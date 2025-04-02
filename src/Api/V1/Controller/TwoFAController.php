@@ -63,8 +63,15 @@ class TwoFAController extends AbstractController
             if (!isset($data['turnstile_token'])) {
                 return new BaseResponse(400, null, 'CAPTCHA validation failed')->toResponse(); # Bad Request Response
             }
-            if (!$this->captchaValidator->validate($data['turnstile_token'], $request->getClientIp())) {
-                return new BaseResponse(400, null, 'CAPTCHA validation failed')->toResponse(); # Bad Request Response
+
+            $turnstileValidation = $this->captchaValidator->validate(
+                $data['turnstile_token'],
+                $request->getClientIp()
+            );
+
+            if (!$turnstileValidation['success']) {
+                $errorMessage = $turnstileValidation['error'] ?? 'CAPTCHA validation failed';
+                return new BaseResponse(400, null, $errorMessage)->toResponse();
             }
         }
 

@@ -7,6 +7,7 @@ use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Form\CustomType;
 use App\Form\RevokeProfilesType;
+use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use App\Service\EventActions;
@@ -36,6 +37,7 @@ class AdminController extends AbstractController
         private readonly SettingRepository $settingRepository,
         private readonly EventActions $eventActions,
         private readonly VerificationCodeEmailGenerator $verificationCodeGenerator,
+        private readonly EventRepository $eventRepository
     ) {
     }
 
@@ -46,7 +48,6 @@ class AdminController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function dashboard(
         Request $request,
-        UserRepository $userRepository,
         #[MapQueryParameter] int $page = 1,
         #[MapQueryParameter] string $sort = 'createdAt',
         #[MapQueryParameter] string $order = 'desc',
@@ -60,7 +61,7 @@ class AdminController extends AbstractController
         $filter = $request->query->get('filter', 'all'); // Default filter
 
         // Use the updated searchWithFilter method to handle both filter and search term
-        $users = $userRepository->searchWithFilter($filter, $searchTerm);
+        $users = $this->userRepository->searchWithFilter($filter, $sort, $order, $searchTerm);
 
         // Perform pagination manually
         $totalUsers = count($users);
@@ -72,9 +73,9 @@ class AdminController extends AbstractController
         $users = array_slice($users, $offset, $count);
 
         // Fetch user counts for table header (All/Verified/Banned)
-        $allUsersCount = $userRepository->countAllUsersExcludingAdmin($searchTerm, $filter);
-        $verifiedUsersCount = $userRepository->countVerifiedUsers($searchTerm);
-        $bannedUsersCount = $userRepository->totalBannedUsers($searchTerm);
+        $allUsersCount = $this->userRepository->countAllUsersExcludingAdmin($searchTerm, $filter);
+        $verifiedUsersCount = $this->userRepository->countVerifiedUsers($searchTerm);
+        $bannedUsersCount = $this->userRepository->totalBannedUsers($searchTerm);
 
         // Check if the export users operation is enabled
         $exportUsers = $this->parameterBag->get('app.export_users');
@@ -116,7 +117,7 @@ class AdminController extends AbstractController
      */
     #[Route('/dashboard/regenerate/{type}', name: 'app_dashboard_regenerate_code_admin')]
     #[IsGranted('ROLE_ADMIN')]
-    public function regenerateCode(string $type): RedirectResponse
+    public function regenerateCode(string $type, Request $request): RedirectResponse
     {
         /** @var User $currentUser */
         $currentUser = $this->getUser();
@@ -138,9 +139,29 @@ class AdminController extends AbstractController
                 ]
             )
         ) {
-            $email = $this->verificationCodeGenerator->createEmailAdminPage($currentUser);
-            $this->mailer->send($email);
-            $this->addFlash('success_admin', 'We have send to you a new code to: ' . $currentUser->getEmail());
+            $lastResend = $this->eventRepository->findLatest2FACodeAttemptEvent(
+                $currentUser,
+                AnalyticalEventType::SETTING_RESET_CODE_REQUEST->value
+            );
+            $timeIntervalInSeconds = 120;
+            if ($this->verificationCodeGenerator->canResendCode($currentUser, $timeIntervalInSeconds)) {
+                $email = $this->verificationCodeGenerator->createEmailAdminPage(
+                    $currentUser,
+                    $request->getClientIp(),
+                    $request->headers->get('User-Agent')
+                );
+                $this->mailer->send($email);
+                $this->addFlash(
+                    'success_admin',
+                    'We have send to you a new code to: ' . $currentUser->getEmail()
+                );
+                return $this->redirectToRoute('admin_confirm_reset', ['type' => $type]);
+            }
+            $timeLeft = $this->verificationCodeGenerator->timeLeftToResendCode($timeIntervalInSeconds, $lastResend);
+            $this->addFlash(
+                'error_admin',
+                'You must wait ' . $timeLeft . ' seconds before requesting a new code. Please try again later.'
+            );
             return $this->redirectToRoute('admin_confirm_reset', ['type' => $type]);
         }
 

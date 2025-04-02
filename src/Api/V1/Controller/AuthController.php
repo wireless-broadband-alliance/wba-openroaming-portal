@@ -78,10 +78,21 @@ class AuthController extends AbstractController
 
         if ($turnstileSetting === OperationMode::ON->value) {
             if (!isset($data['turnstile_token'])) {
-                return new BaseResponse(400, null, 'CAPTCHA validation failed')->toResponse(); # Bad Request Response
+                return new BaseResponse(
+                    400,
+                    null,
+                    'CAPTCHA validation failed'
+                )->toResponse(); # Bad Request Response
             }
-            if (!$this->captchaValidator->validate($data['turnstile_token'], $request->getClientIp())) {
-                return new BaseResponse(400, null, 'CAPTCHA validation failed')->toResponse(); # Bad Request Response
+
+            $turnstileValidation = $this->captchaValidator->validate(
+                $data['turnstile_token'],
+                $request->getClientIp()
+            );
+
+            if (!$turnstileValidation['success']) {
+                $errorMessage = $turnstileValidation['error'] ?? 'CAPTCHA validation failed';
+                return new BaseResponse(400, null, $errorMessage)->toResponse();
             }
         }
 
@@ -395,6 +406,15 @@ class AuthController extends AbstractController
                 )->toResponse();
             }
 
+            // Check if the email is valid
+            if (!$this->userStatusChecker->isValidEmail($user->getEmail(), UserProvider::GOOGLE_ACCOUNT->value)) {
+                return new BaseResponse(
+                    403,
+                    null,
+                    'Your email domain is not allowed to use this platform.'
+                )->toResponse();
+            }
+
             $statusCheckerResponse = $this->userStatusChecker->checkUserStatus($user);
             if ($statusCheckerResponse instanceof BaseResponse) {
                 return $statusCheckerResponse->toResponse();
@@ -504,6 +524,15 @@ class AuthController extends AbstractController
                 )->toResponse();
             }
 
+            // Check if the email is valid
+            if (!$this->userStatusChecker->isValidEmail($user->getEmail(), UserProvider::MICROSOFT_ACCOUNT->value)) {
+                return new BaseResponse(
+                    403,
+                    null,
+                    'Your email domain is not allowed to use this platform.'
+                )->toResponse();
+            }
+
             $statusCheckerResponse = $this->userStatusChecker->checkUserStatus($user);
             if ($statusCheckerResponse instanceof BaseResponse) {
                 return $statusCheckerResponse->toResponse();
@@ -559,7 +588,7 @@ class AuthController extends AbstractController
                 }
             }
 
-            // Authenticate the user using custom Google authentication function already on the project
+            // Authenticate the user using custom Microsoft authentication function already on the project
             $this->microsoftController->authenticateUserMicrosoft($user);
 
             $token = $this->tokenGenerator->generateToken($user);

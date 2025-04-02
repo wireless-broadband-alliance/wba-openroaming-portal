@@ -248,6 +248,14 @@ class GetSettings
             'AUTH_METHOD_SMS_REGISTER_DESCRIPTION' => 'The description for authentication with the 
             phone number on the login page',
 
+            'SYNC_LDAP_ENABLED' => 'Enable or disable synchronization with LDAP.',
+            'SYNC_LDAP_SERVER' => "The LDAP server's URL.",
+            'SYNC_LDAP_BIND_USER_DN' => 'The Distinguished Name (DN) used to bind to the LDAP server.',
+            'SYNC_LDAP_BIND_USER_PASSWORD' => 'The password for the bind user on the LDAP server.',
+            'SYNC_LDAP_SEARCH_BASE_DN' => 'The base DN used when searching the LDAP directory.',
+            'SYNC_LDAP_SEARCH_FILTER' => 'The filter used when searching the LDAP directory.
+             The placeholder `@ID` is replaced with the user\'s ID.',
+
             'TOS' => 'Terms and Conditions format',
             'PRIVACY_POLICY' => 'Privacy policy format',
             'TOS_LINK' => 'Terms and Conditions URL',
@@ -278,6 +286,7 @@ class GetSettings
             'DEFAULT_REGION_PHONE_INPUTS' => 'Set the default regions for the phone number inputs',
             'PROFILE_LIMIT_DATE_GOOGLE' => 'Time in days to disable profiles for users with Google login',
             'PROFILE_LIMIT_DATE_MICROSOFT' => 'Time in days to disable profiles for users with Microsoft login',
+            'PROFILE_LIMIT_DATE_SAML' => 'Time in days to disable profiles for users with SAML login',
             'PROFILE_LIMIT_DATE_EMAIL' => 'Time in days to disable profiles for users with EMAIL login',
             'PROFILE_LIMIT_DATE_SMS' => 'Time in days to disable profiles for users with SMS login',
         ];

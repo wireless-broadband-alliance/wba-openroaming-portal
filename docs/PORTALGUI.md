@@ -35,7 +35,8 @@ improves the platform's security by preventing unwanted access.
 
 ![After_Verification](../assets/wba_screenshots/after_verification.png)
 
-After successfully completing the verification process, the user will be directed to this page.
+After successfully completing the verification process, the user will be directed to the landing page or the two-factor
+configuration / validation depending if it's present on for the account.
 The actions taken during the verification process depend on the mode in
 which the user created their account.
 
@@ -58,11 +59,10 @@ to the portal's features while keeping user data secure.
 
 At the final stage of the process, users have the option to download a profile customized for their specific operating
 system.
-The OpenRoaming Provisioning Portal has intelligent auto-detection that identifies the type of device being
+The OpenRoaming Provisioning Portal has auto-detection that identifies the type of device being
 used.
 
-When the user clicks the "Download" button, the portal generates a profile with information based on the user's account
-information.
+When the user clicks the "Download" button, the portal generates a profile with information based on the user's account.
 This profile is designed to improve the Wi-Fi experience by providing smooth connectivity and increased
 security.
 
@@ -80,7 +80,8 @@ Say goodbye to manual login problems and enjoy a seamless, secure, and personali
 The OpenRoaming Provisioning Portal also has an easy and intuitive admin interface, allowing administrators to easily
 administer and customize the platform.
 The admin dashboard includes a number of features and tools that help simplify
-the Wi-Fi provisioning process and guarantee that it runs smoothly. Here's an overview of the admin dashboard/login and its
+the Wi-Fi provisioning process and guarantee that it runs smoothly. Here's an overview of the admin dashboard/login and
+its
 primary features:
 
 ### 1. Admin Login
