@@ -556,9 +556,7 @@ class UsersManagementController extends AbstractController
         );
 
         // Change user 2fa status
-        $user->setTwoFAtype(UserTwoFactorAuthenticationStatus::DISABLED->value);
-        $this->entityManager->persist($user);
-        $this->entityManager->flush();
+        $this->twoFAService->disable2FA($user);
         $this->twoFAService->event2FA(
             $request->getClientIp(),
             $user,
