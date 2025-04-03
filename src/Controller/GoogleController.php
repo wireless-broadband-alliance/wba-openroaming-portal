@@ -9,6 +9,7 @@ use App\Enum\FirewallType;
 use App\Enum\PlatformMode;
 use App\Enum\UserProvider;
 use App\Repository\SettingRepository;
+use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
 use App\Service\EventActions;
 use App\Service\GetSettings;
@@ -49,6 +50,7 @@ class GoogleController extends AbstractController
         private readonly UserRepository $userRepository,
         private readonly SettingRepository $settingRepository,
         private readonly UserStatusChecker $userStatusChecker,
+        private readonly UserExternalAuthRepository $userExternalAuthRepository,
     ) {
     }
 
@@ -145,32 +147,28 @@ class GoogleController extends AbstractController
         ?string $firstname,
         ?string $lastname
     ): ?User {
-        // Check if a user with the given Google user ID exists in UserExternalAuth
-        $userExternalAuth = $this->entityManager->getRepository(UserExternalAuth::class)->findOneBy([
-            'provider' => UserProvider::GOOGLE_ACCOUNT->value,
-            'provider_id' => $googleUserId
-        ]);
-
-        if ($userExternalAuth !== null) {
-            // If a user with the given Google user ID exists, return the associated user
-            return $userExternalAuth->getUser();
-        }
-
         // Check if a user with the given email exists
-        $userWithEmail = $this->entityManager->getRepository(User::class)->findOneBy(['uuid' => $email]);
+        $userGoogle = $this->userRepository->findOneBy(['uuid' => $email]);
 
-        if ($userWithEmail !== null) {
-            $existingUserAuth = $this->entityManager->getRepository(UserExternalAuth::class)->findOneBy([
-                'user' => $userWithEmail
+        if ($userGoogle !== null) {
+            $existingUserAuth = $this->userExternalAuthRepository->findOneBy([
+                'user' => $userGoogle
             ]);
 
-            if ($existingUserAuth !== null) {
-                $this->addFlash(
-                    'error',
-                    "Email already in use. Please use the original provider from this account!"
-                );
-                return null;
+            if (
+                $existingUserAuth !== null &&
+                $existingUserAuth->getProvider() === UserProvider::GOOGLE_ACCOUNT->value
+            ) {
+                return $userGoogle;
             }
+
+            $this->addFlash(
+                'error',
+                "Email is already in use but is associated with a different provider! 
+                Please use the original one."
+            );
+
+            return null;
         }
 
         // If no user exists, create a new user and a corresponding UserExternalAuth entry

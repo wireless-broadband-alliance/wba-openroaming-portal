@@ -2,7 +2,6 @@
 
 namespace App\Controller;
 
-use App\Entity\Setting;
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
 use App\Enum\AnalyticalEventType;
@@ -10,6 +9,7 @@ use App\Enum\FirewallType;
 use App\Enum\PlatformMode;
 use App\Enum\UserProvider;
 use App\Repository\SettingRepository;
+use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
 use App\Service\EventActions;
 use App\Service\GetSettings;
@@ -20,7 +20,6 @@ use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
-use RuntimeException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -48,6 +47,7 @@ class MicrosoftController extends AbstractController
         private readonly UserRepository $userRepository,
         private readonly SettingRepository $settingRepository,
         private readonly UserStatusChecker $userStatusChecker,
+        private readonly UserExternalAuthRepository $userExternalAuthRepository,
     ) {
     }
 
@@ -118,7 +118,7 @@ class MicrosoftController extends AbstractController
         $user = $this->findOrCreateMicrosoftUser($microsoftUserId, $email, $firstname, $lastname);
 
         // If the user is null, redirect to the landing page
-        if (!$user instanceof \App\Entity\User) {
+        if (!$user instanceof User) {
             return $this->redirectToRoute('app_landing');
         }
 
@@ -141,32 +141,27 @@ class MicrosoftController extends AbstractController
         ?string $firstname,
         ?string $lastname
     ): ?User {
-        // Check if a user with the given Microsoft user ID exists in UserExternalAuth
-        $userExternalAuth = $this->entityManager->getRepository(UserExternalAuth::class)->findOneBy([
-            'provider' => UserProvider::MICROSOFT_ACCOUNT->value,
-            'provider_id' => $microsoftUserId
-        ]);
-
-        if ($userExternalAuth !== null) {
-            // If a user with the given Microsoft user ID exists, return the associated user
-            return $userExternalAuth->getUser();
-        }
-
         // Check if a user with the given email exists
-        $userWithEmail = $this->entityManager->getRepository(User::class)->findOneBy(['uuid' => $email]);
+        $userMicrosoft = $this->userRepository->findOneBy(['uuid' => $email]);
 
-        if ($userWithEmail !== null) {
-            $existingUserAuth = $this->entityManager->getRepository(UserExternalAuth::class)->findOneBy([
-                'user' => $userWithEmail
+        if ($userMicrosoft !== null) {
+            $existingUserAuth = $this->userExternalAuthRepository->findOneBy([
+                'user' => $userMicrosoft
             ]);
 
-            if ($existingUserAuth !== null) {
-                $this->addFlash(
-                    'error',
-                    "Email already in use. Please use the original provider from this account!"
-                );
-                return null;
+            if (
+                $existingUserAuth !== null &&
+                $existingUserAuth->getProvider() === UserProvider::MICROSOFT_ACCOUNT->value
+            ) {
+                return $userMicrosoft;
             }
+
+            $this->addFlash(
+                'error',
+                "Email is already in use but is associated with a different provider!"
+            );
+
+            return null;
         }
 
         // If no user exists, create a new user and a corresponding UserExternalAuth entry
