@@ -39,7 +39,7 @@
                 </p>
             {% endif %}
             <p class="text-md">
-                Please, if you are on this page enter the code sent to you to proceed with enabling 2FA.
+                Please enter the code sent to you to proceed with 2FA verification.
             </p>
         {% elseif data.TWO_FACTOR_AUTH_STATUS.value == constant('App\\Enum\\TwoFAType::ENFORCED_FOR_LOCAL').value %}
             <p class="text-lg">
