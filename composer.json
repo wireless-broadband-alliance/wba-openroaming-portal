@@ -7,6 +7,7 @@
 	"require": {
 		"php": ">=8.4",
 		"ext-ctype": "*",
+		"ext-dom": "*",
 		"ext-gnupg": "*",
 		"ext-iconv": "*",
 		"ext-ldap": "*",
@@ -42,6 +43,7 @@
 		"robrichards/xmlseclibs": "^3.1",
 		"sentry/sentry-symfony": "^5.1.0",
 		"spomky-labs/otphp": "^11.3",
+		"stevenmaguire/oauth2-microsoft": "^2.2",
 		"symfony/asset": "7.2.*",
 		"symfony/console": "7.2.*",
 		"symfony/doctrine-messenger": "7.2.*",
@@ -74,12 +76,10 @@
 		"symfony/webpack-encore-bundle": "^2.2",
 		"symfony/yaml": "7.2.*",
 		"symfonycasts/verify-email-bundle": "^1.17",
-		"thenetworg/oauth2-azure": "^2.2",
 		"twig/extra-bundle": "^2.12|^3.0",
 		"twig/twig": "^2.12|^3.0",
-		"vincentlanglet/twig-cs-fixer": "^3.5",
-    "ext-dom": "*"
-  },
+		"vincentlanglet/twig-cs-fixer": "^3.5"
+	},
 	"config": {
 		"allow-plugins": {
 			"php-http/discovery": true,

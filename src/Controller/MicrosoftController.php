@@ -104,9 +104,9 @@ class MicrosoftController extends AbstractController
         $data = $resourceOwner->toArray();
 
         // Map the relevant details from the returned $data array
-        $email = $data['email'];
-        $firstname = $data['given_name'] ?? null;
-        $lastname = $data['family_name'] ?? null;
+        $email = $data['emails']['preferred'] ?? $data['emails']['account'] ?? null;
+        $firstname = $data['first_name'] ?? null;
+        $lastname = $data['last_name'] ?? null;
 
         // Check if the email is valid
         if (!$this->userStatusChecker->isValidEmail($email, UserProvider::MICROSOFT_ACCOUNT->value)) {
@@ -263,9 +263,9 @@ class MicrosoftController extends AbstractController
         $microsoftUserId = $resourceOwner->getId();
 
         // Map the relevant details from the returned $data array
-        $email = $data['email'];
-        $firstname = $data['given_name'] ?? null;
-        $lastname = $data['family_name'] ?? null;
+        $email = $data['emails']['preferred'] ?? $data['emails']['account'] ?? null;
+        $firstname = $data['first_name'] ?? null;
+        $lastname = $data['last_name'] ?? null;
 
         return $this->findOrCreateMicrosoftUser($microsoftUserId, $email, $firstname, $lastname);
     }
