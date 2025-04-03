@@ -144,6 +144,16 @@ class AuthController extends AbstractController
         }
 
         if ($twoFAEnforcementResult['canSkip2FA'] === false) {
+            if (empty($data['twoFACode'])) {
+                $errors[] = 'twoFACode';
+            }
+            if ($errors !== []) {
+                return new BaseResponse(
+                    400,
+                    ['missing_fields' => $errors],
+                    'Invalid data: Missing required fields.'
+                )->toResponse();
+            }
             if ($user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::TOTP->value) {
                 if (
                     // Validation for OTPCodes -> 12 codes
@@ -429,12 +439,16 @@ class AuthController extends AbstractController
             }
 
             if ($twoFAEnforcementResult['canSkip2FA'] === false) {
-                if (!isset($data['twoFACode'])) {
+                $errors = [];
+                if (empty($data['twoFACode'])) {
+                    $errors[] = 'twoFACode';
+                }
+                if ($errors !== []) {
                     return new BaseResponse(
                         400,
-                        null,
-                        'Missing Two-Factor Authentication code'
-                    )->toResponse(); # Bad Request Response
+                        ['missing_fields' => $errors],
+                        'Invalid data: Missing required fields.'
+                    )->toResponse();
                 }
                 if ($user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::TOTP->value) {
                     if (
@@ -548,12 +562,16 @@ class AuthController extends AbstractController
             }
 
             if ($twoFAEnforcementResult['canSkip2FA'] === false) {
-                if (!isset($data['twoFACode'])) {
+                $errors = [];
+                if (empty($data['twoFACode'])) {
+                    $errors[] = 'twoFACode';
+                }
+                if ($errors !== []) {
                     return new BaseResponse(
                         400,
-                        null,
-                        'Missing Two-Factor Authentication code'
-                    )->toResponse(); # Bad Request Response
+                        ['missing_fields' => $errors],
+                        'Invalid data: Missing required fields.'
+                    )->toResponse();
                 }
                 if ($user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::TOTP->value) {
                     if (

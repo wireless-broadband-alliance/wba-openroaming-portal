@@ -62,19 +62,17 @@ readonly class TwoFAAPIService
                     return [
                         'canSkip2FA' => false,
                         'missing_2fa_setting' => false,
-                        'message' => sprintf(
-                            'Two-Factor Authentication is active and ENFORCED_FOR_LOCAL as: %s.',
-                            $user2FACurrentState['type']
-                        ),
                         '2FAType' => $twoFAValue
                     ];
                 }
 
                 // If user does not have 2FA active, return an enforcement error
                 return [
-                    'canSkip2FA' => true,
+                    'canSkip2FA' => false,
                     'missing_2fa_setting' => false,
-                    'message' => 'Two-Factor Authentication is ENFORCED FOR PORTAL accounts.',
+                    'message' => 'Two-Factor Authentication it\'s required for authentication on the portal. ' .
+                        'Please visit ' . $_SERVER['HTTP_HOST'] . ' to set up 2FA and secure your account.',
+                    '2FAType' => $twoFAValue,
                 ];
             }
 
@@ -83,10 +81,6 @@ readonly class TwoFAAPIService
                     return [
                         'canSkip2FA' => false,
                         'missing_2fa_setting' => false,
-                        'message' => sprintf(
-                            'Two-Factor Authentication is active and ENFORCED_FOR_ALL as: %s.',
-                            $user2FACurrentState['type']
-                        ),
                         '2FAType' => $twoFAValue
                     ];
                 }
