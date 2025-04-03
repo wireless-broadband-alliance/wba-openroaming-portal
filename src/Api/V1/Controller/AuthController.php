@@ -134,22 +134,16 @@ class AuthController extends AbstractController
             $request->attributes->get('_route')
         );
 
-        if ($twoFAEnforcementResult['success'] === false) {
-            if ($twoFAEnforcementResult['missing_2fa_setting'] === true) {
-                // Return error response when 2fa is missing the TWO_FACTOR_AUTH_STATUS setting
-                return new BaseResponse(
-                    400,
-                    null,
-                    $twoFAEnforcementResult['message']
-                )->toResponse();
-            }
-            if (!isset($data['twoFACode'])) {
-                return new BaseResponse(
-                    400,
-                    null,
-                    'Missing Two-Factor Authentication code'
-                )->toResponse(); # Bad Request Response
-            }
+        if ($twoFAEnforcementResult['missing_2fa_setting'] === true) {
+            // Return error response when 2fa is missing the TWO_FACTOR_AUTH_STATUS setting
+            return new BaseResponse(
+                400,
+                null,
+                $twoFAEnforcementResult['message']
+            )->toResponse();
+        }
+
+        if ($twoFAEnforcementResult['canSkip2FA'] === false) {
             if ($user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::TOTP->value) {
                 if (
                     // Validation for OTPCodes -> 12 codes
@@ -305,16 +299,16 @@ class AuthController extends AbstractController
                 $request->attributes->get('_route')
             );
 
-            if ($twoFAEnforcementResult['success'] === false) {
-                if ($twoFAEnforcementResult['missing_2fa_setting'] === true) {
-                    // Return error response when 2fa is missing the TWO_FACTOR_AUTH_STATUS setting
-                    return new BaseResponse(
-                        400,
-                        null,
-                        $twoFAEnforcementResult['message']
-                    )->toResponse();
-                }
+            if ($twoFAEnforcementResult['missing_2fa_setting'] === true) {
+                // Return error response when 2fa is missing the TWO_FACTOR_AUTH_STATUS setting
+                return new BaseResponse(
+                    400,
+                    null,
+                    $twoFAEnforcementResult['message']
+                )->toResponse();
+            }
 
+            if ($twoFAEnforcementResult['canSkip2FA'] === false) {
                 $twoFACode = $request->request->get('twoFACode');
                 if (!$twoFACode) {
                     return new BaseResponse(
@@ -425,15 +419,16 @@ class AuthController extends AbstractController
                 $request->attributes->get('_route')
             );
 
-            if ($twoFAEnforcementResult['success'] === false) {
-                if ($twoFAEnforcementResult['missing_2fa_setting'] === true) {
-                    // Return error response when 2fa is missing the TWO_FACTOR_AUTH_STATUS setting
-                    return new BaseResponse(
-                        400,
-                        null,
-                        $twoFAEnforcementResult['message']
-                    )->toResponse();
-                }
+            if ($twoFAEnforcementResult['missing_2fa_setting'] === true) {
+                // Return error response when 2fa is missing the TWO_FACTOR_AUTH_STATUS setting
+                return new BaseResponse(
+                    400,
+                    null,
+                    $twoFAEnforcementResult['message']
+                )->toResponse();
+            }
+
+            if ($twoFAEnforcementResult['canSkip2FA'] === false) {
                 if (!isset($data['twoFACode'])) {
                     return new BaseResponse(
                         400,
@@ -543,7 +538,7 @@ class AuthController extends AbstractController
                 $request->attributes->get('_route')
             );
 
-            if ($twoFAEnforcementResult['success'] === false) {
+            if ($twoFAEnforcementResult['canSkip2FA'] === false) {
                 if ($twoFAEnforcementResult['missing_2fa_setting'] === true) {
                     // Return error response when 2fa is missing the TWO_FACTOR_AUTH_STATUS setting
                     return new BaseResponse(
