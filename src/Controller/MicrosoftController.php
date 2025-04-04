@@ -97,9 +97,6 @@ class MicrosoftController extends AbstractController
             'code' => $code,
         ]);
 
-        // Retrieve the user ID and email from the resource owner
-        $client->redirect(['openid', 'email', 'User.Read']);
-
         $resourceOwner = $client->fetchUserFromToken($accessToken);
         /** @phpstan-ignore-next-line */
         $data = $resourceOwner->toArray();
