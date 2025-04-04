@@ -81,6 +81,9 @@ readonly class TwoFAAPIService
                     return [
                         'canSkip2FA' => false,
                         'missing_2fa_setting' => false,
+                        'message' => 'Two-Factor Authentication is active for this account.' .
+                            ' Please ensure you provide the correct authentication code.',
+                        'details' => $user2FACurrentState,
                         '2FAType' => $twoFAValue
                     ];
                 }
@@ -117,10 +120,9 @@ readonly class TwoFAAPIService
                 return [
                     'canSkip2FA' => false,
                     'missing_2fa_setting' => false,
-                    'message' => sprintf(
-                        'Two-Factor Authentication is active and configured as: %s.',
-                        $user2FACurrentState['type']
-                    ),
+                    'message' => 'Two-Factor Authentication is active for this account.' .
+                        ' Please ensure you provide the correct authentication code.',
+                    'details' => $user2FACurrentState,
                     '2FAType' => $twoFAValue
                 ];
             }

@@ -209,8 +209,7 @@ class AuthController extends AbstractController
         return new BaseResponse(200, $responseData)->toResponse(); # Success Response
     }
 
-    #[
-        Route('/api/v1/auth/saml', name: 'api_auth_saml', methods: ['POST'])]
+    #[Route('/api/v1/auth/saml', name: 'api_auth_saml', methods: ['POST'])]
     public function authSaml(Request $request, Auth $samlAuth): JsonResponse
     {
         // Get SAML Response
