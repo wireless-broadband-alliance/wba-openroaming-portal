@@ -69,8 +69,18 @@ class MicrosoftController extends AbstractController
         // Retrieve the "microsoft" client
         $client = $this->clientRegistry->getClient('microsoft');
 
-        // Get the authorization URL
-        $redirectUrl = $client->getOAuth2Provider()->getAuthorizationUrl();
+        // Define the minimal required scopes
+        $options = [
+            'scope' => [
+                'wl.emails',
+                // 'wl.basic',
+                'wl.offline_access',
+                // 'wl.signin'
+            ]
+        ];
+
+        // Get the authorization URL with scopes
+        $redirectUrl = $client->getOAuth2Provider()->getAuthorizationUrl($options);
 
         // Redirect the user to the authorization URL
         return $this->redirect($redirectUrl);
