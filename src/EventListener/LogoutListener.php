@@ -18,5 +18,4 @@ class LogoutListener implements EventSubscriberInterface
     {
        // $event->getRequest()->getSession()->invalidate();
     }
-
 }
