@@ -22,8 +22,8 @@ readonly class TwoFAAPIService
         // If $status2FA is null or not found, return an error message
         if (!$status2FA) {
             return [
-                'success' => false,
-                'missing_2fa_setting' => false,
+                'canSkip2FA' => false,
+                'missing_2fa_setting' => true,
                 'message' => 'Missing required configuration setting: TWO_FACTOR_AUTH_STATUS',
             ];
         }
@@ -39,7 +39,7 @@ readonly class TwoFAAPIService
             if ($user2FACurrentState['isActive'] === true) {
                 // If 2FA is active, return details and disallow flow
                 return [
-                    'success' => false,
+                    'canSkip2FA' => false,
                     'missing_2fa_setting' => false,
                     'message' => 'Two-Factor Authentication is active for this account.' .
                         ' Please ensure you provide the correct authentication code.',
@@ -49,7 +49,7 @@ readonly class TwoFAAPIService
 
             // If 2FA is not active, allow flow to continue
             return [
-                'success' => true,
+                'canSkip2FA' => true,
                 'missing_2fa_setting' => false,
                 '2FAType' => $twoFAValue
             ];
@@ -60,49 +60,49 @@ readonly class TwoFAAPIService
             if ($twoFAValue === TwoFAType::ENFORCED_FOR_LOCAL->value) {
                 if ($user2FACurrentState['isActive'] === true) {
                     return [
-                        'success' => true,
+                        'canSkip2FA' => false,
                         'missing_2fa_setting' => false,
-                        'message' => sprintf(
-                            'Two-Factor Authentication is active and ENFORCED_FOR_LOCAL as: %s.',
-                            $user2FACurrentState['type']
-                        ),
+                        'message' => 'Two-Factor Authentication is active for this account.' .
+                            ' Please ensure you provide the correct authentication code.',
+                        'details' => $user2FACurrentState,
                         '2FAType' => $twoFAValue
                     ];
                 }
 
                 // If user does not have 2FA active, return an enforcement error
                 return [
-                    'success' => false,
+                    'canSkip2FA' => false,
                     'missing_2fa_setting' => false,
-                    'message' => 'Two-Factor Authentication is ENFORCED FOR PORTAL accounts.',
+                    'message' => 'Two-Factor Authentication it\'s required for authentication on the portal. ' .
+                        'Please visit ' . $_SERVER['HTTP_HOST'] . ' to set up 2FA and secure your account.',
+                    '2FAType' => $twoFAValue,
                 ];
             }
 
             if ($twoFAValue === TwoFAType::ENFORCED_FOR_ALL->value) {
                 if ($user2FACurrentState['isActive'] === true) {
                     return [
-                        'success' => true,
+                        'canSkip2FA' => false,
                         'missing_2fa_setting' => false,
-                        'message' => sprintf(
-                            'Two-Factor Authentication is active and ENFORCED_FOR_ALL as: %s.',
-                            $user2FACurrentState['type']
-                        ),
+                        'message' => 'Two-Factor Authentication is active for this account.' .
+                            ' Please ensure you provide the correct authentication code.',
+                        'details' => $user2FACurrentState,
                         '2FAType' => $twoFAValue
                     ];
                 }
 
                 // If user does not have 2FA active, return an enforcement error
                 return [
-                    'success' => false,
+                    'canSkip2FA' => false,
                     'missing_2fa_setting' => false,
-                    'message' => 'Two-Factor Authentication it\'s required for authentication on the portal.' .
-                        'Please visit' . $_SERVER['HTTP_HOST'] . ' to set up 2FA and secure your account.',
+                    'message' => 'Two-Factor Authentication it\'s required for authentication on the portal. ' .
+                        'Please visit ' . $_SERVER['HTTP_HOST'] . ' to set up 2FA and secure your account.',
                     '2FAType' => $twoFAValue,
                 ];
             }
 
             return [
-                'success' => false,
+                'canSkip2FA' => false,
                 'missing_2fa_setting' => true,
                 'message' => 'Unhandled Two-Factor Authentication status for the local endpoint.',
             ];
@@ -110,9 +110,20 @@ readonly class TwoFAAPIService
 
         // Handle external providers like Google, Microsoft, SAML
         if ($twoFAValue === TwoFAType::ENFORCED_FOR_LOCAL->value) {
+            if ($user2FACurrentState['isActive'] === true) {
+                return [
+                    'canSkip2FA' => false,
+                    'missing_2fa_setting' => false,
+                    'message' => 'Two-Factor Authentication is active for this account.' .
+                        ' Please ensure you provide the correct authentication code.',
+                    'details' => $user2FACurrentState,
+                    '2FAType' => $twoFAValue
+                ];
+            }
+
             // If 2FA is not active, allow flow to continue
             return [
-                'success' => true,
+                'canSkip2FA' => true,
                 'missing_2fa_setting' => false,
                 '2FAType' => $twoFAValue
             ];
@@ -121,18 +132,17 @@ readonly class TwoFAAPIService
         if ($twoFAValue === TwoFAType::ENFORCED_FOR_ALL->value) {
             if ($user2FACurrentState['isActive'] === true) {
                 return [
-                    'success' => true,
+                    'canSkip2FA' => false,
                     'missing_2fa_setting' => false,
-                    'message' => sprintf(
-                        'Two-Factor Authentication is active and configured as: %s.',
-                        $user2FACurrentState['type']
-                    ),
+                    'message' => 'Two-Factor Authentication is active for this account.' .
+                        ' Please ensure you provide the correct authentication code.',
+                    'details' => $user2FACurrentState,
                     '2FAType' => $twoFAValue
                 ];
             }
 
             return [
-                'success' => false,
+                'canSkip2FA' => false,
                 'missing_2fa_setting' => false,
                 'message' => 'Two-Factor Authentication it\'s required for authentication on the portal. Please visit '
                     . $_SERVER['HTTP_HOST'] . ' to set up 2FA and secure your account.',
@@ -142,7 +152,7 @@ readonly class TwoFAAPIService
 
         // Fallback for unexpected cases
         return [
-            'success' => false,
+            'canSkip2FA' => false,
             'missing_2fa_setting' => true,
             'message' => 'Unhandled Two-Factor Authentication status in the enforcement logic.',
         ];

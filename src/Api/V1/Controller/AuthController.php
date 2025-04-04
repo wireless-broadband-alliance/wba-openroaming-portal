@@ -134,21 +134,25 @@ class AuthController extends AbstractController
             $request->attributes->get('_route')
         );
 
-        if ($twoFAEnforcementResult['success'] === false) {
-            if ($twoFAEnforcementResult['missing_2fa_setting'] === true) {
-                // Return error response when 2fa is missing the TWO_FACTOR_AUTH_STATUS setting
-                return new BaseResponse(
-                    400,
-                    null,
-                    $twoFAEnforcementResult['message']
-                )->toResponse();
+        if ($twoFAEnforcementResult['missing_2fa_setting'] === true) {
+            // Return error response when 2fa is missing the TWO_FACTOR_AUTH_STATUS setting
+            return new BaseResponse(
+                400,
+                null,
+                $twoFAEnforcementResult['message']
+            )->toResponse();
+        }
+
+        if ($twoFAEnforcementResult['canSkip2FA'] === false) {
+            if (empty($data['twoFACode'])) {
+                $errors[] = 'twoFACode';
             }
-            if (!isset($data['twoFACode'])) {
+            if ($errors !== []) {
                 return new BaseResponse(
                     400,
-                    null,
-                    'Missing Two-Factor Authentication code'
-                )->toResponse(); # Bad Request Response
+                    ['missing_fields' => $errors],
+                    'Invalid data: Missing required fields.'
+                )->toResponse();
             }
             if ($user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::TOTP->value) {
                 if (
@@ -205,8 +209,7 @@ class AuthController extends AbstractController
         return new BaseResponse(200, $responseData)->toResponse(); # Success Response
     }
 
-    #[
-        Route('/api/v1/auth/saml', name: 'api_auth_saml', methods: ['POST'])]
+    #[Route('/api/v1/auth/saml', name: 'api_auth_saml', methods: ['POST'])]
     public function authSaml(Request $request, Auth $samlAuth): JsonResponse
     {
         // Get SAML Response
@@ -305,16 +308,16 @@ class AuthController extends AbstractController
                 $request->attributes->get('_route')
             );
 
-            if ($twoFAEnforcementResult['success'] === false) {
-                if ($twoFAEnforcementResult['missing_2fa_setting'] === true) {
-                    // Return error response when 2fa is missing the TWO_FACTOR_AUTH_STATUS setting
-                    return new BaseResponse(
-                        400,
-                        null,
-                        $twoFAEnforcementResult['message']
-                    )->toResponse();
-                }
+            if ($twoFAEnforcementResult['missing_2fa_setting'] === true) {
+                // Return error response when 2fa is missing the TWO_FACTOR_AUTH_STATUS setting
+                return new BaseResponse(
+                    400,
+                    null,
+                    $twoFAEnforcementResult['message']
+                )->toResponse();
+            }
 
+            if ($twoFAEnforcementResult['canSkip2FA'] === false) {
                 $twoFACode = $request->request->get('twoFACode');
                 if (!$twoFACode) {
                     return new BaseResponse(
@@ -425,21 +428,26 @@ class AuthController extends AbstractController
                 $request->attributes->get('_route')
             );
 
-            if ($twoFAEnforcementResult['success'] === false) {
-                if ($twoFAEnforcementResult['missing_2fa_setting'] === true) {
-                    // Return error response when 2fa is missing the TWO_FACTOR_AUTH_STATUS setting
-                    return new BaseResponse(
-                        400,
-                        null,
-                        $twoFAEnforcementResult['message']
-                    )->toResponse();
+            if ($twoFAEnforcementResult['missing_2fa_setting'] === true) {
+                // Return error response when 2fa is missing the TWO_FACTOR_AUTH_STATUS setting
+                return new BaseResponse(
+                    400,
+                    null,
+                    $twoFAEnforcementResult['message']
+                )->toResponse();
+            }
+
+            if ($twoFAEnforcementResult['canSkip2FA'] === false) {
+                $errors = [];
+                if (empty($data['twoFACode'])) {
+                    $errors[] = 'twoFACode';
                 }
-                if (!isset($data['twoFACode'])) {
+                if ($errors !== []) {
                     return new BaseResponse(
                         400,
-                        null,
-                        'Missing Two-Factor Authentication code'
-                    )->toResponse(); # Bad Request Response
+                        ['missing_fields' => $errors],
+                        'Invalid data: Missing required fields.'
+                    )->toResponse();
                 }
                 if ($user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::TOTP->value) {
                     if (
@@ -543,21 +551,26 @@ class AuthController extends AbstractController
                 $request->attributes->get('_route')
             );
 
-            if ($twoFAEnforcementResult['success'] === false) {
-                if ($twoFAEnforcementResult['missing_2fa_setting'] === true) {
-                    // Return error response when 2fa is missing the TWO_FACTOR_AUTH_STATUS setting
-                    return new BaseResponse(
-                        400,
-                        null,
-                        $twoFAEnforcementResult['message']
-                    )->toResponse();
+            if ($twoFAEnforcementResult['missing_2fa_setting'] === true) {
+                // Return error response when 2fa is missing the TWO_FACTOR_AUTH_STATUS setting
+                return new BaseResponse(
+                    400,
+                    null,
+                    $twoFAEnforcementResult['message']
+                )->toResponse();
+            }
+
+            if ($twoFAEnforcementResult['canSkip2FA'] === false) {
+                $errors = [];
+                if (empty($data['twoFACode'])) {
+                    $errors[] = 'twoFACode';
                 }
-                if (!isset($data['twoFACode'])) {
+                if ($errors !== []) {
                     return new BaseResponse(
                         400,
-                        null,
-                        'Missing Two-Factor Authentication code'
-                    )->toResponse(); # Bad Request Response
+                        ['missing_fields' => $errors],
+                        'Invalid data: Missing required fields.'
+                    )->toResponse();
                 }
                 if ($user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::TOTP->value) {
                     if (
