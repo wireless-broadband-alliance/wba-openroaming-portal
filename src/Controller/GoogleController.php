@@ -102,8 +102,9 @@ class GoogleController extends AbstractController
         ]);
 
         // Retrieve the user ID and email from the resource owner
-        $googleUserId = $accessToken->getToken();
         $resourceOwner = $client->fetchUserFromToken($accessToken);
+        /** @phpstan-ignore-next-line */
+        $googleUserId = $resourceOwner->getId();
         /** @phpstan-ignore-next-line */
         $email = $resourceOwner->getEmail();
         /** @phpstan-ignore-next-line */

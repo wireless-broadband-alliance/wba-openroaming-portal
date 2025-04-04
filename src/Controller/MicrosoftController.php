@@ -98,10 +98,13 @@ class MicrosoftController extends AbstractController
         ]);
 
         // Retrieve the user ID and email from the resource owner
-        $microsoftUserId = $accessToken->getToken();
+        $client->redirect(['openid', 'email', 'User.Read']);
+
         $resourceOwner = $client->fetchUserFromToken($accessToken);
         /** @phpstan-ignore-next-line */
         $data = $resourceOwner->toArray();
+        /** @phpstan-ignore-next-line */
+        $microsoftUserId = $resourceOwner->getId();
 
         // Map the relevant details from the returned $data array
         $email = $data['emails']['preferred'] ?? $data['emails']['account'] ?? null;
@@ -114,7 +117,7 @@ class MicrosoftController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
-        // Find or create the user based on the Google user ID and email
+        // Find or create the user based on the Microsoft user ID and email
         $user = $this->findOrCreateMicrosoftUser($microsoftUserId, $email, $firstname, $lastname);
 
         // If the user is null, redirect to the landing page
