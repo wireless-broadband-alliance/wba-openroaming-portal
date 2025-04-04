@@ -62,6 +62,9 @@ readonly class TwoFAAPIService
                     return [
                         'canSkip2FA' => false,
                         'missing_2fa_setting' => false,
+                        'message' => 'Two-Factor Authentication is active for this account.' .
+                            ' Please ensure you provide the correct authentication code.',
+                        'details' => $user2FACurrentState,
                         '2FAType' => $twoFAValue
                     ];
                 }
@@ -107,6 +110,17 @@ readonly class TwoFAAPIService
 
         // Handle external providers like Google, Microsoft, SAML
         if ($twoFAValue === TwoFAType::ENFORCED_FOR_LOCAL->value) {
+            if ($user2FACurrentState['isActive'] === true) {
+                return [
+                    'canSkip2FA' => false,
+                    'missing_2fa_setting' => false,
+                    'message' => 'Two-Factor Authentication is active for this account.' .
+                        ' Please ensure you provide the correct authentication code.',
+                    'details' => $user2FACurrentState,
+                    '2FAType' => $twoFAValue
+                ];
+            }
+
             // If 2FA is not active, allow flow to continue
             return [
                 'canSkip2FA' => true,
