@@ -3,14 +3,12 @@
 namespace App\Controller;
 
 use App\Entity\User;
-use App\Enum\FirewallType;
 use App\Enum\PlatformMode;
 use App\Form\LoginFormType;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use App\Service\GetSettings;
 use Doctrine\ORM\NonUniqueResultException;
-use LogicException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -134,7 +132,7 @@ class SecurityController extends AbstractController
     }
 
 
-    #[Route(path: '/admin/logout', name: 'app_logout_admin',)]
+    #[Route(path: '/admin/logout', name: 'app_logout_admin')]
     public function logoutAdmin(Request $request): Response
     {
         $session = $request->getSession();
