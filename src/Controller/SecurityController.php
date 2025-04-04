@@ -132,15 +132,15 @@ class SecurityController extends AbstractController
     }
 
 
-    #[Route(path: '/admin/logout', name: 'app_logout_admin')]
-    public function logoutAdmin(Request $request): Response
+    #[Route(path: '/dashboard/logout', name: 'app_dashboard_logout')]
+    public function dashboardLogout(Request $request): Response
     {
         $session = $request->getSession();
         $session->clear();
         return $this->redirectToRoute('app_dashboard_login');
     }
 
-    #[Route(path: '/user/logout', name: 'app_user_logout')]
+    #[Route(path: '/logout', name: 'app_logout')]
     public function logout(): Response
     {
         //$session = $request->getSession();
