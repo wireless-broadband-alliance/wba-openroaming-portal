@@ -278,7 +278,7 @@ Please make sure to set up a **public_key** in (pgp_public_key/public_key.asc)
 ### Google Authenticator Credentials
 
 For detailed steps on how to obtain your **Google Client ID** and **Google Client Secret**, please refer to
-the [Google Client ID and Secret Guide](docs/GOOGLE_CLIENT.md).
+the [Google Client ID and Secret Guide](docs/ProvidersGuides/GOOGLE_CLIENT.md).
 Once obtained, you will use the following environment variables in your portal configuration:
 
 - `GOOGLE_CLIENT_ID`
@@ -287,7 +287,7 @@ Once obtained, you will use the following environment variables in your portal c
 ### Microsoft Authenticator Credentials
 
 For detailed instructions on how to obtain your **Microsoft Client ID** and **Microsoft Client Secret**, please refer to
-the [Microsoft Client ID and Secret Guide](docs/MICROSOFT_CLIENT.md).
+the [Microsoft Client ID and Secret Guide](docs/ProvidersGuides/MICROSOFT_CLIENT.md).
 
 Once obtained, you will use the following environment variables in your portal configuration:
 
@@ -297,6 +297,9 @@ Once obtained, you will use the following environment variables in your portal c
 ### 🔒 SAML Specific Settings
 
 These variables are needed to set up the SAML Service Provider (SP) and Identity Provider (IdP):
+
+For detailed instructions on how to obtain your **SAML IDP Credentials**, please refer to
+the [SAML Service Provider (SP)](docs/ProvidersGuides/SAML_IDP_CREDENTIALS.md).
 
 - `SAML_IDP_ENTITY_ID`: This is the entity ID (URI) of the IdP.
 - `SAML_IDP_SSO_URL`: This is the URL of the IdP's Single Sign-On (SSO) service.
