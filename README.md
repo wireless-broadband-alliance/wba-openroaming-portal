@@ -277,21 +277,19 @@ Please make sure to set up a **public_key** in (pgp_public_key/public_key.asc)
 
 ### Google Authenticator Credentials
 
-These credentials can be found on the Google Cloud Platform
-by creating a new client_id & secret on the **credentials section**.
-Follow this link for more instructions for how to get does items:
-https://developers.google.com/identity/gsi/web/guides/get-google-api-clientid
+For detailed steps on how to obtain your **Google Client ID** and **Google Client Secret**, please refer to
+the [Google Client ID and Secret Guide](docs/GOOGLE_CLIENT.md).
+Once obtained, you will use the following environment variables in your portal configuration:
 
 - `GOOGLE_CLIENT_ID`
 - `GOOGLE_CLIENT_SECRET`
 
 ### Microsoft Authenticator Credentials
 
-These credentials can be found on the Microsoft Identity Platform
-by creating a new client_id & secret on the **Identity > Applications > App registrations.**.
-Follow this link for more instructions for how to get does items:
-https://learn.microsoft.com/en-us/entra/identity-platform/quickstart-register-app?tabs=certificate%2Cexpose-a-web-api
-https://learn.microsoft.com/pt-pt/azure/healthcare-apis/register-application
+For detailed instructions on how to obtain your **Microsoft Client ID** and **Microsoft Client Secret**, please refer to
+the [Microsoft Client ID and Secret Guide](docs/MICROSOFT_CLIENT.md).
+
+Once obtained, you will use the following environment variables in your portal configuration:
 
 - `MICROSOFT_CLIENT_ID`
 - `MICROSOFT_CLIENT_SECRET`
