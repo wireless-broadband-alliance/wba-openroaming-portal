@@ -95,7 +95,7 @@
                 </form>
             {% endif %}
 
-            <a href="{{ path('saml_logout') }}" class="w-[160px] btn-logout">Logout</a>
+            <a href="{{ path('app_logout') }}" class="w-[160px] btn-logout">Logout</a>
 
             {# Divider #}
             <div class="my-[25px] divider"></div>
@@ -136,7 +136,7 @@
             {% endif %}
 
             <div {{ stimulus_controller('widget') }}>
-                <a href="{{ path('saml_logout') }}" class="w-[160px] btn-logout">Logout</a>
+                <a href="{{ path('app_user_logout') }}" class="w-[160px] btn-logout">Logout</a>
 
                 <div class="flex flex-row justify-between items-center space-x-6 mt-[120px]">
                     <p class="text-[#212529] text-opacity-40 text-sm">

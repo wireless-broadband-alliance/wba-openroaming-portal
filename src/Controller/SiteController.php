@@ -149,7 +149,7 @@ class SiteController extends AbstractController
                 return $this->redirectToRoute('app_site_forgot_password_checker');
             }
             if ($currentUser->getDeletedAt()) {
-                return $this->redirectToRoute('saml_logout');
+                return $this->redirectToRoute('app_logout');
             }
         }
 

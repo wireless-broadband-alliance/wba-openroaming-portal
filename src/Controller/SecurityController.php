@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\User;
+use App\Enum\FirewallType;
 use App\Enum\PlatformMode;
 use App\Form\LoginFormType;
 use App\Repository\SettingRepository;
@@ -133,11 +134,20 @@ class SecurityController extends AbstractController
     }
 
 
-    #[Route(path: '/logout', name: 'app_logout')]
-    public function logout(): void
+    #[Route(path: '/admin/logout', name: 'app_logout_admin',)]
+    public function logoutAdmin(Request $request): Response
     {
-        throw new LogicException(
-            'This method can be blank - it will be intercepted by the logout key on your firewall.'
-        );
+        $session = $request->getSession();
+        $session->clear();
+        return $this->redirectToRoute('app_dashboard_login');
+    }
+
+    #[Route(path: '/user/logout', name: 'app_user_logout')]
+    public function logout(Request $request,): Response
+    {
+        $session = $request->getSession();
+        $session->clear();
+        dd($this->getUser());
+        return $this->redirectToRoute('app_landing');
     }
 }
