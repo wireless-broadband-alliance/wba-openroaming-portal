@@ -74,7 +74,7 @@ class MicrosoftController extends AbstractController
             'scope' => [
                 'wl.emails',
                 // 'wl.basic',
-                'wl.offline_access',
+                // 'wl.offline_access',
                 // 'wl.signin'
             ]
         ];
