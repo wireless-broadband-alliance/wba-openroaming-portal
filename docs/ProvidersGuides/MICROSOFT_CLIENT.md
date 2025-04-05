@@ -1,4 +1,4 @@
-# Microsoft Authenticator Credentials
+# Microsoft Client ID & Secret Credentials
 
 Follow these steps to obtain your **Microsoft Client ID** and **Microsoft Client Secret**:
 
@@ -25,7 +25,7 @@ Follow these steps to obtain your **Microsoft Client ID** and **Microsoft Client
         - **Accounts in any organizational directory** (Multi-tenant)
         - **Accounts in any organizational directory and personal Microsoft accounts** (Multi-tenant and Microsoft accounts)
     - **Redirect URI**: Add your application's callback URL:
-        - Examples: `https://yourportaldomain.com/google/check` or `http://localhost:8000/microsoft/check`
+        - Examples: `https://yourportaldomain.com/google/check`
 2. Click **Register** to finalize.
 
 ---

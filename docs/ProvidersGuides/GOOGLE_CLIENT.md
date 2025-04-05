@@ -1,4 +1,4 @@
-# Google Authenticator Credentials
+# Google Client ID & Secret Credentials
 
 Follow these steps to obtain your **Google Client ID** and **Google Client Secret**:
 
@@ -46,7 +46,7 @@ Follow these steps to obtain your **Google Client ID** and **Google Client Secre
 3. Choose **Web Application** as the application type.
 4. Provide a **Name** for the client (e.g., "App Client").
 5. Add your application’s **Authorized Redirect URIs**:
-    - Examples: `https://yourportaldomain.com/google/check` or `http://localhost:8000/google/check`
+    - Example: `https://yourportaldomain.com/google/check`
     - Ensure that this matches the URLs in your portal domain application.
 6. Click **Create**.
 
