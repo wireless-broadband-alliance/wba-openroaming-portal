@@ -9,7 +9,6 @@ use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use App\Service\GetSettings;
 use Doctrine\ORM\NonUniqueResultException;
-use LogicException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -133,11 +132,20 @@ class SecurityController extends AbstractController
     }
 
 
-    #[Route(path: '/logout', name: 'app_logout')]
-    public function logout(): void
+    #[Route(path: '/dashboard/logout', name: 'app_dashboard_logout')]
+    public function dashboardLogout(Request $request): Response
     {
-        throw new LogicException(
-            'This method can be blank - it will be intercepted by the logout key on your firewall.'
-        );
+        $session = $request->getSession();
+        $session->clear();
+        return $this->redirectToRoute('app_dashboard_login');
+    }
+
+    #[Route(path: '/logout', name: 'app_logout')]
+    public function logout(): Response
+    {
+        //$session = $request->getSession();
+        //$session->clear();
+        // TODO !!rework logout!! in case of logout bugs with sessions admin/user
+        return $this->redirectToRoute('app_landing');
     }
 }

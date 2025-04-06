@@ -43,8 +43,9 @@ security:
                 password_parameter: password
                 default_target_path: /dashboard
             logout:
-                path: saml_logout
-                target: /
+                path: app_dashboard_logout
+                target: /dashboard
+                invalidate_session: false
             entry_point: form_login
 
         landing:
@@ -71,8 +72,9 @@ security:
                 login_path: saml_login
             # Logout configuration for users with SAML or password authentication.
             logout:
-                path: saml_logout
+                path: app_logout
                 target: / # Redirect users to the homepage (or another path) after logout
+                invalidate_session: false
             # Entry point for authentication.
             entry_point: App\Security\AuthenticationEntryPoint
             # enable impersonation (if required in the future)

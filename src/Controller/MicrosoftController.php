@@ -69,8 +69,18 @@ class MicrosoftController extends AbstractController
         // Retrieve the "microsoft" client
         $client = $this->clientRegistry->getClient('microsoft');
 
-        // Get the authorization URL
-        $redirectUrl = $client->getOAuth2Provider()->getAuthorizationUrl();
+        // Define the minimal required scopes
+        $options = [
+            'scope' => [
+                'wl.emails',
+                // 'wl.basic',
+                // 'wl.offline_access',
+                // 'wl.signin'
+            ]
+        ];
+
+        // Get the authorization URL with scopes
+        $redirectUrl = $client->getOAuth2Provider()->getAuthorizationUrl($options);
 
         // Redirect the user to the authorization URL
         return $this->redirect($redirectUrl);
@@ -97,11 +107,11 @@ class MicrosoftController extends AbstractController
             'code' => $code,
         ]);
 
-        // Retrieve the user ID and email from the resource owner
-        $microsoftUserId = $accessToken->getToken();
         $resourceOwner = $client->fetchUserFromToken($accessToken);
         /** @phpstan-ignore-next-line */
         $data = $resourceOwner->toArray();
+        /** @phpstan-ignore-next-line */
+        $microsoftUserId = $resourceOwner->getId();
 
         // Map the relevant details from the returned $data array
         $email = $data['emails']['preferred'] ?? $data['emails']['account'] ?? null;
@@ -114,7 +124,7 @@ class MicrosoftController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
-        // Find or create the user based on the Google user ID and email
+        // Find or create the user based on the Microsoft user ID and email
         $user = $this->findOrCreateMicrosoftUser($microsoftUserId, $email, $firstname, $lastname);
 
         // If the user is null, redirect to the landing page
