@@ -43,7 +43,10 @@ Follow these steps to obtain your **Microsoft Client ID** and **Microsoft Client
 2. Click **New Client Secret**.
 3. Add a **Description** (e.g., "Symfony App Secret") and set an expiration period.
 4. Click **Add** to generate the secret.
-5. Copy the **Client Secret**—this will only be shown once.
+5. Copy the **Client Secret** — this will only be shown once. 
+
+**Please make sure you copy the value on the left**
+![Microsoft_secret_example](../../assets/wba_screenshots/microsoft_secret_example.png)
 
 ---
 
