@@ -29,29 +29,21 @@ baseline the industry** on the necessary components for developing an enabler co
 9. [🛑 Upgrade Stop: Important Instructions for Future Updates](#-upgrade-stop-important-instructions-for-future-updates)
 
 10. [👀 Portal Overview & Baseline Operation](#-portal-overview--baseline-operation)
+    - [🔧 Environment Variables](#-environment-variables)
+        - [Symfony Application Variables](#-environment-variables)
+        - [Google Client & Secret Credentials](#google-client-and-secret-credentials)
+        - [Microsoft Authenticator Credentials](#microsoft-client-and-secret-credentials)
+        - [🔒 SAML Specific Settings](#-saml-specific-settings)
+        - [👾 Turnstile Integration](#-turnstile-integration)
+        - [🌍 GeoLite GUI Documentation](#-geolite-gui-documentation)
+        - [🕷️ API Platform](#-api-platform)
+        - [🪙 JWT Tokens](#-jwt-tokens)
 
-11. [**🔧 Environment Variables**](#environment-variables)
-    - [Symfony Application Variables](#environment-variables)
-    - [Google Authenticator Credentials](#google-authenticator-credentials)
-    - [Microsoft Authenticator Credentials](#microsoft-authenticator-credentials)
-    - [🔒 SAML Specific Settings](#saml-specific-settings)
-    - [👾 Turnstile Integration](#turnstile-integration)
-    - [🌍 GeoLite GUI Documentation](#geolite-gui-documentation)
-    - [🕷️ API Platform](#api-platform)
-    - [🪙 JWT Tokens](#jwt-tokens)
+11. [🔑 Admin Page Access Page](#-admin-page-access-page)
 
-12. [**🔑 Admin Page Access Page**](#-admin-page-access-page)
+12. [🛠️ Settings Table](#-settings-table)
 
-13. [**🛠️ Settings Table**](#settings-table)
-    - [RADIUS Configuration](#settings-table)
-    - [Authentication Methods](#settings-table)
-    - [Terms, Policies, and Alerts](#settings-table)
-    - [Synchronization Settings](#settings-table)
-    - [Profile Management Settings](#settings-table)
-    - [SMS Configuration](#settings-table)
-    - [Advanced Timeout and Expiry Settings](#settings-table)
-
-14. [**Contact Information**](#contact-information)
+13. [📩 Contact Information](#-contact-information)
 
 ## 💡 Why it was created?
 
@@ -205,7 +197,7 @@ project: [Installation Guide](docs/INSTALATION.md).
 
 Follow this link for a portal user/admin interface overview: [Portal Guide](docs/PORTALGUI.md).
 
-# Portal Overview & Baseline Operation
+# 👀 Portal Overview & Baseline Operation
 
 The objective is for the user to get familiarized with the project and its baseline features.
 
@@ -272,7 +264,7 @@ These two envs are for debugging purposes, they only should be used to control a
 Please make sure to set up a **public_key** in (pgp_public_key/public_key.asc)
 **do not create keys on the production server**.
 
-### Google Authenticator Credentials
+### Google Client and Secret Credentials
 
 For detailed steps on how to obtain your **Google Client ID** and **Google Client Secret**, please refer to
 the [Google Client ID and Secret Guide](docs/ProvidersGuides/GOOGLE_CLIENT.md).
@@ -281,7 +273,7 @@ Once obtained, you will use the following environment variables in your portal c
 - `GOOGLE_CLIENT_ID`
 - `GOOGLE_CLIENT_SECRET`
 
-### Microsoft Authenticator Credentials
+### Microsoft Client and Secret Credentials
 
 For detailed instructions on how to obtain your **Microsoft Client ID** and **Microsoft Client Secret**, please refer to
 the [Microsoft Client ID and Secret Guide](docs/ProvidersGuides/MICROSOFT_CLIENT.md).
@@ -470,4 +462,5 @@ certificate. **Connection errors** can happen if the right SHA1 hash is not prov
 
 #### With these environment variables, you can configure and customize various aspects of the project, such as database connections, SAML settings, login methods, and more.
 
+## 📩 Contact Information?
 For more information please contact: openroaming@wballiance.com
