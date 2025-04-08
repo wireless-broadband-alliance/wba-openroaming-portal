@@ -117,6 +117,8 @@ environment.
 
 ## 🛑 Important References Configurations 🛑
 
+***For a complete installation of the portal please follow these steps***
+
 ### Google Authenticator Credentials
 
 For detailed steps on how to obtain your **Google Client ID** and **Google Client Secret**, please refer to
