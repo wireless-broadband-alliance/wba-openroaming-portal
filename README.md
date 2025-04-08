@@ -3,7 +3,57 @@
 Welcome to the OpenRoaming Provisioning Portal! This repository provides a **reference implementation designed to
 baseline the industry** on the necessary components for developing an enabler component of OpenRoaming.
 
-## Why it was created?
+# Table of Contents
+
+1. [💡 Why It Was Created?](#-why-it-was-created)
+
+2. [🤔 How It Works](#-how-it-works)
+
+3. [🛠️ Tools Used](#-tools-used)
+
+4. [📜 Prerequisites](#-prerequisites)
+
+5. [📥 How to Get the Project](#-how-to-get-the-project)
+
+6. [📖 Features](#-features)
+    - [User Management](#user-management)
+    - [Portal Management](#portal-management)
+    - [Settings Management](#settings-management)
+    - [Portal Statistics](#portal-statistics)
+    - [Connectivity Statistics](#connectivity-statistics)
+
+7. [🚀 OpenRoaming Portal API](#-openroaming-portal-api)
+
+8. [⚙️ Installation Guide](#-installation-guide)
+
+9. [🛑 Upgrade Stop: Important Instructions for Future Updates](#-upgrade-stop-important-instructions-for-future-updates)
+
+10. [👀 Portal Overview & Baseline Operation](#-portal-overview--baseline-operation)
+
+11. [**🔧 Environment Variables**](#environment-variables)
+    - [Symfony Application Variables](#environment-variables)
+    - [Google Authenticator Credentials](#google-authenticator-credentials)
+    - [Microsoft Authenticator Credentials](#microsoft-authenticator-credentials)
+    - [🔒 SAML Specific Settings](#saml-specific-settings)
+    - [👾 Turnstile Integration](#turnstile-integration)
+    - [🌍 GeoLite GUI Documentation](#geolite-gui-documentation)
+    - [🕷️ API Platform](#api-platform)
+    - [🪙 JWT Tokens](#jwt-tokens)
+
+12. [**🔑 Admin Page Access Page**](#-admin-page-access-page)
+
+13. [**🛠️ Settings Table**](#settings-table)
+    - [RADIUS Configuration](#settings-table)
+    - [Authentication Methods](#settings-table)
+    - [Terms, Policies, and Alerts](#settings-table)
+    - [Synchronization Settings](#settings-table)
+    - [Profile Management Settings](#settings-table)
+    - [SMS Configuration](#settings-table)
+    - [Advanced Timeout and Expiry Settings](#settings-table)
+
+14. [**Contact Information**](#contact-information)
+
+## 💡 Why it was created?
 
 The primary objective of the **OpenRoaming Provisioning Portal is to simplify the provisioning of identities using
 Passpoint**, enabling an OpenRoaming network to support seamless Wi-Fi connectivity and enhance security for users
@@ -12,7 +62,7 @@ across various environments.
 The goal is to **provide secure Wi-Fi access to everyone** without the need for repeated logins or unsecure/open
 networks, making Wi-Fi connectivity for individuals and enterprises easier, quicker, and more user-friendly.
 
-## How it works?
+## 🤔 How it works?
 
 OpenRoaming is an **open standard developed to enable global, secure, and automatic Wi-Fi connectivity**. With
 OpenRoaming, users can connect to Wi-Fi networks without being prompted for login credentials. Instead, it utilizes
@@ -37,7 +87,7 @@ These are some of the most important tools used on the development of this proje
 - **MySQL Database**: Efficiently method to save and return user profiles and settings of the portal.
 - **Docker**: Encapsulating the project in containers to improve deployment and compatibility.
 
-### Prerequisites:
+## 📜 Prerequisites:
 
 - Linux based system - Ubuntu 22.04 LTS (tested for the reference implementation)
 - Knowledge about Linux OS (required to set up the project)
@@ -46,7 +96,7 @@ These are some of the most important tools used on the development of this proje
 - Docker compose (responsible for managing multiple containers)
 - Git (optional, if the user prefers to clone the repository)
 
-### How to get the Project
+## 📥 How to get the Project
 
 There are two options to retrieve the project:
 
@@ -121,7 +171,7 @@ This page shows data related to the hybrid machine
 - **Total of Current Authentications** Shows the number of current users connected with a profile (This card is
   independent of the date filtering)
 
-### OpenRoaming Portal API
+## 🚀 OpenRoaming Portal API
 
 This page shows data related to the endpoints in the project required for user authentication, management, and
 configuration within the OpenRoaming Portal. It includes detailed descriptions of each endpoint, highlighting their
@@ -129,6 +179,8 @@ purpose, required inputs, and expected outputs.
 
 Additionally, the documentation shows the necessary security measures,
 such as CAPTCHA validation, that are integrated to protect user data and ensure secure interactions with the API.
+
+Please refer to the [API documentation](docs/api/index.html) for detailed usage instructions and examples.
 
 Follow this link for more information on API documentation: [Api Guide](docs/APIGUI.md)
 
@@ -299,6 +351,10 @@ check the `.env.sample`.
 - `JWT_SECRET_KEY`: The secret defined for the key.
 - `JWT_PUBLIC_KEY`: The public key location.
 - `JWT_PASSPHRASE`: The private key location.
+
+## 🔑 Admin Page Access Page
+
+Follow this link for a portal user/admin interface overview: [Portal Guide](docs/PORTALGUI.md).
 
 ### 🛠️ Settings Table
 

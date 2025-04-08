@@ -97,7 +97,7 @@ This command will create the following files in the `config/jwt` directory:
 
 Make sure to keep these keys secure, especially the private key.
 
-10. **Configure JWT and CORS**: Next, configure the JWT and CORS environment variables in your `.env` file:
+10. **Configure JWT and CORS**: Make sure this configuration is setup on `.env` the JWT and CORS environment variables in your `.env` file:
 
 ```env
 JWT_SECRET_KEY=%kernel.project_dir%/config/jwt/private.pem
