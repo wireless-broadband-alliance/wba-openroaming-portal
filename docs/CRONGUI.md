@@ -47,17 +47,21 @@ Once cron is installed, you can open the container’s crontab file to schedule 
    In the crontab editor, define the cron job:
 
    ```bash
-   0 0 * * * /usr/bin/php /var/www/openroaming/ php bin/console clear:deleteUnconfirmedUsers >> /var/log/clear_unconfirmed_users.log 2>&1
-   0 0 * * * /usr/bin/php /var/www/openroaming/ php bin/console notify:usersWhenProfileExpires >> /var/log/notify_users.log 2>&1
+   0 0 * * * /usr/bin/php /var/www/openroaming/ php bin/console clear:deleteUnconfirmedUsers >> /var/www/openroaming/var/log/clear_unconfirmed_users.log 2>&1
+   0 0 * * * /usr/bin/php /var/www/openroaming/ php bin/console notify:usersWhenProfileExpires >> /var/www/openroaming/var/log/notify_users.log 2>&1
    ```
 
 ### Explanation of the Cron Job:
 
-- **`0 0 * * *`**: Specifies the frequency to run – this example schedules the command daily at midnight.
-- **`/usr/bin/php`**: Path to the PHP binary inside the container (use `which php` within the container to confirm the
-  path).
-- **`/path/to/your/project`**: The path to your Symfony project within the container – replace it with the correct
-  directory.
+- **`0 0 * * *`**: Schedules the command to run **daily at midnight**.
+- **`/usr/bin/php`**: Specifies the PHP binary to execute the Symfony console commands (use `which php` to verify the exact path to PHP in your environment).
+- **`php bin/console`**: Executes the Symfony console commands defined in the project.
+- **`clear:deleteUnconfirmedUsers`**: A Symfony command to delete unconfirmed users from the system.
+- **`notify:usersWhenProfileExpires`**: A Symfony command to notify users when their profile is about to expire.
+- **`>> /var/www/openroaming/var/log/clear_unconfirmed_users.log`** or **`>> /var/www/openroaming/var/log/notify_users.log`**:
+    - Redirects the output of each specific command to log files for monitoring purposes.
+    - Standard output of the command is appended to the respective log file.
+    - All error messages (`stderr`) are also redirected to the same log file due to `2>&1`.
 
 ---
 
