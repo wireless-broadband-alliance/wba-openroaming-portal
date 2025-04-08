@@ -109,7 +109,7 @@ The `CORS_ALLOW_ORIGIN` regex allows requests from `localhost` or `127.0.0.1` du
 Adjust it based on your deployment needs, and make sure to not use the default value from the sample in a production
 environment.
 
-## 🛑 Important references notes 🛑
+## 🛑 Important References Configurations 🛑
 
 ### Google Authenticator Credentials
 
@@ -130,14 +130,39 @@ Once obtained, you will use the following environment variables in your portal c
 - `MICROSOFT_CLIENT_ID`
 - `MICROSOFT_CLIENT_SECRET`
 
-### Geolite Note
+### SAML Authenticator Credentials
 
- ⚠️ ***GeoLite2 is mandatory for a complete project installation***
+These variables are needed to set up the SAML Service Provider (SP) and Identity Provider (IdP):
 
-GeoLite2 is important for personalizing the user experience based on their location. It allows us to identify 
+For detailed instructions on how to obtain your **SAML IDP Credentials**, please refer to
+the [SAML Service Provider (SP)](../docs/ProvidersGuides/SAML_IDP_CREDENTIALS.md).
+
+- `SAML_IDP_ENTITY_ID`: This is the entity ID (URI) of the IdP.
+- `SAML_IDP_SSO_URL`: This is the URL of the IdP's Single Sign-On (SSO) service.
+- `SAML_IDP_X509_CERT`: This is the X509 certificate from the IdP, used for verifying SAML responses.
+- `SAML_SP_ENTITY_ID`: This is the entity ID (URI) of the SP.
+- `SAML_SP_ACS_URL`: This is the URL of the SP's Assertion Consumer Service (ACS), which processes SAML assertions from
+  the IdP.
+
+**Important**:
+If you want to use this provider authentication on the project,
+make sure to expose a SAML attribute on your IDP named
+`samlUuid`,
+to expose a unique id of the SAML account.
+This property it's required to authenticate users if one of them doesn't have an email defined on the IDP.
+
+
+### GeoLite Configuration 
+
+> **Important**: GeoLite2 is mandatory for a complete portal installation
+
+GeoLite2 is important for personalizing the user experience based on their location. It allows the portal to identify 
 the user's region from their IP address, helping us adjust content, set cookies properly, and comply with local laws, 
-such as the GDPR. By using GeoLite2, we ensure that our application delivers relevant content and respects privacy and 
+such as the GDPR. By using GeoLite2, we ensure that our portal delivers relevant content and respects privacy and 
 cookie consent regulations.
+
+For detailed instructions on the GeoLite GUI setup, operations, and usage, refer to
+the [GeoLite GUI Guide](../docs/GEOLITEGUI.md).
 
 ### 🛑 Important Security Note after Installation 🛑
 
