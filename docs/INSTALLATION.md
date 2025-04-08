@@ -84,6 +84,12 @@ following command on the root folder of the project to generate these keys:
 php bin/console lexik:jwt:generate-keypair 
 ```
 
+or 
+
+```bash
+php bin/console lexik:jwt:generate-keypair --passphrase=<your_passphrase>
+```
+
 This command will create the following files in the `config/jwt` directory:
 
 - `private.pem` – the private key used to sign tokens.
