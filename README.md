@@ -191,7 +191,7 @@ project: [Upgrade Guide](docs/UPGRADE.md).
 # ⚙️ Installation Guide
 
 Follow this link for more information on installing this
-project: [Installation Guide](docs/INSTALATION.md).
+project: [Installation Guide](docs/INSTALLATION.md).
 
 # 🔑 Admin Page Access Page
 
