@@ -117,6 +117,11 @@ environment.
 
 ## 🛑 Important References Configurations 🛑
 
+### For a complete installation of the portal please follow these steps
+
+These steps will enhance the portal's security and enable key features required for its full functionality 
+(Cron Commands, Microsoft login, Google Login, SAML login and GeoLite2).
+
 ### Set up a CRON Job for automation commands
 
 For detailed steps on how to set up CRONS, please refer to the [Cron Configuration Guide](../docs/CRONGUI.md)
