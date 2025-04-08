@@ -41,9 +41,11 @@ baseline the industry** on the necessary components for developing an enabler co
 
 11. [🔑 Admin Page Access Page](#-admin-page-access-page)
 
-12. [🛠️ Settings Table](#-settings-table)
+12. [🔧 Set up a CRON Job for automation commands](#-set-up-a-cron-job-for-automation-commands)
 
-13. [📩 Contact Information](#-contact-information)
+13. [🛠️ Settings Table](#-settings-table)
+
+14. [📩 Contact Information](#-contact-information)
 
 ## 💡 Why it was created?
 
@@ -344,6 +346,10 @@ check the `.env.sample`.
 - `JWT_PUBLIC_KEY`: The public key location.
 - `JWT_PASSPHRASE`: The private key location.
 
+### 🔧 Set up a CRON Job for automation commands
+
+For detailed steps on how to set up CRONS, please refer to the [Cron Configuration Guide](docs/CRONGUI.md)
+
 ## 🔑 Admin Page Access Page
 
 Follow this link for a portal user/admin interface overview: [Portal Guide](docs/PORTALGUI.md).
@@ -463,4 +469,5 @@ certificate. **Connection errors** can happen if the right SHA1 hash is not prov
 #### With these environment variables, you can configure and customize various aspects of the project, such as database connections, SAML settings, login methods, and more.
 
 ## 📩 Contact Information?
+
 For more information please contact: openroaming@wballiance.com

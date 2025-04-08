@@ -117,7 +117,9 @@ environment.
 
 ## 🛑 Important References Configurations 🛑
 
-***For a complete installation of the portal please follow these steps***
+### Set up a CRON Job for automation commands
+
+For detailed steps on how to set up CRONS, please refer to the [Cron Configuration Guide](../docs/CRONGUI.md)
 
 ### Google Authenticator Credentials
 
