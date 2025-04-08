@@ -97,7 +97,7 @@ This command will create the following files in the `config/jwt` directory:
 
 Make sure to keep these keys secure, especially the private key.
 
-8. **Configure JWT and CORS**: Make sure this configuration is setup on `.env` the JWT and CORS environment variables in your `.env` file:
+8. **Configure JWT and CORS**: Make sure this configuration is set up on `.env` the JWT and CORS environment variables in your `.env` file:
 
 ```env
 JWT_SECRET_KEY=%kernel.project_dir%/config/jwt/private.pem
@@ -120,7 +120,7 @@ environment.
 ### Google Authenticator Credentials
 
 For detailed steps on how to obtain your **Google Client ID** and **Google Client Secret**, please refer to
-the [Google Client ID and Secret Guide](docs/ProvidersGuides/GOOGLE_CLIENT.md).
+the [Google Client ID and Secret Guide](../docs/ProvidersGuides/GOOGLE_CLIENT.md).
 Once obtained, you will use the following environment variables in your portal configuration:
 
 - `GOOGLE_CLIENT_ID`
@@ -129,7 +129,7 @@ Once obtained, you will use the following environment variables in your portal c
 ### Microsoft Authenticator Credentials
 
 For detailed instructions on how to obtain your **Microsoft Client ID** and **Microsoft Client Secret**, please refer to
-the [Microsoft Client ID and Secret Guide](docs/ProvidersGuides/MICROSOFT_CLIENT.md).
+the [Microsoft Client ID and Secret Guide](../docs/ProvidersGuides/MICROSOFT_CLIENT.md).
 
 Once obtained, you will use the following environment variables in your portal configuration:
 
