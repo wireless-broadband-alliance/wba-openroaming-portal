@@ -132,15 +132,6 @@ such as CAPTCHA validation, that are integrated to protect user data and ensure 
 
 Follow this link for more information on API documentation: [Api Guide](docs/APIGUI.md)
 
-# ⚙️ Installation Guide
-
-Follow this link for more information on installing this
-project: [Installation Guide](docs/INSTALATION.md).
-
-# 🔑 Admin Page Access Page
-
-Follow this link for a portal user/admin interface overview: [Portal Guide](docs/PORTALGUI.md).
-
 ## 🛑 Upgrade Stop: Important Instructions for Future Updates
 
 Certain upgrades may require additional steps or preparation to ensure a smooth and successful transition. These steps
@@ -152,6 +143,15 @@ the instructions provided for each version you are upgrading to.
 
 Follow this link for more information about upgrade this
 project: [Upgrade Guide](docs/UPGRADE.md).
+
+# ⚙️ Installation Guide
+
+Follow this link for more information on installing this
+project: [Installation Guide](docs/INSTALATION.md).
+
+# 🔑 Admin Page Access Page
+
+Follow this link for a portal user/admin interface overview: [Portal Guide](docs/PORTALGUI.md).
 
 # Portal Overview & Baseline Operation
 
