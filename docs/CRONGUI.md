@@ -42,8 +42,8 @@ the container is not running, and you need to start them to verify the existence
 
 ## Step 2: Open the Crontab File in the root folder
 
-Once `cron` is installed, you need to set up specific jobs to execute the required Symfony console commands. Make sure
-you are on the root folder of your project to execute the following steps.
+Once `cron` is installed, you need to set up specific jobs to execute the required Symfony automation commands. Make sure
+you are on the root folder of the project to execute the following steps:
 
 1. **Open Crontab**:
    Run the following command to open the cron scheduler editor (crontab):
