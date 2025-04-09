@@ -15,48 +15,28 @@ intervention.
 
 ## Step 1: Identify the Container and Install Cron
 
-Before setting up `cron`, you need to identify and confirm that the container responsible for the portal database is
-running.
-Once verified, you can proceed to install `cron` inside your system. Follow the steps below:
-
-1. **Identify the Docker Container**:
-Run the following command to automatically detect the correct container:
+1. **Confirm that the CRON package is installed**. Use the following command to
+   check if `cron` is already in the system, if not, it for installed it for you:
 
 ```shell
-   container_name=$(docker ps --format '{{.Names}}' | grep "mysql")
-   if [ -z "$container_name" ]; then
-       echo "Error: No container found matching the keyword '<keyword>'. Exiting..."
-   fi
-       echo "Found container: $container_name"
+  dpkg -l | grep cron || (echo "Cron is not installed. Installing..." && sudo apt update && sudo apt install -y cron && echo "Cron has been installed.")
 ```
 
-It should output something like this:
-
-```
-Found container: cc-openroaming-provisioning-web-mysql-1
-```
-
-2. **Check the mysql container exist & if he is running**, make sure he exists by typing the following command:
+2. **Identify the Docker Container**:
+   Run the following command to automatically detect if the correct `<container-web>` is running:
 
 ```shell
-    status=$(docker inspect -f '{{.State.Status}}' $container_name)
-    if [ "$status" != "running" ]; then
-    echo "Error: Container '$container_name' is not running. Please start the container first."
-    fi
-    echo "Container '$container_name' is running."
+  docker ps | grep web | grep -i cc-openroaming-provisioning-web-web | awk '{print $1}'
 ```
 
-3. **Confirm that the CRON package is installed**. Use the following command to
-check if `cron` is already in the system, if not, it for installed it for you:
+or
 
 ```shell
-    if ! dpkg -l | grep -q cron; then
-    echo "Cron is not installed. Installing..."
-    sudo apt update && apt install -y cron
-    else
-    echo "Cron is already installed."
-    fi
+  docker ps --filter "name=cc-openroaming-provisioning-web-web" --format "{{.ID}}"
 ```
+
+Both of these commands will return the container ID (a hash) of the running `<container-web>`. If no output is returned,
+the container is not running, and you need to start them to verify the existence of this container.
 
 ---
 
@@ -73,36 +53,28 @@ you are on the root folder of your project to execute the following steps.
    ```
 
 2. **Add the Cron Job**:
-   Add the following lines to the crontab file to schedule your Symfony commands (adjust `<project_folder>` to the
-   actual location of the project in your system).
+   Add the following lines to the crontab file to schedule the Symfony automation commands.
 
-   Please make sure you type this commands on the end of the file.
    ```bash
-    0 0 * * * /usr/bin/php $HOME/<project_folder>/bin/console clear:deleteUnconfirmedUsers >> $HOME/<project_folder>/var/log/clear_unconfirmed_users.log 2>&1
-    30 0 * * * /usr/bin/php $HOME/<project_folder>/bin/console notify:usersWhenProfileExpires >> $HOME/<project_folder>/var/log/notify_users.log 2>&1
-   ```
+   0 0 * * * docker exec -it $(docker ps | grep cc-openroaming-provisioning-web-web | awk '{print $1}') php bin/console clear:deleteUnconfirmedUsers
+   30 0 * * * docker exec -it $(docker ps | grep cc-openroaming-provisioning-web-web | awk '{print $1}') php bin/console notify:usersWhenProfileExpires
+   ``` 
 
-- Replace `<project_folder>` with the path to your project folder (e.g., `/openRoaming/cc-openroaming-provisioning-web`)
+**Please make sure you type this commands on the end of the file.**
+
+- The first command: Runs every day at **midnight (00:00)** to clear unconfirmed users.
+- The second command: Runs every day at **12:30 AM (00:30)** to notify users about profile expirations.
 
 3. **Save and Exit**:
-   Save the file and exit the editor. Confirm the cron jobs are set by running:
-   ```bash
+   Save the file and exit the editor.
+
+- In **nano**, press `CTRL + O`, then `ENTER` to save, and `CTRL + X` to exit.
+
+To confirm the cron jobs are set please run this another command:
+
+```bash
    crontab -l
-   ```
-
-### Explanation of the Cron Job:
-
-- **`0 0 * * *`**: Schedules the command to run **daily at midnight**.
-- **`/usr/bin/php`**: Specifies the PHP binary to execute the Symfony console commands (use `which php` to verify the
-  exact path to PHP in your environment).
-- **`php bin/console`**: Executes the Symfony console commands defined in the project.
-- **`clear:deleteUnconfirmedUsers`**: A Symfony command to delete unconfirmed users from the system.
-- **`notify:usersWhenProfileExpires`**: A Symfony command to notify users when their profile is about to expire.
-- **`>> $HOME/<project_folder>/var/log/clear_unconfirmed_users.log`** or *
-  *`>> $HOME/<project_folder>/var/log/notify_users.log`**:
-    - Redirects the output of each specific command to log files for monitoring purposes.
-    - Standard output of the command is appended to the respective log file.
-    - All error messages (`stderr`) are also redirected to the same log file due to `2>&1`.
+```
 
 ---
 
@@ -143,6 +115,7 @@ Before relying on cron to execute the commands, manually test if portal executio
 ```bash
   php bin/console clear:deleteUnconfirmedUsers
 ```
+
 ```bash
   php bin/console notify:usersWhenProfileExpires
 ```
