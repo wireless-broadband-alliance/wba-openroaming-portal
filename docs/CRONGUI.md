@@ -18,24 +18,19 @@ php bin/console notify:usersWhenProfileExpires
 To set up cron, you need to have it installed inside the container we, responsible for the portal. Follow
 the steps below:
 
-1. **Access the Running Container**:
-   Run the following command to access the container’s terminal:
-   ```bash
-   docker exec -it <container_id> bash
-   ```
-   Replace `<container_id>` with the ID of your running container.
+1**Install Package Cron**:
+Once inside the container, install the cron package:
 
-2. **Install Cron Inside the Container**:
-   Once inside the container, install the cron package:
    ```bash
-   apt-get update && apt-get install -y cron
+   sudo apt update && apt install -y cron
    ```
 
 ---
 
-## Step 2: Open the Crontab File in the Container
+## Step 2: Open the Crontab File in the root folder
 
-Once cron is installed, you can open the container’s crontab file to schedule your tasks.
+Once cron is installed, you can open the make sure you are on the root folder of the project to execute the following
+commands
 
 1. **Open Crontab**:
    Run the following command to open the cron scheduler within the container:
@@ -45,20 +40,22 @@ Once cron is installed, you can open the container’s crontab file to schedule 
 
 2. **Add the Cron Job**:
    In the crontab editor, define the cron job:
-
+   TODO: make a pretty explanation for dumb people to change the example on the command to the location folder of the project
    ```bash
-   0 0 * * * /usr/bin/php /var/www/openroaming/ php bin/console clear:deleteUnconfirmedUsers >> /var/www/openroaming/var/log/clear_unconfirmed_users.log 2>&1
-   0 0 * * * /usr/bin/php /var/www/openroaming/ php bin/console notify:usersWhenProfileExpires >> /var/www/openroaming/var/log/notify_users.log 2>&1
+   0 0 * * * /usr/bin/php <project_location>(example: ":~/openroaming-provisioning-web/") php bin/console clear:deleteUnconfirmedUsers >> <project_location>(example: ":~/openroaming-provisioning-web/")/var/log/clear_unconfirmed_users.log 2>&1
+   0 0 * * * /usr/bin/php <project_location>(example: ":~/openroaming-provisioning-web/") php bin/console notify:usersWhenProfileExpires >> <project_location>(example: ":~/openroaming-provisioning-web/")/var/log/notify_users.log 2>&1
    ```
 
 ### Explanation of the Cron Job:
 
 - **`0 0 * * *`**: Schedules the command to run **daily at midnight**.
-- **`/usr/bin/php`**: Specifies the PHP binary to execute the Symfony console commands (use `which php` to verify the exact path to PHP in your environment).
+- **`/usr/bin/php`**: Specifies the PHP binary to execute the Symfony console commands (use `which php` to verify the
+  exact path to PHP in your environment).
 - **`php bin/console`**: Executes the Symfony console commands defined in the project.
 - **`clear:deleteUnconfirmedUsers`**: A Symfony command to delete unconfirmed users from the system.
 - **`notify:usersWhenProfileExpires`**: A Symfony command to notify users when their profile is about to expire.
-- **`>> /var/www/openroaming/var/log/clear_unconfirmed_users.log`** or **`>> /var/www/openroaming/var/log/notify_users.log`**:
+- **`>> /var/www/openroaming/var/log/clear_unconfirmed_users.log`** or *
+  *`>> /var/www/openroaming/var/log/notify_users.log`**:
     - Redirects the output of each specific command to log files for monitoring purposes.
     - Standard output of the command is appended to the respective log file.
     - All error messages (`stderr`) are also redirected to the same log file due to `2>&1`.
@@ -102,7 +99,6 @@ Before relying on cron to execute the commands, manually test if portal executio
 ```bash
 php bin/console clear:deleteUnconfirmedUsers
 php bin/console notify:usersWhenProfileExpires
-
 ```
 
 If the command executes successfully, the cron job is ready to run at the scheduled time.
