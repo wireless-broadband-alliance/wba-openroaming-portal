@@ -24,14 +24,16 @@
 > - **Check Compatibility:**  
     >   Verify the target environment meets all requirements, including:
     >   - Minimum PHP version
->   - MySQL version
+    >
+- MySQL version
 >   - Additional system dependencies
 > - **Follow Intermediate Steps Carefully:**  
     >   Skipping required intermediate versions or commands can break the upgrade process.
 > - **Review System Configurations:**  
     >   Ensure system adjustments are made where necessary before proceeding.
 
-**⚡ TAKE THIS SERIOUSLY ⚡**: Ignoring these steps could render your system unusable. Proceed with caution and always create backups before upgrading.
+**⚡ TAKE THIS SERIOUSLY ⚡**: Ignoring these steps could render your system unusable. Proceed with caution and always
+create backups before upgrading.
 
 ---
 
@@ -59,29 +61,33 @@ Upgrading your system requires caution and preparation. Follow these general gui
     - Break the upgrade path
     - Cause data corruption
 
-   Intermediate versions (e.g., `<intermediate_version>`) act as compatibility layers essential for successful upgrading.
+   Intermediate versions (e.g., `<intermediate_version>`) act as compatibility layers essential for successful
+   upgrading.
 
 4. **Run Any Pre-Upgrade Commands**  
-   Some upgrades require running specific commands—such as schema changes or cleanup tasks—before proceeding to the next version.
+   Some upgrades require running specific commands—such as schema changes or cleanup tasks—before proceeding to the next
+   version.
 
    Example for `<intermediate_version>`:
    ```bash
    php bin/console <command_placeholder>
    ```  
-   > **Note:** Ensure these commands are run in the correct version as they might be removed or deprecated in later versions.
+   > **Note:** Ensure these commands are run in the correct version as they might be removed or deprecated in later
+   versions.
 
 5. **Proceed to the Target Version Upgrade**  
-   Once prerequisites are met (backup, changelog review, and intermediate upgrades), you can safely upgrade to the target version.
+   Once prerequisites are met (backup, changelog review, and intermediate upgrades), you can safely upgrade to the
+   target version.
 
 ---
 
 ## Upgrade Path Matrix
 
-| Current Version | Intermediate Version | Target Version | Notes                                                                |
-|-----------------|----------------------|----------------|----------------------------------------------------------------------|
-| 1.5             | 1.6                  | 1.7            | Run `php bin/console reset:allocate-providers` before proceeding.    |
-| 1.6             | N/A                  | 1.7            | Proceed directly to 1.7 after reviewing changelog.                   |
-| Below 1.5       | Follow earlier paths | 1.7            | Ensure compatibility with earlier versions before upgrading.         |
+| Current Version | Intermediate Version | Target Version | Notes                                                             |
+|-----------------|----------------------|----------------|-------------------------------------------------------------------|
+| Below 1.5       | Follow earlier paths | 1.7            | Ensure compatibility with earlier versions before upgrading.      |
+| 1.5             | 1.6                  | 1.7            | Run `php bin/console reset:allocate-providers` before proceeding. |
+| 1.6             | N/A                  | 1.7            | Proceed directly to 1.7 after reviewing changelog.                |
 
 Use this table to determine the exact steps based on your current version.
 
@@ -102,7 +108,8 @@ Use this table to determine the exact steps based on your current version.
   ```
 
 - **Breaking Changes:**  
-  Module configurations or data models from older versions may need to be adjusted. Refer to the [CHANGELOG.md](../CHANGELOG.md).
+  Module configurations or data models from older versions may need to be adjusted. Refer to
+  the [CHANGELOG.md](../CHANGELOG.md).
 
 ---
 
@@ -110,6 +117,9 @@ Use this table to determine the exact steps based on your current version.
 
 Use the following checklist before starting the upgrade process:
 
+- [ ] **Verify System Requirements**
+    - Confirm the target environment matches all required dependencies (e.g., PHP, MySQL).
+  
 - [ ] **Create Backups**
     - Database
     - Configuration files
@@ -121,9 +131,6 @@ Use the following checklist before starting the upgrade process:
 - [ ] **Complete Pre-Upgrade Steps**
     - Ensure your current version aligns with the **Upgrade Path Matrix**.
     - Run all pre-upgrade commands for intermediate versions.
-
-- [ ] **Verify System Requirements**
-    - Confirm the target environment matches all required dependencies (e.g., PHP, MySQL).
 
 ---
 
@@ -169,6 +176,7 @@ Use the following checklist before starting the upgrade process:
 ### Rollback Procedure
 
 If any step fails:
+
 1. Restore the full backup you created earlier.
 2. Review the logs or errors to identify the failure point.
 3. Perform necessary fixes and repeat the upgrade steps.

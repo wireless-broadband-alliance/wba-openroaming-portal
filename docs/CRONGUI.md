@@ -13,7 +13,19 @@ intervention.
 - php bin/console notify:usersWhenProfileExpires
 ```
 
-## Step 1: Identify the Container and Install Cron
+## Step 1: Test the portal automation Commands Manually
+
+Before relying on cron to execute the commands, manually test if portal execution works as expected:
+
+```bash
+  php bin/console clear:deleteUnconfirmedUsers
+```
+
+```bash
+  php bin/console notify:usersWhenProfileExpires
+```
+
+## Step 2: Identify the Container and Install Cron
 
 1. **Confirm that the CRON package is installed**. Use the following command to
    check if `cron` is already in the system, if not, it for installed it for you:
@@ -26,13 +38,13 @@ intervention.
    Run the following command to automatically detect if the correct `<container-web>` is running:
 
 ```shell
-  docker ps | grep web | grep -i cc-openroaming-provisioning-web-web | awk '{print $1}'
+  docker ps | grep web | grep -i web-1 | awk '{print $1}'
 ```
 
 or
 
 ```shell
-  docker ps --filter "name=cc-openroaming-provisioning-web-web" --format "{{.ID}}"
+  docker ps --filter "name=web-1" --format "{{.ID}}"
 ```
 
 Both of these commands will return the container ID (a hash) of the running `<container-web>`. If no output is returned,
@@ -40,7 +52,7 @@ the container is not running, and you need to start them to verify the existence
 
 ---
 
-## Step 2: Open the Crontab File in the root folder
+## Step 3: Open the Crontab File in the root folder
 
 Once `cron` is installed, you need to set up specific jobs to execute the required Symfony automation commands. Make sure
 you are on the root folder of the project to execute the following steps:
@@ -56,8 +68,8 @@ you are on the root folder of the project to execute the following steps:
    Add the following lines to the crontab file to schedule the Symfony automation commands.
 
    ```bash
-   0 0 * * * docker exec -it $(docker ps | grep cc-openroaming-provisioning-web-web | awk '{print $1}') php bin/console clear:deleteUnconfirmedUsers
-   30 0 * * * docker exec -it $(docker ps | grep cc-openroaming-provisioning-web-web | awk '{print $1}') php bin/console notify:usersWhenProfileExpires
+   0 0 * * * docker exec -it $(docker ps | grep web | grep -i web-1 | awk '{print $1}') php bin/console clear:deleteUnconfirmedUsers
+   30 0 * * * docker exec -it $(docker ps | grep web | grep -i web-1 | awk '{print $1}') php bin/console notify:usersWhenProfileExpires
    ``` 
 
 **Please make sure you type this commands on the end of the file.**
@@ -78,7 +90,7 @@ To confirm the cron jobs are set please run this another command:
 
 ---
 
-## Step 3: Enable and Start the Cron Service
+## Step 4: Enable and Start the Cron Service
 
 After setting up the cron job, you need to enable and start the cron service to ensure it runs.
 
@@ -96,7 +108,7 @@ After setting up the cron job, you need to enable and start the cron service to 
 
 ---
 
-## Step 4: Check Scheduled Cron Jobs
+## Step 5: Check Scheduled Cron Jobs
 
 To verify that your cron job is added and scheduled properly, list the active cron jobs:
 
@@ -104,20 +116,4 @@ To verify that your cron job is added and scheduled properly, list the active cr
   crontab -l
 ```
 
-You should see the command you added in Step 2.
-
----
-
-## Step 5: Test the portal automation Commands Manually
-
-Before relying on cron to execute the commands, manually test if portal execution works as expected:
-
-```bash
-  php bin/console clear:deleteUnconfirmedUsers
-```
-
-```bash
-  php bin/console notify:usersWhenProfileExpires
-```
-
-If the command executes successfully, the cron job is ready to run at the scheduled time.
+You should see the command you added in Step 3.
