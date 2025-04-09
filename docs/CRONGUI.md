@@ -74,13 +74,15 @@ you are on the root folder of your project to execute the following steps.
 
 2. **Add the Cron Job**:
    Add the following lines to the crontab file to schedule your Symfony commands (adjust `<project_folder>` to the
-   actual location of the project in your system)
+   actual location of the project in your system).
+
+   Please make sure you type this commands on the end of the file.
    ```bash
     0 0 * * * /usr/bin/php $HOME/<project_folder>/bin/console clear:deleteUnconfirmedUsers >> $HOME/<project_folder>/var/log/clear_unconfirmed_users.log 2>&1
     30 0 * * * /usr/bin/php $HOME/<project_folder>/bin/console notify:usersWhenProfileExpires >> $HOME/<project_folder>/var/log/notify_users.log 2>&1
    ```
 
-- Replace `<project_folder>` with the path to your project folder (e.g., `/var/www/openroaming-provisioning-web`)
+- Replace `<project_folder>` with the path to your project folder (e.g., `/openRoaming/cc-openroaming-provisioning-web`)
 
 3. **Save and Exit**:
    Save the file and exit the editor. Confirm the cron jobs are set by running:
@@ -104,30 +106,30 @@ you are on the root folder of your project to execute the following steps.
 
 ---
 
-## Step 3: Enable and Start the Cron Service in the Container
+## Step 3: Enable and Start the Cron Service
 
 After setting up the cron job, you need to enable and start the cron service to ensure it runs.
 
 1. **Start the Cron Service**:
-   Start the cron service inside the container:
+   Start the cron service:
    ```bash
-   service cron start
+   sudo service cron start
    ```
 
 2. **Verify Cron Service Is Running**:
-   Optionally, confirm that the cron service is active within the container:
+   Optionally, confirm that the cron service is active:
    ```bash
-   service cron status
+   sudo service cron status
    ```
 
 ---
 
-## Step 4: Check Scheduled Cron Jobs in the Container
+## Step 4: Check Scheduled Cron Jobs
 
 To verify that your cron job is added and scheduled properly, list the active cron jobs:
 
 ```bash
-crontab -l
+  crontab -l
 ```
 
 You should see the command you added in Step 2.
@@ -139,8 +141,10 @@ You should see the command you added in Step 2.
 Before relying on cron to execute the commands, manually test if portal execution works as expected:
 
 ```bash
-php bin/console clear:deleteUnconfirmedUsers
-php bin/console notify:usersWhenProfileExpires
+  php bin/console clear:deleteUnconfirmedUsers
+```
+```bash
+  php bin/console notify:usersWhenProfileExpires
 ```
 
 If the command executes successfully, the cron job is ready to run at the scheduled time.
