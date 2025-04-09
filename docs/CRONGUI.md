@@ -9,41 +9,83 @@ allow the system to handle the task for you at the scheduled time, ensuring the 
 intervention.
 
 ```bash
-php bin/console clear:deleteUnconfirmedUsers
-php bin/console notify:usersWhenProfileExpires
+- php bin/console clear:deleteUnconfirmedUsers
+- php bin/console notify:usersWhenProfileExpires
 ```
 
-## Step 1: Access the Container and Install Cron
+## Step 1: Identify the Container and Install Cron
 
-To set up cron, you need to have it installed inside the container we, responsible for the portal. Follow
-the steps below:
+Before setting up `cron`, you need to identify and confirm that the container responsible for the portal database is
+running.
+Once verified, you can proceed to install `cron` inside your system. Follow the steps below:
 
-1**Install Package Cron**:
-Once inside the container, install the cron package:
+1. **Identify the Docker Container**:
+Run the following command to automatically detect the correct container:
 
-   ```bash
-   sudo apt update && apt install -y cron
-   ```
+```shell
+   container_name=$(docker ps --format '{{.Names}}' | grep "mysql")
+   if [ -z "$container_name" ]; then
+       echo "Error: No container found matching the keyword '<keyword>'. Exiting..."
+   fi
+       echo "Found container: $container_name"
+```
+
+It should output something like this:
+
+```
+Found container: cc-openroaming-provisioning-web-mysql-1
+```
+
+2. **Check the mysql container exist & if he is running**, make sure he exists by typing the following command:
+
+```shell
+    status=$(docker inspect -f '{{.State.Status}}' $container_name)
+    if [ "$status" != "running" ]; then
+    echo "Error: Container '$container_name' is not running. Please start the container first."
+    fi
+    echo "Container '$container_name' is running."
+```
+
+3. **Confirm that the CRON package is installed**. Use the following command to
+check if `cron` is already in the system, if not, it for installed it for you:
+
+```shell
+    if ! dpkg -l | grep -q cron; then
+    echo "Cron is not installed. Installing..."
+    sudo apt update && apt install -y cron
+    else
+    echo "Cron is already installed."
+    fi
+```
 
 ---
 
 ## Step 2: Open the Crontab File in the root folder
 
-Once cron is installed, you can open the make sure you are on the root folder of the project to execute the following
-commands
+Once `cron` is installed, you need to set up specific jobs to execute the required Symfony console commands. Make sure
+you are on the root folder of your project to execute the following steps.
 
 1. **Open Crontab**:
-   Run the following command to open the cron scheduler within the container:
+   Run the following command to open the cron scheduler editor (crontab):
+
    ```bash
    crontab -e
    ```
 
 2. **Add the Cron Job**:
-   In the crontab editor, define the cron job:
-   TODO: make a pretty explanation for dumb people to change the example on the command to the location folder of the project
+   Add the following lines to the crontab file to schedule your Symfony commands (adjust `<project_folder>` to the
+   actual location of the project in your system)
    ```bash
-   0 0 * * * /usr/bin/php <project_location>(example: ":~/openroaming-provisioning-web/") php bin/console clear:deleteUnconfirmedUsers >> <project_location>(example: ":~/openroaming-provisioning-web/")/var/log/clear_unconfirmed_users.log 2>&1
-   0 0 * * * /usr/bin/php <project_location>(example: ":~/openroaming-provisioning-web/") php bin/console notify:usersWhenProfileExpires >> <project_location>(example: ":~/openroaming-provisioning-web/")/var/log/notify_users.log 2>&1
+    0 0 * * * /usr/bin/php $HOME/<project_folder>/bin/console clear:deleteUnconfirmedUsers >> $HOME/<project_folder>/var/log/clear_unconfirmed_users.log 2>&1
+    30 0 * * * /usr/bin/php $HOME/<project_folder>/bin/console notify:usersWhenProfileExpires >> $HOME/<project_folder>/var/log/notify_users.log 2>&1
+   ```
+
+- Replace `<project_folder>` with the path to your project folder (e.g., `/var/www/openroaming-provisioning-web`)
+
+3. **Save and Exit**:
+   Save the file and exit the editor. Confirm the cron jobs are set by running:
+   ```bash
+   crontab -l
    ```
 
 ### Explanation of the Cron Job:
@@ -54,8 +96,8 @@ commands
 - **`php bin/console`**: Executes the Symfony console commands defined in the project.
 - **`clear:deleteUnconfirmedUsers`**: A Symfony command to delete unconfirmed users from the system.
 - **`notify:usersWhenProfileExpires`**: A Symfony command to notify users when their profile is about to expire.
-- **`>> /var/www/openroaming/var/log/clear_unconfirmed_users.log`** or *
-  *`>> /var/www/openroaming/var/log/notify_users.log`**:
+- **`>> $HOME/<project_folder>/var/log/clear_unconfirmed_users.log`** or *
+  *`>> $HOME/<project_folder>/var/log/notify_users.log`**:
     - Redirects the output of each specific command to log files for monitoring purposes.
     - Standard output of the command is appended to the respective log file.
     - All error messages (`stderr`) are also redirected to the same log file due to `2>&1`.
