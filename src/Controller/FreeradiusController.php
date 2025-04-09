@@ -221,7 +221,7 @@ class FreeradiusController extends AbstractController
         $endDateString = $request->query->get('endDate');
 
         // Convert the date strings to DateTime objects
-        $startDate = $startDateString ? new DateTime($startDateString) : (new DateTime())->modify('-1 week');
+        $startDate = $startDateString ? new DateTime($startDateString) : new DateTime()->modify('-1 week');
         $endDate = $endDateString ? new DateTime($endDateString) : new DateTime();
 
         // Fetch the authentication data

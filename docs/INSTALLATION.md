@@ -14,19 +14,7 @@ the docker-compose.yml** file.
 Failure to match the credentials will result in the application being unable to connect to
 the database.
 
-2. **Install Dependencies**: Use npm and composer to install the necessary dependencies. Execute the following commands: 📦
-
-```bash
-- npm install
-- composer install
-```
-
-3. **Build frontend assets**: Execute the following command: 🛠️
-```bash
-- npm run build
-```
-
-4. **Build and Start Services**: Use Docker to build and start the necessary services. Execute the following command: 🐳
+2. **Start Services**: Use Docker to start the necessary services. Execute the following command: 🐳
 
 ```bash
 - docker compose up -d
@@ -38,19 +26,19 @@ or, only for local usage and testing,
 - docker compose -f docker-compose-local.yml up -d
 ```
 
-5. **Check Containers Status**: After executing the previous command, ensure that all containers for each service are
+3. **Check Containers Status**: After executing the previous command, ensure that all containers for each service are
    appropriately formed. The following command may be used to verify the status of each container, example:
 
 ```bash
 - docker ps
 ```
 
-6. **Upload Certificates**:
+4. **Upload Certificates**:
    Upload your certificate files to the `public/signing-keys` directory for the portal o eventually generate profiles
    based on your certificates.
    You can either upload the certs to this folder, inside/outside the container web, but off course before creating it.
 
-7. **Generate PFX Signing Key**: Now, inside the `web` container, go to the tools directory and run the generatePfx
+5. **Generate PFX Signing Key**: Now, inside the `web` container, go to the tools directory and run the generatePfx
    script by doing this:
 
 ```bash
@@ -59,7 +47,7 @@ or, only for local usage and testing,
 - sh generatePfxSigningKey.sh
 ```
 
-8. **Migrations, Fixtures and Permissions**: Still inside of the`web` container, you need to run this 3 commands to load
+6. **Migrations, Fixtures and Permissions**: Still inside of the`web` container, you need to run this 3 commands to load
    the database schema, load is respective settings and add permissions to a specific folder to save images:
 
 ```bash
@@ -86,7 +74,7 @@ Make sure to check the `src/DataFixtures/SettingFixture.php` file for any refere
 migrations about
 the database on the migrations folder of the project.
 
-9. **Generate JWT Keys**
+7. **Generate JWT Keys**
 
 This step is required for the **API** configuration. To enable JWT authentication, you need to generate a key pair (
 private and public keys). Make sure to run the
@@ -96,6 +84,12 @@ following command on the root folder of the project to generate these keys:
 php bin/console lexik:jwt:generate-keypair 
 ```
 
+or 
+
+```bash
+php bin/console lexik:jwt:generate-keypair --passphrase=<your_passphrase>
+```
+
 This command will create the following files in the `config/jwt` directory:
 
 - `private.pem` – the private key used to sign tokens.
@@ -103,7 +97,7 @@ This command will create the following files in the `config/jwt` directory:
 
 Make sure to keep these keys secure, especially the private key.
 
-10. **Configure JWT and CORS**: Next, configure the JWT and CORS environment variables in your `.env` file:
+8. **Configure JWT and CORS**: Make sure this configuration is set up on `.env` the JWT and CORS environment variables in your `.env` file:
 
 ```env
 JWT_SECRET_KEY=%kernel.project_dir%/config/jwt/private.pem
@@ -120,6 +114,70 @@ Replace `openroaming` with the passphrase you used when generating the JWT keys 
 The `CORS_ALLOW_ORIGIN` regex allows requests from `localhost` or `127.0.0.1` during local development.
 Adjust it based on your deployment needs, and make sure to not use the default value from the sample in a production
 environment.
+
+## 🛑 Important References Configurations 🛑
+
+### For a complete installation of the portal please follow these steps
+
+These steps will enhance the portal's security and enable key features required for its full functionality 
+(Cron Commands, Microsoft login, Google Login, SAML login and GeoLite2).
+
+### Set up a CRON Job for automation commands
+
+For detailed steps on how to set up CRONS, please refer to the [Cron Configuration Guide](../docs/CRONGUI.md)
+
+### Google Authenticator Credentials
+
+For detailed steps on how to obtain your **Google Client ID** and **Google Client Secret**, please refer to
+the [Google Client ID and Secret Guide](../docs/ProvidersGuides/GOOGLE_CLIENT.md).
+Once obtained, you will use the following environment variables in your portal configuration:
+
+- `GOOGLE_CLIENT_ID`
+- `GOOGLE_CLIENT_SECRET`
+
+### Microsoft Authenticator Credentials
+
+For detailed instructions on how to obtain your **Microsoft Client ID** and **Microsoft Client Secret**, please refer to
+the [Microsoft Client ID and Secret Guide](../docs/ProvidersGuides/MICROSOFT_CLIENT.md).
+
+Once obtained, you will use the following environment variables in your portal configuration:
+
+- `MICROSOFT_CLIENT_ID`
+- `MICROSOFT_CLIENT_SECRET`
+
+### SAML Authenticator Credentials
+
+These variables are needed to set up the SAML Service Provider (SP) and Identity Provider (IdP):
+
+For detailed instructions on how to obtain your **SAML IDP Credentials**, please refer to
+the [SAML Service Provider (SP)](../docs/ProvidersGuides/SAML_IDP_CREDENTIALS.md).
+
+- `SAML_IDP_ENTITY_ID`: This is the entity ID (URI) of the IdP.
+- `SAML_IDP_SSO_URL`: This is the URL of the IdP's Single Sign-On (SSO) service.
+- `SAML_IDP_X509_CERT`: This is the X509 certificate from the IdP, used for verifying SAML responses.
+- `SAML_SP_ENTITY_ID`: This is the entity ID (URI) of the SP.
+- `SAML_SP_ACS_URL`: This is the URL of the SP's Assertion Consumer Service (ACS), which processes SAML assertions from
+  the IdP.
+
+**Important**:
+If you want to use this provider authentication on the project,
+make sure to expose a SAML attribute on your IDP named
+`samlUuid`,
+to expose a unique id of the SAML account.
+This property it's required to authenticate users if one of them doesn't have an email defined on the IDP.
+
+
+### GeoLite Configuration 
+
+> **Important**: GeoLite2 is mandatory for a complete portal installation
+
+GeoLite2 is important for personalizing the user experience based on their location. It allows the portal to identify 
+the user's region from their IP address, helping us adjust content, set cookies properly, and comply with local laws, 
+such as the GDPR. By using GeoLite2, we ensure that our portal delivers relevant content and respects privacy and 
+cookie consent regulations.
+
+For detailed instructions on the GeoLite GUI setup, operations, and usage, refer to
+the [GeoLite GUI Guide](../docs/GEOLITEGUI.md).
 
 ### 🛑 Important Security Note after Installation 🛑
 

@@ -3,7 +3,51 @@
 Welcome to the OpenRoaming Provisioning Portal! This repository provides a **reference implementation designed to
 baseline the industry** on the necessary components for developing an enabler component of OpenRoaming.
 
-## Why it was created?
+# Table of Contents
+
+1. [💡 Why It Was Created?](#-why-it-was-created)
+
+2. [🤔 How It Works](#-how-it-works)
+
+3. [🛠️ Tools Used](#-tools-used)
+
+4. [📜 Prerequisites](#-prerequisites)
+
+5. [📥 How to Get the Project](#-how-to-get-the-project)
+
+6. [📖 Features](#-features)
+    - [User Management](#user-management)
+    - [Portal Management](#portal-management)
+    - [Settings Management](#settings-management)
+    - [Portal Statistics](#portal-statistics)
+    - [Connectivity Statistics](#connectivity-statistics)
+
+7. [🚀 OpenRoaming Portal API](#-openroaming-portal-api)
+
+8. [⚙️ Installation Guide](#-installation-guide)
+
+9. [🛑 Upgrade Stop: Important Instructions for Future Updates](#-upgrade-stop-important-instructions-for-future-updates)
+
+10. [👀 Portal Overview & Baseline Operation](#-portal-overview--baseline-operation)
+    - [🔧 Environment Variables](#-environment-variables)
+        - [Symfony Application Variables](#-environment-variables)
+        - [Google Client & Secret Credentials](#google-client-and-secret-credentials)
+        - [Microsoft Authenticator Credentials](#microsoft-client-and-secret-credentials)
+        - [🔒 SAML Specific Settings](#-saml-specific-settings)
+        - [👾 Turnstile Integration](#-turnstile-integration)
+        - [🌍 GeoLite GUI Documentation](#-geolite-gui-documentation)
+        - [🕷️ API Platform](#-api-platform)
+        - [🪙 JWT Tokens](#-jwt-tokens)
+
+11. [🔑 Admin Page Access Page](#-admin-page-access-page)
+
+12. [🔧 Set up a CRON Job for automation commands](#-set-up-a-cron-job-for-automation-commands)
+
+13. [🛠️ Settings Table](#-settings-table)
+
+14. [📩 Contact Information](#-contact-information)
+
+## 💡 Why it was created?
 
 The primary objective of the **OpenRoaming Provisioning Portal is to simplify the provisioning of identities using
 Passpoint**, enabling an OpenRoaming network to support seamless Wi-Fi connectivity and enhance security for users
@@ -12,7 +56,7 @@ across various environments.
 The goal is to **provide secure Wi-Fi access to everyone** without the need for repeated logins or unsecure/open
 networks, making Wi-Fi connectivity for individuals and enterprises easier, quicker, and more user-friendly.
 
-## How it works?
+## 🤔 How it works?
 
 OpenRoaming is an **open standard developed to enable global, secure, and automatic Wi-Fi connectivity**. With
 OpenRoaming, users can connect to Wi-Fi networks without being prompted for login credentials. Instead, it utilizes
@@ -37,7 +81,7 @@ These are some of the most important tools used on the development of this proje
 - **MySQL Database**: Efficiently method to save and return user profiles and settings of the portal.
 - **Docker**: Encapsulating the project in containers to improve deployment and compatibility.
 
-### Prerequisites:
+## 📜 Prerequisites:
 
 - Linux based system - Ubuntu 22.04 LTS (tested for the reference implementation)
 - Knowledge about Linux OS (required to set up the project)
@@ -46,7 +90,7 @@ These are some of the most important tools used on the development of this proje
 - Docker compose (responsible for managing multiple containers)
 - Git (optional, if the user prefers to clone the repository)
 
-### How to get the Project
+## 📥 How to get the Project
 
 There are two options to retrieve the project:
 
@@ -121,7 +165,7 @@ This page shows data related to the hybrid machine
 - **Total of Current Authentications** Shows the number of current users connected with a profile (This card is
   independent of the date filtering)
 
-### OpenRoaming Portal API
+## 🚀 OpenRoaming Portal API
 
 This page shows data related to the endpoints in the project required for user authentication, management, and
 configuration within the OpenRoaming Portal. It includes detailed descriptions of each endpoint, highlighting their
@@ -130,16 +174,9 @@ purpose, required inputs, and expected outputs.
 Additionally, the documentation shows the necessary security measures,
 such as CAPTCHA validation, that are integrated to protect user data and ensure secure interactions with the API.
 
+Please refer to the [API documentation](docs/api/index.html) for detailed usage instructions and examples.
+
 Follow this link for more information on API documentation: [Api Guide](docs/APIGUI.md)
-
-# ⚙️ Installation Guide
-
-Follow this link for more information on installing this
-project: [Installation Guide](docs/INSTALATION.md).
-
-# 🔑 Admin Page Access Page
-
-Follow this link for a portal user/admin interface overview: [Portal Guide](docs/PORTALGUI.md).
 
 ## 🛑 Upgrade Stop: Important Instructions for Future Updates
 
@@ -150,65 +187,19 @@ the instructions provided for each version you are upgrading to.
 > **Important**: Failure to follow the required upgrade steps may result in incomplete migrations, unexpected behaviors,
 > or portal downtime.
 
-### General Upgrade Path Guidelines
+Follow this link for more information about upgrade this
+project: [Upgrade Guide](docs/UPGRADE.md).
 
-1. **Review the Changelog**  
-   Before starting any upgrade process, check & read the relevant release notes and on [CHANGELOG.MD](CHANGELOG.md).
-   These file outline new features, breaking changes, deprecations, and mandatory steps.
-   > **Tip**: The changelog is your most comprehensive source to discover mandatory pre-upgrade steps or new commands
-   introduced.
+# ⚙️ Installation Guide
 
-2. **Upgrade to Required Intermediate Versions**  
-   If you are using an older version, verify your system's eligibility for a direct upgrade. Some updates require your
-   system to be upgraded to a specific intermediate version beforehand (e.g., `<intermediate_version>`). Skipping this
-   step can break the upgrade path and result in data loss or corruption.
+Follow this link for more information on installing this
+project: [Installation Guide](docs/INSTALLATION.md).
 
-3. **Run Any Pre-Upgrade Commands**  
-   Certain versions may introduce commands that must be executed before migrating to the new version. These commands
-   can target schema changes, data migrations, or cleanup tasks that are mandatory for a successful upgrade.  
-   Example command for version `<intermediate_version>`:
-   ```bash
-   <command_placeholder>
-   ```  
-   > **Note**: Commands removed or deprecated in the target version must be executed on the intermediate version to
-   avoid migration failures or data inconsistencies.
+# 🔑 Admin Page Access Page
 
-4. **Backup Your System**  
-   Always create a full backup of your system, including the database, configuration files, and user data, before
-   initiating an upgrade. This precaution ensures that you can roll back in case of unforeseen issues.
+Follow this link for a portal user/admin interface overview: [Portal Guide](docs/PORTALGUI.md).
 
-5. **Proceed to the Target Version Upgrade**  
-   After completing any required intermediate upgrades or commands, you can safely upgrade to the target version (e.g.,
-   `<target_version>`). Ensure that all prior steps have been executed to avoid disruptions.
-
----
-
-### Example: Upgrade to Version 1.7
-
-If you are planning to upgrade to **version 1.7**, follow these specific steps:
-
-1. **Upgrade to Version 1.6**  
-   If your current version is **1.5** or lower, you **must** first upgrade your system to version **1.6**. This step is
-   mandatory due to compatibility issues caused by changes in the application’s data model.
-
-2. **Run the Allocate Providers Command**  
-   After upgrading to version **1.6**, execute the following command in your terminal:
-   ```bash
-   php bin/console reset:allocate-providers
-   ```  
-   This command ensures that all deprecated fields (`googleId`, `saml_identifier`, and Allocate Providers) are handled
-   properly before proceeding.
-   > **Important**: This command was discontinued and removed in version **1.7**, so it must be executed in version *
-   *1.6** before proceeding.
-
-3. **Create a Full Backup**  
-   Prior to upgrading to version **1.7**, create a complete backup of your system, including your database,
-   configuration files, and user data, in case a rollback is needed.
-
-4. **Proceed to Version 1.7**  
-   After completing the above steps, proceed with upgrading your system to version **1.7**.
-
-# Portal Overview & Baseline Operation
+# 👀 Portal Overview & Baseline Operation
 
 The objective is for the user to get familiarized with the project and its baseline features.
 
@@ -275,7 +266,7 @@ These two envs are for debugging purposes, they only should be used to control a
 Please make sure to set up a **public_key** in (pgp_public_key/public_key.asc)
 **do not create keys on the production server**.
 
-### Google Authenticator Credentials
+### Google Client and Secret Credentials
 
 For detailed steps on how to obtain your **Google Client ID** and **Google Client Secret**, please refer to
 the [Google Client ID and Secret Guide](docs/ProvidersGuides/GOOGLE_CLIENT.md).
@@ -284,7 +275,7 @@ Once obtained, you will use the following environment variables in your portal c
 - `GOOGLE_CLIENT_ID`
 - `GOOGLE_CLIENT_SECRET`
 
-### Microsoft Authenticator Credentials
+### Microsoft Client and Secret Credentials
 
 For detailed instructions on how to obtain your **Microsoft Client ID** and **Microsoft Client Secret**, please refer to
 the [Microsoft Client ID and Secret Guide](docs/ProvidersGuides/MICROSOFT_CLIENT.md).
@@ -354,6 +345,14 @@ check the `.env.sample`.
 - `JWT_SECRET_KEY`: The secret defined for the key.
 - `JWT_PUBLIC_KEY`: The public key location.
 - `JWT_PASSPHRASE`: The private key location.
+
+### 🔧 Set up a CRON Job for automation commands
+
+For detailed steps on how to set up CRONS, please refer to the [Cron Configuration Guide](docs/CRONGUI.md)
+
+## 🔑 Admin Page Access Page
+
+Follow this link for a portal user/admin interface overview: [Portal Guide](docs/PORTALGUI.md).
 
 ### 🛠️ Settings Table
 
@@ -468,5 +467,7 @@ certificate. **Connection errors** can happen if the right SHA1 hash is not prov
 62. `PROFILE_LIMIT_DATE_SMS`: Time in days to disable profiles for users with SMS login.
 
 #### With these environment variables, you can configure and customize various aspects of the project, such as database connections, SAML settings, login methods, and more.
+
+## 📩 Contact Information?
 
 For more information please contact: openroaming@wballiance.com

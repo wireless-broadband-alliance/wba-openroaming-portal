@@ -43,7 +43,7 @@ class ConfigController extends AbstractController
             'TURNSTILE_CHECKER' => $this->getSettingValueConverted('TURNSTILE_CHECKER'),
             'CONTACT_EMAIL' => $this->getSettingValueRaw('CONTACT_EMAIL'),
             'TOS' => $this->resolveTosValue(),
-            'PRIVACY_POLICY' => $this->resolveTosValue(),
+            'PRIVACY_POLICY' => $this->resolvePrivacyPolicyValue(),
             'TWO_FACTOR_AUTH_STATUS' => $this->getSettingValueRaw('TWO_FACTOR_AUTH_STATUS'),
         ];
 
@@ -108,21 +108,37 @@ class ConfigController extends AbstractController
     {
         $tosType = $this->getSettingValueRaw('TOS');
         $tosLink = $this->getSettingValueRaw('TOS_LINK');
-        $privacyPolicyType = $this->getSettingValueRaw('PRIVACY_POLICY');
-        $privacyPolicyLink = $this->getSettingValueRaw('PRIVACY_POLICY_LINK');
 
         if ($tosType === TextInputType::LINK->value) {
             return $tosLink;
         }
+
         if ($tosType === TextInputType::TEXT_EDITOR->value) {
-            return $this->generateUrl('app_terms_conditions', [], UrlGeneratorInterface::ABSOLUTE_URL);
+            return $this->generateUrl(
+                'app_terms_conditions',
+                [],
+                UrlGeneratorInterface::ABSOLUTE_URL
+            );
         }
+
+        return '';
+    }
+
+    protected function resolvePrivacyPolicyValue(): string
+    {
+        $privacyPolicyType = $this->getSettingValueRaw('PRIVACY_POLICY');
+        $privacyPolicyLink = $this->getSettingValueRaw('PRIVACY_POLICY_LINK');
 
         if ($privacyPolicyType === TextInputType::LINK->value) {
             return $privacyPolicyLink;
         }
+
         if ($privacyPolicyType === TextInputType::TEXT_EDITOR->value) {
-            return $this->generateUrl('app_privacy_policy', [], UrlGeneratorInterface::ABSOLUTE_URL);
+            return $this->generateUrl(
+                'app_privacy_policy',
+                [],
+                UrlGeneratorInterface::ABSOLUTE_URL
+            );
         }
 
         return '';
