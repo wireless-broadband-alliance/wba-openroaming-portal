@@ -2,7 +2,7 @@
 
 ## Table of Contents
 
-1. [⚠️ Critical Warning: Read Before You Upgrade](#-critical-warning-read-before-you-upgrade)
+1. [⚠️ Critical Warning: Read Before You Upgrade](#-critical-warning-read-before-you-upgrade-)
 2. [General Upgrade Path Guidelines](#general-upgrade-path-guidelines)
 3. [Upgrade Path Matrix](#upgrade-path-matrix)
 4. [Release-Specific Notes: Version 1.7](#release-specific-notes-version-17)
