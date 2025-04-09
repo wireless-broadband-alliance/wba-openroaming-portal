@@ -14,7 +14,7 @@ the docker-compose.yml** file.
 Failure to match the credentials will result in the application being unable to connect to
 the database.
 
-2. **Build and Start Services**: Use Docker to build and start the necessary services. Execute the following command: 🐳
+2. **Start Services**: Use Docker to start the necessary services. Execute the following command: 🐳
 
 ```bash
 - docker compose up -d

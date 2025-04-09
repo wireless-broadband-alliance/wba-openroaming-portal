@@ -1,59 +1,180 @@
-## 🛑 Upgrade Stop: Important Instructions for Future Updates
+# 🛑 Upgrade Guide: Important Instructions for Future Updates
 
-### General Upgrade Path Guidelines
+## Table of Contents
 
-1. **Review the Changelog**  
-   Before starting any upgrade process, check & read the relevant release notes and on [CHANGELOG.MD](CHANGELOG.md).
-   These file outline new features, breaking changes, deprecations, and mandatory steps.
-   > **Tip**: The changelog is your most comprehensive source to discover mandatory pre-upgrade steps or new commands
-   introduced.
-
-2. **Upgrade to Required Intermediate Versions**  
-   If you are using an older version, verify your system's eligibility for a direct upgrade. Some updates require your
-   system to be upgraded to a specific intermediate version beforehand (e.g., `<intermediate_version>`). Skipping this
-   step can break the upgrade path and result in data loss or corruption.
-
-3. **Run Any Pre-Upgrade Commands**  
-   Certain versions may introduce commands that must be executed before migrating to the new version. These commands
-   can target schema changes, data migrations, or cleanup tasks that are mandatory for a successful upgrade.  
-   Example command for version `<intermediate_version>`:
-   ```bash
-   <command_placeholder>
-   ```  
-   > **Note**: Commands removed or deprecated in the target version must be executed on the intermediate version to
-   avoid migration failures or data inconsistencies.
-
-4. **Backup Your System**  
-   Always create a full backup of your system, including the database, configuration files, and user data, before
-   initiating an upgrade. This precaution ensures that you can roll back in case of unforeseen issues.
-
-5. **Proceed to the Target Version Upgrade**  
-   After completing any required intermediate upgrades or commands, you can safely upgrade to the target version (e.g.,
-   `<target_version>`). Ensure that all prior steps have been executed to avoid disruptions.
+1. [⚠️ Critical Warning: Read Before You Upgrade](#-critical-warning-read-before-you-upgrade)
+2. [General Upgrade Path Guidelines](#general-upgrade-path-guidelines)
+3. [Upgrade Path Matrix](#upgrade-path-matrix)
+4. [Release-Specific Notes: Version 1.7](#release-specific-notes-version-17)
+5. [Upgrade Checklist](#upgrade-checklist)
+6. [Step-by-Step Procedure](#step-by-step-procedure)
+7. [Troubleshooting & Rollback](#troubleshooting--rollback)
+8. [Additional Resources](#additional-resources)
 
 ---
 
+# ⚠️🛑 **CRITICAL WARNING: READ BEFORE YOU UPGRADE** 🛑⚠️
+
+> **🚨 FAILURE TO FOLLOW INSTRUCTIONS MAY RESULT IN:**
+> - **Data Loss** 💾
+> - **Significant Downtime** ⌛
+> - **Irreversible System Errors** ❗
+>
+> ### Key Precautions:
+> - **Check Compatibility:**  
+    >   Verify the target environment meets all requirements, including:
+    >   - Minimum PHP version
+>   - MySQL version
+>   - Additional system dependencies
+> - **Follow Intermediate Steps Carefully:**  
+    >   Skipping required intermediate versions or commands can break the upgrade process.
+> - **Review System Configurations:**  
+    >   Ensure system adjustments are made where necessary before proceeding.
+
+**⚡ TAKE THIS SERIOUSLY ⚡**: Ignoring these steps could render your system unusable. Proceed with caution and always create backups before upgrading.
+
+---
+
+## General Upgrade Path Guidelines
+
+Upgrading your system requires caution and preparation. Follow these general guidelines in each upgrade process:
+
+1. **Backup Your System**  
+   Always create a **full backup** of your system, including:
+    - Database
+    - Configuration files
+    - User data  
+      Backups ensure that you can roll back in case of unforeseen issues.
+
+2. **Review the Changelog**  
+   Before upgrading, carefully read the release notes or [CHANGELOG.md](../CHANGELOG.md). This file outlines:
+    - New features
+    - Breaking changes
+    - Deprecations
+    - Mandatory upgrade steps
+   > **Tip:** The changelog will help identify required pre-upgrade steps or commands for each version.
+
+3. **Upgrade to Required Intermediate Versions**  
+   If you're on an older version, determine if an intermediate upgrade is required. Skipping intermediate upgrades may:
+    - Break the upgrade path
+    - Cause data corruption
+
+   Intermediate versions (e.g., `<intermediate_version>`) act as compatibility layers essential for successful upgrading.
+
+4. **Run Any Pre-Upgrade Commands**  
+   Some upgrades require running specific commands—such as schema changes or cleanup tasks—before proceeding to the next version.
+
+   Example for `<intermediate_version>`:
+   ```bash
+   php bin/console <command_placeholder>
+   ```  
+   > **Note:** Ensure these commands are run in the correct version as they might be removed or deprecated in later versions.
+
+5. **Proceed to the Target Version Upgrade**  
+   Once prerequisites are met (backup, changelog review, and intermediate upgrades), you can safely upgrade to the target version.
+
+---
+
+## Upgrade Path Matrix
+
+| Current Version | Intermediate Version | Target Version | Notes                                                                |
+|-----------------|----------------------|----------------|----------------------------------------------------------------------|
+| 1.5             | 1.6                  | 1.7            | Run `php bin/console reset:allocate-providers` before proceeding.    |
+| 1.6             | N/A                  | 1.7            | Proceed directly to 1.7 after reviewing changelog.                   |
+| Below 1.5       | Follow earlier paths | 1.7            | Ensure compatibility with earlier versions before upgrading.         |
+
+Use this table to determine the exact steps based on your current version.
+
+---
+
+## Release-Specific Notes: Version 1.7
+
+- **Deprecated Commands:**  
+  The following commands or fields are no longer available in version **1.7**:
+    - `reset:allocate-providers`
+    - Deprecated fields: `googleId`, `saml_identifier`  
+      These must be resolved at version **1.6** before proceeding to version **1.7**.
+
+- **Database Schema Changes:**  
+  In version **1.7**, schema changes require running:
+  ```bash
+  php bin/console doctrine:schema:update --force
+  ```
+
+- **Breaking Changes:**  
+  Module configurations or data models from older versions may need to be adjusted. Refer to the [CHANGELOG.md](../CHANGELOG.md).
+
+---
+
+## Upgrade Checklist
+
+Use the following checklist before starting the upgrade process:
+
+- [ ] **Create Backups**
+    - Database
+    - Configuration files
+    - User data
+
+- [ ] **Review Changelog**
+    - Read release notes or [CHANGELOG.md](../CHANGELOG.md) for breaking changes or mandatory steps.
+
+- [ ] **Complete Pre-Upgrade Steps**
+    - Ensure your current version aligns with the **Upgrade Path Matrix**.
+    - Run all pre-upgrade commands for intermediate versions.
+
+- [ ] **Verify System Requirements**
+    - Confirm the target environment matches all required dependencies (e.g., PHP, MySQL).
+
+---
+
+## Step-by-Step Procedure
+
 ### Example: Upgrade to Version 1.7
 
-If you are planning to upgrade to **version 1.7**, follow these specific steps:
+**Scenario**: Your current version is **1.5** and you want to upgrade to **1.7**.
 
-1. **Upgrade to Version 1.6**  
-   If your current version is **1.5** or lower, you **must** first upgrade your system to version **1.6**. This step is
-   mandatory due to compatibility issues caused by changes in the application’s data model.
+1. **Create a Full Backup**  
+   Backup all critical data:
+    - Database
+    - Configuration files
+    - User data
 
-2. **Run the Allocate Providers Command**  
-   After upgrading to version **1.6**, execute the following command in your terminal:
+   This allows for rollback if issues arise.
+
+2. **Upgrade to Version 1.6**
+    - If your current version is **1.5** or lower, first upgrade to **1.6**.
+   > **Important:** Skipping this step can break the upgrade path.
+
+3. **Run Pre-Upgrade Commands in Version 1.6**  
+   Execute the following command in your terminal after upgrading to **1.6**:
    ```bash
    php bin/console reset:allocate-providers
    ```  
-   This command ensures that all deprecated fields (`googleId`, `saml_identifier`, and Allocate Providers) are handled
-   properly before proceeding.
-   > **Important**: This command was discontinued and removed in version **1.7**, so it must be executed in version *
-   *1.6** before proceeding.
-
-3. **Create a Full Backup**  
-   Prior to upgrading to version **1.7**, create a complete backup of your system, including your database,
-   configuration files, and user data, in case a rollback is needed.
+   _This ensures deprecated fields (`googleId`, `saml_identifier`) are properly handled._
+   > **Note:** This command is removed in version **1.7**, so it must be run in **1.6**.
 
 4. **Proceed to Version 1.7**  
-   After completing the above steps, proceed with upgrading your system to version **1.7**.
+   After completing the steps above, **upgrade to version 1.7** following the usual procedure.
+
+---
+
+## Troubleshooting & Rollback
+
+| Issue                              | Cause                          | Solution                                              |
+|------------------------------------|--------------------------------|-------------------------------------------------------|
+| Missing `reset:allocate-providers` | Skipped upgrade to version 1.6 | Ensure intermediate upgrades are completed correctly. |
+| Database schema mismatch           | Schema updates not applied     | Run `php bin/console doctrine:schema:update --force`. |
+| Deprecation warnings               | Unresolved deprecated fields   | Resolve deprecated fields in version 1.6.             |
+
+### Rollback Procedure
+
+If any step fails:
+1. Restore the full backup you created earlier.
+2. Review the logs or errors to identify the failure point.
+3. Perform necessary fixes and repeat the upgrade steps.
+
+---
+
+## Additional Resources
+
+- [CHANGELOG.md](../CHANGELOG.md)
