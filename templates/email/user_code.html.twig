@@ -3,15 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Email Template</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>{{ emailTitle }} - Code Verification</title>
 </head>
-<body class="bg-[#080D4A]">
-<div class="container mx-auto px-8 pb-8 pt-[50px]">
-    <div class="bg-white rounded-[18px] p-6 shadow-md">
-        <p class="text-lg">Your authentication code is: <span class="font-bold"> {{ verificationCode }} </span></p>
-
-        <p class="text-lg">Please keep this code confidential and do not share it with others.</p>
+<body style="background-color: #080D4A; font-family: ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji'; color: #4A5568; margin: 0; padding: 0;">
+<div style="width: 100%; max-width: 600px; margin: 0 auto; padding: 3rem 1rem;">
+    <div style="max-width: 448px; margin: 0 auto; background-color: #fff; border-radius: 16px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1); overflow: hidden;">
+        <div style="background-color: #7BBA29; color: #fff; padding: 1.5rem; text-align: center;">
+            <h1 style="font-size: 1.5rem; font-weight: 700;">
+                {% if is2FATemplate %}
+                    Two-Factor Authentication
+                {% else %}
+                    Verify Your Account
+                {% endif %}
+            </h1>
+        </div>
+        <div style="padding: 1.5rem;">
+            {% if is2FATemplate %}
+                <p style="font-size: 1.125rem; margin-bottom: 1rem;">
+                    Your two-factor authentication code is:
+                </p>
+                <p style="text-align: center; font-size: 1.5rem; font-weight: 700; color: #0045AD; margin: 1.5rem 0;">
+                    {{ verificationCode }}
+                </p>
+                <p style="font-size: 1.125rem; margin-bottom: 1rem;">
+                    This code can only be used once and is valid for the next
+                    <span style="font-weight: 700;">{{ secondsLeft }}</span> seconds.
+                </p>
+                <p style="font-size: 1.125rem; margin-bottom: 1rem;">
+                    Please keep this code confidential and do not share it with others.
+                </p>
+            {% else %}
+                <p style="font-size: 1.125rem; margin-bottom: 1rem;">
+                    Your authentication code is:
+                </p>
+                <p style="text-align: center; font-size: 1.5rem; font-weight: 700; color: #0045AD; margin: 1.5rem 0;">
+                    {{ verificationCode }}
+                </p>
+                <p style="font-size: 1.125rem; margin-bottom: 1rem;">
+                    Please keep this code confidential and do not share it with others.
+                </p>
+            {% endif %}
+        </div>
+        <div style="background-color: #f4f4f4; text-align: center; padding: 1.5rem;">
+            <p style="font-size: 0.875rem; color: #718096;">
+                Thank you,<br>
+                <strong>{{ emailTitle }} Team</strong>
+            </p>
+        </div>
     </div>
 </div>
 </body>

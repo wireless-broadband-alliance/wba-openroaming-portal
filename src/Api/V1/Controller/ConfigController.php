@@ -9,7 +9,6 @@ use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
@@ -17,15 +16,10 @@ use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 
 class ConfigController extends AbstractController
 {
-    private SettingRepository $settingRepository;
-    private ParameterBagInterface $parameterBag;
-
     public function __construct(
-        SettingRepository $settingRepository,
-        ParameterBagInterface $parameterBag,
+        private readonly SettingRepository $settingRepository,
+        private readonly ParameterBagInterface $parameterBag,
     ) {
-        $this->settingRepository = $settingRepository;
-        $this->parameterBag = $parameterBag;
     }
 
     /**
@@ -34,11 +28,11 @@ class ConfigController extends AbstractController
      * @throws ClientExceptionInterface
      * @throws Exception
      */
-    public function __invoke(Request $request): JsonResponse
+    public function __invoke(): JsonResponse
     {
         $settings = $this->getSettings();
 
-        return (new BaseResponse(200, $settings))->toResponse();
+        return new BaseResponse(200, $settings)->toResponse();
     }
 
     private function getSettings(): array
@@ -49,7 +43,8 @@ class ConfigController extends AbstractController
             'TURNSTILE_CHECKER' => $this->getSettingValueConverted('TURNSTILE_CHECKER'),
             'CONTACT_EMAIL' => $this->getSettingValueRaw('CONTACT_EMAIL'),
             'TOS' => $this->resolveTosValue(),
-            'PRIVACY_POLICY' => $this->resolveTosValue(),
+            'PRIVACY_POLICY' => $this->resolvePrivacyPolicyValue(),
+            'TWO_FACTOR_AUTH_STATUS' => $this->getSettingValueRaw('TWO_FACTOR_AUTH_STATUS'),
         ];
 
         $data['auth'] = [
@@ -68,6 +63,10 @@ class ConfigController extends AbstractController
 
         $data['google'] = [
             'GOOGLE_CLIENT_ID' => $this->parameterBag->get('app.google_client_id')
+        ];
+
+        $data['microsoft'] = [
+            'MICROSOFT_CLIENT_ID' => $this->parameterBag->get('app.microsoft_client_id')
         ];
 
         $data['saml'] = [
@@ -96,10 +95,10 @@ class ConfigController extends AbstractController
     {
         $trueValues = ['ON', 'TRUE', '1', 1, true];
         $falseValues = ['OFF', 'FALSE', '0', 0, false];
-        if (in_array(strtoupper($value), $trueValues, true)) {
+        if (in_array(strtoupper((string)$value), $trueValues, true)) {
             return true;
         }
-        if (in_array(strtoupper($value), $falseValues, true)) {
+        if (in_array(strtoupper((string)$value), $falseValues, true)) {
             return false;
         }
         return (bool)$value;
@@ -109,21 +108,37 @@ class ConfigController extends AbstractController
     {
         $tosType = $this->getSettingValueRaw('TOS');
         $tosLink = $this->getSettingValueRaw('TOS_LINK');
+
+        if ($tosType === TextInputType::LINK->value) {
+            return $tosLink;
+        }
+
+        if ($tosType === TextInputType::TEXT_EDITOR->value) {
+            return $this->generateUrl(
+                'app_terms_conditions',
+                [],
+                UrlGeneratorInterface::ABSOLUTE_URL
+            );
+        }
+
+        return '';
+    }
+
+    protected function resolvePrivacyPolicyValue(): string
+    {
         $privacyPolicyType = $this->getSettingValueRaw('PRIVACY_POLICY');
         $privacyPolicyLink = $this->getSettingValueRaw('PRIVACY_POLICY_LINK');
 
-        if ($tosType === TextInputType::LINK) {
-            return $tosLink;
-        }
-        if ($tosType === TextInputType::TEXT_EDITOR) {
-            return $this->generateUrl('app_terms_conditions', [], UrlGeneratorInterface::ABSOLUTE_URL);
-        }
-
-        if ($privacyPolicyType === TextInputType::LINK) {
+        if ($privacyPolicyType === TextInputType::LINK->value) {
             return $privacyPolicyLink;
         }
-        if ($privacyPolicyType === TextInputType::TEXT_EDITOR) {
-            return $this->generateUrl('app_privacy_policy', [], UrlGeneratorInterface::ABSOLUTE_URL);
+
+        if ($privacyPolicyType === TextInputType::TEXT_EDITOR->value) {
+            return $this->generateUrl(
+                'app_privacy_policy',
+                [],
+                UrlGeneratorInterface::ABSOLUTE_URL
+            );
         }
 
         return '';

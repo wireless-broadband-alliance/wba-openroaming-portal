@@ -2,34 +2,36 @@
     <form action="{{ path('admin_dashboard_settings_status') }}" method="post" enctype="multipart/form-data">
 
         {{ form_row(form._token) }}
-        <div class="grid gap-4 lg:grid-cols-2 p-2 z-0" {{ stimulus_controller('radio-card') }}>
+        <div class="grid gap-4 lg:grid-cols-2 p-2 z-0" {{ stimulus_controller('radio-card ') }}>
             {% for setting in form %}
                 {# Display only the platform and the email verification settings #}
-                {% if setting.vars.name in ['PLATFORM_MODE', 'USER_VERIFICATION', 'TURNSTILE_CHECKER', 'USER_DELETE_TIME', 'TIME_INTERVAL_NOTIFICATION'] %}
+                {% if setting.vars.name in ['PLATFORM_MODE', 'USER_VERIFICATION', 'TURNSTILE_CHECKER', 'USER_DELETE_TIME', 'TIME_INTERVAL_NOTIFICATION', 'API_STATUS'] %}
                     <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full"
                          name="statusCards"
-                         id="{{ setting.vars.name }}" {{ stimulus_controller('radio card') }} {% if setting.vars.name == 'USER_VERIFICATION' %} {{ stimulus_target('radio-card', 'card') }} {% endif %}>
+                         id="{{ setting.vars.name }}" {{ stimulus_controller('radio card three-options_radio') }} {% if setting.vars.name == 'USER_VERIFICATION' %} {{ stimulus_target('radio-card', 'card') }} {% endif %}>
                         {# Title and Icon #}
                         <div class="flex flex-row justify-between">
                             <div class="text-base font-medium text-center break-normal md:break-all">
                                 {% set displayName = {
-                                    'PLATFORM_MODE': 'Platform Mode',
-                                    'USER_VERIFICATION': 'User Verification',
-                                    'TURNSTILE_CHECKER': 'Turnstile Checker',
-                                    'USER_DELETE_TIME' : 'Time to delete users(hours)',
-                                    'TIME_INTERVAL_NOTIFICATION' : 'Time to resend notifications(days)',
-                                }[setting.vars.name] ?? setting.vars.name %}
+                                    PLATFORM_MODE: 'Platform Mode',
+                                    USER_VERIFICATION: 'User Verification',
+                                    TURNSTILE_CHECKER: 'Turnstile Checker',
+                                    API_STATUS: 'API Status',
+                                    USER_DELETE_TIME: 'Auto Delete of Unverified Accounts',
+                                    TIME_INTERVAL_NOTIFICATION: 'Up Comming Profile Expiration Notification',
+                                }
+                                    [setting.vars.name] ?? setting.vars.name %}
                                 <h1 class="text-lg md:text-xl whitespace-nowrap">{{ displayName }}</h1>
                             </div>
                             <label class="flex items-center bg-opacity-40">
-                                <img class="w-6 cursor-pointer" {{ stimulus_target('card', 'button') }} {{ stimulus_action('card', 'show_info','mouseover')|stimulus_action('card', 'hide_info','mouseout') }}
+                                <img class="w-6 cursor-pointer" {{ stimulus_target('card', 'button') }} {{ stimulus_action('card', 'show_info', 'mouseover')|stimulus_action('card', 'hide_info', 'mouseout') }}
                                      src="{{ asset('resources/logos/info_icon.svg') }}"
                                      alt="info_icon"/>
                             </label>
                         </div>
-                        {% if setting.vars.name in ['PLATFORM_MODE', 'USER_VERIFICATION', 'TURNSTILE_CHECKER'] %}
+                        {% if setting.vars.name in ['PLATFORM_MODE', 'USER_VERIFICATION', 'TURNSTILE_CHECKER', 'API_STATUS'] %}
                             <div class="flex items-center space-x-2 mt-5">
-                                {{ form_widget(setting, {'attr': {'class': 'hidden p-2 bg-transparent border text-center outline-none text-left text-base block w-full rounded-md  focus:shadow-sm'}}) }}
+                                {{ form_widget(setting, {attr: {class: 'hidden p-2 bg-transparent border text-center outline-none text-left text-base block w-full rounded-md  focus:shadow-sm'}}) }}
                             </div>
                         {% endif %}
 
@@ -158,15 +160,57 @@
                             </div>
                         {% endif %}
 
+                        {% if setting.vars.name in ['API_STATUS'] %}
+                            <div class="flex flex-col items-center space-y-2 mt-5">
+                                {# Render "ON" Radio Input #}
+                                <label class="flex flex-row justify-between border hover:border-gray-900 duration-200 rounded-lg w-full p-2 pl-4"
+                                       name="onLabelAPIStatus">
+                                    On
+                                    <input type="radio" name="{{ form.API_STATUS.vars.full_name }}"
+                                           id="onRadioAPIStatus"
+                                           value="ON"
+                                           class="radio-input hidden" {{ form.API_STATUS.vars.data == 'ON' ? 'checked' : '' }} {{ stimulus_action('radio', 'toggle') }}>
+                                    <div class="custom-radio pr-3 pt-1.5 {{ form.API_STATUS.vars.data == 'ON' ? '' : 'hidden' }}" {{ stimulus_target('radio', 'on') }}>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10"
+                                             viewBox="0 0 14 10"
+                                             fill="none">
+                                            <path fill-rule="evenodd" clip-rule="evenodd"
+                                                  d="M13.0303 0.96967C13.3232 1.26256 13.3232 1.73744 13.0303 2.03033L6.03033 9.03033C5.73744 9.32322 5.26256 9.32322 4.96967 9.03033L0.96967 5.03033C0.676777 4.73744 0.676777 4.26256 0.96967 3.96967C1.26256 3.67678 1.73744 3.67678 2.03033 3.96967L5.5 7.43934L11.9697 0.96967C12.2626 0.676777 12.7374 0.676777 13.0303 0.96967Z"
+                                                  fill="#210124"></path>
+                                        </svg>
+                                    </div>
+                                </label>
+
+                                {# Render "OFF" Radio Input #}
+                                <label class="flex flex-row justify-between border hover:border-gray-900 duration-200 rounded-lg w-full p-2 pl-4"
+                                       name="offLabelAPIStatus">
+                                    Off
+                                    <input type="radio" name="{{ form.API_STATUS.vars.full_name }}"
+                                           id="offRadioAPIStatus"
+                                           value="OFF"
+                                           class="radio-input hidden" {{ form.API_STATUS.vars.data == 'OFF' ? 'checked' : '' }} {{ stimulus_action('radio', 'toggle') }}>
+                                    <div class="custom-radio pr-3 pt-1.5 {{ form.API_STATUS.vars.data == 'OFF' ? '' : 'hidden' }}" {{ stimulus_target('radio', 'off') }}>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10"
+                                             viewBox="0 0 14 10"
+                                             fill="none">
+                                            <path fill-rule="evenodd" clip-rule="evenodd"
+                                                  d="M13.0303 0.96967C13.3232 1.26256 13.3232 1.73744 13.0303 2.03033L6.03033 9.03033C5.73744 9.32322 5.26256 9.32322 4.96967 9.03033L0.96967 5.03033C0.676777 4.73744 0.676777 4.26256 0.96967 3.96967C1.26256 3.67678 1.73744 3.67678 2.03033 3.96967L5.5 7.43934L11.9697 0.96967C12.2626 0.676777 12.7374 0.676777 13.0303 0.96967Z"
+                                                  fill="#210124"></path>
+                                        </svg>
+                                    </div>
+                                </label>
+                            </div>
+                        {% endif %}
+
                         {% if setting.vars.name in ['USER_DELETE_TIME', 'TIME_INTERVAL_NOTIFICATION'] %}
                             <div class="flex flex-col items-center space-y-2 mt-5">
                                 <div class="flex flex-row justify-between hover:border-gray-900 duration-200 rounded-lg w-full p-2 pl-4">
-                                    {{ form_widget(setting, {'attr': {'class': 'form-widget', 'maxlength': 32}}) }}
+                                    {{ form_widget(setting, {attr: {class: 'form-widget', maxlength: 32}}) }}
                                 </div>
                             </div>
                         {% endif %}
 
-                        {{ include('/admin/shared/settings_actions/_description.html.twig', { description: setting.vars.attr.description }) }}
+                        {{ include('/admin/shared/settings_actions/_description.html.twig', {description: setting.vars.attr.description}) }}
 
                         <div class="mt-2 -mb-2 text-center text-red-500 text-base">
                             {{ form_errors(setting) }}
@@ -188,7 +232,7 @@
         <div class="mt-6 divider-solid"></div>
 
         <div class="mt-6 flex flex-row w-full justify-end items-center gap-2">
-            <a href="{{ path('app_dashboard_regenerate_code_admin', {'type': 'settingStatus'}) }}"
+            <a href="{{ path('app_dashboard_regenerate_code_admin', {type: 'settingStatus'}) }}"
                onclick="return confirm('Are you sure you want to reset to the default settings?')"
                class="text-sm hover:text-red-600 font-bold p-2 rounded-lg transition ease-in duration-300">
                 Reset

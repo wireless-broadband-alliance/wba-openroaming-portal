@@ -1,4 +1,4 @@
-<div class="{{ data.os.selected == constant('App\\Enum\\OSTypes::NONE') ? '' : 'hidden' }} mt-14" {{ stimulus_target('visibility', 'first') }}>
+<div class="{{ data.os.selected == constant('App\\Enum\\OSTypes::NONE').value ? '' : 'hidden' }} mt-14" {{ stimulus_target('visibility', 'first') }}>
     <p>Choose your operating system, so you can download and install the profile:</p>
 
     <div class="grid gap-8 auto-rows-max lg:grid-cols-1 grid-cols-3 xl:grid-cols-3 mt-16 mb-6">
@@ -13,7 +13,7 @@
                     <twig:ux:icon name="wba:{{ key|lower }}" class="w-8" fill="none"/>
                 </label>
 
-                <p class="text-center mt-1.5 text-[#656565] text-xs lg:text-base font-light">{{ key == constant('App\\Enum\\OSTypes::IOS') or key == constant('App\\Enum\\OSTypes::MACOS') ? 'macOS/iOS' : key }}</p>
+                <p class="text-center mt-1.5 text-[#656565] text-xs lg:text-base font-light">{{ key == constant('App\\Enum\\OSTypes::IOS').value or key == constant('App\\Enum\\OSTypes::MACOS').value ? 'macOS/iOS' : key }}</p>
             </div>
         {% endfor %}
     </div>
@@ -26,10 +26,10 @@
 
 <input type="hidden" id="detected-os" name="detected-os" value="{{ data.os.selected }}"/>
 
-{% if data.os.selected != constant('App\\Enum\\OSTypes::NONE') %}
+{% if data.os.selected != constant('App\\Enum\\OSTypes::NONE').value %}
     <div class="mt-10" {{ stimulus_target('visibility', 'second') }}>
 
-        {# Profile selector  #}
+        {# Profile selector #}
         <div class="w-[100%] rounded-[1px] shadow-lg bg-[#F9F9F9] px-[25px] py-[30px] flex flex-row items-center justify-end text-[#3F474D] space-x-6">
 
             <div class="mr-auto flex flex-row items-center justify-start space-x-6">
@@ -52,4 +52,3 @@
         </p>
     </div>
 {% endif %}
-

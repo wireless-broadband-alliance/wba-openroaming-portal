@@ -100,45 +100,164 @@ use Doctrine\ORM\Mapping as ORM;
                                                 'platform' => [
                                                     'type' => 'object',
                                                     'properties' => [
-                                                        'PLATFORM_MODE' => ['type' => 'boolean'],
-                                                        'USER_VERIFICATION' => ['type' => 'boolean'],
-                                                        'TURNSTILE_CHECKER' => ['type' => 'boolean'],
-                                                        'CONTACT_EMAIL' => ['type' => 'string'],
-                                                        'TOS' => ['type' => 'string'],
-                                                        'PRIVACY_POLICY' => ['type' => 'string'],
+                                                        'PLATFORM_MODE' => [
+                                                            'type' => 'string',
+                                                            'enum' => ['Live', 'Demo'],
+                                                            'example' => 'Live',
+                                                            // phpcs:disable Generic.Files.LineLength.TooLong
+                                                            'description' => 'The platform mode of the application. Possible values: Live or Demo.',
+                                                            // phpcs:enable
+                                                        ],
+                                                        'USER_VERIFICATION' => [
+                                                            'type' => 'string',
+                                                            'enum' => ['ON', 'OFF'],
+                                                            'example' => 'ON',
+                                                            // phpcs:disable Generic.Files.LineLength.TooLong
+                                                            'description' => 'Indicates whether user verification is enabled (ON) or disabled (OFF).',
+                                                            // phpcs:enable
+                                                        ],
+                                                        'TURNSTILE_CHECKER' => [
+                                                            'type' => 'string',
+                                                            'enum' => ['ON', 'OFF'],
+                                                            'example' => 'ON',
+                                                            // phpcs:disable Generic.Files.LineLength.TooLong
+                                                            'description' => 'Indicates the status of the turnstile checker. Possible values: ON or OFF.',
+                                                            // phpcs:enable
+                                                        ],
+                                                        'CONTACT_EMAIL' => [
+                                                            'type' => 'string',
+                                                            'example' => 'support@example.com',
+                                                            // phpcs:disable Generic.Files.LineLength.TooLong
+                                                            'description' => 'Contact email address for support or inquiries.',
+                                                            // phpcs:enable
+                                                        ],
+                                                        'TOS' => [
+                                                            'type' => 'string',
+                                                            'enum' => ['LINK', 'TEXT_EDITOR'],
+                                                            'example' => 'LINK',
+                                                            // phpcs:disable Generic.Files.LineLength.TooLong
+                                                            'description' => 'Defines the type of Terms of Service. Possible values: LINK or TEXT_EDITOR.',
+                                                            // phpcs:enable
+                                                        ],
+                                                        'PRIVACY_POLICY' => [
+                                                            'type' => 'string',
+                                                            'enum' => ['LINK', 'TEXT_EDITOR'],
+                                                            'example' => 'TEXT_EDITOR',
+                                                            // phpcs:disable Generic.Files.LineLength.TooLong
+                                                            'description' => 'Defines the type of Privacy Policy. Possible values: LINK or TEXT_EDITOR.',
+                                                            // phpcs:enable
+                                                        ],
+                                                        'TWO_FACTOR_AUTH_STATUS' => [
+                                                            'type' => 'string',
+                                                            'enum' => [
+                                                                'NOT_ENFORCED',
+                                                                'ENFORCED_FOR_LOCAL',
+                                                                'ENFORCED_FOR_ALL',
+                                                            ],
+                                                            'example' => 'NOT_ENFORCED',
+                                                            // phpcs:disable Generic.Files.LineLength.TooLong
+                                                            'description' => 'Status of two-factor authentication enforcement. Possible values: NOT_ENFORCED, ENFORCED_FOR_LOCAL, ENFORCED_FOR_ALL.',
+                                                            // phpcs:enable
+                                                        ],
                                                     ],
                                                 ],
                                                 'auth' => [
                                                     'type' => 'object',
                                                     'properties' => [
-                                                        'AUTH_METHOD_SAML_ENABLED' => ['type' => 'boolean'],
-                                                        'AUTH_METHOD_GOOGLE_LOGIN_ENABLED' => ['type' => 'boolean'],
-                                                        'AUTH_METHOD_REGISTER_ENABLED' => ['type' => 'boolean'],
-                                                        // phpcs:disable Generic.Files.LineLength.TooLong
-                                                        'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED' => ['type' => 'boolean'],
-                                                        // phpcs:enable
-                                                        'AUTH_METHOD_SMS_REGISTER_ENABLED' => ['type' => 'boolean'],
+                                                        'AUTH_METHOD_SAML_ENABLED' => [
+                                                            'type' => 'boolean',
+                                                            'example' => true,
+                                                            // phpcs:disable Generic.Files.LineLength.TooLong
+                                                            'description' => 'Indicates whether SAML authentication is enabled (true) or disabled (false).',
+                                                            // phpcs:enable
+                                                        ],
+                                                        'AUTH_METHOD_GOOGLE_LOGIN_ENABLED' => [
+                                                            'type' => 'boolean',
+                                                            'example' => true,
+                                                            // phpcs:disable Generic.Files.LineLength.TooLong
+                                                            'description' => 'Indicates whether Google login is enabled (true) or disabled (false).',
+                                                            // phpcs:enable
+                                                        ],
+                                                        'AUTH_METHOD_REGISTER_ENABLED' => [
+                                                            'type' => 'boolean',
+                                                            'example' => true,
+                                                            // phpcs:disable Generic.Files.LineLength.TooLong
+                                                            'description' => 'Indicates whether user registration is enabled (true) or disabled (false).',
+                                                            // phpcs:enable
+                                                        ],
+                                                        'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED' => [
+                                                            'type' => 'boolean',
+                                                            'example' => true,
+                                                            // phpcs:disable Generic.Files.LineLength.TooLong
+                                                            'description' => 'Indicates whether traditional (username/password) login is enabled (true) or disabled (false).',
+                                                            // phpcs:enable
+                                                        ],
+                                                        'AUTH_METHOD_SMS_REGISTER_ENABLED' => [
+                                                            'type' => 'boolean',
+                                                            'example' => true,
+                                                            // phpcs:disable Generic.Files.LineLength.TooLong
+                                                            'description' => 'Indicates whether SMS-based registration is enabled (true) or disabled (false).',
+                                                            // phpcs:enable
+                                                        ],
                                                     ],
                                                 ],
                                                 'turnstile' => [
                                                     'type' => 'object',
                                                     'properties' => [
-                                                        'TURNSTILE_KEY' => ['type' => 'string'],
+                                                        'TURNSTILE_KEY' => [
+                                                            'type' => 'string',
+                                                            'example' => 'example_turnstile_key',
+                                                            'description' => 'The API key for the turnstile service.',
+                                                        ],
                                                     ],
                                                 ],
                                                 'google' => [
                                                     'type' => 'object',
                                                     'properties' => [
-                                                        'GOOGLE_CLIENT_ID' => ['type' => 'string'],
+                                                        'GOOGLE_CLIENT_ID' => [
+                                                            'type' => 'string',
+                                                            'example' => 'example_google_client_id',
+                                                            'description' => 'The Google client ID 
+                                                            used for authentication.',
+                                                        ],
+                                                    ],
+                                                ],
+                                                'microsoft' => [
+                                                    'type' => 'object',
+                                                    'properties' => [
+                                                        'MICROSOFT_CLIENT_ID' => [
+                                                            'type' => 'string',
+                                                            'example' => 'example_microsoft_client_id',
+                                                            'description' => 'The Microsoft client ID 
+                                                            used for authentication.',
+                                                        ],
                                                     ],
                                                 ],
                                                 'saml' => [
                                                     'type' => 'object',
                                                     'properties' => [
-                                                        'SAML_IDP_ENTITY_ID' => ['type' => 'string'],
-                                                        'SAML_IDP_SSO_URL' => ['type' => 'string'],
-                                                        'SAML_IDP_X509_CERT' => ['type' => 'string'],
-                                                        'SAML_SP_ENTITY_ID' => ['type' => 'string'],
+                                                        'SAML_IDP_ENTITY_ID' => [
+                                                            'type' => 'string',
+                                                            'example' => 'https://example.com/saml/metadata',
+                                                            'description' => 'The SAML Identity Provider entity ID.',
+                                                        ],
+                                                        'SAML_IDP_SSO_URL' => [
+                                                            'type' => 'string',
+                                                            'example' => 'https://example.com/saml/sso',
+                                                            'description' => 'The SAML Identity Provider 
+                                                            Single Sign-On URL.',
+                                                        ],
+                                                        'SAML_IDP_X509_CERT' => [
+                                                            'type' => 'string',
+                                                            'example' => 'MIIC...AB',
+                                                            'description' => 'The SAML Identity Provider 
+                                                            X.509 certificate.',
+                                                        ],
+                                                        'SAML_SP_ENTITY_ID' => [
+                                                            'type' => 'string',
+                                                            'example' => 'https://example.com/saml/sp',
+                                                            'description' => 'The SAML Service Provider entity ID.',
+                                                        ],
                                                     ],
                                                 ],
                                             ],
@@ -149,12 +268,13 @@ use Doctrine\ORM\Mapping as ORM;
                                     'success' => true,
                                     'data' => [
                                         'platform' => [
-                                            'PLATFORM_MODE' => "Live",
+                                            'PLATFORM_MODE' => 'Live',
                                             'USER_VERIFICATION' => true,
                                             'TURNSTILE_CHECKER' => true,
                                             'CONTACT_EMAIL' => 'support@example.com',
                                             'TOS' => 'LINK',
                                             'PRIVACY_POLICY' => 'LINK',
+                                            'TWO_FACTOR_AUTH_STATUS' => 'NOT_ENFORCED'
                                         ],
                                         'auth' => [
                                             'AUTH_METHOD_SAML_ENABLED' => true,
@@ -168,6 +288,9 @@ use Doctrine\ORM\Mapping as ORM;
                                         ],
                                         'google' => [
                                             'GOOGLE_CLIENT_ID' => 'example_google_client_id',
+                                        ],
+                                        'microsoft' => [
+                                            'MICROSOFT_CLIENT_ID' => 'example_microsoft_client_id',
                                         ],
                                         'saml' => [
                                             'SAML_IDP_ENTITY_ID' => 'https://example.com/saml/metadata',

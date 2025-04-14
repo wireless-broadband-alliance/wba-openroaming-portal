@@ -2,7 +2,7 @@
 
 namespace App\Form;
 
-use App\Enum\EmailConfirmationStrategy;
+use App\Enum\OperationMode;
 use App\Service\GetSettings;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -12,18 +12,16 @@ use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Constraints\Email as EmailConstraint;
 use Symfony\Component\Validator\Constraints\File;
 use Symfony\Component\Validator\Constraints\Length;
-use Symfony\Component\Validator\Constraints as Assert;
 
 class CustomType extends AbstractType
 {
-    private GetSettings $getSettings;
-
-    public function __construct(GetSettings $getSettings)
-    {
-        $this->getSettings = $getSettings;
+    public function __construct(
+        private readonly GetSettings $getSettings
+    ) {
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
@@ -135,8 +133,8 @@ class CustomType extends AbstractType
             // Specific logic for CUSTOMER_LOGO_ENABLED
             if ($settingName === 'CUSTOMER_LOGO_ENABLED') {
                 $formFieldOptions['choices'] = [
-                    EmailConfirmationStrategy::EMAIL => EmailConfirmationStrategy::EMAIL,
-                    EmailConfirmationStrategy::NO_EMAIL => EmailConfirmationStrategy::NO_EMAIL,
+                    OperationMode::ON->value => OperationMode::ON->value,
+                    OperationMode::OFF->value => OperationMode::OFF->value,
                 ];
                 $formFieldOptions['placeholder'] = 'Select an option';
                 $formFieldOptions['required'] = true;

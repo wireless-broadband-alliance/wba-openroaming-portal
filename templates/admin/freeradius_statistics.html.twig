@@ -5,9 +5,9 @@
 {% block container %}
     {# Freeradius Statistics #}
     <div class="flex flex-col lg:flex-row space-y-4 lg:space-y-0 justify-end items-center mb-10">
-        {% if exportFreeradiusStatistics == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') %}
+        {% if exportFreeradiusStatistics == constant('App\\Enum\\OperationMode::ON').value %}
             <div class="mr-auto flex items-center space-x-6">
-                <a href="{{ path('admin_page_export_freeradius', { startDate: selectedStartDate, endDate: selectedEndDate }) }}"
+                <a href="{{ path('admin_page_export_freeradius', {startDate: selectedStartDate, endDate: selectedEndDate}) }}"
                    onclick="return confirm('Are you sure you want to export data' +
                    {% if selectedStartDate and selectedEndDate %}
                        ' from {{ selectedStartDate }} to {{ selectedEndDate }}?'
@@ -37,7 +37,7 @@
     </div>
 
     {# TODO: Update JS to use stimulus instead of native JS (file: statistics_controller.js) #}
-    <div class="mt-10 grid xl:gap-8 gap-y-8 xl:grid-cols-3 md:grid-cols-1" data-controller="freeradiusStatistics">
+    <div class="mt-10 grid xl:gap-8 gap-y-8 xl:grid-cols-3 md:grid-cols-1">
         {# Authentications Attempts #}
         <div class="col-span-3 md:col-span-1 w-full bg-white rounded-lg px-5 py-3 flex flex-col gap-6 shadow">
             <h1 class="text-lg font-medium text-left sm:pt-2">Authentication Attempts</h1>
@@ -60,7 +60,11 @@
                 </a>
             </div>
             <div class="flex flex-col gap-6 animate-fadeIn">
-                <canvas class="max-w-full" id="authAttemptsChart" data-authAttempts
+                <!-- Chart 1 (authAttemptsChart) -->
+                <canvas class="max-w-full" id="authAttemptsChart"
+                        data-controller="freeradius-statistics"
+                        data-freeradius-statistics-target="chart"
+                        data-freeradius-statistics-action="freeradius-statistics#authAttemptsAction@load"
                         data-chart-data="{{ authAttemptsJson }}"></canvas>
             </div>
         </div>
@@ -82,7 +86,11 @@
                 </a>
             </div>
             <div class="pt-4 flex flex-col gap-6 animate-fadeIn">
-                <canvas class="max-w-full" id="sessionTimeChart" data-sessionTime
+                <!-- Chart 2 (sessionTimeChart) -->
+                <canvas class="max-w-full" id="sessionTimeChart"
+                        data-controller="freeradius-statistics"
+                        data-freeradius-statistics-target="chart"
+                        data-freeradius-statistics-action="freeradius-statistics#sessionTimeAction@load"
                         data-chart-data="{{ sessionTimeJson }}"></canvas>
             </div>
         </div>
@@ -104,13 +112,16 @@
                 </a>
             </div>
             <div class="pt-4 flex flex-col gap-6 animate-fadeIn">
-                <canvas class="max-w-full" id="totalTimeChart" data-totalTime
+                <canvas class="max-w-full" id="totalTimeChart"
+                        data-controller="freeradius-statistics"
+                        data-freeradius-statistics-target="chart"
+                        data-freeradius-statistics-action="freeradius-statistics#totalTimeAction@load"
                         data-chart-data="{{ totalTimeJson }}"></canvas>
             </div>
         </div>
     </div>
 
-    <div class="mt-10 grid xl:gap-8 gap-y-8 xl:grid-cols-3 md:grid-cols-1" data-controller="freeradiusStatistics">
+    <div class="mt-10 grid xl:gap-8 gap-y-8 xl:grid-cols-3 md:grid-cols-1">
         {# Total of Traffic #}
         <div class="col-span-3 md:col-span-1 w-full bg-white rounded-lg px-4 p-4 gap-4 shadow">
             <div class="flex justify-between items-center pb-4">
@@ -222,14 +233,17 @@
         </div>
     </div>
 
-    <div class="mt-10 grid gap-8 grid-cols-1 xl:grid-cols-3" data-controller="freeradiusStatistics">
+    <div class="mt-10 grid gap-8 grid-cols-1 xl:grid-cols-3">
         {# Wifi Tags Usage #}
         <div class="col-span-3 md:col-span-1 w-full bg-white rounded-lg px-4 p-2 shadow">
             <div class="flex flex-row justify-start sm:pt-2 pb-6 font-medium text-lg text-left">
                 <h1 class="text-lg font-medium">Wi-Fi Standards - Usage</h1>
             </div>
             <div class="xl:pt-10 flex flex-col gap-6 animate-fadeIn">
-                <canvas class="max-w-full" id="wifiTagsChart" data-wifiTags
+                <canvas class="max-w-full" id="wifiTagsChart"
+                        data-controller="freeradius-statistics"
+                        data-freeradius-statistics-target="chart"
+                        data-freeradius-statistics-action="freeradius-statistics#wifiTagsAction@load"
                         data-chart-data="{{ wifiTagsJson }}"></canvas>
             </div>
         </div>
@@ -287,11 +301,10 @@
             {# AccessPoints Pagination #}
             <div class="m-8">
                 <hr class="w-full h-0.5 bg-gray-300/50 border-0 border-gray-300/50 rounded">
-                {{ include('admin/shared/_pagination_ApUsage.html.twig', {label: 'Access Points per page', route: 'admin_dashboard_statistics_freeradius', occurrencies: totalApCount}) }}
+                {{ include('admin/shared/pagination/_pagination_ApUsage.html.twig', {label: 'Access Points per page', route: 'admin_dashboard_statistics_freeradius', occurrencies: totalApCount}) }}
             </div>
         </div>
     </div>
-
     <div class="mt-10 col-span-3 md:col-span-1 w-full bg-white rounded-lg p-6 flex flex-col gap-4 shadow">
         <h1 class="text-lg font-medium text-left">Current Authentications</h1>
         <div class="flex flex-col items-center">
@@ -321,7 +334,5 @@
         </div>
     </div>
 
-
     <hr class="mb-8 mt-16 divider">
-
 {% endblock %}

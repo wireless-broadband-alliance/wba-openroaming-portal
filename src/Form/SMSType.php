@@ -14,11 +14,8 @@ use Symfony\Component\Validator\Constraints\NotBlank;
 
 class SMSType extends AbstractType
 {
-    private GetSettings $getSettings;
-
-    public function __construct(GetSettings $getSettings)
+    public function __construct(private readonly GetSettings $getSettings)
     {
-        $this->getSettings = $getSettings;
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
@@ -81,8 +78,8 @@ class SMSType extends AbstractType
                         'maxMessage' => ' This field cannot be longer than {{ limit }} characters',
                     ]),
                     new GreaterThanOrEqual([
-                        'value' => 0,
-                        'message' => 'This timer should never be less than 0.',
+                        'value' => 1,
+                        'message' => 'This timer should never be less than 1.',
                     ]),
                     new NotBlank([
                         'message' => 'Please make sure to set a timer',

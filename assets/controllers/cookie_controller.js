@@ -1,11 +1,9 @@
-import {Controller} from "@hotwired/stimulus";
+import { Controller } from "@hotwired/stimulus";
 
 export default class extends Controller {
     static targets = ["banner", "modalCookie", "consentForm"];
 
     connect() {
-        console.log("CookieController connected");
-
         // Initialize preferences without setting any cookies on the first page load
         this.cookieScopes = this.getCookiePreferences() || {
             rememberMe: false,
@@ -21,11 +19,9 @@ export default class extends Controller {
         const hasSavedPreferences = this.getCookie("cookie_preferences");
 
         // If either cookies_accepted or cookie_preferences exists and cookies were not rejected, hide the banner
-        if ((hasAcceptedCookies || hasSavedPreferences)) {
+        if (hasAcceptedCookies || hasSavedPreferences) {
             this.hideBanner();
         }
-
-        console.log("Current cookie preferences: ", this.cookieScopes);
     }
 
     showBanner() {
@@ -41,7 +37,7 @@ export default class extends Controller {
     }
 
     acceptCookies() {
-        Object.keys(this.cookieScopes).forEach(scope => {
+        Object.keys(this.cookieScopes).forEach((scope) => {
             this.cookieScopes[scope] = true;
             this.updateCheckbox(scope, true);
         });
@@ -52,8 +48,6 @@ export default class extends Controller {
     }
 
     rejectCookies() {
-        console.log("Rejecting cookies, removing existing cookies.");
-
         this.clearAllCookies();
 
         this.closeModal();
@@ -62,7 +56,7 @@ export default class extends Controller {
 
     savePreferences() {
         // Save preferences based on user input in the modal
-        this.consentFormTarget.querySelectorAll("[data-scope]").forEach(checkbox => {
+        this.consentFormTarget.querySelectorAll("[data-scope]").forEach((checkbox) => {
             const scope = checkbox.getAttribute("data-scope");
             this.cookieScopes[scope] = checkbox.checked;
         });
@@ -83,7 +77,8 @@ export default class extends Controller {
     }
 
     setCookiePreferences() {
-        document.cookie = "cookie_preferences=" + JSON.stringify(this.cookieScopes) + "; path=/; max-age=" + 365 * 24 * 60 * 60;
+        document.cookie =
+            "cookie_preferences=" + JSON.stringify(this.cookieScopes) + "; path=/; max-age=" + 365 * 24 * 60 * 60;
     }
 
     setCookiesAccepted() {
@@ -104,7 +99,7 @@ export default class extends Controller {
 
     clearAllCookies() {
         const cookies = document.cookie.split(";");
-        cookies.forEach(cookie => {
+        cookies.forEach((cookie) => {
             const eqPos = cookie.indexOf("=");
             const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
             // Clear each cookie by setting max-age=0

@@ -4,39 +4,39 @@
 
 {% block container %}
     {# Content - Edit Users #}
-    <h1 class="text-2xl font-semibold mb-6">User Info</h1>
-    <div>
-        {{ form_start(form) }}
-        {{ form_errors(form) }}
+    <h1 class="text-3xl font-bold text-gray-800 mb-8 border-b-2 border-gray-300 pb-2">{{ user.uuid }}</h1>
 
-        <div class="p-6 mx-auto bg-white rounded-lg grid grid-cols-1 lg:grid-cols-2 gap-6">
+    {{ form_start(form) }}
+    {{ form_errors(form) }}
+    <div class="p-6 bg-white">
+        <div class="mx-auto rounded-lg grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div class="relative">
-                {{ form_label(form.uuid, 'UUID', {'label_attr': {'class': 'form-label'}}) }}
-                {{ form_widget(form.uuid, {'attr': {'class': 'form-widget'}}) }}
+                {{ form_label(form.uuid, 'UUID', {label_attr: {class: 'form-label'}}) }}
+                {{ form_widget(form.uuid, {attr: {class: 'form-widget'}}) }}
                 <div class="text-red-500 m-2">
                     {{ form_errors(form.uuid) }}
                 </div>
             </div>
 
             <div class="relative">
-                {{ form_label(form.firstName, 'First Name', {'label_attr': {'class': 'form-label'}}) }}
-                {{ form_widget(form.firstName, {'attr': {'class': 'form-widget'}}) }}
+                {{ form_label(form.firstName, 'First Name', {label_attr: {class: 'form-label'}}) }}
+                {{ form_widget(form.firstName, {attr: {class: 'form-widget'}}) }}
                 <div class="text-red-500 m-2">
                     {{ form_errors(form.firstName) }}
                 </div>
             </div>
 
             <div class="relative">
-                {{ form_label(form.email, 'Email', {'label_attr': {'class': 'form-label'}}) }}
-                {{ form_widget(form.email, {'attr': {'class': 'form-widget'}}) }}
+                {{ form_label(form.email, 'Email', {label_attr: {class: 'form-label'}}) }}
+                {{ form_widget(form.email, {attr: {class: 'form-widget'}}) }}
                 <div class="text-red-500 m-2">
                     {{ form_errors(form.email) }}
                 </div>
             </div>
 
             <div class="relative">
-                {{ form_label(form.lastName, 'Last Name', {'label_attr': {'class': 'form-label'}}) }}
-                {{ form_widget(form.lastName, {'attr': {'class': 'form-widget'}}) }}
+                {{ form_label(form.lastName, 'Last Name', {label_attr: {class: 'form-label'}}) }}
+                {{ form_widget(form.lastName, {attr: {class: 'form-widget'}}) }}
                 <div class="text-red-500 m-2">
                     {{ form_errors(form.lastName) }}
                 </div>
@@ -46,22 +46,22 @@
                 <div class="flex flex-row items-end space-x-4">
                     {# Phone Number Input #}
                     <div class="flex flex-col w-1/3">
-                        {{ form_label(form.phoneNumber, 'Phone Number', { 'label_attr': {'class': 'form-label'} }) }}
+                        {{ form_label(form.phoneNumber, 'Phone Number', {label_attr: {class: 'form-label'}}) }}
                         {{ form_widget(form.phoneNumber.children.country, {
-                            'attr': {
-                                'class': 'form-widget',
-                                'placeholder': 'Enter your phone number',
-                                'autocomplete': 'tel',
-                            }
+                            attr: {
+                                class: 'form-widget',
+                                placeholder: 'Enter your phone number',
+                                autocomplete: 'tel',
+                            },
                         }) }}
                     </div>
                     <div class="flex flex-col w-2/3">
                         {{ form_widget(form.phoneNumber.children.number, {
-                            'attr': {
-                                'class': 'form-widget',
-                                'placeholder': 'Enter your phone number',
-                                'autocomplete': 'tel',
-                            }
+                            attr: {
+                                class: 'form-widget',
+                                placeholder: 'Enter your phone number',
+                                autocomplete: 'tel',
+                            },
                         }) }}
                     </div>
                 </div>
@@ -74,17 +74,17 @@
             <div class="w-full lg:w-1/2 ">
                 <div class="flex md:flex-row flex-col items-center sm:justify-start">
                     <div class="flex flex-col mx-4 space-x-3 space-y-2">
-                        <p>Verification</p>
+                        <p class="font-bold">Verification</p>
                         <label class="inline-flex items-center cursor-pointer">
-                            {{ form_widget(form.isVerified, {'attr': {'class': 'sr-only peer'}}) }}
+                            {{ form_widget(form.isVerified, {attr: {class: 'sr-only peer'}}) }}
                             <div class="ms-2 relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-bg-lightGreen rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#68D391]"></div>
                             {{ form_errors(form.isVerified) }}
                         </label>
                     </div>
                     <div class="flex flex-col mt-2 md:mt-0 mx-4 space-y-2">
-                        <p>Banned</p>
+                        <p class="font-bold">Banned</p>
                         <label class="inline-flex items-center cursor-pointer">
-                            {{ form_widget(form.bannedAt, {'attr': {'class': 'sr-only peer'}}) }}
+                            {{ form_widget(form.bannedAt, {attr: {class: 'sr-only peer'}}) }}
                             <div class="ms-2 relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-bg-lightGreen rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#f87171]"></div>
                             {{ form_errors(form.bannedAt) }}
                         </label>
@@ -92,31 +92,29 @@
                 </div>
             </div>
         </div>
-
         <div class="flex flex-row justify-end md:w-full mt-6">
             <button type="submit" class="btn-primary">Apply Changes</button>
         </div>
-
-        {{ form_rest(form) }}
-        {{ form_end(form) }}
     </div>
+    {{ form_rest(form) }}
+    {{ form_end(form) }}
 
     {# Content - Reset Password Users/Admin #}
     <h1 class="text-2xl font-semibold mt-6 mb-6">Reset Password</h1>
-    <div>
-        {{ form_start(formReset) }}
-        {{ form_errors(formReset) }}
-        <div class="p-6 mx-auto bg-white rounded-lg grid grid-cols-1 lg:grid-cols-2 gap-6">
+    {{ form_start(formReset) }}
+    {{ form_errors(formReset) }}
+    <div class="p-6 bg-white">
+        <div class="mx-auto rounded-lg grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div class="relative">
-                {{ form_label(formReset.password, 'Password', {'label_attr': {'class': 'form-label'}}) }}
-                {{ form_widget(formReset.password, {'attr': {'class': 'form-widget', 'minlength': 7}}) }}
+                {{ form_label(formReset.password, 'Password', {label_attr: {class: 'form-label'}}) }}
+                {{ form_widget(formReset.password, {attr: {class: 'form-widget', minlength: 7}}) }}
                 <div class="mt-2 -mb-2 text-center text-red-500 text-base">
                     {{ form_errors(formReset.password) }}
                 </div>
             </div>
             <div class="relative">
-                {{ form_label(formReset.confirmPassword, 'Confirm New Password', {'label_attr': {'class': 'form-label'}}) }}
-                {{ form_widget(formReset.confirmPassword, {'attr': {'class': 'form-widget', 'minlength': 7}}) }}
+                {{ form_label(formReset.confirmPassword, 'Confirm New Password', {label_attr: {class: 'form-label'}}) }}
+                {{ form_widget(formReset.confirmPassword, {attr: {class: 'form-widget', minlength: 7}}) }}
                 <div class="mt-2 -mb-2 text-center text-red-500 text-base">
                     {{ form_errors(formReset.confirmPassword) }}
                 </div>
@@ -128,7 +126,35 @@
                 Reset Password
             </button>
         </div>
-        {{ form_rest(formReset) }}
-        {{ form_end(formReset) }}
     </div>
+    {{ form_rest(formReset) }}
+    {{ form_end(formReset) }}
+
+    {# Content - Two-Factor Options - both for admin && user account #}
+
+        {% if app.user and user.id == app.user.id %}
+            <h1 class="text-2xl font-semibold mt-6 mb-6">Two-Factor Authentication Options</h1>
+            <div class="p-6 rounded-lg grid grid-cols-1 lg:grid-cols-2 lg:w-1/2 w-full bg-white justify-start gap-6">
+                <a href="{{ path('app_configure2FA', {context: context}) }}"
+                   class="btn-secondary text-center break-words sm:whitespace-nowrap">
+                    Configure Two-Factor Authentication
+                </a>
+
+            {% if not (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value) %}
+                <a href="{{ path('app_disable2FA', {context: context}) }}" class="btn-logout">Disable</a>
+            {% endif %}
+            </div>
+        {% else %}
+            {% if not (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value) %}
+                <h1 class="text-2xl font-semibold mt-6 mb-6">Two-Factor Authentication Options</h1>
+                <div class="p-6 rounded-lg grid grid-cols-1 lg:grid-cols-2 lg:w-1/2 w-full bg-white justify-start gap-6">
+                    <a
+                            href="{{ path('app_disable2FA_admin', {id: user.id}) }}"
+                            class="btn-logout"
+                            onclick="return confirm('Are you sure you to disable 2FA for this user?')">
+                        Disable
+                    </a>
+                </div>
+            {% endif %}
+        {% endif %}
 {% endblock %}

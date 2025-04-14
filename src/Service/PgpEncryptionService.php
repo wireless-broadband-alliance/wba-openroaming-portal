@@ -17,15 +17,15 @@ class PgpEncryptionService
             $publicKeyContent = file_get_contents($publicKeyPath);
         } else {
             return [
-                UserVerificationStatus::MISSING_PUBLIC_KEY_CONTENT,
+                UserVerificationStatus::MISSING_PUBLIC_KEY_CONTENT->value,
                 'The file does not exist or is not located in the correct path!
             Make sure to define a public key in pgp_public_key/public_key.asc'
             ];
         }
 
-        if (empty($publicKeyContent)) {
+        if ($publicKeyContent === '' || $publicKeyContent === '0' || $publicKeyContent === false) {
             return [
-                UserVerificationStatus::EMPTY_PUBLIC_KEY_CONTENT,
+                UserVerificationStatus::EMPTY_PUBLIC_KEY_CONTENT->value,
                 'The file does not exist or is not located in the correct path!
             Make sure to define a public key in pgp_public_key/public_key.asc'
             ];
@@ -47,7 +47,7 @@ class PgpEncryptionService
             return $gpg->encrypt($data);
         } catch (Exception $e) {
             // Catch any exceptions and display the message for debugging
-            throw new RuntimeException('GnuPG operation failed: ' . $e->getMessage());
+            throw new RuntimeException('GnuPG operation failed: ' . $e->getMessage(), $e->getCode(), $e);
         }
     }
 }

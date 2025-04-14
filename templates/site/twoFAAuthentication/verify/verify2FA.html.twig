@@ -1,0 +1,85 @@
+{% extends 'site/base.html.twig' %}
+
+{% block title %}
+    {{ data.title.value }}
+{% endblock %}
+
+{% block second_col %}
+    {# Form Column #}
+
+    {# Toasts #}
+    <div class="grid grid-cols-1 gap-[5px]">
+        {% for message in app.session.flashbag.get('success') %}
+            {{ include('site/shared/_toast.html.twig', {toast_type: 'toast-success'}) }}
+        {% endfor %}
+
+        {# Flash error message #}
+        {% for message in app.session.flashbag.get('error') %}
+            {{ include('site/shared/_toast.html.twig', {toast_type: 'toast-warning'}) }}
+        {% endfor %}
+    </div>
+
+    {% if data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\OperationMode::ON').value %}
+        <img class="w-[120px] h-[58px] object-scale-down mt-[75px]" src="{{ data.customerLogoName.value }}" alt="Logo"/>
+    {% endif %}
+
+    <div class="{{ data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\OperationMode::ON').value ? 'pt-[28px]' : 'pt-[161px]' }} leading-7">
+        <p class="font-bold text-xl">Two-Factor Authentication - Verification</p>
+
+        {% if data.TWO_FACTOR_AUTH_STATUS.value == constant('App\\Enum\\TwoFAType::NOT_ENFORCED').value %}
+            {% if user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value %}
+                <p class="text-lg">
+                    Two-factor authentication is currently <strong>disabled</strong> for your account. Enabling it
+                    provides an extra layer of security to help protect your account from unauthorized access.
+                </p>
+            {% else %}
+                <p class="text-lg">
+                    Two-factor authentication is currently <strong>enabled</strong> for your account. This helps secure
+                    your account and protect it from unauthorized access.
+                </p>
+            {% endif %}
+            <p class="text-md">
+                Please enter the code sent to you to proceed with 2FA verification.
+            </p>
+        {% elseif data.TWO_FACTOR_AUTH_STATUS.value == constant('App\\Enum\\TwoFAType::ENFORCED_FOR_LOCAL').value %}
+            <p class="text-lg">
+                Two-factor authentication is required for certain account types to ensure compliance with security
+                policies. Please enter the code sent to you to verify and enable 2FA for your account.
+            </p>
+        {% elseif data.TWO_FACTOR_AUTH_STATUS.value == constant('App\\Enum\\TwoFAType::ENFORCED_FOR_ALL').value %}
+            <p class="text-lg">
+                Two-factor authentication is mandatory for all accounts. This added security measure helps prevent
+                unauthorized access to sensitive information. Please enter the code sent to you to complete the
+                verification process and secure your account.
+            </p>
+        {% else %}
+            <p class="text-lg">
+                Two-factor authentication helps protect your account by adding a layer of security. Follow the
+                instructions provided to complete the process.
+            </p>
+        {% endif %}
+    </div>
+    {{ form_start(form) }}
+    <div class="relative mt-10">
+
+        {{ form_widget(form.code, {
+            attr: {
+                class: 'form-widget',
+                placeholder: 'Enter your Code',
+            }}) }}
+
+    </div>
+
+    <div class="grid mt-4 grid-cols-1 sm:gap-4 lg:gap-6 sm:[grid-template-columns:repeat(auto-fit,minmax(150px,1fr))] md:my-2 my-3">
+        <button class="btn-primary"
+                type="submit">Submit
+        </button>
+        {% if not (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::TOTP').value) %}
+            <a href="{{ path('app_2FA_local_resend_code', {context: context}) }}" class="btn-secondary">Resend code</a>
+        {% endif %}
+    </div>
+
+    {{ form_end(form) }}
+    {{ include('site/shared/returnActions/_logout.html.twig') }}
+
+{% endblock %}

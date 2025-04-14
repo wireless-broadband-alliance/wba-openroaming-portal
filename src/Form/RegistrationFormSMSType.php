@@ -3,7 +3,7 @@
 namespace App\Form;
 
 use App\Entity\User;
-use App\Enum\EmailConfirmationStrategy;
+use App\Enum\OperationMode;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use App\Service\GetSettings;
@@ -16,31 +16,23 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class RegistrationFormSMSType extends AbstractType
 {
-    private UserRepository $userRepository;
-    private SettingRepository $settingRepository;
-    private GetSettings $getSettings;
-
     /**
-     *
      * @param UserRepository $userRepository The repository for accessing user data.
      * @param SettingRepository $settingRepository The setting repository is used to create the getSettings function.
      * @param GetSettings $getSettings The instance of GetSettings class.
      */
     public function __construct(
-        UserRepository $userRepository,
-        SettingRepository $settingRepository,
-        GetSettings $getSettings
+        private readonly UserRepository $userRepository,
+        private readonly SettingRepository $settingRepository,
+        private readonly GetSettings $getSettings
     ) {
-        $this->userRepository = $userRepository;
-        $this->settingRepository = $settingRepository;
-        $this->getSettings = $getSettings;
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $turnstileCheckerValue = $data['TURNSTILE_CHECKER']['value'];
-        $regionInputs = explode(',', $data['DEFAULT_REGION_PHONE_INPUTS']['value']);
+        $regionInputs = explode(',', (string)$data['DEFAULT_REGION_PHONE_INPUTS']['value']);
         $regionInputs = array_map('trim', $regionInputs);
 
         $builder
@@ -56,7 +48,7 @@ class RegistrationFormSMSType extends AbstractType
             ]);
 
         // Check if TURNSTILE_CHECKER value is ON
-        if ($turnstileCheckerValue === EmailConfirmationStrategy::EMAIL) {
+        if ($turnstileCheckerValue === OperationMode::ON->value) {
             $builder->add('security', TurnstileType::class, [
                 'attr' => [
                     'data-action' => 'contact',

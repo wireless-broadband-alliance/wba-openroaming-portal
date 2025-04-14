@@ -64,3 +64,13 @@ pgp_public_key/*
 /phpcs.xml
 ###< squizlabs/php_codesniffer ###
 
+
+###> vincentlanglet/twig-cs-fixer ###
+/.twig-cs-fixer.cache
+###< vincentlanglet/twig-cs-fixer ###
+
+###> script for pipelines before commits ###
+.git/hooks/pre-commit
+###> script for pipelines before commits ###
+
+geoLiteDB/GeoLite2-City.mmdb

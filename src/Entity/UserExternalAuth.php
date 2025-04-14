@@ -20,7 +20,7 @@ class UserExternalAuth
     #[ORM\Column(length: 255)]
     private ?string $provider = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(type: 'text', nullable: true)]
     private ?string $provider_id = null;
 
     public function getId(): ?int

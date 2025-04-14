@@ -11,50 +11,54 @@ parameters:
   app.export_freeradius_statistics: '%env(EXPORT_FREERADIUS_STATISTICS)%'
   app.pgp_public_key: '%env(ENABLE_DELETE_USERS_UI)%'
   app.turnstile_key: '%env(TURNSTILE_KEY)%'
+  app.turnstile_secret: '%env(TURNSTILE_SECRET)%'
   app.google_client_id: '%env(GOOGLE_CLIENT_ID)%'
+  app.microsoft_client_id: '%env(MICROSOFT_CLIENT_ID)%'
   app.sentry_dsn: '%env(SENTRY_DSN)%'
   app.saml_idp_entity_id: '%env(SAML_IDP_ENTITY_ID)%'
   app.saml_idp_sso_url: '%env(SAML_IDP_SSO_URL)%'
   app.saml_idp_x509_cert: '%env(SAML_IDP_X509_CERT)%'
   app.saml_sp_entity_id: '%env(SAML_SP_ENTITY_ID)%'
+  app.saml_sp_acs_url: '%env(SAML_SP_ACS_URL)%'
 services:
-  App\EventListener\JWTExceptionListener:
+    App\EventListener\JWTExceptionListener:
         tags:
             - { name: kernel.event_subscriber }
-  App\Form\Transformer\BooleanToDateTimeTransformer: ~
-  App\Service\UserStatusChecker: ~
-  #Things to make the login with Google work
-  App\Controller\GoogleController:
-    arguments:
-      $clientRegistry: '@KnpU\OAuth2ClientBundle\Client\Provider\GoogleClient'
-  # default configuration for services in *this* file
-  _defaults:
-    autowire: true      # Automatically injects dependencies in your services.
-    autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+    App\Form\Transformer\BooleanToDateTimeTransformer: ~
+    App\Service\UserStatusChecker: ~
+    #Things to make the login with Google work
+    App\Controller\GoogleController:
+        arguments:
+            $clientRegistry: '@KnpU\OAuth2ClientBundle\Client\Provider\GoogleClient'
+    App\Controller\MicrosoftController:
+        arguments:
+            $clientRegistry: '@KnpU\OAuth2ClientBundle\Client\Provider\MicrosoftClient'
+            # default configuration for services in *this* file
+    _defaults:
+        autowire: true      # Automatically injects dependencies in your services.
+        autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
 
-  # makes classes in src/ available to be used as services
-  # this creates a service per class whose id is the fully-qualified class name
-  App\:
-    resource: '../src/'
-    exclude:
-      - '../src/DependencyInjection/'
-      - '../src/Entity/'
-      - '../src/Kernel.php'
+    # makes classes in src/ available to be used as services
+    # this creates a service per class whose id is the fully-qualified class name
+    App\:
+        resource: '../src/'
+        exclude:
+            - '../src/DependencyInjection/'
+            - '../src/Entity/'
+            - '../src/Kernel.php'
 
-  # add more service definitions when explicit configuration is needed
-  # please note that last definitions always *replace* previous ones
+    # add more service definitions when explicit configuration is needed
+    # please note that last definitions always *replace* previous ones
+    saml_user_factory:
+        class: App\Security\CustomSamlUserFactory
+        arguments:
+            $userRepository: '@App\Repository\UserRepository'
+            $entityManager: '@doctrine.orm.entity_manager'
+            $getSettings: '@App\Service\GetSettings'
+            $settingRepository: '@App\Repository\SettingRepository'
+            $requestStack: '@request_stack'
+        tags:
+            - { name: 'nbgrp_oneloginsaml.user_factory' }
 
-  saml_user_factory:
-    class: App\Security\CustomSamlUserFactory
-    arguments:
-      ##  User class
-      - App\Entity\User
-      ##  Attribute mapping
-      - password: 'notused'
-        uuid: $samlUuid
-        email: $email
-        first_name: $givenName
-        last_name: $surname
-        isVerified: 1
-        roles: [ ]
-  Nbgrp\OneloginSamlBundle\Security\User\SamlUserFactory: '@saml_user_factory'
+    Nbgrp\OneloginSamlBundle\Security\User\SamlUserFactory: '@saml_user_factory'
+

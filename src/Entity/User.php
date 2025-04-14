@@ -12,8 +12,10 @@ use ApiPlatform\OpenApi\Model\RequestBody;
 use App\Api\V1\Controller\AuthController;
 use App\Api\V1\Controller\GetCurrentUserController;
 use App\Api\V1\Controller\RegistrationController;
+use App\Api\V1\Controller\TwoFAController;
 use App\Repository\UserRepository;
 use App\Security\CustomSamlUserFactory;
+use ArrayObject;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
@@ -57,9 +59,34 @@ use Symfony\Component\Validator\Constraints as Assert;
                                                     'items' => [
                                                         'type' => 'object',
                                                         'properties' => [
-                                                            'provider' => ['type' => 'string'],
-                                                            'provider_id' => ['type' => 'string'],
+                                                            'provider' => [
+                                                                'type' => 'string',
+                                                                'enum' => [
+                                                                    'SAML Account',
+                                                                    'Google Account',
+                                                                    'Microsoft Account',
+                                                                    'Portal Account',
+                                                                ],
+                                                                'example' => 'Google Account',
+                                                                // phpcs:disable Generic.Files.LineLength.TooLong
+                                                                'description' => 'The authentication provider for the user. Possible values: SAML Account, Google Account, Microsoft Account, Portal Account. If the provider is "Portal Account", the provider_id must be "Email" or "Phone Number".',
+                                                                // phpcs:enable
+                                                            ],
+                                                            'provider_id' => [
+                                                                'type' => 'string',
+                                                                'enum' => [
+                                                                    'Email',
+                                                                    'Phone Number',
+                                                                ],
+                                                                'example' => 'Email',
+                                                                // phpcs:disable Generic.Files.LineLength.TooLong
+                                                                'description' => 'The unique identifier for the external authentication provider linked to the user. For "Google Account", this is an OAuth token. For "Portal Account", this must be either "Email" or "Phone Number".',
+                                                                // phpcs:enable
+                                                            ],
                                                         ],
+                                                        // phpcs:disable Generic.Files.LineLength.TooLong
+                                                        'description' => "An array containing external authentication methods associated with the user. Each item specifies the provider and the unique provider ID. Special behavior: For Portal Account, the provider_id is restricted to the values 'Email' or 'Phone Number'.",
+                                                        // phpcs:enable
                                                     ],
                                                 ],
                                                 'phone_number' => ['type' => 'string', 'nullable' => true],
@@ -199,6 +226,279 @@ use Symfony\Component\Validator\Constraints as Assert;
             name: 'api_get_current_user',
         ),
         new Post(
+            uriTemplate: '/api/v1/twoFA/request',
+            controller: TwoFAController::class,
+            openapi: new Operation(
+                responses: [
+                    200 => [
+                        'description' => 'Requested two-factor authentication token',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'success' => ['type' => 'boolean', 'example' => true],
+                                        'data' => [
+                                            'type' => 'object',
+                                            'properties' => [
+                                                'message' => [
+                                                    'type' => 'string',
+                                                    'example' => 'Two-Factor authentication code successfully sent.' .
+                                                        ' You have X attempts remaining to request a new one.',
+                                                ],
+                                            ],
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                    400 => [
+                        'description' => 'Invalid request data',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'success' => [
+                                            'type' => 'boolean',
+                                            'example' => false,
+                                        ],
+                                        'error' => [
+                                            'type' => 'string',
+                                            'description' => 'Error message explaining why the request failed',
+                                            'example' => 'Missing required fields or invalid data',
+                                        ],
+                                    ],
+                                ],
+                                'examples' => [
+                                    'captcha_failed' => [
+                                        'summary' => 'CAPTCHA validation failed',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'CAPTCHA validation failed',
+                                        ],
+                                    ],
+                                    'missing_fields' => [
+                                        'summary' => 'Missing fields',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'Missing required fields: uuid, password or turnstile_token',
+                                        ],
+                                    ],
+                                    'missing_2fa_setting' => [
+                                        'summary' => 'Missing 2FA setting',
+                                        'value' => [
+                                            'success' => false,
+                                            // phpcs:disable Generic.Files.LineLength.TooLong
+                                            'error' => 'Missing required configuration setting: TWO_FACTOR_AUTH_RESEND_INTERVAL TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS',
+                                            // phpcs:enable
+                                        ],
+                                    ],
+                                    'invalid_json' => [
+                                        'summary' => 'Invalid json format',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'Invalid json format',
+                                        ],
+                                    ],
+                                    'miss_typed_uuid' => [
+                                        'summary' => 'Invalid Account Uuid',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'Invalid credentials'
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                    401 => [
+                        'description' => 'Invalid credentials.',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'success' => ['type' => 'boolean', 'example' => false],
+                                        'error' => [
+                                            'type' => 'string',
+                                            'example' => 'Invalid credentials.',
+                                            'description' => 'Invalid credentials provided'
+                                        ],
+                                    ],
+                                ],
+                                'examples' => [
+                                    'missing_user_account' => [
+                                        'summary' => 'Invalid Credentials',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'Invalid credentials'
+                                        ],
+                                    ],
+                                    'miss_typed_password' => [
+                                        'summary' => 'Invalid Password',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'Invalid credentials'
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                    403 => [
+                        'description' => 'Account Type',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'success' => ['type' => 'boolean', 'example' => false],
+                                        'error' => [
+                                            'type' => 'string',
+                                            // phpcs:disable Generic.Files.LineLength.TooLong
+                                            'example' => 'Unauthorized - You do not have permission to access this resource.',
+                                            // phpcs:enable
+                                            'description' => 'Details of the authentication failure',
+                                        ],
+                                    ],
+                                ],
+                                'examples' => [
+                                    'invalid_verification' => [
+                                        'summary' => 'User account is not verified',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'User account is not verified!',
+                                        ],
+                                    ],
+                                    'banned_account' => [
+                                        'summary' => 'User account is banned',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'User account is banned from the system!',
+                                        ],
+                                    ],
+                                    'invalid_account_type' => [
+                                        'summary' => 'User account invalid',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'Invalid account type.' .
+                                                ' Please only use email/phone number accounts from the portal',
+                                        ],
+                                    ],
+                                    'invalid_2fa_configuration' => [
+                                        'summary' => 'Invalid 2FA configuration',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'Invalid Two-Factor Authentication configuration Please ensure' .
+                                                'that 2FA is set up using either email or SMS for this account',
+                                        ],
+                                    ],
+                                    'invalid_2fa_uncompleted_configuration' => [
+                                        'summary' => 'The Two-Factor Authentication configuration is incompleted.',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'The Two-Factor Authentication (2FA) configuration is' .
+                                                ' incomplete. Please set up 2FA using either email or SMS',
+                                        ],
+                                    ],
+                                    'password_reset_request_active' => [
+                                        'summary' => 'Forgot password request active',
+                                        'value' => [
+                                            'success' => false,
+                                            // phpcs:disable Generic.Files.LineLength.TooLong
+                                            'error' => 'Your request cannot be processed at this time due to a pending action. If your account is active, re-login to complete the action',
+                                            // phpcs:enable
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                    429 => [
+                        'description' => 'Too many requests.',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'success' => ['type' => 'boolean', 'example' => false],
+                                        'error' => [
+                                            'type' => 'string',
+                                            'example' => 'Too many requests.',
+                                            'description' => 'Too many requests provided'
+                                        ],
+                                    ],
+                                ],
+                                'examples' => [
+                                    'waiting_interval_between_requests' => [
+                                        'summary' => 'Interval of waiting between requests',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'You need to wait %d seconds before asking for a new code.'
+                                        ],
+                                    ],
+                                    'limit_of_request_exceeded' => [
+                                        'summary' => 'Limit of request exceeded',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'Too many attempts. You have exceeded the limit of %d' .
+                                                ' attempts. Please wait %d minutes before trying again.',
+                                        ],
+                                    ],
+                                    'validation_attempts' => [
+                                        'summary' => 'Validation attempts exceeded',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'Too many validation attempts. You have exceeded the' .
+                                                ' limit of %d attempts. Please wait %d minute(s) before trying again.',
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+                summary: 'Two Factor Authentication request Status',
+                description: 'This endpoint provides Two-Factor Authentication code only for portal accounts. 
+                To be able to request a authentication code the account needs to have setup a 2fa with email or SMS.',
+                requestBody: new RequestBody(
+                    description: 'User Two Factor Authentication request status',
+                    content: new ArrayObject([
+                        'application/json' => [
+                            'schema' => [
+                                'type' => 'object',
+                                'properties' => [
+                                    'uuid' => [
+                                        'type' => 'string',
+                                        'description' => 'Unique identifier of the user',
+                                        'example' => 'user-uuid-example'
+                                    ],
+                                    'password' => [
+                                        'type' => 'string',
+                                        'description' => 'Password of the user',
+                                        'example' => 'user-password-example'
+                                    ],
+                                    'turnstile_token' => [
+                                        'type' => 'string',
+                                        'description' => 'CAPTCHA validation token',
+                                        'example' => 'valid_test_token'
+                                    ],
+                                ],
+                                'required' => ['uuid', 'password', 'turnstile_token'],
+                            ],
+                        ],
+                    ]),
+                    required: true,
+                ),
+                security: [],
+            ),
+            shortName: 'User Auth',
+            name: 'api_twoFA_request',
+            extraProperties: [OpenApiFactory::OVERRIDE_OPENAPI_RESPONSES => false],
+        ),
+        new Post(
             uriTemplate: '/v1/auth/local',
             controller: AuthController::class,
             openapi: new Operation(
@@ -304,6 +604,13 @@ use Symfony\Component\Validator\Constraints as Assert;
                                             'error' => 'Missing required fields: uuid, password or turnstile_token',
                                         ],
                                     ],
+                                    'missing_2fa_setting' => [
+                                        'summary' => 'Missing 2FA settings',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'Missing required configuration setting: TWO_FACTOR_AUTH_STATUS',
+                                        ],
+                                    ],
                                     'invalid_json' => [
                                         'summary' => 'Invalid json format',
                                         'value' => [
@@ -329,9 +636,39 @@ use Symfony\Component\Validator\Constraints as Assert;
                                             'description' => 'Invalid credentials provided'
                                         ],
                                     ],
-                                    'example' => [
-                                        'success' => false,
-                                        'error' => 'Invalid credentials',
+                                ],
+                                'examples' => [
+                                    '2fa_not_configured' => [
+                                        'summary' => '2FA Not Configured',
+                                        'value' => [
+                                            'success' => false,
+                                            // phpcs:disable Generic.Files.LineLength.TooLong
+                                            'error' => 'Two-Factor Authentication is active for this account. Please ensure you provide the correct authentication code.'
+                                            // phpcs:enable
+                                        ],
+                                    ],
+                                    '2fa_enforced_failed' => [
+                                        'summary' => '2FA Enforced Failed',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'Two-Factor Authentication is ENFORCED FOR PORTAL accounts.',
+                                        ],
+                                    ],
+                                    '2fa_configuration_failed' => [
+                                        'summary' => '2FA Configuration Failed',
+                                        'value' => [
+                                            'success' => false,
+                                            // phpcs:disable Generic.Files.LineLength.TooLong
+                                            'error' => 'Two-Factor Authentication it\'s required for authentication on the portal. Please visit DOMAIN to set up 2FA and secure your account.',
+                                            // phpcs:enable
+                                        ],
+                                    ],
+                                    'missing_user_account' => [
+                                        'summary' => 'Invalid Credentials',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'Invalid credentials'
+                                        ],
                                     ],
                                 ],
                             ],
@@ -384,10 +721,12 @@ use Symfony\Component\Validator\Constraints as Assert;
                     ],
                 ],
                 summary: 'Authenticate a user locally',
-                description: 'This endpoint authenticates a user using their UUID, password, and a CAPTCHA token.',
+                description: 'This endpoint authenticates a user using their UUID, password, and a CAPTCHA token.
+                Platform can require the authentication with Two-Factor, the twoFACode parameter will be asked 
+                based on the TWO_FACTOR_AUTH_STATUS setting.',
                 requestBody: new RequestBody(
                     description: 'User credentials and CAPTCHA validation token',
-                    content: new \ArrayObject([
+                    content: new ArrayObject([
                         'application/json' => [
                             'schema' => [
                                 'type' => 'object',
@@ -407,8 +746,13 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'description' => 'CAPTCHA validation token',
                                         'example' => 'valid_test_token'
                                     ],
+                                    'twoFACode' => [
+                                        'type' => 'string',
+                                        'description' => 'Code for 2FA validation',
+                                        'example' => '02YZR88R'
+                                    ],
                                 ],
-                                'required' => ['uuid', 'password', 'turnstile_token'],
+                                'required' => ['uuid', 'password', 'turnstile_token', 'twoFACode'],
                             ],
                         ],
                     ]),
@@ -494,7 +838,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                         ],
                     ],
                     400 => [
-                        'description' => 'Bad Request due to missing SAML response',
+                        'description' => 'Bad Request due to missing or invalid SAML response',
                         'content' => [
                             'application/json' => [
                                 'schema' => [
@@ -510,13 +854,13 @@ use Symfony\Component\Validator\Constraints as Assert;
                                             'example' => 'SAML Response not found',
                                         ],
                                     ],
-                                    'examples' => [
-                                        'saml_response_not_found' => [
-                                            'summary' => 'SAML Response not found',
-                                            'value' => [
-                                                'success' => false,
-                                                'error' => 'SAML Response not found',
-                                            ],
+                                ],
+                                'example' => [
+                                    'saml_response_not_found' => [
+                                        'summary' => 'SAML Response not found',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'SAML Response not found',
                                         ],
                                     ],
                                 ],
@@ -555,13 +899,42 @@ use Symfony\Component\Validator\Constraints as Assert;
                                                 'error' => 'Authentication Failed',
                                             ],
                                         ],
+                                        'examples' => [
+                                            '2fa_not_configured' => [
+                                                'summary' => '2FA Not Configured',
+                                                'value' => [
+                                                    'success' => false,
+                                                    // phpcs:disable Generic.Files.LineLength.TooLong
+                                                    'error' => 'Two-Factor Authentication is active for this account. Please ensure you provide the correct authentication code.'
+                                                    // phpcs:enable
+                                                ],
+                                            ],
+                                            '2fa_enforced_failed' => [
+                                                'summary' => '2FA Enforced Failed',
+                                                'value' => [
+                                                    'success' => false,
+                                                    // phpcs:disable Generic.Files.LineLength.TooLong
+                                                    'error' => 'Two-Factor Authentication is ENFORCED FOR PORTAL accounts.',
+                                                    // phpcs:enable
+                                                ],
+                                            ],
+                                            '2fa_configuration_failed' => [
+                                                'summary' => '2FA Configuration Failed',
+                                                'value' => [
+                                                    'success' => false,
+                                                    // phpcs:disable Generic.Files.LineLength.TooLong
+                                                    'error' => 'Two-Factor Authentication it\'s required for authentication on the portal. Please visit DOMAIN to set up 2FA and secure your account.',
+                                                    // phpcs:enable
+                                                ],
+                                            ],
+                                        ],
                                     ],
                                 ],
                             ],
                         ],
                     ],
                     403 => [
-                        'description' => 'Account unverified/banned',
+                        'description' => 'Access Forbidden - The request was made but the server denies permission.',
                         'content' => [
                             'application/json' => [
                                 'schema' => [
@@ -573,26 +946,44 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         ],
                                         'error' => [
                                             'type' => 'string',
+                                            'description' => 'Details about why access was forbidden.',
                                             // phpcs:disable Generic.Files.LineLength.TooLong
                                             'example' => 'Unauthorized - You do not have permission to access this resource.',
                                             // phpcs:enable
-                                            'description' => 'Details of the authentication failure',
                                         ],
                                     ],
-                                    'examples' => [
-                                        'invalid_verification' => [
-                                            'summary' => 'User account is not verified',
-                                            'value' => [
-                                                'success' => false,
-                                                'error' => 'User account is not verified!',
-                                            ],
+                                ],
+                                'examples' => [
+                                    'invalid_saml_response_idp_entity' => [
+                                        'summary' => 'Invalid IDP Entity',
+                                        'value' => [
+                                            'success' => false,
+                                            // phpcs:disable Generic.Files.LineLength.TooLong
+                                            'error' => 'The provided IDP Entity is invalid or does not match the expected configuration.',
+                                            // phpcs:enabl
                                         ],
-                                        'banned_account' => [
-                                            'summary' => 'User account is banned',
-                                            'value' => [
-                                                'success' => false,
-                                                'error' => 'User account is banned from the system!',
-                                            ],
+                                    ],
+                                    'invalid_saml_response_certificate' => [
+                                        'summary' => 'Invalid Certificate',
+                                        'value' => [
+                                            'success' => false,
+                                            // phpcs:disable Generic.Files.LineLength.TooLong
+                                            'error' => 'The provided certificate is invalid or does not match the expected configuration.',
+                                            // phpcs:enable
+                                        ],
+                                    ],
+                                    'invalid_verification' => [
+                                        'summary' => 'User account is not verified',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'User account is not verified!',
+                                        ],
+                                    ],
+                                    'banned_account' => [
+                                        'summary' => 'User account is banned',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'User account is banned from the system!',
                                         ],
                                     ],
                                 ],
@@ -633,13 +1024,15 @@ use Symfony\Component\Validator\Constraints as Assert;
                 summary: 'Authenticate a user via SAML',
                 description: 'This endpoint authenticates a user using their SAML response. 
                 If the user is not found in the database, a new user will be created based on the SAML assertion. 
-                The response includes user details along with a JWT token if authentication is successful.',
+                The response includes user details along with a JWT token if authentication is successful.
+                Also if the platform requires authentication with Two-Factor, the twoFACode parameter will be asked 
+                based on the TWO_FACTOR_AUTH_STATUS setting.',
                 requestBody: new RequestBody(
                     description: 'SAML response required for user authentication. 
                     The request should be sent as `multipart/form-data` with the SAML response included
                      as a form field (not a file).',
-                    content: new \ArrayObject([
-                        'multipart/form-data' => new \ArrayObject([
+                    content: new ArrayObject([
+                        'multipart/form-data' => new ArrayObject([
                             'schema' => [
                                 'type' => 'object',
                                 'properties' => [
@@ -648,8 +1041,13 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'description' => 'Base64-encoded SAML response included in the form data',
                                         'example' => 'base64-encoded-saml-assertion',
                                     ],
+                                    'twoFACode' => [
+                                        'type' => 'string',
+                                        'description' => '6-7 digits code (2fa authentication or recovery codes)',
+                                        'example' => '02YZR88R',
+                                    ],
                                 ],
-                                'required' => ['SAMLResponse'],
+                                'required' => ['SAMLResponse', 'twoFACode'],
                             ],
                         ]),
                     ]),
@@ -767,6 +1165,51 @@ use Symfony\Component\Validator\Constraints as Assert;
                             ],
                         ],
                     ],
+                    401 => [
+                        'description' => 'Invalid credentials.',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'success' => ['type' => 'boolean', 'example' => false],
+                                        'error' => [
+                                            'type' => 'string',
+                                            'example' => 'Invalid credentials.',
+                                            'description' => 'Invalid credentials provided'
+                                        ],
+                                    ],
+                                ],
+                                'examples' => [
+                                    '2fa_not_configured' => [
+                                        'summary' => '2FA Not Configured',
+                                        'value' => [
+                                            'success' => false,
+                                            // phpcs:disable Generic.Files.LineLength.TooLong
+                                            'error' => 'Two-Factor Authentication is active for this account. Please ensure you provide the correct authentication code.'
+                                            // phpcs:enable
+                                        ],
+                                    ],
+                                    '2fa_enforced_failed' => [
+                                        'summary' => '2FA Enforced Failed',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'Two-Factor Authentication is ENFORCED FOR PORTAL accounts.',
+                                        ],
+                                    ],
+                                    '2fa_configuration_failed' => [
+                                        'summary' => '2FA Configuration Failed',
+                                        'value' => [
+                                            'success' => false,
+                                            // phpcs:disable Generic.Files.LineLength.TooLong
+                                            'error' => 'Two-Factor Authentication it\'s required for authentication on the portal. Please visit DOMAIN to set up 2FA and secure your account.',
+                                            // phpcs:enable
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
                     403 => [
                         'description' => 'Account unverified/banned',
                         'content' => [
@@ -797,6 +1240,13 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'value' => [
                                             'success' => false,
                                             'error' => 'User account is banned from the system!',
+                                        ],
+                                    ],
+                                    'email_domain_not_allowed' => [
+                                        'summary' => 'User email domain is not allowed',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'our email domain is not allowed to use this platform!',
                                         ],
                                     ],
                                 ],
@@ -834,12 +1284,14 @@ use Symfony\Component\Validator\Constraints as Assert;
                 summary: 'Authenticate a user via Google',
                 description: 'This endpoint authenticates a user using their Google account. 
                 A valid Google OAuth authorization code is required. 
-                If the user is successfully authenticated, user details and a JWT token will be returned.',
+                If the user is successfully authenticated, user details and a JWT token will be returned.
+                Also if the platform requires authentication with Two-Factor, the twoFACode parameter will be asked 
+                based on the TWO_FACTOR_AUTH_STATUS setting.',
                 requestBody: new RequestBody(
                     description: 'Google authorization code required for user authentication.
                      The request should be sent as JSON with the authorization code included in the body.',
-                    content: new \ArrayObject([
-                        'application/json' => new \ArrayObject([
+                    content: new ArrayObject([
+                        'application/json' => new ArrayObject([
                             'schema' => [
                                 'type' => 'object',
                                 'properties' => [
@@ -848,8 +1300,13 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         'description' => 'The Google OAuth authorization code',
                                         'example' => '4/0AdKgLCxjQ74mKAg9vs_f7PuO99DR',
                                     ],
+                                    'twoFACode' => [
+                                        'type' => 'string',
+                                        'description' => '6-7 digits code (2fa authentication or recovery codes)',
+                                        'example' => '02YZR88R',
+                                    ],
                                 ],
-                                'required' => ['code'],
+                                'required' => ['code', 'twoFACode'],
                             ],
                         ]),
                     ]),
@@ -859,6 +1316,265 @@ use Symfony\Component\Validator\Constraints as Assert;
             ),
             shortName: 'User Auth',
             name: 'api_auth_google',
+            extraProperties: [OpenApiFactory::OVERRIDE_OPENAPI_RESPONSES => false],
+        ),
+        new Post(
+            uriTemplate: '/v1/auth/microsoft',
+            controller: AuthController::class,
+            openapi: new Operation(
+                responses: [
+                    200 => [
+                        'description' => 'Authenticated user details and JWT token',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'success' => ['type' => 'boolean', 'example' => true],
+                                        'data' => [
+                                            'type' => 'object',
+                                            'properties' => [
+                                                'uuid' => [
+                                                    'type' => 'string',
+                                                    'example' => 'user-uuid-example',
+                                                ],
+                                                'email' => [
+                                                    'type' => 'string',
+                                                    'example' => 'john_doe@example.com',
+                                                ],
+                                                'roles' => [
+                                                    'type' => 'array',
+                                                    'items' => [
+                                                        'type' => 'string',
+                                                    ],
+                                                    'example' => ['ROLE_USER'],
+                                                ],
+                                                'first_name' => [
+                                                    'type' => 'string',
+                                                    'example' => 'John',
+                                                ],
+                                                'last_name' => [
+                                                    'type' => 'string',
+                                                    'example' => 'Doe',
+                                                ],
+                                                'user_external_auths' => [
+                                                    'type' => 'array',
+                                                    'items' => [
+                                                        'type' => 'object',
+                                                        'properties' => [
+                                                            'provider' => [
+                                                                'type' => 'string',
+                                                                'example' => 'Microsoft Account',
+                                                            ],
+                                                            'provider_id' => [
+                                                                'type' => 'string',
+                                                                'example' => 'microsoft_id_example',
+                                                            ],
+                                                        ],
+                                                    ],
+                                                ],
+                                                'token' => [
+                                                    'type' => 'string',
+                                                    'example' => 'jwt-token-example',
+                                                ],
+                                            ],
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                    400 => [
+                        'description' => 'Invalid request data',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'success' => ['type' => 'boolean', 'example' => false],
+                                        'message' => [
+                                            'type' => 'string',
+                                            'example' => 'Missing authorization code!',
+                                        ],
+                                    ],
+                                ],
+                                'examples' => [
+                                    'invalid_json' => [
+                                        'summary' => 'Invalid JSON format',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'Invalid JSON format',
+                                        ],
+                                    ],
+                                    'missing_authorization_code' => [
+                                        'summary' => 'Missing authorization code',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'Missing authorization code!',
+                                        ],
+                                    ],
+                                    'email_not_allowed' => [
+                                        'summary' => 'Email not allowed',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'This code is not associated with a microsoft account!',
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                    401 => [
+                        'description' => 'Invalid credentials.',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'success' => ['type' => 'boolean', 'example' => false],
+                                        'error' => [
+                                            'type' => 'string',
+                                            'example' => 'Invalid credentials.',
+                                            'description' => 'Invalid credentials provided'
+                                        ],
+                                    ],
+                                ],
+                                'examples' => [
+                                    '2fa_not_configured' => [
+                                        'summary' => '2FA Not Configured',
+                                        'value' => [
+                                            'success' => false,
+                                            // phpcs:disable Generic.Files.LineLength.TooLong
+                                            'error' => 'Two-Factor Authentication is active for this account. Please ensure you provide the correct authentication code.'
+                                            // phpcs:enable
+                                        ],
+                                    ],
+                                    '2fa_enforced_failed' => [
+                                        'summary' => '2FA Enforced Failed',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'Two-Factor Authentication is ENFORCED FOR PORTAL accounts.',
+                                        ],
+                                    ],
+                                    '2fa_configuration_failed' => [
+                                        'summary' => '2FA Configuration Failed',
+                                        'value' => [
+                                            'success' => false,
+                                            // phpcs:disable Generic.Files.LineLength.TooLong
+                                            'error' => 'Two-Factor Authentication it\'s required for authentication on the portal. Please visit DOMAIN to set up 2FA and secure your account.',
+                                            // phpcs:enable
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                    403 => [
+                        'description' => 'Account unverified/banned',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'success' => ['type' => 'boolean', 'example' => false],
+                                        'error' => [
+                                            'type' => 'string',
+                                            // phpcs:disable Generic.Files.LineLength.TooLong
+                                            'example' => 'Unauthorized - You do not have permission to access this resource.',
+                                            // phpcs:enable
+                                            'description' => 'Details of the authentication failure',
+                                        ],
+                                    ],
+                                ],
+                                'examples' => [
+                                    'invalid_verification' => [
+                                        'summary' => 'User account is not verified',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'User account is not verified!',
+                                        ],
+                                    ],
+                                    'banned_account' => [
+                                        'summary' => 'User account is banned',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'User account is banned from the system!',
+                                        ],
+                                    ],
+                                    'email_domain_not_allowed' => [
+                                        'summary' => 'User email domain is not allowed',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'our email domain is not allowed to use this platform!',
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                    500 => [
+                        'description' => 'Server error due to internal issues or Microsoft API failure',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'success' => ['type' => 'boolean', 'example' => false],
+                                        'message' => [
+                                            'type' => 'string',
+                                            'example' => 'An error occurred.',
+                                        ],
+                                    ],
+                                ],
+                                'examples' => [
+                                    'Authentication_failed' => [
+                                        'success' => false,
+                                        'message' => 'Authentication Failed.',
+                                    ],
+                                    'Server_related' => [
+                                        'success' => false,
+                                        'message' => 'An error occurred: Generic server related error.',
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+                summary: 'Authenticate a user via Microsoft',
+                description: 'This endpoint authenticates a user using their Microsoft account. 
+                A valid Microsoft OAuth authorization code is required. 
+                If the user is successfully authenticated, user details and a JWT token will be returned.
+                Also if the platform requires authentication with Two-Factor, the twoFACode parameter will be asked 
+                based on the TWO_FACTOR_AUTH_STATUS setting.',
+                requestBody: new RequestBody(
+                    description: 'Microsoft authorization code required for user authentication.
+                     The request should be sent as JSON with the authorization code included in the body.',
+                    content: new ArrayObject([
+                        'application/json' => new ArrayObject([
+                            'schema' => [
+                                'type' => 'object',
+                                'properties' => [
+                                    'code' => [
+                                        'type' => 'string',
+                                        'description' => 'The Microsoft OAuth authorization code',
+                                        'example' => '0.AQk6Lf2I2XGhQkWlU8gBp0KmxeNn2KTcbsJh.8Qt3OeYCB4sQ2FHo',
+                                    ],
+                                    'twoFACode' => [
+                                        'type' => 'string',
+                                        'description' => '6-7 digits code (2fa authentication or recovery codes)',
+                                        'example' => '02YZR88R',
+                                    ],
+                                ],
+                                'required' => ['code', 'twoFACode'],
+                            ],
+                        ]),
+                    ]),
+                    required: true,
+                ),
+                security: [],
+            ),
+            shortName: 'User Auth',
+            name: 'api_auth_microsoft',
             extraProperties: [OpenApiFactory::OVERRIDE_OPENAPI_RESPONSES => false],
         ),
         new Post(
@@ -960,8 +1676,8 @@ use Symfony\Component\Validator\Constraints as Assert;
                 requestBody: new RequestBody(
                     description: 'User registration data and CAPTCHA validation token. 
                     The request should include the user\'s email, password, and Turnstile CAPTCHA token.',
-                    content: new \ArrayObject([
-                        'application/json' => new \ArrayObject([
+                    content: new ArrayObject([
+                        'application/json' => new ArrayObject([
                             'schema' => [
                                 'type' => 'object',
                                 'properties' => [
@@ -1138,8 +1854,8 @@ use Symfony\Component\Validator\Constraints as Assert;
                 validates the request with a CAPTCHA token.',
                 requestBody: new RequestBody(
                     description: 'User registration data with SMS and CAPTCHA validation token',
-                    content: new \ArrayObject([
-                        'application/json' => new \ArrayObject([
+                    content: new ArrayObject([
+                        'application/json' => new ArrayObject([
                             'schema' => [
                                 'type' => 'object',
                                 'properties' => [
@@ -1285,8 +2001,8 @@ use Symfony\Component\Validator\Constraints as Assert;
                  then proceeds with the password reset if the conditions are met.',
                 requestBody: new RequestBody(
                     description: 'Password reset request data, including CAPTCHA validation token and user email',
-                    content: new \ArrayObject([
-                        'application/json' => new \ArrayObject([
+                    content: new ArrayObject([
+                        'application/json' => new ArrayObject([
                             'schema' => [
                                 'type' => 'object',
                                 'properties' => [
@@ -1437,8 +2153,8 @@ use Symfony\Component\Validator\Constraints as Assert;
                 enforces the time interval between requests and limits the number of attempts allowed.',
                 requestBody: new RequestBody(
                     description: 'Password reset request data including CAPTCHA token and user phone number',
-                    content: new \ArrayObject([
-                        'application/json' => new \ArrayObject([
+                    content: new ArrayObject([
+                        'application/json' => new ArrayObject([
                             'schema' => [
                                 'type' => 'object',
                                 'properties' => [
@@ -1498,9 +2214,6 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
     private bool $isVerified = false;
 
     #[ORM\Column(length: 255, nullable: true)]
-    public ?string $saml_identifier = null;
-
-    #[ORM\Column(length: 255, nullable: true)]
     private ?string $first_name = null;
 
     #[ORM\Column(length: 255, nullable: true)]
@@ -1514,9 +2227,6 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
 
     #[ORM\Column(length: 20, nullable: true)]
     private ?string $verificationCode = null;
-
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $googleId = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $createdAt = null;
@@ -1545,12 +2255,116 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
     #[ORM\Column]
     private ?bool $isDisabled = false;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $twoFAsecret = null;
+
+    #[ORM\Column(length: 255)]
+    private int $twoFAtype = 0;
+
+    #[ORM\Column(length: 10, nullable: true)]
+    private ?string $twoFAcode = null;
+
+    #[ORM\Column(type: 'boolean', options: ['default' => false])]
+    private bool $twoFAcodeIsActive = false;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $twoFAcodeGeneratedAt = null;
+
+    /**
+     * @var Collection<int, OTPcode>
+     */
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: OTPcode::class, orphanRemoval: true)]
+    private Collection $oTPcodes;
+
 
     public function __construct()
     {
         $this->userRadiusProfiles = new ArrayCollection();
         $this->userExternalAuths = new ArrayCollection();
         $this->event = new ArrayCollection();
+    }
+
+    public function getTwoFAcodeIsActive(): ?bool
+    {
+        return $this->twoFAcodeIsActive;
+    }
+
+    public function setTwoFAcodeIsActive(?bool $twoFAcodeIsActive): void
+    {
+        $this->twoFAcodeIsActive = $twoFAcodeIsActive;
+    }
+
+
+    public function getTwoFAsecret(): ?string
+    {
+        return $this->twoFAsecret;
+    }
+
+    public function setTwoFAsecret(?string $twoFAsecret): void
+    {
+        $this->twoFAsecret = $twoFAsecret;
+    }
+
+    public function getTwoFAtype(): int
+    {
+        return $this->twoFAtype;
+    }
+
+    public function setTwoFAtype(int $twoFAtype): void
+    {
+        $this->twoFAtype = $twoFAtype;
+    }
+
+    public function getTwoFAcode(): ?string
+    {
+        return $this->twoFAcode;
+    }
+
+    public function setTwoFAcode(?string $twoFAcode): void
+    {
+        $this->twoFAcode = $twoFAcode;
+    }
+
+    public function getTwoFAcodeGeneratedAt(): ?\DateTimeInterface
+    {
+        return $this->twoFAcodeGeneratedAt;
+    }
+
+    public function setTwoFAcodeGeneratedAt(?\DateTimeInterface $twoFAcodeGeneratedAt): void
+    {
+        $this->twoFAcodeGeneratedAt = $twoFAcodeGeneratedAt;
+    }
+
+    /**
+     * @return Collection<int, OTPcode>
+     */
+    public function getOTPcodes(): Collection
+    {
+        return $this->oTPcodes;
+    }
+
+    public function addOTPcode(OTPcode $oTPcode): static
+    {
+        if (!$this->oTPcodes->contains($oTPcode)) {
+            $this->oTPcodes->add($oTPcode);
+            $oTPcode->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeOTPcode(OTPcode $oTPcode): static
+    {
+        // set the owning side to null (unless already changed)
+        if (
+            $this->oTPcodes->removeElement($oTPcode) &&
+            ($this->oTPcodes->removeElement($oTPcode) &&
+                ($this->oTPcodes->removeElement($oTPcode) &&
+                    ($this->oTPcodes->removeElement($oTPcode))))
+        ) {
+            $this->oTPcodes->removeElement($oTPcode);
+        }
+        return $this;
     }
 
     public function getId(): ?int
@@ -1614,10 +2428,11 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
         return $this;
     }
 
+
     /**
      * @see UserInterface
      */
-    public function eraseCredentials()
+    public function eraseCredentials(): void
     {
         // If you store any temporary, sensitive data on the user, clear it here
         // $this->plainPassword = null;
@@ -1655,18 +2470,6 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
     public function setIsVerified(bool $isVerified): self
     {
         $this->isVerified = $isVerified;
-
-        return $this;
-    }
-
-    public function getSamlIdentifier(): ?string
-    {
-        return $this->saml_identifier;
-    }
-
-    public function setSamlIdentifier(?string $saml_identifier): self
-    {
-        $this->saml_identifier = $saml_identifier;
 
         return $this;
     }
@@ -1727,11 +2530,9 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
 
     public function removeUserRadiusProfile(UserRadiusProfile $userRadiusProfile): self
     {
-        if ($this->userRadiusProfiles->removeElement($userRadiusProfile)) {
-            // set the owning side to null (unless already changed)
-            if ($userRadiusProfile->getUser() === $this) {
-                $userRadiusProfile->setUser(null);
-            }
+        // Set the owning side to null (unless already changed)
+        if ($this->userRadiusProfiles->removeElement($userRadiusProfile) && $userRadiusProfile->getUser() === $this) {
+            $userRadiusProfile->setUser(null);
         }
 
         return $this;
@@ -1757,11 +2558,9 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
 
     public function removeUserExternalAuth(UserExternalAuth $userExternalAuth): self
     {
-        if ($this->userExternalAuths->removeElement($userExternalAuth)) {
-            // set the owning side to null (unless already changed)
-            if ($userExternalAuth->getUser() === $this) {
-                $userExternalAuth->setUser(null);
-            }
+        // Set the owning side to null (unless already changed)
+        if ($this->userExternalAuths->removeElement($userExternalAuth) && $userExternalAuth->getUser() === $this) {
+            $userExternalAuth->setUser(null);
         }
 
         return $this;
@@ -1777,11 +2576,6 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
         $this->verificationCode = $verificationCode;
 
         return $this;
-    }
-
-    public function getGoogleId(): ?string
-    {
-        return $this->googleId;
     }
 
     public function getCreatedAt(): ?\DateTimeInterface
@@ -1811,7 +2605,7 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
     #[ORM\PrePersist]
     public function prePresist(): void
     {
-        if ($this->createdAt === null) {
+        if (!$this->createdAt instanceof \DateTimeInterface) {
             $this->createdAt = new \DateTimeImmutable();
         }
     }
@@ -1836,11 +2630,9 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
 
     public function removeEvent(Event $event): static
     {
-        if ($this->event->removeElement($event)) {
-            // set the owning side to null (unless already changed)
-            if ($event->getUser() === $this) {
-                $event->setUser(null);
-            }
+        // Set the owning side to null (unless already changed)
+        if ($this->event->removeElement($event) && $event->getUser() === $this) {
+            $event->setUser(null);
         }
 
         return $this;
@@ -1856,18 +2648,6 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
         if (!$this->event->contains($notification)) {
             $this->event->add($notification);
             $notification->setUser($this);
-        }
-
-        return $this;
-    }
-
-    public function removeNotification(Notification $notification): static
-    {
-        if ($this->event->removeElement($notification)) {
-            // set the owning side to null (unless already changed)
-            if ($notification->getUser() === $this) {
-                $notification->setUser(null);
-            }
         }
 
         return $this;
@@ -1928,12 +2708,10 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
     public function toApiResponse(array $additionalData = []): array
     {
         $userExternalAuths = $this->getUserExternalAuths()->map(
-            function (UserExternalAuth $userExternalAuth) {
-                return [
-                    'provider' => $userExternalAuth->getProvider(),
-                    'provider_id' => $userExternalAuth->getProviderId(),
-                ];
-            }
+            fn(UserExternalAuth $userExternalAuth) => [
+                'provider' => $userExternalAuth->getProvider(),
+                'provider_id' => $userExternalAuth->getProviderId(),
+            ]
         )->toArray();
 
         $responseData = [

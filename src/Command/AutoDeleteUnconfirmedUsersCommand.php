@@ -6,7 +6,6 @@ use App\Entity\Setting;
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
 use App\Entity\UserRadiusProfile;
-use App\Service\PgpEncryptionService;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -22,16 +21,10 @@ use function Symfony\Component\String\u;
 )]
 class AutoDeleteUnconfirmedUsersCommand extends Command
 {
-    private EntityManagerInterface $entityManager;
-    public PgpEncryptionService $pgpEncryptionService;
-
     public function __construct(
-        EntityManagerInterface $entityManager,
-        PgpEncryptionService $pgpEncryptionService,
+        private readonly EntityManagerInterface $entityManager,
     ) {
         parent::__construct();
-        $this->entityManager = $entityManager;
-        $this->pgpEncryptionService = $pgpEncryptionService;
     }
 
     public function deleteUnconfirmedUsers(): int
@@ -50,21 +43,19 @@ class AutoDeleteUnconfirmedUsersCommand extends Command
             /** @var \DateTime $limitTime */
             $limitTime->modify("+ {$time} hours");
             $realTime = new \DateTime();
-            if (!($user->isVerified() && !$user->isDisabled())) {
-                if ($limitTime < $realTime) {
-                    $uuid = $user->getUuid();
-                    if (!(u($uuid)->containsAny('-DEMO-'))) {
-                        $userExternalAuths = $userExternalAuthRepository->findBy(['user' => $user]);
-                        foreach ($userExternalAuths as $userExternalAuth) {
-                            $this->entityManager->remove($userExternalAuth);
-                        }
-                        $userRadiusProfiles = $userRadiusProfileRepository->findBy(['user' => $user]);
-                        foreach ($userRadiusProfiles as $userRadiusProfile) {
-                            $this->entityManager->remove($userRadiusProfile);
-                        }
-                        $this->entityManager->remove($user);
-                        $usersDeleted++;
+            if ($limitTime < $realTime && !($user->isVerified() && !$user->isDisabled())) {
+                $uuid = $user->getUuid();
+                if (!(u($uuid)->containsAny('-DEMO-'))) {
+                    $userExternalAuths = $userExternalAuthRepository->findBy(['user' => $user]);
+                    foreach ($userExternalAuths as $userExternalAuth) {
+                        $this->entityManager->remove($userExternalAuth);
                     }
+                    $userRadiusProfiles = $userRadiusProfileRepository->findBy(['user' => $user]);
+                    foreach ($userRadiusProfiles as $userRadiusProfile) {
+                        $this->entityManager->remove($userRadiusProfile);
+                    }
+                    $this->entityManager->remove($user);
+                    $usersDeleted++;
                 }
             }
             $this->entityManager->flush();

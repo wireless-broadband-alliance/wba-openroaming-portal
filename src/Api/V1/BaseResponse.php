@@ -4,25 +4,14 @@ namespace App\Api\V1;
 
 use Symfony\Component\HttpFoundation\JsonResponse;
 
-class BaseResponse
+readonly class BaseResponse
 {
-    /** @var int */
-    private $statusCode;
-
-    /** @var mixed */
-    private $data;
-
-    /** @var string|null */
-    private $error;
-
-    private $headers;
-
-    public function __construct(int $statusCode, $data = null, string $error = null, $headers = [])
-    {
-        $this->statusCode = $statusCode;
-        $this->data = $data;
-        $this->error = $error;
-        $this->headers = $headers;
+    public function __construct(
+        private int $statusCode,
+        private mixed $data = null,
+        private ?string $error = null,
+        private mixed $headers = []
+    ) {
     }
 
     public function toResponse(): JsonResponse

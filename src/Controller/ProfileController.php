@@ -5,7 +5,7 @@ namespace App\Controller;
 use App\Entity\User;
 use App\Entity\UserRadiusProfile;
 use App\Enum\AnalyticalEventType;
-use App\Enum\EmailConfirmationStrategy;
+use App\Enum\OperationMode;
 use App\Enum\OSTypes;
 use App\Enum\UserProvider;
 use App\Enum\UserRadiusProfileStatus;
@@ -14,12 +14,12 @@ use App\RadiusDb\Repository\RadiusUserRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRadiusProfileRepository;
-use App\Repository\UserRepository;
 use App\Service\EventActions;
 use App\Service\ExpirationProfileService;
-use App\Service\GetSettings;
+use App\Service\TwoFAService;
 use App\Utils\CacheUtils;
 use DateTime;
+use DateTimeInterface;
 use Exception;
 use RuntimeException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -32,43 +32,24 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 class ProfileController extends AbstractController
 {
-    private array $settings;
-    private EventActions $eventActions;
-    private GetSettings $getSettings;
-    private UserRepository $userRepository;
-    private SettingRepository $settingRepository;
-    private UserExternalAuthRepository $userExternalAuthRepository;
-    private ExpirationProfileService $expirationProfileService;
-
     /**
-     * @param SettingRepository $settingRepository
      * @param EventActions $eventActions ,
-     * @param GetSettings $getSettings
-     * @param UserRepository $userRepository
-     * @param UserExternalAuthRepository $userExternalAuthRepository
-     * @param ExpirationProfileService $expirationProfileService
      */
     public function __construct(
-        SettingRepository $settingRepository,
-        EventActions $eventActions,
-        GetSettings $getSettings,
-        UserRepository $userRepository,
-        UserExternalAuthRepository $userExternalAuthRepository,
-        ExpirationProfileService $expirationProfileService,
+        private readonly SettingRepository $settingRepository,
+        private readonly EventActions $eventActions,
+        private readonly UserExternalAuthRepository $userExternalAuthRepository,
+        private readonly ExpirationProfileService $expirationProfileService,
+        private readonly TwoFAService $twoFAService,
     ) {
-        $this->settings = $this->getSettings($settingRepository);
-        $this->eventActions = $eventActions;
-        $this->getSettings = $getSettings;
-        $this->userRepository = $userRepository;
-        $this->settingRepository = $settingRepository;
-        $this->userExternalAuthRepository = $userExternalAuthRepository;
-        $this->expirationProfileService = $expirationProfileService;
     }
 
+    /**
+     * @throws Exception
+     */
     #[Route('/profile/android', name: 'profile_android')]
     public function profileAndroid(
         RadiusUserRepository $radiusUserRepository,
-        UserRepository $userRepository,
         UserRadiusProfileRepository $radiusProfileRepository,
         Request $request
     ): Response {
@@ -82,9 +63,19 @@ class ProfileController extends AbstractController
             return $this->redirectToRoute('app_login');
         }
 
-        if ($this->checkUserStatus($user) === true) {
+        if ($this->checkUserStatus($user)) {
             return $this->redirectToRoute('app_landing');
         }
+
+        if ($this->twoFAService->isTwoFARequired($user)) {
+            return $this->redirectToRoute('app_landing');
+        }
+
+        $session = $request->getSession();
+        if ($this->twoFAService->twoFAisActive($user) && !$session->has('2fa_verified')) {
+            return $this->redirectToRoute('app_landing');
+        }
+
 
         $userExternalAuth = $this->userExternalAuthRepository->findOneBy(['user' => $user]);
 
@@ -92,14 +83,13 @@ class ProfileController extends AbstractController
             $user,
             $radiusUserRepository,
             $radiusProfileRepository,
-            $userRepository,
-            $this->settings['RADIUS_REALM_NAME']
+            $this->settingRepository->findOneBy(['name' => 'RADIUS_REALM_NAME'])->getValue()
         );
 
         $expirationDate = $this->expirationProfileService->calculateExpiration(
             $userExternalAuth->getProvider(),
             $userExternalAuth->getProviderId(),
-            (new UserRadiusProfile())->setIssuedAt(
+            new UserRadiusProfile()->setIssuedAt(
                 new DateTime()
             ), // Pass a new DateTime if the user does not have a profile with the account
             '../signing-keys/cert.pem'
@@ -115,10 +105,10 @@ class ProfileController extends AbstractController
             '@EXPIRATION_DATE@'
         ], [
             $radiusUser->getUsername(),
-            base64_encode($radiusUser->getValue()),
-            $this->settings['DOMAIN_NAME'],
-            $this->settings['RADIUS_TLS_NAME'],
-            $this->settings['DISPLAY_NAME'],
+            base64_encode((string)$radiusUser->getValue()),
+            $this->settingRepository->findOneBy(['name' => 'DOMAIN_NAME'])->getValue(),
+            $this->settingRepository->findOneBy(['name' => 'RADIUS_TLS_NAME'])->getValue(),
+            $this->settingRepository->findOneBy(['name' => 'DISPLAY_NAME'])->getValue(),
             $expirationDate['limitTime']->format('Y-m-d')
         ], $profile);
         $profileTemplate = file_get_contents('../profile_templates/android/template.txt');
@@ -136,13 +126,19 @@ class ProfileController extends AbstractController
         $response->headers->set('Content-Transfer-Encoding', 'base64');
 
         $eventMetadata = [
-            'platform' => $this->settings['PLATFORM_MODE'],
-            'type' => OSTypes::ANDROID,
             'ip' => $request->getClientIp(),
+            'user_agent' => $request->headers->get('User-Agent'),
+            'platform' => $this->settingRepository->findOneBy(['name' => 'PLATFORM_MODE'])->getValue(),
+            'type' => OSTypes::ANDROID->value,
         ];
 
         // Save the event Action using the service
-        $this->eventActions->saveEvent($user, AnalyticalEventType::DOWNLOAD_PROFILE, new DateTime(), $eventMetadata);
+        $this->eventActions->saveEvent(
+            $user,
+            AnalyticalEventType::DOWNLOAD_PROFILE->value,
+            new DateTime(),
+            $eventMetadata
+        );
 
         return $response;
     }
@@ -150,7 +146,6 @@ class ProfileController extends AbstractController
     #[Route('/profile/ios.mobileconfig', name: 'profile_ios')]
     public function profileIos(
         RadiusUserRepository $radiusUserRepository,
-        UserRepository $userRepository,
         UserRadiusProfileRepository $radiusProfileRepository,
         Request $request
     ): Response {
@@ -160,7 +155,16 @@ class ProfileController extends AbstractController
             return $this->redirectToRoute('app_login');
         }
 
-        if ($this->checkUserStatus($user) === true) {
+        if ($this->checkUserStatus($user)) {
+            return $this->redirectToRoute('app_landing');
+        }
+
+        if ($this->twoFAService->isTwoFARequired($user)) {
+            return $this->redirectToRoute('app_landing');
+        }
+
+        $session = $request->getSession();
+        if ($this->twoFAService->twoFAisActive($user) && !$session->has('2fa_verified')) {
             return $this->redirectToRoute('app_landing');
         }
 
@@ -170,14 +174,13 @@ class ProfileController extends AbstractController
             $user,
             $radiusUserRepository,
             $radiusProfileRepository,
-            $userRepository,
-            $this->settings['RADIUS_REALM_NAME']
+            $this->settingRepository->findOneBy(['name' => 'RADIUS_REALM_NAME'])->getValue()
         );
 
         $expirationDate = $this->expirationProfileService->calculateExpiration(
             $userExternalAuth->getProvider(),
             $userExternalAuth->getProviderId(),
-            (new UserRadiusProfile())->setIssuedAt(
+            new UserRadiusProfile()->setIssuedAt(
                 new DateTime()
             ), // Pass a new DateTime if the user does not have a profile with the account
             '../signing-keys/cert.pem'
@@ -198,20 +201,20 @@ class ProfileController extends AbstractController
         ], [
             $radiusUser->getUsername(),
             $radiusUser->getValue(),
-            $this->settings['DOMAIN_NAME'],
-            $this->settings['RADIUS_TLS_NAME'],
-            $this->settings['DISPLAY_NAME'],
-            $this->settings['PAYLOAD_IDENTIFIER'],
-            $this->settings['OPERATOR_NAME'],
-            $this->settings['NAI_REALM'],
-            $this->settings['PROFILES_ENCRYPTION_TYPE_IOS_ONLY'],
+            $this->settingRepository->findOneBy(['name' => 'DOMAIN_NAME'])->getValue(),
+            $this->settingRepository->findOneBy(['name' => 'RADIUS_TLS_NAME'])->getValue(),
+            $this->settingRepository->findOneBy(['name' => 'DISPLAY_NAME'])->getValue(),
+            $this->settingRepository->findOneBy(['name' => 'PAYLOAD_IDENTIFIER'])->getValue(),
+            $this->settingRepository->findOneBy(['name' => 'OPERATOR_NAME'])->getValue(),
+            $this->settingRepository->findOneBy(['name' => 'NAI_REALM'])->getValue(),
+            $this->settingRepository->findOneBy(['name' => 'PROFILES_ENCRYPTION_TYPE_IOS_ONLY'])->getValue(),
             $expirationDate['limitTime']->format('Y-m-d\TH:i:s\Z'),
         ], $profile);
 
         //iOS Specific
-        $randomfactorIdentifier = bin2hex(random_bytes(16));
-        $randomFileName = 'ios_unsigned_' . $randomfactorIdentifier . '.mobileconfig';
-        $randomSignedFileName = 'ios_signed_' . $randomfactorIdentifier . '.mobileconfig';
+        $randomFactorIdentifier = bin2hex(random_bytes(16));
+        $randomFileName = 'ios_unsigned_' . $randomFactorIdentifier . '.mobileconfig';
+        $randomSignedFileName = 'ios_signed_' . $randomFactorIdentifier . '.mobileconfig';
         $signedFilePath = '/tmp/' . $randomSignedFileName;
         $unSignedFilePath = '/tmp/' . $randomFileName;
         file_put_contents($unSignedFilePath, $profile);
@@ -238,7 +241,11 @@ class ProfileController extends AbstractController
             $process->mustRun();
             unlink($unSignedFilePath);
         } catch (ProcessFailedException $exception) {
-            throw new RuntimeException('Signing failed: ' . $exception->getMessage());
+            throw new RuntimeException(
+                'Signing failed: ' . $exception->getMessage(),
+                $exception->getCode(),
+                $exception
+            );
         }
         $signedProfileContents = file_get_contents($signedFilePath);
         unlink($signedFilePath);
@@ -251,21 +258,28 @@ class ProfileController extends AbstractController
         // Save the event Action using the service
         $userAgent = $request->headers->get('User-Agent');
         $eventMetadata = [];
-        if (stripos($userAgent, 'iPhone') !== false || stripos($userAgent, 'iPad') !== false) {
+        if (stripos((string)$userAgent, 'iPhone') !== false || stripos((string)$userAgent, 'iPad') !== false) {
             $eventMetadata = [
-                'platform' => $this->settings['PLATFORM_MODE'],
-                'type' => OSTypes::IOS,
                 'ip' => $request->getClientIp(),
+                'user_agent' => $request->headers->get('User-Agent'),
+                'platform' => $this->settingRepository->findOneBy(['name' => ['PLATFORM_MODE']])->getValue(),
+                'type' => OSTypes::IOS->value,
             ];
-        } elseif (stripos($userAgent, 'Mac OS') !== false) {
+        } elseif (stripos((string)$userAgent, 'Mac OS') !== false) {
             $eventMetadata = [
-                'platform' => $this->settings['PLATFORM_MODE'],
-                'type' => OSTypes::MACOS,
                 'ip' => $request->getClientIp(),
+                'user_agent' => $request->headers->get('User-Agent'),
+                'platform' => $this->settingRepository->findOneBy(['name' => ['PLATFORM_MODE']])->getValue(),
+                'type' => OSTypes::MACOS->value
             ];
         }
 
-        $this->eventActions->saveEvent($user, AnalyticalEventType::DOWNLOAD_PROFILE, new DateTime(), $eventMetadata);
+        $this->eventActions->saveEvent(
+            $user,
+            AnalyticalEventType::DOWNLOAD_PROFILE->value,
+            new DateTime(),
+            $eventMetadata
+        );
 
         return $response;
     }
@@ -273,7 +287,6 @@ class ProfileController extends AbstractController
     #[Route('/profile/windows', name: 'profile_windows')]
     public function profileWindows(
         RadiusUserRepository $radiusUserRepository,
-        UserRepository $userRepository,
         UrlGeneratorInterface $urlGenerator,
         UserRadiusProfileRepository $radiusProfileRepository,
         Request $request
@@ -284,16 +297,24 @@ class ProfileController extends AbstractController
             return $this->redirectToRoute('app_login');
         }
 
-        if ($this->checkUserStatus($user) === true) {
+        if ($this->checkUserStatus($user)) {
             return $this->redirectToRoute('app_landing');
         }
 
-        $radiususer = $this->createOrUpdateRadiusUser(
+        if ($this->twoFAService->isTwoFARequired($user)) {
+            return $this->redirectToRoute('app_landing');
+        }
+
+        $session = $request->getSession();
+        if ($this->twoFAService->twoFAisActive($user) && !$session->has('2fa_verified')) {
+            return $this->redirectToRoute('app_landing');
+        }
+
+        $radiusUser = $this->createOrUpdateRadiusUser(
             $user,
             $radiusUserRepository,
             $radiusProfileRepository,
-            $userRepository,
-            $this->settings['RADIUS_REALM_NAME']
+            $this->settingRepository->findOneBy(['name' => 'RADIUS_REALM_NAME'])->getValue()
         );
         $profile = file_get_contents('../profile_templates/windows/template.xml');
         $profile = str_replace([
@@ -305,18 +326,19 @@ class ProfileController extends AbstractController
             '@RADIUS_TRUSTED_ROOT_CA_SHA1_HASH@',
             '@DISPLAY_NAME@',
         ], [
-            $radiususer->getUsername(),
-            $radiususer->getValue(),
+            $radiusUser->getUsername(),
+            $radiusUser->getValue(),
             $this->generateWindowsUuid(),
-            $this->settings['DOMAIN_NAME'],
-            $this->settings['RADIUS_TLS_NAME'],
-            $this->settings['RADIUS_TRUSTED_ROOT_CA_SHA1_HASH'],
-            $this->settings['DISPLAY_NAME'],
+            $this->settingRepository->findOneBy(['name' => 'DOMAIN_NAME'])->getValue(),
+            $this->settingRepository->findOneBy(['name' => 'RADIUS_TLS_NAME'])->getValue(),
+            $this->settingRepository->findOneBy(['name' => 'RADIUS_TRUSTED_ROOT_CA_SHA1_HASH'])->getValue(),
+            $this->settingRepository->findOneBy(['name' => 'DISPLAY_NAME'])->getValue(),
         ], $profile);
+
         //Windows Specific
-        $randomfactorIdentifier = bin2hex(random_bytes(16));
-        $randomFileName = 'windows_unsigned_' . $randomfactorIdentifier . '.xml';
-        $randomSignedFileName = 'windows_signed_' . $randomfactorIdentifier . '.xml';
+        $randomFactorIdentifier = bin2hex(random_bytes(16));
+        $randomFileName = 'windows_unsigned_' . $randomFactorIdentifier . '.xml';
+        $randomSignedFileName = 'windows_signed_' . $randomFactorIdentifier . '.xml';
         $signedFilePath = '/tmp/' . $randomSignedFileName;
         $unSignedFilePath = '/tmp/' . $randomFileName;
         file_put_contents($unSignedFilePath, $profile);
@@ -336,7 +358,11 @@ class ProfileController extends AbstractController
             $process->mustRun();
             unlink($unSignedFilePath);
         } catch (ProcessFailedException $exception) {
-            throw new RuntimeException('Signing failed: ' . $exception->getMessage());
+            throw new RuntimeException(
+                'Signing failed: ' . $exception->getMessage(),
+                $exception->getCode(),
+                $exception
+            );
         }
         $uuid = uniqid("", true);
         $signedProfileContents = file_get_contents($signedFilePath);
@@ -345,13 +371,19 @@ class ProfileController extends AbstractController
         $cache->write('profile_' . $uuid, $signedProfileContents);
 
         $eventMetadata = [
-            'platform' => $this->settings['PLATFORM_MODE'],
-            'type' => OSTypes::WINDOWS,
             'ip' => $request->getClientIp(),
+            'user_agent' => $request->headers->get('User-Agent'),
+            'platform' => $this->settingRepository->findOneBy(['name' => ['PLATFORM_MODE']])->getValue(),
+            'type' => OSTypes::WINDOWS->value,
         ];
 
         // Save the event Action using the service
-        $this->eventActions->saveEvent($user, AnalyticalEventType::DOWNLOAD_PROFILE, new DateTime(), $eventMetadata);
+        $this->eventActions->saveEvent(
+            $user,
+            AnalyticalEventType::DOWNLOAD_PROFILE->value,
+            new DateTime(),
+            $eventMetadata
+        );
 
         return $this->redirect(
             'ms-settings:wifi-provisioning?uri=' . $urlGenerator->generate(
@@ -411,11 +443,10 @@ class ProfileController extends AbstractController
         User $user,
         RadiusUserRepository $radiusUserRepository,
         UserRadiusProfileRepository $radiusProfileRepository,
-        UserRepository $userRepository,
         string $realmName
     ): RadiusUser {
         $radiusProfile = $radiusProfileRepository->findOneBy(
-            ['user' => $user, 'status' => UserRadiusProfileStatus::ACTIVE]
+            ['user' => $user, 'status' => UserRadiusProfileStatus::ACTIVE->value]
         );
         $userExternalAuth = $this->userExternalAuthRepository->findOneBy(['user' => $user]);
 
@@ -429,8 +460,8 @@ class ProfileController extends AbstractController
             $radiusProfile->setUser($user);
             $radiusProfile->setRadiusToken($token);
             $radiusProfile->setRadiusUser($username);
-            $radiusProfile->setStatus(UserRadiusProfileStatus::ACTIVE);
-            $radiusProfile->setIssuedAt(new \DateTime());
+            $radiusProfile->setStatus(UserRadiusProfileStatus::ACTIVE->value);
+            $radiusProfile->setIssuedAt(new DateTime());
 
             // Get the expiration date from the service
             $expirationData = $this->expirationProfileService->calculateExpiration(
@@ -476,21 +507,9 @@ class ProfileController extends AbstractController
         return $radiusUser;
     }
 
-    private function getSettings(SettingRepository $settingRepository): array
-    {
-        $settings = $settingRepository->findAll();
-        return array_reduce($settings, function ($carry, $item) {
-            $carry[$item->getName()] = $item->getValue();
-            return $carry;
-        }, []);
-    }
-
     private function checkUserStatus(User $user): bool
     {
-        // Call the getSettings method of GetSettings class to retrieve the data
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
-
-        if ($user->getDeletedAt()) {
+        if ($user->getDeletedAt() instanceof DateTimeInterface) {
             $this->addFlash(
                 'error',
                 'Your account has been deleted. Please, for more information contact our support.'
@@ -499,7 +518,7 @@ class ProfileController extends AbstractController
             return true;
         }
 
-        if ($user->getBannedAt()) {
+        if ($user->getBannedAt() instanceof DateTimeInterface) {
             $this->addFlash('error', 'Your account is banned. Please, for more information contact our support.');
             $this->redirectToRoute('app_landing');
             return true;
@@ -513,17 +532,19 @@ class ProfileController extends AbstractController
 
         if (
             !$user->isVerified() &&
-            $data['USER_VERIFICATION']['value'] === EmailConfirmationStrategy::EMAIL
+            $this->settingRepository->findOneBy(
+                ['name' => 'USER_VERIFICATION']
+            )->getValue() === OperationMode::ON->value
         ) {
             $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $user]);
-            if ($userExternalAuths === UserProvider::EMAIL) {
+            if ($userExternalAuths === UserProvider::EMAIL->value) {
                 $this->addFlash(
                     'error',
                     'Your account is not verified to download a profile, 
                     before being able to download a profile you need to confirm your account by 
                     clicking on the link send to you via email!'
                 );
-            } elseif ($userExternalAuths === UserProvider::PHONE_NUMBER) {
+            } elseif ($userExternalAuths === UserProvider::PHONE_NUMBER->value) {
                 $this->addFlash(
                     'error',
                     'Your account is not verified to download a profile, 
@@ -534,6 +555,13 @@ class ProfileController extends AbstractController
             $this->redirectToRoute('app_landing');
             return true;
         }
+
+        if ($user->isForgotPasswordRequest()) {
+            $this->addFlash('error', 'Your account is currently with a request pending approval!');
+            $this->redirectToRoute('app_landing');
+            return true;
+        }
+
         return false;
     }
 }

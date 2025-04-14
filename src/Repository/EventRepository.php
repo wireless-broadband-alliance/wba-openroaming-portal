@@ -45,8 +45,6 @@ class EventRepository extends ServiceEntityRepository
     /**
      * Find the latest 'USER_SMS_ATTEMPT' event for the given user.
      *
-     * @param User $user
-     * @return Event|null
      * @throws NonUniqueResultException
      */
     public function findLatestSmsAttemptEvent(User $user): ?Event
@@ -55,7 +53,7 @@ class EventRepository extends ServiceEntityRepository
             ->andWhere('e.user = :user')
             ->andWhere('e.event_name = :event_name')
             ->setParameter('user', $user)
-            ->setParameter('event_name', AnalyticalEventType::USER_SMS_ATTEMPT)
+            ->setParameter('event_name', AnalyticalEventType::USER_SMS_ATTEMPT->value)
             ->orderBy('e.event_datetime', 'DESC')
             ->setMaxResults(1)
             ->getQuery()
@@ -63,11 +61,47 @@ class EventRepository extends ServiceEntityRepository
     }
 
     /**
+     * Find the latest 'TWO_FA_CODE_SENDED' event for the given user.
+     *
+     * @throws NonUniqueResultException
+     */
+    public function findLatest2FACodeAttemptEvent(User $user, string $eventType): ?Event
+    {
+        return $this->createQueryBuilder('e')
+            ->andWhere('e.user = :user')
+            ->andWhere('e.event_name = :event_name')
+            ->setParameter('user', $user)
+            ->setParameter('event_name', $eventType)
+            ->orderBy('e.event_datetime', 'DESC')
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
+    /**
+     * Find the $maxResults number of 'TWO_FA_CODE_SENDED' events for the given user.
+     *
+     * @throws NonUniqueResultException
+     */
+    public function find2FACodeAttemptEvent(User $user, int $maxResults, \DateTime $time, string $eventType): ?array
+    {
+        return $this->createQueryBuilder('e')
+            ->andWhere('e.user = :user')
+            ->andWhere('e.event_name = :event_name')
+            ->andWhere('e.event_datetime >= :datetime')
+            ->setParameter('user', $user)
+            ->setParameter('event_name', $eventType)
+            ->setParameter('datetime', $time)
+            ->orderBy('e.event_datetime', 'DESC')
+            ->setMaxResults($maxResults)
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
      * Find the latest '$eventLog' from AnalyticalEventType Enum for the given user.
      *
-     * @param User $user
      * @param $eventLog // from ENUM AnalyticalEventType
-     * @return Event|null
      * @throws NonUniqueResultException
      */
     public function findLatestRequestAttemptEvent(User $user, $eventLog): ?Event

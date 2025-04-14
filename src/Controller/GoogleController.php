@@ -2,22 +2,24 @@
 
 namespace App\Controller;
 
-use App\Entity\Setting;
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
 use App\Enum\AnalyticalEventType;
+use App\Enum\FirewallType;
 use App\Enum\PlatformMode;
 use App\Enum\UserProvider;
 use App\Repository\SettingRepository;
+use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
 use App\Service\EventActions;
 use App\Service\GetSettings;
+use App\Service\UserStatusChecker;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
+use GuzzleHttp\Exception\GuzzleException;
 use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
-use RuntimeException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -26,6 +28,7 @@ use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
@@ -35,58 +38,24 @@ use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
  */
 class GoogleController extends AbstractController
 {
-    private ClientRegistry $clientRegistry;
-    private EntityManagerInterface $entityManager;
-    private UserPasswordHasherInterface $passwordEncoder;
-    private TokenStorageInterface $tokenStorage;
-    private RequestStack $requestStack;
-    private EventDispatcherInterface $eventDispatcher;
-    private EventActions $eventActions;
-    private GetSettings $getSettings;
-    private UserRepository $userRepository;
-    private SettingRepository $settingRepository;
-
-    /**
-     * @param ClientRegistry $clientRegistry
-     * @param EntityManagerInterface $entityManager
-     * @param UserPasswordHasherInterface $passwordEncoder
-     * @param TokenStorageInterface $tokenStorage
-     * @param RequestStack $requestStack
-     * @param EventDispatcherInterface $eventDispatcher
-     * @param EventActions $eventActions
-     * @param GetSettings $getSettings
-     * @param UserRepository $userRepository
-     * @param SettingRepository $settingRepository
-     */
     public function __construct(
-        ClientRegistry $clientRegistry,
-        EntityManagerInterface $entityManager,
-        UserPasswordHasherInterface $passwordEncoder,
-        TokenStorageInterface $tokenStorage,
-        RequestStack $requestStack,
-        EventDispatcherInterface $eventDispatcher,
-        EventActions $eventActions,
-        GetSettings $getSettings,
-        UserRepository $userRepository,
-        SettingRepository $settingRepository,
+        private readonly ClientRegistry $clientRegistry,
+        private readonly EntityManagerInterface $entityManager,
+        private readonly UserPasswordHasherInterface $passwordEncoder,
+        private readonly TokenStorageInterface $tokenStorage,
+        private readonly RequestStack $requestStack,
+        private readonly EventDispatcherInterface $eventDispatcher,
+        private readonly EventActions $eventActions,
+        private readonly GetSettings $getSettings,
+        private readonly UserRepository $userRepository,
+        private readonly SettingRepository $settingRepository,
+        private readonly UserStatusChecker $userStatusChecker,
+        private readonly UserExternalAuthRepository $userExternalAuthRepository,
     ) {
-        $this->clientRegistry = $clientRegistry;
-        $this->entityManager = $entityManager;
-        $this->passwordEncoder = $passwordEncoder;
-        $this->tokenStorage = $tokenStorage;
-        $this->requestStack = $requestStack;
-        $this->eventDispatcher = $eventDispatcher;
-        $this->eventActions = $eventActions;
-        $this->getSettings = $getSettings;
-        $this->userRepository = $userRepository;
-        $this->settingRepository = $settingRepository;
     }
 
-    /**
-     * @return RedirectResponse
-     */
     #[Route('/connect/google', name: 'connect_google')]
-    public function connectAction(): RedirectResponse
+    public function connect(): RedirectResponse
     {
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
@@ -113,9 +82,10 @@ class GoogleController extends AbstractController
     /**
      * @throws IdentityProviderException
      * @throws Exception
+     * @throws GuzzleException
      */
     #[Route('/connect/google/check', name: 'connect_google_check', methods: ['GET'])]
-    public function connectCheckAction(Request $request): RedirectResponse
+    public function connectCheck(Request $request): RedirectResponse
     {
         // Retrieve the "google" client
         $client = $this->clientRegistry->getClient('google');
@@ -132,8 +102,9 @@ class GoogleController extends AbstractController
         ]);
 
         // Retrieve the user ID and email from the resource owner
-        $googleUserId = $accessToken->getToken();
         $resourceOwner = $client->fetchUserFromToken($accessToken);
+        /** @phpstan-ignore-next-line */
+        $googleUserId = $resourceOwner->getId();
         /** @phpstan-ignore-next-line */
         $email = $resourceOwner->getEmail();
         /** @phpstan-ignore-next-line */
@@ -142,7 +113,7 @@ class GoogleController extends AbstractController
         $lastname = $resourceOwner->getLastname();
 
         // Check if the email is valid
-        if (!$this->isValidEmail($email)) {
+        if (!$this->userStatusChecker->isValidEmail($email, UserProvider::GOOGLE_ACCOUNT->value)) {
             $this->addFlash('error', 'Sorry! Your email domain is not allowed to use this platform');
             return $this->redirectToRoute('app_landing');
         }
@@ -151,12 +122,12 @@ class GoogleController extends AbstractController
         $user = $this->findOrCreateGoogleUser($googleUserId, $email, $firstname, $lastname);
 
         // If the user is null, redirect to the landing page
-        if ($user === null) {
+        if (!$user instanceof User) {
             return $this->redirectToRoute('app_landing');
         }
 
         // Check if the user is banned
-        if ($user->getBannedAt()) {
+        if ($user->getBannedAt() instanceof \DateTimeInterface) {
             $this->addFlash('error', "Your account has been banned");
             return $this->redirectToRoute('app_landing');
         }
@@ -168,40 +139,6 @@ class GoogleController extends AbstractController
         return $this->redirectToRoute('app_landing');
     }
 
-
-    /**
-     * @param string $email
-     * @return bool
-     */
-    private function isValidEmail(string $email): bool
-    {
-        // Retrieve the valid domains setting from the database
-        $settingRepository = $this->entityManager->getRepository(Setting::class);
-        $validDomainsSetting = $settingRepository->findOneBy(['name' => 'VALID_DOMAINS_GOOGLE_LOGIN']);
-
-        // Throw an exception if the setting is not found
-        if (!$validDomainsSetting) {
-            throw new RuntimeException('VALID_DOMAINS_GOOGLE_LOGIN not found in the database.');
-        }
-
-        // If the valid domains setting is empty, allow all domains
-        $validDomains = $validDomainsSetting->getValue();
-        if (empty($validDomains)) {
-            return true;
-        }
-
-        // Split the valid domains into an array and trim whitespace
-        $validDomains = explode(',', $validDomains);
-        $validDomains = array_map('trim', $validDomains);
-
-        // Extract the domain from the email
-        $emailParts = explode('@', $email);
-        $domain = end($emailParts);
-
-        // Check if the domain is in the list of valid domains
-        return in_array($domain, $validDomains, true);
-    }
-
     /**
      * @throws Exception
      */
@@ -211,32 +148,28 @@ class GoogleController extends AbstractController
         ?string $firstname,
         ?string $lastname
     ): ?User {
-        // Check if a user with the given Google user ID exists in UserExternalAuth
-        $userExternalAuth = $this->entityManager->getRepository(UserExternalAuth::class)->findOneBy([
-            'provider' => UserProvider::GOOGLE_ACCOUNT,
-            'provider_id' => $googleUserId
-        ]);
-
-        if ($userExternalAuth) {
-            // If a user with the given Google user ID exists, return the associated user
-            return $userExternalAuth->getUser();
-        }
-
         // Check if a user with the given email exists
-        $userWithEmail = $this->entityManager->getRepository(User::class)->findOneBy(['uuid' => $email]);
+        $userGoogle = $this->userRepository->findOneBy(['uuid' => $email]);
 
-        if ($userWithEmail) {
-            $existingUserAuth = $this->entityManager->getRepository(UserExternalAuth::class)->findOneBy([
-                'user' => $userWithEmail
+        if ($userGoogle !== null) {
+            $existingUserAuth = $this->userExternalAuthRepository->findOneBy([
+                'user' => $userGoogle
             ]);
 
-            if (!$existingUserAuth) {
-                $this->addFlash('error', "Email already in use. Please use the original provider from this account!");
-                return null;
+            if (
+                $existingUserAuth !== null &&
+                $existingUserAuth->getProvider() === UserProvider::GOOGLE_ACCOUNT->value
+            ) {
+                return $userGoogle;
             }
 
-            // If a user with the given email exists and they don't have an external auth entry, return the user
-            return $userWithEmail;
+            $this->addFlash(
+                'error',
+                "Email is already in use but is associated with a different provider! 
+                Please use the original one."
+            );
+
+            return null;
         }
 
         // If no user exists, create a new user and a corresponding UserExternalAuth entry
@@ -250,7 +183,7 @@ class GoogleController extends AbstractController
 
         $userAuth = new UserExternalAuth();
         $userAuth->setUser($user)
-            ->setProvider(UserProvider::GOOGLE_ACCOUNT)
+            ->setProvider(UserProvider::GOOGLE_ACCOUNT->value)
             ->setProviderId($googleUserId);
 
         $randomPassword = bin2hex(random_bytes(8));
@@ -262,23 +195,29 @@ class GoogleController extends AbstractController
         $this->entityManager->flush();
 
         $event_metadata = [
-            'platform' => PlatformMode::LIVE,
+            'platform' => PlatformMode::LIVE->value,
             'uuid' => $user->getUuid(),
             'ip' => $_SERVER['REMOTE_ADDR'],
-            'registrationType' => UserProvider::GOOGLE_ACCOUNT,
+            'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? 'Unknown',
+            'registrationType' => UserProvider::GOOGLE_ACCOUNT->value,
         ];
 
-        $this->eventActions->saveEvent($user, AnalyticalEventType::USER_CREATION, new DateTime(), $event_metadata);
-        $this->eventActions->saveEvent($user, AnalyticalEventType::USER_VERIFICATION, new DateTime(), []);
+        $this->eventActions->saveEvent(
+            $user,
+            AnalyticalEventType::USER_CREATION->value,
+            new DateTime(),
+            $event_metadata
+        );
+        $this->eventActions->saveEvent(
+            $user,
+            AnalyticalEventType::USER_VERIFICATION->value,
+            new DateTime(),
+            []
+        );
 
         return $user;
     }
 
-
-    /**
-     * @param User $user
-     * @return void
-     */
     public function authenticateUserGoogle(User $user): void
     {
         // Get the current request from the request stack
@@ -289,7 +228,7 @@ class GoogleController extends AbstractController
             $tokenStorage = $this->tokenStorage;
             $token = $tokenStorage->getToken();
             /** @phpstan-ignore-next-line */
-            $firewallName = $token ? $token->getFirewallName() : 'main';
+            $firewallName = $token instanceof TokenInterface ? $token->getFirewallName() : FirewallType::LANDING->value;
 
             // Create a new token with the authenticated user
             $token = new UsernamePasswordToken($user, $firewallName, $user->getRoles());

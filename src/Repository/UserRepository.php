@@ -43,7 +43,7 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
     public function upgradePassword(PasswordAuthenticatedUserInterface $user, string $newHashedPassword): void
     {
         if (!$user instanceof User) {
-            throw new UnsupportedUserException(sprintf('Instances of "%s" are not supported.', \get_class($user)));
+            throw new UnsupportedUserException(sprintf('Instances of "%s" are not supported.', $user::class));
         }
 
         $user->setPassword($newHashedPassword);
@@ -90,7 +90,7 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
             ->join('u.userExternalAuths', 'uea')
             ->andWhere('uea.provider = :provider')
             ->andWhere('uea.provider_id is not null')
-            ->setParameter('provider', UserProvider::SAML)
+            ->setParameter('provider', UserProvider::SAML->value)
             ->getQuery()
             ->getResult();
     }
@@ -104,44 +104,67 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
             ->orderBy('u.createdAt', 'DESC')
             ->setParameter('role', '%ROLE_ADMIN%');
 
-        if ($filter === UserVerificationStatus::VERIFIED) {
+        if ($filter === UserVerificationStatus::VERIFIED->value) {
             $qb->andWhere('u.isVerified = :isVerified')
                 ->setParameter('isVerified', true);
-        } elseif ($filter === UserVerificationStatus::BANNED) {
+        } elseif ($filter === UserVerificationStatus::BANNED->value) {
             $qb->andWhere($qb->expr()->isNotNull('u.bannedAt'));
         }
 
         return $qb->getQuery()->getResult();
     }
 
-    public function searchWithFilter(string $filter, ?string $searchTerm = null): array
+    /**
+     * @method array searchWithFilter(string $filter, ?string $searchTerm = null)
+     *
+     * Searches for users based on provided filter and optional search term.
+     *
+     * Filters out users with roles matching 'ROLE_ADMIN'.
+     * Applies additional filtering based on verification status.
+     * Filters out users who have a non-null deletedAt value.
+     * Joins the SAML provider data if applicable.
+     * Supports partial matching for UUID, email, first name, last name, or SAML provider name using a search term.
+     *
+     * @param string $filter The filter criterion (e.g., verified, banned).
+     * @param string|null $searchTerm An optional partial search term to match user attributes or SAML provider name.
+     *
+     * @return array A list of matched users, ordered by creation date in descending order.
+     */
+    public function searchWithFilter(string $filter, ?string $sort, ?string $order, ?string $searchTerm = null): array
     {
         $qb = $this->createQueryBuilder('u');
 
         $qb->where('u.roles NOT LIKE :role')
             ->setParameter('role', '%ROLE_ADMIN%');
 
-        if ($filter === UserVerificationStatus::VERIFIED) {
+        // Add filters based on verification status
+        if ($filter === UserVerificationStatus::VERIFIED->value) {
             $qb->andWhere('u.isVerified = :Verified')
-                ->setParameter(UserVerificationStatus::VERIFIED, true);
-        } elseif ($filter === UserVerificationStatus::BANNED) {
+                ->setParameter(UserVerificationStatus::VERIFIED->value, true);
+        } elseif ($filter === UserVerificationStatus::BANNED->value) {
             $qb->andWhere('u.bannedAt IS NOT NULL');
         }
 
+        // Exclude deleted users
         $qb->andWhere($qb->expr()->isNull('u.deletedAt'));
 
+        $qb->leftJoin('u.userExternalAuths', 'ua');
+
+        // Apply the search term, if provided
         if ($searchTerm) {
             $qb->andWhere(
                 $qb->expr()->orX(
                     'u.uuid LIKE :searchTerm',
                     'u.email LIKE :searchTerm',
                     'u.first_name LIKE :searchTerm',
-                    'u.last_name LIKE :searchTerm'
+                    'u.last_name LIKE :searchTerm',
                 )
             )->setParameter('searchTerm', '%' . $searchTerm . '%');
         }
 
-        return $qb->orderBy('u.createdAt', 'DESC')
+        $field = $sort === 'uuid' ? 'u.uuid' : 'u.createdAt';
+        // Order by creation date (newest first)
+        return $qb->orderBy($field, $order)
             ->getQuery()
             ->getResult();
     }
@@ -167,9 +190,6 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
 
 
     /**
-     * @param string|null $searchTerm
-     * @param string|null $filter
-     * @return int
      * @throws NonUniqueResultException
      * @throws NoResultException
      */
@@ -191,10 +211,10 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
                 ->setParameter('searchTerm', '%' . $searchTerm . '%');
         }
 
-        if ($filter === UserVerificationStatus::VERIFIED) {
+        if ($filter === UserVerificationStatus::VERIFIED->value) {
             $qb->andWhere('u.isVerified = :Verified')
                 ->setParameter('Verified', true);
-        } elseif ($filter === UserVerificationStatus::BANNED) {
+        } elseif ($filter === UserVerificationStatus::BANNED->value) {
             $qb->andWhere('u.bannedAt IS NOT NULL');
         }
 
@@ -202,8 +222,6 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
     }
 
     /**
-     * @param string|null $searchTerm
-     * @return int
      * @throws NonUniqueResultException
      * @throws NoResultException
      */
@@ -231,8 +249,6 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
     }
 
     /**
-     * @param string|null $searchTerm
-     * @return int
      * @throws NonUniqueResultException
      * @throws NoResultException
      */

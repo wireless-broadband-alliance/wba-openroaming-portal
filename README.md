@@ -3,7 +3,51 @@
 Welcome to the OpenRoaming Provisioning Portal! This repository provides a **reference implementation designed to
 baseline the industry** on the necessary components for developing an enabler component of OpenRoaming.
 
-## Why it was created?
+# Table of Contents
+
+1. [💡 Why It Was Created?](#-why-it-was-created)
+
+2. [🤔 How It Works](#-how-it-works)
+
+3. [🛠️ Tools Used](#-tools-used)
+
+4. [📜 Prerequisites](#-prerequisites)
+
+5. [📥 How to Get the Project](#-how-to-get-the-project)
+
+6. [📖 Features](#-features)
+    - [User Management](#user-management)
+    - [Portal Management](#portal-management)
+    - [Settings Management](#settings-management)
+    - [Portal Statistics](#portal-statistics)
+    - [Connectivity Statistics](#connectivity-statistics)
+
+7. [🚀 OpenRoaming Portal API](#-openroaming-portal-api)
+
+8. [⚙️ Installation Guide](#-installation-guide)
+
+9. [🛑 Upgrade Stop: Important Instructions for Future Updates](#-upgrade-stop-important-instructions-for-future-updates)
+
+10. [👀 Portal Overview & Baseline Operation](#-portal-overview--baseline-operation)
+    - [🔧 Environment Variables](#-environment-variables)
+        - [Symfony Application Variables](#-environment-variables)
+        - [Google Client & Secret Credentials](#google-client-and-secret-credentials)
+        - [Microsoft Authenticator Credentials](#microsoft-client-and-secret-credentials)
+        - [🔒 SAML Specific Settings](#-saml-specific-settings)
+        - [👾 Turnstile Integration](#-turnstile-integration)
+        - [🌍 GeoLite GUI Documentation](#-geolite-gui-documentation)
+        - [🕷️ API Platform](#-api-platform)
+        - [🪙 JWT Tokens](#-jwt-tokens)
+
+11. [🔑 Admin Page Access Page](#-admin-page-access-page)
+
+12. [🔧 Set up a CRON Job for automation commands](#-set-up-a-cron-job-for-automation-commands)
+
+13. [🛠️ Settings Table](#-settings-table)
+
+14. [📩 Contact Information](#-contact-information)
+
+## 💡 Why it was created?
 
 The primary objective of the **OpenRoaming Provisioning Portal is to simplify the provisioning of identities using
 Passpoint**, enabling an OpenRoaming network to support seamless Wi-Fi connectivity and enhance security for users
@@ -12,7 +56,7 @@ across various environments.
 The goal is to **provide secure Wi-Fi access to everyone** without the need for repeated logins or unsecure/open
 networks, making Wi-Fi connectivity for individuals and enterprises easier, quicker, and more user-friendly.
 
-## How it works?
+## 🤔 How it works?
 
 OpenRoaming is an **open standard developed to enable global, secure, and automatic Wi-Fi connectivity**. With
 OpenRoaming, users can connect to Wi-Fi networks without being prompted for login credentials. Instead, it utilizes
@@ -37,23 +81,22 @@ These are some of the most important tools used on the development of this proje
 - **MySQL Database**: Efficiently method to save and return user profiles and settings of the portal.
 - **Docker**: Encapsulating the project in containers to improve deployment and compatibility.
 
-### Prerequisites:
+## 📜 Prerequisites:
 
 - Linux based system - Ubuntu 22.04 LTS (tested for the reference implementation)
-- Knowledge about Linux OS (required to setup the project)
+- Knowledge about Linux OS (required to set up the project)
 - Radius DB and a stack IDP prepared to use the portal
 - Docker (required for running the application)
 - Docker compose (responsible for managing multiple containers)
 - Git (optional, if the user prefers to clone the repository)
 
-### How to get the Project
+## 📥 How to get the Project
 
 There are two options to retrieve the project:
 
 1. **Download Release Package**: Download the release package from the releases section on GitHub. This package contains
    only the required components to run the OpenRoaming Provisioning Portal,
    including `.env.sample`, `docker-compose.yml`, and other necessary files.
-
 
 2. **Clone the Repository**: If the user is familiar with Git and want to access the complete source code, can clone the
    repository using the following command:
@@ -93,10 +136,11 @@ All the present items can be customizable:
 ### Settings Management
 
 - **Platform Status**
+- **Landing Page Configuration**
 - **Terms and Policies**
 - **Radius Configuration**
 - **Authentication Methods**
-- **LDAP Synchronization**
+- **Two Factor Authenticator**
 - **User Engagement**
 - **SMS Configuration**
 
@@ -121,7 +165,7 @@ This page shows data related to the hybrid machine
 - **Total of Current Authentications** Shows the number of current users connected with a profile (This card is
   independent of the date filtering)
 
-### OpenRoaming Portal API
+## 🚀 OpenRoaming Portal API
 
 This page shows data related to the endpoints in the project required for user authentication, management, and
 configuration within the OpenRoaming Portal. It includes detailed descriptions of each endpoint, highlighting their
@@ -130,13 +174,32 @@ purpose, required inputs, and expected outputs.
 Additionally, the documentation shows the necessary security measures,
 such as CAPTCHA validation, that are integrated to protect user data and ensure secure interactions with the API.
 
-Follow this link for more information on API documentation: [Api Guide](APIGUI.md)
+Please refer to the [API documentation](docs/api/index.html) for detailed usage instructions and examples.
+
+Follow this link for more information on API documentation: [Api Guide](docs/APIGUI.md)
+
+## 🛑 Upgrade Stop: Important Instructions for Future Updates
+
+Certain upgrades may require additional steps or preparation to ensure a smooth and successful transition. These steps
+are vital to maintaining the integrity of your system and avoiding issues caused by breaking changes. Always adhere to
+the instructions provided for each version you are upgrading to.
+
+> **Important**: Failure to follow the required upgrade steps may result in incomplete migrations, unexpected behaviors,
+> or portal downtime.
+
+Follow this link for more information about upgrade this
+project: [Upgrade Guide](docs/UPGRADE.md).
 
 # ⚙️ Installation Guide
 
-Follow this link for more information on installing this project: [Installation Guide](INSTALATION.md).
+Follow this link for more information on installing this
+project: [Installation Guide](docs/INSTALLATION.md).
 
-# Portal Overview & Baseline Operation
+# 🔑 Admin Page Access Page
+
+Follow this link for a portal user/admin interface overview: [Portal Guide](docs/PORTALGUI.md).
+
+# 👀 Portal Overview & Baseline Operation
 
 The objective is for the user to get familiarized with the project and its baseline features.
 
@@ -161,7 +224,7 @@ When this mode is activated, **it's not required** to verify the user account se
 When this mode is activated, **it's required** to verify the account every time the user wants to download a profile
 again, because it's a new demo account being generated on the portal.
 
-Follow this link for a portal user interface overview: [Portal Guide](PORTALGUI.md).
+Follow this link for a portal user interface overview: [Portal Guide](docs/PORTALGUI.md).
 
 ## 🔧 Environment Variables
 
@@ -203,19 +266,31 @@ These two envs are for debugging purposes, they only should be used to control a
 Please make sure to set up a **public_key** in (pgp_public_key/public_key.asc)
 **do not create keys on the production server**.
 
-### Google Authenticator Credentials
+### Google Client and Secret Credentials
 
-These credentials can be found on the Google Cloud Platform
-by creating a new client_id & secret on the **credentials section**.
-Follow this link for more instructions for how to get does items:
-https://developers.google.com/identity/gsi/web/guides/get-google-api-clientid
+For detailed steps on how to obtain your **Google Client ID** and **Google Client Secret**, please refer to
+the [Google Client ID and Secret Guide](docs/ProvidersGuides/GOOGLE_CLIENT.md).
+Once obtained, you will use the following environment variables in your portal configuration:
 
 - `GOOGLE_CLIENT_ID`
 - `GOOGLE_CLIENT_SECRET`
 
+### Microsoft Client and Secret Credentials
+
+For detailed instructions on how to obtain your **Microsoft Client ID** and **Microsoft Client Secret**, please refer to
+the [Microsoft Client ID and Secret Guide](docs/ProvidersGuides/MICROSOFT_CLIENT.md).
+
+Once obtained, you will use the following environment variables in your portal configuration:
+
+- `MICROSOFT_CLIENT_ID`
+- `MICROSOFT_CLIENT_SECRET`
+
 ### 🔒 SAML Specific Settings
 
 These variables are needed to set up the SAML Service Provider (SP) and Identity Provider (IdP):
+
+For detailed instructions on how to obtain your **SAML IDP Credentials**, please refer to
+the [SAML Service Provider (SP)](docs/ProvidersGuides/SAML_IDP_CREDENTIALS.md).
 
 - `SAML_IDP_ENTITY_ID`: This is the entity ID (URI) of the IdP.
 - `SAML_IDP_SSO_URL`: This is the URL of the IdP's Single Sign-On (SSO) service.
@@ -244,6 +319,11 @@ link: [Cloudflare Turnstile Testing](https://developers.cloudflare.com/turnstile
 And for any **production deployment**, please follow the
 link: [Cloudflare Turnstile Production Guide]( https://developers.cloudflare.com/turnstile/get-started/).
 
+### 🌍 GeoLite GUI Documentation
+
+For detailed instructions on the GeoLite GUI setup, operations, and usage, refer to
+the [GeoLite GUI Guide](docs/GEOLITEGUI.md).
+
 ### 🕷️ API Platform
 
 The following configurations are required for the API of the project.
@@ -265,6 +345,14 @@ check the `.env.sample`.
 - `JWT_SECRET_KEY`: The secret defined for the key.
 - `JWT_PUBLIC_KEY`: The public key location.
 - `JWT_PASSPHRASE`: The private key location.
+
+### 🔧 Set up a CRON Job for automation commands
+
+For detailed steps on how to set up CRONS, please refer to the [Cron Configuration Guide](docs/CRONGUI.md)
+
+## 🔑 Admin Page Access Page
+
+Follow this link for a portal user/admin interface overview: [Portal Guide](docs/PORTALGUI.md).
 
 ### 🛠️ Settings Table
 
@@ -293,74 +381,93 @@ The Same uuid may result in conflicts between different portals, resulting in pr
 If you use a different CA for your RADIUS server, you must replace this value with the SHA1 hash of your CA's root
 certificate. **Connection errors** can happen if the right SHA1 hash is not provided.
 
-9. `PLATFORM_MODE`: Live || Demo.
-   When demo, only "demo login" is displayed, and SAML and other login
+1. `PLATFORM_MODE`: Live || Demo.
+   When in Demo, only "demo login" is displayed, and SAML and other login
    methods are disabled regardless of other settings. A demo warning will also be displayed.
-10. `USER_VERIFICATION`: ON || OFF.
-    When it\'s ON it activates the email verification system.
-    This system requires all
-    the users to verify its own account before they download any profile.
-11. `TURNSTILE_CHECKER`: ON || OFF.
-    When it\'s ON, it activates the turnstile verification system.
-    This system requires all
-    the users to check and verify is session before creating an account.
-    To prevent bots.
+2. `USER_VERIFICATION`: ON || OFF.
+   When it\'s ON it activates the email verification system.
+   This system requires all
+   the users to verify its own account before they download any profile.
+3. `TURNSTILE_CHECKER`: ON || OFF.
+   When it\'s ON, it activates the turnstile verification system.
+   This system requires all
+   the users to check and verify is session before creating an account.
+   To prevent bots.
+4. `API_STATUS`: Defines whether the API is enabled or disabled.
 
-12. `PAGE_TITLE`: The title displayed on the webpage.
-13. `CUSTOMER_LOGO_ENABLED`: Shows the customer logo on the landing page.
-14. `CUSTOMER_LOGO`: The resource path or URL to the customer logo image.
-15. `OPENROAMING_LOGO`: The resource path or URL to the OpenRoaming logo image.
-16. . `WALLPAPER_IMAGE`: The resource path or URL to the wallpaper image.
-17. `WELCOME_TEXT`: The welcome text displayed on the user interface.
-18. `WELCOME_DESCRIPTION`: The description text displayed under the welcome text.
-19. `VALID_DOMAINS_GOOGLE_LOGIN`: Defines the valid domains to authenticate with Google, when it's empty, he lets anyone
-    with a google account login
-20. `CONTACT_EMAIL`: The email address for contact inquiries.
+5. `PAGE_TITLE`: The title displayed on the webpage.
+6. `CUSTOMER_LOGO_ENABLED`: Shows the customer logo on the landing page.
+7. `CUSTOMER_LOGO`: The resource path or URL to the customer logo image.
+8. `OPENROAMING_LOGO`: The resource path or URL to the OpenRoaming logo image.
+9. `WALLPAPER_IMAGE`: The resource path or URL to the wallpaper image.
+10. `WELCOME_TEXT`: The welcome text displayed on the user interface.
+11. `WELCOME_DESCRIPTION`: The description text displayed under the welcome text.
+12. `VALID_DOMAINS_GOOGLE_LOGIN`: Defines the valid domains to authenticate with Google, when it's empty, he lets anyone
+    with a Google account login.
+13. `VALID_DOMAINS_MICROSOFT_LOGIN`: Defines the valid domains to authenticate with Microsoft Azure, when it's empty, he
+    lets anyone
+    with a Microsoft account login.
+14. `CONTACT_EMAIL`: The email address for contact inquiries.
 
-21. `AUTH_METHOD_SAML_ENABLED`: Enable or disable SAML authentication method.
-22. `AUTH_METHOD_SAML_LABEL`: The label for SAML authentication on the login page.
-23. `AUTH_METHOD_SAML_DESCRIPTION`: The description for SAML authentication on the login page.
-24. `AUTH_METHOD_GOOGLE_LOGIN_ENABLED`: Enable or disable Google authentication method.
-25. `AUTH_METHOD_GOOGLE_LOGIN_LABEL`: The label for Google authentication button on the login page.
-26. `AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION`: The description for Google authentication on the login page.
-27. `AUTH_METHOD_REGISTER_METHOD_ENABLED`: Enable or disable Register authentication method.
-28. `AUTH_METHOD_REGISTER_METHOD_LABEL`: The label for Register authentication button on the login page.
-29. `AUTH_METHOD_REGISTER_METHOD_DESCRIPTION`: The description for Register authentication on the login page.
-30. `AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED`: Enable or disable Login (email) authentication method.
-31. `AUTH_METHOD_LOGIN_TRADITIONAL_LABEL`: The label for Login (email) authentication button on the login page.
-32. `AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION`: The description for Login (email) authentication on the login page.
-33. `AUTH_METHOD_SMS_REGISTER_ENABLED`: Enable or disable Login (SMS) authentication method.
-34. `AUTH_METHOD_SMS_REGISTER_LABEL`: The label for Login (SMS) authentication button on the login page.
-35. `AUTH_METHOD_SMS_REGISTER_DESCRIPTION`: The description for Login (SMS) authentication on the login page.
+15. `AUTH_METHOD_SAML_ENABLED`: Enable or disable SAML authentication method.
+16. `AUTH_METHOD_SAML_LABEL`: The label for SAML authentication button on the login page.
+17. `AUTH_METHOD_SAML_DESCRIPTION`: The description for SAML authentication on the login page.
+18. `AUTH_METHOD_GOOGLE_LOGIN_ENABLED`: Enable or disable Google authentication method.
+19. `AUTH_METHOD_GOOGLE_LOGIN_LABEL`: The label for Google authentication button on the login page.
+20. `AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION`: The description for Google authentication on the login page.
+21. `AUTH_METHOD_MICROSOFT_LOGIN_ENABLED`: Enable or disable Google authentication method.
+22. `AUTH_METHOD_MICROSOFT_LOGIN_LABEL`: The label for Google authentication button on the login page.
+23. `AUTH_METHOD_MICROSOFT_LOGIN_DESCRIPTION`: The description for Google authentication on the login page.
+24. `AUTH_METHOD_REGISTER_METHOD_ENABLED`: Enable or disable Register authentication method.
+25. `AUTH_METHOD_REGISTER_METHOD_LABEL`: The label for Register authentication button on the login page.
+26. `AUTH_METHOD_REGISTER_METHOD_DESCRIPTION`: The description for Register authentication on the login page.
+27. `AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED`: Enable or disable Login (email) authentication method.
+28. `AUTH_METHOD_LOGIN_TRADITIONAL_LABEL`: The label for Login (email) authentication button on the login page.
+29. `AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION`: The description for Login (email) authentication on the login page.
+30. `AUTH_METHOD_SMS_REGISTER_ENABLED`: Enable or disable Login (SMS) authentication method.
+31. `AUTH_METHOD_SMS_REGISTER_LABEL`: The label for Login (SMS) authentication button on the login page.
+32. `AUTH_METHOD_SMS_REGISTER_DESCRIPTION`: The description for Login (SMS) authentication on the login page.
 
-36. `SYNC_LDAP_ENABLED`: Enable or disable synchronization with LDAP.
-37. `SYNC_LDAP_SERVER`: The LDAP server's URL.
-38. `SYNC_LDAP_BIND_USER_DN`: The Distinguished Name (DN) used to bind to the LDAP server.
-39. `SYNC_LDAP_BIND_USER_PASSWORD`: The password for the bind user on the LDAP server.
-40. `SYNC_LDAP_SEARCH_BASE_DN`: The base DN used when searching the LDAP directory.
-41. `SYNC_LDAP_SEARCH_FILTER`: The filter used when searching the LDAP directory.
-    The placeholder `@ID` is replaced with
-    the user's ID.
+33. `TWO_FACTOR_AUTH_STATUS`: The status of two-factor authentication when users log in to the platform.
+34. `TWO_FACTOR_AUTH_APP_LABEL`: Platform identifier in two factor application
+35. `TWO_FACTOR_AUTH_APP_ISSUER`: Issuer identifier in two factor application
+36. `TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME`: Local two-factor authentication code expiration time
+37. `TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE`: Number of attempts to request resending of the two-factor
+    authentication code
+38. `TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS`: Time in minutes to reset attempts to send two-factor
+    authentication code
+39. `TWO_FACTOR_AUTH_RESEND_INTERVAL`: Time interval in seconds to request a new two-factor authentication code
 
-42. `PROFILES_ENCRYPTION_TYPE_IOS_ONLY`: Type of encryption defined for the creation of the profiles, for iOS only.
-43. `CAPPORT_ENABLED`: Enable or disable Capport DHCP configuration.
-44. `CAPPORT_PORTAL_URL`: Domain that is from the entity hosting the service.
-45. `CAPPORT_VENUE_INFO_URL`: Domain where the user is redirected after clicking the DHCP notification.
-46. `SMS_USERNAME`: Budget SMS Username.
-47. `SMS_USER_ID`: Budget SMS User ID.
-48. `SMS_HANDLE`: Budget SMS Handle hash.
-49. `SMS_FROM`: Entity sending the SMS for the users.
-50. `SMS_TIMER_RESEND`: Timer in minutes to make the user wait to resend a new SMS.
+39. `SYNC_LDAP_ENABLED`: Enable or disable synchronization with LDAP.
+40. `SYNC_LDAP_SERVER`: The LDAP server's URL.
+41. `SYNC_LDAP_BIND_USER_DN`: The Distinguished Name (DN) used to bind to the LDAP server.
+42. `SYNC_LDAP_BIND_USER_PASSWORD`: The password for the bind user on the LDAP server.
+43. `SYNC_LDAP_SEARCH_BASE_DN`: The base DN used when searching the LDAP directory.
+44. `SYNC_LDAP_SEARCH_FILTER`: The filter used when searching the LDAP directory.
+    The placeholder `@ID` is replaced with the user's ID.
 
-51. `TOS_LINK`: Terms and Conditions URL
-52. `PRIVACY_POLICY_LINK`: Privacy and Policy URL
-53. `USER_DELETE_TIME`: Time in hours to delete the unverified user
-54. `TIME_INTERVAL_NOTIFICATION`: Time in days to resend the notification when profile is about to expire
-55. `PROFILE_LIMIT_DATE_SAML`: Time in days to disable profiles for SAML users with login
-56. `PROFILE_LIMIT_DATE_GOOGLE`: Time in days to disable profiles for users with GOOGLE login
-57. `PROFILE_LIMIT_DATE_EMAIL`: Time in days to disable profiles for users with EMAIL login
-58. `PROFILE_LIMIT_DATE_SMS`: Time in days to disable profiles for users with SMS login
+45. `PROFILES_ENCRYPTION_TYPE_IOS_ONLY`: Type of encryption defined for the creation of the profiles, for iOS only.
+46. `CAPPORT_ENABLED`: Enable or disable Capport DHCP configuration.
+47. `CAPPORT_PORTAL_URL`: Domain that is from the entity hosting the service.
+48. `CAPPORT_VENUE_INFO_URL`: Domain where the user is redirected after clicking the DHCP notification.
+49. `SMS_USERNAME`: Budget SMS Username.
+50. `SMS_USER_ID`: Budget SMS User ID.
+51. `SMS_HANDLE`: Budget SMS Handle hash.
+52. `SMS_FROM`: Entity sending the SMS for the users.
+53. `SMS_TIMER_RESEND`: Timer in minutes to make the user wait to resend a new SMS.
+
+54. `TOS_LINK`: Terms and Conditions URL.
+55. `PRIVACY_POLICY_LINK`: Privacy and Policy URL.
+56. `USER_DELETE_TIME`: Time in hours to delete the unverified user.
+57. `TIME_INTERVAL_NOTIFICATION`: Time in days to resend the notification when the profile is about to expire.
+58. `PROFILE_LIMIT_DATE_SAML`: Time in days to disable profiles for SAML users with login.
+59. `PROFILE_LIMIT_DATE_GOOGLE`: Time in days to disable profiles for users with GOOGLE login.
+60. `PROFILE_LIMIT_DATE_MICROSOFT`: Time in days to disable profiles for users with MICROSOFT login.
+61. `PROFILE_LIMIT_DATE_EMAIL`: Time in days to disable profiles for users with EMAIL login.
+62. `PROFILE_LIMIT_DATE_SMS`: Time in days to disable profiles for users with SMS login.
 
 #### With these environment variables, you can configure and customize various aspects of the project, such as database connections, SAML settings, login methods, and more.
+
+## 📩 Contact Information?
 
 For more information please contact: openroaming@wballiance.com

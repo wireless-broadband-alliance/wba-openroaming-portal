@@ -6,52 +6,56 @@
 
 /* Css elements */
 .divider {
-	@apply w-full border-t border-dashed;
+    @apply w-full border-t border-dashed;
 }
 
 .divider-solid {
-	@apply w-full h-0.5 bg-gray-300/50;
+    @apply w-full h-0.5 bg-gray-300/50;
 }
 
 
 /* toasts and pills */
 
 .toast-success {
-	@apply text-[#0A115C] text-sm font-medium bg-[#0A115C0A] border border-[#9B9EBD] rounded-[5px] px-[25px] py-[15px] flex flex-row justify-start items-center;
+    @apply text-[#0A115C] text-sm font-medium bg-[#0A115C0A] border border-[#9B9EBD] rounded-[5px] px-[25px] py-[15px] flex flex-row justify-start items-center;
 }
 
 .toast-warning {
-	@apply text-white text-sm font-medium bg-[#F82600CE] border border-[#A83622] rounded-[5px] px-[25px] py-[15px] flex flex-row justify-start items-center;
+    @apply text-white text-sm font-medium bg-[#F82600CE] border border-[#A83622] rounded-[5px] px-[25px] py-[15px] flex flex-row justify-start items-center;
 }
 
 .pill-success {
-	@apply px-2 py-1 text-green-400 bg-green-100/50 rounded-lg;
+    @apply px-2 py-1 text-green-400 bg-green-100/50 rounded-lg;
 }
 
 .pill-error {
-	@apply px-2 py-1 text-red-400 bg-red-100/50 rounded-lg;
+    @apply px-2 py-1 text-red-400 bg-red-100/50 rounded-lg;
 }
 
 /* Form */
 .form-label {
-	@apply absolute left-[10px] -top-[13px] z-10 pl-[7px] pr-[12px] font-bold bg-white;
+    @apply absolute left-[10px] -top-[13px] z-10 pl-[7px] pr-[12px] font-bold bg-white;
 }
 
 .form-widget {
-	@apply w-full border px-5 py-2.5 text-[#656565] placeholder-opacity-40 bg-transparent rounded-[5px] border-[#CECECE] appearance-none focus:outline-none focus:ring-0 focus:border-primary;
+    @apply w-full border px-5 py-2.5 text-[#656565] placeholder-opacity-40 bg-transparent rounded-[5px] border-[#CECECE] appearance-none focus:outline-none focus:ring-0 focus:border-primary;
+}
+
+.form-widget-text-area {
+    @apply form-widget h-48;
 }
 
 .form-select {
-	@apply bg-white border rounded-lg px-3 py-1 text-[#656565] border-[#CECECE] focus:border-primary;
+    @apply bg-white border rounded-lg px-3 py-1 text-[#656565] border-[#CECECE] focus:border-primary;
 }
 
 /* buttons */
 .btn-primary {
-	@apply h-[50px] px-2 rounded-[5px] bg-primary hover:bg-[#6AA123] flex flex-row justify-center text-center items-center text-white font-semibold text-center;
+    @apply h-[50px] px-2 rounded-[5px] bg-primary hover:bg-[#6AA123] flex flex-row justify-center items-center text-white font-semibold text-center;
 }
 
 .btn-secondary {
-	@apply h-[50px] px-2 border border-primary rounded-[5px] bg-transparent hover:bg-[#6AA123]/5 flex flex-row items-center justify-center text-primary font-semibold;
+    @apply h-[50px] px-2 border border-primary rounded-[5px] bg-transparent hover:bg-[#6AA123]/5 flex flex-row items-center justify-center text-primary font-semibold;
 }
 
 .btn-cert-date {
@@ -59,14 +63,17 @@
 }
 
 .btn-logout {
-	@apply h-[50px] px-2 border border-[#E33D40] rounded-[5px] bg-[#E33D40]/20 hover:bg-[#E33D40]/30 flex flex-row items-center justify-center text-[#E33D40] font-semibold;
+    @apply h-[50px] px-2 border border-[#E33D40] rounded-[5px] bg-[#E33D40]/20 hover:bg-[#E33D40]/30 flex flex-row items-center justify-center text-[#E33D40] font-semibold;
 }
 
 .btn-disabled {
-	@apply opacity-60 cursor-not-allowed bg-[#006400];
+    @apply opacity-60 cursor-not-allowed bg-[#006400];
 }
 
 .btn-secondary-disabled {
-	@apply opacity-60 cursor-not-allowed bg-[#696969] border-transparent;
+    @apply opacity-60 cursor-not-allowed bg-[#696969] border-transparent;
 }
 
+.urls-table {
+    @apply whitespace-nowrap truncate block;
+}

@@ -1,20 +1,22 @@
-import {Controller} from '@hotwired/stimulus';
+import { Controller } from "@hotwired/stimulus";
 
 export default class extends Controller {
+    static targets = ["on", "off"];
 
-	static targets = ["on", "off"];
+    connect() {
+        super.connect();
+    }
 
-	connect() {
-		super.connect();
-	}
+    toggle(event) {
+        const validValues = ["ON", "On", "true", "Demo", "LINK"];
 
-	toggle(event) {
-		if (event.target.value == "ON" || event.target.value == "On" || event.target.value == "true" || event.target.value == "Demo" || event.target.value == "LINK") {
-			this.onTarget.classList.remove('hidden');
-			this.offTarget.classList.add('hidden');
-		} else {
-			this.onTarget.classList.add('hidden');
-			this.offTarget.classList.remove('hidden');
-		}
-	}
+        // Check if the event target's
+        if (validValues.includes(event.target.value)) {
+            this.onTarget.classList.remove("hidden");
+            this.offTarget.classList.add("hidden");
+        } else {
+            this.onTarget.classList.add("hidden");
+            this.offTarget.classList.remove("hidden");
+        }
+    }
 }

@@ -13,15 +13,6 @@
             "src/ApiResource/.gitignore"
         ]
     },
-    "doctrine/annotations": {
-        "version": "2.0",
-        "recipe": {
-            "repo": "github.com/symfony/recipes",
-            "branch": "main",
-            "version": "1.10",
-            "ref": "64d8583af5ea57b7afa4aba4b159907f3a148b05"
-        }
-    },
     "doctrine/doctrine-bundle": {
         "version": "2.8",
         "recipe": {
@@ -70,8 +61,8 @@
             "ref": "b131e6cbfe1b898a508987851963fff485986285"
         }
     },
-    "eckinox/tinymce-bundle": {
-        "version": "v2.0.0"
+    "emileperron/tinymce-bundle": {
+        "version": "v2.1.0"
     },
     "knpuniversity/oauth2-client-bundle": {
         "version": "2.15",
@@ -124,18 +115,6 @@
             "config/packages/misd_phone_number.yaml"
         ]
     },
-    "php-http/discovery": {
-        "version": "1.18",
-        "recipe": {
-            "repo": "github.com/symfony/recipes",
-            "branch": "main",
-            "version": "1.18",
-            "ref": "f45b5dd173a27873ab19f5e3180b2f661c21de02"
-        },
-        "files": [
-            "config/packages/http_discovery.yaml"
-        ]
-    },
     "phpstan/phpstan": {
         "version": "1.10",
         "recipe": {
@@ -172,18 +151,6 @@
         },
         "files": [
             "config/packages/pixel_open_cloudflare_turnstile.yaml"
-        ]
-    },
-    "sensio/framework-extra-bundle": {
-        "version": "6.2",
-        "recipe": {
-            "repo": "github.com/symfony/recipes",
-            "branch": "main",
-            "version": "5.2",
-            "ref": "fb7e19da7f013d0d422fa9bce16f5c510e27609b"
-        },
-        "files": [
-            "config/packages/sensio_framework_extra.yaml"
         ]
     },
     "sentry/sentry-symfony": {
@@ -244,6 +211,18 @@
         },
         "files": [
             ".env"
+        ]
+    },
+    "symfony/form": {
+        "version": "7.2",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "main",
+            "version": "7.2",
+            "ref": "7d86a6723f4a623f59e2bf966b6aad2fc461d36b"
+        },
+        "files": [
+            "config/packages/csrf.yaml"
         ]
     },
     "symfony/framework-bundle": {
@@ -506,5 +485,14 @@
     },
     "twig/extra-bundle": {
         "version": "v3.5.1"
+    },
+    "vincentlanglet/twig-cs-fixer": {
+        "version": "3.5",
+        "recipe": {
+            "repo": "github.com/symfony/recipes-contrib",
+            "branch": "main",
+            "version": "3.0",
+            "ref": "d42582ae1bce86fd43491d6264c738b0867f8ffe"
+        }
     }
 }

@@ -1,0 +1,69 @@
+{% extends 'site/base.html.twig' %}
+
+{% block title %}
+    {{ data.title.value }}
+{% endblock %}
+
+{% block second_col %}
+    {# Form Column #}
+
+    {# Toasts #}
+    <div class="grid grid-cols-1 gap-[5px]">
+        {% for message in app.session.flashbag.get('success') %}
+            {{ include('site/shared/_toast.html.twig', {toast_type: 'toast-success'}) }}
+        {% endfor %}
+
+        {# Flash error message #}
+        {% for message in app.session.flashbag.get('error') %}
+            {{ include('site/shared/_toast.html.twig', {toast_type: 'toast-warning'}) }}
+        {% endfor %}
+    </div>
+
+    {% if data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\OperationMode::ON').value %}
+        <img class="w-[120px] h-[58px] object-scale-down mt-[75px]" src="{{ data.customerLogoName.value }}" alt="Logo"/>
+    {% endif %}
+
+    <div class="{{ data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\OperationMode::ON').value ? 'pt-[28px]' : 'pt-[161px]' }} leading-7">
+        <p class="font-bold text-xl">Two-Factor Authentication Codes</p>
+        <p class="text-lg"> Please save these codes for use in case you lose your device. </p>
+        <div data-controller="clipboard print">
+            <div class="mt-5 rounded-md">
+                <div id="codesBox"
+                     data-clipboard-target="code"
+                     class="p-4 bg-gray-100 text-base font-mono rounded-md overflow-x-auto text-left">
+                    <div class="flex justify-start space-x-4 mb-4">
+                        <button title="Copy"
+                                data-action="clipboard#copyToClipboard">
+                            <twig:ux:icon class="w-4" name="wba:copy" />
+                        </button>
+                        <a title="Download"
+                           href="{{ path('app_download_codes', {context: context}) }}">
+                            <twig:ux:icon class="w-4" name="wba:download" />
+                        </a>
+                        <button title="Print"
+                                data-action="print#print">
+                            <twig:ux:icon class="w-4" name="wba:printer" />
+                        </button>
+                    </div>
+                    <div id="codesBox"
+                         data-print-target="codesBox"
+                         class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mt-2">
+                        {% for code in codes %}
+                            <div class="p-2 border rounded-lg text-center">{{ code.code }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    {# Divider #}
+    <div>
+        <a href="{{ path('app_otpCodes_save', {context: context}) }}"
+           class="mt-6 w-[180px] btn-primary">Done</a>
+    </div>
+
+    {{ include('site/shared/returnActions/_logout.html.twig') }}
+
+{% endblock %}

@@ -3,6 +3,7 @@
 namespace App\Command;
 
 use App\Enum\UserProvider;
+use App\Enum\UserRadiusProfileRevokeReason;
 use App\Repository\SettingRepository;
 use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
@@ -19,21 +20,12 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 )]
 class LDAPSyncCommand extends Command
 {
-    private UserRepository $userRepository;
-    private SettingRepository $settingRepository;
-    private ProfileManager $profileManager;
-    private UserExternalAuthRepository $userExternalAuthRepository;
-
     public function __construct(
-        UserRepository $userRepository,
-        SettingRepository $settingRepository,
-        ProfileManager $profileManager,
-        UserExternalAuthRepository $userExternalAuthRepository
+        private readonly UserRepository $userRepository,
+        private readonly SettingRepository $settingRepository,
+        private readonly ProfileManager $profileManager,
+        private readonly UserExternalAuthRepository $userExternalAuthRepository
     ) {
-        $this->userRepository = $userRepository;
-        $this->settingRepository = $settingRepository;
-        $this->profileManager = $profileManager;
-        $this->userExternalAuthRepository = $userExternalAuthRepository;
         parent::__construct();
     }
 
@@ -61,7 +53,10 @@ class LDAPSyncCommand extends Command
                     $ldapUser = $this->fetchUserFromLDAP($providerId);
                     if (is_null($ldapUser)) {
                         $io->writeln('User ' . $providerId . ' not found in LDAP, disabling');
-                        $this->disableProfiles($user);
+                        $this->profileManager->disableProfiles(
+                            $user,
+                            UserRadiusProfileRevokeReason::LDAP_UNKNOWN_USER->value
+                        );
                         continue;
                     }
 
@@ -71,10 +66,16 @@ class LDAPSyncCommand extends Command
 
                     if ($userLocked) {
                         $io->writeln('User ' . $providerId . ' is locked in LDAP, disabling');
-                        $this->disableProfiles($user);
+                        $this->profileManager->disableProfiles(
+                            $user,
+                            UserRadiusProfileRevokeReason::LDAP_USER_LOCKED->value
+                        );
                     } elseif ($passwordExpired || $ldapUser["pwdLastSet"][0] === "0") {
                         $io->writeln('User ' . $providerId . ' has an expired password in LDAP, disabling');
-                        $this->disableProfiles($user);
+                        $this->profileManager->disableProfiles(
+                            $user,
+                            UserRadiusProfileRevokeReason::LDAP_USER_PASSWORD_EXPIRED->value
+                        );
                     } else {
                         $io->writeln('User ' . $providerId . ' is enabled in LDAP, enabling');
                         $this->enableProfiles($user);
@@ -95,7 +96,9 @@ class LDAPSyncCommand extends Command
         ldap_set_option($ldapConnection, LDAP_OPT_DEREF, LDAP_DEREF_ALWAYS);
         ldap_set_option($ldapConnection, LDAP_OPT_PROTOCOL_VERSION, 3);
         ldap_set_option($ldapConnection, LDAP_OPT_REFERRALS, 0);
-        ldap_bind($ldapConnection, $ldapUsername, $ldapPassword) or die("Could not bind to LDAP server.");
+        if (!ldap_bind($ldapConnection, $ldapUsername, $ldapPassword)) {
+            die("Could not bind to LDAP server.");
+        }
         $searchFilter = str_replace(
             "@ID",
             $identifier,
@@ -116,11 +119,6 @@ class LDAPSyncCommand extends Command
         $attrs = ldap_get_attributes($ldapConnection, $entry);
         ldap_unbind($ldapConnection);
         return $attrs;
-    }
-
-    private function disableProfiles($user): void
-    {
-        $this->profileManager->disableProfiles($user);
     }
 
     private function enableProfiles($user): void

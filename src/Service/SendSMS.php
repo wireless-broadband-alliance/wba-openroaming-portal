@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use App\Entity\Event;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Enum\PlatformMode;
@@ -25,41 +26,18 @@ use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 
 class SendSMS
 {
-    private UserRepository $userRepository;
-    private SettingRepository $settingRepository;
-    private GetSettings $getSettings;
-    private ParameterBagInterface $parameterBag;
-    private EventRepository $eventRepository;
-    private EventActions $eventActions;
-    private VerificationCodeGenerator $verificationCodeGenerator;
-
     /**
      * SendSMS constructor.
-     *
-     * @param UserRepository $userRepository
-     * @param SettingRepository $settingRepository
-     * @param GetSettings $getSettings
-     * @param ParameterBagInterface $parameterBag
-     * @param EventRepository $eventRepository
-     * @param EventActions $eventActions
-     * @param VerificationCodeGenerator $verificationCodeGenerator
      */
     public function __construct(
-        UserRepository $userRepository,
-        SettingRepository $settingRepository,
-        GetSettings $getSettings,
-        ParameterBagInterface $parameterBag,
-        EventRepository $eventRepository,
-        EventActions $eventActions,
-        VerificationCodeGenerator $verificationCodeGenerator,
+        private readonly UserRepository $userRepository,
+        private readonly SettingRepository $settingRepository,
+        private readonly GetSettings $getSettings,
+        private readonly ParameterBagInterface $parameterBag,
+        private readonly EventRepository $eventRepository,
+        private readonly EventActions $eventActions,
+        private readonly VerificationCodeEmailGenerator $verificationCodeGenerator,
     ) {
-        $this->userRepository = $userRepository;
-        $this->settingRepository = $settingRepository;
-        $this->getSettings = $getSettings;
-        $this->parameterBag = $parameterBag;
-        $this->eventRepository = $eventRepository;
-        $this->eventActions = $eventActions;
-        $this->verificationCodeGenerator = $verificationCodeGenerator;
     }
 
     /**
@@ -90,15 +68,15 @@ class SendSMS
             $response = $client->request('GET', $apiUrl);
 
             // Handle the API response as needed
-            $statusCode = $response->getStatusCode();
-            $content = $response->getContent();
+            $response->getStatusCode();
+            $response->getContent();
 
             return true;
         }
         return false;
     }
 
-    public function sendSmsReset($recipient, string $message): bool
+    public function sendSmsNoValidation($recipient, string $message): bool
     {
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $apiUrl = $this->parameterBag->get('app.budget_api_url');
@@ -117,8 +95,8 @@ class SendSMS
         $response = $client->request('GET', $apiUrl);
 
         // Handle the API response as needed
-        $statusCode = $response->getStatusCode();
-        $content = $response->getContent();
+        $response->getStatusCode();
+        $response->getContent();
 
         return true;
     }
@@ -131,7 +109,7 @@ class SendSMS
     {
         $latestEvent = $eventRepository->findLatestSmsAttemptEvent($user);
 
-        if (!$latestEvent) {
+        if (!$latestEvent instanceof Event) {
             return true;
         }
 
@@ -146,9 +124,6 @@ class SendSMS
 
     /**
      * Regenerate the verification code for the user and send a new SMS.
-     *
-     * @param User $user
-     * @return bool
      * @throws ClientExceptionInterface
      * @throws NonUniqueResultException
      * @throws RedirectionExceptionInterface
@@ -163,7 +138,7 @@ class SendSMS
         $latestEvent = $this->eventRepository->findLatestSmsAttemptEvent($user);
 
         // Retrieve metadata from the latest event
-        $latestEventMetadata = $latestEvent ? $latestEvent->getEventMetadata() : [];
+        $latestEventMetadata = $latestEvent instanceof Event ? $latestEvent->getEventMetadata() : [];
         $lastVerificationCodeTime = isset($latestEventMetadata['lastVerificationCodeTime'])
             ? new DateTime($latestEventMetadata['lastVerificationCodeTime'])
             : null;
@@ -177,12 +152,12 @@ class SendSMS
                 !$latestEvent || ($lastVerificationCodeTime instanceof DateTime &&
                     $lastVerificationCodeTime->add($minInterval) < $currentTime)
             ) {
-                if (!$latestEvent) {
+                if (!$latestEvent instanceof Event) {
                     // If no previous attempt, set attempts to 1
                     $attempts = 1;
                     // Defines the Event to the table
                     $eventMetadata = [
-                        'platform' => PlatformMode::LIVE,
+                        'platform' => PlatformMode::LIVE->value,
                         'ip' => $_SERVER['REMOTE_ADDR'],
                         'uuid' => $user->getUuid(),
                         'verificationAttempts' => 0,
@@ -190,7 +165,7 @@ class SendSMS
                     ];
                     $this->eventActions->saveEvent(
                         $user,
-                        AnalyticalEventType::USER_SMS_ATTEMPT,
+                        AnalyticalEventType::USER_SMS_ATTEMPT->value,
                         new DateTime(),
                         $eventMetadata
                     );

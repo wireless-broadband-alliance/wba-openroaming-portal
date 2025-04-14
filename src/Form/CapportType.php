@@ -2,7 +2,7 @@
 
 namespace App\Form;
 
-use App\Enum\EmailConfirmationStrategy;
+use App\Enum\OperationMode;
 use App\Service\GetSettings;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -13,11 +13,9 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 class CapportType extends AbstractType
 {
-    private GetSettings $getSettings;
-
-    public function __construct(GetSettings $getSettings)
-    {
-        $this->getSettings = $getSettings;
+    public function __construct(
+        private readonly GetSettings $getSettings
+    ) {
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
@@ -32,6 +30,7 @@ class CapportType extends AbstractType
                     new Assert\Url([
                         'message' => 'The value {{ value }} is not a valid URL.',
                         'protocols' => ['http', 'https'],
+                        'requireTld' => true,
                     ]),
                 ],
             ],
@@ -41,6 +40,7 @@ class CapportType extends AbstractType
                     new Assert\Url([
                         'message' => 'The value {{ value }} is not a valid URL.',
                         'protocols' => ['http', 'https'],
+                        'requireTld' => true,
                     ]),
                 ],
             ],
@@ -53,8 +53,8 @@ class CapportType extends AbstractType
                     $formFieldOptions['data'] = $setting->getValue();
                     if ($settingName === 'CAPPORT_ENABLED') {
                         $formFieldOptions['choices'] = [
-                            EmailConfirmationStrategy::EMAIL => 'true',
-                            EmailConfirmationStrategy::NO_EMAIL => 'false',
+                            OperationMode::ON->value => 'true',
+                            OperationMode::OFF->value => 'false',
                         ];
                         $formFieldOptions['placeholder'] = 'Select an option';
                         $formFieldOptions['required'] = true;

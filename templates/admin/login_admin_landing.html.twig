@@ -1,0 +1,125 @@
+{% extends '/site/base.html.twig' %}
+
+{% block title %}
+    {{ data.title.value }}
+{% endblock %}
+
+{% block second_col %}
+    {# Form Column #}
+
+    {# Toasts #}
+    <div class="grid grid-cols-1 gap-[5px]">
+        {# Flash error message #}
+        {% for message in app.session.flashbag.get('error') %}
+            {{ include('site/shared/_toast.html.twig', {toast_type: 'toast-warning'}) }}
+        {% endfor %}
+    </div>
+
+    {% if data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\OperationMode::ON').value %}
+        <img class="w-[120px] h-[58px] object-scale-down mt-[75px]" src="{{ data.customerLogoName.value }}" alt="Logo"/>
+    {% endif %}
+
+    <div class="{{ data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\OperationMode::ON').value ? 'pt-[28px]' : 'pt-[161px]' }} leading-7">
+        <p class="font-bold text-xl">Admin login Page</p>
+        <p class="text-lg">Please login using your admin credentials. Once logged in, you'll have access to the admin
+            dashboard.</p>
+    </div>
+    {{ form_start(form) }}
+
+    {% if data.EMAIL_REGISTER_ENABLED.value and data.AUTH_METHOD_SMS_REGISTER_ENABLED.value %}
+        {% set label = 'Email or Phone Number' %}
+    {% elseif data.EMAIL_REGISTER_ENABLED.value %}
+        {% set label = 'Email' %}
+    {% elseif data.AUTH_METHOD_SMS_REGISTER_ENABLED.value %}
+        {% set label = 'Phone Number' %}
+    {% else %}
+        {% set label = 'Email' %}
+    {% endif %}
+
+    {# UUID #}
+    <div class="relative mt-[32px]">
+        {{ form_label(form.uuid, label, {label_attr: {class: 'form-label'}}) }}
+        {{ form_widget(form.uuid, {
+            attr: {
+                class: 'form-widget',
+                placeholder: 'Enter your ' ~ label|lower,
+            },
+            full_name: 'uuid',
+        }) }}
+    </div>
+
+    {# Password #}
+    <div class="relative mt-[32px]">
+        {{ form_label(form.password, null, {label_attr: {class: 'form-label'}}) }}
+        {{ form_widget(form.password, {
+            attr: {
+                class: 'form-widget',
+                placeholder: 'Enter your password',
+            },
+            full_name: 'password',
+        }) }}
+    </div>
+
+    {# Turnstile Checker #}
+    {% if data.TURNSTILE_CHECKER.value == constant('App\\Enum\\OperationMode::ON').value %}
+        <div class="ml-3 mt-5">
+            {{ form_row(form.security, {full_name: 'security'}) }}
+        </div>
+    {% endif %}
+
+    <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+
+    <div class="my-[32px] flex justify-start gap-4">
+        <button type="submit" class="w-[220px] btn-primary">
+            Log in
+        </button>
+        <!--
+        {% if data.PLATFORM_MODE.value != constant('App\\Enum\\PlatformMode::DEMO').value %}
+            <a href="{{ path('app_landing') }}" class="w-[220px] btn-secondary">
+                Choose Another
+            </a>
+        {% endif %}
+       -->
+    </div>
+
+    {# Divider #}
+    <div class="my-[25px] divider"></div>
+    {% if data.PLATFORM_MODE.value != constant('App\\Enum\\PlatformMode::DEMO').value %}
+
+        {% if data.EMAIL_REGISTER_ENABLED.value or data.AUTH_METHOD_SMS_REGISTER_ENABLED.value %}
+            <p class="mt-2 text-sm">Did you forget your password? Get a new one for your
+
+            {% if data.EMAIL_REGISTER_ENABLED.value %}
+                <a href="{{ path('app_site_forgot_password_email') }}" class="font-semibold text-primary underline">email</a>
+            {% endif %}
+
+            {% if data.EMAIL_REGISTER_ENABLED.value and data.AUTH_METHOD_SMS_REGISTER_ENABLED.value %}or{% endif %}
+
+            {% if data.AUTH_METHOD_SMS_REGISTER_ENABLED.value %}
+                <a href="{{ path('app_site_forgot_password_sms') }}"
+                   class="font-semibold text-primary underline">phone number</a>.
+            {% endif %}
+
+            {% if data.EMAIL_REGISTER_ENABLED.value or data.AUTH_METHOD_SMS_REGISTER_ENABLED.value %}
+
+                <p class="mt-2 text-sm">You don't have an account? Register with
+
+                    {% if data.EMAIL_REGISTER_ENABLED.value %}
+                        <a href="{{ path('app_register') }}"
+                           class="font-semibold text-primary underline">email</a>
+                    {% endif %}
+
+                    {% if data.EMAIL_REGISTER_ENABLED.value and data.AUTH_METHOD_SMS_REGISTER_ENABLED.value %}or{% endif %}
+
+                    {% if data.AUTH_METHOD_SMS_REGISTER_ENABLED.value %}
+                        <a href="{{ path('app_register_sms') }}"
+                           class="font-semibold text-primary underline">phone number</a>.
+                    {% endif %}
+                </p>
+            {% endif %}
+        {% endif %}
+    {% endif %}
+
+    {{ form_rest(form) }}
+    {{ form_end(form) }}
+{% endblock %}

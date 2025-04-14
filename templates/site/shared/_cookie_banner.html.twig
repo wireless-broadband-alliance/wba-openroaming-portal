@@ -31,7 +31,7 @@
                 </div>
 
                 <div class="flex justify-center">
-                    {% if data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\EmailConfirmationStrategy::EMAIL') %}
+                    {% if data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\OperationMode::ON').value %}
                         <img class="w-[170px] h-[58px] object-scale-down object-right my-4"
                              src="{{ data.customerLogoName.value }}" alt="Logo"/>
                     {% endif %}
@@ -79,7 +79,7 @@
                                     <br>
                                     <p>
                                         <a
-                                                href="{{ path('app_terms_conditions') }}"
+                                                href="{{ path('app_privacy_policy') }}"
                                                 class="underline text-primary"
                                                 target="_blank">
                                             Privacy Policy
@@ -103,14 +103,14 @@
                                     <br>
                                     <p>
                                         <a
-                                                href="{{ path('app_terms_conditions') }}"
+                                                href="{{ path('app_privacy_policy') }}"
                                                 class="underline text-primary"
                                                 target="_blank">
                                             Privacy Policy
                                         </a>
                                     </p>
                                 </li>
-                                {# ST Redirect Cookie #}
+                                {# ST Redirect Cookie
                                 <li>
                                     <strong>ST Redirect Cookie</strong> - Temporarily stores redirect URLs to ensure
                                     users are redirected
@@ -128,13 +128,14 @@
                                     <br>
                                     <p>
                                         <a
-                                                href="{{ path('app_terms_conditions') }}"
+                                                href="{{ path('app_privacy_policy') }}"
                                                 class="underline text-primary"
                                                 target="_blank">
                                             Privacy Policy
                                         </a>
                                     </p>
                                 </li>
+                                #}
                                 {# SAML Session Cookie #}
                                 <li>
                                     <strong>SAML Session Cookie</strong> - Used to manage authentication and session
@@ -151,7 +152,7 @@
                                     </span>
                                     <br>
                                     <p>
-                                        <a href="{{ path('app_terms_conditions') }}"
+                                        <a href="{{ path('app_privacy_policy') }}"
                                            class="underline text-primary"
                                            target="_blank">
                                             Privacy Policy
@@ -175,7 +176,7 @@
                                     </span>
                                     <br>
                                     <p>
-                                        <a href="{{ path('app_terms_conditions') }}"
+                                        <a href="{{ path('app_privacy_policy') }}"
                                            class="underline text-primary"
                                            target="_blank">
                                             Privacy Policy
@@ -229,7 +230,7 @@
                                         </span>
                                             <br>
                                             <p>
-                                                <a href="{{ path('app_terms_conditions') }}"
+                                                <a href="{{ path('app_privacy_policy') }}"
                                                    class="underline text-primary"
                                                    target="_blank">
                                                     Privacy Policy
@@ -328,7 +329,7 @@
                         <div class="md:flex md:justify-between justify-cente items-centerr">
                             <div class="md:flex-1 text-center md:text-left text-xs">
                                 Your data is safe with us. Learn more in our
-                                <a href="{{ path('app_terms_conditions') }}" target="_blank"
+                                <a href="{{ path('app_privacy_policy') }}" target="_blank"
                                    class="underline text-primary font-semibold">Privacy Policy</a>
                             </div>
                             <div class="mt-3 flex flex-col md:flex-row justify-center md:space-x-4 space-x-0 space-y-4 md:space-y-0">
@@ -350,7 +351,7 @@
         <span class="text-sm text-[#707070]">Manage Cookies</span>
         <button id="modalManageCookies" type="button" data-action="cookie#showModal"
                 class="flex items-center duration-300 cursor-pointer rounded-full text-[#707070] focus:animate-spin-slow focus:bg-[#7DB928] focus:text-white hover:shadow-lg p-2.5 relative z-0">
-            <twig:ux:icon name="material-symbols:cookie"/>
+            <twig:ux:icon name="wba:cookie"/>
         </button>
     </div>
 </div>

@@ -11,31 +11,17 @@ use App\Service\EventActions;
 use App\Service\GetSettings;
 use DateTime;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Http\Event\LogoutEvent;
 
-class LogoutSuccessListener implements EventSubscriberInterface
+readonly class LogoutSuccessListener implements EventSubscriberInterface
 {
-    private GetSettings $getSettings;
-    private UserRepository $userRepository;
-    private SettingRepository $settingRepository;
-    private EventActions $eventActions;
-
-    /**
-     * @param GetSettings $getSettings
-     * @param UserRepository $userRepository
-     * @param SettingRepository $settingRepository
-     * @param EventActions $eventActions
-     */
     public function __construct(
-        GetSettings $getSettings,
-        UserRepository $userRepository,
-        SettingRepository $settingRepository,
-        EventActions $eventActions,
+        private GetSettings $getSettings,
+        private UserRepository $userRepository,
+        private SettingRepository $settingRepository,
+        private EventActions $eventActions,
     ) {
-        $this->getSettings = $getSettings;
-        $this->userRepository = $userRepository;
-        $this->settingRepository = $settingRepository;
-        $this->eventActions = $eventActions;
     }
 
     public static function getSubscribedEvents(): array
@@ -52,20 +38,26 @@ class LogoutSuccessListener implements EventSubscriberInterface
 
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
-        if (!$data['PLATFORM_MODE']['value']) {
-            $platformMode = PlatformMode::LIVE;
-        } else {
-            $platformMode = PlatformMode::DEMO;
-        }
+        $platformMode = $data['PLATFORM_MODE']['value'] ? PlatformMode::DEMO->value : PlatformMode::LIVE->value;
 
         if ($user instanceof User) {
+            // Remove the 'session_backup' cookie
+            $response = $event->getResponse() ?? new Response();
+            $response->headers->clearCookie('session_backup');
+
             // Defines the Event to the table
             $eventMetadata = [
                 'platform' => $platformMode,
                 'ip' => $_SERVER['REMOTE_ADDR'],
+                'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? 'Unknown',
                 'uuid' => $user->getUuid(),
             ];
-            $this->eventActions->saveEvent($user, AnalyticalEventType::LOGOUT_REQUEST, new DateTime(), $eventMetadata);
+            $this->eventActions->saveEvent(
+                $user,
+                AnalyticalEventType::LOGOUT_REQUEST->value,
+                new DateTime(),
+                $eventMetadata
+            );
         }
     }
 }

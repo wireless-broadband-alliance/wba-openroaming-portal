@@ -19,12 +19,9 @@ use Symfony\Component\Console\Question\ConfirmationQuestion;
 )]
 class ResetAuthSettingsCommand extends Command
 {
-    private EntityManagerInterface $entityManager;
-
-    public function __construct(EntityManagerInterface $entityManager)
-    {
-        $this->entityManager = $entityManager;
-
+    public function __construct(
+        private readonly EntityManagerInterface $entityManager
+    ) {
         parent::__construct();
     }
 
@@ -52,13 +49,19 @@ class ResetAuthSettingsCommand extends Command
         $settings = [
             ['name' => 'AUTH_METHOD_SAML_ENABLED', 'value' => 'false'],
             ['name' => 'AUTH_METHOD_SAML_LABEL', 'value' => 'Login with SAML'],
-            ['name' => 'AUTH_METHOD_SAML_DESCRIPTION', 'value' => 'Authenticate with your work account'],
+            ['name' => 'AUTH_METHOD_SAML_DESCRIPTION', 'value' => 'Authenticate with your SAML account'],
             ['name' => 'AUTH_METHOD_GOOGLE_LOGIN_ENABLED', 'value' => 'false'],
             ['name' => 'AUTH_METHOD_GOOGLE_LOGIN_LABEL', 'value' => 'Login with Google'],
             ['name' => 'AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION', 'value' => 'Authenticate with your Google account'],
+            ['name' => 'AUTH_METHOD_MICROSOFT_LOGIN_ENABLED', 'value' => 'false'],
+            ['name' => 'AUTH_METHOD_MICROSOFT_LOGIN_LABEL', 'value' => 'Login with Microsoft'],
+            [
+                'name' => 'AUTH_METHOD_MICROSOFT_LOGIN_DESCRIPTION',
+                'value' => 'Authenticate with your Microsoft account'
+            ],
             ['name' => 'VALID_DOMAINS_GOOGLE_LOGIN', 'value' => ''],
             ['name' => 'AUTH_METHOD_REGISTER_ENABLED', 'value' => 'true'],
-            ['name' => 'AUTH_METHOD_REGISTER_LABEL', 'value' => 'Create Account'],
+            ['name' => 'AUTH_METHOD_REGISTER_LABEL', 'value' => 'Create Account with Email'],
             ['name' => 'AUTH_METHOD_REGISTER_DESCRIPTION', 'value' => 'Don\'t have an account? Create one'],
             ['name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED', 'value' => 'true'],
             ['name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_LABEL', 'value' => 'Account Login'],
@@ -66,8 +69,11 @@ class ResetAuthSettingsCommand extends Command
             ['name' => 'AUTH_METHOD_SMS_REGISTER_ENABLED', 'value' => 'false'],
             ['name' => 'AUTH_METHOD_SMS_REGISTER_LABEL', 'value' => 'Create Account with Phone Number'],
             ['name' => 'AUTH_METHOD_SMS_REGISTER_DESCRIPTION', 'value' => 'Don\'t have an account? Create one'],
-            ['name' => 'PROFILE_LIMIT_DATE_SAML', 'value' => '5'],
+            ['name' => 'VALID_DOMAINS_GOOGLE_LOGIN', 'value' => ''],
+            ['name' => 'VALID_DOMAINS_MICROSOFT_LOGIN', 'value' => ''],
             ['name' => 'PROFILE_LIMIT_DATE_GOOGLE', 'value' => '5'],
+            ['name' => 'PROFILE_LIMIT_DATE_MICROSOFT', 'value' => '5'],
+            ['name' => 'PROFILE_LIMIT_DATE_SAML', 'value' => '5'],
             ['name' => 'PROFILE_LIMIT_DATE_EMAIL', 'value' => '5'],
             ['name' => 'PROFILE_LIMIT_DATE_SMS', 'value' => '5'],
         ];
@@ -85,7 +91,7 @@ class ResetAuthSettingsCommand extends Command
                 // Look for all the settings using the name
                 $setting = $settingsRepository->findOneBy(['name' => $name]);
 
-                if ($setting) {
+                if ($setting !== null) {
                     // Update the already existing value
                     $setting->setValue($value);
                 } else {

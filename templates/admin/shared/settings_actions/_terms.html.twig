@@ -8,26 +8,26 @@
                 {# Display only the terms and conditions settings #}
                 {% if setting.vars.name in ['TOS', 'TOS_LINK', 'TOS_EDITOR'] %}
                     <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full
-                            {% if  setting.vars.name in ['TOS_LINK'] %} {{ form.TOS.vars.data == "LINK" ? '' : 'hidden' }}{% endif %}
-                            {% if  setting.vars.name in ['TOS_EDITOR'] %} {{ form.TOS.vars.data == "TEXT_EDITOR" ? '' : 'hidden' }}{% endif %}"
+                            {% if setting.vars.name in ['TOS_LINK'] %} {{ form.TOS.vars.data == 'LINK' ? '' : 'hidden' }}{% endif %}
+                            {% if setting.vars.name in ['TOS_EDITOR'] %} {{ form.TOS.vars.data == 'TEXT_EDITOR' ? '' : 'hidden' }}{% endif %}"
 
-                            {% if  setting.vars.name in ['TOS_LINK'] %} {{ stimulus_target('radio-card', 'linkInput') }}{% endif %}
-                            {% if  setting.vars.name in ['TOS_EDITOR'] %} {{ stimulus_target('radio-card', 'textEditorInput') }}{% endif %}
+                            {% if setting.vars.name in ['TOS_LINK'] %} {{ stimulus_target('radio-card', 'linkInput') }}{% endif %}
+                            {% if setting.vars.name in ['TOS_EDITOR'] %} {{ stimulus_target('radio-card', 'textEditorInput') }}{% endif %}
                             {% if setting.vars.name in ['TOS_LINK', 'TOS_EDITOR'] %} {{ stimulus_controller('card') }} {{ stimulus_target('radio-card', 'card') }} {% else %} {{ stimulus_controller('radio card') }} {% endif %}>
                         {# Title and Icon #}
                         <div class="flex flex-row justify-between">
                             <div class="text-base font-medium text-center break-normal md:break-all">
                                 {% set displayName = {
-                                    'TOS': 'Terms and Conditions',
-                                    'TOS_LINK': 'Terms and Conditions Link',
-                                    'TOS_EDITOR': 'Terms and Conditions Text Editor',
+                                    TOS: 'Terms and Conditions',
+                                    TOS_LINK: 'Terms and Conditions Link',
+                                    TOS_EDITOR: 'Terms and Conditions Text Editor',
                                 }[setting.vars.name] ?? setting.vars.name %}
 
                                 <h1 class="text-lg md:text-xl whitespace-nowrap">{{ displayName }}</h1>
                             </div>
 
                             <label class="flex items-center bg-opacity-40">
-                                <img class="w-6 cursor-pointer" {{ stimulus_target('card', 'button') }} {{ stimulus_action('card', 'show_info','mouseover')|stimulus_action('card', 'hide_info','mouseout') }}
+                                <img class="w-6 cursor-pointer" {{ stimulus_target('card', 'button') }} {{ stimulus_action('card', 'show_info', 'mouseover')|stimulus_action('card', 'hide_info', 'mouseout') }}
                                      src="{{ asset('resources/logos/info_icon.svg') }}" alt="info_icon"/>
                             </label>
                         </div>
@@ -41,8 +41,8 @@
                                     <input type="radio"
                                            name="{{ form.TOS.vars.full_name }}"
                                            value="LINK"
-                                           class="radio-input hidden"{{ form.TOS.vars.value == "LINK" ? 'checked' : '' }} {{ stimulus_action('radio', 'toggle')|stimulus_action('radio-card', 'showLink') }} {{ stimulus_target('radio-card', 'link') }}>
-                                    <div class="custom-radio pr-3 pt-1.5 {{ form.TOS.vars.data == "LINK" ? '' : 'hidden' }}" {{ stimulus_target('radio', 'on') }}>
+                                           class="radio-input hidden"{{ form.TOS.vars.value == 'LINK' ? 'checked' : '' }} {{ stimulus_action('radio', 'toggle')|stimulus_action('radio-card', 'showLink') }} {{ stimulus_target('radio-card', 'link') }}>
+                                    <div class="custom-radio pr-3 pt-1.5 {{ form.TOS.vars.data == 'LINK' ? '' : 'hidden' }}" {{ stimulus_target('radio', 'on') }}>
                                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10"
                                              viewBox="0 0 14 10"
                                              fill="none">
@@ -59,8 +59,8 @@
                                     <input type="radio"
                                            name="{{ form.TOS.vars.full_name }}"
                                            value="TEXT_EDITOR"
-                                           class="radio-input hidden" {{ form.TOS.vars.value == "TEXT_EDITOR" ? 'checked' : '' }} {{ stimulus_action('radio', 'toggle')|stimulus_action('radio-card', 'showTextEditor')}}>
-                                    <div class="custom-radio pr-3 pt-1.5 {{ form.TOS.vars.data == "TEXT_EDITOR" ? '' : 'hidden' }}" {{ stimulus_target('radio', 'off') }}>
+                                           class="radio-input hidden" {{ form.TOS.vars.value == 'TEXT_EDITOR' ? 'checked' : '' }} {{ stimulus_action('radio', 'toggle')|stimulus_action('radio-card', 'showTextEditor') }}>
+                                    <div class="custom-radio pr-3 pt-1.5 {{ form.TOS.vars.data == 'TEXT_EDITOR' ? '' : 'hidden' }}" {{ stimulus_target('radio', 'off') }}>
                                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10"
                                              viewBox="0 0 14 10"
                                              fill="none">
@@ -72,17 +72,17 @@
                                 </label>
                             </div>
                         {% endif %}
-                        {% if  setting.vars.name in ['TOS_LINK'] %}
+                        {% if setting.vars.name in ['TOS_LINK'] %}
                                 <div class="mt-5">
-                                    {{ form_widget(setting, {'attr': {'class': 'form-widget'}}) }}
+                                    {{ form_widget(setting, {attr: {class: 'form-widget'}}) }}
                                 </div>
                         {% endif %}
-                        {% if  setting.vars.name in ['TOS_EDITOR'] %}
+                        {% if setting.vars.name in ['TOS_EDITOR'] %}
                             <div class="mt-5">
                                 {{ form_widget(setting) }}
                             </div>
                         {% endif %}
-                        {{ include('/admin/shared/settings_actions/_description.html.twig', { description: setting.vars.attr.description }) }}
+                        {{ include('/admin/shared/settings_actions/_description.html.twig', {description: setting.vars.attr.description}) }}
                         <div class="mt-2 -mb-2 text-center text-red-500 text-base">
                             {{ form_errors(setting) }}
                         </div>
@@ -97,26 +97,26 @@
                     {# Display only the terms and conditions settings #}
                     {% if setting.vars.name in ['PRIVACY_POLICY', 'PRIVACY_POLICY_LINK', 'PRIVACY_POLICY_EDITOR'] %}
                         <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full
-                            {% if  setting.vars.name in ['PRIVACY_POLICY_LINK'] %} {{ form.PRIVACY_POLICY.vars.data == "LINK" ? '' : 'hidden' }}{% endif %}
-                            {% if  setting.vars.name in ['PRIVACY_POLICY_EDITOR'] %} {{ form.PRIVACY_POLICY.vars.data == "TEXT_EDITOR" ? '' : 'hidden' }}{% endif %}"
+                            {% if setting.vars.name in ['PRIVACY_POLICY_LINK'] %} {{ form.PRIVACY_POLICY.vars.data == 'LINK' ? '' : 'hidden' }}{% endif %}
+                            {% if setting.vars.name in ['PRIVACY_POLICY_EDITOR'] %} {{ form.PRIVACY_POLICY.vars.data == 'TEXT_EDITOR' ? '' : 'hidden' }}{% endif %}"
 
-                                {% if  setting.vars.name in ['PRIVACY_POLICY_LINK'] %} {{ stimulus_target('radio-card', 'linkInput') }}{% endif %}
-                                {% if  setting.vars.name in ['PRIVACY_POLICY_EDITOR'] %} {{ stimulus_target('radio-card', 'textEditorInput') }}{% endif %}
+                                {% if setting.vars.name in ['PRIVACY_POLICY_LINK'] %} {{ stimulus_target('radio-card', 'linkInput') }}{% endif %}
+                                {% if setting.vars.name in ['PRIVACY_POLICY_EDITOR'] %} {{ stimulus_target('radio-card', 'textEditorInput') }}{% endif %}
                                 {% if setting.vars.name in ['PRIVACY_POLICY_LINK', 'PRIVACY_POLICY_EDITOR'] %} {{ stimulus_controller('card') }} {{ stimulus_target('radio-card', 'card') }} {% else %} {{ stimulus_controller('radio card') }} {% endif %}>
                             {# Title and Icon #}
                             <div class="flex flex-row justify-between">
                                 <div class="text-base font-medium text-center break-normal md:break-all">
                                     {% set displayName = {
-                                        'PRIVACY_POLICY': 'Privacy and Policy',
-                                        'PRIVACY_POLICY_LINK': 'Privacy and Policy Link',
-                                        'PRIVACY_POLICY_EDITOR': 'Privacy and Policy Text Editor',
+                                        PRIVACY_POLICY: 'Privacy and Policy',
+                                        PRIVACY_POLICY_LINK: 'Privacy and Policy Link',
+                                        PRIVACY_POLICY_EDITOR: 'Privacy and Policy Text Editor',
                                     }[setting.vars.name] ?? setting.vars.name %}
 
                                     <h1 class="text-lg md:text-xl whitespace-nowrap">{{ displayName }}</h1>
                                 </div>
 
                                 <label class="flex items-center bg-opacity-40">
-                                    <img class="w-6 cursor-pointer" {{ stimulus_target('card', 'button') }} {{ stimulus_action('card', 'show_info','mouseover')|stimulus_action('card', 'hide_info','mouseout') }}
+                                    <img class="w-6 cursor-pointer" {{ stimulus_target('card', 'button') }} {{ stimulus_action('card', 'show_info', 'mouseover')|stimulus_action('card', 'hide_info', 'mouseout') }}
                                          src="{{ asset('resources/logos/info_icon.svg') }}" alt="info_icon"/>
                                 </label>
                             </div>
@@ -130,8 +130,8 @@
                                         <input type="radio"
                                                name="{{ form.PRIVACY_POLICY.vars.full_name }}"
                                                value="LINK"
-                                               class="radio-input hidden"{{ form.PRIVACY_POLICY.vars.value == "LINK" ? 'checked' : '' }} {{ stimulus_action('radio', 'toggle')|stimulus_action('radio-card', 'showLink') }} {{ stimulus_target('radio-card', 'link') }}>
-                                        <div class="custom-radio pr-3 pt-1.5 {{ form.PRIVACY_POLICY.vars.data == "LINK" ? '' : 'hidden' }}" {{ stimulus_target('radio', 'on') }}>
+                                               class="radio-input hidden"{{ form.PRIVACY_POLICY.vars.value == 'LINK' ? 'checked' : '' }} {{ stimulus_action('radio', 'toggle')|stimulus_action('radio-card', 'showLink') }} {{ stimulus_target('radio-card', 'link') }}>
+                                        <div class="custom-radio pr-3 pt-1.5 {{ form.PRIVACY_POLICY.vars.data == 'LINK' ? '' : 'hidden' }}" {{ stimulus_target('radio', 'on') }}>
                                             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10"
                                                  viewBox="0 0 14 10"
                                                  fill="none">
@@ -148,8 +148,8 @@
                                         <input type="radio"
                                                name="{{ form.PRIVACY_POLICY.vars.full_name }}"
                                                value="TEXT_EDITOR"
-                                               class="radio-input hidden" {{ form.PRIVACY_POLICY.vars.value == "TEXT_EDITOR" ? 'checked' : '' }} {{ stimulus_action('radio', 'toggle')|stimulus_action('radio-card', 'showTextEditor')}}>
-                                        <div class="custom-radio pr-3 pt-1.5 {{ form.PRIVACY_POLICY.vars.data == "TEXT_EDITOR" ? '' : 'hidden' }}" {{ stimulus_target('radio', 'off') }}>
+                                               class="radio-input hidden" {{ form.PRIVACY_POLICY.vars.value == 'TEXT_EDITOR' ? 'checked' : '' }} {{ stimulus_action('radio', 'toggle')|stimulus_action('radio-card', 'showTextEditor') }}>
+                                        <div class="custom-radio pr-3 pt-1.5 {{ form.PRIVACY_POLICY.vars.data == 'TEXT_EDITOR' ? '' : 'hidden' }}" {{ stimulus_target('radio', 'off') }}>
                                             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10"
                                                  viewBox="0 0 14 10"
                                                  fill="none">
@@ -161,17 +161,17 @@
                                     </label>
                                 </div>
                             {% endif %}
-                            {% if  setting.vars.name in ['PRIVACY_POLICY_LINK'] %}
+                            {% if setting.vars.name in ['PRIVACY_POLICY_LINK'] %}
                                 <div class="mt-5">
-                                    {{ form_widget(setting, {'attr': {'class': 'form-widget'}}) }}
+                                    {{ form_widget(setting, {attr: {class: 'form-widget'}}) }}
                                 </div>
                             {% endif %}
-                            {% if  setting.vars.name in ['PRIVACY_POLICY_EDITOR'] %}
+                            {% if setting.vars.name in ['PRIVACY_POLICY_EDITOR'] %}
                                 <div class="mt-5">
                                     {{ form_widget(setting) }}
                                 </div>
                             {% endif %}
-                            {{ include('/admin/shared/settings_actions/_description.html.twig', { description: setting.vars.attr.description }) }}
+                            {{ include('/admin/shared/settings_actions/_description.html.twig', {description: setting.vars.attr.description}) }}
                             <div class="mt-2 -mb-2 text-center text-red-500 text-base">
                                 {{ form_errors(setting) }}
                             </div>
@@ -186,7 +186,7 @@
     <div class="mt-8 divider-solid"></div>
 
     <div class="mt-6 flex flex-row w-full justify-end items-center gap-2">
-        <a href="{{ path('app_dashboard_regenerate_code_admin', {'type': 'settingTerms'}) }}"
+        <a href="{{ path('app_dashboard_regenerate_code_admin', {type: 'settingTerms'}) }}"
            onclick="return confirm('Are you sure you want to reset to the default settings?')"
            class="text-sm hover:text-red-600 font-bold p-2 rounded-lg transition ease-in duration-300">
             Reset

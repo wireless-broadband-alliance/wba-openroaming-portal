@@ -19,13 +19,10 @@ use Symfony\Component\Console\Question\ConfirmationQuestion;
 )]
 class ClearEventCommand extends Command
 {
-    private EntityManagerInterface $entityManager;
-    private EventRepository $eventRepository;
-
-    public function __construct(EntityManagerInterface $entityManager, EventRepository $eventRepository)
-    {
-        $this->entityManager = $entityManager;
-        $this->eventRepository = $eventRepository;
+    public function __construct(
+        private readonly EntityManagerInterface $entityManager,
+        private readonly EventRepository $eventRepository
+    ) {
         parent::__construct();
     }
 
@@ -42,12 +39,11 @@ class ClearEventCommand extends Command
         // Confirmation prompt if --yes option is not provided
         if (!$input->getOption('yes')) {
             $helper = $this->getHelper('question');
-            // phpcs:disable Generic.Files.LineLength.TooLong
             $question = new ConfirmationQuestion(
-                'This action will delete all records from the Event entity where any field is null. Do you want to proceed? [y/N] ',
+                'This action will delete all records from the Event entity' .
+                ' where any field is null. Do you want to proceed? [y/N] ',
                 false
             );
-            // phpcs:enable
             /** @var QuestionHelper $helper */
             if (!$helper->ask($input, $output, $question)) {
                 $output->writeln('Command aborted.');
