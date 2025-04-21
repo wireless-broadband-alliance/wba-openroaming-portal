@@ -69,32 +69,41 @@ class AuthType extends AbstractType
                 'type' => IntegerType::class,
                 'constraints' => [
                     new NotBlank([
-                        'message' => 'Please select an option.',
-                    ]),
-                    new Range([
-                        'min' => 1,
-                        'max' => $options['profileLimitDate'],
-                        'notInRangeMessage' => sprintf(
-                            'Please select a value between 1 (minimum, fixed value) and %d 
-                            (maximum, determined by the number of days left until the certificate expires on %s).',
-                            $options['profileLimitDate'],
-                            $options['humanReadableExpirationDate']
-                        ),
+                        'message' => 'Please select return a valid value.',
                     ]),
                     new Callback(function ($value, ExecutionContextInterface $context) use ($options): void {
+                        // Get the root form to access other fields
+                        $form = $context->getRoot();
+
+                        // Check if AUTH_METHOD_SAML_ENABLED is set to 'false'
+                        $authMethodSamlEnabled = $form->get('AUTH_METHOD_SAML_ENABLED')->getData();
+                        if ($authMethodSamlEnabled === 'false') {
+                            // Skip validation if SAML is disabled
+                            return;
+                        }
+
+                        // Perform the range validation if SAML is enabled
+                        if ($value < 1 || $value > $options['profileLimitDate']) {
+                            $context->buildViolation(sprintf(
+                                'Please select a value between 1 (minimum, fixed value) and %d 
+                    (maximum, determined by the number of days left until the certificate expires on %s).',
+                                $options['profileLimitDate'],
+                                $options['humanReadableExpirationDate']
+                            ))->addViolation();
+                        }
+                    }),
+                    new Callback(function ($value, ExecutionContextInterface $context) use ($options): void {
+                        // Additional validation if needed for expired certificates
                         if ($options['profileLimitDate'] < 1) {
-                            // Format the message with the human-readable expiration date
-                            $context->buildViolation(
-                                sprintf(
-                                    'The certificate has expired on (%s), please renew your certificate.',
-                                    $options['humanReadableExpirationDate']
-                                )
-                            )->addViolation();
+                            $context->buildViolation(sprintf(
+                                'The certificate has expired on (%s), please renew your certificate.',
+                                $options['humanReadableExpirationDate']
+                            ))->addViolation();
                         }
                     }),
                 ],
             ],
-            // Google
+            // Google Settings
             'AUTH_METHOD_GOOGLE_LOGIN_ENABLED' => [
                 'type' => ChoiceType::class,
             ],
@@ -112,7 +121,7 @@ class AuthType extends AbstractType
                             'callback' => function ($value, ExecutionContextInterface $context): void {
                                 $form = $context->getRoot();
                                 $authMethodGoogleEnabled = $form->get('AUTH_METHOD_GOOGLE_LOGIN_ENABLED')->getData();
-                                if ($authMethodGoogleEnabled === "true" && empty($value)) {
+                                if ($authMethodGoogleEnabled === 'true' && empty($value)) {
                                     $context->buildViolation('This field cannot be empty when GOOGLE is enabled.')
                                         ->addViolation();
                                 }
@@ -137,7 +146,7 @@ class AuthType extends AbstractType
                 'type' => TextType::class,
                 'options' => [
                     'required' => false,
-                ]
+                ],
             ],
             'PROFILE_LIMIT_DATE_GOOGLE' => [
                 'type' => IntegerType::class,
@@ -145,25 +154,29 @@ class AuthType extends AbstractType
                     new NotBlank([
                         'message' => 'Please select an option.',
                     ]),
-                    new Range([
-                        'min' => 1,
-                        'max' => $options['profileLimitDate'],
-                        'notInRangeMessage' => sprintf(
-                            'Please select a value between 1 (minimum, fixed value) and %d 
-                            (maximum, determined by the number of days left until the certificate expires on %s).',
-                            $options['profileLimitDate'],
-                            $options['humanReadableExpirationDate']
-                        ),
-                    ]),
+                    new Callback(function ($value, ExecutionContextInterface $context) use ($options): void {
+                        $form = $context->getRoot();
+                        $authMethodGoogleEnabled = $form->get('AUTH_METHOD_GOOGLE_LOGIN_ENABLED')->getData();
+                        if ($authMethodGoogleEnabled === 'false') {
+                            return;
+                        }
+
+                        // Perform range validation if Google login is enabled
+                        if ($value < 1 || $value > $options['profileLimitDate']) {
+                            $context->buildViolation(sprintf(
+                                'Please select a value between 1 (minimum, fixed value) and %d 
+                    (maximum, determined by the number of days left until the certificate expires on %s).',
+                                $options['profileLimitDate'],
+                                $options['humanReadableExpirationDate']
+                            ))->addViolation();
+                        }
+                    }),
                     new Callback(function ($value, ExecutionContextInterface $context) use ($options): void {
                         if ($options['profileLimitDate'] < 1) {
-                            // Format the message with the human-readable expiration date
-                            $context->buildViolation(
-                                sprintf(
-                                    'The certificate has expired on (%s), please renew your certificate.',
-                                    $options['humanReadableExpirationDate']
-                                )
-                            )->addViolation();
+                            $context->buildViolation(sprintf(
+                                'The certificate has expired on (%s), please renew your certificate.',
+                                $options['humanReadableExpirationDate']
+                            ))->addViolation();
                         }
                     }),
                 ],
@@ -219,21 +232,36 @@ class AuthType extends AbstractType
                 'type' => IntegerType::class,
                 'constraints' => [
                     new NotBlank([
-                        'message' => 'Please select an option',
+                        'message' => 'Please select a valid value.',
                     ]),
                     new Callback(function ($value, ExecutionContextInterface $context) use ($options): void {
+                        $form = $context->getRoot();
+
+                        $authMethodMicrosoftEnabled = $form->get('AUTH_METHOD_MICROSOFT_LOGIN_ENABLED')->getData();
+                        if ($authMethodMicrosoftEnabled === 'false') {
+                            return;
+                        }
+
+                        if ($value < 1 || $value > $options['profileLimitDate']) {
+                            $context->buildViolation(sprintf(
+                                'Please select a value between 1 (minimum, fixed value) and %d 
+                    (maximum, determined by the number of days left until the certificate expires on %s).',
+                                $options['profileLimitDate'],
+                                $options['humanReadableExpirationDate']
+                            ))->addViolation();
+                        }
+                    }),
+                    new Callback(function ($value, ExecutionContextInterface $context) use ($options): void {
                         if ($options['profileLimitDate'] < 1) {
-                            // Format the message with the human-readable expiration date
-                            $context->buildViolation(
-                                sprintf(
-                                    'The certificate has expired on (%s), please renew your certificate.',
-                                    $options['humanReadableExpirationDate']
-                                )
-                            )->addViolation();
+                            $context->buildViolation(sprintf(
+                                'The certificate has expired on (%s), please renew your certificate.',
+                                $options['humanReadableExpirationDate']
+                            ))->addViolation();
                         }
                     }),
                 ],
             ],
+
             // Email Registration
             'AUTH_METHOD_REGISTER_ENABLED' => [
                 'type' => ChoiceType::class,
@@ -280,25 +308,29 @@ class AuthType extends AbstractType
                     new NotBlank([
                         'message' => 'Please select an option.',
                     ]),
-                    new Range([
-                        'min' => 1,
-                        'max' => $options['profileLimitDate'],
-                        'notInRangeMessage' => sprintf(
-                            'Please select a value between 1 (minimum, fixed value) and %d 
-                            (maximum, determined by the number of days left until the certificate expires on %s).',
-                            $options['profileLimitDate'],
-                            $options['humanReadableExpirationDate']
-                        ),
-                    ]),
+                    new Callback(function ($value, ExecutionContextInterface $context) use ($options): void {
+                        $form = $context->getRoot();
+
+                        $authMethodRegisterEnabled = $form->get('AUTH_METHOD_REGISTER_ENABLED')->getData();
+                        if ($authMethodRegisterEnabled === 'false') {
+                            return;
+                        }
+
+                        if ($value < 1 || $value > $options['profileLimitDate']) {
+                            $context->buildViolation(sprintf(
+                                'Please select a value between 1 (minimum, fixed value) and %d 
+                    (maximum, determined by the number of days left until the certificate expires on %s).',
+                                $options['profileLimitDate'],
+                                $options['humanReadableExpirationDate']
+                            ))->addViolation();
+                        }
+                    }),
                     new Callback(function ($value, ExecutionContextInterface $context) use ($options): void {
                         if ($options['profileLimitDate'] < 1) {
-                            // Format the message with the human-readable expiration date
-                            $context->buildViolation(
-                                sprintf(
-                                    'The certificate has expired on (%s), please renew your certificate.',
-                                    $options['humanReadableExpirationDate']
-                                )
-                            )->addViolation();
+                            $context->buildViolation(sprintf(
+                                'The certificate has expired on (%s), please renew your certificate.',
+                                $options['humanReadableExpirationDate']
+                            ))->addViolation();
                         }
                     }),
                 ],
@@ -392,25 +424,29 @@ class AuthType extends AbstractType
                     new NotBlank([
                         'message' => 'Please select an option.',
                     ]),
-                    new Range([
-                        'min' => 1,
-                        'max' => $options['profileLimitDate'],
-                        'notInRangeMessage' => sprintf(
-                            'Please select a value between 1 (minimum, fixed value) and %d 
-                            (maximum, determined by the number of days left until the certificate expires on %s).',
-                            $options['profileLimitDate'],
-                            $options['humanReadableExpirationDate']
-                        ),
-                    ]),
+                    new Callback(function ($value, ExecutionContextInterface $context) use ($options): void {
+                        $form = $context->getRoot();
+
+                        $authMethodSmsRegisterEnabled = $form->get('AUTH_METHOD_SMS_REGISTER_ENABLED')->getData();
+                        if ($authMethodSmsRegisterEnabled === 'false') {
+                            return;
+                        }
+
+                        if ($value < 1 || $value > $options['profileLimitDate']) {
+                            $context->buildViolation(sprintf(
+                                'Please select a value between 1 (minimum, fixed value) and %d 
+                    (maximum, determined by the number of days left until the certificate expires on %s).',
+                                $options['profileLimitDate'],
+                                $options['humanReadableExpirationDate']
+                            ))->addViolation();
+                        }
+                    }),
                     new Callback(function ($value, ExecutionContextInterface $context) use ($options): void {
                         if ($options['profileLimitDate'] < 1) {
-                            // Format the message with the human-readable expiration date
-                            $context->buildViolation(
-                                sprintf(
-                                    'The certificate has expired on (%s), please renew your certificate.',
-                                    $options['humanReadableExpirationDate']
-                                )
-                            )->addViolation();
+                            $context->buildViolation(sprintf(
+                                'The certificate has expired on (%s). Please renew your certificate.',
+                                $options['humanReadableExpirationDate']
+                            ))->addViolation();
                         }
                     }),
                 ],
