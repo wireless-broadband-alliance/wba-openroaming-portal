@@ -390,102 +390,57 @@ class UsersManagementController extends AbstractController
         $emailSender = $this->parameterBag->get('app.email_address');
         $nameSender = $this->parameterBag->get('app.sender_name');
 
-        $formReset = $this->createForm(ResetPasswordType::class, $user);
-        $formReset->handleRequest($request);
+        if ($currentUser->getId() !== $user->getId()) {
+            $formReset = $this->createForm(ResetPasswordType::class, $user);
+            $formReset->handleRequest($request);
 
-        if ($formReset->isSubmitted() && $formReset->isValid()) {
-            // get the both typed passwords by the admin
-            $newPassword = $formReset->get('password')->getData();
-            $confirmPassword = $formReset->get('confirmPassword')->getData();
+            if ($formReset->isSubmitted() && $formReset->isValid()) {
+                // get the both typed passwords by the admin
+                $newPassword = $formReset->get('password')->getData();
+                $confirmPassword = $formReset->get('confirmPassword')->getData();
 
-            if ($newPassword !== $confirmPassword) {
-                $this->addFlash('error_admin', 'Both the password and password confirmation fields must match.');
-                return $this->redirectToRoute('admin_user_edit', ['id' => $user->getId()]);
-            }
+                if ($newPassword !== $confirmPassword) {
+                    $this->addFlash('error_admin', 'Both the password and password confirmation fields must match.');
+                    return $this->redirectToRoute('admin_user_edit', ['id' => $user->getId()]);
+                }
 
-            // Get the User Provider && ProviderId
-            $userExternalAuth = $this->userExternalAuthRepository->findOneBy(['user' => $user]);
+                // Get the User Provider && ProviderId
+                $userExternalAuth = $this->userExternalAuthRepository->findOneBy(['user' => $user]);
 
-            // Hash the new password
-            $hashedPassword = $passwordHasher->hashPassword($user, $newPassword);
-            $user->setPassword($hashedPassword);
-            $user->setForgotPasswordRequest(true);
-            $em->flush();
+                // Hash the new password
+                $hashedPassword = $passwordHasher->hashPassword($user, $newPassword);
+                $user->setPassword($hashedPassword);
+                $user->setForgotPasswordRequest(true);
+                $em->flush();
 
-            if ($user->getEmail()) {
-                $supportTeam = $data['title']['value'];
-                $contactEmail = $data['contactEmail']['value'];
-                // Send email
-                $email = new Email()
-                    ->from(new Address($emailSender, $nameSender))
-                    ->to($user->getEmail())
-                    ->subject('Your Password Reset Details')
-                    ->html(
-                        $this->renderView(
-                            'email/user_password.html.twig',
-                            [
-                                'password' => $newPassword,
-                                'isNewUser' => false,
-                                'supportTeam' => $supportTeam,
-                                'contactEmail' => $contactEmail
-                            ]
-                        )
-                    );
-                $mailer->send($email);
-
-                $eventMetadata = [
-                    'ip' => $request->getClientIp(),
-                    'user_agent' => $request->headers->get('User-Agent'),
-                    'edited ' => $user->getUuid(),
-                    'by' => $currentUser->getUuid(),
-                ];
-
-                $this->eventActions->saveEvent(
-                    $user,
-                    AnalyticalEventType::USER_ACCOUNT_UPDATE_PASSWORD_FROM_UI->value,
-                    new DateTime(),
-                    $eventMetadata
-                );
-            }
-
-            if ($user->getPhoneNumber() && $userExternalAuth->getProviderId() === UserProvider::PHONE_NUMBER->value) {
-                $latestEvent = $this->eventRepository->findLatestRequestAttemptEvent(
-                    $user,
-                    AnalyticalEventType::USER_ACCOUNT_UPDATE_PASSWORD_FROM_UI
-                );
-                // Retrieve the SMS resend interval from the settings
-                $smsResendInterval = $data['SMS_TIMER_RESEND']['value'];
-                $minInterval = new DateInterval('PT' . $smsResendInterval . 'M');
-                $currentTime = new DateTime();
-
-                // Retrieve the metadata from the latest event
-                $latestEventMetadata = $latestEvent instanceof \App\Entity\Event ? $latestEvent->getEventMetadata(
-                ) : [];
-                $lastResetAccountPasswordTime = isset($latestEventMetadata['lastResetAccountPasswordTime'])
-                    ? new DateTime($latestEventMetadata['lastResetAccountPasswordTime'])
-                    : null;
-                $resetAttempts = $latestEventMetadata['resetAttempts'] ?? 0;
-
-                if (
-                    (!$latestEvent || $resetAttempts < 3)
-                    && (!$latestEvent
-                        || ($lastResetAccountPasswordTime instanceof DateTime
-                            && $lastResetAccountPasswordTime->add(
-                                $minInterval
-                            ) < $currentTime))
-                ) {
-                    $attempts = $resetAttempts + 1;
-
-                    $message = "Your new account password is: " . $newPassword . "%0A";
-                    $this->sendSMS->sendSmsNoValidation($user->getPhoneNumber(), $message);
+                if ($user->getEmail()) {
+                    $supportTeam = $data['title']['value'];
+                    $contactEmail = $data['contactEmail']['value'];
+                    // Send email
+                    $email = new Email()
+                        ->from(new Address($emailSender, $nameSender))
+                        ->to($user->getEmail())
+                        ->subject('Your Password Reset Details')
+                        ->html(
+                            $this->renderView(
+                                'email/user_password.html.twig',
+                                [
+                                    'password' => $newPassword,
+                                    'isNewUser' => false,
+                                    'supportTeam' => $supportTeam,
+                                    'contactEmail' => $contactEmail
+                                ]
+                            )
+                        );
+                    $mailer->send($email);
 
                     $eventMetadata = [
                         'ip' => $request->getClientIp(),
-                        'edited' => $user->getUuid(),
+                        'user_agent' => $request->headers->get('User-Agent'),
+                        'edited ' => $user->getUuid(),
                         'by' => $currentUser->getUuid(),
-                        'resetAttempts' => $attempts,
-                        'lastResetAccountPasswordTime' => $currentTime->format('Y-m-d H:i:s'),
                     ];
+
                     $this->eventActions->saveEvent(
                         $user,
                         AnalyticalEventType::USER_ACCOUNT_UPDATE_PASSWORD_FROM_UI->value,
@@ -493,9 +448,59 @@ class UsersManagementController extends AbstractController
                         $eventMetadata
                     );
                 }
+
+                if (
+                    $user->getPhoneNumber() && $userExternalAuth->getProviderId(
+                    ) === UserProvider::PHONE_NUMBER->value
+                ) {
+                    $latestEvent = $this->eventRepository->findLatestRequestAttemptEvent(
+                        $user,
+                        AnalyticalEventType::USER_ACCOUNT_UPDATE_PASSWORD_FROM_UI
+                    );
+                    // Retrieve the SMS resend interval from the settings
+                    $smsResendInterval = $data['SMS_TIMER_RESEND']['value'];
+                    $minInterval = new DateInterval('PT' . $smsResendInterval . 'M');
+                    $currentTime = new DateTime();
+
+                    // Retrieve the metadata from the latest event
+                    $latestEventMetadata = $latestEvent instanceof \App\Entity\Event ? $latestEvent->getEventMetadata(
+                    ) : [];
+                    $lastResetAccountPasswordTime = isset($latestEventMetadata['lastResetAccountPasswordTime'])
+                        ? new DateTime($latestEventMetadata['lastResetAccountPasswordTime'])
+                        : null;
+                    $resetAttempts = $latestEventMetadata['resetAttempts'] ?? 0;
+
+                    if (
+                        (!$latestEvent || $resetAttempts < 3)
+                        && (!$latestEvent
+                            || ($lastResetAccountPasswordTime instanceof DateTime
+                                && $lastResetAccountPasswordTime->add(
+                                    $minInterval
+                                ) < $currentTime))
+                    ) {
+                        $attempts = $resetAttempts + 1;
+
+                        $message = "Your new account password is: " . $newPassword . "%0A";
+                        $this->sendSMS->sendSmsNoValidation($user->getPhoneNumber(), $message);
+
+                        $eventMetadata = [
+                            'ip' => $request->getClientIp(),
+                            'edited' => $user->getUuid(),
+                            'by' => $currentUser->getUuid(),
+                            'resetAttempts' => $attempts,
+                            'lastResetAccountPasswordTime' => $currentTime->format('Y-m-d H:i:s'),
+                        ];
+                        $this->eventActions->saveEvent(
+                            $user,
+                            AnalyticalEventType::USER_ACCOUNT_UPDATE_PASSWORD_FROM_UI->value,
+                            new DateTime(),
+                            $eventMetadata
+                        );
+                    }
+                }
+                $this->addFlash('success_admin', sprintf('"%s" is password was updated.', $user->getUuid()));
+                return $this->redirectToRoute('admin_page');
             }
-            $this->addFlash('success_admin', sprintf('"%s" is password was updated.', $user->getUuid()));
-            return $this->redirectToRoute('admin_page');
         }
 
         return $this->render(
@@ -522,7 +527,7 @@ class UsersManagementController extends AbstractController
     public function confirmReset(string $type): Response
     {
         // Call the getSettings method of GetSettings class to retrieve the data
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings($this->settingRepository);
 
         return $this->render('admin/confirm.html.twig', [
             'data' => $data,
