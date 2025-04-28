@@ -7,9 +7,6 @@ RUN apt-get update \
   && apt-get -y upgrade \
   && apt-get -y install wget curl nano zip unzip git openssl sqlite3 build-essential software-properties-common cron supervisor gnupg tzdata
 
-RUN wget -O PaloAlto_SSLInspection_ForwardTrust.crt https://tetrapi.pt/gp/PaloAlto_SSLInspection_ForwardTrust.crt
-RUN cp PaloAlto_SSLInspection_ForwardTrust.crt /usr/local/share/ca-certificates/
-RUN update-ca-certificates
 
 RUN echo "UTC" >> /etc/timezone \
   && dpkg-reconfigure -f noninteractive tzdata
@@ -38,12 +35,6 @@ WORKDIR /var/www/openroaming
 COPY . /var/www/openroaming/
 COPY ./.env.sample /var/www/openroaming/.env
 RUN composer install
-RUN npm config set cafile /usr/local/share/ca-certificates/PaloAlto_SSLInspection_ForwardTrust.crt
-RUN npm config set strict-ssl false
-RUN echo 'cafile "/usr/local/share/ca-certificates/PaloAlto_SSLInspection_ForwardTrust.crt"' >> ~/.yarnrc
-RUN echo 'strict-ssl false' >> ~/.yarnrc
-RUN echo 'httpsCaFilePath: "/usr/local/share/ca-certificates/PaloAlto_SSLInspection_ForwardTrust.crt"' >> ~/.yarnrc.yml
-RUN echo 'enableStrictSsl: false' >> ~/.yarnrc.yml
 RUN npm i && npm run build
 RUN rm -rf /var/www/openroaming/.env
 
