@@ -141,10 +141,12 @@ class SecurityController extends AbstractController
     }
 
     #[Route(path: '/logout', name: 'app_logout')]
-    public function logout(): Response
+    public function logout(Request $request): Response
     {
-        //$session = $request->getSession();
-        //$session->clear();
+        $session = $request->getSession();
+        $session->clear();
+
+        dd('ola');
         // TODO !!rework logout!! in case of logout bugs with sessions admin/user
         return $this->redirectToRoute('app_landing');
     }
