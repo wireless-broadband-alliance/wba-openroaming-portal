@@ -524,7 +524,7 @@ class UsersManagementController extends AbstractController
     public function confirmReset(string $type): Response
     {
         // Call the getSettings method of GetSettings class to retrieve the data
-        $data = $this->getSettings->getSettings($this->settingRepository);
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
         return $this->render('admin/confirm.html.twig', [
             'data' => $data,
