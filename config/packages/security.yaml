@@ -45,7 +45,7 @@ security:
             logout:
                 path: app_dashboard_logout
                 target: /dashboard
-                invalidate_session: false
+                invalidate_session: true
             entry_point: form_login
 
         landing:
@@ -74,7 +74,7 @@ security:
             logout:
                 path: app_logout
                 target: / # Redirect users to the homepage (or another path) after logout
-                invalidate_session: false
+                invalidate_session: true
             # Entry point for authentication.
             entry_point: App\Security\AuthenticationEntryPoint
             # enable impersonation (if required in the future)

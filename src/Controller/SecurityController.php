@@ -145,9 +145,6 @@ class SecurityController extends AbstractController
     {
         $session = $request->getSession();
         $session->clear();
-
-        dd('ola');
-        // TODO !!rework logout!! in case of logout bugs with sessions admin/user
         return $this->redirectToRoute('app_landing');
     }
 }
