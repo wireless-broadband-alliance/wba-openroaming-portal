@@ -62,12 +62,11 @@ class ConfigController extends AbstractController
             'TURNSTILE_KEY' => $this->parameterBag->get('app.turnstile_key')
         ];
 
-
         if ($this->getSettingValueRaw('AUTH_METHOD_SAML_ENABLED') === 'true' &&
-            $this->parameterBag->has('app.saml_idp_entity_id') &&
-            $this->parameterBag->has('app.saml_idp_sso_url') &&
-            $this->parameterBag->has('app.saml_idp_x509_cert') &&
-            $this->parameterBag->has('app.saml_sp_entity_id')
+            array_key_exists('SAML_IDP_ENTITY_ID', $_ENV) &&
+            array_key_exists('SAML_IDP_SSO_URL', $_ENV) &&
+            array_key_exists('SAML_IDP_X509_CERT', $_ENV) &&
+            array_key_exists('SAML_SP_ENTITY_ID', $_ENV)
         )
         {
             $data['saml'] = [
@@ -79,7 +78,7 @@ class ConfigController extends AbstractController
         }
 
         if ($this->getSettingValueRaw('AUTH_METHOD_MICROSOFT_LOGIN_ENABLED') === 'true' &&
-            $this->parameterBag->has('app.microsoft_client_id')
+            array_key_exists('MICROSOFT_CLIENT_ID', $_ENV)
         )
         {
             $data['microsoft'] = [
@@ -88,7 +87,7 @@ class ConfigController extends AbstractController
         }
 
         if ($this->getSettingValueRaw('AUTH_METHOD_GOOGLE_LOGIN_ENABLED') === 'true' &&
-            $this->parameterBag->has('app.google_client_id')
+            array_key_exists('GOOGLE_CLIENT_ID', $_ENV)
         )
         {
             $data['google'] = [
