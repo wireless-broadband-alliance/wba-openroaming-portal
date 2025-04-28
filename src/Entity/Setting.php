@@ -178,6 +178,13 @@ use Doctrine\ORM\Mapping as ORM;
                                                             'description' => 'Indicates whether Google login is enabled (true) or disabled (false).',
                                                             // phpcs:enable
                                                         ],
+                                                        'AUTH_METHOD_MICROSOFT_LOGIN_ENABLED' => [
+                                                            'type' => 'boolean',
+                                                            'example' => true,
+                                                            // phpcs:disable Generic.Files.LineLength.TooLong
+                                                            'description' => 'Indicates whether Microsoft login is enabled (true) or disabled (false).',
+                                                            // phpcs:enable
+                                                        ],
                                                         'AUTH_METHOD_REGISTER_ENABLED' => [
                                                             'type' => 'boolean',
                                                             'example' => true,
@@ -279,6 +286,7 @@ use Doctrine\ORM\Mapping as ORM;
                                         'auth' => [
                                             'AUTH_METHOD_SAML_ENABLED' => true,
                                             'AUTH_METHOD_GOOGLE_LOGIN_ENABLED' => true,
+                                            'AUTH_METHOD_MICROSOFT_LOGIN_ENABLED' => true,
                                             'AUTH_METHOD_REGISTER_ENABLED' => true,
                                             'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED' => true,
                                             'AUTH_METHOD_SMS_REGISTER_ENABLED' => true,
