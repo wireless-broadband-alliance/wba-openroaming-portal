@@ -37,6 +37,7 @@ class ConfigController extends AbstractController
 
     private function getSettings(): array
     {
+
         $data['platform'] = [
             'PLATFORM_MODE' => $this->getSettingValueRaw('PLATFORM_MODE'),
             'USER_VERIFICATION' => $this->getSettingValueConverted('USER_VERIFICATION'),
@@ -61,20 +62,39 @@ class ConfigController extends AbstractController
             'TURNSTILE_KEY' => $this->parameterBag->get('app.turnstile_key')
         ];
 
-        $data['google'] = [
+
+        if ($this->getSettingValueRaw('AUTH_METHOD_SAML_ENABLED') === 'true' &&
+            $this->parameterBag->has('app.saml_idp_entity_id') &&
+            $this->parameterBag->has('app.saml_idp_sso_url') &&
+            $this->parameterBag->has('app.saml_idp_x509_cert') &&
+            $this->parameterBag->has('app.saml_sp_entity_id')
+        )
+        {
+            $data['saml'] = [
+                'SAML_IDP_ENTITY_ID' => $this->parameterBag->get('app.saml_idp_entity_id'),
+                'SAML_IDP_SSO_URL' => $this->parameterBag->get('app.saml_idp_sso_url'),
+                'SAML_IDP_X509_CERT' => $this->parameterBag->get('app.saml_idp_x509_cert'),
+                'SAML_SP_ENTITY_ID' => $this->parameterBag->get('app.saml_sp_entity_id')
+            ];
+        }
+
+        if ($this->getSettingValueRaw('AUTH_METHOD_MICROSOFT_LOGIN_ENABLED') === 'true' &&
+            $this->parameterBag->has('app.microsoft_client_id')
+        )
+        {
+            $data['microsoft'] = [
+                'MICROSOFT_CLIENT_ID' => $this->parameterBag->get('app.microsoft_client_id')
+            ];
+        }
+
+        if ($this->getSettingValueRaw('AUTH_METHOD_GOOGLE_LOGIN_ENABLED') === 'true' &&
+            $this->parameterBag->has('app.google_client_id')
+        )
+        {
+            $data['google'] = [
             'GOOGLE_CLIENT_ID' => $this->parameterBag->get('app.google_client_id')
-        ];
-
-        $data['microsoft'] = [
-            'MICROSOFT_CLIENT_ID' => $this->parameterBag->get('app.microsoft_client_id')
-        ];
-
-        $data['saml'] = [
-            'SAML_IDP_ENTITY_ID' => $this->parameterBag->get('app.saml_idp_entity_id'),
-            'SAML_IDP_SSO_URL' => $this->parameterBag->get('app.saml_idp_sso_url'),
-            'SAML_IDP_X509_CERT' => $this->parameterBag->get('app.saml_idp_x509_cert'),
-            'SAML_SP_ENTITY_ID' => $this->parameterBag->get('app.saml_sp_entity_id')
-        ];
+            ];
+        }
 
         return $data;
     }
