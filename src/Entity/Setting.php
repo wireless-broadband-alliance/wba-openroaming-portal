@@ -164,6 +164,13 @@ use Doctrine\ORM\Mapping as ORM;
                                                 'auth' => [
                                                     'type' => 'object',
                                                     'properties' => [
+                                                        'TURNSTILE_CHECKER' => [
+                                                            'type' => 'boolean',
+                                                            'example' => true,
+                                                            // phpcs:disable Generic.Files.LineLength.TooLong
+                                                            'description' => 'Indicates whether Turnstile validator is enabled (true) or disabled (false).',
+                                                            // phpcs:enable
+                                                        ],
                                                         'AUTH_METHOD_SAML_ENABLED' => [
                                                             'type' => 'boolean',
                                                             'example' => true,
