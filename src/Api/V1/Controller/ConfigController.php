@@ -3,6 +3,7 @@
 namespace App\Api\V1\Controller;
 
 use App\Api\V1\BaseResponse;
+use App\Enum\OperationMode;
 use App\Enum\TextInputType;
 use App\Repository\SettingRepository;
 use Exception;
@@ -37,7 +38,6 @@ class ConfigController extends AbstractController
 
     private function getSettings(): array
     {
-
         $data['platform'] = [
             'PLATFORM_MODE' => $this->getSettingValueRaw('PLATFORM_MODE'),
             'USER_VERIFICATION' => $this->getSettingValueConverted('USER_VERIFICATION'),
@@ -49,7 +49,11 @@ class ConfigController extends AbstractController
         ];
 
         $data['auth'] = [
+            'TURNSTILE_CHECKER' => $this->getSettingValueConverted('TURNSTILE_CHECKER'),
             'AUTH_METHOD_SAML_ENABLED' => $this->getSettingValueConverted('AUTH_METHOD_SAML_ENABLED'),
+            'AUTH_METHOD_MICROSOFT_LOGIN_ENABLED' => $this->getSettingValueConverted(
+                'AUTH_METHOD_MICROSOFT_LOGIN_ENABLED'
+            ),
             'AUTH_METHOD_GOOGLE_LOGIN_ENABLED' => $this->getSettingValueConverted('AUTH_METHOD_GOOGLE_LOGIN_ENABLED'),
             'AUTH_METHOD_REGISTER_ENABLED' => $this->getSettingValueConverted('AUTH_METHOD_REGISTER_ENABLED'),
             'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED' => $this->getSettingValueConverted(
@@ -58,17 +62,23 @@ class ConfigController extends AbstractController
             'AUTH_METHOD_SMS_REGISTER_ENABLED' => $this->getSettingValueConverted('AUTH_METHOD_SMS_REGISTER_ENABLED')
         ];
 
-        $data['turnstile'] = [
-            'TURNSTILE_KEY' => $this->parameterBag->get('app.turnstile_key')
-        ];
 
-        if ($this->getSettingValueRaw('AUTH_METHOD_SAML_ENABLED') === 'true' &&
+        if (
+            $this->getSettingValueRaw('TURNSTILE_CHECKER') === OperationMode::ON->value &&
+            array_key_exists('TURNSTILE_KEY', $_ENV)
+        ) {
+            $data['turnstile'] = [
+                'TURNSTILE_KEY' => $this->parameterBag->get('app.turnstile_key')
+            ];
+        }
+
+        if (
+            $this->getSettingValueRaw('AUTH_METHOD_SAML_ENABLED') === 'true' &&
             array_key_exists('SAML_IDP_ENTITY_ID', $_ENV) &&
             array_key_exists('SAML_IDP_SSO_URL', $_ENV) &&
             array_key_exists('SAML_IDP_X509_CERT', $_ENV) &&
             array_key_exists('SAML_SP_ENTITY_ID', $_ENV)
-        )
-        {
+        ) {
             $data['saml'] = [
                 'SAML_IDP_ENTITY_ID' => $this->parameterBag->get('app.saml_idp_entity_id'),
                 'SAML_IDP_SSO_URL' => $this->parameterBag->get('app.saml_idp_sso_url'),
@@ -77,21 +87,21 @@ class ConfigController extends AbstractController
             ];
         }
 
-        if ($this->getSettingValueRaw('AUTH_METHOD_MICROSOFT_LOGIN_ENABLED') === 'true' &&
+        if (
+            $this->getSettingValueRaw('AUTH_METHOD_MICROSOFT_LOGIN_ENABLED') === 'true' &&
             array_key_exists('MICROSOFT_CLIENT_ID', $_ENV)
-        )
-        {
+        ) {
             $data['microsoft'] = [
                 'MICROSOFT_CLIENT_ID' => $this->parameterBag->get('app.microsoft_client_id')
             ];
         }
 
-        if ($this->getSettingValueRaw('AUTH_METHOD_GOOGLE_LOGIN_ENABLED') === 'true' &&
+        if (
+            $this->getSettingValueRaw('AUTH_METHOD_GOOGLE_LOGIN_ENABLED') === 'true' &&
             array_key_exists('GOOGLE_CLIENT_ID', $_ENV)
-        )
-        {
+        ) {
             $data['google'] = [
-            'GOOGLE_CLIENT_ID' => $this->parameterBag->get('app.google_client_id')
+                'GOOGLE_CLIENT_ID' => $this->parameterBag->get('app.google_client_id')
             ];
         }
 
