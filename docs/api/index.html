@@ -560,6 +560,11 @@
                                                         "auth": {
                                                             "type": "object",
                                                             "properties": {
+                                                                "TURNSTILE_CHECKER": {
+                                                                    "type": "boolean",
+                                                                    "example": true,
+                                                                    "description": "Indicates whether Turnstile validator is enabled (true) or disabled (false)."
+                                                                },
                                                                 "AUTH_METHOD_SAML_ENABLED": {
                                                                     "type": "boolean",
                                                                     "example": true,
@@ -569,6 +574,11 @@
                                                                     "type": "boolean",
                                                                     "example": true,
                                                                     "description": "Indicates whether Google login is enabled (true) or disabled (false)."
+                                                                },
+                                                                "AUTH_METHOD_MICROSOFT_LOGIN_ENABLED": {
+                                                                    "type": "boolean",
+                                                                    "example": true,
+                                                                    "description": "Indicates whether Microsoft login is enabled (true) or disabled (false)."
                                                                 },
                                                                 "AUTH_METHOD_REGISTER_ENABLED": {
                                                                     "type": "boolean",
@@ -661,6 +671,7 @@
                                                 "auth": {
                                                     "AUTH_METHOD_SAML_ENABLED": true,
                                                     "AUTH_METHOD_GOOGLE_LOGIN_ENABLED": true,
+                                                    "AUTH_METHOD_MICROSOFT_LOGIN_ENABLED": true,
                                                     "AUTH_METHOD_REGISTER_ENABLED": true,
                                                     "AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED": true,
                                                     "AUTH_METHOD_SMS_REGISTER_ENABLED": true
@@ -5334,7 +5345,10 @@
                                 "type": "string"
                             },
                             "provider_id": {
-                                "type": "string"
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
                             },
                             "providerId": {
                                 "type": "string"
@@ -5394,7 +5408,10 @@
                                 "type": "string"
                             },
                             "provider_id": {
-                                "type": "string"
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
                             },
                             "providerId": {
                                 "type": "string"
