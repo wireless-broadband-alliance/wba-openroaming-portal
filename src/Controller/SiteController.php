@@ -158,7 +158,7 @@ class SiteController extends AbstractController
             (
                 $currentUser->getTwoFAType() !==
                 UserTwoFactorAuthenticationStatus::DISABLED->value &&
-                !$session->has('2fa_verified'))
+                !$session->has('2fa_verified_landing'))
         ) {
             if (
                 $currentUser->getTwoFAType() ===
