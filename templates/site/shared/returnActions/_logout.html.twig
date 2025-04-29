@@ -10,4 +10,10 @@
         {% endif %}
     {% endfor %}
 </p>
-<a href="{{ path('app_logout') }}" class="w-[160px] btn-logout">Logout</a>
+<a
+        {% if context == constant('App\\Enum\\FirewallType::DASHBOARD').value %}
+            href="{{ path('app_dashboard_logout') }}"
+        {% else %}
+            href="{{ path('app_logout') }}"
+        {% endif %}
+        class="w-[160px] btn-logout">Logout</a>

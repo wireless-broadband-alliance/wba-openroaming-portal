@@ -448,7 +448,9 @@ class UsersManagementController extends AbstractController
                 );
             }
 
-            if ($user->getPhoneNumber() && $userExternalAuth->getProviderId() === UserProvider::PHONE_NUMBER->value) {
+            if (
+                $user->getPhoneNumber() && $userExternalAuth->getProviderId() === UserProvider::PHONE_NUMBER->value
+            ) {
                 $latestEvent = $this->eventRepository->findLatestRequestAttemptEvent(
                     $user,
                     AnalyticalEventType::USER_ACCOUNT_UPDATE_PASSWORD_FROM_UI
