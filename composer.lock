@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "84ab7497ae24b8db956106d233cc1ea7",
+    "content-hash": "981338ce4fd0ae0f8582998e499f96d0",
     "packages": [
         {
             "name": "api-platform/core",
@@ -3498,6 +3498,15 @@
                 "source": "https://github.com/odolbeau/phone-number-bundle/tree/v4.1.0"
             },
             "time": "2025-01-09T10:56:51+00:00"
+        },
+        {
+            "name": "onelogin/php-saml",
+            "version": "4.x-dev",
+            "dist": {
+                "type": "zip",
+                "url": "https://github.com/onelogin/php-saml/archive/76236a6907f8dacfe34c41ed85a9cb9fbc654059.zip"
+            },
+            "type": "library"
         },
         {
             "name": "paragonie/constant_time_encoding",
@@ -13902,6 +13911,7 @@
     "aliases": [],
     "minimum-stability": "dev",
     "stability-flags": {
+        "onelogin/php-saml": 20,
         "tetrapi/onelogin-saml-bundle": 20
     },
     "prefer-stable": true,

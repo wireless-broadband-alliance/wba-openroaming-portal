@@ -15,6 +15,17 @@
           "type": "zip"
         }
       }
+    },
+    {
+      "type": "package",
+      "package": {
+        "name": "onelogin/php-saml",
+        "version": "4.x-dev",
+        "dist": {
+          "url": "https://github.com/onelogin/php-saml/archive/76236a6907f8dacfe34c41ed85a9cb9fbc654059.zip",
+          "type": "zip"
+        }
+      }
     }
   ],
   "require": {
@@ -43,6 +54,7 @@
     "league/oauth2-google": "^4.0",
     "lexik/jwt-authentication-bundle": "^3.1",
     "tetrapi/onelogin-saml-bundle": "dev-develop",
+    "onelogin/php-saml": "4.x-dev",
     "nelmio/cors-bundle": "^2.5",
     "odolbeau/phone-number-bundle": "^4.1",
     "phpdocumentor/reflection-docblock": "^5.3",
