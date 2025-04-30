@@ -278,11 +278,8 @@ class RegistrationController extends AbstractController
     /**
      * @throws NonUniqueResultException
      */
-    #[Route('{context}/login/link', name: 'app_confirm_account', defaults: [
-        'context' => FirewallType::LANDING->value
-    ])]
+    #[Route('/login/link', name: 'app_confirm_account')]
     public function confirmAccount(
-        string $context,
         RequestStack $requestStack,
         UserRepository $userRepository,
         TokenStorageInterface $tokenStorage,

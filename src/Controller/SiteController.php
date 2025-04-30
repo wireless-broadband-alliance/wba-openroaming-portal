@@ -923,6 +923,7 @@ class SiteController extends AbstractController
         return $this->render('site/forgot_password_checker_landing.html.twig', [
             'forgotPasswordChecker' => $form->createView(),
             'data' => $data,
+            'context' => FirewallType::LANDING->value
         ]);
     }
 
