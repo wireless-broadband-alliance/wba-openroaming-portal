@@ -727,32 +727,38 @@ use Symfony\Component\Validator\Constraints as Assert;
                         ],
                     ],
                     500 => [
-                        'description' => 'Server error due to internal issues or Google API failure',
+                        'description' => 'Server error due to internal issues.',
                         'content' => [
                             'application/json' => [
                                 'schema' => [
                                     'type' => 'object',
                                     'properties' => [
-                                        'success' => ['type' => 'boolean', 'example' => false],
+                                        'success' => [
+                                            'type' => 'boolean',
+                                            'example' => false,
+                                        ],
                                         'message' => [
                                             'type' => 'string',
-                                            'example' => 'An error occurred.',
+                                            'example' => 'An error occurred: Generic server-side error.',
                                         ],
                                     ],
+                                    'required' => ['success', 'message'],
                                 ],
                                 'examples' => [
-                                    'Server_related' => [
-                                        'summary' => 'Generic server related error',
+                                    'server_issue' => [
+                                        'summary' => 'Example of a general server error',
                                         'value' => [
                                             'success' => false,
-                                            'message' => 'An error occurred: Generic server related error.',
+                                            'message' => 'An error occurred: Generic server-side error.',
                                         ],
                                     ],
-                                    'missing_JWT_key_files' => [
-                                        'summary' => 'JWT key files are missing',
+                                    'missing_jwt_keys' => [
+                                        'summary' => 'Example of missing JWT keys error',
                                         'value' => [
                                             'success' => false,
-                                            'error' => 'JWT key files are missing. Please ensure both private and public keys exist.',
+                                            // phpcs:disable Generic.Files.LineLength.TooLong
+                                            'message' => 'JWT key files are missing. Please ensure both private and public keys exist.',
+                                            // phpcs:enable
                                         ],
                                     ],
                                 ],
@@ -1038,32 +1044,38 @@ use Symfony\Component\Validator\Constraints as Assert;
                         ],
                     ],
                     500 => [
-                        'description' => 'Server error due to internal issues or Google API failure',
+                        'description' => 'Server error due to internal issues.',
                         'content' => [
                             'application/json' => [
                                 'schema' => [
                                     'type' => 'object',
                                     'properties' => [
-                                        'success' => ['type' => 'boolean', 'example' => false],
+                                        'success' => [
+                                            'type' => 'boolean',
+                                            'example' => false,
+                                        ],
                                         'message' => [
                                             'type' => 'string',
-                                            'example' => 'An error occurred.',
+                                            'example' => 'An error occurred: Generic server-side error.',
                                         ],
                                     ],
+                                    'required' => ['success', 'message'],
                                 ],
                                 'examples' => [
-                                    'saml_processing_error' => [
-                                        'summary' => 'SAML processing error',
+                                    'server_issue' => [
+                                        'summary' => 'Example of a general server error',
                                         'value' => [
                                             'success' => false,
-                                            'error' => 'SAML processing error',
+                                            'message' => 'An error occurred: Generic server-side error.',
                                         ],
                                     ],
-                                    'missing_JWT_key_files' => [
-                                        'summary' => 'JWT key files are missing',
+                                    'missing_jwt_keys' => [
+                                        'summary' => 'Example of missing JWT keys error',
                                         'value' => [
                                             'success' => false,
-                                            'error' => 'JWT key files are missing. Please ensure both private and public keys exist.',
+                                            // phpcs:disable Generic.Files.LineLength.TooLong
+                                            'message' => 'JWT key files are missing. Please ensure both private and public keys exist.',
+                                            // phpcs:enable
                                         ],
                                     ],
                                 ],
@@ -1311,32 +1323,38 @@ use Symfony\Component\Validator\Constraints as Assert;
                         ],
                     ],
                     500 => [
-                        'description' => 'Server error due to internal issues or Google API failure',
+                        'description' => 'Server error due to internal issues.',
                         'content' => [
                             'application/json' => [
                                 'schema' => [
                                     'type' => 'object',
                                     'properties' => [
-                                        'success' => ['type' => 'boolean', 'example' => false],
+                                        'success' => [
+                                            'type' => 'boolean',
+                                            'example' => false,
+                                        ],
                                         'message' => [
                                             'type' => 'string',
-                                            'example' => 'An error occurred.',
+                                            'example' => 'An error occurred: Generic server-side error.',
                                         ],
                                     ],
+                                    'required' => ['success', 'message'],
                                 ],
                                 'examples' => [
-                                    'Server_related' => [
-                                        'summary' => 'Generic server related error',
+                                    'server_issue' => [
+                                        'summary' => 'Example of a general server error',
                                         'value' => [
                                             'success' => false,
-                                            'message' => 'An error occurred: Generic server related error.',
+                                            'message' => 'An error occurred: Generic server-side error.',
                                         ],
                                     ],
-                                    'missing_JWT_key_files' => [
-                                        'summary' => 'JWT key files are missing',
+                                    'missing_jwt_keys' => [
+                                        'summary' => 'Example of missing JWT keys error',
                                         'value' => [
                                             'success' => false,
-                                            'error' => 'JWT key files are missing. Please ensure both private and public keys exist.',
+                                            // phpcs:disable Generic.Files.LineLength.TooLong
+                                            'message' => 'JWT key files are missing. Please ensure both private and public keys exist.',
+                                            // phpcs:enable
                                         ],
                                     ],
                                 ],
@@ -1583,32 +1601,38 @@ use Symfony\Component\Validator\Constraints as Assert;
                         ],
                     ],
                     500 => [
-                        'description' => 'Server error due to internal issues or Google API failure',
+                        'description' => 'Server error due to internal issues.',
                         'content' => [
                             'application/json' => [
                                 'schema' => [
                                     'type' => 'object',
                                     'properties' => [
-                                        'success' => ['type' => 'boolean', 'example' => false],
+                                        'success' => [
+                                            'type' => 'boolean',
+                                            'example' => false,
+                                        ],
                                         'message' => [
                                             'type' => 'string',
-                                            'example' => 'An error occurred.',
+                                            'example' => 'An error occurred: Generic server-side error.',
                                         ],
                                     ],
+                                    'required' => ['success', 'message'],
                                 ],
                                 'examples' => [
-                                    'Server_related' => [
-                                        'summary' => 'Generic server related error',
+                                    'server_issue' => [
+                                        'summary' => 'Example of a general server error',
                                         'value' => [
                                             'success' => false,
-                                            'message' => 'An error occurred: Generic server related error.',
+                                            'message' => 'An error occurred: Generic server-side error.',
                                         ],
                                     ],
-                                    'missing_JWT_key_files' => [
-                                        'summary' => 'JWT key files are missing',
+                                    'missing_jwt_keys' => [
+                                        'summary' => 'Example of missing JWT keys error',
                                         'value' => [
                                             'success' => false,
-                                            'error' => 'JWT key files are missing. Please ensure both private and public keys exist.',
+                                            // phpcs:disable Generic.Files.LineLength.TooLong
+                                            'message' => 'JWT key files are missing. Please ensure both private and public keys exist.',
+                                            // phpcs:enable
                                         ],
                                     ],
                                 ],
