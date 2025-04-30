@@ -31,7 +31,7 @@ readonly class JWTTokenGenerator
         if (!$user instanceof User) {
             return [
                 'success' => false,
-                'message' => 'Expected an instance of App\Entity\User',
+                'message' => 'Invalid user provided. Please verify the user data.',
             ];
         }
 
