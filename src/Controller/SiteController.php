@@ -662,6 +662,7 @@ class SiteController extends AbstractController
                                 'contactEmail' => $data['contactEmail']['value'],
                                 'currentPassword' => $randomPassword,
                                 'verificationCode' => $user->getVerificationCode(),
+                                'context' => FirewallType::LANDING->value,
                             ]);
 
                         $mailer->send($email);
@@ -690,14 +691,18 @@ class SiteController extends AbstractController
         return $this->render('site/forgot_password_email_landing.html.twig', [
             'forgotPasswordEmailForm' => $form->createView(),
             'data' => $data,
+            'context' => FirewallType::LANDING->value,
         ]);
     }
 
     /**
      * @throws Exception
      */
-    #[Route('/forgot-password/sms', name: 'app_site_forgot_password_sms')]
+    #[Route('{context}/forgot-password/sms', name: 'app_site_forgot_password_sms', defaults: [
+        'context' => FirewallType::LANDING->value
+    ])]
     public function forgotPasswordUserSMS(
+        string $context,
         Request $request,
         UserPasswordHasherInterface $userPasswordHasher,
         EntityManagerInterface $entityManager,
@@ -824,6 +829,7 @@ class SiteController extends AbstractController
         return $this->render('site/forgot_password_sms_landing.html.twig', [
             'forgotPasswordSMSForm' => $form->createView(),
             'data' => $data,
+            'context' => $context
         ]);
     }
 
@@ -860,7 +866,7 @@ class SiteController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
-        // Checks if the user has a "forgot_password_request", if don't, return to landing page
+        // Checks if the user has a "forgot_password_request", if doesn't, return to the landing page
         if ($this->userRepository->findOneBy(['id' => $currentUser->getId(), 'forgot_password_request' => false])) {
             $this->addFlash('error', 'You can\'t access this page if you don\'t have a request!');
             return $this->redirectToRoute('app_landing');

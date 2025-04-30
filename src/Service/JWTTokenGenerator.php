@@ -10,12 +10,12 @@ use Lexik\Bundle\JWTAuthenticationBundle\Exception\JWTDecodeFailureException;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
-class JWTTokenGenerator
+readonly class JWTTokenGenerator
 {
     public function __construct(
-        private readonly JWTTokenManagerInterface $jwtManager,
-        private readonly JWTEncoderInterface $JWTEncoder,
-        private readonly UserRepository $userRepository
+        private JWTTokenManagerInterface $jwtManager,
+        private JWTEncoderInterface $JWTEncoder,
+        private UserRepository $userRepository
     ) {
     }
 

@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
 use App\Enum\AnalyticalEventType;
+use App\Enum\FirewallType;
 use App\Enum\OperationMode;
 use App\Enum\PlatformMode;
 use App\Enum\UserProvider;
@@ -277,8 +278,11 @@ class RegistrationController extends AbstractController
     /**
      * @throws NonUniqueResultException
      */
-    #[Route('/login/link', name: 'app_confirm_account')]
+    #[Route('{context}/login/link', name: 'app_confirm_account', defaults: [
+        'context' => FirewallType::LANDING->value
+    ])]
     public function confirmAccount(
+        string $context,
         RequestStack $requestStack,
         UserRepository $userRepository,
         TokenStorageInterface $tokenStorage,

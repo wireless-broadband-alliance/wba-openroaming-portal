@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\User;
+use App\Enum\FirewallType;
 use App\Enum\PlatformMode;
 use App\Form\LoginFormType;
 use App\Repository\SettingRepository;
@@ -81,6 +82,7 @@ class SecurityController extends AbstractController
             'error' => $error,
             'data' => $data,
             'form' => $form,
+            'context' => FirewallType::LANDING->value,
         ]);
     }
 
@@ -128,6 +130,7 @@ class SecurityController extends AbstractController
             'error' => $error,
             'data' => $data,
             'form' => $form,
+            'context' => FirewallType::DASHBOARD->value,
         ]);
     }
 
