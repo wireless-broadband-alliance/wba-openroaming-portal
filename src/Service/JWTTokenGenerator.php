@@ -8,21 +8,39 @@ use App\Repository\UserRepository;
 use Lexik\Bundle\JWTAuthenticationBundle\Encoder\JWTEncoderInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Exception\JWTDecodeFailureException;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 readonly class JWTTokenGenerator
 {
+    private string $privateKeyJwtPath;
+    private string $publicKeyJwtPath;
+
     public function __construct(
         private JWTTokenManagerInterface $jwtManager,
         private JWTEncoderInterface $JWTEncoder,
-        private UserRepository $userRepository
+        private UserRepository $userRepository,
+        private ParameterBagInterface $parameterBag,
     ) {
+        $this->publicKeyJwtPath = $this->parameterBag->get('app.jwt_public_key');
+        $this->privateKeyJwtPath = $this->parameterBag->get('app.jwt_secret_key');
     }
 
-    public function generateToken(UserInterface $user): string
+    public function generateToken(UserInterface $user): string|array
     {
         if (!$user instanceof User) {
-            return new BaseResponse(400, null, 'Expected an instance of App\Entity\User')->toResponse();
+            return [
+                'success' => false,
+                'message' => 'Expected an instance of App\Entity\User',
+            ];
+        }
+
+        // Check if both private and public keys exist
+        if (!file_exists($this->privateKeyJwtPath) || !file_exists($this->publicKeyJwtPath)) {
+            return [
+                'success' => false,
+                'message' => 'JWT key files are missing. Please ensure both private and public keys exist.',
+            ];
         }
 
         $customPayload = [

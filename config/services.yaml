@@ -20,7 +20,12 @@ parameters:
   app.saml_idp_x509_cert: '%env(SAML_IDP_X509_CERT)%'
   app.saml_sp_entity_id: '%env(SAML_SP_ENTITY_ID)%'
   app.saml_sp_acs_url: '%env(SAML_SP_ACS_URL)%'
+  app.jwt_secret_key: '%env(JWT_SECRET_KEY)%'
+  app.jwt_public_key: '%env(JWT_PUBLIC_KEY)%'
 services:
+    App\Service\JWTTokenGenerator:
+        arguments:
+            $parameterBag: '@parameter_bag'
     App\EventListener\JWTExceptionListener:
         tags:
             - { name: kernel.event_subscriber }
