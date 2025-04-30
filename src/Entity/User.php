@@ -618,6 +618,13 @@ use Symfony\Component\Validator\Constraints as Assert;
                                             'error' => 'Invalid json format',
                                         ],
                                     ],
+                                    'invalid_user' => [
+                                        'summary' => 'Invalid user',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'Invalid user provided. Please verify the user data',
+                                        ]
+                                    ]
                                 ],
                             ],
                         ],
@@ -713,6 +720,39 @@ use Symfony\Component\Validator\Constraints as Assert;
                                             // phpcs:disable Generic.Files.LineLength.TooLong
                                             'error' => 'Your request cannot be processed at this time due to a pending action. If your account is active, re-login to complete the action',
                                             // phpcs:enable
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                    500 => [
+                        'description' => 'Server error due to internal issues or Google API failure',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'success' => ['type' => 'boolean', 'example' => false],
+                                        'message' => [
+                                            'type' => 'string',
+                                            'example' => 'An error occurred.',
+                                        ],
+                                    ],
+                                ],
+                                'examples' => [
+                                    'Server_related' => [
+                                        'summary' => 'Generic server related error',
+                                        'value' => [
+                                            'success' => false,
+                                            'message' => 'An error occurred: Generic server related error.',
+                                        ],
+                                    ],
+                                    'missing_JWT_key_files' => [
+                                        'summary' => 'JWT key files are missing',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'JWT key files are missing. Please ensure both private and public keys exist.',
                                         ],
                                     ],
                                 ],
@@ -855,7 +895,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                                         ],
                                     ],
                                 ],
-                                'example' => [
+                                'examples' => [
                                     'saml_response_not_found' => [
                                         'summary' => 'SAML Response not found',
                                         'value' => [
@@ -863,6 +903,13 @@ use Symfony\Component\Validator\Constraints as Assert;
                                             'error' => 'SAML Response not found',
                                         ],
                                     ],
+                                    'invalid_user' => [
+                                        'summary' => 'Invalid user',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'Invalid user provided. Please verify the user data',
+                                        ]
+                                    ]
                                 ],
                             ],
                         ],
@@ -991,29 +1038,32 @@ use Symfony\Component\Validator\Constraints as Assert;
                         ],
                     ],
                     500 => [
-                        'description' => 'Server error while processing the SAML response',
+                        'description' => 'Server error due to internal issues or Google API failure',
                         'content' => [
                             'application/json' => [
                                 'schema' => [
                                     'type' => 'object',
                                     'properties' => [
-                                        'success' => [
-                                            'type' => 'boolean',
-                                            'example' => false,
-                                        ],
-                                        'error' => [
+                                        'success' => ['type' => 'boolean', 'example' => false],
+                                        'message' => [
                                             'type' => 'string',
-                                            'description' => 'Error message for why the server error occurred',
-                                            'example' => 'SAML processing error',
+                                            'example' => 'An error occurred.',
                                         ],
                                     ],
-                                    'examples' => [
-                                        'saml_processing_error' => [
-                                            'summary' => 'SAML processing error',
-                                            'value' => [
-                                                'success' => false,
-                                                'error' => 'SAML processing error',
-                                            ],
+                                ],
+                                'examples' => [
+                                    'saml_processing_error' => [
+                                        'summary' => 'SAML processing error',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'SAML processing error',
+                                        ],
+                                    ],
+                                    'missing_JWT_key_files' => [
+                                        'summary' => 'JWT key files are missing',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'JWT key files are missing. Please ensure both private and public keys exist.',
                                         ],
                                     ],
                                 ],
@@ -1161,6 +1211,13 @@ use Symfony\Component\Validator\Constraints as Assert;
                                             'error' => 'This code is not associated with a google account!',
                                         ],
                                     ],
+                                    'invalid_user' => [
+                                        'summary' => 'Invalid user',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'Invalid user provided. Please verify the user data',
+                                        ]
+                                    ]
                                 ],
                             ],
                         ],
@@ -1268,13 +1325,19 @@ use Symfony\Component\Validator\Constraints as Assert;
                                     ],
                                 ],
                                 'examples' => [
-                                    'Authentication_failed' => [
-                                        'success' => false,
-                                        'message' => 'Authentication Failed.',
-                                    ],
                                     'Server_related' => [
-                                        'success' => false,
-                                        'message' => 'An error occurred: Generic server related error.',
+                                        'summary' => 'Generic server related error',
+                                        'value' => [
+                                            'success' => false,
+                                            'message' => 'An error occurred: Generic server related error.',
+                                        ],
+                                    ],
+                                    'missing_JWT_key_files' => [
+                                        'summary' => 'JWT key files are missing',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'JWT key files are missing. Please ensure both private and public keys exist.',
+                                        ],
                                     ],
                                 ],
                             ],
@@ -1420,6 +1483,13 @@ use Symfony\Component\Validator\Constraints as Assert;
                                             'error' => 'This code is not associated with a microsoft account!',
                                         ],
                                     ],
+                                    'invalid_user' => [
+                                        'summary' => 'Invalid user',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'Invalid user provided. Please verify the user data',
+                                        ]
+                                    ]
                                 ],
                             ],
                         ],
@@ -1513,7 +1583,7 @@ use Symfony\Component\Validator\Constraints as Assert;
                         ],
                     ],
                     500 => [
-                        'description' => 'Server error due to internal issues or Microsoft API failure',
+                        'description' => 'Server error due to internal issues or Google API failure',
                         'content' => [
                             'application/json' => [
                                 'schema' => [
@@ -1527,13 +1597,19 @@ use Symfony\Component\Validator\Constraints as Assert;
                                     ],
                                 ],
                                 'examples' => [
-                                    'Authentication_failed' => [
-                                        'success' => false,
-                                        'message' => 'Authentication Failed.',
-                                    ],
                                     'Server_related' => [
-                                        'success' => false,
-                                        'message' => 'An error occurred: Generic server related error.',
+                                        'summary' => 'Generic server related error',
+                                        'value' => [
+                                            'success' => false,
+                                            'message' => 'An error occurred: Generic server related error.',
+                                        ],
+                                    ],
+                                    'missing_JWT_key_files' => [
+                                        'summary' => 'JWT key files are missing',
+                                        'value' => [
+                                            'success' => false,
+                                            'error' => 'JWT key files are missing. Please ensure both private and public keys exist.',
+                                        ],
                                     ],
                                 ],
                             ],
