@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ff0d18d1a87f13561870161fcf777f9f",
+    "content-hash": "84ab7497ae24b8db956106d233cc1ea7",
     "packages": [
         {
             "name": "api-platform/core",
@@ -3365,74 +3365,6 @@
             "time": "2025-03-24T10:02:05+00:00"
         },
         {
-            "name": "nbgrp/onelogin-saml-bundle",
-            "version": "dev-develop",
-            "source": {
-                "type": "git",
-                "url": "git@git.tetrapi.pt:tcs/tatrapi-sa/onelogin-saml-bundle.git",
-                "reference": "b0a7dc6a3a14b331995b2cb19b65aed05b86887f"
-            },
-            "require": {
-                "onelogin/php-saml": "4.x-dev",
-                "php": "^8.2",
-                "phpstan/extension-installer": "^1.4",
-                "phpstan/phpdoc-parser": "^2.0",
-                "phpstan/phpstan": "^2.1",
-                "phpstan/phpstan-symfony": "^2.0",
-                "psr/log": "^1 || ^2 || ^3",
-                "rector/rector": "^2.0",
-                "symfony/config": "^7",
-                "symfony/dependency-injection": "^7",
-                "symfony/deprecation-contracts": "^3",
-                "symfony/event-dispatcher-contracts": "^3",
-                "symfony/http-foundation": "^7",
-                "symfony/http-kernel": "^7",
-                "symfony/routing": "^7",
-                "symfony/security-bundle": "^7",
-                "symfony/security-core": "^7",
-                "symfony/security-http": "^7"
-            },
-            "require-dev": {
-                "doctrine/orm": "^2.3 || ^3",
-                "phpunit/phpunit": "^11.2",
-                "symfony/event-dispatcher": "^7"
-            },
-            "type": "symfony-bundle",
-            "autoload": {
-                "psr-4": {
-                    "Nbgrp\\OneloginSamlBundle\\": "src/",
-                    "OneLogin\\Saml2\\": "vendor/onelogin/php-saml/src/Saml2/"
-                }
-            },
-            "autoload-dev": {
-                "psr-4": {
-                    "Nbgrp\\Tests\\OneloginSamlBundle\\": "tests/"
-                }
-            },
-            "scripts": {
-                "nba": [
-                    "docker run --rm -v $PWD:/app --workdir /app nbgrp/auditor:latest"
-                ]
-            },
-            "license": [
-                "BSD-3-Clause"
-            ],
-            "authors": [
-                {
-                    "name": "Alexander Menshchikov",
-                    "email": "alexander.menshchikov@yandex.ru"
-                }
-            ],
-            "description": "OneLogin SAML Symfony Bundle",
-            "keywords": [
-                "OneLogin",
-                "SAML",
-                "SSO",
-                "multiple IdP"
-            ],
-            "time": "2025-04-28T14:01:04+00:00"
-        },
-        {
             "name": "nelmio/cors-bundle",
             "version": "2.5.0",
             "source": {
@@ -3566,15 +3498,6 @@
                 "source": "https://github.com/odolbeau/phone-number-bundle/tree/v4.1.0"
             },
             "time": "2025-01-09T10:56:51+00:00"
-        },
-        {
-            "name": "onelogin/php-saml",
-            "version": "4.x-dev",
-            "dist": {
-                "type": "zip",
-                "url": "https://github.com/onelogin/php-saml/archive/76236a6907f8dacfe34c41ed85a9cb9fbc654059.zip"
-            },
-            "type": "library"
         },
         {
             "name": "paragonie/constant_time_encoding",
@@ -11116,6 +11039,15 @@
             "time": "2024-12-09T18:44:25+00:00"
         },
         {
+            "name": "tetrapi/onelogin-saml-bundle",
+            "version": "dev-develop",
+            "dist": {
+                "type": "zip",
+                "url": "https://github.com/tetrapi/onelogin-saml-bundle/archive/b0a7dc6a3a14b331995b2cb19b65aed05b86887f.zip"
+            },
+            "type": "library"
+        },
+        {
             "name": "twig/extra-bundle",
             "version": "v3.20.0",
             "source": {
@@ -13970,7 +13902,7 @@
     "aliases": [],
     "minimum-stability": "dev",
     "stability-flags": {
-        "nbgrp/onelogin-saml-bundle": 20
+        "tetrapi/onelogin-saml-bundle": 20
     },
     "prefer-stable": true,
     "prefer-lowest": false,

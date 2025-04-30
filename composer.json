@@ -6,16 +6,12 @@
   "prefer-stable": true,
   "repositories": [
     {
-      "type": "vcs",
-      "url":  "git@git.tetrapi.pt:tcs/tatrapi-sa/onelogin-saml-bundle.git"
-    },
-    {
       "type": "package",
       "package": {
-        "name": "onelogin/php-saml",
-        "version": "4.x-dev",
+        "name": "tetrapi/onelogin-saml-bundle",
+        "version": "dev-develop",
         "dist": {
-          "url": "https://github.com/onelogin/php-saml/archive/76236a6907f8dacfe34c41ed85a9cb9fbc654059.zip",
+          "url": "https://github.com/tetrapi/onelogin-saml-bundle/archive/b0a7dc6a3a14b331995b2cb19b65aed05b86887f.zip",
           "type": "zip"
         }
       }
@@ -46,7 +42,7 @@
     "knpuniversity/oauth2-client-bundle": "^2.18",
     "league/oauth2-google": "^4.0",
     "lexik/jwt-authentication-bundle": "^3.1",
-    "nbgrp/onelogin-saml-bundle": "dev-develop",
+    "tetrapi/onelogin-saml-bundle": "dev-develop",
     "nelmio/cors-bundle": "^2.5",
     "odolbeau/phone-number-bundle": "^4.1",
     "phpdocumentor/reflection-docblock": "^5.3",
@@ -109,6 +105,7 @@
   "autoload": {
     "psr-4": {
       "App\\": "src/",
+      "Nbgrp\\OneloginSamlBundle\\": "vendor/tetrapi/onelogin-saml-bundle/src/",
       "OneLogin\\Saml2\\": "vendor/onelogin/php-saml/src/Saml2/"
     }
   },
