@@ -70,11 +70,9 @@ class LandingAuthenticator extends AbstractLoginFormAuthenticator
         $turnstileSetting = $this->settingRepository->findOneBy(['name' => 'TURNSTILE_CHECKER']);
         $isTurnstileEnabled = $turnstileSetting && $turnstileSetting->getValue() === OperationMode::ON->value;
 
-        if ($isTurnstileEnabled) {
-            // Validate the Turnstile CAPTCHA
-            if (empty($turnstileResponse) || !$this->turnstileHttpClient->verifyResponse($turnstileResponse)) {
-                throw new CustomUserMessageAuthenticationException('Invalid CAPTCHA validation.');
-            }
+        // Validate the Turnstile CAPTCHA
+        if ($isTurnstileEnabled && ($isTurnstileEnabled && ($isTurnstileEnabled && (empty($turnstileResponse) || !$this->turnstileHttpClient->verifyResponse($turnstileResponse))))) {
+            throw new CustomUserMessageAuthenticationException('Invalid CAPTCHA validation.');
         }
 
         // Add LAST_USERNAME to the session (optional)
