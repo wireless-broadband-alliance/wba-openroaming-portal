@@ -66,7 +66,6 @@ export default class extends Controller {
 
         this.setCookiePreferences();
 
-
         // Only remove the session_backup cookie if rememberMe is false
         if (this.cookieScopes.rememberMe === false) {
             this.clearSessionBackupCookie();
