@@ -58,9 +58,6 @@ class LoginFormType extends AbstractType
                     'data-action' => 'contact',
                     'data-theme' => 'light'
                 ],
-                'constraints' => [
-                    new CloudflareTurnstile(),
-                ],
                 'label' => false
             ]);
         }
