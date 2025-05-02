@@ -244,6 +244,7 @@ class TwoFAController extends AbstractController
             'data' => $data,
             'form' => $form,
             'user' => $user,
+            'context' => $context
         ]);
     }
 
