@@ -9,6 +9,7 @@ use App\Enum\TwoFAType;
 use App\Enum\UserTwoFactorAuthenticationStatus;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
+use DateTimeInterface;
 use PixelOpen\CloudflareTurnstileBundle\Http\CloudflareTurnstileHttpClient;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -60,8 +61,8 @@ class LandingAuthenticator extends AbstractLoginFormAuthenticator
                 // Validate if the user account is disabled
                 throw new CustomUserMessageAuthenticationException('This account is currently disabled.');
             }
-            if ($user->getBannedAt() !== null) {
-                // Validate if the user account is banned
+            if ($user->getBannedAt() instanceof DateTimeInterface) {
+                // Validate if the user account exists
                 throw new CustomUserMessageAuthenticationException('This account is currently banned.');
             }
         }
@@ -71,13 +72,7 @@ class LandingAuthenticator extends AbstractLoginFormAuthenticator
         $isTurnstileEnabled = $turnstileSetting && $turnstileSetting->getValue() === OperationMode::ON->value;
 
         // Validate the Turnstile CAPTCHA
-        if (
-            $isTurnstileEnabled &&
-            (
-                $isTurnstileEnabled &&
-                (empty($turnstileResponse) || !$this->turnstileHttpClient->verifyResponse($turnstileResponse))
-            )
-        ) {
+        if ($isTurnstileEnabled && (empty($turnstileResponse) || !$this->turnstileHttpClient->verifyResponse($turnstileResponse))) {
             throw new CustomUserMessageAuthenticationException('Invalid CAPTCHA validation.');
         }
 

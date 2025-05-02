@@ -9,6 +9,7 @@ use App\Enum\TwoFAType;
 use App\Enum\UserTwoFactorAuthenticationStatus;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
+use DateTimeInterface;
 use PixelOpen\CloudflareTurnstileBundle\Http\CloudflareTurnstileHttpClient;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -55,7 +56,7 @@ class DashboardAuthenticator extends AbstractLoginFormAuthenticator
                 // Validate if the user account exists
                 throw new CustomUserMessageAuthenticationException('This account is currently disabled.');
             }
-            if ($user->getBannedAt() instanceof \DateTimeInterface) {
+            if ($user->getBannedAt() instanceof DateTimeInterface) {
                 // Validate if the user account exists
                 throw new CustomUserMessageAuthenticationException('This account is currently banned.');
             }
