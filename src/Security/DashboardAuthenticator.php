@@ -90,7 +90,7 @@ class DashboardAuthenticator extends AbstractLoginFormAuthenticator
 
     protected function getLoginUrl(Request $request): string
     {
-        return $this->urlGenerator->generate('app_login');
+        return $this->urlGenerator->generate('app_dashboard_login');
     }
 
     protected function handleTwoFactorRedirection(
