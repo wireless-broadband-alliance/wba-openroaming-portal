@@ -71,7 +71,13 @@ class LandingAuthenticator extends AbstractLoginFormAuthenticator
         $isTurnstileEnabled = $turnstileSetting && $turnstileSetting->getValue() === OperationMode::ON->value;
 
         // Validate the Turnstile CAPTCHA
-        if ($isTurnstileEnabled && ($isTurnstileEnabled && ($isTurnstileEnabled && (empty($turnstileResponse) || !$this->turnstileHttpClient->verifyResponse($turnstileResponse))))) {
+        if (
+            $isTurnstileEnabled &&
+            (
+                $isTurnstileEnabled &&
+                (empty($turnstileResponse) || !$this->turnstileHttpClient->verifyResponse($turnstileResponse))
+            )
+        ) {
             throw new CustomUserMessageAuthenticationException('Invalid CAPTCHA validation.');
         }
 
