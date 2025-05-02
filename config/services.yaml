@@ -23,6 +23,8 @@ parameters:
   app.jwt_secret_key: '%env(JWT_SECRET_KEY)%'
   app.jwt_public_key: '%env(JWT_PUBLIC_KEY)%'
 services:
+    PixelOpen\CloudflareTurnstileBundle\Http\CloudflareTurnstileHttpClient:
+        alias: 'turnstile.http_client'
     App\Service\JWTTokenGenerator:
         arguments:
             $parameterBag: '@parameter_bag'
