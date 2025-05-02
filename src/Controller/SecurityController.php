@@ -39,6 +39,7 @@ class SecurityController extends AbstractController
     #[Route('/login', name: 'app_login')]
     public function login(Request $request, AuthenticationUtils $authenticationUtils): Response
     {
+        /** @var User $user */
         $user = $this->getUser();
         if ($user instanceof User) {
             return $this->redirectToRoute('app_landing');
@@ -82,7 +83,7 @@ class SecurityController extends AbstractController
     #[Route('/dashboard/login', name: 'app_dashboard_login')]
     public function dashboardLogin(Request $request, AuthenticationUtils $authenticationUtils): Response
     {
-        /** @var User $currentUser */
+        /** @var User $user */
         $user = $this->getUser();
         if ($user instanceof User) {
             return $this->redirectToRoute('admin_page');
