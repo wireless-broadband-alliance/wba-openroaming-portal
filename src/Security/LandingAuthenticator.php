@@ -4,10 +4,12 @@ namespace App\Security;
 
 use App\Entity\User;
 use App\Enum\FirewallType;
+use App\Enum\OperationMode;
 use App\Enum\TwoFAType;
 use App\Enum\UserTwoFactorAuthenticationStatus;
 use App\Form\LoginFormType;
 use App\Repository\SettingRepository;
+use PixelOpen\CloudflareTurnstileBundle\Http\CloudflareTurnstileHttpClient;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -22,6 +24,7 @@ use Symfony\Component\Security\Http\Authenticator\Passport\Credentials\PasswordC
 use Symfony\Component\Security\Http\Authenticator\Passport\Passport;
 use Symfony\Component\Security\Http\SecurityRequestAttributes;
 use Symfony\Component\Security\Http\Util\TargetPathTrait;
+use Symfony\Flex\Unpack\Operation;
 
 class LandingAuthenticator extends AbstractLoginFormAuthenticator
 {
@@ -31,19 +34,27 @@ class LandingAuthenticator extends AbstractLoginFormAuthenticator
         private readonly UrlGeneratorInterface $urlGenerator,
         private readonly FormFactoryInterface $formFactory,
         private readonly SettingRepository $settingRepository,
+        private readonly CloudflareTurnstileHttpClient $turnstileHttpClient
     ) {
     }
 
     public function authenticate(Request $request): Passport
     {
-        // Retrieve the data from the login form
-        $uuid = $request->request->get('uuid', '');
-        $password = $request->request->get('password', '');
-        $turnstileResponse = $request->request->get('cf-turnstile-response', ''); // Captcha
 
-        // Validate the Turnstile CAPTCHA
-        if ($turnstileResponse === '' || !$this->turnstileHttpClient->verifyResponse($turnstileResponse)) {
-            throw new CustomUserMessageAuthenticationException('Invalid CAPTCHA validation.');
+        // Retrieve the data from the login form
+        $uuid = $request->request->get('uuid');
+        $password = $request->request->get('password');
+        $turnstileResponse = $request->request->get('cf-turnstile-response'); // Captcha
+
+        // Check if Turnstile validation is enabled in the database
+        $turnstileSetting = $this->settingRepository->findOneBy(['name' => 'TURNSTILE_CHECKER']);
+        $isTurnstileEnabled = $turnstileSetting && $turnstileSetting->getValue() === OperationMode::ON->value;
+
+        if ($isTurnstileEnabled) {
+            // Validate the Turnstile CAPTCHA
+            if (empty($turnstileResponse) || !$this->turnstileHttpClient->verifyResponse($turnstileResponse)) {
+                throw new CustomUserMessageAuthenticationException('Invalid CAPTCHA validation.');
+            }
         }
 
         // Add LAST_USERNAME to the session (optional)
@@ -92,7 +103,7 @@ class LandingAuthenticator extends AbstractLoginFormAuthenticator
 
     protected function getLoginUrl(Request $request): string
     {
-        return $this->urlGenerator->generate('app_dashboard_login');
+        return $this->urlGenerator->generate('app_login');
     }
 
     protected function handleTwoFactorRedirection(
