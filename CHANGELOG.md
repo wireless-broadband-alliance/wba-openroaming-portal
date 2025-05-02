@@ -17,6 +17,7 @@
 - Fix validation for JWT tokens to prevent 500 errors during API authentication.
 - Added validation on the **Authentication Methods** page, to check if the provider is active before submitting the
   page, to avoid conflicts with `PROFILE_LIMIT` date expiration.
+- Fix turnstile validation on login page was not triggering correctly
 
 ---
 
