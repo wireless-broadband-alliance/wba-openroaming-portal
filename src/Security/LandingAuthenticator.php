@@ -36,23 +36,25 @@ class LandingAuthenticator extends AbstractLoginFormAuthenticator
 
     public function authenticate(Request $request): Passport
     {
-        $userSigning = new User();
-        $form = $this->formFactory->create(LoginFormType::class, $userSigning);
-        $form->handleRequest($request);
+        // Retrieve the data from the login form
+        $uuid = $request->request->get('uuid', '');
+        $password = $request->request->get('password', '');
+        $turnstileResponse = $request->request->get('cf-turnstile-response', ''); // Captcha
 
-        if (!$form->isSubmitted() || !$form->isValid()) {
-            throw new CustomUserMessageAuthenticationException('Invalid login data.');
+        // Validate the Turnstile CAPTCHA
+        if ($turnstileResponse === '' || !$this->turnstileHttpClient->verifyResponse($turnstileResponse)) {
+            throw new CustomUserMessageAuthenticationException('Invalid CAPTCHA validation.');
         }
 
-        $uuid = $request->request->get('uuid', '');
-
+        // Add LAST_USERNAME to the session (optional)
         $request->getSession()->set(SecurityRequestAttributes::LAST_USERNAME, $uuid);
 
+        // Create a Passport with user, credentials, and CSRF token
         return new Passport(
-            new UserBadge($uuid),
-            new PasswordCredentials($request->request->get('password', '')),
+            new UserBadge($uuid), // Identifier for fetching the user
+            new PasswordCredentials($password), // Check password
             [
-                new CsrfTokenBadge('authenticate', $request->request->get('_csrf_token')),
+                new CsrfTokenBadge('authenticate', $request->request->get('_csrf_token')), // CSRF protection
             ]
         );
     }
