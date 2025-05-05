@@ -19,6 +19,7 @@
 - Added validation on the **Authentication Methods** page, to check if the provider is active before submitting the
   page, to avoid conflicts with `PROFILE_LIMIT` date expiration.
 - Fix turnstile validation on the login page was not triggering correctly.
+- Update API docs add missing docs capport endpoint from "User Engagement Page"
 
 ---
 
