@@ -11,10 +11,6 @@
       fixes for compatibility with Symfony 7.2.5 and deprecation warnings. `php-saml`
       `onelogin-saml-bundle`
 
-> **Important**: In this update, it is required to remove the `vendor` folder and re-install all dependencies.  
-> For detailed instructions, please refer to the [UPGRADE.md](docs/UPGRADE.md) guide.
->
-
 - Fix validation for JWT tokens to prevent 500 errors during API authentication.
 - Added validation on the **Authentication Methods** page, to check if the provider is active before submitting the
   page, to avoid conflicts with `PROFILE_LIMIT` date expiration.

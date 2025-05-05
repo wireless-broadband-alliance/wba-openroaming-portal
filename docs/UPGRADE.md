@@ -5,12 +5,11 @@
 1. [⚠️ Critical Warning: Read Before You Upgrade](#-critical-warning-read-before-you-upgrade-)
 2. [General Upgrade Path Guidelines](#general-upgrade-path-guidelines)
 3. [Upgrade Path Matrix](#upgrade-path-matrix)
-4. [Release-Specific Notes: Version 1.7.1](#release-specific-notes-version-171)
-5. [Release-Specific Notes: Version 1.7](#release-specific-notes-version-17)
-6. [Upgrade Checklist](#upgrade-checklist)
-7. [Step-by-Step Procedure](#step-by-step-procedure)
-8. [Troubleshooting & Rollback](#troubleshooting--rollback)
-9. [Additional Resources](#additional-resources)
+4. [Release-Specific Notes: Version 1.7](#release-specific-notes-version-17)
+5. [Upgrade Checklist](#upgrade-checklist)
+6. [Step-by-Step Procedure](#step-by-step-procedure)
+7. [Troubleshooting & Rollback](#troubleshooting--rollback)
+8. [Additional Resources](#additional-resources)
 
 ---
 
@@ -93,52 +92,8 @@ Upgrading your system requires caution and preparation. Follow these general gui
 | Below 1.5       | Follow earlier paths | 1.7.1          | Ensure compatibility with earlier versions before upgrading.      |
 | 1.5             | 1.6                  | 1.7.1          | Run `php bin/console reset:allocate-providers` before proceeding. |
 | 1.6             | N/A                  | 1.7.1          | Proceed directly to 1.7.1 after reviewing changelog.              |
-| 1.7             | N/A                  | 1.7.1          | Remove the `vendor` folder and re-install dependencies.           |
 
 Use this table to determine the exact steps based on your current version.
-
----
-
-## Release-Specific Notes: Version 1.7.1
-
-- **Important Dependency Update**:  
-  To address compatibility issues and ensure a smooth upgrade process in version **1.7.1**, you are required to remove
-  the `vendor` folder and re-install all dependencies.
-
-  ### Steps to Remove the Vendor Folder in the Docker Web Container:
-    1. **Access the Container**:  
-       Use the following command to connect to the project web container:
-        ```bash
-        docker exec -it cc-openroaming-provisioning-web-web-1 bash
-        ```
-
-    2. **Navigate to the Project Directory**:  
-       Once inside the container, navigate to the project directory (e.g., `/var/www/openroaming`):
-       ```bash
-       cd /var/www/openroaming
-       ```
-
-    3. **Remove the `vendor` Folder**:  
-       Use the `rm` command to delete the `vendor` folder:
-       ```bash
-       rm -rf vendor
-       ```
-
-    4. **Re-Install Dependencies**:  
-       Run the following command to re-install all necessary dependencies:
-       ```bash
-       composer install
-       ```
-
-    5. **Clear and Rebuild the Cache**:  
-       Finally, rebuild the cache to ensure proper functionality:
-       ```bash
-       php bin/console cache:clear
-       ```
-
-- **Breaking Changes**:  
-  This release includes updates to dependencies and other system adjustments, which may require additional configuration
-  changes. Refer to the [CHANGELOG.md](../CHANGELOG.md) for a summary of changes.
 
 ---
 
@@ -221,7 +176,6 @@ Use the following checklist before starting the upgrade process:
 | Missing `reset:allocate-providers` | Skipped upgrade to version 1.6       | Ensure intermediate upgrades are completed correctly.         |
 | Database schema mismatch           | Schema updates not applied           | Run `php bin/console doctrine:schema:update --force`.         |
 | Deprecation warnings               | Unresolved deprecated fields         | Resolve deprecated fields in version 1.6.                     |
-| Application breaks after upgrade   | Incomplete dependency reinstallation | Remove `vendor` and re-install all dependencies (`composer`). |
 | Cache-related issues               | Old cache files causing conflicts    | Run `php bin/console cache:clear` to rebuild the cache.       |
 
 ### Rollback Procedure
