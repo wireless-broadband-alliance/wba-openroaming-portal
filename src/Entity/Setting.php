@@ -8,6 +8,7 @@ use ApiPlatform\OpenApi\Factory\OpenApiFactory;
 use ApiPlatform\OpenApi\Model\Operation;
 use ApiPlatform\OpenApi\Model\Parameter;
 use ApiPlatform\OpenApi\Model\RequestBody;
+use App\Api\V1\Controller\CapportController;
 use App\Api\V1\Controller\ConfigController;
 use App\Api\V1\Controller\ProfileController;
 use App\Api\V1\Controller\TurnstileController;
@@ -76,6 +77,83 @@ use Doctrine\ORM\Mapping as ORM;
             paginationEnabled: false,
             description: 'Serves the public HTML configuration required for Turnstile integration for Android apps.',
             name: 'api_turnstile_html_android',
+            extraProperties: [OpenApiFactory::OVERRIDE_OPENAPI_RESPONSES => false],
+        ),
+        new GetCollection(
+            uriTemplate: '/api/v1/capport/json',
+            controller: CapportController::class,
+            openapi: new Operation(
+                responses: [
+                    200 => [
+                        'description' => 'Successful response with CAPPORT metadata.',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'success' => [
+                                            'type' => 'boolean',
+                                            'example' => true,
+                                            'description' => 'Indicates if the request was successful.'
+                                        ],
+                                        'data' => [
+                                            'type' => 'object',
+                                            'description' => 'CAPPORT metadata object.',
+                                            'properties' => [
+                                                'captive' => [
+                                                    'type' => 'boolean',
+                                                    'example' => false
+                                                ],
+                                                'user-portal-url' => [
+                                                    'type' => 'string',
+                                                    'format' => 'uri',
+                                                    'example' => 'https://example.com/'
+                                                ],
+                                                'venue-info-url' => [
+                                                    'type' => 'string',
+                                                    'format' => 'uri',
+                                                    'example' => 'https://openroaming.org/'
+                                                ]
+                                            ]
+                                        ]
+                                    ]
+                                ],
+                                'example' => [
+                                    'success' => true,
+                                    'data' => [
+                                        'captive' => false,
+                                        'user-portal-url' => 'https://example.com/',
+                                        'venue-info-url' => 'https://openroaming.org/'
+                                    ]
+                                ]
+                            ]
+                        ]
+                    ],
+                    404 => [
+                        'description' => 'CAPPORT is not enabled.',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'success' => ['type' => 'boolean', 'example' => false],
+                                        'error' => ['type' => 'string', 'example' => 'CAPPORT is not enabled']
+                                    ]
+                                ],
+                                'example' => [
+                                    'success' => false,
+                                    'error' => 'CAPPORT is not enabled'
+                                ]
+                            ]
+                        ]
+                    ]
+                ],
+                security: []
+            ),
+            shortName: 'Capport',
+            paginationEnabled: false,
+            description: 'CAPPORT JSON metadata endpoint',
+            name: 'api_capport_json',
             extraProperties: [OpenApiFactory::OVERRIDE_OPENAPI_RESPONSES => false],
         ),
         new GetCollection(
