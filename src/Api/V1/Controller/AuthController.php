@@ -186,8 +186,8 @@ class AuthController extends AbstractController
         // Generate JWT Token
         $token = $this->tokenGenerator->generateToken($user);
         if (is_array($token) && isset($token['success']) && $token['success'] === false) {
-            $statusCode = $token['message'] === 'Expected an instance of App\Entity\User' ? 400 : 500;
-            return new BaseResponse($statusCode, null, $token['message'])->toResponse();
+            $statusCode = $token['error'] === 'Invalid user provided. Please verify the user data.' ? 400 : 500;
+            return new BaseResponse($statusCode, null, $token['error'])->toResponse();
         }
 
         // Prepare response data
@@ -362,8 +362,8 @@ class AuthController extends AbstractController
             // Generate JWT Token
             $token = $this->tokenGenerator->generateToken($user);
             if (is_array($token) && isset($token['success']) && $token['success'] === false) {
-                $statusCode = $token['message'] === 'Expected an instance of App\Entity\User' ? 400 : 500;
-                return new BaseResponse($statusCode, null, $token['message'])->toResponse();
+                $statusCode = $token['error'] === 'Invalid user provided. Please verify the user data.' ? 400 : 500;
+                return new BaseResponse($statusCode, null, $token['error'])->toResponse();
             }
 
             // Use the toApiResponse method to generate the response
@@ -492,8 +492,8 @@ class AuthController extends AbstractController
             // Generate JWT Token
             $token = $this->tokenGenerator->generateToken($user);
             if (is_array($token) && isset($token['success']) && $token['success'] === false) {
-                $statusCode = $token['message'] === 'Expected an instance of App\Entity\User' ? 400 : 500;
-                return new BaseResponse($statusCode, null, $token['message'])->toResponse();
+                $statusCode = $token['error'] === 'Invalid user provided. Please verify the user data.' ? 400 : 500;
+                return new BaseResponse($statusCode, null, $token['error'])->toResponse();
             }
 
             $formattedUserData = $user->toApiResponse(['token' => $token]);
@@ -620,8 +620,8 @@ class AuthController extends AbstractController
             // Generate JWT Token
             $token = $this->tokenGenerator->generateToken($user);
             if (is_array($token) && isset($token['success']) && $token['success'] === false) {
-                $statusCode = $token['message'] === 'Expected an instance of App\Entity\User' ? 400 : 500;
-                return new BaseResponse($statusCode, null, $token['message'])->toResponse();
+                $statusCode = $token['error'] === 'Invalid user provided. Please verify the user data.' ? 400 : 500;
+                return new BaseResponse($statusCode, null, $token['error'])->toResponse();
             }
 
             $formattedUserData = $user->toApiResponse(['token' => $token]);

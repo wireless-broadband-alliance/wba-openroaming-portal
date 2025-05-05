@@ -2,13 +2,13 @@
 
 namespace App\Service;
 
-use App\Api\V1\BaseResponse;
 use App\Entity\User;
 use App\Repository\UserRepository;
 use Lexik\Bundle\JWTAuthenticationBundle\Encoder\JWTEncoderInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Exception\JWTDecodeFailureException;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 readonly class JWTTokenGenerator
@@ -20,10 +20,16 @@ readonly class JWTTokenGenerator
         private JWTTokenManagerInterface $jwtManager,
         private JWTEncoderInterface $JWTEncoder,
         private UserRepository $userRepository,
+        private KernelInterface $kernel,
         private ParameterBagInterface $parameterBag,
     ) {
-        $this->publicKeyJwtPath = $this->parameterBag->get('app.jwt_public_key');
-        $this->privateKeyJwtPath = $this->parameterBag->get('app.jwt_secret_key');
+        $projectDir = $this->kernel->getProjectDir();
+        $this->publicKeyJwtPath = "$projectDir/config/jwt/public.pem" ?? $this->parameterBag->get(
+            'app.jwt_public_key'
+        );
+        $this->privateKeyJwtPath = "$projectDir/config/jwt/private.pem" ?? $this->parameterBag->get(
+            'app.jwt_secret_key'
+        );
     }
 
     public function generateToken(UserInterface $user): string|array
@@ -31,7 +37,7 @@ readonly class JWTTokenGenerator
         if (!$user instanceof User) {
             return [
                 'success' => false,
-                'message' => 'Invalid user provided. Please verify the user data.',
+                'error' => 'Invalid user provided. Please verify the user data.',
             ];
         }
 
@@ -39,7 +45,7 @@ readonly class JWTTokenGenerator
         if (!file_exists($this->privateKeyJwtPath) || !file_exists($this->publicKeyJwtPath)) {
             return [
                 'success' => false,
-                'message' => 'JWT key files are missing. Please ensure both private and public keys exist.',
+                'error' => 'JWT key files are missing. Please ensure both private and public keys exist.',
             ];
         }
 

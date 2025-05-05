@@ -50,10 +50,12 @@ class ConfigController extends AbstractController
 
         $data['auth'] = [
             'AUTH_METHOD_SAML_ENABLED' => $this->getSettingValueConverted('AUTH_METHOD_SAML_ENABLED'),
+            'AUTH_METHOD_GOOGLE_LOGIN_ENABLED' => $this->getSettingValueConverted(
+                'AUTH_METHOD_GOOGLE_LOGIN_ENABLED'
+            ),
             'AUTH_METHOD_MICROSOFT_LOGIN_ENABLED' => $this->getSettingValueConverted(
                 'AUTH_METHOD_MICROSOFT_LOGIN_ENABLED'
             ),
-            'AUTH_METHOD_GOOGLE_LOGIN_ENABLED' => $this->getSettingValueConverted('AUTH_METHOD_GOOGLE_LOGIN_ENABLED'),
             'AUTH_METHOD_REGISTER_ENABLED' => $this->getSettingValueConverted('AUTH_METHOD_REGISTER_ENABLED'),
             'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED' => $this->getSettingValueConverted(
                 'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED'
@@ -72,16 +74,11 @@ class ConfigController extends AbstractController
         }
 
         if (
-            $this->areEnvKeysAvailable(
-                ['SAML_IDP_ENTITY_ID', 'SAML_IDP_SSO_URL', 'SAML_IDP_X509_CERT', 'SAML_SP_ENTITY_ID']
-            ) &&
-            $this->getSettingValueRaw('AUTH_METHOD_SAML_ENABLED') === 'true'
+            $this->areEnvKeysAvailable(['GOOGLE_CLIENT_ID']) &&
+            $this->getSettingValueRaw('AUTH_METHOD_GOOGLE_LOGIN_ENABLED') === 'true'
         ) {
-            $data['saml'] = [
-                'SAML_IDP_ENTITY_ID' => $this->parameterBag->get('app.saml_idp_entity_id'),
-                'SAML_IDP_SSO_URL' => $this->parameterBag->get('app.saml_idp_sso_url'),
-                'SAML_IDP_X509_CERT' => $this->parameterBag->get('app.saml_idp_x509_cert'),
-                'SAML_SP_ENTITY_ID' => $this->parameterBag->get('app.saml_sp_entity_id'),
+            $data['google'] = [
+                'GOOGLE_CLIENT_ID' => $this->parameterBag->get('app.google_client_id'),
             ];
         }
 
@@ -95,11 +92,16 @@ class ConfigController extends AbstractController
         }
 
         if (
-            $this->areEnvKeysAvailable(['GOOGLE_CLIENT_ID']) &&
-            $this->getSettingValueRaw('AUTH_METHOD_GOOGLE_LOGIN_ENABLED') === 'true'
+            $this->areEnvKeysAvailable(
+                ['SAML_IDP_ENTITY_ID', 'SAML_IDP_SSO_URL', 'SAML_IDP_X509_CERT', 'SAML_SP_ENTITY_ID']
+            ) &&
+            $this->getSettingValueRaw('AUTH_METHOD_SAML_ENABLED') === 'true'
         ) {
-            $data['google'] = [
-                'GOOGLE_CLIENT_ID' => $this->parameterBag->get('app.google_client_id'),
+            $data['saml'] = [
+                'SAML_IDP_ENTITY_ID' => $this->parameterBag->get('app.saml_idp_entity_id'),
+                'SAML_IDP_SSO_URL' => $this->parameterBag->get('app.saml_idp_sso_url'),
+                'SAML_IDP_X509_CERT' => $this->parameterBag->get('app.saml_idp_x509_cert'),
+                'SAML_SP_ENTITY_ID' => $this->parameterBag->get('app.saml_sp_entity_id'),
             ];
         }
 
