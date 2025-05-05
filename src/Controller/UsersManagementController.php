@@ -351,7 +351,8 @@ class UsersManagementController extends AbstractController
                 $user->setBannedAt(new DateTime());
                 $this->profileManager->disableProfiles(
                     $user,
-                    UserRadiusProfileRevokeReason::ADMIN_BANNED_USER->value
+                    UserRadiusProfileRevokeReason::ADMIN_BANNED_USER->value,
+                    true
                 );
             } else {
                 $user->setBannedAt(null);

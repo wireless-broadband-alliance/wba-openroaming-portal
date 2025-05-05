@@ -49,9 +49,7 @@ class LandingAuthenticator extends AbstractLoginFormAuthenticator
         if ($uuid) {
             $user = $this->userRepository->findOneBy([
                 'uuid' => $uuid,
-                'bannedAt' => null,
                 'deletedAt' => null,
-                'isDisabled' => false,
             ]);
             if (!$user) {
                 // Validate if the user account exists

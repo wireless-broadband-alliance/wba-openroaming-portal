@@ -52,14 +52,6 @@ class DashboardAuthenticator extends AbstractLoginFormAuthenticator
                 // Validate if the user account exists
                 throw new CustomUserMessageAuthenticationException('Invalid Credentials.');
             }
-            if ($user->isDisabled() === true) {
-                // Validate if the user account exists
-                throw new CustomUserMessageAuthenticationException('This account is currently disabled.');
-            }
-            if ($user->getBannedAt() instanceof DateTimeInterface) {
-                // Validate if the user account exists
-                throw new CustomUserMessageAuthenticationException('This account is currently banned.');
-            }
         }
 
         // Check if Turnstile validation is enabled in the database
