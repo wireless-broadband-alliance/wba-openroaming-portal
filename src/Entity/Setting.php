@@ -145,7 +145,7 @@ use Doctrine\ORM\Mapping as ORM;
                         ]
                     ]
                 ],
-                description: 'Returns JSON metadata for the Captive Portal (CAPPORT) configuration, used by clients to determine network access conditions.',
+                description: 'Returns JSON metadata for the Captive Portal (CAPPORT) configuration.',
                 security: []
             ),
             shortName: 'Capport',
