@@ -119,12 +119,9 @@ use Doctrine\ORM\Mapping as ORM;
                                     ]
                                 ],
                                 'example' => [
-                                    'success' => true,
-                                    'data' => [
-                                        'captive' => false,
-                                        'user-portal-url' => 'https://example.com/',
-                                        'venue-info-url' => 'https://openroaming.org/'
-                                    ]
+                                    'captive' => false,
+                                    'user-portal-url' => 'https://example.com/',
+                                    'venue-info-url' => 'https://openroaming.org/'
                                 ]
                             ]
                         ]
@@ -148,6 +145,7 @@ use Doctrine\ORM\Mapping as ORM;
                         ]
                     ]
                 ],
+                description: 'Returns JSON metadata for the Captive Portal (CAPPORT) configuration, used by clients to determine network access conditions.',
                 security: []
             ),
             shortName: 'Capport',
