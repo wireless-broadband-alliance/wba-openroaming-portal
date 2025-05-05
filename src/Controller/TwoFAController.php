@@ -115,7 +115,7 @@ class TwoFAController extends AbstractController
                 $secret = $user->gettwoFASecret();
                 // Check if the code used is the one generated in the application.
                 if ($this->totpService->verifyTOTP($secret, $code)) {
-                    $session->set('2fa_verified', true);
+                    $session->set('2fa_verified_' . $context, true);
                     $this->twoFAService->event2FA(
                         $request->getClientIp(),
                         $user,
@@ -198,7 +198,7 @@ class TwoFAController extends AbstractController
         }
 
         // Check if 2FA has already been verified
-        if ($session->has('2fa_verified')) {
+        if ($session->has('2fa_verified_' . $context)) {
             return $this->redirectToRoute('app_landing');
         }
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
@@ -211,7 +211,7 @@ class TwoFAController extends AbstractController
                 $secret = $user->gettwoFASecret();
                 // Check if the used code is one of the OTP codes
                 if ($this->twoFAService->validateOTPCodes($user, $code)) {
-                    $session->set('2fa_verified', true);
+                    $session->set('2fa_verified_' . $context, true);
                     $this->twoFAService->event2FA(
                         $request->getClientIp(),
                         $user,
@@ -225,7 +225,7 @@ class TwoFAController extends AbstractController
                 }
                 // Check if the code used is the one generated in the application.
                 if ($this->totpService->verifyTOTP($secret, $code)) {
-                    $session->set('2fa_verified', true);
+                    $session->set('2fa_verified_' . $context, true);
                     $this->twoFAService->event2FA(
                         $request->getClientIp(),
                         $user,
@@ -244,6 +244,7 @@ class TwoFAController extends AbstractController
             'data' => $data,
             'form' => $form,
             'user' => $user,
+            'context' => $context
         ]);
     }
 
@@ -272,7 +273,7 @@ class TwoFAController extends AbstractController
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $form = $this->createForm(TwoFACode::class);
         $session = $request->getSession();
-        if ($session->has('2fa_verified')) {
+        if ($session->has('2fa_verified_' . $context)) {
             return $this->redirectToRoute('app_landing');
         }
         if ($form->handleRequest($request)->isSubmitted() && $form->isValid()) {
@@ -280,7 +281,7 @@ class TwoFAController extends AbstractController
             $formCode = $form->get('code')->getData();
             // Check if the used code is one of the OTP codes
             if ($this->twoFAService->validateOTPCodes($user, $formCode)) {
-                $session->set('2fa_verified', true);
+                $session->set('2fa_verified_' . $context, true);
                 $this->twoFAService->event2FA(
                     $request->getClientIp(),
                     $user,
@@ -294,7 +295,7 @@ class TwoFAController extends AbstractController
             }
             // Check if the code used is the one generated in the BD.
             if ($this->twoFAService->validate2FACode($user, $formCode)) {
-                $session->set('2fa_verified', true);
+                $session->set('2fa_verified_' . $context, true);
                 $this->twoFAService->event2FA(
                     $request->getClientIp(),
                     $user,
@@ -917,7 +918,7 @@ class TwoFAController extends AbstractController
             $formCode = $form->get('code')->getData();
             // Check if the code used is the one generated in the BD.
             if ($this->twoFAService->validate2FACode($user, $formCode)) {
-                $session->set('2fa_verified', true);
+                $session->set('2fa_verified_' . $context, true);
                 if ($user->getPhoneNumber() instanceof PhoneNumber) {
                     if ($user instanceof User) {
                         $user->setTwoFAtype(UserTwoFactorAuthenticationStatus::SMS->value);

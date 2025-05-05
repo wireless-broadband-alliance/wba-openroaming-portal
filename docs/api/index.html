@@ -34,7 +34,7 @@
             "info": {
                 "title": "OpenRoaming Portal API",
                 "description": "",
-                "version": "1.7.0"
+                "version": "1.7.1"
             },
             "servers": [
                 {
@@ -43,6 +43,87 @@
                 }
             ],
             "paths": {
+                "/api/v1/capport/json": {
+                    "get": {
+                        "operationId": "api_capport_json",
+                        "tags": [
+                            "Capport"
+                        ],
+                        "responses": {
+                            "200": {
+                                "description": "Successful response with CAPPORT metadata.",
+                                "content": {
+                                    "application/json": {
+                                        "schema": {
+                                            "type": "object",
+                                            "properties": {
+                                                "success": {
+                                                    "type": "boolean",
+                                                    "example": true,
+                                                    "description": "Indicates if the request was successful."
+                                                },
+                                                "data": {
+                                                    "type": "object",
+                                                    "description": "CAPPORT metadata object.",
+                                                    "properties": {
+                                                        "captive": {
+                                                            "type": "boolean",
+                                                            "example": false
+                                                        },
+                                                        "user-portal-url": {
+                                                            "type": "string",
+                                                            "format": "uri",
+                                                            "example": "https://example.com/"
+                                                        },
+                                                        "venue-info-url": {
+                                                            "type": "string",
+                                                            "format": "uri",
+                                                            "example": "https://openroaming.org/"
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        "example": {
+                                            "captive": false,
+                                            "user-portal-url": "https://example.com/",
+                                            "venue-info-url": "https://openroaming.org/"
+                                        }
+                                    }
+                                }
+                            },
+                            "404": {
+                                "description": "CAPPORT is not enabled.",
+                                "content": {
+                                    "application/json": {
+                                        "schema": {
+                                            "type": "object",
+                                            "properties": {
+                                                "success": {
+                                                    "type": "boolean",
+                                                    "example": false
+                                                },
+                                                "error": {
+                                                    "type": "string",
+                                                    "example": "CAPPORT is not enabled"
+                                                }
+                                            }
+                                        },
+                                        "example": {
+                                            "success": false,
+                                            "error": "CAPPORT is not enabled"
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "summary": "Retrieves the collection of Capport resources.",
+                        "description": "Returns JSON metadata for the Captive Portal (CAPPORT) configuration.",
+                        "parameters": [],
+                        "deprecated": false,
+                        "security": []
+                    }
+                },
                 "/api/v1/config/profile/android": {
                     "get": {
                         "operationId": "api_config_profile_android",
@@ -560,6 +641,11 @@
                                                         "auth": {
                                                             "type": "object",
                                                             "properties": {
+                                                                "TURNSTILE_CHECKER": {
+                                                                    "type": "boolean",
+                                                                    "example": true,
+                                                                    "description": "Indicates whether Turnstile validator is enabled (true) or disabled (false)."
+                                                                },
                                                                 "AUTH_METHOD_SAML_ENABLED": {
                                                                     "type": "boolean",
                                                                     "example": true,
@@ -569,6 +655,11 @@
                                                                     "type": "boolean",
                                                                     "example": true,
                                                                     "description": "Indicates whether Google login is enabled (true) or disabled (false)."
+                                                                },
+                                                                "AUTH_METHOD_MICROSOFT_LOGIN_ENABLED": {
+                                                                    "type": "boolean",
+                                                                    "example": true,
+                                                                    "description": "Indicates whether Microsoft login is enabled (true) or disabled (false)."
                                                                 },
                                                                 "AUTH_METHOD_REGISTER_ENABLED": {
                                                                     "type": "boolean",
@@ -661,6 +752,7 @@
                                                 "auth": {
                                                     "AUTH_METHOD_SAML_ENABLED": true,
                                                     "AUTH_METHOD_GOOGLE_LOGIN_ENABLED": true,
+                                                    "AUTH_METHOD_MICROSOFT_LOGIN_ENABLED": true,
                                                     "AUTH_METHOD_REGISTER_ENABLED": true,
                                                     "AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED": true,
                                                     "AUTH_METHOD_SMS_REGISTER_ENABLED": true
@@ -1074,6 +1166,13 @@
                                                     "success": false,
                                                     "error": "This code is not associated with a google account!"
                                                 }
+                                            },
+                                            "invalid_user": {
+                                                "summary": "Invalid user",
+                                                "value": {
+                                                    "success": false,
+                                                    "error": "Invalid user provided. Please verify the user data"
+                                                }
                                             }
                                         }
                                     }
@@ -1168,7 +1267,7 @@
                                 }
                             },
                             "500": {
-                                "description": "Server error due to internal issues or Google API failure",
+                                "description": "Server error due to internal issues.",
                                 "content": {
                                     "application/json": {
                                         "schema": {
@@ -1180,18 +1279,28 @@
                                                 },
                                                 "message": {
                                                     "type": "string",
-                                                    "example": "An error occurred."
+                                                    "example": "An error occurred: Generic server-side error."
                                                 }
-                                            }
+                                            },
+                                            "required": [
+                                                "success",
+                                                "message"
+                                            ]
                                         },
                                         "examples": {
-                                            "Authentication_failed": {
-                                                "success": false,
-                                                "message": "Authentication Failed."
+                                            "server_issue": {
+                                                "summary": "Example of a general server error",
+                                                "value": {
+                                                    "success": false,
+                                                    "message": "An error occurred: Generic server-side error."
+                                                }
                                             },
-                                            "Server_related": {
-                                                "success": false,
-                                                "message": "An error occurred: Generic server related error."
+                                            "missing_jwt_keys": {
+                                                "summary": "Example of missing JWT keys error",
+                                                "value": {
+                                                    "success": false,
+                                                    "message": "JWT key files are missing. Please ensure both private and public keys exist."
+                                                }
                                             }
                                         }
                                     }
@@ -1360,6 +1469,13 @@
                                                     "success": false,
                                                     "error": "Invalid json format"
                                                 }
+                                            },
+                                            "invalid_user": {
+                                                "summary": "Invalid user",
+                                                "value": {
+                                                    "success": false,
+                                                    "error": "Invalid user provided. Please verify the user data"
+                                                }
                                             }
                                         }
                                     }
@@ -1454,6 +1570,46 @@
                                                 "value": {
                                                     "success": false,
                                                     "error": "Your request cannot be processed at this time due to a pending action. If your account is active, re-login to complete the action"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            "500": {
+                                "description": "Server error due to internal issues.",
+                                "content": {
+                                    "application/json": {
+                                        "schema": {
+                                            "type": "object",
+                                            "properties": {
+                                                "success": {
+                                                    "type": "boolean",
+                                                    "example": false
+                                                },
+                                                "message": {
+                                                    "type": "string",
+                                                    "example": "An error occurred: Generic server-side error."
+                                                }
+                                            },
+                                            "required": [
+                                                "success",
+                                                "message"
+                                            ]
+                                        },
+                                        "examples": {
+                                            "server_issue": {
+                                                "summary": "Example of a general server error",
+                                                "value": {
+                                                    "success": false,
+                                                    "message": "An error occurred: Generic server-side error."
+                                                }
+                                            },
+                                            "missing_jwt_keys": {
+                                                "summary": "Example of missing JWT keys error",
+                                                "value": {
+                                                    "success": false,
+                                                    "message": "JWT key files are missing. Please ensure both private and public keys exist."
                                                 }
                                             }
                                         }
@@ -1618,6 +1774,13 @@
                                                     "success": false,
                                                     "error": "This code is not associated with a microsoft account!"
                                                 }
+                                            },
+                                            "invalid_user": {
+                                                "summary": "Invalid user",
+                                                "value": {
+                                                    "success": false,
+                                                    "error": "Invalid user provided. Please verify the user data"
+                                                }
                                             }
                                         }
                                     }
@@ -1712,7 +1875,7 @@
                                 }
                             },
                             "500": {
-                                "description": "Server error due to internal issues or Microsoft API failure",
+                                "description": "Server error due to internal issues.",
                                 "content": {
                                     "application/json": {
                                         "schema": {
@@ -1724,18 +1887,28 @@
                                                 },
                                                 "message": {
                                                     "type": "string",
-                                                    "example": "An error occurred."
+                                                    "example": "An error occurred: Generic server-side error."
                                                 }
-                                            }
+                                            },
+                                            "required": [
+                                                "success",
+                                                "message"
+                                            ]
                                         },
                                         "examples": {
-                                            "Authentication_failed": {
-                                                "success": false,
-                                                "message": "Authentication Failed."
+                                            "server_issue": {
+                                                "summary": "Example of a general server error",
+                                                "value": {
+                                                    "success": false,
+                                                    "message": "An error occurred: Generic server-side error."
+                                                }
                                             },
-                                            "Server_related": {
-                                                "success": false,
-                                                "message": "An error occurred: Generic server related error."
+                                            "missing_jwt_keys": {
+                                                "summary": "Example of missing JWT keys error",
+                                                "value": {
+                                                    "success": false,
+                                                    "message": "JWT key files are missing. Please ensure both private and public keys exist."
+                                                }
                                             }
                                         }
                                     }
@@ -1876,12 +2049,19 @@
                                                 }
                                             }
                                         },
-                                        "example": {
+                                        "examples": {
                                             "saml_response_not_found": {
                                                 "summary": "SAML Response not found",
                                                 "value": {
                                                     "success": false,
                                                     "error": "SAML Response not found"
+                                                }
+                                            },
+                                            "invalid_user": {
+                                                "summary": "Invalid user",
+                                                "value": {
+                                                    "success": false,
+                                                    "error": "Invalid user provided. Please verify the user data"
                                                 }
                                             }
                                         }
@@ -2000,7 +2180,7 @@
                                 }
                             },
                             "500": {
-                                "description": "Server error while processing the SAML response",
+                                "description": "Server error due to internal issues.",
                                 "content": {
                                     "application/json": {
                                         "schema": {
@@ -2010,19 +2190,29 @@
                                                     "type": "boolean",
                                                     "example": false
                                                 },
-                                                "error": {
+                                                "message": {
                                                     "type": "string",
-                                                    "description": "Error message for why the server error occurred",
-                                                    "example": "SAML processing error"
+                                                    "example": "An error occurred: Generic server-side error."
                                                 }
                                             },
-                                            "examples": {
-                                                "saml_processing_error": {
-                                                    "summary": "SAML processing error",
-                                                    "value": {
-                                                        "success": false,
-                                                        "error": "SAML processing error"
-                                                    }
+                                            "required": [
+                                                "success",
+                                                "message"
+                                            ]
+                                        },
+                                        "examples": {
+                                            "server_issue": {
+                                                "summary": "Example of a general server error",
+                                                "value": {
+                                                    "success": false,
+                                                    "message": "An error occurred: Generic server-side error."
+                                                }
+                                            },
+                                            "missing_jwt_keys": {
+                                                "summary": "Example of missing JWT keys error",
+                                                "value": {
+                                                    "success": false,
+                                                    "message": "JWT key files are missing. Please ensure both private and public keys exist."
                                                 }
                                             }
                                         }
@@ -2944,6 +3134,54 @@
             },
             "components": {
                 "schemas": {
+                    "Capport": {
+                        "type": "object",
+                        "description": "CAPPORT JSON metadata endpoint",
+                        "deprecated": false,
+                        "properties": {
+                            "id": {
+                                "readOnly": true,
+                                "type": "integer"
+                            },
+                            "name": {
+                                "type": "string"
+                            },
+                            "value": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            }
+                        }
+                    },
+                    "Capport.jsonld": {
+                        "type": "object",
+                        "description": "CAPPORT JSON metadata endpoint",
+                        "deprecated": false,
+                        "properties": {
+                            "@id": {
+                                "readOnly": true,
+                                "type": "string"
+                            },
+                            "@type": {
+                                "readOnly": true,
+                                "type": "string"
+                            },
+                            "id": {
+                                "readOnly": true,
+                                "type": "integer"
+                            },
+                            "name": {
+                                "type": "string"
+                            },
+                            "value": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            }
+                        }
+                    },
                     "DeletedUserData": {
                         "type": "object",
                         "description": "",
@@ -5334,7 +5572,10 @@
                                 "type": "string"
                             },
                             "provider_id": {
-                                "type": "string"
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
                             },
                             "providerId": {
                                 "type": "string"
@@ -5394,7 +5635,10 @@
                                 "type": "string"
                             },
                             "provider_id": {
-                                "type": "string"
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
                             },
                             "providerId": {
                                 "type": "string"
@@ -5595,6 +5839,10 @@
             "tags": [
                 {
                     "name": "Turnstile",
+                    "description": "The Setting entity returns configuration options for the application. \n    Each setting consists of a name and an optional value, \n    which can be used to store and return configuration parameters required for the API."
+                },
+                {
+                    "name": "Capport",
                     "description": "The Setting entity returns configuration options for the application. \n    Each setting consists of a name and an optional value, \n    which can be used to store and return configuration parameters required for the API."
                 },
                 {
@@ -5981,7 +6229,7 @@
                     <section class="block col-12">
                         <div class="info">
                             <hgroup class="main">
-                                <h2 class="title">OpenRoaming Portal API<span><small><pre class="version"> 1.7.0 </pre></small><small
+                                <h2 class="title">OpenRoaming Portal API<span><small><pre class="version"> 1.7.1 </pre></small><small
                                         class="version-stamp"><pre class="version">OAS 3.1</pre></small></span></h2>
                             </hgroup>
                             <div class="info__description description"></div>

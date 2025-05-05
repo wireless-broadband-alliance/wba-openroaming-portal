@@ -78,7 +78,7 @@ readonly class SessionValidatorListener
             // Check if the 2FA process is completed
             if (
                 ($user->getTwoFAtype() !== UserTwoFactorAuthenticationStatus::DISABLED->value)
-                && !$session->has('2fa_verified')
+                && !$session->has('2fa_verified_dashboard')
             ) {
                 if (
                     $user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::EMAIL->value ||

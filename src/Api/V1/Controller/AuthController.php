@@ -185,6 +185,10 @@ class AuthController extends AbstractController
 
         // Generate JWT Token
         $token = $this->tokenGenerator->generateToken($user);
+        if (is_array($token) && isset($token['success']) && $token['success'] === false) {
+            $statusCode = $token['error'] === 'Invalid user provided. Please verify the user data.' ? 400 : 500;
+            return new BaseResponse($statusCode, null, $token['error'])->toResponse();
+        }
 
         // Prepare response data
         $responseData = $user->toApiResponse([
@@ -355,8 +359,12 @@ class AuthController extends AbstractController
                 }
             }
 
-            // Generate JWT token for the user
+            // Generate JWT Token
             $token = $this->tokenGenerator->generateToken($user);
+            if (is_array($token) && isset($token['success']) && $token['success'] === false) {
+                $statusCode = $token['error'] === 'Invalid user provided. Please verify the user data.' ? 400 : 500;
+                return new BaseResponse($statusCode, null, $token['error'])->toResponse();
+            }
 
             // Use the toApiResponse method to generate the response
             $responseData = $user->toApiResponse([
@@ -478,10 +486,15 @@ class AuthController extends AbstractController
                 }
             }
 
-            // Authenticate the user using custom Google authentication function already on the project
+            // Authenticate the user using a custom Google authentication function already on the project
             $this->googleController->authenticateUserGoogle($user);
 
+            // Generate JWT Token
             $token = $this->tokenGenerator->generateToken($user);
+            if (is_array($token) && isset($token['success']) && $token['success'] === false) {
+                $statusCode = $token['error'] === 'Invalid user provided. Please verify the user data.' ? 400 : 500;
+                return new BaseResponse($statusCode, null, $token['error'])->toResponse();
+            }
 
             $formattedUserData = $user->toApiResponse(['token' => $token]);
 
@@ -601,10 +614,15 @@ class AuthController extends AbstractController
                 }
             }
 
-            // Authenticate the user using custom Microsoft authentication function already on the project
+            // Authenticate the user using a custom Microsoft authentication function already on the project
             $this->microsoftController->authenticateUserMicrosoft($user);
 
+            // Generate JWT Token
             $token = $this->tokenGenerator->generateToken($user);
+            if (is_array($token) && isset($token['success']) && $token['success'] === false) {
+                $statusCode = $token['error'] === 'Invalid user provided. Please verify the user data.' ? 400 : 500;
+                return new BaseResponse($statusCode, null, $token['error'])->toResponse();
+            }
 
             $formattedUserData = $user->toApiResponse(['token' => $token]);
 

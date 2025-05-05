@@ -1,143 +1,170 @@
 {
-	"type": "project",
-	"license": "Apache-2.0",
+  "type": "project",
+  "license": "Apache-2.0",
   "version": "1.7.0",
-	"minimum-stability": "stable",
-	"prefer-stable": true,
-	"require": {
-		"php": ">=8.4",
-		"ext-ctype": "*",
-		"ext-dom": "*",
-		"ext-gnupg": "*",
-		"ext-iconv": "*",
-		"ext-ldap": "*",
-		"ext-libxml": "*",
-		"ext-memcached": "*",
-		"ext-openssl": "*",
-		"ext-simplexml": "*",
-		"composer": "*",
-		"api-platform/core": "4.1.0",
-		"doctrine/dbal": "^4",
-		"doctrine/doctrine-bundle": "^2.13",
-		"doctrine/doctrine-migrations-bundle": "^3.4",
-		"doctrine/orm": "^3",
-		"easycorp/easyadmin-bundle": "^4.24",
-		"emileperron/tinymce-bundle": "^3.1.1",
-		"endroid/qr-code": "^6.0",
-		"ezyang/htmlpurifier": "^4.18",
-		"geoip2/geoip2": "^3.1",
-		"knpuniversity/oauth2-client-bundle": "^2.18",
-		"league/oauth2-google": "^4.0",
-		"lexik/jwt-authentication-bundle": "^3.1",
-		"nbgrp/onelogin-saml-bundle": "^2.0",
-		"nelmio/cors-bundle": "^2.5",
-		"odolbeau/phone-number-bundle": "^4.1",
-		"phpdocumentor/reflection-docblock": "^5.3",
-		"phpoffice/phpspreadsheet": "^1.29",
-		"phpstan/extension-installer": "^1.4",
-		"phpstan/phpdoc-parser": "^2.0",
-		"phpstan/phpstan": "^2.1",
-		"phpstan/phpstan-symfony": "^2.0",
-		"pixelopen/cloudflare-turnstile-bundle": "^0.4.1",
-		"rector/rector": "^2.0",
-		"robrichards/xmlseclibs": "^3.1",
-		"sentry/sentry-symfony": "^5.1.0",
-		"spomky-labs/otphp": "^11.3",
-		"stevenmaguire/oauth2-microsoft": "^2.2",
-		"symfony/asset": "7.2.*",
-		"symfony/console": "7.2.*",
-		"symfony/doctrine-messenger": "7.2.*",
-		"symfony/dotenv": "7.2.*",
-		"symfony/expression-language": "7.2.*",
-		"symfony/flex": "^2",
-		"symfony/form": "7.2.*",
-		"symfony/framework-bundle": "7.2.*",
-		"symfony/google-mailer": "7.2.*",
-		"symfony/http-client": "7.2.*",
-		"symfony/intl": "7.2.*",
-		"symfony/mailer": "7.2.*",
-		"symfony/mime": "7.2.*",
-		"symfony/monolog-bundle": "^3.10",
-		"symfony/notifier": "7.2.*",
-		"symfony/process": "7.2.*",
-		"symfony/property-access": "7.2.*",
-		"symfony/property-info": "7.2.*",
-		"symfony/runtime": "7.2.*",
-		"symfony/security-bundle": "7.2.*",
-		"symfony/serializer": "7.2.*",
-		"symfony/string": "7.2.*",
-		"symfony/translation": "7.2.*",
-		"symfony/twig-bundle": "7.2.*",
-		"symfony/ux-chartjs": "^2.23",
-		"symfony/ux-icons": "^2.23",
-		"symfony/ux-twig-component": "^2.23",
-		"symfony/validator": "7.2.*",
-		"symfony/web-link": "7.2.*",
-		"symfony/webpack-encore-bundle": "^2.2",
-		"symfony/yaml": "7.2.*",
-		"symfonycasts/verify-email-bundle": "^1.17",
-		"twig/extra-bundle": "^2.12|^3.0",
-		"twig/twig": "^2.12|^3.0",
-		"vincentlanglet/twig-cs-fixer": "^3.5"
-	},
-	"config": {
-		"allow-plugins": {
-			"php-http/discovery": true,
-			"symfony/flex": true,
-			"symfony/runtime": true,
-			"phpstan/extension-installer": true
-		},
-		"sort-packages": true
-	},
-	"autoload": {
-		"psr-4": {
-            "App\\": "src/"
+  "minimum-stability": "dev",
+  "prefer-stable": true,
+  "repositories": [
+    {
+      "type": "package",
+      "package": {
+        "name": "tetrapi/onelogin-saml-bundle",
+        "version": "dev-develop",
+        "dist": {
+          "url": "https://github.com/tetrapi/onelogin-saml-bundle/archive/b0a7dc6a3a14b331995b2cb19b65aed05b86887f.zip",
+          "type": "zip"
         }
+      }
     },
-    "autoload-dev": {
-        "psr-4": {
-            "App\\Tests\\": "tests/"
+    {
+      "type": "package",
+      "package": {
+        "name": "onelogin/php-saml",
+        "version": "4.x-dev",
+        "dist": {
+          "url": "https://github.com/onelogin/php-saml/archive/76236a6907f8dacfe34c41ed85a9cb9fbc654059.zip",
+          "type": "zip"
         }
+      }
+    }
+  ],
+  "require": {
+    "php": ">=8.4",
+    "ext-ctype": "*",
+    "ext-dom": "*",
+    "ext-gnupg": "*",
+    "ext-iconv": "*",
+    "ext-ldap": "*",
+    "ext-libxml": "*",
+    "ext-memcached": "*",
+    "ext-openssl": "*",
+    "ext-simplexml": "*",
+    "composer": "*",
+    "api-platform/core": "4.1.0",
+    "doctrine/dbal": "^4",
+    "doctrine/doctrine-bundle": "^2.13",
+    "doctrine/doctrine-migrations-bundle": "^3.4",
+    "doctrine/orm": "^3",
+    "easycorp/easyadmin-bundle": "^4.24",
+    "emileperron/tinymce-bundle": "^3.1.1",
+    "endroid/qr-code": "^6.0",
+    "ezyang/htmlpurifier": "^4.18",
+    "geoip2/geoip2": "^3.1",
+    "knpuniversity/oauth2-client-bundle": "^2.18",
+    "league/oauth2-google": "^4.0",
+    "lexik/jwt-authentication-bundle": "^3.1",
+    "tetrapi/onelogin-saml-bundle": "dev-develop",
+    "onelogin/php-saml": "4.x-dev",
+    "nelmio/cors-bundle": "^2.5",
+    "odolbeau/phone-number-bundle": "^4.1",
+    "phpdocumentor/reflection-docblock": "^5.3",
+    "phpoffice/phpspreadsheet": "^1.29",
+    "phpstan/extension-installer": "^1.4",
+    "phpstan/phpdoc-parser": "^2.0",
+    "phpstan/phpstan": "^2.1",
+    "phpstan/phpstan-symfony": "^2.0",
+    "pixelopen/cloudflare-turnstile-bundle": "^0.4.1",
+    "rector/rector": "^2.0",
+    "robrichards/xmlseclibs": "^3.1",
+    "sentry/sentry-symfony": "^5.1.0",
+    "spomky-labs/otphp": "^11.3",
+    "stevenmaguire/oauth2-microsoft": "^2.2",
+    "symfony/asset": "7.2.*",
+    "symfony/console": "7.2.*",
+    "symfony/doctrine-messenger": "7.2.*",
+    "symfony/dotenv": "7.2.*",
+    "symfony/expression-language": "7.2.*",
+    "symfony/flex": "^2",
+    "symfony/form": "7.2.*",
+    "symfony/framework-bundle": "7.2.*",
+    "symfony/google-mailer": "7.2.*",
+    "symfony/http-client": "7.2.*",
+    "symfony/intl": "7.2.*",
+    "symfony/mailer": "7.2.*",
+    "symfony/mime": "7.2.*",
+    "symfony/monolog-bundle": "^3.10",
+    "symfony/notifier": "7.2.*",
+    "symfony/process": "7.2.*",
+    "symfony/property-access": "7.2.*",
+    "symfony/property-info": "7.2.*",
+    "symfony/runtime": "7.2.*",
+    "symfony/security-bundle": "7.2.*",
+    "symfony/serializer": "7.2.*",
+    "symfony/string": "7.2.*",
+    "symfony/translation": "7.2.*",
+    "symfony/twig-bundle": "7.2.*",
+    "symfony/ux-chartjs": "^2.23",
+    "symfony/ux-icons": "^2.23",
+    "symfony/ux-twig-component": "^2.23",
+    "symfony/validator": "7.2.*",
+    "symfony/web-link": "7.2.*",
+    "symfony/webpack-encore-bundle": "^2.2",
+    "symfony/yaml": "7.2.*",
+    "symfonycasts/verify-email-bundle": "^1.17",
+    "twig/extra-bundle": "^2.12|^3.0",
+    "twig/twig": "^2.12|^3.0",
+    "vincentlanglet/twig-cs-fixer": "^3.5"
+  },
+  "config": {
+    "allow-plugins": {
+      "php-http/discovery": true,
+      "symfony/flex": true,
+      "symfony/runtime": true,
+      "phpstan/extension-installer": true
     },
-    "replace": {
-        "symfony/polyfill-ctype": "*",
-        "symfony/polyfill-iconv": "*",
-        "symfony/polyfill-php72": "*",
-        "symfony/polyfill-php73": "*",
-        "symfony/polyfill-php74": "*",
-        "symfony/polyfill-php80": "*",
-        "symfony/polyfill-php81": "*"
+    "sort-packages": true
+  },
+  "autoload": {
+    "psr-4": {
+      "App\\": "src/",
+      "Nbgrp\\OneloginSamlBundle\\": "vendor/tetrapi/onelogin-saml-bundle/src/",
+      "OneLogin\\Saml2\\": "vendor/onelogin/php-saml/src/Saml2/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "App\\Tests\\": "tests/"
+    }
+  },
+  "replace": {
+    "symfony/polyfill-ctype": "*",
+    "symfony/polyfill-iconv": "*",
+    "symfony/polyfill-php72": "*",
+    "symfony/polyfill-php73": "*",
+    "symfony/polyfill-php74": "*",
+    "symfony/polyfill-php80": "*",
+    "symfony/polyfill-php81": "*"
+  },
+  "scripts": {
+    "auto-scripts": {
+      "cache:clear": "symfony-cmd",
+      "assets:install %PUBLIC_DIR%": "symfony-cmd"
     },
-    "scripts": {
-        "auto-scripts": {
-			"cache:clear": "symfony-cmd",
-			"assets:install %PUBLIC_DIR%": "symfony-cmd"
-		},
-        "post-install-cmd": [
-            "@auto-scripts"
-        ],
-        "post-update-cmd": [
-            "@auto-scripts"
-        ]
-    },
-    "conflict": {
-        "symfony/symfony": "*"
-    },
-    "extra": {
-        "symfony": {
-            "allow-contrib": false,
-            "require": "7.2.*"
-        }
-    },
-    "require-dev": {
-		"doctrine/doctrine-fixtures-bundle": "^4.0",
-		"phpunit/phpunit": "^9.5",
-		"symfony/browser-kit": "7.2.*",
-		"symfony/css-selector": "7.2.*",
-		"symfony/debug-bundle": "7.2.*",
-		"symfony/maker-bundle": "^1.62",
-		"symfony/phpunit-bridge": "^7.2",
-		"symfony/stopwatch": "7.2.*",
-		"symfony/web-profiler-bundle": "7.2.*"
-	}
+    "post-install-cmd": [
+      "@auto-scripts"
+    ],
+    "post-update-cmd": [
+      "@auto-scripts"
+    ]
+  },
+  "conflict": {
+    "symfony/symfony": "*"
+  },
+  "extra": {
+    "symfony": {
+      "allow-contrib": false,
+      "require": "7.2.*"
+    }
+  },
+  "require-dev": {
+    "doctrine/doctrine-fixtures-bundle": "^4.0",
+    "phpunit/phpunit": "^9.6",
+    "symfony/browser-kit": "7.2.*",
+    "symfony/css-selector": "7.2.*",
+    "symfony/debug-bundle": "7.2.*",
+    "symfony/maker-bundle": "^1.62",
+    "symfony/phpunit-bridge": "^7.2",
+    "symfony/stopwatch": "7.2.*",
+    "symfony/web-profiler-bundle": "7.2.*"
+  }
 }
