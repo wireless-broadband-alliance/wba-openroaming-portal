@@ -7,7 +7,7 @@ baseline the industry** on the necessary components for developing an enabler co
 
 1. [💡 Why It Was Created?](#-why-it-was-created)
 
-2. [🤔 How It Works](#-how-it-works)
+2. [🤔 How does it Work?](#-how-does-it-work)
 
 3. [🛠️ Tools Used](#-tools-used)
 
@@ -49,14 +49,14 @@ baseline the industry** on the necessary components for developing an enabler co
 
 ## 💡 Why it was created?
 
-The primary objective of the **OpenRoaming Provisioning Portal is to simplify the provisioning of identities using
+The primary goal of the **OpenRoaming Provisioning Portal is to simplify the provisioning of identities using
 Passpoint**, enabling an OpenRoaming network to support seamless Wi-Fi connectivity and enhance security for users
 across various environments.
 
 The goal is to **provide secure Wi-Fi access to everyone** without the need for repeated logins or unsecure/open
 networks, making Wi-Fi connectivity for individuals and enterprises easier, quicker, and more user-friendly.
 
-## 🤔 How it works?
+## 🤔 How does it work?
 
 OpenRoaming is an **open standard developed to enable global, secure, and automatic Wi-Fi connectivity**. With
 OpenRoaming, users can connect to Wi-Fi networks without being prompted for login credentials. Instead, it utilizes
@@ -68,7 +68,7 @@ Each user is provided with a unique and secure profile that caters to their spec
 OpenRoaming Provisioning Portal simplifies the setup and configuration process for network administrators, acting as a
 key enabler for OpenRoaming technology.
 
-For more information about OpenRoaming Technology please visit: https://openroaming.org
+For more information about OpenRoaming Technology, please visit: https://openroaming.org
 
 ## 🛠️ Tools Used
 
@@ -78,12 +78,12 @@ These are some of the most important tools used on the development of this proje
 - **Symfony Framework**: The core of the portal, the Symfony framework provides a solid and scalable base for web
   applications.
 - **Twig Templating Engine**: Generates consistent, responsive views by separating logic.
-- **MySQL Database**: Efficiently method to save and return user profiles and settings of the portal.
+- **MySQL Database**: Efficient method to save and return user profiles and settings of the portal.
 - **Docker**: Encapsulating the project in containers to improve deployment and compatibility.
 
 ## 📜 Prerequisites:
 
-- Linux based system - Ubuntu 22.04 LTS (tested for the reference implementation)
+- Linux-based system - Ubuntu 22.04 LTS (tested for the reference implementation)
 - Knowledge about Linux OS (required to set up the project)
 - Radius DB and a stack IDP prepared to use the portal
 - Docker (required for running the application)
@@ -187,7 +187,7 @@ the instructions provided for each version you are upgrading to.
 > **Important**: Failure to follow the required upgrade steps may result in incomplete migrations, unexpected behaviors,
 > or portal downtime.
 
-Follow this link for more information about upgrade this
+Follow this link for more information about upgrading this
 project: [Upgrade Guide](docs/UPGRADE.md).
 
 # ⚙️ Installation Guide
@@ -328,11 +328,12 @@ the [GeoLite GUI Guide](docs/GEOLITEGUI.md).
 
 The following configurations are required for the API of the project.
 
-- `CORS_ALLOW_ORIGIN`: Required to let the project know which domain is able to use the API
+- `CORS_ALLOW_ORIGIN`: Required to let the project know which domain is able to use the API, is not necessary to change
+  this env.
 
 #### 🪙 Jwt Tokens
 
-If you are planning using the API, please make sure to run the following command on the root folder of the container
+If you are planning on using the API, please make sure to run the following command on the root folder of the container
 project:
 
 ```bash
@@ -370,7 +371,7 @@ individual needs. Here's a rundown of several important variables and their func
    CA).
 
 **IMPORTANT**: The LetsEncrypt CA's SHA1 hash is set as the default value.
-This hash is important since it is needed
+This hash is important since it is necessary
 to validate the RADIUS server's certificate.
 
 **Missing Values:** Please check that all crucial fields are fully filled if any values are missing.
@@ -438,33 +439,33 @@ certificate. **Connection errors** can happen if the right SHA1 hash is not prov
     authentication code
 39. `TWO_FACTOR_AUTH_RESEND_INTERVAL`: Time interval in seconds to request a new two-factor authentication code
 
-39. `SYNC_LDAP_ENABLED`: Enable or disable synchronization with LDAP.
-40. `SYNC_LDAP_SERVER`: The LDAP server's URL.
-41. `SYNC_LDAP_BIND_USER_DN`: The Distinguished Name (DN) used to bind to the LDAP server.
-42. `SYNC_LDAP_BIND_USER_PASSWORD`: The password for the bind user on the LDAP server.
-43. `SYNC_LDAP_SEARCH_BASE_DN`: The base DN used when searching the LDAP directory.
-44. `SYNC_LDAP_SEARCH_FILTER`: The filter used when searching the LDAP directory.
+40. `SYNC_LDAP_ENABLED`: Enable or disable synchronization with LDAP.
+41. `SYNC_LDAP_SERVER`: The LDAP server's URL.
+42. `SYNC_LDAP_BIND_USER_DN`: The Distinguished Name (DN) used to bind to the LDAP server.
+43. `SYNC_LDAP_BIND_USER_PASSWORD`: The password for the bind user on the LDAP server.
+44. `SYNC_LDAP_SEARCH_BASE_DN`: The base DN used when searching the LDAP directory.
+45. `SYNC_LDAP_SEARCH_FILTER`: The filter used when searching the LDAP directory.
     The placeholder `@ID` is replaced with the user's ID.
 
-45. `PROFILES_ENCRYPTION_TYPE_IOS_ONLY`: Type of encryption defined for the creation of the profiles, for iOS only.
-46. `CAPPORT_ENABLED`: Enable or disable Capport DHCP configuration.
-47. `CAPPORT_PORTAL_URL`: Domain that is from the entity hosting the service.
-48. `CAPPORT_VENUE_INFO_URL`: Domain where the user is redirected after clicking the DHCP notification.
-49. `SMS_USERNAME`: Budget SMS Username.
-50. `SMS_USER_ID`: Budget SMS User ID.
-51. `SMS_HANDLE`: Budget SMS Handle hash.
-52. `SMS_FROM`: Entity sending the SMS for the users.
-53. `SMS_TIMER_RESEND`: Timer in minutes to make the user wait to resend a new SMS.
+46. `PROFILES_ENCRYPTION_TYPE_IOS_ONLY`: Type of encryption defined for the creation of the profiles, for iOS only.
+47. `CAPPORT_ENABLED`: Enable or disable Capport DHCP configuration.
+48. `CAPPORT_PORTAL_URL`: Domain that is from the entity hosting the service.
+49. `CAPPORT_VENUE_INFO_URL`: Domain where the user is redirected after clicking the DHCP notification.
+50. `SMS_USERNAME`: Budget SMS Username.
+51. `SMS_USER_ID`: Budget SMS User ID.
+52. `SMS_HANDLE`: Budget SMS Handle hash.
+53. `SMS_FROM`: Entity sending the SMS for the users.
+54. `SMS_TIMER_RESEND`: Timer in minutes to make the user wait to resend a new SMS.
 
-54. `TOS_LINK`: Terms and Conditions URL.
-55. `PRIVACY_POLICY_LINK`: Privacy and Policy URL.
-56. `USER_DELETE_TIME`: Time in hours to delete the unverified user.
-57. `TIME_INTERVAL_NOTIFICATION`: Time in days to resend the notification when the profile is about to expire.
-58. `PROFILE_LIMIT_DATE_SAML`: Time in days to disable profiles for SAML users with login.
-59. `PROFILE_LIMIT_DATE_GOOGLE`: Time in days to disable profiles for users with GOOGLE login.
-60. `PROFILE_LIMIT_DATE_MICROSOFT`: Time in days to disable profiles for users with MICROSOFT login.
-61. `PROFILE_LIMIT_DATE_EMAIL`: Time in days to disable profiles for users with EMAIL login.
-62. `PROFILE_LIMIT_DATE_SMS`: Time in days to disable profiles for users with SMS login.
+55. `TOS_LINK`: Term's and Conditions URL.
+56. `PRIVACY_POLICY_LINK`: Privacy and Policy URL.
+57. `USER_DELETE_TIME`: Time in hours to delete the unverified user.
+58. `TIME_INTERVAL_NOTIFICATION`: Time in days to resend the notification when the profile is about to expire.
+59. `PROFILE_LIMIT_DATE_SAML`: Time in days to disable profiles for SAML users with login.
+60. `PROFILE_LIMIT_DATE_GOOGLE`: Time in days to disable profiles for users with GOOGLE login.
+61. `PROFILE_LIMIT_DATE_MICROSOFT`: Time in days to disable profiles for users with MICROSOFT login.
+62. `PROFILE_LIMIT_DATE_EMAIL`: Time in days to disable profiles for users with EMAIL login.
+63. `PROFILE_LIMIT_DATE_SMS`: Time in days to disable profiles for users with SMS login.
 
 #### With these environment variables, you can configure and customize various aspects of the project, such as database connections, SAML settings, login methods, and more.
 

@@ -3,7 +3,8 @@
 # Release V1.7.1
 
 - Removed the "Reset Password" option for admins editing their own account.
-- Resolved issue where logout didn't invalidate the session token, causing 2FA issues.
+- Resolved an issue where logout didn't invalidate the session token, causing 2FA issues.
+- Resolved an issue where editing a user account caused the ban action to also disable the account, which conflicted with the error messages in the landing page authenticator
 - Migrated from the deprecated to its actively maintained forks:
     - [nbgrp/onelogin-saml-bundle](https://github.com/nbgrp/onelogin-saml-bundle) for ongoing support and updates.
     - [tetrapi/onelogin-saml-bundle](https://github.com/tetrapi/onelogin-saml-bundle) as an alternative with additional

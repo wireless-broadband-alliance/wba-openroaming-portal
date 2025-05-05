@@ -297,7 +297,7 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
             ->setParameter(
                 'role',
                 '%ROLE_ADMIN%'
-            ) // Change this later for "SUPER_ADMIN" to make multiple admins on the platform
+            ) // TODO Change this later for "SUPER_ADMIN" to make multiple admins on the platform
             ->setMaxResults(1);
 
         return $qb->getQuery()->getOneOrNullResult();

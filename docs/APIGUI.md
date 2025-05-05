@@ -10,18 +10,18 @@ improve user authentication and management processes, with integrated CAPTCHA va
     - This content is specifically designed for use in the public Android Turnstile functionality.
     - Includes placeholder elements for Android-specific app setup.
 
-## Profile Configuration
-
-- **Retrieves profile configuration for Android/iOS including the following data**
-    - User Radius Profile Data.
-    - Encrypted Radius Password with RSA
-    - Another important settings for a profile generation (Domain Name, Operator Name, Radius TLS Name, etc...)
-
 ## Setting
 
 - **Public Settings Configuration**
     - Returns public values from the Setting entity and environment variables.
     - Data is categorized by platform and provider.
+
+## Profile Configuration
+
+- **Retrieves profile configuration for Android/iOS including the following data**
+    - User Radius Profile Data.
+    - Encrypted Radius Password with RSA
+    - Other important settings for a profile generation (Domain Name, Operator Name, Radius TLS Name, etc...)
 
 ## User
 
