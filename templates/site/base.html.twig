@@ -37,7 +37,7 @@
 
             {# Language Selector #}
             {% block language %}
-                {% include '/site/shared/_select_language.html.twig' %}
+                {{ include('/site/shared/_select_language.html.twig') }}
             {% endblock %}
 
             {% block second_col %}

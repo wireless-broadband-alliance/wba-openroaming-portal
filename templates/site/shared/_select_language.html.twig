@@ -1,4 +1,4 @@
-<form method="GET" action="{{ path('change_language', {'locale': app.request.locale }) }}"
+<form method="GET" action="{{ path('change_language', {locale: app.request.locale}) }}"
       class="relative flex justify-end">
     <label for="language-selector" class="block text-sm font-medium text-gray-900 mr-2 self-center">{{ 'language'|trans({}, 'landing') }}</label>
     <div class="relative w-44">
