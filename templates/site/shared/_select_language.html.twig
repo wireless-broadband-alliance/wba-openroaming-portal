@@ -1,0 +1,15 @@
+
+<div class="absolute top-5 right-5">
+    <form method="GET" action="{{ path('change_language', {'locale': 'en'}) }}" class="relative">
+        <select name="locale"
+                onchange="this.form.submit()"
+                class="bg-gray-100 text-gray-700 py-2 px-3 border border-gray-300 rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-300">
+            <option value="en" {% if app.request.locale == 'en' %}selected{% endif %}>
+                Eng
+            </option>
+            <option value="pt" {% if app.request.locale == 'pt' %}selected{% endif %}>
+                PT
+            </option>
+        </select>
+    </form>
+</div>
