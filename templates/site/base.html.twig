@@ -34,12 +34,13 @@
         {# Scrollable Second Section #}
         <div class="w-full xl:w-1/2 xl:overflow-y-auto xl:h-screen p-8 xl:pl-[90px] xl:pr-[130px] xl:pt-[74px] overflow-hidden"
                 {{ stimulus_controller('visibility') }}>
-            {% block second_col %}
-            {% endblock %}
 
             {# Language Selector #}
             {% block language %}
                 {% include '/site/shared/_select_language.html.twig' %}
+            {% endblock %}
+
+            {% block second_col %}
             {% endblock %}
 
             {# Cookie Banner #}

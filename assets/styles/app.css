@@ -77,3 +77,8 @@
 .urls-table {
     @apply whitespace-nowrap truncate block;
 }
+
+.country-dropdown {
+    @apply block w-full cursor-pointer appearance-none rounded-lg bg-white py-2 pl-3 pr-10 text-sm shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-primary;
+}
+
