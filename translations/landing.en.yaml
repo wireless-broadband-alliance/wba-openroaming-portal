@@ -1,3 +1,5 @@
+language: 'Language'
+
 welcomeDescription: 'Download and install an OpenRoaming profile tailored to your device, provided by WBA OpenRoaming'
 
 welcomeSupport: 'WBA’s profiles are proven to work across a broad range of devices, including iOS, Android, macOS, and Windows, ensuring optimal compatibility.'
