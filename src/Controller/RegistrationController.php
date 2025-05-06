@@ -148,7 +148,7 @@ class RegistrationController extends AbstractController
             }
         }
 
-        return $this->render('site/register_landing.html.twig', [
+        return $this->render('landing/landing/register_landing.html.twig', [
             'registrationForm' => $form->createView(),
             'data' => $data,
         ]);
@@ -266,7 +266,7 @@ class RegistrationController extends AbstractController
             }
         }
 
-        return $this->render('site/register_landing_sms.html.twig', [
+        return $this->render('landing/landing/register_landing_sms.html.twig', [
             'registrationSMSForm' => $form->createView(),
             'data' => $data,
         ]);

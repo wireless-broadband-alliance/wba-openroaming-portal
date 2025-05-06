@@ -86,7 +86,7 @@ class AdminController extends AbstractController
 
         /** @var User $user */
         $user = $this->getUser();
-        return $this->render('admin/index.html.twig', [
+        return $this->render('dashboard/index.html.twig', [
             'user' => $user,
             'users' => $users,
             'currentPage' => $page,
@@ -260,7 +260,7 @@ class AdminController extends AbstractController
             return $this->redirectToRoute('admin_dashboard_customize');
         }
 
-        return $this->render('admin/settings_actions.html.twig', [
+        return $this->render('dashboard/shared/settings_actions.html.twig', [
             'user' => $currentUser,
             'settings' => $settings,
             'form' => $form->createView(),

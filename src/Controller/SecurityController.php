@@ -68,7 +68,7 @@ class SecurityController extends AbstractController
             $this->addFlash('error', $error->getMessage());
         }
 
-        return $this->render('site/login_landing.html.twig', [
+        return $this->render('landing/landing/login_landing.html.twig', [
             'last_username' => $lastUsername,
             'error' => $error,
             'data' => $data,
@@ -108,7 +108,7 @@ class SecurityController extends AbstractController
             $this->addFlash('error', $error->getMessage());
         }
 
-        return $this->render('admin/login_admin_landing.html.twig', [
+        return $this->render('dashboard/login/login_admin_landing.html.twig', [
             'last_username' => $lastUsername,
             'error' => $error,
             'data' => $data,

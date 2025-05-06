@@ -1,0 +1,135 @@
+<div class="bg-white rounded-lg transition-all duration-300 px-10 py-[35px] h-[calc(90%)] lg:h-[calc(80%)] w-[810px] overflow-auto">
+
+    <div class="flex flex-row justify-start items-center">
+        <h1 class="text-primary text-xl font-semibold">Account Settings</h1>
+        <button type="button"
+                class="ml-auto flex flex-row justify-end gap-x-[12px] items-center text-[#707070]" {{ stimulus_action('widget', 'close') }}>
+            <span>Close</span>
+
+            <twig:ux:icon name="wba:cross" fill="fill-current"/>
+        </button>
+    </div>
+
+    <div {{ stimulus_controller('fields') }}>
+        <form method="POST" action="{{ path('app_site_account_user') }}">
+            <h1 class="text-lg mb-8 mt-10">Personal Data</h1>
+
+            {{ form_start(form) }}
+            {{ form_errors(form) }}
+
+            <div class="flex flex-col lg:flex-row gap-x-6 gap-y-8">
+                <div class="relative w-full">
+                    {{ form_label(form.firstName, 'First Name', {label_attr: {class: 'form-label'}}) }}
+                    {{ form_widget(form.firstName, {attr: {class: 'form-widget', 'data-fields-target': 'input', 'data-action': 'fields#input_changed'}}) }}
+                    {{ form_errors(form.firstName) }}
+                </div>
+
+                <div class="relative w-full">
+                    {{ form_label(form.lastName, 'Last Name', {label_attr: {class: 'form-label'}}) }}
+                    {{ form_widget(form.lastName, {attr: {class: 'form-widget', 'data-fields-target': 'input', 'data-action': 'fields#input_changed'}}) }}
+                    {{ form_errors(form.lastName) }}
+                </div>
+            </div>
+
+            <button {{ stimulus_target('fields', 'button') }} class="mt-6 w-[180px] btn-primary cursor-not-allowed"
+                                                              type="submit" disabled>
+                Apply Changes
+            </button>
+
+            {{ form_rest(form) }}
+            {{ form_end(form) }}
+        </form>
+    </div>
+
+    {# divider #}
+    <div class="divider my-8"></div>
+
+    <div {{ stimulus_controller('fields') }}>
+        <form method="POST" action="{{ path('app_site_account_user') }}">
+            <h1 class="text-lg mb-8">New Password</h1>
+
+            {{ form_start(formPassword) }}
+            {{ form_errors(formPassword) }}
+
+            <div class="flex flex-col gap-x-6 gap-y-8">
+                <div class="flex flex-col lg:flex-row gap-x-6 gap-y-8">
+                    <div class="relative w-full">
+                        {{ form_label(formPassword.password, 'Current Password', {label_attr: {class: 'form-label'}}) }}
+                        {{ form_widget(formPassword.password, {attr: {class: 'form-widget', 'data-fields-target': 'input', 'data-action': 'fields#input_changed'}}) }}
+                        {{ form_errors(formPassword.password) }}
+                    </div>
+
+                    <div class="hidden lg:flex w-full"></div>
+                </div>
+
+                <div class="flex flex-col lg:flex-row gap-x-6 gap-y-8">
+                    <div class="relative w-full">
+                        {{ form_label(formPassword.newPassword, 'New Password', {label_attr: {class: 'form-label'}}) }}
+                        {{ form_widget(formPassword.newPassword, {attr: {class: 'form-widget', minlength: 7, 'data-fields-target': 'input', 'data-action': 'fields#input_changed'}}) }}
+                        {{ form_errors(formPassword.newPassword) }}
+                    </div>
+
+                    <div class="relative w-full">
+                        {{ form_label(formPassword.confirmPassword, 'Confirm Password', {label_attr: {class: 'form-label'}}) }}
+                        {{ form_widget(formPassword.confirmPassword, {attr: {class: 'form-widget', minlength: 7, 'data-fields-target': 'input', 'data-action': 'fields#input_changed'}}) }}
+                        {{ form_errors(formPassword.confirmPassword) }}
+                    </div>
+                </div>
+            </div>
+
+            {# Turnstile Checker #}
+            {% if data.TURNSTILE_CHECKER.value == constant('App\\Enum\\OperationMode::ON').value %}
+                <div class="ml-3 mt-5">
+                    {{ form_widget(formPassword.security) }}
+                </div>
+            {% endif %}
+
+            <button {{ stimulus_target('fields', 'button') }} class="mt-6 w-[180px] btn-primary cursor-not-allowed"
+                                                              type="submit" disabled>
+                Change Password
+            </button>
+
+            {{ form_rest(formPassword) }}
+            {{ form_end(formPassword) }}
+        </form>
+    </div>
+
+    {# Two-Factor Authenticator #}
+    <div class="divider my-8"></div>
+    <h1 class="text-lg mb-8 mt-10">Two-Factor Authentication</h1>
+    <div class="grid grid-cols-2 space-x-2">
+        <a href="{{ path('app_configure2FA') }}" class="btn-secondary md:text-base text-sm">
+            Configure Two-Factor Authentication
+        </a>
+        {% if not (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value) %}
+            <a href="{{ path('app_disable2FA', {context: context}) }}" class="btn-logout">Disable</a>
+        {% endif %}
+    </div>
+
+    {# Divider #}
+    <div class="divider my-8"></div>
+
+    {# Revoke Profile #}
+    <div {{ stimulus_controller('alert') }}>
+        <form method="POST"
+              action="{{ path('app_site_account_user') }}"
+              data-controller="alert"
+              data-alert-target="form">
+            <h1 class="text-lg mb-8 mt-10">Profile Data</h1>
+
+            {{ form_start(formRevokeProfiles) }}
+            {{ form_errors(formRevokeProfiles) }}
+
+            <button class="mt-6 w-[240px] btn-logout"
+                    data-action="alert#revoke_profiles"
+                    data-alert-target="button"
+                    data-user-uuid="{% if userExternalAuths[user.id] is defined %}{% for auth in userExternalAuths[user.id] %}{% if auth.provider == constant('App\\Enum\\UserProvider::SAML').value %}{{ auth.providerId }}{% else %}{{ app.user.uuid }}{% endif %}{% endfor %}{% endif %}"
+                    type="button">
+                Revoke Account Profiles
+            </button>
+
+            {{ form_rest(formRevokeProfiles) }}
+            {{ form_end(formRevokeProfiles) }}
+        </form>
+    </div>
+</div>

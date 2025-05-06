@@ -461,7 +461,7 @@ class SettingsController extends AbstractController
         }
 
 
-        return $this->render('admin/settings_actions.html.twig', [
+        return $this->render('dashboard/shared/settings_actions.html.twig', [
             'user' => $currentUser,
             'data' => $data,
             'settings' => $settings,
@@ -537,7 +537,7 @@ class SettingsController extends AbstractController
             return $this->redirectToRoute('admin_dashboard_settings_LDAP');
         }
 
-        return $this->render('admin/settings_actions.html.twig', [
+        return $this->render('dashboard/shared/settings_actions.html.twig', [
             'data' => $data,
             'settings' => $settings,
             'getSettings' => $getSettings,
@@ -630,7 +630,7 @@ class SettingsController extends AbstractController
             }
         }
 
-        return $this->render('admin/settings_actions.html.twig', [
+        return $this->render('dashboard/shared/settings_actions.html.twig', [
             'user' => $currentUser,
             'data' => $data,
             'settings' => $settings,
@@ -729,7 +729,7 @@ class SettingsController extends AbstractController
         }
 
 
-        return $this->render('admin/settings_actions.html.twig', [
+        return $this->render('dashboard/shared/settings_actions.html.twig', [
             'user' => $currentUser,
             'data' => $data,
             'settings' => $settings,
@@ -800,7 +800,7 @@ class SettingsController extends AbstractController
             return $this->redirectToRoute('admin_dashboard_settings_two_fa');
         }
 
-        return $this->render('admin/settings_actions.html.twig', [
+        return $this->render('dashboard/shared/settings_actions.html.twig', [
             'user' => $currentUser,
             'data' => $data,
             'settings' => $settings,
@@ -925,7 +925,7 @@ class SettingsController extends AbstractController
             return $this->redirectToRoute('admin_dashboard_settings_auth');
         }
 
-        return $this->render('admin/settings_actions.html.twig', [
+        return $this->render('dashboard/shared/settings_actions.html.twig', [
             'user' => $currentUser,
             'data' => $data,
             'settings' => $settings,
@@ -997,7 +997,7 @@ class SettingsController extends AbstractController
             return $this->redirectToRoute('admin_dashboard_settings_capport');
         }
 
-        return $this->render('admin/settings_actions.html.twig', [
+        return $this->render('dashboard/shared/settings_actions.html.twig', [
             'user' => $currentUser,
             'data' => $data,
             'settings' => $settings,
@@ -1069,7 +1069,7 @@ class SettingsController extends AbstractController
             return $this->redirectToRoute('admin_dashboard_settings_sms');
         }
 
-        return $this->render('admin/settings_actions.html.twig', [
+        return $this->render('dashboard/shared/settings_actions.html.twig', [
             'user' => $currentUser,
             'data' => $data,
             'settings' => $settings,
@@ -1138,7 +1138,7 @@ class SettingsController extends AbstractController
             return $this->redirectToRoute('admin_dashboard_statistics');
         }
 
-        return $this->render('admin/statistics.html.twig', [
+        return $this->render('dashboard/statistics/statistics.html.twig', [
             'user' => $currentUser,
             'data' => $data,
             'devicesDataJson' => json_encode($fetchChartDevices, JSON_THROW_ON_ERROR),
