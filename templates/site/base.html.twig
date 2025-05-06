@@ -37,6 +37,11 @@
             {% block second_col %}
             {% endblock %}
 
+            {# Language Selector #}
+            {% block language %}
+                {% include '/site/shared/_select_language.html.twig' %}
+            {% endblock %}
+
             {# Cookie Banner #}
             {% block cookie %}
                 <div class="grid grid-cols-1 gap-[5px] break-words">

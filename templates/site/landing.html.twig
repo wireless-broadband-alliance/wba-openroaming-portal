@@ -8,8 +8,6 @@
     {# Form Column #}
     {# Toasts #}
 
-    {# language selector form #}
-    {% include '/site/shared/_select_language.html.twig' %}
     <div class="grid grid-cols-1 gap-[5px]">
         {% for message in app.session.flashbag.get('success') %}
             {{ include('site/shared/_toast.html.twig', {toast_type: 'toast-success'}) }}
