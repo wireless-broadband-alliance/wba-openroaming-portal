@@ -1,0 +1,38 @@
+# translations/landing/landing.en.yaml
+
+title: '{{ data.title.value }}' # Placeholder if dynamic content is used
+downloadInstallProfiles: 'Download and install a tailored OpenRoaming profile for your device, provided by WBA OpenRoaming.'
+profilesExplanation: 'WBA’s profiles are proven to work across a broad range of devices, including iOS, Android, macOS, and Windows, ensuring optimal compatibility.'
+customerLogoEnabled: 'Customer logo display is enabled.'
+agreeTerms: 'I agree to the'
+termsConditions: 'terms & conditions of use'
+privacyPolicy: 'privacy policy'
+termsCheckboxText: 'I agree to the %terms% and the %privacy%.'
+
+demoMode:
+  header: 'DEMO MODE – {status}'
+  enterYourEmail: 'Enter your email'
+  systemMessage: 'This portal is for testing purposes only and should not be used in production environments. Users created on this portal might be revoked at any time without notice.'
+  createAccount: 'Create Demo Account'
+  status:
+    confirmed: 'CONFIRMED EMAIL SYSTEM'
+    unconfirmed: 'UNCONFIRMED EMAIL SYSTEM'
+
+authenticatedAs: 'You are currently authenticated as'
+obtainProfile: 'Obtain Your Profile'
+authenticationMethods: 'To get started, select one of the following authentication methods:'
+
+confirmationModal:
+  title: 'You need to confirm the terms before proceeding.'
+  closeButton: 'Close'
+
+accountSettings: 'Account Settings'
+authenticatedUser: 'You are currently authenticated as {uuid}'
+
+os_selection:
+  choose_os: 'Choose your operating system, so you can download and install the profile:'
+  macos_or_ios: 'macOS/iOS'
+  download_install: 'Download and Install Profile'
+  device_identified: 'Device identified as running: %os%'
+  is_wrong: 'Is this Wrong?'
+  click_to_select: 'Click here to select your OS.'

@@ -206,6 +206,15 @@ class SiteController extends AbstractController
         if ($data['PLATFORM_MODE']['value']) {
             if ($request->isMethod('POST')) {
                 $payload = $request->request->all();
+                if ($data['TURNSTILE_CHECKER']['value'] === OperationMode::ON->value) {
+                    $turnstileResponse = $request->request->get('cf-turnstile-response');
+                    // Validate the Turnstile CAPTCHA
+                    if ((empty($turnstileResponse))
+                    ) {
+                        $this->addFlash('error', 'Invalid CAPTCHA validation!');
+                        return $this->redirectToRoute('app_landing');
+                    }
+                }
                 if (empty($payload['radio-os']) && empty($payload['detected-os'])) {
                     $this->addFlash('error', 'Please select Operating System!');
                 } elseif (!$this->getUser() instanceof UserInterface) {
@@ -745,8 +754,7 @@ class SiteController extends AbstractController
                 $minInterval = new DateInterval('PT' . $smsResendInterval . 'M');
                 $currentTime = new DateTime();
                 // Check if the user has not exceeded the attempt limit
-                $latestEventMetadata = $latestEvent instanceof Event ? $latestEvent->getEventMetadata(
-                ) : [];
+                $latestEventMetadata = $latestEvent instanceof Event ? $latestEvent->getEventMetadata() : [];
                 $lastVerificationCodeTime = isset($latestEventMetadata['lastVerificationCodeTime'])
                     ? new DateTime($latestEventMetadata['lastVerificationCodeTime'])
                     : null;

@@ -1,0 +1,39 @@
+# translations/landing/landing.pt.yaml
+
+title: '{{ data.title.value }}' # Placeholder if dynamic content is used
+downloadInstallProfiles: 'Transferir e instalar um perfil OpenRoaming adaptado ao seu dispositivo, fornecido pela WBA OpenRoaming.'
+profilesExplanation: 'Os perfis da WBA são comprovadamente compatíveis com uma ampla variedade de dispositivos, incluindo iOS, Android, macOS e Windows, garantindo uma compatibilidade ideal.'
+customerLogoEnabled: 'A exibição do logotipo do cliente está ativada.'
+agreeTerms: 'Concordo com os'
+termsConditions: 'termos e condições de utilização'
+privacyPolicy: 'política de privacidade'
+termsCheckboxText: 'Concordo com os %terms% e a %privacy%.'
+
+demoMode:
+  header: 'MODO DEMO – {status}'
+  enterYourEmail: 'Introduza o seu e-mail'
+  systemMessage: 'Este portal é apenas para fins de teste e não deve ser utilizado em ambientes de produção. Os utilizadores criados neste portal podem ser revogados a qualquer momento sem aviso prévio.'
+  createAccount: 'Criar Conta Demo'
+  status:
+    confirmed: 'SISTEMA DE EMAIL CONFIRMADO'
+    unconfirmed: 'SISTEMA DE EMAIL NÃO CONFIRMADO'
+
+authenticatedAs: 'Atualmente está autenticado como'
+obtainProfile: 'Obtenha o Seu Perfil'
+authenticationMethods: 'Para começar, selecione um dos seguintes métodos de autenticação:'
+
+confirmationModal:
+  title: 'Deve confirmar os termos antes de continuar.'
+  closeButton: 'Fechar'
+
+accountSettings: 'Configurações da Conta'
+authenticatedUser: 'Atualmente está autenticado como {uuid}'
+
+os_selection:
+  choose_os: 'Escolha o seu sistema operativo para que possa transferir e instalar o perfil:'
+  macos_or_ios: 'macOS/iOS'
+  download_install: 'Transferir e Instalar Perfil'
+  device_identified: 'Dispositivo identificado como executando: %os%'
+  is_wrong: 'Está incorreto?'
+  click_to_select: 'Clique aqui para selecionar o seu sistema operativo.'
+

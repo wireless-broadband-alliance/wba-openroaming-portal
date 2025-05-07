@@ -1,5 +1,5 @@
 <div class="{{ data.os.selected == constant('App\\Enum\\OSTypes::NONE').value ? '' : 'hidden' }} mt-14" {{ stimulus_target('visibility', 'first') }}>
-    <p>Choose your operating system, so you can download and install the profile:</p>
+    <p>{{ 'os_selection.choose_os'|trans({}, 'landing') }}</p>
 
     <div class="grid gap-8 auto-rows-max lg:grid-cols-1 grid-cols-3 xl:grid-cols-3 mt-16 mb-6">
         {% for key, item in data.os.items %}
@@ -13,14 +13,18 @@
                     <twig:ux:icon name="wba:{{ key|lower }}" class="w-8" fill="none"/>
                 </label>
 
-                <p class="text-center mt-1.5 text-[#656565] text-xs lg:text-base font-light">{{ key == constant('App\\Enum\\OSTypes::IOS').value or key == constant('App\\Enum\\OSTypes::MACOS').value ? 'macOS/iOS' : key }}</p>
+                <p class="text-center mt-1.5 text-[#656565] text-xs lg:text-base font-light">
+                    {{ key == constant('App\\Enum\\OSTypes::IOS').value or key == constant('App\\Enum\\OSTypes::MACOS').value
+                    ? 'os_selection.macos_or_ios'|trans({}, 'landing')
+                    : key }}
+                </p>
             </div>
         {% endfor %}
     </div>
 
     {# Download profile button #}
     <button type="submit" class="my-6 w-[250px] btn-primary py-2">
-        Download and Install Profile
+        {{ 'os_selection.download_install'|trans({}, 'landing') }}
     </button>
 </div>
 
@@ -35,19 +39,22 @@
             <div class="mr-auto flex flex-row items-center justify-start space-x-6">
                 <twig:ux:icon name="wba:{{ data.os.selected|lower }}" class="w-8" fill="none"/>
 
-                <span class="font-medium">Device identified as running: {{ data.os.selected }}</span>
+                <span class="font-medium">
+                    {{ 'os_selection.device_identified'|trans({'%os%': data.os.selected}, 'landing') }}
+                </span>
             </div>
 
             {# Download profile button #}
             <button type="submit" class="ml-auto w-[250px] btn-primary py-2">
-                Download and Install Profile
+                {{ 'os_selection.download_install'|trans({}, 'landing') }}
             </button>
         </div>
 
-        <p class="text-sm mt-[15px] mb-[40px]"> Is this Wrong?
+        <p class="text-sm mt-[15px] mb-[40px]">
+            {{ 'os_selection.is_wrong'|trans({}, 'landing') }}
             <button type="button"
                     class="text-primary font-semibold underline" {{ stimulus_action('visibility', 'toggle') }}>
-                Click here to select your OS.
+                {{ 'os_selection.click_to_select'|trans({}, 'landing') }}
             </button>
         </p>
     </div>
