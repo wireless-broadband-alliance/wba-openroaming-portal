@@ -57,6 +57,7 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * @method getParameterBag()
@@ -89,7 +90,8 @@ class SiteController extends AbstractController
         private readonly VerificationCodeEmailGenerator $verificationCodeGenerator,
         private readonly ProfileManager $profileManager,
         private readonly SendSMS $sendSMS,
-        private readonly TwoFAService $twoFAService
+        private readonly TwoFAService $twoFAService,
+        private readonly TranslatorInterface $translator
     ) {
     }
 
@@ -209,9 +211,11 @@ class SiteController extends AbstractController
                 if ($data['TURNSTILE_CHECKER']['value'] === OperationMode::ON->value) {
                     $turnstileResponse = $request->request->get('cf-turnstile-response');
                     // Validate the Turnstile CAPTCHA
-                    if ((empty($turnstileResponse) && !$this->getUser())
-                    ) {
-                        $this->addFlash('error', 'Invalid CAPTCHA validation!');
+                    if ((empty($turnstileResponse) && !$this->getUser())) {
+                        $this->addFlash(
+                            'error',
+                            $this->translator->trans('invalidCaptcha', [], 'landing')
+                        );
                         return $this->redirectToRoute('app_landing');
                     }
                 }
@@ -1030,11 +1034,22 @@ class SiteController extends AbstractController
 
                 $eventRepository->save($latestEvent, true);
 
-                $message = sprintf('We have sent you a new code to: %s.', $currentUser->getEmail());
+                $message = $this->translator->trans(
+                    'emailVerification.newCodeSentEmail',
+                    ['%email%' => $currentUser->getEmail()],
+                    'landing'
+                );
                 $this->addFlash('success', $message);
             } else {
                 // Inform the user to wait before trying again
-                $this->addFlash('error', 'Please wait 2 minutes before trying again.');
+                $this->addFlash(
+                    'error',
+                    $this->translator->trans(
+                        'emailVerification.waitBeforeTryingAgain',
+                        ['%time%' => 2],
+                        'landing'
+                    )
+                );
             }
         }
 
@@ -1060,7 +1075,12 @@ class SiteController extends AbstractController
         $currentUser = $this->getUser();
 
         if (!$currentUser) {
-            $this->addFlash('error', 'You can only access this page logged in.');
+            $this->addFlash('error', $this->translator->trans(
+                'accessLoggedInOnly',
+                [],
+                'landing'
+            )
+            );
             return $this->redirectToRoute('app_landing');
         }
 
@@ -1090,13 +1110,25 @@ class SiteController extends AbstractController
         $currentUser = $this->getUser();
 
         if (!$currentUser) {
-            $this->addFlash('error', 'You can only access this page logged in.');
+            $this->addFlash('error', $this->translator->trans(
+                'accessLoggedInOnly',
+                [],
+                'landing'
+            )
+            );
             return $this->redirectToRoute('app_landing');
         }
 
         // Checks if the user has a "forgot_password_request", if yes, return to the password-reset form
         if ($this->userRepository->findOneBy(['id' => $currentUser->getId(), 'forgot_password_request' => true])) {
-            $this->addFlash('error', 'You need to confirm the new password before download a profile!');
+            $this->addFlash(
+                'error',
+                $this->translator->trans(
+                    'confirmNewPasswordBeforeDownload',
+                    [],
+                    'landing'
+                )
+            );
             return $this->redirectToRoute('app_site_forgot_password_checker');
         }
 
@@ -1121,7 +1153,14 @@ class SiteController extends AbstractController
                 $eventMetadata
             );
 
-            $this->addFlash('success', 'Your account is now successfully verified');
+            $this->addFlash(
+                'success',
+                $this->translator->trans(
+                    'emailVerification.accountSuccessfullyVerified',
+                    [],
+                    'landing'
+                )
+            );
             return $this->redirectToRoute('app_landing');
         }
 

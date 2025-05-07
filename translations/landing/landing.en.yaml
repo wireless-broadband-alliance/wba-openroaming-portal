@@ -1,6 +1,7 @@
 # translations/landing/landing.en.yaml
 
 title: '{{ data.title.value }}' # Placeholder if dynamic content is used
+language: 'Language'
 downloadInstallProfiles: 'Download and install a tailored OpenRoaming profile for your device, provided by WBA OpenRoaming.'
 profilesExplanation: 'WBA’s profiles are proven to work across a broad range of devices, including iOS, Android, macOS, and Windows, ensuring optimal compatibility.'
 customerLogoEnabled: 'Customer logo display is enabled.'
@@ -37,5 +38,13 @@ os_selection:
   is_wrong: 'Is this Wrong?'
   click_to_select: 'Click here to select your OS.'
 
+invalidCaptcha: 'Invalid CAPTCHA validation!'
 logout: 'Logout'
+accessLoggedInOnly: 'You can only access this page logged in.'
 authenticatedMessage: 'You are currently authenticated as {uuid}'
+confirmNewPasswordBeforeDownload: 'You need to confirm the new password before downloading a profile!'
+
+emailVerification:
+  newCodeSentEmail: 'We have sent you a new code to: %email%.'
+  waitBeforeTryingAgain: 'Please wait %time% minutes before trying again.'
+  accountSuccessfullyVerified: 'Your account is now successfully verified.'
