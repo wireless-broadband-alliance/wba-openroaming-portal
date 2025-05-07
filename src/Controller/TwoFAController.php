@@ -185,7 +185,7 @@ class TwoFAController extends AbstractController
         $user = $this->getUser();
         $session = $request->getSession();
 
-        // If the user isn't logged in, redirect to the landing page
+        // If the user isn't logged in, redirect to the login page
         if (!$user instanceof UserInterface) {
             $this->addFlash('error', 'You can only access this page logged in.');
             return $this->redirectToRoute('app_landing');

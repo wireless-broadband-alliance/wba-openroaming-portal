@@ -209,7 +209,7 @@ class GetSettings
             'TWO_FACTOR_AUTH_RESEND_INTERVAL' => 'Time interval in seconds to request a new authentication code',
 
             'PAGE_TITLE' => 'The title displayed on the webpage',
-            'CUSTOMER_LOGO_ENABLED' => 'Shows the customer logo on the landing page.',
+            'CUSTOMER_LOGO_ENABLED' => 'Shows the customer logo on the login page.',
             'CUSTOMER_LOGO' => 'The resource path or URL to the customer\'s logo image',
             'OPENROAMING_LOGO' => 'The resource path or URL to the OpenRoaming logo image',
 
@@ -218,7 +218,7 @@ class GetSettings
 
             'WELCOME_TEXT' => 'The welcome text displayed on the user interface',
             'WELCOME_DESCRIPTION' => 'The description text displayed under the welcome text',
-            'ADDITIONAL_LABEL' => 'Additional label displayed on the landing page for more, if necessary, information',
+            'ADDITIONAL_LABEL' => 'Additional label displayed on the login page for more, if necessary, information',
             'CONTACT_EMAIL' => 'The email address for contact inquiries',
 
             'AUTH_METHOD_SAML_ENABLED' => 'Enable or disable SAML authentication method',

@@ -56,7 +56,7 @@ class MicrosoftAuthenticator extends OAuth2Authenticator
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
     {
-        // Redirect user to the landing page after successful authentication
+        // Redirect user to the login page after successful authentication
         return new RedirectResponse(
             $this->router->generate('app_landing')
         );

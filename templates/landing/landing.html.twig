@@ -1,4 +1,4 @@
-{% extends '/templates/landing' %}
+{% extends '/template/landing' %}
 
 {% block title %}
     {{ data.title.value }}
@@ -10,12 +10,12 @@
 
     <div class="grid grid-cols-1 gap-[5px]">
         {% for message in app.session.flashbag.get('success') %}
-            {{ include('site/shared/_toast.html.twig', {toast_type: 'toast-success'}) }}
+            {{ include('landing/shared/_toast.html.twig', {toast_type: 'toast-success'}) }}
         {% endfor %}
 
         {# Flash error message #}
         {% for message in app.session.flashbag.get('error') %}
-            {{ include('site/shared/_toast.html.twig', {toast_type: 'toast-warning'}) }}
+            {{ include('landing/shared/_toast.html.twig', {toast_type: 'toast-warning'}) }}
         {% endfor %}
     </div>
 
@@ -71,7 +71,7 @@
             </div>
 
             {# OS #}
-            {{ include('site/shared/_os_selection.html.twig') }}
+            {{ include('landing/shared/_os_selection.html.twig') }}
 
             {# Button Submit #}
             {{ form_row(registrationFormDemo._token) }}
@@ -84,14 +84,14 @@
         {% else %}
             {% if data.USER_VERIFICATION.value == constant('App\\Enum\\OperationMode::ON').value %}
                 {% if not app.user.isVerified %}
-                    {{ include('site/shared/_account_activation.html.twig') }}
+                    {{ include('landing/shared/_account_activation.html.twig') }}
                 {% endif %}
             {% endif %}
 
             {% if app.request.attributes.get('_route') != 'app_email_code' %}
                 <form method="post" novalidate>
                     {# OS #}
-                    {{ include('site/shared/_os_selection.html.twig') }}
+                    {{ include('landing/shared/_os_selection.html.twig') }}
                 </form>
             {% endif %}
 
@@ -123,14 +123,14 @@
         {% if app.user %}
             {% if app.user.isVerified %}
                 <form method="post" novalidate>
-                    {{ include('site/shared/_os_selection.html.twig') }}
+                    {{ include('landing/shared/_os_selection.html.twig') }}
                 </form>
             {% else %}
                 {% if data.USER_VERIFICATION.value == constant('App\\Enum\\OperationMode::ON').value %}
-                    {{ include('site/shared/_account_activation.html.twig') }}
+                    {{ include('landing/shared/_account_activation.html.twig') }}
                 {% else %}
                     <form method="post" novalidate>
-                        {{ include('site/shared/_os_selection.html.twig') }}
+                        {{ include('landing/shared/_os_selection.html.twig') }}
                     </form>
                 {% endif %}
             {% endif %}
@@ -173,7 +173,7 @@
                     <div {{ stimulus_target('widget', 'modal') }}
                             class="hidden fixed top-0 left-0 w-full h-full bg-[#090B2F] bg-opacity-70 z-20 ">
                         <div class="flex flex-row justify-center items-center h-full w-full">
-                            {{ include('site/shared/_account_widget.html.twig') }}
+                            {{ include('landing/shared/_account_widget.html.twig') }}
                         </div>
                     </div>
                 {% endif %}
@@ -189,7 +189,7 @@
             </div>
             <div {{ stimulus_controller('terms-widget') }}>
                 <div class="my-8 grid gap-4">
-                    {{ include('site/shared/_providers_login.html.twig') }}
+                    {{ include('landing/shared/_providers_login.html.twig') }}
                 </div>
 
                 {# Terms and Conditions Check Box #}

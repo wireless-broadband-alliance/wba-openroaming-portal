@@ -339,7 +339,7 @@ class SiteController extends AbstractController
         $formRevokeProfiles = $this->createForm(RevokeProfilesType::class, $this->getUser());
         $formTOS = $this->createForm(TOSType::class);
 
-        return $this->render('site/landing.html.twig', [
+        return $this->render('landing/landing.html.twig', [
             'form' => $form->createView(),
             'formPassword' => $formPassword->createView(),
             'formTOS' => $formTOS,
@@ -866,7 +866,7 @@ class SiteController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
-        // Checks if the user has a "forgot_password_request", if doesn't, return to the landing page
+        // Checks if the user has a "forgot_password_request", if doesn't, return to the login page
         if ($this->userRepository->findOneBy(['id' => $currentUser->getId(), 'forgot_password_request' => false])) {
             $this->addFlash('error', 'You can\'t access this page if you don\'t have a request!');
             return $this->redirectToRoute('app_landing');
@@ -1055,14 +1055,14 @@ class SiteController extends AbstractController
         if (!$currentUser->isVerified()) {
             $formTOS = $this->createForm(TOSType::class);
             // Render the template with the verification code
-            return $this->render('site/landing.html.twig', [
+            return $this->render('site/login.html.twig', [
                 'data' => $data,
                 'formTOS' => $formTOS,
                 'user' => $currentUser
             ]);
         }
 
-        // User is already verified, render the landing template
+        // User is already verified, render the login template
         return $this->redirectToRoute('app_landing');
     }
 

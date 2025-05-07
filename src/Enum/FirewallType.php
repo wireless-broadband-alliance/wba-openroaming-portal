@@ -4,6 +4,6 @@ namespace App\Enum;
 
 enum FirewallType: string
 {
-    case LANDING = 'landing';
+    case LANDING = 'login';
     case DASHBOARD = 'dashboard';
 }
