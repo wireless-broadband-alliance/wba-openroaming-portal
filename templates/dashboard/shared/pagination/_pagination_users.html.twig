@@ -30,7 +30,7 @@
                         class="hover:shadow-md p-1 rounded-lg {{ currentPage > 1 ? 'cursor-pointer' : 'text-gray-400 cursor-not-allowed' }}"
                         title="Go to First Page">
                     <twig:ux:icon name="wba:d-right" class="w-4 rotate-180" fill="none"/>
-                    <span class="sr-only">First Page</span>
+                    <span class="sr-only">{{ 'firstPage'|trans({}, '_pagination_users') }}</span>
                 </a>
 
                 {# Previous Page navigation #}
@@ -38,7 +38,7 @@
                         class="hover:shadow-md p-1 rounded-lg {{ currentPage > 1 ? 'cursor-pointer' : 'text-gray-400 cursor-not-allowed' }}"
                         title="Go to Previous Page">
                     <twig:ux:icon name="wba:right" class="w-4 rotate-180" fill="none"/>
-                    <span class="sr-only">Previous Page</span>
+                    <span class="sr-only">{{ 'previousPage'|trans({}, '_pagination_users') }}</span>
                 </a>
 
                 {# Next Page navigation #}
@@ -46,7 +46,7 @@
                         class="hover:shadow-md p-1 rounded-lg {{ currentPage < totalPages ? 'cursor-pointer' : 'text-gray-400 cursor-not-allowed' }}"
                         title="Go to Next Page">
                     <twig:ux:icon name="wba:right" class="w-4" fill="none"/>
-                    <span class="sr-only">Next Page</span>
+                    <span class="sr-only">{{ 'nextPage'|trans({}, '_pagination_users') }}</span>
                 </a>
 
                 {# Last Page navigation #}
@@ -54,7 +54,7 @@
                         class="hover:shadow-md p-1 rounded-lg {{ currentPage < totalPages ? 'cursor-pointer' : 'text-gray-400 cursor-not-allowed' }}"
                         title="Go to Last Page">
                     <twig:ux:icon name="wba:d-right" class="w-4" fill="none"/>
-                    <span class="sr-only">Last Page</span>
+                    <span class="sr-only">{{ 'lastPage'|trans({}, '_pagination_users') }}</span>
                 </a>
             </div>
         </div>
