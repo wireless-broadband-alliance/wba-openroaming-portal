@@ -551,7 +551,7 @@ class UsersManagementController extends AbstractController
         // Get the User Provider && ProviderId
         $userExternalAuths = $this->userExternalAuthRepository->findOneBy(['user' => $user]);
 
-        // Disable current associated Profile
+        // Disable the current associated Profile
         $this->profileManager->disableProfiles(
             $user,
             UserRadiusProfileRevokeReason::TWO_FA_DISABLED_BY->value,
