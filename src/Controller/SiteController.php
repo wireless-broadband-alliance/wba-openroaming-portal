@@ -67,10 +67,10 @@ class SiteController extends AbstractController
      * SiteController constructor.
      *
      * @param UserRepository $userRepository The repository for accessing user data.
-     * @param UserExternalAuthRepository $userExternalAuthRepository The repository required to fetch the provider.
+     * @param UserExternalAuthRepository $userExternalAuthRepository The repository is required to fetch the provider.
      * @param ParameterBagInterface $parameterBag The parameter bag for accessing application configuration.
      * @param SettingRepository $settingRepository The setting repository is used to create the getSettings function.
-     * @param GetSettings $getSettings The instance of GetSettings class.
+     * @param GetSettings $getSettings The instance of the GetSettings class.
      * @param EventRepository $eventRepository The entity returns the last events data related to each user.
      * @param EventActions $eventActions Used to generate event related to the User creation
      * @param VerificationCodeEmailGenerator $verificationCodeGenerator Generates a new verification code
@@ -120,7 +120,7 @@ class SiteController extends AbstractController
             if (!$verification) {
                 return $this->redirectToRoute('app_email_code');
             }
-            // Checks the 2FA status of the platform, if mandatory forces the user to configure it
+            // Checks the 2FA status of the platform if mandatory forces the user to configure it
             if (
                 $currentUser->getUserExternalAuths() &&
                 ($data['TWO_FACTOR_AUTH_STATUS']['value'] ===
@@ -140,7 +140,7 @@ class SiteController extends AbstractController
             ) {
                 return $this->redirectToRoute('app_configure2FA');
             }
-            // Checks if the user has a "forgot_password_request", if yes, return to password reset form
+            // Checks if the user has a "forgot_password_request", if yes, return to the password-reset form
             if ($currentUser->isForgotPasswordRequest()) {
                 $this->addFlash(
                     'error',
@@ -370,7 +370,7 @@ class SiteController extends AbstractController
             } else {
                 $content = '';
             }
-            return $this->render('site/shared/tos/_tos.html.twig', [
+            return $this->render('landing/shared/tos/_tos.html.twig', [
                 'content' => $content,
                 'data' => $data
             ]);
@@ -405,7 +405,7 @@ class SiteController extends AbstractController
             } else {
                 $content = '';
             }
-            return $this->render('site/shared/tos/_privacy_policy.html.twig', [
+            return $this->render('landing/shared/tos/_privacy_policy.html.twig', [
                 'content' => $content,
                 'data' => $data
             ]);
@@ -688,7 +688,7 @@ class SiteController extends AbstractController
                 );
             }
         }
-        return $this->render('site/forgot_password_email_landing.html.twig', [
+        return $this->render('landing/forgot_password/forgot_password_email_landing.html.twig', [
             'forgotPasswordEmailForm' => $form->createView(),
             'data' => $data,
             'context' => FirewallType::LANDING->value,
@@ -745,7 +745,7 @@ class SiteController extends AbstractController
                 $minInterval = new DateInterval('PT' . $smsResendInterval . 'M');
                 $currentTime = new DateTime();
                 // Check if the user has not exceeded the attempt limit
-                $latestEventMetadata = $latestEvent instanceof \App\Entity\Event ? $latestEvent->getEventMetadata(
+                $latestEventMetadata = $latestEvent instanceof Event ? $latestEvent->getEventMetadata(
                 ) : [];
                 $lastVerificationCodeTime = isset($latestEventMetadata['lastVerificationCodeTime'])
                     ? new DateTime($latestEventMetadata['lastVerificationCodeTime'])
@@ -783,7 +783,7 @@ class SiteController extends AbstractController
                         $user->setIsVerified(true);
                         $this->eventRepository->save($latestEvent, true);
 
-                        // save new password hashed on the db for the user
+                        // save a new password hashed on the db for the user
                         $randomPassword = bin2hex(random_bytes(4));
                         $hashedPassword = $userPasswordHasher->hashPassword($user, $randomPassword);
                         $user->setPassword($hashedPassword);
@@ -826,7 +826,7 @@ class SiteController extends AbstractController
                 );
             }
         }
-        return $this->render('site/forgot_password_sms_landing.html.twig', [
+        return $this->render('landing/forgot_password/forgot_password_sms_landing.html.twig', [
             'forgotPasswordSMSForm' => $form->createView(),
             'data' => $data,
             'context' => $context
@@ -834,7 +834,6 @@ class SiteController extends AbstractController
     }
 
     /**
-     * @throws TransportExceptionInterface
      * @throws Exception
      */
     #[Route('/forgot-password/checker', name: 'app_site_forgot_password_checker')]
@@ -866,7 +865,7 @@ class SiteController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
-        // Checks if the user has a "forgot_password_request", if doesn't, return to the login page
+        // Checks if the user has a "forgot_password_request", if not, return to the login page
         if ($this->userRepository->findOneBy(['id' => $currentUser->getId(), 'forgot_password_request' => false])) {
             $this->addFlash('error', 'You can\'t access this page if you don\'t have a request!');
             return $this->redirectToRoute('app_landing');
@@ -920,7 +919,7 @@ class SiteController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
-        return $this->render('site/forgot_password_checker_landing.html.twig', [
+        return $this->render('landing/forgot_password/forgot_password_checker_landing.html.twig', [
             'forgotPasswordChecker' => $form->createView(),
             'data' => $data,
             'context' => FirewallType::LANDING->value
@@ -966,6 +965,7 @@ class SiteController extends AbstractController
      * @throws TransportExceptionInterface
      * @throws \DateMalformedStringException
      * @throws NonUniqueResultException
+     * @throws Exception
      */
     #[Route('/email/regenerate', name: 'app_regenerate_email_code')]
     #[IsGranted('ROLE_USER')]
@@ -1055,7 +1055,7 @@ class SiteController extends AbstractController
         if (!$currentUser->isVerified()) {
             $formTOS = $this->createForm(TOSType::class);
             // Render the template with the verification code
-            return $this->render('site/login.html.twig', [
+            return $this->render('landing/landing.html.twig', [
                 'data' => $data,
                 'formTOS' => $formTOS,
                 'user' => $currentUser
@@ -1082,7 +1082,7 @@ class SiteController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
-        // Checks if the user has a "forgot_password_request", if yes, return to password reset form
+        // Checks if the user has a "forgot_password_request", if yes, return to the password-reset form
         if ($this->userRepository->findOneBy(['id' => $currentUser->getId(), 'forgot_password_request' => true])) {
             $this->addFlash('error', 'You need to confirm the new password before download a profile!');
             return $this->redirectToRoute('app_site_forgot_password_checker');
@@ -1092,7 +1092,6 @@ class SiteController extends AbstractController
         $enteredCode = $requestStack->getCurrentRequest()->request->get('code');
 
         if ($enteredCode === $currentUser->getVerificationCode()) {
-            $event = new Event();
             // Set the user as verified
             $currentUser->setIsVerified(true);
             $userRepository->save($currentUser, true);
@@ -1114,7 +1113,7 @@ class SiteController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
-        // Code is incorrect, display error message and redirect again to the check email page
+        // Code is incorrect, display the error message and redirect again to the check email page
         $this->addFlash('error', 'The verification code is incorrect. Please try again.');
         return $this->redirectToRoute('app_email_code');
     }
@@ -1142,7 +1141,7 @@ class SiteController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
-        // Checks if the user has a "forgot_password_request", if yes, return to password reset form
+        // Checks if the user has a "forgot_password_request", if yes, return to the password-reset form
         if ($this->userRepository->findOneBy(['id' => $currentUser->getId(), 'forgot_password_request' => true])) {
             $this->addFlash('error', 'You need to confirm the new password before downloading a profile!');
             return $this->redirectToRoute('app_site_forgot_password_checker');
@@ -1156,7 +1155,7 @@ class SiteController extends AbstractController
                 $latestEvent = $eventRepository->findLatestSmsAttemptEvent($currentUser);
 
                 // Check if $latestEvent to avoid null conflicts
-                if ($latestEvent instanceof \App\Entity\Event) {
+                if ($latestEvent instanceof Event) {
                     $latestEventMetadata = $latestEvent->getEventMetadata();
                     $verificationAttempts = $latestEventMetadata['verificationAttempts'] ?? 0;
                     $attemptsLeft = 3 - $verificationAttempts;
