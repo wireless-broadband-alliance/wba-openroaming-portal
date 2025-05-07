@@ -100,7 +100,7 @@
                             </div>
                         {% endif %}
 
-                        {{ include('/admin/shared/settings_actions/_description.html.twig', {description: setting.vars.attr.description}) }}
+                        {{ include('dashboard/shared/settings_actions/_description.html.twig', {description: setting.vars.attr.description}) }}
 
                         <div class="mt-2 -mb-2 text-center text-red-500 text-base">
                             {{ form_errors(setting) }}
@@ -110,13 +110,13 @@
             {% endfor %}
 
             {% for imgSetting in imageSettings %}
-                {{ include('/admin/shared/settings_actions/_card.html.twig', {...imgSetting, settingType: 'image'}) }}
+                {{ include('/dashboard/shared/settings_actions/_card.html.twig', {...imgSetting, settingType: 'image'}) }}
             {% endfor %}
         </div>
         {# Text Settings #}
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {% for textSetting in textSettings %}
-                {{ include('/admin/shared/settings_actions/_card.html.twig', {...textSetting, settingType: 'text'}) }}
+                {{ include('/dashboard/shared/settings_actions/_card.html.twig', {...textSetting, settingType: 'text'}) }}
             {% endfor %}
         </div>
     </div>
