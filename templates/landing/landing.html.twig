@@ -24,8 +24,8 @@
     {% endif %}
 
     <div class="{{ data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\OperationMode::ON').value ? 'pt-[28px]' : 'pt-[161px]' }} leading-7">
-        <p class="font-bold text-lg">{{ 'welcomeDescription'|trans({}, 'landing') }}</p>
-        <p class="mt-3">{{ 'welcomeSupport'|trans({}, 'landing') }}</p>
+        <p class="font-bold text-lg">{{ 'downloadInstallProfiles'|trans({}, 'landing/landing/landing') }}</p>
+        <p class="mt-3">{{ 'profilesExplanation'|trans({}, 'landing/landing/landing') }}</p>
     </div>
 
     {% if data.PLATFORM_MODE.value == constant('App\\Enum\\PlatformMode::DEMO').value %}
@@ -57,15 +57,15 @@
                           rounded-[5px] border border-[#CECECE] cursor-pointer checked:bg-primary'}}) }}
 
                 <label for="{{ formTOS.agreeTerms.vars.id }}" class="text-xs">
-                    I agree to the
+                    {{ 'agreeTerms'|trans({}, 'landing/landing/landing') }}
                     <a href="{{ path('app_terms_conditions') }}" target="_blank"
                        class="underline text-primary font-semibold">
-                        terms & conditions of use
+                        {{ 'agreeTerms'|trans({}, 'landing/landing/landing') }}
                     </a>
                     and
                     <a href="{{ path('app_privacy_policy') }}" target="_blank"
                        class="underline text-primary font-semibold">
-                        privacy policy
+                        {{ 'privacyPolicy'|trans({}, 'landing/landing/landing') }}
                     </a>.
                 </label>
             </div>

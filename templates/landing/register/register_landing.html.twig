@@ -1,4 +1,4 @@
-{% extends '/templates/login' %}
+{% extends '/landing/base.html.twig' %}
 
 {% block title %}
     {{ data.title.value }}
@@ -8,16 +8,7 @@
     {# Form Column #}
 
     {# Toasts #}
-    <div class="grid grid-cols-1 gap-[5px]">
-        {% for message in app.session.flashbag.get('success') %}
-            {{ include('site/shared/_toast.html.twig', {toast_type: 'toast-success'}) }}
-        {% endfor %}
-
-        {# Flash warning message #}
-        {% for message in app.session.flashbag.get('warning') %}
-            {{ include('site/shared/_toast.html.twig', {toast_type: 'toast-warning'}) }}
-        {% endfor %}
-    </div>
+    {{ block('toast_messages') }}
 
     {% if data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\OperationMode::ON').value %}
         <img class="w-[120px] h-[58px] object-scale-down mt-[75px]" src="{{ data.customerLogoName.value }}" alt="Logo"/>
