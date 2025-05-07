@@ -67,7 +67,7 @@ class TwoFAController extends AbstractController
 
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
-        return $this->render('site/twoFAAuthentication/base_configuration.html.twig', [
+        return $this->render('landing/twoFAAuthentication/base_configuration.html.twig', [
             'user' => $user,
             'data' => $data,
             'context' => $context
@@ -161,7 +161,7 @@ class TwoFAController extends AbstractController
         $qrCodeResult = $writer->write($qrCode);
         $qrCodeImage = base64_encode($qrCodeResult->getString());
 
-        return $this->render('site/twoFAAuthentication/actions/enable2faTOTP.html.twig', [
+        return $this->render('landing/twoFAAuthentication/actions/enable2faTOTP.html.twig', [
             'qrCodeImage' => $qrCodeImage,
             'provisioningUri' => $provisioningUri,
             'secret' => $formattedSecret,
@@ -240,7 +240,7 @@ class TwoFAController extends AbstractController
                 $this->addFlash('error', 'Invalid code');
             }
         }
-        return $this->render('site/twoFAAuthentication/verify/verify2FA.html.twig', [
+        return $this->render('landing/twoFAAuthentication/verify/verify2FA.html.twig', [
             'data' => $data,
             'form' => $form,
             'user' => $user,
@@ -309,7 +309,7 @@ class TwoFAController extends AbstractController
             }
             $this->addFlash('error', 'Invalid code please try again or resend the code');
         }
-        return $this->render('site/twoFAAuthentication/verify/verify2FA.html.twig', [
+        return $this->render('landing/twoFAAuthentication/verify/verify2FA.html.twig', [
             'data' => $data,
             'form' => $form,
             'user' => $user,
@@ -441,7 +441,7 @@ class TwoFAController extends AbstractController
                 return $this->redirectToRoute('app_landing');
             }
         }
-        return $this->render('site/twoFAAuthentication/actions/disable2FA.html.twig', [
+        return $this->render('landing/twoFAAuthentication/actions/disable2FA.html.twig', [
             'data' => $data,
             'form' => $form,
             'user' => $user,
@@ -502,7 +502,7 @@ class TwoFAController extends AbstractController
                 return $this->redirectToRoute('app_landing');
             }
         }
-        return $this->render('site/twoFAAuthentication/actions/disable2FA.html.twig', [
+        return $this->render('landing/twoFAAuthentication/actions/disable2FA.html.twig', [
             'data' => $data,
             'form' => $form,
             'user' => $user,
@@ -549,7 +549,7 @@ class TwoFAController extends AbstractController
             if ($user->getOTPcodes()->isEmpty()) {
                 $this->twoFAService->generateOTPCodes($user);
             }
-            return $this->render('site/twoFAAuthentication/otpCodes.html.twig', [
+            return $this->render('landing/twoFAAuthentication/otpCodes.html.twig', [
                 'data' => $data,
                 'codes' => $user->getOTPcodes(),
                 'user' => $user,
@@ -967,7 +967,7 @@ class TwoFAController extends AbstractController
                 'Invalid code! The code may be wrong or may have already expired. Please try again or resend the code'
             );
         }
-        return $this->render('site/twoFAAuthentication/validate/validate2FA.html.twig', [
+        return $this->render('landing/twoFAAuthentication/validate/validate2FA.html.twig', [
             'data' => $data,
             'form' => $form,
             'user' => $user,
@@ -1035,7 +1035,7 @@ class TwoFAController extends AbstractController
             }
             $this->addFlash('error', 'Invalid code please try again or resend the code');
         }
-        return $this->render('site/twoFAAuthentication/actions/disable2FA.html.twig', [
+        return $this->render('landing/twoFAAuthentication/actions/disable2FA.html.twig', [
             'data' => $data,
             'form' => $form,
             'user' => $user,
@@ -1159,7 +1159,7 @@ class TwoFAController extends AbstractController
             }
             $this->addFlash('error', 'Invalid code');
         }
-        return $this->render('site/twoFAAuthentication/actions/disable2FA.html.twig', [
+        return $this->render('landing/twoFAAuthentication/actions/disable2FA.html.twig', [
             'data' => $data,
             'form' => $form,
             'user' => $user,

@@ -502,7 +502,7 @@ class UsersManagementController extends AbstractController
         }
 
         return $this->render(
-            'admin/edit.html.twig',
+            'dashboard/actions/edit.html.twig',
             [
                 'form' => $form->createView(),
                 'formReset' => $formReset->createView(),
@@ -527,7 +527,7 @@ class UsersManagementController extends AbstractController
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
-        return $this->render('admin/confirm.html.twig', [
+        return $this->render('dashboard/actions/confirm.html.twig', [
             'data' => $data,
             'type' => $type
         ]);
