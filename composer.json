@@ -1,7 +1,7 @@
 {
   "type": "project",
   "license": "Apache-2.0",
-  "version": "1.7.0",
+  "version": "1.7.1",
   "minimum-stability": "dev",
   "prefer-stable": true,
   "repositories": [
