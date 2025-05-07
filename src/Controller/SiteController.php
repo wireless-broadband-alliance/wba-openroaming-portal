@@ -209,7 +209,7 @@ class SiteController extends AbstractController
                 if ($data['TURNSTILE_CHECKER']['value'] === OperationMode::ON->value) {
                     $turnstileResponse = $request->request->get('cf-turnstile-response');
                     // Validate the Turnstile CAPTCHA
-                    if ((empty($turnstileResponse))
+                    if ((empty($turnstileResponse) && !$this->getUser())
                     ) {
                         $this->addFlash('error', 'Invalid CAPTCHA validation!');
                         return $this->redirectToRoute('app_landing');
@@ -1050,6 +1050,10 @@ class SiteController extends AbstractController
     {
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+
+        if ($data['USER_VERIFICATION']['value'] !== OperationMode::ON->value) {
+            return $this->redirectToRoute('app_landing');
+        }
 
         // Get the current user
         /** @var User $currentUser */

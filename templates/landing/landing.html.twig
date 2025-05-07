@@ -5,12 +5,27 @@
 {% endblock %}
 
 {% block second_col %}
-    {# Form Column #}
+    {% if data.PLATFORM_MODE.value == constant('App\\Enum\\PlatformMode::DEMO').value %}
+        {# Demo Mode Warning #}
+        <div class="w-[100%] rounded-[1px] shadow-lg bg-[#F9F9F9] px-[25px] py-[30px] text-[#212529] text-opacity-60">
+            <h1 class="font-xl font-bold">
+                {{ 'demoMode.header'|trans({'{status}': data.USER_VERIFICATION.value == constant('App\\Enum\\OperationMode::OFF').value
+                    ? 'demoMode.status.unconfirmed'|trans({}, 'landing')
+                    : 'demoMode.status.confirmed'|trans({}, 'landing') }, 'landing') }}
+            </h1>
+
+            <p class="font-lg">
+                {{ 'demoMode.systemMessage'|trans({}, 'landing') }}
+            </p>
+        </div>
+        <div class="my-[25px] divider"></div>
+    {% endif %}
+
     {# Toasts #}
     {{ block('toast_messages') }}
 
     {% if data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\OperationMode::ON').value %}
-        <img class="w-[120px] h-[58px] object-scale-down mt-[75px]" src="{{ data.customerLogoName.value }}" alt="Logo"/>
+        <img class="w-[120px] h-[58px] object-scale-down" src="{{ data.customerLogoName.value }}" alt="Logo"/>
     {% endif %}
 
     <div class="{{ data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\OperationMode::ON').value ? 'pt-[28px]' : 'pt-[161px]' }} leading-7">
@@ -85,30 +100,19 @@
                 </form>
             {% endif %}
 
-            <a href="{{ path('app_logout') }}" class="w-[160px] btn-logout">Logout</a>
+            <a href="{{ path('app_logout') }}" class="w-[160px] btn-logout">
+                {{ 'logout'|trans({}, 'landing') }}
+            </a>
+            <p class="text-[#212529] text-opacity-40 text-sm mt-2">
+                {{ 'authenticatedMessage'|trans({'{uuid}': app.user.uuid}, 'landing') }}
+            </p>
 
             {# Divider #}
             <div class="my-[25px] divider"></div>
 
+            {# Addicional Label #}
             <p class="text-sm">{{ data.ADDITIONAL_LABEL.value }}</p>
-
-            <p class="text-[#212529] text-opacity-40 text-sm">
-                You are currently authenticated as
-                {{ app.user.uuid }}
-            </p>
-
         {% endif %}
-
-        {# Profile selector #}
-        <div class="mt-10 w-[100%] rounded-[1px] shadow-lg bg-[#F9F9F9] px-[25px] py-[30px] text-[#212529] text-opacity-60">
-
-            <h1 class="font-xl font-bold">DEMO MODE
-                – {{ data.USER_VERIFICATION.value == constant('App\\Enum\\OperationMode::OFF').value ? 'UNCONFIRMED' : 'CONFIRMED' }}
-                EMAIL SYSTEM</h1>
-
-            <p class="font-lg">This portal if for testing purposes only and should not be used in production
-                environments. Users created on this portal might be revoked at anytime without notice.</p>
-        </div>
     {% else %}
         {% if app.user %}
             {% if app.user.isVerified %}

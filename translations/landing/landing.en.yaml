@@ -36,3 +36,6 @@ os_selection:
   device_identified: 'Device identified as running: %os%'
   is_wrong: 'Is this Wrong?'
   click_to_select: 'Click here to select your OS.'
+
+logout: 'Logout'
+authenticatedMessage: 'You are currently authenticated as {uuid}'
