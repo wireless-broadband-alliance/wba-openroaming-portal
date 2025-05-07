@@ -12,6 +12,11 @@
                 {{ include('dashboard/shared/_header_admin.html.twig') }}
             </div>
 
+            {# need to be reworked, only for tests!!! #}
+            {% block language %}
+                {{ include('landing/shared/_select_language.html.twig') }}
+            {% endblock %}
+
             {% block container %}
             {% endblock container %}
         </div>
