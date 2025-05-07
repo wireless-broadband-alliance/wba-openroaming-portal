@@ -86,7 +86,7 @@ class AdminController extends AbstractController
 
         /** @var User $user */
         $user = $this->getUser();
-        return $this->render('dashboard.html.twig', [
+        return $this->render('dashboard/dashboard.html.twig', [
             'user' => $user,
             'users' => $users,
             'currentPage' => $page,
