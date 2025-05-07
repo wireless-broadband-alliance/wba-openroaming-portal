@@ -159,6 +159,7 @@
   "require-dev": {
     "doctrine/doctrine-fixtures-bundle": "^4.0",
     "phpunit/phpunit": "^9.6",
+    "roave/security-advisories": "dev-latest",
     "symfony/browser-kit": "7.2.*",
     "symfony/css-selector": "7.2.*",
     "symfony/debug-bundle": "7.2.*",
