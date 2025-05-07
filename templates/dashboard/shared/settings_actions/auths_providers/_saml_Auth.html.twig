@@ -11,10 +11,10 @@
                 <div class="flex flex-row justify-between">
                     <div class="text-base font-medium text-center break-normal md:break-all">
                         {% set displayName = {
-                            AUTH_METHOD_SAML_ENABLED: 'Mode',
-                            AUTH_METHOD_SAML_LABEL: 'Label',
-                            AUTH_METHOD_SAML_DESCRIPTION: 'Description',
-                            PROFILE_LIMIT_DATE_SAML: 'Time to disable profiles (days)',
+                            AUTH_METHOD_SAML_ENABLED: 'mode'|trans({}, 'auths_providers'),
+                            AUTH_METHOD_SAML_LABEL: 'label'|trans({}, 'auths_providers'),
+                            AUTH_METHOD_SAML_DESCRIPTION: 'description'|trans({}, 'auths_providers'),
+                            PROFILE_LIMIT_DATE_SAML: 'profileLimitDate'|trans({}, 'auths_providers'),
                         }[setting.vars.name] ?? setting.vars.name %}
 
                         <h1 class="text-base md:text-lg whitespace-nowrap">{{ displayName }}</h1>

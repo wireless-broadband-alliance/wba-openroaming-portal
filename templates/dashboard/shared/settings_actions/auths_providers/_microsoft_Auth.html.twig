@@ -14,10 +14,10 @@
                         <div class="flex flex-row justify-between">
                             <div class="text-base font-medium text-center break-normal md:break-all">
                                 {% set displayName = {
-                                    AUTH_METHOD_MICROSOFT_LOGIN_ENABLED: 'Mode',
-                                    AUTH_METHOD_MICROSOFT_LOGIN_LABEL: 'Label',
-                                    AUTH_METHOD_MICROSOFT_LOGIN_DESCRIPTION: 'Description',
-                                    PROFILE_LIMIT_DATE_MICROSOFT: 'Time to disable profiles (days)',
+                                    AUTH_METHOD_MICROSOFT_LOGIN_ENABLED: 'mode'|trans({}, 'auths_providers'),
+                                    AUTH_METHOD_MICROSOFT_LOGIN_LABEL: 'label'|trans({}, 'auths_providers'),
+                                    AUTH_METHOD_MICROSOFT_LOGIN_DESCRIPTION: 'description'|trans({}, 'auths_providers'),
+                                    PROFILE_LIMIT_DATE_MICROSOFT: 'profileLimitDate'|trans({}, 'auths_providers'),
                                 }[setting.vars.name] ?? setting.vars.name %}
                                 <h1 class="text-base md:text-lg whitespace-nowrap">{{ displayName }}</h1>
                             </div>
@@ -115,7 +115,7 @@
     {# Microsoft Sub-settings #}
     <div>
         <div class="p-2 mt-10">
-            <h1 class="text-xl md:text-2xl font-semibold">Microsoft Sub-Settings</h1>
+            <h1 class="text-xl md:text-2xl font-semibold">{{ 'microsoftSubSettings'|trans({}, 'auths_providers') }}</h1>
         </div>
 
         <div class="grid gap-4 lg:grid-cols-2 xl:grid-cols-3 p-2 z-0">
@@ -129,7 +129,7 @@
                         <div class="flex flex-row justify-between">
                             <div class="text-base font-medium text-center break-normal md:break-all">
                                 {% set displayName = {
-                                    VALID_DOMAINS_MICROSOFT_LOGIN: 'Domains to authenticate with Microsoft',
+                                    VALID_DOMAINS_MICROSOFT_LOGIN: 'microsoftDomains'|trans({}, 'auths_providers'),
                                 }[setting.vars.name] ?? setting.vars.name %}
                                 <h1 class="text-base md:text-lg whitespace-nowrap">{{ displayName }}</h1>
                             </div>

@@ -1,0 +1,21 @@
+mode: 'Mode'
+
+label: 'Label'
+
+description: 'Description'
+
+profileLimitDate: 'Time to disable profiles (days)'
+
+googleSubSettings: 'Google Sub-Settings'
+
+googleDomains: 'Domains to authenticate with Google'
+
+microsoftSubSettings: 'Microsoft Sub-Settings'
+
+microsoftDomains: 'Domains to authenticate with Microsoft'
+
+smsRegister: 'SMS REGISTER'
+
+emailRegister: 'EMAIL REGISTER'
+
+loginMethod: 'LOGIN METHOD'
