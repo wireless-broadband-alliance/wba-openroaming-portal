@@ -40,6 +40,10 @@
                 {{ include('landing/shared/_select_language.html.twig') }}
             {% endblock %}
 
+            {% block toast_messages %}
+                {{ include('landing/shared/_render_toasts.html.twig') }}
+            {% endblock %}
+
             {% block second_col %}
             {% endblock %}
 

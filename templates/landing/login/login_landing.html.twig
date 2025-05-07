@@ -1,18 +1,12 @@
-{% extends '/templates/login' %}
+{% extends '/landing/base.html.twig' %}
 
 {% block title %}
     {{ data.title.value }}
 {% endblock %}
 
 {% block second_col %}
-    {# Form Column #}
     {# Toasts #}
-    <div class="grid grid-cols-1 gap-[5px]">
-        {# Flash error message #}
-        {% for message in app.session.flashbag.get('error') %}
-            {{ include('site/shared/_toast.html.twig', {toast_type: 'toast-warning'}) }}
-        {% endfor %}
-    </div>
+    {{ block('toast_messages') }}
 
     {% if data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\OperationMode::ON').value %}
         <img class="w-[120px] h-[58px] object-scale-down mt-[75px]" src="{{ data.customerLogoName.value }}" alt="Logo"/>
@@ -24,6 +18,8 @@
             profile onto
             your device.</p>
     </div>
+
+    {# Form Column #}
     {{ form_start(form) }}
 
     {% if data.EMAIL_REGISTER_ENABLED.value and data.AUTH_METHOD_SMS_REGISTER_ENABLED.value %}
