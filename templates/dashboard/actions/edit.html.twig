@@ -19,7 +19,7 @@
             </div>
 
             <div class="relative">
-                {{ form_label(form.firstName, 'First Name', {label_attr: {class: 'form-label'}}) }}
+                {{ form_label(form.firstName,  'firstName'|trans({}, 'edit') , {label_attr: {class: 'form-label'}}) }}
                 {{ form_widget(form.firstName, {attr: {class: 'form-widget'}}) }}
                 <div class="text-red-500 m-2">
                     {{ form_errors(form.firstName) }}
@@ -35,7 +35,7 @@
             </div>
 
             <div class="relative">
-                {{ form_label(form.lastName, 'Last Name', {label_attr: {class: 'form-label'}}) }}
+                {{ form_label(form.lastName,  'lastName'|trans({}, 'edit') , {label_attr: {class: 'form-label'}}) }}
                 {{ form_widget(form.lastName, {attr: {class: 'form-widget'}}) }}
                 <div class="text-red-500 m-2">
                     {{ form_errors(form.lastName) }}
@@ -46,11 +46,11 @@
                 <div class="flex flex-row items-end space-x-4">
                     {# Phone Number Input #}
                     <div class="flex flex-col w-1/3">
-                        {{ form_label(form.phoneNumber, 'Phone Number', {label_attr: {class: 'form-label'}}) }}
+                        {{ form_label(form.phoneNumber, 'phoneNumber'|trans({}, 'edit'), {label_attr: {class: 'form-label'}}) }}
                         {{ form_widget(form.phoneNumber.children.country, {
                             attr: {
                                 class: 'form-widget',
-                                placeholder: 'Enter your phone number',
+                                placeholder: 'phoneNumberPlaceOlder'|trans({}, 'edit'),
                                 autocomplete: 'tel',
                             },
                         }) }}
@@ -59,7 +59,7 @@
                         {{ form_widget(form.phoneNumber.children.number, {
                             attr: {
                                 class: 'form-widget',
-                                placeholder: 'Enter your phone number',
+                                placeholder: 'phoneNumberPlaceOlder'|trans({}, 'edit'),
                                 autocomplete: 'tel',
                             },
                         }) }}
@@ -74,7 +74,7 @@
             <div class="w-full lg:w-1/2 ">
                 <div class="flex md:flex-row flex-col items-center sm:justify-start">
                     <div class="flex flex-col mx-4 space-x-3 space-y-2">
-                        <p class="font-bold">Verification</p>
+                        <p class="font-bold">{{ 'verification'|trans({}, 'edit') }}</p>
                         <label class="inline-flex items-center cursor-pointer">
                             {{ form_widget(form.isVerified, {attr: {class: 'sr-only peer'}}) }}
                             <div class="ms-2 relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-bg-lightGreen rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#68D391]"></div>
@@ -82,7 +82,7 @@
                         </label>
                     </div>
                     <div class="flex flex-col mt-2 md:mt-0 mx-4 space-y-2">
-                        <p class="font-bold">Banned</p>
+                        <p class="font-bold">{{ 'banned'|trans({}, 'edit') }}</p>
                         <label class="inline-flex items-center cursor-pointer">
                             {{ form_widget(form.bannedAt, {attr: {class: 'sr-only peer'}}) }}
                             <div class="ms-2 relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-bg-lightGreen rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#f87171]"></div>
@@ -93,7 +93,7 @@
             </div>
         </div>
         <div class="flex flex-row justify-end md:w-full mt-6">
-            <button type="submit" class="btn-primary">Apply Changes</button>
+            <button type="submit" class="btn-primary">{{ 'applyChanges'|trans({}, 'edit') }}</button>
         </div>
     </div>
     {{ form_rest(form) }}
@@ -102,20 +102,20 @@
     {# Content - Reset Password Users/Admin #}
     {# Check if the authenticated user is not the same as the user being edited (admin) #}
     {% if app.user.id != user.id %}
-        <h1 class="text-2xl font-semibold mt-6 mb-6">Reset Password</h1>
+        <h1 class="text-2xl font-semibold mt-6 mb-6">{{ 'resetPassword'|trans({}, 'edit') }}</h1>
         {{ form_start(formReset) }}
         {{ form_errors(formReset) }}
         <div class="p-6 bg-white">
             <div class="mx-auto rounded-lg grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div class="relative">
-                    {{ form_label(formReset.password, 'Password', {label_attr: {class: 'form-label'}}) }}
+                    {{ form_label(formReset.password, 'password'|trans({}, 'edit'), {label_attr: {class: 'form-label'}}) }}
                     {{ form_widget(formReset.password, {attr: {class: 'form-widget', minlength: 7}}) }}
                     <div class="mt-2 -mb-2 text-center text-red-500 text-base">
                         {{ form_errors(formReset.password) }}
                     </div>
                 </div>
                 <div class="relative">
-                    {{ form_label(formReset.confirmPassword, 'Confirm New Password', {label_attr: {class: 'form-label'}}) }}
+                    {{ form_label(formReset.confirmPassword, 'confirmNewPassword'|trans({}, 'edit'), {label_attr: {class: 'form-label'}}) }}
                     {{ form_widget(formReset.confirmPassword, {attr: {class: 'form-widget', minlength: 7}}) }}
                     <div class="mt-2 -mb-2 text-center text-red-500 text-base">
                         {{ form_errors(formReset.confirmPassword) }}
@@ -136,26 +136,26 @@
     {# Content - Two-Factor Options - both for admin && user account #}
 
     {% if app.user and user.id == app.user.id %}
-        <h1 class="text-2xl font-semibold mt-6 mb-6">Two-Factor Authentication Options</h1>
+        <h1 class="text-2xl font-semibold mt-6 mb-6">{{ 'TwoFAOptions'|trans({}, 'edit') }}</h1>
         <div class="p-6 rounded-lg grid grid-cols-1 lg:grid-cols-2 lg:w-1/2 w-full bg-white justify-start gap-6">
             <a href="{{ path('app_configure2FA', {context: context}) }}"
                class="btn-secondary text-center break-words sm:whitespace-nowrap">
-                Configure Two-Factor Authentication
+                {{ 'configureTwoFactorAuthentication'|trans({}, 'edit') }}
             </a>
 
             {% if not (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value) %}
-                <a href="{{ path('app_disable2FA', {context: context}) }}" class="btn-logout">Disable</a>
+                <a href="{{ path('app_disable2FA', {context: context}) }}" class="btn-logout">{{ 'disable'|trans({}, 'edit') }}</a>
             {% endif %}
         </div>
     {% else %}
         {% if not (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value) %}
-            <h1 class="text-2xl font-semibold mt-6 mb-6">Two-Factor Authentication Options</h1>
+            <h1 class="text-2xl font-semibold mt-6 mb-6">{{ 'TwoFAOptions'|trans({}, 'edit') }}</h1>
             <div class="p-6 rounded-lg grid grid-cols-1 lg:grid-cols-2 lg:w-1/2 w-full bg-white justify-start gap-6">
                 <a
                         href="{{ path('app_disable2FA_admin', {id: user.id}) }}"
                         class="btn-logout"
                         onclick="return confirm('Are you sure you to disable 2FA for this user?')">
-                    Disable
+                    {{ 'disable'|trans({}, 'edit') }}
                 </a>
             </div>
         {% endif %}
