@@ -351,7 +351,8 @@ class UsersManagementController extends AbstractController
                 $user->setBannedAt(new DateTime());
                 $this->profileManager->disableProfiles(
                     $user,
-                    UserRadiusProfileRevokeReason::ADMIN_BANNED_USER->value
+                    UserRadiusProfileRevokeReason::ADMIN_BANNED_USER->value,
+                    true
                 );
             } else {
                 $user->setBannedAt(null);
@@ -448,7 +449,9 @@ class UsersManagementController extends AbstractController
                 );
             }
 
-            if ($user->getPhoneNumber() && $userExternalAuth->getProviderId() === UserProvider::PHONE_NUMBER->value) {
+            if (
+                $user->getPhoneNumber() && $userExternalAuth->getProviderId() === UserProvider::PHONE_NUMBER->value
+            ) {
                 $latestEvent = $this->eventRepository->findLatestRequestAttemptEvent(
                     $user,
                     AnalyticalEventType::USER_ACCOUNT_UPDATE_PASSWORD_FROM_UI

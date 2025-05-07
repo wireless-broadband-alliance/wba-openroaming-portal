@@ -4,7 +4,6 @@ namespace App\EventListener;
 
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\Security\Http\Event\LogoutEvent;
-use Symfony\Component\Security\Http\SecurityEvents;
 
 class LogoutListener implements EventSubscriberInterface
 {
@@ -14,8 +13,23 @@ class LogoutListener implements EventSubscriberInterface
             LogoutEvent::class => 'onLogout',
         ];
     }
+
     public function onLogout(LogoutEvent $event): void
     {
-       // $event->getRequest()->getSession()->invalidate();
+        $request = $event->getRequest();
+        $session = $request->getSession();
+
+        // Determine the firewall name (context) from the request
+        $firewallContext = $request->attributes->get(
+            '_firewall_context'
+        ); // E.g., "security.firewall.map.context.landing"
+
+        if ($firewallContext) {
+            // Extract the actual firewall name (e.g., "landing" from "security.firewall.map.context.landing")
+            $firewallName = str_replace('security.firewall.map.context.', '', $firewallContext);
+
+            // Dynamically remove ONLY the 2fa_verified session key for the current firewall
+            $session->remove("2fa_verified_$firewallName");
+        }
     }
 }

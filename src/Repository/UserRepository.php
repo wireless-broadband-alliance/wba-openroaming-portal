@@ -188,6 +188,24 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         return $qb->getQuery()->getOneOrNullResult();
     }
 
+    /**
+     * @throws NonUniqueResultException
+     */
+    public function findOneByUUIDAdmin(string $uuid): ?User
+    {
+        $qb = $this->createQueryBuilder('u');
+
+        $qb->where('u.roles LIKE :role')
+        ->setParameter('role', '%ROLE_ADMIN%')
+            ->andWhere('u.uuid = :uuid')
+            ->setParameter('uuid', $uuid)
+            ->andWhere('u.bannedAt IS NULL')
+            ->andWhere('u.deletedAt IS NULL')
+            ->andWhere('u.isDisabled = false');
+
+        // Execute the query and return the result
+        return $qb->getQuery()->getOneOrNullResult();
+    }
 
     /**
      * @throws NonUniqueResultException
@@ -279,7 +297,7 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
             ->setParameter(
                 'role',
                 '%ROLE_ADMIN%'
-            ) // Change this later for "SUPER_ADMIN" to make multiple admins on the platform
+            ) // TODO Change this later for "SUPER_ADMIN" to make multiple admins on the platform
             ->setMaxResults(1);
 
         return $qb->getQuery()->getOneOrNullResult();

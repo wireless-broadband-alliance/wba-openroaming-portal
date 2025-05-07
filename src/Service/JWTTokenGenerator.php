@@ -2,27 +2,51 @@
 
 namespace App\Service;
 
-use App\Api\V1\BaseResponse;
 use App\Entity\User;
 use App\Repository\UserRepository;
 use Lexik\Bundle\JWTAuthenticationBundle\Encoder\JWTEncoderInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Exception\JWTDecodeFailureException;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
-class JWTTokenGenerator
+readonly class JWTTokenGenerator
 {
+    private string $privateKeyJwtPath;
+    private string $publicKeyJwtPath;
+
     public function __construct(
-        private readonly JWTTokenManagerInterface $jwtManager,
-        private readonly JWTEncoderInterface $JWTEncoder,
-        private readonly UserRepository $userRepository
+        private JWTTokenManagerInterface $jwtManager,
+        private JWTEncoderInterface $JWTEncoder,
+        private UserRepository $userRepository,
+        private KernelInterface $kernel,
+        private ParameterBagInterface $parameterBag,
     ) {
+        $projectDir = $this->kernel->getProjectDir();
+        $this->publicKeyJwtPath = "$projectDir/config/jwt/public.pem" ?? $this->parameterBag->get(
+            'app.jwt_public_key'
+        );
+        $this->privateKeyJwtPath = "$projectDir/config/jwt/private.pem" ?? $this->parameterBag->get(
+            'app.jwt_secret_key'
+        );
     }
 
-    public function generateToken(UserInterface $user): string
+    public function generateToken(UserInterface $user): string|array
     {
         if (!$user instanceof User) {
-            return new BaseResponse(400, null, 'Expected an instance of App\Entity\User')->toResponse();
+            return [
+                'success' => false,
+                'error' => 'Invalid user provided. Please verify the user data.',
+            ];
+        }
+
+        // Check if both private and public keys exist
+        if (!file_exists($this->privateKeyJwtPath) || !file_exists($this->publicKeyJwtPath)) {
+            return [
+                'success' => false,
+                'error' => 'JWT key files are missing. Please ensure both private and public keys exist.',
+            ];
         }
 
         $customPayload = [

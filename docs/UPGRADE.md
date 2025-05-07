@@ -25,8 +25,10 @@
     >   Verify the target environment meets all requirements, including:
     >   - Minimum PHP version
     >
+
 - MySQL version
->   - Additional system dependencies
+
+> - Additional system dependencies
 > - **Follow Intermediate Steps Carefully:**  
     >   Skipping required intermediate versions or commands can break the upgrade process.
 > - **Review System Configurations:**  
@@ -83,11 +85,13 @@ Upgrading your system requires caution and preparation. Follow these general gui
 
 ## Upgrade Path Matrix
 
+## Upgrade Path Matrix
+
 | Current Version | Intermediate Version | Target Version | Notes                                                             |
 |-----------------|----------------------|----------------|-------------------------------------------------------------------|
-| Below 1.5       | Follow earlier paths | 1.7            | Ensure compatibility with earlier versions before upgrading.      |
-| 1.5             | 1.6                  | 1.7            | Run `php bin/console reset:allocate-providers` before proceeding. |
-| 1.6             | N/A                  | 1.7            | Proceed directly to 1.7 after reviewing changelog.                |
+| Below 1.5       | Follow earlier paths | 1.7.1          | Ensure compatibility with earlier versions before upgrading.      |
+| 1.5             | 1.6                  | 1.7.1          | Run `php bin/console reset:allocate-providers` before proceeding. |
+| 1.6             | N/A                  | 1.7.1          | Proceed directly to 1.7.1 after reviewing changelog.              |
 
 Use this table to determine the exact steps based on your current version.
 
@@ -119,7 +123,7 @@ Use the following checklist before starting the upgrade process:
 
 - [ ] **Verify System Requirements**
     - Confirm the target environment matches all required dependencies (e.g., PHP, MySQL).
-  
+
 - [ ] **Create Backups**
     - Database
     - Configuration files
@@ -167,11 +171,12 @@ Use the following checklist before starting the upgrade process:
 
 ## Troubleshooting & Rollback
 
-| Issue                              | Cause                          | Solution                                              |
-|------------------------------------|--------------------------------|-------------------------------------------------------|
-| Missing `reset:allocate-providers` | Skipped upgrade to version 1.6 | Ensure intermediate upgrades are completed correctly. |
-| Database schema mismatch           | Schema updates not applied     | Run `php bin/console doctrine:schema:update --force`. |
-| Deprecation warnings               | Unresolved deprecated fields   | Resolve deprecated fields in version 1.6.             |
+| Issue                              | Cause                                | Solution                                                      |
+|------------------------------------|--------------------------------------|---------------------------------------------------------------|
+| Missing `reset:allocate-providers` | Skipped upgrade to version 1.6       | Ensure intermediate upgrades are completed correctly.         |
+| Database schema mismatch           | Schema updates not applied           | Run `php bin/console doctrine:schema:update --force`.         |
+| Deprecation warnings               | Unresolved deprecated fields         | Resolve deprecated fields in version 1.6.                     |
+| Cache-related issues               | Old cache files causing conflicts    | Run `php bin/console cache:clear` to rebuild the cache.       |
 
 ### Rollback Procedure
 
@@ -179,7 +184,7 @@ If any step fails:
 
 1. Restore the full backup you created earlier.
 2. Review the logs or errors to identify the failure point.
-3. Perform necessary fixes and repeat the upgrade steps.
+3. Perform the necessary fixes and repeat the upgrade steps.
 
 ---
 

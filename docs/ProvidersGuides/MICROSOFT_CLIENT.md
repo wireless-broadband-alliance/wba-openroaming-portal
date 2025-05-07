@@ -24,8 +24,10 @@ Follow these steps to obtain your **Microsoft Client ID** and **Microsoft Client
         - **Accounts in this organizational directory only** (Single tenant)
         - **Accounts in any organizational directory** (Multi-tenant)
         - **Accounts in any organizational directory and personal Microsoft accounts** (Multi-tenant and Microsoft accounts)
-    - **Redirect URI**: Add your application's callback URL:
-        - Examples: `https://yourportaldomain.com/google/check`
+    - **Redirect URI**: Add your application's callback and checker URL's:
+        - Examples: 
+          - `https://yourportaldomain/connect/microsoft`
+          - `https://yourportaldomain/connect/microsoft/check`
 2. Click **Register** to finalize.
 
 ---

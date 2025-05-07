@@ -4,10 +4,13 @@ namespace App\Security;
 
 use App\Entity\User;
 use App\Enum\FirewallType;
+use App\Enum\OperationMode;
 use App\Enum\TwoFAType;
 use App\Enum\UserTwoFactorAuthenticationStatus;
-use App\Form\LoginFormType;
 use App\Repository\SettingRepository;
+use App\Repository\UserRepository;
+use DateTimeInterface;
+use PixelOpen\CloudflareTurnstileBundle\Http\CloudflareTurnstileHttpClient;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -31,28 +34,58 @@ class LandingAuthenticator extends AbstractLoginFormAuthenticator
         private readonly UrlGeneratorInterface $urlGenerator,
         private readonly FormFactoryInterface $formFactory,
         private readonly SettingRepository $settingRepository,
+        private readonly CloudflareTurnstileHttpClient $turnstileHttpClient,
+        private readonly UserRepository $userRepository,
     ) {
     }
 
     public function authenticate(Request $request): Passport
     {
-        $userSigning = new User();
-        $form = $this->formFactory->create(LoginFormType::class, $userSigning);
-        $form->handleRequest($request);
+        // Retrieve the data from the login form
+        $uuid = $request->request->get('uuid');
+        $password = $request->request->get('password');
+        $turnstileResponse = $request->request->get('cf-turnstile-response'); // Captcha
 
-        if (!$form->isSubmitted() || !$form->isValid()) {
-            throw new CustomUserMessageAuthenticationException('Invalid login data.');
+        if ($uuid) {
+            $user = $this->userRepository->findOneBy([
+                'uuid' => $uuid,
+                'deletedAt' => null,
+            ]);
+            if (!$user) {
+                // Validate if the user account exists
+                throw new CustomUserMessageAuthenticationException('Invalid Credentials.');
+            }
+            if ($user->isDisabled() === true) {
+                // Validate if the user account is disabled
+                throw new CustomUserMessageAuthenticationException('This account is currently disabled.');
+            }
+            if ($user->getBannedAt() instanceof DateTimeInterface) {
+                // Validate if the user account exists
+                throw new CustomUserMessageAuthenticationException('This account is currently banned.');
+            }
         }
 
-        $uuid = $request->request->get('uuid', '');
+        // Check if Turnstile validation is enabled in the database
+        $turnstileSetting = $this->settingRepository->findOneBy(['name' => 'TURNSTILE_CHECKER']);
+        $isTurnstileEnabled = $turnstileSetting && $turnstileSetting->getValue() === OperationMode::ON->value;
 
+        // Validate the Turnstile CAPTCHA
+        if (
+            $isTurnstileEnabled &&
+            (empty($turnstileResponse) || !$this->turnstileHttpClient->verifyResponse($turnstileResponse))
+        ) {
+            throw new CustomUserMessageAuthenticationException('Invalid CAPTCHA validation.');
+        }
+
+        // Add LAST_USERNAME to the session (optional)
         $request->getSession()->set(SecurityRequestAttributes::LAST_USERNAME, $uuid);
 
+        // Create a Passport with user, credentials, and CSRF token
         return new Passport(
-            new UserBadge($uuid),
-            new PasswordCredentials($request->request->get('password', '')),
+            new UserBadge($uuid), // Identifier for fetching the user
+            new PasswordCredentials($password), // Check password
             [
-                new CsrfTokenBadge('authenticate', $request->request->get('_csrf_token')),
+                new CsrfTokenBadge('authenticate', $request->request->get('_csrf_token')), // CSRF protection
             ]
         );
     }
@@ -90,7 +123,7 @@ class LandingAuthenticator extends AbstractLoginFormAuthenticator
 
     protected function getLoginUrl(Request $request): string
     {
-        return $this->urlGenerator->generate('app_dashboard_login');
+        return $this->urlGenerator->generate('app_login');
     }
 
     protected function handleTwoFactorRedirection(

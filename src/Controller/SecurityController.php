@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\User;
+use App\Enum\FirewallType;
 use App\Enum\PlatformMode;
 use App\Form\LoginFormType;
 use App\Repository\SettingRepository;
@@ -38,6 +39,7 @@ class SecurityController extends AbstractController
     #[Route('/login', name: 'app_login')]
     public function login(Request $request, AuthenticationUtils $authenticationUtils): Response
     {
+        /** @var User $user */
         $user = $this->getUser();
         if ($user instanceof User) {
             return $this->redirectToRoute('app_landing');
@@ -50,26 +52,16 @@ class SecurityController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
-        $user_sigin = new User();
-        $form = $this->createForm(LoginFormType::class, $user_sigin);
+        // Last username entered by the user (this will be empty if the user clicked the verification link)
+        $lastUsername = $authenticationUtils->getLastUsername();
+        $user = $this->userRepository->findOneBy([
+            'uuid' => $lastUsername,
+        ]);
+        $form = $this->createForm(LoginFormType::class, $user);
         $form->handleRequest($request);
 
         // Get the login error if there is one
         $error = $authenticationUtils->getLastAuthenticationError();
-
-        // Last username entered by the user (this will be empty if the user clicked the verification link)
-        $lastUsername = $authenticationUtils->getLastUsername();
-
-        // Check if there's a UUID parameter in the URL
-        $uuid = $request->query->get('uuid');
-        if ($uuid) {
-            // Try to find the user by UUID excluding admins
-            $user = $this->userRepository->findOneByUUIDExcludingAdmin($uuid);
-            if ($user instanceof User) {
-                // If the user is found, set their email as the last username to pre-fill the email field
-                $lastUsername = $user->getUuid();
-            }
-        }
 
         // Show an error message if the login attempt fails
         if ($error instanceof AuthenticationException) {
@@ -81,6 +73,7 @@ class SecurityController extends AbstractController
             'error' => $error,
             'data' => $data,
             'form' => $form,
+            'context' => FirewallType::LANDING->value,
         ]);
     }
 
@@ -90,6 +83,7 @@ class SecurityController extends AbstractController
     #[Route('/dashboard/login', name: 'app_dashboard_login')]
     public function dashboardLogin(Request $request, AuthenticationUtils $authenticationUtils): Response
     {
+        /** @var User $user */
         $user = $this->getUser();
         if ($user instanceof User) {
             return $this->redirectToRoute('admin_page');
@@ -97,26 +91,17 @@ class SecurityController extends AbstractController
 
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
-        $user_sigin = new User();
-        $form = $this->createForm(LoginFormType::class, $user_sigin);
+
+        // Last username entered by the user (this will be empty if the user clicked the verification link)
+        $lastUsername = $authenticationUtils->getLastUsername();
+        $user = $this->userRepository->findOneBy([
+            'uuid' => $lastUsername,
+        ]);
+        $form = $this->createForm(LoginFormType::class, $user);
         $form->handleRequest($request);
 
         // Get the login error if there is one
         $error = $authenticationUtils->getLastAuthenticationError();
-
-        // Last username entered by the user (this will be empty if the user clicked the verification link)
-        $lastUsername = $authenticationUtils->getLastUsername();
-
-        // Check if there's a UUID parameter in the URL
-        $uuid = $request->query->get('uuid');
-        if ($uuid) {
-            // Try to find the user by UUID excluding admins
-            $user = $this->userRepository->findOneByUUIDExcludingAdmin($uuid);
-            if ($user instanceof User) {
-                // If the user is found, set their email as the last username to pre-fill the email field
-                $lastUsername = $user->getUuid();
-            }
-        }
 
         // Show an error message if the login attempt fails
         if ($error instanceof AuthenticationException) {
@@ -128,6 +113,7 @@ class SecurityController extends AbstractController
             'error' => $error,
             'data' => $data,
             'form' => $form,
+            'context' => FirewallType::DASHBOARD->value,
         ]);
     }
 
@@ -141,11 +127,10 @@ class SecurityController extends AbstractController
     }
 
     #[Route(path: '/logout', name: 'app_logout')]
-    public function logout(): Response
+    public function logout(Request $request): Response
     {
-        //$session = $request->getSession();
-        //$session->clear();
-        // TODO !!rework logout!! in case of logout bugs with sessions admin/user
+        $session = $request->getSession();
+        $session->clear();
         return $this->redirectToRoute('app_landing');
     }
 }

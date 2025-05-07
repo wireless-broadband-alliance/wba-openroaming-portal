@@ -8,7 +8,7 @@
 
 The main page in platform mode (**Live**) provides a user-friendly interface for users with
 individual accounts.
-The page welcomes visitors with a customisable banner that includes the company logo, welcome text,
+The page welcomes visitors with a customizable banner that includes the company logo, welcome text,
 and a brief summary of the portal's features.
 
 Depending on the settings made by the administrator, users can log in using multiple authentication methods such as
@@ -25,7 +25,7 @@ verification system sends an email or sms to the user's provided email or phone 
 This procedure contains a unique verification link
 or code that the user must click to complete the verification process.
 
-The verification phase is a critical to validate the user's identity and makes sure their email or phone number
+The verification phase is critical to validate the user's identity and makes sure their email or phone number
 address is valid on the portal.
 The user validates ownership of the email account and shows permission to use the OpenRoaming
 Provisioning Portal by clicking the verification link or by submitting the code given on the email. This procedure
@@ -101,7 +101,7 @@ entry point to control the platform.
 
 Administrators are presented with the dashboard overview after successfully logging in.
 Administrators may quickly
-access/search information about the users on the portal, the system customization, the current applied settings and
+access/search information about the users on the portal, the system customization, the current applied settings, and
 other essential data.
 And if needed, they can check all the statistics of the portal.
 Statistics like, profiles downloaded in which device, what method of authentication the users used, among others.

@@ -100,61 +100,64 @@
     {{ form_end(form) }}
 
     {# Content - Reset Password Users/Admin #}
-    <h1 class="text-2xl font-semibold mt-6 mb-6">Reset Password</h1>
-    {{ form_start(formReset) }}
-    {{ form_errors(formReset) }}
-    <div class="p-6 bg-white">
-        <div class="mx-auto rounded-lg grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div class="relative">
-                {{ form_label(formReset.password, 'Password', {label_attr: {class: 'form-label'}}) }}
-                {{ form_widget(formReset.password, {attr: {class: 'form-widget', minlength: 7}}) }}
-                <div class="mt-2 -mb-2 text-center text-red-500 text-base">
-                    {{ form_errors(formReset.password) }}
+    {# Check if the authenticated user is not the same as the user being edited (admin) #}
+    {% if app.user.id != user.id %}
+        <h1 class="text-2xl font-semibold mt-6 mb-6">Reset Password</h1>
+        {{ form_start(formReset) }}
+        {{ form_errors(formReset) }}
+        <div class="p-6 bg-white">
+            <div class="mx-auto rounded-lg grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="relative">
+                    {{ form_label(formReset.password, 'Password', {label_attr: {class: 'form-label'}}) }}
+                    {{ form_widget(formReset.password, {attr: {class: 'form-widget', minlength: 7}}) }}
+                    <div class="mt-2 -mb-2 text-center text-red-500 text-base">
+                        {{ form_errors(formReset.password) }}
+                    </div>
+                </div>
+                <div class="relative">
+                    {{ form_label(formReset.confirmPassword, 'Confirm New Password', {label_attr: {class: 'form-label'}}) }}
+                    {{ form_widget(formReset.confirmPassword, {attr: {class: 'form-widget', minlength: 7}}) }}
+                    <div class="mt-2 -mb-2 text-center text-red-500 text-base">
+                        {{ form_errors(formReset.confirmPassword) }}
+                    </div>
                 </div>
             </div>
-            <div class="relative">
-                {{ form_label(formReset.confirmPassword, 'Confirm New Password', {label_attr: {class: 'form-label'}}) }}
-                {{ form_widget(formReset.confirmPassword, {attr: {class: 'form-widget', minlength: 7}}) }}
-                <div class="mt-2 -mb-2 text-center text-red-500 text-base">
-                    {{ form_errors(formReset.confirmPassword) }}
-                </div>
+            <div class="flex justify-end">
+                <button type="submit" class="btn-primary mt-6"
+                        onclick="return confirm('Are you sure you want to reset the password of: {{ user.uuid }}?')">
+                    Reset Password
+                </button>
             </div>
         </div>
-        <div class="flex justify-end">
-            <button type="submit" class="btn-primary mt-6"
-                    onclick="return confirm('Are you sure you want to reset the password of: {{ user.uuid }}?')">
-                Reset Password
-            </button>
-        </div>
-    </div>
-    {{ form_rest(formReset) }}
-    {{ form_end(formReset) }}
+        {{ form_rest(formReset) }}
+        {{ form_end(formReset) }}
+    {% endif %}
 
     {# Content - Two-Factor Options - both for admin && user account #}
 
-        {% if app.user and user.id == app.user.id %}
-            <h1 class="text-2xl font-semibold mt-6 mb-6">Two-Factor Authentication Options</h1>
-            <div class="p-6 rounded-lg grid grid-cols-1 lg:grid-cols-2 lg:w-1/2 w-full bg-white justify-start gap-6">
-                <a href="{{ path('app_configure2FA', {context: context}) }}"
-                   class="btn-secondary text-center break-words sm:whitespace-nowrap">
-                    Configure Two-Factor Authentication
-                </a>
+    {% if app.user and user.id == app.user.id %}
+        <h1 class="text-2xl font-semibold mt-6 mb-6">Two-Factor Authentication Options</h1>
+        <div class="p-6 rounded-lg grid grid-cols-1 lg:grid-cols-2 lg:w-1/2 w-full bg-white justify-start gap-6">
+            <a href="{{ path('app_configure2FA', {context: context}) }}"
+               class="btn-secondary text-center break-words sm:whitespace-nowrap">
+                Configure Two-Factor Authentication
+            </a>
 
             {% if not (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value) %}
                 <a href="{{ path('app_disable2FA', {context: context}) }}" class="btn-logout">Disable</a>
             {% endif %}
+        </div>
+    {% else %}
+        {% if not (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value) %}
+            <h1 class="text-2xl font-semibold mt-6 mb-6">Two-Factor Authentication Options</h1>
+            <div class="p-6 rounded-lg grid grid-cols-1 lg:grid-cols-2 lg:w-1/2 w-full bg-white justify-start gap-6">
+                <a
+                        href="{{ path('app_disable2FA_admin', {id: user.id}) }}"
+                        class="btn-logout"
+                        onclick="return confirm('Are you sure you to disable 2FA for this user?')">
+                    Disable
+                </a>
             </div>
-        {% else %}
-            {% if not (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value) %}
-                <h1 class="text-2xl font-semibold mt-6 mb-6">Two-Factor Authentication Options</h1>
-                <div class="p-6 rounded-lg grid grid-cols-1 lg:grid-cols-2 lg:w-1/2 w-full bg-white justify-start gap-6">
-                    <a
-                            href="{{ path('app_disable2FA_admin', {id: user.id}) }}"
-                            class="btn-logout"
-                            onclick="return confirm('Are you sure you to disable 2FA for this user?')">
-                        Disable
-                    </a>
-                </div>
-            {% endif %}
         {% endif %}
+    {% endif %}
 {% endblock %}

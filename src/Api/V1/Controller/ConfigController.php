@@ -3,6 +3,7 @@
 namespace App\Api\V1\Controller;
 
 use App\Api\V1\BaseResponse;
+use App\Enum\OperationMode;
 use App\Enum\TextInputType;
 use App\Repository\SettingRepository;
 use Exception;
@@ -49,7 +50,12 @@ class ConfigController extends AbstractController
 
         $data['auth'] = [
             'AUTH_METHOD_SAML_ENABLED' => $this->getSettingValueConverted('AUTH_METHOD_SAML_ENABLED'),
-            'AUTH_METHOD_GOOGLE_LOGIN_ENABLED' => $this->getSettingValueConverted('AUTH_METHOD_GOOGLE_LOGIN_ENABLED'),
+            'AUTH_METHOD_GOOGLE_LOGIN_ENABLED' => $this->getSettingValueConverted(
+                'AUTH_METHOD_GOOGLE_LOGIN_ENABLED'
+            ),
+            'AUTH_METHOD_MICROSOFT_LOGIN_ENABLED' => $this->getSettingValueConverted(
+                'AUTH_METHOD_MICROSOFT_LOGIN_ENABLED'
+            ),
             'AUTH_METHOD_REGISTER_ENABLED' => $this->getSettingValueConverted('AUTH_METHOD_REGISTER_ENABLED'),
             'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED' => $this->getSettingValueConverted(
                 'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED'
@@ -57,24 +63,47 @@ class ConfigController extends AbstractController
             'AUTH_METHOD_SMS_REGISTER_ENABLED' => $this->getSettingValueConverted('AUTH_METHOD_SMS_REGISTER_ENABLED')
         ];
 
-        $data['turnstile'] = [
-            'TURNSTILE_KEY' => $this->parameterBag->get('app.turnstile_key')
-        ];
+        if (
+            array_key_exists('TURNSTILE_KEY', $_ENV) && $this->getSettingValueRaw(
+                'TURNSTILE_CHECKER'
+            ) === OperationMode::ON->value
+        ) {
+            $data['turnstile'] = [
+                'TURNSTILE_KEY' => $this->parameterBag->get('app.turnstile_key')
+            ];
+        }
 
-        $data['google'] = [
-            'GOOGLE_CLIENT_ID' => $this->parameterBag->get('app.google_client_id')
-        ];
+        if (
+            $this->areEnvKeysAvailable(['GOOGLE_CLIENT_ID']) &&
+            $this->getSettingValueRaw('AUTH_METHOD_GOOGLE_LOGIN_ENABLED') === 'true'
+        ) {
+            $data['google'] = [
+                'GOOGLE_CLIENT_ID' => $this->parameterBag->get('app.google_client_id'),
+            ];
+        }
 
-        $data['microsoft'] = [
-            'MICROSOFT_CLIENT_ID' => $this->parameterBag->get('app.microsoft_client_id')
-        ];
+        if (
+            $this->areEnvKeysAvailable(['MICROSOFT_CLIENT_ID']) &&
+            $this->getSettingValueRaw('AUTH_METHOD_MICROSOFT_LOGIN_ENABLED') === 'true'
+        ) {
+            $data['microsoft'] = [
+                'MICROSOFT_CLIENT_ID' => $this->parameterBag->get('app.microsoft_client_id'),
+            ];
+        }
 
-        $data['saml'] = [
-            'SAML_IDP_ENTITY_ID' => $this->parameterBag->get('app.saml_idp_entity_id'),
-            'SAML_IDP_SSO_URL' => $this->parameterBag->get('app.saml_idp_sso_url'),
-            'SAML_IDP_X509_CERT' => $this->parameterBag->get('app.saml_idp_x509_cert'),
-            'SAML_SP_ENTITY_ID' => $this->parameterBag->get('app.saml_sp_entity_id')
-        ];
+        if (
+            $this->areEnvKeysAvailable(
+                ['SAML_IDP_ENTITY_ID', 'SAML_IDP_SSO_URL', 'SAML_IDP_X509_CERT', 'SAML_SP_ENTITY_ID']
+            ) &&
+            $this->getSettingValueRaw('AUTH_METHOD_SAML_ENABLED') === 'true'
+        ) {
+            $data['saml'] = [
+                'SAML_IDP_ENTITY_ID' => $this->parameterBag->get('app.saml_idp_entity_id'),
+                'SAML_IDP_SSO_URL' => $this->parameterBag->get('app.saml_idp_sso_url'),
+                'SAML_IDP_X509_CERT' => $this->parameterBag->get('app.saml_idp_x509_cert'),
+                'SAML_SP_ENTITY_ID' => $this->parameterBag->get('app.saml_sp_entity_id'),
+            ];
+        }
 
         return $data;
     }
@@ -102,6 +131,11 @@ class ConfigController extends AbstractController
             return false;
         }
         return (bool)$value;
+    }
+
+    protected function areEnvKeysAvailable(array $keys): bool
+    {
+        return array_all($keys, static fn($key) => array_key_exists($key, $_ENV));
     }
 
     protected function resolveTosValue(): string

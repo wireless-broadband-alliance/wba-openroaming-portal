@@ -34,19 +34,18 @@ security:
             provider: admin_user_provider
             custom_authenticators:
                 - App\Security\DashboardAuthenticator
-
-            form_login:
-                login_path: app_dashboard_login
-                check_path: app_dashboard_login
-                enable_csrf: true
-                username_parameter: uuid
-                password_parameter: password
-                default_target_path: /dashboard
+            entry_point: App\Security\DashboardAuthenticator
+            # form_login:
+            #    login_path: app_dashboard_login
+            #    check_path: app_dashboard_login
+            #    enable_csrf: true
+                # username_parameter: uuid
+                # password_parameter: password
+                # default_target_path: /dashboard
             logout:
                 path: app_dashboard_logout
                 target: /dashboard
                 invalidate_session: false
-            entry_point: form_login
 
         landing:
             pattern: ^/
@@ -55,14 +54,15 @@ security:
             # Integrate multiple custom authenticators here.
             custom_authenticators:
                 - App\Security\LandingAuthenticator # Password-based authenticator
-
+            # Entry point for authentication.
+            entry_point: App\Security\LandingAuthenticator
             # Form login for password-based authentication.
-            form_login:
-                login_path: app_login
-                check_path: app_login
-                username_parameter: uuid
-                password_parameter: password
-                enable_csrf: true
+            # form_login:
+            #    enable_csrf: true
+            #    login_path: app_login
+            #    check_path: app_login
+            #    username_parameter: uuid
+            #    password_parameter: password
             saml:
                 identifier_attribute: sAMAccountName
                 user_factory: saml_user_factory
@@ -75,8 +75,7 @@ security:
                 path: app_logout
                 target: / # Redirect users to the homepage (or another path) after logout
                 invalidate_session: false
-            # Entry point for authentication.
-            entry_point: App\Security\AuthenticationEntryPoint
+
             # enable impersonation (if required in the future)
             # switch_user: true
     # Easy way to control access for large sections of your site

@@ -1,11 +1,30 @@
 # Changelog
+
+# Release V1.7.1
+
+- Removed the "Reset Password" option for admins editing their own account.
+- Resolved an issue where logout didn't invalidate the session token, causing 2FA issues.
+- Resolved an issue where editing a user account caused the ban action to also disable the account, which conflicted with the error messages in the landing page authenticator
+- Migrated from the deprecated to its actively maintained forks:
+    - [nbgrp/onelogin-saml-bundle](https://github.com/nbgrp/onelogin-saml-bundle) for ongoing support and updates.
+    - [tetrapi/onelogin-saml-bundle](https://github.com/tetrapi/onelogin-saml-bundle) as an alternative with additional
+      fixes for compatibility with Symfony 7.2.5 and deprecation warnings. `php-saml`
+      `onelogin-saml-bundle`
+
+- Fix validation for JWT tokens to prevent 500 errors during API authentication.
+- Added validation on the **Authentication Methods** page, to check if the provider is active before submitting the
+  page, to avoid conflicts with `PROFILE_LIMIT` date expiration.
+- Fix turnstile validation on the login page was not triggering correctly.
+- Update API docs add missing docs capport endpoint from "User Engagement Page"
+
 ---
 
 # Release V1.7.0
 
 - Update PHP to 8.4
 - Add revoke reason everytime a profile is revoked
-- Turnstile API Fix: Refactored the Turnstile logic in the API to resolve an issue where the verification step was being prematurely interrupted
+- Turnstile API Fix: Refactored the Turnstile logic in the API to resolve an issue where the verification step was being
+  prematurely interrupted
 - Rework **cookies integration only EEA users** (checks for current location of the user to show the cookies banner) -
   Using
   GeoLite2 from Maxmind
@@ -13,17 +32,17 @@
 - New Setting for API Status (ON & OFF)
 - SideBar Admin UI changes
 - Two-Factor Authentication Implementation
-  - New endpoint for 2FA request codes
-  - Rework old endpoints authentication endpoint (local/google/saml/microsoft)to implement with 2FA
-  - New settings page **/dashboard/settings/twoFA**
-  - New implementation on landing page depending on the enforcement level
-    - NOT_ENFORCED
-    - ENFORCED_FOR_LOCAL
-    - ENFORCED_FOR_ALL
-  - New Two-factor authentication selection 
-    - Email
-    - SMS
-    - TOTP (Google Authenticator && Microsoft Authenticator)
+    - New endpoint for 2FA request codes
+    - Rework old endpoints authentication endpoint (local/google/saml/microsoft)to implement with 2FA
+    - New settings page **/dashboard/settings/twoFA**
+    - New implementation on landing page depending on the enforcement level
+        - NOT_ENFORCED
+        - ENFORCED_FOR_LOCAL
+        - ENFORCED_FOR_ALL
+    - New Two-factor authentication selection
+        - Email
+        - SMS
+        - TOTP (Google Authenticator && Microsoft Authenticator)
 - Microsoft Login Implementation - New authentication provider / New endpoint
 
 > **Important**: In this release, the fields googleId, saml_identifier and Allocate Providers Command were eliminated.
@@ -137,7 +156,8 @@ To use this command, run the following code in the root folder of the project:
 php bin/console reset:allocate-providers
 ```
 
-- Rework User delete - Add PGP encryption (Steps for configuration on the [Installation Guide](docs/INSTALATION.md), it's
+- Rework User delete - Add PGP encryption (Steps for configuration on the [Installation Guide](docs/INSTALATION.md),
+  it's
   required to back up the user data for legal purposes)
 - Forgot password for user's - landing page implementation (widget for user on the landing page after login)
 - CloudFlare TurnStile Implementation - Landing page
