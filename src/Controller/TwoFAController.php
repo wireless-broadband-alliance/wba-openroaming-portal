@@ -782,7 +782,7 @@ class TwoFAController extends AbstractController
             $codes[] = $code->getCode();
         }
 
-        // create a content of the file
+        // Create the content of the file
         $fileContent = implode("\n", $codes);
 
         // response for file download
