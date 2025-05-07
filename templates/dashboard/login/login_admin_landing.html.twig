@@ -14,20 +14,19 @@
     {% endif %}
 
     <div class="{{ data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\OperationMode::ON').value ? 'pt-[28px]' : 'pt-[161px]' }} leading-7">
-        <p class="font-bold text-xl">Admin login Page</p>
-        <p class="text-lg">Please log in using your admin credentials. Once logged in, you'll have access to the admin
-            dashboard.</p>
+        <p class="font-bold text-xl">{{ 'adminLoginPage'|trans({}, 'login_admin_landing') }}</p>
+        <p class="text-lg">{{ 'loginPageMessage'|trans({}, 'login_admin_landing') }}</p>
     </div>
 
     {# Form Column #}
     {{ form_start(form) }}
 
     {% if data.EMAIL_REGISTER_ENABLED.value and data.AUTH_METHOD_SMS_REGISTER_ENABLED.value %}
-        {% set label = 'Email or Phone Number' %}
+        {% set label = 'emailPhoneNumber'|trans({}, 'login_admin_landing') %}
     {% elseif data.EMAIL_REGISTER_ENABLED.value %}
         {% set label = 'Email' %}
     {% elseif data.AUTH_METHOD_SMS_REGISTER_ENABLED.value %}
-        {% set label = 'Phone Number' %}
+        {% set label = 'phoneNumber'|trans({}, 'login_admin_landing') %}
     {% else %}
         {% set label = 'Email' %}
     {% endif %}
@@ -38,7 +37,7 @@
         {{ form_widget(form.uuid, {
             attr: {
                 class: 'form-widget',
-                placeholder: 'Enter your ' ~ label|lower,
+                placeholder: 'enterYour'|trans({}, 'login_admin_landing') ~ label|lower,
             },
             full_name: 'uuid',
         }) }}
@@ -50,7 +49,7 @@
         {{ form_widget(form.password, {
             attr: {
                 class: 'form-widget',
-                placeholder: 'Enter your password',
+                placeholder: 'enterPassword'|trans({}, 'login_admin_landing'),
             },
             full_name: 'password',
         }) }}
@@ -67,12 +66,12 @@
 
     <div class="my-[32px] flex justify-start gap-4">
         <button type="submit" class="w-[220px] btn-primary">
-            Log in
+            {{ 'login'|trans({}, 'login_admin_landing') }}
         </button>
         <!--
         {% if data.PLATFORM_MODE.value != constant('App\\Enum\\PlatformMode::DEMO').value %}
             <a href="{{ path('app_landing') }}" class="w-[220px] btn-secondary">
-                Choose Another
+                {{ 'chooseAnother'|trans({}, 'login_admin_landing') }}
             </a>
         {% endif %}
        -->
@@ -83,7 +82,7 @@
     {% if data.PLATFORM_MODE.value != constant('App\\Enum\\PlatformMode::DEMO').value %}
 
         {% if data.EMAIL_REGISTER_ENABLED.value or data.AUTH_METHOD_SMS_REGISTER_ENABLED.value %}
-            <p class="mt-2 text-sm">Did you forget your password? Get a new one for your
+            <p class="mt-2 text-sm">{{ 'forgetPassword'|trans({}, 'login_admin_landing') }}
 
             {% if data.EMAIL_REGISTER_ENABLED.value %}
                 <a href="{{ path('app_site_forgot_password_email') }}" class="font-semibold text-primary underline">email</a>
@@ -93,23 +92,23 @@
 
             {% if data.AUTH_METHOD_SMS_REGISTER_ENABLED.value %}
                 <a href="{{ path('app_site_forgot_password_sms') }}"
-                   class="font-semibold text-primary underline">phone number</a>.
+                   class="font-semibold text-primary underline">{{ 'phoneNumber'|trans({}, 'login_admin_landing') }}</a>.
             {% endif %}
 
             {% if data.EMAIL_REGISTER_ENABLED.value or data.AUTH_METHOD_SMS_REGISTER_ENABLED.value %}
 
-                <p class="mt-2 text-sm">You don't have an account? Register with
+                <p class="mt-2 text-sm">{{ 'noAccount'|trans({}, 'login_admin_landing') }}
 
                     {% if data.EMAIL_REGISTER_ENABLED.value %}
                         <a href="{{ path('app_register') }}"
                            class="font-semibold text-primary underline">email</a>
                     {% endif %}
 
-                    {% if data.EMAIL_REGISTER_ENABLED.value and data.AUTH_METHOD_SMS_REGISTER_ENABLED.value %}or{% endif %}
+                    {% if data.EMAIL_REGISTER_ENABLED.value and data.AUTH_METHOD_SMS_REGISTER_ENABLED.value %}{{ 'or'|trans({}, 'login_admin_landing') }}{% endif %}
 
                     {% if data.AUTH_METHOD_SMS_REGISTER_ENABLED.value %}
                         <a href="{{ path('app_register_sms') }}"
-                           class="font-semibold text-primary underline">phone number</a>.
+                           class="font-semibold text-primary underline">{{ 'phoneNumber'|trans({}, 'login_admin_landing') }}</a>.
                     {% endif %}
                 </p>
             {% endif %}

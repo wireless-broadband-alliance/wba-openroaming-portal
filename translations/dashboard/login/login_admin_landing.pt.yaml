@@ -1,0 +1,21 @@
+adminLoginPage: 'Página de Login do Administrador'
+
+loginPageMessage: "Por favor, efetue login usando as suas credenciais de administrador. Após o login, terá acesso ao painel de administração."
+
+emailPhoneNumber: 'Email ou Número de Telefone'
+
+phoneNumber: 'Número de Telefone'
+
+enterYour: 'Introduza o seu '
+
+enterPassword: 'Introduza a sua palavra-passe'
+
+chooseAnother: 'Escolher Outro'
+
+forgetPassword: 'Esqueceu-se da sua palavra-passe? Obtenha uma nova para o seu'
+
+noAccount: "Não tem uma conta? Registe-se com"
+
+or: 'ou'
+
+login: 'Iniciar Sessão'
