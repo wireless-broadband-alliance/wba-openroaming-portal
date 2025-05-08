@@ -1,0 +1,34 @@
+title: 'Configurações de Cookies'
+subTitle: 'Cookies Necessários'
+text: 'Ao aceitar cookies, você consente em transferir e instalar um perfil OpenRoaming para o seu dispositivo como parte do programa WBA OpenRoaming.'
+accept: 'Aceitar Cookies'
+reject: 'Rejeitar Cookies'
+apply: 'Aplicar Cookies'
+settings: 'Configurações de Cookies'
+close: 'Fechar'
+cookiesDescription: 'Esta plataforma usa cookies para fornecer uma experiência perfeita ao conectar-se à rede OpenRoaming. Esses cookies são essenciais para conectar seu dispositivo com segurança, possibilitando uma autenticação automática e garantir conformidade com nossas políticas. Ao usar nossa plataforma, você concorda com o uso desses cookies.'
+essentialCookiesText: 'Esses cookies são essenciais para o funcionamento adequado da plataforma e não podem ser desativados.'
+dataSafetyText: 'Os seus dados estão seguros connosco. Saiba mais na nossa'
+
+controlledBy: 'Controlado por'
+privacyPolicy: 'Política de Privacidade'
+sessionCookie:
+    title: 'Cookie de Sessão (PHPSESSID)'
+    description: 'Este cookie é essencial para manter o estado da sessão do utilizador durante a duração da mesma. Ele permite que a plataforma funcione corretamente e garante uma experiência de utilizador perfeita.'
+csrfToken:
+    title: 'Token CSRF'
+    description: 'Protege contra ataques de falsificação de pedidos entre sites (CSRF), garantindo que formulários e pedidos sejam enviados a partir de fontes confiáveis.'
+samlSessionCookie:
+    title: 'Cookie de Sessão SAML'
+    description: 'Usado para gerir a autenticação e o estado da sessão durante interações de Single Sign-On (SSO) com um fornecedor de identidade SAML. Garante um login seguro e perfeito entre serviços conectados.'
+jwtAuthenticationCookie:
+    title: 'Cookie de Autenticação JWT'
+    description: 'Armazena um JSON Web Token (JWT) para a autenticação do utilizador, permitindo acesso seguro a recursos protegidos durante a sessão do utilizador. Garante que a identidade do utilizador é verificada ao longo da sessão.'
+turnstileCookie:
+    title: 'Cookie de Segurança Turnstile'
+    description: 'Garante a segurança da plataforma ao prevenir interações de spam e bots.'
+rememberMeCookie:
+    title: 'Lembre-te de mim'
+    description: 'Guarda a sessão do utilizador se a conta estiver previamente ativa.'
+    manageableCookiesTitle: 'Cookies Gerenciáveis'
+    manageableCookiesDescription: 'Estes cookies ajudam-nos a compreender como prefere usar a nossa plataforma.'

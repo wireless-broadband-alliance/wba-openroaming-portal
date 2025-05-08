@@ -51,7 +51,7 @@
             {% block cookie %}
                 <div class="grid grid-cols-1 gap-[5px] break-words">
                     {% if isEEAUser() == constant('App\\Enum\\GeoLocation\\IsEEAHandler::IN_EEA').value %}
-                        {{ include('landing/shared/_select_language.html.twig') }}
+                        {{ include('landing/shared/_cookie_banner.html.twig') }}
                     {% endif %}
                 </div>
             {% endblock %}
