@@ -10,10 +10,14 @@ use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
 use App\Service\EventActions;
 use App\Service\JWTTokenGenerator;
+use App\Service\SamlResolverService;
 use App\Service\UserDeletionService;
 use App\Service\UserStatusChecker;
 use DateTime;
 use JsonException;
+use OneLogin\Saml2\Auth;
+use OneLogin\Saml2\Error;
+use OneLogin\Saml2\ValidationError;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -33,21 +37,18 @@ class UserAccountController extends AbstractController
         private readonly UserExternalAuthRepository $userExternalAuthRepository,
         private readonly UserDeletionService $userDeletionService,
         private readonly UserPasswordHasherInterface $passwordHasher,
+        private readonly SamlResolverService $samlResolverService
     ) {
     }
 
     /**
-     * @throws \JsonException
+     * @throws ValidationError
+     * @throws Error
+     * @throws JsonException
      */
     #[Route('/api/v1/userAccount/deletion', name: 'api_user_account_deletion', methods: ['POST'])]
-    public function userAccountDeletion(Request $request): JsonResponse
+    public function userAccountDeletion(Request $request, Auth $samlAuth): JsonResponse
     {
-        try {
-            $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
-        } catch (JsonException) {
-            return new BaseResponse(400, null, 'Invalid JSON format')->toResponse(); # Bad Request Response
-        }
-
         $token = $this->tokenStorage->getToken();
 
         if ($token instanceof TokenInterface && $token->getUser() instanceof User) {
@@ -89,6 +90,21 @@ class UserAccountController extends AbstractController
 
             foreach ($currentUser->getUserExternalAuths() as $externalAuth) {
                 if ($externalAuth->getProvider() === UserProvider::PORTAL_ACCOUNT->value) {
+                    try {
+                        $data = json_decode(
+                            $request->getContent(),
+                            true,
+                            512,
+                            JSON_THROW_ON_ERROR
+                        );
+                    } catch (JsonException) {
+                        return new BaseResponse(
+                            400,
+                            null,
+                            'Invalid JSON format'
+                        )->toResponse();
+                    }
+
                     $errors = [];
                     if (empty($data['password'])) {
                         $errors[] = 'password';
@@ -112,22 +128,96 @@ class UserAccountController extends AbstractController
                 }
 
                 if ($externalAuth->getProvider() === UserProvider::SAML->value) {
-                    // TODO ask for payload -> check the saml assertion is valid the same email of uuid field
-                    $errors = [];
-                    // Check for missing fields and add them to the array errors
-                    if (empty($data['samlAssertion'])) {
-                        $errors[] = 'samlAssertion';
-                    }
-                    if ($errors !== []) {
+                    // Get SAML Response
+                    $samlResponseBase64 = $request->request->get('SAMLResponse');
+                    if (!$samlResponseBase64) {
                         return new BaseResponse(
                             400,
-                            ['missing_fields' => $errors],
-                            'Invalid data: Missing required fields.'
+                            null,
+                            'SAML Response not found'
                         )->toResponse();
                     }
-                    dd('saml account');
+
+                    $samlResponseData = $this->samlResolverService->decodeSamlResponse($samlResponseBase64);
+                    $idpEntityId = $samlResponseData['idp_entity_id'];
+                    $idpCertificate = $samlResponseData['certificate'];
+
+                    // Compare entity IDs
+                    if ($this->getParameter('app.saml_idp_entity_id') !== $idpEntityId) {
+                        return new BaseResponse(
+                            403,
+                            null,
+                            'The configured IDP Entity ID does not match the expected value. Access denied.'
+                        )->toResponse();
+                    }
+
+                    // Compare certificates
+                    if ($this->getParameter('app.saml_idp_x509_cert') !== $idpCertificate) {
+                        return new BaseResponse(
+                            403,
+                            null,
+                            'The configured certificate does not match the expected value. Access denied.'
+                        )->toResponse();
+                    }
+
+                    // Load and validate the SAML response
+                    $samlAuth->processResponse();
+
+                    // Handle errors from the SAML process
+                    if ($samlAuth->getErrors()) {
+                        return new BaseResponse(
+                            401,
+                            null,
+                            'Unable to validate SAML assertion',
+                        )->toResponse();
+                    }
+
+                    // Ensure the authentication was successful
+                    if (!$samlAuth->isAuthenticated()) {
+                        return new BaseResponse(
+                            401,
+                            null,
+                            'Authentication Failed'
+                        )->toResponse();
+                    }
+
+                    // Extract email from the SAML assertion attributes
+                    $attributes = $samlAuth->getAttributes();
+                    $email = $attributes['urn:oid:1.2.840.113549.1.9.1'][0] ?? null;
+
+                    if ($email === null) {
+                        return new BaseResponse(
+                            400,
+                            ['missing_field' => 'email'],
+                            'The SAML assertion does not contain a valid email address.'
+                        )->toResponse();
+                    }
+
+                    // Compare the SAML email with the current user's email
+                    if ($email !== $currentUser->getEmail()) {
+                        return new BaseResponse(
+                            403,
+                            null,
+                            'Unauthorized: The SAML assertion email does not match the user account email.'
+                        )->toResponse();
+                    }
                 }
+
                 if ($externalAuth->getProvider() === UserProvider::GOOGLE_ACCOUNT->value) {
+                    try {
+                        $data = json_decode(
+                            $request->getContent(),
+                            true,
+                            512,
+                            JSON_THROW_ON_ERROR
+                        );
+                    } catch (JsonException) {
+                        return new BaseResponse(
+                            400,
+                            null,
+                            'Invalid JSON format'
+                        )->toResponse();
+                    }
                     // TODO ask for payload -> check the google code if valid, make a request with the code
                     $errors = [];
                     // Check for missing fields and add them to the array errors
@@ -144,6 +234,21 @@ class UserAccountController extends AbstractController
                     dd('google account');
                 }
                 if ($externalAuth->getProvider() === UserProvider::MICROSOFT_ACCOUNT->value) {
+                    try {
+                        $data = json_decode(
+                            $request->getContent(),
+                            true,
+                            512,
+                            JSON_THROW_ON_ERROR
+                        );
+                    } catch (JsonException) {
+                        return new BaseResponse(
+                            400,
+                            null,
+                            'Invalid JSON format'
+                        )->toResponse();
+                    }
+
                     // TODO ask for payload -> check the microsoft code if vali, make a request with the code
                     $errors = [];
                     // Check for missing fields and add them to the array errors
