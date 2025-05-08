@@ -15,9 +15,9 @@
                         <div class="flex flex-row justify-between">
                             <div class="text-base font-medium text-center break-normal md:break-all">
                                 {% set displayName = {
-                                    CAPPORT_ENABLED: 'Mode',
-                                    CAPPORT_PORTAL_URL: 'CAPPORT Portal URL',
-                                    CAPPORT_VENUE_INFO_URL: 'CAPPORT Venue Info URL',
+                                    CAPPORT_ENABLED: 'mode'|trans({}, '_capport'),
+                                    CAPPORT_PORTAL_URL: 'capportURL'|trans({}, '_capport'),
+                                    CAPPORT_VENUE_INFO_URL: 'capportVenueInfo'|trans({}, '_capport'),
                                 }[setting.vars.name] ?? setting.vars.name %}
                                 <h1 class="text-base md:text-lg whitespace-nowrap">{{ displayName }}</h1>
                             </div>
@@ -86,7 +86,7 @@
             <div class="flex bg-infoBgColor/50 rounded-lg p-4 text-xs md:text-sm text-infoTextColor" role="alert">
                 <twig:ux:icon name="wba:info" class="w-10 md:w-5 h-10 md:h-5 inline mr-3" fill="currentColor"/>
 
-                <span class="font-medium">To activate CAPPORT you must activate Option 114 on your DHCP server with the value of: <strong>{{ app.request.schemeAndHttpHost ~ app.request.baseUrl }}/api/v1/capport/json</strong></span>
+                <span class="font-medium">{{ 'capportActivationMessage'|trans({}, '_capport') }}<strong>{{ app.request.schemeAndHttpHost ~ app.request.baseUrl }}/api/v1/capport/json</strong></span>
             </div>
         </div>
 
@@ -96,11 +96,11 @@
             <a href="{{ path('app_dashboard_regenerate_code_admin', {type: 'settingCAPPORT'}) }}"
                onclick="return confirm('Are you sure you want to reset to the default settings?')"
                class="text-sm hover:text-red-600 font-bold p-2 rounded-lg transition ease-in duration-300">
-                Reset
+                {{ 'reset'|trans({}, '_capport') }}
             </a>
 
             <button type="submit" class="btn-primary"
-                    onclick="return confirm('Are you sure you want to apply this new changes?')">Save Changes
+                    onclick="return confirm('Are you sure you want to apply this new changes?')">{{ 'saveChanges'|trans({}, '_capport') }}
             </button>
         </div>
     </form>

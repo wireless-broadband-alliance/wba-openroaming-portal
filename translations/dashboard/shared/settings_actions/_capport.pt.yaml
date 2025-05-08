@@ -1,0 +1,11 @@
+mode: 'Modo'
+
+capportURL: 'URL do Portal CAPPORT'
+
+capportVenueInfo: 'URL de Informações do Local CAPPORT'
+
+capportActivationMessage: 'Para ativar o CAPPORT, deve ativar a Opção 114 no seu servidor DHCP com o valor de: '
+
+reset: 'Restaurar'
+
+saveChanges: 'Guardar Alterações'

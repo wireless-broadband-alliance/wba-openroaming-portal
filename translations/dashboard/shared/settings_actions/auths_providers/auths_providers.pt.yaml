@@ -19,3 +19,7 @@ smsRegister: 'Registo com SMS'
 emailRegister: 'Registo com Email'
 
 loginMethod: 'Método de login'
+
+saveChanges: 'Guardar Alterações'
+
+reset: 'Restaurar'
