@@ -72,7 +72,7 @@ class UserAccountController extends AbstractController
 
             $userUUID = $currentUser->getUuid();
             $isAdminAccount = $this->userRepository->findOneByUUIDExcludingAdmin($userUUID);
-            if (!$isAdminAccount) {
+            if (!$isAdminAccount instanceof User) {
                 return new BaseResponse(
                     404,
                     null,
