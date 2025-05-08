@@ -2,11 +2,48 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Delete;
+use ApiPlatform\OpenApi\Factory\OpenApiFactory;
+use ApiPlatform\OpenApi\Model\Operation;
+use ApiPlatform\OpenApi\Model\Parameter;
+use App\Api\V1\Controller\UserAccountController;
 use App\Repository\DeletedUserDataRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: DeletedUserDataRepository::class)]
+#[ApiResource(
+    operations: [
+        new Delete(
+            uriTemplate: '/api/v1/userAccount/deletion',
+            controller: UserAccountController::class,
+            openapi: new Operation(
+                summary: '',
+                description: '',
+                parameters: [
+                    new Parameter(
+                        name: 'Authorization',
+                        in: 'header',
+                        description: 'Bearer token required for authentication. Use the format: `Bearer <JWT token>`.',
+                        required: true,
+                        schema: [
+                            'type' => 'string',
+                        ],
+                    ),
+                ],
+                security: [
+                    [
+                        'bearerAuth' => [],
+                    ]
+                ],
+            ),
+            shortName: 'User Account',
+            name: 'api_user_account_deletion',
+            extraProperties: [OpenApiFactory::OVERRIDE_OPENAPI_RESPONSES => false],
+        ),
+    ],
+)]
 class DeletedUserData
 {
     #[ORM\Id]
