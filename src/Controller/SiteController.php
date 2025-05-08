@@ -1291,7 +1291,7 @@ class SiteController extends AbstractController
 
             $currentPasswordDB = $user->getPassword();
 
-            if ($user->getUserExternalAuths()[0]->getProvider() === UserProvider::PORTAL_ACCOUNT)
+            if ($user->getUserExternalAuths()[0]->getProvider() === UserProvider::PORTAL_ACCOUNT->value)
             {
                 $typedPassword = $form->get('password')->getData();
 

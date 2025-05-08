@@ -55,8 +55,6 @@
 
 
     {# Divider #}
-    <div>
-        <a class="w-[160px] btn-logout" href="{{ path('app_landing') }}">Go Back</a>
-    </div>
+    {{ include('/site/shared/returnActions/_2FA_config_return_action.html.twig') }}
 
 {% endblock %}
