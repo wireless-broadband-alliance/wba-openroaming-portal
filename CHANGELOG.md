@@ -1,5 +1,12 @@
 # Changelog
 
+# Release V1.8.0
+
+- The user can now delete its own account from the account_widget popup
+- New endpoint on the API to delete the user account for APP's
+
+---
+
 # Release V1.7.2
 
 - Fix minor detail with an invalid comparison to show the cookie banner on the landing page
