@@ -1,25 +1,13 @@
 mode: 'Modo'
-
 label: 'Legenda'
-
 description: 'Descrição'
-
 profileLimitDate: 'Tempo para desativar perfis (dias)'
-
 googleSubSettings: 'Subdefinições do Google'
-
 googleDomains: 'Domínios para autenticar com o Google'
-
 microsoftSubSettings: 'Subdefinições da Microsoft'
-
 microsoftDomains: 'Domínios para autenticar com a Microsoft'
-
 smsRegister: 'Registo com SMS'
-
 emailRegister: 'Registo com Email'
-
 loginMethod: 'Método de login'
-
 saveChanges: 'Guardar Alterações'
-
 reset: 'Restaurar'
