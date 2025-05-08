@@ -16,6 +16,8 @@
         {% for message in app.session.flashbag.get('error') %}
             {{ include('site/shared/_toast.html.twig', {toast_type: 'toast-warning'}) }}
         {% endfor %}
+        <p class="toast-warning">You are on the page to permanently delete your account.
+            This action cannot be undone, and all your data will be irreversibly erased.</p>
     </div>
 
     {% if data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\OperationMode::ON').value %}
@@ -23,24 +25,46 @@
     {% endif %}
 
     <div class="{{ data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\OperationMode::ON').value ? 'pt-[28px]' : 'pt-[161px]' }} leading-7">
-        <p class="font-bold text-xl">Danger: Account deletion</p>
-        <p class="text-lg">You are on the page to permanently delete your account. This action cannot be undone, and all your data will be irreversibly erased<p>
-    </div>
+        <p class="font-bold text-xl text-red-600">Danger Account deletion</p>
+        {% if (user.userExternalAuths[0].provider == constant('App\\Enum\\UserProvider::PORTAL_ACCOUNT').value) %}
+            <p class="text-lg">To proceed, you must confirm your password.</p>
+        {% else %}
+            <p class="text-lg">To proceed, you must enter the security code that has been sent to your email.</p>
+        {% endif %}
+
 
     {{ form_start(form) }}
     <div class="relative mt-10 mb-6">
         {% if (user.userExternalAuths[0].provider == constant('App\\Enum\\UserProvider::PORTAL_ACCOUNT').value) %}
-        {{ form_widget(form.password, {
-            attr: {
-                class: 'form-widget',
-                placeholder: 'Enter your Password',
-            }}) }}
+            <div class="relative mt-[32px]">
+                {{ form_label(form.password, 'Password', {label_attr: {class: 'form-label'}}) }}
+                {{ form_widget(form.password, {
+                    attr: {
+                        class: 'form-widget',
+                        placeholder: 'Enter your password',
+                    },
+                    full_name: 'password',
+                }) }}
+            </div>
+            <div class="checkbox-container">
+                {{ form_widget(form.confirm) }}
+                <label for="{{ form.confirm.vars.id }}">I confirm that I want to permanently delete my account, and I understand this action cannot be undone.</label>
+            </div>
         {% else %}
-        {{ form_widget(form.code, {
-            attr: {
-                class: 'form-widget',
-                placeholder: 'Enter your code',
-            }}) }}
+            <div class="relative mt-[32px]">
+                {{ form_label(form.code, 'Code', {label_attr: {class: 'form-label'}}) }}
+                {{ form_widget(form.code, {
+                    attr: {
+                        class: 'form-widget',
+                        placeholder: 'Enter your code',
+                    },
+                    full_name: 'code',
+                }) }}
+            </div>
+            <div class="checkbox-container">
+                {{ form_widget(form.confirm) }}
+                <label for="{{ form.confirm.vars.id }}">I confirm that I want to permanently delete my account, and I understand this action cannot be undone.</label>
+            </div>
         {% endif %}
 
     </div>
@@ -50,6 +74,9 @@
         <button class="btn-primary"
                 type="submit">Submit
         </button>
+        {% if not (user.userExternalAuths[0].provider == constant('App\\Enum\\UserProvider::PORTAL_ACCOUNT').value) %}
+        <a href="{{ path('app_2FA_local_resend_code', {context: context}) }}" class="btn-secondary">Resend code</a>
+        {% endif %}
     </div>
     {{ form_end(form) }}
 

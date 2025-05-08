@@ -19,6 +19,7 @@ use App\Enum\UserProvider;
 use App\Enum\UserRadiusProfileRevokeReason;
 use App\Enum\UserTwoFactorAuthenticationStatus;
 use App\Form\AccountUserUpdateLandingType;
+use App\Form\AutoDeleteCodeType;
 use App\Form\AutoDeletePasswordType;
 use App\Form\ForgotPasswordEmailType;
 use App\Form\ForgotPasswordSMSType;
@@ -1282,10 +1283,11 @@ class SiteController extends AbstractController
             $form = $this->createForm(AutoDeletePasswordType::class, $user);
         }
         else {
-            $form = $this->createForm(TwoFACode::class);
+            $form = $this->createForm(AutoDeleteCodeType::class);
         }
 
         $form->handleRequest($request);
+
 
         if ($form->isSubmitted() && $form->isValid()) {
 
@@ -1294,7 +1296,7 @@ class SiteController extends AbstractController
             if ($user->getUserExternalAuths()[0]->getProvider() === UserProvider::PORTAL_ACCOUNT->value)
             {
                 $typedPassword = $form->get('password')->getData();
-
+                
                 // Compare the typed password with the hashed password from the database
                 if (password_verify((string)$typedPassword, $currentPasswordDB)) {
                     $this->userDeletionService->deleteUser($user, $userExternalAuths, $request, $currentUser);
