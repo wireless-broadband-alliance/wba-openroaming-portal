@@ -1,5 +1,11 @@
 # Changelog
 
+# Release V1.7.2
+
+- Fix minor detail with an invalid comparison to show the cookie banner on the landing page
+
+---
+
 # Release V1.7.1
 
 - Removed the "Reset Password" option for admins editing their own account.
