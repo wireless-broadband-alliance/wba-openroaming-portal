@@ -135,9 +135,9 @@
 
     {# User Auto Delete #}
     <div class="divider my-8"></div>
-    <h1 class="text-lg mb-8 mt-10">Two-Factor Authentication</h1>
+    <h1 class="text-lg mb-8 mt-10 !text-red-600 font-bold uppercase">Danger Zone</h1>
     <div class="grid grid-cols-2 space-x-2">
-        <a href="{{ path('app_user_auto_delete') }}" class="btn-logout">
+        <a href="{{ path('app_user_account_deletion') }}" class="btn-logout">
             Delete Account
         </a>
     </div>
