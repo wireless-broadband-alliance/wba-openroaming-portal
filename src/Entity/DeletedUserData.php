@@ -19,8 +19,48 @@ use Doctrine\ORM\Mapping as ORM;
             uriTemplate: '/api/v1/userAccount/deletion',
             controller: UserAccountController::class,
             openapi: new Operation(
-                summary: '',
-                description: '',
+                responses: [
+                    200 => [
+                        'description' => 'User Account was deleted successfully.',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'success' => [
+                                            'type' => 'boolean',
+                                            'example' => true,
+                                        ],
+                                        'data' => [
+                                            'type' => 'object',
+                                            'properties' => [
+                                                'message' => [
+                                                    'type' => 'string',
+                                                    // phpcs:disable Generic.Files.LineLength.TooLong
+                                                    'example' => 'User with UUID "%s" successfully deleted.',
+                                                    // phpcs:enable
+                                                ],
+                                            ],
+                                        ],
+                                    ],
+                                ],
+                                'example' => [
+                                    'success' => true,
+                                    'data' => [
+                                        // phpcs:disable Generic.Files.LineLength.TooLong
+                                        'message' => 'User with UUID "test@openroaming.com" successfully deleted.',
+                                        // phpcs:enable
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+                summary: 'Delete the authenticated user account',
+                description: 'This endpoint deletes the currently authenticated user account.
+                 Depending on the authentication method, the request body may require a password (Portal Account),
+                  a SAMLResponse (SAML), or an authorization code (Google/Microsoft). 
+                  The request verifies the provided authentication details before performing the account deletion.',
                 parameters: [
                     new Parameter(
                         name: 'Authorization',
