@@ -1280,7 +1280,7 @@ class SiteController extends AbstractController
         }
 
         if ($user->getUserExternalAuths()[0]->getProvider() === UserProvider::PORTAL_ACCOUNT->value) {
-            $form = $this->createForm(AutoDeletePasswordType::class, $user);
+            $form = $this->createForm(AutoDeletePasswordType::class);
         }
         else {
             $form = $this->createForm(AutoDeleteCodeType::class);

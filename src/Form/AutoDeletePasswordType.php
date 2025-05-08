@@ -19,7 +19,6 @@ class AutoDeletePasswordType extends AbstractType
             ->add('password', PasswordType::class, [
                 'label' => 'Password',
                 'required' => true,
-                'mapped' => false,
             ])
             ->add('confirm', CheckboxType::class, [
                 'required' => true,
@@ -35,7 +34,7 @@ class AutoDeletePasswordType extends AbstractType
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'data_class' => User::class,
+            'data_class' => null,
         ]);
     }
 }

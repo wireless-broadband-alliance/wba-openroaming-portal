@@ -43,11 +43,11 @@
                         class: 'form-widget',
                         placeholder: 'Enter your password',
                     },
-                    full_name: 'password',
                 }) }}
             </div>
-            <div class="checkbox-container">
-                {{ form_widget(form.confirm) }}
+            <div class="mt-[28px] flex items-center justify-start gap-2">
+                {{ form_widget(form.confirm, {attr: {class: 'w-5 h-5 peer relative appearance-none
+                          rounded-[5px] border border-[#CECECE] cursor-pointer checked:bg-primary'}}) }}
                 <label for="{{ form.confirm.vars.id }}">I confirm that I want to permanently delete my account, and I understand this action cannot be undone.</label>
             </div>
         {% else %}
