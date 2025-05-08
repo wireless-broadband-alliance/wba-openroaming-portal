@@ -1,31 +1,31 @@
 {% set imageSettings = [
     {
         name: 'CUSTOMER_LOGO',
-        displayName: 'Customer Logo',
+        displayName: 'customerLogo'|trans({}, '_custom_portal'),
         imagePath: asset(data.customerLogoName.value),
     },
     {
         name: 'OPENROAMING_LOGO',
-        displayName: 'OpenRoaming Logo',
+        displayName: 'openRoamingLogo'|trans({}, '_custom_portal'),
         imagePath: asset(data.openroamingLogoName.value),
     },
     {
         name: 'WALLPAPER_IMAGE',
-        displayName: 'Wallpaper Image',
+        displayName: 'wallpaperImage'|trans({}, '_custom_portal'),
         imagePath: asset(data.wallpaperImageName.value),
     },
 ] %}
 
 {% set textSettings = [
-    {name: 'PAGE_TITLE', displayName: 'Page Title'},
-    {name: 'WELCOME_TEXT', displayName: 'Welcome Text'},
-    {name: 'WELCOME_DESCRIPTION', displayName: 'Welcome Description'},
-    {name: 'ADDITIONAL_LABEL', displayName: 'Additional Label'},
-    {name: 'CONTACT_EMAIL', displayName: 'Contact Email'},
+    {name: 'PAGE_TITLE', displayName: 'pageTitle'|trans({}, '_custom_portal')},
+    {name: 'WELCOME_TEXT', displayName: 'welcomeText'|trans({}, '_custom_portal')},
+    {name: 'WELCOME_DESCRIPTION', displayName: 'welcomeDescription'|trans({}, '_custom_portal')},
+    {name: 'ADDITIONAL_LABEL', displayName: 'additionalLabel'|trans({}, '_custom_portal')},
+    {name: 'CONTACT_EMAIL', displayName: 'contactEmail'|trans({}, '_custom_portal')},
 ] %}
 
 {% set choiceSettings = [
-    {name: 'CUSTOMER_LOGO_ENABLED', displayName: 'Show Customer Logo'},
+    {name: 'CUSTOMER_LOGO_ENABLED', displayName: 'showCustomerLogo'|trans({}, '_custom_portal')},
 ] %}
 
 <form action="{{ path('admin_dashboard_customize') }}" method="post" enctype="multipart/form-data">
@@ -43,7 +43,7 @@
                         <div class="flex flex-row justify-between">
                             <div class="text-base font-medium text-center break-normal md:break-all">
                                 {% set displayName = {
-                                    CUSTOMER_LOGO_ENABLED: 'Show Customer Logo',
+                                    CUSTOMER_LOGO_ENABLED: 'showCustomerLogo'|trans({}, '_custom_portal'),
                                 }[setting.vars.name] ?? setting.vars.name %}
                                 <h1 class="text-lg md:text-xl whitespace-nowrap">{{ displayName }}</h1>
                             </div>
@@ -125,14 +125,14 @@
 
     <div class="mt-6 flex flex-row w-full justify-end items-center gap-2">
         <a href="{{ path('app_dashboard_regenerate_code_admin', {type: 'settingCustom'}) }}"
-           onclick="return confirm('Are you sure you want to reset to the default settings?')"
+           onclick="return confirm('{{ 'resetMessage'|trans({}, 'settings_actions_general') }}')"
            class="text-base font-semibold hover:text-red-600 transition ease-in duration-300 p-2 rounded-lg">
-            Reset
+            {{ 'reset'|trans({}, 'settings_actions_general') }}
         </a>
 
         <button type="submit" class="btn-primary"
-                onclick="return confirm('Are you sure you want to apply this new changes?')">
-            Save Changes
+                onclick="return confirm('{{ 'saveChangesMessage'|trans({}, 'settings_actions_general') }}')">
+            {{ 'saveChanges'|trans({}, 'settings_actions_general') }}
         </button>
     </div>
 </form>
