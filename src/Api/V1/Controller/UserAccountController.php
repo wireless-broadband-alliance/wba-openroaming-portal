@@ -3,6 +3,8 @@
 namespace App\Api\V1\Controller;
 
 use App\Api\V1\BaseResponse;
+use App\Controller\GoogleController;
+use App\Controller\MicrosoftController;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Enum\UserProvider;
@@ -37,7 +39,10 @@ class UserAccountController extends AbstractController
         private readonly UserExternalAuthRepository $userExternalAuthRepository,
         private readonly UserDeletionService $userDeletionService,
         private readonly UserPasswordHasherInterface $passwordHasher,
-        private readonly SamlResolverService $samlResolverService
+        private readonly SamlResolverService $samlResolverService,
+        private readonly GoogleController $googleController,
+        private readonly MicrosoftController $microsoftController,
+        private readonly jwtTokenGenerator $tokenGenerator,
     ) {
     }
 
@@ -231,8 +236,18 @@ class UserAccountController extends AbstractController
                             'Invalid data: Missing required fields.'
                         )->toResponse();
                     }
-                    dd('google account');
+
+                    // Authenticate the user using a custom Google authentication function already on the project
+                    $this->googleController->authenticateUserGoogle($currentUser);
+
+                    // Generate JWT Token
+                    $token = $this->tokenGenerator->generateToken($currentUser);
+                    if (is_array($token) && isset($token['success']) && $token['success'] === false) {
+                        $statusCode = $token['error'] === 'Invalid user provided. Please verify the user data.' ? 400 : 500;
+                        return new BaseResponse($statusCode, null, $token['error'])->toResponse();
+                    }
                 }
+
                 if ($externalAuth->getProvider() === UserProvider::MICROSOFT_ACCOUNT->value) {
                     try {
                         $data = json_decode(
@@ -249,7 +264,6 @@ class UserAccountController extends AbstractController
                         )->toResponse();
                     }
 
-                    // TODO ask for payload -> check the microsoft code if vali, make a request with the code
                     $errors = [];
                     // Check for missing fields and add them to the array errors
                     if (empty($data['code'])) {
@@ -262,11 +276,18 @@ class UserAccountController extends AbstractController
                             'Invalid data: Missing required fields.'
                         )->toResponse();
                     }
-                    dd('microsoft account');
+
+                    // Authenticate the user using a custom Microsoft authentication function already on the project
+                    $this->microsoftController->authenticateUserMicrosoft($currentUser);
+
+                    // Generate JWT Token
+                    $token = $this->tokenGenerator->generateToken($currentUser);
+                    if (is_array($token) && isset($token['success']) && $token['success'] === false) {
+                        $statusCode = $token['error'] === 'Invalid user provided. Please verify the user data.' ? 400 : 500;
+                        return new BaseResponse($statusCode, null, $token['error'])->toResponse();
+                    }
                 }
             }
-
-            dd('starting user account deletion');
 
             // Call the user deletion service
             $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $currentUser->getId()]);
@@ -301,8 +322,8 @@ class UserAccountController extends AbstractController
 
             return new BaseResponse(
                 200,
-                null,
-                'User successfully deleted.'
+                ['user_uuid' => $userUUID],
+                sprintf('User with UUID "%s" successfully deleted.', $userUUID)
             )->toResponse();
         }
 
