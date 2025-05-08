@@ -223,7 +223,7 @@ class UserAccountController extends AbstractController
                             'Invalid JSON format'
                         )->toResponse();
                     }
-                    // TODO ask for payload -> check the google code if valid, make a request with the code
+
                     $errors = [];
                     // Check for missing fields and add them to the array errors
                     if (empty($data['code'])) {
