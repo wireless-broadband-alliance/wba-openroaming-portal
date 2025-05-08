@@ -178,8 +178,8 @@
             <div class="my-[25px] divider"></div>
 
             <div class="leading-7">
-                <p class="font-bold text-lg">Obtain Your Profile:</p>
-                <p>To get started, select one of the following authentication methods:</p>
+                <p class="font-bold text-lg">{{ 'obtainProfile'|trans({}, 'landing') }}</p>
+                <p>{{ 'authenticationMethods'|trans({}, 'landing') }}</p>
             </div>
             <div {{ stimulus_controller('terms-widget') }}>
                 <div class="my-8 grid gap-4">
@@ -197,13 +197,12 @@
                             'data-terms-widget-target': 'agreeTerms',
                         },
                     }) }}
+
                     <label for="{{ formTOS.agreeTerms.vars.id }}" class="text-xs">
-                        I agree to the
-                        <a href="{{ path('app_terms_conditions') }}" target="_blank"
-                           class="underline text-primary font-semibold">terms & conditions of use</a>
-                        and
-                        <a href="{{ path('app_privacy_policy') }}" target="_blank"
-                           class="underline text-primary font-semibold">privacy policy</a>.
+                        {{ 'termsCheckboxText'|trans({
+                            '%terms%': '<a href="' ~ path('app_terms_conditions') ~ '" target="_blank" class="underline text-primary font-semibold">' ~ 'termsConditions'|trans({}, 'landing') ~ '</a>',
+                            '%privacy%': '<a href="' ~ path('app_privacy_policy') ~ '" target="_blank" class="underline text-primary font-semibold">' ~ 'privacyPolicy'|trans({}, 'landing') ~ '</a>'
+                        }, 'landing')|raw }}
                     </label>
                 </div>
                 {{ form_end(formTOS) }}
@@ -212,9 +211,12 @@
                 <div class="z-20 modal hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center"
                      data-terms-widget-target="confirmationModal" id="confirmationTermsModal">
                     <div class="modal-content bg-white p-5 rounded shadow-lg text-center">
-                        <p class="text-sm">You need to confirm the terms before proceeding.</p>
+                        <p class="text-sm">
+                            {{ 'confirmationModal.title'|trans({}, 'landing') }}
+                        </p>
                         <div class="mt-4 flex justify-center">
-                            <button data-action="terms-widget#closeConfirmationModal" class="btn-secondary">Close
+                            <button data-action="terms-widget#closeConfirmationModal" class="btn-secondary">
+                                {{ 'confirmationModal.closeButton'|trans({}, 'landing') }}
                             </button>
                         </div>
                     </div>

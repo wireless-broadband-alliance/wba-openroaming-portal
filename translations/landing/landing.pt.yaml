@@ -24,7 +24,7 @@ obtainProfile: 'Obtenha o Seu Perfil'
 authenticationMethods: 'Para começar, selecione um dos seguintes métodos de autenticação:'
 
 confirmationModal:
-  title: 'Deve confirmar os termos antes de continuar.'
+  title: 'Por favor confirme os termos de uso antes de continuar.'
   closeButton: 'Fechar'
 
 accountSettings: 'Configurações da Conta'
