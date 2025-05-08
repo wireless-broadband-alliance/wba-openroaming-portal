@@ -1278,7 +1278,7 @@ class SiteController extends AbstractController
             throw $this->createNotFoundException('User not found.');
         }
 
-        if ($user->getUserExternalAuths()[0]->getProvider() === UserProvider::PORTAL_ACCOUNT) {
+        if ($user->getUserExternalAuths()[0]->getProvider() === UserProvider::PORTAL_ACCOUNT->value) {
             $form = $this->createForm(AutoDeletePasswordType::class, $user);
         }
         else {
