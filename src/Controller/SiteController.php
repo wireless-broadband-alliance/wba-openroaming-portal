@@ -26,6 +26,7 @@ use App\Form\NewPasswordAccountType;
 use App\Form\RegistrationFormType;
 use App\Form\RevokeProfilesType;
 use App\Form\TOSType;
+use App\Form\TwoFACode;
 use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserExternalAuthRepository;
@@ -1200,6 +1201,60 @@ class SiteController extends AbstractController
         return $this->redirect($referer);
     }
 
+    #[Route('/landing/userAccount/deletion/generateCode', name: 'app_user_account_deletion_generate_code')]
+    public function autoDeleteUserGenerateCode(Request $request,): RedirectResponse
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+
+        if (!$user) {
+            throw $this->createNotFoundException('User not found.');
+        }
+
+        if (!($user->getUserExternalAuths()[0]->getProvider() === UserProvider::PORTAL_ACCOUNT->value)) {
+            if ($this->twoFAService->canValidationCode($user, AnalyticalEventType::USER_AUTO_DELETE_CODE->value)) {
+                if ($this->twoFAService->timeIntervalToSendCode($user, AnalyticalEventType::USER_AUTO_DELETED->value)) {
+                    $this->twoFAService->generate2FACode(
+                        $user,
+                        $request->getClientIp(),
+                        $request->headers->get('User-Agent'),
+                        AnalyticalEventType::USER_AUTO_DELETE_CODE->value
+                    );
+                    $this->addFlash(
+                        'success',
+                        'A confirmation code was sent to you successfully.'
+                    );
+                }
+                else {
+                    $interval_seconds = $this->twoFAService->timeLeftToResendCodeTimeInterval(
+                        $user,
+                        AnalyticalEventType::USER_AUTO_DELETE_CODE->value
+                    );
+                    $this->addFlash(
+                        'error',
+                        'You must wait ' .
+                        $interval_seconds . ' seconds before you can resend code'
+                    );
+                }
+
+            }
+            else {
+                $interval_minutes = $this->twoFAService->timeLeftToResendCode(
+                    $user,
+                    AnalyticalEventType::USER_AUTO_DELETE_CODE->value
+                );
+                $this->addFlash(
+                    'error',
+                    'Your code has already been sent to you previously. Wait ' .
+                    $interval_minutes . ' minutes to request a code again'
+                );
+            }
+        }
+
+        return $this->redirectToRoute('app_user_account_deletion');
+    }
+
+
     /**
      * @throws \JsonException
      */
@@ -1210,6 +1265,10 @@ class SiteController extends AbstractController
 
         /** @var User $currentUser */
         $currentUser = $this->getUser();
+
+        if ($currentUser->getPhoneNumber() === null && empty($currentUser->getEmail())) {
+            $this->redirectToRoute('app_landing');
+        }
         $id = $currentUser->getId();
 
         // Fetch user and external auths
@@ -1219,23 +1278,39 @@ class SiteController extends AbstractController
             throw $this->createNotFoundException('User not found.');
         }
 
-        $form = $this->createForm(AutoDeletePasswordType::class, $user);
+        if ($user->getUserExternalAuths()[0]->getProvider() === UserProvider::PORTAL_ACCOUNT) {
+            $form = $this->createForm(AutoDeletePasswordType::class, $user);
+        }
+        else {
+            $form = $this->createForm(TwoFACode::class);
+        }
+
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
 
             $currentPasswordDB = $user->getPassword();
-            $typedPassword = $form->get('password')->getData();
 
-            // Compare the typed password with the hashed password from the database
-            if (password_verify((string)$typedPassword, $currentPasswordDB)) {
-                $this->userDeletionService->deleteUser($user, $userExternalAuths, $request, $currentUser);
-                return $this->redirectToRoute('app_landing');
+            if ($user->getUserExternalAuths()[0]->getProvider() === UserProvider::PORTAL_ACCOUNT)
+            {
+                $typedPassword = $form->get('password')->getData();
+
+                // Compare the typed password with the hashed password from the database
+                if (password_verify((string)$typedPassword, $currentPasswordDB)) {
+                    $this->userDeletionService->deleteUser($user, $userExternalAuths, $request, $currentUser);
+                    return $this->redirectToRoute('app_landing');
+                }
+                $this->addFlash('error', 'Current password Invalid. Please try again.');
             }
-            $this->addFlash('error', 'Current password Invalid. Please try again.');
+            else {
+                $typedCode = $form->get('code')->getData();
+                if ($this->twoFAService->validate2FACode($currentUser, $typedCode)) {
+                    $this->userDeletionService->deleteUser($user, $userExternalAuths, $request, $currentUser);
+                    return $this->redirectToRoute('app_landing');
+                }
+                $this->addFlash('error', 'Code Invalid. Please try again.');
+            }
         }
-
-
 
         return $this->render('site/actions/auto_delete_account.html.twig', [
             'form' => $form->createView(),

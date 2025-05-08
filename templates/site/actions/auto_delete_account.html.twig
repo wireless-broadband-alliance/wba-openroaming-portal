@@ -29,11 +29,20 @@
 
     {{ form_start(form) }}
     <div class="relative mt-10 mb-6">
+        {% if (user.userExternalAuths[0].provider == constant('App\\Enum\\UserProvider::PORTAL_ACCOUNT').value) %}
         {{ form_widget(form.password, {
             attr: {
                 class: 'form-widget',
                 placeholder: 'Enter your Password',
             }}) }}
+        {% else %}
+        {{ form_widget(form.code, {
+            attr: {
+                class: 'form-widget',
+                placeholder: 'Enter your code',
+            }}) }}
+        {% endif %}
+
     </div>
 
     {# Action Buttons #}
