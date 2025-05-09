@@ -652,7 +652,8 @@ class TwoFAController extends AbstractController
             $autoDeletion = false;
         }
 
-        if ($this->twoFAService->canResendCode($user, $eventType) &&
+        if (
+            $this->twoFAService->canResendCode($user, $eventType) &&
             $this->twoFAService->timeIntervalToResendCode($user, $eventType)
         ) {
             $this->twoFAService->resendCode(
