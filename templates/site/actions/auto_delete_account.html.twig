@@ -76,7 +76,7 @@
             {% if not (user.userExternalAuths[0].provider == constant('App\\Enum\\UserProvider::PORTAL_ACCOUNT').value) %}
                 <a href="{{ path('app_local_resend_code', {
                     context: context,
-                    type: constant('App\\Enum\\CodeVerificationType::AUTO_DELETE_RESEND').value}
+                    type: constant('App\\Enum\\CodeVerificationType::AUTO_DELETE_RESEND').value},
                 ) }}"
                    class="btn-secondary">Resend
                     code</a>
@@ -84,9 +84,7 @@
         </div>
         {{ form_end(form) }}
 
-
         {# Divider #}
         {{ include('/site/shared/returnActions/_2FA_config_return_action.html.twig') }}
     </div>
 {% endblock %}
-

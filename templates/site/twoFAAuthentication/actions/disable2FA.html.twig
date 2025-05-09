@@ -51,7 +51,7 @@
         {% if not (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::TOTP').value) %}
             <a href="{{ path('app_local_resend_code', {
                 context: context,
-                type: constant('App\\Enum\\CodeVerificationType::TWO_FA_DISABLE_RESEND').value}
+                type: constant('App\\Enum\\CodeVerificationType::TWO_FA_DISABLE_RESEND').value},
             ) }}"
                class="btn-secondary">Resend
                 code</a>
