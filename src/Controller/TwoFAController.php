@@ -637,23 +637,27 @@ class TwoFAController extends AbstractController
         $timeIntervalToResendCode = $data["TWO_FACTOR_AUTH_RESEND_INTERVAL"]["value"];
         $limitTime = new DateTime();
         $limitTime->modify('-' . $timeToResetAttempts . ' minutes');
-        if ($type === CodeVerificationType::TWO_FA_VERIFY_RESEND->value) {
-            $evenType = AnalyticalEventType::TWO_FA_CODE_RESEND->value;
-        } else {
-            $evenType = AnalyticalEventType::USER_AUTO_DELETE_RESEND_CODE->value;
-        }
+
+        $eventTypeMapping = [
+            CodeVerificationType::TWO_FA_VERIFY_RESEND->value => AnalyticalEventType::TWO_FA_CODE_VERIFY_RESEND->value,
+            CodeVerificationType::TWO_FA_DISABLE_RESEND->value => AnalyticalEventType::TWO_FA_CODE_DISABLE_RESEND->value,
+            CodeVerificationType::TWO_FA_ENABLE_RESEND->value => AnalyticalEventType::TWO_FA_CODE_ENABLE_RESEND->value,
+            CodeVerificationType::AUTO_DELETE_RESEND->value => AnalyticalEventType::USER_AUTO_DELETE_CODE->value,
+        ];
+        $eventType = $eventTypeMapping[$type] ?? null;
+
         if ($this->twoFAService->canResendCode($user) && $this->twoFAService->timeIntervalToResendCode($user)) {
             $this->twoFAService->resendCode(
                 $user,
                 $request->getClientIp(),
                 $request->headers->get('User-Agent'),
-                $evenType
+                $eventType
             );
             $attempts = $this->eventRepository->find2FACodeAttemptEvent(
                 $user,
                 $nrAttempts,
                 $limitTime,
-                $evenType
+                $eventType
             );
             $attemptsLeft = $nrAttempts - count($attempts);
             $this->addFlash(
@@ -663,7 +667,7 @@ class TwoFAController extends AbstractController
         } else {
             $lastEvent = $this->eventRepository->findLatest2FACodeAttemptEvent(
                 $user,
-                $evenType
+                $eventType
             );
             $now = new DateTime();
             if (!$this->twoFAService->canResendCode($user)) {
