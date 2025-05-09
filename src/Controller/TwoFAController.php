@@ -613,7 +613,6 @@ class TwoFAController extends AbstractController
         name: 'app_local_resend_code',
         defaults: [
             'context' => FirewallType::LANDING->value,
-            'type' => CodeVerificationType::IS_USER_ACCOUNT_DELETION->value
         ]
     )]
     public function resendCode(string $context, string $type, Request $request): RedirectResponse
@@ -638,18 +637,23 @@ class TwoFAController extends AbstractController
         $timeIntervalToResendCode = $data["TWO_FACTOR_AUTH_RESEND_INTERVAL"]["value"];
         $limitTime = new DateTime();
         $limitTime->modify('-' . $timeToResetAttempts . ' minutes');
+        if ($type === CodeVerificationType::TWO_FA_VERIFY_RESEND->value) {
+            $evenType = AnalyticalEventType::TWO_FA_CODE_RESEND->value;
+        } else {
+            $evenType = AnalyticalEventType::USER_AUTO_DELETE_RESEND_CODE->value;
+        }
         if ($this->twoFAService->canResendCode($user) && $this->twoFAService->timeIntervalToResendCode($user)) {
             $this->twoFAService->resendCode(
                 $user,
                 $request->getClientIp(),
                 $request->headers->get('User-Agent'),
-                AnalyticalEventType::TWO_FA_CODE_RESEND->value
+                $evenType
             );
             $attempts = $this->eventRepository->find2FACodeAttemptEvent(
                 $user,
                 $nrAttempts,
                 $limitTime,
-                AnalyticalEventType::TWO_FA_CODE_RESEND->value
+                $evenType
             );
             $attemptsLeft = $nrAttempts - count($attempts);
             $this->addFlash(
@@ -659,7 +663,7 @@ class TwoFAController extends AbstractController
         } else {
             $lastEvent = $this->eventRepository->findLatest2FACodeAttemptEvent(
                 $user,
-                AnalyticalEventType::TWO_FA_CODE_RESEND->value
+                $evenType
             );
             $now = new DateTime();
             if (!$this->twoFAService->canResendCode($user)) {

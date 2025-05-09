@@ -4,6 +4,9 @@ namespace App\Enum;
 
 enum CodeVerificationType: string
 {
-    case IS_2FA_REQUEST_RESEND = 'IS_2FA_REQUEST_RESEND';
-    case IS_USER_ACCOUNT_DELETION = 'IS_USER_ACCOUNT_DELETION';
+    case TWO_FA_VERIFY_RESEND = 'verify2FA';
+    case TWO_FA_DISABLE_RESEND = 'disable2FA';
+    case TWO_FA_ENABLE_RESEND = 'enable2FA';
+    case TWO_FA_VALIDATE_RESEND = 'validate2FA';
+    case AUTO_DELETE_RESEND = 'accountDeletion';
 }
