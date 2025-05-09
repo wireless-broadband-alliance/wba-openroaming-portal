@@ -253,7 +253,7 @@ readonly class TwoFAService
         $this->entityManager->flush();
     }
 
-    public function canResendCode(User $user): bool
+    public function canResendCode(User $user, string $eventType): bool
     {
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $nrAttempts = $data["TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE"]["value"];
@@ -264,12 +264,12 @@ readonly class TwoFAService
             $user,
             $nrAttempts,
             $limitTime,
-            AnalyticalEventType::TWO_FA_CODE_RESEND->value
+            $eventType
         );
         return count($attempts) < $nrAttempts;
     }
 
-    public function timeIntervalToResendCode(User $user): bool
+    public function timeIntervalToResendCode(User $user, string $eventType): bool
     {
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $timeIntervalToResendCode = $data["TWO_FACTOR_AUTH_RESEND_INTERVAL"]["value"];
@@ -279,7 +279,7 @@ readonly class TwoFAService
             $user,
             1,
             $limitTime,
-            AnalyticalEventType::TWO_FA_CODE_RESEND->value
+            $eventType
         );
         return count($attempts) < 1;
     }

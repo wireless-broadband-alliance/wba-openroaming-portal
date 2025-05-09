@@ -646,7 +646,9 @@ class TwoFAController extends AbstractController
         ];
         $eventType = $eventTypeMapping[$type] ?? null;
 
-        if ($this->twoFAService->canResendCode($user) && $this->twoFAService->timeIntervalToResendCode($user)) {
+        if ($this->twoFAService->canResendCode($user, $eventType) &&
+            $this->twoFAService->timeIntervalToResendCode($user, $eventType)
+        ) {
             $this->twoFAService->resendCode(
                 $user,
                 $request->getClientIp(),
@@ -670,7 +672,7 @@ class TwoFAController extends AbstractController
                 $eventType
             );
             $now = new DateTime();
-            if (!$this->twoFAService->canResendCode($user)) {
+            if (!$this->twoFAService->canResendCode($user, $eventType)) {
                 $lastAttemptTime = $lastEvent instanceof Event ?
                     $lastEvent->getEventDatetime() : $timeToResetAttempts;
                 $limitTime = $lastAttemptTime;
