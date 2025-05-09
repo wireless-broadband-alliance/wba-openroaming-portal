@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Event;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
+use App\Enum\CodeVerificationType;
 use App\Enum\FirewallType;
 use App\Enum\UserTwoFactorAuthenticationStatus;
 use App\Form\TwoFACode;
@@ -608,13 +609,14 @@ class TwoFAController extends AbstractController
      * @throws RandomException
      */
     #[Route(
-        '/{context}/verify2FA/resend',
-        name: 'app_2FA_local_resend_code',
+        '/{context}/{type}/resend',
+        name: 'app_local_resend_code',
         defaults: [
-            'context' => FirewallType::LANDING->value
+            'context' => FirewallType::LANDING->value,
+            'type' => CodeVerificationType::IS_USER_ACCOUNT_DELETION->value
         ]
     )]
-    public function resendCode(string $context, Request $request): RedirectResponse
+    public function resendCode(string $context, string $type, Request $request): RedirectResponse
     {
         /** @var User $user */
         $user = $this->getUser();

@@ -1229,11 +1229,12 @@ class SiteController extends AbstractController
                         $currentUser,
                         $request->getClientIp(),
                         $request->headers->get('User-Agent'),
-                        AnalyticalEventType::USER_AUTO_DELETE_CODE->value
+                        AnalyticalEventType::USER_AUTO_DELETE_CODE->value,
+                        true
                     );
                     $this->addFlash(
                         'success',
-                        'A confirmation code was sent to you successfully.'
+                        'A confirmation code was sent to your email.'
                     );
                 } else {
                     $interval_seconds = $this->twoFAService->timeLeftToResendCodeTimeInterval(
