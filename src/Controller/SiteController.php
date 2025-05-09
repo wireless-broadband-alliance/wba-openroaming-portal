@@ -27,7 +27,6 @@ use App\Form\NewPasswordAccountType;
 use App\Form\RegistrationFormType;
 use App\Form\RevokeProfilesType;
 use App\Form\TOSType;
-use App\Form\TwoFACode;
 use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserExternalAuthRepository;
@@ -1203,20 +1202,31 @@ class SiteController extends AbstractController
     }
 
     #[Route('/landing/userAccount/deletion/generateCode', name: 'app_user_account_deletion_generate_code')]
-    public function autoDeleteUserGenerateCode(Request $request,): RedirectResponse
+    #[IsGranted('ROLE_USER')]
+    public function autoDeleteUserGenerateCode(Request $request): RedirectResponse
     {
-        /** @var User $user */
-        $user = $this->getUser();
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
 
-        if (!$user) {
+        if (!$currentUser) {
             throw $this->createNotFoundException('User not found.');
         }
 
-        if (!($user->getUserExternalAuths()[0]->getProvider() === UserProvider::PORTAL_ACCOUNT->value)) {
-            if ($this->twoFAService->canValidationCode($user, AnalyticalEventType::USER_AUTO_DELETE_CODE->value)) {
-                if ($this->twoFAService->timeIntervalToSendCode($user, AnalyticalEventType::USER_AUTO_DELETED->value)) {
+        if (!($currentUser->getUserExternalAuths()[0]->getProvider() === UserProvider::PORTAL_ACCOUNT->value)) {
+            if (
+                $this->twoFAService->canValidationCode(
+                    $currentUser,
+                    AnalyticalEventType::USER_AUTO_DELETE_CODE->value
+                )
+            ) {
+                if (
+                    $this->twoFAService->timeIntervalToSendCode(
+                        $currentUser,
+                        AnalyticalEventType::USER_AUTO_DELETED->value
+                    )
+                ) {
                     $this->twoFAService->generate2FACode(
-                        $user,
+                        $currentUser,
                         $request->getClientIp(),
                         $request->headers->get('User-Agent'),
                         AnalyticalEventType::USER_AUTO_DELETE_CODE->value
@@ -1225,10 +1235,9 @@ class SiteController extends AbstractController
                         'success',
                         'A confirmation code was sent to you successfully.'
                     );
-                }
-                else {
+                } else {
                     $interval_seconds = $this->twoFAService->timeLeftToResendCodeTimeInterval(
-                        $user,
+                        $currentUser,
                         AnalyticalEventType::USER_AUTO_DELETE_CODE->value
                     );
                     $this->addFlash(
@@ -1237,11 +1246,9 @@ class SiteController extends AbstractController
                         $interval_seconds . ' seconds before you can resend code'
                     );
                 }
-
-            }
-            else {
+            } else {
                 $interval_minutes = $this->twoFAService->timeLeftToResendCode(
-                    $user,
+                    $currentUser,
                     AnalyticalEventType::USER_AUTO_DELETE_CODE->value
                 );
                 $this->addFlash(
@@ -1260,7 +1267,8 @@ class SiteController extends AbstractController
      * @throws \JsonException
      */
     #[Route('/landing/userAccount/deletion', name: 'app_user_account_deletion')]
-    public function autoDeleteUser(Request $request,): Response
+    #[IsGranted('ROLE_USER')]
+    public function autoDeleteUser(Request $request): Response
     {
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
@@ -1270,41 +1278,34 @@ class SiteController extends AbstractController
         if ($currentUser->getPhoneNumber() === null && empty($currentUser->getEmail())) {
             $this->redirectToRoute('app_landing');
         }
-        $id = $currentUser->getId();
 
         // Fetch user and external auths
-        $user = $this->userRepository->find($id);
-        $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $id]);
+        $user = $this->userRepository->findOneByUUIDExcludingAdmin($currentUser->getUuid());
         if (!$user) {
             throw $this->createNotFoundException('User not found.');
         }
+        $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $user->getId()]);
 
         if ($user->getUserExternalAuths()[0]->getProvider() === UserProvider::PORTAL_ACCOUNT->value) {
             $form = $this->createForm(AutoDeletePasswordType::class);
-        }
-        else {
+        } else {
             $form = $this->createForm(AutoDeleteCodeType::class);
         }
 
         $form->handleRequest($request);
-
-
         if ($form->isSubmitted() && $form->isValid()) {
-
             $currentPasswordDB = $user->getPassword();
 
-            if ($user->getUserExternalAuths()[0]->getProvider() === UserProvider::PORTAL_ACCOUNT->value)
-            {
+            if ($user->getUserExternalAuths()[0]->getProvider() === UserProvider::PORTAL_ACCOUNT->value) {
                 $typedPassword = $form->get('password')->getData();
-                
+
                 // Compare the typed password with the hashed password from the database
                 if (password_verify((string)$typedPassword, $currentPasswordDB)) {
                     $this->userDeletionService->deleteUser($user, $userExternalAuths, $request, $currentUser);
                     return $this->redirectToRoute('app_landing');
                 }
                 $this->addFlash('error', 'Current password Invalid. Please try again.');
-            }
-            else {
+            } else {
                 $typedCode = $form->get('code')->getData();
                 if ($this->twoFAService->validate2FACode($currentUser, $typedCode)) {
                     $this->userDeletionService->deleteUser($user, $userExternalAuths, $request, $currentUser);
@@ -1321,5 +1322,4 @@ class SiteController extends AbstractController
             'context' => FirewallType::LANDING->value
         ]);
     }
-
 }
