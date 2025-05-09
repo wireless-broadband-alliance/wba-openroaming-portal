@@ -702,11 +702,13 @@ class SiteController extends AbstractController
     /**
      * @throws Exception
      */
-    #[Route('{context}/forgot-password/sms',
+    #[Route(
+        '{context}/forgot-password/sms',
         name: 'app_site_forgot_password_sms',
         requirements: ['context' => 'landing|dashboard'],
         defaults: ['context' => FirewallType::LANDING->value
-    ])]
+        ]
+    )]
     public function forgotPasswordUserSMS(
         string $context,
         Request $request,
