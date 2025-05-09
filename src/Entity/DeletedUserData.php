@@ -163,42 +163,54 @@ use Doctrine\ORM\Mapping as ORM;
                                         'summary' => 'Unauthorized Access',
                                         'value' => [
                                             'success' => false,
+                                            // phpcs:disable Generic.Files.LineLength.TooLong
                                             'error' => 'Unauthorized - You do not have permission to access this resource.',
+                                            // phpcs:enable
                                         ],
                                     ],
                                     'saml_email_mismatch' => [
                                         'summary' => 'SAML Verification Failed',
                                         'value' => [
                                             'success' => false,
+                                            // phpcs:disable Generic.Files.LineLength.TooLong
                                             'error' => 'Unauthorized: The SAML assertion email does not match the user account email.',
+                                            // phpcs:enable
                                         ],
                                     ],
                                     'saml_configuration_error' => [
                                         'summary' => 'SAML Configuration Mismatch',
                                         'value' => [
                                             'success' => false,
+                                            // phpcs:disable Generic.Files.LineLength.TooLong
                                             'error' => 'The configured IDP Entity ID does not match the expected value. Access denied.',
+                                            // phpcs:enable
                                         ],
                                     ],
                                     'invalid_2fa_type' => [
                                         'summary' => 'Invalid Two-Factor Authentication Type',
                                         'value' => [
                                             'success' => false,
+                                            // phpcs:disable Generic.Files.LineLength.TooLong
                                             'error' => 'Invalid Two-Factor Authentication configuration. Please ensure that 2FA is set up using either email or SMS for this account.',
+                                            // phpcs:enable
                                         ],
                                     ],
                                     'incomplete_2fa_setup' => [
                                         'summary' => 'Incomplete Two-Factor Authentication Setup',
                                         'value' => [
                                             'success' => false,
+                                            // phpcs:disable Generic.Files.LineLength.TooLong
                                             'error' => 'The Two-Factor Authentication (2FA) configuration is incomplete. Please set up 2FA using either email or SMS.',
+                                            // phpcs:enable
                                         ],
                                     ],
                                     'invalid_account_type' => [
                                         'summary' => 'Invalid Account Type',
                                         'value' => [
                                             'success' => false,
+                                            // phpcs:disable Generic.Files.LineLength.TooLong
                                             'error' => 'Invalid account type. Please only use email/phone number accounts from the portal.',
+                                            // phpcs:enable
                                         ],
                                     ],
                                 ],
@@ -258,7 +270,9 @@ use Doctrine\ORM\Mapping as ORM;
                                         'summary' => 'Failure in External Service',
                                         'value' => [
                                             'success' => false,
+                                            // phpcs:disable Generic.Files.LineLength.TooLong
                                             'error' => 'An error occurred while communicating with an external service.',
+                                            // phpcs:enable
                                         ],
                                     ],
                                     'unexpected_error' => [
@@ -282,7 +296,8 @@ use Doctrine\ORM\Mapping as ORM;
                     new Parameter(
                         name: 'Authorization',
                         in: 'header',
-                        description: 'Bearer token is required for authentication. Use the format: `Bearer <JWT token>`.',
+                        description: 'Bearer token is required for authentication. 
+                                        Use the format: `Bearer <JWT token>`.',
                         required: true,
                         schema: [
                             'type' => 'string',
@@ -290,7 +305,8 @@ use Doctrine\ORM\Mapping as ORM;
                     ),
                 ],
                 requestBody: new RequestBody(
-                    description: 'Conditional payload required for deleting a user, based on the external authentication provider.',
+                    description: 'Conditional payload required for deleting a user, 
+                    based on the external authentication provider.',
                     content: new ArrayObject([
                         'application/json' => [
                             'schema' => [
@@ -325,11 +341,15 @@ use Doctrine\ORM\Mapping as ORM;
                                         'properties' => [
                                             'code' => [
                                                 'type' => 'string',
+                                                // phpcs:disable Generic.Files.LineLength.TooLong
                                                 'description' => 'Authorization code used for Google/Microsoft accounts.',
+                                                // phpcs:enable
                                                 'example' => '4/AABEsG...',
                                             ],
                                         ],
+                                        // phpcs:disable Generic.Files.LineLength.TooLong
                                         'description' => 'Authentication payload for users with Google or Microsoft accounts.',
+                                        // phpcs:enable
                                     ],
                                 ],
                                 'description' => 'Payload structure depends on the external authentication provider.',

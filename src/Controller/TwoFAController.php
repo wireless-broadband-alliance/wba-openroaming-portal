@@ -639,10 +639,14 @@ class TwoFAController extends AbstractController
         $limitTime->modify('-' . $timeToResetAttempts . ' minutes');
 
         $eventTypeMapping = [
-            CodeVerificationType::TWO_FA_VERIFY_RESEND->value => AnalyticalEventType::TWO_FA_CODE_VERIFY_RESEND->value,
-            CodeVerificationType::TWO_FA_DISABLE_RESEND->value => AnalyticalEventType::TWO_FA_CODE_DISABLE_RESEND->value,
-            CodeVerificationType::AUTO_DELETE_RESEND->value => AnalyticalEventType::USER_AUTO_DELETE_CODE->value,
-            CodeVerificationType::TWO_FA_VALIDATE_RESEND->value => AnalyticalEventType::TWO_FA_CODE_VALIDATE_RESEND->value,
+            CodeVerificationType::TWO_FA_VERIFY_RESEND->value =>
+                AnalyticalEventType::TWO_FA_CODE_VERIFY_RESEND->value,
+            CodeVerificationType::TWO_FA_DISABLE_RESEND->value =>
+                AnalyticalEventType::TWO_FA_CODE_DISABLE_RESEND->value,
+            CodeVerificationType::AUTO_DELETE_RESEND->value =>
+                AnalyticalEventType::USER_AUTO_DELETE_CODE->value,
+            CodeVerificationType::TWO_FA_VALIDATE_RESEND->value =>
+                AnalyticalEventType::TWO_FA_CODE_VALIDATE_RESEND->value,
         ];
         $eventType = $eventTypeMapping[$type] ?? null;
 

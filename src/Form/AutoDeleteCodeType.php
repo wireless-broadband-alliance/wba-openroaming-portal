@@ -30,7 +30,8 @@ class AutoDeleteCodeType extends AbstractType
                 'mapped' => false,
                 'constraints' => [
                     new IsTrue([
-                        'message' => 'You must confirm that you understand deleting your account is permanent and cannot be undone.',
+                        'message' => 'You must confirm that you understand deleting
+                         your account is permanent and cannot be undone.',
                     ]),
                 ],
             ]);
