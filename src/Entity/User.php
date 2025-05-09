@@ -28,7 +28,6 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ApiResource(
-    description: "The User entity returns values related to a user.",
     operations: [
         new GetCollection(
             uriTemplate: '/v1/user',

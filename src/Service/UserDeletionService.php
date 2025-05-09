@@ -12,13 +12,13 @@ use Doctrine\ORM\EntityManagerInterface;
 use libphonenumber\PhoneNumber;
 use Symfony\Component\HttpFoundation\Request;
 
-class UserDeletionService
+readonly class UserDeletionService
 {
     public function __construct(
-        private readonly ProfileManager $profileManager,
-        private readonly EventActions $eventActions,
-        private readonly EntityManagerInterface $entityManager,
-        private readonly PgpEncryptionService $encryptionService,
+        private ProfileManager $profileManager,
+        private EventActions $eventActions,
+        private EntityManagerInterface $entityManager,
+        private PgpEncryptionService $encryptionService,
     ) {
     }
 
