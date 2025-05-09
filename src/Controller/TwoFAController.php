@@ -252,6 +252,9 @@ class TwoFAController extends AbstractController
     #[Route(
         '/{context}/verify2FA',
         name: 'app_verify2FA_portal',
+        requirements: [
+            'context' => 'landing|dashboard'
+        ],
         defaults: [
             'context' => FirewallType::LANDING->value
         ]
