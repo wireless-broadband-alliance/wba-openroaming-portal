@@ -45,6 +45,9 @@ class TwoFAController extends AbstractController
     #[Route(
         '/{context}/configure2FA',
         name: 'app_configure2FA',
+        requirements: [
+            'context' => 'landing|dashboard'
+        ],
         defaults: [
             'context' => FirewallType::LANDING->value
         ]
@@ -78,6 +81,9 @@ class TwoFAController extends AbstractController
     #[Route(
         '/{context}/enable2FA/TOTP',
         name: 'app_enable2FA_TOTP',
+        requirements: [
+            'context' => 'landing|dashboard'
+        ],
         defaults: [
             'context' => FirewallType::LANDING->value
         ]
@@ -176,6 +182,9 @@ class TwoFAController extends AbstractController
     #[Route(
         '/{context}/verify2FA/TOTP',
         name: 'app_verify2FA_TOTP',
+        requirements: [
+            'context' => 'landing|dashboard'
+        ],
         defaults: [
             'context' => FirewallType::LANDING->value
         ]
@@ -324,6 +333,9 @@ class TwoFAController extends AbstractController
     #[Route(
         '/{context}/disable2FA',
         name: 'app_disable2FA',
+        requirements: [
+            'context' => 'landing|dashboard'
+        ],
         defaults: [
             'context' => FirewallType::LANDING->value
         ]
@@ -398,6 +410,9 @@ class TwoFAController extends AbstractController
     #[Route(
         '/{context}/disable2FA/local',
         name: 'app_disable2FA_local',
+        requirements: [
+            'context' => 'landing|dashboard'
+        ],
         defaults: [
             'context' => FirewallType::LANDING->value
         ]
@@ -457,6 +472,9 @@ class TwoFAController extends AbstractController
     #[Route(
         '/{context}/disable2FA/TOTP',
         name: 'app_disable2FA_TOTP',
+        requirements: [
+            'context' => 'landing|dashboard'
+        ],
         defaults: [
             'context' => FirewallType::LANDING->value
         ]
@@ -517,6 +535,9 @@ class TwoFAController extends AbstractController
     #[Route(
         '/{context}/2FAFirstSetup/codes',
         name: 'app_otpCodes',
+        requirements: [
+            'context' => 'landing|dashboard'
+        ],
         defaults: [
             'context' => FirewallType::LANDING->value
         ]
@@ -573,6 +594,9 @@ class TwoFAController extends AbstractController
     #[Route(
         '/{context}/2FAFirstSetup/codes/save',
         name: 'app_otpCodes_save',
+        requirements: [
+            'context' => 'landing|dashboard'
+        ],
         defaults: [
             'context' => FirewallType::LANDING->value
         ]
@@ -614,6 +638,9 @@ class TwoFAController extends AbstractController
     #[Route(
         '/{context}/{type}/resend',
         name: 'app_local_resend_code',
+        requirements: [
+            'context' => 'landing|dashboard'
+        ],
         defaults: [
             'context' => FirewallType::LANDING->value,
         ]
@@ -721,6 +748,9 @@ class TwoFAController extends AbstractController
     #[Route(
         '/{context}/generate2FACode',
         name: 'app_2FA_generate_code',
+        requirements: [
+            'context' => 'landing|dashboard'
+        ],
         defaults: [
             'context' => FirewallType::LANDING->value
         ]
@@ -779,6 +809,9 @@ class TwoFAController extends AbstractController
     #[Route(
         '/{context}/downloadCodes',
         name: 'app_download_codes',
+        requirements: [
+            'context' => 'landing|dashboard'
+        ],
         defaults: [
             'context' => FirewallType::LANDING->value
         ]
@@ -823,6 +856,9 @@ class TwoFAController extends AbstractController
     #[Route(
         '/{context}/2FAFirstSetup/portal',
         name: 'app_2FA_firstSetup_local',
+        requirements: [
+            'context' => 'landing|dashboard'
+        ],
         defaults: [
             'context' => FirewallType::LANDING->value
         ]
@@ -898,6 +934,9 @@ class TwoFAController extends AbstractController
     #[Route(
         '/{context}/2FAFirstSetup/verification',
         name: 'app_2FA_first_verification_local',
+        requirements: [
+            'context' => 'landing|dashboard'
+        ],
         defaults: [
             'context' => FirewallType::LANDING->value
         ]
@@ -1001,6 +1040,9 @@ class TwoFAController extends AbstractController
     #[Route(
         '/{context}/2FASwapMethod/disableLocal',
         name: 'app_swap2FA_disable_Local',
+        requirements: [
+            'context' => 'landing|dashboard'
+        ],
         defaults: [
             'context' => FirewallType::LANDING->value
         ]
@@ -1070,6 +1112,9 @@ class TwoFAController extends AbstractController
     #[Route(
         '/{context}/generate2FACode/swapMethod',
         name: 'app_2FA_generate_code_swap_method',
+        requirements: [
+            'context' => 'landing|dashboard'
+        ],
         defaults: [
             'context' => FirewallType::LANDING->value
         ]
@@ -1123,6 +1168,9 @@ class TwoFAController extends AbstractController
     #[Route(
         '/{context}/2FASwapMethod/disable/TOTP',
         name: 'app_swap2FA_disable_TOTP',
+        requirements: [
+            'context' => 'landing|dashboard'
+        ],
         defaults: [
             'context' => FirewallType::LANDING->value
         ]
