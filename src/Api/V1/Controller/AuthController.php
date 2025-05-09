@@ -269,7 +269,7 @@ class AuthController extends AbstractController
             $sAMAccountName = $samlAuth->getNameId();
             $attributes = $samlAuth->getAttributes();
 
-            // Extract necessary attributes
+            // Extract the necessary attributes
             $uuid = $attributes['samlUuid'][0] ?? null;
             $email = $attributes['urn:oid:1.2.840.113549.1.9.1'][0] ?? null;
             $firstName = $attributes['urn:oid:2.5.4.42'][0] ?? null;

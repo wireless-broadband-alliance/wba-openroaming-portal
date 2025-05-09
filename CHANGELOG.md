@@ -1,5 +1,15 @@
 # Changelog
 
+# Release V1.7.3
+
+- The user can now delete its own account from the account_widget popup
+- New endpoint on the API to delete the user account for APP's
+- Rework Two Factor Authenticator to have a type of validation. Now the page knows what type of request is being made when
+  a new code is generated, to having problems of saving the previous number of attempts on new requests (disable, validate, verify etc.)
+- Rework Two Factor Authenticator request API endpoint to also now the type of request.
+
+---
+
 # Release V1.7.2
 
 - Fix minor detail with an invalid comparison to show the cookie banner on the landing page
@@ -10,7 +20,8 @@
 
 - Removed the "Reset Password" option for admins editing their own account.
 - Resolved an issue where logout didn't invalidate the session token, causing 2FA issues.
-- Resolved an issue where editing a user account caused the ban action to also disable the account, which conflicted with the error messages in the landing page authenticator
+- Resolved an issue where editing a user account caused the ban action to also disable the account, which conflicted
+  with the error messages in the landing page authenticator
 - Migrated from the deprecated to its actively maintained forks:
     - [nbgrp/onelogin-saml-bundle](https://github.com/nbgrp/onelogin-saml-bundle) for ongoing support and updates.
     - [tetrapi/onelogin-saml-bundle](https://github.com/tetrapi/onelogin-saml-bundle) as an alternative with additional

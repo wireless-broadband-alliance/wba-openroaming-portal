@@ -75,7 +75,12 @@
                 type="submit">Submit
         </button>
         {% if not (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::TOTP').value) %}
-            <a href="{{ path('app_2FA_local_resend_code', {context: context}) }}" class="btn-secondary">Resend code</a>
+            <a href="{{ path('app_local_resend_code', {
+                context: context,
+                type: constant('App\\Enum\\CodeVerificationType::TWO_FA_VERIFY_RESEND').value},
+            ) }}"
+               class="btn-secondary">Resend
+                code</a>
         {% endif %}
     </div>
 
