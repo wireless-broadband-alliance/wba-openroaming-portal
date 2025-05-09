@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Event;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
+use App\Enum\CodeVerificationType;
 use App\Enum\FirewallType;
 use App\Enum\UserTwoFactorAuthenticationStatus;
 use App\Form\TwoFACode;
@@ -608,13 +609,13 @@ class TwoFAController extends AbstractController
      * @throws RandomException
      */
     #[Route(
-        '/{context}/verify2FA/resend',
-        name: 'app_2FA_local_resend_code',
+        '/{context}/{type}/resend',
+        name: 'app_local_resend_code',
         defaults: [
-            'context' => FirewallType::LANDING->value
+            'context' => FirewallType::LANDING->value,
         ]
     )]
-    public function resendCode(string $context, Request $request): RedirectResponse
+    public function resendCode(string $context, string $type, Request $request): RedirectResponse
     {
         /** @var User $user */
         $user = $this->getUser();
@@ -636,18 +637,36 @@ class TwoFAController extends AbstractController
         $timeIntervalToResendCode = $data["TWO_FACTOR_AUTH_RESEND_INTERVAL"]["value"];
         $limitTime = new DateTime();
         $limitTime->modify('-' . $timeToResetAttempts . ' minutes');
-        if ($this->twoFAService->canResendCode($user) && $this->twoFAService->timeIntervalToResendCode($user)) {
+
+        $eventTypeMapping = [
+            CodeVerificationType::TWO_FA_VERIFY_RESEND->value => AnalyticalEventType::TWO_FA_CODE_VERIFY_RESEND->value,
+            CodeVerificationType::TWO_FA_DISABLE_RESEND->value => AnalyticalEventType::TWO_FA_CODE_DISABLE_RESEND->value,
+            CodeVerificationType::AUTO_DELETE_RESEND->value => AnalyticalEventType::USER_AUTO_DELETE_CODE->value,
+            CodeVerificationType::TWO_FA_VALIDATE_RESEND->value => AnalyticalEventType::TWO_FA_CODE_VALIDATE_RESEND->value,
+        ];
+        $eventType = $eventTypeMapping[$type] ?? null;
+
+        if ($eventType === AnalyticalEventType::USER_AUTO_DELETE_CODE->value) {
+            $autoDeletion = true;
+        } else {
+            $autoDeletion = false;
+        }
+
+        if ($this->twoFAService->canResendCode($user, $eventType) &&
+            $this->twoFAService->timeIntervalToResendCode($user, $eventType)
+        ) {
             $this->twoFAService->resendCode(
                 $user,
                 $request->getClientIp(),
                 $request->headers->get('User-Agent'),
-                AnalyticalEventType::TWO_FA_CODE_RESEND->value
+                $eventType,
+                $autoDeletion
             );
             $attempts = $this->eventRepository->find2FACodeAttemptEvent(
                 $user,
                 $nrAttempts,
                 $limitTime,
-                AnalyticalEventType::TWO_FA_CODE_RESEND->value
+                $eventType
             );
             $attemptsLeft = $nrAttempts - count($attempts);
             $this->addFlash(
@@ -657,10 +676,10 @@ class TwoFAController extends AbstractController
         } else {
             $lastEvent = $this->eventRepository->findLatest2FACodeAttemptEvent(
                 $user,
-                AnalyticalEventType::TWO_FA_CODE_RESEND->value
+                $eventType
             );
             $now = new DateTime();
-            if (!$this->twoFAService->canResendCode($user)) {
+            if (!$this->twoFAService->canResendCode($user, $eventType)) {
                 $lastAttemptTime = $lastEvent instanceof Event ?
                     $lastEvent->getEventDatetime() : $timeToResetAttempts;
                 $limitTime = $lastAttemptTime;

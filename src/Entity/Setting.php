@@ -17,9 +17,6 @@ use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: SettingRepository::class)]
 #[ApiResource(
-    description: "The Setting entity returns configuration options for the application. 
-    Each setting consists of a name and an optional value, 
-    which can be used to store and return configuration parameters required for the API.",
     operations: [
         new GetCollection(
             uriTemplate: '/api/v1/turnstile/android',

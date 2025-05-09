@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ emailTitle }} - Warning</title>
+</head>
+<body style="background-color: #080D4A; font-family: ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji'; color: #4A5568; margin: 0; padding: 0;">
+<div style="width: 100%; max-width: 600px; margin: 0 auto; padding: 3rem 1rem;">
+    <div style="max-width: 448px; margin: 0 auto; background-color: #fff; border-radius: 16px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1); overflow: hidden;">
+        <div style="background-color: #FF6B6B; color: #fff; padding: 1.5rem; text-align: center;">
+            <h1 style="font-size: 1.5rem; font-weight: 700;">
+                Warning: Account Deletion in Progress
+            </h1>
+        </div>
+        <div style="padding: 1.5rem;">
+            <p style="font-size: 1.125rem; margin-bottom: 1rem;">
+                You are about to <strong>permanently delete your account</strong>. This action is <span
+                        style="color: #FF0000; font-weight: bold;">irreversible</span> and will result in the permanent
+                loss of all your data.
+            </p>
+            <p style="font-size: 1.125rem; margin-bottom: 1rem;">
+                To confirm, please use the verification code below:
+            </p>
+            <p style="text-align: center; font-size: 1.5rem; font-weight: 700; color: #0045AD; margin: 1.5rem 0;">
+                {{ deletionCode }}
+            </p>
+            <div style="background-color: #FFFAE6; padding: 1rem; border-left: 4px solid #FFD700; margin-top: 1rem; border-radius: 4px;">
+                <p style="color: #856404; font-size: 1rem; margin: 0;">
+                    If you did not request this action or believe it to be a mistake, please contact our support team
+                    immediately.
+                </p>
+            </div>
+        </div>
+        <div style="background-color: #f4f4f4; text-align: center; padding: 1.5rem;">
+            <p style="font-size: 0.875rem; color: #718096;">
+                Thank you,<br>
+                <strong>{{ emailTitle }} Team</strong>
+            </p>
+        </div>
+    </div>
+</div>
+</body>
+</html>

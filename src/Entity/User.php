@@ -12,7 +12,7 @@ use ApiPlatform\OpenApi\Model\RequestBody;
 use App\Api\V1\Controller\AuthController;
 use App\Api\V1\Controller\GetCurrentUserController;
 use App\Api\V1\Controller\RegistrationController;
-use App\Api\V1\Controller\TwoFAController;
+use App\Api\V1\Controller\UserAccountController;
 use App\Repository\UserRepository;
 use App\Security\CustomSamlUserFactory;
 use ArrayObject;
@@ -28,7 +28,6 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ApiResource(
-    description: "The User entity returns values related to a user.",
     operations: [
         new GetCollection(
             uriTemplate: '/v1/user',
@@ -227,7 +226,7 @@ use Symfony\Component\Validator\Constraints as Assert;
         ),
         new Post(
             uriTemplate: '/api/v1/twoFA/request',
-            controller: TwoFAController::class,
+            controller: UserAccountController::class,
             openapi: new Operation(
                 responses: [
                     200 => [
