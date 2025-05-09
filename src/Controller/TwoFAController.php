@@ -646,11 +646,7 @@ class TwoFAController extends AbstractController
         ];
         $eventType = $eventTypeMapping[$type] ?? null;
 
-        if ($eventType === AnalyticalEventType::USER_AUTO_DELETE_CODE->value) {
-            $autoDeletion = true;
-        } else {
-            $autoDeletion = false;
-        }
+        $autoDeletion = $eventType === AnalyticalEventType::USER_AUTO_DELETE_CODE->value;
 
         if (
             $this->twoFAService->canResendCode($user, $eventType) &&

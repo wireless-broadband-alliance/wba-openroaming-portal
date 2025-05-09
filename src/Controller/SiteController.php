@@ -1212,7 +1212,7 @@ class SiteController extends AbstractController
             throw $this->createNotFoundException('User not found.');
         }
 
-        if (!($currentUser->getUserExternalAuths()[0]->getProvider() === UserProvider::PORTAL_ACCOUNT->value)) {
+        if ($currentUser->getUserExternalAuths()[0]->getProvider() !== UserProvider::PORTAL_ACCOUNT->value) {
             if (
                 $this->twoFAService->canValidationCode(
                     $currentUser,
@@ -1282,7 +1282,7 @@ class SiteController extends AbstractController
 
         // Fetch user and external auths
         $user = $this->userRepository->findOneByUUIDExcludingAdmin($currentUser->getUuid());
-        if (!$user) {
+        if (!$user instanceof User) {
             throw $this->createNotFoundException('User not found.');
         }
         $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $user->getId()]);
