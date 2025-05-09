@@ -127,7 +127,7 @@ class MicrosoftController extends AbstractController
         // Find or create the user based on the Microsoft user ID and email
         $user = $this->findOrCreateMicrosoftUser($microsoftUserId, $email, $firstname, $lastname);
 
-        // If the user is null, redirect to the login page
+        // If the user is null, redirect to the landing page
         if (!$user instanceof User) {
             return $this->redirectToRoute('app_landing');
         }
@@ -141,7 +141,7 @@ class MicrosoftController extends AbstractController
         // Authenticate the user
         $this->authenticateUserMicrosoft($user);
 
-        // Redirect the user to the login page
+        // Redirect the user to the landing page
         return $this->redirectToRoute('app_landing');
     }
 

@@ -22,10 +22,10 @@ class LogoutListener implements EventSubscriberInterface
         // Determine the firewall name (context) from the request
         $firewallContext = $request->attributes->get(
             '_firewall_context'
-        ); // E.g., "security.firewall.map.context.login"
+        ); // E.g., "security.firewall.map.context.landing"
 
         if ($firewallContext) {
-            // Extract the actual firewall name (e.g., "login" from "security.firewall.map.context.login")
+            // Extract the actual firewall name (e.g., "landing" from "security.firewall.map.context.landing")
             $firewallName = str_replace('security.firewall.map.context.', '', $firewallContext);
 
             // Dynamically remove ONLY the 2fa_verified session key for the current firewall
