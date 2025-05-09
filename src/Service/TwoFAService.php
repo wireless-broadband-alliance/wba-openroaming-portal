@@ -95,10 +95,11 @@ readonly class TwoFAService
         User $user,
         ?string $ip,
         ?string $userAgent,
-        string $eventType
+        string $eventType,
+        ?bool $autoDeletion = false
     ): void {
         $code = $this->twoFACode($user);
-        $this->sendCode($user, $code, $ip, $userAgent, $eventType);
+        $this->sendCode($user, $code, $ip, $userAgent, $eventType, $autoDeletion);
     }
 
     /**
