@@ -321,7 +321,9 @@ use Doctrine\ORM\Mapping as ORM;
                                                 'example' => 'user-password-example',
                                             ],
                                         ],
+                                        // phpcs:disable Generic.Files.LineLength.TooLong
                                         'description' => 'Payload structure for users authenticated via Portal Account.',
+                                        // phpcs:enable
                                     ],
                                     [
                                         'type' => 'object',
