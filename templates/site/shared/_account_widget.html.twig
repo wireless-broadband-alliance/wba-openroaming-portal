@@ -97,7 +97,11 @@
     {# Two-Factor Authenticator #}
     <div class="divider my-8"></div>
     <h1 class="text-lg mb-8 mt-10">Two-Factor Authentication</h1>
-    <div class="grid grid-cols-2 space-x-2">
+    {% if not (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value) %}
+        <div class="grid grid-cols-2 space-x-2">
+    {% else %}
+            <div class="grid grid-cols-1 space-x-2">
+    {% endif %}
         <a href="{{ path('app_configure2FA') }}" class="btn-secondary md:text-base text-sm">
             Configure Two-Factor Authentication
         </a>
@@ -116,7 +120,7 @@
               data-controller="alert"
               data-alert-target="form">
             <h1 class="text-lg mb-8 mt-10">Profile Data</h1>
-            <div class="grid grid-cols-2 space-x-2">
+            <div class="grid grid-cols-1 space-x-2">
             {{ form_start(formRevokeProfiles) }}
             {{ form_errors(formRevokeProfiles) }}
 
@@ -139,7 +143,7 @@
             {# User Auto Delete #}
             <div class="divider my-8"></div>
             <h1 class="text-lg mb-8 mt-10 !text-red-600 font-bold uppercase">Danger Zone</h1>
-            <div class="grid grid-cols-2 space-x-2">
+            <div class="grid grid-cols-1 space-x-2">
                 <a href="{{ path('app_user_account_deletion_generate_code') }}" class="btn-logout">
                     Delete Account
                 </a>

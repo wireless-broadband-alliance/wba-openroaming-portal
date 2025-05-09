@@ -1316,6 +1316,12 @@ class SiteController extends AbstractController
             }
         }
 
+        if ($form->isSubmitted() && !$form->isValid()) {
+            foreach ($form->getErrors(true) as $error) {
+                $this->addFlash('error', $error->getMessage());
+            }
+        }
+
         return $this->render('site/actions/auto_delete_account.html.twig', [
             'form' => $form->createView(),
             'data' => $data,
