@@ -116,17 +116,18 @@
               data-controller="alert"
               data-alert-target="form">
             <h1 class="text-lg mb-8 mt-10">Profile Data</h1>
-
+            <div class="grid grid-cols-2 space-x-2">
             {{ form_start(formRevokeProfiles) }}
             {{ form_errors(formRevokeProfiles) }}
 
-            <button class="mt-6 w-[240px] btn-logout"
+            <button class="grid grid-cols-2 space-x-2 btn-logout"
                     data-action="alert#revoke_profiles"
                     data-alert-target="button"
                     data-user-uuid="{% if userExternalAuths[user.id] is defined %}{% for auth in userExternalAuths[user.id] %}{% if auth.provider == constant('App\\Enum\\UserProvider::SAML').value %}{{ auth.providerId }}{% else %}{{ app.user.uuid }}{% endif %}{% endfor %}{% endif %}"
                     type="button">
                 Revoke Account Profiles
             </button>
+            </div>
 
             {{ form_rest(formRevokeProfiles) }}
             {{ form_end(formRevokeProfiles) }}
@@ -134,13 +135,15 @@
     </div>
 
     {% if user.email is not null or user.phoneNumber is not null %}
-    {# User Auto Delete #}
-    <div class="divider my-8"></div>
-    <h1 class="text-lg mb-8 mt-10 !text-red-600 font-bold uppercase">Danger Zone</h1>
-    <div class="grid grid-cols-2 space-x-2">
-        <a href="{{ path('app_user_account_deletion_generate_code') }}" class="btn-logout">
-            Delete Account
-        </a>
-    </div>
+        {% if not is_granted('ROLE_ADMIN') %}
+            {# User Auto Delete #}
+            <div class="divider my-8"></div>
+            <h1 class="text-lg mb-8 mt-10 !text-red-600 font-bold uppercase">Danger Zone</h1>
+            <div class="grid grid-cols-2 space-x-2">
+                <a href="{{ path('app_user_account_deletion_generate_code') }}" class="btn-logout">
+                    Delete Account
+                </a>
+            </div>
+        {% endif %}
     {% endif %}
 </div>
