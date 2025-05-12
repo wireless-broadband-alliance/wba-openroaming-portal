@@ -21,13 +21,12 @@
 
         {% if twoFAEnabled %}
             <div class="toast-success">
-                You already have two-factor authentication configured for this account.
+                {{ 'alreadyConfigured'|trans({}, 'base_configuration') }}
             </div>
         {% endif %}
         {% if is2FAEnforced %}
             <div class="toast-warning">
-                Two-factor authentication is mandatory for account security on the portal.
-                You cannot proceed without enabling it. Please activate it immediately to continue.
+                {{ 'mandatory'|trans({}, 'base_configuration') }}
             </div>
         {% endif %}
     </div>
@@ -37,8 +36,8 @@
     {% endif %}
 
     <div class="{{ data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\OperationMode::ON').value ? 'pt-[28px]' : 'pt-[161px]' }} leading-7">
-        <p class="font-bold text-xl">Two-Factor Authentication</p>
-        <p class="text-lg mb-6">Please select an option to configure your experience.</p>
+        <p class="font-bold text-xl">{{ 'title'|trans({}, 'base_configuration') }}</p>
+        <p class="text-lg mb-6">{{ 'prompt'|trans({}, 'base_configuration') }}</p>
     </div>
 
     <div class="grid grid-cols-1 sm:gap-4 lg:gap-6 sm:grid-cols-2 md:my-2 my-3 space-y-4 sm:space-y-0">

@@ -10,27 +10,27 @@
     {{ block('toast_messages') }}
 
     {% if data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\OperationMode::ON').value %}
-        <img class="w-[120px] h-[58px] object-scale-down mt-[75px]" src="{{ data.customerLogoName.value }}" alt="Logo"/>
+        <img class="w-[120px] h-[58px] object-scale-down mt-[75px]" src="{{ data.customerLogoName.value }}" alt="{{ 'logoAlt'|trans({}, 'otp_codes') }}"/>
     {% endif %}
 
     <div class="{{ data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\OperationMode::ON').value ? 'pt-[28px]' : 'pt-[161px]' }} leading-7">
-        <p class="font-bold text-xl">Two-Factor Authentication Codes</p>
-        <p class="text-lg"> Please save these codes for use in case you lose your device. </p>
+        <p class="font-bold text-xl">{{ 'heading'|trans({}, 'otp_codes') }}</p>
+        <p class="text-lg">{{ 'description'|trans({}, 'otp_codes') }}</p>
         <div data-controller="clipboard print">
             <div class="mt-5 rounded-md">
                 <div id="codesBox"
                      data-clipboard-target="code"
                      class="p-4 bg-gray-100 text-base font-mono rounded-md overflow-x-auto text-left">
                     <div class="flex justify-start space-x-4 mb-4">
-                        <button title="Copy"
+                        <button title="{{ 'copy'|trans({}, 'otp_codes') }}"
                                 data-action="clipboard#copyToClipboard">
                             <twig:ux:icon class="w-4" name="wba:copy" />
                         </button>
-                        <a title="Download"
+                        <a title="{{ 'download'|trans({}, 'otp_codes') }}"
                            href="{{ path('app_download_codes', {context: context}) }}">
                             <twig:ux:icon class="w-4" name="wba:download" />
                         </a>
-                        <button title="Print"
+                        <button title="{{ 'print'|trans({}, 'otp_codes') }}"
                                 data-action="print#print">
                             <twig:ux:icon class="w-4" name="wba:printer" />
                         </button>
@@ -51,9 +51,10 @@
     {# Divider #}
     <div>
         <a href="{{ path('app_otpCodes_save', {context: context}) }}"
-           class="mt-6 w-[180px] btn-primary">Done</a>
+           class="mt-6 w-[180px] btn-primary">{{ 'done'|trans({}, 'otp_codes') }}</a>
     </div>
 
     {{ include('landing/shared/returnActions/_logout.html.twig') }}
 
 {% endblock %}
+

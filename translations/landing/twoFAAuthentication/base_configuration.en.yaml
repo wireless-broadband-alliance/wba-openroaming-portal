@@ -1,0 +1,4 @@
+title: 'Two-Factor Authentication'
+prompt: 'Please select an option to configure your experience.'
+alreadyConfigured: 'You already have two-factor authentication configured for this account.'
+mandatory: 'Two-factor authentication is mandatory for account security on the portal. You cannot proceed without enabling it. Please activate it immediately to continue.'
