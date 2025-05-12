@@ -11,12 +11,12 @@
                     <div class="flex flex-row justify-between">
                         <div class="text-base font-medium text-center break-normal md:break-all">
                             {% set displayName = {
-                                SYNC_LDAP_ENABLED:  'synchronizationLDAP'|trans({}, '_LDAP') ,
-                                SYNC_LDAP_SERVER:  'synchronizationLDAPServer'|trans({}, '_LDAP') ,
-                                SYNC_LDAP_BIND_USER_DN:  'bindDistinguishedName'|trans({}, '_LDAP') ,
-                                SYNC_LDAP_BIND_USER_PASSWORD:  'bindDistinguishedPassword'|trans({}, '_LDAP') ,
-                                SYNC_LDAP_SEARCH_BASE_DN:  'searchBaseDistinguishedName'|trans({}, '_LDAP') ,
-                                SYNC_LDAP_SEARCH_FILTER:  'LDAPSearchFilter'|trans({}, '_LDAP'),
+                                SYNC_LDAP_ENABLED: 'synchronizationLDAP'|trans({}, '_LDAP'),
+                                SYNC_LDAP_SERVER: 'synchronizationLDAPServer'|trans({}, '_LDAP'),
+                                SYNC_LDAP_BIND_USER_DN: 'bindDistinguishedName'|trans({}, '_LDAP'),
+                                SYNC_LDAP_BIND_USER_PASSWORD: 'bindDistinguishedPassword'|trans({}, '_LDAP'),
+                                SYNC_LDAP_SEARCH_BASE_DN: 'searchBaseDistinguishedName'|trans({}, '_LDAP'),
+                                SYNC_LDAP_SEARCH_FILTER: 'LDAPSearchFilter'|trans({}, '_LDAP'),
                             }[setting.vars.name] ?? setting.vars.name %}
                             <h1 class="text-base md:text-lg whitespace-nowrap">{{ displayName }}</h1>
                         </div>

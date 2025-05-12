@@ -20,6 +20,7 @@ demoMode:
     unconfirmed: 'SISTEMA DE EMAIL NÃO CONFIRMADO'
 
 authenticatedAs: 'Atualmente está autenticado como'
+authenticatedUserAsProvider: 'Atualmente está autenticado como {providerId}'
 obtainProfile: 'Obtenha o Seu Perfil'
 authenticationMethods: 'Para começar, selecione um dos seguintes métodos de autenticação:'
 
@@ -27,8 +28,7 @@ confirmationModal:
   title: 'Por favor confirme os termos de uso antes de continuar.'
   closeButton: 'Fechar'
 
-accountSettings: 'Configurações da Conta'
-authenticatedUser: 'Atualmente está autenticado como {uuid}'
+accountSettings: 'Definições de Conta'
 
 os_selection:
   choose_os: 'Escolha o seu sistema operativo para que possa transferir e instalar o perfil:'
@@ -40,9 +40,8 @@ os_selection:
 
 invalidCaptcha: 'Validação de CAPTCHA inválida!'
 logout: 'Terminar sessão'
-accessLoggedInOnly: 'Você só pode acessar esta página estando logado.'
-authenticatedMessage: 'Você está autenticado como {uuid}'
-confirmNewPasswordBeforeDownload: 'Você precisa confirmar a nova senha antes de baixar um perfil!'
+accessLoggedInOnly: 'Só pode aceder esta página estando autenticado.'
+confirmNewPasswordBeforeDownload: 'É necessário confirmar a nova palavra-passe antes de transferir um perfil!'
 
 emailVerification:
   newCodeSentEmail: 'Enviamos um novo código para: %email%.'

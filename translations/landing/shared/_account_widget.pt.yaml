@@ -1,0 +1,25 @@
+title: 'Definições de Conta'
+close: 'Fechar'
+personalData:
+    title: 'Dados Pessoais'
+    firstName: 'Primeiro Nome'
+    lastName: 'Último Nome'
+    apply: 'Aplicar Alterações'
+changePassword:
+    title: 'Alterar Palavra-Passe'
+    current: 'Palavra-Passe Atual'
+    new: 'Palavra-Passe Nova'
+    confirm: 'Palavra-Passe Confirmação'
+    changeBtn: 'Alterar Palavra-Passe'
+twoFactorAuth:
+    title: 'Autenticação de Dois Fatores'
+    configure: 'Configurar Autenticação de Dois Fatores'
+    disable: 'Desativar'
+
+profileData:
+    title: 'Dados do Perfil'
+    revokeProfiles: 'Revogar Perfis de Conta'
+
+dangerZone:
+    title: 'Zona de Perigo'
+    deleteAccount: 'Eliminar Conta'

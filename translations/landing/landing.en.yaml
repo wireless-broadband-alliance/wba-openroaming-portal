@@ -20,6 +20,7 @@ demoMode:
     unconfirmed: 'UNCONFIRMED EMAIL SYSTEM'
 
 authenticatedAs: 'You are currently authenticated as'
+authenticatedUserAsProvider: 'You are currently authenticated as {providerId}.'
 obtainProfile: 'Obtain Your Profile'
 authenticationMethods: 'To get started, select one of the following authentication methods:'
 
@@ -41,7 +42,6 @@ os_selection:
 invalidCaptcha: 'Invalid CAPTCHA validation!'
 logout: 'Logout'
 accessLoggedInOnly: 'You can only access this page logged in.'
-authenticatedMessage: 'You are currently authenticated as {uuid}'
 confirmNewPasswordBeforeDownload: 'You need to confirm the new password before downloading a profile!'
 
 emailVerification:

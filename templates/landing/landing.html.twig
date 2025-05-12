@@ -11,7 +11,7 @@
             <h1 class="font-xl font-bold">
                 {{ 'demoMode.header'|trans({'{status}': data.USER_VERIFICATION.value == constant('App\\Enum\\OperationMode::OFF').value
                     ? 'demoMode.status.unconfirmed'|trans({}, 'landing')
-                    : 'demoMode.status.confirmed'|trans({}, 'landing') }, 'landing') }}
+                    : 'demoMode.status.confirmed'|trans({}, 'landing')}, 'landing') }}
             </h1>
 
             <p class="font-lg">
@@ -104,7 +104,7 @@
                 {{ 'logout'|trans({}, 'landing') }}
             </a>
             <p class="text-[#212529] text-opacity-40 text-sm mt-2">
-                {{ 'authenticatedMessage'|trans({'{uuid}': app.user.uuid}, 'landing') }}
+                {{ 'authenticatedUserAsProvider'|trans({'{uuid}': app.user.uuid}, 'landing') }}
             </p>
 
             {# Divider #}
@@ -134,23 +134,15 @@
 
                 <div class="flex flex-row justify-between items-center space-x-6 mt-[120px]">
                     <p class="text-[#212529] text-opacity-40 text-sm">
-                        You are currently authenticated as
-                        {% if userExternalAuths[user.id] is defined %}
-                            {% for auth in userExternalAuths[user.id] %}
-                                {% if auth.provider == constant('App\\Enum\\UserProvider::SAML').value %}
-                                    {{ auth.providerId }}
-                                {% else %}
-                                    {{ app.user.uuid }}
-                                {% endif %}
-                            {% endfor %}
-                        {% else %}
-                            {{ app.user.uuid }}
-                        {% endif %}
+                        {{ 'authenticatedUserAsProvider'|trans({
+                            '{uuid}': app.user.uuid,
+                            '{providerId}': userExternalAuths[user.id][0].providerId ?? app.user.uuid,
+                        }, 'landing') }}
                     </p>
 
                     {% if app.user.isVerified %}
                         <div class="flex flex-row justify-end items-center gap-2">
-                            <p class="text-sm text-[#707070]">Account Settings</p>
+                            <p class="text-sm text-[#707070]">{{ 'title'|trans({}, '_account_widget') }}</p>
                             <button id="widgetUserButton" type="button" {{ stimulus_action('widget', 'open') }}
                                     class="ml-auto duration-300 cursor-pointer rounded-full text-[#707070] focus:animate-spin-slow focus:bg-[#7DB928] focus:text-white hover:shadow-lg p-2.5 relative z-0">
 
@@ -201,7 +193,7 @@
                     <label for="{{ formTOS.agreeTerms.vars.id }}" class="text-xs">
                         {{ 'termsCheckboxText'|trans({
                             '%terms%': '<a href="' ~ path('app_terms_conditions') ~ '" target="_blank" class="underline text-primary font-semibold">' ~ 'termsConditions'|trans({}, 'landing') ~ '</a>',
-                            '%privacy%': '<a href="' ~ path('app_privacy_policy') ~ '" target="_blank" class="underline text-primary font-semibold">' ~ 'privacyPolicy'|trans({}, 'landing') ~ '</a>'
+                            '%privacy%': '<a href="' ~ path('app_privacy_policy') ~ '" target="_blank" class="underline text-primary font-semibold">' ~ 'privacyPolicy'|trans({}, 'landing') ~ '</a>',
                         }, 'landing')|raw }}
                     </label>
                 </div>

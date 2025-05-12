@@ -1,0 +1,24 @@
+title: 'Account Settings'
+close: 'Close'
+personalData:
+    title: 'Personal Data'
+    firstName: 'First Name'
+    lastName: 'Last Name'
+    applyBtn: 'Apply Changes'
+
+changePassword:
+    title: 'Change Password'
+    current: 'Current Password'
+    new: 'New Password'
+    confirm: 'Confirm Password'
+    changeBtn: 'Change Password'
+twoFactorAuth:
+    title: 'Two-Factor Authentication'
+    configure: 'Configure Two-Factor Authentication'
+    disable: 'Disable'
+profileData:
+    title: 'Profile Data'
+    revokeProfiles: 'Revoke Account Profiles'
+dangerZone:
+    title: 'Danger Zone'
+    deleteAccount: 'Delete Account'

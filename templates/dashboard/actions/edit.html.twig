@@ -19,7 +19,7 @@
             </div>
 
             <div class="relative">
-                {{ form_label(form.firstName,  'firstName'|trans({}, 'edit') , {label_attr: {class: 'form-label'}}) }}
+                {{ form_label(form.firstName, 'firstName'|trans({}, 'edit'), {label_attr: {class: 'form-label'}}) }}
                 {{ form_widget(form.firstName, {attr: {class: 'form-widget'}}) }}
                 <div class="text-red-500 m-2">
                     {{ form_errors(form.firstName) }}
@@ -35,7 +35,7 @@
             </div>
 
             <div class="relative">
-                {{ form_label(form.lastName,  'lastName'|trans({}, 'edit') , {label_attr: {class: 'form-label'}}) }}
+                {{ form_label(form.lastName, 'lastName'|trans({}, 'edit'), {label_attr: {class: 'form-label'}}) }}
                 {{ form_widget(form.lastName, {attr: {class: 'form-widget'}}) }}
                 <div class="text-red-500 m-2">
                     {{ form_errors(form.lastName) }}
