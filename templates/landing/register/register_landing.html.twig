@@ -11,14 +11,15 @@
     {{ block('toast_messages') }}
 
     {% if data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\OperationMode::ON').value %}
-        <img class="w-[120px] h-[58px] object-scale-down mt-[75px]" src="{{ data.customerLogoName.value }}" alt="Logo"/>
+        <img class="w-[120px] h-[58px] object-scale-down mt-[75px]"
+             src="{{ data.customerLogoName.value }}"
+             alt="{{ 'logoAlt'|trans({}, 'register_landing') }}"/>
     {% endif %}
 
     <div class="{{ data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\OperationMode::ON').value ? 'pt-[28px]' : 'pt-[161px]' }} leading-7">
-        <p class="font-bold text-xl">Create your account</p>
-        <p class="text-lg">This will enable you to access and download a profile onto your device.</p>
-        <p class="text-lg">Once you download your profile you can connect automatically to OpenRoaming Wi-Fi networks
-            across the world.</p>
+        <p class="font-bold text-xl">{{ 'heading'|trans({}, 'register_landing') }}</p>
+        <p class="text-lg">{{ 'description.1'|trans({}, 'register_landing') }}</p>
+        <p class="text-lg">{{ 'description.2'|trans({}, 'register_landing') }}</p>
     </div>
 
     {{ form_start(registrationForm) }}
@@ -29,7 +30,7 @@
         {{ form_widget(registrationForm.email, {
             attr: {
                 class: 'form-widget',
-                placeholder: 'Enter your email',
+                placeholder: 'form.email_placeholder'|trans({}, 'register_landing'),
             },
         }) }}
     </div>
@@ -46,11 +47,11 @@
 
     <div class="my-[32px] 2xl:pr-[18%] grid lg:grid-cols-1 grid-cols-2 xl:grid-cols-2 gap-4">
         <button type="submit" class="btn-primary">
-            Create Account
+            {{ 'form.submit'|trans({}, 'register_landing') }}
         </button>
         {% if data.PLATFORM_MODE != constant('App\\Enum\\PlatformMode::DEMO').value %}
             <a href="{{ path('app_landing') }}" class="btn-secondary">
-                Choose Another
+                {{ 'form.choose_another'|trans({}, 'register_landing') }}
             </a>
         {% endif %}
     </div>
@@ -60,9 +61,10 @@
         <div class="my-[25px] divider"></div>
 
         <p class="text-sm">
-            You already have one account?
-            <a href="{{ path('app_login') }}" class="font-semibold text-primary underline">Login</a>
-            here!
+            {{ 'form.already_have_account'|trans({}, 'register_landing') }}
+            <a href="{{ path('app_login') }}" class="font-semibold text-primary underline">
+                {{ 'form.login'|trans({}, 'register_landing') }}
+            </a> {{ 'form.here'|trans({}, 'register_landing') }}
         </p>
     {% endif %}
 
