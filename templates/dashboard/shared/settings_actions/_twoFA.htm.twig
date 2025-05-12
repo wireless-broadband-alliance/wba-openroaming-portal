@@ -13,13 +13,13 @@
                     <div class="flex flex-row justify-between">
                         <div class="text-base font-medium text-center break-normal md:break-all">
                             {% set displayName = {
-                                TWO_FACTOR_AUTH_STATUS: 'Status',
-                                TWO_FACTOR_AUTH_APP_LABEL: 'TOTP App Label',
-                                TWO_FACTOR_AUTH_APP_ISSUER: 'TOTP App Issuer',
-                                TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME: 'Expiration Time (secs)',
-                                TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE: 'Resend Attempts Count',
-                                TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS: 'Time to Reset Rttempts (min)',
-                                TWO_FACTOR_AUTH_RESEND_INTERVAL: 'Time Interval to Resend (secs)',
+                                TWO_FACTOR_AUTH_STATUS: 'status'|trans({}, '_twoFA'),
+                                TWO_FACTOR_AUTH_APP_LABEL: 'TOTPAppLabel'|trans({}, '_twoFA'),
+                                TWO_FACTOR_AUTH_APP_ISSUER: 'TOTPAppIssuer'|trans({}, '_twoFA'),
+                                TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME: 'expirationTime'|trans({}, '_twoFA'),
+                                TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE: 'resendAttemptsCount'|trans({}, '_twoFA'),
+                                TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS: 'timeToResetAttempts'|trans({}, '_twoFA'),
+                                TWO_FACTOR_AUTH_RESEND_INTERVAL: 'timeIntervalToResend'|trans({}, '_twoFA'),
                             }
                                 [setting.vars.name] ?? setting.vars.name %}
                             <h1 class="text-lg md:text-xl whitespace-nowrap">{{ displayName }}</h1>
@@ -41,7 +41,7 @@
                             {# Render "NOT_ENFORCED" Radio Input #}
                             <label class="flex flex-row justify-between border hover:border-gray-900 duration-200 rounded-lg w-full p-2 pl-4"
                                    name="onLabelEmail">
-                                Not Enforced
+                                {{ 'notEnforced'|trans({}, '_twoFA') }}
                                 <input type="radio" name="{{ formTwoFA.TWO_FACTOR_AUTH_STATUS.vars.full_name }}"
                                        id="onRadioEmail"
                                        value="NOT_ENFORCED"
@@ -63,7 +63,7 @@
                             {# Render "ENFORCED_FOR_LOCAL" Radio Input #}
                             <label class="flex flex-row justify-between border hover:border-gray-900 duration-200 rounded-lg w-full p-2 pl-4"
                                    name="offLabelEmail">
-                                Enforced for Local accounts only
+                                {{ 'enforcedForLocalAccounts'|trans({}, '_twoFA') }}
                                 <input type="radio" name="{{ formTwoFA.TWO_FACTOR_AUTH_STATUS.vars.full_name }}"
                                        id="offRadioEmail"
                                        value="ENFORCED_FOR_LOCAL"
@@ -85,7 +85,7 @@
                             {# Render "ENFORCED_FOR_ALL" Radio Input #}
                             <label class="flex flex-row justify-between border hover:border-gray-900 duration-200 rounded-lg w-full p-2 pl-4"
                                    name="offLabelEmail">
-                                Enforced for all accounts
+                                {{ 'enforcedForAllAccounts'|trans({}, '_twoFA') }}
                                 <input type="radio" name="{{ formTwoFA.TWO_FACTOR_AUTH_STATUS.vars.full_name }}"
                                        id="offRadioEmail"
                                        value="ENFORCED_FOR_ALL"
@@ -125,13 +125,14 @@
 
     <div class="mt-6 flex flex-row w-full justify-end items-center gap-2">
         <a href="{{ path('app_dashboard_regenerate_code_admin', {type: 'settingTwoFA'}) }}"
-           onclick="return confirm('Are you sure you want to reset to the default settings?')"
+           onclick="return confirm('{{ 'resetMessage'|trans({}, 'settings_actions_general') }}')"
            class="text-sm hover:text-red-600 font-bold p-2 rounded-lg transition ease-in duration-300">
-            Reset
+            {{ 'reset'|trans({}, 'settings_actions_general') }}
         </a>
 
         <button type="submit" class="btn-primary"
-                onclick="return confirm('Are you sure you want to apply this new changes?')">Save Changes
+                onclick="return confirm('{{ 'saveChangesMessage'|trans({}, 'settings_actions_general') }}')">
+            {{ 'saveChanges'|trans({}, 'settings_actions_general') }}
         </button>
     </div>
     {{ form_end(formTwoFA) }}
