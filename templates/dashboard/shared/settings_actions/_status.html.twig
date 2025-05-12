@@ -13,12 +13,12 @@
                         <div class="flex flex-row justify-between">
                             <div class="text-base font-medium text-center break-normal md:break-all">
                                 {% set displayName = {
-                                    PLATFORM_MODE: 'Platform Mode',
-                                    USER_VERIFICATION: 'User Verification',
-                                    TURNSTILE_CHECKER: 'Turnstile Checker',
-                                    API_STATUS: 'API Status',
-                                    USER_DELETE_TIME: 'Auto Delete of Unverified Accounts',
-                                    TIME_INTERVAL_NOTIFICATION: 'Up Comming Profile Expiration Notification',
+                                    PLATFORM_MODE: 'platformMode'|trans({}, '_status'),
+                                    USER_VERIFICATION: 'userVerification'|trans({}, '_status'),
+                                    TURNSTILE_CHECKER: 'turnstileChecker'|trans({}, '_status'),
+                                    API_STATUS: 'APIStatus'|trans({}, '_status'),
+                                    USER_DELETE_TIME: 'deleteUnverifiedAccounts'|trans({}, '_status'),
+                                    TIME_INTERVAL_NOTIFICATION: 'profileExpirationNotification'|trans({}, '_status'),
                                 }
                                     [setting.vars.name] ?? setting.vars.name %}
                                 <h1 class="text-lg md:text-xl whitespace-nowrap">{{ displayName }}</h1>
@@ -40,7 +40,7 @@
                                 {# Render "Demo" Radio Input #}
                                 <label class="flex flex-row justify-between border hover:border-gray-900 duration-200 rounded-lg w-full p-2 pl-4"
                                        name="onLabel">
-                                    Demo
+                                    {{ 'demo'|trans({}, '_status') }}
                                     <input type="radio" name="{{ form.PLATFORM_MODE.vars.full_name }}" id="onRadio"
                                            value="Demo"
                                            class="radio-input hidden" {{ form.PLATFORM_MODE.vars.data == 'Demo' ? 'checked' : '' }} {{ stimulus_action('radio', 'toggle')|stimulus_action('radio-msg', 'hide')|stimulus_action('radio-card', 'unblock') }}
@@ -59,7 +59,7 @@
                                 {# Render "Live" Radio Input #}
                                 <label class="flex flex-row justify-between border hover:border-gray-900 duration-200 rounded-lg w-full p-2 pl-4"
                                        name="offLabel">
-                                    Live
+                                    {{ 'live'|trans({}, '_status') }}
                                     <input type="radio" name="{{ form.PLATFORM_MODE.vars.full_name }}" id="offRadio"
                                            value="Live"
                                            class="radio-input hidden" {{ form.PLATFORM_MODE.vars.data == 'Live' ? 'checked' : '' }} {{ stimulus_action('radio', 'toggle')|stimulus_action('radio-msg', 'display')|stimulus_action('radio-card', 'block') }} >
@@ -225,7 +225,7 @@
             <div class="flex bg-infoBgColor/50 rounded-lg p-4 text-xs md:text-sm text-infoTextColor" role="alert">
                 <twig:ux:icon name="wba:info" class="w-10 md:w-5 h-10 md:h-5 inline mr-3" fill="currentColor"/>
 
-                <span class="font-medium">For security reasons, it is only possible to use the email verification <strong>ON</strong> in <strong>Live</strong> mode.</span>
+                <span class="font-medium">{{ 'emailVerificationMessage'|trans({}, '_status')|raw }}</span>
             </div>
         </div>
 
@@ -233,13 +233,14 @@
 
         <div class="mt-6 flex flex-row w-full justify-end items-center gap-2">
             <a href="{{ path('app_dashboard_regenerate_code_admin', {type: 'settingStatus'}) }}"
-               onclick="return confirm('Are you sure you want to reset to the default settings?')"
+               onclick="return confirm('{{ 'resetMessage'|trans({}, 'settings_actions_general') }}')"
                class="text-sm hover:text-red-600 font-bold p-2 rounded-lg transition ease-in duration-300">
-                Reset
+                {{ 'reset'|trans({}, 'settings_actions_general') }}
             </a>
 
             <button type="submit" class="btn-primary"
-                    onclick="return confirm('Are you sure you want to apply this new changes?')">Save Changes
+                    onclick="return confirm('{{ 'saveChangesMessage'|trans({}, 'settings_actions_general') }}')">
+                {{ 'saveChanges'|trans({}, 'settings_actions_general') }}
             </button>
         </div>
     </form>
