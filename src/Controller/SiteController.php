@@ -60,7 +60,6 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface;
-use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * @method getParameterBag()
@@ -718,7 +717,8 @@ class SiteController extends AbstractController
         '{context}/forgot-password/sms',
         name: 'app_site_forgot_password_sms',
         requirements: ['context' => 'landing|dashboard'],
-        defaults: ['context' => FirewallType::LANDING->value
+        defaults: [
+            'context' => FirewallType::LANDING->value
         ]
     )]
     public function forgotPasswordUserSMS(
@@ -913,7 +913,12 @@ class SiteController extends AbstractController
                 return $this->redirectToRoute('app_landing');
             }
 
-            $currentUser->setPassword($userPasswordHasher->hashPassword($currentUser, $form->get('newPassword')->getData()));
+            $currentUser->setPassword(
+                $userPasswordHasher->hashPassword(
+                    $currentUser,
+                    $form->get('newPassword')->getData()
+                )
+            );
             $currentUser->setForgotPasswordRequest(false);
             $entityManager->persist($currentUser);
             $entityManager->flush();
@@ -1080,11 +1085,13 @@ class SiteController extends AbstractController
         $currentUser = $this->getUser();
 
         if (!$currentUser) {
-            $this->addFlash('error', $this->translator->trans(
-                'accessLoggedInOnly',
-                [],
-                'landing'
-            )
+            $this->addFlash(
+                'error',
+                $this->translator->trans(
+                    'accessLoggedInOnly',
+                    [],
+                    'landing'
+                )
             );
             return $this->redirectToRoute('app_landing');
         }
@@ -1115,11 +1122,13 @@ class SiteController extends AbstractController
         $currentUser = $this->getUser();
 
         if (!$currentUser) {
-            $this->addFlash('error', $this->translator->trans(
-                'accessLoggedInOnly',
-                [],
-                'landing'
-            )
+            $this->addFlash(
+                'error',
+                $this->translator->trans(
+                    'accessLoggedInOnly',
+                    [],
+                    'landing'
+                )
             );
             return $this->redirectToRoute('app_landing');
         }
