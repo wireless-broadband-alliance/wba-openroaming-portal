@@ -856,11 +856,19 @@ class SiteController extends AbstractController
      * @throws Exception
      */
     #[Route('/forgot-password/checker', name: 'app_site_forgot_password_checker')]
+    #[IsGranted('ROLE_USER')]
     public function forgotPasswordUserChecker(
         Request $request,
         EntityManagerInterface $entityManager,
         UserPasswordHasherInterface $userPasswordHasher,
     ): Response {
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
+        if (!$currentUser) {
+            $this->addFlash('error', 'You can only access this page logged in.');
+            return $this->redirectToRoute('app_landing');
+        }
+
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
@@ -869,13 +877,6 @@ class SiteController extends AbstractController
                 'error',
                 'The portal is in Demo mode - it is not possible to use this verification method!'
             );
-            return $this->redirectToRoute('app_landing');
-        }
-
-        /** @var User $currentUser */
-        $currentUser = $this->getUser();
-        if (!$currentUser) {
-            $this->addFlash('error', 'You can only access this page logged in.');
             return $this->redirectToRoute('app_landing');
         }
 
@@ -890,15 +891,11 @@ class SiteController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
-        $user = new User();
-        $form = $this->createForm(NewPasswordAccountType::class, $user);
+        $form = $this->createForm(NewPasswordAccountType::class, $currentUser);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            /** @var User $user */
-            $user = $this->getUser();
-
-            $currentPasswordDB = $user->getPassword();
+            $currentPasswordDB = $currentUser->getPassword();
             $typedPassword = $form->get('password')->getData();
 
             // Compare the typed password with the hashed password from the database
@@ -916,19 +913,19 @@ class SiteController extends AbstractController
                 return $this->redirectToRoute('app_landing');
             }
 
-            $user->setPassword($userPasswordHasher->hashPassword($user, $form->get('newPassword')->getData()));
-            $user->setForgotPasswordRequest(false);
-            $entityManager->persist($user);
+            $currentUser->setPassword($userPasswordHasher->hashPassword($currentUser, $form->get('newPassword')->getData()));
+            $currentUser->setForgotPasswordRequest(false);
+            $entityManager->persist($currentUser);
             $entityManager->flush();
 
             $eventMetadata = [
                 'ip' => $request->getClientIp(),
                 'user_agent' => $request->headers->get('User-Agent'),
                 'platform' => PlatformMode::LIVE->value,
-                'uuid' => $user->getUuid(),
+                'uuid' => $currentUser->getUuid(),
             ];
             $this->eventActions->saveEvent(
-                $user,
+                $currentUser,
                 AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST_ACCEPTED->value,
                 new DateTime(),
                 $eventMetadata
@@ -941,7 +938,8 @@ class SiteController extends AbstractController
         return $this->render('landing/forgot_password/forgot_password_checker_landing.html.twig', [
             'forgotPasswordChecker' => $form->createView(),
             'data' => $data,
-            'context' => FirewallType::LANDING->value
+            'context' => FirewallType::LANDING->value,
+            'user' => $currentUser,
         ]);
     }
 

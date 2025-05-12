@@ -136,9 +136,8 @@
 
                 <div class="flex flex-row justify-between items-center space-x-6 mt-[120px]">
                     <p class="text-[#212529] text-opacity-40 text-sm">
-                        {{ 'authenticatedUserAsProvider'|trans({
+                        {{ 'authenticatedUser'|trans({
                             '{uuid}': app.user.uuid,
-                            '{providerId}': userExternalAuths[user.id][0].providerId ?? app.user.uuid,
                         }, 'landing') }}
                     </p>
 

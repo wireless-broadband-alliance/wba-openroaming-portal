@@ -1,0 +1,14 @@
+logoAlt: 'Customer Logo'
+title: 'Password Reset Request'
+description: >
+    If you got here, please make sure to type the <strong>random password</strong> given to you.
+    And remember to type a new one for your account.
+form:
+    currentPassword: 'Palavra-passe Atual'
+    newPassword: 'Nova Palavra-passe'
+    confirmPassword: 'Confirmar Palavra-passe'
+    errors:
+        currentPassword: 'Por favor, insira a palavra-passe atual.'
+        newPassword: 'A nova palavra-passe deve ter pelo menos 7 caracteres.'
+        confirmPassword: 'Confirme a nova palavra-passe para continuar.'
+    submit: 'Confirm New Password'
