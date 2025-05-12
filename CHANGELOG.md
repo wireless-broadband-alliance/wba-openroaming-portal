@@ -1,6 +1,6 @@
 # Changelog
 
-# Release V1.8.0
+# Release V1.7.3
 
 - The user can now delete its own account from the account_widget popup
 - New endpoint on the API to delete the user account for APP's

@@ -85,14 +85,6 @@ class UserAccountController extends AbstractController
                 return $statusCheckerResponse->toResponse();
             }
 
-            if ($currentUser->getDeletedAt() !== null) {
-                return new BaseResponse(
-                    400,
-                    null,
-                    'This user has already been deleted.'
-                )->toResponse();
-            }
-
             foreach ($currentUser->getUserExternalAuths() as $externalAuth) {
                 if ($externalAuth->getProvider() === UserProvider::PORTAL_ACCOUNT->value) {
                     try {
