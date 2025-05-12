@@ -33,7 +33,7 @@
                         <a href="{{ path('admin_page', {filter: 'all', u: app.request.query.get('u')}) }}"
                            class="flex flex-row group hover:border-b-2 hover:border-y-veryDarkButton transition-all duration-100 {% if app.request.query.get('filter') == null or app.request.query.get('filter') == 'all' %}border-b-2 border-y-veryDarkButton transition-all{% endif %}">
                             <h1 class="px-2">
-                                All
+                                {{ 'all'|trans({}, 'dashboard') }}
                             </h1>
                             <div class="w-auto h-6 mb-1 px-2 bg-veryLightGreen group-hover:bg-veryDarkButton rounded-md group-hover:text-white text-center transition-all duration-100">
                                 {{ allUsersCount }}
@@ -42,7 +42,7 @@
                         <a href="{{ path('admin_page', {filter: constant('App\\Enum\\UserVerificationStatus::VERIFIED').value, u: app.request.query.get('u')}) }}"
                            class="flex flex-row group hover:text-lightGreen hover:border-b-2 hover:border-y-lightGreen/50 transition-all duration-100 {% if app.request.query.get('filter') == constant('App\\Enum\\UserVerificationStatus::VERIFIED').value %}text-lightGreen border-b-2 border-y-lightGreen transition-all{% endif %}">
                             <h1 class="px-2">
-                                Verified
+                                {{ 'verified'|trans({}, 'dashboard') }}
                             </h1>
                             <div class="w-auto h-6 mb-1 px-2 bg-veryLightGreen group-hover:bg-lightGreen rounded-md group-hover:text-white text-center transition-all duration-100">
                                 {{ verifiedUsersCount }}
@@ -51,7 +51,7 @@
                         <a href="{{ path('admin_page', {filter: constant('App\\Enum\\UserVerificationStatus::BANNED').value, u: app.request.query.get('u')}) }}"
                            class="flex flex-row group hover:text-red-400 hover:border-b-2 hover:border-y-red-400 transition-all duration-100 {% if app.request.query.get('filter') == constant('App\\Enum\\UserVerificationStatus::BANNED').value %}text-red-400 border-b-2 border-y-red-400 transition-all{% endif %}">
                             <h1 class="px-2">
-                                Banned
+                                {{ 'banned'|trans({}, 'dashboard') }}
                             </h1>
                             <div class="w-auto h-6 mb-1 px-2 bg-veryLightGreen group-hover:bg-red-400 rounded-md group-hover:text-white text-center transition-all duration-100">
                                 {{ bannedUsersCount }}
@@ -89,7 +89,7 @@
                     {% if export_users == constant('App\\Enum\\OperationMode::ON').value %}
                         <div class="flex items-center space-x-6">
                             <a href="{{ path('admin_user_export') }}" class="btn-primary">
-                                Export Everything
+                                {{ 'exportEverything'|trans({}, 'dashboard') }}
                             </a>
                         </div>
                     {% endif %}
@@ -115,23 +115,23 @@
                             </th>
 
                             <th scope="col" class="px-6 py-3 -ml-2">
-                                Provider
+                                {{ 'provider'|trans({}, 'dashboard') }}
                             </th>
 
                             <th scope="col" class="px-6 py-3">
-                                Verification
+                                {{ 'verification'|trans({}, 'dashboard') }}
                             </th>
 
                             <th scope="col" class="px-6 py-3">
-                                2FA status
+                                {{ '2FAStatus'|trans({}, 'dashboard') }}
                             </th>
 
                             <th scope="col" class="px-6 py-3">
-                                Banned At
+                                {{ 'bannedAt'|trans({}, 'dashboard') }}
                             </th>
 
                             <th scope="col" class="flex items-center px-6 py-3">
-                                <h1 class="mr-2">CreatedAt</h1>
+                                <h1 class="mr-2">{{ 'createdAt'|trans({}, 'dashboard') }}</h1>
                                 <a href="{{ path('admin_page', {...app.request.query.all, sort: 'createdAt', order: activeSort == 'createdAt' and activeOrder == 'asc' ? 'desc' : 'asc'}) }}"
                                    class="p-1 hover:shadow-md rounded-lg cursor-pointer">
                                     {{ sharedSort.sortArrow('createdAt', activeSort, activeOrder) }}
@@ -152,13 +152,13 @@
                                     <div class="flex flex-row justify-center items-start mt-2">
                                         <div class="pill-error">
                                             {% if searchTerm %}
-                                                No users found with "{{ searchTerm }}"
+                                                {{ 'noUsersFoundWith'|trans({}, 'dashboard') }} "{{ searchTerm }}"
                                             {% elseif app.request.query.get('filter') == constant('App\\Enum\\UserVerificationStatus::VERIFIED') %}
-                                                There are no verified users in the system
+                                                {{ 'noVerifiedUsers'|trans({}, 'dashboard') }}
                                             {% elseif app.request.query.get('filter') == constant('App\\Enum\\UserVerificationStatus::BANNED') %}
-                                                There are no banned users in the system
+                                                {{ 'noBannedUsers'|trans({}, 'dashboard') }}
                                             {% else %}
-                                                There are no users in the system
+                                                {{ 'noUsers'|trans({}, 'dashboard') }}
                                             {% endif %}
                                         </div>
                                     </div>
