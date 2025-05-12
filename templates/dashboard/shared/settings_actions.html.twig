@@ -1,6 +1,6 @@
 {% extends '/dashboard/base.html.twig' %}
 
-{% block title %}Admin Page WBA{% endblock %}
+{% block title %}{{ 'adminPageWBA'|trans({}, '_header_admin') }}{% endblock %}
 
 {% block container %}
     {% if app.request.attributes.get('_route') == 'admin_dashboard_customize' %}
