@@ -2,7 +2,7 @@
 <tr>
     {# UUID #}
     <td class="p-4 pl-8 font-medium">
-        {{ user.uuid is defined ? user.uuid : 'No information' }}
+        {{ user.uuid is defined ? user.uuid : 'noInformation'|trans({}, '_user') }}
     </td>
 
     {# Email #}
@@ -10,7 +10,8 @@
         {% if user.email is not null %}
             {{ user.email }}
         {% else %}
-            <span class="font-semibold p-1 pill-error">No Information</span>
+            <span class="font-semibold p-1 pill-error">{{ 'noInformation'|trans({}, '_user') }}
+</span>
         {% endif %}
     </td>
 
@@ -23,7 +24,7 @@
                     {% if not loop.last %}, {% endif %}
                 {% endfor %}
             {% else %}
-                <span>No providers found</span>
+                <span>{{ 'noProvidersFound'|trans({}, '_user') }}</span>
             {% endif %}
         </p>
     </td>
@@ -33,11 +34,11 @@
         <p class="font-semibold p-1">
             {% if user.isVerified is defined and user.isVerified == 0 %}
                 <span class="pill-error">
-                    Not Verified
+                    {{ 'notVerified'|trans({}, '_user') }}
                 </span>
             {% else %}
                 <span class="pill-success">
-                    Verified
+                    {{ 'verified'|trans({}, '_user') }}
                 </span>
             {% endif %}
         </p>
@@ -47,7 +48,7 @@
     <td class="px-6 py-4 font-medium">
         {% if user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value %}
             <span class="pill-error">
-                Disabled
+                {{ 'disabled'|trans({}, '_user') }}
             </span>
         {% endif %}
         {% if user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::EMAIL').value %}
@@ -76,7 +77,7 @@
                 </span>
             {% else %}
                 <span class="pill-success">
-                    Not Banned
+                    {{ 'notBanned'|trans({}, '_user') }}
                 </span>
             {% endif %}
         </p>
@@ -104,7 +105,7 @@
                     <a href="{{ path('admin_user_edit', {id: user.id}) }}"
                        class="flex flex-row items-center px-2 py-2 duration-100 p-2 cursor-pointer hover:text-lightGreen">
                         <twig:ux:icon name="wba:pencil-edit" class="w-5 mr-3" fill="none"/>
-                        Edit
+                        {{ 'edit'|trans({}, '_user') }}
                     </a>
                 </li>
                 {% if delete_users == constant('App\\Enum\\OperationMode::ON').value %}
@@ -117,7 +118,7 @@
                                     {{ stimulus_action('alert', 'delete_user') }} {{ stimulus_target('alert', 'button') }}
                                class="flex flex-row items-center px-2 py-2 duration-100 p-2 cursor-pointer hover:text-red-400">
                                 <twig:ux:icon name="wba:trash" class="w-5 mr-3" fill="none"/>
-                                Delete
+                                {{ 'delete'|trans({}, '_user') }}
                             </a>
                         </form>
                     </li>
@@ -136,7 +137,7 @@
                            data-user-uuid="{% if userExternalAuths[user.id] is defined %}{% for auth in userExternalAuths[user.id] %}{% if auth.provider == constant('App\\Enum\\UserProvider::SAML').value %}{{ auth.providerId }}{% else %}{{ user.uuid }}{% endif %}{% endfor %}{% endif %}"
                         >
                             <twig:ux:icon name="wba:return-2-solid" class="w-6 mr-3" fill="none"/>
-                            Revoke
+                            {{ 'revoke'|trans({}, '_user') }}
                         </a>
                         {{ form_rest(formRevokeProfiles) }}
                         {{ form_end(formRevokeProfiles) }}
