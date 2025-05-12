@@ -1,0 +1,22 @@
+logoAlt: 'Logotipo do Cliente'
+welcome_back: 'Bem-vindo de volta'
+description: >
+    Selecionou iniciar sessão via email e palavra-passe. Assim que iniciar sessão,
+    instale o perfil no seu dispositivo.
+form:
+    email_or_phone: 'Email ou Número de Telefone'
+    email: 'Email'
+    phone_number: 'Número de Telefone'
+    enter_placeholder: 'Introduza o seu %label%'
+    password: 'Palavra-passe'
+    password_placeholder: 'Introduza a sua palavra-passe'
+btn:
+    login: 'Iniciar sessão'
+    choose_another: 'Escolher Outra'
+forgot_password: 'Esqueceu-se da sua palavra-passe? Obtenha uma nova para o seu'
+forgot_password_email: 'email'
+forgot_password_phone: 'número de telefone'
+or: 'ou'
+no_account_register: 'Não tem uma conta? Registar-se com'
+register_email: 'email'
+register_phone: 'número de telefone'
