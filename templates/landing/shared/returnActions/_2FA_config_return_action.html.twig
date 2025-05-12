@@ -1,7 +1,7 @@
 <div class="my-[25px] divider"></div>
 <div class="space-y-2">
     <p class="text-[#212529] text-opacity-40 text-sm my-5">
-        You are currently authenticated as
+        {{ 'authenticatedAs'|trans({}, 'landing') }}
         {% for auth in user.userExternalAuths %}
             {% if auth.provider == constant('App\\Enum\\UserProvider::SAML').value %}
                 {{ auth.providerId }}
@@ -10,9 +10,12 @@
             {% endif %}
         {% endfor %}
     </p>
+
     {% if data.TWO_FACTOR_AUTH_STATUS.value == constant('App\\Enum\\TwoFAType::NOT_ENFORCED').value %}
         <a href="{{ context == constant('App\\Enum\\FirewallType::DASHBOARD').value ? path('admin_page') : path('app_landing') }}"
-           class="w-[160px] btn-secondary">Go Back</a>
+           class="w-[160px] btn-secondary">
+            {{ 'twoFactorAuth.goBack'|trans({}, '_account_widget') }}
+        </a>
     {% elseif data.TWO_FACTOR_AUTH_STATUS.value == constant('App\\Enum\\TwoFAType::ENFORCED_FOR_LOCAL').value %}
         {% if user.userExternalAuths[0].provider == constant('App\\Enum\\UserProvider::PORTAL_ACCOUNT').value %}
             {% if user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value %}
@@ -22,14 +25,20 @@
                         {% else %}
                             href="{{ path('app_logout') }}"
                         {% endif %}
-                        class="w-[160px] btn-logout">Logout</a>
+                        class="w-[160px] btn-logout">
+                    {{ 'twoFactorAuth.logout'|trans({}, '_account_widget') }}
+                </a>
             {% else %}
                 <a href="{{ context == constant('App\\Enum\\FirewallType::DASHBOARD').value ? path('admin_page') : path('app_landing') }}"
-                   class="w-[160px] btn-secondary">Go Back</a>
+                   class="w-[160px] btn-secondary">
+                    {{ 'twoFactorAuth.goBack'|trans({}, '_account_widget') }}
+                </a>
             {% endif %}
         {% else %}
             <a href="{{ context == constant('App\\Enum\\FirewallType::DASHBOARD').value ? path('admin_page') : path('app_landing') }}"
-               class="w-[160px] btn-secondary">Go Back</a>
+               class="w-[160px] btn-secondary">
+                {{ 'twoFactorAuth.goBack'|trans({}, '_account_widget') }}
+            </a>
         {% endif %}
     {% elseif data.TWO_FACTOR_AUTH_STATUS.value == constant('App\\Enum\\TwoFAType::ENFORCED_FOR_ALL').value %}
         {% if user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value %}
@@ -39,10 +48,14 @@
                     {% else %}
                         href="{{ path('app_logout') }}"
                     {% endif %}
-                    class="w-[160px] btn-logout">Logout</a>
+                    class="w-[160px] btn-logout">
+                {{ 'twoFactorAuth.logout'|trans({}, '_account_widget') }}
+            </a>
         {% else %}
             <a href="{{ context == constant('App\\Enum\\FirewallType::DASHBOARD').value ? path('admin_page') : path('app_landing') }}"
-               class="w-[160px] btn-secondary">Go Back</a>
+               class="w-[160px] btn-secondary">
+                {{ 'twoFactorAuth.goBack'|trans({}, '_account_widget') }}
+            </a>
         {% endif %}
     {% endif %}
 </div>

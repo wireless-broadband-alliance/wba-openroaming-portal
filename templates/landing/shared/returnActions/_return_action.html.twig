@@ -1,7 +1,7 @@
 <div class="my-[25px] divider"></div>
 <div class="space-y-2">
     <p class="text-[#212529] text-opacity-40 text-sm my-5">
-        You are currently authenticated as
+        {{ 'authenticatedAs'|trans({}, 'landing') }}
         {% for auth in user.userExternalAuths %}
             {% if auth.provider == constant('App\\Enum\\UserProvider::SAML').value %}
                 {{ auth.providerId }}
@@ -10,10 +10,14 @@
             {% endif %}
         {% endfor %}
     </p>
-    {% if (app.request.attributes.get('_route') == 'app_enable2FA_TOTP') or
-        (app.request.attributes.get('_route') == 'app_2FA_first_verification_local') %}
-        <a class="w-[160px] btn-secondary" href='{{ path('app_configure2FA', {context: context}) }}'>Go Back</a>
+    {% if (app.request.attributes.get('_route') == 'app_enable2FA_TOTP')
+        or (app.request.attributes.get('_route') == 'app_2FA_first_verification_local') %}
+        <a class="w-[160px] btn-secondary" href="{{ path('app_configure2FA', {context: context}) }}">
+            {{ 'twoFactorAuth.goBack'|trans({}, '_account_widget') }}
+        </a>
     {% else %}
-        <button class="w-[160px] btn-secondary" onClick="window.history.back();">Go Back</button>
+        <button class="w-[160px] btn-secondary" onclick="window.history.back();">
+            {{ 'twoFactorAuth.goBack'|trans({}, '_account_widget') }}
+        </button>
     {% endif %}
 </div>

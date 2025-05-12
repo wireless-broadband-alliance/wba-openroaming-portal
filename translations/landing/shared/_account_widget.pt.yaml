@@ -15,11 +15,11 @@ twoFactorAuth:
     title: 'Autenticação de Dois Fatores'
     configure: 'Configurar Autenticação de Dois Fatores'
     disable: 'Desativar'
-
+    goBack: 'Voltar'
+    logout: 'Terminar Sessão'
 profileData:
     title: 'Dados do Perfil'
     revokeProfiles: 'Revogar Perfis de Conta'
-
 dangerZone:
     title: 'Zona de Perigo'
     deleteAccount: 'Eliminar Conta'

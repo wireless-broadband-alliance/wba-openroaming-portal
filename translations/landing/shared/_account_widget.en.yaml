@@ -16,6 +16,8 @@ twoFactorAuth:
     title: 'Two-Factor Authentication'
     configure: 'Configure Two-Factor Authentication'
     disable: 'Disable'
+    goBack: 'Go Back'
+    logout: 'Logout'
 profileData:
     title: 'Profile Data'
     revokeProfiles: 'Revoke Account Profiles'
