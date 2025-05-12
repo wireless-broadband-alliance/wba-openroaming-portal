@@ -1,0 +1,11 @@
+username: 'Nome de Utilizador'
+userId: 'ID do Utilizador'
+handle: 'Identificador'
+from: 'De'
+timeToResend: 'Tempo para Reenviar'
+defaultRegionPhoneInputs: 'Região Padrão de Números'
+sms_provider_notice: 'Isto é para o fornecedor 
+  <a class="font-semibold underline inline-block" href="https://www.budgetsms.net/" target="_blank">
+      BudgetSMS.net
+  </a>,
+  deverá criar e financiar uma conta com eles.'

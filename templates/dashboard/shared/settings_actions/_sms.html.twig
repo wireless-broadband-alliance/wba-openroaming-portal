@@ -10,12 +10,12 @@
                     <div class="flex flex-row justify-between">
                         <div class="text-base font-medium text-center break-normal md:break-all">
                             {% set displayName = {
-                                SMS_USERNAME: 'Username',
-                                SMS_USER_ID: 'User Id',
-                                SMS_HANDLE: 'Handle',
-                                SMS_FROM: 'From',
-                                SMS_TIMER_RESEND: 'Time to Resend',
-                                DEFAULT_REGION_PHONE_INPUTS: 'Default Region Phone Inputs',
+                                SMS_USERNAME: 'username'|trans({}, '_sms'),
+                                SMS_USER_ID: 'userId'|trans({}, '_sms'),
+                                SMS_HANDLE: 'handle'|trans({}, '_sms'),
+                                SMS_FROM: 'from'|trans({}, '_sms'),
+                                SMS_TIMER_RESEND: 'timeToResend'|trans({}, '_sms'),
+                                DEFAULT_REGION_PHONE_INPUTS: 'defaultRegionPhoneInputs'|trans({}, '_sms'),
                             }[setting.vars.name] ?? setting.vars.name %}
                             <h1 class="text-base md:text-lg whitespace-nowrap">{{ displayName }}</h1>
                         </div>
@@ -43,11 +43,7 @@
         <div class="flex bg-infoBgColor/50 rounded-lg p-4 text-xs md:text-sm text-infoTextColor" role="alert">
             <twig:ux:icon name="wba:info" class="w-10 md:w-5 h-10 md:h-5 inline mr-3" fill="currentColor"/>
             <span class="font-medium">
-                This is for the
-                <a class="font-semibold underline inline-block" href="https://www.budgetsms.net/" target="_blank">
-                    BudgetSMS.net
-                </a>
-                provider, you should create and fund an account with them.
+                {{ 'sms_provider_notice'|trans({}, '_sms')|raw }}
             </span>
         </div>
     </div>
@@ -56,13 +52,14 @@
 
     <div class="mt-6 flex flex-row w-full justify-end items-center gap-2">
         <a href="{{ path('app_dashboard_regenerate_code_admin', {type: 'settingSMS'}) }}"
-           onclick="return confirm('Are you sure you want to clear this settings?')"
+           onclick="return confirm('{{ 'clearMessage'|trans({}, 'settings_actions_general') }}')"
            class="text-sm hover:text-red-600 font-bold p-2 rounded-lg transition ease-in duration-300">
-            Clear
+            {{ 'clear'|trans({}, 'settings_actions_general') }}
         </a>
 
         <button type="submit" class="btn-primary"
-                onclick="return confirm('Are you sure you want to apply this new changes?')">Save Changes
+                onclick="return confirm('{{ 'saveChangesMessage'|trans({}, 'settings_actions_general') }}')">
+            {{ 'saveChanges'|trans({}, 'settings_actions_general') }}
         </button>
     </div>
 </form>
