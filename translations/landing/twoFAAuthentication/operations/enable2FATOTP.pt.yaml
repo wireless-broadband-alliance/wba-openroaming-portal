@@ -1,0 +1,26 @@
+title: 'Configuração de Autenticação de Dois Fatores'
+logoAlt: 'Logotipo do Cliente'
+heading: 'Configuração de Autenticação de Dois Fatores'
+instructions: 'Antes de continuar, instale um dos seguintes aplicativos de Autenticação de Dois Fatores no seu dispositivo:'
+googleAuth:
+    name: 'Google Authenticator'
+    availableOn: 'Disponível em'
+    googlePlay: 'Google Play'
+    appStore: 'App Store'
+microsoftAuth:
+    name: 'Microsoft Authenticator'
+    availableOn: 'Disponível em'
+    googlePlay: 'Google Play'
+    appStore: 'App Store'
+and: 'e'
+steps:
+    heading: 'Para ativar a Autenticação de Dois Fatores, siga estas etapas:'
+    install: 'Instale um dos aplicativos listados acima no seu dispositivo móvel.'
+    addAccount: 'Abra o aplicativo e escolha a opção para adicionar uma nova conta.'
+    scanCode: 'Digitalize o código QR abaixo usando ou insira manualmente a chave fornecida no aplicativo.'
+    useCode: 'Depois que o aplicativo estiver configurado, use o código gerado pelo aplicativo sempre que solicitado ao fazer login.'
+qrCodeAlt: 'Código QR para configuração do 2FA'
+manualCode: 'Ou insira manualmente o código no aplicativo:'
+form:
+    placeholder: 'Insira o Código 2FA'
+    submit: 'Enviar'

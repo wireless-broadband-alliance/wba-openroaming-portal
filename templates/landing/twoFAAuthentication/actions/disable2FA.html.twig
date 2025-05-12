@@ -10,19 +10,18 @@
     {{ block('toast_messages') }}
 
     {% if data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\OperationMode::ON').value %}
-        <img class="w-[120px] h-[58px] object-scale-down mt-[75px]" src="{{ data.customerLogoName.value }}" alt="Logo"/>
+        <img class="w-[120px] h-[58px] object-scale-down mt-[75px]" src="{{ data.customerLogoName.value }}" alt="{{ 'logoAlt'|trans({}, 'disable2FA') }}"/>
     {% endif %}
 
     <div class="{{ data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\OperationMode::ON').value ? 'pt-[28px]' : 'pt-[161px]' }} leading-7">
         {% if swap %}
-            <p class="font-bold text-xl"> Disable Two-Factor Authentication - Swap Method</p>
-            <p class="text-lg"> To change your authentication method, you must first disable your current method.</p>
-            <p class="text-lg"> Please enter your code to disable Two-Factor Authentication.</p>
+            <p class="font-bold text-xl">{{ 'heading.swap'|trans({}, 'disable2FA') }}</p>
+            <p class="text-lg">{{ 'description.swap'|trans({}, 'disable2FA') }}</p>
+            <p class="text-lg">{{ 'instructions'|trans({}, 'disable2FA') }}</p>
         {% else %}
-            <p class="font-bold text-xl"> Disable Two-Factor Authentication</p>
-            <p class="text-lg"> Please enter your code to disable Two-Factor Authentication.</p>
+            <p class="font-bold text-xl">{{ 'heading.default'|trans({}, 'disable2FA') }}</p>
+            <p class="text-lg">{{ 'description.default'|trans({}, 'disable2FA') }}</p>
         {% endif %}
-
     </div>
 
     {# Form Column #}
@@ -31,22 +30,20 @@
         {{ form_widget(form.code, {
             attr: {
                 class: 'form-widget',
-                placeholder: 'Enter your Code',
+                placeholder: 'form.placeholder'|trans({}, 'disable2FA'),
             }}) }}
     </div>
 
     {# Action Buttons #}
     <div class="grid mt-4 grid-cols-1 sm:gap-4 lg:gap-6 sm:[grid-template-columns:repeat(auto-fit,minmax(150px,1fr))] md:my-2 my-3 space-y-4 sm:space-y-0">
         <button class="btn-primary"
-                type="submit">Submit
-        </button>
+                type="submit">{{ 'form.submit'|trans({}, 'disable2FA') }}</button>
         {% if not (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::TOTP').value) %}
             <a href="{{ path('app_local_resend_code', {
                 context: context,
                 type: constant('App\\Enum\\CodeVerificationType::TWO_FA_DISABLE_RESEND').value},
             ) }}"
-               class="btn-secondary">Resend
-                code</a>
+               class="btn-secondary">{{ 'form.resend'|trans({}, 'disable2FA') }}</a>
         {% endif %}
     </div>
     {{ form_end(form) }}

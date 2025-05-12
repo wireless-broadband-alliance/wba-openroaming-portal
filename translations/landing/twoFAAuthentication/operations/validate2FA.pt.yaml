@@ -1,0 +1,7 @@
+title: 'Autenticação de Dois Fatores - Validação de Método'
+logoAlt: 'Logotipo do Cliente'
+heading: 'Autenticação de Dois Fatores - Validação de Método'
+description: 'Para validar o uso da autenticação de dois fatores, insira o código que foi lhe enviado.'
+placeholder: 'Insira seu Código'
+submit: 'Enviar'
+resend: 'Reenviar código'
