@@ -60,6 +60,7 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * @method getParameterBag()
@@ -94,6 +95,7 @@ class SiteController extends AbstractController
         private readonly SendSMS $sendSMS,
         private readonly TwoFAService $twoFAService,
         private readonly UserDeletionService $userDeletionService,
+        private readonly TranslatorInterface $translator
     ) {
     }
 
