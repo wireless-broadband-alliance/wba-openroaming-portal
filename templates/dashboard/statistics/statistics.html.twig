@@ -1,6 +1,6 @@
 {% extends '/dashboard/base.html.twig' %}
 
-{% block title %}Admin Page WBA - Stats{% endblock %}
+{% block title %}{{ 'adminPageWBA'|trans({}, 'statistics') }}{% endblock %}
 
 {% block container %}
     {# Header #}
@@ -12,7 +12,7 @@
                    class="rounded text-sm bg-transparent py-1 px-2 border border-gray-300 focus:ring-0 w-auto"
                    value="{{ selectedStartDate }}"
                    onchange="this.form.submit()">
-            <span class="px-1"> to </span>
+            <span class="px-1"> {{ 'to'|trans({}, 'statistics') }} </span>
 
             <input data-date-filter-target="end" type="datetime-local" name="endDate" id="endDate"
                    class="rounded text-sm bg-transparent py-1 px-2 border border-gray-300 focus:ring-0 w-full sm:w-auto"
@@ -25,7 +25,7 @@
     <div class="grid gap-8 grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3">
         {# SMS & Email #}
         <div class="bg-white rounded-lg px-5 py-3 flex flex-col gap-6 shadow">
-            <h1 class="text-lg font-medium text-left">Portal with SMS or Email</h1>
+            <h1 class="text-lg font-medium text-left">{{ 'portalSMSorEmail'|trans({}, 'statistics') }}</h1>
             <canvas class="max-w-full"
                     data-controller="statistics"
                     data-statistics-target="chart"
@@ -35,7 +35,7 @@
 
         {# Authentication #}
         <div class="bg-white rounded-lg px-5 py-3 flex flex-col gap-6 shadow">
-            <h1 class="text-lg font-medium text-left">Authentication</h1>
+            <h1 class="text-lg font-medium text-left">{{ 'authentication'|trans({}, 'statistics') }}</h1>
             <canvas class="max-w-full"
                     data-controller="statistics"
                     data-statistics-target="chart"
@@ -45,7 +45,7 @@
 
         {# Devices #}
         <div class="bg-white rounded-lg px-5 py-3 flex flex-col gap-6 shadow">
-            <h1 class="text-lg font-medium text-left">Devices</h1>
+            <h1 class="text-lg font-medium text-left">{{ 'devices'|trans({}, 'statistics') }}</h1>
             <canvas class="max-w-full"
                     data-controller="statistics"
                     data-statistics-target="chart"
@@ -55,7 +55,7 @@
 
         {# Platform Status #}
         <div class="bg-white rounded-lg px-5 py-3 flex flex-col gap-6 shadow">
-            <h1 class="text-lg font-medium text-left">User created in</h1>
+            <h1 class="text-lg font-medium text-left">{{ 'userCreatedIn'|trans({}, 'statistics') }}</h1>
             <canvas class="max-w-full"
                     data-controller="statistics"
                     data-statistics-target="chart"
@@ -66,7 +66,7 @@
 
         {# Users Management #}
         <div class="bg-white rounded-lg px-5 py-3 flex flex-col gap-6 shadow">
-            <h1 class="text-lg font-medium text-left">Users Management</h1>
+            <h1 class="text-lg font-medium text-left">{{ 'usersManagement'|trans({}, 'statistics') }}</h1>
             <canvas class="max-w-full"
                     data-controller="statistics"
                     data-statistics-target="chart"
@@ -77,7 +77,7 @@
 
         {# Users 2FA Configuration Status #}
         <div class="bg-white rounded-lg px-5 py-3 flex flex-col gap-6 shadow">
-            <h1 class="text-lg font-medium text-left">Users 2FA Configuration Status</h1>
+            <h1 class="text-lg font-medium text-left">{{ 'users2FAStatus'|trans({}, 'statistics') }}</h1>
             <canvas class="max-w-full"
                     data-controller="statistics"
                     data-statistics-target="chart"
