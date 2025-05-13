@@ -39,6 +39,7 @@ use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class RegistrationController extends AbstractController
 {
@@ -62,6 +63,8 @@ class RegistrationController extends AbstractController
         private readonly EventActions $eventActions,
         private readonly VerificationCodeEmailGenerator $verificationCodeGenerator,
         private readonly RegistrationEmailGenerator $emailGenerator,
+        private readonly TranslatorInterface $translator
+
     ) {
     }
 
@@ -86,13 +89,24 @@ class RegistrationController extends AbstractController
         if ($data['PLATFORM_MODE']['value'] === true) {
             $this->addFlash(
                 'error',
-                'The portal is in Demo mode - it is not possible to use this authentication method.'
+                $this->translator->trans(
+                    'portalInDemoMode',
+                    [],
+                    'controllers'
+                )
             );
             return $this->redirectToRoute('app_landing');
         }
 
         if ($data['EMAIL_REGISTER_ENABLED']['value'] !== true) {
-            $this->addFlash('error', 'This authentication method it\'s not enabled!');
+            $this->addFlash(
+                'error',
+                $this->translator->trans(
+                    'authenticationMethodNotEnabled',
+                    [],
+                    'controllers'
+                )
+            );
             return $this->redirectToRoute('app_landing');
         }
 
@@ -105,7 +119,11 @@ class RegistrationController extends AbstractController
             if ($this->userRepository->findOneBy(['email' => $user->getEmail()])) {
                 $this->addFlash(
                     'warning',
-                    'User with the same email already exists, please try to Login using the link below.'
+                    $this->translator->trans(
+                        'userWithSameEmail',
+                        [],
+                        'controllers'
+                    )
                 );
             } elseif ($data['USER_VERIFICATION']['value'] === OperationMode::ON->value) {
                 // Generate a random password
@@ -143,7 +161,11 @@ class RegistrationController extends AbstractController
 
                 $this->addFlash(
                     'success',
-                    'We have sent an email with your account password and verification code'
+                    $this->translator->trans(
+                        'emailSentWithPasswordAndVerificationCode',
+                        [],
+                        'controllers'
+                    )
                 );
             }
         }
@@ -180,13 +202,24 @@ class RegistrationController extends AbstractController
         if ($data['PLATFORM_MODE']['value'] === true) {
             $this->addFlash(
                 'error',
-                'The portal is in Demo mode - it is not possible to use this authentication method.'
+                $this->translator->trans(
+                    'portalInDemoMode',
+                    [],
+                    'controllers'
+                )
             );
             return $this->redirectToRoute('app_landing');
         }
 
         if ($data['AUTH_METHOD_SMS_REGISTER_ENABLED']['value'] !== true) {
-            $this->addFlash('error', 'This authentication method is not enabled!');
+            $this->addFlash(
+                'error',
+                $this->translator->trans(
+                    'authenticationMethodNotEnabled',
+                    [],
+                    'controllers'
+                )
+            );
             return $this->redirectToRoute('app_landing');
         }
 
@@ -199,7 +232,11 @@ class RegistrationController extends AbstractController
             if ($this->userRepository->findOneBy(['phoneNumber' => $user->getPhoneNumber()])) {
                 $this->addFlash(
                     'warning',
-                    'User with the same phone number already exists, please try to "Log in" using the link below.'
+                    $this->translator->trans(
+                        'userWithSamePhoneNumber',
+                        [],
+                        'controllers'
+                    )
                 );
             } else {
                 // Generate a random password
@@ -243,15 +280,15 @@ class RegistrationController extends AbstractController
                 $verificationCode = $user->getVerificationCode();
 
                 // Send SMS
-                $message = "Your account password is: "
+                $message = $this->translator->trans('yourAccountPasswordIs', [], 'controllers')
                     . $randomPassword
                     . "%0A"
-                    . "Verification code is: "
+                    . $this->translator->trans('verificationCodeIs', [], 'controllers')
                     . $verificationCode;
                 $this->sendSMS->sendSms($user->getPhoneNumber(), $message);
                 $this->addFlash(
                     'success',
-                    'We have sent a message to your phone with your password and verification code'
+                    $this->translator->trans('messageSentWithPasswordAndVerificationCode', [], 'controllers')
                 );
 
                 // Authenticate the user
@@ -323,15 +360,24 @@ class RegistrationController extends AbstractController
                     $eventMetadata
                 );
 
-                $this->addFlash('success', 'Your account has been verified!');
+                $this->addFlash(
+                    'success',
+                    $this->translator->trans('accountVerified', [], 'controllers')
+                );
 
                 return $this->redirectToRoute('app_landing');
             } catch (CustomUserMessageAuthenticationException) {
-                $this->addFlash('error', 'Authentication failed. Please try to log in manually.');
+                $this->addFlash(
+                    'error',
+                    $this->translator->trans('authenticationFailedTryAgain', [], 'controllers')
+                );
             }
         } else {
             // If the verification code is invalid or not found, display an error message and redirect to the login page
-            $this->addFlash('error', 'Invalid verification code or link expired. Please try to log in manually');
+            $this->addFlash(
+                'error',
+                $this->translator->trans('invalidVerificationCodeLink', [], 'controllers')
+            );
         }
 
         return $this->redirectToRoute('app_login');
