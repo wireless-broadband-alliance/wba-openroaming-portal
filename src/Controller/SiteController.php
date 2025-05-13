@@ -1023,8 +1023,11 @@ class SiteController extends AbstractController
             ) {
                 // Increment the attempt count
                 $attempts = $verificationAttempts + 1;
-
-                $email = $this->verificationCodeGenerator->createEmailLanding($currentUser);
+                $session = $request->getSession();
+                $email = $this->verificationCodeGenerator->createEmailLanding(
+                    $currentUser,
+                    $session->get('_locale')
+                );
                 $mailer->send($email);
 
                 // Save event with attempt count and current time

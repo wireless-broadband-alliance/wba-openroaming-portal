@@ -1,0 +1,8 @@
+title: 'Code Verification'
+subject_2fa: 'Two-Factor Authentication'
+subject_verify: 'Verify Your Account'
+two_factor_message: 'Your two-factor authentication code is:'
+one_time_code_message: 'Your authentication code is:'
+valid_for_message: 'This code can only be used once and is valid for the next {seconds} seconds.'
+confidential_message: 'Please keep this code confidential and do not share it with others.'
+footer_thank_you: 'Our team thanks you,'

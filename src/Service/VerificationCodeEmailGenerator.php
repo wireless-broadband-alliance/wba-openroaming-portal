@@ -15,6 +15,7 @@ use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 readonly class VerificationCodeEmailGenerator
 {
@@ -23,7 +24,8 @@ readonly class VerificationCodeEmailGenerator
         private SettingRepository $settingRepository,
         private ParameterBagInterface $parameterBag,
         private EventRepository $eventRepository,
-        private EventActions $eventActions
+        private EventActions $eventActions,
+        private TranslatorInterface $translator
     ) {
     }
 
@@ -89,23 +91,28 @@ readonly class VerificationCodeEmailGenerator
     /**
      * Create an email message with the verification code.
      *
-     * @return Email The email with the code.
+     * @param User $user
+     * @param string $locale
+     * @return TemplatedEmail The email with the code.
      * @throws Exception
      */
-    public function createEmailLanding(User $user): Email
+    public function createEmailLanding(User $user, string $locale): TemplatedEmail
     {
-        // Get the values from the services.yaml file using $parameterBag on the __construct
+        // Set the locale for translations
+        $this->translator->setLocale($locale);
+
+        // Get the values from the configuration
         $emailSender = $this->parameterBag->get('app.email_address');
         $nameSender = $this->parameterBag->get('app.sender_name');
 
-        // If the verification code is not provided, generate a new one
+        // Generate a new verification code if not provided
         $verificationCode = $this->generateVerificationCode($user);
         $emailTitle = $this->settingRepository->findOneBy(['name' => 'PAGE_TITLE'])->getValue();
 
         return new TemplatedEmail()
             ->from(new Address($emailSender, $nameSender))
             ->to($user->getEmail())
-            ->subject('Your OpenRoaming Authentication Code is: ' . $verificationCode)
+            ->subject($this->translator->trans('subject_verify', [], 'user_code'))
             ->htmlTemplate('email/user_code.html.twig')
             ->context([
                 'verificationCode' => $verificationCode,
@@ -114,6 +121,7 @@ readonly class VerificationCodeEmailGenerator
                 'is2FATemplate' => false,
             ]);
     }
+
 
     /**
      * Create an email message about 2fa disabled by the admin.
