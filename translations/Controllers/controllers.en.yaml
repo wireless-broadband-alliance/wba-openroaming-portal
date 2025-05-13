@@ -1,0 +1,3 @@
+successResendAdmin: 'We have send to you a new code to: %email%'
+errorAdminWait: "You must wait %time% seconds before requesting a new code. Please try again later."
+settingsUpdatedSuccessfully: 'Customization settings have been updated successfully.'

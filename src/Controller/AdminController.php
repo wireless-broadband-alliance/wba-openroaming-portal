@@ -26,6 +26,7 @@ use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class AdminController extends AbstractController
 {
@@ -37,7 +38,8 @@ class AdminController extends AbstractController
         private readonly SettingRepository $settingRepository,
         private readonly EventActions $eventActions,
         private readonly VerificationCodeEmailGenerator $verificationCodeGenerator,
-        private readonly EventRepository $eventRepository
+        private readonly EventRepository $eventRepository,
+        private readonly TranslatorInterface $translator
     ) {
     }
 
@@ -153,14 +155,22 @@ class AdminController extends AbstractController
                 $this->mailer->send($email);
                 $this->addFlash(
                     'success_admin',
-                    'We have send to you a new code to: ' . $currentUser->getEmail()
+                    $this->translator->trans(
+                        'successResendAdmin',
+                        ['%email%' => $currentUser->getEmail()],
+                        'controllers'
+                    )
                 );
                 return $this->redirectToRoute('admin_confirm_reset', ['type' => $type]);
             }
             $timeLeft = $this->verificationCodeGenerator->timeLeftToResendCode($timeIntervalInSeconds, $lastResend);
             $this->addFlash(
                 'error_admin',
-                'You must wait ' . $timeLeft . ' seconds before requesting a new code. Please try again later.'
+                $this->translator->trans(
+                    'errorAdminWait',
+                    ['%time%' => $timeLeft],
+                    'controllers'
+                )
             );
             return $this->redirectToRoute('admin_confirm_reset', ['type' => $type]);
         }
@@ -243,7 +253,14 @@ class AdminController extends AbstractController
                 }
             }
 
-            $this->addFlash('success_admin', 'Customization settings have been updated successfully.');
+            $this->addFlash(
+                'success_admin',
+                $this->translator->trans(
+                'settingsUpdatedSuccessfully',
+                [],
+                'controllers'
+            )
+            );
 
             $eventMetadata = [
                 'ip' => $request->getClientIp(),
