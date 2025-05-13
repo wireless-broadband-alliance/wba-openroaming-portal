@@ -1,3 +1,5 @@
 successResendAdmin: 'We have send to you a new code to: %email%'
 errorAdminWait: "You must wait %time% seconds before requesting a new code. Please try again later."
 settingsUpdatedSuccessfully: 'Customization settings have been updated successfully.'
+maximumDateRange1Year: 'Maximum date range is 1 year'
+dataRequestedTooLarge: 'The data you requested is too large to be processed. Please try a smaller date range.'

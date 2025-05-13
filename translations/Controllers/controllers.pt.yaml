@@ -1,3 +1,5 @@
 successResendAdmin: 'Enviamos um novo código para: %email%'
 errorAdminWait: "Você deve esperar %time% segundos antes de solicitar um novo código. Por favor, tente novamente mais tarde."
 settingsUpdatedSuccessfully: 'As configurações de personalização foram atualizadas com sucesso.'
+maximumDateRange1Year: 'O intervalo máximo de datas é de 1 ano.'
+dataRequestedTooLarge: 'Os dados solicitados são muito extensos para serem processados. Por favor, tente um intervalo de datas menor.'

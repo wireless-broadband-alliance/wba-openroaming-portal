@@ -24,6 +24,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class FreeradiusController extends AbstractController
 {
@@ -35,7 +36,8 @@ class FreeradiusController extends AbstractController
         private readonly ParameterBagInterface $parameterBag,
         private readonly EventActions $eventActions,
         private readonly RadiusAuthsRepository $radiusAuthsRepository,
-        private readonly RadiusAccountingRepository $radiusAccountingRepository
+        private readonly RadiusAccountingRepository $radiusAccountingRepository,
+        private readonly TranslatorInterface $translator
     ) {
     }
 
@@ -70,7 +72,14 @@ class FreeradiusController extends AbstractController
 
         $interval = $startDate->diff($endDate);
         if ($interval->days > 365) {
-            $this->addFlash('error_admin', 'Maximum date range is 1 year');
+            $this->addFlash(
+                'error_admin',
+                $this->translator->trans(
+                'maximumDateRange1Year',
+                [],
+                'controllers'
+            )
+            );
 
             return $this->redirectToRoute('admin_dashboard_statistics_freeradius');
         }
@@ -100,7 +109,11 @@ class FreeradiusController extends AbstractController
         if ($memory_diff > 134217728) {
             $this->addFlash(
                 'error_admin',
-                'The data you requested is too large to be processed. Please try a smaller date range.'
+                $this->translator->trans(
+                    'maximumDateRange1Year',
+                    [],
+                    'controllers'
+                )
             );
 
             return $this->redirectToRoute('admin_dashboard_statistics_freeradius');
