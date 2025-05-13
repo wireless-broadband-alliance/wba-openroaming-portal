@@ -49,10 +49,10 @@
         </div>
 
         <!-- Footer Section -->
-        <div style='background-color: #f4f4f4; text-align: center; padding: 1.5rem;'>
-            <p style='font-size: 0.875rem; color: #718096;'>
-                {{ 'footer_thank_you'|trans({}, 'user_code') }}
-                <strong>{{ emailTitle }}</strong>
+        <div style="background-color: #f4f4f4; text-align: center; padding: 1.5rem;">
+            <p style="font-size: 0.875rem; color: #718096;">
+                {{ 'footer.thank_you'|trans({}, 'user_code') }}<br>
+                <strong>{{ 'footer.team'|trans({'%emailTitle%': emailTitle}, 'user_code') }}</strong>
             </p>
         </div>
 

@@ -5,4 +5,7 @@ two_factor_message: 'O seu código de autenticação dois fatores é:'
 one_time_code_message: 'O seu código de autenticação é:'
 valid_for_message: 'Este código só pode ser usado uma vez e é válido nos próximos {seconds} segundos.'
 confidential_message: 'Por favor, mantenha este código confidencial e não o compartilhe com terceiros.'
-footer_thank_you: 'Nossa equipa agradece,'
+footer:
+    support_team: 'Equipa de apoio:'
+    thank_you: 'Obrigado,'
+    team: 'A Equipa %emailTitle%'
