@@ -1107,7 +1107,8 @@ class SiteController extends AbstractController
             return $this->render('landing/landing.html.twig', [
                 'data' => $data,
                 'formTOS' => $formTOS,
-                'user' => $currentUser
+                'user' => $currentUser,
+                'context' => FirewallType::LANDING->value
             ]);
         }
 

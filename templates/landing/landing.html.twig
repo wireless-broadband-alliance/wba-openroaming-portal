@@ -100,12 +100,7 @@
                 </form>
             {% endif %}
 
-            <a href="{{ path('app_logout') }}" class="w-[160px] btn-logout">
-                {{ 'logout'|trans({}, 'landing') }}
-            </a>
-            <p class="text-[#212529] text-opacity-40 text-sm mt-2">
-                {{ 'authenticatedUserAsProvider'|trans({'{uuid}': app.user.uuid}, 'landing') }}
-            </p>
+            {{ include('landing/shared/returnActions/_logout.html.twig') }}
 
             {# Divider #}
             <div class="my-[25px] divider"></div>
@@ -150,7 +145,6 @@
                                 <twig:ux:icon name="wba:cog" class="w-6" fill="none"/>
                             </button>
                         </div>
-
                     {% endif %}
                 </div>
 
