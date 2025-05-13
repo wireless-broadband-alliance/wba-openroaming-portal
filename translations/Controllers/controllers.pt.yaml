@@ -16,3 +16,13 @@ accountNotVerifiedToDownloadProfile: 'A sua conta não está verificada para des
 accountNotVerifiedToDownloadProfileSMS: 'A sua conta não está verificada para descarregar um perfil. Antes de poder descarregar um perfil, precisa de confirmar a sua conta inserindo o código enviado para si via SMS!'
 accountCurrentlyPendingApproval: 'A sua conta está atualmente com um pedido pendente de aprovação!'
 profileNotFound: 'Perfil não encontrado'
+authenticationMethodNotEnabled!: "Este método de autenticação não está ativado!"
+userWithSameEmail: 'Já existe um utilizador com o mesmo email. Por favor, tente iniciar sessão usando o link abaixo.'
+emailSentWithPasswordAndVerificationCode: 'Enviámos um email com a sua palavra-passe e o código de verificação da conta.'
+userWithSamePhoneNumber: 'Já existe um utilizador com o mesmo número de telefone. Por favor, tente "Iniciar sessão" usando o link abaixo.'
+yourAccountPasswordIs: 'A palavra-passe da sua conta é: '
+verificationCodeIs: 'O código de verificação é: '
+messageSentWithPasswordAndVerificationCode: 'Enviámos uma mensagem para o seu telefone com a sua palavra-passe e o código de verificação.'
+accountVerified: 'A sua conta foi verificada!'
+authenticationFailedTryAgain: 'A autenticação falhou. Por favor, tente iniciar sessão manualmente.'
+invalidVerificationCodeLink: 'Código de verificação inválido ou link expirado. Por favor, tente iniciar sessão manualmente.'
