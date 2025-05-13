@@ -1,6 +1,6 @@
 all: 'Todos'
-verified: 'Verificado'
-banned: 'Banido'
+verified: 'Verificados'
+banned: 'Banidos'
 exportEverything: 'Exportar Tudo'
 provider: 'Tipo de conta '
 verification: 'Verificação'
