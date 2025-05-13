@@ -622,7 +622,7 @@ class SiteController extends AbstractController
                         $user,
                         AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST->value
                     );
-                    $minInterval = new DateInterval('PT2M');
+                    $minInterval = new DateInterval('PT1M');
                     $currentTime = new DateTime();
                     // Check if enough time has passed since the last attempt
                     $latestEventMetadata = $latestEvent instanceof Event ? $latestEvent->getEventMetadata() : [];
@@ -669,7 +669,13 @@ class SiteController extends AbstractController
                                 )
                             )
                             ->to($user->getEmail())
-                            ->subject('Your OpenRoaming - Password Request')
+                            ->subject(
+                                $this->translator->trans(
+                                    'subject_forgot_password',
+                                    [],
+                                    'user_forgot_password_request'
+                                )
+                            )
                             ->htmlTemplate('email/user_forgot_password_request.html.twig')
                             ->context([
                                 'password' => $randomPassword,

@@ -1,3 +1,4 @@
+subject_two_factor_code: 'O seu código de autenticação de dois fatores do OpenRoaming é %code%.'
 title: 'Verificação de Código'
 subject_2fa: 'Autenticação em Duas Etapas'
 subject_verify: 'Verifique Sua Conta'

@@ -46,6 +46,7 @@ use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class RegistrationController extends AbstractController
 {
@@ -63,7 +64,8 @@ class RegistrationController extends AbstractController
         private readonly VerificationCodeEmailGenerator $verificationCodeGenerator,
         private readonly CaptchaValidator $captchaValidator,
         private readonly RegistrationEmailGenerator $emailGenerator,
-        private readonly ValidatorInterface $validator
+        private readonly ValidatorInterface $validator,
+        private readonly TranslatorInterface $translator,
     ) {
     }
 
@@ -327,7 +329,13 @@ class RegistrationController extends AbstractController
                             )
                         )
                         ->to($user->getEmail())
-                        ->subject('OpenRoaming Portal - Password Request')
+                        ->subject(
+                            $this->translator->trans(
+                                'subject_forgot_password',
+                                [],
+                                'user_forgot_password_request'
+                            )
+                        )
                         ->htmlTemplate('email/user_forgot_password_request.html.twig')
                         ->context([
                             'password' => $randomPassword,

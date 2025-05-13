@@ -5,7 +5,6 @@ namespace App\Service;
 use App\Entity\Event;
 use App\Entity\OTPcode;
 use App\Entity\User;
-use App\Enum\AnalyticalEventType;
 use App\Enum\PlatformMode;
 use App\Enum\TwoFAType;
 use App\Enum\UserProvider;
@@ -25,6 +24,7 @@ use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 readonly class TwoFAService
 {
@@ -38,6 +38,7 @@ readonly class TwoFAService
         private EventActions $eventActions,
         private GetSettings $getSettings,
         private EventRepository $eventRepository,
+        private TranslatorInterface $translator
     ) {
     }
 
@@ -207,7 +208,13 @@ readonly class TwoFAService
                         )
                     )
                     ->to($user->getEmail())
-                    ->subject('Your OpenRoaming Two Factor Authentication code is ' . $code . '.')
+                    ->subject(
+                        $this->translator->trans(
+                            'subject_two_factor_code',
+                            ['%code%' => $code],
+                            'user_code'
+                        )
+                    )
                     ->htmlTemplate('email/user_code.html.twig')
                     ->context([
                         'uuid' => $user->getEmail(),

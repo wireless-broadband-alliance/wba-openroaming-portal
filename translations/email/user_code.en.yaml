@@ -1,3 +1,4 @@
+subject_two_factor_code: 'Your OpenRoaming Two Factor Authentication code is %code%.'
 title: 'Code Verification'
 subject_2fa: 'Two-Factor Authentication'
 subject_verify: 'Verify Your Account'

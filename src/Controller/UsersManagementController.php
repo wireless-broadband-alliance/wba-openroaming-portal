@@ -43,6 +43,7 @@ use Symfony\Component\Mime\Email;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class UsersManagementController extends AbstractController
 {
@@ -60,6 +61,7 @@ class UsersManagementController extends AbstractController
         private readonly UserDeletionService $userDeletionService,
         private readonly TwoFAService $twoFAService,
         private readonly VerificationCodeEmailGenerator $verificationCodeEmailGenerator,
+        private readonly TranslatorInterface $translator
     ) {
     }
 
@@ -420,7 +422,7 @@ class UsersManagementController extends AbstractController
                 $email = new Email()
                     ->from(new Address($emailSender, $nameSender))
                     ->to($user->getEmail())
-                    ->subject('Your Password Reset Details')
+                    ->subject($this->translator->trans('subject_registration_details', [], 'user_password'))
                     ->html(
                         $this->renderView(
                             'email/user_password.html.twig',

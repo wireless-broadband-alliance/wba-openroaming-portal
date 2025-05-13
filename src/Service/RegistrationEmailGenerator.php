@@ -9,6 +9,7 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 readonly class RegistrationEmailGenerator
 {
@@ -16,6 +17,7 @@ readonly class RegistrationEmailGenerator
         private ParameterBagInterface $parameterBag,
         private MailerInterface $mailer,
         private SettingRepository $settingRepository,
+        private TranslatorInterface $translator
     ) {
     }
 
@@ -36,7 +38,7 @@ readonly class RegistrationEmailGenerator
                 )
             )
             ->to($user->getEmail())
-            ->subject('Your OpenRoaming Registration Details')
+            ->subject($this->translator->trans('subject_registration_details', [], 'user_password'))
             ->htmlTemplate('email/user_password.html.twig')
             ->context([
                 'uuid' => $user->getEmail(),
