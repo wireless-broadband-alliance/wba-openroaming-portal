@@ -2,31 +2,39 @@
 
 namespace App\EventListener;
 
-use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
-use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
-class LocaleListener
+readonly class LocaleListener
 {
+    public function __construct(
+        private TranslatorInterface $translator
+    ) {
+    }
+
     #[AsEventListener(event: KernelEvents::REQUEST)]
     public function onKernelRequest(RequestEvent $event): void
     {
         $request = $event->getRequest();
         $session = $request->getSession();
 
+        // If locale is already set in the session, do nothing
         if ($session->has('_locale')) {
+            $request->setLocale($session->get('_locale'));
             return;
         }
 
+        // Determine the preferred language from the browser
         $preferredLanguage = $request->getPreferredLanguage(['en', 'pt']);
+        $session->set('_locale', $preferredLanguage ?: 'en');
 
-        $session->set('_locale', $preferredLanguage);
+        // Set the locale both for the session and the current request
+        $request->setLocale($preferredLanguage);
 
-        $request->setLocale($session->get('_locale'));
-
-        $currentUrl = $request->getUri(); // Get the current URL
-        $response = new RedirectResponse($currentUrl);
-        $event->setResponse($response); // Set the redirect response
+        // IMPORTANT: Set locale for the translator service (used for translations)
+        $locale = $session->get('_locale');
+        $this->translator->setLocale($locale);
     }
 }
