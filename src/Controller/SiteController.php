@@ -622,7 +622,7 @@ class SiteController extends AbstractController
                         $user,
                         AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST->value
                     );
-                    $minInterval = new DateInterval('PT1M');
+                    $minInterval = new DateInterval('PT2M');
                     $currentTime = new DateTime();
                     // Check if enough time has passed since the last attempt
                     $latestEventMetadata = $latestEvent instanceof Event ? $latestEvent->getEventMetadata() : [];

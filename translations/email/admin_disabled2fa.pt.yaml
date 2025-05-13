@@ -1,0 +1,10 @@
+title_2fa_disabled: 'Autenticação de Dois Fatores Desativada'
+subject_2fa_disabled: 'Autenticação de Dois Fatores Desativada'
+greeting: 'Olá, %uuid%'
+info_2fa_disabled: 'Informamos que sua autenticação de dois fatores (2FA) foi desativada por um administrador.'
+warning_contact_support: 'Se esta ação foi inesperada ou não autorizada, entre em contato imediatamente com nossa equipe de suporte.'
+recommend_reenable_2fa: 'Por questões de segurança, recomendamos reativar a autenticação em dois fatores o mais breve possível.'
+configuration_guidance: 'Acesse o seguinte <a href="%link%" style="color: #0045AD; text-decoration: underline;">link</a> para gerenciar as configurações da sua autenticação em dois fatores.'
+footer:
+    support_team: 'Equipe de suporte:'
+    thank_you: 'Obrigado,'
