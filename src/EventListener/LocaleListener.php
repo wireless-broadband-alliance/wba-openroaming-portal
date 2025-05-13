@@ -35,6 +35,8 @@ readonly class LocaleListener
 
         // IMPORTANT: Set locale for the translator service (used for translations)
         $locale = $session->get('_locale');
-        $this->translator->setLocale($locale);
+        if (method_exists($this->translator, 'setLocale')) {
+            $this->translator->setLocale($locale);
+        }
     }
 }

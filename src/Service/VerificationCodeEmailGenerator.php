@@ -91,15 +91,15 @@ readonly class VerificationCodeEmailGenerator
     /**
      * Create an email message with the verification code.
      *
-     * @param User $user
-     * @param string $locale
      * @return TemplatedEmail The email with the code.
      * @throws Exception
      */
     public function createEmailLanding(User $user, string $locale): TemplatedEmail
     {
         // Set the locale for translations
-        $this->translator->setLocale($locale);
+        if (method_exists($this->translator, 'setLocale')) {
+            $this->translator->setLocale($locale);
+        }
 
         // Get the values from the configuration
         $emailSender = $this->parameterBag->get('app.email_address');
