@@ -18,4 +18,14 @@ export default class extends Controller {
             this.buttonTarget.classList.remove("selected");
         }
     }
+
+    toggleHeader() {
+        this.containerTarget.classList.toggle("hidden");
+    }
+
+    lost_focusHeader() {
+        if (!this.containerTarget.matches(":hover")) {
+            this.containerTarget.classList.add("hidden");
+        }
+    }
 }
