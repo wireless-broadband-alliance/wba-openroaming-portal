@@ -275,10 +275,10 @@ class GoogleController extends AbstractController
         } catch (AuthenticationException $exception) {
             // Handle authentication failure
             $errorMessage = $this->translator->trans(
-                    'authenticationFailed',
-                    [],
-                    'controllers'
-                ) . $exception->getMessage();
+                'authenticationFailed',
+                [],
+                'controllers'
+            ) . $exception->getMessage();
             $this->addFlash('error', $errorMessage);
             $this->redirectToRoute('app_landing');
             return;

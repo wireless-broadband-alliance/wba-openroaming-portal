@@ -75,10 +75,10 @@ class FreeradiusController extends AbstractController
             $this->addFlash(
                 'error_admin',
                 $this->translator->trans(
-                'maximumDateRange1Year',
-                [],
-                'controllers'
-            )
+                    'maximumDateRange1Year',
+                    [],
+                    'controllers'
+                )
             );
 
             return $this->redirectToRoute('admin_dashboard_statistics_freeradius');

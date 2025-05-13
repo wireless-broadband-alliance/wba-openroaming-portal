@@ -64,7 +64,6 @@ class RegistrationController extends AbstractController
         private readonly VerificationCodeEmailGenerator $verificationCodeGenerator,
         private readonly RegistrationEmailGenerator $emailGenerator,
         private readonly TranslatorInterface $translator
-
     ) {
     }
 

@@ -256,10 +256,10 @@ class AdminController extends AbstractController
             $this->addFlash(
                 'success_admin',
                 $this->translator->trans(
-                'settingsUpdatedSuccessfully',
-                [],
-                'controllers'
-            )
+                    'settingsUpdatedSuccessfully',
+                    [],
+                    'controllers'
+                )
             );
 
             $eventMetadata = [
