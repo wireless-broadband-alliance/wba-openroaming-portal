@@ -410,7 +410,14 @@ class ProfileController extends AbstractController
         $cache = new CacheUtils();
         $profileData = $cache->read('profile_' . $request->query->get("uuid"));
         if (!$profileData) {
-            $this->addFlash('error', 'Profile not found');
+            $this->addFlash(
+                'error',
+                $this->translator->trans(
+                    'profileNotFound',
+                    [],
+                    'controllers'
+                )
+            );
             return $this->redirectToRoute('app_landing');
         }
         $response = new Response($profileData);
