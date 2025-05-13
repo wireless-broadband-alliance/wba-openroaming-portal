@@ -197,9 +197,12 @@
                 <twig:ux:icon name="wba:right" class="w-4 transition ease-in" fill="none"
                               data-nav-submenu-target="icon"/>
             </button>
+            {# Submenu Dropdown #}
             <div class="hidden py-2 mt-1 mb-4 bg-lightGray rounded-md duration-300 shadow"
                     {{ stimulus_target('nav-submenu', 'container') }}>
                 <ul class="mx-2">
+
+                    {# Account Option #}
                     <li>
                         <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300"
                            href="{{ path('admin_user_edit', {id: app.user.id}) }}">
@@ -207,10 +210,47 @@
                             {{ 'account'|trans({}, '_header_admin') }}
                         </a>
                     </li>
+
+                    {# Language Selector as a Dropdown #}
+                    <li class="px-4 py-2 mt-2 text-sm font-semibold rounded-lg duration-300" {{ stimulus_controller('nav-dropdown') }}>
+                        <button
+                                type="button"
+                                {{ stimulus_target('nav-dropdown', 'button') }}
+                                {{ stimulus_action('nav-dropdown', 'toggle')|stimulus_action('nav-dropdown', 'lost_focus', 'focusout') }}
+                                class="w-full flex justify-between items-center">
+
+                            <div class="flex items-center space-x-2">
+                                <twig:ux:icon name="wba:globe" class="w-6 pr-1 mr-2" fill="none"/>
+                                <span class="truncate">{{ 'language'|trans({}, 'landing') }}</span>
+                            </div>
+                        </button>
+
+                        {# Country Dropdown Options #}
+                        <ul {{ stimulus_target('nav-dropdown', 'container') }}
+                                class="hidden mt-3 divide-y divide-gray-100 py-2 text-sm rounded-lg bg-white shadow">
+                            <li>
+                                <a
+                                        href="{{ path('change_language', {locale: 'en'}) }}"
+                                        class="block px-4 py-2 cursor-pointer hover:text-lightGreen rounded {{ app.request.locale == 'en' ? 'selected' : '' }}">
+                                    🇬🇧 English
+                                </a>
+                            </li>
+                            <li>
+                                <a
+                                        href="{{ path('change_language', {locale: 'pt'}) }}"
+                                        class="block px-4 py-2 cursor-pointer hover:text-lightGreen rounded {{ app.request.locale == 'pt' ? 'selected' : '' }}">
+                                    🇵🇹 Portuguese
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+
+                    {# Logout Option #}
                     <li>
-                        <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300"
-                           href="{{ path('app_dashboard_logout') }}"
-                           onclick="return confirm('Are you sure you to leave?')">
+                        <a
+                                class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300"
+                                href="{{ path('app_dashboard_logout') }}"
+                                onclick="return confirm('Are you sure you want to leave?')">
                             <twig:ux:icon name="wba:logout" class="w-5 mr-4" fill="none"/>
                             {{ 'logout'|trans({}, '_header_admin') }}
                         </a>

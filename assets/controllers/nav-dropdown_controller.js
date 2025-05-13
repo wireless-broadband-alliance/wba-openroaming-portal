@@ -22,10 +22,4 @@ export default class extends Controller {
     toggleHeader() {
         this.containerTarget.classList.toggle("hidden");
     }
-
-    lost_focusHeader() {
-        if (!this.containerTarget.matches(":hover")) {
-            this.containerTarget.classList.add("hidden");
-        }
-    }
 }
