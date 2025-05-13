@@ -23,6 +23,9 @@ parameters:
   app.jwt_secret_key: '%env(JWT_SECRET_KEY)%'
   app.jwt_public_key: '%env(JWT_PUBLIC_KEY)%'
 services:
+    App\EventListener\LocaleListener:
+      tags:
+        - { name: kernel.event_listener, event: kernel.request, priority: 20 }
     PixelOpen\CloudflareTurnstileBundle\Http\CloudflareTurnstileHttpClient:
         alias: 'turnstile.http_client'
     App\Service\JWTTokenGenerator:
