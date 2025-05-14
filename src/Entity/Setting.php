@@ -763,12 +763,12 @@ class Setting
     /**
      * @var Collection<int, SettingTranslation>
      */
-    #[ORM\OneToMany(targetEntity: SettingTranslation::class, mappedBy: 'relation')]
-    private Collection $yes;
+    #[ORM\OneToMany(targetEntity: SettingTranslation::class, mappedBy: 'setting')]
+    private Collection $translations;
 
     public function __construct()
     {
-        $this->yes = new ArrayCollection();
+        $this->translations = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -803,28 +803,26 @@ class Setting
     /**
      * @return Collection<int, SettingTranslation>
      */
-    public function getYes(): Collection
+    public function getTranslations(): Collection
     {
-        return $this->yes;
+        return $this->translations;
     }
 
-    public function addYe(SettingTranslation $ye): static
+    public function addTranslation(SettingTranslation $translation): self
     {
-        if (!$this->yes->contains($ye)) {
-            $this->yes->add($ye);
-            $ye->setRelation($this);
+        if (!$this->translations->contains($translation)) {
+            $this->translations->add($translation);
+            $translation->setSetting($this);
         }
 
         return $this;
     }
 
-    public function removeYe(SettingTranslation $ye): static
+    public function removeTranslation(SettingTranslation $translation): self
     {
-        if ($this->yes->removeElement($ye)) {
-            // set the owning side to null (unless already changed)
-            if ($ye->getRelation() === $this) {
-                $ye->setRelation(null);
-            }
+        // Set the owning side to null (unless already changed)
+        if ($this->translations->removeElement($translation) && $translation->getSetting() === $this) {
+            $translation->setSetting(null);
         }
 
         return $this;

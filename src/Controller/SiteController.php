@@ -29,6 +29,7 @@ use App\Form\RevokeProfilesType;
 use App\Form\TOSType;
 use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
+use App\Repository\SettingTranslationRepository;
 use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
 use App\Security\LandingAuthenticator;
@@ -95,7 +96,8 @@ class SiteController extends AbstractController
         private readonly SendSMS $sendSMS,
         private readonly TwoFAService $twoFAService,
         private readonly UserDeletionService $userDeletionService,
-        private readonly TranslatorInterface $translator
+        private readonly TranslatorInterface $translator,
+        private readonly SettingTranslationRepository $settingTranslationRepository
     ) {
     }
 
@@ -365,6 +367,16 @@ class SiteController extends AbstractController
         $formRevokeProfiles = $this->createForm(RevokeProfilesType::class, $this->getUser());
         $formTOS = $this->createForm(TOSType::class);
 
+        // Get translations available for the setting
+        $translations = $this->settingTranslationRepository->findBy(['locale' => $session->get('_locale')]);
+        $localizedSettings = [];
+        foreach ($translations as $translation) {
+            $localizedSettings[] = [
+                'settingId' => $translation->getSetting()->getId(),
+                'value' => $translation->getTranslation(),
+            ];
+        }
+
         return $this->render('landing/landing.html.twig', [
             'form' => $form->createView(),
             'formPassword' => $formPassword->createView(),
@@ -374,7 +386,8 @@ class SiteController extends AbstractController
             'data' => $data,
             'userExternalAuths' => $externalAuthsData,
             'user' => $currentUser,
-            'context' => FirewallType::LANDING->value
+            'context' => FirewallType::LANDING->value,
+            'localizedSettings' => $localizedSettings
         ]);
     }
 
@@ -719,11 +732,13 @@ class SiteController extends AbstractController
 
                         $mailer->send($email);
 
-                        $message = sprintf($this->translator->trans(
-                            'emailSentMessage',
-                            ['%email%' => $user->getEmail()],
-                            'messages'
-                        ));
+                        $message = sprintf(
+                            $this->translator->trans(
+                                'emailSentMessage',
+                                ['%email%' => $user->getEmail()],
+                                'messages'
+                            )
+                        );
                         $this->addFlash('success', $message);
                     } else {
                         // Inform the user to wait before trying again

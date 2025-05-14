@@ -19,7 +19,7 @@ class SettingTranslation
     #[ORM\Column(length: 255)]
     private ?string $translation = null;
 
-    #[ORM\ManyToOne(inversedBy: 'yes')]
+    #[ORM\ManyToOne(inversedBy: 'translations')]
     #[ORM\JoinColumn(nullable: false)]
     private ?Setting $setting = null;
 
