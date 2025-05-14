@@ -1,0 +1,10 @@
+subject: 'Código de Confirmação para a Eliminação de Conta'
+account_deletion_title: 'Aviso: A sua conta está em progresso de eliminação'
+deletion_warning: 'Está prestes a eliminar permanentemente a sua conta. Esta ação é irreversível e resultará na perda permanente de todos os seus dados.'
+deletion_confirmation: 'Para confirmar, utilize o código de verificação abaixo:'
+no_action_message: 'Se não solicitou esta ação ou acredita que se trata de um erro, contacte a nossa equipa de suporte imediatamente.'
+thank_you: 'Obrigado,'
+footer:
+    support_team: 'Equipa de apoio:'
+    thank_you: 'Obrigado,'
+    team: 'A Equipa %emailTitle%'

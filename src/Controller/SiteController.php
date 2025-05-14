@@ -1394,7 +1394,7 @@ class SiteController extends AbstractController
             }
         }
 
-        return $this->render('site/actions/auto_delete_account.html.twig', [
+        return $this->render('landing/autoDeleteAccount/auto_delete_account.html.twig', [
             'form' => $form->createView(),
             'data' => $data,
             'user' => $currentUser,

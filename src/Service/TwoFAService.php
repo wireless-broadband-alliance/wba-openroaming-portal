@@ -181,6 +181,7 @@ readonly class TwoFAService
         $secondsLeft = $data["TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME"]["value"];
         if ($messageType === UserTwoFactorAuthenticationStatus::EMAIL->value || $user->getEmail()) {
             $emailTitle = $this->settingRepository->findOneBy(['name' => 'PAGE_TITLE'])->getValue();
+            $contactEmail = $this->settingRepository->findOneBy(['name' => 'CONTACT_EMAIL'])->getValue();
 
             // Send email to the user with the verification code
             if ($autoDeletion === true) {
@@ -192,11 +193,12 @@ readonly class TwoFAService
                         )
                     )
                     ->to($user->getEmail())
-                    ->subject('Account Deletion Confirmation Code')
+                    ->subject($this->translator->trans('subject', [], 'auto_delete_notice'))
                     ->htmlTemplate('email/auto_delete_notice.html.twig')
                     ->context([
                         'uuid' => $user->getEmail(),
                         'emailTitle' => $emailTitle,
+                        'contactEmail' => $contactEmail,
                         'deletionCode' => $code,
                     ]);
             } else {
