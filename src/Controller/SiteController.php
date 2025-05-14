@@ -97,7 +97,6 @@ class SiteController extends AbstractController
         private readonly TwoFAService $twoFAService,
         private readonly UserDeletionService $userDeletionService,
         private readonly TranslatorInterface $translator,
-        private readonly SettingTranslationRepository $settingTranslationRepository
     ) {
     }
 
@@ -111,7 +110,8 @@ class SiteController extends AbstractController
         RequestStack $requestStack
     ): Response {
         // Call the getSettings method of GetSettings class to retrieve the data
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
+
         /** @var User $currentUser */
         $currentUser = $this->getUser();
         $session = $request->getSession();
@@ -367,16 +367,6 @@ class SiteController extends AbstractController
         $formRevokeProfiles = $this->createForm(RevokeProfilesType::class, $this->getUser());
         $formTOS = $this->createForm(TOSType::class);
 
-        // Get translations available for the setting
-        $translations = $this->settingTranslationRepository->findBy(['locale' => $session->get('_locale')]);
-        $localizedSettings = [];
-        foreach ($translations as $translation) {
-            $localizedSettings[] = [
-                'settingId' => $translation->getSetting()->getId(),
-                'value' => $translation->getTranslation(),
-            ];
-        }
-
         return $this->render('landing/landing.html.twig', [
             'form' => $form->createView(),
             'formPassword' => $formPassword->createView(),
@@ -387,7 +377,6 @@ class SiteController extends AbstractController
             'userExternalAuths' => $externalAuthsData,
             'user' => $currentUser,
             'context' => FirewallType::LANDING->value,
-            'localizedSettings' => $localizedSettings
         ]);
     }
 

@@ -9,6 +9,7 @@ agreeTerms: 'I agree to the'
 termsConditions: 'terms & conditions of use'
 privacyPolicy: 'privacy policy'
 termsCheckboxText: 'I agree to the %terms% and the %privacy%.'
+contactText: 'Should you have any questions or require assistance, please contact us at'
 
 demoMode:
   header: 'DEMO MODE – {status}'

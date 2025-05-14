@@ -13,17 +13,14 @@
                  style="background-image: url('{{ data.wallpaperImageName.value }}');">
                 <div class="h-full w-full flex flex-col">
                     <img class="w-96 max-w-full" src="{{ data.openroamingLogoName.value }}" alt="OpenRoaming Logo"/>
-
                     <h1 class="text-5xl font-segoe text-white mt-[55px] font-bold break-words">
                         {{ data.welcomeText.value }}
                     </h1>
-
                     <p class="text-white text-2xl mt-[45px] leading-7 break-words">
                         {{ data.welcomeDescription.value }}
                     </p>
-
                     <p class="text-white text-lg mt-[55px] mb-6 break-words">
-                        Should you have any questions or require assistance, please contact us at
+                        {{ 'contactText'|trans({}, 'landing') }}
                         <a href="mailto:{{ data.contactEmail.value }}"
                            class="font-semibold underline text-primary break-words">{{ data.contactEmail.value }}</a>
                     </p>

@@ -3,13 +3,39 @@
 namespace App\Service;
 
 use App\Repository\SettingRepository;
-use App\Repository\UserRepository;
+use App\Repository\SettingTranslationRepository;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 
-class GetSettings
+readonly class GetSettings
 {
-    public function getSettings(UserRepository $userRepository, SettingRepository $settingRepository): array
+    public function __construct(
+        private SettingRepository $settingRepository,
+        private SettingTranslationRepository $settingTranslationRepository,
+        private RequestStack $requestStack
+    ) {
+    }
+
+    public function getSettings(): array
     {
+        // Get the current request from the RequestStack
+        $request = $this->requestStack->getCurrentRequest();
+        if (!$request) {
+            throw new \RuntimeException('No current request available.');
+        }
+
+        $session = $request->getSession();
         $data = [];
+
+        // Fetch translations for the current locale
+        $translations = $this->settingTranslationRepository->findBy(['locale' => $session->get('_locale')]);
+        $localizedSettings = [];
+        foreach ($translations as $translation) {
+            $settingName = $translation->getSetting()->getName();
+            $localizedSettings[$settingName] = [
+                'value' => $translation->getTranslation(),
+            ];
+        }
 
         $specialSettings = [
             'TURNSTILE_CHECKER',
@@ -34,18 +60,19 @@ class GetSettings
             'CAPPORT_ENABLED',
         ];
 
-        foreach ($settingRepository->findAll() as $setting) {
-            if (in_array($setting, $specialSettings, true)) {
+        foreach ($this->settingRepository->findAll() as $setting) {
+            if (in_array($setting->getName(), $specialSettings, true)) {
                 continue;
             }
 
-            $data[$this->mapSetting($setting->getName())] = [
-                'value' => $setting->getValue(),
-                'description' => $this->getSettingDescription($setting->getName()),
+            $settingName = $setting->getName();
+            $data[$this->mapSetting($settingName)] = [
+                'value' => $localizedSettings[$settingName]['value'] ?? $setting->getValue(),
+                'description' => $this->getSettingDescription($settingName),
             ];
         }
 
-        $turnstile_checker = $settingRepository->findOneBy(['name' => 'TURNSTILE_CHECKER']);
+        $turnstile_checker = $this->settingRepository->findOneBy(['name' => 'TURNSTILE_CHECKER']);
         if ($turnstile_checker !== null) {
             $data['TURNSTILE_CHECKER'] = [
                 'value' => $turnstile_checker->getValue(),
@@ -53,7 +80,7 @@ class GetSettings
             ];
         }
 
-        $user_verification = $settingRepository->findOneBy(['name' => 'USER_VERIFICATION']);
+        $user_verification = $this->settingRepository->findOneBy(['name' => 'USER_VERIFICATION']);
         if ($user_verification !== null) {
             $data['USER_VERIFICATION'] = [
                 'value' => $user_verification->getValue(),
@@ -61,111 +88,108 @@ class GetSettings
             ];
         }
 
-        $data['code'] = [
-            'value' =>
-                ($user = $userRepository->findOneBy(['verificationCode' => null]))
-                    ? $user->getVerificationCode()
-                    : null,
-            'description' => $this->getSettingDescription('code'),
-        ];
-
         $data['PLATFORM_MODE'] = [
-            'value' => $settingRepository->findOneBy(['name' => 'PLATFORM_MODE'])->getValue() === 'Demo',
+            'value' => $this->settingRepository->findOneBy(['name' => 'PLATFORM_MODE'])->getValue() === 'Demo',
             'description' => $this->getSettingDescription('PLATFORM_MODE'),
         ];
 
         $data['SAML_ENABLED'] = [
-            'value' => $settingRepository->findOneBy(['name' => 'AUTH_METHOD_SAML_ENABLED'])->getValue() === 'true',
+            'value' => $this->settingRepository->findOneBy(['name' => 'AUTH_METHOD_SAML_ENABLED'])->getValue(
+                ) === 'true',
             'description' => $this->getSettingDescription('AUTH_METHOD_SAML_ENABLED'),
         ];
 
         $data['SAML_LABEL'] = [
-            'value' => $settingRepository->findOneBy(['name' => 'AUTH_METHOD_SAML_LABEL'])->getValue(),
+            'value' => $this->settingRepository->findOneBy(['name' => 'AUTH_METHOD_SAML_LABEL'])->getValue(),
             'description' => $this->getSettingDescription('AUTH_METHOD_SAML_LABEL'),
         ];
 
         $data['SAML_DESCRIPTION'] = [
-            'value' => $settingRepository->findOneBy(['name' => 'AUTH_METHOD_SAML_DESCRIPTION'])->getValue(),
+            'value' => $this->settingRepository->findOneBy(['name' => 'AUTH_METHOD_SAML_DESCRIPTION'])->getValue(),
             'description' => $this->getSettingDescription('AUTH_METHOD_SAML_DESCRIPTION'),
         ];
 
         $data['GOOGLE_LOGIN_ENABLED'] = [
-            'value' => $settingRepository->findOneBy([
+            'value' => $this->settingRepository->findOneBy([
                     'name' => 'AUTH_METHOD_GOOGLE_LOGIN_ENABLED'
                 ])->getValue() === 'true',
             'description' => $this->getSettingDescription('AUTH_METHOD_GOOGLE_LOGIN_ENABLED'),
         ];
 
         $data['GOOGLE_LOGIN_LABEL'] = [
-            'value' => $settingRepository->findOneBy(['name' => 'AUTH_METHOD_GOOGLE_LOGIN_LABEL'])->getValue(),
+            'value' => $localizedSettings[$settingName]['value'] ?? $this->settingRepository->findOneBy(['name' => 'AUTH_METHOD_GOOGLE_LOGIN_LABEL'])->getValue(),
             'description' => $this->getSettingDescription('AUTH_METHOD_GOOGLE_LOGIN_LABEL'),
         ];
 
         $data['GOOGLE_LOGIN_DESCRIPTION'] = [
-            'value' => $settingRepository->findOneBy(['name' => 'AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION'])->getValue(),
+            'value' => $this->settingRepository->findOneBy(['name' => 'AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION']
+            )->getValue(),
             'description' => $this->getSettingDescription('AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION'),
         ];
 
         $data['MICROSOFT_LOGIN_ENABLED'] = [
-            'value' => $settingRepository->findOneBy([
+            'value' => $this->settingRepository->findOneBy([
                     'name' => 'AUTH_METHOD_MICROSOFT_LOGIN_ENABLED'
                 ])->getValue() === 'true',
             'description' => $this->getSettingDescription('AUTH_METHOD_MICROSOFT_LOGIN_ENABLED'),
         ];
 
         $data['MICROSOFT_LOGIN_LABEL'] = [
-            'value' => $settingRepository->findOneBy(['name' => 'AUTH_METHOD_MICROSOFT_LOGIN_LABEL'])->getValue(),
+            'value' => $this->settingRepository->findOneBy(['name' => 'AUTH_METHOD_MICROSOFT_LOGIN_LABEL'])->getValue(),
             'description' => $this->getSettingDescription('AUTH_METHOD_MICROSOFT_LOGIN_LABEL'),
         ];
 
         $data['MICROSOFT_LOGIN_DESCRIPTION'] = [
-            'value' => $settingRepository->findOneBy(['name' => 'AUTH_METHOD_MICROSOFT_LOGIN_DESCRIPTION'])->getValue(),
+            'value' => $this->settingRepository->findOneBy(['name' => 'AUTH_METHOD_MICROSOFT_LOGIN_DESCRIPTION']
+            )->getValue(),
             'description' => $this->getSettingDescription('AUTH_METHOD_MICROSOFT_LOGIN_DESCRIPTION'),
         ];
 
         $data['EMAIL_REGISTER_ENABLED'] = [
-            'value' => $settingRepository->findOneBy(['name' => 'AUTH_METHOD_REGISTER_ENABLED'])->getValue() === 'true',
+            'value' => $this->settingRepository->findOneBy(['name' => 'AUTH_METHOD_REGISTER_ENABLED'])->getValue(
+                ) === 'true',
             'description' => $this->getSettingDescription('AUTH_METHOD_REGISTER_ENABLED'),
         ];
 
         $data['REGISTER_LABEL'] = [
-            'value' => $settingRepository->findOneBy(['name' => 'AUTH_METHOD_REGISTER_LABEL'])->getValue(),
+            'value' => $this->settingRepository->findOneBy(['name' => 'AUTH_METHOD_REGISTER_LABEL'])->getValue(),
             'description' => $this->getSettingDescription('AUTH_METHOD_REGISTER_LABEL'),
         ];
 
         $data['REGISTER_DESCRIPTION'] = [
-            'value' => $settingRepository->findOneBy(['name' => 'AUTH_METHOD_REGISTER_DESCRIPTION'])->getValue(),
+            'value' => $this->settingRepository->findOneBy(['name' => 'AUTH_METHOD_REGISTER_DESCRIPTION'])->getValue(),
             'description' => $this->getSettingDescription('AUTH_METHOD_REGISTER_DESCRIPTION'),
         ];
 
         $data['LOGIN_TRADITIONAL_ENABLED'] = [
-            'value' => $settingRepository->findOneBy([
+            'value' => $this->settingRepository->findOneBy([
                     'name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED'
                 ])->getValue() === 'true',
             'description' => $this->getSettingDescription('AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED'),
         ];
 
         $data['LOGIN_TRADITIONAL_LABEL'] = [
-            'value' => $settingRepository->findOneBy(['name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_LABEL'])->getValue(),
+            'value' => $this->settingRepository->findOneBy(['name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_LABEL'])->getValue(
+            ),
             'description' => $this->getSettingDescription('AUTH_METHOD_LOGIN_TRADITIONAL_LABEL'),
         ];
 
         $data['LOGIN_TRADITIONAL_DESCRIPTION'] = [
-            'value' => $settingRepository->findOneBy([
+            'value' => $this->settingRepository->findOneBy([
                 'name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION'
             ])->getValue(),
             'description' => $this->getSettingDescription('AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION'),
         ];
 
         $data['AUTH_METHOD_SMS_REGISTER_ENABLED'] = [
-            'value' => $settingRepository->findOneBy([
+            'value' => $this->settingRepository->findOneBy([
                     'name' => 'AUTH_METHOD_SMS_REGISTER_ENABLED'
                 ])->getValue() === 'true',
             'description' => $this->getSettingDescription('AUTH_METHOD_SMS_REGISTER_ENABLED'),
         ];
 
         $data['CAPPORT_ENABLED'] = [
-            'value' => $settingRepository->findOneBy(['name' => 'CAPPORT_ENABLED'])->getValue() === 'true',
+            'value' => $this->settingRepository->findOneBy(['name' => 'CAPPORT_ENABLED'])->getValue() === 'true',
             'description' => $this->getSettingDescription('CAPPORT_ENABLED'),
         ];
 

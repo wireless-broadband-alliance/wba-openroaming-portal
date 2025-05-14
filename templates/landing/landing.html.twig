@@ -5,9 +5,6 @@
 {% endblock %}
 
 {% block second_col %}
-    {% for setting in localizedSettings %}
-        <p>{{ setting.value }}</p>
-    {% endfor %}
     {% if data.PLATFORM_MODE.value == constant('App\\Enum\\PlatformMode::DEMO').value %}
         {# Demo Mode Warning #}
         <div class="w-[100%] rounded-[1px] shadow-lg bg-[#F9F9F9] px-[25px] py-[30px] text-[#212529] text-opacity-60">

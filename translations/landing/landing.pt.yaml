@@ -9,6 +9,7 @@ agreeTerms: 'Concordo com os'
 termsConditions: 'termos e condições de utilização'
 privacyPolicy: 'política de privacidade'
 termsCheckboxText: 'Concordo com os %terms% e a %privacy%.'
+contactText: 'Caso tenha alguma dúvida ou precise de assistência, por favor contacte-nos através de'
 
 demoMode:
   header: 'MODO DEMO – {status}'
