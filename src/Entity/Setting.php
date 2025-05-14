@@ -13,6 +13,8 @@ use App\Api\V1\Controller\ConfigController;
 use App\Api\V1\Controller\ProfileController;
 use App\Api\V1\Controller\TurnstileController;
 use App\Repository\SettingRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: SettingRepository::class)]
@@ -758,6 +760,17 @@ class Setting
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $value = null;
 
+    /**
+     * @var Collection<int, SettingTranslation>
+     */
+    #[ORM\OneToMany(targetEntity: SettingTranslation::class, mappedBy: 'relation')]
+    private Collection $yes;
+
+    public function __construct()
+    {
+        $this->yes = new ArrayCollection();
+    }
+
     public function getId(): ?int
     {
         return $this->id;
@@ -783,6 +796,36 @@ class Setting
     public function setValue(?string $value): self
     {
         $this->value = $value;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, SettingTranslation>
+     */
+    public function getYes(): Collection
+    {
+        return $this->yes;
+    }
+
+    public function addYe(SettingTranslation $ye): static
+    {
+        if (!$this->yes->contains($ye)) {
+            $this->yes->add($ye);
+            $ye->setRelation($this);
+        }
+
+        return $this;
+    }
+
+    public function removeYe(SettingTranslation $ye): static
+    {
+        if ($this->yes->removeElement($ye)) {
+            // set the owning side to null (unless already changed)
+            if ($ye->getRelation() === $this) {
+                $ye->setRelation(null);
+            }
+        }
 
         return $this;
     }
