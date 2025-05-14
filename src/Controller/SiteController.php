@@ -711,7 +711,7 @@ class SiteController extends AbstractController
                 );
             }
         }
-        return $this->render('landing/forgot_password/forgot_password_email_landing.html.twig', [
+        return $this->render('landing/forgotPassword/forgot_password_email.html.twig', [
             'forgotPasswordEmailForm' => $form->createView(),
             'data' => $data,
             'context' => FirewallType::LANDING->value,
@@ -853,7 +853,7 @@ class SiteController extends AbstractController
                 );
             }
         }
-        return $this->render('landing/forgot_password/forgot_password_sms_landing.html.twig', [
+        return $this->render('landing/forgotPassword/forgot_password_sms.html.twig', [
             'forgotPasswordSMSForm' => $form->createView(),
             'data' => $data,
             'context' => $context
@@ -948,7 +948,7 @@ class SiteController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
-        return $this->render('landing/forgot_password/forgot_password_checker_landing.html.twig', [
+        return $this->render('landing/forgotPassword/forgot_password_checker.html.twig', [
             'forgotPasswordChecker' => $form->createView(),
             'data' => $data,
             'context' => FirewallType::LANDING->value,
