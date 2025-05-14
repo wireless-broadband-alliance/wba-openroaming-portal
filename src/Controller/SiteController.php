@@ -28,8 +28,6 @@ use App\Form\RegistrationFormType;
 use App\Form\RevokeProfilesType;
 use App\Form\TOSType;
 use App\Repository\EventRepository;
-use App\Repository\SettingRepository;
-use App\Repository\SettingTranslationRepository;
 use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
 use App\Security\LandingAuthenticator;
@@ -74,7 +72,6 @@ class SiteController extends AbstractController
      * @param UserRepository $userRepository The repository for accessing user data.
      * @param UserExternalAuthRepository $userExternalAuthRepository The repository is required to fetch the provider.
      * @param ParameterBagInterface $parameterBag The parameter bag for accessing application configuration.
-     * @param SettingRepository $settingRepository The setting repository is used to create the getSettings function.
      * @param GetSettings $getSettings The instance of the GetSettings class.
      * @param EventRepository $eventRepository The entity returns the last events data related to each user.
      * @param EventActions $eventActions Used to generate event related to the User creation
@@ -87,7 +84,6 @@ class SiteController extends AbstractController
         private readonly UserRepository $userRepository,
         private readonly UserExternalAuthRepository $userExternalAuthRepository,
         private readonly ParameterBagInterface $parameterBag,
-        private readonly SettingRepository $settingRepository,
         private readonly GetSettings $getSettings,
         private readonly EventRepository $eventRepository,
         private readonly EventActions $eventActions,
