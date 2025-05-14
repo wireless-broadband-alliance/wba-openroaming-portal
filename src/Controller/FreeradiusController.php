@@ -55,7 +55,7 @@ class FreeradiusController extends AbstractController
         Request $request,
         #[MapQueryParameter] int $page = 1,
     ): Response {
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
         $user = $this->getUser();
         $export_freeradius_statistics = $this->parameterBag->get('app.export_freeradius_statistics');
 

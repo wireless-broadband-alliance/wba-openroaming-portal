@@ -336,7 +336,7 @@ class UsersManagementController extends AbstractController
         $id
     ): Response {
         // Call the getSettings method of GetSettings class to retrieve the data
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
 
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
@@ -582,7 +582,7 @@ class UsersManagementController extends AbstractController
     public function confirmReset(string $type): Response
     {
         // Call the getSettings method of GetSettings class to retrieve the data
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
 
         return $this->render('dashboard/actions/confirm.html.twig', [
             'data' => $data,

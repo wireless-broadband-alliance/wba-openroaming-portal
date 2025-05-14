@@ -369,7 +369,6 @@ class SettingsController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function settingsTerms(
         Request $request,
-        GetSettings $getSettings
     ): Response {
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
@@ -392,7 +391,7 @@ class SettingsController extends AbstractController
         }
         $this->entityManager->flush();
 
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
 
         $settingsRepository = $this->entityManager->getRepository(Setting::class);
         $settings = $settingsRepository->findAll();
@@ -501,7 +500,6 @@ class SettingsController extends AbstractController
             'user' => $currentUser,
             'data' => $data,
             'settings' => $settings,
-            'getSettings' => $getSettings,
             'current_user' => $currentUser,
             'form' => $form->createView(),
         ]);
@@ -513,9 +511,8 @@ class SettingsController extends AbstractController
     public function settingsLDAP(
         Request $request,
         EntityManagerInterface $em,
-        GetSettings $getSettings
     ): Response {
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
         $currentUser = $this->getUser();
@@ -579,7 +576,6 @@ class SettingsController extends AbstractController
         return $this->render('dashboard/shared/settings_actions.html.twig', [
             'data' => $data,
             'settings' => $settings,
-            'getSettings' => $getSettings,
             'form' => $form->createView()
         ]);
     }
@@ -588,9 +584,8 @@ class SettingsController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function settingsRadius(
         Request $request,
-        GetSettings $getSettings
     ): Response {
-        $data = $getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $getSettings->getSettings();
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
         $currentUser = $this->getUser();
@@ -683,7 +678,6 @@ class SettingsController extends AbstractController
             'user' => $currentUser,
             'data' => $data,
             'settings' => $settings,
-            'getSettings' => $getSettings,
             'form' => $form->createView()
         ]);
     }
@@ -691,13 +685,12 @@ class SettingsController extends AbstractController
     #[Route('/dashboard/settings/status', name: 'admin_dashboard_settings_status')]
     #[IsGranted('ROLE_ADMIN')]
     public function settingsStatus(
-        Request $request,
-        GetSettings $getSettings
+        Request $request
     ): Response {
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
         $currentUser = $this->getUser();
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
 
         $settingsRepository = $this->entityManager->getRepository(Setting::class);
         $settings = $settingsRepository->findAll();
@@ -785,7 +778,6 @@ class SettingsController extends AbstractController
             'user' => $currentUser,
             'data' => $data,
             'settings' => $settings,
-            'getSettings' => $getSettings,
             'current_user' => $currentUser,
             'form' => $form->createView(),
         ]);
@@ -796,12 +788,11 @@ class SettingsController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function settingsTwoFA(
         Request $request,
-        GetSettings $getSettings
     ): Response {
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
         $currentUser = $this->getUser();
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
 
         $settingsRepository = $this->entityManager->getRepository(Setting::class);
         $settings = $settingsRepository->findAll();
@@ -859,7 +850,6 @@ class SettingsController extends AbstractController
             'user' => $currentUser,
             'data' => $data,
             'settings' => $settings,
-            'getSettings' => $getSettings,
             'current_user' => $currentUser,
             'formTwoFA' => $formTwoFA->createView(),
         ]);
@@ -869,13 +859,12 @@ class SettingsController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function settingsAuths(
         Request $request,
-        GetSettings $getSettings,
         CertificateService $certificateService
     ): Response {
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
         $currentUser = $this->getUser();
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
 
         $settingsRepository = $this->entityManager->getRepository(Setting::class);
         $settings = $settingsRepository->findAll();
@@ -987,7 +976,6 @@ class SettingsController extends AbstractController
             'user' => $currentUser,
             'data' => $data,
             'settings' => $settings,
-            'getSettings' => $getSettings,
             'current_user' => $currentUser,
             'form' => $form->createView(),
             'profileLimitDate' => $profileLimitDate,
@@ -1001,7 +989,7 @@ class SettingsController extends AbstractController
         Request $request,
         GetSettings $getSettings
     ): Response {
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
         $currentUser = $this->getUser();
@@ -1070,13 +1058,12 @@ class SettingsController extends AbstractController
     #[Route('/dashboard/settings/sms', name: 'admin_dashboard_settings_sms')]
     #[IsGranted('ROLE_ADMIN')]
     public function settingsSMS(
-        Request $request,
-        GetSettings $getSettings
+        Request $request
     ): Response {
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
         $currentUser = $this->getUser();
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
 
         $settingsRepository = $this->entityManager->getRepository(Setting::class);
         $settings = $settingsRepository->findAll();
@@ -1137,7 +1124,6 @@ class SettingsController extends AbstractController
             'user' => $currentUser,
             'data' => $data,
             'settings' => $settings,
-            'getSettings' => $getSettings,
             'current_user' => $currentUser,
             'form' => $form->createView(),
         ]);
@@ -1154,7 +1140,7 @@ class SettingsController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function statisticsData(Request $request): Response
     {
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
 
         /** @var User $currentUser */
         $currentUser = $this->getUser();

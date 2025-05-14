@@ -384,7 +384,7 @@ class SiteController extends AbstractController
     public function termsConditions(EntityManagerInterface $em): RedirectResponse|Response
     {
         // Call the getSettings method of GetSettings class to retrieve the data
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
 
         $settingsRepository = $em->getRepository(Setting::class);
         $tosFormat = $settingsRepository->findOneBy(['name' => 'TOS']);
@@ -417,7 +417,7 @@ class SiteController extends AbstractController
     public function privacyPolicy(EntityManagerInterface $em): RedirectResponse|Response
     {
         // Call the getSettings method of GetSettings class to retrieve the data
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
 
         $settingsRepository = $em->getRepository(Setting::class);
         $textEditorRepository = $em->getRepository(TextEditor::class);
@@ -609,7 +609,7 @@ class SiteController extends AbstractController
         }
 
         // Call the getSettings method of GetSettings class to retrieve the data
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
 
         // Check if the user clicked on the 'sms' variable present only on the SMS authentication buttons
         if ($data['PLATFORM_MODE']['value'] === true) {
@@ -774,7 +774,7 @@ class SiteController extends AbstractController
         EntityManagerInterface $entityManager,
     ): Response {
         // Call the getSettings method of GetSettings class to retrieve the data
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
 
         if ($this->getUser() instanceof UserInterface) {
             $this->addFlash(
@@ -935,7 +935,7 @@ class SiteController extends AbstractController
         }
 
         // Call the getSettings method of GetSettings class to retrieve the data
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
 
         if ($data['PLATFORM_MODE']['value']) {
             $this->addFlash(
@@ -1153,7 +1153,7 @@ class SiteController extends AbstractController
     public function sendCode(): Response
     {
         // Call the getSettings method of GetSettings class to retrieve the data
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
 
         if ($data['USER_VERIFICATION']['value'] !== OperationMode::ON->value) {
             return $this->redirectToRoute('app_landing');
@@ -1279,7 +1279,7 @@ class SiteController extends AbstractController
     public function regenerateCodeSMS(EventRepository $eventRepository, SendSMS $sendSmsService): RedirectResponse
     {
         // Call the getSettings method of GetSettings class to retrieve the data
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
 
         /** @var User $currentUser */
         $currentUser = $this->getUser();
@@ -1438,7 +1438,7 @@ class SiteController extends AbstractController
     #[IsGranted('ROLE_USER')]
     public function autoDeleteUser(Request $request): Response
     {
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
 
         /** @var User $currentUser */
         $currentUser = $this->getUser();

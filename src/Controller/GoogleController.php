@@ -60,7 +60,7 @@ class GoogleController extends AbstractController
     public function connect(): RedirectResponse
     {
         // Call the getSettings method of GetSettings class to retrieve the data
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
 
         // Check if the user clicked on the 'sms' variable present only on the SMS authentication buttons
         if ($data['PLATFORM_MODE']['value'] === true) {

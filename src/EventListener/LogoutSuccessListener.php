@@ -5,8 +5,6 @@ namespace App\EventListener;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Enum\PlatformMode;
-use App\Repository\SettingRepository;
-use App\Repository\UserRepository;
 use App\Service\EventActions;
 use App\Service\GetSettings;
 use DateTime;
@@ -18,8 +16,6 @@ readonly class LogoutSuccessListener implements EventSubscriberInterface
 {
     public function __construct(
         private GetSettings $getSettings,
-        private UserRepository $userRepository,
-        private SettingRepository $settingRepository,
         private EventActions $eventActions,
     ) {
     }
@@ -37,7 +33,7 @@ readonly class LogoutSuccessListener implements EventSubscriberInterface
         $user = $token?->getUser();
 
         // Call the getSettings method of GetSettings class to retrieve the data
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
         $platformMode = $data['PLATFORM_MODE']['value'] ? PlatformMode::DEMO->value : PlatformMode::LIVE->value;
 
         if ($user instanceof User) {

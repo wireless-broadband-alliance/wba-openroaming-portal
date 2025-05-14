@@ -25,10 +25,11 @@ readonly class GetSettings
         }
 
         $session = $request->getSession();
+        $locale = $session->get('_locale') ?: 'en';
         $data = [];
 
         // Fetch translations for the current locale
-        $translations = $this->settingTranslationRepository->findBy(['locale' => $session->get('_locale')]);
+        $translations = $this->settingTranslationRepository->findBy(['locale' => $locale]);
         $localizedSettings = [];
         foreach ($translations as $translation) {
             $settingName = $translation->getSetting()->getName();

@@ -77,7 +77,7 @@ class TwoFAController extends AbstractController
             return $this->redirectToRoute('app_dashboard_login');
         }
 
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
 
         return $this->render('landing/twoFAAuthentication/base_configuration.html.twig', [
             'user' => $user,
@@ -125,7 +125,7 @@ class TwoFAController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
         $form = $this->createForm(TwoFACode::class);
         $session = $request->getSession();
         if ($form->handleRequest($request)->isSubmitted() && $form->isValid()) {
@@ -237,7 +237,7 @@ class TwoFAController extends AbstractController
         if ($session->has('2fa_verified_' . $context)) {
             return $this->redirectToRoute('app_landing');
         }
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
         $form = $this->createForm(TwoFACode::class);
         if ($form->handleRequest($request)->isSubmitted() && $form->isValid()) {
             // Get the introduced code
@@ -318,7 +318,7 @@ class TwoFAController extends AbstractController
             return $this->redirectToRoute('app_dashboard_login');
         }
 
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
         $form = $this->createForm(TwoFACode::class);
         $session = $request->getSession();
         if ($session->has('2fa_verified_' . $context)) {
@@ -403,7 +403,7 @@ class TwoFAController extends AbstractController
             $user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::SMS->value ||
             $user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::EMAIL->value
         ) {
-            $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+            $data = $this->getSettings->getSettings();
             $timeToResetAttempts = $data["TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS"]["value"];
             $limitTime = new DateTime();
             $limitTime->modify('-' . $timeToResetAttempts . ' minutes');
@@ -491,7 +491,7 @@ class TwoFAController extends AbstractController
             );
             return $this->redirectToRoute('app_dashboard_login');
         }
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
         $form = $this->createForm(TwoFACode::class);
         if ($form->handleRequest($request)->isSubmitted() && $form->isValid()) {
             // Get the introduced code
@@ -559,7 +559,7 @@ class TwoFAController extends AbstractController
             );
             return $this->redirectToRoute('app_dashboard_login');
         }
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
         $form = $this->createForm(TwoFACode::class);
         if ($form->handleRequest($request)->isSubmitted() && $form->isValid()) {
             // Get the introduced code
@@ -628,7 +628,7 @@ class TwoFAController extends AbstractController
             );
             return $this->redirectToRoute('app_dashboard_login');
         }
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
         $session = $request->getSession();
         if ($this->twoFAService->hasValidOTPCodes($user)) {
             return $this->redirectToRoute('app_landing');
@@ -746,7 +746,7 @@ class TwoFAController extends AbstractController
             );
             return $this->redirectToRoute('app_dashboard_login');
         }
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
         $timeToResetAttempts = $data["TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS"]["value"];
         $nrAttempts = $data["TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE"]["value"];
         $timeIntervalToResendCode = $data["TWO_FACTOR_AUTH_RESEND_INTERVAL"]["value"];
@@ -1006,7 +1006,7 @@ class TwoFAController extends AbstractController
                 'context' => $context
             ]);
         }
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
         $timeToResetAttempts = $data["TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS"]["value"];
         $limitTime = new DateTime();
         $limitTime->modify('-' . $timeToResetAttempts . ' minutes');
@@ -1107,7 +1107,7 @@ class TwoFAController extends AbstractController
         }
 
         $session = $request->getSession();
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
         $form = $this->createForm(TwoFACode::class);
         if ($form->handleRequest($request)->isSubmitted() && $form->isValid()) {
             // Get the introduced code
@@ -1219,7 +1219,7 @@ class TwoFAController extends AbstractController
                 'context' => $context
             ]);
         }
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
         $form = $this->createForm(TwoFACode::class);
         if ($form->handleRequest($request)->isSubmitted() && $form->isValid()) {
             // Get the introduced code
@@ -1367,7 +1367,7 @@ class TwoFAController extends AbstractController
                 'context' => $context
             ]);
         }
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
         $form = $this->createForm(TwoFACode::class);
         if ($form->handleRequest($request)->isSubmitted() && $form->isValid()) {
             // Get the introduced code

@@ -10,7 +10,6 @@ use ApiPlatform\Metadata\UrlGeneratorInterface;
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
 use App\Enum\UserProvider;
-use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use App\Service\GetSettings;
 use DateTime;
@@ -38,7 +37,6 @@ class CustomSamlUserFactory implements SamlUserFactoryInterface
         private readonly UserRepository $userRepository,
         private readonly EntityManagerInterface $entityManager,
         private readonly GetSettings $getSettings,
-        private readonly SettingRepository $settingRepository,
         private readonly UrlGeneratorInterface $urlGenerator,
         RequestStack $requestStack,
     ) {
@@ -61,7 +59,7 @@ class CustomSamlUserFactory implements SamlUserFactoryInterface
     public function createUser(string $identifier, array $attributes): UserInterface
     {
         // Call the getSettings method of GetSettings class to retrieve the data
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
 
         if ($data['PLATFORM_MODE']['value'] === true) {
             throw new RuntimeException(

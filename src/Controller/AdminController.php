@@ -8,7 +8,6 @@ use App\Enum\AnalyticalEventType;
 use App\Form\CustomType;
 use App\Form\RevokeProfilesType;
 use App\Repository\EventRepository;
-use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use App\Service\EventActions;
 use App\Service\GetSettings;
@@ -35,7 +34,6 @@ class AdminController extends AbstractController
         private readonly UserRepository $userRepository,
         private readonly ParameterBagInterface $parameterBag,
         private readonly GetSettings $getSettings,
-        private readonly SettingRepository $settingRepository,
         private readonly EventActions $eventActions,
         private readonly VerificationCodeEmailGenerator $verificationCodeGenerator,
         private readonly EventRepository $eventRepository,
@@ -56,7 +54,7 @@ class AdminController extends AbstractController
         #[MapQueryParameter] ?int $count = 7
     ): Response {
         // Call the getSettings method of GetSettings class to retrieve the data
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
 
         $searchTerm = $request->query->get('u');
 
@@ -183,10 +181,10 @@ class AdminController extends AbstractController
      */
     #[Route('/dashboard/customize', name: 'admin_dashboard_customize')]
     #[IsGranted('ROLE_ADMIN')]
-    public function customize(Request $request, EntityManagerInterface $em, GetSettings $getSettings): Response
+    public function customize(Request $request, EntityManagerInterface $em): Response
     {
         // Call the getSettings method of GetSettings class to retrieve the data
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
         $currentUser = $this->getUser();
@@ -282,7 +280,6 @@ class AdminController extends AbstractController
             'settings' => $settings,
             'form' => $form->createView(),
             'data' => $data,
-            'getSettings' => $getSettings
         ]);
     }
 }
