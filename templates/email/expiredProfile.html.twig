@@ -3,40 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Your OpenRoaming Profile has Expired</title>
+    <title>{{ 'subject_is_expired'|trans({}, 'expirationProfiles') }}</title>
 </head>
 <body style="background-color: #080D4A; font-family: ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji'; color: #4A5568; margin: 0; padding: 0;">
 <div style="width: 100%; max-width: 600px; margin: 0 auto; padding: 3rem 1rem;">
-    <div style="max-width: 448px; margin: 0 auto; background-color: #fff; border-radius: 1rem; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1); overflow: hidden;">
-        <div style="background-color: #e53935; color: #fff; text-align: center; padding: 1.5rem;">
-            <h1 style="font-size: 1.5rem; font-weight: bold;">Your OpenRoaming Profile has Expired</h1>
+    <div style="max-width: 600px; margin: 0 auto; background-color: #fff; border-radius: 16px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1); overflow: hidden;">
+        <!-- Title Section -->
+        <div style="background-color: #7BBA29; color: #fff; padding: 1.5rem; display: flex; justify-content: space-between; align-items: center;">
+            <h1 style="margin: 0; font-size: 1.5rem; font-weight: 700; color: #fff;">
+                {{ 'header'|trans({}, 'expirationProfiles') }}
+            </h1>
         </div>
+
+        <!-- Main Content -->
         <div style="padding: 1.5rem;">
             <p style="font-size: 1.125rem; margin-bottom: 1rem;">
-                Your OpenRoaming profile has expired.
+                {{ 'expired_message'|trans({}, 'expirationProfiles') }}
             </p>
             <p style="font-size: 1.125rem; margin-bottom: 1rem;">
-                To get a new profile, please follow these simple steps:
+                {{ 'renew_instructions'|trans({}, 'expirationProfiles') }}
             </p>
             <ol style="margin-top: 1rem; font-size: 1.125rem; list-style-type: decimal; list-style-position: inside; padding-left: 0; margin-bottom: 0;">
                 <li style="margin-bottom: 0.75rem;">
-                    Click <a href="{{ absolute_url(path('app_landing')) }}"
-                             style="font-weight: bold; color: #7BBA29; text-decoration: underline;">here</a> to access
-                    the OpenRoaming portal.
+                    {{ 'steps.access_portal'|trans({'%link%': absolute_url(path('app_landing'))}, 'expirationProfiles')|raw }}
                 </li>
-                <li style="margin-bottom: 0.75rem;">Log in with your credentials.</li>
-                <li>Inside the portal, download a new profile.</li>
+                <li style="margin-bottom: 0.75rem;">
+                    {{ 'steps.login'|trans({}, 'expirationProfiles') }}
+                </li>
+                <li>
+                    {{ 'steps.download'|trans({}, 'expirationProfiles') }}
+                </li>
             </ol>
         </div>
+
+        <!-- Footer Section -->
         <div style="background-color: #f4f4f4; text-align: center; padding: 1.5rem;">
             <p style="font-size: 0.875rem; color: #718096;">
-                Support team:
+                {{ 'footer.support_team'|trans({}, 'expirationProfiles') }}
                 <a href="mailto:{{ contactEmail }}"
                    style="color: #0045AD; text-decoration: underline;">{{ contactEmail }}</a>
             </p>
             <p style="font-size: 0.875rem; color: #718096;">
-                Thank you,<br>
-                <strong>{{ supportTeam }} Team</strong>
+                {{ 'footer.thank_you'|trans({}, 'expirationProfiles') }}<br>
+                <strong>{{ 'footer.team'|trans({'%emailTitle%': emailTitle}, 'expirationProfiles') }}</strong>
             </p>
         </div>
     </div>

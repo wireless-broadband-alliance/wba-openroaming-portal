@@ -1,0 +1,14 @@
+subject_is_expired: 'Your OpenRoaming Profile has Expired'
+subject_is_expiring: 'Your OpenRoaming Profile is about to Expire'
+header: 'Your OpenRoaming Profile has Expired'
+profile_expiration_warning: 'Your profile will expire in <span style="font-weight: 700; color: #0045AD;">%timeLeft%</span> days.'
+expired_message: 'Your OpenRoaming profile has expired.'
+renew_instructions: 'To get a new profile, please follow these simple steps:'
+steps:
+    access_portal: 'Click <a href="%link%">here</a> to access the OpenRoaming portal.'
+    login: 'Log in with your credentials.'
+    download: 'Inside the portal, download a new profile.'
+footer:
+    support_team: 'Support team:'
+    thank_you: 'Thank you,'
+    team: 'The %emailTitle% Team'

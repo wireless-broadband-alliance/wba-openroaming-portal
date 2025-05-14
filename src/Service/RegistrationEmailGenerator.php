@@ -58,7 +58,7 @@ readonly class RegistrationEmailGenerator
      */
     public function sendNotifyExpiresProfileEmail(User $user, int $timeLeft): void
     {
-        $supportTeam = $this->settingRepository->findOneBy(['name' => 'PAGE_TITLE'])->getValue();
+        $emailTitle = $this->settingRepository->findOneBy(['name' => 'PAGE_TITLE'])->getValue();
         $contactEmail = $this->settingRepository->findOneBy(['name' => 'CONTACT_EMAIL'])->getValue();
 
         // Send email to the user with the verification code
@@ -70,20 +70,23 @@ readonly class RegistrationEmailGenerator
                 )
             )
             ->to($user->getEmail())
-            ->subject('Your OpenRoaming Profile is about to expire')
+            ->subject($this->translator->trans('subject', [], 'expirationProfiles'))
             ->htmlTemplate('email/expiresProfile.html.twig')
             ->context([
                 'uuid' => $user->getEmail(),
-                'supportTeam' => $supportTeam,
+                'emailTitle' => $emailTitle,
                 'contactEmail' => $contactEmail,
                 'timeLeft' => $timeLeft,
             ]);
         $this->mailer->send($email);
     }
 
+    /**
+     * @throws TransportExceptionInterface
+     */
     public function sendNotifyExpiredProfile(User $user): void
     {
-        $supportTeam = $this->settingRepository->findOneBy(['name' => 'PAGE_TITLE'])->getValue();
+        $emailTitle = $this->settingRepository->findOneBy(['name' => 'PAGE_TITLE'])->getValue();
         $contactEmail = $this->settingRepository->findOneBy(['name' => 'CONTACT_EMAIL'])->getValue();
 
         // Send email to the user with the verification code
@@ -95,12 +98,12 @@ readonly class RegistrationEmailGenerator
                 )
             )
             ->to($user->getEmail())
-            ->subject('Your OpenRoaming Profile is about to expire')
+            ->subject($this->translator->trans('subject_is_expired', [], 'expirationProfiles'))
             ->htmlTemplate('email/expiredProfile.html.twig')
             ->context([
                 'uuid' => $user->getEmail(),
                 'contactEmail' => $contactEmail,
-                'supportTeam' => $supportTeam,
+                'emailTitle' => $emailTitle,
             ]);
 
         $this->mailer->send($email);
