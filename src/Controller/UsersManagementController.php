@@ -76,7 +76,10 @@ class UsersManagementController extends AbstractController
         $currentUser = $this->getUser();
         $user = $userRepository->find($id);
         if (!$user) {
-            $this->addFlash('error', 'User not found.');
+            $this->addFlash(
+                'error',
+                $this->translator->trans('userNotFound', [], 'controllers')
+            );
             return $this->redirectToRoute('app_landing');
         }
         $revokeProfiles = $this->profileManager->disableProfiles(
@@ -85,7 +88,10 @@ class UsersManagementController extends AbstractController
             true
         );
         if (!$revokeProfiles) {
-            $this->addFlash('error_admin', 'This account doesn\'t have profiles associated!');
+            $this->addFlash(
+                'error_admin',
+                $this->translator->trans('accountWithoutProfilesAssociated', [], 'controllers')
+            );
             return $this->redirectToRoute('admin_page');
         }
 
@@ -105,9 +111,12 @@ class UsersManagementController extends AbstractController
 
         $this->addFlash(
             'success_admin',
-            sprintf(
-                'Profile associated "%s" have been revoked.',
-                $user->getUuid()
+            $this->translator->trans(
+                'profileRevoked',
+                [
+                    '%uuid%' => $user->getUuid()
+                ],
+                'controllers'
             )
         );
 
@@ -132,7 +141,10 @@ class UsersManagementController extends AbstractController
         // Check if the export users operation is enabled
         $exportUsers = $this->parameterBag->get('app.export_users');
         if ($exportUsers === OperationMode::OFF->value) {
-            $this->addFlash('error_admin', 'This operation is disabled for security reasons');
+            $this->addFlash(
+                'error_admin',
+                $this->translator->trans('operationDisabledForSecurityReasons', [], 'controllers')
+            );
             return $this->redirectToRoute('admin_page');
         }
 
@@ -280,7 +292,10 @@ class UsersManagementController extends AbstractController
         $getUserUuid = $user->getUuid();
 
         if ($user->getDeletedAt() !== null) {
-            $this->addFlash('error_admin', 'This user has already been deleted.');
+            $this->addFlash(
+                'error_admin',
+                $this->translator->trans('userAlreadyDeleted', [], 'controllers')
+            );
             return $this->redirectToRoute('admin_page');
         }
 
@@ -291,7 +306,16 @@ class UsersManagementController extends AbstractController
             return $this->redirectToRoute('admin_page');
         }
 
-        $this->addFlash('success_admin', sprintf('User with the UUID "%s" deleted successfully.', $getUserUuid));
+        $this->addFlash(
+            'success_admin',
+            $this->translator->trans(
+                'userDeleted',
+                [
+                    '%uuid%' => $getUserUuid
+                ],
+                'controllers'
+            )
+        );
         return $this->redirectToRoute('admin_page');
     }
 
@@ -320,12 +344,18 @@ class UsersManagementController extends AbstractController
 
         if (!$user = $this->userRepository->find($id)) {
             // Get the 'id' parameter from the route URL
-            $this->addFlash('error_admin', 'The user does not exist.');
+            $this->addFlash(
+                'error_admin',
+                $this->translator->trans('userNotFound', [], 'controllers')
+            );
             return $this->redirectToRoute('admin_page');
         }
 
         if ($user->getDeletedAt() !== null) {
-            $this->addFlash('error_admin', 'This user has already been deleted.');
+            $this->addFlash(
+                'error_admin',
+                $this->translator->trans('userAlreadyDeleted', [], 'controllers')
+            );
             return $this->redirectToRoute('admin_page');
         }
 
@@ -340,14 +370,20 @@ class UsersManagementController extends AbstractController
             // Verifies if the isVerified is removed to the logged account
             if (($currentUser->getId() === $user->getId()) && $form->get('isVerified')->getData() === 0) {
                 $user->isVerified();
-                $this->addFlash('error_admin', 'Sorry, administrators cannot remove is own verification.');
+                $this->addFlash(
+                    'error_admin',
+                    $this->translator->trans('administratorsCannotRemoveOwnVerification', [], 'controllers')
+                );
                 return $this->redirectToRoute('admin_user_edit', ['id' => $user->getId()]);
             }
 
             // Verifies if the bannedAt was submitted and compares the form value "banned" to the current value
             if ($form->get('bannedAt')->getData() && $user->getBannedAt() !== $initialBannedAtValue) {
                 if ($currentUser->getId() === $user->getId()) {
-                    $this->addFlash('error_admin', 'Sorry, administrators cannot ban themselves.');
+                    $this->addFlash(
+                        'error_admin',
+                        $this->translator->trans('administratorsCannotBanThemselves', [], 'controllers')
+                    );
                     return $this->redirectToRoute('admin_user_edit', ['id' => $user->getId()]);
                 }
                 $user->setBannedAt(new DateTime());
@@ -385,7 +421,15 @@ class UsersManagementController extends AbstractController
             );
 
             $uuid = $user->getUuid();
-            $this->addFlash('success_admin', sprintf('"%s" has been updated successfully.', $uuid));
+            $this->addFlash(
+                'success_admin',
+                $this->translator->trans(
+                    'userUpdated',
+                    [
+                        '%uuid%' => $uuid
+                    ]
+                )
+            );
 
             return $this->redirectToRoute('admin_page');
         }
@@ -402,7 +446,10 @@ class UsersManagementController extends AbstractController
             $confirmPassword = $formReset->get('confirmPassword')->getData();
 
             if ($newPassword !== $confirmPassword) {
-                $this->addFlash('error_admin', 'Both the password and password confirmation fields must match.');
+                $this->addFlash(
+                    'error_admin',
+                    $this->translator->trans('PasswordPasswordConfirmationMustMatch', [], 'controllers')
+                );
                 return $this->redirectToRoute('admin_user_edit', ['id' => $user->getId()]);
             }
 
@@ -499,7 +546,15 @@ class UsersManagementController extends AbstractController
                     );
                 }
             }
-            $this->addFlash('success_admin', sprintf('"%s" is password was updated.', $user->getUuid()));
+            $this->addFlash(
+                'success_admin',
+                $this->translator->trans(
+                    'passwordUpdated',
+                    [
+                        '%uuid%' => $user->getUuid()
+                    ]
+                )
+            );
             return $this->redirectToRoute('admin_page');
         }
 
@@ -547,7 +602,10 @@ class UsersManagementController extends AbstractController
     ): RedirectResponse {
         if (!$user = $this->userRepository->find($id)) {
             // Get the 'id' parameter from the route URL
-            $this->addFlash('error_admin', 'The user does not exist.');
+            $this->addFlash(
+                'error_admin',
+                $this->translator->trans('userNotFound', [], 'controllers')
+            );
             return $this->redirectToRoute('admin_page');
         }
         // Get the User Provider && ProviderId
@@ -581,7 +639,7 @@ class UsersManagementController extends AbstractController
 
         $this->addFlash(
             'success_admin',
-            'Two factor authentication successfully disabled'
+            $this->translator->trans('twoFASuccessfullyDisabled', [], 'controllers')
         );
         return $this->redirectToRoute('admin_user_edit', [
             'id' => $user->getId(),
