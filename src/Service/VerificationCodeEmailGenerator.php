@@ -61,6 +61,8 @@ readonly class VerificationCodeEmailGenerator
         // Get the values from the services.yaml file using $parameterBag on the __construct
         $emailSender = $this->parameterBag->get('app.email_address');
         $nameSender = $this->parameterBag->get('app.sender_name');
+        $supportTeam = $this->settingRepository->findOneBy(['name' => 'PAGE_TITLE'])->getValue();
+        $contactEmail = $this->settingRepository->findOneBy(['name' => 'CONTACT_EMAIL'])->getValue();
 
         $verificationCode = $this->generateVerificationCode($user);
 
@@ -80,11 +82,12 @@ readonly class VerificationCodeEmailGenerator
         return new TemplatedEmail()
             ->from(new Address($emailSender, $nameSender))
             ->to($user->getEmail())
-            ->subject('Your Settings Reset Details')
+            ->subject($this->translator->trans('subject_verify', [], 'admin_reset'))
             ->htmlTemplate('email/admin_reset.html.twig')
             ->context([
                 'verificationCode' => $verificationCode,
-                'resetPassword' => false
+                'supportTeam' => $supportTeam,
+                'contactEmail' => $contactEmail,
             ]);
     }
 
