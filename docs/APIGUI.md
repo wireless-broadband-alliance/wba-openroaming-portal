@@ -1,7 +1,19 @@
-# API Endpoints
+~~# API Endpoints
 
 This document provides an overview of the key API endpoints introduced in this project. Each endpoint is designed to
 improve user authentication and management processes, with integrated CAPTCHA validation to ensure security.
+
+## User Account Deletion
+
+This endpoint allows users authenticated with a valid JWT to permanently delete their accounts. The request requirements
+vary based on the authentication provider:
+
+- **Portal Account**: Requires the account password in the request body.
+- **SAML**: Requires the account's `SAMLResponse`.
+- **Google/Microsoft**: Requires the authentication code.
+
+For external providers, the endpoint performs a simulated authentication with the provider to validate and confirm
+account deletion.
 
 ## Turnstile Configuration
 
@@ -74,4 +86,4 @@ improve user authentication and management processes, with integrated CAPTCHA va
 
 - Most of the endpoints above are integrated with CAPTCHA validation to increase security.
 - Please refer to the [API documentation](api/index.html) generated with OpenAPI via Swagger UI for detailed usage
-  instructions and examples.
+  instructions and examples.~~

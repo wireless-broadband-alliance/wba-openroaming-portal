@@ -1,12 +1,27 @@
 # Changelog
 
+# Release V1.8.0
+
+- New Feature: Responsive Translations (Available: EN & PT-PT)
+- New Listener to auto-detection of the user language
+- For this release it's required to run the new migrations to set up the new entity SettingTranslations
+  Run the migration with:
+
+```bash
+php bin/console doctrine:migrations:migrate
+```
+
+---
+
 # Release V1.7.3
 
 - The user can now delete its own account from the account_widget popup
 - New endpoint on the API to delete the user account for APP's
-- Rework Two Factor Authenticator to have a type of validation. Now the page knows what type of request is being made when
-  a new code is generated, to having problems of saving the previous number of attempts on new requests (disable, validate, verify etc.)
-- Rework Two Factor Authenticator request API endpoint to also now the type of request.
+- Rework Two Factor Authenticator to have a type of validation. Now the page knows what type of request is being made
+  when
+  a new code is generated, to having problems of saving the previous number of attempts on new requests (disable,
+  validate, verify, etc.)
+- Rework Two Factor Authenticator request API endpoint to also now the type of request
 
 ---
 
