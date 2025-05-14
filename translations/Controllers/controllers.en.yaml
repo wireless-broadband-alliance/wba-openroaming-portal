@@ -16,7 +16,7 @@ accountNotVerifiedToDownloadProfile: 'Your account is not verified to download a
 accountNotVerifiedToDownloadProfileSMS: 'Your account is not verified to download a profile, before being able to download a profile you need to confirm your account by inserting the code send to you via SMS!'
 accountCurrentlyPendingApproval: 'Your account is currently with a request pending approval!'
 profileNotFound: 'Profile not found'
-authenticationMethodNotEnabled!: "This authentication method it's not enabled!"
+authenticationMethodNotEnabled: "This authentication method it's not enabled!"
 userWithSameEmail: 'User with the same email already exists, please try to Login using the link below.'
 emailSentWithPasswordAndVerificationCode: 'We have sent an email with your account password and verification code'
 userWithSamePhoneNumber: 'User with the same phone number already exists, please try to "Log in" using the link below.'

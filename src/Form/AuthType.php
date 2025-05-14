@@ -14,12 +14,15 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\Callback;
 use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotBlank;
-use Symfony\Component\Validator\Constraints\Range;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class AuthType extends AbstractType
 {
-    public function __construct(private readonly GetSettings $getSettings)
+    public function __construct(
+        private readonly GetSettings $getSettings,
+        private readonly TranslatorInterface $translator
+    )
     {
     }
 
@@ -37,15 +40,15 @@ class AuthType extends AbstractType
                         new Length([
                             'min' => 3,
                             'max' => 50,
-                            'minMessage' => 'The label must be at least {{ limit }} characters long.',
-                            'maxMessage' => 'The label cannot be longer than {{ limit }} characters.',
+                            'minMessage' => $this->translator->trans('labelMinimumCharactersMessage', [], 'AuthType'),
+                            'maxMessage' => $this->translator->trans('labelMaximumCharactersMessage', [], 'AuthType'),
                         ]),
                         new Callback([
                             'callback' => function ($value, ExecutionContextInterface $context): void {
                                 $form = $context->getRoot();
                                 $authMethodGoogleEnabled = $form->get('AUTH_METHOD_GOOGLE_LOGIN_ENABLED')->getData();
                                 if ($authMethodGoogleEnabled === "true" && empty($value)) {
-                                    $context->buildViolation('This field cannot be empty when GOOGLE is enabled.')
+                                    $context->buildViolation($this->translator->trans('fieldNotEmptyWhenSAMLEnabled', [], 'AuthType'))
                                         ->addViolation();
                                 }
                             },
@@ -60,7 +63,7 @@ class AuthType extends AbstractType
                     'constraints' => [
                         new Length([
                             'max' => 100,
-                            'maxMessage' => 'The description cannot be longer than {{ limit }} characters.',
+                            'maxMessage' => $this->translator->trans('descriptionMaximumCharactersMessage', [], 'AuthType'),
                         ]),
                     ],
                 ],
@@ -69,7 +72,7 @@ class AuthType extends AbstractType
                 'type' => IntegerType::class,
                 'constraints' => [
                     new NotBlank([
-                        'message' => 'Please select return a valid value.',
+                        'message' => $this->translator->trans('selectValidValue', [], 'AuthType'),
                     ]),
                     new Callback(function ($value, ExecutionContextInterface $context) use ($options): void {
                         // Get the root form to access other fields
@@ -84,21 +87,27 @@ class AuthType extends AbstractType
 
                         // Perform the range validation if SAML is enabled
                         if ($value < 1 || $value > $options['profileLimitDate']) {
-                            $context->buildViolation(sprintf(
-                                'Please select a value between 1 (minimum, fixed value) and %d 
-                    (maximum, determined by the number of days left until the certificate expires on %s).',
-                                $options['profileLimitDate'],
-                                $options['humanReadableExpirationDate']
-                            ))->addViolation();
+                            $context->buildViolation($this->translator->trans(
+                                'profileLimitMessage',
+                                [
+                                '{{ limit }}' => $options['profileLimitDate'],
+                                '{{ expiration_date }}' => $options['humanReadableExpirationDate']
+                                ],
+                                'AuthType'
+                            )
+                            )->addViolation();
                         }
                     }),
                     new Callback(function ($value, ExecutionContextInterface $context) use ($options): void {
                         // Additional validation if needed for expired certificates
                         if ($options['profileLimitDate'] < 1) {
-                            $context->buildViolation(sprintf(
-                                'The certificate has expired on (%s), please renew your certificate.',
-                                $options['humanReadableExpirationDate']
-                            ))->addViolation();
+                            $context->buildViolation(
+                                $this->translator->trans('certificateExpired', [
+                                    '{{ expiration_date }}' => $options['humanReadableExpirationDate'],
+                                ],
+                                'AuthType'
+                                )
+                            )->addViolation();
                         }
                     }),
                 ],
@@ -114,15 +123,15 @@ class AuthType extends AbstractType
                         new Length([
                             'min' => 3,
                             'max' => 50,
-                            'minMessage' => 'The label must be at least {{ limit }} characters long.',
-                            'maxMessage' => 'The label cannot be longer than {{ limit }} characters.',
+                            'minMessage' => $this->translator->trans('labelMinimumCharactersMessage', [], 'AuthType'),
+                            'maxMessage' => $this->translator->trans('labelMaximumCharactersMessage', [], 'AuthType'),
                         ]),
                         new Callback([
                             'callback' => function ($value, ExecutionContextInterface $context): void {
                                 $form = $context->getRoot();
                                 $authMethodGoogleEnabled = $form->get('AUTH_METHOD_GOOGLE_LOGIN_ENABLED')->getData();
                                 if ($authMethodGoogleEnabled === 'true' && empty($value)) {
-                                    $context->buildViolation('This field cannot be empty when GOOGLE is enabled.')
+                                    $context->buildViolation($this->translator->trans('fieldNotEmptyWhenGOOGLEEnabled', [], 'AuthType'))
                                         ->addViolation();
                                 }
                             },
@@ -137,7 +146,7 @@ class AuthType extends AbstractType
                     'constraints' => [
                         new Length([
                             'max' => 100,
-                            'maxMessage' => 'The description cannot be longer than {{ limit }} characters.',
+                            'maxMessage' => $this->translator->trans('descriptionMaximumCharactersMessage', [], 'AuthType'),
                         ]),
                     ],
                 ],
@@ -152,7 +161,7 @@ class AuthType extends AbstractType
                 'type' => IntegerType::class,
                 'constraints' => [
                     new NotBlank([
-                        'message' => 'Please select an option.',
+                        'message' => $this->translator->trans('selectValidValue', [], 'AuthType'),
                     ]),
                     new Callback(function ($value, ExecutionContextInterface $context) use ($options): void {
                         $form = $context->getRoot();
@@ -163,20 +172,26 @@ class AuthType extends AbstractType
 
                         // Perform range validation if Google login is enabled
                         if ($value < 1 || $value > $options['profileLimitDate']) {
-                            $context->buildViolation(sprintf(
-                                'Please select a value between 1 (minimum, fixed value) and %d 
-                    (maximum, determined by the number of days left until the certificate expires on %s).',
-                                $options['profileLimitDate'],
-                                $options['humanReadableExpirationDate']
-                            ))->addViolation();
+                            $context->buildViolation($this->translator->trans(
+                                'profileLimitMessage',
+                                [
+                                    '{{ limit }}' => $options['profileLimitDate'],
+                                    '{{ expiration_date }}' => $options['humanReadableExpirationDate']
+                                ],
+                                'AuthType'
+                            )
+                            )->addViolation();
                         }
                     }),
                     new Callback(function ($value, ExecutionContextInterface $context) use ($options): void {
                         if ($options['profileLimitDate'] < 1) {
-                            $context->buildViolation(sprintf(
-                                'The certificate has expired on (%s), please renew your certificate.',
-                                $options['humanReadableExpirationDate']
-                            ))->addViolation();
+                            $context->buildViolation(
+                                $this->translator->trans('certificateExpired', [
+                                    '{{ expiration_date }}' => $options['humanReadableExpirationDate'],
+                                ],
+                                    'AuthType'
+                                )
+                            )->addViolation();
                         }
                     }),
                 ],
@@ -192,8 +207,8 @@ class AuthType extends AbstractType
                         new Length([
                             'min' => 3,
                             'max' => 50,
-                            'minMessage' => 'The label must be at least {{ limit }} characters long.',
-                            'maxMessage' => 'The label cannot be longer than {{ limit }} characters.',
+                            'minMessage' => $this->translator->trans('labelMinimumCharactersMessage', [], 'AuthType'),
+                            'maxMessage' => $this->translator->trans('labelMaximumCharactersMessage', [], 'AuthType'),
                         ]),
                         new Callback([
                             'callback' => function ($value, ExecutionContextInterface $context): void {
@@ -202,7 +217,7 @@ class AuthType extends AbstractType
                                     'AUTH_METHOD_MICROSOFT_LOGIN_ENABLED'
                                 )->getData();
                                 if ($authMethodMicrosoftEnabled === "true" && empty($value)) {
-                                    $context->buildViolation('This field cannot be empty when Microsoft is enabled.')
+                                    $context->buildViolation($this->translator->trans('fieldNotEmptyWhenMicrosoftEnabled', [], 'AuthType'))
                                         ->addViolation();
                                 }
                             },
@@ -217,7 +232,7 @@ class AuthType extends AbstractType
                     'constraints' => [
                         new Length([
                             'max' => 100,
-                            'maxMessage' => 'The description cannot be longer than {{ limit }} characters.',
+                            'maxMessage' => $this->translator->trans('descriptionMaximumCharactersMessage', [], 'AuthType'),
                         ]),
                     ],
                 ],
@@ -232,7 +247,7 @@ class AuthType extends AbstractType
                 'type' => IntegerType::class,
                 'constraints' => [
                     new NotBlank([
-                        'message' => 'Please select a valid value.',
+                        'message' => $this->translator->trans('selectValidValue', [], 'AuthType'),
                     ]),
                     new Callback(function ($value, ExecutionContextInterface $context) use ($options): void {
                         $form = $context->getRoot();
@@ -243,20 +258,26 @@ class AuthType extends AbstractType
                         }
 
                         if ($value < 1 || $value > $options['profileLimitDate']) {
-                            $context->buildViolation(sprintf(
-                                'Please select a value between 1 (minimum, fixed value) and %d 
-                    (maximum, determined by the number of days left until the certificate expires on %s).',
-                                $options['profileLimitDate'],
-                                $options['humanReadableExpirationDate']
-                            ))->addViolation();
+                            $context->buildViolation($this->translator->trans(
+                                'profileLimitMessage',
+                                [
+                                    '{{ limit }}' => $options['profileLimitDate'],
+                                    '{{ expiration_date }}' => $options['humanReadableExpirationDate']
+                                ],
+                                'AuthType'
+                            )
+                            )->addViolation();
                         }
                     }),
                     new Callback(function ($value, ExecutionContextInterface $context) use ($options): void {
                         if ($options['profileLimitDate'] < 1) {
-                            $context->buildViolation(sprintf(
-                                'The certificate has expired on (%s), please renew your certificate.',
-                                $options['humanReadableExpirationDate']
-                            ))->addViolation();
+                            $context->buildViolation(
+                                $this->translator->trans('certificateExpired', [
+                                    '{{ expiration_date }}' => $options['humanReadableExpirationDate'],
+                                ],
+                                    'AuthType'
+                                )
+                            )->addViolation();
                         }
                     }),
                 ],
@@ -273,8 +294,8 @@ class AuthType extends AbstractType
                         new Length([
                             'min' => 3,
                             'max' => 50,
-                            'minMessage' => 'The label must be at least {{ limit }} characters long.',
-                            'maxMessage' => 'The label cannot be longer than {{ limit }} characters.',
+                            'minMessage' => $this->translator->trans('labelMinimumCharactersMessage', [], 'AuthType'),
+                            'maxMessage' => $this->translator->trans('labelMaximumCharactersMessage', [], 'AuthType'),
                         ]),
                         new Callback([
                             'callback' => function ($value, ExecutionContextInterface $context): void {
@@ -282,7 +303,7 @@ class AuthType extends AbstractType
                                 $authMethodRegisterEnabled = $form->get('AUTH_METHOD_REGISTER_ENABLED')->getData();
                                 if ($authMethodRegisterEnabled === "true" && empty($value)) {
                                     $context->buildViolation(
-                                        'This field cannot be empty when EMAIL REGISTER is enabled.'
+                                        $this->translator->trans('fieldNotEmptyWhenEMAILEnabled', [], 'AuthType')
                                     )->addViolation();
                                 }
                             },
@@ -297,7 +318,7 @@ class AuthType extends AbstractType
                     'constraints' => [
                         new Length([
                             'max' => 100,
-                            'maxMessage' => 'The description cannot be longer than {{ limit }} characters.',
+                            'maxMessage' => $this->translator->trans('descriptionMaximumCharactersMessage', [], 'AuthType'),
                         ]),
                     ],
                 ],
@@ -306,7 +327,7 @@ class AuthType extends AbstractType
                 'type' => IntegerType::class,
                 'constraints' => [
                     new NotBlank([
-                        'message' => 'Please select an option.',
+                        'message' => $this->translator->trans('selectValidValue', [], 'AuthType'),
                     ]),
                     new Callback(function ($value, ExecutionContextInterface $context) use ($options): void {
                         $form = $context->getRoot();
@@ -317,20 +338,26 @@ class AuthType extends AbstractType
                         }
 
                         if ($value < 1 || $value > $options['profileLimitDate']) {
-                            $context->buildViolation(sprintf(
-                                'Please select a value between 1 (minimum, fixed value) and %d 
-                    (maximum, determined by the number of days left until the certificate expires on %s).',
-                                $options['profileLimitDate'],
-                                $options['humanReadableExpirationDate']
-                            ))->addViolation();
+                            $context->buildViolation($this->translator->trans(
+                                'profileLimitMessage',
+                                [
+                                    '{{ limit }}' => $options['profileLimitDate'],
+                                    '{{ expiration_date }}' => $options['humanReadableExpirationDate']
+                                ],
+                                'AuthType'
+                            )
+                            )->addViolation();
                         }
                     }),
                     new Callback(function ($value, ExecutionContextInterface $context) use ($options): void {
                         if ($options['profileLimitDate'] < 1) {
-                            $context->buildViolation(sprintf(
-                                'The certificate has expired on (%s), please renew your certificate.',
-                                $options['humanReadableExpirationDate']
-                            ))->addViolation();
+                            $context->buildViolation(
+                                $this->translator->trans('certificateExpired', [
+                                    '{{ expiration_date }}' => $options['humanReadableExpirationDate'],
+                                ],
+                                    'AuthType'
+                                )
+                            )->addViolation();
                         }
                     }),
                 ],
@@ -346,8 +373,8 @@ class AuthType extends AbstractType
                         new Length([
                             'min' => 3,
                             'max' => 50,
-                            'minMessage' => 'The label must be at least {{ limit }} characters long.',
-                            'maxMessage' => 'The label cannot be longer than {{ limit }} characters.',
+                            'minMessage' => $this->translator->trans('labelMinimumCharactersMessage', [], 'AuthType'),
+                            'maxMessage' => $this->translator->trans('labelMaximumCharactersMessage', [], 'AuthType'),
                         ]),
                         new Callback([
                             'callback' => function ($value, ExecutionContextInterface $context): void {
@@ -357,7 +384,7 @@ class AuthType extends AbstractType
                                 )->getData();
                                 if ($authMethodLoginTraditionalEnabled === "true" && empty($value)) {
                                     $context->buildViolation(
-                                        'This field cannot be empty when Login Traditional is enabled.'
+                                        $this->translator->trans('fieldNotEmptyWhenTraditionalEnabled', [], 'AuthType')
                                     )->addViolation();
                                 }
                             },
@@ -372,7 +399,7 @@ class AuthType extends AbstractType
                     'constraints' => [
                         new Length([
                             'max' => 100,
-                            'maxMessage' => 'The description cannot be longer than {{ limit }} characters.',
+                            'maxMessage' => $this->translator->trans('descriptionMaximumCharactersMessage', [], 'AuthType'),
                         ]),
                     ],
                 ],
@@ -388,8 +415,8 @@ class AuthType extends AbstractType
                         new Length([
                             'min' => 3,
                             'max' => 50,
-                            'minMessage' => 'The label must be at least {{ limit }} characters long.',
-                            'maxMessage' => 'The label cannot be longer than {{ limit }} characters.',
+                            'minMessage' => $this->translator->trans('labelMinimumCharactersMessage', [], 'AuthType'),
+                            'maxMessage' => $this->translator->trans('labelMaximumCharactersMessage', [], 'AuthType'),
                         ]),
                         new Callback([
                             'callback' => function ($value, ExecutionContextInterface $context): void {
@@ -398,7 +425,7 @@ class AuthType extends AbstractType
                                 );
                                 if ($authMethodSMSRegisterEnabled === "true" && empty($value)) {
                                     $context->buildViolation(
-                                        'This field cannot be empty when SMS Register is enabled.'
+                                        $this->translator->trans('fieldNotEmptyWhenSMSEnabled', [], 'AuthType')
                                     )->addViolation();
                                 }
                             },
@@ -413,7 +440,7 @@ class AuthType extends AbstractType
                     'constraints' => [
                         new Length([
                             'max' => 100,
-                            'maxMessage' => 'The description cannot be longer than {{ limit }} characters.',
+                            'maxMessage' => $this->translator->trans('descriptionMaximumCharactersMessage', [], 'AuthType'),
                         ]),
                     ],
                 ],
@@ -422,7 +449,7 @@ class AuthType extends AbstractType
                 'type' => IntegerType::class,
                 'constraints' => [
                     new NotBlank([
-                        'message' => 'Please select an option.',
+                        'message' => $this->translator->trans('selectValidValue', [], 'AuthType'),
                     ]),
                     new Callback(function ($value, ExecutionContextInterface $context) use ($options): void {
                         $form = $context->getRoot();
@@ -433,20 +460,26 @@ class AuthType extends AbstractType
                         }
 
                         if ($value < 1 || $value > $options['profileLimitDate']) {
-                            $context->buildViolation(sprintf(
-                                'Please select a value between 1 (minimum, fixed value) and %d 
-                    (maximum, determined by the number of days left until the certificate expires on %s).',
-                                $options['profileLimitDate'],
-                                $options['humanReadableExpirationDate']
-                            ))->addViolation();
+                            $context->buildViolation($this->translator->trans(
+                                'profileLimitMessage',
+                                [
+                                    '{{ limit }}' => $options['profileLimitDate'],
+                                    '{{ expiration_date }}' => $options['humanReadableExpirationDate']
+                                ],
+                                'AuthType'
+                            )
+                            )->addViolation();
                         }
                     }),
                     new Callback(function ($value, ExecutionContextInterface $context) use ($options): void {
                         if ($options['profileLimitDate'] < 1) {
-                            $context->buildViolation(sprintf(
-                                'The certificate has expired on (%s). Please renew your certificate.',
-                                $options['humanReadableExpirationDate']
-                            ))->addViolation();
+                            $context->buildViolation(
+                                $this->translator->trans('certificateExpired', [
+                                    '{{ expiration_date }}' => $options['humanReadableExpirationDate'],
+                                ],
+                                    'AuthType'
+                                )
+                            )->addViolation();
                         }
                     }),
                 ],
@@ -474,7 +507,7 @@ class AuthType extends AbstractType
                             OperationMode::ON->value => 'true',
                             OperationMode::OFF->value => 'false',
                         ];
-                        $formFieldOptions['placeholder'] = 'Select an option';
+                        $formFieldOptions['placeholder'] = $this->translator->trans('selectOption', [], 'AuthType');
                     }
                     if (isset($config['constraints'])) {
                         $formFieldOptions['constraints'] = $config['constraints'];
