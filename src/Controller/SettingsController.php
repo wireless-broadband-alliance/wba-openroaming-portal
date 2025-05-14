@@ -40,6 +40,7 @@ use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class SettingsController extends AbstractController
 {
@@ -50,7 +51,8 @@ class SettingsController extends AbstractController
         private readonly UserRepository $userRepository,
         private readonly EntityManagerInterface $entityManager,
         private readonly RadiusAuthsRepository $radiusAuthsRepository,
-        private readonly RadiusAccountingRepository $radiusAccountingRepository
+        private readonly RadiusAccountingRepository $radiusAccountingRepository,
+        private readonly TranslatorInterface $translator
     ) {
     }
 
@@ -83,7 +85,14 @@ class SettingsController extends AbstractController
                 // if you want to dd("$output, $errorOutput"), please use the following variables
                 $output = $process->getOutput();
                 $errorOutput = $process->getErrorOutput();
-                $this->addFlash('success_admin', 'The setting has been reset successfully!');
+                $this->addFlash(
+                    'success_admin',
+                    $this->translator->trans(
+                        'settingResetSuccessfully',
+                        [],
+                        'controllers'
+                    )
+                );
                 $eventMetadata = [
                     'ip' => $request->getClientIp(),
                     'user_agent' => $request->headers->get('User-Agent'),
@@ -110,7 +119,10 @@ class SettingsController extends AbstractController
                 // if you want to dd("$output, $errorOutput"), please use the following variables
                 $output = $process->getOutput();
                 $errorOutput = $process->getErrorOutput();
-                $this->addFlash('success_admin', 'The terms and policies settings has been reset successfully!');
+                $this->addFlash(
+                    'success_admin',
+                    $this->translator->trans('termsPoliciesSettingsResetSuccessfully', [], 'controllers')
+                );
 
                 $eventMetadata = [
                     'ip' => $request->getClientIp(),
@@ -138,7 +150,10 @@ class SettingsController extends AbstractController
                 // if you want to dd("$output, $errorOutput"), please use the following variables
                 $output = $process->getOutput();
                 $errorOutput = $process->getErrorOutput();
-                $this->addFlash('success_admin', 'The Radius configurations has been reset successfully!');
+                $this->addFlash(
+                    'success_admin',
+                    $this->translator->trans('radiusConfigurationsResetSuccessfully', [], 'controllers')
+                );
 
                 $eventMetadata = [
                     'ip' => $request->getClientIp(),
@@ -167,7 +182,10 @@ class SettingsController extends AbstractController
                 // if you want to dd("$output, $errorOutput"), please use the following variables
                 $output = $process->getOutput();
                 $errorOutput = $process->getErrorOutput();
-                $this->addFlash('success_admin', 'The LDAP settings has been reset successfully!');
+                $this->addFlash(
+                    'success_admin',
+                    $this->translator->trans('LDAPSettingsResetSuccessfully', [], 'controllers')
+                );
 
                 $eventMetadata = [
                     'ip' => $request->getClientIp(),
@@ -195,7 +213,10 @@ class SettingsController extends AbstractController
                 // if you want to dd("$output, $errorOutput"), please use the following variables
                 $output = $process->getOutput();
                 $errorOutput = $process->getErrorOutput();
-                $this->addFlash('success_admin', 'The platform mode status has been reset successfully!');
+                $this->addFlash(
+                    'success_admin',
+                    $this->translator->trans('platformModeStatusResetSuccessfully', [], 'controllers')
+                );
 
                 $eventMetadata = [
                     'ip' => $request->getClientIp(),
@@ -223,7 +244,10 @@ class SettingsController extends AbstractController
                 // if you want to dd("$output, $errorOutput"), please use the following variables
                 $output = $process->getOutput();
                 $errorOutput = $process->getErrorOutput();
-                $this->addFlash('success_admin', 'The CAPPORT settings has been reset successfully!');
+                $this->addFlash(
+                    'success_admin',
+                    $this->translator->trans('platformModeStatusResetSuccessfully', [], 'controllers')
+                );
 
                 $eventMetadata = [
                     'ip' => $request->getClientIp(),
@@ -251,7 +275,10 @@ class SettingsController extends AbstractController
                 // if you want to dd("$output, $errorOutput"), please use the following variables
                 $output = $process->getOutput();
                 $errorOutput = $process->getErrorOutput();
-                $this->addFlash('success_admin', 'The authentication settings has been reset successfully!');
+                $this->addFlash(
+                    'success_admin',
+                    $this->translator->trans('authenticationSettingsResetSuccessfully', [], 'controllers')
+                );
 
                 $eventMetadata = [
                     'ip' => $request->getClientIp(),
@@ -279,7 +306,10 @@ class SettingsController extends AbstractController
                 // if you want to dd("$output, $errorOutput"), please use the following variables
                 $output = $process->getOutput();
                 $errorOutput = $process->getErrorOutput();
-                $this->addFlash('success_admin', 'The Two Factor settings has been reset successfully!');
+                $this->addFlash(
+                    'success_admin',
+                    $this->translator->trans('authenticationSettingsResetSuccessfully', [], 'controllers')
+                );
 
                 $eventMetadata = [
                     'ip' => $request->getClientIp(),
@@ -309,7 +339,7 @@ class SettingsController extends AbstractController
                 $errorOutput = $process->getErrorOutput();
                 $this->addFlash(
                     'success_admin',
-                    'The configuration SMS settings has been clear successfully!'
+                    $this->translator->trans('SMSSettingsClearSuccessfully', [], 'controllers')
                 );
 
                 $eventMetadata = [
@@ -328,7 +358,10 @@ class SettingsController extends AbstractController
             }
         }
 
-        $this->addFlash('error_admin', 'The verification code is incorrect. Please try again.');
+        $this->addFlash(
+            'error_admin',
+            $this->translator->trans('incorrectVerificationCode', [], 'controllers')
+        );
         return $this->redirectToRoute('admin_confirm_reset', ['type' => $type]);
     }
 
@@ -456,7 +489,10 @@ class SettingsController extends AbstractController
 
 
             $this->entityManager->flush();
-            $this->addFlash('success_admin', 'Terms and Policies links changes have been applied successfully.');
+            $this->addFlash(
+                'success_admin',
+                $this->translator->trans('termsPoliciesLinksChangesAppliedSuccessfully', [], 'controllers')
+            );
             return $this->redirectToRoute('admin_dashboard_settings_terms');
         }
 
@@ -533,7 +569,10 @@ class SettingsController extends AbstractController
             );
 
 
-            $this->addFlash('success_admin', 'New LDAP configuration have been applied successfully.');
+            $this->addFlash(
+                'success_admin',
+                $this->translator->trans('LDAPConfigurationAppliedSuccessfully', [], 'controllers')
+            );
             return $this->redirectToRoute('admin_dashboard_settings_LDAP');
         }
 
@@ -570,7 +609,10 @@ class SettingsController extends AbstractController
 
             $staticValue = '887FAE2A-F051-4CC9-99BB-8DFD66F553A9';
             if ($submittedData['PAYLOAD_IDENTIFIER'] === $staticValue) {
-                $this->addFlash('error_admin', 'Please do not use the default value from the Payload Identifier card.');
+                $this->addFlash(
+                    'error_admin',
+                    $this->translator->trans('notUseDefaultPayloadIdentifierCard', [], 'controllers')
+                );
             } else {
                 $settingsToUpdate = [
                     'RADIUS_REALM_NAME',
@@ -601,7 +643,11 @@ class SettingsController extends AbstractController
                     ) {
                         $this->addFlash(
                             'error_admin',
-                            "The value for $settingName is not a valid domain or does not resolve to an IP address."
+                            $this->translator->trans(
+                                'invalidDomainOrIP',
+                                ['%settingName%' => $settingName],
+                                'controllers'
+                            )
                         );
                         return $this->redirectToRoute('admin_dashboard_settings_radius');
                     }
@@ -625,7 +671,10 @@ class SettingsController extends AbstractController
                     $eventMetadata
                 );
 
-                $this->addFlash('success_admin', 'Radius configuration have been applied successfully.');
+                $this->addFlash(
+                    'success_admin',
+                    $this->translator->trans('radiusConfigurationAppliedSuccessfully', [], 'controllers')
+                );
                 return $this->redirectToRoute('admin_dashboard_settings_radius');
             }
         }
@@ -724,7 +773,10 @@ class SettingsController extends AbstractController
                 $eventMetadata
             );
 
-            $this->addFlash('success_admin', 'The new changes have been applied successfully.');
+            $this->addFlash(
+                'success_admin',
+                $this->translator->trans('newChangesAppliedSuccessfully', [], 'controllers')
+            );
             return $this->redirectToRoute('admin_dashboard_settings_status');
         }
 
@@ -796,7 +848,10 @@ class SettingsController extends AbstractController
                 $eventMetadata
             );
 
-            $this->addFlash('success_admin', 'The new changes have been applied successfully.');
+            $this->addFlash(
+                'success_admin',
+                $this->translator->trans('newChangesAppliedSuccessfully', [], 'controllers')
+            );
             return $this->redirectToRoute('admin_dashboard_settings_two_fa');
         }
 
@@ -921,7 +976,10 @@ class SettingsController extends AbstractController
                 new DateTime(),
                 $eventMetadata
             );
-            $this->addFlash('success_admin', 'New authentication configuration have been applied successfully.');
+            $this->addFlash(
+                'success_admin',
+                $this->translator->trans('authenticationConfigurationAppliedSuccessfully', [], 'controllers')
+            );
             return $this->redirectToRoute('admin_dashboard_settings_auth');
         }
 
@@ -993,7 +1051,10 @@ class SettingsController extends AbstractController
                 $eventMetadata
             );
 
-            $this->addFlash('success_admin', 'New CAPPORT configuration have been applied successfully.');
+            $this->addFlash(
+                'success_admin',
+                $this->translator->trans('CAPPORTConfigurationAppliedSuccessfully', [], 'controllers')
+            );
             return $this->redirectToRoute('admin_dashboard_settings_capport');
         }
 
@@ -1065,7 +1126,10 @@ class SettingsController extends AbstractController
                 $eventMetadata
             );
 
-            $this->addFlash('success_admin', 'New SMS configuration have been applied successfully.');
+            $this->addFlash(
+                'success_admin',
+                $this->translator->trans('SMSConfigurationAppliedSuccessfully', [], 'controllers')
+            );
             return $this->redirectToRoute('admin_dashboard_settings_sms');
         }
 
@@ -1109,7 +1173,10 @@ class SettingsController extends AbstractController
         $interval = $startDate->diff($endDate);
 
         if ($interval->days > 366) {
-            $this->addFlash('error_admin', 'Maximum date range is 1 year');
+            $this->addFlash(
+                'error_admin',
+                $this->translator->trans('maximumDateRange1Year', [], 'controllers')
+            );
             return $this->redirectToRoute('admin_dashboard_statistics');
         }
 
@@ -1133,7 +1200,7 @@ class SettingsController extends AbstractController
         if ($memory_diff > 134217728) {
             $this->addFlash(
                 'error_admin',
-                'The data you requested is too large to be processed. Please try a smaller date range.'
+                $this->translator->trans('dataRequestedTooLarge', [], 'controllers')
             );
             return $this->redirectToRoute('admin_dashboard_statistics');
         }
