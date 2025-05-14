@@ -9,16 +9,23 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\IsTrue;
 use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class AutoDeleteCodeType extends AbstractType
 {
+    public function __construct(
+        private readonly TranslatorInterface $translator
+    )
+    {
+    }
+
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
             ->add('code', TextType::class, [
                 'constraints' => [
                     new NotBlank([
-                        'message' => 'You should enter a code.',
+                        'message' => $this->translator->trans('enterCode', [], 'AuthType'),
                     ]),
                 ],
                 'attr' => [
@@ -30,8 +37,7 @@ class AutoDeleteCodeType extends AbstractType
                 'mapped' => false,
                 'constraints' => [
                     new IsTrue([
-                        'message' => 'You must confirm that you understand deleting
-                         your account is permanent and cannot be undone.',
+                        'message' => $this->translator->trans('confirmDeletingYourAccount', [], 'AuthType'),
                     ]),
                 ],
             ]);
