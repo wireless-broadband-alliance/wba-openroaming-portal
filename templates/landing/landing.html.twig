@@ -131,9 +131,14 @@
 
                 <div class="flex flex-row justify-between items-center space-x-6 mt-[120px]">
                     <p class="text-[#212529] text-opacity-40 text-sm">
-                        {{ 'authenticatedUser'|trans({
-                            '{uuid}': app.user.uuid,
-                        }, 'landing') }}
+                        {{ 'authenticatedAs'|trans({}, 'landing') }}
+                        {% for auth in user.userExternalAuths %}
+                            {% if auth.provider == constant('App\\Enum\\UserProvider::SAML').value %}
+                                {{ auth.providerId }}
+                            {% else %}
+                                {{ app.user.uuid }}
+                            {% endif %}
+                        {% endfor %}
                     </p>
 
                     {% if app.user.isVerified %}

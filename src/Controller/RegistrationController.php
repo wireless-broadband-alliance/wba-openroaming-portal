@@ -94,7 +94,7 @@ class RegistrationController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
-        if ($data['AUTH_METHOD_REGISTER_ENABLED']['value'] !== true) {
+        if ($data['AUTH_METHOD_REGISTER_ENABLED']['value'] !== 'true') {
             $this->addFlash(
                 'error',
                 $this->translator->trans(
@@ -207,7 +207,7 @@ class RegistrationController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
-        if ($data['AUTH_METHOD_SMS_REGISTER_ENABLED']['value'] !== true) {
+        if ($data['AUTH_METHOD_SMS_REGISTER_ENABLED']['value'] !== 'true') {
             $this->addFlash(
                 'error',
                 $this->translator->trans(

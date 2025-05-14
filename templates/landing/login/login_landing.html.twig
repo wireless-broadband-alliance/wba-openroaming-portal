@@ -11,7 +11,7 @@
     {% if data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\OperationMode::ON').value %}
         <img class="w-[120px] h-[58px] object-scale-down mt-[75px]"
              src="{{ data.customerLogoName.value }}"
-             alt="{{ 'logoAlt'|trans({}, 'login_landing') }}" />
+             alt="{{ 'logoAlt'|trans({}, 'login_landing') }}"/>
     {% endif %}
 
     <div class="{{ data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\OperationMode::ON').value ? 'pt-[28px]' : 'pt-[161px]' }} leading-7">
@@ -26,11 +26,11 @@
     {# Form Column #}
     {{ form_start(form) }}
 
-    {% if data.EMAIL_REGISTER_ENABLED.value and data.AUTH_METHOD_SMS_REGISTER_ENABLED.value %}
+    {% if data.AUTH_METHOD_REGISTER_ENABLED.value and data.AUTH_METHOD_SMS_REGISTER_ENABLED.value == 'true' %}
         {% set label = 'form.email_or_phone'|trans({}, 'login_landing') %}
-    {% elseif data.EMAIL_REGISTER_ENABLED.value %}
+    {% elseif data.AUTH_METHOD_REGISTER_ENABLED.value == 'true' %}
         {% set label = 'form.email'|trans({}, 'login_landing') %}
-    {% elseif data.AUTH_METHOD_SMS_REGISTER_ENABLED.value %}
+    {% elseif data.AUTH_METHOD_SMS_REGISTER_ENABLED.value == 'true' %}
         {% set label = 'form.phone_number'|trans({}, 'login_landing') %}
     {% else %}
         {% set label = 'form.email'|trans({}, 'login_landing') %}
@@ -84,21 +84,21 @@
     <div class="my-[25px] divider"></div>
     {% if data.PLATFORM_MODE.value != constant('App\\Enum\\PlatformMode::DEMO').value %}
 
-        {% if data.EMAIL_REGISTER_ENABLED.value or data.AUTH_METHOD_SMS_REGISTER_ENABLED.value %}
+        {% if data.AUTH_METHOD_REGISTER_ENABLED.value or data.AUTH_METHOD_SMS_REGISTER_ENABLED.value == 'true' %}
             <p class="mt-2 text-sm">
                 {{ 'forgot_password'|trans({}, 'login_landing') }}
 
-                {% if data.EMAIL_REGISTER_ENABLED.value %}
+                {% if data.AUTH_METHOD_REGISTER_ENABLED.value == 'true' %}
                     <a href="{{ path('app_site_forgot_password_email') }}" class="font-semibold text-primary underline">
                         {{ 'forgot_password_email'|trans({}, 'login_landing') }}
                     </a>
                 {% endif %}
 
-                {% if data.EMAIL_REGISTER_ENABLED.value and data.AUTH_METHOD_SMS_REGISTER_ENABLED.value %}
+                {% if data.AUTH_METHOD_REGISTER_ENABLED.value or data.AUTH_METHOD_SMS_REGISTER_ENABLED.value == 'true' %}
                     {{ 'or'|trans({}, 'login_landing') }}
                 {% endif %}
 
-                {% if data.AUTH_METHOD_SMS_REGISTER_ENABLED.value %}
+                {% if data.AUTH_METHOD_SMS_REGISTER_ENABLED.value == 'true' %}
                     <a href="{{ path('app_site_forgot_password_sms') }}" class="font-semibold text-primary underline">
                         {{ 'forgot_password_phone'|trans({}, 'login_landing') }}
                     </a>.
@@ -108,17 +108,17 @@
             <p class="mt-2 text-sm">
                 {{ 'no_account_register'|trans({}, 'login_landing') }}
 
-                {% if data.EMAIL_REGISTER_ENABLED.value %}
+                {% if data.AUTH_METHOD_REGISTER_ENABLED.value == 'true' %}
                     <a href="{{ path('app_register') }}" class="font-semibold text-primary underline">
                         {{ 'register_email'|trans({}, 'login_landing') }}
                     </a>
                 {% endif %}
 
-                {% if data.EMAIL_REGISTER_ENABLED.value and data.AUTH_METHOD_SMS_REGISTER_ENABLED.value %}
+                {% if data.AUTH_METHOD_REGISTER_ENABLED.value or data.AUTH_METHOD_SMS_REGISTER_ENABLED.value == 'true' %}
                     {{ 'or'|trans({}, 'login_landing') }}
                 {% endif %}
 
-                {% if data.AUTH_METHOD_SMS_REGISTER_ENABLED.value %}
+                {% if data.AUTH_METHOD_SMS_REGISTER_ENABLED.value == 'true' %}
                     <a href="{{ path('app_register_sms') }}" class="font-semibold text-primary underline">
                         {{ 'register_phone'|trans({}, 'login_landing') }}
                     </a>.
