@@ -90,6 +90,7 @@ readonly class GetSettings
         $session = $request->getSession();
         $locale = $session->get('_locale') ?: 'en';
 
+        // phpcs:disable Generic.Files.LineLength.TooLong
         $descriptions = [
             'en' => [
                 'RADIUS_REALM_NAME' => 'The realm name for your RADIUS server',
@@ -253,6 +254,7 @@ readonly class GetSettings
                 'PROFILE_LIMIT_DATE_SMS' => 'Tempo em dias para desativar perfis de utilizadores com login por SMS',
             ]
         ];
+        // phpcs:enable
 
         return $descriptions[$locale][$settingName] ?? $descriptions['en'][$settingName];
     }

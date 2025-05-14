@@ -22,8 +22,7 @@ class AuthType extends AbstractType
     public function __construct(
         private readonly GetSettings $getSettings,
         private readonly TranslatorInterface $translator
-    )
-    {
+    ) {
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
@@ -48,7 +47,13 @@ class AuthType extends AbstractType
                                 $form = $context->getRoot();
                                 $authMethodGoogleEnabled = $form->get('AUTH_METHOD_GOOGLE_LOGIN_ENABLED')->getData();
                                 if ($authMethodGoogleEnabled === "true" && empty($value)) {
-                                    $context->buildViolation($this->translator->trans('fieldNotEmptyWhenSAMLEnabled', [], 'AuthType'))
+                                    $context->buildViolation(
+                                        $this->translator->trans(
+                                            'fieldNotEmptyWhenSAMLEnabled',
+                                            [],
+                                            'AuthType'
+                                        )
+                                    )
                                         ->addViolation();
                                 }
                             },
@@ -63,7 +68,11 @@ class AuthType extends AbstractType
                     'constraints' => [
                         new Length([
                             'max' => 100,
-                            'maxMessage' => $this->translator->trans('descriptionMaximumCharactersMessage', [], 'AuthType'),
+                            'maxMessage' => $this->translator->trans(
+                                'descriptionMaximumCharactersMessage',
+                                [],
+                                'AuthType'
+                            ),
                         ]),
                     ],
                 ],
@@ -87,14 +96,15 @@ class AuthType extends AbstractType
 
                         // Perform the range validation if SAML is enabled
                         if ($value < 1 || $value > $options['profileLimitDate']) {
-                            $context->buildViolation($this->translator->trans(
-                                'profileLimitMessage',
-                                [
-                                '{{ limit }}' => $options['profileLimitDate'],
-                                '{{ expiration_date }}' => $options['humanReadableExpirationDate']
-                                ],
-                                'AuthType'
-                            )
+                            $context->buildViolation(
+                                $this->translator->trans(
+                                    'profileLimitMessage',
+                                    [
+                                        '{{ limit }}' => $options['profileLimitDate'],
+                                        '{{ expiration_date }}' => $options['humanReadableExpirationDate']
+                                    ],
+                                    'AuthType'
+                                )
                             )->addViolation();
                         }
                     }),
@@ -102,10 +112,12 @@ class AuthType extends AbstractType
                         // Additional validation if needed for expired certificates
                         if ($options['profileLimitDate'] < 1) {
                             $context->buildViolation(
-                                $this->translator->trans('certificateExpired', [
-                                    '{{ expiration_date }}' => $options['humanReadableExpirationDate'],
-                                ],
-                                'AuthType'
+                                $this->translator->trans(
+                                    'certificateExpired',
+                                    [
+                                        '{{ expiration_date }}' => $options['humanReadableExpirationDate'],
+                                    ],
+                                    'AuthType'
                                 )
                             )->addViolation();
                         }
@@ -131,7 +143,9 @@ class AuthType extends AbstractType
                                 $form = $context->getRoot();
                                 $authMethodGoogleEnabled = $form->get('AUTH_METHOD_GOOGLE_LOGIN_ENABLED')->getData();
                                 if ($authMethodGoogleEnabled === 'true' && empty($value)) {
-                                    $context->buildViolation($this->translator->trans('fieldNotEmptyWhenGOOGLEEnabled', [], 'AuthType'))
+                                    $context->buildViolation(
+                                        $this->translator->trans('fieldNotEmptyWhenGOOGLEEnabled', [], 'AuthType')
+                                    )
                                         ->addViolation();
                                 }
                             },
@@ -146,7 +160,11 @@ class AuthType extends AbstractType
                     'constraints' => [
                         new Length([
                             'max' => 100,
-                            'maxMessage' => $this->translator->trans('descriptionMaximumCharactersMessage', [], 'AuthType'),
+                            'maxMessage' => $this->translator->trans(
+                                'descriptionMaximumCharactersMessage',
+                                [],
+                                'AuthType'
+                            ),
                         ]),
                     ],
                 ],
@@ -172,23 +190,26 @@ class AuthType extends AbstractType
 
                         // Perform range validation if Google login is enabled
                         if ($value < 1 || $value > $options['profileLimitDate']) {
-                            $context->buildViolation($this->translator->trans(
-                                'profileLimitMessage',
-                                [
-                                    '{{ limit }}' => $options['profileLimitDate'],
-                                    '{{ expiration_date }}' => $options['humanReadableExpirationDate']
-                                ],
-                                'AuthType'
-                            )
+                            $context->buildViolation(
+                                $this->translator->trans(
+                                    'profileLimitMessage',
+                                    [
+                                        '{{ limit }}' => $options['profileLimitDate'],
+                                        '{{ expiration_date }}' => $options['humanReadableExpirationDate']
+                                    ],
+                                    'AuthType'
+                                )
                             )->addViolation();
                         }
                     }),
                     new Callback(function ($value, ExecutionContextInterface $context) use ($options): void {
                         if ($options['profileLimitDate'] < 1) {
                             $context->buildViolation(
-                                $this->translator->trans('certificateExpired', [
-                                    '{{ expiration_date }}' => $options['humanReadableExpirationDate'],
-                                ],
+                                $this->translator->trans(
+                                    'certificateExpired',
+                                    [
+                                        '{{ expiration_date }}' => $options['humanReadableExpirationDate'],
+                                    ],
                                     'AuthType'
                                 )
                             )->addViolation();
@@ -217,7 +238,9 @@ class AuthType extends AbstractType
                                     'AUTH_METHOD_MICROSOFT_LOGIN_ENABLED'
                                 )->getData();
                                 if ($authMethodMicrosoftEnabled === "true" && empty($value)) {
-                                    $context->buildViolation($this->translator->trans('fieldNotEmptyWhenMicrosoftEnabled', [], 'AuthType'))
+                                    $context->buildViolation(
+                                        $this->translator->trans('fieldNotEmptyWhenMicrosoftEnabled', [], 'AuthType')
+                                    )
                                         ->addViolation();
                                 }
                             },
@@ -232,7 +255,11 @@ class AuthType extends AbstractType
                     'constraints' => [
                         new Length([
                             'max' => 100,
-                            'maxMessage' => $this->translator->trans('descriptionMaximumCharactersMessage', [], 'AuthType'),
+                            'maxMessage' => $this->translator->trans(
+                                'descriptionMaximumCharactersMessage',
+                                [],
+                                'AuthType'
+                            ),
                         ]),
                     ],
                 ],
@@ -258,23 +285,26 @@ class AuthType extends AbstractType
                         }
 
                         if ($value < 1 || $value > $options['profileLimitDate']) {
-                            $context->buildViolation($this->translator->trans(
-                                'profileLimitMessage',
-                                [
-                                    '{{ limit }}' => $options['profileLimitDate'],
-                                    '{{ expiration_date }}' => $options['humanReadableExpirationDate']
-                                ],
-                                'AuthType'
-                            )
+                            $context->buildViolation(
+                                $this->translator->trans(
+                                    'profileLimitMessage',
+                                    [
+                                        '{{ limit }}' => $options['profileLimitDate'],
+                                        '{{ expiration_date }}' => $options['humanReadableExpirationDate']
+                                    ],
+                                    'AuthType'
+                                )
                             )->addViolation();
                         }
                     }),
                     new Callback(function ($value, ExecutionContextInterface $context) use ($options): void {
                         if ($options['profileLimitDate'] < 1) {
                             $context->buildViolation(
-                                $this->translator->trans('certificateExpired', [
-                                    '{{ expiration_date }}' => $options['humanReadableExpirationDate'],
-                                ],
+                                $this->translator->trans(
+                                    'certificateExpired',
+                                    [
+                                        '{{ expiration_date }}' => $options['humanReadableExpirationDate'],
+                                    ],
                                     'AuthType'
                                 )
                             )->addViolation();
@@ -318,7 +348,11 @@ class AuthType extends AbstractType
                     'constraints' => [
                         new Length([
                             'max' => 100,
-                            'maxMessage' => $this->translator->trans('descriptionMaximumCharactersMessage', [], 'AuthType'),
+                            'maxMessage' => $this->translator->trans(
+                                'descriptionMaximumCharactersMessage',
+                                [],
+                                'AuthType'
+                            ),
                         ]),
                     ],
                 ],
@@ -338,23 +372,26 @@ class AuthType extends AbstractType
                         }
 
                         if ($value < 1 || $value > $options['profileLimitDate']) {
-                            $context->buildViolation($this->translator->trans(
-                                'profileLimitMessage',
-                                [
-                                    '{{ limit }}' => $options['profileLimitDate'],
-                                    '{{ expiration_date }}' => $options['humanReadableExpirationDate']
-                                ],
-                                'AuthType'
-                            )
+                            $context->buildViolation(
+                                $this->translator->trans(
+                                    'profileLimitMessage',
+                                    [
+                                        '{{ limit }}' => $options['profileLimitDate'],
+                                        '{{ expiration_date }}' => $options['humanReadableExpirationDate']
+                                    ],
+                                    'AuthType'
+                                )
                             )->addViolation();
                         }
                     }),
                     new Callback(function ($value, ExecutionContextInterface $context) use ($options): void {
                         if ($options['profileLimitDate'] < 1) {
                             $context->buildViolation(
-                                $this->translator->trans('certificateExpired', [
-                                    '{{ expiration_date }}' => $options['humanReadableExpirationDate'],
-                                ],
+                                $this->translator->trans(
+                                    'certificateExpired',
+                                    [
+                                        '{{ expiration_date }}' => $options['humanReadableExpirationDate'],
+                                    ],
                                     'AuthType'
                                 )
                             )->addViolation();
@@ -399,7 +436,11 @@ class AuthType extends AbstractType
                     'constraints' => [
                         new Length([
                             'max' => 100,
-                            'maxMessage' => $this->translator->trans('descriptionMaximumCharactersMessage', [], 'AuthType'),
+                            'maxMessage' => $this->translator->trans(
+                                'descriptionMaximumCharactersMessage',
+                                [],
+                                'AuthType'
+                            ),
                         ]),
                     ],
                 ],
@@ -440,7 +481,11 @@ class AuthType extends AbstractType
                     'constraints' => [
                         new Length([
                             'max' => 100,
-                            'maxMessage' => $this->translator->trans('descriptionMaximumCharactersMessage', [], 'AuthType'),
+                            'maxMessage' => $this->translator->trans(
+                                'descriptionMaximumCharactersMessage',
+                                [],
+                                'AuthType'
+                            ),
                         ]),
                     ],
                 ],
@@ -460,23 +505,26 @@ class AuthType extends AbstractType
                         }
 
                         if ($value < 1 || $value > $options['profileLimitDate']) {
-                            $context->buildViolation($this->translator->trans(
-                                'profileLimitMessage',
-                                [
-                                    '{{ limit }}' => $options['profileLimitDate'],
-                                    '{{ expiration_date }}' => $options['humanReadableExpirationDate']
-                                ],
-                                'AuthType'
-                            )
+                            $context->buildViolation(
+                                $this->translator->trans(
+                                    'profileLimitMessage',
+                                    [
+                                        '{{ limit }}' => $options['profileLimitDate'],
+                                        '{{ expiration_date }}' => $options['humanReadableExpirationDate']
+                                    ],
+                                    'AuthType'
+                                )
                             )->addViolation();
                         }
                     }),
                     new Callback(function ($value, ExecutionContextInterface $context) use ($options): void {
                         if ($options['profileLimitDate'] < 1) {
                             $context->buildViolation(
-                                $this->translator->trans('certificateExpired', [
-                                    '{{ expiration_date }}' => $options['humanReadableExpirationDate'],
-                                ],
+                                $this->translator->trans(
+                                    'certificateExpired',
+                                    [
+                                        '{{ expiration_date }}' => $options['humanReadableExpirationDate'],
+                                    ],
                                     'AuthType'
                                 )
                             )->addViolation();

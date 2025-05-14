@@ -12,6 +12,7 @@ class SettingTranslationFixture extends Fixture
     public function load(ObjectManager $manager): void
     {
         // Settings with their respective translations for each locale
+        // phpcs:disable Generic.Files.LineLength.TooLong
         $settingsToTranslate = [
             [
                 'name' => 'WELCOME_TEXT',
@@ -134,6 +135,7 @@ class SettingTranslationFixture extends Fixture
                 ],
             ],
         ];
+        // phpcs:enable
 
         // Process settings and translations
         foreach ($settingsToTranslate as $data) {
