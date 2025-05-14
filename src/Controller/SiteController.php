@@ -150,7 +150,7 @@ class SiteController extends AbstractController
             if ($currentUser->isForgotPasswordRequest()) {
                 $this->addFlash(
                     'error',
-                    'You need to confirm the new password before download a profile!'
+                    $this->translator->trans('confirmNewPasswordBeforeDownloadProfile', [], 'controllers')
                 );
                 return $this->redirectToRoute('app_site_forgot_password_checker');
             }
@@ -224,7 +224,10 @@ class SiteController extends AbstractController
                     }
                 }
                 if (empty($payload['radio-os']) && empty($payload['detected-os'])) {
-                    $this->addFlash('error', 'Please select Operating System!');
+                    $this->addFlash(
+                        'error',
+                        $this->translator->trans('selectOperatingSystem', [], 'controllers')
+                    );
                 } elseif (!$this->getUser() instanceof UserInterface) {
                     $user = new User();
                     $userAuths = new UserExternalAuth();
@@ -301,7 +304,10 @@ class SiteController extends AbstractController
         } elseif ($request->isMethod('POST')) {
             $payload = $request->request->all();
             if (empty($payload['radio-os']) && empty($payload['detected-os'])) {
-                $this->addFlash('error', 'Please select Operating System!');
+                $this->addFlash(
+                    'error',
+                    $this->translator->trans('selectOperatingSystem', [], 'controllers')
+                );
             }
             if (!array_key_exists('radio-os', $payload)) {
                 if (!array_key_exists('detected-os', $payload)) {
@@ -347,7 +353,10 @@ class SiteController extends AbstractController
         ];
 
         if ($data['os']['selected'] === OSTypes::NONE->value && $currentUser && $currentUser->isVerified()) {
-            $this->addFlash('error', 'Please select Operating System!');
+            $this->addFlash(
+                'error',
+                $this->translator->trans('selectOperatingSystem', [], 'controllers')
+            );
         }
 
         $form = $this->createForm(AccountUserUpdateLandingType::class, $this->getUser());
@@ -464,7 +473,10 @@ class SiteController extends AbstractController
                 true
             );
             if (!$revokeProfiles) {
-                $this->addFlash('error', 'This account doesn\'t have profiles associated!');
+                $this->addFlash(
+                    'error',
+                    $this->translator->trans('accountWithoutProfilesAssociated', [], 'controllers')
+                );
                 return $this->redirectToRoute('app_landing');
             }
             $eventMetaData = [
@@ -480,7 +492,10 @@ class SiteController extends AbstractController
                 $eventMetaData
             );
 
-            $this->addFlash('success', 'Your profiles associated with this account have been revoked.');
+            $this->addFlash(
+                'success',
+                $this->translator->trans('profilesAssociatedRevoked', [], 'controllers')
+            );
             return $this->redirectToRoute('app_landing');
         }
 
@@ -509,7 +524,10 @@ class SiteController extends AbstractController
                 $eventMetaData
             );
 
-            $this->addFlash('success', 'Your account information has been updated');
+            $this->addFlash(
+                'success',
+                $this->translator->trans('accountInformationUpdated', [], 'controllers')
+            );
 
             // Redirect the user upon successful form submission
             return $this->redirectToRoute('app_landing');
@@ -527,15 +545,17 @@ class SiteController extends AbstractController
 
             // Compare the typed password with the hashed password from the database
             if (!password_verify((string)$typedPassword, $currentPasswordDB)) {
-                $this->addFlash('error', 'Current password Invalid. Please try again.');
+                $this->addFlash(
+                    'error',
+                    $this->translator->trans('passwordInvalid', [], 'controllers')
+                );
                 return $this->redirectToRoute('app_landing');
             }
 
             if ($formPassword->get('newPassword')->getData() !== $formPassword->get('confirmPassword')->getData()) {
                 $this->addFlash(
                     'error',
-                    'Please make sure to type the same password on both fields. 
-                    If the problem keep occurring contact our support!'
+                    $this->translator->trans('typeTheSamePasswordBothFields', [], 'controllers')
                 );
                 return $this->redirectToRoute('app_landing');
             }
@@ -558,7 +578,10 @@ class SiteController extends AbstractController
                 $eventMetaData
             );
 
-            $this->addFlash('success', 'Your password has been updated successfully!');
+            $this->addFlash(
+                'success',
+                $this->translator->trans('passwordUpdatedSuccessfully', [], 'controllers')
+            );
         }
 
         return $this->redirectToRoute('app_landing');
@@ -576,7 +599,10 @@ class SiteController extends AbstractController
         MailerInterface $mailer
     ): Response {
         if ($this->getUser() instanceof UserInterface) {
-            $this->addFlash('error', 'You can\'t access this page logged in. ');
+            $this->addFlash(
+                'error',
+                $this->translator->trans('cantAccessThisPageLoggedIn', [], 'controllers')
+            );
             return $this->redirectToRoute('app_landing');
         }
 
@@ -587,13 +613,16 @@ class SiteController extends AbstractController
         if ($data['PLATFORM_MODE']['value'] === true) {
             $this->addFlash(
                 'error',
-                'The portal is in Demo mode - it is not possible to use this verification method.'
+                $this->translator->trans('portalInDemoMode', [], 'controllers')
             );
             return $this->redirectToRoute('app_landing');
         }
 
         if ($data['EMAIL_REGISTER_ENABLED']['value'] !== true) {
-            $this->addFlash('error', 'This verification method it\'s not enabled!');
+            $this->addFlash(
+                'error',
+                $this->translator->trans('verificationMethodNotEnabled', [], 'controllers')
+            );
             return $this->redirectToRoute('app_landing');
         }
 
@@ -690,24 +719,29 @@ class SiteController extends AbstractController
 
                         $mailer->send($email);
 
-                        $message = sprintf('We have sent you a new email to: %s.', $user->getEmail());
+                        $message = sprintf($this->translator->trans(
+                            'emailSentMessage',
+                            ['%email%' => $user->getEmail()],
+                            'messages'
+                        ));
                         $this->addFlash('success', $message);
                     } else {
                         // Inform the user to wait before trying again
-                        $this->addFlash('warning', 'Please wait 2 minutes before trying again.');
+                        $this->addFlash(
+                            'warning',
+                            $this->translator->trans('portalInDemoMode', [], 'controllers')
+                        );
                     }
                 } else {
                     $this->addFlash(
                         'warning',
-                        'This email is not associated with a valid account. 
-                        Please submit a valid email from the system, 
-                        ensuring it is from the platform and not from another provider.'
+                        $this->translator->trans('emailNotAssociatedWithValidAccount', [], 'controllers')
                     );
                 }
             } else {
                 $this->addFlash(
                     'warning',
-                    'This email doesn\'t exist, please make sure to create a account with a email on the platform!'
+                    $this->translator->trans('emailDoesntExist', [], 'controllers')
                 );
             }
         }
@@ -739,7 +773,10 @@ class SiteController extends AbstractController
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
         if ($this->getUser() instanceof UserInterface) {
-            $this->addFlash('error', 'You can\'t access this page logged in.');
+            $this->addFlash(
+                'error',
+                $this->translator->trans('cantAccessThisPageLoggedIn', [], 'controllers')
+            );
             return $this->redirectToRoute('app_landing');
         }
 
@@ -747,13 +784,16 @@ class SiteController extends AbstractController
         if ($data['PLATFORM_MODE']['value']) {
             $this->addFlash(
                 'error',
-                'The portal is in Demo mode - it is not possible to use this verification method.'
+                $this->translator->trans('portalInDemoMode', [], 'controllers')
             );
             return $this->redirectToRoute('app_landing');
         }
 
         if ($data['EMAIL_REGISTER_ENABLED']['value'] !== true) {
-            $this->addFlash('error', 'This verification method it\'s not enabled!');
+            $this->addFlash(
+                'error',
+                $this->translator->trans('verificationMethodNotEnabled', [], 'controllers')
+            );
             return $this->redirectToRoute('app_landing');
         }
 
@@ -820,36 +860,46 @@ class SiteController extends AbstractController
                             $user->getPhoneNumber()->getCountryCode() .
                             $user->getPhoneNumber()->getNationalNumber();
                         // Send SMS
-                        $message = "Your new random account password is: "
-                            . $randomPassword
-                            . "%0A" . "Please make sure to login to complete the request";
+                        $message = $this->translator->trans(
+                            'newRandomPasswordMessage',
+                            ['%password%' => $randomPassword],
+                            'controllers'
+                        );
                         $this->sendSMS->sendSmsNoValidation($recipient, $message);
 
                         $attemptsLeft = 3 - $verificationAttempts;
-                        $message = sprintf(
-                            'We have sent you a message to: %s. You have %d attempt(s) left.',
-                            $user->getUuid(),
-                            $attemptsLeft
+                        $message = $this->translator->trans(
+                            'messageSentWithAttemptsLeft',
+                            [
+                                '%uuid%' => $user->getUuid(),
+                                '%attempts%' => $attemptsLeft
+                            ],
+                            'controllers'
                         );
                         $this->addFlash('success', $message);
                     } else {
                         // Inform the user to wait before trying again
                         $this->addFlash(
                             'warning',
-                            "Please wait " . $data['SMS_TIMER_RESEND']['value'] . " minutes before trying again."
+                            $this->translator->trans(
+                                'waitBeforeRetry',
+                                [
+                                    '%minutes%' => $data['SMS_TIMER_RESEND']['value']
+                                ],
+                                'controllers'
+                            )
                         );
                     }
                 } else {
                     $this->addFlash(
                         'warning',
-                        'You have exceeded the limits of request for a new password. 
-                            Please contact our support for help.'
+                        $this->translator->trans('exceededLimitsRequestForNewPassword', [], 'controllers')
                     );
                 }
             } else {
                 $this->addFlash(
                     'warning',
-                    'This phone number doesn\'t exist, please submit a valid one from the system!'
+                    $this->translator->trans('PhoneNumberDoesntExist', [], 'controllers')
                 );
             }
         }
@@ -873,7 +923,10 @@ class SiteController extends AbstractController
         /** @var User $currentUser */
         $currentUser = $this->getUser();
         if (!$currentUser) {
-            $this->addFlash('error', 'You can only access this page logged in.');
+            $this->addFlash(
+                'error',
+                $this->translator->trans('onlyAccessThisPageLoggedIn', [], 'controllers')
+            );
             return $this->redirectToRoute('app_landing');
         }
 
@@ -883,19 +936,25 @@ class SiteController extends AbstractController
         if ($data['PLATFORM_MODE']['value']) {
             $this->addFlash(
                 'error',
-                'The portal is in Demo mode - it is not possible to use this verification method!'
+                $this->translator->trans('portalInDemoMode', [], 'controllers')
             );
             return $this->redirectToRoute('app_landing');
         }
 
         if (!$currentUser->isForgotPasswordRequest()) {
-            $this->addFlash('error', 'You can not access this page without a valid request!');
+            $this->addFlash(
+                'error',
+                $this->translator->trans('cannotAccessThisPageWithoutValidRequest', [], 'controllers')
+            );
             return $this->redirectToRoute('app_landing');
         }
 
         // Checks if the user has a "forgot_password_request", if not, return to the landing page
         if ($this->userRepository->findOneBy(['id' => $currentUser->getId(), 'forgot_password_request' => false])) {
-            $this->addFlash('error', 'You can\'t access this page if you don\'t have a request!');
+            $this->addFlash(
+                'error',
+                $this->translator->trans('cantAccessThisPageWithoutRequest', [], 'controllers')
+            );
             return $this->redirectToRoute('app_landing');
         }
 
@@ -908,15 +967,17 @@ class SiteController extends AbstractController
 
             // Compare the typed password with the hashed password from the database
             if (!password_verify((string)$typedPassword, $currentPasswordDB)) {
-                $this->addFlash('error', 'Current password Invalid. Please try again.');
+                $this->addFlash(
+                    'error',
+                    $this->translator->trans('passwordInvalid', [], 'controllers')
+                );
                 return $this->redirectToRoute('app_landing');
             }
 
             if ($form->get('newPassword')->getData() !== $form->get('confirmPassword')->getData()) {
                 $this->addFlash(
                     'error',
-                    'Please make sure to type the same password on both fields. 
-                    If the problem keep occurring contact our support!'
+                    $this->translator->trans('typeTheSamePasswordBothFields', [], 'controllers')
                 );
                 return $this->redirectToRoute('app_landing');
             }
@@ -944,7 +1005,10 @@ class SiteController extends AbstractController
                 $eventMetadata
             );
 
-            $this->addFlash('success', 'Your password has been updated successfully!');
+            $this->addFlash(
+                'success',
+                $this->translator->trans('passwordUpdatedSuccessfully', [], 'controllers')
+            );
             return $this->redirectToRoute('app_landing');
         }
 
@@ -1191,7 +1255,10 @@ class SiteController extends AbstractController
         }
 
         // Code is incorrect, display the error message and redirect again to the check email page
-        $this->addFlash('error', 'The verification code is incorrect. Please try again.');
+        $this->addFlash(
+            'error',
+            $this->translator->trans('verificationCodeIncorrect', [], 'controllers')
+        );
         return $this->redirectToRoute('app_email_code');
     }
 
@@ -1214,13 +1281,19 @@ class SiteController extends AbstractController
         $currentUser = $this->getUser();
 
         if (!$currentUser) {
-            $this->addFlash('error', 'You can only access this page logged in.');
+            $this->addFlash(
+                'error',
+                $this->translator->trans('onlyAccessThisPageLoggedIn', [], 'controllers')
+            );
             return $this->redirectToRoute('app_landing');
         }
 
         // Checks if the user has a "forgot_password_request", if yes, return to the password-reset form
         if ($this->userRepository->findOneBy(['id' => $currentUser->getId(), 'forgot_password_request' => true])) {
-            $this->addFlash('error', 'You need to confirm the new password before downloading a profile!');
+            $this->addFlash(
+                'error',
+                $this->translator->trans('confirmNewPasswordBeforeDownloadProfile', [], 'controllers')
+            );
             return $this->redirectToRoute('app_site_forgot_password_checker');
         }
 
@@ -1237,10 +1310,13 @@ class SiteController extends AbstractController
                     $verificationAttempts = $latestEventMetadata['verificationAttempts'] ?? 0;
                     $attemptsLeft = 3 - $verificationAttempts;
 
-                    $message = sprintf(
-                        'We have sent you a new code to: %s. You have %d attempt(s) left.',
-                        $currentUser->getPhoneNumber(),
-                        $attemptsLeft
+                    $message = $this->translator->trans(
+                        'codeSentWithAttemptsLeft',
+                        [
+                            '%phone%' => $currentUser->getPhoneNumber(),
+                            '%attempts%' => $attemptsLeft
+                        ],
+                        'controllers'
                     );
                     $this->addFlash('success', $message);
                 }
@@ -1248,9 +1324,13 @@ class SiteController extends AbstractController
                 // If regeneration failed, show an appropriate error message
                 $this->addFlash(
                     'error',
-                    'Failed to regenerate SMS code. Please, wait '
-                    . $data['SMS_TIMER_RESEND']['value']
-                    . ' minute(s) before generating a new code.'
+                    $this->translator->trans(
+                        'smsRegenerationError',
+                        [
+                            '%minutes%' => $data['SMS_TIMER_RESEND']['value']
+                        ],
+                        'controllers'
+                    )
                 );
             }
         } catch (\RuntimeException $e) {
@@ -1258,7 +1338,10 @@ class SiteController extends AbstractController
             $this->addFlash('error', $e->getMessage());
         } catch (Exception) {
             // Handle exceptions thrown by the service (e.g., network issues, API errors)
-            $this->addFlash('error', 'An error occurred while regenerating the SMS code. Please try again later.');
+            $this->addFlash(
+                'error',
+                $this->translator->trans('errorOccurredWhileRegeneratingSMSCode', [], 'controllers')
+            );
         }
         return $this->redirectToRoute('app_landing');
     }
@@ -1306,7 +1389,7 @@ class SiteController extends AbstractController
                     );
                     $this->addFlash(
                         'success',
-                        'A confirmation code was sent to your email.'
+                        $this->translator->trans('confirmationCodeSentToEmail', [], 'controllers')
                     );
                 } else {
                     $interval_seconds = $this->twoFAService->timeLeftToResendCodeTimeInterval(
@@ -1315,8 +1398,11 @@ class SiteController extends AbstractController
                     );
                     $this->addFlash(
                         'error',
-                        'You must wait ' .
-                        $interval_seconds . ' seconds before you can resend code'
+                        $this->translator->trans(
+                            'errorAdminWait',
+                            ['%time%' => $interval_seconds],
+                            'controllers'
+                        )
                     );
                 }
             } else {
@@ -1326,8 +1412,13 @@ class SiteController extends AbstractController
                 );
                 $this->addFlash(
                     'error',
-                    'Your code has already been sent to you previously. Wait ' .
-                    $interval_minutes . ' minutes to request a code again'
+                    $this->translator->trans(
+                        'codeAlreadySent',
+                        [
+                            '%minutes%' => $interval_minutes
+                        ],
+                        'controllers'
+                    )
                 );
             }
         }
@@ -1377,14 +1468,20 @@ class SiteController extends AbstractController
                     $this->userDeletionService->deleteUser($user, $userExternalAuths, $request, $currentUser);
                     return $this->redirectToRoute('app_landing');
                 }
-                $this->addFlash('error', 'Current password Invalid. Please try again.');
+                $this->addFlash(
+                    'error',
+                    $this->translator->trans('invalidPassword', [], 'controllers')
+                );
             } else {
                 $typedCode = $form->get('code')->getData();
                 if ($this->twoFAService->validate2FACode($currentUser, $typedCode)) {
                     $this->userDeletionService->deleteUser($user, $userExternalAuths, $request, $currentUser);
                     return $this->redirectToRoute('app_landing');
                 }
-                $this->addFlash('error', 'Code Invalid. Please try again.');
+                $this->addFlash(
+                    'error',
+                    $this->translator->trans('invalidCode', [], 'controllers')
+                );
             }
         }
 
