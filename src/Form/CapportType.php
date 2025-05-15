@@ -30,7 +30,7 @@ class CapportType extends AbstractType
                 'type' => TextType::class,
                 'constraints' => [
                     new Assert\Url([
-                        'message' => $this->translator->trans('valueNotValid', [], 'AuthType'),
+                        'message' => $this->translator->trans('valueNotValid', [], 'CapportType'),
                         'protocols' => ['http', 'https'],
                         'requireTld' => true,
                     ]),
@@ -40,7 +40,7 @@ class CapportType extends AbstractType
                 'type' => TextType::class,
                 'constraints' => [
                     new Assert\Url([
-                        'message' => $this->translator->trans('valueNotValid', [], 'AuthType'),
+                        'message' => $this->translator->trans('valueNotValid', [], 'CapportType'),
                         'protocols' => ['http', 'https'],
                         'requireTld' => true,
                     ]),
@@ -58,7 +58,7 @@ class CapportType extends AbstractType
                             OperationMode::ON->value => 'true',
                             OperationMode::OFF->value => 'false',
                         ];
-                        $formFieldOptions['placeholder'] = $this->translator->trans('selectOption', [], 'AuthType');
+                        $formFieldOptions['placeholder'] = $this->translator->trans('selectOption', [], 'CapportType');
                         $formFieldOptions['required'] = true;
                     }
                     $formFieldOptions['attr']['description'] = $this->getSettings->getSettingDescription($settingName);
