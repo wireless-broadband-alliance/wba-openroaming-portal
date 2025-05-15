@@ -170,11 +170,10 @@ class UserAccountDeletionController extends AbstractController
 
             return $this->redirectToRoute('app_landing');
         }
-
-        $user = $this->userRepository->findBy(['id' => $currentLoggedUserID]);
+        /** @var User $user */
+        $user = $this->userRepository->findOneBy(['id' => $currentLoggedUserID]);
         if ($user) {
-            $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $user->getId()]);
-            dd($user, $userExternalAuths);
+            $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $user]);
             $this->userDeletionService->deleteUser($user, $userExternalAuths, $request, $user);
         }
 
