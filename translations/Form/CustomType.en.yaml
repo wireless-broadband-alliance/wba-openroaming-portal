@@ -1,0 +1,5 @@
+fieldCannotBeEmpty: 'This field cannot be empty'
+fieldCannotBeLongerThan: ' This field cannot be longer than {{ limit }} characters'
+invalidValueEmailAddress.: 'The value "{{ value }}" is not a valid email address.'
+uploadValidFormat: 'Please upload a valid format (JPEG,PNG,SVG,WEBP) image'
+selectOption: 'Select an option'

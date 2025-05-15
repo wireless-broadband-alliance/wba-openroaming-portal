@@ -16,11 +16,13 @@ use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Constraints\Email as EmailConstraint;
 use Symfony\Component\Validator\Constraints\File;
 use Symfony\Component\Validator\Constraints\Length;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class CustomType extends AbstractType
 {
     public function __construct(
-        private readonly GetSettings $getSettings
+        private readonly GetSettings $getSettings,
+        private readonly TranslatorInterface $translator
     ) {
     }
 
@@ -35,7 +37,7 @@ class CustomType extends AbstractType
                 'type' => TextareaType::class,
                 'constraints' => [
                     new Assert\NotBlank([
-                        'message' => 'This field cannot be empty'
+                        'message' => $this->translator->trans('fieldCannotBeEmpty', [], 'CustomType')
                     ]),
                 ]
             ],
@@ -48,7 +50,7 @@ class CustomType extends AbstractType
                     ]),
                     new Length([
                         'max' => 255,
-                        'maxMessage' => ' This field cannot be longer than {{ limit }} characters',
+                        'maxMessage' => $this->translator->trans('fieldCannotBeLongerThan', [], 'CustomType'),
                     ])
                 ],
             ],
@@ -57,7 +59,7 @@ class CustomType extends AbstractType
                 'constraints' => [
                     new Length([
                         'max' => 255,
-                        'maxMessage' => ' This field cannot be longer than {{ limit }} characters',
+                        'maxMessage' => $this->translator->trans('fieldCannotBeLongerThan', [], 'CustomType'),
                     ])
                 ],
             ],
@@ -65,14 +67,14 @@ class CustomType extends AbstractType
                 'type' => EmailType::class,
                 'constraints' => [
                     new EmailConstraint([
-                        'message' => 'The value "{{ value }}" is not a valid email address.'
+                        'message' => $this->translator->trans('invalidValueEmailAddress', [], 'CustomType')
                     ]),
                     new Assert\NotBlank([
-                        'message' => 'This field cannot be empty'
+                        'message' => $this->translator->trans('fieldCannotBeEmpty', [], 'CustomType')
                     ]),
                     new Length([
                         'max' => 320,
-                        'maxMessage' => ' This field cannot be longer than {{ limit }} characters',
+                        'maxMessage' => $this->translator->trans('fieldCannotBeLongerThan', [], 'CustomType'),
                     ])
                 ]
             ],
@@ -100,7 +102,7 @@ class CustomType extends AbstractType
                             'image/svg',
                             'image/webp',
                         ],
-                        'mimeTypesMessage' => 'Please upload a valid format (JPEG,PNG,SVG,WEBP) image',
+                        'mimeTypesMessage' => $this->translator->trans('uploadValidFormat', [], 'CustomType'),
                     ]),
                 ];
                 $formFieldType = $config;
@@ -136,7 +138,7 @@ class CustomType extends AbstractType
                     OperationMode::ON->value => OperationMode::ON->value,
                     OperationMode::OFF->value => OperationMode::OFF->value,
                 ];
-                $formFieldOptions['placeholder'] = 'Select an option';
+                $formFieldOptions['placeholder'] = $this->translator->trans('selectOption', [], 'CustomType');
                 $formFieldOptions['required'] = true;
             }
 
