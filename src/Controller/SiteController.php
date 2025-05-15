@@ -725,7 +725,7 @@ class SiteController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
-        if ($data['EMAIL_REGISTER_ENABLED']['value'] !== true) {
+        if ($data['AUTH_METHOD_REGISTER_ENABLED']['value'] !== 'true') {
             $this->addFlash(
                 'error',
                 $this->translator->trans('verificationMethodNotEnabled', [], 'controllers')
