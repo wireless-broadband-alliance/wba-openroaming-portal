@@ -19,9 +19,11 @@ class CapportController extends AbstractController
     #[Route('/capport/json', name: 'api_capport_json', methods: ['GET'])]
     public function capportJson(): JsonResponse
     {
-        if ($this->settingRepository->findOneBy(
+        if (
+            $this->settingRepository->findOneBy(
                 ['name' => 'CAPPORT_ENABLED']
-            )->getValue() !== 'true') {
+            )->getValue() !== 'true'
+        ) {
             return new BaseResponse(
                 Response::HTTP_BAD_REQUEST,
                 null,
