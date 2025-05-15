@@ -128,8 +128,7 @@ class StatusType extends AbstractType
                     'constraints' => [
                         new GreaterThanOrEqual([
                             'value' => 1,
-                            'message' => $this->translator->trans
-                            (
+                            'message' => $this->translator->trans(
                                 'timerShouldNotBeLessThanProfileNotification',
                                 [],
                                 'StatusType'

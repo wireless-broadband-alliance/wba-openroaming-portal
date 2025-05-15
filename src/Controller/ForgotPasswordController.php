@@ -221,7 +221,8 @@ class ForgotPasswordController extends AbstractController
     /**
      * @throws Exception
      */
-    #[Route('forgot-password/sms',
+    #[Route(
+        'forgot-password/sms',
         name: 'app_site_forgot_password_sms',
     )]
     public function forgotPasswordUserSMS(
