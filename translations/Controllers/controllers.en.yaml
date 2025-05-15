@@ -65,6 +65,7 @@ exceededLimitsRequestForNewPassword: 'You have exceeded the limits of request fo
 PhoneNumberDoesntExist: "This phone number doesn't exist, please submit a valid one from the system!"
 onlyAccessThisPageLoggedIn: 'You can only access this page logged in.'
 cannotAccessThisPageWithoutValidRequest: 'You can not access this page without a valid request!'
+cannotAccessThisPageWithAInvalidProvider: 'You can not access this page without the valid requirements!'
 cantAccessThisPageWithoutRequest: "You can't access this page if you don't have a request!"
 codeSentWithAttemptsLeft: 'We have sent you a new code to: %phone%. You have %attempts% attempt(s) left.'
 smsRegenerationError: 'Failed to regenerate SMS code. Please, wait %minutes% minute(s) before generating a new code.'
