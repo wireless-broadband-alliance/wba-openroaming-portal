@@ -1426,13 +1426,23 @@ class SiteController extends AbstractController
         return $this->redirectToRoute('app_user_account_deletion');
     }
 
+    #[Route('/landing/userAccount/deletion/external', name: 'app_user_account_deletion_external')]
+    #[IsGranted('ROLE_USER')]
+    public function autoDeleteUserExternal(Request $request): RedirectResponse
+    {
+        $data = $this->getSettings->getSettings();
+        dd($data, $request);
+        // TODO FIND THE EXTERNAL PROVIDER OF THE USER
+        // TODO SIMULATE A AUTHENTICATION BEFORE THE USER ACCOUNT DELETION (SAML/GOOGLE/MICROSOFT)
+        // TODO Execute the user account deletion like the local one
+    }
 
     /**
      * @throws \JsonException
      */
-    #[Route('/landing/userAccount/deletion', name: 'app_user_account_deletion')]
+    #[Route('/landing/userAccount/deletion/local', name: 'app_user_account_deletion_local')]
     #[IsGranted('ROLE_USER')]
-    public function autoDeleteUser(Request $request): Response
+    public function autoDeleteUserLocalRequest(Request $request): Response
     {
         $data = $this->getSettings->getSettings();
 

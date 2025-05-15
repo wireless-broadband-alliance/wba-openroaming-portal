@@ -151,9 +151,19 @@
                 {{ 'dangerZone.title'|trans({}, '_account_widget') }}
             </h1>
             <div class="grid grid-cols-1 space-y-4">
-                <a href="{{ path('app_user_account_deletion_generate_code') }}" class="btn-logout">
-                    {{ 'dangerZone.deleteAccount'|trans({}, '_account_widget') }}
-                </a>
+                {% for auth in user.userExternalAuths %}
+                    {% if auth.provider != constant('App\\Enum\\UserProvider::PORTAL_ACCOUNT').value %}
+                        <a href="{{ path('app_user_account_deletion_external') }}" class="btn-logout"
+                           onclick="return confirm('{{ 'dangerZone.deleteAccountWarningMessage'|trans({}, '_account_widget') }}')">
+                            {{ 'dangerZone.deleteAccount'|trans({}, '_account_widget') }}
+                        </a>
+                    {% else %}
+                        <a href="{{ path('app_user_account_deletion_generate_code') }}" class="btn-logout"
+                           onclick="return confirm('{{ 'dangerZone.deleteAccountWarningMessage'|trans({}, '_account_widget') }}')">
+                            {{ 'dangerZone.deleteAccount'|trans({}, '_account_widget') }}
+                        </a>
+                    {% endif %}
+                {% endfor %}
             </div>
         {% endif %}
     {% endif %}
