@@ -3,6 +3,7 @@
 namespace App\Command;
 
 use App\Entity\Setting;
+use App\Entity\SettingTranslation;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -78,28 +79,138 @@ class ResetAuthSettingsCommand extends Command
             ['name' => 'PROFILE_LIMIT_DATE_SMS', 'value' => '5'],
         ];
 
+        $settingsToTranslate = [
+            [
+                'name' => 'AUTH_METHOD_SAML_LABEL',
+                'value' => 'Login with SAML',
+                'translations' => [
+                    'en' => 'Login with SAML',
+                    'pt' => 'Entrar com SAML',
+                ],
+            ],
+            [
+                'name' => 'AUTH_METHOD_SAML_DESCRIPTION',
+                'value' => 'Authenticate with your SAML account',
+                'translations' => [
+                    'en' => 'Authenticate with your SAML account',
+                    'pt' => 'Autentique-se com sua conta SAML',
+                ],
+            ],
+            [
+                'name' => 'AUTH_METHOD_GOOGLE_LOGIN_LABEL',
+                'value' => 'Login with Google',
+                'translations' => [
+                    'en' => 'Login with Google',
+                    'pt' => 'Entrar com Google',
+                ],
+            ],
+            [
+                'name' => 'AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION',
+                'value' => 'Authenticate with your Google account',
+                'translations' => [
+                    'en' => 'Authenticate with your Google account',
+                    'pt' => 'Autentique-se com sua conta Google',
+                ],
+            ],
+            [
+                'name' => 'AUTH_METHOD_MICROSOFT_LOGIN_LABEL',
+                'value' => 'Login with Microsoft',
+                'translations' => [
+                    'en' => 'Login with Microsoft',
+                    'pt' => 'Entrar com Microsoft',
+                ],
+            ],
+            [
+                'name' => 'AUTH_METHOD_MICROSOFT_LOGIN_DESCRIPTION',
+                'value' => 'Authenticate with your Microsoft account',
+                'translations' => [
+                    'en' => 'Authenticate with your Microsoft account',
+                    'pt' => 'Autentique-se com sua conta Microsoft',
+                ],
+            ],
+            [
+                'name' => 'AUTH_METHOD_REGISTER_LABEL',
+                'value' => 'Create Account with Email',
+                'translations' => [
+                    'en' => 'Create Account with Email',
+                    'pt' => 'Criar Conta com Email',
+                ],
+            ],
+            [
+                'name' => 'AUTH_METHOD_REGISTER_DESCRIPTION',
+                'value' => "Don't have an account? Create one",
+                'translations' => [
+                    'en' => "Don't have an account? Create one",
+                    'pt' => 'Não tem uma conta? Crie uma',
+                ],
+            ],
+            [
+                'name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_LABEL',
+                'value' => 'Login Here',
+                'translations' => [
+                    'en' => 'Login Here',
+                    'pt' => 'Entre Aqui',
+                ],
+            ],
+            [
+                'name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION',
+                'value' => 'Already have an account? Login then',
+                'translations' => [
+                    'en' => 'Already have an account? Login then',
+                    'pt' => 'Já tem uma conta? Faça login então',
+                ],
+            ],
+            [
+                'name' => 'AUTH_METHOD_SMS_REGISTER_LABEL',
+                'value' => 'Create Account with Phone Number',
+                'translations' => [
+                    'en' => 'Create Account with Phone Number',
+                    'pt' => 'Criar Conta com Número de Telefone',
+                ],
+            ],
+            [
+                'name' => 'AUTH_METHOD_SMS_REGISTER_DESCRIPTION',
+                'value' => "Don't have an account? Create one",
+                'translations' => [
+                    'en' => "Don't have an account? Create one",
+                    'pt' => 'Não tem uma conta? Crie uma',
+                ],
+            ],
+        ];
+
         // Begin a database transaction to ensure data consistency
         $this->entityManager->beginTransaction();
 
         try {
             $settingsRepository = $this->entityManager->getRepository(Setting::class);
+            $translationsRepository = $this->entityManager->getRepository(SettingTranslation::class);
 
+            // Insert or update settings
             foreach ($settings as $settingData) {
-                $name = $settingData['name'];
-                $value = $settingData['value'];
+                $setting = $settingsRepository->findOneBy(['name' => $settingData['name']]) ?? new Setting();
+                $setting->setName($settingData['name']);
+                $setting->setValue($settingData['value']);
+                $this->entityManager->persist($setting);
+            }
 
-                // Look for all the settings using the name
-                $setting = $settingsRepository->findOneBy(['name' => $name]);
+            // Insert or update settings with translations
+            foreach ($settingsToTranslate as $settingData) {
+                $setting = $settingsRepository->findOneBy(['name' => $settingData['name']]) ?? new Setting();
+                $setting->setName($settingData['name']);
+                $setting->setValue($settingData['value']);
+                $this->entityManager->persist($setting);
 
-                if ($setting !== null) {
-                    // Update the already existing value
-                    $setting->setValue($value);
-                } else {
-                    // If it doesn't exist, create a new setting from the $setting
-                    $setting = new Setting();
-                    $setting->setName($name);
-                    $setting->setValue($value);
-                    $this->entityManager->persist($setting);
+                // Handle translations
+                foreach ($settingData['translations'] as $locale => $translationText) {
+                    $translation = $translationsRepository->findOneBy([
+                        'setting' => $setting,
+                        'locale' => $locale,
+                    ]) ?? new SettingTranslation();
+
+                    $translation->setSetting($setting);
+                    $translation->setLocale($locale);
+                    $translation->setTranslation($translationText);
+                    $this->entityManager->persist($translation);
                 }
             }
 
