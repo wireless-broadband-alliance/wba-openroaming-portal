@@ -26,7 +26,7 @@
     {% elseif data.AUTH_METHOD_REGISTER_ENABLED.value == 'true' %}
         {% set label = 'Email' %}
     {% elseif data.AUTH_METHOD_SMS_REGISTER_ENABLED.value == 'true' %}
-        {% set label = 'phoneNumber'|trans({}, 'login_admin_landing') %}
+        {% set label = 'phoneNumberLabel'|trans({}, 'login_admin_landing') %}
     {% else %}
         {% set label = 'Email' %}
     {% endif %}
@@ -88,7 +88,9 @@
                 <a href="{{ path('app_site_forgot_password_email') }}" class="font-semibold text-primary underline">email</a>
             {% endif %}
 
-            {% if data.AUTH_METHOD_REGISTER_ENABLED.value and data.AUTH_METHOD_SMS_REGISTER_ENABLED.value == 'true' %}or{% endif %}
+            {% if data.AUTH_METHOD_REGISTER_ENABLED.value == 'true' and data.AUTH_METHOD_SMS_REGISTER_ENABLED.value == 'true' %}
+                {{ 'or'|trans({}, 'login_admin_landing') }}
+            {% endif %}
 
             {% if data.AUTH_METHOD_SMS_REGISTER_ENABLED.value == 'true' %}
                 <a href="{{ path('app_site_forgot_password_sms') }}"
@@ -104,7 +106,7 @@
                            class="font-semibold text-primary underline">email</a>
                     {% endif %}
 
-                    {% if data.AUTH_METHOD_REGISTER_ENABLED.value and data.AUTH_METHOD_SMS_REGISTER_ENABLED.value == 'true' %}
+                    {% if data.AUTH_METHOD_REGISTER_ENABLED.value == 'true' and data.AUTH_METHOD_SMS_REGISTER_ENABLED.value == 'true' %}
                         {{ 'or'|trans({}, 'login_admin_landing') }}
                     {% endif %}
 

@@ -1,7 +1,8 @@
 adminLoginPage: 'Página de Login do Administrador'
 loginPageMessage: "Por favor, efetue login usando as suas credenciais de administrador. Após o login, terá acesso ao painel de administração."
 emailPhoneNumber: 'Email ou Número de Telefone'
-phoneNumber: 'Número de Telefone'
+phoneNumber: 'número de telefone'
+phoneNumberLabel: 'Número de Telefone'
 enterYour: 'Introduza o seu '
 enterPassword: 'Introduza a sua palavra-passe'
 chooseAnother: 'Escolher Outro'

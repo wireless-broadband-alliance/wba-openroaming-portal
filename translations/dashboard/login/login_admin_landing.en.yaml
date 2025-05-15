@@ -1,7 +1,8 @@
 adminLoginPage: 'Admin login Page'
 loginPageMessage: "Please log in using your admin credentials. Once logged in, you'll have access to the admin dashboard."
 emailPhoneNumber: 'Email or Phone Number'
-phoneNumber: 'Phone Number'
+phoneNumber: 'phone number'
+phoneNumberLabel: 'Phone Number'
 enterYour: 'Enter your '
 enterPassword: 'Enter your password'
 chooseAnother: 'Choose Another'
