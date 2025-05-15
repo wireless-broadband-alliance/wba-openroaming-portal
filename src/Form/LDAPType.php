@@ -10,10 +10,14 @@ use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class LDAPType extends AbstractType
 {
-    public function __construct(private readonly GetSettings $getSettings)
+    public function __construct(
+        private readonly GetSettings $getSettings,
+        private readonly TranslatorInterface $translator
+    )
     {
     }
 
@@ -50,7 +54,7 @@ class LDAPType extends AbstractType
                             OperationMode::ON->value => 'true',
                             OperationMode::OFF->value => 'false',
                         ];
-                        $formFieldOptions['placeholder'] = 'Select an option';
+                        $formFieldOptions['placeholder'] = $this->translator->trans('selectOption', [], 'CustomType');
                         $formFieldOptions['required'] = true;
                     }
                     $formFieldOptions['attr']['description'] = $this->getSettings->getSettingDescription($settingName);
