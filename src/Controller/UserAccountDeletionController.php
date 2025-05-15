@@ -10,11 +10,13 @@ use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
 use App\Service\GetSettings;
 use App\Service\UserDeletionService;
+use DateTime;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
@@ -94,6 +96,9 @@ class UserAccountDeletionController extends AbstractController
         ]);
     }
 
+    /**
+     * @throws \DateMalformedStringException
+     */
     #[Route('/landing/userAccount/deletion/external', name: 'app_user_account_deletion_external')]
     #[IsGranted('ROLE_USER')]
     public function autoDeleteUserExternal(): RedirectResponse
@@ -125,20 +130,34 @@ class UserAccountDeletionController extends AbstractController
         // GOOGLE ACCOUNT
         if ($userExternalAuths[0]->getProvider() === UserProvider::GOOGLE_ACCOUNT->value) {
             $previousLoggedID = $currentUser->getId();
-
             return $this->redirectToRoute('connect_google', ['previousLoggedID' => $previousLoggedID]);
         }
 
         // MICROSOFT ACCOUNT
         if ($userExternalAuths[0]->getProvider() === UserProvider::MICROSOFT_ACCOUNT->value) {
             $previousLoggedID = $currentUser->getId();
-
             return $this->redirectToRoute('connect_microsoft', ['previousLoggedID' => $previousLoggedID]);
         }
 
         // SAML ACCOUNT
         if ($userExternalAuths[0]->getProvider() === UserProvider::SAML->value) {
-            // TODO: Implement SAML login simulation
+            $previousLoggedID = $currentUser->getId();
+
+            $cookie = new Cookie(
+                'previousLoggedID',
+                $previousLoggedID,
+                new DateTime()->modify('+1 minutes'),
+                '/',
+                null,
+                false,
+                true,
+                false,
+                Cookie::SAMESITE_LAX
+            );
+            $response = $this->redirectToRoute('saml_login');
+            $response->headers->setCookie($cookie);
+
+            return $response;
         }
 
         // Default case redirects to the landing page

@@ -4,6 +4,9 @@
 
 - New Feature: Responsive Translations (Available: EN & PT-PT)
 - New Listener to auto-detection of the user language
+- Optimized the `GetSettings` service to significantly reduce the loading process, improving application performance by
+  minimizing redundant data processing and database queries.
+- Rework `UserAccountDeletion`, simulates a login to confirm the account action for external providers.
 - For this release it's required to run the new migrations to set up the new entity SettingTranslations
   Run the migration with:
 

@@ -3,8 +3,6 @@
 namespace App\Controller;
 
 use App\Entity\Event;
-use App\Entity\Setting;
-use App\Entity\TextEditor;
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
 use App\Enum\AnalyticalEventType;
@@ -12,14 +10,11 @@ use App\Enum\FirewallType;
 use App\Enum\OperationMode;
 use App\Enum\OSTypes;
 use App\Enum\PlatformMode;
-use App\Enum\TextEditorName;
-use App\Enum\TextInputType;
 use App\Enum\TwoFAType;
 use App\Enum\UserProvider;
 use App\Enum\UserRadiusProfileRevokeReason;
 use App\Enum\UserTwoFactorAuthenticationStatus;
 use App\Form\AccountUserUpdateLandingType;
-use App\Form\AutoDeletePasswordType;
 use App\Form\ForgotPasswordEmailType;
 use App\Form\ForgotPasswordSMSType;
 use App\Form\NewPasswordAccountType;
@@ -90,8 +85,8 @@ class SiteController extends AbstractController
         private readonly ProfileManager $profileManager,
         private readonly SendSMS $sendSMS,
         private readonly TwoFAService $twoFAService,
-        private readonly UserDeletionService $userDeletionService,
         private readonly TranslatorInterface $translator,
+        private readonly UserDeletionService $userDeletionService,
     ) {
     }
 
@@ -116,8 +111,23 @@ class SiteController extends AbstractController
         if (
             isset($data["USER_VERIFICATION"]["value"]) &&
             $data["USER_VERIFICATION"]["value"] === OperationMode::ON->value &&
-            $this->getUser()
+            $currentUser
         ) {
+            // Retrieve the cookie about SAML_ACCOUNT Deletion from the request
+            $previousLoggedID = $request->cookies->get('previousLoggedID');
+
+            if ($previousLoggedID && $previousLoggedID == $currentUser->getId()) {
+                $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $currentUser]);
+                $this->userDeletionService->deleteUser(
+                    $currentUser,
+                    $userExternalAuths,
+                    $request,
+                    $currentUser
+                );
+
+                return $this->redirectToRoute('app_logout');
+            }
+
             $verification = $currentUser->isVerified();
             // Check if the user is verified
             if (!$verification) {
@@ -374,7 +384,6 @@ class SiteController extends AbstractController
             'context' => FirewallType::LANDING->value,
         ]);
     }
-
 
 
     /**
@@ -688,16 +697,10 @@ class SiteController extends AbstractController
     /**
      * @throws Exception
      */
-    #[Route(
-        '{context}/forgot-password/sms',
+    #[Route('forgot-password/sms',
         name: 'app_site_forgot_password_sms',
-        requirements: ['context' => 'landing|dashboard'],
-        defaults: [
-            'context' => FirewallType::LANDING->value
-        ]
     )]
     public function forgotPasswordUserSMS(
-        string $context,
         Request $request,
         UserPasswordHasherInterface $userPasswordHasher,
         EntityManagerInterface $entityManager,
@@ -839,7 +842,7 @@ class SiteController extends AbstractController
         return $this->render('landing/forgotPassword/forgot_password_sms.html.twig', [
             'forgotPasswordSMSForm' => $form->createView(),
             'data' => $data,
-            'context' => $context
+            'context' => FirewallType::LANDING->value
         ]);
     }
 
