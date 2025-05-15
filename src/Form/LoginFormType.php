@@ -11,6 +11,7 @@ use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class LoginFormType extends AbstractType
 {
@@ -18,7 +19,8 @@ class LoginFormType extends AbstractType
      * @param GetSettings $getSettings The instance of GetSettings class.
      */
     public function __construct(
-        private readonly GetSettings $getSettings
+        private readonly GetSettings $getSettings,
+        private readonly TranslatorInterface $translator
     ) {
     }
 
@@ -28,9 +30,9 @@ class LoginFormType extends AbstractType
         $turnstileCheckerValue = $data['TURNSTILE_CHECKER']['value'];
 
         $builder->add('uuid', TextType::class, [
-            'label' => 'Email or Phone Number',
+            'label' => $this->translator->trans('emailOrPhoneNumber', [], 'CustomType'),
             'attr' => [
-                'placeholder' => 'Enter your email or phone number',
+                'placeholder' => $this->translator->trans('EnterEmailOrPhoneNumber', [], 'CustomType'),
                 'name' => 'uuid',
                 'full_name' => 'uuid',
             ],
@@ -39,7 +41,7 @@ class LoginFormType extends AbstractType
             ->add('password', PasswordType::class, [
                 'label' => 'Password',
                 'attr' => [
-                    'placeholder' => 'Enter your password',
+                    'placeholder' => $this->translator->trans('EnterPassword', [], 'CustomType'),
                     'name' => 'password',
                     'full_name' => 'password',
                 ],
