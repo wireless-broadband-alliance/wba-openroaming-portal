@@ -23,39 +23,21 @@
         {# Form Column #}
         {{ form_start(form) }}
         <div class="relative mt-10 mb-6">
-            {% if user.userExternalAuths[0].provider == constant('App\\Enum\\UserProvider::PORTAL_ACCOUNT').value %}
-                <div class="relative mt-[32px]">
-                    {{ form_label(form.password, 'password_label'|trans({}, 'auto_delete_account'), {label_attr: {class: 'form-label'}}) }}
-                    {{ form_widget(form.password, {
-                        attr: {
-                            class: 'form-widget',
-                            placeholder: 'password_placeholder'|trans({}, 'auto_delete_account'),
-                        },
-                    }) }}
-                </div>
-                <div class="mt-[28px] flex items-center justify-start gap-2">
-                    {{ form_widget(form.confirm, {attr: {class: 'w-5 h-5 peer relative appearance-none rounded-[5px] border border-[#CECECE] cursor-pointer checked:bg-primary'}}) }}
-                    <label for="{{ form.confirm.vars.id }}" class="text-sm text-gray-700 leading-6">
-                        {{ 'confirm_label'|trans({}, 'auto_delete_account') }}
-                    </label>
-                </div>
-            {% else %}
-                <div class="relative mt-[32px]">
-                    {{ form_label(form.code, 'code_label'|trans({}, 'auto_delete_account'), {label_attr: {class: 'form-label'}}) }}
-                    {{ form_widget(form.code, {
-                        attr: {
-                            class: 'form-widget',
-                            placeholder: 'code_placeholder'|trans({}, 'auto_delete_account'),
-                        },
-                    }) }}
-                </div>
-                <div class="mt-[28px] flex items-center justify-start gap-2">
-                    {{ form_widget(form.confirm, {attr: {class: 'w-5 h-5 peer relative appearance-none rounded-[5px] border border-[#CECECE] cursor-pointer checked:bg-primary'}}) }}
-                    <label for="{{ form.confirm.vars.id }}">
-                        {{ 'confirm_label'|trans({}, 'auto_delete_account') }}
-                    </label>
-                </div>
-            {% endif %}
+            <div class="relative mt-[32px]">
+                {{ form_label(form.password, 'password_label'|trans({}, 'auto_delete_account'), {label_attr: {class: 'form-label'}}) }}
+                {{ form_widget(form.password, {
+                    attr: {
+                        class: 'form-widget',
+                        placeholder: 'password_placeholder'|trans({}, 'auto_delete_account'),
+                    },
+                }) }}
+            </div>
+            <div class="mt-[28px] flex items-center justify-start gap-2">
+                {{ form_widget(form.confirm, {attr: {class: 'w-5 h-5 peer relative appearance-none rounded-[5px] border border-[#CECECE] cursor-pointer checked:bg-primary'}}) }}
+                <label for="{{ form.confirm.vars.id }}" class="text-sm text-gray-700 leading-6">
+                    {{ 'confirm_label'|trans({}, 'auto_delete_account') }}
+                </label>
+            </div>
         </div>
 
         {# Action Buttons #}

@@ -158,8 +158,7 @@
                             {{ 'dangerZone.deleteAccount'|trans({}, '_account_widget') }}
                         </a>
                     {% else %}
-                        <a href="{{ path('app_user_account_deletion_generate_code') }}" class="btn-logout"
-                           onclick="return confirm('{{ 'dangerZone.deleteAccountWarningMessage'|trans({}, '_account_widget') }}')">
+                        <a href="{{ path('app_user_account_deletion_local') }}" class="btn-logout">
                             {{ 'dangerZone.deleteAccount'|trans({}, '_account_widget') }}
                         </a>
                     {% endif %}
