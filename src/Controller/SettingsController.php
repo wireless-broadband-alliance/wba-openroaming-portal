@@ -19,8 +19,6 @@ use App\Form\TermsType;
 use App\Form\TwoFASettingsType;
 use App\RadiusDb\Repository\RadiusAccountingRepository;
 use App\RadiusDb\Repository\RadiusAuthsRepository;
-use App\Repository\SettingRepository;
-use App\Repository\UserRepository;
 use App\Service\CertificateService;
 use App\Service\Domain;
 use App\Service\EventActions;
@@ -47,8 +45,6 @@ class SettingsController extends AbstractController
     public function __construct(
         private readonly EventActions $eventActions,
         private readonly GetSettings $getSettings,
-        private readonly SettingRepository $settingRepository,
-        private readonly UserRepository $userRepository,
         private readonly EntityManagerInterface $entityManager,
         private readonly RadiusAuthsRepository $radiusAuthsRepository,
         private readonly RadiusAccountingRepository $radiusAccountingRepository,

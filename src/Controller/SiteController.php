@@ -19,7 +19,6 @@ use App\Enum\UserProvider;
 use App\Enum\UserRadiusProfileRevokeReason;
 use App\Enum\UserTwoFactorAuthenticationStatus;
 use App\Form\AccountUserUpdateLandingType;
-use App\Form\AutoDeleteCodeType;
 use App\Form\AutoDeletePasswordType;
 use App\Form\ForgotPasswordEmailType;
 use App\Form\ForgotPasswordSMSType;
@@ -1359,7 +1358,7 @@ class SiteController extends AbstractController
             $this->redirectToRoute('app_landing');
         }
 
-        $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $currentUser->getId()]);
+        // 1. TODO FIND THE EXTERNAL PROVIDER OF THE USER $currentUser->getUserExternalAuths()[0]->getProvider()
         if ($currentUser->getUserExternalAuths()[0]->getProvider() === UserProvider::PORTAL_ACCOUNT->value) {
             $this->addFlash(
                 'error',
@@ -1372,16 +1371,30 @@ class SiteController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
-//        if ($currentUser->getUserExternalAuths()[0]->getProvider() === UserProvider::PORTAL_ACCOUNT->value) {
-//            $form = $this->createForm(AutoDeletePasswordType::class);
-//        } else {
-//            $form = $this->createForm(AutoDeleteCodeType::class);
-//        }
+        // 2. TODO SIMULATE A AUTHENTICATION BEFORE THE USER ACCOUNT DELETION (SAML/GOOGLE/MICROSOFT)
+        if ($currentUser->getUserExternalAuths()[0]->getProvider() === UserProvider::GOOGLE_ACCOUNT->value) {
+            // Retrieve the "google" client
+            $client = $this->clientRegistry->getClient('google');
+
+            // Get the authorization URL
+            $redirectUrl = $client->getOAuth2Provider()->getAuthorizationUrl();
+
+            // Redirect the user to the authorization URL
+            return $this->redirect($redirectUrl);
+        }
+
+        if ($currentUser->getUserExternalAuths()[0]->getProvider() === UserProvider::MICROSOFT_ACCOUNT->value) {
+            // TODO SIMULATE MICROSOFT_ACCOUNT LOGIN
+        }
+
+        if ($currentUser->getUserExternalAuths()[0]->getProvider() === UserProvider::SAML->value) {
+            // TODO SIMULATE SAML_ACCOUNT LOGIN
+        }
+
+        // 3 TODO Execute the user account deletion like the local one
+
 
         dd($data, $request, $currentUser);
-        // TODO FIND THE EXTERNAL PROVIDER OF THE USER
-        // TODO SIMULATE A AUTHENTICATION BEFORE THE USER ACCOUNT DELETION (SAML/GOOGLE/MICROSOFT)
-        // TODO Execute the user account deletion like the local one
     }
 
     /**

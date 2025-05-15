@@ -8,7 +8,6 @@ use App\Enum\AnalyticalEventType;
 use App\Enum\FirewallType;
 use App\Enum\PlatformMode;
 use App\Enum\UserProvider;
-use App\Repository\SettingRepository;
 use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
 use App\Service\EventActions;
@@ -49,7 +48,6 @@ class GoogleController extends AbstractController
         private readonly EventActions $eventActions,
         private readonly GetSettings $getSettings,
         private readonly UserRepository $userRepository,
-        private readonly SettingRepository $settingRepository,
         private readonly UserStatusChecker $userStatusChecker,
         private readonly UserExternalAuthRepository $userExternalAuthRepository,
         private readonly TranslatorInterface $translator
@@ -275,10 +273,10 @@ class GoogleController extends AbstractController
         } catch (AuthenticationException $exception) {
             // Handle authentication failure
             $errorMessage = $this->translator->trans(
-                'authenticationFailed',
-                [],
-                'controllers'
-            ) . $exception->getMessage();
+                    'authenticationFailed',
+                    [],
+                    'controllers'
+                ) . $exception->getMessage();
             $this->addFlash('error', $errorMessage);
             $this->redirectToRoute('app_landing');
             return;
