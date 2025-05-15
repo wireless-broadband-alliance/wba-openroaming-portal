@@ -3,3 +3,5 @@ fieldCannotBeLongerThan: 'Este campo não pode ter mais de {{ limit }} caractere
 invalidValueEmailAddress.: 'O valor "{{ value }}" não é um endereço de email válido.'
 uploadValidFormat: 'Por favor, carrega uma imagem com um formato válido (JPEG, PNG, SVG, WEBP)'
 selectOption: 'Seleciona uma opção'
+timerShouldNeverBeLessThan: 'O temporizador nunca deve ser inferior a 1.'
+pleaseSetTimer: 'Por favor, certifica-te de configurar o temporizador.'
