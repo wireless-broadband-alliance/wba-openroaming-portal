@@ -10,11 +10,13 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class TwoFactorPhoneNumber extends AbstractType
 {
     public function __construct(
         private readonly GetSettings $getSettings,
+        private readonly TranslatorInterface $translator
     ) {
     }
 
@@ -25,7 +27,7 @@ class TwoFactorPhoneNumber extends AbstractType
         $regionInputs = array_map('trim', $regionInputs);
         $builder
             ->add('phoneNumber', PhoneNumberType::class, [
-                'label' => 'Phone Number',
+                'label' => $this->translator->trans('phoneNumber', [], 'TwoFA'),
                 'default_region' => $regionInputs[0],  // This will be dynamically changed -> Dropdown Country
                 'format' => PhoneNumberFormat::INTERNATIONAL,
                 'widget' => PhoneNumberType::WIDGET_COUNTRY_CHOICE,
