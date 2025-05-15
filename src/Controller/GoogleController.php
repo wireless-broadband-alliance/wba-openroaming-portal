@@ -52,7 +52,7 @@ class GoogleController extends AbstractController
         private readonly UserStatusChecker $userStatusChecker,
         private readonly UserExternalAuthRepository $userExternalAuthRepository,
         private readonly TranslatorInterface $translator,
-        private readonly CsrfTokenManagerInterface  $csrfTokenManager,
+        private readonly CsrfTokenManagerInterface $csrfTokenManager,
     ) {
     }
 
@@ -295,11 +295,8 @@ class GoogleController extends AbstractController
             $this->entityManager->flush();
         } catch (AuthenticationException $exception) {
             // Handle authentication failure
-            $errorMessage = $this->translator->trans(
-                    'authenticationFailed',
-                    [],
-                    'controllers'
-                ) . $exception->getMessage();
+            $errorMessage = $this->translator->trans('authenticationFailed', [], 'controllers')
+                . $exception->getMessage();
             $this->addFlash('error', $errorMessage);
             $this->redirectToRoute('app_landing');
             return;
