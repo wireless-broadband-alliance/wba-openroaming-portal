@@ -131,7 +131,9 @@ class UserAccountDeletionController extends AbstractController
 
         // MICROSOFT ACCOUNT
         if ($userExternalAuths[0]->getProvider() === UserProvider::MICROSOFT_ACCOUNT->value) {
-            // TODO: Implement Microsoft account authentication
+            $previousLoggedID = $currentUser->getId();
+
+            return $this->redirectToRoute('connect_microsoft', ['previousLoggedID' => $previousLoggedID]);
         }
 
         // SAML ACCOUNT
@@ -170,6 +172,7 @@ class UserAccountDeletionController extends AbstractController
 
             return $this->redirectToRoute('app_landing');
         }
+
         /** @var User $user */
         $user = $this->userRepository->findOneBy(['id' => $currentLoggedUserID]);
         if ($user) {

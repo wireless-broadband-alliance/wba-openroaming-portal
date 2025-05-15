@@ -57,7 +57,7 @@ class GoogleController extends AbstractController
     }
 
     #[Route('/connect/google', name: 'connect_google')]
-    public function connect(): RedirectResponse
+    public function connect(Request $request): RedirectResponse
     {
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings();
@@ -73,12 +73,6 @@ class GoogleController extends AbstractController
                 )
             );
             return $this->redirectToRoute('app_landing');
-        }
-
-        // Retrieve the `previousLoggedID` from the request
-        $request = $this->requestStack->getCurrentRequest();
-        if (!$request) {
-            throw new \RuntimeException('No current request available.');
         }
 
         $previousLoggedID = $request->get('previousLoggedID');
