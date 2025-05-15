@@ -31,8 +31,6 @@ class FreeradiusController extends AbstractController
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
         private readonly GetSettings $getSettings,
-        private readonly UserRepository $userRepository,
-        private readonly SettingRepository $settingRepository,
         private readonly ParameterBagInterface $parameterBag,
         private readonly EventActions $eventActions,
         private readonly RadiusAuthsRepository $radiusAuthsRepository,

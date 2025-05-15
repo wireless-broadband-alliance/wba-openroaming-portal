@@ -4,6 +4,7 @@ namespace App\Service;
 
 use App\Repository\SettingRepository;
 use App\Repository\SettingTranslationRepository;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 readonly class GetSettings
@@ -19,7 +20,7 @@ readonly class GetSettings
     {
         // Get the current request from the RequestStack
         $request = $this->requestStack->getCurrentRequest();
-        if (!$request) {
+        if (!$request instanceof Request) {
             throw new \RuntimeException('No current request available.');
         }
 
@@ -83,7 +84,7 @@ readonly class GetSettings
     {
         // Retrieve current locale from the session, default to 'en' if not found
         $request = $this->requestStack->getCurrentRequest();
-        if (!$request) {
+        if (!$request instanceof Request) {
             throw new \RuntimeException('No current request available.');
         }
 

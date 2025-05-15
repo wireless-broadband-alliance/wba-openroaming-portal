@@ -581,7 +581,7 @@ class SettingsController extends AbstractController
     public function settingsRadius(
         Request $request,
     ): Response {
-        $data = $getSettings->getSettings();
+        $data = $this->getSettings->getSettings();
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
         $currentUser = $this->getUser();

@@ -141,7 +141,7 @@ class SettingTranslationFixture extends Fixture
         foreach ($settingsToTranslate as $data) {
             // Find or create the Setting entity
             $setting = $manager->getRepository(Setting::class)->findOneBy(['name' => $data['name']]);
-            if (!$setting) {
+            if ($setting === null) {
                 $setting = new Setting();
                 $setting->setName($data['name']);
                 $setting->setValue($data['value']);
