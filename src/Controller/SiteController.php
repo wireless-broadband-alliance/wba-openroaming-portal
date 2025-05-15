@@ -1345,17 +1345,6 @@ class SiteController extends AbstractController
         }
         return $this->redirectToRoute('app_landing');
     }
-
-    #[Route('/change-locale/{locale}', name: 'change_locale')]
-    public function changeLocale(string $locale, Request $request): Response
-    {
-        // Store the locale in the session
-        $request->getSession()->set('_locale', $locale);
-
-        $referer = $request->headers->get('referer', $this->generateUrl('app_landing'));
-        return $this->redirect($referer);
-    }
-
     #[Route('/landing/userAccount/deletion/external', name: 'app_user_account_deletion_external')]
     #[IsGranted('ROLE_USER')]
     public function autoDeleteUserExternal(Request $request): RedirectResponse

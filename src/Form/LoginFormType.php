@@ -30,9 +30,9 @@ class LoginFormType extends AbstractType
         $turnstileCheckerValue = $data['TURNSTILE_CHECKER']['value'];
 
         $builder->add('uuid', TextType::class, [
-            'label' => $this->translator->trans('emailOrPhoneNumber', [], 'CustomType'),
+            'label' => $this->translator->trans('emailOrPhoneNumber', [], 'LoginFormType'),
             'attr' => [
-                'placeholder' => $this->translator->trans('EnterEmailOrPhoneNumber', [], 'CustomType'),
+                'placeholder' => $this->translator->trans('EnterEmailOrPhoneNumber', [], 'LoginFormType'),
                 'name' => 'uuid',
                 'full_name' => 'uuid',
             ],
@@ -41,7 +41,7 @@ class LoginFormType extends AbstractType
             ->add('password', PasswordType::class, [
                 'label' => 'Password',
                 'attr' => [
-                    'placeholder' => $this->translator->trans('EnterPassword', [], 'CustomType'),
+                    'placeholder' => $this->translator->trans('EnterPassword', [], 'LoginFormType'),
                     'name' => 'password',
                     'full_name' => 'password',
                 ],
