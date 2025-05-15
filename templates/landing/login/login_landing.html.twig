@@ -94,7 +94,7 @@
                     </a>
                 {% endif %}
 
-                {% if data.AUTH_METHOD_REGISTER_ENABLED.value or data.AUTH_METHOD_SMS_REGISTER_ENABLED.value == 'true' %}
+                {% if data.AUTH_METHOD_REGISTER_ENABLED.value and data.AUTH_METHOD_SMS_REGISTER_ENABLED.value == 'true' %}
                     {{ 'or'|trans({}, 'login_landing') }}
                 {% endif %}
 
@@ -114,7 +114,7 @@
                     </a>
                 {% endif %}
 
-                {% if data.AUTH_METHOD_REGISTER_ENABLED.value or data.AUTH_METHOD_SMS_REGISTER_ENABLED.value == 'true' %}
+                {% if data.AUTH_METHOD_REGISTER_ENABLED.value and data.AUTH_METHOD_SMS_REGISTER_ENABLED.value == 'true' %}
                     {{ 'or'|trans({}, 'login_landing') }}
                 {% endif %}
 
