@@ -34,7 +34,7 @@ class UserAccountDeletionController extends AbstractController
     /**
      * @throws \JsonException
      */
-    #[\Symfony\Component\Routing\Attribute\Route('/landing/userAccount/deletion/local', name: 'app_user_account_deletion_local')]
+    #[Route('/landing/userAccount/deletion/local', name: 'app_user_account_deletion_local')]
     #[IsGranted('ROLE_USER')]
     public function autoDeleteUserLocalRequest(Request $request): Response
     {

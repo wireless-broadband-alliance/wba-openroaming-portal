@@ -11,7 +11,6 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
 class TwoFACode extends AbstractType
 {
-
     public function __construct(
         private readonly TranslatorInterface $translator
     ) {

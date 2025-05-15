@@ -13,7 +13,6 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
 class SimpleRegistrationFormType extends AbstractType
 {
-
     public function __construct(
         private readonly TranslatorInterface $translator
     ) {
