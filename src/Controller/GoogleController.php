@@ -30,6 +30,7 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
+use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
@@ -50,7 +51,8 @@ class GoogleController extends AbstractController
         private readonly UserRepository $userRepository,
         private readonly UserStatusChecker $userStatusChecker,
         private readonly UserExternalAuthRepository $userExternalAuthRepository,
-        private readonly TranslatorInterface $translator
+        private readonly TranslatorInterface $translator,
+        private readonly CsrfTokenManagerInterface  $csrfTokenManager,
     ) {
     }
 
@@ -174,16 +176,18 @@ class GoogleController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
-        // Authenticate the user
-        $this->authenticateUserGoogle($user);
-
-        // If the previousLoggedID exists, return to the route for user account deletion
+        // Check if the previousLoggedID exist to trigger the user Account deletion
+        $csrfToken = $this->csrfTokenManager->getToken('user_deletion_check_token')->getValue();
         if ($previousLoggedID) {
             return $this->redirectToRoute('app_user_account_deletion_external_check', [
                 'previousLoggedID' => $previousLoggedID,
-                'currentLoggedUserID' => $user->getId()
+                'currentLoggedUserID' => $user->getId(),
+                '_csrf_token' => $csrfToken
             ]);
         }
+
+        // Authenticate the user
+        $this->authenticateUserGoogle($user);
 
         // Redirect the user to the landing page
         return $this->redirectToRoute('app_landing');

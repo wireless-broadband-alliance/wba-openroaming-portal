@@ -7,6 +7,7 @@ use App\Enum\FirewallType;
 use App\Enum\UserProvider;
 use App\Form\AutoDeletePasswordType;
 use App\Repository\UserExternalAuthRepository;
+use App\Repository\UserRepository;
 use App\Service\GetSettings;
 use App\Service\UserDeletionService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -23,7 +24,8 @@ class UserAccountDeletionController extends AbstractController
         private readonly UserExternalAuthRepository $userExternalAuthRepository,
         private readonly GetSettings $getSettings,
         private readonly UserDeletionService $userDeletionService,
-        private readonly TranslatorInterface $translator
+        private readonly TranslatorInterface $translator,
+        private readonly UserRepository $userRepository
     ) {
     }
 
@@ -120,15 +122,19 @@ class UserAccountDeletionController extends AbstractController
         }
 
         // Redirect based on external provider
+        // GOOGLE ACCOUNT
         if ($userExternalAuths[0]->getProvider() === UserProvider::GOOGLE_ACCOUNT->value) {
             $previousLoggedID = $currentUser->getId();
+
             return $this->redirectToRoute('connect_google', ['previousLoggedID' => $previousLoggedID]);
         }
 
+        // MICROSOFT ACCOUNT
         if ($userExternalAuths[0]->getProvider() === UserProvider::MICROSOFT_ACCOUNT->value) {
             // TODO: Implement Microsoft account authentication
         }
 
+        // SAML ACCOUNT
         if ($userExternalAuths[0]->getProvider() === UserProvider::SAML->value) {
             // TODO: Implement SAML login simulation
         }
@@ -137,12 +143,25 @@ class UserAccountDeletionController extends AbstractController
         return $this->redirectToRoute('app_landing');
     }
 
-    #[Route('/landing/userAccount/deletion/external/check/{previousLoggedID}/{currentLoggedUserID}',
-        name: 'app_user_account_deletion_external_check')
-    ]
+    /**
+     * @throws \JsonException
+     */
+    #[Route(
+        '/landing/userAccount/deletion/external/check/{previousLoggedID}/{currentLoggedUserID}',
+        name: 'app_user_account_deletion_external_check',
+    )]
     #[IsGranted('ROLE_USER')]
-    public function autoDeleteUserExternalCheck(?int $previousLoggedID, int $currentLoggedUserID): RedirectResponse
-    {
+    public function autoDeleteUserExternalCheck(
+        ?int $previousLoggedID,
+        int $currentLoggedUserID,
+        Request $request
+    ): RedirectResponse {
+        $csrfToken = $request->query->get('_csrf_token');
+
+        if (!$this->isCsrfTokenValid('user_deletion_check_token', $csrfToken)) {
+            throw $this->createAccessDeniedException('Invalid CSRF token.');
+        }
+
         if ($previousLoggedID !== $currentLoggedUserID) {
             $this->addFlash(
                 'error',
@@ -150,6 +169,13 @@ class UserAccountDeletionController extends AbstractController
             );
 
             return $this->redirectToRoute('app_landing');
+        }
+
+        $user = $this->userRepository->findBy(['id' => $currentLoggedUserID]);
+        if ($user) {
+            $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $user->getId()]);
+            dd($user, $userExternalAuths);
+            $this->userDeletionService->deleteUser($user, $userExternalAuths, $request, $user);
         }
 
         return $this->redirectToRoute('app_landing');
