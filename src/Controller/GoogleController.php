@@ -177,7 +177,7 @@ class GoogleController extends AbstractController
         // Authenticate the user
         $this->authenticateUserGoogle($user);
 
-        // If the previousLoggedID exists return to the route for user account deletion
+        // If the previousLoggedID exists, return to the route for user account deletion
         if ($previousLoggedID) {
             return $this->redirectToRoute('app_user_account_deletion_external_check', [
                 'previousLoggedID' => $previousLoggedID,

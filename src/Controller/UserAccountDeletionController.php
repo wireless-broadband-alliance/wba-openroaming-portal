@@ -143,11 +143,14 @@ class UserAccountDeletionController extends AbstractController
     #[IsGranted('ROLE_USER')]
     public function autoDeleteUserExternalCheck(?int $previousLoggedID, int $currentLoggedUserID): RedirectResponse
     {
-        if ($previousLoggedID) {
-            $this->addFlash('info', "Previous User ID: $previousLoggedID");
-        }
+        if ($previousLoggedID !== $currentLoggedUserID) {
+            $this->addFlash(
+                'error',
+                $this->translator->trans('invalidAccountSelectForUserDeletion', [], 'controllers')
+            );
 
-        $this->addFlash('info', "Current Logged-In User ID: $currentLoggedUserID");
+            return $this->redirectToRoute('app_landing');
+        }
 
         return $this->redirectToRoute('app_landing');
     }

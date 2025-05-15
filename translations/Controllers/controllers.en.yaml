@@ -84,6 +84,7 @@ attemptsExceeded: 'You have exceeded the number of attempts, wait %minutes% minu
 confirmationCodeSentSuccessfully: 'A confirmation code was sent to you successfully.'
 accountWithoutContactIdentifier: 'This account does not have a contact identifier (email or phone number) associated with it.Please select another valid two-factor authentication if you want to configure one for this account.'
 invalidCodeMessage: 'Invalid code! The code may be wrong or may have already expired. Please try again or resend the code'
+invalidAccountSelectForUserDeletion: 'You did not select the correct account for deletion. Your currently authenticated account is not the same as the selected one.'
 accountAlreadyHasTwoFADisabled: 'This account already has two factor authentication disabled.'
 twoFASuccessfullyDisabled: 'Two factor authentication successfully disabled'
 profileRevoked: 'Profile associated "%uuid%" has been revoked.'

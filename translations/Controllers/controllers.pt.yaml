@@ -84,5 +84,6 @@ attemptsExceeded: 'Excedeu o número de tentativas. Aguarde %minutes% minuto(s) 
 confirmationCodeSentSuccessfully: 'Um código de confirmação foi enviado para si com sucesso.'
 accountWithoutContactIdentifier: 'Esta conta não tem um contacto (email ou número de telefone) associado. Por favor, selecione outro método de autenticação de dois fatores válido caso pretenda configurar um para esta conta.'
 invalidCodeMessage: 'Código inválido! O código pode estar errado ou já pode ter expirado. Por favor, tente novamente ou reenvie o código.'
+invalidAccountSelectForUserDeletion: 'Não selecionou a conta correta para eliminação. A sua conta autenticada atualmente não é a mesma que a conta selecionada.'
 accountAlreadyHasTwoFADisabled: 'Esta conta já tem a autenticação de dois fatores desativada.'
 twoFASuccessfullyDisabled: 'A autenticação de dois fatores foi desativada com sucesso.'
