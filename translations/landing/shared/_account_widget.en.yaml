@@ -24,3 +24,4 @@ profileData:
 dangerZone:
     title: 'Danger Zone'
     deleteAccount: 'Delete Account'
+    deleteAccountWarningMessage: 'Warning: You are about to delete your own account. This action is irreversible. Are you sure you want to proceed?'
