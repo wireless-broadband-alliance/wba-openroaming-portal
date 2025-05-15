@@ -44,8 +44,7 @@ class SecurityController extends AbstractController
 
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings();
-        $platformMode = $data['PLATFORM_MODE']['value'];
-        if ($platformMode === PlatformMode::DEMO->value) {
+        if ($data['PLATFORM_MODE']['value'] === true) {
             return $this->redirectToRoute('app_landing');
         }
 
