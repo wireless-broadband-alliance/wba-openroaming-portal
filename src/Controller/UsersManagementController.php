@@ -14,7 +14,6 @@ use App\Enum\UserTwoFactorAuthenticationStatus;
 use App\Form\ResetPasswordType;
 use App\Form\UserUpdateType;
 use App\Repository\EventRepository;
-use App\Repository\SettingRepository;
 use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
 use App\Service\EscapeSpreadSheet;
@@ -55,7 +54,6 @@ class UsersManagementController extends AbstractController
         private readonly EntityManagerInterface $entityManager,
         private readonly UserExternalAuthRepository $userExternalAuthRepository,
         private readonly GetSettings $getSettings,
-        private readonly SettingRepository $settingRepository,
         private readonly EventRepository $eventRepository,
         private readonly SendSMS $sendSMS,
         private readonly UserDeletionService $userDeletionService,
