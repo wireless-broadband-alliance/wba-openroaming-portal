@@ -27,7 +27,7 @@ class SimpleRegistrationFormType extends AbstractType
                 'mapped' => false,
                 'constraints' => [
                     new IsTrue([
-                        'message' => $this->translator->trans('agreeTerms', [], 'CustomType'),
+                        'message' => $this->translator->trans('agreeTerms', [], 'LoginFormType'),
                     ]),
                 ],
             ]);
