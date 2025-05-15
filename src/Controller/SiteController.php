@@ -375,73 +375,7 @@ class SiteController extends AbstractController
         ]);
     }
 
-    #[Route('/terms-conditions', name: 'app_terms_conditions')]
-    public function termsConditions(EntityManagerInterface $em): RedirectResponse|Response
-    {
-        // Call the getSettings method of GetSettings class to retrieve the data
-        $data = $this->getSettings->getSettings();
 
-        $settingsRepository = $em->getRepository(Setting::class);
-        $tosFormat = $settingsRepository->findOneBy(['name' => 'TOS']);
-        $textEditorRepository = $em->getRepository(TextEditor::class);
-        if (
-            $tosFormat &&
-            $tosFormat->getValue() === TextInputType::TEXT_EDITOR->value
-        ) {
-            if ($textEditorRepository->findOneBy(['name' => TextEditorName::TOS->value]) !== null) {
-                $content = $textEditorRepository->findOneBy(['name' => TextEditorName::TOS->value])->getContent();
-            } else {
-                $content = '';
-            }
-            return $this->render('landing/shared/tos/_tos.html.twig', [
-                'content' => $content,
-                'data' => $data
-            ]);
-        }
-        if (
-            $tosFormat &&
-            $tosFormat->getValue() === TextInputType::LINK->value &&
-            $settingsRepository->findOneBy(['name' => 'TOS_LINK'])
-        ) {
-            return $this->redirect($settingsRepository->findOneBy(['name' => 'TOS_LINK'])->getValue());
-        }
-        return $this->redirectToRoute('app_landing');
-    }
-
-    #[Route('/privacy-policy', name: 'app_privacy_policy')]
-    public function privacyPolicy(EntityManagerInterface $em): RedirectResponse|Response
-    {
-        // Call the getSettings method of GetSettings class to retrieve the data
-        $data = $this->getSettings->getSettings();
-
-        $settingsRepository = $em->getRepository(Setting::class);
-        $textEditorRepository = $em->getRepository(TextEditor::class);
-        $privacyPolicyFormat = $settingsRepository->findOneBy(['name' => 'PRIVACY_POLICY']);
-        if (
-            $privacyPolicyFormat &&
-            $privacyPolicyFormat->getValue() === TextInputType::TEXT_EDITOR->value
-        ) {
-            if ($textEditorRepository->findOneBy(['name' => TextEditorName::PRIVACY_POLICY->value]) !== null) {
-                $content = $textEditorRepository->findOneBy(
-                    ['name' => TextEditorName::PRIVACY_POLICY->value]
-                )->getContent();
-            } else {
-                $content = '';
-            }
-            return $this->render('landing/shared/tos/_privacy_policy.html.twig', [
-                'content' => $content,
-                'data' => $data
-            ]);
-        }
-        if (
-            $privacyPolicyFormat &&
-            $privacyPolicyFormat->getValue() === TextInputType::LINK->value &&
-            $settingsRepository->findOneBy(['name' => 'PRIVACY_POLICY_LINK'])
-        ) {
-            return $this->redirect($settingsRepository->findOneBy(['name' => 'PRIVACY_POLICY_LINK'])->getValue());
-        }
-        return $this->redirectToRoute('app_landing');
-    }
 
     /**
      * Widget with data about the account of the user / upload new password
@@ -720,7 +654,7 @@ class SiteController extends AbstractController
                             $this->translator->trans(
                                 'emailSentMessage',
                                 ['%email%' => $user->getEmail()],
-                                'messages'
+                                'controllers'
                             )
                         );
                         $this->addFlash('success', $message);
@@ -1343,120 +1277,5 @@ class SiteController extends AbstractController
             );
         }
         return $this->redirectToRoute('app_landing');
-    }
-    #[Route('/landing/userAccount/deletion/external', name: 'app_user_account_deletion_external')]
-    #[IsGranted('ROLE_USER')]
-    public function autoDeleteUserExternal(Request $request): RedirectResponse
-    {
-        $data = $this->getSettings->getSettings();
-
-        /** @var User $currentUser */
-        $currentUser = $this->getUser();
-
-        // Check if the local account has a phoneNumber of an email
-        if ($currentUser->getPhoneNumber() === null && empty($currentUser->getEmail())) {
-            $this->redirectToRoute('app_landing');
-        }
-
-        // 1. TODO FIND THE EXTERNAL PROVIDER OF THE USER $currentUser->getUserExternalAuths()[0]->getProvider()
-        if ($currentUser->getUserExternalAuths()[0]->getProvider() === UserProvider::PORTAL_ACCOUNT->value) {
-            $this->addFlash(
-                'error',
-                $this->translator->trans(
-                    'cannotAccessThisPageWithAInvalidProvider',
-                    [],
-                    'controllers'
-                )
-            );
-            return $this->redirectToRoute('app_landing');
-        }
-
-        // 2. TODO SIMULATE A AUTHENTICATION BEFORE THE USER ACCOUNT DELETION (SAML/GOOGLE/MICROSOFT)
-        if ($currentUser->getUserExternalAuths()[0]->getProvider() === UserProvider::GOOGLE_ACCOUNT->value) {
-            // Retrieve the "google" client
-            $client = $this->clientRegistry->getClient('google');
-
-            // Get the authorization URL
-            $redirectUrl = $client->getOAuth2Provider()->getAuthorizationUrl();
-
-            // Redirect the user to the authorization URL
-            return $this->redirect($redirectUrl);
-        }
-
-        if ($currentUser->getUserExternalAuths()[0]->getProvider() === UserProvider::MICROSOFT_ACCOUNT->value) {
-            // TODO SIMULATE MICROSOFT_ACCOUNT LOGIN
-        }
-
-        if ($currentUser->getUserExternalAuths()[0]->getProvider() === UserProvider::SAML->value) {
-            // TODO SIMULATE SAML_ACCOUNT LOGIN
-        }
-
-        // 3 TODO Execute the user account deletion like the local one
-
-
-        dd($data, $request, $currentUser);
-    }
-
-    /**
-     * @throws \JsonException
-     */
-    #[Route('/landing/userAccount/deletion/local', name: 'app_user_account_deletion_local')]
-    #[IsGranted('ROLE_USER')]
-    public function autoDeleteUserLocalRequest(Request $request): Response
-    {
-        $data = $this->getSettings->getSettings();
-
-        /** @var User $currentUser */
-        $currentUser = $this->getUser();
-
-        // Check if the local account has a phoneNumber of an email
-        if ($currentUser->getPhoneNumber() === null && empty($currentUser->getEmail())) {
-            $this->redirectToRoute('app_landing');
-        }
-
-        $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $currentUser->getId()]);
-        if ($currentUser->getUserExternalAuths()[0]->getProvider() !== UserProvider::PORTAL_ACCOUNT->value) {
-            $this->addFlash(
-                'error',
-                $this->translator->trans(
-                    'cannotAccessThisPageWithAInvalidProvider',
-                    [],
-                    'controllers'
-                )
-            );
-            return $this->redirectToRoute('app_landing');
-        }
-
-        $form = $this->createForm(AutoDeletePasswordType::class);
-        $form->handleRequest($request);
-        if ($form->isSubmitted() && $form->isValid()) {
-            $currentPasswordDB = $currentUser->getPassword();
-            if ($currentUser->getUserExternalAuths()[0]->getProvider() === UserProvider::PORTAL_ACCOUNT->value) {
-                $typedPassword = $form->get('password')->getData();
-
-                // Compare the typed password with the hashed password from the database
-                if (password_verify((string)$typedPassword, $currentPasswordDB)) {
-                    $this->userDeletionService->deleteUser($currentUser, $userExternalAuths, $request, $currentUser);
-                    return $this->redirectToRoute('app_landing');
-                }
-                $this->addFlash(
-                    'error',
-                    $this->translator->trans('invalidPassword', [], 'controllers')
-                );
-            }
-        }
-
-        if ($form->isSubmitted() && !$form->isValid()) {
-            foreach ($form->getErrors(true) as $error) {
-                $this->addFlash('error', $error->getMessage());
-            }
-        }
-
-        return $this->render('landing/autoDeleteAccount/auto_delete_account.html.twig', [
-            'form' => $form->createView(),
-            'data' => $data,
-            'user' => $currentUser,
-            'context' => FirewallType::LANDING->value
-        ]);
     }
 }

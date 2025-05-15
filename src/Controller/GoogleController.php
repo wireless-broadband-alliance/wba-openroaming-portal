@@ -73,11 +73,22 @@ class GoogleController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
+        // Retrieve the `previousLoggedID` from the request
+        $request = $this->requestStack->getCurrentRequest();
+        if (!$request) {
+            throw new \RuntimeException('No current request available.');
+        }
+
+        $previousLoggedID = $request->get('previousLoggedID');
+
         // Retrieve the "google" client
         $client = $this->clientRegistry->getClient('google');
 
-        // Get the authorization URL
-        $redirectUrl = $client->getOAuth2Provider()->getAuthorizationUrl();
+        // Get authorization URL with a custom state including `previousLoggedID` if available
+        $state = $previousLoggedID ? ['previousLoggedID' => $previousLoggedID] : [];
+        $redirectUrl = $client->getOAuth2Provider()->getAuthorizationUrl([
+            'state' => json_encode($state, JSON_THROW_ON_ERROR),
+        ]);
 
         // Redirect the user to the authorization URL
         return $this->redirect($redirectUrl);
@@ -106,6 +117,12 @@ class GoogleController extends AbstractController
             );
             return $this->redirectToRoute('app_landing');
         }
+
+        // Retrieve the `state` parameter and decode it
+        $state = $request->query->get('state');
+        $stateParams = $state !== null ? json_decode($state, true, 512, JSON_THROW_ON_ERROR) : [];
+        $previousLoggedID = $stateParams['previousLoggedID'] ?? null;
+
 
         // Exchange the authorization code for an access token
         $accessToken = $client->getOAuth2Provider()->getAccessToken('authorization_code', [
@@ -159,6 +176,14 @@ class GoogleController extends AbstractController
 
         // Authenticate the user
         $this->authenticateUserGoogle($user);
+
+        // If the previousLoggedID exists return to the route for user account deletion
+        if ($previousLoggedID) {
+            return $this->redirectToRoute('app_user_account_deletion_external_check', [
+                'previousLoggedID' => $previousLoggedID,
+                'currentLoggedUserID' => $user->getId()
+            ]);
+        }
 
         // Redirect the user to the landing page
         return $this->redirectToRoute('app_landing');
