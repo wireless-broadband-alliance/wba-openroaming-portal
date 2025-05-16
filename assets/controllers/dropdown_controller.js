@@ -1,7 +1,7 @@
-import { Controller } from '@hotwired/stimulus';
+import { Controller } from "@hotwired/stimulus";
 
 export default class extends Controller {
-    static targets = ['menu'];
+    static targets = ["menu"];
 
     connect() {
         this.isOpen = false;
@@ -9,13 +9,13 @@ export default class extends Controller {
 
     toggle() {
         this.isOpen = !this.isOpen;
-        this.menuTarget.classList.toggle('hidden', !this.isOpen);
+        this.menuTarget.classList.toggle("hidden", !this.isOpen);
     }
 
     close(event) {
         if (!this.element.contains(event.target)) {
             this.isOpen = false;
-            this.menuTarget.classList.add('hidden');
+            this.menuTarget.classList.add("hidden");
         }
     }
 }
