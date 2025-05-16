@@ -227,7 +227,7 @@ class AdminController extends AbstractController
                     )
                 ) {
 
-                    if (in_array($settingName, $this->getSettings->arraySettingsToTranslate()))
+                    if (in_array($settingName, $this->getSettings->arraySettingsToTranslate(), true))
                     {
                         $session = $request->getSession();
                         $locale = $session->get('_locale');

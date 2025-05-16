@@ -50,7 +50,7 @@ readonly class GetSettings
             }
 
             $settingName = $setting->getName();
-            $data[$this->mapSetting($settingName)] = [
+            $data[$settingName] = [
                 'value' => $localizedSettings[$settingName]['value'] ?? $setting->getValue(),
                 'description' => $this->getSettingDescription($settingName),
             ];
@@ -303,19 +303,5 @@ readonly class GetSettings
             'AUTH_METHOD_SMS_REGISTER_LABEL',
             'AUTH_METHOD_SMS_REGISTER_DESCRIPTION',
         ];
-    }
-
-    private function mapSetting($settingName): string
-    {
-        return match ($settingName) {
-            'PAGE_TITLE' => 'title',
-            'CUSTOMER_LOGO' => 'customerLogoName',
-            'OPENROAMING_LOGO' => 'openroamingLogoName',
-            'WALLPAPER_IMAGE' => 'wallpaperImageName',
-            'WELCOME_TEXT' => 'welcomeText',
-            'WELCOME_DESCRIPTION' => 'welcomeDescription',
-            'CONTACT_EMAIL' => 'contactEmail',
-            default => $settingName,
-        };
     }
 }
