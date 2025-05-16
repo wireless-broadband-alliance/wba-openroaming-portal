@@ -20,7 +20,7 @@ class SettingTranslationFixture extends Fixture
                 'value' => 'Welcome to OpenRoaming Provisioning Service',
                 'translations' => [
                     LanguagesType::EN->value => 'Welcome to OpenRoaming Provisioning Service',
-                    'pt' => 'Bem-vindo ao Serviço de OpenRoaming Provisioning',
+                    LanguagesType::PT->value => 'Bem-vindo ao Serviço de OpenRoaming Provisioning',
                 ],
             ],
             [
@@ -28,7 +28,7 @@ class SettingTranslationFixture extends Fixture
                 'value' => 'This portal allows you to download and install an OpenRoaming profile tailored to your device, allowing you to connect automatically to OpenRoaming Wi-Fi networks across the world.',
                 'translations' => [
                     LanguagesType::EN->value => 'This portal allows you to download and install an OpenRoaming profile tailored to your device, allowing you to connect automatically to OpenRoaming Wi-Fi networks across the world.',
-                    'pt' => 'Este portal permite que você faça o download e instale um perfil OpenRoaming adaptado ao seu dispositivo, permitindo-lhe conectar-se automaticamente às redes OpenRoaming Wi-Fi em todo o mundo.',
+                    LanguagesType::PT->value => 'Este portal permite que você faça o download e instale um perfil OpenRoaming adaptado ao seu dispositivo, permitindo-lhe conectar-se automaticamente às redes OpenRoaming Wi-Fi em todo o mundo.',
                 ],
             ],
             [
@@ -36,7 +36,7 @@ class SettingTranslationFixture extends Fixture
                 'value' => 'This label is used to add extra content if necessary',
                 'translations' => [
                     LanguagesType::EN->value => 'This label is used to add extra content if necessary',
-                    'pt' => 'Este rótulo é usado para adicionar conteúdo extra, se necessário',
+                    LanguagesType::PT->value => 'Este rótulo é usado para adicionar conteúdo extra, se necessário',
                 ],
             ],
             [
@@ -44,7 +44,7 @@ class SettingTranslationFixture extends Fixture
                 'value' => 'Login with SAML',
                 'translations' => [
                     LanguagesType::EN->value => 'Login with SAML',
-                    'pt' => 'Entrar com SAML',
+                    LanguagesType::PT->value => 'Entrar com SAML',
                 ],
             ],
             [
@@ -52,7 +52,7 @@ class SettingTranslationFixture extends Fixture
                 'value' => 'Authenticate with your SAML account',
                 'translations' => [
                     LanguagesType::EN->value => 'Authenticate with your SAML account',
-                    'pt' => 'Autentique-se com sua conta SAML',
+                    LanguagesType::PT->value => 'Autentique-se com sua conta SAML',
                 ],
             ],
             [
@@ -60,7 +60,7 @@ class SettingTranslationFixture extends Fixture
                 'value' => 'Login with Google',
                 'translations' => [
                     LanguagesType::EN->value => 'Login with Google',
-                    'pt' => 'Entrar com Google',
+                    LanguagesType::PT->value => 'Entrar com Google',
                 ],
             ],
             [
@@ -68,7 +68,7 @@ class SettingTranslationFixture extends Fixture
                 'value' => 'Authenticate with your Google account',
                 'translations' => [
                     LanguagesType::EN->value => 'Authenticate with your Google account',
-                    'pt' => 'Autentique-se com sua conta Google',
+                    LanguagesType::PT->value => 'Autentique-se com sua conta Google',
                 ],
             ],
             [
@@ -76,7 +76,7 @@ class SettingTranslationFixture extends Fixture
                 'value' => 'Login with Microsoft',
                 'translations' => [
                     LanguagesType::EN->value => 'Login with Microsoft',
-                    'pt' => 'Entrar com Microsoft',
+                    LanguagesType::PT->value => 'Entrar com Microsoft',
                 ],
             ],
             [
@@ -84,7 +84,7 @@ class SettingTranslationFixture extends Fixture
                 'value' => 'Authenticate with your Microsoft account',
                 'translations' => [
                     LanguagesType::EN->value => 'Authenticate with your Microsoft account',
-                    'pt' => 'Autentique-se com sua conta Microsoft',
+                    LanguagesType::PT->value => 'Autentique-se com sua conta Microsoft',
                 ],
             ],
             [
@@ -92,7 +92,7 @@ class SettingTranslationFixture extends Fixture
                 'value' => 'Create Account with Email',
                 'translations' => [
                     LanguagesType::EN->value => 'Create Account with Email',
-                    'pt' => 'Criar Conta com Email',
+                    LanguagesType::PT->value => 'Criar Conta com Email',
                 ],
             ],
             [
@@ -100,7 +100,7 @@ class SettingTranslationFixture extends Fixture
                 'value' => "Don't have an account? Create one",
                 'translations' => [
                     LanguagesType::EN->value => "Don't have an account? Create one",
-                    'pt' => 'Não tem uma conta? Crie uma',
+                    LanguagesType::PT->value => 'Não tem uma conta? Crie uma',
                 ],
             ],
             [
@@ -108,7 +108,7 @@ class SettingTranslationFixture extends Fixture
                 'value' => 'Login Here',
                 'translations' => [
                     LanguagesType::EN->value => 'Login Here',
-                    'pt' => 'Entre Aqui',
+                    LanguagesType::PT->value => 'Entre Aqui',
                 ],
             ],
             [
@@ -116,7 +116,7 @@ class SettingTranslationFixture extends Fixture
                 'value' => 'Already have an account? Login then',
                 'translations' => [
                     LanguagesType::EN->value => 'Already have an account? Login then',
-                    'pt' => 'Já tem uma conta? Faça login então',
+                    LanguagesType::PT->value => 'Já tem uma conta? Faça login então',
                 ],
             ],
             [
@@ -124,7 +124,7 @@ class SettingTranslationFixture extends Fixture
                 'value' => 'Create Account with Phone Number',
                 'translations' => [
                     LanguagesType::EN->value => 'Create Account with Phone Number',
-                    'pt' => 'Criar Conta com Número de Telefone',
+                    LanguagesType::PT->value => 'Criar Conta com Número de Telefone',
                 ],
             ],
             [
@@ -132,7 +132,7 @@ class SettingTranslationFixture extends Fixture
                 'value' => "Don't have an account? Create one",
                 'translations' => [
                     LanguagesType::EN->value => "Don't have an account? Create one",
-                    'pt' => 'Não tem uma conta? Crie uma',
+                    LanguagesType::PT->value => 'Não tem uma conta? Crie uma',
                 ],
             ],
         ];
