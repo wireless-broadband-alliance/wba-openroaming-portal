@@ -80,6 +80,30 @@ readonly class GetSettings
         return $data;
     }
 
+    public function getSettingsByLoale(array $settings, array $data): array
+    {
+        $settingsToTranslate = $this->arraySettingsToTranslate();
+
+        foreach ($settings as $setting) {
+            if  (in_array($setting->getName(), $settingsToTranslate, true))
+            {
+                if ($setting->getName() === 'WELCOME_TEXT')
+                {
+                    $setting->setValue($data['welcomeText']['value']);
+                }
+                elseif ($setting->getName() === 'WELCOME_DESCRIPTION')
+                {
+                    $setting->setValue($data['welcomeDescription']['value']);
+                }
+                else {
+                    $setting->setValue($data[$setting->getName()]['value']);
+                }
+
+            }
+        }
+        return $settings;
+    }
+
     public function getSettingDescription($settingName): string
     {
         // Retrieve current locale from the session, default to 'en' if not found
@@ -258,6 +282,27 @@ readonly class GetSettings
         // phpcs:enable
 
         return $descriptions[$locale][$settingName] ?? $descriptions['en'][$settingName];
+    }
+
+    public function arraySettingsToTranslate (): array
+    {
+        return [
+            'WELCOME_TEXT',
+            'WELCOME_DESCRIPTION',
+            'ADDITIONAL_LABEL',
+            'AUTH_METHOD_SAML_LABEL',
+            'AUTH_METHOD_SAML_DESCRIPTION',
+            'AUTH_METHOD_GOOGLE_LOGIN_LABEL',
+            'AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION',
+            'AUTH_METHOD_MICROSOFT_LOGIN_LABEL',
+            'AUTH_METHOD_MICROSOFT_LOGIN_DESCRIPTION',
+            'AUTH_METHOD_REGISTER_LABEL',
+            'AUTH_METHOD_REGISTER_DESCRIPTION',
+            'AUTH_METHOD_LOGIN_TRADITIONAL_LABEL',
+            'AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION',
+            'AUTH_METHOD_SMS_REGISTER_LABEL',
+            'AUTH_METHOD_SMS_REGISTER_DESCRIPTION',
+        ];
     }
 
     private function mapSetting($settingName): string

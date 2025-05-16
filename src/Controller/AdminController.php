@@ -8,6 +8,7 @@ use App\Enum\AnalyticalEventType;
 use App\Form\CustomType;
 use App\Form\RevokeProfilesType;
 use App\Repository\EventRepository;
+use App\Repository\SettingTranslationRepository;
 use App\Repository\UserRepository;
 use App\Service\EventActions;
 use App\Service\GetSettings;
@@ -37,7 +38,8 @@ class AdminController extends AbstractController
         private readonly EventActions $eventActions,
         private readonly VerificationCodeEmailGenerator $verificationCodeGenerator,
         private readonly EventRepository $eventRepository,
-        private readonly TranslatorInterface $translator
+        private readonly TranslatorInterface $translator,
+        private readonly SettingTranslationRepository $settingTranslationRepository
     ) {
     }
 
@@ -192,9 +194,10 @@ class AdminController extends AbstractController
         $settingsRepository = $em->getRepository(Setting::class);
         $settings = $settingsRepository->findAll();
 
+        $settingsTranslated = $this->getSettings->getSettingsByLoale($settings, $data);
         // Create the form with the CustomType and pass the relevant settings
         $form = $this->createForm(CustomType::class, null, [
-            'settings' => $settings,
+            'settings' => $settingsTranslated,
         ]);
 
         $form->handleRequest($request);
@@ -221,11 +224,60 @@ class AdminController extends AbstractController
                         ]
                     )
                 ) {
-                    // Get the value from the submitted form data
-                    $submittedValue = $submittedData[$settingName];
 
-                    // Update the setting value
-                    $setting->setValue($submittedValue);
+                    if (in_array($settingName, $this->getSettings->arraySettingsToTranslate()))
+                    {
+                        $session = $request->getSession();
+                        $locale = $session->get('_locale');
+                        if ($setting->getName() === 'WELCOME_TEXT')
+                        {
+                            $submittedValue = $submittedData[$settingName];
+                            if ($locale === 'en') {
+                                // Update the setting value
+                                $setting->setValue($submittedValue);
+                            }
+                            // Get the translated setting
+                            $settingTranslation = $this->settingTranslationRepository->findOneBy(['setting' => $setting, 'locale' => $locale]);
+                            if ($settingTranslation) {
+                                $settingTranslation->setTranslation($submittedValue);
+                            }
+
+                        }
+                        elseif ($setting->getName() === 'WELCOME_DESCRIPTION')
+                        {
+                            $submittedValue = $submittedData[$settingName];
+                            if ($locale === 'en') {
+                                // Update the setting value
+                                $setting->setValue($submittedValue);
+                            }
+                            // Get the translated setting
+                            $settingTranslation = $this->settingTranslationRepository->findOneBy(['setting' => $setting, 'locale' => $locale]);
+                            if ($settingTranslation) {
+                                $settingTranslation->setTranslation($submittedValue);
+                            }
+                        }
+                        else {
+                            $submittedValue = $submittedData[$settingName];
+                            if ($locale === 'en') {
+                                // Update the setting value
+                                $setting->setValue($submittedValue);
+                            }
+                            // Get the translated setting
+                            $settingTranslation = $this->settingTranslationRepository->findOneBy(['setting' => $setting, 'locale' => $locale]);
+                            if ($settingTranslation) {
+                                $settingTranslation->setTranslation($submittedValue);
+                            }
+                        }
+
+                    }
+                    else {
+                        // Get the value from the submitted form data
+                        $submittedValue = $submittedData[$settingName];
+
+                        // Update the setting value
+                        $setting->setValue($submittedValue);
+                    }
+
                 } elseif (in_array($settingName, ['CUSTOMER_LOGO', 'OPENROAMING_LOGO', 'WALLPAPER_IMAGE'])) {
                     // Handle file uploads for logos and wallpaper image
                     $file = $form->get($settingName)->getData();
@@ -277,7 +329,7 @@ class AdminController extends AbstractController
 
         return $this->render('dashboard/shared/settings_actions.html.twig', [
             'user' => $currentUser,
-            'settings' => $settings,
+            'settings' => $settingsTranslated,
             'form' => $form->createView(),
             'data' => $data,
         ]);
