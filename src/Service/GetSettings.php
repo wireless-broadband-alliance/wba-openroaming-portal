@@ -188,7 +188,7 @@ readonly class GetSettings
                 'PROFILE_LIMIT_DATE_EMAIL' => 'Time in days to disable profiles for users with EMAIL login',
                 'PROFILE_LIMIT_DATE_SMS' => 'Time in days to disable profiles for users with SMS login',
             ],
-            'pt' => [
+            LanguagesType::PT->value => [
                 'RADIUS_REALM_NAME' => 'O nome do realm para o seu servidor RADIUS',
                 'DISPLAY_NAME' => 'O nome utilizado nos perfis',
                 'PAYLOAD_IDENTIFIER' => 'O identificador da carga útil utilizada nos perfis. Apenas usado para criar perfis iOS/macOS.',
