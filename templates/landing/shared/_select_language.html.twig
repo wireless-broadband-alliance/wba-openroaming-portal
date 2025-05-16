@@ -7,10 +7,16 @@
                 onchange="this.form.submit()"
                 class="country-dropdown">
             <option value="en" {% if app.request.locale == 'en' %}selected{% endif %}>
-                🇬🇧 English
+                <div class="flex flex-row space-x-2">
+                    <twig:ux:icon class="w-2" name="wba:gb-flag"/>
+                    <p>English</p>
+                </div>
             </option>
             <option value="pt" {% if app.request.locale == 'pt' %}selected{% endif %}>
-                🇵🇹 Portuguese
+                <div class="flex flex-row space-x-2">
+                    <twig:ux:icon class="w-2" name="wba:portugal-flag"/>
+                    <p>Portugal</p>
+                </div>
             </option>
         </select>
 
