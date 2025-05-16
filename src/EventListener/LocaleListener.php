@@ -19,6 +19,12 @@ readonly class LocaleListener
     public function onKernelRequest(RequestEvent $event): void
     {
         $request = $event->getRequest();
+
+        // Ignore locale logic if the request starts with '/api'
+        if (str_starts_with($request->getPathInfo(), '/api')) {
+            return;
+        }
+
         $session = $request->getSession();
 
         // If locale is already set in the session, do nothing

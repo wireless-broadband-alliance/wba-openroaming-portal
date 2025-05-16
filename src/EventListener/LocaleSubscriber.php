@@ -21,6 +21,12 @@ readonly class LocaleSubscriber implements EventSubscriberInterface
         }
 
         $request = $event->getRequest();
+
+        // Ignore locale logic if the request starts with '/api'
+        if (str_starts_with($request->getPathInfo(), '/api')) {
+            return;
+        }
+
         if (!$request->hasPreviousSession()) {
             return;
         }

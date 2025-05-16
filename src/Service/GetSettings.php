@@ -25,6 +25,11 @@ readonly class GetSettings
             throw new \RuntimeException('No current request available.');
         }
 
+        // Ignore locale logic for API requests
+        if (str_starts_with($request->getPathInfo(), '/api')) {
+            return [];
+        }
+
         $session = $request->getSession();
         $locale = $session->get('_locale') ?: LanguagesType::EN->value;
         $data = [];
