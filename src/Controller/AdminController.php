@@ -226,60 +226,56 @@ class AdminController extends AbstractController
                         ]
                     )
                 ) {
-
-                    if (in_array($settingName, $this->getSettings->arraySettingsToTranslate()))
-                    {
+                    if (in_array($settingName, $this->getSettings->arraySettingsToTranslate(), true)) {
                         $session = $request->getSession();
                         $locale = $session->get('_locale');
-                        if ($setting->getName() === 'WELCOME_TEXT')
-                        {
+                        if ($setting->getName() === 'WELCOME_TEXT') {
                             $submittedValue = $submittedData[$settingName];
                             if ($locale === 'en') {
                                 // Update the setting value
                                 $setting->setValue($submittedValue);
                             }
                             // Get the translated setting
-                            $settingTranslation = $this->settingTranslationRepository->findOneBy(['setting' => $setting, 'locale' => $locale]);
+                            $settingTranslation = $this->settingTranslationRepository->findOneBy(
+                                ['setting' => $setting, 'locale' => $locale]
+                            );
                             if ($settingTranslation) {
                                 $settingTranslation->setTranslation($submittedValue);
                             }
-
-                        }
-                        elseif ($setting->getName() === 'WELCOME_DESCRIPTION')
-                        {
+                        } elseif ($setting->getName() === 'WELCOME_DESCRIPTION') {
                             $submittedValue = $submittedData[$settingName];
                             if ($locale === 'en') {
                                 // Update the setting value
                                 $setting->setValue($submittedValue);
                             }
                             // Get the translated setting
-                            $settingTranslation = $this->settingTranslationRepository->findOneBy(['setting' => $setting, 'locale' => $locale]);
+                            $settingTranslation = $this->settingTranslationRepository->findOneBy(
+                                ['setting' => $setting, 'locale' => $locale]
+                            );
                             if ($settingTranslation) {
                                 $settingTranslation->setTranslation($submittedValue);
                             }
-                        }
-                        else {
+                        } else {
                             $submittedValue = $submittedData[$settingName];
                             if ($locale === 'en') {
                                 // Update the setting value
                                 $setting->setValue($submittedValue);
                             }
                             // Get the translated setting
-                            $settingTranslation = $this->settingTranslationRepository->findOneBy(['setting' => $setting, 'locale' => $locale]);
+                            $settingTranslation = $this->settingTranslationRepository->findOneBy(
+                                ['setting' => $setting, 'locale' => $locale]
+                            );
                             if ($settingTranslation) {
                                 $settingTranslation->setTranslation($submittedValue);
                             }
                         }
-
-                    }
-                    else {
+                    } else {
                         // Get the value from the submitted form data
                         $submittedValue = $submittedData[$settingName];
 
                         // Update the setting value
                         $setting->setValue($submittedValue);
                     }
-
                 } elseif (in_array($settingName, ['CUSTOMER_LOGO', 'OPENROAMING_LOGO', 'WALLPAPER_IMAGE'])) {
                     // Handle file uploads for logos and wallpaper image
                     $file = $form->get($settingName)->getData();
