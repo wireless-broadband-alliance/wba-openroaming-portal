@@ -4,6 +4,7 @@ namespace App\Command;
 
 use App\Entity\Setting;
 use App\Entity\SettingTranslation;
+use App\Enum\LanguagesType;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -76,24 +77,24 @@ class ResetCustomSettingsCommand extends Command
                 'name' => 'WELCOME_TEXT',
                 'value' => 'Welcome to OpenRoaming Provisioning Service',
                 'translations' => [
-                    'en' => 'Welcome to OpenRoaming Provisioning Service',
-                    'pt' => 'Bem-vindo ao Serviço de OpenRoaming Provisioning',
+                    LanguagesType::EN->value => 'Welcome to OpenRoaming Provisioning Service',
+                    LanguagesType::PT->value => 'Bem-vindo ao Serviço de OpenRoaming Provisioning',
                 ],
             ],
             [
                 'name' => 'WELCOME_DESCRIPTION',
                 'value' => 'This portal allows you to download and install an OpenRoaming profile tailored to your device, allowing you to connect automatically to OpenRoaming Wi-Fi networks across the world.',
                 'translations' => [
-                    'en' => 'This portal allows you to download and install an OpenRoaming profile tailored to your device, allowing you to connect automatically to OpenRoaming Wi-Fi networks across the world.',
-                    'pt' => 'Este portal permite que você faça o download e instale um perfil OpenRoaming adaptado ao seu dispositivo, permitindo-lhe conectar-se automaticamente às redes OpenRoaming Wi-Fi em todo o mundo.',
+                    LanguagesType::EN->value => 'This portal allows you to download and install an OpenRoaming profile tailored to your device, allowing you to connect automatically to OpenRoaming Wi-Fi networks across the world.',
+                    LanguagesType::PT->value => 'Este portal permite que você faça o download e instale um perfil OpenRoaming adaptado ao seu dispositivo, permitindo-lhe conectar-se automaticamente às redes OpenRoaming Wi-Fi em todo o mundo.',
                 ],
             ],
             [
                 'name' => 'ADDITIONAL_LABEL',
                 'value' => 'This label is used to add extra content if necessary',
                 'translations' => [
-                    'en' => 'This label is used to add extra content if necessary',
-                    'pt' => 'Este rótulo é usado para adicionar conteúdo extra, se necessário',
+                    LanguagesType::EN->value => 'This label is used to add extra content if necessary',
+                    LanguagesType::PT->value => 'Este rótulo é usado para adicionar conteúdo extra, se necessário',
                 ],
             ],
         ];

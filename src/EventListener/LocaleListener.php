@@ -2,6 +2,7 @@
 
 namespace App\EventListener;
 
+use App\Enum\LanguagesType;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
@@ -27,8 +28,8 @@ readonly class LocaleListener
         }
 
         // Determine the preferred language from the browser
-        $preferredLanguage = $request->getPreferredLanguage(['en', 'pt']);
-        $session->set('_locale', $preferredLanguage ?: 'en');
+        $preferredLanguage = $request->getPreferredLanguage([LanguagesType::EN->value, 'pt']);
+        $session->set('_locale', $preferredLanguage ?: LanguagesType::EN->value);
 
         // Set the locale both for the session and the current request
         $request->setLocale($preferredLanguage);

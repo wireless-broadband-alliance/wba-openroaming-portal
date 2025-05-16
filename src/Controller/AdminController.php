@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Setting;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
+use App\Enum\LanguagesType;
 use App\Form\CustomType;
 use App\Form\RevokeProfilesType;
 use App\Repository\EventRepository;
@@ -232,7 +233,7 @@ class AdminController extends AbstractController
                         $session = $request->getSession();
                         $locale = $session->get('_locale');
                         $submittedValue = $submittedData[$settingName];
-                        if ($locale === 'en') {
+                        if ($locale === LanguagesType::EN->value) {
                             // Update the setting value
                             $setting->setValue($submittedValue);
                         }

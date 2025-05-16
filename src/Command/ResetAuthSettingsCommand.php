@@ -4,6 +4,7 @@ namespace App\Command;
 
 use App\Entity\Setting;
 use App\Entity\SettingTranslation;
+use App\Enum\LanguagesType;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -84,96 +85,96 @@ class ResetAuthSettingsCommand extends Command
                 'name' => 'AUTH_METHOD_SAML_LABEL',
                 'value' => 'Login with SAML',
                 'translations' => [
-                    'en' => 'Login with SAML',
-                    'pt' => 'Entrar com SAML',
+                    LanguagesType::EN->value => 'Login with SAML',
+                    LanguagesType::PT->value => 'Entrar com SAML',
                 ],
             ],
             [
                 'name' => 'AUTH_METHOD_SAML_DESCRIPTION',
                 'value' => 'Authenticate with your SAML account',
                 'translations' => [
-                    'en' => 'Authenticate with your SAML account',
-                    'pt' => 'Autentique-se com sua conta SAML',
+                    LanguagesType::EN->value => 'Authenticate with your SAML account',
+                    LanguagesType::PT->value => 'Autentique-se com sua conta SAML',
                 ],
             ],
             [
                 'name' => 'AUTH_METHOD_GOOGLE_LOGIN_LABEL',
                 'value' => 'Login with Google',
                 'translations' => [
-                    'en' => 'Login with Google',
-                    'pt' => 'Entrar com Google',
+                    LanguagesType::EN->value => 'Login with Google',
+                    LanguagesType::PT->value => 'Entrar com Google',
                 ],
             ],
             [
                 'name' => 'AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION',
                 'value' => 'Authenticate with your Google account',
                 'translations' => [
-                    'en' => 'Authenticate with your Google account',
-                    'pt' => 'Autentique-se com sua conta Google',
+                    LanguagesType::EN->value => 'Authenticate with your Google account',
+                    LanguagesType::PT->value => 'Autentique-se com sua conta Google',
                 ],
             ],
             [
                 'name' => 'AUTH_METHOD_MICROSOFT_LOGIN_LABEL',
                 'value' => 'Login with Microsoft',
                 'translations' => [
-                    'en' => 'Login with Microsoft',
-                    'pt' => 'Entrar com Microsoft',
+                    LanguagesType::EN->value => 'Login with Microsoft',
+                    LanguagesType::PT->value => 'Entrar com Microsoft',
                 ],
             ],
             [
                 'name' => 'AUTH_METHOD_MICROSOFT_LOGIN_DESCRIPTION',
                 'value' => 'Authenticate with your Microsoft account',
                 'translations' => [
-                    'en' => 'Authenticate with your Microsoft account',
-                    'pt' => 'Autentique-se com sua conta Microsoft',
+                    LanguagesType::EN->value => 'Authenticate with your Microsoft account',
+                    LanguagesType::PT->value => 'Autentique-se com sua conta Microsoft',
                 ],
             ],
             [
                 'name' => 'AUTH_METHOD_REGISTER_LABEL',
                 'value' => 'Create Account with Email',
                 'translations' => [
-                    'en' => 'Create Account with Email',
-                    'pt' => 'Criar Conta com Email',
+                    LanguagesType::EN->value => 'Create Account with Email',
+                    LanguagesType::PT->value => 'Criar Conta com Email',
                 ],
             ],
             [
                 'name' => 'AUTH_METHOD_REGISTER_DESCRIPTION',
                 'value' => "Don't have an account? Create one",
                 'translations' => [
-                    'en' => "Don't have an account? Create one",
-                    'pt' => 'Não tem uma conta? Crie uma',
+                    LanguagesType::EN->value => "Don't have an account? Create one",
+                    LanguagesType::PT->value => 'Não tem uma conta? Crie uma',
                 ],
             ],
             [
                 'name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_LABEL',
                 'value' => 'Login Here',
                 'translations' => [
-                    'en' => 'Login Here',
-                    'pt' => 'Entre Aqui',
+                    LanguagesType::EN->value => 'Login Here',
+                    LanguagesType::PT->value => 'Entre Aqui',
                 ],
             ],
             [
                 'name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION',
                 'value' => 'Already have an account? Login then',
                 'translations' => [
-                    'en' => 'Already have an account? Login then',
-                    'pt' => 'Já tem uma conta? Faça login então',
+                    LanguagesType::EN->value => 'Already have an account? Login then',
+                    LanguagesType::PT->value => 'Já tem uma conta? Faça login então',
                 ],
             ],
             [
                 'name' => 'AUTH_METHOD_SMS_REGISTER_LABEL',
                 'value' => 'Create Account with Phone Number',
                 'translations' => [
-                    'en' => 'Create Account with Phone Number',
-                    'pt' => 'Criar Conta com Número de Telefone',
+                    LanguagesType::EN->value => 'Create Account with Phone Number',
+                    LanguagesType::PT->value => 'Criar Conta com Número de Telefone',
                 ],
             ],
             [
                 'name' => 'AUTH_METHOD_SMS_REGISTER_DESCRIPTION',
                 'value' => "Don't have an account? Create one",
                 'translations' => [
-                    'en' => "Don't have an account? Create one",
-                    'pt' => 'Não tem uma conta? Crie uma',
+                    LanguagesType::EN->value => "Don't have an account? Create one",
+                    LanguagesType::PT->value => 'Não tem uma conta? Crie uma',
                 ],
             ],
         ];

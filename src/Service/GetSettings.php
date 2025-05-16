@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use App\Enum\LanguagesType;
 use App\Repository\SettingRepository;
 use App\Repository\SettingTranslationRepository;
 use Symfony\Component\HttpFoundation\Request;
@@ -25,7 +26,7 @@ readonly class GetSettings
         }
 
         $session = $request->getSession();
-        $locale = $session->get('_locale') ?: 'en';
+        $locale = $session->get('_locale') ?: LanguagesType::EN->value;
         $data = [];
 
         // Fetch translations for the current locale
@@ -101,11 +102,11 @@ readonly class GetSettings
         }
 
         $session = $request->getSession();
-        $locale = $session->get('_locale') ?: 'en';
+        $locale = $session->get('_locale') ?: LanguagesType::EN->value;
 
         // phpcs:disable Generic.Files.LineLength.TooLong
         $descriptions = [
-            'en' => [
+            LanguagesType::EN->value => [
                 'RADIUS_REALM_NAME' => 'The realm name for your RADIUS server',
                 'DISPLAY_NAME' => 'The name used on the profiles',
                 'PAYLOAD_IDENTIFIER' => 'The identifier for the payload used on the profiles. This is only used to create iOS/macOS profiles.',
@@ -269,7 +270,7 @@ readonly class GetSettings
         ];
         // phpcs:enable
 
-        return $descriptions[$locale][$settingName] ?? $descriptions['en'][$settingName];
+        return $descriptions[$locale][$settingName] ?? $descriptions[LanguagesType::EN->value][$settingName];
     }
 
     public function arraySettingsToTranslate(): array
