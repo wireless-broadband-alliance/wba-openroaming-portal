@@ -1,7 +1,7 @@
 {% extends 'base.html.twig' %}
 
 {% block title %}
-    {{ data.title.value }}
+    {{ data.PAGE_TITLE.value }}
 {% endblock %}
 
 {% block body %}
@@ -10,19 +10,19 @@
         <div class="w-full xl:w-1/2 h-screen bg-center bg-cover"
              style="background-image: url('/resources/images/background.png');">
             <div class="w-full h-full p-8 xl:pl-[130px] xl:pr-[150px] xl:pt-[210px] bg-center bg-cover"
-                 style="background-image: url('{{ data.wallpaperImageName.value }}');">
+                 style="background-image: url('{{ data.WALLPAPER_IMAGE.value }}');">
                 <div class="h-full w-full flex flex-col">
-                    <img class="w-96 max-w-full" src="{{ data.openroamingLogoName.value }}" alt="OpenRoaming Logo"/>
+                    <img class="w-96 max-w-full" src="{{ data.OPENROAMING_LOGO.value }}" alt="OpenRoaming Logo"/>
                     <h1 class="text-5xl font-segoe text-white mt-[55px] font-bold break-words">
-                        {{ data.welcomeText.value }}
+                        {{ data.WELCOME_TEXT.value }}
                     </h1>
                     <p class="text-white text-2xl mt-[45px] leading-7 break-words">
-                        {{ data.welcomeDescription.value }}
+                        {{ data.WELCOME_DESCRIPTION.value }}
                     </p>
                     <p class="text-white text-lg mt-[55px] mb-6 break-words">
                         {{ 'contactText'|trans({}, 'landing') }}
-                        <a href="mailto:{{ data.contactEmail.value }}"
-                           class="font-semibold underline text-primary break-words">{{ data.contactEmail.value }}</a>
+                        <a href="mailto:{{ data.CONTACT_EMAIL.value }}"
+                           class="font-semibold underline text-primary break-words">{{ data.CONTACT_EMAIL.value }}</a>
                     </p>
                 </div>
             </div>
