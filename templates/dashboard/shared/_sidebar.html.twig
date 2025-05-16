@@ -228,18 +228,16 @@
                         {# Country Dropdown Options #}
                         <ul {{ stimulus_target('nav-dropdown', 'container') }}
                                 class="hidden mt-3 divide-y divide-gray-100 py-2 text-sm rounded-lg bg-white shadow">
-                            <li>
-                                <a
-                                        href="{{ path('change_language', {locale: 'en'}) }}"
-                                        class="block px-4 py-2 cursor-pointer hover:text-lightGreen rounded {{ app.request.locale == 'en' ? 'selected' : '' }}">
-                                    🇬🇧 English
+                            <li class="flex items-center space-x-2 px-4 py-2 rounded cursor-pointer hover:text-lightGreen {{ app.request.locale == 'en' ? 'selected' : '' }}">
+                                <twig:ux:icon class="w-4 h-4" name="wba:gb-flag" />
+                                <a href="{{ path('change_language', {locale: 'en'}) }}">
+                                    English
                                 </a>
                             </li>
-                            <li>
-                                <a
-                                        href="{{ path('change_language', {locale: 'pt'}) }}"
-                                        class="block px-4 py-2 cursor-pointer hover:text-lightGreen rounded {{ app.request.locale == 'pt' ? 'selected' : '' }}">
-                                    🇵🇹 Portuguese
+                            <li class="flex items-center space-x-2 px-4 py-2 rounded cursor-pointer hover:text-lightGreen {{ app.request.locale == 'pt' ? 'selected' : '' }}">
+                                <twig:ux:icon class="w-4 h-4" name="wba:portugal-flag" />
+                                <a href="{{ path('change_language', {locale: 'pt'}) }}">
+                                    Portuguese
                                 </a>
                             </li>
                         </ul>

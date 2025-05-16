@@ -89,13 +89,14 @@
                         {{ 'account'|trans({}, '_header_admin') }}
                     </a>
                 </li>
+                {# Language Dropdown #}
                 <div {{ stimulus_controller('nav-dropdown') }}>
                     <div class="px-4 py-2 mx-2 cursor-pointer hover:shadow hover:text-lightGreen duration-100 rounded">
                         <button
                                 type="button"
                                 {{ stimulus_target('nav-dropdown', 'button') }}
                                 {{ stimulus_action('nav-dropdown', 'toggleHeader')|stimulus_action('nav-dropdown', 'lost_focusHeader', 'focusout') }}>
-                            {# Language Dropdown #}
+
                             <div class="flex flex-row items-center space-x-2">
                                 <twig:ux:icon name="wba:globe" class="w-6 pr-1 mr-2" fill="none"/>
                                 <span class="truncate">{{ 'language'|trans({}, 'landing') }}</span>
@@ -105,18 +106,16 @@
                     {# Country Dropdown Options #}
                     <ul {{ stimulus_target('nav-dropdown', 'container') }}
                             class="px-6 hidden mt-2 divide-y divide-gray-100 text-sm rounded-lg bg-white">
-                        <li>
-                            <a
-                                    href="{{ path('change_language', {locale: 'en'}) }}"
-                                    class="block px-4 py-2 cursor-pointer hover:text-lightGreen rounded {{ app.request.locale == 'en' ? 'selected' : '' }}">
-                                🇬🇧 English
+                        <li class="flex items-center space-x-2 px-4 py-2 rounded cursor-pointer hover:text-lightGreen {{ app.request.locale == 'en' ? 'selected' : '' }}">
+                            <twig:ux:icon class="w-4 h-4" name="wba:gb-flag" />
+                            <a href="{{ path('change_language', {locale: 'en'}) }}">
+                                English
                             </a>
                         </li>
-                        <li>
-                            <a
-                                    href="{{ path('change_language', {locale: 'pt'}) }}"
-                                    class="block px-4 py-2 cursor-pointer hover:text-lightGreen rounded {{ app.request.locale == 'pt' ? 'selected' : '' }}">
-                                🇵🇹 Portuguese
+                        <li class="flex items-center space-x-2 px-4 py-2 rounded cursor-pointer hover:text-lightGreen {{ app.request.locale == 'pt' ? 'selected' : '' }}">
+                            <twig:ux:icon class="w-4 h-4" name="wba:portugal-flag" />
+                            <a href="{{ path('change_language', {locale: 'pt'}) }}">
+                                Portuguese
                             </a>
                         </li>
                     </ul>
