@@ -28,7 +28,7 @@ readonly class LocaleListener
         }
 
         // Determine the preferred language from the browser
-        $preferredLanguage = $request->getPreferredLanguage([LanguagesType::EN->value, 'pt']);
+        $preferredLanguage = $request->getPreferredLanguage([LanguagesType::EN->value, LanguagesType::PT->value]);
         $session->set('_locale', $preferredLanguage ?: LanguagesType::EN->value);
 
         // Set the locale both for the session and the current request
