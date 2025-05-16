@@ -106,15 +106,15 @@
                     {# Country Dropdown Options #}
                     <ul {{ stimulus_target('nav-dropdown', 'container') }}
                             class="px-6 hidden mt-2 divide-y divide-gray-100 text-sm rounded-lg bg-white">
-                        <li class="flex items-center space-x-2 px-4 py-2 rounded cursor-pointer hover:text-lightGreen {{ app.request.locale == 'en' ? 'selected' : '' }}">
+                        <li class="flex items-center space-x-2 px-4 py-2 rounded cursor-pointer hover:text-lightGreen {{ app.request.locale == constant('App\\Enum\\LanguagesType::EN').value ? 'selected' : '' }}">
                             <twig:ux:icon class="w-4 h-4 rounded-full" name="wba:gb-flag" />
-                            <a href="{{ path('change_language', {locale: 'en'}) }}">
+                            <a href="{{ path('change_language', {locale: constant('App\\Enum\\LanguagesType::EN').value}) }}">
                                 English
                             </a>
                         </li>
-                        <li class="flex items-center space-x-2 px-4 py-2 rounded cursor-pointer hover:text-lightGreen {{ app.request.locale == 'pt' ? 'selected' : '' }}">
+                        <li class="flex items-center space-x-2 px-4 py-2 rounded cursor-pointer hover:text-lightGreen {{ app.request.locale == constant('App\\Enum\\LanguagesType::PT').value ? 'selected' : '' }}">
                             <twig:ux:icon class="w-4 h-4 rounded-full" name="wba:portugal-flag" />
-                            <a href="{{ path('change_language', {locale: 'pt'}) }}">
+                            <a href="{{ path('change_language', {locale: constant('App\\Enum\\LanguagesType::PT').value}) }}">
                                 Portuguese
                             </a>
                         </li>
