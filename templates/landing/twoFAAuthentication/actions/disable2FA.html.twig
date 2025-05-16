@@ -1,7 +1,7 @@
 {% extends 'landing/base.html.twig' %}
 
 {% block title %}
-    {{ data.title.value }}
+    {{ data.PAGE_TITLE.value }}
 {% endblock %}
 
 {% block second_col %}
@@ -10,7 +10,7 @@
     {{ block('toast_messages') }}
 
     {% if data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\OperationMode::ON').value %}
-        <img class="w-[120px] h-[58px] object-scale-down mt-[75px]" src="{{ data.customerLogoName.value }}" alt="{{ 'logoAlt'|trans({}, 'disable2FA') }}"/>
+        <img class="w-[120px] h-[58px] object-scale-down mt-[75px]" src="{{ data.CUSTOMER_LOGO.value }}" alt="{{ 'logoAlt'|trans({}, 'disable2FA') }}"/>
     {% endif %}
 
     <div class="{{ data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\OperationMode::ON').value ? 'pt-[28px]' : 'pt-[161px]' }} leading-7">
