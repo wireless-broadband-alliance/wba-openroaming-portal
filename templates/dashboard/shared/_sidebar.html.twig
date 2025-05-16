@@ -8,7 +8,7 @@
 
         {% if data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\OperationMode::ON').value %}
             <a href="{{ path('admin_page') }}">
-                <img class="w-[120px] h-[58px] object-scale-down" src="{{ data.customerLogoName.value }}" alt="Logo"/>
+                <img class="w-[120px] h-[58px] object-scale-down" src="{{ data.CUSTOMER_LOGO.value }}" alt="Logo"/>
             </a>
         {% endif %}
 

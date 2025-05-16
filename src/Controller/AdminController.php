@@ -231,45 +231,17 @@ class AdminController extends AbstractController
                     {
                         $session = $request->getSession();
                         $locale = $session->get('_locale');
-                        if ($setting->getName() === 'WELCOME_TEXT') {
-                            $submittedValue = $submittedData[$settingName];
-                            if ($locale === 'en') {
-                                // Update the setting value
-                                $setting->setValue($submittedValue);
-                            }
-                            // Get the translated setting
-                            $settingTranslation = $this->settingTranslationRepository->findOneBy(
-                                ['setting' => $setting, 'locale' => $locale]
-                            );
-                            if ($settingTranslation) {
-                                $settingTranslation->setTranslation($submittedValue);
-                            }
-                        } elseif ($setting->getName() === 'WELCOME_DESCRIPTION') {
-                            $submittedValue = $submittedData[$settingName];
-                            if ($locale === 'en') {
-                                // Update the setting value
-                                $setting->setValue($submittedValue);
-                            }
-                            // Get the translated setting
-                            $settingTranslation = $this->settingTranslationRepository->findOneBy(
-                                ['setting' => $setting, 'locale' => $locale]
-                            );
-                            if ($settingTranslation) {
-                                $settingTranslation->setTranslation($submittedValue);
-                            }
-                        } else {
-                            $submittedValue = $submittedData[$settingName];
-                            if ($locale === 'en') {
-                                // Update the setting value
-                                $setting->setValue($submittedValue);
-                            }
-                            // Get the translated setting
-                            $settingTranslation = $this->settingTranslationRepository->findOneBy(
-                                ['setting' => $setting, 'locale' => $locale]
-                            );
-                            if ($settingTranslation) {
-                                $settingTranslation->setTranslation($submittedValue);
-                            }
+                        $submittedValue = $submittedData[$settingName];
+                        if ($locale === 'en') {
+                            // Update the setting value
+                            $setting->setValue($submittedValue);
+                        }
+                        // Get the translated setting
+                        $settingTranslation = $this->settingTranslationRepository->findOneBy(
+                            ['setting' => $setting, 'locale' => $locale]
+                        );
+                        if ($settingTranslation) {
+                            $settingTranslation->setTranslation($submittedValue);
                         }
                     } else {
                         // Get the value from the submitted form data

@@ -86,13 +86,7 @@ readonly class GetSettings
 
         foreach ($settings as $setting) {
             if (in_array($setting->getName(), $settingsToTranslate, true)) {
-                if ($setting->getName() === 'WELCOME_TEXT') {
-                    $setting->setValue($data['welcomeText']['value']);
-                } elseif ($setting->getName() === 'WELCOME_DESCRIPTION') {
-                    $setting->setValue($data['welcomeDescription']['value']);
-                } else {
-                    $setting->setValue($data[$setting->getName()]['value']);
-                }
+                $setting->setValue($data[$setting->getName()]['value']);
             }
         }
         return $settings;
