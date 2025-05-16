@@ -19,6 +19,7 @@ use App\Form\TermsType;
 use App\Form\TwoFASettingsType;
 use App\RadiusDb\Repository\RadiusAccountingRepository;
 use App\RadiusDb\Repository\RadiusAuthsRepository;
+use App\Repository\SettingTranslationRepository;
 use App\Service\CertificateService;
 use App\Service\Domain;
 use App\Service\EventActions;
@@ -48,7 +49,8 @@ class SettingsController extends AbstractController
         private readonly EntityManagerInterface $entityManager,
         private readonly RadiusAuthsRepository $radiusAuthsRepository,
         private readonly RadiusAccountingRepository $radiusAccountingRepository,
-        private readonly TranslatorInterface $translator
+        private readonly TranslatorInterface $translator,
+        private readonly SettingTranslationRepository $settingTranslationRepository
     ) {
     }
 
@@ -881,8 +883,12 @@ class SettingsController extends AbstractController
 
         // Convert to human-readable format
         $humanReadableExpirationDate = $dateTime->format('Y-m-d H:i:s T');
+
+        // Get the settings value according to the language
+        $settingsTranslated = $this->getSettings->getSettingsByLoale($settings, $data);
+
         $form = $this->createForm(AuthType::class, null, [
-            'settings' => $settings,
+            'settings' => $settingsTranslated,
             'profileLimitDate' => $profileLimitDate,
             'humanReadableExpirationDate' => $humanReadableExpirationDate
         ]);
@@ -894,6 +900,8 @@ class SettingsController extends AbstractController
 
             $settingsToUpdate = [
                 'AUTH_METHOD_SAML_ENABLED',
+                'AUTH_METHOD_SAML_LABEL',
+                'AUTH_METHOD_SAML_DESCRIPTION',
 
                 'AUTH_METHOD_GOOGLE_LOGIN_ENABLED',
                 'AUTH_METHOD_GOOGLE_LOGIN_LABEL',
@@ -934,6 +942,18 @@ class SettingsController extends AbstractController
             foreach ($settingsToUpdate as $settingName) {
                 $value = $submittedData[$settingName] ?? null;
 
+                if (in_array($settingName, $this->getSettings->arraySettingsToTranslate())) {
+                    $session = $request->getSession();
+                    $locale = $session->get('_locale');
+                    $submittedValue = $submittedData[$settingName];
+                    // Get the translated setting
+                    $setting = $settingsRepository->findOneBy(['name' => $settingName]);
+                    $settingTranslation = $this->settingTranslationRepository->findOneBy(['setting' => $setting, 'locale' => $locale]);
+                    if ($settingTranslation) {
+                        $settingTranslation->setTranslation($submittedValue);
+                    }
+                }
+
                 // Check if the setting is a label, to be impossible to set it null of empty
                 if (($value === null || $value === "") && in_array($settingName, $labelsFields)) {
                     continue;
@@ -971,7 +991,7 @@ class SettingsController extends AbstractController
         return $this->render('dashboard/shared/settings_actions.html.twig', [
             'user' => $currentUser,
             'data' => $data,
-            'settings' => $settings,
+            'settings' => $settingsTranslated,
             'current_user' => $currentUser,
             'form' => $form->createView(),
             'profileLimitDate' => $profileLimitDate,
