@@ -1,4 +1,4 @@
-fservices:
+services:
   web:
     image: ghcr.io/wireless-broadband-alliance/wba-openroaming-portal:1.7.2
     env_file:
