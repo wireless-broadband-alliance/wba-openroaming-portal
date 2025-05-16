@@ -1,30 +1,40 @@
-<form method="GET" action="{{ path('change_language', {locale: app.request.locale}) }}"
-      class="relative flex justify-end">
+<div class="relative flex justify-end" data-controller="dropdown">
     <label for="language-selector"
            class="block text-sm font-medium text-gray-900 mr-2 self-center">{{ 'language'|trans({}, 'landing') }}</label>
-    <div class="relative w-44">
-        <select id="language-selector" name="locale"
-                onchange="this.form.submit()"
-                class="country-dropdown">
-            <option value="en" {% if app.request.locale == 'en' %}selected{% endif %}>
-                <div class="flex flex-row space-x-2">
-                    <twig:ux:icon class="w-2" name="wba:gb-flag"/>
-                    <p>English</p>
-                </div>
-            </option>
-            <option value="pt" {% if app.request.locale == 'pt' %}selected{% endif %}>
-                <div class="flex flex-row space-x-2">
-                    <twig:ux:icon class="w-2" name="wba:portugal-flag"/>
-                    <p>Portugal</p>
-                </div>
-            </option>
-        </select>
 
-        {# Dropdown Arrow Icon #}
-        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
-            <svg class="h-4 w-4 text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                <twig:ux:icon name="wba:arrow-down"/>
-            </svg>
-        </div>
+    <div class="relative w-44">
+        {# Dropdown Button #}
+        <button
+                class="flex items-center justify-between w-full px-4 py-2 text-sm bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none"
+                type="button"
+                data-action="click->dropdown#toggle"
+                data-dropdown-target="button">
+            <div class="flex items-center space-x-2">
+                {% if app.request.locale == 'en' %}
+                    <twig:ux:icon class="w-4 h-4 rounded-full" name="wba:gb-flag" />
+                    <span>English</span>
+                {% else %}
+                    <twig:ux:icon class="w-4 h-4 rounded-full" name="wba:portugal-flag" />
+                    <span>Portuguese</span>
+                {% endif %}
+            </div>
+            <twig:ux:icon class="w-4 h-4 text-gray-500" name="wba:arrow-down" />
+        </button>
+
+        {# Dropdown Menu #}
+        <ul
+                class="absolute hidden mt-2 divide-y divide-gray-100 rounded-lg bg-white shadow-lg text-sm w-full z-10"
+                data-dropdown-target="menu">
+            <li
+                    class="flex items-center space-x-2 px-4 py-2 cursor-pointer hover:text-lightGreen {{ app.request.locale == 'en' ? 'bg-gray-100 font-semibold' : '' }}">
+                <twig:ux:icon class="w-4 h-4 rounded-full" name="wba:gb-flag"/>
+                <a href="{{ path('change_language', {locale: 'en'}) }}" class="block w-full">English</a>
+            </li>
+            <li
+                    class="flex items-center space-x-2 px-4 py-2 cursor-pointer hover:text-lightGreen {{ app.request.locale == 'pt' ? 'bg-gray-100 font-semibold' : '' }}">
+                <twig:ux:icon class="w-4 h-4 rounded-full" name="wba:portugal-flag"/>
+                <a href="{{ path('change_language', {locale: 'pt'}) }}" class="block w-full">Portuguese</a>
+            </li>
+        </ul>
     </div>
-</form>
+</div>
