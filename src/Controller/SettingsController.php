@@ -948,7 +948,9 @@ class SettingsController extends AbstractController
                     $submittedValue = $submittedData[$settingName];
                     // Get the translated setting
                     $setting = $settingsRepository->findOneBy(['name' => $settingName]);
-                    $settingTranslation = $this->settingTranslationRepository->findOneBy(['setting' => $setting, 'locale' => $locale]);
+                    $settingTranslation = $this->settingTranslationRepository->findOneBy(
+                        ['setting' => $setting, 'locale' => $locale]
+                    );
                     if ($settingTranslation) {
                         $settingTranslation->setTranslation($submittedValue);
                     }

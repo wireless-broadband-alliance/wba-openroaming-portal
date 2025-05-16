@@ -85,20 +85,14 @@ readonly class GetSettings
         $settingsToTranslate = $this->arraySettingsToTranslate();
 
         foreach ($settings as $setting) {
-            if  (in_array($setting->getName(), $settingsToTranslate, true))
-            {
-                if ($setting->getName() === 'WELCOME_TEXT')
-                {
+            if (in_array($setting->getName(), $settingsToTranslate, true)) {
+                if ($setting->getName() === 'WELCOME_TEXT') {
                     $setting->setValue($data['welcomeText']['value']);
-                }
-                elseif ($setting->getName() === 'WELCOME_DESCRIPTION')
-                {
+                } elseif ($setting->getName() === 'WELCOME_DESCRIPTION') {
                     $setting->setValue($data['welcomeDescription']['value']);
-                }
-                else {
+                } else {
                     $setting->setValue($data[$setting->getName()]['value']);
                 }
-
             }
         }
         return $settings;
@@ -284,7 +278,7 @@ readonly class GetSettings
         return $descriptions[$locale][$settingName] ?? $descriptions['en'][$settingName];
     }
 
-    public function arraySettingsToTranslate (): array
+    public function arraySettingsToTranslate(): array
     {
         return [
             'WELCOME_TEXT',
