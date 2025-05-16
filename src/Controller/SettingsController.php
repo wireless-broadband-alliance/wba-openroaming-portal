@@ -951,9 +951,7 @@ class SettingsController extends AbstractController
                     $settingTranslation = $this->settingTranslationRepository->findOneBy(
                         ['setting' => $setting, 'locale' => $locale]
                     );
-                    if ($settingTranslation) {
-                        $settingTranslation->setTranslation($submittedValue);
-                    }
+                    $settingTranslation?->setTranslation($submittedValue);
                 }
 
                 // Check if the setting is a label, to be impossible to set it null of empty
