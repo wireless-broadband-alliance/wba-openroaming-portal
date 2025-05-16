@@ -885,7 +885,7 @@ class SettingsController extends AbstractController
         $humanReadableExpirationDate = $dateTime->format('Y-m-d H:i:s T');
 
         // Get the settings value according to the language
-        $settingsTranslated = $this->getSettings->getSettingsByLoale($settings, $data);
+        $settingsTranslated = $this->getSettings->getSettingsByLocale($settings, $data);
 
         $form = $this->createForm(AuthType::class, null, [
             'settings' => $settingsTranslated,

@@ -80,7 +80,7 @@ readonly class GetSettings
         return $data;
     }
 
-    public function getSettingsByLoale(array $settings, array $data): array
+    public function getSettingsByLocale(array $settings, array $data): array
     {
         $settingsToTranslate = $this->arraySettingsToTranslate();
 

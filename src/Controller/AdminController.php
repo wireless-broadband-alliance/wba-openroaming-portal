@@ -195,7 +195,7 @@ class AdminController extends AbstractController
         $settings = $settingsRepository->findAll();
 
         // Get the settings value according to the language
-        $settingsTranslated = $this->getSettings->getSettingsByLoale($settings, $data);
+        $settingsTranslated = $this->getSettings->getSettingsByLocale($settings, $data);
 
         // Create the form with the CustomType and pass the relevant settings
         $form = $this->createForm(CustomType::class, null, [
