@@ -425,7 +425,8 @@ class UsersManagementController extends AbstractController
                     'userUpdated',
                     [
                         '%uuid%' => $uuid
-                    ]
+                    ],
+                    'controllers'
                 )
             );
 
@@ -461,8 +462,8 @@ class UsersManagementController extends AbstractController
             $em->flush();
 
             if ($user->getEmail()) {
-                $supportTeam = $data['title']['value'];
-                $contactEmail = $data['contactEmail']['value'];
+                $supportTeam = $data['PAGE_TITLE']['value'];
+                $contactEmail = $data['CONTACT_EMAIL']['value'];
                 // Send email
                 $email = new Email()
                     ->from(new Address($emailSender, $nameSender))
@@ -550,7 +551,8 @@ class UsersManagementController extends AbstractController
                     'passwordUpdated',
                     [
                         '%uuid%' => $user->getUuid()
-                    ]
+                    ],
+                    'controllers'
                 )
             );
             return $this->redirectToRoute('admin_page');
