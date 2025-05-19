@@ -1,3 +1,7 @@
+{% block language %}
+    {{ include('dashboard/shared/_select_language.html.twig') }}
+{% endblock %}
+
 {% set imageSettings = [
     {
         name: 'CUSTOMER_LOGO',
