@@ -182,12 +182,13 @@ class AdminController extends AbstractController
     /**
      * Handles the Page Style on the dashboard
      */
-    #[Route('/dashboard/customize', name: 'admin_dashboard_customize')]
+    #[Route('/dashboard/customize/{language}', name: 'admin_dashboard_customize', defaults: ['language' => LanguagesType::EN->value])]
     #[IsGranted('ROLE_ADMIN')]
-    public function customize(Request $request, EntityManagerInterface $em): Response
+    public function customize(Request $request, EntityManagerInterface $em, string $language): Response
     {
+
         // Call the getSettings method of GetSettings class to retrieve the data
-        $data = $this->getSettings->getSettings();
+        $data = $this->getSettings->getSettings($language);
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
         $currentUser = $this->getUser();
@@ -228,8 +229,7 @@ class AdminController extends AbstractController
                     )
                 ) {
                     if (in_array($settingName, $this->getSettings->arraySettingsToTranslate(), true)) {
-                        $session = $request->getSession();
-                        $locale = $session->get('_locale');
+                        $locale = $language;
                         $submittedValue = $submittedData[$settingName];
                         if ($locale === LanguagesType::EN->value) {
                             // Update the setting value
@@ -293,7 +293,7 @@ class AdminController extends AbstractController
                 $eventMetadata
             );
 
-            return $this->redirectToRoute('admin_dashboard_customize');
+            return $this->redirectToRoute('admin_dashboard_customize', ['language' => $language]);
         }
 
         return $this->render('dashboard/shared/settings_actions.html.twig', [
@@ -301,6 +301,7 @@ class AdminController extends AbstractController
             'settings' => $settingsTranslated,
             'form' => $form->createView(),
             'data' => $data,
+            'language' => $language
         ]);
     }
 }
