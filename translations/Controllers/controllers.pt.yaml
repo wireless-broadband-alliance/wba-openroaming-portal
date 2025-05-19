@@ -34,7 +34,7 @@ platformModeStatusResetSuccessfully!: 'O estado do modo de plataforma foi restau
 CAPPORTSettingsResetSuccessfully: 'As configurações do CAPPORT foram restauradas com sucesso!'
 authenticationSettingsResetSuccessfully: 'As configurações de autenticação foram restauradas com sucesso!'
 TwoFactorSettingsResetSuccessfully: 'As configurações de autenticação de dois fatores foram restauradas com sucesso!'
-SMSSettingsClearSuccessfully!: 'As configurações de SMS foram limpas com sucesso!'
+SMSSettingsClearSuccessfully: 'As configurações de SMS foram limpas com sucesso!'
 termsPoliciesLinksChangesAppliedSuccessfully: 'As alterações aos links dos Termos e Políticas foram aplicadas com sucesso.'
 LDAPConfigurationAppliedSuccessfully: 'Uma nova configuração do LDAP foi aplicada com sucesso.'
 notUseDefaultPayloadIdentifierCard: 'Por favor, não utilize o valor padrão no Identificador de Payload.'
