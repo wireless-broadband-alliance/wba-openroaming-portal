@@ -58,8 +58,8 @@ class FreeradiusController extends AbstractController
         $export_freeradius_statistics = $this->parameterBag->get('app.export_freeradius_statistics');
 
         // Get the submitted start and end dates from the form
-        $startDateString = $request->request->get('startDate');
-        $endDateString = $request->request->get('endDate');
+        $startDateString = $request->query->get('startDate');
+        $endDateString = $request->query->get('endDate');
 
         // Convert the date strings to DateTime objects
         $startDate = $startDateString ? new DateTime($startDateString) : new DateTime()->modify(
