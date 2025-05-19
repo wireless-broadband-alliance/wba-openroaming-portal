@@ -1,3 +1,10 @@
+{% include 'shared/_select_language.html.twig' with {
+    'alignment': 'start',
+    'currentLocale': language,
+    'routeName': 'admin_dashboard_settings_auth',
+    'warningMessage' : true
+} %}
+
 <form action="{{ path('admin_dashboard_settings_auth', {language: language}) }}" method="post" enctype="multipart/form-data">
     {{ form_row(form._token) }}
 
