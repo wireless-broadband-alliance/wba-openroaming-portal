@@ -1,15 +1,15 @@
 <div class="flex flex-col sm:flex-row items-center justify-start mt-5 gap-y-6">
     <form method="get" action="{{ path('admin_dashboard_statistics_freeradius') }}">
-        {% if ApUsageCount is defined %}
+        {% if ApUsagePerPage is defined %}
             <div data-controller="update-url"
                  data-update-url-target="select"
                  class="flex flex-row justify-start items-center gap-4"
             >
                 <label for="count">{{ label }}</label>
 
-                <select class="form-select" name="count" id="count" data-update-url-target="select">
-                    <option value="5" {% if ApUsageCount == 5 %} selected {% endif %}>5</option>
-                    <option value="10" {% if ApUsageCount == 10 %} selected {% endif %}>10</option>
+                <select class="form-select" name="count" id="count" data-update-url-target="select" onchange="this.form.submit()">
+                    <option value="5" {% if ApUsagePerPage == 7 %} selected {% endif %}>5</option>
+                    <option value="10" {% if ApUsagePerPage == 20 %} selected {% endif %}>10</option>
                 </select>
             </div>
         {% endif %}
@@ -18,21 +18,41 @@
         <div class="sm:ml-auto flex flex-row text-base cursor-default">
             {# Display the range of user numbers on the current page #}
             <div class="flex space-x-2 mr-4">
-                {{ (currentPage - 1) * ApUsageCount + 1 }} - {{ min(currentPage * ApUsageCount, totalApCount) }}
+                {{ (currentPage - 1) * ApUsagePerPage + 1 }} - {{ min(currentPage * ApUsagePerPage, totalApCount) }}
                 of {{ totalApCount }}
             </div>
 
             <div class="flex space-x-2.5">
-                {# Previous page navigation #}
-                <a {% if currentPage > 1 %} href="{{ path(route, {page: currentPage - 1, startDate: selectedStartDate, endDate: selectedEndDate}) }}" {% endif %}
-                        class="hover:shadow-md p-1 rounded-lg {{ currentPage > 1 ? 'cursor-pointer' : 'text-gray-400 cursor-not-allowed' }}">
-                    <twig:ux:icon name="wba:right" class="w-4 rotate-180" fill="none"/>
+                {# First Page navigation #}
+                <a {% if currentPage > 1 %} href="{{ path(route, {page: 1, startDate: selectedStartDate, endDate: selectedEndDate, ApUsagePerPage: ApUsagePerPage}) }}" {% endif %}
+                        class="hover:shadow-md p-1 rounded-lg {{ currentPage > 1 ? 'cursor-pointer' : 'text-gray-400 cursor-not-allowed' }}"
+                        title="Go to First Page">
+                    <twig:ux:icon name="wba:d-right" class="w-4 rotate-180" fill="none"/>
+                    <span class="sr-only">{{ 'firstPage'|trans({}, '_pagination') }}</span>
                 </a>
 
-                {# Next page navigation #}
-                <a {% if currentPage < totalPages %} href="{{ path(route, {page: currentPage + 1, startDate: selectedStartDate, endDate: selectedEndDate}) }}" {% endif %}
-                        class="hover:shadow-md p-1 rounded-lg {{ currentPage < totalPages ? 'cursor-pointer' : 'text-gray-400 cursor-not-allowed' }}">
+                {# Previous Page navigation #}
+                <a {% if currentPage > 1 %} href="{{ path(route, {page: currentPage - 1, startDate: selectedStartDate, endDate: selectedEndDate, ApUsagePerPage: ApUsagePerPage}) }}" {% endif %}
+                        class="hover:shadow-md p-1 rounded-lg {{ currentPage > 1 ? 'cursor-pointer' : 'text-gray-400 cursor-not-allowed' }}"
+                        title="Go to Previous Page">
+                    <twig:ux:icon name="wba:right" class="w-4 rotate-180" fill="none"/>
+                    <span class="sr-only">{{ 'previousPage'|trans({}, '_pagination') }}</span>
+                </a>
+
+                {# Next Page navigation #}
+                <a {% if currentPage < totalPages %} href="{{ path(route, {page: currentPage + 1, startDate: selectedStartDate, endDate: selectedEndDate, ApUsagePerPage: ApUsagePerPage}) }}" {% endif %}
+                        class="hover:shadow-md p-1 rounded-lg {{ currentPage < totalPages ? 'cursor-pointer' : 'text-gray-400 cursor-not-allowed' }}"
+                        title="Go to Next Page">
                     <twig:ux:icon name="wba:right" class="w-4" fill="none"/>
+                    <span class="sr-only">{{ 'nextPage'|trans({}, '_pagination') }}</span>
+                </a>
+
+                {# Last Page navigation #}
+                <a {% if currentPage < totalPages %} href="{{ path(route, {page: totalPages, startDate: selectedStartDate, endDate: selectedEndDate, ApUsagePerPage: ApUsagePerPage}) }}" {% endif %}
+                        class="hover:shadow-md p-1 rounded-lg {{ currentPage < totalPages ? 'cursor-pointer' : 'text-gray-400 cursor-not-allowed' }}"
+                        title="Go to Last Page">
+                    <twig:ux:icon name="wba:d-right" class="w-4" fill="none"/>
+                    <span class="sr-only">{{ 'lastPage'|trans({}, '_pagination') }}</span>
                 </a>
             </div>
         </div>
