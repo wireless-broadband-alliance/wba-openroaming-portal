@@ -52,7 +52,7 @@ class FreeradiusController extends AbstractController
     public function freeradiusStatisticsData(
         Request $request,
         #[MapQueryParameter] int $page = 1,
-        #[MapQueryParameter] ?int $ApUsagecount = 5
+        #[MapQueryParameter] ?int $ApUsageCount = 5
     ): Response {
         $data = $this->getSettings->getSettings();
         $user = $this->getUser();
@@ -179,9 +179,9 @@ class FreeradiusController extends AbstractController
         );
 
         $totalApCount = count($fetchChartApUsage);
-        $totalPages = ceil($totalApCount / $ApUsagecount);
-        $offset = ($page - 1) * $ApUsagecount;
-        $fetchChartApUsage = array_slice($fetchChartApUsage, $offset, $ApUsagecount);
+        $totalPages = ceil($totalApCount / $ApUsageCount);
+        $offset = ($page - 1) * $ApUsageCount;
+        $fetchChartApUsage = array_slice($fetchChartApUsage, $offset, $ApUsageCount);
 
         return $this->render('dashboard/statistics/freeradius_statistics.html.twig', [
             'user' => $user,
@@ -189,7 +189,7 @@ class FreeradiusController extends AbstractController
             'current_user' => $user,
             'currentPage' => $page,
             'totalPages' => $totalPages,
-            'ApUsagecount' => $ApUsagecount,
+            'ApUsageCount' => $ApUsageCount,
             'totalApCount' => $totalApCount,
             'realmsUsage' => $realmsUsage,
             'authCounts' => $authCounts,

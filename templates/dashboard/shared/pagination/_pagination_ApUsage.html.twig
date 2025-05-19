@@ -1,6 +1,6 @@
 <div class="flex flex-col sm:flex-row items-center justify-start mt-5 gap-y-6">
     <form method="get" action="{{ path('admin_dashboard_statistics_freeradius') }}">
-        {% if ApUsagecount is defined %}
+        {% if ApUsageCount is defined %}
             <div data-controller="update-url"
                  data-update-url-target="select"
                  class="flex flex-row justify-start items-center gap-4"
@@ -8,8 +8,8 @@
                 <label for="count">{{ label }}</label>
 
                 <select class="form-select" name="count" id="count" data-update-url-target="select">
-                    <option value="7" {% if ApUsagecount == 5 %} selected {% endif %}>5</option>
-                    <option value="20" {% if ApUsagecount == 10 %} selected {% endif %}>10</option>
+                    <option value="5" {% if ApUsageCount == 5 %} selected {% endif %}>5</option>
+                    <option value="10" {% if ApUsageCount == 10 %} selected {% endif %}>10</option>
                 </select>
             </div>
         {% endif %}
@@ -18,7 +18,7 @@
         <div class="sm:ml-auto flex flex-row text-base cursor-default">
             {# Display the range of user numbers on the current page #}
             <div class="flex space-x-2 mr-4">
-                {{ (currentPage - 1) * ApUsagecount + 1 }} - {{ min(currentPage * ApUsagecount, totalApCount) }}
+                {{ (currentPage - 1) * ApUsageCount + 1 }} - {{ min(currentPage * ApUsageCount, totalApCount) }}
                 of {{ totalApCount }}
             </div>
 
