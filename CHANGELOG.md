@@ -9,6 +9,7 @@
 - Rework `UserAccountDeletion`, simulates a login to confirm the account action for external providers.
 - For this release it's required to run the new migrations to set up the new entity SettingTranslations
   Run the migration with:
+- Fix pagination for the table `Access Points Usage` on the `dashboard/statistics/freeradius` page (Add new custom display of results per page)
 
 ```bash
 php bin/console doctrine:migrations:migrate
