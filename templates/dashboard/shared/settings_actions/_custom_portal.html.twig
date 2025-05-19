@@ -1,6 +1,9 @@
-{% block language %}
-    {{ include('dashboard/shared/_select_language.html.twig') }}
-{% endblock %}
+{% include 'shared/_select_language.html.twig' with {
+    'alignment': 'start',
+    'currentLocale': language,
+    'routeName': 'admin_dashboard_customize',
+    'warningMessage' : true
+} %}
 
 {% set imageSettings = [
     {
@@ -32,7 +35,8 @@
     {name: 'CUSTOMER_LOGO_ENABLED', displayName: 'showCustomerLogo'|trans({}, '_custom_portal')},
 ] %}
 
-<form action="{{ path('admin_dashboard_customize', {language: language}) }}" method="post" enctype="multipart/form-data">
+<form action="{{ path('admin_dashboard_customize', {language: language}) }}" method="post"
+      enctype="multipart/form-data">
     {{ form_row(form._token) }}
     <div class="flex flex-col gap-8 z-0 justify-start">
         {# Choice and Images Settings #}
