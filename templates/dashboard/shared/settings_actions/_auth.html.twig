@@ -1,4 +1,4 @@
-<form action="{{ path('admin_dashboard_settings_auth') }}" method="post" enctype="multipart/form-data">
+<form action="{{ path('admin_dashboard_settings_auth', {language: language}) }}" method="post" enctype="multipart/form-data">
     {{ form_row(form._token) }}
 
     {# SAML #}

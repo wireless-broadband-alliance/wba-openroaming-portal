@@ -6,6 +6,7 @@ use App\Entity\Setting;
 use App\Entity\TextEditor;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
+use App\Enum\LanguagesType;
 use App\Enum\OperationMode;
 use App\Enum\PlatformMode;
 use App\Enum\TextEditorName;
@@ -853,16 +854,17 @@ class SettingsController extends AbstractController
         ]);
     }
 
-    #[Route('/dashboard/settings/auth', name: 'admin_dashboard_settings_auth')]
+    #[Route('/dashboard/settings/auth/{language}', name: 'admin_dashboard_settings_auth', defaults: ['language' => LanguagesType::EN->value])]
     #[IsGranted('ROLE_ADMIN')]
     public function settingsAuths(
         Request $request,
-        CertificateService $certificateService
+        CertificateService $certificateService,
+        string $language
     ): Response {
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
         $currentUser = $this->getUser();
-        $data = $this->getSettings->getSettings();
+        $data = $this->getSettings->getSettings($language);
 
         $settingsRepository = $this->entityManager->getRepository(Setting::class);
         $settings = $settingsRepository->findAll();
@@ -943,8 +945,7 @@ class SettingsController extends AbstractController
                 $value = $submittedData[$settingName] ?? null;
 
                 if (in_array($settingName, $this->getSettings->arraySettingsToTranslate())) {
-                    $session = $request->getSession();
-                    $locale = $session->get('_locale');
+                    $locale = $language;
                     $submittedValue = $submittedData[$settingName];
                     // Get the translated setting
                     $setting = $settingsRepository->findOneBy(['name' => $settingName]);
@@ -985,7 +986,7 @@ class SettingsController extends AbstractController
                 'success_admin',
                 $this->translator->trans('authenticationConfigurationAppliedSuccessfully', [], 'controllers')
             );
-            return $this->redirectToRoute('admin_dashboard_settings_auth');
+            return $this->redirectToRoute('admin_dashboard_settings_auth', ['language' => $language]);
         }
 
         return $this->render('dashboard/shared/settings_actions.html.twig', [
@@ -995,7 +996,8 @@ class SettingsController extends AbstractController
             'current_user' => $currentUser,
             'form' => $form->createView(),
             'profileLimitDate' => $profileLimitDate,
-            'humanReadableExpirationDate' => $humanReadableExpirationDate
+            'humanReadableExpirationDate' => $humanReadableExpirationDate,
+            'language' => $language,
         ]);
     }
 
