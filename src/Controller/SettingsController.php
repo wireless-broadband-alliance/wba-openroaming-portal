@@ -854,7 +854,11 @@ class SettingsController extends AbstractController
         ]);
     }
 
-    #[Route('/dashboard/settings/auth/{language}', name: 'admin_dashboard_settings_auth', defaults: ['language' => LanguagesType::EN->value])]
+    #[Route(
+        '/dashboard/settings/auth/{language}',
+        name: 'admin_dashboard_settings_auth',
+        defaults: ['language' => LanguagesType::EN->value]
+    )]
     #[IsGranted('ROLE_ADMIN')]
     public function settingsAuths(
         Request $request,

@@ -182,7 +182,11 @@ class AdminController extends AbstractController
     /**
      * Handles the Page Style on the dashboard
      */
-    #[Route('/dashboard/customize/{language}', name: 'admin_dashboard_customize', defaults: ['language' => LanguagesType::EN->value])]
+    #[Route(
+        '/dashboard/customize/{language}',
+        name: 'admin_dashboard_customize',
+        defaults: ['language' => LanguagesType::EN->value]
+    )]
     #[IsGranted('ROLE_ADMIN')]
     public function customize(Request $request, EntityManagerInterface $em, string $language): Response
     {
