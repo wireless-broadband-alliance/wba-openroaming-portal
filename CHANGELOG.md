@@ -11,7 +11,6 @@
   Run the migration with:
 - Fix pagination for the table `Access Points Usage` on the `dashboard/statistics/freeradius` page (Add new custom
   display of results per page)
-- Fix CAPPORT endpoint `/api/v1/capport/json` is independent from the current state of the `API_STATUS`.
 - Invalidate session on the dashboard in case the admin changes is password on the landing firewall.
 
 ```bash
