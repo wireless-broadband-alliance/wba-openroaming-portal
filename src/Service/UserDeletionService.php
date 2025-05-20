@@ -62,11 +62,17 @@ readonly class UserDeletionService
         $pgpEncryptedData = $this->encryptionService->encrypt($jsonDataCombined);
 
         if ($pgpEncryptedData[0] === UserVerificationStatus::MISSING_PUBLIC_KEY_CONTENT->value) {
-            return ['success' => false, 'message' => $this->translator->trans('publicKeyMissing', [], 'UserDeletionService')];
+            return [
+                'success' => false,
+                'message' => $this->translator->trans('publicKeyMissing', [], 'UserDeletionService')
+            ];
         }
 
         if ($pgpEncryptedData[0] === UserVerificationStatus::EMPTY_PUBLIC_KEY_CONTENT->value) {
-            return ['success' => false, 'message' => $this->translator->trans('publicKeyEmpty', [], 'UserDeletionService')];
+            return [
+                'success' => false,
+                'message' => $this->translator->trans('publicKeyEmpty', [], 'UserDeletionService')
+            ];
         }
 
         $deletedUserDataEntity = new DeletedUserData();
