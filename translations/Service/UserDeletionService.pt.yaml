@@ -1,0 +1,3 @@
+publicKeyMissing: 'A chave pública está em falta. Por favor, forneça uma.'
+publicKeyEmpty: 'A chave pública está vazia. Por favor, forneça o conteúdo da chave válido.'
+userSuccessfullyDeleted: 'Os dados do utilizador foram eliminados e encriptados com sucesso.'
