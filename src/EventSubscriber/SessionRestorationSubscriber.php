@@ -1,6 +1,6 @@
 <?php
 
-namespace App\EventListener;
+namespace App\EventSubscriber;
 
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
@@ -11,7 +11,8 @@ class SessionRestorationSubscriber implements EventSubscriberInterface
     public static function getSubscribedEvents(): array
     {
         return [
-            KernelEvents::REQUEST => ['onKernelRequest', 9999], 
+            // Very early, before the session is touched
+            KernelEvents::REQUEST => ['onKernelRequest', 1000],
         ];
     }
 
@@ -23,16 +24,12 @@ class SessionRestorationSubscriber implements EventSubscriberInterface
 
         $request = $event->getRequest();
 
-        if (!isset($_COOKIE['session_backup'])) {
-            return;
-        }
+        $sessionBackup = $request->cookies->get('session_backup');
 
-        $backupSessionId = $_COOKIE['session_backup'];
-        $currentSessionId = $_COOKIE[session_name()] ?? null;
-
-        if ($backupSessionId && $backupSessionId !== $currentSessionId) {
-            session_id($backupSessionId);
-            $_COOKIE[session_name()] = $backupSessionId;
+        // If there's a backup, override session_id BEFORE Symfony starts the session
+        if ($sessionBackup) {
+            session_id($sessionBackup);
+            $_COOKIE[session_name()] = $sessionBackup;
         }
     }
 }

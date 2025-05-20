@@ -1,6 +1,6 @@
 <?php
 
-namespace App\EventListener;
+namespace App\EventSubscriber;
 
 use App\Enum\LanguagesType;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
