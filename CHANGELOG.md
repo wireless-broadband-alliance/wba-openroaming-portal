@@ -1,5 +1,10 @@
 # Changelog
 
+# Release V1.7.4
+
+- Update docker add new geoLite volume, to save the previous geoLite database schema.
+- Fix CAPPORT endpoint `/api/v1/capport/json` is independent of the current state of the `API_STATUS`.
+
 # Release V1.7.3
 
 - The user can now delete its own account from the account_widget popup
