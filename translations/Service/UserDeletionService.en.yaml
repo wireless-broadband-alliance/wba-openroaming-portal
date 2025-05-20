@@ -1,0 +1,3 @@
+publicKeyMissing: 'Public key is missing. Please provide one.'
+publicKeyEmpty: 'Public key is empty. Please provide valid key content.'
+userSuccessfullyDeleted: 'User data successfully deleted and encrypted.'
