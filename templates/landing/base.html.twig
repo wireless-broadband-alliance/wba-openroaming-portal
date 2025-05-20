@@ -34,10 +34,11 @@
 
             {# Language Selector #}
             {% block language %}
-                {% Include 'shared/_select_language.html.twig' with {
+                {% include 'shared/_select_language.html.twig' with {
                     alignment: 'end',
                     currentLocale: app.request.locale,
-                    routeName: 'admin_dashboard_customize',
+                    routeName: 'change_language',
+                    warningMessage: false,
                 } %}
             {% endblock %}
 

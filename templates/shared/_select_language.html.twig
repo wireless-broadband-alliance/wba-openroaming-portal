@@ -18,7 +18,7 @@
                 data-action="click->dropdown#toggle"
                 data-dropdown-target="button">
             <div class="flex items-center space-x-2">
-                {% if language == constant('App\\Enum\\LanguagesType::EN').value %}
+                {% if currentLocale == constant('App\\Enum\\LanguagesType::EN').value %}
                     <twig:ux:icon class="w-4 h-4 rounded-full" name="wba:gb-flag" />
                     <span>English</span>
                 {% else %}
@@ -34,12 +34,12 @@
                 class="absolute hidden mt-2 divide-y divide-gray-100 rounded-lg bg-white shadow-lg text-sm w-full z-10"
                 data-dropdown-target="menu">
             <li
-                    class="flex items-center space-x-2 px-4 py-2 cursor-pointer hover:text-lightGreen {{ language == constant('App\\Enum\\LanguagesType::EN').value ? 'bg-gray-100 font-semibold' : '' }}">
+                    class="flex items-center space-x-2 px-4 py-2 cursor-pointer hover:text-lightGreen {{ currentLocale == constant('App\\Enum\\LanguagesType::EN').value ? 'bg-gray-100 font-semibold' : '' }}">
                 <twig:ux:icon class="w-4 h-4 rounded-full" name="wba:gb-flag"/>
                 <a href="{{ path(routeName, {locale: constant('App\\Enum\\LanguagesType::EN').value}) }}" class="block w-full">English</a>
             </li>
             <li
-                    class="flex items-center space-x-2 px-4 py-2 cursor-pointer hover:text-lightGreen {{ language == constant('App\\Enum\\LanguagesType::PT').value ? 'bg-gray-100 font-semibold' : '' }}">
+                    class="flex items-center space-x-2 px-4 py-2 cursor-pointer hover:text-lightGreen {{ currentLocale == constant('App\\Enum\\LanguagesType::PT').value ? 'bg-gray-100 font-semibold' : '' }}">
                 <twig:ux:icon class="w-4 h-4 rounded-full" name="wba:portugal-flag"/>
                 <a href="{{ path(routeName, {locale: constant('App\\Enum\\LanguagesType::PT').value}) }}" class="block w-full">Portuguese</a>
             </li>
