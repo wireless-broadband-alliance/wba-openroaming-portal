@@ -1,8 +1,8 @@
-{% include 'shared/_select_language.html.twig' with {
+{{ include('shared/_select_language.html.twig', {
     currentLocale: language,
     routeName: 'admin_dashboard_customize',
     warningMessage: true,
-} %}
+}) }}
 
 {% set imageSettings = [
     {

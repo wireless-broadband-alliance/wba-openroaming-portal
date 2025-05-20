@@ -34,11 +34,11 @@
 
             {# Language Selector #}
             {% block language %}
-                {% include 'shared/_select_language.html.twig' with {
+                {{ include('shared/_select_language.html.twig', {
                     currentLocale: app.request.locale,
                     routeName: 'change_language',
                     warningMessage: false,
-                } %}
+                }) }}
             {% endblock %}
 
             {% block toast_messages %}
