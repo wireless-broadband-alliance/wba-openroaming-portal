@@ -23,8 +23,6 @@ parameters:
   app.jwt_secret_key: '%env(JWT_SECRET_KEY)%'
   app.jwt_public_key: '%env(JWT_PUBLIC_KEY)%'
 services:
-    App\EventSubscriber\SessionRestorationSubscriber:
-        - { name: kernel.event_subscriber }
     App\EventListener\LocaleListener:
       tags:
         - { name: kernel.event_listener, event: kernel.request, priority: 20 }
