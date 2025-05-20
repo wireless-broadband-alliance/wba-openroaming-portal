@@ -4,6 +4,7 @@ namespace App\EventListener;
 
 use App\Enum\LanguagesType;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
+use Symfony\Component\HttpKernel\Event\ControllerEvent;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -15,33 +16,36 @@ readonly class LocaleListener
     ) {
     }
 
-    #[AsEventListener(event: KernelEvents::REQUEST)]
-    public function onKernelRequest(RequestEvent $event): void
+    #[AsEventListener(event: KernelEvents::CONTROLLER)]
+    public function onKernelRequest(ControllerEvent $event): void
     {
         $request = $event->getRequest();
 
-        // Ignore locale logic if the request starts with '/api'
-        if (str_starts_with($request->getPathInfo(), '/api')) {
+        if ($request->getPathInfo() !== '/') {
             return;
         }
 
         $session = $request->getSession();
-
-        // If locale is already set in the session, do nothing
+        // dd($session->getId(), $_COOKIE['session_backup'], $request, $session->get('_locale'));
+        // If the locale is already set, use it
         if ($session->has('_locale')) {
-            $request->setLocale($session->get('_locale'));
+            if (method_exists($this->translator, 'setLocale')) {
+                $this->translator->setLocale($session->get('_locale'));
+            }
             return;
         }
 
-        // Determine the preferred language from the browser
-        $preferredLanguage = $request->getPreferredLanguage([LanguagesType::EN->value, LanguagesType::PT->value]);
-        $session->set('_locale', $preferredLanguage ?: LanguagesType::EN->value);
+        // Otherwise, detect and store the preferred language
+        $preferredLanguage = $request->getPreferredLanguage([
+            LanguagesType::EN->value,
+            LanguagesType::PT->value,
+        ]);
 
-        // Set the locale both for the session and the current request
-        $request->setLocale($preferredLanguage);
+        $locale = $preferredLanguage ?: LanguagesType::EN->value;
 
-        // IMPORTANT: Set locale for the translator service (used for translations)
-        $locale = $session->get('_locale');
+        $session->set('_locale', $locale);
+        $request->setLocale($locale);
+
         if (method_exists($this->translator, 'setLocale')) {
             $this->translator->setLocale($locale);
         }
