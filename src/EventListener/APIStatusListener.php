@@ -14,6 +14,10 @@ final class APIStatusListener
 {
     private string $apiEntryPoint = '/api';
 
+    private array $ignoredPaths = [
+        '/api/v1/capport/json',
+    ];
+
     public function __construct(
         private readonly SettingRepository $settingRepository,
     ) {
@@ -24,6 +28,11 @@ final class APIStatusListener
     {
         $request = $event->getRequest();
         $pathInfo = $request->getPathInfo();
+
+        // Skip validation if the path is in the ignoredPaths array
+        if (in_array($pathInfo, $this->ignoredPaths, true)) {
+            return;
+        }
 
         // Checks if the request targets the API
         if (str_starts_with($pathInfo, $this->apiEntryPoint)) {
