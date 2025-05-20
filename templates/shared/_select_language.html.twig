@@ -1,7 +1,7 @@
-<div class="relative flex flex-col justify-end" data-controller="dropdown">
+<div class="relative flex flex-row justify-end" data-controller="dropdown">
 
     <label for="language-selector"
-           class="block text-sm font-medium text-gray-900 mb-2 self-start">
+           class="p-2 block text-sm font-medium text-gray-900 mb-2 self-start">
         {% if warningMessage == true %}
             {{ 'translationLanguageWarning'|trans({}, '_custom_portal') }}
         {% else %}
