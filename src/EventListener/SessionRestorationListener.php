@@ -2,22 +2,37 @@
 
 namespace App\EventListener;
 
-use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 
-final class SessionRestorationListener
+class SessionRestorationSubscriber implements EventSubscriberInterface
 {
-    #[AsEventListener(event: KernelEvents::REQUEST)]
+    public static function getSubscribedEvents(): array
+    {
+        return [
+            KernelEvents::REQUEST => ['onKernelRequest', 9999], 
+        ];
+    }
+
     public function onKernelRequest(RequestEvent $event): void
     {
-        $request = $event->getRequest();
-        $session = $request->getSession();
+        if (!$event->isMainRequest()) {
+            return;
+        }
 
-        $sessionBackup = $request->cookies->get('session_backup');
-        if (isset($sessionBackup) && !$session->isStarted()) {
-            $session->setId($sessionBackup);
-            $session->start();
+        $request = $event->getRequest();
+
+        if (!isset($_COOKIE['session_backup'])) {
+            return;
+        }
+
+        $backupSessionId = $_COOKIE['session_backup'];
+        $currentSessionId = $_COOKIE[session_name()] ?? null;
+
+        if ($backupSessionId && $backupSessionId !== $currentSessionId) {
+            session_id($backupSessionId);
+            $_COOKIE[session_name()] = $backupSessionId;
         }
     }
 }

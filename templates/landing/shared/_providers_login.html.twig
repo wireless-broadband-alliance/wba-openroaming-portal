@@ -1,7 +1,7 @@
 {# Auth Providers #}
 <div class="grid grid-cols-1 sm:gap-4 lg:gap-6 sm:[grid-template-columns:repeat(auto-fit,minmax(150px,1fr))] md:my-2 my-3">
     {% if data.AUTH_METHOD_SAML_ENABLED.value == 'true' %}
-        <div class="w-full mb-6">
+        <div class="w-full">
             <a href="{{ path('saml_login') }}"
                class="terms-widget__link"
                data-action="click->terms-widget#showModal">
@@ -11,7 +11,7 @@
                     {{ data.AUTH_METHOD_SAML_LABEL.value }}
                 </button>
             </a>
-            <p class="text-xs mt-3 text-center text-gray-600">
+            <p class="text-xs md:my-1 my-2 text-center text-gray-600">
                 {{ data.AUTH_METHOD_SAML_DESCRIPTION.value }}
             </p>
         </div>
@@ -28,7 +28,9 @@
                     {{ data.AUTH_METHOD_GOOGLE_LOGIN_LABEL.value }}
                 </button>
             </a>
-            <p class="text-xs mt-2 text-center">{{ data.AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION.value }}</p>
+            <p class="text-xs md:my-1 my-2 text-center text-gray-600">
+                {{ data.AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION.value }}
+            </p>
         </div>
     {% endif %}
 
@@ -43,7 +45,9 @@
                     {{ data.AUTH_METHOD_MICROSOFT_LOGIN_LABEL.value }}
                 </button>
             </a>
-            <p class="text-xs mt-2 text-center">{{ data.AUTH_METHOD_MICROSOFT_LOGIN_DESCRIPTION.value }}</p>
+            <p class="text-xs md:my-1 my-2 text-center text-gray-600">
+                {{ data.AUTH_METHOD_MICROSOFT_LOGIN_DESCRIPTION.value }}
+            </p>
         </div>
     {% endif %}
 </div>
@@ -61,7 +65,9 @@
                     {{ data.AUTH_METHOD_REGISTER_LABEL.value }}
                 </button>
             </a>
-            <p class="text-xs mt-2 text-center">{{ data.AUTH_METHOD_REGISTER_DESCRIPTION.value }}</p>
+            <p class="text-xs md:my-1 my-2 text-center text-gray-600">
+                {{ data.AUTH_METHOD_REGISTER_DESCRIPTION.value }}
+            </p>
         </div>
     {% endif %}
 
@@ -76,7 +82,9 @@
                     {{ data.AUTH_METHOD_SMS_REGISTER_LABEL.value }}
                 </button>
             </a>
-            <p class="text-xs mt-2 text-center">{{ data.AUTH_METHOD_SMS_REGISTER_DESCRIPTION.value }}</p>
+            <p class="text-xs md:my-1 my-2 text-center text-gray-600">
+                {{ data.AUTH_METHOD_SMS_REGISTER_DESCRIPTION.value }}
+            </p>
         </div>
     {% endif %}
 </div>
@@ -93,6 +101,8 @@
                 {{ data.AUTH_METHOD_LOGIN_TRADITIONAL_LABEL.value }}
             </button>
         </a>
-        <p class="text-xs mt-2 text-center">{{ data.AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION.value }}</p>
+        <p class="text-xs md:my-1 my-2 text-center text-gray-600">
+            {{ data.AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION.value }}
+        </p>
     </div>
 {% endif %}
