@@ -243,7 +243,11 @@ class AdminController extends AbstractController
                         $settingTranslation = $this->settingTranslationRepository->findOneBy(
                             ['setting' => $setting, 'locale' => $locale]
                         );
-                        $settingTranslation?->setTranslation($submittedValue);
+                        if($settingName === 'ADDITIONAL_LABEL' && $submittedValue === null){
+                            $settingTranslation?->setTranslation('');
+                        } else {
+                            $settingTranslation?->setTranslation($submittedValue);
+                        }
                     } else {
                         // Get the value from the submitted form data
                         $submittedValue = $submittedData[$settingName];

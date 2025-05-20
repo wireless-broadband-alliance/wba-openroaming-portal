@@ -812,7 +812,8 @@ class TwoFAController extends AbstractController
                         'attemptsExceeded',
                         [
                             '%minutes%' => $interval_minutes
-                        ]
+                        ],
+                        'controllers'
                     )
                 );
             } else {
