@@ -91,7 +91,7 @@
 
 {# Portal Login #}
 {% if data.AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED.value == 'true' %}
-    <div class="w-full sm:space-y-4">
+    <div class="w-full">
         <a href="{{ path('app_login') }}"
            class="terms-widget__link"
            data-action="click->terms-widget#showModal">
