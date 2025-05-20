@@ -945,6 +945,15 @@ class SettingsController extends AbstractController
                 'AUTH_METHOD_SMS_REGISTER_LABEL',
             ];
 
+            $descriptionsFields = [
+                'AUTH_METHOD_SAML_DESCRIPTION',
+                'AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION',
+                'AUTH_METHOD_MICROSOFT_LOGIN_DESCRIPTION',
+                'AUTH_METHOD_REGISTER_DESCRIPTION',
+                'AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION',
+                'AUTH_METHOD_SMS_REGISTER_DESCRIPTION',
+            ];
+
             foreach ($settingsToUpdate as $settingName) {
                 $value = $submittedData[$settingName] ?? null;
 
@@ -956,7 +965,11 @@ class SettingsController extends AbstractController
                     $settingTranslation = $this->settingTranslationRepository->findOneBy(
                         ['setting' => $setting, 'locale' => $locale]
                     );
-                    $settingTranslation?->setTranslation($submittedValue);
+                    if (in_array($settingName, $descriptionsFields) && $submittedValue === null) {
+                        $settingTranslation?->setTranslation('');
+                    } else {
+                        $settingTranslation?->setTranslation($submittedValue);
+                    }
                 }
 
                 // Check if the setting is a label, to be impossible to set it null of empty
