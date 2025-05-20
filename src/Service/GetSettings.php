@@ -17,7 +17,7 @@ readonly class GetSettings
     ) {
     }
 
-    public function getSettings(): array
+    public function getSettings(?string $language = null): array
     {
         // Get the current request from the RequestStack
         $request = $this->requestStack->getCurrentRequest();
@@ -31,7 +31,12 @@ readonly class GetSettings
         }
 
         $session = $request->getSession();
-        $locale = $session->get('_locale') ?: LanguagesType::EN->value;
+        if ($language) {
+            $locale = $language;
+        } else {
+            $locale = $session->get('_locale') ?: LanguagesType::EN->value;
+        }
+
         $data = [];
 
         // Fetch translations for the current locale
