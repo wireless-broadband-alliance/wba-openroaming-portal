@@ -3,7 +3,6 @@
 namespace App\EventListener;
 
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
-use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpKernel\Event\ControllerEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 
@@ -26,14 +25,9 @@ final class SessionRestorationListener
 
         if (isset($preferences['rememberMe']) && $preferences['rememberMe'] === true) {
             $sessionBackup = $request->cookies->get('session_backup');
-            $locale = $session->get('_locale');
-
-            if ($sessionBackup) {
-                $session->invalidate();
-                session_id($sessionBackup);
-                session_start();
-                $request->setSession(new Session());
-                $request->getSession()->set('_locale', $locale);
+            if (isset($sessionBackup) && !$session->isStarted()) {
+                $session->setId($sessionBackup);
+                $session->start();
             }
         }
     }

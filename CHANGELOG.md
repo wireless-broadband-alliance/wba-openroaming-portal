@@ -4,6 +4,7 @@
 
 - New Feature: Responsive Translations (Available: EN & PT-PT)
 - New Listener to auto-detection of the user language
+- Cookie Modal update with new required `_locale` cookie
 - Optimized the `GetSettings` service to significantly reduce the loading process, improving application performance by
   minimizing redundant data processing and database queries.
 - Rework `UserAccountDeletion`, simulates a login to confirm the account action for external providers.
