@@ -325,6 +325,15 @@ class RegistrationController extends AbstractController
         // Get the user with the matching email, excluding admin users
         $user = $userRepository->findOneByUUIDExcludingAdmin($uuid);
 
+        // check if the user has been previously verified
+        if ($user && $user->isVerified()) {
+            $this->addFlash(
+                'error',
+                $this->translator->trans('accountAlreadyVerified', [], 'controllers')
+            );
+            return $this->redirectToRoute('app_landing');
+        }
+
         if ($user && $user->getVerificationCode() === $verificationCode) {
             try {
                 // Create a token manually for the user

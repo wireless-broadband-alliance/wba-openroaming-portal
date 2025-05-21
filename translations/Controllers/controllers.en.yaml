@@ -96,3 +96,4 @@ administratorsCannotBanThemselves: 'Sorry, administrators cannot ban themselves.
 userUpdated: '"%uuid%" has been updated successfully.'
 PasswordPasswordConfirmationMustMatch: 'Both the password and password confirmation fields must match.'
 passwordUpdated: '"%uuid%" password was updated.'
+accountAlreadyVerified: 'This account is already verified.'

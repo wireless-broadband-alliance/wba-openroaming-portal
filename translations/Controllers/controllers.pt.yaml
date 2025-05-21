@@ -96,3 +96,4 @@ administratorsCannotBanThemselves: 'Desculpe, administradores não podem banir-s
 userUpdated: '"%uuid%" foi atualizado com sucesso.'
 PasswordPasswordConfirmationMustMatch: 'Os campos palavra-passe e confirmação de palavra-passe devem coincidir.'
 passwordUpdated: '"%uuid%" palavra-passe foi atualizada.'
+accountAlreadyVerified: 'Esta conta já foi verificada.'
