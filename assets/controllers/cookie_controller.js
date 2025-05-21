@@ -7,7 +7,7 @@ export default class extends Controller {
         // Initialize preferences without setting any cookies on the first page load
         this.cookieScopes = this.getCookiePreferences() || {
             rememberMe: false,
-            localeDetection: false
+            localeDetection: false,
         };
 
         this.updateCheckboxes();
@@ -82,7 +82,7 @@ export default class extends Controller {
             this.clearLocaleCookie();
         }
 
-        const allEnabled = Object.values(this.cookieScopes).every(val => val === true);
+        const allEnabled = Object.values(this.cookieScopes).every((val) => val === true);
         if (allEnabled) {
             this.setCookiesAccepted();
         } else {
