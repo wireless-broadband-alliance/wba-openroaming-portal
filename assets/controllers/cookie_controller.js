@@ -82,6 +82,14 @@ export default class extends Controller {
             this.clearLocaleCookie();
         }
 
+        const allEnabled = Object.values(this.cookieScopes).every(val => val === true);
+        if (allEnabled) {
+            this.setCookiesAccepted();
+        } else {
+            // If even one is false, remove cookies_accepted
+            document.cookie = "cookies_accepted=; path=/; max-age=0";
+        }
+
         this.closeModal();
         this.hideBanner();
         location.reload();
