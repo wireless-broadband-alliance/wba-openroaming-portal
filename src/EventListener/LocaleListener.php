@@ -22,19 +22,16 @@ class LocaleListener
     ) {
     }
 
-    #[AsEventListener(event: KernelEvents::REQUEST, priority: 10)]
+    #[AsEventListener(event: KernelEvents::REQUEST)]
     public function onKernelRequest(RequestEvent $event): void
     {
         $request = $event->getRequest();
 
-        // Skip API routes
-        if (str_starts_with($request->getPathInfo(), '/api')) {
-            return;
-        }
+        // Default locale
+        $locale = LanguagesType::EN->value;
 
-        // Check if a user accepted localeDetection cookie preference
-        $cookiePreferences = $request->cookies->get("cookie_preferences");
-
+        // Check cookie_preferences for localeDetection
+        $cookiePreferences = $request->cookies->get('cookie_preferences');
         if ($cookiePreferences) {
             try {
                 $preferences = json_decode(
@@ -43,26 +40,21 @@ class LocaleListener
                     512,
                     JSON_THROW_ON_ERROR
                 );
-                $this->canStoreLocale = !empty($preferences['localeDetection']);
+                $this->canStoreLocale = $preferences['localeDetection'] ?? false;
             } catch (\JsonException) {
-                // Invalid JSON, treat as not accepted
                 $this->canStoreLocale = false;
             }
         }
 
-        $cookieLocale = $request->cookies->get('_locale');
+        // If the user allowed cookie preference - localeDetection
+        if ($this->canStoreLocale) {
+            $cookieLocale = $request->cookies->get('_locale');
 
-        // Validate the locale or fallback to the preferred language
-        if (in_array($cookieLocale, self::SUPPORTED_LOCALES, true)) {
-            $locale = $cookieLocale;
-        } else {
-            $preferred = $request->getPreferredLanguage(self::SUPPORTED_LOCALES);
-            $locale = in_array($preferred, self::SUPPORTED_LOCALES, true)
-                ? $preferred
-                : LanguagesType::EN->value;
-
-            // Only store locale if the user accepted it
-            if ($this->canStoreLocale) {
+            if (in_array($cookieLocale, self::SUPPORTED_LOCALES, true)) {
+                $locale = $cookieLocale;
+            } else {
+                $preferred = $request->getPreferredLanguage(self::SUPPORTED_LOCALES);
+                $locale = in_array($preferred, self::SUPPORTED_LOCALES, true) ? $preferred : $locale;
                 $this->resolvedLocale = $locale;
             }
         }
@@ -82,12 +74,11 @@ class LocaleListener
 
         $response = $event->getResponse();
 
-        // Set a 1-year cookie for the locale
         $response->headers->setCookie(
             new Cookie(
                 name: '_locale',
                 value: $this->resolvedLocale,
-                expire: time() + (365 * 24 * 60 * 60),
+                expire: time() + (365 * 24 * 60 * 60), // 1 year
                 path: '/',
                 secure: false,
                 httpOnly: false

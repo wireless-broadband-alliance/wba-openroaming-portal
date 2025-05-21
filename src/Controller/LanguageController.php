@@ -21,17 +21,38 @@ class LanguageController extends AbstractController
             $locale = LanguagesType::EN->value;
         }
 
+        // Read the cookie_preferences cookie
+        $cookiePreferences = $request->cookies->get('cookie_preferences');
+        $allowLocaleChange = false;
+
+        if ($cookiePreferences) {
+            $decodedPreferences = json_decode(
+                $cookiePreferences,
+                true,
+                512,
+                JSON_THROW_ON_ERROR
+            );
+            $allowLocaleChange = $decodedPreferences['localeDetection'] ?? false;
+        }
+
         $response = new RedirectResponse($request->headers->get('referer', '/'));
-        $response->headers->setCookie(
-            new Cookie(
-                name: '_locale',
-                value: $locale,
-                expire: time() + (365 * 24 * 60 * 60), // 1 year
-                path: '/',
-                secure: false,
-                httpOnly: false
-            )
-        );
+
+        if ($allowLocaleChange) {
+            // Set locale cookie
+            $response->headers->setCookie(
+                new Cookie(
+                    name: '_locale',
+                    value: $locale,
+                    expire: time() + (365 * 24 * 60 * 60), // 1 year
+                    path: '/',
+                    secure: false,
+                    httpOnly: false
+                )
+            );
+        } else {
+            $this->addFlash('error', 'Language preference cookies are disabled.');
+            $this->addFlash('error_admin', 'Language preference cookies are disabled.');
+        }
 
         return $response;
     }
