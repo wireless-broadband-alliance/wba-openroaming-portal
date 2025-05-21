@@ -2,6 +2,7 @@
 
 namespace App\EventListener;
 
+use App\Enum\FirewallType;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
@@ -12,8 +13,14 @@ final class SessionRestorationListener
     public function onKernelRequest(RequestEvent $event): void
     {
         $request = $event->getRequest();
-        $session = $request->getSession();
 
+        // Restore only the session if the user is on the firewall "landing"
+        $firewallContext = $request->attributes->get('_firewall_context');
+        if (!str_contains((string) $firewallContext, FirewallType::LANDING->value)) {
+            return;
+        }
+
+        $session = $request->getSession();
         $cookiePreferences = $request->cookies->get("cookie_preferences");
 
         try {
