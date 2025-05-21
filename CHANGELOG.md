@@ -5,14 +5,15 @@
 - New Feature: Responsive Translations (Available: EN & PT-PT)
 - New Listener to auto-detection of the user language
 - Cookie Modal update with new required `_locale` cookie
+- Fix bug with registration links, use could use them to re-log in to the portal at any time, can only be used once.
 - Optimized the `GetSettings` service to significantly reduce the loading process, improving application performance by
   minimizing redundant data processing and database queries.
 - Rework `UserAccountDeletion`, simulates a login to confirm the account action for external providers.
-- For this release it's required to run the new migrations to set up the new entity SettingTranslations
-  Run the migration with:
 - Fix pagination for the table `Access Points Usage` on the `dashboard/statistics/freeradius` page (Add new custom
   display of results per page)
 - Invalidate session on the dashboard in case the admin changes is password on the landing firewall.
+- For this release it's required to run the new migrations to set up the new entity SettingTranslations
+  Run the migration with:
 
 ```bash
 php bin/console doctrine:migrations:migrate
