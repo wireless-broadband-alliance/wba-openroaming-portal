@@ -22,6 +22,13 @@ account deletion.
     - This content is specifically designed for use in the public Android Turnstile functionality.
     - Includes placeholder elements for Android-specific app setup.
 
+## Capport Configuration
+
+- **Retrieves a JSON metadata for the Captive Portal (CAPPORT) configuration.**
+    - This metadata enables admins to configure enforced messages when a user connects to a specific SSID
+      associated with a profile on any access point. It ensures consistent messaging across all access
+      points for that network.
+
 ## Setting
 
 - **Public Settings Configuration**
