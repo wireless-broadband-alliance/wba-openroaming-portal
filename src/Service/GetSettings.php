@@ -31,11 +31,7 @@ readonly class GetSettings
             return [];
         }
 
-        if ($language) {
-            $locale = $language;
-        } else {
-            $locale = $request->cookies->get('_locale');
-        }
+        $locale = $language ?: $request->cookies->get('_locale');
 
         $data = [];
 
