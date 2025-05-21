@@ -29,11 +29,11 @@ class SendSMS
      */
     public function __construct(
         private readonly UserRepository $userRepository,
-        private readonly GetSettings $getSettings,
         private readonly ParameterBagInterface $parameterBag,
         private readonly EventRepository $eventRepository,
         private readonly EventActions $eventActions,
         private readonly VerificationCodeEmailGenerator $verificationCodeGenerator,
+        private readonly SettingRepository $settingRepository,
     ) {
     }
 
@@ -46,14 +46,13 @@ class SendSMS
      */
     public function sendSms($recipient, string $message): bool
     {
-        $data = $this->getSettings->getSettings();
         $apiUrl = $this->parameterBag->get('app.budget_api_url');
 
         // Fetch SMS credentials from the database
-        $username = $data['SMS_USERNAME']['value'];
-        $userId = $data['SMS_USER_ID']['value'];
-        $handle = $data['SMS_HANDLE']['value'];
-        $from = $data['SMS_FROM']['value'];
+        $username = $this->settingRepository->findOneBy(['name' => 'SMS_USERNAME'])->getValue();
+        $userId = $this->settingRepository->findOneBy(['name' => 'SMS_USER_ID'])->getValue();
+        $handle = $this->settingRepository->findOneBy(['name' => 'SMS_HANDLE'])->getValue();
+        $from = $this->settingRepository->findOneBy(['name' => 'SMS_FROM'])->getValue();
 
         // Check if the user can regenerate the SMS code
         $user = $this->userRepository->findOneBy(['phoneNumber' => $recipient]);
