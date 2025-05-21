@@ -7,6 +7,7 @@ export default class extends Controller {
         // Initialize preferences without setting any cookies on the first page load
         this.cookieScopes = this.getCookiePreferences() || {
             rememberMe: false,
+            localeDetection: false
         };
 
         this.updateCheckboxes();
@@ -20,6 +21,11 @@ export default class extends Controller {
         // Ensure the session_backup cookie is removed if rememberMe is false
         if (this.cookieScopes.rememberMe === false) {
             this.clearSessionBackupCookie();
+        }
+
+        // Ensure the session_backup cookie is removed if localeDetection is false
+        if (this.cookieScopes.localeDetection === false) {
+            this.clearLocaleCookie();
         }
 
         // If either cookies_accepted or cookie_preferences exists and cookies were not rejected, hide the banner
@@ -69,6 +75,11 @@ export default class extends Controller {
         // Only remove the session_backup cookie if rememberMe is false
         if (this.cookieScopes.rememberMe === false) {
             this.clearSessionBackupCookie();
+        }
+
+        // Ensure the session_backup cookie is removed if localeDetection is false
+        if (this.cookieScopes.localeDetection === false) {
+            this.clearLocaleCookie();
         }
 
         this.closeModal();
@@ -121,6 +132,11 @@ export default class extends Controller {
     clearSessionBackupCookie() {
         // Clear the session_backup cookie
         document.cookie = "session_backup=; path=/; max-age=0";
+    }
+
+    clearLocaleCookie() {
+        // Clear the localeDetectionCookie cookie
+        document.cookie = "_locale=; path=/; max-age=0";
     }
 
     closeModal() {

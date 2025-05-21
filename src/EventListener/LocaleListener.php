@@ -13,6 +13,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 class LocaleListener
 {
     private ?string $resolvedLocale = null;
+    private bool $canStoreLocale = false;
 
     private const array SUPPORTED_LOCALES = [LanguagesType::EN->value, LanguagesType::PT->value];
 
@@ -31,19 +32,39 @@ class LocaleListener
             return;
         }
 
+        // Check if a user accepted localeDetection cookie preference
+        $cookiePreferences = $request->cookies->get("cookie_preferences");
+
+        if ($cookiePreferences) {
+            try {
+                $preferences = json_decode(
+                    $cookiePreferences,
+                    true,
+                    512,
+                    JSON_THROW_ON_ERROR
+                );
+                $this->canStoreLocale = !empty($preferences['localeDetection']);
+            } catch (\JsonException) {
+                // Invalid JSON, treat as not accepted
+                $this->canStoreLocale = false;
+            }
+        }
+
         $cookieLocale = $request->cookies->get('_locale');
 
         // Validate the locale or fallback to the preferred language
         if (in_array($cookieLocale, self::SUPPORTED_LOCALES, true)) {
             $locale = $cookieLocale;
         } else {
-            // Detect preferred language
             $preferred = $request->getPreferredLanguage(self::SUPPORTED_LOCALES);
             $locale = in_array($preferred, self::SUPPORTED_LOCALES, true)
                 ? $preferred
                 : LanguagesType::EN->value;
 
-            $this->resolvedLocale = $locale;
+            // Only store locale if the user accepted it
+            if ($this->canStoreLocale) {
+                $this->resolvedLocale = $locale;
+            }
         }
 
         $request->setLocale($locale);
@@ -55,22 +76,21 @@ class LocaleListener
     #[AsEventListener(event: KernelEvents::RESPONSE)]
     public function onKernelResponse(ResponseEvent $event): void
     {
-        if ($this->resolvedLocale === null) {
+        if (!$this->canStoreLocale || $this->resolvedLocale === null) {
             return;
         }
 
         $response = $event->getResponse();
 
-        // Set a 1-year cookie for the validated/resolved locale
+        // Set a 1-year cookie for the locale
         $response->headers->setCookie(
             new Cookie(
-                '_locale',
-                $this->resolvedLocale,
-                time() + (365 * 24 * 60 * 60),
-                '/',
-                null,
-                false,
-                false
+                name: '_locale',
+                value: $this->resolvedLocale,
+                expire: time() + (365 * 24 * 60 * 60),
+                path: '/',
+                secure: false,
+                httpOnly: false
             )
         );
     }

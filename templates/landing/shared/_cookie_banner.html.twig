@@ -90,7 +90,7 @@
                                     {{ 'csrfToken.description'|trans({}, '_cookie_banner') }}
                                     <span>
                                         <br>
-                                        {{ 'csrfToken.controlledBy'|trans({}, '_cookie_banner') }}:
+                                        {{ 'controlledBy'|trans({}, '_cookie_banner') }}:
                                         <a
                                                 class="underline text-primary font-semibold"
                                                 href="{{ absolute_url(path('app_landing')) }}">
@@ -200,13 +200,14 @@
                             </ul>
                         </div>
 
-                        {# Remember Me Session Cookie #}
+                        {# Manageable Cookies #}
                         <div class="flex flex-col space-y-3">
-                            <h3 class="font-semibold">{{ 'rememberMeCookie.manageableCookiesTitle'|trans({}, '_cookie_banner') }}</h3>
+                            <h3 class="font-semibold">{{ 'manageableCookiesTitle'|trans({}, '_cookie_banner') }}</h3>
                             <p class="text-sm">
-                                {{ 'rememberMeCookie.manageableCookiesDescription'|trans({}, '_cookie_banner') }}
+                                {{ 'manageableCookiesDescription'|trans({}, '_cookie_banner') }}
                             </p>
                             <ul class="text-sm space-y-2">
+                                {# Remember Me Session Cookie #}
                                 <li>
                                     <div class="flex justify-between items-center">
                                         <div>
@@ -233,6 +234,39 @@
                                         <div>
                                             <label class="inline-flex items-center cursor-pointer">
                                                 <input type="checkbox" class="sr-only peer" data-scope="rememberMe">
+                                                <div class="ms-2 relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-bg-lightGreen rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#68D391]"></div>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </li>
+
+                                {# Locale Dectection Cookie #}
+                                <li>
+                                    <div class="flex justify-between items-center">
+                                        <div>
+                                            <strong>{{ 'localeDetectionCookie.title'|trans({}, '_cookie_banner') }}</strong>
+                                            -
+                                            {{ 'localeDetectionCookie.description'|trans({}, '_cookie_banner') }}
+                                            <span>
+                                            <br>
+                                            {{ 'controlledBy'|trans({}, '_cookie_banner') }}:
+                                            <a class="underline text-primary font-semibold"
+                                               href="{{ absolute_url(path('app_landing')) }}">
+                                                {{ app.request.getHost() }}
+                                            </a>
+                                            </span>
+                                            <br>
+                                            <p>
+                                                <a href="{{ path('app_privacy_policy') }}"
+                                                   class="underline text-primary"
+                                                   target="_blank">
+                                                    {{ 'privacyPolicy'|trans({}, '_cookie_banner') }}
+                                                </a>
+                                            </p>
+                                        </div>
+                                        <div>
+                                            <label class="inline-flex items-center cursor-pointer">
+                                                <input type="checkbox" class="sr-only peer" data-scope="localeDetection">
                                                 <div class="ms-2 relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-bg-lightGreen rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#68D391]"></div>
                                             </label>
                                         </div>
