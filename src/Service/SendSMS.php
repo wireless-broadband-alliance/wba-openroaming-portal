@@ -74,14 +74,13 @@ class SendSMS
 
     public function sendSmsNoValidation($recipient, string $message): bool
     {
-        $data = $this->getSettings->getSettings();
         $apiUrl = $this->parameterBag->get('app.budget_api_url');
 
         // Fetch SMS credentials from the database
-        $username = $data['SMS_USERNAME']['value'];
-        $userId = $data['SMS_USER_ID']['value'];
-        $handle = $data['SMS_HANDLE']['value'];
-        $from = $data['SMS_FROM']['value'];
+        $username = $this->settingRepository->findOneBy(['name' => 'SMS_USERNAME'])->getValue();
+        $userId = $this->settingRepository->findOneBy(['name' => 'SMS_USER_ID'])->getValue();
+        $handle = $this->settingRepository->findOneBy(['name' => 'SMS_HANDLE'])->getValue();
+        $from = $this->settingRepository->findOneBy(['name' => 'SMS_FROM'])->getValue();
 
         // Check if the user can regenerate the SMS code
         $client = HttpClient::create();
@@ -130,7 +129,7 @@ class SendSMS
      */
     public function regenerateSmsCode(User $user): bool
     {
-        $data = $this->getSettings->getSettings();
+        $smsTimerResend = $this->settingRepository->findOneBy(['name' => 'SMS_TIMER_RESEND'])->getValue();
         $latestEvent = $this->eventRepository->findLatestSmsAttemptEvent($user);
 
         // Retrieve metadata from the latest event
@@ -141,7 +140,7 @@ class SendSMS
         $verificationAttempts = $latestEventMetadata['verificationAttempts'] ?? 0;
 
         if (!$latestEvent || $verificationAttempts < 3) {
-            $minInterval = new DateInterval('PT' . $data['SMS_TIMER_RESEND']['value'] . 'M');
+            $minInterval = new DateInterval('PT' . $smsTimerResend . 'M');
             $currentTime = new DateTime();
 
             if (
