@@ -5,6 +5,7 @@ namespace App\Service;
 use App\Enum\LanguagesType;
 use App\Repository\SettingRepository;
 use App\Repository\SettingTranslationRepository;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 
@@ -30,11 +31,10 @@ readonly class GetSettings
             return [];
         }
 
-        $session = $request->getSession();
         if ($language) {
             $locale = $language;
         } else {
-            $locale = $session->get('_locale') ?: LanguagesType::EN->value;
+            $locale = $request->cookies->get('_locale');
         }
 
         $data = [];
