@@ -95,7 +95,9 @@ class LandingAuthenticator extends AbstractLoginFormAuthenticator
         ];
 
         if ($rememberMe) {
-            $badges[] = new RememberMeBadge();
+            $rememberMeBadge = new RememberMeBadge();
+            $rememberMeBadge->enable();
+            $badges[] = $rememberMeBadge;
         }
 
         // Create a Passport with user, credentials, and CSRF token
