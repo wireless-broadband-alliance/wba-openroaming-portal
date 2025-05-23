@@ -63,6 +63,9 @@ security:
             #    check_path: app_login
             #    username_parameter: uuid
             #    password_parameter: password
+            remember_me:
+                secret: '%kernel.secret%'
+                lifetime: 604800
             saml:
                 identifier_attribute: sAMAccountName
                 user_factory: saml_user_factory

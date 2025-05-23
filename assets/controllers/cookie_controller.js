@@ -18,12 +18,7 @@ export default class extends Controller {
         const hasAcceptedCookies = this.getCookie("cookies_accepted");
         const hasSavedPreferences = this.getCookie("cookie_preferences");
 
-        // Ensure the session_backup cookie is removed if rememberMe is false
-        if (this.cookieScopes.rememberMe === false) {
-            this.clearSessionBackupCookie();
-        }
-
-        // Ensure the session_backup cookie is removed if localeDetection is false
+        // Ensure the cookie is removed if localeDetection is false
         if (this.cookieScopes.localeDetection === false) {
             this.clearLocaleCookie();
         }
@@ -72,12 +67,8 @@ export default class extends Controller {
 
         this.setCookiePreferences();
 
-        // Only remove the session_backup cookie if rememberMe is false
-        if (this.cookieScopes.rememberMe === false) {
-            this.clearSessionBackupCookie();
-        }
 
-        // Ensure the session_backup cookie is removed if localeDetection is false
+        // Ensure the cookie is removed if localeDetection is false
         if (this.cookieScopes.localeDetection === false) {
             this.clearLocaleCookie();
         }
@@ -135,11 +126,6 @@ export default class extends Controller {
         });
 
         localStorage.clear();
-    }
-
-    clearSessionBackupCookie() {
-        // Clear the session_backup cookie
-        document.cookie = "session_backup=; path=/; max-age=0";
     }
 
     clearLocaleCookie() {
