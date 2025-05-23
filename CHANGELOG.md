@@ -24,6 +24,8 @@ php bin/console doctrine:migrations:migrate
 
 # Release V1.7.3
 
+- Update docker add new geoLite volume, to save the previous geoLite database schema.
+- Fix CAPPORT endpoint `/api/v1/capport/json` is independent of the current state of the `API_STATUS`.
 - The user can now delete its own account from the account_widget popup
 - New endpoint on the API to delete the user account for APP's
 - Rework Two Factor Authenticator to have a type of validation. Now the page knows what type of request is being made
