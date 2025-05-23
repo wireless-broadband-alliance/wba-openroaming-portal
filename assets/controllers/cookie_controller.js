@@ -67,7 +67,6 @@ export default class extends Controller {
 
         this.setCookiePreferences();
 
-
         // Ensure the cookie is removed if localeDetection is false
         if (this.cookieScopes.localeDetection === false) {
             this.clearLocaleCookie();
