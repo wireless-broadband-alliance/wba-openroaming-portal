@@ -67,6 +67,16 @@
         </div>
     {% endif %}
 
+    {# Remember Me #}
+    {# TODO IMPROVE THIS DESIGN #}
+    <label class="flex items-start gap-2 mt-[28px] text-xs">
+        <input type="checkbox" name="_remember_me"
+               class="w-5 h-5 appearance-none rounded-[5px] border border-[#CECECE] cursor-pointer checked:bg-primary" />
+
+        {{ 'btn.remember_me'|trans({}, 'login_landing') }}
+    </label>
+
+
     <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
 
     <div class="my-[32px] flex justify-start gap-4">

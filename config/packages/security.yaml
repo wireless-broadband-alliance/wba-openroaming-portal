@@ -66,6 +66,8 @@ security:
             remember_me:
                 secret: '%kernel.secret%'
                 lifetime: 604800
+                path: /
+                name: REMEMBERME
             saml:
                 identifier_attribute: sAMAccountName
                 user_factory: saml_user_factory

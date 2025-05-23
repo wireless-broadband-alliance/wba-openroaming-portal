@@ -13,6 +13,7 @@ form:
 btn:
     login: 'Iniciar sessão'
     choose_another: 'Escolher Outra'
+    remember_me: 'Manter minha sessão ativa'
 forgot_password: 'Esqueceu-se da sua palavra-passe? Obtenha uma nova para o seu'
 forgot_password_email: 'email'
 forgot_password_phone: 'número de telefone'

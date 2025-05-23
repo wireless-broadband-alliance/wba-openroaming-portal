@@ -13,6 +13,7 @@ form:
 btn:
     login: 'Log in'
     choose_another: 'Choose Another'
+    remember_me: 'Keep my session active'
 forgot_password: 'Did you forget your password? Get a new one for your'
 forgot_password_email: 'email'
 forgot_password_phone: 'phone number'

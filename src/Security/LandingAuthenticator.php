@@ -20,6 +20,7 @@ use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;
 use Symfony\Component\Security\Http\Authenticator\AbstractLoginFormAuthenticator;
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\CsrfTokenBadge;
+use Symfony\Component\Security\Http\Authenticator\Passport\Badge\RememberMeBadge;
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
 use Symfony\Component\Security\Http\Authenticator\Passport\Credentials\PasswordCredentials;
 use Symfony\Component\Security\Http\Authenticator\Passport\Passport;
@@ -80,13 +81,28 @@ class LandingAuthenticator extends AbstractLoginFormAuthenticator
         // Add LAST_USERNAME to the session (optional)
         $request->getSession()->set(SecurityRequestAttributes::LAST_USERNAME, $uuid);
 
+        // Preferences Checker
+        $rememberMe = false;
+        $cookie = $request->cookies->get('cookie_preferences');
+        if ($cookie) {
+            $preferences = json_decode($cookie, true, 512, JSON_THROW_ON_ERROR);
+            $rememberMe = isset($preferences['rememberMe']) && $preferences['rememberMe'] === true;
+        }
+
+        // Prepare badges
+        $badges = [
+            new CsrfTokenBadge('authenticate', $request->request->get('_csrf_token')),
+        ];
+
+        if ($rememberMe) {
+            $badges[] = new RememberMeBadge();
+        }
+
         // Create a Passport with user, credentials, and CSRF token
         return new Passport(
-            new UserBadge($uuid), // Identifier for fetching the user
-            new PasswordCredentials($password), // Check password
-            [
-                new CsrfTokenBadge('authenticate', $request->request->get('_csrf_token')), // CSRF protection
-            ]
+            new UserBadge($uuid),
+            new PasswordCredentials($password),
+            $badges
         );
     }
 
