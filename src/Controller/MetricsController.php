@@ -43,7 +43,7 @@ class MetricsController extends AbstractController
             $this->params->get('app.metrics_enabled', true),
             FILTER_VALIDATE_BOOLEAN
         );
-        
+
         if (!$metricsEnabled) {
             return new Response('Metrics endpoint is disabled', Response::HTTP_NOT_FOUND);
         }
@@ -52,7 +52,7 @@ class MetricsController extends AbstractController
         $allowedIps = $this->params->get('app.metrics_allowed_ips', '0.0.0.0/0');
         $allowedIps = $allowedIps ?: '0.0.0.0/0';
         $isIpAllowed = $this->isIpAllowed($clientIp, $allowedIps);
-        
+
         if (!$isIpAllowed) {
             $this->logger->warning('Unauthorized metrics access attempt from IP: ' . $clientIp);
             return new Response('Access denied', Response::HTTP_FORBIDDEN);
@@ -60,12 +60,12 @@ class MetricsController extends AbstractController
 
         try {
             $registry = $this->metricsService->collectMetrics();
-            
+
             $renderer = new RenderTextFormat();
             $result = $renderer->render($registry->getMetricFamilySamples());
-            
+
             $this->logger->info('Metrics collected successfully for ' . $clientIp);
-            
+
             return new Response($result, Response::HTTP_OK, [
                 'Content-Type' => RenderTextFormat::MIME_TYPE
             ]);
@@ -74,7 +74,7 @@ class MetricsController extends AbstractController
                 'exception' => $e,
                 'trace' => $e->getTraceAsString()
             ]);
-            
+
             return new Response('Internal error collecting metrics', Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
@@ -91,13 +91,13 @@ class MetricsController extends AbstractController
         if (empty($allowedIps) || $allowedIps === '0.0.0.0/0') {
             return true;
         }
-        
+
         $allowedIpList = array_map('trim', explode(',', $allowedIps));
-        
+
         if (in_array($ip, $allowedIpList)) {
             return true;
         }
-        
+
         foreach ($allowedIpList as $allowedIp) {
             if (strpos($allowedIp, '/') !== false) {
                 if ($this->ipInCidrRange($ip, $allowedIp)) {
@@ -105,7 +105,7 @@ class MetricsController extends AbstractController
                 }
             }
         }
-        
+
         return false;
     }
 
@@ -119,17 +119,17 @@ class MetricsController extends AbstractController
     private function ipInCidrRange(string $ip, string $cidr): bool
     {
         list($subnet, $mask) = explode('/', $cidr);
-        
+
         $ipLong = ip2long($ip);
         $subnetLong = ip2long($subnet);
-        
+
         if ($ipLong === false || $subnetLong === false) {
             return false;
         }
-        
+
         $maskBits = 32 - (int)$mask;
         $netmask = ~((1 << $maskBits) - 1) & 0xFFFFFFFF;
-        
+
         return ($ipLong & $netmask) === ($subnetLong & $netmask);
     }
 }

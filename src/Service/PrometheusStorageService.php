@@ -10,10 +10,8 @@ use Prometheus\Storage\InMemory;
  */
 class PrometheusStorageService
 {
-
     public function __construct()
     {
-
     }
 
 
