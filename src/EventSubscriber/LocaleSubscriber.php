@@ -7,15 +7,12 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 
-class LocaleSubscriber implements EventSubscriberInterface
+readonly class LocaleSubscriber implements EventSubscriberInterface
 {
-    private const array SUPPORTED_LOCALES = [LanguagesType::EN->value, LanguagesType::PT->value];
-
     public function __construct(
         private string $defaultLocale = LanguagesType::EN->value
     ) {
     }
-
 
     public function onKernelRequest(RequestEvent $event): void
     {

@@ -17,7 +17,6 @@ export default class extends Controller {
         const hasAcceptedCookies = this.getCookie("cookies_accepted");
         const hasSavedPreferences = this.getCookie("cookie_preferences");
 
-
         // If either cookies_accepted or cookie_preferences exists and cookies were not rejected, hide the banner
         if (hasAcceptedCookies || hasSavedPreferences) {
             this.hideBanner();
@@ -61,7 +60,6 @@ export default class extends Controller {
         });
 
         this.setCookiePreferences();
-
 
         const allEnabled = Object.values(this.cookieScopes).every((val) => val === true);
         if (allEnabled) {
