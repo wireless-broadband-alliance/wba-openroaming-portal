@@ -52,7 +52,8 @@ class ResetPlatformStatusSettingsCommand extends Command
             ['name' => 'PLATFORM_MODE', 'value' => 'Demo'],
             ['name' => 'USER_VERIFICATION', 'value' => 'OFF'],
             ['name' => 'TURNSTILE_CHECKER', 'value' => 'OFF'],
-            ['name' => 'API_STATUS', 'value' => 'ON'],
+            ['name' => 'API_STATUS', 'value' => 'OFF'],
+            ['name' => 'MAGIC_LINK', 'value' => 'OFF'],
             ['name' => 'USER_DELETE_TIME', 'value' => '5'],
             ['name' => 'TIME_INTERVAL_NOTIFICATION', 'value' => '7'],
         ];

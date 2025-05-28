@@ -64,7 +64,8 @@ class ResetAllSettingsCommand extends Command
             ['name' => 'PLATFORM_MODE', 'value' => 'Demo'],
             ['name' => 'USER_VERIFICATION', 'value' => 'OFF'],
             ['name' => 'TURNSTILE_CHECKER', 'value' => 'OFF'],
-            ['name' => 'API_STATUS', 'value' => 'ON'],
+            ['name' => 'API_STATUS', 'value' => 'OFF'],
+            ['name' => 'MAGIC_LINK', 'value' => 'OFF'],
 
             ['name' => 'TWO_FACTOR_AUTH_STATUS', 'value' => 'NOT_ENFORCED'],
             ['name' => 'TWO_FACTOR_AUTH_APP_LABEL', 'value' => 'OpenRoaming'],
