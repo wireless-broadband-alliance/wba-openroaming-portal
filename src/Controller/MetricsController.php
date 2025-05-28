@@ -6,25 +6,21 @@ use App\Service\MetricsService;
 use Prometheus\RenderTextFormat;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
 
 /**
  * Controller for exposing Prometheus metrics.
  */
 class MetricsController extends AbstractController
 {
-    private MetricsService $metricsService;
-
-    public function __construct(MetricsService $metricsService)
+    public function __construct(private readonly MetricsService $metricsService)
     {
-        $this->metricsService = $metricsService;
     }
 
     /**
      * Exposes Prometheus metrics.
      * This endpoint is publicly accessible without authentication.
      */
-    #[Route('/metrics', name: 'app_metrics', methods: ['GET'])]
+    #[\Symfony\Component\Routing\Attribute\Route('/metrics', name: 'app_metrics', methods: ['GET'])]
     public function index(): Response
     {
         $registry = $this->metricsService->collectMetrics();
@@ -33,7 +29,7 @@ class MetricsController extends AbstractController
         $renderer = new RenderTextFormat();
         $result = $renderer->render($registry->getMetricFamilySamples());
 
-        return new Response($result, 200, [
+        return new Response($result, \Symfony\Component\HttpFoundation\Response::HTTP_OK, [
             'Content-Type' => RenderTextFormat::MIME_TYPE
         ]);
     }

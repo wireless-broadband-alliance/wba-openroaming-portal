@@ -14,24 +14,17 @@ use Psr\Log\LoggerInterface;
  */
 class MetricsService
 {
-    private CollectorRegistry $registry;
-    private UserRepository $userRepository;
-    private UserRadiusProfileRepository $userRadiusProfileRepository;
-    private UserExternalAuthRepository $userExternalAuthRepository;
-    private LoggerInterface $logger;
+    public $projectDir;
+    private readonly CollectorRegistry $registry;
 
     public function __construct(
-        UserRepository $userRepository,
-        UserRadiusProfileRepository $userRadiusProfileRepository,
-        UserExternalAuthRepository $userExternalAuthRepository,
+        private readonly UserRepository $userRepository,
+        private readonly UserRadiusProfileRepository $userRadiusProfileRepository,
+        private readonly UserExternalAuthRepository $userExternalAuthRepository,
         PrometheusStorageService $storageService,
-        LoggerInterface $logger
+        private readonly LoggerInterface $logger
     ) {
         $this->registry = new CollectorRegistry($storageService->getAdapter());
-        $this->userRepository = $userRepository;
-        $this->userRadiusProfileRepository = $userRadiusProfileRepository;
-        $this->userExternalAuthRepository = $userExternalAuthRepository;
-        $this->logger = $logger;
     }
 
     /**
