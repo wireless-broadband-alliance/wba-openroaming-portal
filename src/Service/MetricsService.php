@@ -8,6 +8,7 @@ use App\Repository\UserRadiusProfileRepository;
 use App\Repository\UserRepository;
 use Prometheus\CollectorRegistry;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\HttpKernel\KernelInterface;
 
 /**
  * Service for collecting and providing application metrics.
@@ -22,7 +23,8 @@ class MetricsService
         private readonly UserRadiusProfileRepository $userRadiusProfileRepository,
         private readonly UserExternalAuthRepository $userExternalAuthRepository,
         PrometheusStorageService $storageService,
-        private readonly LoggerInterface $logger
+        private readonly LoggerInterface $logger,
+        private readonly KernelInterface $kernel
     ) {
         $this->registry = new CollectorRegistry($storageService->getAdapter());
     }
@@ -233,7 +235,7 @@ class MetricsService
 
     private function getAppVersion(): ?string
     {
-        $composerJsonPath = $this->projectDir . '/composer.json';
+        $composerJsonPath = $this->kernel->getProjectDir() . '/composer.json';
 
         if (!file_exists($composerJsonPath)) {
             throw new \RuntimeException('Unable to fetch version');
