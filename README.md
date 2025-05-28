@@ -485,4 +485,4 @@ The portal exposes metrics for monitoring using Prometheus. The metrics are avai
 
 ### Configuration
 
-Please refer to the Prometheus metrics documentations [Prometheus Metrics Configurations](docs/metrics.md).
+Please refer to the Prometheus metrics documentations [Prometheus Metrics Configurations](docs/METRICS.md).
