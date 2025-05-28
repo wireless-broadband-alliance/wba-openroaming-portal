@@ -472,3 +472,21 @@ certificate. **Connection errors** can happen if the right SHA1 hash is not prov
 ## 📩 Contact Information?
 
 For more information please contact: openroaming@wballiance.com
+
+## 🔍 Prometheus Metrics
+
+The portal exposes metrics for monitoring using Prometheus. The metrics are available at the `/metrics` endpoint and can be accessed without authentication.
+
+### Available Metrics
+
+- **Users**: Total users, verified users, and banned users
+- **Authentication Providers**: Users by provider (Portal Account, SAML Account, Google Account, Microsoft Account) and portal users by type (Email, Phone Number)
+- **Radius Profiles**: Profiles by status, total profiles, and total radius users from the radius database
+
+The Prometheus scrape config should look something like this:
+```
+  - job_name: 'openroaming-portal'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['url:80'] 
+```

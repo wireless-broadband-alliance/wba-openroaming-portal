@@ -69,3 +69,6 @@ services:
 
     Nbgrp\OneloginSamlBundle\Security\User\SamlUserFactory: '@saml_user_factory'
 
+
+    App\Service\PrometheusStorageService: ~
+
