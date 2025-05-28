@@ -28,7 +28,7 @@ class MetricsController extends AbstractController
     public function index(): Response
     {
         $registry = $this->metricsService->collectMetrics();
-        
+
         // Render metrics as text
         $renderer = new RenderTextFormat();
         $result = $renderer->render($registry->getMetricFamilySamples());
@@ -37,4 +37,4 @@ class MetricsController extends AbstractController
             'Content-Type' => RenderTextFormat::MIME_TYPE
         ]);
     }
-} 
+}

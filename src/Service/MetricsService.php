@@ -42,7 +42,7 @@ class MetricsService
         try {
             // Always add basic app metrics
             $this->collectBasicAppMetrics();
-            
+
             // Try to collect the main metrics
             $this->collectUserMetrics();
             $this->collectAuthProviderMetrics();
@@ -53,7 +53,7 @@ class MetricsService
 
         return $this->registry;
     }
-    
+
     /**
      * Collect basic app metrics that don't rely on repositories.
      */
@@ -66,9 +66,9 @@ class MetricsService
             'Information about the OpenRoaming Portal application',
             ['version', 'environment']
         );
-        
+
         $infoGauge->set(1, ['version' => $this->getAppVersion(), 'environment' => $_ENV['APP_ENV'] ?? 'prod']);
-        
+
         // Current time metric (useful for checking if metrics are being updated)
         $timeGauge = $this->registry->getOrRegisterGauge(
             'app',
@@ -76,7 +76,7 @@ class MetricsService
             'Timestamp of the last metrics scrape',
             []
         );
-        
+
         $timeGauge->set(time());
     }
 
@@ -130,13 +130,13 @@ class MetricsService
             $authProviderGauge->set(0, ['provider' => UserProvider::SAML->value]);
             $authProviderGauge->set(0, ['provider' => UserProvider::GOOGLE_ACCOUNT->value]);
             $authProviderGauge->set(0, ['provider' => UserProvider::MICROSOFT_ACCOUNT->value]);
-            
+
             // Get all external auths
             $externalAuths = $this->userExternalAuthRepository->findAll();
             $providerCounts = [];
-            
+
             $this->logger->info('Found ' . count($externalAuths) . ' external auth records');
-            
+
             // Count by provider
             foreach ($externalAuths as $auth) {
                 $provider = $auth->getProvider();
@@ -145,15 +145,15 @@ class MetricsService
                 }
                 $providerCounts[$provider]++;
             }
-            
+
             $this->logger->info('Provider counts: ' . json_encode($providerCounts));
-            
+
             // Set metrics for each provider
             foreach ($providerCounts as $provider => $count) {
                 $authProviderGauge->set($count, ['provider' => $provider]);
                 $this->logger->info("Set auth provider metric: $provider = $count");
             }
-            
+
             // Portal-specific metrics (Email vs Phone)
             $portalProviderGauge = $this->registry->getOrRegisterGauge(
                 'app',
@@ -161,17 +161,17 @@ class MetricsService
                 'Number of portal users by type',
                 ['type']
             );
-            
+
             // Initialize with zeros
             $portalProviderGauge->set(0, ['type' => UserProvider::EMAIL->value]);
             $portalProviderGauge->set(0, ['type' => UserProvider::PHONE_NUMBER->value]);
-            
+
             // Count portal users by provider_id
             $portalCounts = [
                 UserProvider::EMAIL->value => 0,
                 UserProvider::PHONE_NUMBER->value => 0
             ];
-            
+
             foreach ($externalAuths as $auth) {
                 if ($auth->getProvider() === UserProvider::PORTAL_ACCOUNT->value) {
                     $providerId = $auth->getProviderId();
@@ -181,9 +181,9 @@ class MetricsService
                     }
                 }
             }
-            
+
             $this->logger->info('Portal counts: ' . json_encode($portalCounts));
-            
+
             // Set portal metrics
             foreach ($portalCounts as $type => $count) {
                 $portalProviderGauge->set($count, ['type' => $type]);
@@ -210,9 +210,9 @@ class MetricsService
             // Get all radius profiles
             $allProfiles = $this->userRadiusProfileRepository->findAll();
             $profilesByStatus = [];
-            
+
             $this->logger->info('Found ' . count($allProfiles) . ' radius profiles');
-            
+
             // Count by status
             foreach ($allProfiles as $profile) {
                 $status = $profile->getStatus();
@@ -221,15 +221,15 @@ class MetricsService
                 }
                 $profilesByStatus[$status]++;
             }
-            
+
             $this->logger->info('Radius profile counts by status: ' . json_encode($profilesByStatus));
-            
+
             // Set metrics for each status
             foreach ($profilesByStatus as $status => $count) {
                 $radiusProfileGauge->set($count, ['status' => (string)$status]);
                 $this->logger->info("Set radius profile metric: status $status = $count");
             }
-            
+
             // Set total profiles
             $radiusProfileGauge->set(count($allProfiles), ['status' => 'total']);
             $this->logger->info('Set total radius profiles metric: ' . count($allProfiles));
@@ -256,4 +256,4 @@ class MetricsService
 
         return $composerJsonDecoded['version'] ?? null;
     }
-} 
+}

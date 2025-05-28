@@ -17,7 +17,7 @@ class PrometheusStorageService
     {
         // No parameters needed
     }
-    
+
     /**
      * Get the in-memory storage adapter.
      */
@@ -25,4 +25,4 @@ class PrometheusStorageService
     {
         return new InMemory();
     }
-} 
+}
