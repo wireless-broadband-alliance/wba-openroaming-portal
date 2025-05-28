@@ -67,8 +67,7 @@ class MetricsService
             ['version', 'environment']
         );
         
-        // Set app version #NotaParaOFachaDepois->Meter isto a ir buscar as vars
-        $infoGauge->set(1, ['version' => '1.7.2', 'environment' => $_ENV['APP_ENV'] ?? 'prod']);
+        $infoGauge->set(1, ['version' => $this->getAppVersion(), 'environment' => $_ENV['APP_ENV'] ?? 'prod']);
         
         // Current time metric (useful for checking if metrics are being updated)
         $timeGauge = $this->registry->getOrRegisterGauge(
@@ -237,5 +236,24 @@ class MetricsService
         } catch (\Exception $e) {
             $this->logger->error('Error collecting radius profile metrics: ' . $e->getMessage(), ['exception' => $e]);
         }
+    }
+
+    private function getAppVersion(): ?string
+    {
+        $composerJsonPath = $this->projectDir . '/composer.json';
+
+        if (!file_exists($composerJsonPath)) {
+            throw new \RuntimeException('Unable to fetch version');
+        }
+
+        $composerJsonContent = file_get_contents($composerJsonPath);
+        /** @noinspection JsonEncodingApiUsageInspection */
+        $composerJsonDecoded = json_decode($composerJsonContent, true);
+
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            throw new \RuntimeException('Unable to decode composer.json: ' . json_last_error_msg());
+        }
+
+        return $composerJsonDecoded['version'] ?? null;
     }
 } 
