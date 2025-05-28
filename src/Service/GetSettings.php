@@ -31,7 +31,7 @@ readonly class GetSettings
             return [];
         }
 
-        $locale = $language ?: $request->getSession()->get('_locale') ?: LanguagesType::EN->value;
+        $locale = ($language ?: $request->getSession()->get('_locale')) ?: LanguagesType::EN->value;
 
         $data = [];
 
