@@ -10,7 +10,7 @@ services:
       - ./geoLiteDB/:/var/www/openroaming/geoLiteDB/
       - uploads:/var/www/openroaming/public/resources/uploaded
       - ./service-config/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./service-config/nginx/sites:/etc/nginx/conf.d:ro
+      - ./service-config/nginx/sites-ssl:/etc/nginx/conf.d:ro
       - ./service-config/supervisor/supervisord-dev.conf:/etc/supervisor/conf.d/supervisord.conf:ro
       - ./config/jwt/:/var/www/openroaming/config/jwt/
       - ./self-signed-ssl/ssl.crt:/etc/nginx/ssl/ssl.crt:ro
