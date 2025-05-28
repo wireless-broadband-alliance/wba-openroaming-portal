@@ -22,6 +22,9 @@ parameters:
   app.saml_sp_acs_url: '%env(SAML_SP_ACS_URL)%'
   app.jwt_secret_key: '%env(JWT_SECRET_KEY)%'
   app.jwt_public_key: '%env(JWT_PUBLIC_KEY)%'
+  # Metrics configuration
+  app.metrics_enabled: '%env(bool:METRICS_ENABLED)%'
+  app.metrics_allowed_ips: '%env(string:METRICS_ALLOWED_IPS)%'
 services:
     PixelOpen\CloudflareTurnstileBundle\Http\CloudflareTurnstileHttpClient:
         alias: 'turnstile.http_client'

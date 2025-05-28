@@ -475,7 +475,7 @@ For more information please contact: openroaming@wballiance.com
 
 ## 🔍 Prometheus Metrics
 
-The portal exposes metrics for monitoring using Prometheus. The metrics are available at the `/metrics` endpoint and can be accessed without authentication.
+The portal exposes metrics for monitoring using Prometheus. The metrics are available at the `/metrics` endpoint.
 
 ### Available Metrics
 
@@ -483,10 +483,6 @@ The portal exposes metrics for monitoring using Prometheus. The metrics are avai
 - **Authentication Providers**: Users by provider (Portal Account, SAML Account, Google Account, Microsoft Account) and portal users by type (Email, Phone Number)
 - **Radius Profiles**: Profiles by status, total profiles, and total radius users from the radius database
 
-The Prometheus scrape config should look something like this:
-```
-  - job_name: 'openroaming-portal'
-    metrics_path: '/metrics'
-    static_configs:
-      - targets: ['url:80'] 
-```
+### Configuration
+
+Please refer to the Prometheus metrics documentations [Prometheus Metrics Configurations](docs/metrics.md).
