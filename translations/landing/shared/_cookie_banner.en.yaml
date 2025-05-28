@@ -33,6 +33,3 @@ turnstileCookie:
 rememberMeCookie:
     title: 'Remember Me'
     description: 'Saves user session if the account was previously active.'
-localeDetectionCookie:
-    title: 'Language Preference'
-    description: 'Stores your selected language to personalize the portal experience.'
