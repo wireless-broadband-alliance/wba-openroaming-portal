@@ -15,9 +15,11 @@ use Symfony\Component\HttpFoundation\Response;
  */
 class MetricsController extends AbstractController
 {
-    public function __construct(private readonly MetricsService $metricsService,
-        private readonly LoggerInterface $logger, private readonly ParameterBagInterface $params)
-    {
+    public function __construct(
+        private readonly MetricsService $metricsService,
+        private readonly LoggerInterface $logger,
+        private readonly ParameterBagInterface $params
+    ) {
     }
 
     /**
