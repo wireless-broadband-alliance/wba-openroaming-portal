@@ -124,6 +124,7 @@ class AuthType extends AbstractType
                     }),
                 ],
             ],
+
             // Google Settings
             'AUTH_METHOD_GOOGLE_LOGIN_ENABLED' => [
                 'type' => ChoiceType::class,
@@ -217,6 +218,7 @@ class AuthType extends AbstractType
                     }),
                 ],
             ],
+
             // Microsoft
             'AUTH_METHOD_MICROSOFT_LOGIN_ENABLED' => [
                 'type' => ChoiceType::class,
@@ -357,6 +359,19 @@ class AuthType extends AbstractType
                     ],
                 ],
             ],
+            'MAGIC_LINK' => [
+                'type' => ChoiceType::class,
+                'options' => [
+                    'choices' => [
+                        'ON' => OperationMode::ON->value,
+                        'OFF' => OperationMode::OFF->value,
+                    ],
+                    'expanded' => true, // Define o campo como radio buttons para melhor usabilidade
+                    'multiple' => false, // Apenas permite uma escolha
+                    'data' => $options['settings']['MAGIC_LINK'] ?? OperationMode::OFF->value, // Define um valor padrão
+                    'placeholder' => 'Choose an option', // Opcional
+                ]
+            ],
             'PROFILE_LIMIT_DATE_EMAIL' => [
                 'type' => IntegerType::class,
                 'constraints' => [
@@ -399,6 +414,7 @@ class AuthType extends AbstractType
                     }),
                 ],
             ],
+
             // Login
             'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED' => [
                 'type' => ChoiceType::class,
@@ -445,6 +461,7 @@ class AuthType extends AbstractType
                     ],
                 ],
             ],
+
             // SMS
             'AUTH_METHOD_SMS_REGISTER_ENABLED' => [
                 'type' => ChoiceType::class,
