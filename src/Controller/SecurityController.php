@@ -4,8 +4,11 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Enum\FirewallType;
+use App\Enum\OperationMode;
 use App\Enum\PlatformMode;
 use App\Form\LoginFormType;
+use App\Form\RegistrationFormType;
+use App\Form\SimpleRegistrationFormType;
 use App\Repository\UserRepository;
 use App\Service\GetSettings;
 use Doctrine\ORM\NonUniqueResultException;
@@ -41,9 +44,12 @@ class SecurityController extends AbstractController
         if ($user instanceof User) {
             return $this->redirectToRoute('app_landing');
         }
-
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings();
+        if ($data['MAGIC_LINK']['value'] === OperationMode::ON->value) {
+            return $this->redirectToRoute('app_magicLink_login');
+        }
+
         if ($data['PLATFORM_MODE']['value'] === true) {
             return $this->redirectToRoute('app_landing');
         }
@@ -65,6 +71,44 @@ class SecurityController extends AbstractController
         }
 
         return $this->render('landing/login/login_landing.html.twig', [
+            'last_username' => $lastUsername,
+            'error' => $error,
+            'data' => $data,
+            'form' => $form,
+            'context' => FirewallType::LANDING->value,
+        ]);
+    }
+
+    #[Route('/magicLink/login', name: 'app_magicLink_login')]
+    public function magicLinkLogin(Request $request, AuthenticationUtils $authenticationUtils): Response
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+        if ($user instanceof User) {
+            return $this->redirectToRoute('app_landing');
+        }
+
+        $data = $this->getSettings->getSettings();
+        if ($data['PLATFORM_MODE']['value'] === true) {
+            return $this->redirectToRoute('app_landing');
+        }
+
+        $lastUsername = $authenticationUtils->getLastUsername();
+        $user = $this->userRepository->findOneBy([
+            'uuid' => $lastUsername,
+        ]);
+        $form = $this->createForm(SimpleRegistrationFormType::class, $user);
+        $form->handleRequest($request);
+
+        // Get the login error if there is one
+        $error = $authenticationUtils->getLastAuthenticationError();
+
+        // Show an error message if the login attempt fails
+        if ($error instanceof AuthenticationException) {
+            $this->addFlash('error', $error->getMessage());
+        }
+
+        return $this->render('landing/login/magic_link_login_landing.html.twig', [
             'last_username' => $lastUsername,
             'error' => $error,
             'data' => $data,
