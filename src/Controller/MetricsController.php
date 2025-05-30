@@ -91,7 +91,7 @@ class MetricsController extends AbstractController
         }
 
         foreach ($allowedIpList as $allowedIp) {
-            if (strpos($allowedIp, '/') !== false && $this->ipInCidrRange($ip, $allowedIp)) {
+            if (str_contains($allowedIp, '/') && $this->ipInCidrRange($ip, $allowedIp)) {
                 return true;
             }
         }
