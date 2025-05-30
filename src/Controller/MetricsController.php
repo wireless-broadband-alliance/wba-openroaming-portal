@@ -32,7 +32,7 @@ class MetricsController extends AbstractController
     public function index(Request $request): Response
     {
         $metricsEnabled = filter_var(
-            $this->params->get('app.metrics_enabled', true),
+            $this->params->get('app.metrics_enabled'),
             FILTER_VALIDATE_BOOLEAN
         );
 
@@ -41,7 +41,7 @@ class MetricsController extends AbstractController
         }
 
         $clientIp = $request->getClientIp();
-        $allowedIps = $this->params->get('app.metrics_allowed_ips', '0.0.0.0/0');
+        $allowedIps = $this->params->get('app.metrics_allowed_ips');
         $allowedIps = $allowedIps ?: '0.0.0.0/0';
         $isIpAllowed = $this->isIpAllowed($clientIp, $allowedIps);
 
