@@ -9,25 +9,14 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
 
 /**
  * Controller for exposing Prometheus metrics.
  */
 class MetricsController extends AbstractController
 {
-    private MetricsService $metricsService;
-    private LoggerInterface $logger;
-    private ParameterBagInterface $params;
-
-    public function __construct(
-        MetricsService $metricsService,
-        LoggerInterface $logger,
-        ParameterBagInterface $params
-    ) {
-        $this->metricsService = $metricsService;
-        $this->logger = $logger;
-        $this->params = $params;
+    public function __construct(private readonly MetricsService $metricsService, private readonly LoggerInterface $logger, private readonly ParameterBagInterface $params)
+    {
     }
 
     /**
@@ -36,7 +25,7 @@ class MetricsController extends AbstractController
      * - METRICS_ENABLED: If set to 'false', the endpoint is disabled
      * - METRICS_ALLOWED_IPS: Comma-separated list of IP addresses or CIDR blocks allowed to access metrics
      */
-    #[Route('/metrics', name: 'app_metrics', methods: ['GET'])]
+    #[\Symfony\Component\Routing\Attribute\Route('/metrics', name: 'app_metrics', methods: ['GET'])]
     public function index(Request $request): Response
     {
         $metricsEnabled = filter_var(
@@ -88,7 +77,7 @@ class MetricsController extends AbstractController
      */
     private function isIpAllowed(string $ip, string $allowedIps): bool
     {
-        if (empty($allowedIps) || $allowedIps === '0.0.0.0/0') {
+        if ($allowedIps === '' || $allowedIps === '0' || $allowedIps === '0.0.0.0/0') {
             return true;
         }
 
@@ -99,10 +88,8 @@ class MetricsController extends AbstractController
         }
 
         foreach ($allowedIpList as $allowedIp) {
-            if (strpos($allowedIp, '/') !== false) {
-                if ($this->ipInCidrRange($ip, $allowedIp)) {
-                    return true;
-                }
+            if (strpos($allowedIp, '/') !== false && $this->ipInCidrRange($ip, $allowedIp)) {
+                return true;
             }
         }
 
@@ -118,7 +105,7 @@ class MetricsController extends AbstractController
      */
     private function ipInCidrRange(string $ip, string $cidr): bool
     {
-        list($subnet, $mask) = explode('/', $cidr);
+        [$subnet, $mask] = explode('/', $cidr);
 
         $ipLong = ip2long($ip);
         $subnetLong = ip2long($subnet);

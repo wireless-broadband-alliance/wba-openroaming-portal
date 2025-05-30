@@ -10,11 +10,6 @@ use Prometheus\Storage\InMemory;
  */
 class PrometheusStorageService
 {
-    public function __construct()
-    {
-    }
-
-
     public function getAdapter(): Adapter
     {
         return new InMemory();
