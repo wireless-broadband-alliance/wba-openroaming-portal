@@ -65,6 +65,20 @@ class StatusType extends AbstractType
                     ],
                     'invalid_message' => $this->translator->trans('selectOption', [], 'StatusType'),
                 ]);
+            } elseif ($settingName === 'MAGIC_LINK') {
+                $builder->add('MAGIC_LINK', ChoiceType::class, [
+                        'choices' => [
+                            'ON' => OperationMode::ON->value,
+                            'OFF' => OperationMode::OFF->value,
+                        ],
+                        'attr' => [
+                            'description' => $description,
+                        ],
+                        'expanded' => true,
+                        'multiple' => false,
+                        'data' =>$settingValue,
+                        'placeholder' => $this->translator->trans('selectOption', [], 'StatusType'),
+                ]);
             } elseif ($settingName === 'TURNSTILE_CHECKER') {
                 $builder->add('TURNSTILE_CHECKER', ChoiceType::class, [
                     'choices' => [
