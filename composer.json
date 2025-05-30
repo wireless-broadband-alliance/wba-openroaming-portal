@@ -32,7 +32,7 @@
     "nbgrp/onelogin-saml-bundle": "^2.0",
     "nelmio/cors-bundle": "^2.5",
     "odolbeau/phone-number-bundle": "^4.1",
-    "onelogin/php-saml": "4.x-dev",
+    "onelogin/php-saml": "^4.3",
     "phpdocumentor/reflection-docblock": "^5.3",
     "phpoffice/phpspreadsheet": "^1.29",
     "phpstan/extension-installer": "^1.4",
@@ -78,7 +78,6 @@
     "symfony/webpack-encore-bundle": "^2.2",
     "symfony/yaml": "7.2.*",
     "symfonycasts/verify-email-bundle": "^1.17",
-    "tetrapi/onelogin-saml-bundle": "dev-develop",
     "twig/extra-bundle": "^2.12|^3.0",
     "twig/twig": "^2.12|^3.0",
     "vincentlanglet/twig-cs-fixer": "^3.5"
