@@ -7,6 +7,7 @@ use App\Enum\FirewallType;
 use App\Enum\OperationMode;
 use App\Enum\PlatformMode;
 use App\Form\LoginFormType;
+use App\Form\MagicLinkLoginType;
 use App\Form\RegistrationFormType;
 use App\Form\SimpleRegistrationFormType;
 use App\Repository\UserRepository;
@@ -97,7 +98,7 @@ class SecurityController extends AbstractController
         $user = $this->userRepository->findOneBy([
             'uuid' => $lastUsername,
         ]);
-        $form = $this->createForm(SimpleRegistrationFormType::class, $user);
+        $form = $this->createForm(MagicLinkLoginType::class, $user);
         $form->handleRequest($request);
 
         // Get the login error if there is one
