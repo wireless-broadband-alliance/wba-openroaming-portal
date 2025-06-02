@@ -10,3 +10,4 @@ ValueCannotBeLessThan: 'Este valor não pode ser inferior a {{ limit }} segundos
 enterValidNumber.: 'Por favor, introduz um número válido.'
 valueCannotBeLessThanAttempt: 'Este valor não pode ser inferior a {{ limit }} tentativa.'
 valueCannotBeLessThanMinutes: 'Este valor não pode ser inferior a {{ limit }} minutos.'
+code: 'Código'

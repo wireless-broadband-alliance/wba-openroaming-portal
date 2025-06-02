@@ -20,6 +20,7 @@ class TwoFACode extends AbstractType
     {
         $builder
             ->add('code', TextType::class, [
+                'label' => $this->translator->trans('code', [], 'TwoFA'),
                 'constraints' => [
                     new NotBlank([
                         'message' => $this->translator->trans('enterCode', [], 'TwoFA'),

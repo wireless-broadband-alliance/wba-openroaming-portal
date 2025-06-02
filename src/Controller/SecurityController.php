@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\User;
+use App\Enum\AnalyticalEventType;
 use App\Enum\FirewallType;
 use App\Enum\OperationMode;
 use App\Enum\PlatformMode;
@@ -10,15 +11,23 @@ use App\Form\LoginFormType;
 use App\Form\MagicLinkLoginType;
 use App\Form\RegistrationFormType;
 use App\Form\SimpleRegistrationFormType;
+use App\Form\TwoFACode;
 use App\Repository\UserRepository;
 use App\Service\GetSettings;
+use App\Service\TwoFAService;
 use Doctrine\ORM\NonUniqueResultException;
+use Psr\EventDispatcher\EventDispatcherInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
+use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class SecurityController extends AbstractController
 {
@@ -31,6 +40,8 @@ class SecurityController extends AbstractController
     public function __construct(
         private readonly UserRepository $userRepository,
         private readonly GetSettings $getSettings,
+        private readonly TwoFAService $twoFAService,
+        private readonly TranslatorInterface $translator,
     ) {
     }
 
@@ -48,7 +59,7 @@ class SecurityController extends AbstractController
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings();
         if ($data['MAGIC_LINK']['value'] === OperationMode::ON->value) {
-            return $this->redirectToRoute('app_magicLink_login');
+            return $this->redirectToRoute('app_magicLink');
         }
 
         if ($data['PLATFORM_MODE']['value'] === true) {
@@ -80,38 +91,86 @@ class SecurityController extends AbstractController
         ]);
     }
 
-    #[Route('/magicLink/login', name: 'app_magicLink_login')]
-    public function magicLinkLogin(Request $request, AuthenticationUtils $authenticationUtils): Response
+    #[Route('/magicLink', name: 'app_magicLink')]
+    public function magicLink(Request $request): Response
     {
-        /** @var User $user */
-        $user = $this->getUser();
-        if ($user instanceof User) {
+        $data = $this->getSettings->getSettings();
+        if ($data['PLATFORM_MODE']['value'] === true) {
             return $this->redirectToRoute('app_landing');
         }
+        $session = $request->getSession();
+        $form = $this->createForm(MagicLinkLoginType::class);
+        $form->handleRequest($request);
 
+        if ($form->isSubmitted() && $form->isValid()) {
+            $uuid = $form->getData()['uuid'];
+            $user = $this->userRepository->findOneBy(['uuid' => $uuid]);
+            if ($user === null) {
+                $this->addFlash(
+                    'error',
+                    $this->translator->trans('userNotFound', [], 'controllers')
+                );
+                return $this->redirectToRoute('app_magicLink');
+            }
+            $this->twoFAService->generate2FACode(
+                $user,
+                $request->getClientIp(),
+                $request->headers->get('User-Agent'),
+                AnalyticalEventType::TWO_FA_CODE_DISABLE->value
+            );
+            $session->set('uuid', $uuid);
+            return $this->redirectToRoute('app_magicLink_login');
+        }
+        return $this->render('landing/login/magic_link_landing.html.twig', [
+            'data' => $data,
+            'form' => $form,
+            'context' => FirewallType::LANDING->value,
+        ]);
+    }
+
+    #[Route('/magicLink/login', name: 'app_magicLink_login')]
+    public function magicLinkLogin(
+        Request $request,
+        TokenStorageInterface $tokenStorage,
+        EventDispatcherInterface $eventDispatcher,
+        RequestStack $requestStack,
+    ): Response {
         $data = $this->getSettings->getSettings();
         if ($data['PLATFORM_MODE']['value'] === true) {
             return $this->redirectToRoute('app_landing');
         }
 
-        $lastUsername = $authenticationUtils->getLastUsername();
-        $user = $this->userRepository->findOneBy([
-            'uuid' => $lastUsername,
-        ]);
-        $form = $this->createForm(MagicLinkLoginType::class, $user);
+        $form = $this->createForm(TwoFACode::class);
         $form->handleRequest($request);
+        $session = $request->getSession();
+        if ($form->isSubmitted() && $form->isValid()) {
+            $uuid = $session->get('uuid');
+            $user = $this->userRepository->findOneBy(['uuid' => $uuid]);
+            if ($user === null) {
+                $this->addFlash(
+                    'error',
+                    $this->translator->trans('userNotFound', [], 'controllers')
+                );
+                return $this->redirectToRoute('app_magicLink');
+            }
+            $code = $form->getData()['code'];
+            if ($this->twoFAService->validate2FACode($user, $code)) {
+                // Create a token manually for the user
+                $token = new UsernamePasswordToken($user, 'main', $user->getRoles());
 
-        // Get the login error if there is one
-        $error = $authenticationUtils->getLastAuthenticationError();
+                // Set the token in the token storage
+                $tokenStorage->setToken($token);
 
-        // Show an error message if the login attempt fails
-        if ($error instanceof AuthenticationException) {
-            $this->addFlash('error', $error->getMessage());
+                // Dispatch the login event
+                $request = $requestStack->getCurrentRequest();
+                $event = new InteractiveLoginEvent($request, $token);
+                $eventDispatcher->dispatch($event);
+
+                return $this->redirectToRoute('app_landing');
+            }
+
         }
-
         return $this->render('landing/login/magic_link_login_landing.html.twig', [
-            'last_username' => $lastUsername,
-            'error' => $error,
             'data' => $data,
             'form' => $form,
             'context' => FirewallType::LANDING->value,
