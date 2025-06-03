@@ -5,6 +5,7 @@ namespace App\Service;
 use App\Entity\Event;
 use App\Entity\OTPcode;
 use App\Entity\User;
+use App\Enum\AnalyticalEventType;
 use App\Enum\PlatformMode;
 use App\Enum\TwoFAType;
 use App\Enum\UserProvider;
@@ -201,6 +202,26 @@ readonly class TwoFAService
                         'contactEmail' => $contactEmail,
                         'deletionCode' => $code,
                     ]);
+            } elseif (
+                $eventType === AnalyticalEventType::MAGIC_LINK_CODE->value ||
+                $eventType === AnalyticalEventType::MAGIC_LINK_CODE_RESEND->value
+            ) {
+                $email = new TemplatedEmail()
+                    ->from(
+                        new Address(
+                            $this->parameterBag->get('app.email_address'),
+                            $this->parameterBag->get('app.sender_name')
+                        )
+                    )
+                    ->to($user->getEmail())
+                    ->subject($this->translator->trans('subject', [], 'auto_delete_notice'))
+                    ->htmlTemplate('email/magic_link_code.html.twig')
+                    ->context([
+                        'uuid' => $user->getEmail(),
+                        'emailTitle' => $emailTitle,
+                        'contactEmail' => $contactEmail,
+                        'code' => $code,
+                    ]);
             } else {
                 $email = new TemplatedEmail()
                     ->from(
@@ -228,7 +249,14 @@ readonly class TwoFAService
             }
             $this->mailer->send($email);
         } elseif ($messageType === UserTwoFactorAuthenticationStatus::SMS->value || $user->getPhoneNumber()) {
-            $message = "Your Two Factor Authentication Code is " . $code;
+            if (
+                $eventType === AnalyticalEventType::MAGIC_LINK_CODE->value ||
+                $eventType === AnalyticalEventType::MAGIC_LINK_CODE_RESEND->value
+            ) {
+                $message = "Your verification Code is " . $code;
+            } else {
+                $message = "Your Two Factor Authentication Code is " . $code;
+            }
             $this->sendSMS->sendSms($user->getPhoneNumber(), $message);
         }
 

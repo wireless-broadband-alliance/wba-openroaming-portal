@@ -1,0 +1,6 @@
+header_welcome: 'Welcome to the OpenRoaming Provisioning Portal!'
+intro_login_User: 'To login with your OpenRoaming Portal account, please follow these simple steps:'
+support_team: 'Support team:'
+thank_you: 'Thank you,'
+download_profile: "After login, don't forget to click <strong>“Download and Install Profile”</strong> on the portal to complete setting up your device."
+login_code_and_link: 'Click <a href="%confirmLink%" style="font-weight: 700; color: #7BBA29; text-decoration: underline;">here</a> to login or use the code: %code%.'
