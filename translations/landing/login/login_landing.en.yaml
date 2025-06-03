@@ -6,6 +6,9 @@ description: >
 magic_link_description: >
     You have selected to login via email or phone number. 
     An email will be sent to you with a code to confirm your identity.
+magic_link_login_description: >
+    The identity confirmation code has been sent to your authentication method.
+    Enter the code to confirm your identity.
 form:
     email_or_phone: 'Email or Phone Number'
     email: 'Email'

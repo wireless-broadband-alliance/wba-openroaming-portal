@@ -112,13 +112,35 @@ class SecurityController extends AbstractController
                 );
                 return $this->redirectToRoute('app_magicLink');
             }
-            $this->twoFAService->generate2FACode(
+
+            if ($this->twoFAService->canValidationCode($user, AnalyticalEventType::MAGIC_LINK_CODE->value)) {
+                $this->twoFAService->generate2FACode(
+                    $user,
+                    $request->getClientIp(),
+                    $request->headers->get('User-Agent'),
+                    AnalyticalEventType::MAGIC_LINK_CODE->value
+                );
+                $session->set('uuid', $uuid);
+                $this->addFlash(
+                    'success',
+                    $this->translator->trans('codeSentSuccessfully', [], 'controllers')
+                );
+                return $this->redirectToRoute('app_magicLink_login');
+            }
+            $interval_minutes = $this->twoFAService->timeLeftToResendCode(
                 $user,
-                $request->getClientIp(),
-                $request->headers->get('User-Agent'),
-                AnalyticalEventType::TWO_FA_CODE_DISABLE->value
+                AnalyticalEventType::MAGIC_LINK_CODE->value
             );
-            $session->set('uuid', $uuid);
+            $this->addFlash(
+                'error',
+                $this->translator->trans(
+                    'codeAlreadySent',
+                    [
+                        '%minutes%' => $interval_minutes
+                    ],
+                    'controllers'
+                )
+            );
             return $this->redirectToRoute('app_magicLink_login');
         }
         return $this->render('landing/login/magic_link_landing.html.twig', [

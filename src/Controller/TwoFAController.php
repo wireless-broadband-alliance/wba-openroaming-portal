@@ -10,6 +10,7 @@ use App\Enum\FirewallType;
 use App\Enum\UserTwoFactorAuthenticationStatus;
 use App\Form\TwoFACode;
 use App\Repository\EventRepository;
+use App\Repository\UserRepository;
 use App\Service\GetSettings;
 use App\Service\TOTPService;
 use App\Service\TwoFAService;
@@ -36,7 +37,8 @@ class TwoFAController extends AbstractController
         private readonly EntityManagerInterface $entityManager,
         private readonly TwoFAService $twoFAService,
         private readonly EventRepository $eventRepository,
-        private readonly TranslatorInterface $translator
+        private readonly TranslatorInterface $translator,
+        private readonly UserRepository $userRepository,
     ) {
     }
 
@@ -725,15 +727,20 @@ class TwoFAController extends AbstractController
         /** @var User $user */
         $user = $this->getUser();
 
-        // Ensure the user is logged in
-        if (!$user instanceof UserInterface) {
-            $this->addFlash(
-                'error',
-                $this->translator->trans('onlyAccessThisPageLoggedIn', [], 'controllers')
-            );
-            return $this->redirectToRoute('app_landing');
+        // Ensure the user is logged if it's not magic link login
+        if ($type != AnalyticalEventType::MAGIC_LINK_CODE_RESEND->value) {
+            if (!$user instanceof UserInterface) {
+                $this->addFlash(
+                    'error',
+                    $this->translator->trans('onlyAccessThisPageLoggedIn', [], 'controllers')
+                );
+                return $this->redirectToRoute('app_landing');
+            }
+        } else {
+            $session = $request->getSession();
+            $uuid = $session->get('uuid');
+            $user = $this->userRepository->findOneBy(['uuid' => $uuid]);
         }
-
         // Handle access restrictions based on the context
         if ($context === FirewallType::DASHBOARD->value && !$this->isGranted('ROLE_ADMIN')) {
             $this->addFlash(
@@ -758,6 +765,8 @@ class TwoFAController extends AbstractController
                 AnalyticalEventType::USER_AUTO_DELETE_CODE->value,
             CodeVerificationType::TWO_FA_VALIDATE_RESEND->value =>
                 AnalyticalEventType::TWO_FA_CODE_VALIDATE_RESEND->value,
+            AnalyticalEventType::MAGIC_LINK_CODE_RESEND->value =>
+                AnalyticalEventType::MAGIC_LINK_CODE_RESEND->value,
         ];
         $eventType = $eventTypeMapping[$type] ?? null;
 
