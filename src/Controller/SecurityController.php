@@ -13,8 +13,10 @@ use App\Form\RegistrationFormType;
 use App\Form\SimpleRegistrationFormType;
 use App\Form\TwoFACode;
 use App\Repository\UserRepository;
+use App\Service\EventActions;
 use App\Service\GetSettings;
 use App\Service\TwoFAService;
+use DateTime;
 use Doctrine\ORM\NonUniqueResultException;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -23,6 +25,7 @@ use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
@@ -42,6 +45,7 @@ class SecurityController extends AbstractController
         private readonly GetSettings $getSettings,
         private readonly TwoFAService $twoFAService,
         private readonly TranslatorInterface $translator,
+        private readonly EventActions $eventActions,
     ) {
     }
 
@@ -148,6 +152,70 @@ class SecurityController extends AbstractController
             'form' => $form,
             'context' => FirewallType::LANDING->value,
         ]);
+    }
+
+    #[Route('/magicLink/link', name: 'app_magicLink_link')]
+    public function magicLinkLink(
+        RequestStack $requestStack,
+        TokenStorageInterface $tokenStorage,
+        EventDispatcherInterface $eventDispatcher,
+    ): Response
+    {
+        // Get the email and verification code from the URL query parameters
+        $uuid = $requestStack->getCurrentRequest()->query->get('uuid');
+        $code = $requestStack->getCurrentRequest()->query->get('code');
+
+        // Get the user with the matching email, excluding admin users
+        $user = $this->userRepository->findOneByUUIDExcludingAdmin($uuid);
+
+        if ($user && $user->getTwoFAcode() === $code) {
+            try {
+                // Create a token manually for the user
+                $token = new UsernamePasswordToken($user, 'main', $user->getRoles());
+
+                // Set the token in the token storage
+                $tokenStorage->setToken($token);
+
+                // Dispatch the login event
+                $request = $requestStack->getCurrentRequest();
+                $event = new InteractiveLoginEvent($request, $token);
+                $eventDispatcher->dispatch($event);
+
+                // Defines the Event to the table
+                $eventMetadata = [
+                    'ip' => $request->getClientIp(),
+                    'user_agent' => $request->headers->get('User-Agent'),
+                    'platform' => PlatformMode::LIVE->value,
+                    'uuid' => $user->getUuid(),
+                ];
+                $this->eventActions->saveEvent(
+                    $user,
+                    AnalyticalEventType::LOGIN_TRADITIONAL_REQUEST->value,
+                    new DateTime(),
+                    $eventMetadata
+                );
+
+                $this->addFlash(
+                    'success',
+                    $this->translator->trans('accountVerified', [], 'controllers')
+                );
+
+                return $this->redirectToRoute('app_landing');
+            } catch (CustomUserMessageAuthenticationException) {
+                $this->addFlash(
+                    'error',
+                    $this->translator->trans('authenticationFailedTryAgain', [], 'controllers')
+                );
+            }
+        } else {
+            // If the verification code is invalid or not found, display an error message and redirect to the login page
+            $this->addFlash(
+                'error',
+                $this->translator->trans('invalidVerificationCodeLink', [], 'controllers')
+            );
+        }
+
+        return $this->redirectToRoute('app_login');
     }
 
     #[Route('/magicLink/login', name: 'app_magicLink_login')]
