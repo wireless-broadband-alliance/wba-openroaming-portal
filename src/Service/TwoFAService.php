@@ -84,12 +84,11 @@ readonly class TwoFAService
         string $ip,
         string $userAgent,
         string $eventType,
-        ?bool $autoDeletion = false
     ): ?string {
         // Generate code
         $code = $this->twoFACode($user);
         // Send code
-        $this->sendCode($user, $code, $ip, $userAgent, $eventType, $autoDeletion);
+        $this->sendCode($user, $code, $ip, $userAgent, $eventType);
         return $user->getTwoFAcode();
     }
 
@@ -97,11 +96,10 @@ readonly class TwoFAService
         User $user,
         ?string $ip,
         ?string $userAgent,
-        string $eventType,
-        ?bool $autoDeletion = false
+        string $eventType
     ): void {
         $code = $this->twoFACode($user);
-        $this->sendCode($user, $code, $ip, $userAgent, $eventType, $autoDeletion);
+        $this->sendCode($user, $code, $ip, $userAgent, $eventType);
     }
 
     /**
@@ -175,7 +173,6 @@ readonly class TwoFAService
         ?string $ip,
         ?string $userAgent,
         string $eventType,
-        ?bool $autoDeletion = false
     ): void {
         $messageType = $user->getTwoFAtype();
         $data = $this->getSettings->getSettings();
@@ -184,25 +181,7 @@ readonly class TwoFAService
             $emailTitle = $this->settingRepository->findOneBy(['name' => 'PAGE_TITLE'])->getValue();
             $contactEmail = $this->settingRepository->findOneBy(['name' => 'CONTACT_EMAIL'])->getValue();
 
-            // Send email to the user with the verification code
-            if ($autoDeletion === true) {
-                $email = new TemplatedEmail()
-                    ->from(
-                        new Address(
-                            $this->parameterBag->get('app.email_address'),
-                            $this->parameterBag->get('app.sender_name')
-                        )
-                    )
-                    ->to($user->getEmail())
-                    ->subject($this->translator->trans('subject', [], 'auto_delete_notice'))
-                    ->htmlTemplate('email/auto_delete_notice.html.twig')
-                    ->context([
-                        'uuid' => $user->getEmail(),
-                        'emailTitle' => $emailTitle,
-                        'contactEmail' => $contactEmail,
-                        'deletionCode' => $code,
-                    ]);
-            } elseif (
+            if (
                 $eventType === AnalyticalEventType::MAGIC_LINK_CODE->value ||
                 $eventType === AnalyticalEventType::MAGIC_LINK_CODE_RESEND->value
             ) {
@@ -214,7 +193,7 @@ readonly class TwoFAService
                         )
                     )
                     ->to($user->getEmail())
-                    ->subject($this->translator->trans('subject', [], 'auto_delete_notice'))
+                    ->subject($this->translator->trans('subject', [], 'magic_link_code'))
                     ->htmlTemplate('email/magic_link_code.html.twig')
                     ->context([
                         'uuid' => $user->getEmail(),
