@@ -12,8 +12,7 @@
     {% endfor %}
 </p>
 
-<a
-        {% if context == constant('App\\Enum\\FirewallType::DASHBOARD').value %}
+<a {% if context == constant('App\\Enum\\FirewallType::DASHBOARD').value %}
             href="{{ path('app_dashboard_logout') }}"
         {% else %}
             href="{{ path('app_logout') }}"
