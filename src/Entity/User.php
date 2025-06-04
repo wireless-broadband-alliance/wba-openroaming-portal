@@ -2324,9 +2324,6 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: UserExternalAuth::class)]
     private Collection $userExternalAuths;
 
-    #[ORM\Column(length: 20, nullable: true)]
-    private ?string $verificationCode = null;
-
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $createdAt = null;
 
@@ -2661,18 +2658,6 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
         if ($this->userExternalAuths->removeElement($userExternalAuth) && $userExternalAuth->getUser() === $this) {
             $userExternalAuth->setUser(null);
         }
-
-        return $this;
-    }
-
-    public function getVerificationCode(): ?string
-    {
-        return $this->verificationCode;
-    }
-
-    public function setVerificationCode(?string $verificationCode): self
-    {
-        $this->verificationCode = $verificationCode;
 
         return $this;
     }
