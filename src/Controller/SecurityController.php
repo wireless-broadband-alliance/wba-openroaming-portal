@@ -6,7 +6,6 @@ use App\Entity\User;
 use App\Enum\FirewallType;
 use App\Enum\OperationMode;
 use App\Form\LoginFormType;
-use App\Form\MagicLinkLoginType;
 use App\Form\TwoFACode;
 use App\Repository\UserRepository;
 use App\Service\GetSettings;
@@ -85,6 +84,12 @@ class SecurityController extends AbstractController
     public function loginConfirmation(
         Request $request,
     ): Response {
+        /** @var User $user */
+        $user = $this->getUser();
+        if (!$user instanceof User) {
+            return $this->redirectToRoute('app_login');
+        }
+
         $data = $this->getSettings->getSettings();
 
         if ($data['PLATFORM_MODE']['value'] === true) {
@@ -123,6 +128,7 @@ class SecurityController extends AbstractController
             'data' => $data,
             'form' => $form,
             'context' => FirewallType::LANDING->value,
+            'user' => $user
         ]);
     }
 
