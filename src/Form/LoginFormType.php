@@ -28,6 +28,7 @@ class LoginFormType extends AbstractType
     {
         $data = $this->getSettings->getSettings();
         $turnstileCheckerValue = $data['TURNSTILE_CHECKER']['value'];
+        $loginWithUuidOnlyValue = $data['LOGIN_WITH_UUID_ONLY']['value'];
 
         $builder->add('uuid', TextType::class, [
             'label' => $this->translator->trans('emailOrPhoneNumber', [], 'LoginFormType'),
@@ -37,15 +38,18 @@ class LoginFormType extends AbstractType
                 'full_name' => 'uuid',
             ],
             'required' => true,
-        ])
-            ->add('password', PasswordType::class, [
-                'label' => 'Password',
-                'attr' => [
-                    'placeholder' => $this->translator->trans('EnterPassword', [], 'LoginFormType'),
-                    'name' => 'password',
-                    'full_name' => 'password',
-                ],
-            ]);
+        ]);
+            if ($loginWithUuidOnlyValue === OperationMode::OFF->value) {
+                $builder->add('password', PasswordType::class, [
+                    'label' => 'Password',
+                    'attr' => [
+                        'placeholder' => $this->translator->trans('EnterPassword', [], 'LoginFormType'),
+                        'name' => 'password',
+                        'full_name' => 'password',
+                    ],
+                ]);
+            }
+
 
         if ($turnstileCheckerValue === OperationMode::ON->value) {
             $builder->add('security', TurnstileType::class, [

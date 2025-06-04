@@ -59,15 +59,12 @@ class SecurityController extends AbstractController
     {
         /** @var User $user */
         $user = $this->getUser();
+
         if ($user instanceof User) {
             return $this->redirectToRoute('app_landing');
         }
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings();
-        if ($data['MAGIC_LINK']['value'] === OperationMode::ON->value) {
-            return $this->redirectToRoute('app_magicLink');
-        }
-
         if ($data['PLATFORM_MODE']['value'] === true) {
             return $this->redirectToRoute('app_landing');
         }
@@ -87,69 +84,16 @@ class SecurityController extends AbstractController
         if ($error instanceof AuthenticationException) {
             $this->addFlash('error', $error->getMessage());
         }
-
+        if ($data['LOGIN_WITH_UUID_ONLY']['value'] === OperationMode::ON->value) {
+            return $this->render('landing/login/magic_link_landing.html.twig', [
+                'data' => $data,
+                'form' => $form,
+                'context' => FirewallType::LANDING->value,
+            ]);
+        }
         return $this->render('landing/login/login_landing.html.twig', [
             'last_username' => $lastUsername,
             'error' => $error,
-            'data' => $data,
-            'form' => $form,
-            'context' => FirewallType::LANDING->value,
-        ]);
-    }
-
-    #[Route('/magicLink', name: 'app_magicLink')]
-    public function magicLink(Request $request): Response
-    {
-        $data = $this->getSettings->getSettings();
-        if ($data['PLATFORM_MODE']['value'] === true) {
-            return $this->redirectToRoute('app_landing');
-        }
-        $session = $request->getSession();
-        $form = $this->createForm(MagicLinkLoginType::class);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $uuid = $form->getData()['uuid'];
-            $user = $this->userRepository->findOneBy(['uuid' => $uuid]);
-            if ($user === null) {
-                $this->addFlash(
-                    'error',
-                    $this->translator->trans('userNotFound', [], 'controllers')
-                );
-                return $this->redirectToRoute('app_magicLink');
-            }
-
-            if ($this->twoFAService->canValidationCode($user, AnalyticalEventType::MAGIC_LINK_CODE->value)) {
-                $this->twoFAService->generate2FACode(
-                    $user,
-                    $request->getClientIp(),
-                    $request->headers->get('User-Agent'),
-                    AnalyticalEventType::MAGIC_LINK_CODE->value
-                );
-                $session->set('uuid', $uuid);
-                $this->addFlash(
-                    'success',
-                    $this->translator->trans('codeSentSuccessfully', [], 'controllers')
-                );
-                return $this->redirectToRoute('app_login_confirmation');
-            }
-            $interval_minutes = $this->twoFAService->timeLeftToResendCode(
-                $user,
-                AnalyticalEventType::MAGIC_LINK_CODE->value
-            );
-            $this->addFlash(
-                'error',
-                $this->translator->trans(
-                    'codeAlreadySent',
-                    [
-                        '%minutes%' => $interval_minutes
-                    ],
-                    'controllers'
-                )
-            );
-            return $this->redirectToRoute('app_login_confirmation');
-        }
-        return $this->render('landing/login/magic_link_landing.html.twig', [
             'data' => $data,
             'form' => $form,
             'context' => FirewallType::LANDING->value,
