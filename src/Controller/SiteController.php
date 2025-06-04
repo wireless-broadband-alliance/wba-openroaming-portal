@@ -118,7 +118,9 @@ class SiteController extends AbstractController
             }
 
             // Check if the user is verified
-            if (!$session->has('user_verified_landing')) {
+            if (!$session->has('user_verified_landing') &&
+                $data["LOGIN_WITH_UUID_ONLY"]["value"] === OperationMode::ON->value
+            ) {
                 if ($this->twoFAService->canValidationCode(
                     $currentUser,
                     AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE->value
