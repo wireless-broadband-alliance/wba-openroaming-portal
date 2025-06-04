@@ -70,7 +70,7 @@ readonly class TwoFAService
     private function twoFACode(User $user): int
     {
         // Generate a random verification code with 7 digits
-        $verificationCode = random_int(1000000, 9999999);
+        $verificationCode = random_int(100000, 999999);
         $user->setTwoFACode($verificationCode);
         $user->setTwoFACodeGeneratedAt(new DateTime());
         $user->setTwoFAcodeIsActive(true);

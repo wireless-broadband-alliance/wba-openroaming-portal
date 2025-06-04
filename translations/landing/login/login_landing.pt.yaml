@@ -23,6 +23,7 @@ btn:
     choose_another: 'Escolher Outra'
     send_code: 'Enviar Código'
     resend: 'Reenviar código'
+    verifyCode: 'Verificar código'
 forgot_password: 'Esqueceu-se da sua palavra-passe? Obtenha uma nova para o seu'
 forgot_password_email: 'email'
 forgot_password_phone: 'número de telefone'

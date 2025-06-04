@@ -23,6 +23,7 @@ btn:
     choose_another: 'Choose Another'
     send_code: 'Send Code'
     resend: 'Resend code'
+    verifyCode: 'Verify code'
 forgot_password: 'Did you forget your password? Get a new one for your'
 forgot_password_email: 'email'
 forgot_password_phone: 'phone number'
