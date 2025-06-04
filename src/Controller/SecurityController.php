@@ -116,7 +116,7 @@ class SecurityController extends AbstractController
                     'error',
                     $this->translator->trans('userNotFound', [], 'controllers')
                 );
-                return $this->redirectToRoute('app_magicLink');
+                return $this->redirectToRoute('app_login');
             }
             $code = $form->getData()['code'];
             if ($this->twoFAService->validate2FACode($user, $code)) {

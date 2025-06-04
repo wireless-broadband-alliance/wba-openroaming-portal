@@ -22,10 +22,12 @@ use Symfony\Component\Security\Http\Authenticator\AbstractLoginFormAuthenticator
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\CsrfTokenBadge;
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\RememberMeBadge;
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
+use Symfony\Component\Security\Http\Authenticator\Passport\Credentials\CustomCredentials;
 use Symfony\Component\Security\Http\Authenticator\Passport\Credentials\PasswordCredentials;
 use Symfony\Component\Security\Http\Authenticator\Passport\Passport;
 use Symfony\Component\Security\Http\SecurityRequestAttributes;
 use Symfony\Component\Security\Http\Util\TargetPathTrait;
+use Symfony\Flex\Unpack\Operation;
 
 class LandingAuthenticator extends AbstractLoginFormAuthenticator
 {
@@ -46,6 +48,9 @@ class LandingAuthenticator extends AbstractLoginFormAuthenticator
         $uuid = $request->request->get('uuid');
         $password = $request->request->get('password');
         $turnstileResponse = $request->request->get('cf-turnstile-response'); // Captcha
+
+        $loginWithUUIDOnly = $this->settingRepository
+                ->findOneBy(['name' => 'LOGIN_WITH_UUID_ONLY'])?->getValue() === OperationMode::ON->value;
 
         if ($uuid) {
             $user = $this->userRepository->findOneBy([
@@ -100,7 +105,25 @@ class LandingAuthenticator extends AbstractLoginFormAuthenticator
             $badges[] = $rememberMeBadge;
         }
 
+        $user = $this->userRepository->findOneBy([
+            'uuid' => $uuid,
+            'deletedAt' => null,
+        ]);
+
         // Create a Passport with user, credentials, and CSRF token
+        if ($loginWithUUIDOnly) {
+            // No password check – assume pre-validated (e.g., via confirmation code)
+            return new Passport(
+                new UserBadge($uuid),
+                new CustomCredentials(
+                    fn() => true,
+                    $user
+                ),
+                $badges
+            );
+        }
+
+        // Standard login with password
         return new Passport(
             new UserBadge($uuid),
             new PasswordCredentials($password),
