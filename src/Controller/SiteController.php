@@ -119,7 +119,10 @@ class SiteController extends AbstractController
 
             // Check if the user is verified
             if (!$session->has('user_verified_landing')) {
-                if ($this->twoFAService->canValidationCode($currentUser, AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE->value)) {
+                if ($this->twoFAService->canValidationCode(
+                    $currentUser,
+                    AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE->value
+                )) {
                     $this->twoFAService->generate2FACode(
                         $currentUser,
                         $request->getClientIp(),
