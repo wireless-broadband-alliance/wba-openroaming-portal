@@ -9,10 +9,8 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Attribute\Route;
 
-/**
- * Controller for exposing Prometheus metrics.
- */
 class MetricsController extends AbstractController
 {
     public function __construct(
@@ -28,7 +26,7 @@ class MetricsController extends AbstractController
      * - METRICS_ENABLED: If set to 'false', the endpoint is disabled
      * - METRICS_ALLOWED_IPS: Comma-separated list of IP addresses or CIDR blocks allowed to access metrics
      */
-    #[\Symfony\Component\Routing\Attribute\Route('/metrics', name: 'app_metrics', methods: ['GET'])]
+    #[Route('/metrics', name: 'app_metrics', methods: ['GET'])]
     public function index(Request $request): Response
     {
         $metricsEnabled = filter_var(
@@ -86,17 +84,14 @@ class MetricsController extends AbstractController
 
         $allowedIpList = array_map('trim', explode(',', $allowedIps));
 
-        if (in_array($ip, $allowedIpList)) {
+        if (in_array($ip, $allowedIpList, true)) {
             return true;
         }
 
-        foreach ($allowedIpList as $allowedIp) {
-            if (str_contains($allowedIp, '/') && $this->ipInCidrRange($ip, $allowedIp)) {
-                return true;
-            }
-        }
-
-        return false;
+        return array_any(
+            $allowedIpList,
+            fn($allowedIp) => str_contains($allowedIp, '/') && $this->ipInCidrRange($ip, $allowedIp)
+        );
     }
 
     /**

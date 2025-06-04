@@ -2,7 +2,7 @@
   "type": "project",
   "license": "Apache-2.0",
   "version": "1.7.2",
-  "minimum-stability": "dev",
+  "minimum-stability": "stable",
   "prefer-stable": true,
   "require": {
     "php": ">=8.4",
