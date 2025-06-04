@@ -727,19 +727,12 @@ class TwoFAController extends AbstractController
         /** @var User $user */
         $user = $this->getUser();
 
-        // Ensure the user is logged if it's not magic link login
-        if ($type != AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE_RESEND->value) {
-            if (!$user instanceof UserInterface) {
-                $this->addFlash(
-                    'error',
-                    $this->translator->trans('onlyAccessThisPageLoggedIn', [], 'controllers')
-                );
-                return $this->redirectToRoute('app_landing');
-            }
-        } else {
-            $session = $request->getSession();
-            $uuid = $session->get('uuid');
-            $user = $this->userRepository->findOneBy(['uuid' => $uuid]);
+        if (!$user instanceof UserInterface) {
+            $this->addFlash(
+                'error',
+                $this->translator->trans('onlyAccessThisPageLoggedIn', [], 'controllers')
+            );
+            return $this->redirectToRoute('app_landing');
         }
         // Handle access restrictions based on the context
         if ($context === FirewallType::DASHBOARD->value && !$this->isGranted('ROLE_ADMIN')) {
