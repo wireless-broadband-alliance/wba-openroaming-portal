@@ -26,6 +26,9 @@ readonly class UserDeletionService
 
     public function deleteUser(User $user, array $userExternalAuths, Request $request, User $currentUser): array
     {
+        $deletedUserUuid = $user->getUuid();
+        $deletedUserByUuid = $currentUser->getUuid();
+
         $phoneNumber = null;
         if ($user->getPhoneNumber() instanceof PhoneNumber) {
             $phoneNumber = "+" .
@@ -102,8 +105,8 @@ readonly class UserDeletionService
         $this->entityManager->flush();
 
         $eventMetadata = [
-            'uuid' => $user->getUuid(),
-            'deletedBy' => $currentUser->getUuid(),
+            'uuid' => $deletedUserUuid,
+            'deletedBy' => $deletedByUserUuid,
             'ip' => $request->getClientIp(),
         ];
         $this->eventActions->saveEvent(

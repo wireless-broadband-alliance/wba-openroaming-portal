@@ -8,7 +8,6 @@ use App\Enum\AnalyticalEventType;
 use App\Enum\PlatformMode;
 use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
-use App\Repository\UserRepository;
 use DateTime;
 use Exception;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
@@ -20,7 +19,6 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 readonly class VerificationCodeEmailGenerator
 {
     public function __construct(
-        private UserRepository $userRepository,
         private SettingRepository $settingRepository,
         private ParameterBagInterface $parameterBag,
         private EventRepository $eventRepository,
@@ -32,19 +30,13 @@ readonly class VerificationCodeEmailGenerator
     /**
      * Generate a new verification code for the user.
      *
-     * @param User $user The user for whom the verification code is generated.
      * @return int The generated verification code.
      * @throws Exception
      */
-    public function generateVerificationCode(User $user): int
+    public function generateVerificationCode(): int
     {
         // Generate a random verification code with 6 digits
-        $verificationCode = random_int(100000, 999999);
-        $user->setVerificationCode((string)$verificationCode);
-        $user->setCreatedAt(new \DateTime());
-        $this->userRepository->save($user, true);
-
-        return $verificationCode;
+        return random_int(100000, 999999);
     }
 
     /**
@@ -64,7 +56,7 @@ readonly class VerificationCodeEmailGenerator
         $supportTeam = $this->settingRepository->findOneBy(['name' => 'PAGE_TITLE'])->getValue();
         $contactEmail = $this->settingRepository->findOneBy(['name' => 'CONTACT_EMAIL'])->getValue();
 
-        $verificationCode = $this->generateVerificationCode($user);
+        $verificationCode = $this->generateVerificationCode();
 
         $eventMetaData = [
             'platform' => PlatformMode::LIVE->value,
@@ -90,41 +82,6 @@ readonly class VerificationCodeEmailGenerator
                 'contactEmail' => $contactEmail,
             ]);
     }
-
-    /**
-     * Create an email message with the verification code.
-     *
-     * @return TemplatedEmail The email with the code.
-     * @throws Exception
-     */
-    public function createEmailLanding(User $user, string $locale): TemplatedEmail
-    {
-        // Set the locale for translations
-        if (method_exists($this->translator, 'setLocale')) {
-            $this->translator->setLocale($locale);
-        }
-
-        // Get the values from the configuration
-        $emailSender = $this->parameterBag->get('app.email_address');
-        $nameSender = $this->parameterBag->get('app.sender_name');
-
-        // Generate a new verification code if not provided
-        $verificationCode = $this->generateVerificationCode($user);
-        $emailTitle = $this->settingRepository->findOneBy(['name' => 'PAGE_TITLE'])->getValue();
-
-        return new TemplatedEmail()
-            ->from(new Address($emailSender, $nameSender))
-            ->to($user->getEmail())
-            ->subject($this->translator->trans('subject_verify', [], 'user_code'))
-            ->htmlTemplate('email/user_code.html.twig')
-            ->context([
-                'verificationCode' => $verificationCode,
-                'uuid' => $user->getEmail(),
-                'emailTitle' => $emailTitle,
-                'is2FATemplate' => false,
-            ]);
-    }
-
 
     /**
      * Create an email message about 2fa disabled by the admin.
