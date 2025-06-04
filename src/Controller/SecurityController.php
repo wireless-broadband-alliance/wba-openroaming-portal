@@ -17,6 +17,7 @@ use App\Service\EventActions;
 use App\Service\GetSettings;
 use App\Service\TwoFAService;
 use DateTime;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -46,6 +47,7 @@ class SecurityController extends AbstractController
         private readonly TwoFAService $twoFAService,
         private readonly TranslatorInterface $translator,
         private readonly EventActions $eventActions,
+        private readonly EntityManagerInterface $entityManager,
     ) {
     }
 
@@ -181,6 +183,10 @@ class SecurityController extends AbstractController
             }
             $code = $form->getData()['code'];
             if ($this->twoFAService->validate2FACode($user, $code)) {
+                $user->setIsVerified(true);
+                $this->entityManager->persist($user);
+                $this->entityManager->flush();
+
                 // Create a token manually for the user
                 $token = new UsernamePasswordToken($user, 'main', $user->getRoles());
 
