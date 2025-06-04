@@ -3,12 +3,14 @@
 namespace App\Security;
 
 use App\Entity\User;
+use App\Enum\AnalyticalEventType;
 use App\Enum\FirewallType;
 use App\Enum\OperationMode;
 use App\Enum\TwoFAType;
 use App\Enum\UserTwoFactorAuthenticationStatus;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
+use App\Service\TwoFAService;
 use DateTimeInterface;
 use PixelOpen\CloudflareTurnstileBundle\Http\CloudflareTurnstileHttpClient;
 use Symfony\Component\Form\FormFactoryInterface;
@@ -28,6 +30,7 @@ use Symfony\Component\Security\Http\Authenticator\Passport\Passport;
 use Symfony\Component\Security\Http\SecurityRequestAttributes;
 use Symfony\Component\Security\Http\Util\TargetPathTrait;
 use Symfony\Flex\Unpack\Operation;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class LandingAuthenticator extends AbstractLoginFormAuthenticator
 {
@@ -39,6 +42,8 @@ class LandingAuthenticator extends AbstractLoginFormAuthenticator
         private readonly SettingRepository $settingRepository,
         private readonly CloudflareTurnstileHttpClient $turnstileHttpClient,
         private readonly UserRepository $userRepository,
+        private readonly TwoFAService $twoFAService,
+        private readonly TranslatorInterface $translator,
     ) {
     }
 
@@ -144,7 +149,29 @@ class LandingAuthenticator extends AbstractLoginFormAuthenticator
             $verification = $user->isVerified();
             // Check if the user is verified
             if (!$verification) {
-                return new RedirectResponse($this->urlGenerator->generate('app_login_confirmation'));
+                if ($this->twoFAService->canValidationCode(
+                    $user,
+                    AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE->value
+                )) {
+                    $this->twoFAService->generate2FACode(
+                        $user,
+                        $request->getClientIp(),
+                        $request->headers->get('User-Agent'),
+                        AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE->value
+                    );
+                    return new RedirectResponse($this->urlGenerator->generate('app_login_confirmation'));
+                }
+                $interval_minutes = $this->twoFAService->timeLeftToResendCode(
+                    $user,
+                    AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE->value
+                );
+                throw new CustomUserMessageAuthenticationException($this->translator->trans(
+                    'codeAlreadySent',
+                    [
+                        '%minutes%' => $interval_minutes
+                    ],
+                    'controllers'
+                ));
             }
 
             return $this->handleTwoFactorRedirection(
