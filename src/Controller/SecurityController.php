@@ -129,7 +129,7 @@ class SecurityController extends AbstractController
                     'success',
                     $this->translator->trans('codeSentSuccessfully', [], 'controllers')
                 );
-                return $this->redirectToRoute('app_magicLink_login');
+                return $this->redirectToRoute('app_login_confirmation');
             }
             $interval_minutes = $this->twoFAService->timeLeftToResendCode(
                 $user,
@@ -145,7 +145,7 @@ class SecurityController extends AbstractController
                     'controllers'
                 )
             );
-            return $this->redirectToRoute('app_magicLink_login');
+            return $this->redirectToRoute('app_login_confirmation');
         }
         return $this->render('landing/login/magic_link_landing.html.twig', [
             'data' => $data,
@@ -154,71 +154,7 @@ class SecurityController extends AbstractController
         ]);
     }
 
-    #[Route('/magicLink/link', name: 'app_magicLink_link')]
-    public function magicLinkLink(
-        RequestStack $requestStack,
-        TokenStorageInterface $tokenStorage,
-        EventDispatcherInterface $eventDispatcher,
-    ): Response
-    {
-        // Get the email and verification code from the URL query parameters
-        $uuid = $requestStack->getCurrentRequest()->query->get('uuid');
-        $code = $requestStack->getCurrentRequest()->query->get('code');
-
-        // Get the user with the matching email, excluding admin users
-        $user = $this->userRepository->findOneByUUIDExcludingAdmin($uuid);
-
-        if ($user && $user->getTwoFAcode() === $code) {
-            try {
-                // Create a token manually for the user
-                $token = new UsernamePasswordToken($user, 'main', $user->getRoles());
-
-                // Set the token in the token storage
-                $tokenStorage->setToken($token);
-
-                // Dispatch the login event
-                $request = $requestStack->getCurrentRequest();
-                $event = new InteractiveLoginEvent($request, $token);
-                $eventDispatcher->dispatch($event);
-
-                // Defines the Event to the table
-                $eventMetadata = [
-                    'ip' => $request->getClientIp(),
-                    'user_agent' => $request->headers->get('User-Agent'),
-                    'platform' => PlatformMode::LIVE->value,
-                    'uuid' => $user->getUuid(),
-                ];
-                $this->eventActions->saveEvent(
-                    $user,
-                    AnalyticalEventType::LOGIN_TRADITIONAL_REQUEST->value,
-                    new DateTime(),
-                    $eventMetadata
-                );
-
-                $this->addFlash(
-                    'success',
-                    $this->translator->trans('accountVerified', [], 'controllers')
-                );
-
-                return $this->redirectToRoute('app_landing');
-            } catch (CustomUserMessageAuthenticationException) {
-                $this->addFlash(
-                    'error',
-                    $this->translator->trans('authenticationFailedTryAgain', [], 'controllers')
-                );
-            }
-        } else {
-            // If the verification code is invalid or not found, display an error message and redirect to the login page
-            $this->addFlash(
-                'error',
-                $this->translator->trans('invalidVerificationCodeLink', [], 'controllers')
-            );
-        }
-
-        return $this->redirectToRoute('app_login');
-    }
-
-    #[Route('/magicLink/login', name: 'app_magicLink_login')]
+    #[Route('/login/confirmation', name: 'app_login_confirmation')]
     public function magicLinkLogin(
         Request $request,
         TokenStorageInterface $tokenStorage,
