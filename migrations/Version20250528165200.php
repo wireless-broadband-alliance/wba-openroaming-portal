@@ -20,12 +20,12 @@ final class Version20250528165200 extends AbstractMigration
     public function up(Schema $schema): void
     {
         // this up() migration is auto-generated, please modify it to your needs
-        $this->addSql("INSERT INTO Setting (name, value) VALUES ('LOGIN_WITH_EMAIL_ONLY', 'OFF')");
+        $this->addSql("INSERT INTO Setting (name, value) VALUES ('LOGIN_WITH_UUID_ONLY', 'OFF')");
     }
 
     public function down(Schema $schema): void
     {
         // Removes the entries added in the up() method
-        $this->addSql("DELETE FROM Setting WHERE name = 'LOGIN_WITH_EMAIL_ONLY'");
+        $this->addSql("DELETE FROM Setting WHERE name = 'LOGIN_WITH_UUID_ONLY'");
     }
 }
