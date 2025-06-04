@@ -144,7 +144,7 @@ class LandingAuthenticator extends AbstractLoginFormAuthenticator
             $verification = $user->isVerified();
             // Check if the user is verified
             if (!$verification) {
-                return new RedirectResponse($this->urlGenerator->generate('app_email_code'));
+                return new RedirectResponse($this->urlGenerator->generate('app_login_confirmation'));
             }
 
             return $this->handleTwoFactorRedirection(

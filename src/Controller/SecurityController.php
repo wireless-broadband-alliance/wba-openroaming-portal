@@ -4,7 +4,6 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Enum\FirewallType;
-use App\Enum\OperationMode;
 use App\Form\LoginFormType;
 use App\Form\TwoFACode;
 use App\Repository\UserRepository;
@@ -95,33 +94,24 @@ class SecurityController extends AbstractController
         if ($data['PLATFORM_MODE']['value'] === true) {
             return $this->redirectToRoute('app_landing');
         }
-        if ($data['LOGIN_WITH_UUID_ONLY']['value'] === OperationMode::OFF->value) {
-            return $this->redirectToRoute('app_login');
-        }
 
         $form = $this->createForm(TwoFACode::class);
         $form->handleRequest($request);
         $session = $request->getSession();
         if ($form->isSubmitted() && $form->isValid()) {
-            $uuid = $session->get('uuid');
-            $user = $this->userRepository->findOneBy(['uuid' => $uuid]);
-            if ($user === null) {
-                $this->addFlash(
-                    'error',
-                    $this->translator->trans('userNotFound', [], 'controllers')
-                );
-                return $this->redirectToRoute('app_login');
-            }
-
             $code = $form->getData()['code'];
             if ($this->twoFAService->validate2FACode($user, $code)) {
                 $user->setIsVerified(true);
                 $this->entityManager->persist($user);
                 $this->entityManager->flush();
                 $session->set('user_verified_landing', true);
-
                 return $this->redirectToRoute('app_landing');
             }
+
+            $this->addFlash(
+                'error',
+                $this->translator->trans('invalidCode', [], 'controllers')
+            );
         }
 
         return $this->render('landing/login/login_landing_code_confirmation.html.twig', [

@@ -96,7 +96,7 @@ class SiteController extends AbstractController
         $session = $request->getSession();
 
         // Check if the user is logged in and verification of the user
-        // And check if the user don't have a forgot_password_request active
+        // And check if the user doesn't have a forgot_password_request active
         if (
             isset($data["USER_VERIFICATION"]["value"]) &&
             $data["USER_VERIFICATION"]["value"] === OperationMode::ON->value &&
@@ -118,9 +118,7 @@ class SiteController extends AbstractController
             }
 
             // Check if the user is verified
-            if (!$session->has('user_verified_landing') &&
-                $data["LOGIN_WITH_UUID_ONLY"]["value"] === OperationMode::ON->value
-            ) {
+            if (!$currentUser->isVerified()) {
                 if ($this->twoFAService->canValidationCode(
                     $currentUser,
                     AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE->value
@@ -213,7 +211,8 @@ class SiteController extends AbstractController
                 return $this->redirectToRoute('app_verify2FA_TOTP');
             }
         }
-        // check if the user have otpCodes
+
+        // Check if the user has OTPCodes
         if (
             $currentUser &&
             $currentUser->getTwoFAtype() !== UserTwoFactorAuthenticationStatus::DISABLED->value &&
