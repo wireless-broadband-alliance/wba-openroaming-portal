@@ -36,7 +36,7 @@
         {% if data.PLATFORM_MODE.value != constant('App\\Enum\\PlatformMode::DEMO').value %}
             <a href="{{ path('app_local_resend_code', {
                 context: context,
-                type: constant('App\\Enum\\AnalyticalEventType::MAGIC_LINK_CODE_RESEND').value},
+                type: constant('App\\Enum\\AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE_RESEND').value},
             ) }}"
                class="w-[220px] btn-secondary">
                 {{ 'btn.resend'|trans({}, 'login_landing') }}

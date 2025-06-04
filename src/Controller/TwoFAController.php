@@ -728,7 +728,7 @@ class TwoFAController extends AbstractController
         $user = $this->getUser();
 
         // Ensure the user is logged if it's not magic link login
-        if ($type != AnalyticalEventType::MAGIC_LINK_CODE_RESEND->value) {
+        if ($type != AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE_RESEND->value) {
             if (!$user instanceof UserInterface) {
                 $this->addFlash(
                     'error',
@@ -765,8 +765,8 @@ class TwoFAController extends AbstractController
                 AnalyticalEventType::USER_AUTO_DELETE_CODE->value,
             CodeVerificationType::TWO_FA_VALIDATE_RESEND->value =>
                 AnalyticalEventType::TWO_FA_CODE_VALIDATE_RESEND->value,
-            AnalyticalEventType::MAGIC_LINK_CODE_RESEND->value =>
-                AnalyticalEventType::MAGIC_LINK_CODE_RESEND->value,
+            AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE_RESEND->value =>
+                AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE_RESEND->value,
         ];
         $eventType = $eventTypeMapping[$type] ?? null;
 

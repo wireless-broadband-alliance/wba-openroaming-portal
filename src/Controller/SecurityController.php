@@ -123,24 +123,14 @@ class SecurityController extends AbstractController
                 $user->setIsVerified(true);
                 $this->entityManager->persist($user);
                 $this->entityManager->flush();
-
-                // Create a token manually for the user
-                $token = new UsernamePasswordToken($user, 'main', $user->getRoles());
-
-                // Set the token in the token storage
-                $tokenStorage->setToken($token);
-
-                // Dispatch the login event
-                $request = $requestStack->getCurrentRequest();
-                $event = new InteractiveLoginEvent($request, $token);
-                $eventDispatcher->dispatch($event);
+                $session->set('user_verified_landing', true);
 
                 return $this->redirectToRoute('app_landing');
             }
 
         }
 
-        return $this->render('landing/login/login_landing.html.twig', [
+        return $this->render('landing/login/login_landing_code_confirmation.html.twig', [
             'data' => $data,
             'form' => $form,
             'context' => FirewallType::LANDING->value,

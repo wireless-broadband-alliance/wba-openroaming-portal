@@ -182,8 +182,8 @@ readonly class TwoFAService
             $contactEmail = $this->settingRepository->findOneBy(['name' => 'CONTACT_EMAIL'])->getValue();
 
             if (
-                $eventType === AnalyticalEventType::MAGIC_LINK_CODE->value ||
-                $eventType === AnalyticalEventType::MAGIC_LINK_CODE_RESEND->value
+                $eventType === AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE->value ||
+                $eventType === AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE_RESEND->value
             ) {
                 $email = new TemplatedEmail()
                     ->from(
@@ -229,8 +229,8 @@ readonly class TwoFAService
             $this->mailer->send($email);
         } elseif ($messageType === UserTwoFactorAuthenticationStatus::SMS->value || $user->getPhoneNumber()) {
             if (
-                $eventType === AnalyticalEventType::MAGIC_LINK_CODE->value ||
-                $eventType === AnalyticalEventType::MAGIC_LINK_CODE_RESEND->value
+                $eventType === AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE->value ||
+                $eventType === AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE_RESEND->value
             ) {
                 $message = "Your verification Code is " . $code;
             } else {

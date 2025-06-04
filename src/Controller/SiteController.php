@@ -118,7 +118,34 @@ class SiteController extends AbstractController
             }
 
             // Check if the user is verified
-            if (!$currentUser->isVerified()) {
+            if (!$session->has('user_verified_landing')) {
+                if ($this->twoFAService->canValidationCode($currentUser, AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE->value)) {
+                    $this->twoFAService->generate2FACode(
+                        $currentUser,
+                        $request->getClientIp(),
+                        $request->headers->get('User-Agent'),
+                        AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE->value
+                    );
+                    $this->addFlash(
+                        'success',
+                        $this->translator->trans('codeSentSuccessfully', [], 'controllers')
+                    );
+                    return $this->redirectToRoute('app_login_confirmation');
+                }
+                $interval_minutes = $this->twoFAService->timeLeftToResendCode(
+                    $currentUser,
+                    AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE->value
+                );
+                $this->addFlash(
+                    'error',
+                    $this->translator->trans(
+                        'codeAlreadySent',
+                        [
+                            '%minutes%' => $interval_minutes
+                        ],
+                        'controllers'
+                    )
+                );
                 return $this->redirectToRoute('app_login_confirmation');
             }
 
