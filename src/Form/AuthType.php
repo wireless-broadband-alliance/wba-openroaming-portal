@@ -359,19 +359,6 @@ class AuthType extends AbstractType
                     ],
                 ],
             ],
-            'MAGIC_LINK' => [
-                'type' => ChoiceType::class,
-                'options' => [
-                    'choices' => [
-                        'ON' => OperationMode::ON->value,
-                        'OFF' => OperationMode::OFF->value,
-                    ],
-                    'expanded' => true, // Define o campo como radio buttons para melhor usabilidade
-                    'multiple' => false, // Apenas permite uma escolha
-                    'data' => $options['settings']['MAGIC_LINK'] ?? OperationMode::OFF->value, // Define um valor padrão
-                    'placeholder' => 'Choose an option', // Opcional
-                ]
-            ],
             'PROFILE_LIMIT_DATE_EMAIL' => [
                 'type' => IntegerType::class,
                 'constraints' => [
@@ -460,6 +447,10 @@ class AuthType extends AbstractType
                         ]),
                     ],
                 ],
+            ],
+            // Login with UUID only Settings
+            'LOGIN_WITH_UUID_ONLY' => [
+                'type' => ChoiceType::class,
             ],
 
             // SMS
@@ -573,7 +564,14 @@ class AuthType extends AbstractType
                             OperationMode::OFF->value => 'false',
                         ];
                         $formFieldOptions['placeholder'] = $this->translator->trans('selectOption', [], 'AuthType');
+                    } elseif ($settingName === 'LOGIN_WITH_UUID_ONLY') {
+                        $formFieldOptions['choices'] = [
+                            OperationMode::ON->value => OperationMode::ON->value,
+                            OperationMode::OFF->value => OperationMode::OFF->value,
+                        ];
+                        $formFieldOptions['placeholder'] = $this->translator->trans('selectOption', [], 'AuthType');
                     }
+
                     if (isset($config['constraints'])) {
                         $formFieldOptions['constraints'] = $config['constraints'];
                     }

@@ -702,7 +702,6 @@ class SettingsController extends AbstractController
             // Get the submitted data
             $submittedData = $form->getData();
 
-
             // Update the 'PLATFORM_MODE', 'USER_VERIFICATION' and 'TURNSTILE_CHECKER' settings
             $platformMode = $submittedData['PLATFORM_MODE'] ?? null;
             $turnstileChecker = $submittedData['TURNSTILE_CHECKER'] ?? null;
@@ -712,14 +711,6 @@ class SettingsController extends AbstractController
             $emailVerification = ($platformMode === PlatformMode::LIVE->value) ?
                 OperationMode::ON->value : $submittedData['USER_VERIFICATION'] ?? null;
             $timeIntervalNotifications = $submittedData['TIME_INTERVAL_NOTIFICATION'] ?? 7;
-            $magicLink = $submittedData['MAGIC_LINK'] ?? OperationMode::OFF->value;
-
-
-            $magicLinkSetting = $settingsRepository->findOneBy(['name' => 'MAGIC_LINK']);
-            if ($magicLinkSetting !== null) {
-                $magicLinkSetting->setValue($magicLink);
-                $this->entityManager->persist($magicLinkSetting);
-            }
 
             $platformModeSetting = $settingsRepository->findOneBy(['name' => 'PLATFORM_MODE']);
             if ($platformModeSetting !== null) {
@@ -938,6 +929,7 @@ class SettingsController extends AbstractController
                 'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED',
                 'AUTH_METHOD_LOGIN_TRADITIONAL_LABEL',
                 'AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION',
+                'LOGIN_WITH_UUID_ONLY',
 
                 'AUTH_METHOD_SMS_REGISTER_ENABLED',
                 'AUTH_METHOD_SMS_REGISTER_LABEL',
