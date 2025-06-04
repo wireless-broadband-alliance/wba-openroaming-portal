@@ -30,7 +30,7 @@
                                      alt="info_icon"/>
                             </label>
                         </div>
-                        {% if setting.vars.name in ['PLATFORM_MODE', 'USER_VERIFICATION', 'MAGIC_LINK', 'TURNSTILE_CHECKER', 'API_STATUS' ] %}
+                        {% if setting.vars.name in ['PLATFORM_MODE', 'USER_VERIFICATION', 'MAGIC_LINK', 'TURNSTILE_CHECKER', 'API_STATUS'] %}
                             <div class="flex items-center space-x-2 mt-5">
                                 {{ form_widget(setting, {attr: {class: 'hidden p-2 bg-transparent border text-center outline-none text-left text-base block w-full rounded-md  focus:shadow-sm'}}) }}
                             </div>

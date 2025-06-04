@@ -76,7 +76,7 @@ class StatusType extends AbstractType
                         ],
                         'expanded' => true,
                         'multiple' => false,
-                        'data' =>$settingValue,
+                        'data' => $settingValue,
                         'placeholder' => $this->translator->trans('selectOption', [], 'StatusType'),
                 ]);
             } elseif ($settingName === 'TURNSTILE_CHECKER') {
