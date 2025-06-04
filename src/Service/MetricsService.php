@@ -16,7 +16,6 @@ use Throwable;
 
 readonly class MetricsService
 {
-    private string $projectDir;
     private CollectorRegistry $registry;
 
     public function __construct(
@@ -25,10 +24,9 @@ readonly class MetricsService
         private UserExternalAuthRepository $userExternalAuthRepository,
         PrometheusStorageService $storageService,
         private LoggerInterface $logger,
-        #[Autowire('%kernel.project_dir%')] string $projectDir
+        #[Autowire('%kernel.project_dir%')] private string $projectDir
     ) {
         $this->registry = new CollectorRegistry($storageService->getAdapter());
-        $this->projectDir = $projectDir;
     }
 
     public function collectMetrics(): CollectorRegistry
