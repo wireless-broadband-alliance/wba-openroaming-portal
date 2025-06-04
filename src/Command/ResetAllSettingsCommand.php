@@ -65,7 +65,6 @@ class ResetAllSettingsCommand extends Command
             ['name' => 'USER_VERIFICATION', 'value' => 'OFF'],
             ['name' => 'TURNSTILE_CHECKER', 'value' => 'OFF'],
             ['name' => 'API_STATUS', 'value' => 'OFF'],
-            ['name' => 'MAGIC_LINK', 'value' => 'OFF'],
 
             ['name' => 'TWO_FACTOR_AUTH_STATUS', 'value' => 'NOT_ENFORCED'],
             ['name' => 'TWO_FACTOR_AUTH_APP_LABEL', 'value' => 'OpenRoaming'],
@@ -106,6 +105,7 @@ class ResetAllSettingsCommand extends Command
             ['name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED', 'value' => 'true'],
             ['name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_LABEL', 'value' => 'Account Login'],
             ['name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION', 'value' => 'Already have an account? Login then'],
+            ['name' => 'LOGIN_WITH_UUID_ONLY', 'value' => 'OFF'],
             ['name' => 'AUTH_METHOD_SMS_REGISTER_ENABLED', 'value' => 'false'],
             ['name' => 'AUTH_METHOD_SMS_REGISTER_LABEL', 'value' => 'Create Account with Phone Number'],
             ['name' => 'AUTH_METHOD_SMS_REGISTER_DESCRIPTION', 'value' => 'Don\'t have an account? Create one'],

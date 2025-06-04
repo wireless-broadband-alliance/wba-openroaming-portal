@@ -117,11 +117,11 @@ class SiteController extends AbstractController
                 return $this->redirectToRoute('app_logout');
             }
 
-            $verification = $currentUser->isVerified();
             // Check if the user is verified
-            if (!$verification) {
-                return $this->redirectToRoute('app_email_code');
+            if (!$currentUser->isVerified()) {
+                return $this->redirectToRoute('app_login_confirmation');
             }
+
             // Checks the 2FA status of the platform if mandatory forces the user to configure it
             if (
                 $currentUser->getUserExternalAuths() &&

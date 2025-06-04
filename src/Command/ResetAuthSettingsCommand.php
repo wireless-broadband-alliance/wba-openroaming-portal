@@ -68,6 +68,7 @@ class ResetAuthSettingsCommand extends Command
             ['name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED', 'value' => 'true'],
             ['name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_LABEL', 'value' => 'Account Login'],
             ['name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION', 'value' => 'Already have an account? Login then'],
+            ['name' => 'LOGIN_WITH_UUID_ONLY', 'value' => 'OFF'],
             ['name' => 'AUTH_METHOD_SMS_REGISTER_ENABLED', 'value' => 'false'],
             ['name' => 'AUTH_METHOD_SMS_REGISTER_LABEL', 'value' => 'Create Account with Phone Number'],
             ['name' => 'AUTH_METHOD_SMS_REGISTER_DESCRIPTION', 'value' => 'Don\'t have an account? Create one'],

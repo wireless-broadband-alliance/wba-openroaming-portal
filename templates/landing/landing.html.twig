@@ -110,19 +110,9 @@
         {% endif %}
     {% else %}
         {% if app.user %}
-            {% if app.user.isVerified %}
-                <form method="post" novalidate>
-                    {{ include('landing/shared/_os_selection.html.twig') }}
-                </form>
-            {% else %}
-                {% if data.USER_VERIFICATION.value == constant('App\\Enum\\OperationMode::ON').value %}
-                    {{ include('landing/shared/_account_activation.html.twig') }}
-                {% else %}
-                    <form method="post" novalidate>
-                        {{ include('landing/shared/_os_selection.html.twig') }}
-                    </form>
-                {% endif %}
-            {% endif %}
+            <form method="post" novalidate>
+                {{ include('landing/shared/_os_selection.html.twig') }}
+            </form>
 
             <div {{ stimulus_controller('widget') }}>
                 <a href="{{ path('app_logout') }}" class="w-[160px] btn-logout">

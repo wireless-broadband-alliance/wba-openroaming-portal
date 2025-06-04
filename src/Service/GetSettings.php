@@ -47,7 +47,6 @@ readonly class GetSettings
 
         $specialSettings = [
             'TURNSTILE_CHECKER',
-            'USER_VERIFICATION',
             'PLATFORM_MODE',
         ];
 
@@ -68,14 +67,6 @@ readonly class GetSettings
             $data['TURNSTILE_CHECKER'] = [
                 'value' => $turnstile_checker->getValue(),
                 'description' => $this->getSettingDescription('TURNSTILE_CHECKER'),
-            ];
-        }
-
-        $user_verification = $this->settingRepository->findOneBy(['name' => 'USER_VERIFICATION']);
-        if ($user_verification !== null) {
-            $data['USER_VERIFICATION'] = [
-                'value' => $user_verification->getValue(),
-                'description' => $this->getSettingDescription('USER_VERIFICATION'),
             ];
         }
 
@@ -123,7 +114,7 @@ readonly class GetSettings
                 'RADIUS_TRUSTED_ROOT_CA_SHA1_HASH' => 'The SHA1 hash of your RADIUS server\'s trusted root CA (Defaults to LetsEncrypt CA)',
                 'PLATFORM_MODE' => 'Live || Demo. When demo, only "demo login" is displayed, and SAML and other login methods are disabled regardless of other settings. A demo warning will also be displayed.',
                 'API_STATUS' => 'Defines whether the API is enabled or disabled.',
-                'MAGIC_LINK' => 'Defines whether authentication is performed using a confirmation code sent to the user or a password.',
+                'LOGIN_WITH_UUID_ONLY' => 'Defines whether authentication is performed using a confirmation code sent to the user or a tradicional uuid & password.',
                 'USER_VERIFICATION' => 'ON || OFF. When it\'s ON it activates the verification system. This system requires all the users to verify is own account before they download any profile',
                 'TURNSTILE_CHECKER' => 'The Turnstile checker is a validation step to between genuine users and bots. This can be used in Live or Demo modes.',
                 'TWO_FACTOR_AUTH_STATUS' => 'The status of two factor authentication when users log in to the platform',
@@ -206,7 +197,7 @@ readonly class GetSettings
                 'RADIUS_TRUSTED_ROOT_CA_SHA1_HASH' => 'O hash SHA1 da CA raiz confiável do seu servidor RADIUS (Padrão: CA da LetsEncrypt)',
                 'PLATFORM_MODE' => 'Live || Demo. Quando em demo, apenas o "login demo" é mostrado, e SAML e outros métodos de login são desativados, independentemente das outras definições. Um aviso de demonstração também será exibido.',
                 'API_STATUS' => 'Define se a API está ativa ou desativada.',
-                'MAGIC_LINK' => 'Define se a autenticação é feita usando um código de confirmação enviado ao utilizador ou uma password.',
+                'LOGIN_WITH_UUID_ONLY' => 'Define se a autenticação é feita usando um código de confirmação enviado ao utilizador ou a tradicional uuid e password.',
                 'USER_VERIFICATION' => 'ON || OFF. Quando está ON, ativa o sistema de verificação. Este sistema exige que todos os utilizadores verifiquem a sua conta antes de descarregarem qualquer perfil',
                 'TURNSTILE_CHECKER' => 'O verificador Turnstile é uma etapa de validação entre utilizadores genuínos e bots. Pode ser usado nos modos Live ou Demo.',
                 'TWO_FACTOR_AUTH_STATUS' => 'O estado da autenticação de dois fatores quando os utilizadores iniciam sessão na plataforma',
