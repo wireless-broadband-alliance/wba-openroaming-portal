@@ -19,7 +19,11 @@
             {{ 'welcome_back'|trans({}, 'login_landing') }}
         </p>
         <p class="text-lg">
-            {{ 'description'|trans({}, 'login_landing') }}
+            {% if data.LOGIN_WITH_UUID_ONLY.value == constant('App\\Enum\\OperationMode::OFF').value %}
+                {{ 'description'|trans({}, 'login_landing') }}
+            {% else %}
+                {{ 'magic_link_description'|trans({}, 'login_landing') }}
+            {% endif %}
         </p>
     </div>
 
@@ -48,17 +52,19 @@
         }) }}
     </div>
 
-    {# Password Field #}
-    <div class="relative mt-[32px]">
-        {{ form_label(form.password, 'form.password'|trans({}, 'login_landing'), {label_attr: {class: 'form-label'}}) }}
-        {{ form_widget(form.password, {
-            attr: {
-                class: 'form-widget',
-                placeholder: 'form.password_placeholder'|trans({}, 'login_landing'),
-            },
-            full_name: 'password',
-        }) }}
-    </div>
+    {% if data.LOGIN_WITH_UUID_ONLY.value == constant('App\\Enum\\OperationMode::OFF').value %}
+        {# Password Field #}
+        <div class="relative mt-[32px]">
+            {{ form_label(form.password, 'form.password'|trans({}, 'login_landing'), {label_attr: {class: 'form-label'}}) }}
+            {{ form_widget(form.password, {
+                attr: {
+                    class: 'form-widget',
+                    placeholder: 'form.password_placeholder'|trans({}, 'login_landing'),
+                },
+                full_name: 'password',
+            }) }}
+        </div>
+    {% endif %}
 
     {# Turnstile Checker #}
     {% if data.TURNSTILE_CHECKER.value == constant('App\\Enum\\OperationMode::ON').value %}
@@ -85,25 +91,29 @@
     {% if data.PLATFORM_MODE.value != constant('App\\Enum\\PlatformMode::DEMO').value %}
 
         {% if data.AUTH_METHOD_REGISTER_ENABLED.value or data.AUTH_METHOD_SMS_REGISTER_ENABLED.value == 'true' %}
-            <p class="mt-2 text-sm">
-                {{ 'forgot_password'|trans({}, 'login_landing') }}
+            {% if data.LOGIN_WITH_UUID_ONLY.value == constant('App\\Enum\\OperationMode::OFF').value %}
+                <p class="mt-2 text-sm">
+                    {{ 'forgot_password'|trans({}, 'login_landing') }}
 
-                {% if data.AUTH_METHOD_REGISTER_ENABLED.value == 'true' %}
-                    <a href="{{ path('app_site_forgot_password_email') }}" class="font-semibold text-primary underline">
-                        {{ 'forgot_password_email'|trans({}, 'login_landing') }}
-                    </a>
-                {% endif %}
+                    {% if data.AUTH_METHOD_REGISTER_ENABLED.value == 'true' %}
+                        <a href="{{ path('app_site_forgot_password_email') }}"
+                           class="font-semibold text-primary underline">
+                            {{ 'forgot_password_email'|trans({}, 'login_landing') }}
+                        </a>
+                    {% endif %}
 
-                {% if data.AUTH_METHOD_REGISTER_ENABLED.value == 'true' and data.AUTH_METHOD_SMS_REGISTER_ENABLED.value == 'true' %}
-                    {{ 'or'|trans({}, 'login_landing') }}
-                {% endif %}
+                    {% if data.AUTH_METHOD_REGISTER_ENABLED.value == 'true' and data.AUTH_METHOD_SMS_REGISTER_ENABLED.value == 'true' %}
+                        {{ 'or'|trans({}, 'login_landing') }}
+                    {% endif %}
 
-                {% if data.AUTH_METHOD_SMS_REGISTER_ENABLED.value == 'true' %}
-                    <a href="{{ path('app_site_forgot_password_sms') }}" class="font-semibold text-primary underline">
-                        {{ 'forgot_password_phone'|trans({}, 'login_landing') }}
-                    </a>.
-                {% endif %}
-            </p>
+                    {% if data.AUTH_METHOD_SMS_REGISTER_ENABLED.value == 'true' %}
+                        <a href="{{ path('app_site_forgot_password_sms') }}"
+                           class="font-semibold text-primary underline">
+                            {{ 'forgot_password_phone'|trans({}, 'login_landing') }}
+                        </a>.
+                    {% endif %}
+                </p>
+            {% endif %}
 
             <p class="mt-2 text-sm">
                 {{ 'no_account_register'|trans({}, 'login_landing') }}

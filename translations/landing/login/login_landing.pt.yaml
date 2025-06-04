@@ -5,7 +5,7 @@ description: >
     instale o perfil no seu dispositivo.
 magic_link_description: >
     Selecionou iniciar sessão via email ou número de telefone.
-    Será enviado um e-mail com um código para confirmar a sua identidade.
+    Será enviado um código para confirmação da sua identidade.
 magic_link_login_description: >
     O código de confirmação de identidade foi enviado para o seu método de autenticação.
     Insira o código para confirmar a sua identidade.

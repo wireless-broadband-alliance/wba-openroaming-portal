@@ -46,7 +46,6 @@ class SecurityController extends AbstractController
         private readonly GetSettings $getSettings,
         private readonly TwoFAService $twoFAService,
         private readonly TranslatorInterface $translator,
-        private readonly EventActions $eventActions,
         private readonly EntityManagerInterface $entityManager,
     ) {
     }
@@ -59,10 +58,10 @@ class SecurityController extends AbstractController
     {
         /** @var User $user */
         $user = $this->getUser();
-
         if ($user instanceof User) {
             return $this->redirectToRoute('app_landing');
         }
+
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings();
         if ($data['PLATFORM_MODE']['value'] === true) {
@@ -84,13 +83,7 @@ class SecurityController extends AbstractController
         if ($error instanceof AuthenticationException) {
             $this->addFlash('error', $error->getMessage());
         }
-        if ($data['LOGIN_WITH_UUID_ONLY']['value'] === OperationMode::ON->value) {
-            return $this->render('landing/login/magic_link_landing.html.twig', [
-                'data' => $data,
-                'form' => $form,
-                'context' => FirewallType::LANDING->value,
-            ]);
-        }
+
         return $this->render('landing/login/login_landing.html.twig', [
             'last_username' => $lastUsername,
             'error' => $error,
@@ -146,7 +139,8 @@ class SecurityController extends AbstractController
             }
 
         }
-        return $this->render('landing/login/magic_link_login_landing.html.twig', [
+
+        return $this->render('landing/login/login_landing.html.twig', [
             'data' => $data,
             'form' => $form,
             'context' => FirewallType::LANDING->value,
