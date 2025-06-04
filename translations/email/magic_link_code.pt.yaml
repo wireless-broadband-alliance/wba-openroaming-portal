@@ -3,4 +3,4 @@ intro_login_User: 'Para iniciar sessão com a sua conta do Portal OpenRoaming, s
 support_team: 'Equipa de Suporte:'
 thank_you: 'Obrigado,'
 download_profile: 'Depois de iniciar sessão, não se esqueça de clicar em <strong>“Descarregar e Instalar Perfil”</strong> no portal para concluir a configuração do seu dispositivo.'
-login_code_and_link: 'Clique <a href="%confirmLink%" style="font-weight: 700; color: #7BBA29; text-decoration: underline;">aqui</a> para iniciar sessão ou utilize o código: %code%.'
+login_code_and_link: 'Utilize o código: %code% para fazer login.'

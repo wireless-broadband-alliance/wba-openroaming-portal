@@ -24,7 +24,7 @@
             </p>
             <ol style="margin-top: 1rem; font-size: 1.125rem; list-style-type: decimal; list-style-position: inside; padding-left: 0; margin-bottom: 0;">
                 <li style="margin-bottom: 0.75rem;">
-                    {{ 'login_code_and_link'|trans({'%code%': code, '%confirmLink%': absolute_url('/magicLink/link') ~ '?' ~ 'uuid=' ~ uuid|url_encode ~ 'code=' ~ code}, 'magic_link_code')|raw }}
+                    {{ 'login_code'|trans({'%code%': code,}, 'magic_link_code')|raw }}
                 </li>
                 <li style="margin-bottom: 0.75rem;">
                     {{ 'download_profile'|trans({}, 'magic_link_code')|raw }}
