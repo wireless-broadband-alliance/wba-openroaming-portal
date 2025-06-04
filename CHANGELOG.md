@@ -13,8 +13,20 @@
   display of results per page)
 - New conditions to restore the user session, only restore on the firewall "landing"
 - Invalidate session on the dashboard in case the admin changes is password on the landing firewall.
-- For this release it's required to run the new migrations to set up the new entity SettingTranslations
-  Run the migration with:
+- **Login only with uuid** → This new feature simplifies the process of authentication on the portal using only the
+  account uuid. This way the user confirm himself everytime to get the confirmation code for authentication.
+
+> **Important**: In this release, the field **verificationCode** was eliminated.
+> If you are upgrading from version 1.7.3 or lower, and your application or database still has the
+> **verificationCode** field, please ensure any necessary data migrations are handled before upgrading to version 1.8.0.
+
+- This change is part of an optimization process to improve the handling of the user account confirmation on the portal,
+  and other confirmation methods.
+
+- Also for this release, it's required to run the new migrations to set up the new entity SettingTranslations and the
+  new
+  settings
+  Run the migrations with:
 
 ```bash
 php bin/console doctrine:migrations:migrate
