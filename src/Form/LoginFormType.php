@@ -3,6 +3,7 @@
 namespace App\Form;
 
 use App\Entity\User;
+use App\Enum\FirewallType;
 use App\Enum\OperationMode;
 use App\Service\GetSettings;
 use PixelOpen\CloudflareTurnstileBundle\Type\TurnstileType;
@@ -11,6 +12,7 @@ use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Security\Http\Firewall;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 class LoginFormType extends AbstractType
@@ -26,6 +28,8 @@ class LoginFormType extends AbstractType
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
+        $firewallType = $options['firewallType'];
+
         $data = $this->getSettings->getSettings();
         $turnstileCheckerValue = $data['TURNSTILE_CHECKER']['value'];
         $loginWithUuidOnlyValue = $data['LOGIN_WITH_UUID_ONLY']['value'];
@@ -39,6 +43,17 @@ class LoginFormType extends AbstractType
             ],
             'required' => true,
         ]);
+
+        if ($firewallType === FirewallType::DASHBOARD->value) {
+            $builder->add('password', PasswordType::class, [
+                'label' => 'Password',
+                'attr' => [
+                    'placeholder' => $this->translator->trans('EnterPassword', [], 'LoginFormType'),
+                    'name' => 'password',
+                    'full_name' => 'password',
+                ],
+            ]);
+        }
 
         if ($loginWithUuidOnlyValue === OperationMode::OFF->value) {
             $builder->add('password', PasswordType::class, [
@@ -66,6 +81,7 @@ class LoginFormType extends AbstractType
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
+            'firewallType' => null,
             'data_class' => User::class,
         ]);
     }

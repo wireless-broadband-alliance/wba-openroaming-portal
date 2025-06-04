@@ -59,7 +59,10 @@ class SecurityController extends AbstractController
         $user = $this->userRepository->findOneBy([
             'uuid' => $lastUsername,
         ]);
-        $form = $this->createForm(LoginFormType::class, $user);
+
+        $form = $this->createForm(LoginFormType::class, $user, [
+            'firewallType' => FirewallType::LANDING->value,
+        ]);
         $form->handleRequest($request);
 
         // Get the login error if there is one
@@ -142,7 +145,10 @@ class SecurityController extends AbstractController
         $user = $this->userRepository->findOneBy([
             'uuid' => $lastUsername,
         ]);
-        $form = $this->createForm(LoginFormType::class, $user);
+
+        $form = $this->createForm(LoginFormType::class, $user, [
+            'firewallType' => FirewallType::DASHBOARD->value,
+        ]);
         $form->handleRequest($request);
 
         // Get the login error if there is one
