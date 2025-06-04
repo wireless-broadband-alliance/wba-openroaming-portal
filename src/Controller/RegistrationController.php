@@ -10,7 +10,6 @@ use App\Enum\PlatformMode;
 use App\Enum\UserProvider;
 use App\Form\RegistrationFormSMSType;
 use App\Form\RegistrationFormType;
-use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use App\Service\EventActions;
 use App\Service\GetSettings;
@@ -131,12 +130,14 @@ class RegistrationController extends AbstractController
                 // Set the hashed password for the user
                 $user->setPassword($hashedPassword);
                 $user->setUuid($user->getEmail());
-                $user->setVerificationCode($this->verificationCodeGenerator->generateVerificationCode($user));
+                $user->setCreatedAt(new DateTime());
+                $user->setTwoFAcode($this->verificationCodeGenerator->generateVerificationCode());
                 $userAuths->setProvider(UserProvider::PORTAL_ACCOUNT->value);
                 $userAuths->setProviderId(UserProvider::EMAIL->value);
                 $userAuths->setUser($user);
                 $entityManager->persist($user);
                 $entityManager->persist($userAuths);
+                $entityManager->flush();
 
                 // Defines the Event to the table
                 $eventMetaData = [
@@ -250,13 +251,15 @@ class RegistrationController extends AbstractController
                     );
                 }
 
-                $user->setVerificationCode($this->verificationCodeGenerator->generateVerificationCode($user));
+                $user->setUuid($user->getEmail());
                 $user->setCreatedAt(new DateTime());
+                $user->setTwoFAcode($this->verificationCodeGenerator->generateVerificationCode());
                 $userAuths->setProvider(UserProvider::PORTAL_ACCOUNT->value);
                 $userAuths->setProviderId(UserProvider::PHONE_NUMBER->value);
                 $userAuths->setUser($user);
                 $entityManager->persist($user);
                 $entityManager->persist($userAuths);
+                $entityManager->flush();
 
                 // Defines the Event to the table
                 $eventMetadata = [
@@ -334,7 +337,7 @@ class RegistrationController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
-        if ($user && $user->getVerificationCode() === $verificationCode) {
+        if ($user && $user->getTwoFAcode() === $verificationCode) {
             try {
                 // Create a token manually for the user
                 $token = new UsernamePasswordToken($user, 'main', $user->getRoles());
