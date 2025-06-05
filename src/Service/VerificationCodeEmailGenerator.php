@@ -8,6 +8,7 @@ use App\Enum\AnalyticalEventType;
 use App\Enum\PlatformMode;
 use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
+use App\Repository\UserRepository;
 use DateTime;
 use Exception;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
@@ -23,7 +24,8 @@ readonly class VerificationCodeEmailGenerator
         private ParameterBagInterface $parameterBag,
         private EventRepository $eventRepository,
         private EventActions $eventActions,
-        private TranslatorInterface $translator
+        private TranslatorInterface $translator,
+        private UserRepository $userRepository,
     ) {
     }
 
@@ -33,10 +35,16 @@ readonly class VerificationCodeEmailGenerator
      * @return int The generated verification code.
      * @throws Exception
      */
-    public function generateVerificationCode(): int
+    public function generateVerificationCode(User $user): int
     {
         // Generate a random verification code with 6 digits
-        return random_int(100000, 999999);
+        $verificationCode = random_int(100000, 999999);
+        $user->setTwoFACode($verificationCode);
+        $user->setTwoFACodeGeneratedAt(new DateTime());
+        $user->setTwoFAcodeIsActive(true);
+        $this->userRepository->save($user, true);
+
+        return $verificationCode;
     }
 
     /**
@@ -56,7 +64,7 @@ readonly class VerificationCodeEmailGenerator
         $supportTeam = $this->settingRepository->findOneBy(['name' => 'PAGE_TITLE'])->getValue();
         $contactEmail = $this->settingRepository->findOneBy(['name' => 'CONTACT_EMAIL'])->getValue();
 
-        $verificationCode = $this->generateVerificationCode();
+        $verificationCode = $this->generateVerificationCode($user);
 
         $eventMetaData = [
             'platform' => PlatformMode::LIVE->value,
