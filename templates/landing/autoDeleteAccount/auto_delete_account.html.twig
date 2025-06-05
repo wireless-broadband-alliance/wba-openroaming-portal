@@ -20,6 +20,10 @@
             {{ 'account_deletion_process'|trans({}, 'auto_delete_account') }}
         </p>
 
+        <p class="text-lg mb-6">
+            {{ 'deletion_description'|trans({}, 'auto_delete_account')|raw }}
+        </p>
+
         {# Form Column #}
         {{ form_start(form) }}
         <div class="relative mt-10 mb-6">
