@@ -342,7 +342,7 @@ class RegistrationController extends AbstractController
                             'forgotPasswordUser' => true,
                             'uuid' => $user->getUuid(),
                             'currentPassword' => $randomPassword,
-                            'verificationCode' => $user->getVerificationCode(),
+                            'verificationCode' => $user->getTwoFAcode(),
                             'emailTitle' => $this->settingRepository->findOneBy(['name' => 'PAGE_TITLE'])->getValue(),
                             'contactEmail' => $this->settingRepository->findOneBy(
                                 ['name' => 'CONTACT_EMAIL']
@@ -522,7 +522,7 @@ class RegistrationController extends AbstractController
         try {
             $message = "Your account password is: "
                 . $data['password'] . "%0A" . "Verification code is: "
-                . $user->getVerificationCode();
+                . $user->getTwoFAcode();
             $result = $this->sendSMSService->sendSms($user->getPhoneNumber(), $message);
 
             if ($result) {
@@ -727,7 +727,7 @@ class RegistrationController extends AbstractController
                     $message = sprintf(
                         "Your account password is: %s\n Verification code is: %s",
                         $randomPassword,
-                        $user->getVerificationCode()
+                        $user->getTwoFAcode()
                     );
 
                     $result = $this->sendSMSService->sendSms($user->getPhoneNumber(), $message);

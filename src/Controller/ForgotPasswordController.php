@@ -179,7 +179,7 @@ class ForgotPasswordController extends AbstractController
                                 'emailTitle' => $data['PAGE_TITLE']['value'],
                                 'contactEmail' => $data['CONTACT_EMAIL']['value'],
                                 'currentPassword' => $randomPassword,
-                                'verificationCode' => $user->getVerificationCode(),
+                                'verificationCode' => $user->getTwoFAcode(),
                                 'context' => FirewallType::LANDING->value,
                             ]);
 

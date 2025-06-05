@@ -64,15 +64,16 @@ class SettingsController extends AbstractController
     #[Route('/dashboard/confirm-checker/{type}', name: 'admin_confirm_checker')]
     #[IsGranted('ROLE_ADMIN')]
     public function checkSettings(
-        RequestStack $requestStack,
         Request $request,
         string $type
     ): Response {
         // Get the entered code from the form
-        $enteredCode = $requestStack->getCurrentRequest()->request->get('code');
+        $enteredCode = $request->get('code');
+
         /** @var User $currentUser */
         $currentUser = $this->getUser();
-        if ($enteredCode === $currentUser->getVerificationCode()) {
+
+        if ($enteredCode === $currentUser->getTwoFAcode()) {
             if ($type === 'settingCustom') {
                 $command = 'php bin/console reset:customSettings --yes';
                 $projectRootDir = $this->getParameter('kernel.project_dir');
