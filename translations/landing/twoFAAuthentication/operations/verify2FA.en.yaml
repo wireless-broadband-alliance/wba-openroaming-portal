@@ -2,8 +2,8 @@ title: 'Two-Factor Authentication - Verification'
 logoAlt: 'Customer Logo'
 heading: 'Two-Factor Authentication - Verification'
 notEnforced:
-    disabled: 'Two-factor authentication is currently <strong>disabled</strong> for your account. Enabling it provides an extra layer of security to help protect your account from unauthorized access.'
-    enabled: 'Two-factor authentication is currently <strong>enabled</strong> for your account. This helps secure your account and protect it from unauthorized access.'
+    disabled: 'Two-factor authentication is currently disabled for your account. Enabling it provides an extra layer of security to help protect your account from unauthorized access.'
+    enabled: 'Two-factor authentication is currently enabled for your account. This helps secure your account and protect it from unauthorized access.'
     prompt: 'Please enter the code sent to you to proceed with 2FA verification.'
 enforced:
     local: 'Two-factor authentication is required for certain account types to ensure compliance with security policies. Please enter the code sent to you to verify and enable 2FA for your account.'

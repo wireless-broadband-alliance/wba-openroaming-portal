@@ -2,8 +2,8 @@ title: 'Autenticação de Dois Fatores - Verificação'
 logoAlt: 'Logotipo do Cliente'
 heading: 'Autenticação de Dois Fatores - Verificação'
 notEnforced:
-    disabled: 'A autenticação de dois fatores está atualmente <strong>desativada</strong> para a sua conta. Ativá-la fornece uma camada extra de segurança para proteger sua conta contra acessos não autorizados.'
-    enabled: 'A autenticação de dois fatores está atualmente <strong>ativada</strong> para a sua conta. Isso ajuda a proteger sua conta contra acessos não autorizados.'
+    disabled: 'A autenticação de dois fatores está atualmente desativada para a sua conta. Ativá-la fornece uma camada extra de segurança para proteger sua conta contra acessos não autorizados.'
+    enabled: 'A autenticação de dois fatores está atualmente ativada para a sua conta. Isso ajuda a proteger sua conta contra acessos não autorizados.'
     prompt: 'Por favor, insira o código enviado para você para prosseguir com a verificação 2FA.'
 enforced:
     local: 'A autenticação de dois fatores é obrigatória para determinados tipos de conta para garantir conformidade com políticas de segurança. Insira o código enviado para verificar e ativar a 2FA na sua conta.'
