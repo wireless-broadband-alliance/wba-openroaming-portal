@@ -8,7 +8,7 @@ new_user_steps:
     confirm_account: 'Clique <a href="%confirmLink%" style="font-weight: 700; color: #7BBA29; text-decoration: underline;">aqui</a> para confirmar a sua conta.'
     download_profile: "Após a confirmação, não se esqueça de clicar em <strong>“Download e Instalar Perfil”</strong> no portal para configurar o seu dispositivo."
     password: "Palavra-passe: Sua palavra-passe é: <strong style='color: #0045AD;'>%password%</strong>"
-    enter_code: "Se tiver problemas com o link de confirmação, inicie sessão com suas credenciais (email e palavra-passe) e insira este código: <strong style='color: #0045AD;'>%verificationCode%</strong>"
+    enter_code: "Se tiver problemas com o link de confirmação, inicie sessão com suas credenciais (email e palavra-passe) e insira este código: <strong style='color: #0045AD;'>%twoFaCode%</strong>"
 password_reset_intro: 'Sua nova palavra-passe temporária foi gerada:'
 password_reset_warning: 'Por favor, mantenha esta palavra-passe em segurança e não a compartilhe com ninguém. Você pode alterá-la nas configurações de sua conta.'
 footer:

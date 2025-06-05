@@ -44,7 +44,7 @@ readonly class RegistrationEmailGenerator
                 'uuid' => $user->getEmail(),
                 'supportTeam' => $supportTeam,
                 'contactEmail' => $contactEmail,
-                'verificationCode' => $user->getTwoFAcode(),
+                'twoFaCode' => $user->getTwoFAcode(),
                 'password' => $password,
             ]);
 

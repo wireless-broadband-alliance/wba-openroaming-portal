@@ -45,6 +45,8 @@ class SecurityController extends AbstractController
     #[Route('/login', name: 'app_login')]
     public function login(Request $request, AuthenticationUtils $authenticationUtils): Response
     {
+        $uuidFromExpiredLinkRegistration = $request->query->get('uuid');
+
         /** @var User $user */
         $user = $this->getUser();
         if ($user instanceof User) {
@@ -58,7 +60,7 @@ class SecurityController extends AbstractController
         }
 
         // Last username entered by the user (this will be empty if the user clicked the verification link)
-        $lastUsername = $authenticationUtils->getLastUsername();
+        $lastUsername = $uuidFromExpiredLinkRegistration ?? $authenticationUtils->getLastUsername();
         $user = $this->userRepository->findOneBy([
             'uuid' => $lastUsername,
         ]);

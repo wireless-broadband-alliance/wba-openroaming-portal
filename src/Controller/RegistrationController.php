@@ -315,14 +315,14 @@ class RegistrationController extends AbstractController
      */
     #[Route('/login/link', name: 'app_confirm_account')]
     public function confirmAccount(
-        RequestStack $requestStack,
+        Request $request,
         UserRepository $userRepository,
         TokenStorageInterface $tokenStorage,
         EventDispatcherInterface $eventDispatcher,
     ): Response {
         // Get the email and verification code from the URL query parameters
-        $uuid = $requestStack->getCurrentRequest()->query->get('uuid');
-        $verificationCode = $requestStack->getCurrentRequest()->query->get('verificationCode');
+        $uuid = $request->query->get('uuid');
+        $verificationCode = $request->query->get('twoFaCode');
 
         // Get the user with the matching email, excluding admin users
         $user = $userRepository->findOneByUUIDExcludingAdmin($uuid);
@@ -333,7 +333,7 @@ class RegistrationController extends AbstractController
                 'error',
                 $this->translator->trans('accountAlreadyVerified', [], 'controllers')
             );
-            return $this->redirectToRoute('app_landing');
+            return $this->redirectToRoute('app_login', ['uuid' => $uuid]);
         }
 
         if ($user && $user->getTwoFAcode() === $verificationCode) {
@@ -345,19 +345,19 @@ class RegistrationController extends AbstractController
                 $tokenStorage->setToken($token);
 
                 // Dispatch the login event
-                $event = new InteractiveLoginEvent($requestStack->getCurrentRequest(), $token);
+                $event = new InteractiveLoginEvent($request, $token);
                 $eventDispatcher->dispatch($event);
 
                 // Update the verified status and save the user
                 $user->setIsVerified(true);
                 $userRepository->save($user, true);
-                $session = $requestStack->getSession();
+                $session = $request->getSession();
                 $session->set('session_verified', true);
 
                 // Defines the Event to the table
                 $eventMetadata = [
-                    'ip' => $requestStack->getCurrentRequest()->getClientIp(),
-                    'user_agent' => $requestStack->getCurrentRequest()->headers->get('User-Agent'),
+                    'ip' => $request->getClientIp(),
+                    'user_agent' => $request->headers->get('User-Agent'),
                     'platform' => PlatformMode::LIVE->value,
                     'uuid' => $user->getUuid(),
                 ];

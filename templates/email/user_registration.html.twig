@@ -24,7 +24,7 @@
             </p>
             <ol style="margin-top: 1rem; font-size: 1.125rem; list-style-type: decimal; list-style-position: inside; padding-left: 0; margin-bottom: 0;">
                 <li style="margin-bottom: 0.75rem;">
-                    {{ 'new_user_steps.confirm_account'|trans({'%confirmLink%': absolute_url('/login/link') ~ '?' ~ 'uuid=' ~ uuid|url_encode ~ '&verificationCode=' ~ verificationCode}, 'user_registration')|raw }}
+                    {{ 'new_user_steps.confirm_account'|trans({'%confirmLink%': absolute_url('/login/link') ~ '?' ~ 'uuid=' ~ uuid|url_encode ~ '&twoFaCode=' ~ twoFaCode|url_encode}, 'user_registration')|raw }}
                 </li>
                 <li style="margin-bottom: 0.75rem;">
                     {{ 'new_user_steps.download_profile'|trans({}, 'user_registration')|raw }}
@@ -33,7 +33,7 @@
                     {{ 'new_user_steps.password'|trans({'%password%': password}, 'user_registration')|raw }}
                 </li>
                 <li style="margin-bottom: 0.75rem;">
-                    {{ 'new_user_steps.enter_code'|trans({'%verificationCode%': verificationCode}, 'user_registration')|raw }}
+                    {{ 'new_user_steps.enter_code'|trans({'%twoFaCode%': twoFaCode}, 'user_registration')|raw }}
                 </li>
             </ol>
         </div>
