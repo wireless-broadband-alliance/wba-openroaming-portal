@@ -13,6 +13,10 @@
   display of results per page)
 - New conditions to restore the user session, only restore on the firewall "landing"
 - Invalidate session on the dashboard in case the admin changes is password on the landing firewall.
+- New return detector for expired links on registration email, now it returns to the login page with the input
+  pre-fielded
+- For security reasons, 2FA is now required to be configured for admin users; now the dashboard is no longer assessable
+  without it.
 - **Login only with uuid** → This new feature simplifies the process of authentication on the portal using only the
   account uuid. This way the user confirm himself everytime to get the confirmation code for authentication.
 
