@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Event;
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
 use App\Enum\AnalyticalEventType;
@@ -314,7 +315,10 @@ class UsersManagementController extends AbstractController
                 'controllers'
             )
         );
-        return $this->redirectToRoute('admin_page');
+
+        // Return to the last page where the user has (with searching filters)
+        $lastPage = $request->headers->get('referer', '/dashboard');
+        return $this->redirect($lastPage);
     }
 
     /**
@@ -430,7 +434,9 @@ class UsersManagementController extends AbstractController
                 )
             );
 
-            return $this->redirectToRoute('admin_page');
+            // Return to the last page where the user has (with searching filters)
+            $lastPage = $request->headers->get('referer', '/dashboard');
+            return $this->redirect($lastPage);
         }
 
         $emailSender = $this->parameterBag->get('app.email_address');
@@ -468,13 +474,12 @@ class UsersManagementController extends AbstractController
                 $email = new Email()
                     ->from(new Address($emailSender, $nameSender))
                     ->to($user->getEmail())
-                    ->subject($this->translator->trans('subject_registration_details', [], 'user_password'))
+                    ->subject($this->translator->trans('subject_password_reset_details', [], 'user_password_reset'))
                     ->html(
                         $this->renderView(
-                            'user_registration.html.twig',
+                            'email/user_password_reset.html.twig',
                             [
                                 'password' => $newPassword,
-                                'isNewUser' => false,
                                 'supportTeam' => $supportTeam,
                                 'contactEmail' => $contactEmail
                             ]
@@ -510,7 +515,7 @@ class UsersManagementController extends AbstractController
                 $currentTime = new DateTime();
 
                 // Retrieve the metadata from the latest event
-                $latestEventMetadata = $latestEvent instanceof \App\Entity\Event ? $latestEvent->getEventMetadata(
+                $latestEventMetadata = $latestEvent instanceof Event ? $latestEvent->getEventMetadata(
                 ) : [];
                 $lastResetAccountPasswordTime = isset($latestEventMetadata['lastResetAccountPasswordTime'])
                     ? new DateTime($latestEventMetadata['lastResetAccountPasswordTime'])
@@ -555,7 +560,10 @@ class UsersManagementController extends AbstractController
                     'controllers'
                 )
             );
-            return $this->redirectToRoute('admin_page');
+
+            // Return to the last page where the user has (with searching filters)
+            $lastPage = $request->headers->get('referer', '/dashboard');
+            return $this->redirect($lastPage);
         }
 
         return $this->render(

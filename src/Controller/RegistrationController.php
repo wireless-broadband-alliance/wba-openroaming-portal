@@ -251,7 +251,6 @@ class RegistrationController extends AbstractController
                     );
                 }
 
-                $user->setUuid($user->getEmail());
                 $user->setCreatedAt(new DateTime());
                 $user->setTwoFAcode($this->verificationCodeGenerator->generateVerificationCode());
                 $userAuths->setProvider(UserProvider::PORTAL_ACCOUNT->value);
@@ -276,7 +275,7 @@ class RegistrationController extends AbstractController
                     $eventMetadata
                 );
 
-                $verificationCode = $user->getVerificationCode();
+                $verificationCode = $user->getTwoFAcode();
 
                 // Send SMS
                 $message = $this->translator->trans('yourAccountPasswordIs', [], 'controllers')
