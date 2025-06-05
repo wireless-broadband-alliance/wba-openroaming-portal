@@ -106,7 +106,7 @@ readonly class UserDeletionService
 
         $eventMetadata = [
             'uuid' => $deletedUserUuid,
-            'deletedBy' => $deletedByUserUuid,
+            'deletedBy' => $deletedUserByUuid,
             'ip' => $request->getClientIp(),
         ];
         $this->eventActions->saveEvent(
