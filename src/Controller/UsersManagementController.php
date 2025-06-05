@@ -471,7 +471,7 @@ class UsersManagementController extends AbstractController
                     ->subject($this->translator->trans('subject_registration_details', [], 'user_password'))
                     ->html(
                         $this->renderView(
-                            'email/user_password.html.twig',
+                            'user_registration.html.twig',
                             [
                                 'password' => $newPassword,
                                 'isNewUser' => false,

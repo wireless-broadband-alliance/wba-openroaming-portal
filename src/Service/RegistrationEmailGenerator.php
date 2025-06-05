@@ -38,15 +38,13 @@ readonly class RegistrationEmailGenerator
                 )
             )
             ->to($user->getEmail())
-            ->subject($this->translator->trans('subject_registration_details', [], 'user_password'))
-            ->htmlTemplate('email/user_password.html.twig')
+            ->subject($this->translator->trans('subject_registration_details', [], 'user_registration'))
+            ->htmlTemplate('email/user_registration.html.twig')
             ->context([
                 'uuid' => $user->getEmail(),
                 'supportTeam' => $supportTeam,
                 'contactEmail' => $contactEmail,
                 'verificationCode' => $user->getTwoFAcode(),
-                'isNewUser' => true,
-                // This variable informs if the user it's new our if it's just a password reset request
                 'password' => $password,
             ]);
 

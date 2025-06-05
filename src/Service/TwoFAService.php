@@ -215,13 +215,13 @@ readonly class TwoFAService
                         )
                     )
                     ->to($user->getEmail())
-                    ->subject($this->translator->trans('subject', [], 'confirmation_resend_code'))
-                    ->htmlTemplate('email/confirmation_resend_code.html.twig')
+                    ->subject($this->translator->trans('subject_verify', [], 'user_verification'))
+                    ->htmlTemplate('email/user_verification.html.twig')
                     ->context([
                         'uuid' => $user->getEmail(),
                         'emailTitle' => $emailTitle,
                         'contactEmail' => $contactEmail,
-                        'code' => $code,
+                        'verificationCode' => $code,
                     ]);
             }
 
@@ -244,7 +244,7 @@ readonly class TwoFAService
                             'user_code'
                         )
                     )
-                    ->htmlTemplate('email/user_code.html.twig')
+                    ->htmlTemplate('email/user_verification.html.twig')
                     ->context([
                         'uuid' => $user->getEmail(),
                         'emailTitle' => $emailTitle,

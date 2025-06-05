@@ -12,9 +12,9 @@
         <div style="background-color: #7BBA29; color: #fff; padding: 1.5rem; display: flex; justify-content: space-between; align-items: center;">
             <h1 style="margin: 0; font-size: 1.5rem; font-weight: 700; color: #fff;">
                 {% if is2FATemplate %}
-                    {{ 'subject_2fa'|trans({}, 'user_code') }}
+                    {{ 'subject_2fa'|trans({}, 'user_verification') }}
                 {% else %}
-                    {{ 'subject_verify'|trans({}, 'user_code') }}
+                    {{ 'subject_verify'|trans({}, 'user_verification') }}
                 {% endif %}
             </h1>
         </div>
@@ -23,26 +23,26 @@
         <div style='padding: 1.5rem;'>
             {% if is2FATemplate %}
                 <p style='font-size: 1.125rem; margin-bottom: 1rem;'>
-                    {{ 'two_factor_message'|trans({}, 'user_code') }}
+                    {{ 'two_factor_message'|trans({}, 'user_verification') }}
                 </p>
                 <p style='text-align: center; font-size: 1.5rem; font-weight: 700; color: #0045AD; margin: 1.5rem 0;'>
                     {{ verificationCode }}
                 </p>
                 <p style='font-size: 1.125rem; margin-bottom: 1rem;'>
-                    {{ 'valid_for_message'|trans({'%seconds%': secondsLeft}, 'user_code') }}
+                    {{ 'valid_for_message'|trans({'%seconds%': secondsLeft}, 'user_verification') }}
                 </p>
                 <p style='font-size: 1.125rem; margin-bottom: 1rem;'>
-                    {{ 'confidential_message'|trans({}, 'user_code') }}
+                    {{ 'confidential_message'|trans({}, 'user_verification') }}
                 </p>
             {% else %}
                 <p style='font-size: 1.125rem; margin-bottom: 1rem;'>
-                    {{ 'one_time_code_message'|trans({}, 'user_code') }}
+                    {{ 'one_time_code_message'|trans({}, 'user_verification') }}
                 </p>
                 <p style='text-align: center; font-size: 1.5rem; font-weight: 700; color: #0045AD; margin: 1.5rem 0;'>
                     {{ verificationCode }}
                 </p>
                 <p style='font-size: 1.125rem; margin-bottom: 1rem;'>
-                    {{ 'confidential_message'|trans({}, 'user_code') }}
+                    {{ 'confidential_message'|trans({}, 'user_verification') }}
                 </p>
             {% endif %}
         </div>
@@ -50,8 +50,8 @@
         <!-- Footer Section -->
         <div style="background-color: #f4f4f4; text-align: center; padding: 1.5rem;">
             <p style="font-size: 0.875rem; color: #718096;">
-                {{ 'footer.thank_you'|trans({}, 'user_code') }}<br>
-                <strong>{{ 'footer.team'|trans({'%emailTitle%': emailTitle}, 'user_code') }}</strong>
+                {{ 'footer.thank_you'|trans({}, 'user_verification') }}<br>
+                <strong>{{ 'footer.team'|trans({'%emailTitle%': emailTitle}, 'user_verification') }}</strong>
             </p>
         </div>
 

@@ -12,22 +12,28 @@
         <!-- Title Section -->
         <div style="background-color: #7BBA29; color: #fff; text-align: center; padding: 1.5rem;">
             <h1 style="font-size: 1.5rem; font-weight: 700;">
-                {{ 'header_welcome'|trans({}, 'confirmation_code') }}
+                {{ 'header_welcome'|trans({}, 'user_registration') }}
             </h1>
         </div>
 
         <!-- Main Content -->
         <div style="padding: 1.5rem;">
-            <!-- Confirmation Code Instructions -->
+            <!-- New User Instructions -->
             <p style="font-size: 1.125rem; margin-bottom: 1rem;">
-                {{ 'intro_login_User'|trans({}, 'confirmation_code') }}
+                {{ 'intro_new_user'|trans({}, 'user_registration') }}
             </p>
             <ol style="margin-top: 1rem; font-size: 1.125rem; list-style-type: decimal; list-style-position: inside; padding-left: 0; margin-bottom: 0;">
                 <li style="margin-bottom: 0.75rem;">
-                    {{ 'login_code'|trans({'%code%': code,}, 'confirmation_code')|raw }}
+                    {{ 'new_user_steps.confirm_account'|trans({'%confirmLink%': absolute_url('/login/link') ~ '?' ~ 'uuid=' ~ uuid|url_encode ~ '&verificationCode=' ~ verificationCode}, 'user_registration')|raw }}
                 </li>
                 <li style="margin-bottom: 0.75rem;">
-                    {{ 'download_profile'|trans({}, 'confirmation_code')|raw }}
+                    {{ 'new_user_steps.download_profile'|trans({}, 'user_registration')|raw }}
+                </li>
+                <li style="margin-bottom: 0.75rem;">
+                    {{ 'new_user_steps.password'|trans({'%password%': password}, 'user_registration')|raw }}
+                </li>
+                <li style="margin-bottom: 0.75rem;">
+                    {{ 'new_user_steps.enter_code'|trans({'%verificationCode%': verificationCode}, 'user_registration')|raw }}
                 </li>
             </ol>
         </div>
@@ -35,13 +41,14 @@
         <!-- Footer Section -->
         <div style="background-color: #f4f4f4; text-align: center; padding: 1.5rem;">
             <p style="font-size: 0.875rem; color: #718096;">
-                {{ 'support_team'|trans({}, 'confirmation_code') }}
-                <a href="mailto:{{ contactEmail }}"
-                   style="color: #0045AD; text-decoration: underline;">{{ contactEmail }}</a>
+                {{ 'footer.support_team'|trans({}, 'user_registration') }}
+                <a href="mailto:{{ contactEmail }}" style="color: #0045AD; text-decoration: underline;">
+                    {{ contactEmail }}
+                </a>
             </p>
             <p style="font-size: 0.875rem; color: #718096;">
-                {{ 'thank_you'|trans({}, 'confirmation_code') }}<br>
-                <strong>{{ emailTitle }}</strong>
+                {{ 'footer.thank_you'|trans({}, 'user_registration') }}<br>
+                <strong>{{ 'footer.team'|trans({'%supportTeam%': supportTeam}, 'user_registration') }}</strong>
             </p>
         </div>
 
