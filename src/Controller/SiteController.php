@@ -174,41 +174,45 @@ class SiteController extends AbstractController
                 return $this->redirectToRoute('app_logout');
             }
         }
-
-        if (
-            $currentUser &&
-            (
-                $currentUser->getTwoFAType() !==
-                UserTwoFactorAuthenticationStatus::DISABLED->value &&
-                !$session->has('2fa_verified_landing'))
-        ) {
-            if (
-                $currentUser->getTwoFAType() ===
-                UserTwoFactorAuthenticationStatus::SMS->value
+        if ($currentUser) {
+            if ($data["LOGIN_WITH_UUID_ONLY"]["value"] === OperationMode::OFF->value ||
+                $currentUser->getUserExternalAuths()[0]->getProvider() !== UserProvider::PORTAL_ACCOUNT->value
             ) {
-                return $this->redirectToRoute('app_2FA_generate_code');
+                if (
+                    $currentUser &&
+                    (
+                        $currentUser->getTwoFAType() !==
+                        UserTwoFactorAuthenticationStatus::DISABLED->value &&
+                        !$session->has('2fa_verified_landing'))
+                ) {
+                    if (
+                        $currentUser->getTwoFAType() ===
+                        UserTwoFactorAuthenticationStatus::SMS->value
+                    ) {
+                        return $this->redirectToRoute('app_2FA_generate_code');
+                    }
+                    if (
+                        $currentUser->getTwoFAType() ===
+                        UserTwoFactorAuthenticationStatus::EMAIL->value
+                    ) {
+                        return $this->redirectToRoute('app_2FA_generate_code');
+                    }
+                    if (
+                        $currentUser->getTwoFAType() ===
+                        UserTwoFactorAuthenticationStatus::TOTP->value
+                    ) {
+                        return $this->redirectToRoute('app_verify2FA_TOTP');
+                    }
+                }
+                // Check if the user has OTPCodes
+                if (
+                    $currentUser &&
+                    $currentUser->getTwoFAtype() !== UserTwoFactorAuthenticationStatus::DISABLED->value &&
+                    !$this->twoFAService->hasValidOTPCodes($currentUser)
+                ) {
+                    return $this->redirectToRoute('app_otpCodes');
+                }
             }
-            if (
-                $currentUser->getTwoFAType() ===
-                UserTwoFactorAuthenticationStatus::EMAIL->value
-            ) {
-                return $this->redirectToRoute('app_2FA_generate_code');
-            }
-            if (
-                $currentUser->getTwoFAType() ===
-                UserTwoFactorAuthenticationStatus::TOTP->value
-            ) {
-                return $this->redirectToRoute('app_verify2FA_TOTP');
-            }
-        }
-
-        // Check if the user has OTPCodes
-        if (
-            $currentUser &&
-            $currentUser->getTwoFAtype() !== UserTwoFactorAuthenticationStatus::DISABLED->value &&
-            !$this->twoFAService->hasValidOTPCodes($currentUser)
-        ) {
-            return $this->redirectToRoute('app_otpCodes');
         }
 
         // Check if the current user has a provider

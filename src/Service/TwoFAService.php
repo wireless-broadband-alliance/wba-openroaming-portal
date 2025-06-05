@@ -202,8 +202,7 @@ readonly class TwoFAService
                         'code' => $code,
                     ]);
             }
-
-            if (
+            elseif (
                 $eventType === AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE_RESEND->value
             ) {
                 // LOGIN_WITH_UUID_ONLY_CODE_RESEND
@@ -224,8 +223,7 @@ readonly class TwoFAService
                         'verificationCode' => $code,
                     ]);
             }
-
-            if (
+            elseif (
                 $eventType === AnalyticalEventType::USER_CREATION->value
             ) {
                 // USER_CREATION
@@ -241,7 +239,7 @@ readonly class TwoFAService
                         $this->translator->trans(
                             'subject_two_factor_code',
                             ['%code%' => $code],
-                            'user_code'
+                            'user_verification'
                         )
                     )
                     ->htmlTemplate('email/user_verification.html.twig')
@@ -253,7 +251,32 @@ readonly class TwoFAService
                         'secondsLeft' => $secondsLeft,
                     ]);
             }
-
+            else {
+                // USER_CREATION
+                $email = new TemplatedEmail()
+                    ->from(
+                        new Address(
+                            $this->parameterBag->get('app.email_address'),
+                            $this->parameterBag->get('app.sender_name')
+                        )
+                    )
+                    ->to($user->getEmail())
+                    ->subject(
+                        $this->translator->trans(
+                            'subject_two_factor_code',
+                            ['%code%' => $code],
+                            'user_verification'
+                        )
+                    )
+                    ->htmlTemplate('email/user_verification.html.twig')
+                    ->context([
+                        'uuid' => $user->getEmail(),
+                        'emailTitle' => $emailTitle,
+                        'verificationCode' => $code,
+                        'is2FATemplate' => true,
+                        'secondsLeft' => $secondsLeft,
+                    ]);
+            }
             $this->mailer->send($email);
         } elseif ($messageType === UserTwoFactorAuthenticationStatus::SMS->value || $user->getPhoneNumber()) {
             if (

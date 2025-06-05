@@ -7,6 +7,7 @@ use App\Enum\AnalyticalEventType;
 use App\Enum\FirewallType;
 use App\Enum\OperationMode;
 use App\Enum\TwoFAType;
+use App\Enum\UserProvider;
 use App\Enum\UserTwoFactorAuthenticationStatus;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
@@ -225,23 +226,28 @@ class LandingAuthenticator extends AbstractLoginFormAuthenticator
 
     protected function redirectBasedOnTwoFAType(User $user): Response
     {
-        // Check if the user's 2FA type is SMS or EMAIL and redirect accordingly
+        $loginWithUuidOnlySetting = $this->settingRepository->findOneBy(['name' => 'LOGIN_WITH_UUID_ONLY']);
         if (
-            $user->getTwoFAType() === UserTwoFactorAuthenticationStatus::SMS->value ||
-            $user->getTwoFAType() === UserTwoFactorAuthenticationStatus::EMAIL->value
+            ($loginWithUuidOnlySetting && $loginWithUuidOnlySetting->getValue() === OperationMode::OFF->value) ||
+            $user->getUserExternalAuths()[0]->getProvider() !== UserProvider::PORTAL_ACCOUNT->value
         ) {
-            return new RedirectResponse($this->urlGenerator->generate('app_2FA_generate_code', [
-                'context' => FirewallType::LANDING->value,
-            ]));
-        }
+            // Check if the user's 2FA type is SMS or EMAIL and redirect accordingly
+            if (
+                $user->getTwoFAType() === UserTwoFactorAuthenticationStatus::SMS->value ||
+                $user->getTwoFAType() === UserTwoFactorAuthenticationStatus::EMAIL->value
+            ) {
+                return new RedirectResponse($this->urlGenerator->generate('app_2FA_generate_code', [
+                    'context' => FirewallType::LANDING->value,
+                ]));
+            }
 
-        // Check if the user's 2FA type is TOTP and redirect accordingly
-        if ($user->getTwoFAType() === UserTwoFactorAuthenticationStatus::TOTP->value) {
-            return new RedirectResponse($this->urlGenerator->generate('app_verify2FA_TOTP', [
-                'context' => FirewallType::LANDING->value,
-            ]));
+            // Check if the user's 2FA type is TOTP and redirect accordingly
+            if ($user->getTwoFAType() === UserTwoFactorAuthenticationStatus::TOTP->value) {
+                return new RedirectResponse($this->urlGenerator->generate('app_verify2FA_TOTP', [
+                    'context' => FirewallType::LANDING->value,
+                ]));
+            }
         }
-
         // Redirect to app_landing as a fallback
         return new RedirectResponse($this->urlGenerator->generate('app_landing'));
     }
