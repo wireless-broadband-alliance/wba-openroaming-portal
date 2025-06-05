@@ -61,6 +61,9 @@ readonly class SessionValidatorListener
             '/dashboard/generate2FACode/swapMethod',
             '/dashboard/2FASwapMethod/disable/TOTP',
             '/dashboard/2FASwapMethod/disableLocal',
+            '/dashboard/disable2FA/resend',
+            '/dashboard/enable2FA/resend',
+            '/dashboard/validate2FA/resend',
         ];
         if ($userToken && str_starts_with($path, '/dashboard')) {
             // Make an exception to ignore the '/dashboard/login' route
