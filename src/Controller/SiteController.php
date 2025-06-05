@@ -62,7 +62,6 @@ class SiteController extends AbstractController
      * @param UserExternalAuthRepository $userExternalAuthRepository The repository is required to fetch the provider.
      * @param GetSettings $getSettings The instance of the GetSettings class.
      * @param EventActions $eventActions Used to generate event related to the User creation
-     * @param VerificationCodeEmailGenerator $verificationCodeGenerator Generates a new verification code
      * of the user account
      * @param ProfileManager $profileManager Calls the functions to enable/disable provisioning profiles
      */
@@ -71,7 +70,6 @@ class SiteController extends AbstractController
         private readonly UserExternalAuthRepository $userExternalAuthRepository,
         private readonly GetSettings $getSettings,
         private readonly EventActions $eventActions,
-        private readonly VerificationCodeEmailGenerator $verificationCodeGenerator,
         private readonly ProfileManager $profileManager,
         private readonly TwoFAService $twoFAService,
         private readonly TranslatorInterface $translator,
@@ -86,7 +84,6 @@ class SiteController extends AbstractController
         UserAuthenticatorInterface $userAuthenticator,
         LandingAuthenticator $authenticator,
         EntityManagerInterface $entityManager,
-        RequestStack $requestStack
     ): Response {
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings();
@@ -118,7 +115,7 @@ class SiteController extends AbstractController
             }
 
             // Check if the user is verified
-            if (!$session->has('user_verified_landing')) {
+            if (!$session->has('session_verified')) {
                 if ($this->twoFAService->canValidationCode(
                     $currentUser,
                     AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE->value
@@ -235,7 +232,8 @@ class SiteController extends AbstractController
         }
 
         $userAgent = $request->headers->get('User-Agent');
-        $actionName = $requestStack->getCurrentRequest()->attributes->get('_route');
+        $actionName = $request->attributes->get('_route');
+
         if ($data['PLATFORM_MODE']['value']) {
             if ($request->isMethod('POST')) {
                 $payload = $request->request->all();
@@ -295,8 +293,9 @@ class SiteController extends AbstractController
                     }
 
                     if ($data["USER_VERIFICATION"]['value'] === OperationMode::ON->value) {
-                        return $this->redirectToRoute('app_regenerate_email_code');
+                        return $this->redirectToRoute('app_login_confirmation');
                     }
+
                     if ($data["USER_VERIFICATION"]['value'] === OperationMode::OFF->value) {
                         return $this->redirectToRoute('app_landing');
                     }

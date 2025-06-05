@@ -12,7 +12,7 @@
         <!-- Title Section -->
         <div style="background-color: #7BBA29; color: #fff; text-align: center; padding: 1.5rem;">
             <h1 style="font-size: 1.5rem; font-weight: 700;">
-                {{ 'header_welcome'|trans({}, 'magic_link_code') }}
+                {{ 'header_welcome'|trans({}, 'confirmation_code') }}
             </h1>
         </div>
 
@@ -20,14 +20,14 @@
         <div style="padding: 1.5rem;">
             <!-- Magic Link Instructions -->
             <p style="font-size: 1.125rem; margin-bottom: 1rem;">
-                {{ 'intro_login_User'|trans({}, 'magic_link_code') }}
+                {{ 'intro_login_User'|trans({}, 'confirmation_code') }}
             </p>
             <ol style="margin-top: 1rem; font-size: 1.125rem; list-style-type: decimal; list-style-position: inside; padding-left: 0; margin-bottom: 0;">
                 <li style="margin-bottom: 0.75rem;">
-                    {{ 'login_code'|trans({'%code%': code,}, 'magic_link_code')|raw }}
+                    {{ 'login_code'|trans({'%code%': code,}, 'confirmation_code')|raw }}
                 </li>
                 <li style="margin-bottom: 0.75rem;">
-                    {{ 'download_profile'|trans({}, 'magic_link_code')|raw }}
+                    {{ 'download_profile'|trans({}, 'confirmation_code')|raw }}
                 </li>
             </ol>
         </div>
@@ -35,12 +35,12 @@
         <!-- Footer Section -->
         <div style="background-color: #f4f4f4; text-align: center; padding: 1.5rem;">
             <p style="font-size: 0.875rem; color: #718096;">
-                {{ 'support_team'|trans({}, 'magic_link_code') }}
+                {{ 'support_team'|trans({}, 'confirmation_code') }}
                 <a href="mailto:{{ contactEmail }}"
                    style="color: #0045AD; text-decoration: underline;">{{ contactEmail }}</a>
             </p>
             <p style="font-size: 0.875rem; color: #718096;">
-                {{ 'thank_you'|trans({}, 'magic_link_code') }}<br>
+                {{ 'thank_you'|trans({}, 'confirmation_code') }}<br>
                 <strong>{{ emailTitle }}</strong>
             </p>
         </div>

@@ -87,18 +87,10 @@
             {# Divider #}
             <div class="my-[25px] divider"></div>
         {% else %}
-            {% if data.USER_VERIFICATION.value == constant('App\\Enum\\OperationMode::ON').value %}
-                {% if not app.user.isVerified %}
-                    {{ include('landing/shared/_account_activation.html.twig') }}
-                {% endif %}
-            {% endif %}
-
-            {% if app.request.attributes.get('_route') != 'app_email_code' %}
-                <form method="post" novalidate>
-                    {# OS #}
-                    {{ include('landing/shared/_os_selection.html.twig') }}
-                </form>
-            {% endif %}
+            <form method="post" novalidate>
+                {# OS #}
+                {{ include('landing/shared/_os_selection.html.twig') }}
+            </form>
 
             {{ include('landing/shared/returnActions/_logout.html.twig') }}
 

@@ -1,7 +1,0 @@
-phone: 'Número de Telefone'
-email: 'Email'
-codeSent: 'Um código foi enviado para o seu {label}. Por favor, insira o código ou gere um novo.'
-validateButton: 'Validar'
-resendButton: 'Reenviar Código'
-activationTitle: 'Ativação de {title}'
-codeLabel: 'Código'

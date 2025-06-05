@@ -88,15 +88,12 @@ class SecurityController extends AbstractController
     ): Response {
         /** @var User $user */
         $user = $this->getUser();
+
         if (!$user instanceof User) {
             return $this->redirectToRoute('app_login');
         }
 
         $data = $this->getSettings->getSettings();
-
-        if ($data['PLATFORM_MODE']['value'] === true) {
-            return $this->redirectToRoute('app_landing');
-        }
 
         $form = $this->createForm(TwoFACode::class);
         $form->handleRequest($request);
@@ -107,7 +104,7 @@ class SecurityController extends AbstractController
                 $user->setIsVerified(true);
                 $this->entityManager->persist($user);
                 $this->entityManager->flush();
-                $session->set('user_verified_landing', true);
+                $session->set('session_verified', true);
                 return $this->redirectToRoute('app_landing');
             }
 

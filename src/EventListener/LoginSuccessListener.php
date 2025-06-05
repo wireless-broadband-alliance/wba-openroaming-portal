@@ -40,7 +40,7 @@ readonly class LoginSuccessListener implements EventSubscriberInterface
 
         if ($user instanceof User) {
             if ($data["LOGIN_WITH_UUID_ONLY"]["value"] === OperationMode::OFF->value && $user->isVerified()) {
-                $session->set('user_verified_landing', true);
+                $session->set('session_verified', true);
             }
 
             // Defines the Event to the table

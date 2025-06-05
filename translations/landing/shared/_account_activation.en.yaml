@@ -1,7 +1,0 @@
-phone: 'Phone Number'
-email: 'Email'
-codeSent: 'A code has been sent to your {label}. Please enter the code or generate a new one.'
-validateButton: 'Validate'
-resendButton: 'Resend Code'
-activationTitle: '{title} Activation'
-codeLabel: 'Code'

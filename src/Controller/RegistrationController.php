@@ -346,18 +346,19 @@ class RegistrationController extends AbstractController
                 $tokenStorage->setToken($token);
 
                 // Dispatch the login event
-                $request = $requestStack->getCurrentRequest();
-                $event = new InteractiveLoginEvent($request, $token);
+                $event = new InteractiveLoginEvent($requestStack->getCurrentRequest(), $token);
                 $eventDispatcher->dispatch($event);
 
                 // Update the verified status and save the user
                 $user->setIsVerified(true);
                 $userRepository->save($user, true);
+                $session = $requestStack->getSession();
+                $session->set('session_verified', true);
 
                 // Defines the Event to the table
                 $eventMetadata = [
-                    'ip' => $request->getClientIp(),
-                    'user_agent' => $request->headers->get('User-Agent'),
+                    'ip' => $requestStack->getCurrentRequest()->getClientIp(),
+                    'user_agent' => $requestStack->getCurrentRequest()->headers->get('User-Agent'),
                     'platform' => PlatformMode::LIVE->value,
                     'uuid' => $user->getUuid(),
                 ];

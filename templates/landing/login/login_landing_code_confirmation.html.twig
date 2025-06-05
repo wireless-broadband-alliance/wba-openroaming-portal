@@ -10,7 +10,8 @@
     {{ block('toast_messages') }}
 
     {% if data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\OperationMode::ON').value %}
-        <img class="w-[120px] h-[58px] object-scale-down mt-[75px]" src="{{ data.CUSTOMER_LOGO.value }}" alt="{{ 'logoAlt'|trans({}, 'login_landing') }}"/>
+        <img class="w-[120px] h-[58px] object-scale-down mt-[75px]" src="{{ data.CUSTOMER_LOGO.value }}"
+             alt="{{ 'logoAlt'|trans({}, 'login_landing') }}"/>
     {% endif %}
 
     <div class="{{ data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\OperationMode::ON').value ? 'pt-[28px]' : 'pt-[161px]' }} leading-7">
@@ -33,15 +34,13 @@
     <div class="grid mt-4 grid-cols-1 sm:gap-4 lg:gap-6 sm:[grid-template-columns:repeat(auto-fit,minmax(150px,1fr))] md:my-2 my-3 space-y-4 sm:space-y-0">
         <button class="btn-primary"
                 type="submit">{{ 'btn.login'|trans({}, 'login_landing') }}</button>
-        {% if data.PLATFORM_MODE.value != constant('App\\Enum\\PlatformMode::DEMO').value %}
-            <a href="{{ path('app_local_resend_code', {
-                context: context,
-                type: constant('App\\Enum\\AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE_RESEND').value},
-            ) }}"
-               class="w-[220px] btn-secondary">
-                {{ 'btn.resend'|trans({}, 'login_landing') }}
-            </a>
-        {% endif %}
+        <a href="{{ path('app_local_resend_code', {
+            context: context,
+            type: constant('App\\Enum\\AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE_RESEND').value},
+        ) }}"
+           class="w-[220px] btn-secondary">
+            {{ 'btn.resend'|trans({}, 'login_landing') }}
+        </a>
     </div>
     {{ form_end(form) }}
 

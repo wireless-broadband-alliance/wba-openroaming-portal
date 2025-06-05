@@ -182,9 +182,9 @@ readonly class TwoFAService
             $contactEmail = $this->settingRepository->findOneBy(['name' => 'CONTACT_EMAIL'])->getValue();
 
             if (
-                $eventType === AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE->value ||
-                $eventType === AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE_RESEND->value
+                $eventType === AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE->value
             ) {
+                // LOGIN_WITH_UUID_ONLY_CODE
                 $email = new TemplatedEmail()
                     ->from(
                         new Address(
@@ -193,15 +193,42 @@ readonly class TwoFAService
                         )
                     )
                     ->to($user->getEmail())
-                    ->subject($this->translator->trans('subject', [], 'magic_link_code'))
-                    ->htmlTemplate('email/magic_link_code.html.twig')
+                    ->subject($this->translator->trans('subject', [], 'confirmation_code'))
+                    ->htmlTemplate('email/confirmation_code.html.twig')
                     ->context([
                         'uuid' => $user->getEmail(),
                         'emailTitle' => $emailTitle,
                         'contactEmail' => $contactEmail,
                         'code' => $code,
                     ]);
-            } else {
+            }
+
+            if (
+                $eventType === AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE_RESEND->value
+            ) {
+                // LOGIN_WITH_UUID_ONLY_CODE_RESEND
+                $email = new TemplatedEmail()
+                    ->from(
+                        new Address(
+                            $this->parameterBag->get('app.email_address'),
+                            $this->parameterBag->get('app.sender_name')
+                        )
+                    )
+                    ->to($user->getEmail())
+                    ->subject($this->translator->trans('subject', [], 'confirmation_resend_code'))
+                    ->htmlTemplate('email/confirmation_resend_code.html.twig')
+                    ->context([
+                        'uuid' => $user->getEmail(),
+                        'emailTitle' => $emailTitle,
+                        'contactEmail' => $contactEmail,
+                        'code' => $code,
+                    ]);
+            }
+
+            if (
+                $eventType === AnalyticalEventType::USER_CREATION->value
+            ) {
+                // USER_CREATION
                 $email = new TemplatedEmail()
                     ->from(
                         new Address(
@@ -226,6 +253,7 @@ readonly class TwoFAService
                         'secondsLeft' => $secondsLeft,
                     ]);
             }
+
             $this->mailer->send($email);
         } elseif ($messageType === UserTwoFactorAuthenticationStatus::SMS->value || $user->getPhoneNumber()) {
             if (

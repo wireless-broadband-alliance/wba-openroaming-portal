@@ -1,5 +1,6 @@
 header_welcome: 'Welcome to the OpenRoaming Provisioning Portal!'
 intro_login_User: 'To log in with your OpenRoaming Portal account, please follow these simple steps:'
+subject: 'OpenRoaming Confirmation'
 support_team: 'Support Team:'
 thank_you: 'Thank you,'
 download_profile: 'After logging in, don’t forget to click <strong>“Download and Install Profile”</strong> on the portal to complete setting up your device.'
