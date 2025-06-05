@@ -29,20 +29,13 @@ use App\Service\ProfileManager;
 use App\Service\SendSMS;
 use App\Service\TwoFAService;
 use App\Service\UserDeletionService;
-use App\Service\VerificationCodeEmailGenerator;
-use DateInterval;
 use DateTime;
-use DateTimeInterface;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\NonUniqueResultException;
 use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
-use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -101,9 +94,8 @@ class SiteController extends AbstractController
         ) {
             // Retrieve the cookie about SAML_ACCOUNT Deletion from the request
             $previousLoggedID = $request->cookies->get('previousLoggedID');
-
+            $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $currentUser]);
             if ($previousLoggedID && $previousLoggedID == $currentUser->getId()) {
-                $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $currentUser]);
                 $this->userDeletionService->deleteUser(
                     $currentUser,
                     $userExternalAuths,
@@ -115,7 +107,8 @@ class SiteController extends AbstractController
             }
 
             // Check if the user is verified
-            if (!$session->has('session_verified')) {
+            if ($userExternalAuths[0]->getProvider() === UserProvider::PORTAL_ACCOUNT->value &&
+                !$session->has('session_verified')) {
                 if ($this->twoFAService->canValidationCode(
                     $currentUser,
                     AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE->value

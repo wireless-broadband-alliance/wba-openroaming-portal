@@ -4,8 +4,10 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Enum\FirewallType;
+use App\Enum\UserProvider;
 use App\Form\LoginFormType;
 use App\Form\TwoFACode;
+use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
 use App\Service\GetSettings;
 use App\Service\TwoFAService;
@@ -29,6 +31,7 @@ class SecurityController extends AbstractController
      */
     public function __construct(
         private readonly UserRepository $userRepository,
+        private readonly UserExternalAuthRepository $userExternalAuthRepository,
         private readonly GetSettings $getSettings,
         private readonly TwoFAService $twoFAService,
         private readonly TranslatorInterface $translator,
@@ -91,6 +94,16 @@ class SecurityController extends AbstractController
 
         if (!$user instanceof User) {
             return $this->redirectToRoute('app_login');
+        }
+
+        $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $user]);
+
+        // Check if the user is already verified
+        $session = $request->getSession();
+        if ($userExternalAuths[0]->getProvider() !== UserProvider::PORTAL_ACCOUNT->value ||
+            $session->has('session_verified')
+        ) {
+            return $this->redirectToRoute('app_landing');
         }
 
         $data = $this->getSettings->getSettings();
