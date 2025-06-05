@@ -149,7 +149,7 @@ class RegistrationController extends AbstractController
         $hashedPassword = $userPasswordHasher->hashPassword($user, $data['password']);
         $user->setPassword($hashedPassword);
         $user->setIsVerified(false);
-        $user->setTwoFAcode($this->verificationCodeGenerator->generateVerificationCode());
+        $user->setTwoFAcode($this->verificationCodeGenerator->generateVerificationCode($user));
         $user->setFirstName($data['first_name'] ?? null);
         $user->setLastName($data['last_name'] ?? null);
         $user->setCreatedAt(new DateTime());
@@ -489,7 +489,7 @@ class RegistrationController extends AbstractController
         $hashedPassword = $userPasswordHasher->hashPassword($user, $data['password']);
         $user->setPassword($hashedPassword);
         $user->setIsVerified(false);
-        $user->setTwoFAcode($this->verificationCodeGenerator->generateVerificationCode());
+        $user->setTwoFAcode($this->verificationCodeGenerator->generateVerificationCode($user));
         $user->setFirstName($data['first_name'] ?? null);
         $user->setLastName($data['last_name'] ?? null);
         $user->setCreatedAt(new DateTime());
