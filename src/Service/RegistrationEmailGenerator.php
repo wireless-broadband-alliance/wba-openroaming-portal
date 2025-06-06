@@ -28,15 +28,18 @@ readonly class RegistrationEmailGenerator
     {
         $supportTeam = $this->settingRepository->findOneBy(['name' => 'PAGE_TITLE'])->getValue();
         $contactEmail = $this->settingRepository->findOneBy(['name' => 'CONTACT_EMAIL'])->getValue();
+        $isLoginOnlyWithUUIDActive = $this->settingRepository->findOneBy(['name' => 'LOGIN_WITH_UUID_ONLY'])->getValue(
+        );
+        $customerLogo = $this->settingRepository->findOneBy(['name' => 'CUSTOMER_LOGO'])->getValue();
+        $projectDir =  $this->parameterBag->get('kernel.project_dir');
+        $logoPath = $projectDir . '/public' . $customerLogo;
 
         // Send email to the user with the verification code
         $email = new TemplatedEmail()
-            ->from(
-                new Address(
-                    $this->parameterBag->get('app.email_address'),
-                    $this->parameterBag->get('app.sender_name')
-                )
-            )
+            ->from(new Address(
+                $this->parameterBag->get('app.email_address'),
+                $this->parameterBag->get('app.sender_name')
+            ))
             ->to($user->getEmail())
             ->subject($this->translator->trans('subject_registration_details', [], 'user_registration'))
             ->htmlTemplate('email/user_registration.html.twig')
@@ -46,7 +49,9 @@ readonly class RegistrationEmailGenerator
                 'contactEmail' => $contactEmail,
                 'twoFaCode' => $user->getTwoFAcode(),
                 'password' => $password,
-            ]);
+                'isLoginOnlyWithUUIDActive' => $isLoginOnlyWithUUIDActive
+            ])
+            ->embedFromPath($logoPath, 'logo_cid');
 
         $this->mailer->send($email);
     }

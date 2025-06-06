@@ -1,58 +1,175 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="{{ app.request.locale }}">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Open the door to OpenRoaming!</title>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>OpenRoaming Registration</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet"/>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            background-color: #F4F4F4;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 1300px;
+            background: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .header {
+            background-color: #0B1A58;
+            width: 1300px;
+            height: 256px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .header img {
+            width: 540px;
+            height: 64px;
+            object-fit: contain;
+        }
+
+        .content {
+            width: 1300px;
+            height: 960px;
+            background-color: #FFFFFF;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 2rem;
+            box-sizing: border-box;
+        }
+
+        .content h1 {
+            color: #0B1A58;
+            font-size: 44px;
+            font-weight: 700;
+            margin-bottom: 2rem;
+        }
+
+        .content p {
+            font-size: 32px;
+            margin-bottom: 2.5rem;
+            line-height: 1.5;
+            color: #000;
+        }
+
+        .content p span {
+            font-weight: 600;
+        }
+
+        .content p span.strong {
+            font-weight: 700;
+        }
+
+        .btn-download {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 800px;
+            height: 128px;
+            background-color: #7BBA29;
+            color: #0B1A58; /* Matches the screenshot */
+            font-size: 40px;
+            font-weight: 700;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 10px;
+            transition: background-color 0.3s ease;
+            box-sizing: border-box;
+            line-height: 1; /* avoid vertical misalignment */
+        }
+
+        .btn-download:hover,
+        .btn-download:focus {
+            background-color: #669922;
+            outline: none;
+        }
+
+
+        .footer {
+            background-color: #E6E6E6;
+            width: 1300px;
+            height: 256px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 1.5rem;
+            box-sizing: border-box;
+        }
+
+        .footer p {
+            margin: 0.5rem 0;
+            font-size: 24px;
+            color: #1A202C;
+        }
+
+        .footer a {
+            color: #0B1A58;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .footer strong {
+            color: #0B1A58;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .footer a:hover,
+        .footer a:focus {
+            text-decoration: underline;
+        }
+    </style>
 </head>
-<body style="background-color: #080D4A; font-family: ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji'; color: #4A5568; margin: 0; padding: 0;">
-<div style="width: 100%; max-width: 600px; margin: 0 auto; padding: 3rem 1rem;">
-    <div style="max-width: 600px; margin: 0 auto; background-color: #fff; border-radius: 16px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1); overflow: hidden;">
-
-        <!-- Title Section -->
-        <div style="background-color: #7BBA29; color: #fff; text-align: center; padding: 1.5rem;">
-            <h1 style="font-size: 1.5rem; font-weight: 700;">
-                {{ 'header_welcome'|trans({}, 'user_registration') }}
-            </h1>
-        </div>
-
-        <!-- Main Content -->
-        <div style="padding: 1.5rem;">
-            <!-- New User Instructions -->
-            <p style="font-size: 1.125rem; margin-bottom: 1rem;">
-                {{ 'intro_new_user'|trans({}, 'user_registration') }}
-            </p>
-            <ol style="margin-top: 1rem; font-size: 1.125rem; list-style-type: decimal; list-style-position: inside; padding-left: 0; margin-bottom: 0;">
-                <li style="margin-bottom: 0.75rem;">
-                    {{ 'new_user_steps.confirm_account'|trans({'%confirmLink%': absolute_url('/login/link') ~ '?' ~ 'uuid=' ~ uuid|url_encode ~ '&twoFaCode=' ~ twoFaCode|url_encode}, 'user_registration')|raw }}
-                </li>
-                <li style="margin-bottom: 0.75rem;">
-                    {{ 'new_user_steps.download_profile'|trans({}, 'user_registration')|raw }}
-                </li>
-                <li style="margin-bottom: 0.75rem;">
-                    {{ 'new_user_steps.password'|trans({'%password%': password}, 'user_registration')|raw }}
-                </li>
-                <li style="margin-bottom: 0.75rem;">
-                    {{ 'new_user_steps.enter_code'|trans({'%twoFaCode%': twoFaCode}, 'user_registration')|raw }}
-                </li>
-            </ol>
-        </div>
-
-        <!-- Footer Section -->
-        <div style="background-color: #f4f4f4; text-align: center; padding: 1.5rem;">
-            <p style="font-size: 0.875rem; color: #718096;">
-                {{ 'footer.support_team'|trans({}, 'user_registration') }}
-                <a href="mailto:{{ contactEmail }}" style="color: #0045AD; text-decoration: underline;">
-                    {{ contactEmail }}
-                </a>
-            </p>
-            <p style="font-size: 0.875rem; color: #718096;">
-                {{ 'footer.thank_you'|trans({}, 'user_registration') }}<br>
-                <strong>{{ 'footer.team'|trans({'%supportTeam%': supportTeam}, 'user_registration') }}</strong>
-            </p>
-        </div>
-
+<body>
+<div class="container">
+    <div class="container">
+        <header class="header" role="banner">
+            <img src="cid:logo_cid" alt="Customer Logo"/>
+        </header>
     </div>
+
+    <main class="content" role="main">
+        <h1>{{ 'header_welcome'|trans({}, 'user_registration') }}</h1>
+        <p>
+            {{ 'intro_new_user'|trans({}, 'user_registration') }}
+        </p>
+        {% if isLoginOnlyWithUUIDActive == constant('App\\Enum\\OperationMode::OFF').value %}
+            <p>
+                {{ 'new_user_steps.password'|trans({'%password%': password}, 'user_registration')|raw }}
+            </p>
+            <p>
+                {{ 'new_user_steps.enter_code'|trans({'%twoFaCode%': twoFaCode}, 'user_registration')|raw }}
+            </p>
+        {% endif %}
+        <a href="{{ absolute_url('/login/link') ~ '?uuid=' ~ uuid|url_encode ~ '&twoFaCode=' ~ twoFaCode|url_encode }}" class="btn-download">
+            {{ 'download_and_install'|trans({}, 'user_registration') }}
+        </a>
+    </main>
+
+    <footer class="footer" role="contentinfo">
+        <p>
+            {{ 'footer.support_team'|trans({}, 'user_registration') }}
+            <a href="mailto:{{ contactEmail }}">{{ contactEmail }}</a>
+        </p>
+        <p>
+            <strong>{{ 'footer.thank_you'|trans({}, 'user_registration') }}</strong><br/>
+            {{ 'footer.team'|trans({'%supportTeam%': supportTeam}, 'user_registration') }}
+        </p>
+    </footer>
 </div>
 </body>
 </html>

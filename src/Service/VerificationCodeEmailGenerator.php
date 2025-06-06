@@ -70,7 +70,7 @@ readonly class VerificationCodeEmailGenerator
             ->subject($this->translator->trans('subject_verify', [], 'admin_reset'))
             ->htmlTemplate('email/admin_reset.html.twig')
             ->context([
-                'verificationCode' => $verificationCode,
+                'verificationCode' => $user->getTwoFAcode(),
                 'supportTeam' => $supportTeam,
                 'contactEmail' => $contactEmail,
             ]);
