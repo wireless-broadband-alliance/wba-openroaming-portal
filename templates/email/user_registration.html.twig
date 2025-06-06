@@ -8,58 +8,60 @@
     <style>
         body {
             margin: 0;
+            padding: 0;
             font-family: 'Poppins', sans-serif;
             background-color: #F4F4F4;
-            display: flex;
-            justify-content: center;
         }
 
         .container {
-            width: 1300px;
+            width: 100%;
+            max-width: 1100px;
             background: #fff;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            margin: 0 auto;
         }
 
+        /* HEADER */
         .header {
             background-color: #0B1A58;
-            width: 1300px;
-            height: 256px;
+            width: 100%;
+            min-height: 180px;
             display: flex;
             justify-content: center;
             align-items: center;
+            padding: 3rem 1rem;
+            box-sizing: border-box;
+            margin-bottom: 2rem;
         }
 
         .header img {
-            width: 540px;
-            height: 64px;
-            object-fit: contain;
+            max-width: 100%;
+            height: auto;
         }
 
+        /* CONTENT */
         .content {
-            width: 1300px;
-            height: 960px;
+            width: 100%;
             background-color: #FFFFFF;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             text-align: center;
-            padding: 2rem;
+            padding: 3rem 2rem;
+            margin-bottom: 2rem;
             box-sizing: border-box;
         }
 
         .content h1 {
             color: #0B1A58;
-            font-size: 44px;
+            font-size: 2.5rem;
             font-weight: 700;
-            margin-bottom: 2rem;
+            margin-bottom: 2.5rem;
         }
 
         .content p {
-            font-size: 32px;
-            margin-bottom: 2.5rem;
+            font-size: 1.25rem;
+            margin-bottom: 2rem;
             line-height: 1.5;
             color: #000;
         }
@@ -73,21 +75,48 @@
         }
 
         .btn-download {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 800px;
-            height: 128px;
+            display: inline-block;
+            width: 90%;
+            max-width: 800px;
+            padding: 1.25rem;
             background-color: #7BBA29;
-            color: #0B1A58; /* Matches the screenshot */
-            font-size: 40px;
+            color: #0B1A58;
+            font-size: 1.25rem;
             font-weight: 700;
             text-align: center;
             text-decoration: none;
             border-radius: 10px;
             transition: background-color 0.3s ease;
+            margin-top: 1.25rem;
+        }
+
+        /* FOOTER */
+        .footer {
+            background-color: #E6E6E6;
+            width: 100%;
+            min-height: 160px;
+            padding: 1.5rem 1rem;
+            text-align: center;
             box-sizing: border-box;
-            line-height: 1; /* avoid vertical misalignment */
+        }
+
+        .footer p {
+            margin: 0.75rem 0;
+            font-size: 1rem;
+            color: #1A202C;
+        }
+
+        .footer a,
+        .footer strong {
+            color: #0B1A58;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        /* Hover states */
+        .footer a:hover,
+        .footer a:focus {
+            text-decoration: underline;
         }
 
         .btn-download:hover,
@@ -96,41 +125,48 @@
             outline: none;
         }
 
+        /* Responsive adjustments */
+        @media only screen and (max-width: 768px) {
+            .content h1 {
+                font-size: 2rem;
+            }
 
-        .footer {
-            background-color: #E6E6E6;
-            width: 1300px;
-            height: 256px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            padding: 1.5rem;
-            box-sizing: border-box;
+            .content p {
+                font-size: 1.1rem;
+            }
+
+            .btn-download {
+                font-size: 1.25rem;
+                padding: 1.5rem;
+            }
+
+            .header img {
+                width: 100%;
+                max-width: 300px;
+            }
+
+            .footer p {
+                font-size: 0.95rem;
+            }
         }
 
-        .footer p {
-            margin: 0.5rem 0;
-            font-size: 24px;
-            color: #1A202C;
-        }
+        @media only screen and (max-width: 480px) {
+            .content h1 {
+                font-size: 1.5rem;
+            }
 
-        .footer a {
-            color: #0B1A58;
-            font-weight: 600;
-            text-decoration: none;
-        }
+            .content p {
+                font-size: 1rem;
+            }
 
-        .footer strong {
-            color: #0B1A58;
-            font-weight: 600;
-            text-decoration: none;
-        }
+            .btn-download {
+                font-size: 1rem;
+                padding: 1rem;
+            }
 
-        .footer a:hover,
-        .footer a:focus {
-            text-decoration: underline;
+            .header {
+                padding: 2rem 1rem;
+            }
         }
     </style>
 </head>
