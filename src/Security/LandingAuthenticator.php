@@ -213,15 +213,15 @@ class LandingAuthenticator extends AbstractLoginFormAuthenticator
             ($twoFAPlatformStatus === TwoFAType::ENFORCED_FOR_LOCAL->value ||
                 $twoFAPlatformStatus === TwoFAType::ENFORCED_FOR_ALL->value)
         ) {
-                if (
-                    $user->getTwoFAType() === UserTwoFactorAuthenticationStatus::DISABLED->value
-                ) {
-                    return new RedirectResponse($this->urlGenerator->generate('app_configure2FA', [
-                        'context' => FirewallType::LANDING->value,
-                    ]));
-                }
+            if (
+                $user->getTwoFAType() === UserTwoFactorAuthenticationStatus::DISABLED->value
+            ) {
+                return new RedirectResponse($this->urlGenerator->generate('app_configure2FA', [
+                    'context' => FirewallType::LANDING->value,
+                ]));
+            }
 
-                return $this->redirectBasedOnTwoFAType($user);
+            return $this->redirectBasedOnTwoFAType($user);
         }
         // Fallback default redirection
         return new RedirectResponse($this->urlGenerator->generate('app_landing'));

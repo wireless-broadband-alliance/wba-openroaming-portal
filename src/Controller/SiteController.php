@@ -147,7 +147,8 @@ class SiteController extends AbstractController
             }
 
 
-            if ($currentUser &&
+            if (
+                $currentUser &&
                 ($data["LOGIN_WITH_UUID_ONLY"]["value"] === OperationMode::OFF->value ||
                 $currentUser->getUserExternalAuths()[0]->getProvider() !== UserProvider::PORTAL_ACCOUNT->value)
             ) {

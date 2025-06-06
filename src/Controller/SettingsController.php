@@ -981,12 +981,16 @@ class SettingsController extends AbstractController
                 }
 
                 $setting = $settingsRepository->findOneBy(['name' => $settingName]);
-                if ($settingName === 'LOGIN_WITH_UUID_ONLY' && $setting && ($setting->getValue() === OperationMode::ON->value && $value === OperationMode::OFF->value)) {
+                if (
+                    $settingName === 'LOGIN_WITH_UUID_ONLY' &&
+                    $setting &&
+                    ($setting->getValue() === OperationMode::ON->value && $value === OperationMode::OFF->value)
+                ) {
                     $this->resetPasswordService->resetPasswordForLocalAccounts(
                         $currentUser,
                         $request->getClientIp(),
                         $request->headers->get('User-Agent')
-                        );
+                    );
                 }
                 if ($setting !== null) {
                     $setting->setValue($value);
