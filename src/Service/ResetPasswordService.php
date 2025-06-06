@@ -19,7 +19,6 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
 readonly class ResetPasswordService
 {
-
     public function __construct(
         private UserRepository $userRepository,
         private EntityManagerInterface $entityManager,
