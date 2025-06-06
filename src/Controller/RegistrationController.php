@@ -131,7 +131,8 @@ class RegistrationController extends AbstractController
                 $user->setPassword($hashedPassword);
                 $user->setUuid($user->getEmail());
                 $user->setCreatedAt(new DateTime());
-                $user->setTwoFAcode($this->verificationCodeGenerator->generateVerificationCode($user));
+                $user->setTwoFAcode(random_int(100000, 999999));
+                $user->setTwoFACodeGeneratedAt(new DateTime());
                 $userAuths->setProvider(UserProvider::PORTAL_ACCOUNT->value);
                 $userAuths->setProviderId(UserProvider::EMAIL->value);
                 $userAuths->setUser($user);
@@ -252,7 +253,8 @@ class RegistrationController extends AbstractController
                 }
 
                 $user->setCreatedAt(new DateTime());
-                $user->setTwoFAcode($this->verificationCodeGenerator->generateVerificationCode($user));
+                $user->setTwoFACode(random_int(100000, 999999));
+                $user->setTwoFACodeGeneratedAt(new DateTime());
                 $userAuths->setProvider(UserProvider::PORTAL_ACCOUNT->value);
                 $userAuths->setProviderId(UserProvider::PHONE_NUMBER->value);
                 $userAuths->setUser($user);

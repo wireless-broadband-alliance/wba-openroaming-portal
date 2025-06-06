@@ -30,24 +30,6 @@ readonly class VerificationCodeEmailGenerator
     }
 
     /**
-     * Generate a new verification code for the user.
-     *
-     * @return int The generated verification code.
-     * @throws Exception
-     */
-    public function generateVerificationCode(User $user): int
-    {
-        // Generate a random verification code with 6 digits
-        $verificationCode = random_int(100000, 999999);
-        $user->setTwoFACode($verificationCode);
-        $user->setTwoFACodeGeneratedAt(new DateTime());
-        $user->setTwoFAcodeIsActive(true);
-        $this->userRepository->save($user, true);
-
-        return $verificationCode;
-    }
-
-    /**
      * Create an email message with the verification code.
      *
      * @return Email The email with the code.
@@ -64,7 +46,7 @@ readonly class VerificationCodeEmailGenerator
         $supportTeam = $this->settingRepository->findOneBy(['name' => 'PAGE_TITLE'])->getValue();
         $contactEmail = $this->settingRepository->findOneBy(['name' => 'CONTACT_EMAIL'])->getValue();
 
-        $verificationCode = $this->generateVerificationCode($user);
+        $verificationCode = random_int(100000, 999999);
 
         $eventMetaData = [
             'platform' => PlatformMode::LIVE->value,
