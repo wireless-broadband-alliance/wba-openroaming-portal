@@ -1,51 +1,209 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="{{ app.request.locale }}">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ supportTeam }} - Two-Factor Authentication Disabled</title>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>OpenRoaming Registration</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet"/>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', sans-serif;
+            background-color: #F4F4F4;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1100px;
+            background: #fff;
+            margin: 0 auto;
+        }
+
+        /* HEADER */
+        .header {
+            background-color: #0B1A58;
+            width: 100%;
+            min-height: 180px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 3rem 1rem;
+            box-sizing: border-box;
+            margin-bottom: 2rem;
+        }
+
+        .header img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        /* CONTENT */
+        .content {
+            width: 100%;
+            background-color: #FFFFFF;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 3rem 2rem;
+            margin-bottom: 2rem;
+            box-sizing: border-box;
+        }
+
+        .content h1 {
+            color: #0B1A58;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 2.5rem;
+        }
+
+        .content p {
+            font-size: 1.25rem;
+            margin-bottom: 2rem;
+            line-height: 1.5;
+            color: #0B1A58;
+        }
+
+        .content p span {
+            font-weight: 600;
+        }
+
+        .content p span.strong {
+            font-weight: 700;
+        }
+
+        .btn-download {
+            display: inline-block;
+            width: 90%;
+            max-width: 800px;
+            padding: 1.25rem;
+            background-color: #7BBA29;
+            color: #0B1A58;
+            font-size: 1.25rem;
+            font-weight: 700;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 10px;
+            transition: background-color 0.3s ease;
+            margin-top: 1.25rem;
+        }
+
+        /* FOOTER */
+        .footer {
+            background-color: #E6E6E6;
+            width: 100%;
+            min-height: 160px;
+            padding: 1.5rem 1rem;
+            text-align: center;
+            box-sizing: border-box;
+        }
+
+        .footer p {
+            margin: 0.75rem 0;
+            font-size: 1rem;
+            color: #1A202C;
+        }
+
+        .footer a,
+        .footer strong {
+            color: #0B1A58;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        /* Hover states */
+        .footer a:hover,
+        .footer a:focus {
+            text-decoration: underline;
+        }
+
+        .btn-download:hover,
+        .btn-download:focus {
+            background-color: #669922;
+            outline: none;
+        }
+
+        /* Responsive adjustments */
+        @media only screen and (max-width: 768px) {
+            .content h1 {
+                font-size: 2rem;
+            }
+
+            .content p {
+                font-size: 1.1rem;
+            }
+
+            .btn-download {
+                font-size: 1.25rem;
+                padding: 1.5rem;
+            }
+
+            .header img {
+                width: 100%;
+                max-width: 300px;
+            }
+
+            .footer p {
+                font-size: 0.95rem;
+            }
+        }
+
+        @media only screen and (max-width: 480px) {
+            .content h1 {
+                font-size: 1.5rem;
+            }
+
+            .content p {
+                font-size: 1rem;
+            }
+
+            .btn-download {
+                font-size: 1rem;
+                padding: 1rem;
+            }
+
+            .header {
+                padding: 2rem 1rem;
+            }
+        }
+    </style>
 </head>
-<body style="background-color: #080D4A; font-family: ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji'; color: #4A5568; margin: 0; padding: 0;">
-<div style="width: 100%; max-width: 600px; margin: 0 auto; padding: 3rem 1rem;">
-    <div style="max-width: 600px; margin: 0 auto; background-color: #fff; border-radius: 16px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1); overflow: hidden;">
+<body>
+<div class="container">
+    <div class="container">
+        <header class="header" role="banner">
+            <img src="cid:logo_cid" alt="Customer Logo"/>
+        </header>
+    </div>
 
-        <!-- Title Section -->
-        <div style="background-color: #7BBA29; color: #fff; padding: 1.5rem; display: flex; justify-content: space-between; align-items: center;">
-            <h1 style="margin: 0; font-size: 1.5rem; font-weight: 700; color: #fff;">
-                {{ 'subject_2fa_disabled'|trans({}, 'admin_disabled2fa') }}
-            </h1>
-        </div>
-
-        <!-- Main Content -->
-        <div style="padding: 1.5rem;">
-            <p style="font-size: 1rem; margin-bottom: 1rem; color: #4A5568;">
+    <main class="content" role="main">
+        <h1>{{ 'subject_2fa_disabled'|trans({}, 'admin_disabled2fa') }}</h1>
+        <div style="text-align: left">
+            <p>
                 {{ 'greeting'|trans({'%uuid%': uuid}, 'admin_disabled2fa') }}
             </p>
-            <p style="font-size: 0.9375rem; line-height: 1.5; color: #4A5568; margin-bottom: 1rem;">
-                {{ 'info_2fa_disabled'|trans({}, 'admin_disabled2fa') }}
-            </p>
-            <p style="font-size: 0.9375rem; line-height: 1.5; color: #4A5568; margin-bottom: 1rem;">
-                {{ 'warning_contact_support'|trans({}, 'admin_disabled2fa') }}
-            </p>
-            <p style="font-size: 0.9375rem; line-height: 1.5; color: #4A5568; margin-top: 2rem;">
-                {{ 'recommend_reenable_2fa'|trans({}, 'admin_disabled2fa') }}
+            <p>
+                {{ 'info_2fa_disabled'|trans({}, 'admin_disabled2fa')|raw }}
+                <br>
+                {{ 'warning_contact_support'|trans({}, 'admin_disabled2fa')|raw }}
+                <br>
+                {{ 'recommend_reenable_2fa'|trans({}, 'admin_disabled2fa')|raw }}
             </p>
         </div>
+    </main>
 
-        <!-- Footer Section -->
-        <div style="background-color: #f4f4f4; text-align: center; padding: 1.5rem;">
-            <p style="font-size: 0.875rem; color: #718096;">
-                {{ 'footer.support_team'|trans({}, 'user_verification') }}
-                <a href="mailto:{{ contactEmail }}"
-                   style="color: #0045AD; text-decoration: underline;">{{ contactEmail }}</a>
-            </p>
-            <p style="font-size: 0.875rem; color: #718096;">
-                {{ 'footer.thank_you'|trans({}, 'user_verification') }}<br>
-                <strong>{{ supportTeam }}</strong>
-            </p>
-        </div>
-
-    </div>
+    <footer class="footer" role="contentinfo">
+        <p>
+            {{ 'footer.support_team'|trans({}, 'user_registration') }}
+            <a href="mailto:{{ contactEmail }}">{{ contactEmail }}</a>
+        </p>
+        <p>
+            <strong>{{ 'footer.thank_you'|trans({}, 'user_registration') }}</strong><br/>
+            {{ 'footer.team'|trans({'%supportTeam%': supportTeam}, 'user_registration') }}
+        </p>
+    </footer>
 </div>
 </body>
 </html>

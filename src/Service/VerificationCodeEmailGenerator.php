@@ -91,6 +91,9 @@ readonly class VerificationCodeEmailGenerator
         // If the verification code is not provided, generate a new one
         $supportTeam = $this->settingRepository->findOneBy(['name' => 'PAGE_TITLE'])->getValue();
         $contactEmail = $this->settingRepository->findOneBy(['name' => 'CONTACT_EMAIL'])->getValue();
+        $customerLogo = $this->settingRepository->findOneBy(['name' => 'CUSTOMER_LOGO'])->getValue();
+        $projectDir =  $this->parameterBag->get('kernel.project_dir');
+        $logoPath = $projectDir . '/public' . $customerLogo;
 
         return new TemplatedEmail()
             ->from(new Address($emailSender, $nameSender))
@@ -108,7 +111,8 @@ readonly class VerificationCodeEmailGenerator
                 'uuid' => $user->getEmail(),
                 'supportTeam' => $supportTeam,
                 'contactEmail' => $contactEmail
-            ]);
+            ])
+            ->embedFromPath($logoPath, 'logo_cid');
     }
 
     public function timeLeftToResendCode(int $timeInterval, ?Event $event): null|int
