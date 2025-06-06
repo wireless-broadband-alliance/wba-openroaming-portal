@@ -180,6 +180,10 @@ readonly class TwoFAService
         if ($messageType === UserTwoFactorAuthenticationStatus::EMAIL->value || $user->getEmail()) {
             $emailTitle = $this->settingRepository->findOneBy(['name' => 'PAGE_TITLE'])->getValue();
             $contactEmail = $this->settingRepository->findOneBy(['name' => 'CONTACT_EMAIL'])->getValue();
+            $supportTeam = $this->settingRepository->findOneBy(['name' => 'PAGE_TITLE'])->getValue();
+            $customerLogo = $this->settingRepository->findOneBy(['name' => 'CUSTOMER_LOGO'])->getValue();
+            $projectDir =  $this->parameterBag->get('kernel.project_dir');
+            $logoPath = $projectDir . '/public' . $customerLogo;
 
             if (
                 $eventType === AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE->value
@@ -218,9 +222,11 @@ readonly class TwoFAService
                     ->context([
                         'uuid' => $user->getEmail(),
                         'emailTitle' => $emailTitle,
+                        'supportTeam' => $supportTeam,
                         'contactEmail' => $contactEmail,
                         'verificationCode' => $code,
-                    ]);
+                    ])
+                    ->embedFromPath($logoPath, 'logo_cid');
             } elseif (
                 $eventType === AnalyticalEventType::USER_CREATION->value
             ) {
@@ -245,9 +251,12 @@ readonly class TwoFAService
                         'uuid' => $user->getEmail(),
                         'emailTitle' => $emailTitle,
                         'verificationCode' => $code,
+                        'contactEmail' => $contactEmail,
+                        'supportTeam' => $supportTeam,
                         'is2FATemplate' => true,
                         'secondsLeft' => $secondsLeft,
-                    ]);
+                    ])
+                    ->embedFromPath($logoPath, 'logo_cid');
             } else {
                 // USER_CREATION
                 $email = new TemplatedEmail()
@@ -269,10 +278,13 @@ readonly class TwoFAService
                     ->context([
                         'uuid' => $user->getEmail(),
                         'emailTitle' => $emailTitle,
+                        'contactEmail' => $contactEmail,
+                        'supportTeam' => $supportTeam,
                         'verificationCode' => $code,
                         'is2FATemplate' => true,
                         'secondsLeft' => $secondsLeft,
-                    ]);
+                    ])
+                    ->embedFromPath($logoPath, 'logo_cid');
             }
             $this->mailer->send($email);
         } elseif ($messageType === UserTwoFactorAuthenticationStatus::SMS->value || $user->getPhoneNumber()) {

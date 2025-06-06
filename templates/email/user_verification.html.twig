@@ -1,61 +1,220 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="{{ app.request.locale }}">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ emailTitle }} - Code Verification</title>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>OpenRoaming Registration</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet"/>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', sans-serif;
+            background-color: #F4F4F4;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1100px;
+            background: #fff;
+            margin: 0 auto;
+        }
+
+        /* HEADER */
+        .header {
+            background-color: #0B1A58;
+            width: 100%;
+            min-height: 180px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 3rem 1rem;
+            box-sizing: border-box;
+            margin-bottom: 2rem;
+        }
+
+        .header img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        /* CONTENT */
+        .content {
+            width: 100%;
+            background-color: #FFFFFF;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 3rem 2rem;
+            margin-bottom: 2rem;
+            box-sizing: border-box;
+        }
+
+        .content h1 {
+            color: #0B1A58;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 2.5rem;
+        }
+
+        .content p {
+            font-size: 1.25rem;
+            margin-bottom: 2rem;
+            line-height: 1.5;
+            color: #0B1A58;
+        }
+
+        .content p span {
+            font-weight: 600;
+        }
+
+        .content p span.strong {
+            font-weight: 700;
+        }
+
+        .btn-download {
+            display: inline-block;
+            width: 90%;
+            max-width: 800px;
+            padding: 1.25rem;
+            background-color: #7BBA29;
+            color: #0B1A58;
+            font-size: 1.25rem;
+            font-weight: 700;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 10px;
+            transition: background-color 0.3s ease;
+            margin-top: 1.25rem;
+        }
+
+        /* FOOTER */
+        .footer {
+            background-color: #E6E6E6;
+            width: 100%;
+            min-height: 160px;
+            padding: 1.5rem 1rem;
+            text-align: center;
+            box-sizing: border-box;
+        }
+
+        .footer p {
+            margin: 0.75rem 0;
+            font-size: 1rem;
+            color: #1A202C;
+        }
+
+        .footer a,
+        .footer strong {
+            color: #0B1A58;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        /* Hover states */
+        .footer a:hover,
+        .footer a:focus {
+            text-decoration: underline;
+        }
+
+        .btn-download:hover,
+        .btn-download:focus {
+            background-color: #669922;
+            outline: none;
+        }
+
+        /* Responsive adjustments */
+        @media only screen and (max-width: 768px) {
+            .content h1 {
+                font-size: 2rem;
+            }
+
+            .content p {
+                font-size: 1.1rem;
+            }
+
+            .btn-download {
+                font-size: 1.25rem;
+                padding: 1.5rem;
+            }
+
+            .header img {
+                width: 100%;
+                max-width: 300px;
+            }
+
+            .footer p {
+                font-size: 0.95rem;
+            }
+        }
+
+        @media only screen and (max-width: 480px) {
+            .content h1 {
+                font-size: 1.5rem;
+            }
+
+            .content p {
+                font-size: 1rem;
+            }
+
+            .btn-download {
+                font-size: 1rem;
+                padding: 1rem;
+            }
+
+            .header {
+                padding: 2rem 1rem;
+            }
+        }
+    </style>
 </head>
-<body style="background-color: #080D4A; font-family: ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji'; color: #4A5568; margin: 0; padding: 0;">
-<div style="width: 100%; max-width: 600px; margin: 0 auto; padding: 3rem 1rem;">
-    <div style="max-width: 600px; margin: 0 auto; background-color: #fff; border-radius: 16px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1); overflow: hidden;">
-        <!-- Title Section -->
-        <div style="background-color: #7BBA29; color: #fff; padding: 1.5rem; display: flex; justify-content: space-between; align-items: center;">
-            <h1 style="margin: 0; font-size: 1.5rem; font-weight: 700; color: #fff;">
-                {% if is2FATemplate %}
-                    {{ 'subject_2fa'|trans({}, 'user_verification') }}
-                {% else %}
-                    {{ 'subject_verify'|trans({}, 'user_verification') }}
-                {% endif %}
-            </h1>
-        </div>
-
-        <!-- Verification Messages -->
-        <div style='padding: 1.5rem;'>
-            {% if is2FATemplate %}
-                <p style='font-size: 1.125rem; margin-bottom: 1rem;'>
-                    {{ 'two_factor_message'|trans({}, 'user_verification') }}
-                </p>
-                <p style='text-align: center; font-size: 1.5rem; font-weight: 700; color: #0045AD; margin: 1.5rem 0;'>
-                    {{ verificationCode }}
-                </p>
-                <p style='font-size: 1.125rem; margin-bottom: 1rem;'>
-                    {{ 'valid_for_message'|trans({'%seconds%': secondsLeft}, 'user_verification') }}
-                </p>
-                <p style='font-size: 1.125rem; margin-bottom: 1rem;'>
-                    {{ 'confidential_message'|trans({}, 'user_verification') }}
-                </p>
-            {% else %}
-                <p style='font-size: 1.125rem; margin-bottom: 1rem;'>
-                    {{ 'one_time_code_message'|trans({}, 'user_verification') }}
-                </p>
-                <p style='text-align: center; font-size: 1.5rem; font-weight: 700; color: #0045AD; margin: 1.5rem 0;'>
-                    {{ verificationCode }}
-                </p>
-                <p style='font-size: 1.125rem; margin-bottom: 1rem;'>
-                    {{ 'confidential_message'|trans({}, 'user_verification') }}
-                </p>
-            {% endif %}
-        </div>
-
-        <!-- Footer Section -->
-        <div style="background-color: #f4f4f4; text-align: center; padding: 1.5rem;">
-            <p style="font-size: 0.875rem; color: #718096;">
-                {{ 'footer.thank_you'|trans({}, 'user_verification') }}<br>
-                <strong>{{ 'footer.team'|trans({'%emailTitle%': emailTitle}, 'user_verification') }}</strong>
-            </p>
-        </div>
-
+<body>
+<div class="container">
+    <div class="container">
+        <header class="header" role="banner">
+            <img src="cid:logo_cid" alt="Customer Logo"/>
+        </header>
     </div>
+
+    <main class="content" role="main">
+        <h1>{{ 'subject_2fa'|trans({}, 'user_verification') }}</h1>
+        {% if is2FATemplate %}
+        <p >
+            {{ 'two_factor_message'|trans({}, 'user_verification') }}
+        </p>
+        <p >
+            <strong>{{ verificationCode }}</strong>
+        </p>
+        <p >
+            {{ 'valid_for_message'|trans({'%seconds%': secondsLeft}, 'user_verification')|raw }}
+            <br>
+            {{ 'confidential_message'|trans({}, 'user_verification')|raw }}
+        </p>
+        {% else %}
+            <p >
+                {{ 'one_time_code_message'|trans({}, 'user_verification') }}
+            </p>
+            <p>
+                <strong>{{ verificationCode }}</strong>
+            </p>
+            <p >
+                {{ 'confidential_message'|trans({}, 'user_verification')|raw }}
+            </p>
+        {% endif %}
+    </main>
+
+    <footer class="footer" role="contentinfo">
+        <p>
+            {{ 'footer.support_team'|trans({}, 'user_verification') }}
+            <a href="mailto:{{ contactEmail }}">{{ contactEmail }}</a>
+        </p>
+        <p>
+            <strong>{{ 'footer.thank_you'|trans({}, 'user_verification') }}</strong><br/>
+            {{ 'footer.team'|trans({'%supportTeam%': supportTeam}, 'user_verification') }}
+        </p>
+    </footer>
 </div>
 </body>
 </html>
