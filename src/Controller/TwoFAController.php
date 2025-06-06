@@ -38,7 +38,6 @@ class TwoFAController extends AbstractController
         private readonly TwoFAService $twoFAService,
         private readonly EventRepository $eventRepository,
         private readonly TranslatorInterface $translator,
-        private readonly UserRepository $userRepository,
     ) {
     }
 
@@ -763,8 +762,6 @@ class TwoFAController extends AbstractController
         ];
         $eventType = $eventTypeMapping[$type] ?? null;
 
-        $autoDeletion = $eventType === AnalyticalEventType::USER_AUTO_DELETE_CODE->value;
-
         if (
             $this->twoFAService->canResendCode($user, $eventType) &&
             $this->twoFAService->timeIntervalToResendCode($user, $eventType)
@@ -774,7 +771,6 @@ class TwoFAController extends AbstractController
                 $request->getClientIp(),
                 $request->headers->get('User-Agent'),
                 $eventType,
-                $autoDeletion
             );
             $attempts = $this->eventRepository->find2FACodeAttemptEvent(
                 $user,

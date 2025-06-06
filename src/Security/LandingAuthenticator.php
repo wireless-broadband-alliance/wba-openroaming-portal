@@ -150,10 +150,12 @@ class LandingAuthenticator extends AbstractLoginFormAuthenticator
             $verification = $user->isVerified();
             // Check if the user is verified
             if (!$verification) {
-                if ($this->twoFAService->canValidationCode(
-                    $user,
-                    AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE->value
-                )) {
+                if (
+                    $this->twoFAService->canValidationCode(
+                        $user,
+                        AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE->value
+                    )
+                ) {
                     $this->twoFAService->generate2FACode(
                         $user,
                         $request->getClientIp(),

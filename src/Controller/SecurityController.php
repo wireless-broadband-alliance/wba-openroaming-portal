@@ -102,7 +102,8 @@ class SecurityController extends AbstractController
 
         // Check if the user is already verified
         $session = $request->getSession();
-        if ($userExternalAuths[0]->getProvider() !== UserProvider::PORTAL_ACCOUNT->value ||
+        if (
+            $userExternalAuths[0]->getProvider() !== UserProvider::PORTAL_ACCOUNT->value ||
             $session->has('session_verified')
         ) {
             return $this->redirectToRoute('app_landing');

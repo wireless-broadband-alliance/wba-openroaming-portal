@@ -107,12 +107,16 @@ class SiteController extends AbstractController
             }
 
             // Check if the user is verified
-            if ($userExternalAuths[0]->getProvider() === UserProvider::PORTAL_ACCOUNT->value &&
-                !$session->has('session_verified')) {
-                if ($this->twoFAService->canValidationCode(
-                    $currentUser,
-                    AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE->value
-                )) {
+            if (
+                $userExternalAuths[0]->getProvider() === UserProvider::PORTAL_ACCOUNT->value &&
+                !$session->has('session_verified')
+            ) {
+                if (
+                    $this->twoFAService->canValidationCode(
+                        $currentUser,
+                        AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE->value
+                    )
+                ) {
                     $this->twoFAService->generate2FACode(
                         $currentUser,
                         $request->getClientIp(),
@@ -143,7 +147,8 @@ class SiteController extends AbstractController
             }
 
             if ($currentUser) {
-                if ($data["LOGIN_WITH_UUID_ONLY"]["value"] === OperationMode::OFF->value ||
+                if (
+                    $data["LOGIN_WITH_UUID_ONLY"]["value"] === OperationMode::OFF->value ||
                     $currentUser->getUserExternalAuths()[0]->getProvider() !== UserProvider::PORTAL_ACCOUNT->value
                 ) {
                     // Checks the 2FA status of the platform if mandatory forces the user to configure it
@@ -181,7 +186,8 @@ class SiteController extends AbstractController
             }
         }
         if ($currentUser) {
-            if ($data["LOGIN_WITH_UUID_ONLY"]["value"] === OperationMode::OFF->value ||
+            if (
+                $data["LOGIN_WITH_UUID_ONLY"]["value"] === OperationMode::OFF->value ||
                 $currentUser->getUserExternalAuths()[0]->getProvider() !== UserProvider::PORTAL_ACCOUNT->value
             ) {
                 if (

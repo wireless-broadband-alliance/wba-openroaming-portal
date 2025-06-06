@@ -31,7 +31,7 @@ readonly class SessionValidatorListener
     #[AsEventListener(event: KernelEvents::REQUEST)]
     public function onKernelRequest(RequestEvent $event): void
     {
-        $data = $this->getSettings->getSettings();
+        $this->getSettings->getSettings();
         $request = $event->getRequest();
         $session = $request->getSession();
         $path = $request->getPathInfo();

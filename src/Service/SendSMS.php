@@ -179,7 +179,7 @@ class SendSMS
                 $user->setTwoFAcodeIsActive(true);
                 $this->userRepository->save($user, true);
 
-                $message = 'Your new verification code is: ' . $verificationCode;
+                $message = 'Your new verification code is: ' . $user->getTwoFAcode();
                 $this->sendSms($user->getPhoneNumber(), $message);
                 return true;
             }

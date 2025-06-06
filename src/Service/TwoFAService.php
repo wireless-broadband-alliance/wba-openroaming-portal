@@ -201,8 +201,7 @@ readonly class TwoFAService
                         'contactEmail' => $contactEmail,
                         'code' => $code,
                     ]);
-            }
-            elseif (
+            } elseif (
                 $eventType === AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE_RESEND->value
             ) {
                 // LOGIN_WITH_UUID_ONLY_CODE_RESEND
@@ -222,8 +221,7 @@ readonly class TwoFAService
                         'contactEmail' => $contactEmail,
                         'verificationCode' => $code,
                     ]);
-            }
-            elseif (
+            } elseif (
                 $eventType === AnalyticalEventType::USER_CREATION->value
             ) {
                 // USER_CREATION
@@ -250,8 +248,7 @@ readonly class TwoFAService
                         'is2FATemplate' => true,
                         'secondsLeft' => $secondsLeft,
                     ]);
-            }
-            else {
+            } else {
                 // USER_CREATION
                 $email = new TemplatedEmail()
                     ->from(
