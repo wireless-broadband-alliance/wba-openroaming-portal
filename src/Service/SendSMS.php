@@ -32,7 +32,6 @@ class SendSMS
         private readonly ParameterBagInterface $parameterBag,
         private readonly EventRepository $eventRepository,
         private readonly EventActions $eventActions,
-        private readonly VerificationCodeEmailGenerator $verificationCodeGenerator,
         private readonly SettingRepository $settingRepository,
     ) {
     }

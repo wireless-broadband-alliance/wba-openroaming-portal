@@ -208,14 +208,11 @@ class LandingAuthenticator extends AbstractLoginFormAuthenticator
 
         $loginWithUuidOnlySetting = $this->settingRepository->findOneBy(['name' => 'LOGIN_WITH_UUID_ONLY']);
         if (
-            ($loginWithUuidOnlySetting && $loginWithUuidOnlySetting->getValue() === OperationMode::OFF->value) ||
-            $user->getUserExternalAuths()[0]->getProvider() !== UserProvider::PORTAL_ACCOUNT->value
+            (($loginWithUuidOnlySetting && $loginWithUuidOnlySetting->getValue() === OperationMode::OFF->value) ||
+                $user->getUserExternalAuths()[0]->getProvider() !== UserProvider::PORTAL_ACCOUNT->value) &&
+            ($twoFAPlatformStatus === TwoFAType::ENFORCED_FOR_LOCAL->value ||
+                $twoFAPlatformStatus === TwoFAType::ENFORCED_FOR_ALL->value)
         ) {
-            // Handle ENFORCED_FOR_LOCAL or ENFORCED_FOR_ALL statuses
-            if (
-                $twoFAPlatformStatus === TwoFAType::ENFORCED_FOR_LOCAL->value ||
-                $twoFAPlatformStatus === TwoFAType::ENFORCED_FOR_ALL->value
-            ) {
                 if (
                     $user->getTwoFAType() === UserTwoFactorAuthenticationStatus::DISABLED->value
                 ) {
@@ -225,7 +222,6 @@ class LandingAuthenticator extends AbstractLoginFormAuthenticator
                 }
 
                 return $this->redirectBasedOnTwoFAType($user);
-            }
         }
         // Fallback default redirection
         return new RedirectResponse($this->urlGenerator->generate('app_landing'));
