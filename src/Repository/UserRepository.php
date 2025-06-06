@@ -302,4 +302,17 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
 
         return $qb->getQuery()->getOneOrNullResult();
     }
+
+    public function findAllPortalAccountsExcludingAdmin()
+    {
+        $qb = $this->createQueryBuilder('u')
+            ->join('u.userExternalAuths', 'a')
+            ->where('a.provider = :provider')
+            ->andWhere('u.roles NOT LIKE :role')
+            ->setParameter('provider', UserProvider::PORTAL_ACCOUNT->value)
+            ->setParameter('role', '%ROLE_ADMIN%')
+            ->getQuery()
+            ->getResult();
+        return $qb;
+    }
 }
