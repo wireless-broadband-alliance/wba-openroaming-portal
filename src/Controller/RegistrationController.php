@@ -133,6 +133,7 @@ class RegistrationController extends AbstractController
                 $user->setCreatedAt(new DateTime());
                 $user->setTwoFAcode(random_int(100000, 999999));
                 $user->setTwoFACodeGeneratedAt(new DateTime());
+                $user->setTwoFAcodeIsActive(true);
                 $userAuths->setProvider(UserProvider::PORTAL_ACCOUNT->value);
                 $userAuths->setProviderId(UserProvider::EMAIL->value);
                 $userAuths->setUser($user);
@@ -253,8 +254,9 @@ class RegistrationController extends AbstractController
                 }
 
                 $user->setCreatedAt(new DateTime());
-                $user->setTwoFACode(random_int(100000, 999999));
+                $user->setTwoFAcode(random_int(100000, 999999));
                 $user->setTwoFACodeGeneratedAt(new DateTime());
+                $user->setTwoFAcodeIsActive(true);
                 $userAuths->setProvider(UserProvider::PORTAL_ACCOUNT->value);
                 $userAuths->setProviderId(UserProvider::PHONE_NUMBER->value);
                 $userAuths->setUser($user);

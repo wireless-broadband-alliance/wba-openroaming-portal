@@ -46,7 +46,10 @@ readonly class VerificationCodeEmailGenerator
         $supportTeam = $this->settingRepository->findOneBy(['name' => 'PAGE_TITLE'])->getValue();
         $contactEmail = $this->settingRepository->findOneBy(['name' => 'CONTACT_EMAIL'])->getValue();
 
-        $verificationCode = random_int(100000, 999999);
+        $user->setTwoFACode(random_int(100000, 999999));
+        $user->setTwoFACodeGeneratedAt(new DateTime());
+        $user->setTwoFAcodeIsActive(true);
+        $this->userRepository->save($user, true);
 
         $eventMetaData = [
             'platform' => PlatformMode::LIVE->value,

@@ -19,7 +19,6 @@ use App\Service\EventActions;
 use App\Service\GetSettings;
 use App\Service\RegistrationEmailGenerator;
 use App\Service\SendSMS;
-use App\Service\VerificationCodeEmailGenerator;
 use DateInterval;
 use DateTime;
 use DateTimeInterface;
@@ -61,7 +60,6 @@ class RegistrationController extends AbstractController
         private readonly GetSettings $getSettings,
         private readonly SettingRepository $settingRepository,
         private readonly UserPasswordHasherInterface $userPasswordHasher,
-        private readonly VerificationCodeEmailGenerator $verificationCodeGenerator,
         private readonly CaptchaValidator $captchaValidator,
         private readonly RegistrationEmailGenerator $emailGenerator,
         private readonly ValidatorInterface $validator,
@@ -152,6 +150,7 @@ class RegistrationController extends AbstractController
         $user->setCreatedAt(new DateTime());
         $user->setTwoFAcode(random_int(100000, 999999));
         $user->setTwoFACodeGeneratedAt(new DateTime());
+        $user->setTwoFAcodeIsActive(true);
         $user->setFirstName($data['first_name'] ?? null);
         $user->setLastName($data['last_name'] ?? null);
 
@@ -492,6 +491,8 @@ class RegistrationController extends AbstractController
         $user->setIsVerified(false);
         $user->setCreatedAt(new DateTime());
         $user->setTwoFAcode(random_int(100000, 999999));
+        $user->setTwoFACodeGeneratedAt(new DateTime());
+        $user->setTwoFAcodeIsActive(true);
         $user->setFirstName($data['first_name'] ?? null);
         $user->setLastName($data['last_name'] ?? null);
 
