@@ -228,38 +228,7 @@ readonly class TwoFAService
                         'is2FATemplate' => false
                     ])
                     ->embedFromPath($logoPath, 'logo_cid');
-            } elseif (
-                $eventType === AnalyticalEventType::USER_CREATION->value
-            ) {
-                dd($eventType); // this dd will stay here for debug (Marcelo) idk where does it come from
-                // USER_CREATION
-                $email = new TemplatedEmail()
-                    ->from(
-                        new Address(
-                            $this->parameterBag->get('app.email_address'),
-                            $this->parameterBag->get('app.sender_name')
-                        )
-                    )
-                    ->to($user->getEmail())
-                    ->subject(
-                        $this->translator->trans(
-                            'subject_two_factor_code',
-                            ['%code%' => $code],
-                            'user_verification'
-                        )
-                    )
-                    ->htmlTemplate('email/user_verification.html.twig')
-                    ->context([
-                        'uuid' => $user->getEmail(),
-                        'emailTitle' => $emailTitle,
-                        'twoFaCode' => $code,
-                        'contactEmail' => $contactEmail,
-                        'supportTeam' => $supportTeam,
-                        'is2FATemplate' => true,
-                        'secondsLeft' => $secondsLeft,
-                    ])
-                    ->embedFromPath($logoPath, 'logo_cid');
-            } elseif (
+            }  elseif (
                 $eventType === AnalyticalEventType::USER_AUTO_DELETE_CODE->value
             ) {
                 // AUTO DELETE CONFIRMATION CODE
