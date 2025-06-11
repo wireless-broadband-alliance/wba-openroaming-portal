@@ -26,7 +26,6 @@ use App\Service\Domain;
 use App\Service\EnforcePasswordResetService;
 use App\Service\EventActions;
 use App\Service\GetSettings;
-use App\Service\ResetPasswordService;
 use App\Service\SanitizeHTML;
 use App\Service\Statistics;
 use DateTime;
@@ -53,8 +52,7 @@ class SettingsController extends AbstractController
         private readonly RadiusAccountingRepository $radiusAccountingRepository,
         private readonly TranslatorInterface $translator,
         private readonly SettingTranslationRepository $settingTranslationRepository,
-        private readonly ResetPasswordService $resetPasswordService,
-        private readonly EnforcePasswordResetService $enforcePasswordResetService
+        private readonly EnforcePasswordResetService $enforcePasswordResetService,
     ) {
     }
 
