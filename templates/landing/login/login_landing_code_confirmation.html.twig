@@ -36,7 +36,7 @@
                 type="submit">{{ 'btn.login'|trans({}, 'login_landing') }}</button>
         <a href="{{ path('app_local_resend_code', {
             context: context,
-            type: constant('App\\Enum\\AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE_RESEND').value},
+            type: constant('App\\Enum\\AnalyticalEventType::LOGIN_CODE_RESEND').value},
         ) }}"
            class="w-[220px] btn-secondary">
             {{ 'btn.resend'|trans({}, 'login_landing') }}

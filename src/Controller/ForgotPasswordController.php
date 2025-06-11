@@ -450,6 +450,7 @@ class ForgotPasswordController extends AbstractController
                 )
             );
             $currentUser->setForgotPasswordRequest(false);
+            $currentUser->setIsVerified(true);
             $entityManager->persist($currentUser);
             $entityManager->flush();
 

@@ -118,6 +118,7 @@ class SecurityController extends AbstractController
             $code = $form->getData()['code'];
             if ($this->twoFAService->validate2FACode($user, $code)) {
                 $user->setIsVerified(true);
+                $user->setForgotPasswordRequest(false);
                 $this->entityManager->persist($user);
                 $this->entityManager->flush();
                 $session->set('session_verified', true);

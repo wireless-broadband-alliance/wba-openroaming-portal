@@ -203,12 +203,13 @@ readonly class TwoFAService
                         'uuid' => $user->getEmail(),
                         'emailTitle' => $emailTitle,
                         'contactEmail' => $contactEmail,
-                        'code' => $code,
+                        'twoFaCode' => $code,
                     ]);
             } elseif (
-                $eventType === AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE_RESEND->value
+                $eventType === AnalyticalEventType::LOGIN_TRADITIONAL_REQUEST->value ||
+                $eventType === AnalyticalEventType::LOGIN_CODE_RESEND->value
             ) {
-                // LOGIN_WITH_UUID_ONLY_CODE_RESEND || LOGIN_TRADITIONAL_REQUEST_RESEND_CODE
+                // LOGIN_TRADITIONAL_REQUEST || LOGIN_CODE_RESEND
                 $email = new TemplatedEmail()
                     ->from(
                         new Address(
@@ -217,14 +218,14 @@ readonly class TwoFAService
                         )
                     )
                     ->to($user->getEmail())
-                    ->subject($this->translator->trans('subject', [], 'confirmation_code'))
-                    ->htmlTemplate('email/confirmation_code.html.twig')
+                    ->subject($this->translator->trans('subject_verify', [], 'user_verification'))
+                    ->htmlTemplate('email/user_verification.html.twig')
                     ->context([
                         'uuid' => $user->getEmail(),
-                        'emailTitle' => $emailTitle,
-                        'supportTeam' => $supportTeam,
+                        'supportTeam' => $emailTitle,
                         'contactEmail' => $contactEmail,
-                        'code' => $code,
+                        'twoFaCode' => $code,
+                        'is2FATemplate' => false
                     ])
                     ->embedFromPath($logoPath, 'logo_cid');
             } elseif (
@@ -250,7 +251,7 @@ readonly class TwoFAService
                     ->context([
                         'uuid' => $user->getEmail(),
                         'emailTitle' => $emailTitle,
-                        'verificationCode' => $code,
+                        'twoFaCode' => $code,
                         'contactEmail' => $contactEmail,
                         'supportTeam' => $supportTeam,
                         'is2FATemplate' => true,
@@ -258,7 +259,7 @@ readonly class TwoFAService
                     ])
                     ->embedFromPath($logoPath, 'logo_cid');
             } else {
-                // USER_CREATION
+                // 2FA VERIFICATION REQUESTS
                 $email = new TemplatedEmail()
                     ->from(
                         new Address(
@@ -280,7 +281,7 @@ readonly class TwoFAService
                         'emailTitle' => $emailTitle,
                         'contactEmail' => $contactEmail,
                         'supportTeam' => $supportTeam,
-                        'verificationCode' => $code,
+                        'twoFaCode' => $code,
                         'is2FATemplate' => true,
                         'secondsLeft' => $secondsLeft,
                     ])
@@ -290,8 +291,8 @@ readonly class TwoFAService
         } elseif ($messageType === UserTwoFactorAuthenticationStatus::SMS->value || $user->getPhoneNumber()) {
             if (
                 $eventType === AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE->value ||
-                $eventType === AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE_RESEND->value ||
-                $eventType === AnalyticalEventType::LOGIN_TRADITIONAL_REQUEST->value
+                $eventType === AnalyticalEventType::LOGIN_TRADITIONAL_REQUEST->value ||
+                $eventType === AnalyticalEventType::LOGIN_CODE_RESEND->value
             ) {
                 $message = "Your verification Code is " . $code;
             } else {
@@ -300,18 +301,20 @@ readonly class TwoFAService
             $this->sendSMS->sendSms($user->getPhoneNumber(), $message);
         }
 
-        $eventMetaData = [
-            'platform' => PlatformMode::LIVE->value,
-            'user_agent' => $userAgent ?? null,
-            'uuid' => $user->getUuid(),
-            'ip' => $ip ?? null,
-        ];
-        $this->eventActions->saveEvent(
-            $user,
-            $eventType,
-            new DateTime(),
-            $eventMetaData
-        );
+        if ($eventType !== AnalyticalEventType::LOGIN_TRADITIONAL_REQUEST->value) {
+            $eventMetaData = [
+                'platform' => PlatformMode::LIVE->value,
+                'user_agent' => $userAgent ?? 'Unknown',
+                'uuid' => $user->getUuid(),
+                'ip' => $ip ?? null,
+            ];
+            $this->eventActions->saveEvent(
+                $user,
+                $eventType,
+                new DateTime(),
+                $eventMetaData
+            );
+        }
     }
 
     public function twoFAisActive(User $user): bool

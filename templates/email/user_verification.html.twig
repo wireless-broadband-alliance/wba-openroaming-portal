@@ -185,7 +185,7 @@
                 {{ 'two_factor_message'|trans({}, 'user_verification') }}
             </p>
             <h1>
-                <strong>{{ verificationCode }}</strong>
+                <strong>{{ twoFaCode }}</strong>
             </h1>
             <p>
                 {{ 'valid_for_message'|trans({'%seconds%': secondsLeft}, 'user_verification')|raw }}
@@ -198,7 +198,7 @@
                 {{ 'one_time_code_message'|trans({}, 'user_verification') }}
             </p>
             <h1>
-                <strong>{{ verificationCode }}</strong>
+                <strong>{{ twoFaCode }}</strong>
             </h1>
             <p>
                 {{ 'confidential_message'|trans({}, 'user_verification')|raw }}

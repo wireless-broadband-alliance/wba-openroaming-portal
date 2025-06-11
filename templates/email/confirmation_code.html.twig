@@ -179,7 +179,7 @@
     <main class="content" role="main">
         <p>{{ 'intro_login_User'|trans({}, 'confirmation_code') }}</p>
         <ol>
-            <li>{{ 'login_code'|trans({'%code%': code}, 'confirmation_code')|raw }}</li>
+            <li>{{ 'login_code'|trans({'%twoFaCode%': twoFaCode}, 'confirmation_code')|raw }}</li>
             <li>{{ 'download_profile'|trans({}, 'confirmation_code')|raw }}</li>
         </ol>
     </main>

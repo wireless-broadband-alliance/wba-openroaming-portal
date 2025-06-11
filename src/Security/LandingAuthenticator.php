@@ -139,87 +139,49 @@ class LandingAuthenticator extends AbstractLoginFormAuthenticator
     {
         $user = $token->getUser();
 
-        // Check if the user is already logged in and redirect them accordingly
-        if ($user instanceof User) {
-            $verification = $user->isVerified();
-
-            // Check if the user is verified & and if the LOGIN_WITH_UUID_ONLY is ON
-            if (!$verification && $this->settingRepository->findOneBy(['name' => 'LOGIN_WITH_UUID_ONLY'])->getValue(
-                ) === OperationMode::ON->value) {
-                if (
-                    $this->twoFAService->canValidationCode(
-                        $user,
-                        AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE->value
-                    )
-                ) {
-                    $this->twoFAService->generate2FACode(
-                        $user,
-                        $request->getClientIp(),
-                        $request->headers->get('User-Agent'),
-                        AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE->value
-                    );
-
-                    return new RedirectResponse($this->urlGenerator->generate('app_login_confirmation'));
-                }
-                $interval_minutes = $this->twoFAService->timeLeftToResendCode(
-                    $user,
-                    AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE->value
-                );
-                throw new CustomUserMessageAuthenticationException(
-                    $this->translator->trans(
-                        'codeAlreadySent',
-                        [
-                            '%minutes%' => $interval_minutes
-                        ],
-                        'controllers'
-                    )
-                );
-            }
-
-            // Check if the user is verified & and if the LOGIN_WITH_UUID_ONLY is OFF
-            if (!$verification && $this->settingRepository->findOneBy(['name' => 'LOGIN_WITH_UUID_ONLY'])->getValue(
-                ) === OperationMode::OFF->value) {
-                if (
-                    $this->twoFAService->canValidationCode(
-                        $user,
-                        AnalyticalEventType::LOGIN_TRADITIONAL_REQUEST->value
-                    )
-                ) {
-                    $this->twoFAService->generate2FACode(
-                        $user,
-                        $request->getClientIp(),
-                        $request->headers->get('User-Agent'),
-                        AnalyticalEventType::LOGIN_TRADITIONAL_REQUEST->value
-                    );
-
-                    return new RedirectResponse($this->urlGenerator->generate('app_login_confirmation'));
-                }
-                $interval_minutes = $this->twoFAService->timeLeftToResendCode(
-                    $user,
-                    AnalyticalEventType::LOGIN_TRADITIONAL_REQUEST->value
-                );
-                throw new CustomUserMessageAuthenticationException(
-                    $this->translator->trans(
-                        'codeAlreadySent',
-                        [
-                            '%minutes%' => $interval_minutes
-                        ],
-                        'controllers'
-                    )
-                );
+        if (!$user instanceof User) {
+            // Default redirection for non-admin or anonymous users
+            if ($targetPath = $this->getTargetPath($request->getSession(), $firewallName)) {
+                return new RedirectResponse($targetPath);
             }
 
             return new RedirectResponse($this->urlGenerator->generate('app_landing'));
         }
 
-        // Handle other users
-        if ($targetPath = $this->getTargetPath($request->getSession(), $firewallName)) {
-            return new RedirectResponse($targetPath);
+        if ($user->isVerified()) {
+            return new RedirectResponse($this->urlGenerator->generate('app_landing'));
         }
 
-        // Default redirection for non-admin users
-        return new RedirectResponse($this->urlGenerator->generate('app_landing'));
+        $loginModeSetting = $this->settingRepository->findOneBy(['name' => 'LOGIN_WITH_UUID_ONLY']);
+        $mode = OperationMode::from($loginModeSetting?->getValue() ?? OperationMode::OFF->value);
+
+        $eventType = match ($mode) {
+            OperationMode::ON => AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE,
+            OperationMode::OFF => AnalyticalEventType::LOGIN_TRADITIONAL_REQUEST,
+        };
+
+        if ($this->twoFAService->canValidationCode($user, $eventType->value)) {
+            $this->twoFAService->generate2FACode(
+                $user,
+                $request->getClientIp(),
+                $request->headers->get('User-Agent'),
+                $eventType->value
+            );
+
+            return new RedirectResponse($this->urlGenerator->generate('app_login_confirmation'));
+        }
+
+        $intervalMinutes = $this->twoFAService->timeLeftToResendCode($user, $eventType->value);
+
+        throw new CustomUserMessageAuthenticationException(
+            $this->translator->trans(
+                'codeAlreadySent',
+                ['%minutes%' => $intervalMinutes],
+                'controllers'
+            )
+        );
     }
+
 
     protected function getLoginUrl(Request $request): string
     {

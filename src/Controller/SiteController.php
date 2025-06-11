@@ -106,6 +106,18 @@ class SiteController extends AbstractController
                 return $this->redirectToRoute('app_logout');
             }
 
+            // Checks if the user has a "forgot_password_request", if yes, return to the password-reset form
+            if ($currentUser->isForgotPasswordRequest()) {
+                $this->addFlash(
+                    'error',
+                    $this->translator->trans('confirmNewPasswordBeforeDownloadProfile', [], 'controllers')
+                );
+                return $this->redirectToRoute('app_site_forgot_password_checker');
+            }
+            if ($currentUser->getDeletedAt()) {
+                return $this->redirectToRoute('app_logout');
+            }
+
             // Check if the user is verified
             if (
                 $userExternalAuths[0]->getProvider() === UserProvider::PORTAL_ACCOUNT->value &&
@@ -146,18 +158,6 @@ class SiteController extends AbstractController
                 return $this->redirectToRoute('app_login_confirmation');
             }
 
-
-            // Checks if the user has a "forgot_password_request", if yes, return to the password-reset form
-            if ($currentUser->isForgotPasswordRequest()) {
-                $this->addFlash(
-                    'error',
-                    $this->translator->trans('confirmNewPasswordBeforeDownloadProfile', [], 'controllers')
-                );
-                return $this->redirectToRoute('app_site_forgot_password_checker');
-            }
-            if ($currentUser->getDeletedAt()) {
-                return $this->redirectToRoute('app_logout');
-            }
 
             if (
                 $currentUser &&
