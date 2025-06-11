@@ -3,7 +3,7 @@ subject_2fa_disabled: 'Two-Factor Authentication Disabled'
 greeting: 'Hello %uuid%,'
 info_2fa_disabled: 'We wanted to inform you that your Two-Factor Authentication (2FA) <strong>has been disabled</strong> by an administrator.'
 warning_contact_support: 'If this action was unexpected or unauthorized, please <strong>contact our support team</strong> immediately for assistance.'
-recommend_reenable_2fa: 'For your safety, we recommend <strong>re-enabling Two-Factor Authentication</strong> at the earliest opportunity.'
+recommend_re_enable_2fa: 'For your safety, we recommend <strong>re-enabling Two-Factor Authentication</strong> as soon as possible.'
 configuration_guidance: 'Please access the following <a href="%link%" style="color: #0045AD; text-decoration: underline;">link</a> to manage your Two-Factor Authentication settings.'
 footer:
     support_team: 'Support team:'

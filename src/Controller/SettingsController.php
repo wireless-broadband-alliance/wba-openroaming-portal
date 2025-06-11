@@ -992,10 +992,12 @@ class SettingsController extends AbstractController
                         $request->headers->get('User-Agent')
                     );
                 }
+
                 if ($setting !== null) {
                     $setting->setValue($value);
                     $this->entityManager->persist($setting);
                 }
+
                 if ($settingName === 'VALID_DOMAINS_GOOGLE_LOGIN' || $settingName === 'VALID_DOMAINS_MICROSOFT_LOGIN') {
                     continue;
                 }

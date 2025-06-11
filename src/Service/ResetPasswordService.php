@@ -5,6 +5,7 @@ namespace App\Service;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Enum\UserProvider;
+use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
@@ -21,10 +22,10 @@ readonly class ResetPasswordService
 {
     public function __construct(
         private UserRepository $userRepository,
+        private SettingRepository $settingRepository,
         private EntityManagerInterface $entityManager,
         private UserPasswordHasherInterface $userPasswordHasher,
         private ParameterBagInterface $parameterBag,
-        private GetSettings $getSettings,
         private TranslatorInterface $translator,
         private MailerInterface $mailer,
         private SendSMS $sendSMS,
@@ -52,7 +53,7 @@ readonly class ResetPasswordService
 
             $this->eventActions->saveEvent(
                 $user,
-                AnalyticalEventType::USER_ACCOUNT_UPDATE_PASSWORD_FROM_UI->value,
+                AnalyticalEventType::USER_PASSWORD_RESET_FROM_SETTING_AUTH->value,
                 new DateTime(),
                 $eventMetadata
             );
@@ -72,13 +73,12 @@ readonly class ResetPasswordService
         $this->entityManager->persist($user);
         $this->entityManager->flush();
 
-        $data = $this->getSettings->getSettings();
-
         if ($user->getUserExternalAuths()[0]->getProviderId() === UserProvider::EMAIL->value) {
             $emailSender = $this->parameterBag->get('app.email_address');
             $nameSender = $this->parameterBag->get('app.sender_name');
-            $supportTeam = $data['PAGE_TITLE']['value'];
-            $contactEmail = $data['CONTACT_EMAIL']['value'];
+            $supportTeam = $this->settingRepository->findOneBy(['name' => 'PAGE_TITLE'])->getValue();
+            $contactEmail = $this->settingRepository->findOneBy(['name' => 'CONTACT_EMAIL'])->getValue();
+
             // Send email
             $email = new TemplatedEmail()
                 ->from(new Address($emailSender, $nameSender))

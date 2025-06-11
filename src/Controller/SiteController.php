@@ -147,6 +147,18 @@ class SiteController extends AbstractController
             }
 
 
+            // Checks if the user has a "forgot_password_request", if yes, return to the password-reset form
+            if ($currentUser->isForgotPasswordRequest()) {
+                $this->addFlash(
+                    'error',
+                    $this->translator->trans('confirmNewPasswordBeforeDownloadProfile', [], 'controllers')
+                );
+                return $this->redirectToRoute('app_site_forgot_password_checker');
+            }
+            if ($currentUser->getDeletedAt()) {
+                return $this->redirectToRoute('app_logout');
+            }
+
             if (
                 $currentUser &&
                 ($data["LOGIN_WITH_UUID_ONLY"]["value"] === OperationMode::OFF->value ||
@@ -174,17 +186,6 @@ class SiteController extends AbstractController
                 }
             }
 
-            // Checks if the user has a "forgot_password_request", if yes, return to the password-reset form
-            if ($currentUser->isForgotPasswordRequest()) {
-                $this->addFlash(
-                    'error',
-                    $this->translator->trans('confirmNewPasswordBeforeDownloadProfile', [], 'controllers')
-                );
-                return $this->redirectToRoute('app_site_forgot_password_checker');
-            }
-            if ($currentUser->getDeletedAt()) {
-                return $this->redirectToRoute('app_logout');
-            }
         }
         if (
             $currentUser &&
