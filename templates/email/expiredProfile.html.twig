@@ -179,23 +179,13 @@
     </div>
 
     <main class="content" role="main">
-            <h1>{{ 'header'|trans({}, 'expirationProfiles') }}</h1>
-            <p>
-                {{ 'expired_message'|trans({}, 'expirationProfiles') }}
-                <br>
-                {{ 'renew_instructions'|trans({}, 'expirationProfiles') }}
-            </p>
-            <ol style="margin-top: 1rem; font-size: 1.125rem; list-style-type: decimal; list-style-position: inside; padding-left: 0; margin-bottom: 0;">
-                <li style="margin-bottom: 0.75rem;">
-                    {{ 'steps.access_portal'|trans({'%link%': absolute_url(path('app_landing'))}, 'expirationProfiles')|raw }}
-                </li>
-                <li style="margin-bottom: 0.75rem;">
-                    {{ 'steps.login'|trans({}, 'expirationProfiles') }}
-                </li>
-                <li>
-                    {{ 'steps.download'|trans({}, 'expirationProfiles') }}
-                </li>
-            </ol>
+        <h1>{{ 'header'|trans({}, 'expirationProfiles') }}</h1>
+        <p>
+            {{ 'expired_message'|trans({}, 'expirationProfiles')|raw }}
+        </p>
+        <a href="{{ absolute_url(path('app_landing')) ~ '?uuid=' ~ uuid|url_encode|url_encode }}" class="btn-download">
+            {{ 'new_profile'|trans({}, 'expirationProfiles') }}
+        </a>
     </main>
 
     <footer class="footer" role="contentinfo">
