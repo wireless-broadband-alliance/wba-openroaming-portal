@@ -156,6 +156,9 @@ class ForgotPasswordController extends AbstractController
                         $entityManager->persist($user);
                         $entityManager->flush();
 
+                        $customerLogo = $data['CUSTOMER_LOGO']['value'];
+                        $projectDir =  $this->parameterBag->get('kernel.project_dir');
+                        $logoPath = $projectDir . '/public' . $customerLogo;
                         $email = new TemplatedEmail()
                             ->from(
                                 new Address(
@@ -181,7 +184,8 @@ class ForgotPasswordController extends AbstractController
                                 'currentPassword' => $randomPassword,
                                 'verificationCode' => $user->getTwoFAcode(),
                                 'context' => FirewallType::LANDING->value,
-                            ]);
+                            ])
+                            ->embedFromPath($logoPath, 'logo_cid');
 
                         $mailer->send($email);
 
@@ -451,6 +455,7 @@ class ForgotPasswordController extends AbstractController
             );
             $currentUser->setForgotPasswordRequest(false);
             $currentUser->setIsVerified(true);
+            $currentUser->setTwoFAcode(random_int(100000, 999999));
             $session = $request->getSession();
             $session->set('session_verified', true);
             $entityManager->persist($currentUser);

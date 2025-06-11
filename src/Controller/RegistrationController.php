@@ -328,8 +328,8 @@ class RegistrationController extends AbstractController
         // Get the user with the matching email, excluding admin users
         $user = $userRepository->findOneByUUIDExcludingAdmin($uuid);
 
-        // check if the user has been previously verified
-        if ($user && $user->isVerified()) {
+        // Check if the user has been previously verified
+        if ($user && $user->isVerified() && !$user->isForgotPasswordRequest()) {
             $this->addFlash(
                 'error',
                 $this->translator->trans('accountAlreadyVerified', [], 'controllers')
