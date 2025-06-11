@@ -1,7 +1,9 @@
 subject_registration_details: 'Your OpenRoaming Registration Details'
 title_welcome: 'Open the door to OpenRoaming!'
 header_welcome: 'Welcome to the OpenRoaming Provisioning Portal!'
-intro_new_user: 'To use your account in OpenRoaming Portal, click the link below. Download and install the wifi network to configure your device.'
+intro_new_user: >
+    To use your account in OpenRoaming Portal, <strong style='color: #0B1A58;'>%link_text%</strong>. 
+    <strong>%download_text%</strong> to configure your device.
 
 new_user_steps:
     confirm_account: 'Click <a href="%confirmLink%" style="font-weight: 700; color: #7BBA29; text-decoration: underline;">here</a> to confirm your account.'
