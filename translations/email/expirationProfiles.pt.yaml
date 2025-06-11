@@ -1,6 +1,7 @@
-subject: 'O seu Perfil OpenRoaming Expirou'
+subject_is_expired: 'O seu Perfil OpenRoaming Expirou'
 subject_is_expiring: 'O seu Perfil OpenRoaming está prestes a expirar'
 header: 'O seu Perfil OpenRoaming Expirou'
+profile_expiration_warning: 'O seu Perfil vai expirar em <span style="font-weight: 700; color: #0045AD;">%timeLeft%</span> dias.'
 expired_message: 'O seu perfil OpenRoaming expirou.'
 renew_instructions: 'Para obter um novo perfil, siga estes simples passos:'
 steps:

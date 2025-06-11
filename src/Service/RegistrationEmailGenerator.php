@@ -90,7 +90,11 @@ readonly class RegistrationEmailGenerator
     public function sendNotifyExpiredProfile(User $user): void
     {
         $emailTitle = $this->settingRepository->findOneBy(['name' => 'PAGE_TITLE'])->getValue();
+        $supportTeam = $this->settingRepository->findOneBy(['name' => 'PAGE_TITLE'])->getValue();
         $contactEmail = $this->settingRepository->findOneBy(['name' => 'CONTACT_EMAIL'])->getValue();
+        $customerLogo = $this->settingRepository->findOneBy(['name' => 'CUSTOMER_LOGO'])->getValue();
+        $projectDir = $this->parameterBag->get('kernel.project_dir');
+        $logoPath = $projectDir . '/public' . $customerLogo;
 
         // Send email to the user with the verification code
         $email = new TemplatedEmail()
@@ -107,7 +111,9 @@ readonly class RegistrationEmailGenerator
                 'uuid' => $user->getEmail(),
                 'contactEmail' => $contactEmail,
                 'emailTitle' => $emailTitle,
-            ]);
+                'supportTeam' => $supportTeam,
+            ])
+            ->embedFromPath($logoPath, 'logo_cid');
 
         $this->mailer->send($email);
     }
