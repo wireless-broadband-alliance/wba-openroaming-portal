@@ -91,29 +91,27 @@
     {% if data.PLATFORM_MODE.value != constant('App\\Enum\\PlatformMode::DEMO').value %}
 
         {% if data.AUTH_METHOD_REGISTER_ENABLED.value or data.AUTH_METHOD_SMS_REGISTER_ENABLED.value == 'true' %}
-            {% if data.LOGIN_WITH_UUID_ONLY.value == constant('App\\Enum\\OperationMode::OFF').value %}
-                <p class="mt-2 text-sm">
-                    {{ 'forgot_password'|trans({}, 'login_landing') }}
+            <p class="mt-2 text-sm">
+                {{ 'forgot_password'|trans({}, 'login_landing') }}
 
-                    {% if data.AUTH_METHOD_REGISTER_ENABLED.value == 'true' %}
-                        <a href="{{ path('app_site_forgot_password_email') }}"
-                           class="font-semibold text-primary underline">
-                            {{ 'forgot_password_email'|trans({}, 'login_landing') }}
-                        </a>
-                    {% endif %}
+                {% if data.AUTH_METHOD_REGISTER_ENABLED.value == 'true' %}
+                    <a href="{{ path('app_site_forgot_password_email') }}"
+                       class="font-semibold text-primary underline">
+                        {{ 'forgot_password_email'|trans({}, 'login_landing') }}
+                    </a>
+                {% endif %}
 
-                    {% if data.AUTH_METHOD_REGISTER_ENABLED.value == 'true' and data.AUTH_METHOD_SMS_REGISTER_ENABLED.value == 'true' %}
-                        {{ 'or'|trans({}, 'login_landing') }}
-                    {% endif %}
+                {% if data.AUTH_METHOD_REGISTER_ENABLED.value == 'true' and data.AUTH_METHOD_SMS_REGISTER_ENABLED.value == 'true' %}
+                    {{ 'or'|trans({}, 'login_landing') }}
+                {% endif %}
 
-                    {% if data.AUTH_METHOD_SMS_REGISTER_ENABLED.value == 'true' %}
-                        <a href="{{ path('app_site_forgot_password_sms') }}"
-                           class="font-semibold text-primary underline">
-                            {{ 'forgot_password_phone'|trans({}, 'login_landing') }}
-                        </a>.
-                    {% endif %}
-                </p>
-            {% endif %}
+                {% if data.AUTH_METHOD_SMS_REGISTER_ENABLED.value == 'true' %}
+                    <a href="{{ path('app_site_forgot_password_sms') }}"
+                       class="font-semibold text-primary underline">
+                        {{ 'forgot_password_phone'|trans({}, 'login_landing') }}
+                    </a>.
+                {% endif %}
+            </p>
 
             <p class="mt-2 text-sm">
                 {{ 'no_account_register'|trans({}, 'login_landing') }}
