@@ -69,23 +69,6 @@ class UserAccountDeletionController extends AbstractController
         if ($data['LOGIN_WITH_UUID_ONLY']['value'] === OperationMode::ON->value &&
         $currentUser->getUserExternalAuths()[0]->getProvider() === UserProvider::PORTAL_ACCOUNT->value
         ) {
-            $form = $this->createForm(AutoDeleteCodeType::class);
-            $form->handleRequest($request);
-            if ($form->isSubmitted() && $form->isValid()) {
-                if ($currentUser->getUserExternalAuths()[0]->getProvider() === UserProvider::PORTAL_ACCOUNT->value) {
-                    $typedCode = $form->get('code')->getData();
-
-                    // Compare the typed code with the 2fa code from the database
-                    if ($this->twoFAService->validate2FACode($currentUser, $typedCode)) {
-                        $this->userDeletionService->deleteUser($currentUser, $userExternalAuths, $request, $currentUser);
-                        return $this->redirectToRoute('app_landing');
-                    }
-                    $this->addFlash(
-                        'error',
-                        $this->translator->trans('invalidCode', [], 'controllers')
-                    );
-                }
-            }
             if ($this->twoFAService->canValidationCode($currentUser, AnalyticalEventType::USER_AUTO_DELETE_CODE->value))
             {
                 $this->twoFAService->generate2FACode(
@@ -114,12 +97,7 @@ class UserAccountDeletionController extends AbstractController
                     )
                 );
             }
-            return $this->render('landing/autoDeleteAccount/auto_delete_account.html.twig', [
-                'form' => $form->createView(),
-                'data' => $data,
-                'user' => $currentUser,
-                'context' => FirewallType::LANDING->value,
-            ]);
+            return $this->redirectToRoute('app_user_account_deletion_local_code');
         }
         $form = $this->createForm(AutoDeletePasswordType::class);
         $form->handleRequest($request);
@@ -137,6 +115,66 @@ class UserAccountDeletionController extends AbstractController
                 $this->addFlash(
                     'error',
                     $this->translator->trans('invalidPassword', [], 'controllers')
+                );
+            }
+        }
+
+        if ($form->isSubmitted() && !$form->isValid()) {
+            foreach ($form->getErrors(true) as $error) {
+                $this->addFlash('error', $error->getMessage());
+            }
+        }
+
+        return $this->render('landing/autoDeleteAccount/auto_delete_account.html.twig', [
+            'form' => $form->createView(),
+            'data' => $data,
+            'user' => $currentUser,
+            'context' => FirewallType::LANDING->value,
+        ]);
+    }
+
+    #[Route('/landing/userAccount/deletion/local/code', name: 'app_user_account_deletion_local_code')]
+    #[IsGranted('ROLE_USER')]
+    public function userAccountDeletionLocalConfirm(Request $request): Response
+    {
+        $data = $this->getSettings->getSettings();
+
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
+
+        // Check if the local account has a phoneNumber of an email
+        if ($currentUser->getPhoneNumber() === null && empty($currentUser->getEmail())) {
+            $this->redirectToRoute('app_landing');
+        }
+
+        $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $currentUser->getId()]);
+        if ($currentUser->getUserExternalAuths()[0]->getProvider() !== UserProvider::PORTAL_ACCOUNT->value) {
+            $this->addFlash(
+                'error',
+                $this->translator->trans(
+                    'cannotAccessThisPageWithAInvalidProvider',
+                    [],
+                    'controllers'
+                )
+            );
+
+            return $this->redirectToRoute('app_landing');
+        }
+
+        $form = $this->createForm(AutoDeleteCodeType::class);
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            if ($currentUser->getUserExternalAuths()[0]->getProvider() === UserProvider::PORTAL_ACCOUNT->value) {
+                $typedCode = $form->get('code')->getData();
+
+                // Compare the typed code with the 2fa code from the database
+                if ($this->twoFAService->validate2FACode($currentUser, $typedCode)) {
+                    $this->userDeletionService->deleteUser($currentUser, $userExternalAuths, $request, $currentUser);
+                    return $this->redirectToRoute('app_landing');
+                }
+                $this->addFlash(
+                    'error',
+                    $this->translator->trans('invalidCode', [], 'controllers')
                 );
             }
         }
