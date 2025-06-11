@@ -3,8 +3,8 @@ toast_warning: 'Está na página para eliminar permanentemente a sua conta. Esta
 account_deletion_process: 'Processo de Eliminação de Conta'
 deletion_description: >
     Para prosseguir com a eliminação da conta, introduza a sua <strong class="text-red-600">palavra-passe atual</strong>.
-    Se a tiver esquecido, pode verificá-la no seu <strong class="text-blue-600">e-mail de registo</strong> ou redefini-la através da opção de recuperação de palavra-passe.
-    Para redefinir a sua palavra-passe, aceda a <strong class="text-blue-600">"/forgot-password/email"</strong> —
+    Se a tiver esquecido, pode verificá-la no seu <strong class="text-blue-600">e-mail de registo ou sms</strong> ou redefini-la através da opção de recuperação de palavra-passe.
+    Para redefinir a sua palavra-passe, aceda a <strong class="text-blue-600">"/forgot-password/email or /forgot-password/sms"</strong> —
     <strong class="text-red-600">não pode estar autenticado</strong> para o fazer.
 
 password_label: 'Palavra-passe'
