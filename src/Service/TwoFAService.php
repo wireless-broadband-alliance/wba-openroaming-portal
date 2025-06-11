@@ -182,7 +182,7 @@ readonly class TwoFAService
             $contactEmail = $this->settingRepository->findOneBy(['name' => 'CONTACT_EMAIL'])->getValue();
             $supportTeam = $this->settingRepository->findOneBy(['name' => 'PAGE_TITLE'])->getValue();
             $customerLogo = $this->settingRepository->findOneBy(['name' => 'CUSTOMER_LOGO'])->getValue();
-            $projectDir =  $this->parameterBag->get('kernel.project_dir');
+            $projectDir = $this->parameterBag->get('kernel.project_dir');
             $logoPath = $projectDir . '/public' . $customerLogo;
 
             if (
@@ -208,7 +208,7 @@ readonly class TwoFAService
             } elseif (
                 $eventType === AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE_RESEND->value
             ) {
-                // LOGIN_WITH_UUID_ONLY_CODE_RESEND
+                // LOGIN_WITH_UUID_ONLY_CODE_RESEND || LOGIN_TRADITIONAL_REQUEST_RESEND_CODE
                 $email = new TemplatedEmail()
                     ->from(
                         new Address(
@@ -217,14 +217,14 @@ readonly class TwoFAService
                         )
                     )
                     ->to($user->getEmail())
-                    ->subject($this->translator->trans('subject_verify', [], 'user_verification'))
-                    ->htmlTemplate('email/user_verification.html.twig')
+                    ->subject($this->translator->trans('subject', [], 'confirmation_code'))
+                    ->htmlTemplate('email/confirmation_code.html.twig')
                     ->context([
                         'uuid' => $user->getEmail(),
                         'emailTitle' => $emailTitle,
                         'supportTeam' => $supportTeam,
                         'contactEmail' => $contactEmail,
-                        'verificationCode' => $code,
+                        'code' => $code,
                     ])
                     ->embedFromPath($logoPath, 'logo_cid');
             } elseif (
@@ -290,7 +290,8 @@ readonly class TwoFAService
         } elseif ($messageType === UserTwoFactorAuthenticationStatus::SMS->value || $user->getPhoneNumber()) {
             if (
                 $eventType === AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE->value ||
-                $eventType === AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE_RESEND->value
+                $eventType === AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE_RESEND->value ||
+                $eventType === AnalyticalEventType::LOGIN_TRADITIONAL_REQUEST->value
             ) {
                 $message = "Your verification Code is " . $code;
             } else {

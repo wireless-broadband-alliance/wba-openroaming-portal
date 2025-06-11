@@ -8,7 +8,7 @@ intro_new_user: >
 new_user_steps:
     confirm_account: 'Click <a href="%confirmLink%" style="font-weight: 700; color: #7BBA29; text-decoration: underline;">here</a> to confirm your account.'
     download_profile: "After confirmation, don't forget to click <strong>“Download and Install Profile”</strong> on the portal to complete setting up your device."
-    password: "Password: Your account password is: <strong style='color: #0045AD;'>%password%</strong>"
+    password: "Your account password is: <strong style='color: #0045AD;'>%password%</strong>"
     enter_code: "If you encounter any issues with the confirmation link, log in using your credentials (email and password) and enter this code: <strong style='color: #0045AD;'>%twoFaCode%</strong>"
 
 download_and_install: 'Download and Install'

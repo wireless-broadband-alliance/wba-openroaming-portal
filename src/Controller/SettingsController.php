@@ -981,21 +981,22 @@ class SettingsController extends AbstractController
                 }
 
                 $setting = $settingsRepository->findOneBy(['name' => $settingName]);
+
+                if ($setting !== null) {
+                    $setting->setValue($value);
+                    $this->entityManager->persist($setting);
+                }
+
                 if (
                     $settingName === 'LOGIN_WITH_UUID_ONLY' &&
                     $setting &&
-                    ($setting->getValue() === OperationMode::ON->value && $value === OperationMode::OFF->value)
+                    ($setting->getValue() === OperationMode::OFF->value && $value === OperationMode::OFF->value)
                 ) {
                     $this->resetPasswordService->resetPasswordForLocalAccounts(
                         $currentUser,
                         $request->getClientIp(),
                         $request->headers->get('User-Agent')
                     );
-                }
-
-                if ($setting !== null) {
-                    $setting->setValue($value);
-                    $this->entityManager->persist($setting);
                 }
 
                 if ($settingName === 'VALID_DOMAINS_GOOGLE_LOGIN' || $settingName === 'VALID_DOMAINS_MICROSOFT_LOGIN') {

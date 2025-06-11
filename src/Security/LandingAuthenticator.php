@@ -6,7 +6,6 @@ use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Enum\FirewallType;
 use App\Enum\OperationMode;
-use App\Enum\TwoFAType;
 use App\Enum\UserProvider;
 use App\Enum\UserTwoFactorAuthenticationStatus;
 use App\Repository\SettingRepository;
@@ -30,7 +29,6 @@ use Symfony\Component\Security\Http\Authenticator\Passport\Credentials\PasswordC
 use Symfony\Component\Security\Http\Authenticator\Passport\Passport;
 use Symfony\Component\Security\Http\SecurityRequestAttributes;
 use Symfony\Component\Security\Http\Util\TargetPathTrait;
-use Symfony\Flex\Unpack\Operation;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 class LandingAuthenticator extends AbstractLoginFormAuthenticator
@@ -143,13 +141,11 @@ class LandingAuthenticator extends AbstractLoginFormAuthenticator
 
         // Check if the user is already logged in and redirect them accordingly
         if ($user instanceof User) {
-            $twoFAPlatformStatus = $this->settingRepository->findOneBy([
-                'name' => 'TWO_FACTOR_AUTH_STATUS'
-            ])->getValue();
-
             $verification = $user->isVerified();
-            // Check if the user is verified
-            if (!$verification) {
+
+            // Check if the user is verified & and if the LOGIN_WITH_UUID_ONLY is ON
+            if (!$verification && $this->settingRepository->findOneBy(['name' => 'LOGIN_WITH_UUID_ONLY'])->getValue(
+                ) === OperationMode::ON->value) {
                 if (
                     $this->twoFAService->canValidationCode(
                         $user,
@@ -162,25 +158,58 @@ class LandingAuthenticator extends AbstractLoginFormAuthenticator
                         $request->headers->get('User-Agent'),
                         AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE->value
                     );
+
                     return new RedirectResponse($this->urlGenerator->generate('app_login_confirmation'));
                 }
                 $interval_minutes = $this->twoFAService->timeLeftToResendCode(
                     $user,
                     AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE->value
                 );
-                throw new CustomUserMessageAuthenticationException($this->translator->trans(
-                    'codeAlreadySent',
-                    [
-                        '%minutes%' => $interval_minutes
-                    ],
-                    'controllers'
-                ));
+                throw new CustomUserMessageAuthenticationException(
+                    $this->translator->trans(
+                        'codeAlreadySent',
+                        [
+                            '%minutes%' => $interval_minutes
+                        ],
+                        'controllers'
+                    )
+                );
             }
 
-            return $this->handleTwoFactorRedirection(
-                $user,
-                $twoFAPlatformStatus
-            );
+            // Check if the user is verified & and if the LOGIN_WITH_UUID_ONLY is OFF
+            if (!$verification && $this->settingRepository->findOneBy(['name' => 'LOGIN_WITH_UUID_ONLY'])->getValue(
+                ) === OperationMode::OFF->value) {
+                if (
+                    $this->twoFAService->canValidationCode(
+                        $user,
+                        AnalyticalEventType::LOGIN_TRADITIONAL_REQUEST->value
+                    )
+                ) {
+                    $this->twoFAService->generate2FACode(
+                        $user,
+                        $request->getClientIp(),
+                        $request->headers->get('User-Agent'),
+                        AnalyticalEventType::LOGIN_TRADITIONAL_REQUEST->value
+                    );
+
+                    return new RedirectResponse($this->urlGenerator->generate('app_login_confirmation'));
+                }
+                $interval_minutes = $this->twoFAService->timeLeftToResendCode(
+                    $user,
+                    AnalyticalEventType::LOGIN_TRADITIONAL_REQUEST->value
+                );
+                throw new CustomUserMessageAuthenticationException(
+                    $this->translator->trans(
+                        'codeAlreadySent',
+                        [
+                            '%minutes%' => $interval_minutes
+                        ],
+                        'controllers'
+                    )
+                );
+            }
+
+            return new RedirectResponse($this->urlGenerator->generate('app_landing'));
         }
 
         // Handle other users
@@ -195,63 +224,5 @@ class LandingAuthenticator extends AbstractLoginFormAuthenticator
     protected function getLoginUrl(Request $request): string
     {
         return $this->urlGenerator->generate('app_login');
-    }
-
-    protected function handleTwoFactorRedirection(
-        User $user,
-        string $twoFAPlatformStatus,
-    ): Response {
-        // Handle NOT_ENFORCED TwoFA status
-        if ($twoFAPlatformStatus === TwoFAType::NOT_ENFORCED->value) {
-            return $this->redirectBasedOnTwoFAType($user);
-        }
-
-        $loginWithUuidOnlySetting = $this->settingRepository->findOneBy(['name' => 'LOGIN_WITH_UUID_ONLY']);
-        if (
-            (($loginWithUuidOnlySetting && $loginWithUuidOnlySetting->getValue() === OperationMode::OFF->value) ||
-                $user->getUserExternalAuths()[0]->getProvider() !== UserProvider::PORTAL_ACCOUNT->value) &&
-            ($twoFAPlatformStatus === TwoFAType::ENFORCED_FOR_LOCAL->value ||
-                $twoFAPlatformStatus === TwoFAType::ENFORCED_FOR_ALL->value)
-        ) {
-            if (
-                $user->getTwoFAType() === UserTwoFactorAuthenticationStatus::DISABLED->value
-            ) {
-                return new RedirectResponse($this->urlGenerator->generate('app_configure2FA', [
-                    'context' => FirewallType::LANDING->value,
-                ]));
-            }
-
-            return $this->redirectBasedOnTwoFAType($user);
-        }
-        // Fallback default redirection
-        return new RedirectResponse($this->urlGenerator->generate('app_landing'));
-    }
-
-    protected function redirectBasedOnTwoFAType(User $user): Response
-    {
-        $loginWithUuidOnlySetting = $this->settingRepository->findOneBy(['name' => 'LOGIN_WITH_UUID_ONLY']);
-        if (
-            ($loginWithUuidOnlySetting && $loginWithUuidOnlySetting->getValue() === OperationMode::OFF->value) ||
-            $user->getUserExternalAuths()[0]->getProvider() !== UserProvider::PORTAL_ACCOUNT->value
-        ) {
-            // Check if the user's 2FA type is SMS or EMAIL and redirect accordingly
-            if (
-                $user->getTwoFAType() === UserTwoFactorAuthenticationStatus::SMS->value ||
-                $user->getTwoFAType() === UserTwoFactorAuthenticationStatus::EMAIL->value
-            ) {
-                return new RedirectResponse($this->urlGenerator->generate('app_2FA_generate_code', [
-                    'context' => FirewallType::LANDING->value,
-                ]));
-            }
-
-            // Check if the user's 2FA type is TOTP and redirect accordingly
-            if ($user->getTwoFAType() === UserTwoFactorAuthenticationStatus::TOTP->value) {
-                return new RedirectResponse($this->urlGenerator->generate('app_verify2FA_TOTP', [
-                    'context' => FirewallType::LANDING->value,
-                ]));
-            }
-        }
-        // Redirect to app_landing as a fallback
-        return new RedirectResponse($this->urlGenerator->generate('app_landing'));
     }
 }

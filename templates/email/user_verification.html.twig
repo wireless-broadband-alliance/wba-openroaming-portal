@@ -179,27 +179,28 @@
     </div>
 
     <main class="content" role="main">
-        <h1>{{ 'subject_2fa'|trans({}, 'user_verification') }}</h1>
-        {% if is2FATemplate %}
-        <p >
-            {{ 'two_factor_message'|trans({}, 'user_verification') }}
-        </p>
-        <h1>
-            <strong>{{ verificationCode }}</strong>
-        </h1>
-        <p >
-            {{ 'valid_for_message'|trans({'%seconds%': secondsLeft}, 'user_verification')|raw }}
-            <br>
-            {{ 'confidential_message'|trans({}, 'user_verification')|raw }}
-        </p>
+        {% if is2FATemplate == true %}
+            <h1>{{ 'subject_2fa'|trans({}, 'user_verification') }}</h1>
+            <p>
+                {{ 'two_factor_message'|trans({}, 'user_verification') }}
+            </p>
+            <h1>
+                <strong>{{ verificationCode }}</strong>
+            </h1>
+            <p>
+                {{ 'valid_for_message'|trans({'%seconds%': secondsLeft}, 'user_verification')|raw }}
+                <br>
+                {{ 'confidential_message'|trans({}, 'user_verification')|raw }}
+            </p>
         {% else %}
-            <p >
+            <h1>{{ 'subject_verify'|trans({}, 'user_verification') }}</h1>
+            <p>
                 {{ 'one_time_code_message'|trans({}, 'user_verification') }}
             </p>
             <h1>
                 <strong>{{ verificationCode }}</strong>
             </h1>
-            <p >
+            <p>
                 {{ 'confidential_message'|trans({}, 'user_verification')|raw }}
             </p>
         {% endif %}
