@@ -180,6 +180,9 @@
 
     <main class="content" role="main">
             <h1>{{ 'subject'|trans({}, 'user_auto_delete_code') }}</h1>
+            <p style="color: red">
+                <strong>{{ 'warning'|trans({}, 'user_auto_delete_code') }}</strong>
+            </p>
             <p>
                 {{ 'auto_deletion_message'|trans({}, 'user_auto_delete_code') }}
             </p>
