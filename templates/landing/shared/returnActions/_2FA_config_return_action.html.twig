@@ -11,7 +11,12 @@
         {% endfor %}
     </p>
 
-    {% if data.TWO_FACTOR_AUTH_STATUS.value == constant('App\\Enum\\TwoFAType::NOT_ENFORCED').value %}
+    {% if context == constant('App\\Enum\\FirewallType::DASHBOARD').value %}
+    <a href="{{ path('app_dashboard_logout') }}" class="w-[160px] btn-logout">
+        {{ 'twoFactorAuth.logout'|trans({}, '_account_widget') }}
+    </a>
+    {% else %}
+        {% if data.TWO_FACTOR_AUTH_STATUS.value == constant('App\\Enum\\TwoFAType::NOT_ENFORCED').value %}
         <a href="{{ context == constant('App\\Enum\\FirewallType::DASHBOARD').value ? path('admin_page') : path('app_landing') }}"
            class="w-[160px] btn-secondary">
             {{ 'twoFactorAuth.goBack'|trans({}, '_account_widget') }}
@@ -57,5 +62,6 @@
                 {{ 'twoFactorAuth.goBack'|trans({}, '_account_widget') }}
             </a>
         {% endif %}
+    {% endif %}
     {% endif %}
 </div>
