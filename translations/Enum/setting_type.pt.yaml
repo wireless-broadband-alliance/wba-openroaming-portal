@@ -1,9 +1,9 @@
-setting_type.settingCustom: Configuração Personalizada
-setting_type.settingTerms: Termos e Condições
-setting_type.settingRadius: Configurações RADIUS
-setting_type.settingStatus: Configurações de Estado
-setting_type.settingLDAP: Configuração LDAP
-setting_type.settingCAPPORT: Configuração CAPPORT
-setting_type.settingAUTH: Autenticação
-setting_type.settingTwoFA: Autenticação de Dois Fatores
-setting_type.settingSMS: Gateway SMS
+setting_type.settingCustom: Configuração da Página Inicial
+setting_type.settingTerms: Termos e Políticas
+setting_type.settingRadius: Configuração do Perfil Radius
+setting_type.settingStatus: Estado da Plataforma
+setting_type.settingLDAP: Sincronização LDAP
+setting_type.settingCAPPORT: Interação com Utilizadores
+setting_type.settingAUTH: Métodos de Autenticação
+setting_type.settingTwoFA: Autenticador de Dois Fatores
+setting_type.settingSMS: Configuração SMS
