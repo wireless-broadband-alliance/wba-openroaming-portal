@@ -231,6 +231,7 @@ readonly class TwoFAService
             } elseif (
                 $eventType === AnalyticalEventType::USER_CREATION->value
             ) {
+                dd($eventType); // this dd will stay here for debug (Marcelo) idk where does it come from
                 // USER_CREATION
                 $email = new TemplatedEmail()
                     ->from(
