@@ -23,3 +23,5 @@ profileData:
 dangerZone:
     title: 'Zona de Perigo'
     deleteAccount: 'Eliminar Conta'
+    deleteAccountWarningMessage: 'Aviso: Está prestes a eliminar a sua conta. Esta ação é irreversível. Tem a certeza de que pretende prosseguir?'
+    deleteAccountWarningMessageLocal: 'Aviso: Está prestes a eliminar a sua conta. Esta ação é irreversível. Enviaremos um código para confirmar esta ação. Tem a certeza de que pretende prosseguir?'

@@ -3,12 +3,16 @@
 namespace App\Controller;
 
 use App\Entity\User;
+use App\Enum\AnalyticalEventType;
 use App\Enum\FirewallType;
+use App\Enum\OperationMode;
 use App\Enum\UserProvider;
+use App\Form\AutoDeleteCodeType;
 use App\Form\AutoDeletePasswordType;
 use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
 use App\Service\GetSettings;
+use App\Service\TwoFAService;
 use App\Service\UserDeletionService;
 use DateTime;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -27,7 +31,8 @@ class UserAccountDeletionController extends AbstractController
         private readonly GetSettings $getSettings,
         private readonly UserDeletionService $userDeletionService,
         private readonly TranslatorInterface $translator,
-        private readonly UserRepository $userRepository
+        private readonly UserRepository $userRepository,
+        private readonly TwoFAService $twoFAService,
     ) {
     }
 
@@ -61,7 +66,61 @@ class UserAccountDeletionController extends AbstractController
 
             return $this->redirectToRoute('app_landing');
         }
+        if ($data['LOGIN_WITH_UUID_ONLY']['value'] === OperationMode::ON->value &&
+        $currentUser->getUserExternalAuths()[0]->getProvider() === UserProvider::PORTAL_ACCOUNT->value
+        ) {
+            $form = $this->createForm(AutoDeleteCodeType::class);
+            $form->handleRequest($request);
+            if ($form->isSubmitted() && $form->isValid()) {
+                if ($currentUser->getUserExternalAuths()[0]->getProvider() === UserProvider::PORTAL_ACCOUNT->value) {
+                    $typedCode = $form->get('code')->getData();
 
+                    // Compare the typed code with the 2fa code from the database
+                    if ($this->twoFAService->validate2FACode($currentUser, $typedCode)) {
+                        $this->userDeletionService->deleteUser($currentUser, $userExternalAuths, $request, $currentUser);
+                        return $this->redirectToRoute('app_landing');
+                    }
+                    $this->addFlash(
+                        'error',
+                        $this->translator->trans('invalidCode', [], 'controllers')
+                    );
+                }
+            }
+            if ($this->twoFAService->canValidationCode($currentUser, AnalyticalEventType::USER_AUTO_DELETE_CODE->value))
+            {
+                $this->twoFAService->generate2FACode(
+                    $currentUser,
+                    $request->getClientIp(),
+                    $request->headers->get('User-Agent'),
+                    AnalyticalEventType::USER_AUTO_DELETE_CODE->value
+                );
+                $this->addFlash(
+                    'success',
+                    $this->translator->trans('confirmationCodeSentToEmail', [], 'controllers')
+                );
+            } else {
+                $interval_minutes = $this->twoFAService->timeLeftToResendCode(
+                    $currentUser,
+                    AnalyticalEventType::USER_AUTO_DELETE_CODE->value
+                );
+                $this->addFlash(
+                    'error',
+                    $this->translator->trans(
+                        'codeAlreadySent',
+                        [
+                            '%minutes%' => $interval_minutes
+                        ],
+                        'controllers'
+                    )
+                );
+            }
+            return $this->render('landing/autoDeleteAccount/auto_delete_account.html.twig', [
+                'form' => $form->createView(),
+                'data' => $data,
+                'user' => $currentUser,
+                'context' => FirewallType::LANDING->value,
+            ]);
+        }
         $form = $this->createForm(AutoDeletePasswordType::class);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {

@@ -19,14 +19,29 @@
         <p class="font-bold text-xl text-red-600">
             {{ 'account_deletion_process'|trans({}, 'auto_delete_account') }}
         </p>
-
         <p class="text-lg mb-6">
+        {% if data.LOGIN_WITH_UUID_ONLY.value == constant('App\\Enum\\OperationMode::ON').value and
+            user.userExternalAuths[0].provider == constant('App\\Enum\\UserProvider::PORTAL_ACCOUNT').value %}
+            {{ 'deletion_description_code'|trans({}, 'auto_delete_account')|raw }}
+        {% else %}
             {{ 'deletion_description'|trans({}, 'auto_delete_account')|raw }}
+        {% endif %}
         </p>
-
         {# Form Column #}
         {{ form_start(form) }}
         <div class="relative mt-10 mb-6">
+            {% if data.LOGIN_WITH_UUID_ONLY.value == constant('App\\Enum\\OperationMode::ON').value and
+            user.userExternalAuths[0].provider == constant('App\\Enum\\UserProvider::PORTAL_ACCOUNT').value %}
+            <div class="relative mt-[32px]">
+                {{ form_label(form.code, 'code_label'|trans({}, 'auto_delete_account'), {label_attr: {class: 'form-label'}}) }}
+                {{ form_widget(form.code, {
+                    attr: {
+                        class: 'form-widget',
+                        placeholder: 'code_placeholder'|trans({}, 'auto_delete_account'),
+                    },
+                }) }}
+            </div>
+            {% else %}
             <div class="relative mt-[32px]">
                 {{ form_label(form.password, 'password_label'|trans({}, 'auto_delete_account'), {label_attr: {class: 'form-label'}}) }}
                 {{ form_widget(form.password, {
@@ -36,6 +51,7 @@
                     },
                 }) }}
             </div>
+            {% endif %}
             <div class="mt-[28px] flex items-center justify-start gap-2">
                 {{ form_widget(form.confirm, {attr: {class: 'w-5 h-5 peer relative appearance-none rounded-[5px] border border-[#CECECE] cursor-pointer checked:bg-primary'}}) }}
                 <label for="{{ form.confirm.vars.id }}" class="text-sm text-gray-700 leading-6">
@@ -49,7 +65,8 @@
             <button class="btn-primary" type="submit">
                 {{ 'submit_button'|trans({}, 'auto_delete_account') }}
             </button>
-            {% if not user.userExternalAuths[0].provider == constant('App\\Enum\\UserProvider::PORTAL_ACCOUNT').value %}
+            {% if user.userExternalAuths[0].provider == constant('App\\Enum\\UserProvider::PORTAL_ACCOUNT').value and
+                data.LOGIN_WITH_UUID_ONLY.value == constant('App\\Enum\\OperationMode::ON').value %}
                 <a href="{{ path('app_local_resend_code', {context: context, type: constant('App\\Enum\\CodeVerificationType::AUTO_DELETE_RESEND').value}) }}"
                    class="btn-secondary">
                     {{ 'resend_code_button'|trans({}, 'auto_delete_account') }}

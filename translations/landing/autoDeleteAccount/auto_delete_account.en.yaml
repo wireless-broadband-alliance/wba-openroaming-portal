@@ -14,3 +14,5 @@ code_label: 'Code'
 code_placeholder: 'Enter your code'
 submit_button: 'Submit'
 resend_code_button: 'Resend code'
+deletion_description_code: >
+    To proceed with account deletion, please enter the <strong class="text-red-600">code</strong> sent to you.

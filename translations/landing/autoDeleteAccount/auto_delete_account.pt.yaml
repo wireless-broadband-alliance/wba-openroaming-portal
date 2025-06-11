@@ -14,3 +14,6 @@ code_label: 'Código'
 code_placeholder: 'Introduza o seu código'
 submit_button: 'Enviar'
 resend_code_button: 'Reenviar código'
+deletion_description_code: >
+    Para prosseguir com a eliminação da conta, introduza o <strong class="text-red-600">código</strong> que lhe foi enviado.
+

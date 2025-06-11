@@ -5,7 +5,6 @@ personalData:
     firstName: 'First Name'
     lastName: 'Last Name'
     applyBtn: 'Apply Changes'
-
 changePassword:
     title: 'Change Password'
     current: 'Current Password'
@@ -25,3 +24,4 @@ dangerZone:
     title: 'Danger Zone'
     deleteAccount: 'Delete Account'
     deleteAccountWarningMessage: 'Warning: You are about to delete your own account. This action is irreversible. Are you sure you want to proceed?'
+    deleteAccountWarningMessageLocal: 'Warning: You are about to delete your own account. This action is irreversible. We will send you a code to confirm this action. Are you sure you want to proceed?'
