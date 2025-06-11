@@ -288,8 +288,7 @@ readonly class TwoFAService
                         'secondsLeft' => $secondsLeft,
                     ])
                     ->embedFromPath($logoPath, 'logo_cid');
-            } else
-            {
+            } else {
                 // 2FA VERIFICATION REQUESTS
                 $email = new TemplatedEmail()
                     ->from(

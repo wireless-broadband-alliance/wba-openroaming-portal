@@ -66,11 +66,13 @@ class UserAccountDeletionController extends AbstractController
 
             return $this->redirectToRoute('app_landing');
         }
-        if ($data['LOGIN_WITH_UUID_ONLY']['value'] === OperationMode::ON->value &&
-        $currentUser->getUserExternalAuths()[0]->getProvider() === UserProvider::PORTAL_ACCOUNT->value
+        if (
+            $data['LOGIN_WITH_UUID_ONLY']['value'] === OperationMode::ON->value &&
+            $currentUser->getUserExternalAuths()[0]->getProvider() === UserProvider::PORTAL_ACCOUNT->value
         ) {
-            if ($this->twoFAService->canValidationCode($currentUser, AnalyticalEventType::USER_AUTO_DELETE_CODE->value))
-            {
+            if (
+                $this->twoFAService->canValidationCode($currentUser, AnalyticalEventType::USER_AUTO_DELETE_CODE->value)
+            ) {
                 $this->twoFAService->generate2FACode(
                     $currentUser,
                     $request->getClientIp(),

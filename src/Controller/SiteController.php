@@ -185,7 +185,6 @@ class SiteController extends AbstractController
                     return $this->redirectToRoute('app_configure2FA');
                 }
             }
-
         }
         if (
             $currentUser &&
