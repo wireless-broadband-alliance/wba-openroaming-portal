@@ -75,7 +75,6 @@ class ForgotPasswordController extends AbstractController
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings();
 
-        // Check if the user clicked on the 'sms' variable present only on the SMS authentication buttons
         if ($data['PLATFORM_MODE']['value'] === true) {
             $this->addFlash(
                 'error',
@@ -199,7 +198,7 @@ class ForgotPasswordController extends AbstractController
                         // Inform the user to wait before trying again
                         $this->addFlash(
                             'warning',
-                            $this->translator->trans('portalInDemoMode', [], 'controllers')
+                            $this->translator->trans('waitBeforeTryingAgain', [], 'controllers')
                         );
                     }
                 } else {
