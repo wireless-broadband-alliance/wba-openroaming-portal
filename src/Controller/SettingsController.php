@@ -23,6 +23,7 @@ use App\RadiusDb\Repository\RadiusAuthsRepository;
 use App\Repository\SettingTranslationRepository;
 use App\Service\CertificateService;
 use App\Service\Domain;
+use App\Service\EnforcePasswordResetService;
 use App\Service\EventActions;
 use App\Service\GetSettings;
 use App\Service\ResetPasswordService;
@@ -35,7 +36,6 @@ use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpClient\Exception\JsonException;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
@@ -53,7 +53,8 @@ class SettingsController extends AbstractController
         private readonly RadiusAccountingRepository $radiusAccountingRepository,
         private readonly TranslatorInterface $translator,
         private readonly SettingTranslationRepository $settingTranslationRepository,
-        private readonly ResetPasswordService $resetPasswordService
+        private readonly ResetPasswordService $resetPasswordService,
+        private readonly EnforcePasswordResetService $enforcePasswordResetService
     ) {
     }
 
@@ -992,7 +993,8 @@ class SettingsController extends AbstractController
                     $setting &&
                     ($setting->getValue() === OperationMode::OFF->value && $value === OperationMode::OFF->value)
                 ) {
-                    $this->resetPasswordService->resetPasswordForLocalAccounts(
+                    // Set every portal account with a password reset action, to require everyone to use a new password
+                    $this->enforcePasswordResetService->enforceReset(
                         $currentUser,
                         $request->getClientIp(),
                         $request->headers->get('User-Agent')
