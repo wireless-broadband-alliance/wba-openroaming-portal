@@ -259,7 +259,37 @@ readonly class TwoFAService
                         'secondsLeft' => $secondsLeft,
                     ])
                     ->embedFromPath($logoPath, 'logo_cid');
-            } else {
+            } elseif (
+                $eventType === AnalyticalEventType::USER_AUTO_DELETE_CODE->value
+            ) {
+                // AUTO DELETE CONFIRMATION CODE
+                $email = new TemplatedEmail()
+                    ->from(
+                        new Address(
+                            $this->parameterBag->get('app.email_address'),
+                            $this->parameterBag->get('app.sender_name')
+                        )
+                    )
+                    ->to($user->getEmail())
+                    ->subject(
+                        $this->translator->trans(
+                            'subject_auto_deletion_code',
+                            ['%code%' => $code],
+                            'user_auto_delete_code'
+                        )
+                    )
+                    ->htmlTemplate('email/user_auto_delete_code.html.twig')
+                    ->context([
+                        'uuid' => $user->getEmail(),
+                        'emailTitle' => $emailTitle,
+                        'contactEmail' => $contactEmail,
+                        'supportTeam' => $supportTeam,
+                        'code' => $code,
+                        'secondsLeft' => $secondsLeft,
+                    ])
+                    ->embedFromPath($logoPath, 'logo_cid');
+            } else
+            {
                 // 2FA VERIFICATION REQUESTS
                 $email = new TemplatedEmail()
                     ->from(

@@ -1,0 +1,9 @@
+subject_auto_deletion_code: 'Your OpenRoaming Auto deletion code is %code%.'
+subject: 'Auto delete account'
+auto_deletion_message: 'Your auto deletion confirmation code is:'
+valid_for_message: 'This code <strong>can only be used once</strong> and is <strong>valid for the next %seconds% seconds.</strong>'
+confidential_message: 'Please, <strong>keep this code confidential</strong> and <strong>do not share it with others.</strong>'
+footer:
+  support_team: 'Support team:'
+  thank_you: 'Thank you,'
+  team: 'The %supportTeam% Team'
