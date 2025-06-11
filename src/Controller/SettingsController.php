@@ -52,7 +52,7 @@ class SettingsController extends AbstractController
         private readonly RadiusAccountingRepository $radiusAccountingRepository,
         private readonly TranslatorInterface $translator,
         private readonly SettingTranslationRepository $settingTranslationRepository,
-        private readonly EnforcePasswordResetService $enforcePasswordResetService,
+        private readonly EnforcePasswordResetService $enforcePasswordResetService
     ) {
     }
 

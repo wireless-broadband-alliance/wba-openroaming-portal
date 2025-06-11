@@ -228,11 +228,10 @@ readonly class TwoFAService
                         'is2FATemplate' => false
                     ])
                     ->embedFromPath($logoPath, 'logo_cid');
-            } elseif (
-                $eventType === AnalyticalEventType::USER_CREATION->value
+            }  elseif (
+                $eventType === AnalyticalEventType::USER_AUTO_DELETE_CODE->value
             ) {
-                dd($eventType); // this dd will stay here for debug (Marcelo) idk where does it come from
-                // USER_CREATION
+                // AUTO DELETE CONFIRMATION CODE
                 $email = new TemplatedEmail()
                     ->from(
                         new Address(
@@ -243,19 +242,18 @@ readonly class TwoFAService
                     ->to($user->getEmail())
                     ->subject(
                         $this->translator->trans(
-                            'subject_two_factor_code',
+                            'subject_auto_deletion_code',
                             ['%code%' => $code],
-                            'user_verification'
+                            'user_auto_delete_code'
                         )
                     )
-                    ->htmlTemplate('email/user_verification.html.twig')
+                    ->htmlTemplate('email/user_auto_delete_code.html.twig')
                     ->context([
                         'uuid' => $user->getEmail(),
                         'emailTitle' => $emailTitle,
-                        'twoFaCode' => $code,
                         'contactEmail' => $contactEmail,
                         'supportTeam' => $supportTeam,
-                        'is2FATemplate' => true,
+                        'code' => $code,
                         'secondsLeft' => $secondsLeft,
                     ])
                     ->embedFromPath($logoPath, 'logo_cid');
