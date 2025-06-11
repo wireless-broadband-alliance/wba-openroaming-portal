@@ -2,7 +2,7 @@ subject_verify: 'Your Setting Reset Details'
 header_password_reset: 'Admin Password Reset'
 header_settings_reset: 'Admin Settings Reset'
 message_password_reset: 'This is a step to confirm your password reset.'
-message_settings_reset: 'This is a step to confirm the settings reset.'
+message_settings_reset: 'This is a step to confirm the reset of: <strong>%settingCategory%</strong>.'
 confirmation_code: 'Please use the following code to confirm the action:'
 footer:
     support_team: 'Support team:'

@@ -1,0 +1,9 @@
+setting_type.settingCustom: Configuração Personalizada
+setting_type.settingTerms: Termos e Condições
+setting_type.settingRadius: Configurações RADIUS
+setting_type.settingStatus: Configurações de Estado
+setting_type.settingLDAP: Configuração LDAP
+setting_type.settingCAPPORT: Configuração CAPPORT
+setting_type.settingAUTH: Autenticação
+setting_type.settingTwoFA: Autenticação de Dois Fatores
+setting_type.settingSMS: Gateway SMS

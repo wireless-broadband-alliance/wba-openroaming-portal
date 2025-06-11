@@ -1,0 +1,9 @@
+setting_type.settingCustom: Custom Configuration
+setting_type.settingTerms: Terms & Conditions
+setting_type.settingRadius: RADIUS Settings
+setting_type.settingStatus: Status Settings
+setting_type.settingLDAP: LDAP Configuration
+setting_type.settingCAPPORT: CAPPORT Configuration
+setting_type.settingAUTH: Authentication
+setting_type.settingTwoFA: Two-Factor Authentication
+setting_type.settingSMS: SMS Gateway

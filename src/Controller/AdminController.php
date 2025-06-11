@@ -6,6 +6,7 @@ use App\Entity\Setting;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Enum\LanguagesType;
+use App\Enum\SettingType;
 use App\Form\CustomType;
 use App\Form\RevokeProfilesType;
 use App\Repository\EventRepository;
@@ -127,20 +128,17 @@ class AdminController extends AbstractController
         // Regenerate the verification code for the admin to reset settings
 
         if (
-            in_array(
-                $type,
-                [
-                    'settingCustom',
-                    'settingTerms',
-                    'settingRadius',
-                    'settingStatus',
-                    'settingLDAP',
-                    'settingCAPPORT',
-                    'settingAUTH',
-                    'settingTwoFA',
-                    'settingSMS'
-                ]
-            )
+            in_array($type, [
+                SettingType::SettingCustom->value,
+                SettingType::SettingTerms->value,
+                SettingType::SettingRadius->value,
+                SettingType::SettingStatus->value,
+                SettingType::SettingLDAP->value,
+                SettingType::SettingCAPPORT->value,
+                SettingType::SettingAUTH->value,
+                SettingType::SettingTwoFA->value,
+                SettingType::SettingSMS->value,
+            ], true)
         ) {
             $lastResend = $this->eventRepository->findLatest2FACodeAttemptEvent(
                 $currentUser,
@@ -151,8 +149,10 @@ class AdminController extends AbstractController
                 $email = $this->verificationCodeGenerator->createEmailAdminPage(
                     $currentUser,
                     $request->getClientIp(),
-                    $request->headers->get('User-Agent')
+                    $request->headers->get('User-Agent'),
+                    $type
                 );
+
                 $this->mailer->send($email);
                 $this->addFlash(
                     'success_admin',

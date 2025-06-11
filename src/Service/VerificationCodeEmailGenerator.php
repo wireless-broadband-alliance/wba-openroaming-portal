@@ -6,6 +6,7 @@ use App\Entity\Event;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Enum\PlatformMode;
+use App\Enum\SettingType;
 use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
@@ -39,17 +40,25 @@ readonly class VerificationCodeEmailGenerator
         User $user,
         string $ip,
         string $userAgent,
+        string $settingCategory
     ): Email {
         // Get the values from the services.yaml file using $parameterBag on the __construct
         $emailSender = $this->parameterBag->get('app.email_address');
         $nameSender = $this->parameterBag->get('app.sender_name');
         $supportTeam = $this->settingRepository->findOneBy(['name' => 'PAGE_TITLE'])->getValue();
         $contactEmail = $this->settingRepository->findOneBy(['name' => 'CONTACT_EMAIL'])->getValue();
+        $customerLogo = $this->settingRepository->findOneBy(['name' => 'CUSTOMER_LOGO'])->getValue();
+        $projectDir = $this->parameterBag->get('kernel.project_dir');
+        $logoPath = $projectDir . '/public' . $customerLogo;
 
         $user->setTwoFACode(random_int(100000, 999999));
         $user->setTwoFACodeGeneratedAt(new DateTime());
         $user->setTwoFAcodeIsActive(true);
         $this->userRepository->save($user, true);
+
+        // Convert string to enum and translate
+        $enum = SettingType::from($settingCategory);
+        $translatedCategory = $this->translator->trans($enum->getTranslationKey(), [], 'setting_type');
 
         $eventMetaData = [
             'platform' => PlatformMode::LIVE->value,
@@ -73,7 +82,9 @@ readonly class VerificationCodeEmailGenerator
                 'verificationCode' => $user->getTwoFAcode(),
                 'supportTeam' => $supportTeam,
                 'contactEmail' => $contactEmail,
-            ]);
+                'settingCategory' => $translatedCategory
+            ])
+            ->embedFromPath($logoPath, 'logo_cid');
     }
 
     /**
@@ -92,7 +103,7 @@ readonly class VerificationCodeEmailGenerator
         $supportTeam = $this->settingRepository->findOneBy(['name' => 'PAGE_TITLE'])->getValue();
         $contactEmail = $this->settingRepository->findOneBy(['name' => 'CONTACT_EMAIL'])->getValue();
         $customerLogo = $this->settingRepository->findOneBy(['name' => 'CUSTOMER_LOGO'])->getValue();
-        $projectDir =  $this->parameterBag->get('kernel.project_dir');
+        $projectDir = $this->parameterBag->get('kernel.project_dir');
         $logoPath = $projectDir . '/public' . $customerLogo;
 
         return new TemplatedEmail()
