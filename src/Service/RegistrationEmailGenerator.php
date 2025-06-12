@@ -63,6 +63,9 @@ readonly class RegistrationEmailGenerator
     {
         $emailTitle = $this->settingRepository->findOneBy(['name' => 'PAGE_TITLE'])->getValue();
         $contactEmail = $this->settingRepository->findOneBy(['name' => 'CONTACT_EMAIL'])->getValue();
+        $customerLogo = $this->settingRepository->findOneBy(['name' => 'CUSTOMER_LOGO'])->getValue();
+        $projectDir = $this->parameterBag->get('kernel.project_dir');
+        $logoPath = $projectDir . '/public' . $customerLogo;
 
         // Send email to the user with the verification code
         $email = new TemplatedEmail()
@@ -73,14 +76,15 @@ readonly class RegistrationEmailGenerator
                 )
             )
             ->to($user->getEmail())
-            ->subject($this->translator->trans('subject', [], 'expirationProfiles'))
+            ->subject($this->translator->trans('subject_is_expiring', [], 'expirationProfiles'))
             ->htmlTemplate('email/expiresProfile.html.twig')
             ->context([
                 'uuid' => $user->getEmail(),
                 'emailTitle' => $emailTitle,
                 'contactEmail' => $contactEmail,
                 'timeLeft' => $timeLeft,
-            ]);
+            ])
+            ->embedFromPath($logoPath, 'logo_cid');
         $this->mailer->send($email);
     }
 
