@@ -10,6 +10,14 @@
 - Optimized the `GetSettings` service to significantly reduce the loading process, improving application performance by
   minimizing redundant data processing and database queries.
 - Rework Automation commands to use official symfony bundle about CRON's
+
+> **Note**: If you are using automated CRON's from our previous guide, it's recommended you use the official symfony
+> bundle from this release. For reference, you need to run the following command on the container web:
+> php bin/console messenger:consume scheduler_default
+
+- Rework AutoDeleteUnconfirmedAccounts command, now saves on the database an array with all the deleted uuids, on the
+  Event table, important for logs and security concerns
+
 - Rework `UserAccountDeletion`, simulates a login to confirm the account action for external providers.
 - Fix pagination for the table `Access Points Usage` on the `dashboard/statistics/freeradius` page (Add new custom
   display of results per page)
