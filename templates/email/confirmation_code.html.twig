@@ -172,17 +172,21 @@
 </head>
 <body>
 <div class="container">
-    <header class="header" role="banner">
-        {{ 'header_welcome'|trans({}, 'confirmation_code') }}
-    </header>
+    <div class="container">
+        <header class="header" role="banner">
+            <img src="cid:logo_cid" alt="Customer Logo"/>
+        </header>
+    </div>
 
-    <main class="content" role="main">
-        <p>{{ 'intro_login_User'|trans({}, 'confirmation_code') }}</p>
-        <ol>
-            <li>{{ 'login_code'|trans({'%twoFaCode%': twoFaCode}, 'confirmation_code')|raw }}</li>
-            <li>{{ 'download_profile'|trans({}, 'confirmation_code')|raw }}</li>
-        </ol>
-    </main>
+    <!-- Content -->
+    <div class="content">
+        <h1>{{ 'header_welcome'|trans({}, 'confirmation_code') }}</h1>
+        <p>{{ 'intro'|trans({}, 'confirmation_code')|raw }}</p>
+        <h1>
+            <strong>{{ twoFaCode }}</strong>
+        </h1>
+        <p>{{ 'notice'|trans({}, 'confirmation_code')|raw }}</p>
+    </div>
 
     <footer class="footer" role="contentinfo">
         <p>
