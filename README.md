@@ -347,6 +347,18 @@ check the `.env.sample`.
 - `JWT_PUBLIC_KEY`: The public key location.
 - `JWT_PASSPHRASE`: The private key location.
 
+### 🔧 Set up a CRON Job for automation commands
+
+For reference, all the previous documentation related to the **CRONGUI.md** was discontinued. Now the framework
+handles all this automation, and the supervisor configuration takes cares of the process. If you want to run the
+configuration command by yourself, you can run the following command:
+
+```bash
+php bin/console messenger:consume scheduler_default -vv
+```
+
+Also, all this setup is configured on the following file: `src/Schedule.php`
+
 ## 🔑 Admin Page Access Page
 
 Follow this link for a portal user/admin interface overview: [Portal Guide](docs/PORTALGUI.md).
@@ -421,7 +433,8 @@ certificate. **Connection errors** can happen if the right SHA1 hash is not prov
 27. `AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED`: Enable or disable Login (email) authentication method.
 28. `AUTH_METHOD_LOGIN_TRADITIONAL_LABEL`: The label for Login (email) authentication button on the login page.
 29. `AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION`: The description for Login (email) authentication on the login page.
-30. `LOGIN_WITH_UUID_ONLY`: Enabled or disabled only UUID authentication, this method sends a confirmation code instead of the tradicional uuid & password. 
+30. `LOGIN_WITH_UUID_ONLY`: Enabled or disabled only UUID authentication, this method sends a confirmation code instead
+    of the tradicional uuid & password.
 31. `AUTH_METHOD_SMS_REGISTER_ENABLED`: Enable or disable Login (SMS) authentication method.
 32. `AUTH_METHOD_SMS_REGISTER_LABEL`: The label for Login (SMS) authentication button on the login page.
 33. `AUTH_METHOD_SMS_REGISTER_DESCRIPTION`: The description for Login (SMS) authentication on the login page.
@@ -477,7 +490,8 @@ The portal exposes metrics for monitoring using Prometheus. The metrics are avai
 ### Available Metrics
 
 - **Users**: Total users, verified users, and banned users
-- **Authentication Providers**: Users by provider (Portal Account, SAML Account, Google Account, Microsoft Account) and portal users by type (Email, Phone Number)
+- **Authentication Providers**: Users by provider (Portal Account, SAML Account, Google Account, Microsoft Account) and
+  portal users by type (Email, Phone Number)
 - **Radius Profiles**: Profiles by status, total profiles, and total radius users from the radius database
 
 ### Configuration

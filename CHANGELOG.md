@@ -9,7 +9,7 @@
 - Fix bug with registration links, use could use them to re-log in to the portal at any time, can only be used once.
 - Optimized the `GetSettings` service to significantly reduce the loading process, improving application performance by
   minimizing redundant data processing and database queries.
-- Rework Automation commands to use official symfony bundle about CRON's
+- Rework Automation commands to use official symfony bundle about CRON's.
 
 > **Note**: If you are using automated CRON's from our previous guide, it's recommended you use the official symfony
 > bundle from this release. For reference, you need to run the following command on the container web:
