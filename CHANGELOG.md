@@ -2,12 +2,14 @@
 
 # Release V1.8.0
 
-- New Feature: Responsive Translations (Available: EN & PT-PT)
+- New Feature: Responsive Translations (Available: EN & PT-PT) - Administrator can just add new configurations for YAML
+  files in the translations folder, and the page auto-detects the added language.
 - New Listener to auto-detection of the user language
 - Cookie Modal update with new required `_locale` cookie
 - Fix bug with registration links, use could use them to re-log in to the portal at any time, can only be used once.
 - Optimized the `GetSettings` service to significantly reduce the loading process, improving application performance by
   minimizing redundant data processing and database queries.
+- Rework Automation commands to use official symfony bundle about CRON's
 - Rework `UserAccountDeletion`, simulates a login to confirm the account action for external providers.
 - Fix pagination for the table `Access Points Usage` on the `dashboard/statistics/freeradius` page (Add new custom
   display of results per page)
