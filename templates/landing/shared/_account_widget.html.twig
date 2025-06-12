@@ -41,9 +41,11 @@
         </form>
     </div>
 
+    {% if data.LOGIN_WITH_UUID_ONLY.value == constant('App\\Enum\\OperationMode::OFF').value  %}
     {# divider #}
     <div class="divider my-8"></div>
 
+    {# Form Password Section #}
     <div {{ stimulus_controller('fields') }}>
         <form method="POST" action="{{ path('app_site_account_user') }}">
             <h1 class="text-lg mb-8">{{ 'changePassword.title'|trans({}, '_account_widget') }}</h1>
@@ -93,6 +95,7 @@
             {{ form_end(formPassword) }}
         </form>
     </div>
+    {% endif %}
 
     {% if data.LOGIN_WITH_UUID_ONLY.value == constant('App\\Enum\\OperationMode::OFF').value or
         user.userExternalAuths[0].provider != constant('App\\Enum\\UserProvider::PORTAL_ACCOUNT').value %}
