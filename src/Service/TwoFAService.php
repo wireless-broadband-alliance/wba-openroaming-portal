@@ -204,7 +204,8 @@ readonly class TwoFAService
                         'emailTitle' => $emailTitle,
                         'contactEmail' => $contactEmail,
                         'twoFaCode' => $code,
-                    ]);
+                    ])
+                    ->embedFromPath($logoPath, 'logo_cid');
             } elseif (
                 $eventType === AnalyticalEventType::LOGIN_TRADITIONAL_REQUEST->value ||
                 $eventType === AnalyticalEventType::LOGIN_CODE_RESEND->value
