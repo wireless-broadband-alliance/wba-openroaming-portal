@@ -470,6 +470,10 @@ class UsersManagementController extends AbstractController
             if ($user->getEmail()) {
                 $supportTeam = $data['PAGE_TITLE']['value'];
                 $contactEmail = $data['CONTACT_EMAIL']['value'];
+                $customerLogo = $data['CUSTOMER_LOGO']['value'];
+                $projectDir = $this->parameterBag->get('kernel.project_dir');
+                $logoPath = $projectDir . '/public' . $customerLogo;
+
                 // Send email
                 $email = new Email()
                     ->from(new Address($emailSender, $nameSender))
@@ -484,7 +488,8 @@ class UsersManagementController extends AbstractController
                                 'contactEmail' => $contactEmail
                             ]
                         )
-                    );
+                    )
+                    ->embedFromPath($logoPath, 'logo_cid');
                 $mailer->send($email);
 
                 $eventMetadata = [
