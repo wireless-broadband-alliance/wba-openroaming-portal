@@ -165,20 +165,21 @@ class UserAccountDeletionController extends AbstractController
 
         $form = $this->createForm(AutoDeleteCodeType::class);
         $form->handleRequest($request);
-        if ($form->isSubmitted() && $form->isValid()) {
-            if ($currentUser->getUserExternalAuths()[0]->getProvider() === UserProvider::PORTAL_ACCOUNT->value) {
-                $typedCode = $form->get('code')->getData();
+        if ($form->isSubmitted() &&
+            $form->isValid() &&
+            $currentUser->getUserExternalAuths()[0]->getProvider() === UserProvider::PORTAL_ACCOUNT->value
+        ) {
+            $typedCode = $form->get('code')->getData();
 
-                // Compare the typed code with the 2fa code from the database
-                if ($this->twoFAService->validate2FACode($currentUser, $typedCode)) {
-                    $this->userDeletionService->deleteUser($currentUser, $userExternalAuths, $request, $currentUser);
-                    return $this->redirectToRoute('app_landing');
-                }
-                $this->addFlash(
-                    'error',
-                    $this->translator->trans('invalidCode', [], 'controllers')
-                );
+            // Compare the typed code with the 2fa code from the database
+            if ($this->twoFAService->validate2FACode($currentUser, $typedCode)) {
+                $this->userDeletionService->deleteUser($currentUser, $userExternalAuths, $request, $currentUser);
+                return $this->redirectToRoute('app_landing');
             }
+            $this->addFlash(
+                'error',
+                $this->translator->trans('invalidCode', [], 'controllers')
+            );
         }
 
         if ($form->isSubmitted() && !$form->isValid()) {

@@ -229,7 +229,7 @@ readonly class TwoFAService
                         'is2FATemplate' => false
                     ])
                     ->embedFromPath($logoPath, 'logo_cid');
-            }  elseif (
+            } elseif (
                 $eventType === AnalyticalEventType::USER_AUTO_DELETE_CODE->value
             ) {
                 // AUTO DELETE CONFIRMATION CODE
