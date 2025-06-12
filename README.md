@@ -347,10 +347,6 @@ check the `.env.sample`.
 - `JWT_PUBLIC_KEY`: The public key location.
 - `JWT_PASSPHRASE`: The private key location.
 
-### 🔧 Set up a CRON Job for automation commands
-
-For detailed steps on how to set up CRONS, please refer to the [Cron Configuration Guide](docs/CRONGUI.md)
-
 ## 🔑 Admin Page Access Page
 
 Follow this link for a portal user/admin interface overview: [Portal Guide](docs/PORTALGUI.md).
