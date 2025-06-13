@@ -60,9 +60,7 @@ class SecurityController extends AbstractController
             'uuid' => $lastUsername,
         ]);
 
-        $form = $this->createForm(LoginFormType::class, $user, [
-            'firewallType' => FirewallType::LANDING->value,
-        ]);
+        $form = $this->createForm(LoginFormType::class, $user);
         $form->handleRequest($request);
 
         // Get the login error if there is one

@@ -3,7 +3,6 @@
 namespace App\Form;
 
 use App\Entity\User;
-use App\Enum\FirewallType;
 use App\Enum\OperationMode;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
@@ -29,8 +28,6 @@ class LoginFormType extends AbstractType
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
-        $firewallType = $options['firewallType'];
-
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $turnstileCheckerValue = $data['TURNSTILE_CHECKER']['value'];
 
@@ -44,16 +41,14 @@ class LoginFormType extends AbstractType
             'required' => true,
         ]);
 
-        if ($firewallType === FirewallType::DASHBOARD->value) {
-            $builder->add('password', PasswordType::class, [
-                'label' => 'Password',
-                'attr' => [
-                    'placeholder' => 'Enter your password',
-                    'name' => 'password',
-                    'full_name' => 'password',
-                ],
-            ]);
-        }
+        $builder->add('password', PasswordType::class, [
+            'label' => 'Password',
+            'attr' => [
+                'placeholder' => 'Enter your password',
+                'name' => 'password',
+                'full_name' => 'password',
+            ],
+        ]);
 
         if ($turnstileCheckerValue === OperationMode::ON->value) {
             $builder->add('security', TurnstileType::class, [
