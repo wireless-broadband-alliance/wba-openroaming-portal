@@ -3,17 +3,17 @@
 # Release V1.8.0
 
 - Fix bug with registration links, use could use them to re-log in to the portal at any time, can only be used once.
-- Rework `UserAccountDeletion`, simulates a login to confirm the account action for external providers.
-- Fix pagination for the table `Access Points Usage` on the `dashboard/statistics/freeradius` page (Add new custom
-  display of results per page)
-- New conditions to restore the user session, only restore on the firewall "landing"
+- Fix bug on the pagination page with the table `Access Points Usage` on the `dashboard/statistics/freeradius` page (Add
+  new custom display of results per page).
+- Fix bug about when the user session should be restored. Only when the firewall "landing".
 - Invalidate session on the dashboard in case the admin changes is password on the landing firewall.
-- New return detector for expired links on registration email, now it returns to the login page with the input
-  pre-fielded
+- Fix bug with return detector for expired links on registration email, now it returns to the login page with the input
+  pre-fielded.
 - For security reasons, 2FA is now required to be configured for admin users; now the dashboard is no longer assessable
   without it.
-- Now the forgot-password request, checks if the user is not verified and skips that extra unnecessary steps to avoid
-  many codes and interactions with the user
+- For security reasons,`UserAccountDeletion` now simulates a login to confirm the account action for external providers.
+- Fix bug with the forgot-password request, checks if the user is not verified and skips that extra unnecessary steps to
+  avoid many codes and interactions with the user.
 
 ---
 
