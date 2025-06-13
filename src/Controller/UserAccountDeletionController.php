@@ -5,7 +5,6 @@ namespace App\Controller;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Enum\FirewallType;
-use App\Enum\OperationMode;
 use App\Enum\UserProvider;
 use App\Form\AutoDeleteCodeType;
 use App\Form\AutoDeletePasswordType;
@@ -62,38 +61,33 @@ class UserAccountDeletionController extends AbstractController
 
             return $this->redirectToRoute('app_landing');
         }
+
         if (
-            $data['LOGIN_WITH_UUID_ONLY']['value'] === OperationMode::ON->value &&
-            $currentUser->getUserExternalAuths()[0]->getProvider() === UserProvider::PORTAL_ACCOUNT->value
+            $this->twoFAService->canValidationCode($currentUser, AnalyticalEventType::USER_AUTO_DELETE_CODE->value)
         ) {
-            if (
-                $this->twoFAService->canValidationCode($currentUser, AnalyticalEventType::USER_AUTO_DELETE_CODE->value)
-            ) {
-                $this->twoFAService->generate2FACode(
-                    $currentUser,
-                    $request->getClientIp(),
-                    $request->headers->get('User-Agent'),
-                    AnalyticalEventType::USER_AUTO_DELETE_CODE->value
-                );
-                $this->addFlash(
-                    'success',
-                    'A confirmation code was sent to your email.'
-                );
-            } else {
-                $interval_minutes = $this->twoFAService->timeLeftToResendCode(
-                    $currentUser,
-                    AnalyticalEventType::USER_AUTO_DELETE_CODE->value
-                );
+            $this->twoFAService->generate2FACode(
+                $currentUser,
+                $request->getClientIp(),
+                $request->headers->get('User-Agent'),
+                AnalyticalEventType::USER_AUTO_DELETE_CODE->value
+            );
+            $this->addFlash(
+                'success',
+                'A confirmation code was sent to your email.'
+            );
+        } else {
+            $interval_minutes = $this->twoFAService->timeLeftToResendCode(
+                $currentUser,
+                AnalyticalEventType::USER_AUTO_DELETE_CODE->value
+            );
 
-                $this->addFlash(
-                    'error',
-                    "Your code has already been sent to you previously. 
+            $this->addFlash(
+                'error',
+                "Your code has already been sent to you previously. 
                     Wait {$interval_minutes} minute(s) to request a code again."
-                );
-            }
-
-            return $this->redirectToRoute('app_user_account_deletion_local_code');
+            );
         }
+
         $form = $this->createForm(AutoDeletePasswordType::class);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
