@@ -113,7 +113,7 @@ class SiteController extends AbstractController
         $session = $request->getSession();
 
         // Check if the user is logged in and verification of the user
-        // And check if the user don't have a forgot_password_request active
+        // And check if the user doesn't have a forgot_password_request active
         if (
             isset($data["USER_VERIFICATION"]["value"]) &&
             $data["USER_VERIFICATION"]["value"] === OperationMode::ON->value &&
@@ -152,7 +152,8 @@ class SiteController extends AbstractController
             if (!$session->has('session_verified') && !$currentUser->isVerified()) {
                 return $this->redirectToRoute('app_email_code');
             }
-            // Checks the 2FA status of the platform, if mandatory forces the user to configure it
+
+            // Checks the 2FA status of the platform if mandatory forces the user to configure it
             if (
                 $currentUser->getUserExternalAuths() &&
                 ($data['TWO_FACTOR_AUTH_STATUS']['value'] ===
