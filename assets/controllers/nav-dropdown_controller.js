@@ -18,4 +18,8 @@ export default class extends Controller {
             this.buttonTarget.classList.remove("selected");
         }
     }
+
+    toggleHeader() {
+        this.containerTarget.classList.toggle("hidden");
+    }
 }
