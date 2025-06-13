@@ -148,9 +148,8 @@ class SiteController extends AbstractController
                 return $this->redirectToRoute('app_logout');
             }
 
-            $verification = $currentUser->isVerified();
             // Check if the user is verified
-            if (!$verification) {
+            if (!$session->has('session_verified') && !$currentUser->isVerified()) {
                 return $this->redirectToRoute('app_email_code');
             }
             // Checks the 2FA status of the platform, if mandatory forces the user to configure it
@@ -724,6 +723,7 @@ class SiteController extends AbstractController
         // Get the current user
         /** @var User $currentUser */
         $currentUser = $this->getUser();
+        $session = $request->getSession();
 
         if (!$currentUser) {
             $this->addFlash('error', 'You can only access this page logged in.');
@@ -742,7 +742,9 @@ class SiteController extends AbstractController
         if ($enteredCode === $currentUser->getVerificationCode()) {
             $event = new Event();
             // Set the user as verified
+            $currentUser->setVerificationCode(random_int(100000, 999999));
             $currentUser->setIsVerified(true);
+            $session->set('session_verified', true);
             $userRepository->save($currentUser, true);
 
             $eventMetadata = [
