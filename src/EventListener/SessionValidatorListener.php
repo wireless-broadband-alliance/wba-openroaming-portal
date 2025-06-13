@@ -6,7 +6,6 @@ use App\Entity\User;
 use App\Enum\FirewallType;
 use App\Enum\TwoFAType;
 use App\Enum\UserTwoFactorAuthenticationStatus;
-use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use App\Service\GetSettings;
 use App\Service\TwoFAService;
@@ -24,7 +23,6 @@ readonly class SessionValidatorListener
         private TokenStorageInterface $tokenStorage,
         private RouterInterface $router,
         private UserRepository $userRepository,
-        private SettingRepository $settingRepository,
         private GetSettings $getSettings,
         private TwoFAService $twoFAService,
     ) {
@@ -33,7 +31,7 @@ readonly class SessionValidatorListener
     #[AsEventListener(event: KernelEvents::REQUEST)]
     public function onKernelRequest(RequestEvent $event): void
     {
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $this->getSettings->getSettings();
         $request = $event->getRequest();
         $session = $request->getSession();
         $path = $request->getPathInfo();
@@ -63,6 +61,9 @@ readonly class SessionValidatorListener
             '/dashboard/generate2FACode/swapMethod',
             '/dashboard/2FASwapMethod/disable/TOTP',
             '/dashboard/2FASwapMethod/disableLocal',
+            '/dashboard/disable2FA/resend',
+            '/dashboard/enable2FA/resend',
+            '/dashboard/validate2FA/resend',
         ];
         if ($userToken && str_starts_with($path, '/dashboard')) {
             // Make an exception to ignore the '/dashboard/login' route
@@ -96,10 +97,7 @@ readonly class SessionValidatorListener
                 }
                 $event->setResponse(new RedirectResponse($url));
             }
-
-            $setting2faStatus = $data['TWO_FACTOR_AUTH_STATUS']['value'];
             if (
-                $setting2faStatus !== TwoFAType::NOT_ENFORCED->value &&
                 $user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::DISABLED->value
             ) {
                 $url = $this->router->generate('app_configure2FA', ['context' => FirewallType::DASHBOARD->value]);
