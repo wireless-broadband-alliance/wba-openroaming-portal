@@ -122,7 +122,9 @@ class SiteController extends AbstractController
             // Retrieve the cookie about SAML_ACCOUNT Deletion from the request
             $previousLoggedID = $request->cookies->get('previousLoggedID');
 
-            if ($previousLoggedID && $previousLoggedID === $currentUser->getId()) {
+            // $previousLoggedID it's a string
+            // currentUser->getID it's an int
+            if ($previousLoggedID && $previousLoggedID == $currentUser->getId()) {
                 $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $currentUser]);
                 $this->userDeletionService->deleteUser(
                     $currentUser,
