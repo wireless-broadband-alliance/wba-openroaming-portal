@@ -12,6 +12,8 @@
   pre-fielded
 - For security reasons, 2FA is now required to be configured for admin users; now the dashboard is no longer assessable
   without it.
+- Now the forgot-password request, checks if the user is not verified and skips that extra unnecessary steps to avoid
+  many codes and interactions with the user
 
 ---
 
