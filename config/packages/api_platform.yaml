@@ -1,6 +1,6 @@
 api_platform:
     title: OpenRoaming Portal API
-    version: 1.7.3
+    version: 1.8.0
     formats:
         jsonld: [ 'application/ld+json' ]
         json: [ 'application/json' ]
