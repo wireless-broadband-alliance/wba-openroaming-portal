@@ -1,12 +1,49 @@
 # Changelog
 
+# Release V1.8.0
+
+- Fix bug with registration links, use could use them to re-log in to the portal at any time, can only be used once.
+- Rework `UserAccountDeletion`, simulates a login to confirm the account action for external providers.
+- Fix pagination for the table `Access Points Usage` on the `dashboard/statistics/freeradius` page (Add new custom
+  display of results per page)
+- New conditions to restore the user session, only restore on the firewall "landing"
+- Invalidate session on the dashboard in case the admin changes is password on the landing firewall.
+- New return detector for expired links on registration email, now it returns to the login page with the input
+  pre-fielded
+- For security reasons, 2FA is now required to be configured for admin users; now the dashboard is no longer assessable
+  without it.
+- **Login only with uuid** → This new feature simplifies the process of authentication on the portal using only the
+  account uuid. This way the user confirm himself everytime to get the confirmation code for authentication.
+
+> **Important**: In this release, the field **verificationCode** was eliminated.
+> If you are upgrading from version 1.7.3 or lower, and your application or database still has the
+> **verificationCode** field, please ensure any necessary data migrations are handled before upgrading to version 1.8.0.
+
+- This change is part of an optimization process to improve the handling of the user account confirmation on the portal,
+  and other confirmation methods.
+
+- Also for this release, it's required to run the new migrations to set up the new entity SettingTranslations and the
+  new
+  settings
+  Run the migrations with:
+
+```bash
+php bin/console doctrine:migrations:migrate
+```
+
+---
+
 # Release V1.7.3
 
+- Update docker add new geoLite volume, to save the previous geoLite database schema.
+- Fix CAPPORT endpoint `/api/v1/capport/json` is independent of the current state of the `API_STATUS`.
 - The user can now delete its own account from the account_widget popup
 - New endpoint on the API to delete the user account for APP's
-- Rework Two Factor Authenticator to have a type of validation. Now the page knows what type of request is being made when
-  a new code is generated, to having problems of saving the previous number of attempts on new requests (disable, validate, verify etc.)
-- Rework Two Factor Authenticator request API endpoint to also now the type of request.
+- Rework Two Factor Authenticator to have a type of validation. Now the page knows what type of request is being made
+  when
+  a new code is generated, to having problems of saving the previous number of attempts on new requests (disable,
+  validate, verify, etc.)
+- Rework Two Factor Authenticator request API endpoint to also now the type of request
 
 ---
 

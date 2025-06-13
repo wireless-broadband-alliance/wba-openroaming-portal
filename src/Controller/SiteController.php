@@ -117,8 +117,23 @@ class SiteController extends AbstractController
         if (
             isset($data["USER_VERIFICATION"]["value"]) &&
             $data["USER_VERIFICATION"]["value"] === OperationMode::ON->value &&
-            $this->getUser()
+            $currentUser
         ) {
+            // Retrieve the cookie about SAML_ACCOUNT Deletion from the request
+            $previousLoggedID = $request->cookies->get('previousLoggedID');
+
+            if ($previousLoggedID && $previousLoggedID === $currentUser->getId()) {
+                $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $currentUser]);
+                $this->userDeletionService->deleteUser(
+                    $currentUser,
+                    $userExternalAuths,
+                    $request,
+                    $currentUser
+                );
+
+                return $this->redirectToRoute('app_logout');
+            }
+
             $verification = $currentUser->isVerified();
             // Check if the user is verified
             if (!$verification) {
@@ -702,15 +717,10 @@ class SiteController extends AbstractController
     /**
      * @throws Exception
      */
-    #[Route(
-        '{context}/forgot-password/sms',
-        name: 'app_site_forgot_password_sms',
-        requirements: ['context' => 'landing|dashboard'],
-        defaults: ['context' => FirewallType::LANDING->value
-        ]
+    #[Route('/forgot-password/sms',
+        name: 'app_site_forgot_password_sms'
     )]
     public function forgotPasswordUserSMS(
-        string $context,
         Request $request,
         UserPasswordHasherInterface $userPasswordHasher,
         EntityManagerInterface $entityManager,
@@ -837,7 +847,7 @@ class SiteController extends AbstractController
         return $this->render('site/forgot_password_sms_landing.html.twig', [
             'forgotPasswordSMSForm' => $form->createView(),
             'data' => $data,
-            'context' => $context
+            'context' => FirewallType::LANDING->value
         ]);
     }
 
@@ -1266,7 +1276,6 @@ class SiteController extends AbstractController
 
         return $this->redirectToRoute('app_user_account_deletion');
     }
-
 
     /**
      * @throws \JsonException
