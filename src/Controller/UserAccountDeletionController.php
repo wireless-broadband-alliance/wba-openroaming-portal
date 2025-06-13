@@ -122,8 +122,8 @@ class UserAccountDeletionController extends AbstractController
 
         $form = $this->createForm(AutoDeleteCodeType::class);
         $form->handleRequest($request);
-        if ($form->isSubmitted() && $form->isValid()) {
-            if ($currentUser->getUserExternalAuths()[0]->getProvider() === UserProvider::PORTAL_ACCOUNT->value) {
+        if ($form->isSubmitted() && $form->isValid() && $currentUser->getUserExternalAuths()[0]->getProvider(
+            ) === UserProvider::PORTAL_ACCOUNT->value) {
                 $typedCode = $form->get('code')->getData();
 
                 // Compare the typed code with the 2fa code from the database
@@ -137,7 +137,6 @@ class UserAccountDeletionController extends AbstractController
                     'Code Invalid. Please try again.'
                 );
             }
-        }
 
         if ($form->isSubmitted() && !$form->isValid()) {
             foreach ($form->getErrors(true) as $error) {
