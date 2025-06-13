@@ -62,32 +62,6 @@ class UserAccountDeletionController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
-        if (
-            $this->twoFAService->canValidationCode($currentUser, AnalyticalEventType::USER_AUTO_DELETE_CODE->value)
-        ) {
-            $this->twoFAService->generate2FACode(
-                $currentUser,
-                $request->getClientIp(),
-                $request->headers->get('User-Agent'),
-                AnalyticalEventType::USER_AUTO_DELETE_CODE->value
-            );
-            $this->addFlash(
-                'success',
-                'A confirmation code was sent to your email.'
-            );
-        } else {
-            $interval_minutes = $this->twoFAService->timeLeftToResendCode(
-                $currentUser,
-                AnalyticalEventType::USER_AUTO_DELETE_CODE->value
-            );
-
-            $this->addFlash(
-                'error',
-                "Your code has already been sent to you previously. 
-                    Wait {$interval_minutes} minute(s) to request a code again."
-            );
-        }
-
         $form = $this->createForm(AutoDeletePasswordType::class);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
