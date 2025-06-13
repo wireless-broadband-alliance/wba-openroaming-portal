@@ -7,6 +7,7 @@ services:
       - .env/:/var/www/openroaming/.env
       - ./pgp_public_key/:/var/www/openroaming/pgp_public_key/
       - ./signing-keys/:/var/www/openroaming/signing-keys/
+      - geoLiteDB:/var/www/openroaming/geoLiteDB
       - uploads:/var/www/openroaming/public/resources/uploaded
       - ./service-config/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./service-config/nginx/sites:/etc/nginx/conf.d:ro
@@ -32,4 +33,6 @@ volumes:
   uploads:
       driver: local
   mysql:
+    driver: local
+  geoLiteDB:
     driver: local
