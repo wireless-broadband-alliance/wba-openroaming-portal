@@ -5,7 +5,6 @@ namespace App\Controller;
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
 use App\Enum\AnalyticalEventType;
-use App\Enum\FirewallType;
 use App\Enum\OperationMode;
 use App\Enum\PlatformMode;
 use App\Enum\UserProvider;
@@ -26,7 +25,6 @@ use Psr\EventDispatcher\EventDispatcherInterface;
 use Random\RandomException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
@@ -280,17 +278,26 @@ class RegistrationController extends AbstractController
      */
     #[Route('/login/link', name: 'app_confirm_account')]
     public function confirmAccount(
-        RequestStack $requestStack,
+        Request $request,
         UserRepository $userRepository,
         TokenStorageInterface $tokenStorage,
         EventDispatcherInterface $eventDispatcher,
     ): Response {
         // Get the email and verification code from the URL query parameters
-        $uuid = $requestStack->getCurrentRequest()->query->get('uuid');
-        $verificationCode = $requestStack->getCurrentRequest()->query->get('verificationCode');
+        $uuid = $request->query->get('uuid');
+        $verificationCode = $request->query->get('verificationCode');
 
         // Get the user with the matching email, excluding admin users
         $user = $userRepository->findOneByUUIDExcludingAdmin($uuid);
+
+        // Check if the user has been previously verified
+        if ($user && $user->isVerified() && !$user->isForgotPasswordRequest()) {
+            $this->addFlash(
+                'error',
+                'This account is already verified.'
+            );
+            return $this->redirectToRoute('app_login', ['uuid' => $uuid]);
+        }
 
         if ($user && $user->getVerificationCode() === $verificationCode) {
             try {
@@ -301,7 +308,6 @@ class RegistrationController extends AbstractController
                 $tokenStorage->setToken($token);
 
                 // Dispatch the login event
-                $request = $requestStack->getCurrentRequest();
                 $event = new InteractiveLoginEvent($request, $token);
                 $eventDispatcher->dispatch($event);
 
@@ -323,15 +329,24 @@ class RegistrationController extends AbstractController
                     $eventMetadata
                 );
 
-                $this->addFlash('success', 'Your account has been verified!');
+                $this->addFlash(
+                    'success',
+                    'Your account has been verified!'
+                );
 
                 return $this->redirectToRoute('app_landing');
             } catch (CustomUserMessageAuthenticationException) {
-                $this->addFlash('error', 'Authentication failed. Please try to log in manually.');
+                $this->addFlash(
+                    'error',
+                    'Authentication failed. Please try to log in manually.'
+                );
             }
         } else {
             // If the verification code is invalid or not found, display an error message and redirect to the login page
-            $this->addFlash('error', 'Invalid verification code or link expired. Please try to log in manually');
+            $this->addFlash(
+                'error',
+                'Invalid verification code or link expired. Please try to log in manually'
+            );
         }
 
         return $this->redirectToRoute('app_login');
