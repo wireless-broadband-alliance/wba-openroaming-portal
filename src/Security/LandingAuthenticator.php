@@ -102,14 +102,9 @@ class LandingAuthenticator extends AbstractLoginFormAuthenticator
 
         // Standard login with password
         return new Passport(
-            new UserBadge($uuid), // Identifier for fetching the user
-            new PasswordCredentials($password), // Check password
-            [
-                new CsrfTokenBadge(
-                    'authenticate',
-                    $request->request->get('_csrf_token')
-                ), // CSRF protection
-            ]
+            new UserBadge($uuid),
+            new PasswordCredentials($password),
+            $badges
         );
     }
 
