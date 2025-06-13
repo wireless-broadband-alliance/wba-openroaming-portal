@@ -4,8 +4,8 @@ namespace App\EventListener;
 
 use App\Entity\User;
 use App\Enum\FirewallType;
-use App\Enum\TwoFAType;
 use App\Enum\UserTwoFactorAuthenticationStatus;
+use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use App\Service\GetSettings;
 use App\Service\TwoFAService;
@@ -23,6 +23,7 @@ readonly class SessionValidatorListener
         private TokenStorageInterface $tokenStorage,
         private RouterInterface $router,
         private UserRepository $userRepository,
+        private SettingRepository $settingRepository,
         private GetSettings $getSettings,
         private TwoFAService $twoFAService,
     ) {
@@ -31,7 +32,7 @@ readonly class SessionValidatorListener
     #[AsEventListener(event: KernelEvents::REQUEST)]
     public function onKernelRequest(RequestEvent $event): void
     {
-        $this->getSettings->getSettings();
+        $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $request = $event->getRequest();
         $session = $request->getSession();
         $path = $request->getPathInfo();
