@@ -545,6 +545,12 @@ class SiteController extends AbstractController
             }
 
             $user->setPassword($passwordHasher->hashPassword($user, $formPassword->get('newPassword')->getData()));
+            $session = $request->getSession();
+
+            // Check and kill the dashboard session if the admin is logged at both firewalls at the same time
+            if ($session->has('_security_dashboard')) {
+                $session->remove('_security_dashboard');
+            }
 
             $em->persist($user);
             $em->flush();
