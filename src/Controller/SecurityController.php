@@ -4,7 +4,6 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Enum\FirewallType;
-use App\Enum\PlatformMode;
 use App\Form\LoginFormType;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
@@ -37,8 +36,12 @@ class SecurityController extends AbstractController
      * @throws NonUniqueResultException
      */
     #[Route('/login', name: 'app_login')]
-    public function login(Request $request, AuthenticationUtils $authenticationUtils): Response
-    {
+    public function login(
+        Request $request,
+        AuthenticationUtils $authenticationUtils
+    ): Response {
+        $uuidFromExpiredLinkRegistration = $request->query->get('uuid');
+
         /** @var User $user */
         $user = $this->getUser();
         if ($user instanceof User) {
@@ -47,17 +50,19 @@ class SecurityController extends AbstractController
 
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
-        $platformMode = $data['PLATFORM_MODE']['value'];
-        if ($platformMode === PlatformMode::DEMO->value) {
+        if ($data['PLATFORM_MODE']['value'] === true) {
             return $this->redirectToRoute('app_landing');
         }
 
         // Last username entered by the user (this will be empty if the user clicked the verification link)
-        $lastUsername = $authenticationUtils->getLastUsername();
+        $lastUsername = $uuidFromExpiredLinkRegistration ?? $authenticationUtils->getLastUsername();
         $user = $this->userRepository->findOneBy([
             'uuid' => $lastUsername,
         ]);
-        $form = $this->createForm(LoginFormType::class, $user);
+
+        $form = $this->createForm(LoginFormType::class, $user, [
+            'firewallType' => FirewallType::LANDING->value,
+        ]);
         $form->handleRequest($request);
 
         // Get the login error if there is one
