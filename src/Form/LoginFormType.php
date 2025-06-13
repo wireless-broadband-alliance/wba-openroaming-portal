@@ -3,6 +3,7 @@
 namespace App\Form;
 
 use App\Entity\User;
+use App\Enum\FirewallType;
 use App\Enum\OperationMode;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
@@ -13,43 +14,48 @@ use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class LoginFormType extends AbstractType
 {
     /**
-     * @param UserRepository $userRepository The repository for accessing user data.
-     * @param SettingRepository $settingRepository The setting repository is used to create the getSettings function.
      * @param GetSettings $getSettings The instance of GetSettings class.
      */
     public function __construct(
+        private readonly GetSettings $getSettings,
+        private readonly TranslatorInterface $translator,
         private readonly UserRepository $userRepository,
-        private readonly SettingRepository $settingRepository,
-        private readonly GetSettings $getSettings
+        private readonly SettingRepository $settingRepository
     ) {
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
+        $firewallType = $options['firewallType'];
+
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $turnstileCheckerValue = $data['TURNSTILE_CHECKER']['value'];
 
         $builder->add('uuid', TextType::class, [
-            'label' => 'Email or Phone Number',
+            'label' => $this->translator->trans('emailOrPhoneNumber', [], 'LoginFormType'),
             'attr' => [
-                'placeholder' => 'Enter your email or phone number',
+                'placeholder' => $this->translator->trans('EnterEmailOrPhoneNumber', [], 'LoginFormType'),
                 'name' => 'uuid',
                 'full_name' => 'uuid',
             ],
             'required' => true,
-        ])
-            ->add('password', PasswordType::class, [
+        ]);
+
+        if ($firewallType === FirewallType::DASHBOARD->value) {
+            $builder->add('password', PasswordType::class, [
                 'label' => 'Password',
                 'attr' => [
-                    'placeholder' => 'Enter your password',
+                    'placeholder' => $this->translator->trans('EnterPassword', [], 'LoginFormType'),
                     'name' => 'password',
                     'full_name' => 'password',
                 ],
             ]);
+        }
 
         if ($turnstileCheckerValue === OperationMode::ON->value) {
             $builder->add('security', TurnstileType::class, [
@@ -66,6 +72,7 @@ class LoginFormType extends AbstractType
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
+            'firewallType' => null,
             'data_class' => User::class,
         ]);
     }
