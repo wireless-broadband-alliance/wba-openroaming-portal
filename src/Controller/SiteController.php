@@ -136,6 +136,18 @@ class SiteController extends AbstractController
                 return $this->redirectToRoute('app_logout');
             }
 
+            // Checks if the user has a "forgot_password_request", if yes, return to password reset form
+            if ($currentUser->isForgotPasswordRequest()) {
+                $this->addFlash(
+                    'error',
+                    'You need to confirm the new password before download a profile!'
+                );
+                return $this->redirectToRoute('app_site_forgot_password_checker');
+            }
+            if ($currentUser->getDeletedAt()) {
+                return $this->redirectToRoute('app_logout');
+            }
+
             $verification = $currentUser->isVerified();
             // Check if the user is verified
             if (!$verification) {
@@ -160,17 +172,6 @@ class SiteController extends AbstractController
                     UserTwoFactorAuthenticationStatus::DISABLED->value)
             ) {
                 return $this->redirectToRoute('app_configure2FA');
-            }
-            // Checks if the user has a "forgot_password_request", if yes, return to password reset form
-            if ($currentUser->isForgotPasswordRequest()) {
-                $this->addFlash(
-                    'error',
-                    'You need to confirm the new password before download a profile!'
-                );
-                return $this->redirectToRoute('app_site_forgot_password_checker');
-            }
-            if ($currentUser->getDeletedAt()) {
-                return $this->redirectToRoute('app_logout');
             }
         }
 
