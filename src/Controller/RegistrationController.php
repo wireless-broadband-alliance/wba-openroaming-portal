@@ -249,7 +249,7 @@ class RegistrationController extends AbstractController
                 $this->sendSMS->sendSms($user->getPhoneNumber(), $message);
                 $this->addFlash(
                     'success',
-                    'We have sent a message to your phone with your password and verification code'
+                    'We have sent a message to your phone with your password and verification code' . $randomPassword
                 );
 
                 // Authenticate the user

@@ -120,31 +120,7 @@ class LandingAuthenticator extends AbstractLoginFormAuthenticator
 
             return new RedirectResponse($this->urlGenerator->generate('app_landing'));
         }
-
-        if ($user->isVerified()) {
-            return new RedirectResponse($this->urlGenerator->generate('app_landing'));
-        }
-
-        if ($this->twoFAService->canValidationCode($user, AnalyticalEventType::LOGIN_TRADITIONAL_REQUEST->value)) {
-            $this->twoFAService->generate2FACode(
-                $user,
-                $request->getClientIp(),
-                $request->headers->get('User-Agent'),
-                AnalyticalEventType::LOGIN_TRADITIONAL_REQUEST->value
-            );
-
-            return new RedirectResponse($this->urlGenerator->generate('app_email_code'));
-        }
-
-        $intervalMinutes = $this->twoFAService->timeLeftToResendCode(
-            $user,
-            AnalyticalEventType::LOGIN_TRADITIONAL_REQUEST->value
-        );
-
-        throw new CustomUserMessageAuthenticationException(
-            "Your code has already been sent to you previously. 
-            Wait {$intervalMinutes} minute(s) to request a code again."
-        );
+        return new RedirectResponse($this->urlGenerator->generate('app_landing'));
     }
 
     protected function getLoginUrl(Request $request): string
