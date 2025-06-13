@@ -280,6 +280,22 @@ class MicrosoftController extends AbstractController
             $eventDispatcher = $this->eventDispatcher;
             $eventDispatcher->dispatch(new InteractiveLoginEvent($request, $token));
 
+            // Defines the Event to the table
+            $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+            $platformMode = $data['PLATFORM_MODE']['value'] ? PlatformMode::DEMO->value : PlatformMode::LIVE->value;
+            $eventMetadata = [
+                'platform' => $platformMode,
+                'ip' => $_SERVER['REMOTE_ADDR'],
+                'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? 'Unknown',
+                'uuid' => $user->getUuid(),
+            ];
+            $this->eventActions->saveEvent(
+                $user,
+                AnalyticalEventType::MICROSOFT_LOGIN_REQUEST->value,
+                new DateTime(),
+                $eventMetadata
+            );
+
             // Save the changes
             $this->entityManager->flush();
         } catch (AuthenticationException $exception) {
