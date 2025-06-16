@@ -15,6 +15,11 @@
 - Fix bug with the forgot-password request, checks if the user is not verified and skips that extra unnecessary steps to
   avoid many codes and interactions with the user.
 - Fix bug for capport endpoint, it's now independent of the API. Required for AP's configuration with captive portal
+- For security reasons, the `ForgotPasswordRequest` process was reworked: email-based resets now require confirming a
+  link before any database changes occur, and SMS-based resets require validating a code on a dedicated page before
+  proceeding.
+- New Setting for time configuration of email resend on the `ForgotPasswordRequest`, present on the Authentications
+  methods page.
 
 ---
 
