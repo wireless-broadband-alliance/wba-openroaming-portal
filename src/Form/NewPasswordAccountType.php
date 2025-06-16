@@ -32,12 +32,15 @@ class NewPasswordAccountType extends AbstractType
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $turnstileCheckerValue = $data['TURNSTILE_CHECKER']['value'];
 
-        $builder
-            ->add('password', PasswordType::class, [
+        if ($options['require_current_password'] ?? true) {
+            $builder->add('password', PasswordType::class, [
                 'label' => 'Current Password',
                 'required' => true,
                 'mapped' => false,
-            ])
+            ]);
+        }
+
+        $builder
             ->add('newPassword', PasswordType::class, [
                 'label' => 'New Password',
                 'required' => true,
@@ -65,6 +68,7 @@ class NewPasswordAccountType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => User::class,
+            'require_current_password' => true, // default is to require it
         ]);
     }
 }

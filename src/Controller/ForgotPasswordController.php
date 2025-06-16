@@ -485,23 +485,14 @@ class ForgotPasswordController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
-        $form = $this->createForm(NewPasswordAccountType::class, $currentUser);
+        $form = $this->createForm(
+            NewPasswordAccountType::class,
+            $currentUser,
+            ['require_current_password' => false]
+        );
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $currentPasswordDB = $currentUser->getPassword();
-            $typedPassword = $form->get('password')->getData();
-
-            // Compare the typed password with the hashed password from the database
-            if (!password_verify((string)$typedPassword, $currentPasswordDB)) {
-                $this->addFlash(
-                    'error',
-                    'Current password Invalid. Please try again.'
-                );
-
-                return $this->redirectToRoute('app_landing');
-            }
-
             if ($form->get('newPassword')->getData() !== $form->get('confirmPassword')->getData()) {
                 $this->addFlash(
                     'error',
@@ -520,7 +511,7 @@ class ForgotPasswordController extends AbstractController
             );
             $currentUser->setForgotPasswordRequest(false);
             $currentUser->setIsVerified(true);
-            $currentUser->setTwoFAcode(random_int(100000, 999999));
+            $currentUser->setVerificationCode(random_int(100000, 999999));
             $session = $request->getSession();
             $session->set('session_verified', true);
             $entityManager->persist($currentUser);
