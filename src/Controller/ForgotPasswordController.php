@@ -23,6 +23,7 @@ use DateTime;
 use DateTimeInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
+use Random\RandomException;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -35,7 +36,6 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
-use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * @method getParameterBag()
@@ -358,6 +358,80 @@ class ForgotPasswordController extends AbstractController
             'data' => $data,
             'context' => FirewallType::LANDING->value,
         ]);
+    }
+
+    /**
+     * @throws RandomException
+     */
+    #[Route('forgot-password/link', name: 'app_site_forgot_password_link', methods: ['POST'])]
+    #[IsGranted('ROLE_USER')]
+    public function forgotPasswordLinkAction(
+        Request $request,
+        EntityManagerInterface $entityManager
+    ): Response {
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
+        if (!$currentUser) {
+            $this->addFlash(
+                'error',
+                'You can only access this page logged in.'
+            );
+
+            return $this->redirectToRoute('app_landing');
+        }
+
+        // Call the getSettings method of GetSettings class to retrieve the data
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+
+        if ($data['PLATFORM_MODE']['value']) {
+            $this->addFlash(
+                'error',
+                'The portal is in Demo mode - it is not possible to use this verification method.'
+            );
+
+            return $this->redirectToRoute('app_landing');
+        }
+
+        // Get the uuid and verification code from the URL query parameters
+        $uuid = $request->query->get('uuid');
+        $verificationCode = $request->query->get('verificationCode');
+
+        // Get the user with the matching email, excluding admin users
+        $user = $this->userRepository->findOneByUUIDExcludingAdmin($uuid);
+
+        if ($user && $user->getUuid() === $uuid && $user->getVerificationCode() === $verificationCode) {
+            $user->setForgotPasswordRequest(true);
+            $user->setVerificationCode(random_int(100000, 999999));
+            $entityManager->persist($user);
+            $entityManager->flush();
+
+            // Defines the Event to the table
+            $eventMetadata = [
+                'ip' => $request->getClientIp(),
+                'user_agent' => $request->headers->get('User-Agent'),
+                'platform' => PlatformMode::LIVE->value,
+                'uuid' => $user->getUuid(),
+            ];
+
+            $this->eventActions->saveEvent(
+                $user,
+                AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST_ACCEPTED->value,
+                new DateTime(),
+                $eventMetadata
+            );
+
+            $this->addFlash(
+                'success',
+                'Your account password-request has been accepted!'
+            );
+        }
+
+        $this->addFlash(
+            'error',
+            'You can not access this page without a valid request!'
+        );
+
+        return $this->redirectToRoute('app_landing');
     }
 
     /**

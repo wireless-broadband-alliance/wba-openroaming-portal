@@ -282,7 +282,7 @@ class RegistrationController extends AbstractController
         TokenStorageInterface $tokenStorage,
         EventDispatcherInterface $eventDispatcher,
     ): Response {
-        // Get the email and verification code from the URL query parameters
+        // Get the uuid and verification code from the URL query parameters
         $uuid = $request->query->get('uuid');
         $verificationCode = $request->query->get('verificationCode');
 
