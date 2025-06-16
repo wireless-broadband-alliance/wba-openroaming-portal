@@ -225,7 +225,6 @@ class ForgotPasswordController extends AbstractController
     )]
     public function forgotPasswordUserSMS(
         Request $request,
-        UserPasswordHasherInterface $userPasswordHasher,
         EntityManagerInterface $entityManager,
     ): Response {
         // Call the getSettings method of GetSettings class to retrieve the data
@@ -317,9 +316,9 @@ class ForgotPasswordController extends AbstractController
                         You have {$attemptsLeft} attempt(s) left.";
                         $this->addFlash('success', $message);
 
-                        return $this->redirectToRoute('app_site_forgot_password_code', [
-                            'uuid' => $user->getUuid(),
-                        ]);
+                        $request->getSession()->set('forgot_password_uuid', $user->getUuid());
+
+                        return $this->redirectToRoute('app_site_forgot_password_code');
                     }
 
                     // Inform the user to wait before trying again
@@ -355,9 +354,6 @@ class ForgotPasswordController extends AbstractController
     #[Route('/forgot-password/link', name: 'app_site_forgot_password_link')]
     public function forgotPasswordLinkAction(
         Request $request,
-        EntityManagerInterface $entityManager,
-        TokenStorageInterface $tokenStorage,
-        EventDispatcherInterface $eventDispatcher
     ): Response {
         // Get the uuid and verification code from the URL query parameters
         $uuid = $request->query->get('uuid');
@@ -414,7 +410,11 @@ class ForgotPasswordController extends AbstractController
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
         // Get the uuid and verification code from the URL query parameters
-        $uuid = $request->query->get('uuid');
+        $uuid = $request->getSession()->get('forgot_password_uuid');
+        if (!$uuid) {
+            $this->addFlash('error', 'You can not access this page without a valid request!');
+            return $this->redirectToRoute('app_landing');
+        }
 
         // Get the user with the matching email, excluding admin users
         $user = $this->userRepository->findOneByUUIDExcludingAdmin($uuid);

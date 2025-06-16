@@ -45,6 +45,9 @@ readonly class PasswordResetRequestHandler
         $this->entityManager->persist($user);
         $this->entityManager->flush();
 
+        // Kill the session forgot_password_uuid after being used
+        $request->getSession()->remove('forgot_password_uuid');
+
         // Log the event
         $eventMetadata = [
             'ip' => $request->getClientIp(),
