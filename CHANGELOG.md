@@ -20,7 +20,12 @@
   proceeding.
 - New Setting for time configuration of email resend on the `ForgotPasswordRequest`, present on the Authentications
   methods page.
+- Also for this release, it's required to run the new migrations to set up the new settings:
+  Run the migrations with:
 
+```bash
+php bin/console doctrine:migrations:migrate
+```
 ---
 
 # Release V1.7.3
