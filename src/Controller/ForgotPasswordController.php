@@ -426,12 +426,9 @@ class ForgotPasswordController extends AbstractController
                 'success',
                 'Your account password-request has been accepted!'
             );
-        }
 
-        $this->addFlash(
-            'error',
-            'You can not access this page without a valid request!'
-        );
+            return $this->redirectToRoute('app_site_forgot_password_checker');
+        }
 
         return $this->redirectToRoute('app_landing');
     }
