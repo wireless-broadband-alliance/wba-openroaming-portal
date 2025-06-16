@@ -185,9 +185,10 @@ class ForgotPasswordController extends AbstractController
                         $this->addFlash('success', $message);
                     } else {
                         // Inform the user to wait before trying again
+                        $emailTimeIntervalSetting = $data['EMAIL_TIMER_RESEND']['value'];
                         $this->addFlash(
                             'warning',
-                            'Please wait 2 minutes before trying again.'
+                            'Please wait ' . $emailTimeIntervalSetting . ' minutes before trying again.'
                         );
                     }
                 } else {

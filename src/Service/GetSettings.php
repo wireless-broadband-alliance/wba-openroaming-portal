@@ -280,6 +280,9 @@ class GetSettings
             'SMS_HANDLE' => 'Budget SMS Handle hash',
             'SMS_FROM' => 'Entity sending the SMS for the users',
             'SMS_TIMER_RESEND' => 'Time in minutes to make the user wait to resend a new SMS',
+
+            'EMAIL_TIMER_RESEND' => 'Time in minutes to make the user wait to resend a new EMAIL for reset password request',
+
             'USER_DELETE_TIME' => 'Time in hours to delete the unverified user',
             'TIME_INTERVAL_NOTIFICATION' =>
                 'The notification interval (in days) to alert a user before their profile expires',
