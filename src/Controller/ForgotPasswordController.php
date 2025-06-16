@@ -147,6 +147,7 @@ class ForgotPasswordController extends AbstractController
                         $latestEventMetadata['lastVerificationCodeTime'] =
                             $currentTime->format(DateTimeInterface::ATOM);
                         $latestEvent->setEventMetadata($latestEventMetadata);
+                        $user->setVerificationCode(random_int(100000, 999999));
 
                         $this->eventRepository->save($latestEvent, true);
                         $entityManager->persist($user);
