@@ -31,6 +31,7 @@ class LogoutListener implements EventSubscriberInterface
             // Dynamically remove ONLY the 2fa_verified session key for the current firewall
             $session->remove("2fa_verified_$firewallName");
             $session->remove('session_verified');
+            $session->remove('forgot_password_uuid');
         }
     }
 }
