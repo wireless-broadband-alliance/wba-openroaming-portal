@@ -23,6 +23,7 @@ use DateTime;
 use DateTimeInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
+use Psr\EventDispatcher\EventDispatcherInterface;
 use Random\RandomException;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -34,8 +35,11 @@ use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
 
 /**
  * @method getParameterBag()
@@ -356,26 +360,29 @@ class ForgotPasswordController extends AbstractController
      * @throws RandomException
      */
     #[Route('/forgot-password/link', name: 'app_site_forgot_password_link')]
-    #[IsGranted('ROLE_USER')]
     public function forgotPasswordLinkAction(
         Request $request,
-        EntityManagerInterface $entityManager
+        EntityManagerInterface $entityManager,
+        TokenStorageInterface $tokenStorage,
+        EventDispatcherInterface $eventDispatcher
     ): Response {
-        /** @var User $currentUser */
-        $currentUser = $this->getUser();
-        if (!$currentUser) {
+        // Get the uuid and verification code from the URL query parameters
+        $uuid = $request->query->get('uuid');
+        $verificationCode = $request->query->get('verificationCode');
+
+        // Get the user with the matching email, excluding admin users
+        $user = $this->userRepository->findOneByUUIDExcludingAdmin($uuid);
+        if (!$user) {
             $this->addFlash(
                 'error',
-                'You can only access this page logged in.'
+                'You can not access this page without a valid request!'
             );
 
             return $this->redirectToRoute('app_landing');
         }
 
-        // Call the getSettings method of GetSettings class to retrieve the data
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
-
-        if ($data['PLATFORM_MODE']['value']) {
+        if ($this->settingRepository->findOneBy(['name' => 'PLATFORM_MODE'])->getValue() !== PlatformMode::LIVE->value
+        ) {
             $this->addFlash(
                 'error',
                 'The portal is in Demo mode - it is not possible to use this verification method.'
@@ -384,14 +391,17 @@ class ForgotPasswordController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
-        // Get the uuid and verification code from the URL query parameters
-        $uuid = $request->query->get('uuid');
-        $verificationCode = $request->query->get('verificationCode');
+        if ($user->getUuid() === $uuid && $user->getVerificationCode() === $verificationCode) {
+            // Create a token manually for the user
+            $token = new UsernamePasswordToken($user, FirewallType::LANDING->value, $user->getRoles());
 
-        // Get the user with the matching email, excluding admin users
-        $user = $this->userRepository->findOneByUUIDExcludingAdmin($uuid);
+            // Set the token in the token storage
+            $tokenStorage->setToken($token);
 
-        if ($user && $user->getUuid() === $uuid && $user->getVerificationCode() === $verificationCode) {
+            // Dispatch the login event
+            $event = new InteractiveLoginEvent($request, $token);
+            $eventDispatcher->dispatch($event);
+
             $user->setForgotPasswordRequest(true);
             $user->setVerificationCode(random_int(100000, 999999));
             $entityManager->persist($user);

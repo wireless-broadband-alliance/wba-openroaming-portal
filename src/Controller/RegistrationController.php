@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
 use App\Enum\AnalyticalEventType;
+use App\Enum\FirewallType;
 use App\Enum\OperationMode;
 use App\Enum\PlatformMode;
 use App\Enum\UserProvider;
@@ -252,7 +253,7 @@ class RegistrationController extends AbstractController
                 );
 
                 // Authenticate the user
-                $token = new UsernamePasswordToken($user, 'main', $user->getRoles());
+                $token = new UsernamePasswordToken($user, FirewallType::LANDING->value, $user->getRoles());
                 $this->tokenStorage->setToken($token);
 
                 // Store the authentication token in the session
