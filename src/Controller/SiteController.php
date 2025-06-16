@@ -84,14 +84,11 @@ class SiteController extends AbstractController
     public function __construct(
         private readonly UserRepository $userRepository,
         private readonly UserExternalAuthRepository $userExternalAuthRepository,
-        private readonly ParameterBagInterface $parameterBag,
         private readonly SettingRepository $settingRepository,
         private readonly GetSettings $getSettings,
-        private readonly EventRepository $eventRepository,
         private readonly EventActions $eventActions,
         private readonly VerificationCodeEmailGenerator $verificationCodeGenerator,
         private readonly ProfileManager $profileManager,
-        private readonly SendSMS $sendSMS,
         private readonly TwoFAService $twoFAService,
         private readonly UserDeletionService $userDeletionService,
     ) {
