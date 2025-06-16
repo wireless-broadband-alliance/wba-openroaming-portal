@@ -273,7 +273,7 @@ class ForgotPasswordController extends AbstractController
                 );
                 // Retrieve the SMS resend interval from the settings
                 $smsResendInterval = $data['SMS_TIMER_RESEND']['value'];
-                $minInterval = new DateInterval('PT'.$smsResendInterval.'M');
+                $minInterval = new DateInterval('PT' . $smsResendInterval . 'M');
                 $currentTime = new DateTime();
                 // Check if the user has not exceeded the attempt limit
                 $latestEventMetadata = $latestEvent instanceof Event ? $latestEvent->getEventMetadata() : [];
@@ -319,8 +319,8 @@ class ForgotPasswordController extends AbstractController
                         $user->setPassword($hashedPassword);
                         $entityManager->persist($user);
                         $entityManager->flush();
-                        $recipient = "+".
-                            $user->getPhoneNumber()->getCountryCode().
+                        $recipient = "+" .
+                            $user->getPhoneNumber()->getCountryCode() .
                             $user->getPhoneNumber()->getNationalNumber();
                         // Send SMS
                         $message = "Your new random account password is: {$randomPassword}\n
