@@ -11,6 +11,7 @@ use App\Enum\UserProvider;
 use App\Form\ForgotPasswordEmailType;
 use App\Form\ForgotPasswordSMSType;
 use App\Form\NewPasswordAccountType;
+use App\Form\ResetPasswordSMSConfirmationType;
 use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserExternalAuthRepository;
@@ -247,15 +248,6 @@ class ForgotPasswordController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
-        if ($data['AUTH_METHOD_REGISTER_ENABLED']['value'] !== 'true') {
-            $this->addFlash(
-                'error',
-                'This verification method it\'s not enabled!'
-            );
-
-            return $this->redirectToRoute('app_landing');
-        }
-
         $user = new User();
         $form = $this->createForm(ForgotPasswordSMSType::class, $user);
         $form->handleRequest($request);
@@ -305,35 +297,36 @@ class ForgotPasswordController extends AbstractController
                         $latestEventMetadata['verificationAttempts'] = $attempts;
                         $latestEvent->setEventMetadata($latestEventMetadata);
 
-                        $user->setForgotPasswordRequest(true);
-                        $user->setIsVerified(true);
+                        $user->setVerificationCode(random_int(100000, 999999));
                         $this->eventRepository->save($latestEvent, true);
 
-                        // save a new password hashed on the db for the user
-                        $randomPassword = bin2hex(random_bytes(4));
-                        $hashedPassword = $userPasswordHasher->hashPassword($user, $randomPassword);
-                        $user->setPassword($hashedPassword);
                         $entityManager->persist($user);
                         $entityManager->flush();
                         $recipient = "+" .
                             $user->getPhoneNumber()->getCountryCode() .
                             $user->getPhoneNumber()->getNationalNumber();
-                        // Send SMS
-                        $message = "Your new random account password is: {$randomPassword}\n
-                        Please make sure to login to complete the request.";
-                        $this->sendSMS->sendSmsNoValidation($recipient, $message);
+
+                        $message = "If you requested a password reset for your OpenRoaming account, 
+                        use this code to proceed: {$user->getVerificationCode()}";
+                        $encodedMessage = urlencode($message);
+                        $this->sendSMS->sendSmsNoValidation($recipient, $encodedMessage);
 
                         $attemptsLeft = 3 - $verificationAttempts;
                         $message = "We have sent you a message to: {$user->getUuid()}. 
                         You have {$attemptsLeft} attempt(s) left.";
                         $this->addFlash('success', $message);
-                    } else {
-                        // Inform the user to wait before trying again
-                        $this->addFlash(
-                            'warning',
-                            "Please wait {$data['SMS_TIMER_RESEND']['value']} minute(s) before trying again."
-                        );
+
+                        return $this->redirectToRoute('app_site_forgot_password_code', [
+                            'uuid' => $user->getUuid(),
+                        ]);
                     }
+
+                    // Inform the user to wait before trying again
+                    $this->addFlash(
+                        'warning',
+                        "Please wait {$data['SMS_TIMER_RESEND']['value']} minute(s) before trying again."
+                    );
+
                 } else {
                     $this->addFlash(
                         'warning',
@@ -392,6 +385,7 @@ class ForgotPasswordController extends AbstractController
         }
 
         if ($user->getUuid() === $uuid && $user->getVerificationCode() === $verificationCode) {
+            // TODO MAKE A SERVICE of this code
             // Create a token manually for the user
             $token = new UsernamePasswordToken($user, FirewallType::LANDING->value, $user->getRoles());
 
@@ -431,6 +425,62 @@ class ForgotPasswordController extends AbstractController
         }
 
         return $this->redirectToRoute('app_landing');
+    }
+
+    /**
+     * @throws RandomException
+     */
+    #[Route('/forgot-password/code', name: 'app_site_forgot_password_code')]
+    public function forgotPasswordCodeAction(
+        Request $request,
+    ): Response {
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+
+        // Get the uuid and verification code from the URL query parameters
+        $uuid = $request->query->get('uuid');
+
+        // Get the user with the matching email, excluding admin users
+        $user = $this->userRepository->findOneByUUIDExcludingAdmin($uuid);
+        if (!$user) {
+            $this->addFlash(
+                'error',
+                'You can not access this page without a valid request!'
+            );
+
+            return $this->redirectToRoute('app_landing');
+        }
+
+        if ($this->settingRepository->findOneBy(['name' => 'PLATFORM_MODE'])->getValue() !== PlatformMode::LIVE->value
+        ) {
+            $this->addFlash(
+                'error',
+                'The portal is in Demo mode - it is not possible to use this verification method.'
+            );
+
+            return $this->redirectToRoute('app_landing');
+        }
+
+        $form = $this->createForm(ResetPasswordSMSConfirmationType::class);
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $code = $form->get('verificationCode')->getData();
+            if ($user->getUuid() === $uuid && $user->getVerificationCode() === $code) {
+                // TODO MAKE A SERVICE of this code
+                dd('Make the service', $uuid, $user, $code);
+                return $this->redirectToRoute('app_site_forgot_password_checker');
+            }
+
+            $this->addFlash(
+                'error',
+                'The verification code is incorrect. Please check and try again.'
+            );
+        }
+
+        return $this->render('site/forgot_password_code_landing.html.twig', [
+            'forgotPasswordCode' => $form->createView(),
+            'data' => $data,
+            'context' => FirewallType::LANDING->value,
+        ]);
     }
 
     /**

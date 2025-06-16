@@ -735,7 +735,6 @@ class SiteController extends AbstractController
         $enteredCode = $requestStack->getCurrentRequest()->request->get('code');
 
         if ($enteredCode === $currentUser->getVerificationCode()) {
-            $event = new Event();
             // Set the user as verified
             $currentUser->setVerificationCode(random_int(100000, 999999));
             $currentUser->setIsVerified(true);
