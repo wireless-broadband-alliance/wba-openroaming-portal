@@ -58,7 +58,7 @@ readonly class PasswordResetRequestHandler
 
         $this->eventActions->saveEvent(
             $user,
-            AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST_ACCEPTED->value,
+            AnalyticalEventType::FORGOT_PASSWORD_REQUEST_ACCEPTED->value,
             new DateTime(),
             $eventMetadata
         );
