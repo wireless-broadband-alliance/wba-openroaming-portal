@@ -100,7 +100,7 @@ class RegistrationController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            if ($this->userRepository->findOneBy(['email' => $user->getEmail()])) {
+            if ($this->userRepository->findOneBy(['uuid' => $user->getUuid()])) {
                 $this->addFlash(
                     'warning',
                     'User with the same email already exists, please try to Login using the link below.'
