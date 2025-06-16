@@ -23,7 +23,8 @@ readonly class PasswordResetRequestHandler
         private EntityManagerInterface $entityManager,
         private EventActions $eventActions,
         private RequestStack $requestStack
-    ) {}
+    ) {
+    }
 
     /**
      * @throws RandomException

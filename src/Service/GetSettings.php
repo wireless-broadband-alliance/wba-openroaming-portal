@@ -281,7 +281,8 @@ class GetSettings
             'SMS_FROM' => 'Entity sending the SMS for the users',
             'SMS_TIMER_RESEND' => 'Time in minutes to make the user wait to resend a new SMS',
 
-            'EMAIL_TIMER_RESEND' => 'Time in minutes to make the user wait to resend a new EMAIL for reset password request',
+            'EMAIL_TIMER_RESEND' => 'Time in minutes to make the user wait to resend a new 
+            EMAIL for reset password requests',
             'LINK_VALIDITY' => 'Time in minutes a link stays active before it expires.',
 
 

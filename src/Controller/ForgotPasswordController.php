@@ -25,8 +25,6 @@ use DateTime;
 use DateTimeInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
-use phpDocumentor\Reflection\DocBlock\Tags\Link;
-use Psr\EventDispatcher\EventDispatcherInterface;
 use Random\RandomException;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -38,7 +36,6 @@ use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
@@ -126,7 +123,7 @@ class ForgotPasswordController extends AbstractController
                         AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST->value
                     );
                     $resetPasswordTimer = $data['EMAIL_TIMER_RESEND']['value'];
-                    $minInterval = new DateInterval('PT'. $resetPasswordTimer . 'M');
+                    $minInterval = new DateInterval('PT' . $resetPasswordTimer . 'M');
                     $currentTime = new DateTime();
                     // Check if enough time has passed since the last attempt
                     $latestEventMetadata = $latestEvent instanceof Event ? $latestEvent->getEventMetadata() : [];
@@ -361,7 +358,6 @@ class ForgotPasswordController extends AbstractController
         $verificationCode = $request->query->get('verificationCode');
 
 
-
         // Get the user with the matching email, excluding admin users
         $user = $this->userRepository->findOneByUUIDExcludingAdmin($uuid);
         if (!$user) {
@@ -373,7 +369,8 @@ class ForgotPasswordController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
-        if ($this->settingRepository->findOneBy(['name' => 'PLATFORM_MODE'])->getValue() !== PlatformMode::LIVE->value
+        if (
+            $this->settingRepository->findOneBy(['name' => 'PLATFORM_MODE'])->getValue() !== PlatformMode::LIVE->value
         ) {
             $this->addFlash(
                 'error',
@@ -384,7 +381,10 @@ class ForgotPasswordController extends AbstractController
         }
 
         if ($user->getUuid() === $uuid && $user->getVerificationCode() === $verificationCode) {
-            $lastEvent = $this->eventRepository->findLatest2FACodeAttemptEvent($user, AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST->value);
+            $lastEvent = $this->eventRepository->findLatest2FACodeAttemptEvent(
+                $user,
+                AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST->value
+            );
             $linkTimeInterval = $this->settingRepository->findOneBy(['name' => 'LINK_VALIDITY'])->getValue();
             $lastAttemptTime = $lastEvent instanceof Event ?
                 $lastEvent->getEventDatetime() : $linkTimeInterval;
@@ -393,7 +393,7 @@ class ForgotPasswordController extends AbstractController
             $interval_minutes = $interval->days * 1440;
             $interval_minutes += $interval->h * 60;
             $interval_minutes += $interval->i;
-            if ($interval_minutes > ((int) $linkTimeInterval)) {
+            if ($interval_minutes > ((int)$linkTimeInterval)) {
                 $this->addFlash(
                     'error',
                     'Link expired. Please try to log in manually'
@@ -446,7 +446,8 @@ class ForgotPasswordController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
-        if ($this->settingRepository->findOneBy(['name' => 'PLATFORM_MODE'])->getValue() !== PlatformMode::LIVE->value
+        if (
+            $this->settingRepository->findOneBy(['name' => 'PLATFORM_MODE'])->getValue() !== PlatformMode::LIVE->value
         ) {
             $this->addFlash(
                 'error',
