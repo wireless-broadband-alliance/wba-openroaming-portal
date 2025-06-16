@@ -35,7 +35,6 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
-use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * @method getParameterBag()
@@ -61,7 +60,6 @@ class ForgotPasswordController extends AbstractController
     #[Route('/forgot-password/email', name: 'app_site_forgot_password_email')]
     public function forgotPasswordUserEmail(
         Request $request,
-        UserPasswordHasherInterface $userPasswordHasher,
         EntityManagerInterface $entityManager,
         MailerInterface $mailer
     ): Response {
@@ -152,10 +150,6 @@ class ForgotPasswordController extends AbstractController
                         $user->setForgotPasswordRequest(true);
                         $user->setIsVerified(true);
                         $this->eventRepository->save($latestEvent, true);
-
-                        $randomPassword = bin2hex(random_bytes(4));
-                        $hashedPassword = $userPasswordHasher->hashPassword($user, $randomPassword);
-                        $user->setPassword($hashedPassword);
                         $entityManager->persist($user);
                         $entityManager->flush();
 
@@ -172,12 +166,10 @@ class ForgotPasswordController extends AbstractController
                             )
                             ->htmlTemplate('email/user_forgot_password_request.html.twig')
                             ->context([
-                                'password' => $randomPassword,
                                 'forgotPasswordUser' => true,
                                 'uuid' => $user->getUuid(),
                                 'emailTitle' => $data['title']['value'],
                                 'contactEmail' => $data['contactEmail']['value'],
-                                'currentPassword' => $randomPassword,
                                 'verificationCode' => $user->getTwoFAcode(),
                                 'context' => FirewallType::LANDING->value,
                             ]);
