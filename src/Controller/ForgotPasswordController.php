@@ -354,7 +354,7 @@ class ForgotPasswordController extends AbstractController
     /**
      * @throws RandomException
      */
-    #[Route('forgot-password/link', name: 'app_site_forgot_password_link', methods: ['POST'])]
+    #[Route('/forgot-password/link', name: 'app_site_forgot_password_link')]
     #[IsGranted('ROLE_USER')]
     public function forgotPasswordLinkAction(
         Request $request,
