@@ -148,8 +148,6 @@ class ForgotPasswordController extends AbstractController
                             $currentTime->format(DateTimeInterface::ATOM);
                         $latestEvent->setEventMetadata($latestEventMetadata);
 
-                        $user->setForgotPasswordRequest(true);
-                        $user->setIsVerified(true);
                         $this->eventRepository->save($latestEvent, true);
                         $entityManager->persist($user);
                         $entityManager->flush();
@@ -171,7 +169,7 @@ class ForgotPasswordController extends AbstractController
                                 'uuid' => $user->getUuid(),
                                 'emailTitle' => $data['title']['value'],
                                 'contactEmail' => $data['contactEmail']['value'],
-                                'verificationCode' => $user->getTwoFAcode(),
+                                'verificationCode' => $user->getVerificationCode(),
                                 'context' => FirewallType::LANDING->value,
                             ]);
 
