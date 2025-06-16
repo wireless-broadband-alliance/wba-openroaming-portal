@@ -327,7 +327,7 @@ class RegistrationController extends AbstractController
                             )
                         )
                         ->to($user->getEmail())
-                        ->subject('OpenRoaming Portal - Password Request')
+                        ->subject('Reset Your OpenRoaming Password')
                         ->htmlTemplate('email/user_forgot_password_request.html.twig')
                         ->context([
                             'password' => $randomPassword,
