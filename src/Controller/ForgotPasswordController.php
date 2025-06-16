@@ -18,6 +18,7 @@ use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
 use App\Service\EventActions;
 use App\Service\GetSettings;
+use App\Service\PasswordResetRequestHandler;
 use App\Service\SendSMS;
 use DateInterval;
 use DateTime;
@@ -37,10 +38,8 @@ use Symfony\Component\Mime\Address;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
-use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
-use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
 
 /**
  * @method getParameterBag()
@@ -56,6 +55,7 @@ class ForgotPasswordController extends AbstractController
         private readonly EventActions $eventActions,
         private readonly SendSMS $sendSMS,
         private readonly SettingRepository $settingRepository,
+        private readonly PasswordResetRequestHandler $passwordResetRequestHandler,
     ) {
     }
 
@@ -326,7 +326,6 @@ class ForgotPasswordController extends AbstractController
                         'warning',
                         "Please wait {$data['SMS_TIMER_RESEND']['value']} minute(s) before trying again."
                     );
-
                 } else {
                     $this->addFlash(
                         'warning',
@@ -385,36 +384,8 @@ class ForgotPasswordController extends AbstractController
         }
 
         if ($user->getUuid() === $uuid && $user->getVerificationCode() === $verificationCode) {
-            // TODO MAKE A SERVICE of this code
             // Create a token manually for the user
-            $token = new UsernamePasswordToken($user, FirewallType::LANDING->value, $user->getRoles());
-
-            // Set the token in the token storage
-            $tokenStorage->setToken($token);
-
-            // Dispatch the login event
-            $event = new InteractiveLoginEvent($request, $token);
-            $eventDispatcher->dispatch($event);
-
-            $user->setForgotPasswordRequest(true);
-            $user->setVerificationCode(random_int(100000, 999999));
-            $entityManager->persist($user);
-            $entityManager->flush();
-
-            // Defines the Event to the table
-            $eventMetadata = [
-                'ip' => $request->getClientIp(),
-                'user_agent' => $request->headers->get('User-Agent'),
-                'platform' => PlatformMode::LIVE->value,
-                'uuid' => $user->getUuid(),
-            ];
-
-            $this->eventActions->saveEvent(
-                $user,
-                AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST_ACCEPTED->value,
-                new DateTime(),
-                $eventMetadata
-            );
+            $this->passwordResetRequestHandler->handle($user);
 
             $this->addFlash(
                 'success',
@@ -423,6 +394,11 @@ class ForgotPasswordController extends AbstractController
 
             return $this->redirectToRoute('app_site_forgot_password_checker');
         }
+
+        $this->addFlash(
+            'error',
+            'Invalid verification code or link expired. Please try to log in manually'
+        );
 
         return $this->redirectToRoute('app_landing');
     }
@@ -465,8 +441,14 @@ class ForgotPasswordController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $code = $form->get('verificationCode')->getData();
             if ($user->getUuid() === $uuid && $user->getVerificationCode() === $code) {
-                // TODO MAKE A SERVICE of this code
-                dd('Make the service', $uuid, $user, $code);
+                // Create a token manually for the user
+                $this->passwordResetRequestHandler->handle($user);
+
+                $this->addFlash(
+                    'success',
+                    'Your account password-request has been accepted!'
+                );
+
                 return $this->redirectToRoute('app_site_forgot_password_checker');
             }
 
