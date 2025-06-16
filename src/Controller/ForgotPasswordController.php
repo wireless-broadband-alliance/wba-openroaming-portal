@@ -306,10 +306,9 @@ class ForgotPasswordController extends AbstractController
                             $user->getPhoneNumber()->getCountryCode() .
                             $user->getPhoneNumber()->getNationalNumber();
 
-                        $message = "If you requested a password reset for your OpenRoaming account, 
-                        use this code to proceed: {$user->getVerificationCode()}";
-                        $encodedMessage = urlencode($message);
-                        $this->sendSMS->sendSmsNoValidation($recipient, $encodedMessage);
+                        $message = "If you requested a password reset for your OpenRoaming account, " .
+                            "use this code to proceed: {$user->getVerificationCode()}";
+                        $this->sendSMS->sendSmsNoValidation($recipient, $message);
 
                         $attemptsLeft = 3 - $verificationAttempts;
                         $message = "We have sent you a message to: {$user->getUuid()}. 
