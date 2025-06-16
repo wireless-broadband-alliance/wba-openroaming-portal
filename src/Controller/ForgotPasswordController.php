@@ -124,7 +124,8 @@ class ForgotPasswordController extends AbstractController
                         $user,
                         AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST->value
                     );
-                    $minInterval = new DateInterval('PT2M');
+                    $resetPasswordTimer = $data['EMAIL_TIMER_RESEND']['value'];
+                    $minInterval = new DateInterval('PT'. $resetPasswordTimer . 'M');
                     $currentTime = new DateTime();
                     // Check if enough time has passed since the last attempt
                     $latestEventMetadata = $latestEvent instanceof Event ? $latestEvent->getEventMetadata() : [];
