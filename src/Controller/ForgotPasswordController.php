@@ -577,7 +577,7 @@ class ForgotPasswordController extends AbstractController
             ];
             $this->eventActions->saveEvent(
                 $currentUser,
-                AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST_ACCEPTED->value,
+                AnalyticalEventType::FORGOT_PASSWORD_REQUEST_ACCEPTED->value,
                 new DateTime(),
                 $eventMetadata
             );
