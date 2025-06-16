@@ -25,6 +25,7 @@ use DateTime;
 use DateTimeInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
+use phpDocumentor\Reflection\DocBlock\Tags\Link;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Random\RandomException;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
@@ -359,6 +360,8 @@ class ForgotPasswordController extends AbstractController
         $uuid = $request->query->get('uuid');
         $verificationCode = $request->query->get('verificationCode');
 
+
+
         // Get the user with the matching email, excluding admin users
         $user = $this->userRepository->findOneByUUIDExcludingAdmin($uuid);
         if (!$user) {
@@ -381,6 +384,22 @@ class ForgotPasswordController extends AbstractController
         }
 
         if ($user->getUuid() === $uuid && $user->getVerificationCode() === $verificationCode) {
+            $lastEvent = $this->eventRepository->findLatest2FACodeAttemptEvent($user, AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST->value);
+            $linkTimeInterval = $this->settingRepository->findOneBy(['name' => 'LINK_VALIDITY'])->getValue();
+            $lastAttemptTime = $lastEvent instanceof Event ?
+                $lastEvent->getEventDatetime() : $linkTimeInterval;
+            $now = new DateTime();
+            $interval = date_diff($now, $lastAttemptTime);
+            $interval_minutes = $interval->days * 1440;
+            $interval_minutes += $interval->h * 60;
+            $interval_minutes += $interval->i;
+            if ($interval_minutes > ((int) $linkTimeInterval)) {
+                $this->addFlash(
+                    'error',
+                    'Link expired. Please try to log in manually'
+                );
+                return $this->redirectToRoute('app_landing');
+            }
             // Create a token manually for the user
             $this->passwordResetRequestHandler->handle($user);
 
