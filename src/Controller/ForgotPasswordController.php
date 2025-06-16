@@ -350,7 +350,7 @@ class ForgotPasswordController extends AbstractController
      * @throws RandomException
      */
     #[Route('/forgot-password/link', name: 'app_site_forgot_password_link')]
-    public function forgotPasswordLinkAction(
+    public function forgotPasswordLink(
         Request $request,
     ): Response {
         // Get the uuid and verification code from the URL query parameters
@@ -360,7 +360,7 @@ class ForgotPasswordController extends AbstractController
 
         // Get the user with the matching email, excluding admin users
         $user = $this->userRepository->findOneByUUIDExcludingAdmin($uuid);
-        if (!$user) {
+        if (!$user instanceof User) {
             $this->addFlash(
                 'error',
                 'You can not access this page without a valid request!'
@@ -423,7 +423,7 @@ class ForgotPasswordController extends AbstractController
      * @throws RandomException
      */
     #[Route('/forgot-password/code', name: 'app_site_forgot_password_code')]
-    public function forgotPasswordCodeAction(
+    public function forgotPasswordCode(
         Request $request,
     ): Response {
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
@@ -437,7 +437,7 @@ class ForgotPasswordController extends AbstractController
 
         // Get the user with the matching email, excluding admin users
         $user = $this->userRepository->findOneByUUIDExcludingAdmin($uuid);
-        if (!$user) {
+        if (!$user instanceof User) {
             $this->addFlash(
                 'error',
                 'You can not access this page without a valid request!'
