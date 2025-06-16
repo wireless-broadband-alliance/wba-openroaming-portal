@@ -117,6 +117,7 @@ class RegistrationController extends AbstractController
                 $user->setUuid($form->get('email')->getData());
                 $user->setEmail($form->get('email')->getData());
                 $user->setVerificationCode(random_int(100000, 999999));
+                $user->setCreatedAt(new DateTime());
                 $userAuths->setProvider(UserProvider::PORTAL_ACCOUNT->value);
                 $userAuths->setProviderId(UserProvider::EMAIL->value);
                 $userAuths->setUser($user);
