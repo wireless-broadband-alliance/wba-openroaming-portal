@@ -114,13 +114,15 @@ class RegistrationController extends AbstractController
 
                 // Set the hashed password for the user
                 $user->setPassword($hashedPassword);
-                $user->setUuid($user->getEmail());
+                $user->setUuid($form->get('email')->getData());
+                $user->setEmail($form->get('email')->getData());
                 $user->setVerificationCode(random_int(100000, 999999));
                 $userAuths->setProvider(UserProvider::PORTAL_ACCOUNT->value);
                 $userAuths->setProviderId(UserProvider::EMAIL->value);
                 $userAuths->setUser($user);
                 $entityManager->persist($user);
                 $entityManager->persist($userAuths);
+                $entityManager->flush();
 
                 // Defines the Event to the table
                 $eventMetaData = [
