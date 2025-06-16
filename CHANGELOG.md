@@ -14,6 +14,7 @@
 - For security reasons,`UserAccountDeletion` now simulates a login to confirm the account action for external providers.
 - Fix bug with the forgot-password request, checks if the user is not verified and skips that extra unnecessary steps to
   avoid many codes and interactions with the user.
+- Fix bug for capport endpoint, it's now independent of the API. Required for AP's configuration with captive portal
 
 ---
 

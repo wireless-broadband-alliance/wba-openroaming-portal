@@ -115,7 +115,7 @@ class RegistrationController extends AbstractController
                 // Set the hashed password for the user
                 $user->setPassword($hashedPassword);
                 $user->setUuid($user->getEmail());
-                $user->setVerificationCode($this->verificationCodeGenerator->generateVerificationCode($user));
+                $user->setVerificationCode(random_int(100000, 999999));
                 $userAuths->setProvider(UserProvider::PORTAL_ACCOUNT->value);
                 $userAuths->setProviderId(UserProvider::EMAIL->value);
                 $userAuths->setUser($user);
@@ -215,7 +215,7 @@ class RegistrationController extends AbstractController
                     );
                 }
 
-                $user->setVerificationCode($this->verificationCodeGenerator->generateVerificationCode($user));
+                $user->setVerificationCode(random_int(100000, 999999));
                 $user->setCreatedAt(new DateTime());
                 $userAuths->setProvider(UserProvider::PORTAL_ACCOUNT->value);
                 $userAuths->setProviderId(UserProvider::PHONE_NUMBER->value);

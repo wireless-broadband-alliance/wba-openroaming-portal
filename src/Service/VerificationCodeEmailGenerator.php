@@ -28,24 +28,6 @@ readonly class VerificationCodeEmailGenerator
     }
 
     /**
-     * Generate a new verification code for the user.
-     *
-     * @param User $user The user for whom the verification code is generated.
-     * @return int The generated verification code.
-     * @throws Exception
-     */
-    public function generateVerificationCode(User $user): int
-    {
-        // Generate a random verification code with 6 digits
-        $verificationCode = random_int(100000, 999999);
-        $user->setVerificationCode((string)$verificationCode);
-        $user->setCreatedAt(new \DateTime());
-        $this->userRepository->save($user, true);
-
-        return $verificationCode;
-    }
-
-    /**
      * Create an email message with the verification code.
      *
      * @return Email The email with the code.
@@ -60,7 +42,9 @@ readonly class VerificationCodeEmailGenerator
         $emailSender = $this->parameterBag->get('app.email_address');
         $nameSender = $this->parameterBag->get('app.sender_name');
 
-        $verificationCode = $this->generateVerificationCode($user);
+        $verificationCode = random_int(100000, 999999);
+        $user->setVerificationCode($verificationCode);
+        $this->userRepository->save($user, true);
 
         $eventMetaData = [
             'platform' => PlatformMode::LIVE->value,
@@ -99,7 +83,9 @@ readonly class VerificationCodeEmailGenerator
         $nameSender = $this->parameterBag->get('app.sender_name');
 
         // If the verification code is not provided, generate a new one
-        $verificationCode = $this->generateVerificationCode($user);
+        $verificationCode = random_int(100000, 999999);
+        $user->setVerificationCode($verificationCode);
+        $this->userRepository->save($user, true);
         $emailTitle = $this->settingRepository->findOneBy(['name' => 'PAGE_TITLE'])->getValue();
 
         return new TemplatedEmail()
