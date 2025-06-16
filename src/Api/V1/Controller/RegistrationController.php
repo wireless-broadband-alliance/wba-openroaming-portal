@@ -60,7 +60,6 @@ class RegistrationController extends AbstractController
         private readonly GetSettings $getSettings,
         private readonly SettingRepository $settingRepository,
         private readonly UserPasswordHasherInterface $userPasswordHasher,
-        private readonly VerificationCodeEmailGenerator $verificationCodeGenerator,
         private readonly CaptchaValidator $captchaValidator,
         private readonly RegistrationEmailGenerator $emailGenerator,
         private readonly ValidatorInterface $validator

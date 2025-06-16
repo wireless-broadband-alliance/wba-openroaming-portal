@@ -58,7 +58,6 @@ class RegistrationController extends AbstractController
         private readonly SendSMS $sendSMS,
         private readonly TokenStorageInterface $tokenStorage,
         private readonly EventActions $eventActions,
-        private readonly VerificationCodeEmailGenerator $verificationCodeGenerator,
         private readonly RegistrationEmailGenerator $emailGenerator,
     ) {
     }
