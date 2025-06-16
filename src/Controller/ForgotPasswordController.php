@@ -103,7 +103,7 @@ class ForgotPasswordController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $user = $this->userRepository->findOneBy(['email' => $user->getEmail()]);
+            $user = $this->userRepository->findOneBy(['uuid' => $user->getEmail()]);
             if ($user) {
                 // Check if the provider is "PORTAL_ACCOUNT" and the providerId "EMAIL"
                 $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $user]);
