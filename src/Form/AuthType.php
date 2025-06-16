@@ -353,6 +353,23 @@ class AuthType extends AbstractType
 
                 ]
             ],
+            'LINK_VALIDITY' => [
+                'type' => IntegerType::class,
+                'constraints' => [
+                    new Length([
+                        'max' => 3,
+                        'maxMessage' => ' This field cannot be longer than {{ limit }} characters',
+                    ]),
+                    new GreaterThanOrEqual([
+                        'value' => 1,
+                        'message' => 'This timer should never be less than 1.',
+                    ]),
+                    new NotBlank([
+                        'message' => 'Please make sure to set a timer',
+                    ]),
+
+                ]
+            ],
             // Login
             'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED' => [
                 'type' => ChoiceType::class,

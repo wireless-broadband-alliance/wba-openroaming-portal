@@ -21,6 +21,7 @@ final class Version20250616121133 extends AbstractMigration
     {
         // this up() migration is auto-generated, please modify it to your needs
         $this->addSql("INSERT INTO Setting (name, value) VALUES ('EMAIL_TIMER_RESEND', '2')");
+        $this->addSql("INSERT INTO Setting (name, value) VALUES ('LINK_VALIDITY', '10')");
 
     }
 
@@ -28,5 +29,6 @@ final class Version20250616121133 extends AbstractMigration
     {
         // this down() migration is auto-generated, please modify it to your needs
         $this->addSql("DELETE FROM Setting WHERE name = 'EMAIL_TIMER_RESEND'");
+        $this->addSql("DELETE FROM Setting WHERE name = 'LINK_VALIDITY'");
     }
 }

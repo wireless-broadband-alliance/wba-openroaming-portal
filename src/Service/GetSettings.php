@@ -282,6 +282,8 @@ class GetSettings
             'SMS_TIMER_RESEND' => 'Time in minutes to make the user wait to resend a new SMS',
 
             'EMAIL_TIMER_RESEND' => 'Time in minutes to make the user wait to resend a new EMAIL for reset password request',
+            'LINK_VALIDITY' => 'Time in minutes a link stays active before it expires.',
+
 
             'USER_DELETE_TIME' => 'Time in hours to delete the unverified user',
             'TIME_INTERVAL_NOTIFICATION' =>

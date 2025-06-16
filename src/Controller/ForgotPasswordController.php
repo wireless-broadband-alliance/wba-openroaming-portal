@@ -155,7 +155,7 @@ class ForgotPasswordController extends AbstractController
                         $latestEvent->setEventMetadata($latestEventMetadata);
                         $user->setVerificationCode(random_int(100000, 999999));
 
-                        $this->eventRepository->save($latestEvent, true);
+                        $entityManager->persist($latestEvent);
                         $entityManager->persist($user);
                         $entityManager->flush();
 
