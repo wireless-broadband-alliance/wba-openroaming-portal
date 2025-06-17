@@ -85,13 +85,12 @@ Upgrading your system requires caution and preparation. Follow these general gui
 
 ## Upgrade Path Matrix
 
-
-| Current Version | Intermediate Version | Target Version | Notes                                                                 |
-|-----------------|----------------------|----------------|-----------------------------------------------------------------------|
-| 1.4.0           | 1.5                  | Latest Release | Run `php bin/console lexik:jwt:generate-keypair` before upgrading.    |
-| 1.5             | 1.6                  | Latest Release | Run `php bin/console reset:allocate-providers` before proceeding.     |
-| 1.6             | N/A                  | Latest Release | Proceed directly to latest release after reviewing changelog.         |
-| Below 1.4.0     | Follow earlier paths | Latest Release | Ensure compatibility with earlier versions before upgrading.          |
+| Current Version | Intermediate Version | Target Version | Notes                                                                |
+|-----------------|----------------------|----------------|----------------------------------------------------------------------|
+| < 1.4.0         | 1.4.0                | Latest Release | Run `php bin/console clear:eventEntity` to clean up invalid records. |
+| 1.4.0           | 1.5                  | Latest Release | Run `php bin/console lexik:jwt:generate-keypair` before upgrading.   |
+| 1.5             | 1.6                  | Latest Release | Run `php bin/console reset:allocate-providers` before proceeding.    |
+| 1.6             | N/A                  | Latest Release | Proceed directly to latest release after reviewing changelog.        |
 
 Use this table to determine the exact steps based on your current version.
 
@@ -171,13 +170,13 @@ Use the following checklist before starting the upgrade process:
 
 ## Troubleshooting & Rollback
 
-| Issue                                | Cause                              | Solution                                                            |
-|--------------------------------------|------------------------------------|---------------------------------------------------------------------|
-| Missing `lexik:jwt:generate-keypair` | Skipped upgrade from version 1.4.0 | Run `php bin/console lexik:jwt:generate-keypair` before proceeding. |
-| Missing `reset:allocate-providers`   | Skipped upgrade to version 1.6     | Ensure intermediate upgrades are completed correctly.               |
-| Database schema mismatch             | Schema updates not applied         | Run `php bin/console doctrine:schema:update --force`.               |
-| Deprecation warnings                 | Unresolved deprecated fields       | Resolve deprecated fields in version 1.6.                           |
-| Cache-related issues                 | Old cache files causing conflicts  | Run `php bin/console cache:clear` to rebuild the cache.             |
+| Issue                              | Cause                       | Solution                                              |
+|------------------------------------|-----------------------------|-------------------------------------------------------|
+| Errors running migrations          | Old invalid `Event` records | Run `php bin/console clear:eventEntity` to clean up.  |
+| Missing JWT keypair                | Skipped step in 1.4.0       | Run `php bin/console lexik:jwt:generate-keypair`.     |
+| `reset:allocate-providers` missing | Skipped 1.6                 | Complete upgrade to 1.6 and run the command.          |
+| Schema mismatch                    | Schema updates not applied  | Run `php bin/console doctrine:schema:update --force`. |
+| Cache issues                       | Old cache files present     | Run `php bin/console cache:clear`.                    |
 
 ### Rollback Procedure
 
