@@ -459,6 +459,7 @@ class TwoFAController extends AbstractController
                 }
                 return $this->redirectToRoute('app_landing');
             }
+            $this->addFlash('error', 'Invalid code please try again or resend the code');
         }
         return $this->render('site/twoFAAuthentication/actions/disable2FA.html.twig', [
             'data' => $data,
