@@ -5,7 +5,7 @@
 1. [⚠️ Critical Warning: Read Before You Upgrade](#-critical-warning-read-before-you-upgrade-)
 2. [General Upgrade Path Guidelines](#general-upgrade-path-guidelines)
 3. [Upgrade Path Matrix](#upgrade-path-matrix)
-4. [Release-Specific Notes: Version 1.7](#release-specific-notes-version-17)
+4. [Release-Specific Notes: Version 1.7](#release-specific-notes-version-17x)
 5. [Upgrade Checklist](#upgrade-checklist)
 6. [Step-by-Step Procedure](#step-by-step-procedure)
 7. [Troubleshooting & Rollback](#troubleshooting--rollback)
@@ -85,28 +85,28 @@ Upgrading your system requires caution and preparation. Follow these general gui
 
 ## Upgrade Path Matrix
 
-## Upgrade Path Matrix
 
-| Current Version | Intermediate Version | Target Version | Notes                                                             |
-|-----------------|----------------------|----------------|-------------------------------------------------------------------|
-| Below 1.5       | Follow earlier paths | 1.7.1          | Ensure compatibility with earlier versions before upgrading.      |
-| 1.5             | 1.6                  | 1.7.1          | Run `php bin/console reset:allocate-providers` before proceeding. |
-| 1.6             | N/A                  | 1.7.1          | Proceed directly to 1.7.1 after reviewing changelog.              |
+| Current Version | Intermediate Version | Target Version | Notes                                                                 |
+|-----------------|----------------------|----------------|-----------------------------------------------------------------------|
+| 1.4.0           | 1.5                  | Latest Release | Run `php bin/console lexik:jwt:generate-keypair` before upgrading.    |
+| 1.5             | 1.6                  | Latest Release | Run `php bin/console reset:allocate-providers` before proceeding.     |
+| 1.6             | N/A                  | Latest Release | Proceed directly to latest release after reviewing changelog.         |
+| Below 1.4.0     | Follow earlier paths | Latest Release | Ensure compatibility with earlier versions before upgrading.          |
 
 Use this table to determine the exact steps based on your current version.
 
 ---
 
-## Release-Specific Notes: Version 1.7
+## Release-Specific Notes: Version 1.7.x
 
 - **Deprecated Commands:**  
-  The following commands or fields are no longer available in version **1.7**:
+  The following commands or fields are no longer available in version **1.7.x**:
     - `reset:allocate-providers`
     - Deprecated fields: `googleId`, `saml_identifier`  
-      These must be resolved at version **1.6** before proceeding to version **1.7**.
+      These must be resolved at version **1.6** before proceeding to version **1.7.x**.
 
 - **Database Schema Changes:**  
-  In version **1.7**, schema changes require running:
+  In version **1.7.x**, schema changes require running:
   ```bash
   php bin/console doctrine:schema:update --force
   ```
@@ -140,9 +140,9 @@ Use the following checklist before starting the upgrade process:
 
 ## Step-by-Step Procedure
 
-### Example: Upgrade to Version 1.7
+### Example: Upgrade to Version 1.7.x
 
-**Scenario**: Your current version is **1.5** and you want to upgrade to **1.7**.
+**Scenario**: Your current version is **1.5** and you want to upgrade to **1.7.x**.
 
 1. **Create a Full Backup**  
    Backup all critical data:
@@ -162,21 +162,22 @@ Use the following checklist before starting the upgrade process:
    php bin/console reset:allocate-providers
    ```  
    _This ensures deprecated fields (`googleId`, `saml_identifier`) are properly handled._
-   > **Note:** This command is removed in version **1.7**, so it must be run in **1.6**.
+   > **Note:** This command is removed in version **1.7.x**, so it must be run in **1.6**.
 
-4. **Proceed to Version 1.7**  
-   After completing the steps above, **upgrade to version 1.7** following the usual procedure.
+4. **Proceed to Version 1.7.x**  
+   After completing the steps above, **upgrade to version 1.7.x** following the usual procedure.
 
 ---
 
 ## Troubleshooting & Rollback
 
-| Issue                              | Cause                                | Solution                                                      |
-|------------------------------------|--------------------------------------|---------------------------------------------------------------|
-| Missing `reset:allocate-providers` | Skipped upgrade to version 1.6       | Ensure intermediate upgrades are completed correctly.         |
-| Database schema mismatch           | Schema updates not applied           | Run `php bin/console doctrine:schema:update --force`.         |
-| Deprecation warnings               | Unresolved deprecated fields         | Resolve deprecated fields in version 1.6.                     |
-| Cache-related issues               | Old cache files causing conflicts    | Run `php bin/console cache:clear` to rebuild the cache.       |
+| Issue                                | Cause                              | Solution                                                            |
+|--------------------------------------|------------------------------------|---------------------------------------------------------------------|
+| Missing `lexik:jwt:generate-keypair` | Skipped upgrade from version 1.4.0 | Run `php bin/console lexik:jwt:generate-keypair` before proceeding. |
+| Missing `reset:allocate-providers`   | Skipped upgrade to version 1.6     | Ensure intermediate upgrades are completed correctly.               |
+| Database schema mismatch             | Schema updates not applied         | Run `php bin/console doctrine:schema:update --force`.               |
+| Deprecation warnings                 | Unresolved deprecated fields       | Resolve deprecated fields in version 1.6.                           |
+| Cache-related issues                 | Old cache files causing conflicts  | Run `php bin/console cache:clear` to rebuild the cache.             |
 
 ### Rollback Procedure
 
