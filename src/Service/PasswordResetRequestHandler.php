@@ -42,6 +42,7 @@ readonly class PasswordResetRequestHandler
 
         // Update user
         $user->setForgotPasswordRequest(true);
+        $user->setIsVerified(true);
         $user->setVerificationCode(random_int(100000, 999999));
         $this->entityManager->persist($user);
         $this->entityManager->flush();
