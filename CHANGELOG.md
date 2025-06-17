@@ -19,13 +19,16 @@
   link before any database changes occur, and SMS-based resets require validating a code on a dedicated page before
   proceeding.
 - New Setting for time configuration of email resend on the `ForgotPasswordRequest`, present on the Authentications
-  methods page.
+  methods page (EMAIL_TIMER_RESEND).
+- New Setting for time configuration of an email link validly. This same time reflect for link present on the
+  `ForgotPasswordRequest` & on the  `RegistrationWithEmail` (LINK_VALIDITY)
 - Also for this release, it's required to run the new migrations to set up the new settings:
   Run the migrations with:
 
 ```bash
 php bin/console doctrine:migrations:migrate
 ```
+
 ---
 
 # Release V1.7.3
