@@ -62,6 +62,14 @@ class UserAccountDeletionController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
+        if (in_array('ROLE_ADMIN', $currentUser->getRoles(), true)) {
+            $this->addFlash(
+                'error',
+                'Admin user can not delete his own account'
+            );
+            return $this->redirectToRoute('app_landing');
+        }
+
         $form = $this->createForm(AutoDeletePasswordType::class);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
