@@ -1,6 +1,6 @@
 {% extends 'admin/base.html.twig' %}
 
-{% block title %}{{ 'adminPageWBA'|trans({}, '_header_admin') }}{% endblock %}
+{% block title %}Admin Page WBA{% endblock %}
 
 {% block container %}
     {# Freeradius Statistics #}
@@ -10,13 +10,13 @@
                 <a href="{{ path('admin_page_export_freeradius', {startDate: selectedStartDate, endDate: selectedEndDate}) }}"
                    onclick="return confirm('Are you sure you want to export data' +
                    {% if selectedStartDate and selectedEndDate %}
-                       ' {{ 'from'|trans({}, 'freeradius_statistics') }} {{ selectedStartDate }} {{ 'to'|trans({}, 'statistics') }} {{ selectedEndDate }}?'
+                       ' from {{ selectedStartDate }} to {{ selectedEndDate }}?'
                    {% else %}
                        '?'
                    {% endif %}
                            )"
                    class="btn-primary">
-                    {{ 'exportStatistics'|trans({}, 'freeradius_statistics') }}
+                    Export Statistics
                 </a>
             </div>
         {% endif %}
@@ -28,7 +28,7 @@
                    class="rounded text-sm bg-transparent py-1 px-2 border border-gray-300 focus:ring-0 w-auto"
                    value="{{ selectedStartDate }}"
                    onchange="this.form.submit()">
-            <span class="px-1"> {{ 'to'|trans({}, 'statistics') }} </span>
+            <span class="px-1"> to </span>
             <input data-date-filter-target="end" type="datetime-local" name="endDate" id="endDate"
                    class="rounded text-sm bg-transparent py-1 px-2 border border-gray-300 focus:ring-0 w-full sm:w-auto"
                    value="{{ selectedEndDate }}"
@@ -44,7 +44,7 @@
             <div class="flex flex-col sm:flex-row justify-center items-center space-y-6 sm:space-y-0 sm:space-x-4">
                 <a class="cursor-default flex flex-row group hover:text-[#7DB928] hover:border-b-2 hover:border-y-[#7DB928]/50 transition-all duration-100">
                     <h1 class="px-2 text-lg sm:text-base">
-                        {{ 'accepted'|trans({}, 'freeradius_statistics') }}
+                        Accepted
                     </h1>
                     <div class="mb-1 bg-veryLightGreen group-hover:bg-[#7DB928] rounded-md group-hover:text-white text-center transition-all duration-100">
                         <span class="w-auto h-6 mb-1 px-2">{{ authCounts['Accepted'] }}</span>
@@ -52,7 +52,7 @@
                 </a>
                 <a class="cursor-default flex flex-row group hover:text-[#FE4068] hover:border-b-2 hover:border-y-[#FE4068]/50 transition-all duration-100">
                     <h1 class="px-2 text-lg sm:text-base">
-                        {{ 'rejected'|trans({}, 'freeradius_statistics') }}
+                        Rejected
                     </h1>
                     <div class="mb-1 bg-veryLightGreen group-hover:bg-[#FE4068] rounded-md group-hover:text-white text-center transition-all duration-100">
                         <span class="w-auto h-6 mb-1 px-2">{{ authCounts['Rejected'] }}</span>
@@ -72,13 +72,13 @@
         {# Average Session Time #}
         <div class="col-span-3 md:col-span-1 w-full bg-white rounded-lg px-5 py-3 shadow">
             <div class="flex flex-row justify-between sm:pt-2 pb-6 font-medium text-lg text-left">
-                <h1 class="text-lg font-medium">{{ 'averageSessionTime'|trans({}, 'freeradius_statistics') }}</h1>
-                <span class="text-base text-gray-500">{{ 'inHours'|trans({}, 'freeradius_statistics') }}</span>
+                <h1 class="text-lg font-medium">Average Session Time</h1>
+                <span class="text-base text-gray-500">(in Hours)</span>
             </div>
             <div class="flex flex-col sm:flex-row justify-center items-center space-y-6 sm:space-y-0 sm:space-x-4">
                 <a class="cursor-default flex flex-row group hover:text-[#7DB928] hover:border-b-2 hover:border-y-[#7DB928]/50 transition-all duration-100">
                     <h1 class="px-2 text-lg sm:text-base">
-                        {{ 'totalAverageOf'|trans({}, 'freeradius_statistics') }}
+                       Total Average of
                     </h1>
                     <div class="mb-1 bg-veryLightGreen group-hover:bg-[#7DB928] rounded-md group-hover:text-white text-center transition-all duration-100">
                         <span class="w-auto h-6 mb-1 px-2">{{ sessionTimeAverage }}</span>
@@ -98,13 +98,13 @@
         {# Total Session Time #}
         <div class="col-span-3 md:col-span-1 w-full bg-white rounded-lg px-5 py-3 shadow">
             <div class="flex flex-row justify-between sm:pt-2 pb-6 font-medium text-lg text-left">
-                <h1 class="text-lg font-medium">{{ 'sessionTime'|trans({}, 'freeradius_statistics') }}</h1>
-                <span class="text-base text-gray-500">{{ 'inHours'|trans({}, 'freeradius_statistics') }}</span>
+                <h1 class="text-lg font-medium">Session Time</h1>
+                <span class="text-base text-gray-500">(in Hours)</span>
             </div>
             <div class="flex flex-col sm:flex-row justify-center items-center space-y-6 sm:space-y-0 sm:space-x-4">
                 <a class="cursor-default flex flex-row group hover:text-[#7DB928] hover:border-b-2 hover:border-y-[#7DB928]/50 transition-all duration-100">
                     <h1 class="px-2 text-lg sm:text-base">
-                        {{ 'totalOf'|trans({}, 'freeradius_statistics') }}
+                        Total of
                     </h1>
                     <div class="mb-1 bg-veryLightGreen group-hover:bg-[#7DB928] rounded-md group-hover:text-white text-center transition-all duration-100">
                         <span class="w-auto h-6 mb-1 px-2">{{ totalTime }}</span>
@@ -125,13 +125,13 @@
         {# Total of Traffic #}
         <div class="col-span-3 md:col-span-1 w-full bg-white rounded-lg px-4 p-4 gap-4 shadow">
             <div class="flex justify-between items-center pb-4">
-                <h1 class="text-lg font-medium text-left">{{ 'trafficTotal'|trans({}, 'freeradius_statistics') }}</h1>
-                <h2 class="text-base font-medium text-gray-400 text-right">{{ 'inGigabyte'|trans({}, 'freeradius_statistics') }}</h2>
+                <h1 class="text-lg font-medium text-left">Traffic Total</h1>
+                <h2 class="text-base font-medium text-gray-400 text-right">(in Gigabyte)</h2>
             </div>
             <div class="md:mt-6 flex md:flex-row flex-col justify-center md:justify-around items-center xl:space-x-6 space-x-0">
                 <div class="flex flex-col">
                     <h1 class="text-center font-semibold">
-                        {{ 'uploads'|trans({}, 'freeradius_statistics') }}
+                        Uploads
                     </h1>
                     {% if totalTrafficFreeradius['total_input'] >= 0.1 %}
                         {% set sizeClass = 'w-24 h-24' %}
@@ -149,7 +149,7 @@
                         </div>
                     {% else %}
                         <div class="bg-red-500/50 rounded-full m-2 p-2 mt-4 text-red-500 font-semibold text-center md:text-base text-sm">
-                            {{ 'noDataAvailable'|trans({}, 'freeradius_statistics') }}
+                            No Data Available
                         </div>
                     {% endif %}
                 </div>
@@ -173,7 +173,7 @@
                         </div>
                     {% else %}
                         <div class="bg-red-500/50 rounded-full m-2 p-2 mt-4 text-red-500 font-semibold text-center md:text-base text-sm">
-                            {{ 'noDataAvailable'|trans({}, 'freeradius_statistics') }}
+                            No Data Available
                         </div>
                     {% endif %}
                 </div>
@@ -182,7 +182,7 @@
 
         {# Realm Usage #}
         <div class="col-span-3 md:col-span-2 w-full bg-white rounded-lg p-4 gap-4 shadow">
-            <h1 class="text-lg font-medium text-left pb-4">{{ 'realmUsage'|trans({}, 'freeradius_statistics') }}</h1>
+            <h1 class="text-lg font-medium text-left pb-4">Realm Usage</h1>
             <div class="overflow-x-auto max-w-full flex flex-col gap-6 animate-fadeIn">
                 <div class="w-full items-start md:mx-auto space-y-4 sm:space-y-0">
                     <table class="w-full items-start">
@@ -190,10 +190,10 @@
                         <tr>
                             <th scope="col"
                                 class="p-6 text-left text-xs text-gray-500 uppercase tracking-wider">
-                                {{ 'Usage'|trans({}, 'freeradius_statistics') }}
+                                Usage
                             </th>
                             <th scope="col" class="p-6 text-left text-xs text-gray-500 uppercase tracking-wider">
-                                {{ 'realmName'|trans({}, 'freeradius_statistics') }}
+                                Realm Name
                             </th>
                         </tr>
                         </thead>
@@ -202,7 +202,7 @@
                             <tr>
                                 <td colspan="2">
                                     <div class="bg-red-500/50 rounded-full m-4 p-1 mt-4 text-red-500 font-semibold text-center md:text-base text-sm">
-                                        {{ 'noDataAvailable'|trans({}, 'freeradius_statistics') }}
+                                        No Data Available
                                     </div>
                                 </td>
                             </tr>
@@ -237,7 +237,7 @@
         {# Wifi Tags Usage #}
         <div class="col-span-3 md:col-span-1 w-full bg-white rounded-lg px-4 p-2 shadow">
             <div class="flex flex-row justify-start sm:pt-2 pb-6 font-medium text-lg text-left">
-                <h1 class="text-lg font-medium">{{ 'WiFiStandardsUsage'|trans({}, 'freeradius_statistics') }}</h1>
+                <h1 class="text-lg font-medium">Wi-Fi Standards - Usage</h1>
             </div>
             <div class="xl:pt-10 flex flex-col gap-6 animate-fadeIn">
                 <canvas class="max-w-full" id="wifiTagsChart"
@@ -250,7 +250,7 @@
 
         {# Access Points Usage #}
         <div class="col-span-3 md:col-span-2 w-full bg-white rounded-lg p-4 gap-4 shadow">
-            <h1 class="text-lg font-medium text-left sm:pb-4">{{ 'accessPointsUsage'|trans({}, 'freeradius_statistics') }}</h1>
+            <h1 class="text-lg font-medium text-left sm:pb-4">Access Points Usage</h1>
             <div class="overflow-x-auto max-w-full flex flex-col gap-6 animate-fadeIn">
                 <div class="w-full items-start md:mx-auto space-y-4 sm:space-y-0">
                     <table class="w-full items-start">
@@ -258,7 +258,7 @@
                         <tr>
                             <th scope="col"
                                 class="w-3/12 p-6 text-left text-xs text-gray-500 uppercase tracking-wider">
-                                {{ 'Usage'|trans({}, 'freeradius_statistics') }}
+                                Usage
                             </th>
                             <th scope="col" class="p-6 text-left text-xs text-gray-500 uppercase tracking-wider">
                                 Mac Address:SSID
@@ -270,7 +270,7 @@
                             <tr>
                                 <td colspan="2">
                                     <div class="bg-red-500/50 rounded-full m-4 p-1 mt-4 text-red-500 font-semibold text-center md:text-base text-sm">
-                                        {{ 'noDataAvailable'|trans({}, 'freeradius_statistics') }}
+                                        No Data Available
                                     </div>
                                 </td>
                             </tr>
@@ -301,12 +301,12 @@
             {# AccessPoints Pagination #}
             <div class="m-8">
                 <hr class="w-full h-0.5 bg-gray-300/50 border-0 border-gray-300/50 rounded">
-                {{ include('admin/shared/pagination/_pagination_ApUsage.html.twig', {label: 'apUsagePerPage'|trans({}, 'freeradius_statistics'), route: 'admin_dashboard_statistics_freeradius', occurrencies: totalApCount}) }}
+                {{ include('admin/shared/pagination/_pagination_ApUsage.html.twig', {label: 'Access Points per page', route: 'admin_dashboard_statistics_freeradius', occurrencies: totalApCount}) }}
             </div>
         </div>
     </div>
     <div class="mt-10 col-span-3 md:col-span-1 w-full bg-white rounded-lg p-6 flex flex-col gap-4 shadow">
-        <h1 class="text-lg font-medium text-left">{{ 'currentAuthentications'|trans({}, 'freeradius_statistics') }}</h1>
+        <h1 class="text-lg font-medium text-left">Current Authentications</h1>
         <div class="flex flex-col items-center">
             {% if totalCurrentAuths >= 1 %}
                 {% set sizeClass = 'w-24 h-24' %}
@@ -324,12 +324,12 @@
                 </div>
             {% else %}
                 <div class="bg-red-500/50 rounded-full m-2 p-2 mt-4 text-red-500 font-semibold text-center md:text-base text-sm">
-                    {{ 'noDataAvailable'|trans({}, 'freeradius_statistics') }}
+                    No Data Available
                 </div>
             {% endif %}
             <div class="bg-infoBgColor/50 rounded-lg p-4 text-xs md:text-sm text-infoTextColor mt-8" role="alert">
                 <twig:ux:icon name="wba:info" class="w-10 md:w-5 h-10 md:h-5 inline mr-3" fill="currentColor"/>
-                <span class="font-medium">{{ 'cardIndependentFiltering'|trans({}, 'freeradius_statistics') }}</span>
+                <span class="font-medium">This card is independent of the date filtering.</span>
             </div>
         </div>
     </div>
