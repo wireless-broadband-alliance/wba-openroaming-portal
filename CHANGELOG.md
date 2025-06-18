@@ -2,9 +2,18 @@
 
 # Release V1.8.0
 
-- Prometheus Implementation
+- Prometheus Implementation.
+- Rework Automation commands to use official symfony bundle about CRON's.
+
+> **Note**: If you are using automated CRON's from our previous guide, it's recommended you use the official symfony
+> bundle from this release. For reference, you need to run the following command on the container web:
+> php bin/console messenger:consume scheduler_default
+
+- Rework AutoDeleteUnconfirmedAccounts command, now saves on the database an array with all the deleted uuids, on the
+  Event table, important for logs and security concerns.
 - Fix bug with registration links, use could use them to re-log in to the portal at any time, can only be used once.
-- Fix bug with account deletion, the admin was able to access the page using the url. The admin cannot delete his own account.
+- Fix bug with account deletion, the admin was able to access the page using the url. The admin cannot delete his own
+  account.
 - Fix bug on the pagination page with the table `Access Points Usage` on the `dashboard/statistics/freeradius` page (Add
   new custom display of results per page).
 - Fix bug about when the user session should be restored. Only when the firewall "landing".
