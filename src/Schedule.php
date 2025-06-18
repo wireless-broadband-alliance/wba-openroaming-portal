@@ -37,6 +37,14 @@ readonly class Schedule implements ScheduleProviderInterface
                     '0 1 * * *',
                     new RunCommandMessage('notify:usersWhenProfileExpires')
                 )
+            )
+
+            // daily at 02:00
+            ->add(
+                RecurringMessage::cron(
+                    '0 2 * * *',
+                    new RunCommandMessage('ldap:sync')
+                )
             );
     }
 }
