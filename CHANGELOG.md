@@ -3,6 +3,7 @@
 # Release V1.8.0
 
 - Fix bug with registration links, use could use them to re-log in to the portal at any time, can only be used once.
+- Fix bug with account deletion, the admin was able to access the page using the url. The admin cannot delete his own account.
 - Fix bug on the pagination page with the table `Access Points Usage` on the `dashboard/statistics/freeradius` page (Add
   new custom display of results per page).
 - Fix bug about when the user session should be restored. Only when the firewall "landing".
