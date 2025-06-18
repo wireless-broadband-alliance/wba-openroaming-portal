@@ -404,7 +404,10 @@ class ForgotPasswordController extends AbstractController
                 'success',
                 'Your account password-request has been accepted!'
             );
-
+            if (in_array('ROLE_ADMIN', $user->getRoles(), true)) {
+                $session = $request->getSession();
+                $session->remove('_security_dashboard');
+            }
             return $this->redirectToRoute('app_site_forgot_password_checker');
         }
 
