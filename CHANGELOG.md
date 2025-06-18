@@ -3,11 +3,15 @@
 # Release V1.8.0
 
 - Prometheus Implementation.
-- Rework Automation commands to use official symfony bundle about CRON's.
+- Rework Automation commands to use an official symfony bundle about automation commands.
 
 > **Note**: If you are using automated CRON's from our previous guide, it's recommended you use the official symfony
-> bundle from this release. For reference, you need to run the following command on the container web:
-> php bin/console messenger:consume scheduler_default
+> bundle from this release. For reference, the command that takes care of the operation inside of the container web is
+> this one:
+
+```
+php:bin/console messenger:consume scheduler_default -vv
+```
 
 - Rework AutoDeleteUnconfirmedAccounts command, now saves on the database an array with all the deleted uuids, on the
   Event table, important for logs and security concerns.
