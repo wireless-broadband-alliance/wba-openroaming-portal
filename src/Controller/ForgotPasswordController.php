@@ -135,18 +135,15 @@ class ForgotPasswordController extends AbstractController
                         !$latestEvent || ($lastVerificationCodeTime instanceof DateTime &&
                             $lastVerificationCodeTime->add($minInterval) < $currentTime)
                     ) {
-                        // Save event with attempt count and current time
-                        if (!$latestEvent instanceof Event) {
-                            $latestEvent = new Event();
-                            $latestEvent->setUser($user);
-                            $latestEvent->setEventDatetime(new DateTime());
-                            $latestEvent->setEventName(AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST->value);
-                            $latestEventMetadata = [
-                                'platform' => PlatformMode::LIVE->value,
-                                'ip' => $request->getClientIp(),
-                                'uuid' => $user->getUuid(),
-                            ];
-                        }
+                        $latestEvent = new Event();
+                        $latestEvent->setUser($user);
+                        $latestEvent->setEventDatetime(new DateTime());
+                        $latestEvent->setEventName(AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST->value);
+                        $latestEventMetadata = [
+                            'platform' => PlatformMode::LIVE->value,
+                            'ip' => $request->getClientIp(),
+                            'uuid' => $user->getUuid(),
+                        ];
 
                         $latestEventMetadata['lastVerificationCodeTime'] =
                             $currentTime->format(DateTimeInterface::ATOM);
@@ -359,7 +356,7 @@ class ForgotPasswordController extends AbstractController
 
 
         // Get the user with the matching email, excluding admin users
-        $user = $this->userRepository->findOneByUUIDExcludingAdmin($uuid);
+        $user = $this->userRepository->findOneBy([ 'uuid' => $uuid]);
         if (!$user instanceof User) {
             $this->addFlash(
                 'error',
