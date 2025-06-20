@@ -31,13 +31,13 @@
   account uuid. This way the user confirm himself everytime to get the confirmation code for authentication.
 
 > **Important**: In this release, the field **verificationCode** was eliminated.
-> If you are upgrading from version 1.7.3 or lower, and your application or database still has the
+> If you are upgrading from version 1.7.3 or lower, and your portal or database still has the
 > **verificationCode** field, please ensure any necessary data migrations are handled when upgrading to version 1.8.0.
 
 - This change is part of an optimization process to improve the handling of the user account confirmation on the portal,
   and other confirmation methods.
 
-- Also for this release, it's required to run the new migrations to set up the new entity SettingTranslations and the
+- Also for this release, it's required to run the new migrations because of the new upgrade on the `User Entity` and the
   new
   settings
   Run the migrations with:
