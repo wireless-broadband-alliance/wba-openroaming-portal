@@ -1,5 +1,9 @@
 {% extends 'landing/base.html.twig' %}
 
+{% set resendType = data.LOGIN_WITH_UUID_ONLY.value == constant('App\\Enum\\OperationMode::ON').value
+    ? constant('App\\Enum\\AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE_RESEND').value
+    : constant('App\\Enum\\AnalyticalEventType::VERIFICATION_CODE_LOGIN_RESEND').value %}
+
 {% block title %}
     {{ data.PAGE_TITLE.value }}
 {% endblock %}
@@ -36,15 +40,11 @@
                 type="submit">{{ 'btn.login'|trans({}, 'login_landing') }}</button>
         <a href="{{ path('app_local_resend_code', {
             context: context,
-            {% if data.LOGIN_WITH_UUID_ONLY.value == constant('App\\Enum\\OperationMode::ON').value %}
-                type: constant('App\\Enum\\AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE_RESEND').value},
-            {% else %}
-                type: constant('App\\Enum\\AnalyticalEventType::VERIFICATION_CODE_LOGIN_RESEND').value},
-            {% endif %}
-        ) }}"
+            type: resendType
+        }) }}"
            class="w-[220px] btn-secondary">
             {{ 'btn.resend'|trans({}, 'login_landing') }}
-        </a>
+        </a>W
     </div>
     {{ form_end(form) }}
 
