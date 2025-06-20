@@ -636,7 +636,7 @@ class UsersManagementController extends AbstractController
         $this->twoFAService->event2FA(
             $request->getClientIp(),
             $user,
-            AnalyticalEventType::DISABLE_2FA->value,
+            AnalyticalEventType::DISABLED_2FA_BY->value,
             $request->headers->get('User-Agent')
         );
 
