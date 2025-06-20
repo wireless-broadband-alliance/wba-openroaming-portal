@@ -5,7 +5,7 @@ description: >
     please install the profile onto your device.
 magic_link_description: >
     You have selected to login via email or phone number. 
-    An code will be sent to you with to confirm your identity.
+    An code has been sent to you to confirm your identity.
 magic_link_login_description: >
     The identity confirmation code has been sent to your authentication method.
     Enter the code to confirm your identity.
