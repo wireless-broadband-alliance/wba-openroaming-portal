@@ -276,14 +276,13 @@ class RegistrationController extends AbstractController
                     $eventMetadata
                 );
 
-                $verificationCode = $user->getTwoFAcode();
 
                 // Send SMS
                 $message = $this->translator->trans('yourAccountPasswordIs', [], 'controllers')
                     . $randomPassword
                     . "%0A"
                     . $this->translator->trans('verificationCodeIs', [], 'controllers')
-                    . $verificationCode;
+                    . $user->getTwoFAcode();
                 $this->sendSMS->sendSms($user->getPhoneNumber(), $message);
                 $this->addFlash(
                     'success',
