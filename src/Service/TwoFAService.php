@@ -208,7 +208,7 @@ readonly class TwoFAService
                     ->embedFromPath($logoPath, 'logo_cid');
             } elseif (
                 $eventType === AnalyticalEventType::LOGIN_TRADITIONAL_REQUEST->value ||
-                $eventType === AnalyticalEventType::LOGIN_CODE_RESEND->value
+                $eventType === AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE_RESEND->value
             ) {
                 // LOGIN_TRADITIONAL_REQUEST || LOGIN_CODE_RESEND
                 $email = new TemplatedEmail()
@@ -292,7 +292,7 @@ readonly class TwoFAService
             if (
                 $eventType === AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE->value ||
                 $eventType === AnalyticalEventType::LOGIN_TRADITIONAL_REQUEST->value ||
-                $eventType === AnalyticalEventType::LOGIN_CODE_RESEND->value
+                $eventType === AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE_RESEND->value
             ) {
                 $message = "Your verification Code is " . $code;
             } else {
