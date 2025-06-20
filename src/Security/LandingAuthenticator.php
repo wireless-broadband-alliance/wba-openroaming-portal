@@ -160,7 +160,10 @@ class LandingAuthenticator extends AbstractLoginFormAuthenticator
             OperationMode::OFF => AnalyticalEventType::LOGIN_TRADITIONAL_REQUEST,
         };
 
-        if ($this->settingRepository->findOneBy(['name' => 'USER_VERIFICATION'])->getValue() === OperationMode::ON->value) {
+        if (
+            $this->settingRepository->findOneBy(['name' => 'USER_VERIFICATION'])->getValue() ===
+            OperationMode::ON->value
+        ) {
             if ($this->twoFAService->canValidationCode($user, $eventType->value)) {
                 $this->twoFAService->generate2FACode(
                     $user,
