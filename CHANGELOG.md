@@ -32,7 +32,7 @@
 
 > **Important**: In this release, the field **verificationCode** was eliminated.
 > If you are upgrading from version 1.7.3 or lower, and your application or database still has the
-> **verificationCode** field, please ensure any necessary data migrations are handled before upgrading to version 1.8.0.
+> **verificationCode** field, please ensure any necessary data migrations are handled when upgrading to version 1.8.0.
 
 - This change is part of an optimization process to improve the handling of the user account confirmation on the portal,
   and other confirmation methods.

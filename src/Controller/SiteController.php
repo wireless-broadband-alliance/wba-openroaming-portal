@@ -51,7 +51,6 @@ class SiteController extends AbstractController
     /**
      * SiteController constructor.
      *
-     * @param UserRepository $userRepository The repository for accessing user data.
      * @param UserExternalAuthRepository $userExternalAuthRepository The repository is required to fetch the provider.
      * @param GetSettings $getSettings The instance of the GetSettings class.
      * @param EventActions $eventActions Used to generate event related to the User creation
@@ -59,7 +58,6 @@ class SiteController extends AbstractController
      * @param ProfileManager $profileManager Calls the functions to enable/disable provisioning profiles
      */
     public function __construct(
-        private readonly UserRepository $userRepository,
         private readonly UserExternalAuthRepository $userExternalAuthRepository,
         private readonly GetSettings $getSettings,
         private readonly EventActions $eventActions,
