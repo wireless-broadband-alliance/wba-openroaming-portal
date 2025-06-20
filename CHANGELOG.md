@@ -4,8 +4,8 @@
 
 - New Feature: Responsive Translations (Available: EN & PT-PT) - Administrator can just add new configurations for YAML
   files in the translations folder, and the page auto-detects the added language.
-- New Listener to auto-detection of the user language
-- Cookie Modal update with new required `_locale` cookie
+- New Listener to auto-detection of the user language.
+- Session token to auto detect thw new required `_locale`.
 - Fix bug with registration links, use could use them to re-log in to the portal at any time, can only be used once.
 - Optimized the `GetSettings` service to significantly reduce the loading process, improving application performance by
   minimizing redundant data processing and database queries.
@@ -29,22 +29,6 @@
   without it.
 - **Login only with uuid** → This new feature simplifies the process of authentication on the portal using only the
   account uuid. This way the user confirm himself everytime to get the confirmation code for authentication.
-
-> **Important**: In this release, the field **verificationCode** was eliminated.
-> If you are upgrading from version 1.7.3 or lower, and your application or database still has the
-> **verificationCode** field, please ensure any necessary data migrations are handled before upgrading to version 1.8.0.
-
-- This change is part of an optimization process to improve the handling of the user account confirmation on the portal,
-  and other confirmation methods.
-
-- Also for this release, it's required to run the new migrations to set up the new entity SettingTranslations and the
-  new
-  settings
-  Run the migrations with:
-
-```bash
-php bin/console doctrine:migrations:migrate
-```
 
 > **Important**: In this release, the field **verificationCode** was eliminated.
 > If you are upgrading from version 1.7.3 or lower, and your application or database still has the
