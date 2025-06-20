@@ -160,26 +160,40 @@ class LandingAuthenticator extends AbstractLoginFormAuthenticator
             OperationMode::OFF => AnalyticalEventType::LOGIN_TRADITIONAL_REQUEST,
         };
 
-        if ($this->twoFAService->canValidationCode($user, $eventType->value)) {
-            $this->twoFAService->generate2FACode(
-                $user,
-                $request->getClientIp(),
-                $request->headers->get('User-Agent'),
-                $eventType->value
-            );
+        if ($this->settingRepository->findOneBy(['name' => 'USER_VERIFICATION'])->getValue() === OperationMode::ON->value) {
+            if ($this->twoFAService->canValidationCode($user, $eventType->value)) {
+                $this->twoFAService->generate2FACode(
+                    $user,
+                    $request->getClientIp(),
+                    $request->headers->get('User-Agent'),
+                    $eventType->value
+                );
 
-            return new RedirectResponse($this->urlGenerator->generate('app_login_confirmation'));
+                $request->getSession()->getFlashBag()->add(
+                    'success',
+                    $this->translator->trans(
+                        'verificationCodeSent',
+                        [],
+                        'controllers'
+                    )
+                );
+
+
+                return new RedirectResponse($this->urlGenerator->generate('app_login_confirmation'));
+            }
+
+            $intervalMinutes = $this->twoFAService->timeLeftToResendCode($user, $eventType->value);
+
+            throw new CustomUserMessageAuthenticationException(
+                $this->translator->trans(
+                    'codeAlreadySent',
+                    ['%minutes%' => $intervalMinutes],
+                    'controllers'
+                )
+            );
         }
 
-        $intervalMinutes = $this->twoFAService->timeLeftToResendCode($user, $eventType->value);
-
-        throw new CustomUserMessageAuthenticationException(
-            $this->translator->trans(
-                'codeAlreadySent',
-                ['%minutes%' => $intervalMinutes],
-                'controllers'
-            )
-        );
+        return new RedirectResponse($this->urlGenerator->generate('app_landing'));
     }
 
 
