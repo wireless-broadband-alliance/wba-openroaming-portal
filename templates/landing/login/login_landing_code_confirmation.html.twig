@@ -40,7 +40,7 @@
                 type="submit">{{ 'btn.login'|trans({}, 'login_landing') }}</button>
         <a href="{{ path('app_local_resend_code', {
             context: context,
-            type: resendType
+            type: resendType,
         }) }}"
            class="w-[220px] btn-secondary">
             {{ 'btn.resend'|trans({}, 'login_landing') }}
