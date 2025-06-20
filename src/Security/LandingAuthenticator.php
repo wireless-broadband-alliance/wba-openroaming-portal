@@ -13,9 +13,11 @@ use App\Repository\UserRepository;
 use App\Service\TwoFAService;
 use DateTimeInterface;
 use PixelOpen\CloudflareTurnstileBundle\Http\CloudflareTurnstileHttpClient;
+use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
@@ -43,6 +45,7 @@ class LandingAuthenticator extends AbstractLoginFormAuthenticator
         private readonly UserRepository $userRepository,
         private readonly TwoFAService $twoFAService,
         private readonly TranslatorInterface $translator,
+        private readonly RequestStack $requestStack,
     ) {
     }
 
@@ -172,14 +175,17 @@ class LandingAuthenticator extends AbstractLoginFormAuthenticator
                     $eventType->value
                 );
 
-                $request->getSession()->getFlashBag()->add(
-                    'success',
-                    $this->translator->trans(
-                        'verificationCodeSent',
-                        [],
-                        'controllers'
-                    )
-                );
+                $session = $this->requestStack->getSession();
+                if ($session instanceof Session) {
+                    $session->getFlashBag()->add(
+                        'success',
+                        $this->translator->trans(
+                            'verificationCodeSent',
+                            [],
+                            'controllers'
+                        )
+                    );
+                }
 
 
                 return new RedirectResponse($this->urlGenerator->generate('app_login_confirmation'));
