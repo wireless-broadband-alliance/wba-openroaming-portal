@@ -17,14 +17,12 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 class LoginFormType extends AbstractType
 {
     /**
-     * @param UserRepository $userRepository The repository for accessing user data.
-     * @param SettingRepository $settingRepository The setting repository is used to create the getSettings function.
      * @param GetSettings $getSettings The instance of GetSettings class.
      */
     public function __construct(
+        private readonly GetSettings $getSettings,
         private readonly UserRepository $userRepository,
-        private readonly SettingRepository $settingRepository,
-        private readonly GetSettings $getSettings
+        private readonly SettingRepository $settingRepository
     ) {
     }
 
@@ -41,15 +39,16 @@ class LoginFormType extends AbstractType
                 'full_name' => 'uuid',
             ],
             'required' => true,
-        ])
-            ->add('password', PasswordType::class, [
-                'label' => 'Password',
-                'attr' => [
-                    'placeholder' => 'Enter your password',
-                    'name' => 'password',
-                    'full_name' => 'password',
-                ],
-            ]);
+        ]);
+
+        $builder->add('password', PasswordType::class, [
+            'label' => 'Password',
+            'attr' => [
+                'placeholder' => 'Enter your password',
+                'name' => 'password',
+                'full_name' => 'password',
+            ],
+        ]);
 
         if ($turnstileCheckerValue === OperationMode::ON->value) {
             $builder->add('security', TurnstileType::class, [
@@ -66,6 +65,7 @@ class LoginFormType extends AbstractType
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
+            'firewallType' => null,
             'data_class' => User::class,
         ]);
     }

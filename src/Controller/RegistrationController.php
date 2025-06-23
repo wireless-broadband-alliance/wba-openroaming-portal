@@ -26,7 +26,6 @@ use Psr\EventDispatcher\EventDispatcherInterface;
 use Random\RandomException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
@@ -60,7 +59,6 @@ class RegistrationController extends AbstractController
         private readonly SendSMS $sendSMS,
         private readonly TokenStorageInterface $tokenStorage,
         private readonly EventActions $eventActions,
-        private readonly VerificationCodeEmailGenerator $verificationCodeGenerator,
         private readonly RegistrationEmailGenerator $emailGenerator,
     ) {
     }
@@ -102,7 +100,7 @@ class RegistrationController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            if ($this->userRepository->findOneBy(['email' => $user->getEmail()])) {
+            if ($this->userRepository->findOneBy(['uuid' => $form->get('email')->getData()])) {
                 $this->addFlash(
                     'warning',
                     'User with the same email already exists, please try to Login using the link below.'
@@ -116,13 +114,16 @@ class RegistrationController extends AbstractController
 
                 // Set the hashed password for the user
                 $user->setPassword($hashedPassword);
-                $user->setUuid($user->getEmail());
-                $user->setVerificationCode($this->verificationCodeGenerator->generateVerificationCode($user));
+                $user->setUuid($form->get('email')->getData());
+                $user->setEmail($form->get('email')->getData());
+                $user->setVerificationCode(random_int(100000, 999999));
+                $user->setCreatedAt(new DateTime());
                 $userAuths->setProvider(UserProvider::PORTAL_ACCOUNT->value);
                 $userAuths->setProviderId(UserProvider::EMAIL->value);
                 $userAuths->setUser($user);
                 $entityManager->persist($user);
                 $entityManager->persist($userAuths);
+                $entityManager->flush();
 
                 // Defines the Event to the table
                 $eventMetaData = [
@@ -217,7 +218,7 @@ class RegistrationController extends AbstractController
                     );
                 }
 
-                $user->setVerificationCode($this->verificationCodeGenerator->generateVerificationCode($user));
+                $user->setVerificationCode(random_int(100000, 999999));
                 $user->setCreatedAt(new DateTime());
                 $userAuths->setProvider(UserProvider::PORTAL_ACCOUNT->value);
                 $userAuths->setProviderId(UserProvider::PHONE_NUMBER->value);
@@ -255,7 +256,7 @@ class RegistrationController extends AbstractController
                 );
 
                 // Authenticate the user
-                $token = new UsernamePasswordToken($user, 'main', $user->getRoles());
+                $token = new UsernamePasswordToken($user, FirewallType::LANDING->value, $user->getRoles());
                 $this->tokenStorage->setToken($token);
 
                 // Store the authentication token in the session
@@ -280,17 +281,26 @@ class RegistrationController extends AbstractController
      */
     #[Route('/login/link', name: 'app_confirm_account')]
     public function confirmAccount(
-        RequestStack $requestStack,
+        Request $request,
         UserRepository $userRepository,
         TokenStorageInterface $tokenStorage,
         EventDispatcherInterface $eventDispatcher,
     ): Response {
-        // Get the email and verification code from the URL query parameters
-        $uuid = $requestStack->getCurrentRequest()->query->get('uuid');
-        $verificationCode = $requestStack->getCurrentRequest()->query->get('verificationCode');
+        // Get the uuid and verification code from the URL query parameters
+        $uuid = $request->query->get('uuid');
+        $verificationCode = $request->query->get('verificationCode');
 
         // Get the user with the matching email, excluding admin users
         $user = $userRepository->findOneByUUIDExcludingAdmin($uuid);
+
+        // Check if the user has been previously verified
+        if ($user && $user->isVerified() && !$user->isForgotPasswordRequest()) {
+            $this->addFlash(
+                'error',
+                'This account is already verified.'
+            );
+            return $this->redirectToRoute('app_login', ['uuid' => $uuid]);
+        }
 
         if ($user && $user->getVerificationCode() === $verificationCode) {
             try {
@@ -301,7 +311,6 @@ class RegistrationController extends AbstractController
                 $tokenStorage->setToken($token);
 
                 // Dispatch the login event
-                $request = $requestStack->getCurrentRequest();
                 $event = new InteractiveLoginEvent($request, $token);
                 $eventDispatcher->dispatch($event);
 
@@ -323,15 +332,24 @@ class RegistrationController extends AbstractController
                     $eventMetadata
                 );
 
-                $this->addFlash('success', 'Your account has been verified!');
+                $this->addFlash(
+                    'success',
+                    'Your account has been verified!'
+                );
 
                 return $this->redirectToRoute('app_landing');
             } catch (CustomUserMessageAuthenticationException) {
-                $this->addFlash('error', 'Authentication failed. Please try to log in manually.');
+                $this->addFlash(
+                    'error',
+                    'Authentication failed. Please try to log in manually.'
+                );
             }
         } else {
             // If the verification code is invalid or not found, display an error message and redirect to the login page
-            $this->addFlash('error', 'Invalid verification code or link expired. Please try to log in manually');
+            $this->addFlash(
+                'error',
+                'Invalid verification code or link expired. Please try to log in manually'
+            );
         }
 
         return $this->redirectToRoute('app_login');

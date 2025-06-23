@@ -457,15 +457,18 @@ certificate. **Connection errors** can happen if the right SHA1 hash is not prov
 53. `SMS_FROM`: Entity sending the SMS for the users.
 54. `SMS_TIMER_RESEND`: Timer in minutes to make the user wait to resend a new SMS.
 
-55. `TOS_LINK`: Term's and Conditions URL.
-56. `PRIVACY_POLICY_LINK`: Privacy and Policy URL.
-57. `USER_DELETE_TIME`: Time in hours to delete the unverified user.
-58. `TIME_INTERVAL_NOTIFICATION`: Time in days to resend the notification when the profile is about to expire.
-59. `PROFILE_LIMIT_DATE_SAML`: Time in days to disable profiles for SAML users with login.
-60. `PROFILE_LIMIT_DATE_GOOGLE`: Time in days to disable profiles for users with GOOGLE login.
-61. `PROFILE_LIMIT_DATE_MICROSOFT`: Time in days to disable profiles for users with MICROSOFT login.
-62. `PROFILE_LIMIT_DATE_EMAIL`: Time in days to disable profiles for users with EMAIL login.
-63. `PROFILE_LIMIT_DATE_SMS`: Time in days to disable profiles for users with SMS login.
+55. `EMAIL_TIMER_RESEND`: Time in minutes to make the user wait to resend a new EMAIL for reset password request.
+56. `LINK_VALIDITY`: Time in minutes a link stays active before it expires.
+
+57. `TOS_LINK`: Term's and Conditions URL.
+58. `PRIVACY_POLICY_LINK`: Privacy and Policy URL.
+59. `USER_DELETE_TIME`: Time in hours to delete the unverified user.
+60. `TIME_INTERVAL_NOTIFICATION`: Time in days to resend the notification when the profile is about to expire.
+61. `PROFILE_LIMIT_DATE_SAML`: Time in days to disable profiles for SAML users with login.
+62. `PROFILE_LIMIT_DATE_GOOGLE`: Time in days to disable profiles for users with GOOGLE login.
+63. `PROFILE_LIMIT_DATE_MICROSOFT`: Time in days to disable profiles for users with MICROSOFT login.
+64. `PROFILE_LIMIT_DATE_EMAIL`: Time in days to disable profiles for users with EMAIL login.
+65. `PROFILE_LIMIT_DATE_SMS`: Time in days to disable profiles for users with SMS login.
 
 #### With these environment variables, you can configure and customize various aspects of the project, such as database connections, SAML settings, login methods, and more.
 

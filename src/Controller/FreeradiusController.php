@@ -52,14 +52,16 @@ class FreeradiusController extends AbstractController
     public function freeradiusStatisticsData(
         Request $request,
         #[MapQueryParameter] int $page = 1,
+        #[MapQueryParameter] ?int $count = 5
     ): Response {
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+
         $user = $this->getUser();
         $export_freeradius_statistics = $this->parameterBag->get('app.export_freeradius_statistics');
 
         // Get the submitted start and end dates from the form
-        $startDateString = $request->request->get('startDate');
-        $endDateString = $request->request->get('endDate');
+        $startDateString = $request->query->get('startDate');
+        $endDateString = $request->query->get('endDate');
 
         // Convert the date strings to DateTime objects
         $startDate = $startDateString ? new DateTime($startDateString) : new DateTime()->modify(
@@ -70,12 +72,15 @@ class FreeradiusController extends AbstractController
 
         $interval = $startDate->diff($endDate);
         if ($interval->days > 365) {
-            $this->addFlash('error_admin', 'Maximum date range is 1 year');
+            $this->addFlash(
+                'error_admin',
+                'Maximum date range is 1 year'
+            );
 
             return $this->redirectToRoute('admin_dashboard_statistics_freeradius');
         }
 
-        // Fetch all the required data, graphics etc...
+        // Fetch all the required data, graphics, etc...
         $statisticsService = new Statistics(
             $this->entityManager,
             $this->radiusAuthsRepository,
@@ -100,7 +105,7 @@ class FreeradiusController extends AbstractController
         if ($memory_diff > 134217728) {
             $this->addFlash(
                 'error_admin',
-                'The data you requested is too large to be processed. Please try a smaller date range.'
+                'Maximum date range is 1 year'
             );
 
             return $this->redirectToRoute('admin_dashboard_statistics_freeradius');
@@ -116,12 +121,12 @@ class FreeradiusController extends AbstractController
         $realmsUsage = [];
         foreach ($fetchChartRealmsFreeradius as $content) {
             $realm = $content['realm'];
-            $count = $content['count'];
+            $usage = $content['count'];
 
             if (isset($realmsUsage[$realm])) {
-                $realmsUsage[$realm] += $count;
+                $realmsUsage[$realm] += $usage;
             } else {
-                $realmsUsage[$realm] = $count;
+                $realmsUsage[$realm] = $usage;
             }
         }
 
@@ -166,11 +171,10 @@ class FreeradiusController extends AbstractController
             floor(($totalTimeSeconds % 3600) / 60)
         );
 
-        $perPage = 3;
         $totalApCount = count($fetchChartApUsage);
-        $totalPages = ceil($totalApCount / $perPage);
-        $offset = ($page - 1) * $perPage;
-        $fetchChartApUsage = array_slice($fetchChartApUsage, $offset, $perPage);
+        $totalPages = ceil($totalApCount / $count);
+        $offset = ($page - 1) * $count;
+        $fetchChartApUsage = array_slice($fetchChartApUsage, $offset, $count);
 
         return $this->render('admin/freeradius_statistics.html.twig', [
             'user' => $user,
@@ -178,7 +182,7 @@ class FreeradiusController extends AbstractController
             'current_user' => $user,
             'currentPage' => $page,
             'totalPages' => $totalPages,
-            'perPage' => $perPage,
+            'count' => $count,
             'totalApCount' => $totalApCount,
             'realmsUsage' => $realmsUsage,
             'authCounts' => $authCounts,
