@@ -49,20 +49,6 @@ readonly class SessionValidatorListener
         /** @var User $userToken */
         $userToken = $token->getUser();
 
-        if ($userToken->isForgotPasswordRequest()) {
-            $session = $this->requestStack->getSession();
-
-            if ($session instanceof Session) {
-                $session->getFlashBag()->add(
-                    'error',
-                    'You need to confirm the new password before download a profile!'
-                );
-            }
-
-            $url = $this->router->generate('app_site_forgot_password_checker');
-            $event->setResponse(new RedirectResponse($url));
-        }
-
         $url = [
             '/dashboard/login',
             '/dashboard/verify2FA',
