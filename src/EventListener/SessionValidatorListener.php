@@ -11,6 +11,7 @@ use App\Service\GetSettings;
 use App\Service\TwoFAService;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\KernelEvents;
@@ -26,6 +27,7 @@ readonly class SessionValidatorListener
         private SettingRepository $settingRepository,
         private GetSettings $getSettings,
         private TwoFAService $twoFAService,
+        private RequestStack $requestStack
     ) {
     }
 
@@ -45,6 +47,19 @@ readonly class SessionValidatorListener
 
         /** @var User $userToken */
         $userToken = $token->getUser();
+
+        if ($userToken->isForgotPasswordRequest()) {
+            $session = $this->requestStack->getSession();
+
+            $session->getFlashBag()->add(
+                'error',
+                'You need to confirm the new password before download a profile!'
+            );
+
+            $url = $this->router->generate('app_site_forgot_password_checker');
+            $event->setResponse(new RedirectResponse($url));
+        }
+
         $url = [
             '/dashboard/login',
             '/dashboard/verify2FA',
@@ -66,7 +81,8 @@ readonly class SessionValidatorListener
             '/dashboard/enable2FA/resend',
             '/dashboard/validate2FA/resend',
         ];
-        if ($userToken && str_starts_with($path, '/dashboard')) {
+
+        if (str_starts_with($path, '/dashboard')) {
             // Make an exception to ignore the '/dashboard/login' route
             if (in_array($path, $url)) {
                 return;
