@@ -102,6 +102,8 @@ class ResetAdminCommand extends Command
         }
 
         // Set password
+        $admin->setUuid('admin@example.com');
+        $admin->setEmail('admin@example.com');
         $admin->setPassword($this->userPasswordHashed->hashPassword($admin, 'gnimaornepo'));
         $admin->setForgotPasswordRequest(true);
 
