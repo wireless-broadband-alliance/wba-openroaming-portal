@@ -11,8 +11,6 @@ use App\Service\GetSettings;
 use App\Service\TwoFAService;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpFoundation\RedirectResponse;
-use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\KernelEvents;
@@ -28,7 +26,6 @@ readonly class SessionValidatorListener
         private SettingRepository $settingRepository,
         private GetSettings $getSettings,
         private TwoFAService $twoFAService,
-        private RequestStack $requestStack
     ) {
     }
 
