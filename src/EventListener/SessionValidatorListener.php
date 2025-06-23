@@ -12,6 +12,7 @@ use App\Service\TwoFAService;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\KernelEvents;
@@ -51,10 +52,12 @@ readonly class SessionValidatorListener
         if ($userToken->isForgotPasswordRequest()) {
             $session = $this->requestStack->getSession();
 
-            $session->getFlashBag()->add(
-                'error',
-                'You need to confirm the new password before download a profile!'
-            );
+            if ($session instanceof Session) {
+                $session->getFlashBag()->add(
+                    'error',
+                    'You need to confirm the new password before download a profile!'
+                );
+            }
 
             $url = $this->router->generate('app_site_forgot_password_checker');
             $event->setResponse(new RedirectResponse($url));
