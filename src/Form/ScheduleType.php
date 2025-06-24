@@ -9,9 +9,11 @@ use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\TimeType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\FormError;
+use Symfony\Component\Form\FormEvent;
+use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\Callback;
-use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 class ScheduleType extends AbstractType
@@ -23,7 +25,6 @@ class ScheduleType extends AbstractType
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
-        // Checkbox to toggle advanced mode
         $builder->add('use_advanced_mode', CheckboxType::class, [
             'label' => 'Use Advanced Mode (Manual CRON Expression)',
             'required' => false,
@@ -37,7 +38,7 @@ class ScheduleType extends AbstractType
         ];
 
         foreach ($cronSettings as $settingName) {
-            // Advanced mode: raw CRON expression (text field)
+            // Advanced field
             $builder->add("{$settingName}_advanced", TextType::class, [
                 'required' => false,
                 'label' => false,
@@ -47,34 +48,31 @@ class ScheduleType extends AbstractType
                 ],
                 'constraints' => [
                     new Callback(function ($value, ExecutionContextInterface $context) {
-                        if ($value === null || $value === '') {
-                            return; // allow empty in advanced field, will be handled by simple mode
+                        if (empty($value)) {
+                            return;
                         }
+
                         $parts = preg_split('/\s+/', trim($value));
                         if (count($parts) !== 5) {
                             $context->buildViolation(
                                 'The cron expression must have exactly 5 parts separated by spaces.'
-                            )
-                                ->addViolation();
+                            )->addViolation();
                             return;
                         }
+
                         foreach ($parts as $part) {
                             if (!preg_match('/^[\d\*\/\-,]+$/', $part)) {
                                 $context->buildViolation(
                                     'Each part of the cron expression can only contain digits, *, /, -, or , characters.'
-                                )
-                                    ->addViolation();
+                                )->addViolation();
                                 return;
                             }
                         }
                     }),
-                    new NotBlank([
-                        'message' => 'This field cannot be empty',
-                    ]),
                 ],
             ]);
 
-            // Simple mode: frequency choice
+            // Frequency
             $builder->add("{$settingName}_frequency", ChoiceType::class, [
                 'choices' => [
                     'Daily' => 'daily',
@@ -89,7 +87,7 @@ class ScheduleType extends AbstractType
                 ],
             ]);
 
-            // Simple mode: time picker
+            // Time
             $builder->add("{$settingName}_time", TimeType::class, [
                 'required' => false,
                 'widget' => 'single_text',
@@ -100,7 +98,7 @@ class ScheduleType extends AbstractType
                 ],
             ]);
 
-            // Simple mode: day of week (only relevant if weekly)
+            // Day of week
             $builder->add("{$settingName}_day_of_week", ChoiceType::class, [
                 'choices' => [
                     'Sunday' => 0,
@@ -119,7 +117,7 @@ class ScheduleType extends AbstractType
                 ],
             ]);
 
-            // Simple mode: day of month (only relevant if monthly)
+            // Day of month
             $builder->add("{$settingName}_day_of_month", ChoiceType::class, [
                 'choices' => array_combine(range(1, 31), range(1, 31)),
                 'placeholder' => 'Choose a day of month',
@@ -130,6 +128,40 @@ class ScheduleType extends AbstractType
                 ],
             ]);
         }
+
+        // Dynamic validation listener
+        $builder->addEventListener(FormEvents::POST_SUBMIT, function (FormEvent $event) use ($cronSettings) {
+            $form = $event->getForm();
+            $data = $form->getData();
+            $isAdvanced = $form->get('use_advanced_mode')->getData();
+
+            foreach ($cronSettings as $settingName) {
+                $frequency = $data["{$settingName}_frequency"] ?? null;
+
+                if ($isAdvanced) {
+                    $advancedValue = $data["{$settingName}_advanced"] ?? null;
+                    if (empty($advancedValue)) {
+                        $form->get("{$settingName}_advanced")->addError(
+                            new FormError('This field is required in advanced mode.')
+                        );
+                    }
+                } else {
+                    // Weekly → day_of_week required
+                    if ($frequency === 'weekly' && empty($data["{$settingName}_day_of_week"])) {
+                        $form->get("{$settingName}_day_of_week")->addError(
+                            new FormError('Please make sure to define the day of the week.')
+                        );
+                    }
+
+                    // Monthly → day_of_month required
+                    if ($frequency === 'monthly' && empty($data["{$settingName}_day_of_month"])) {
+                        $form->get("{$settingName}_day_of_month")->addError(
+                            new FormError('Please make sure to define the day of the month.')
+                        );
+                    }
+                }
+            }
+        });
     }
 
     public function configureOptions(OptionsResolver $resolver): void
