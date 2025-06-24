@@ -4,6 +4,15 @@
             <h1 class="text-2xl font-semibold">Schedule Automation</h1>
         </div>
         {{ form_row(form._token) }}
+        <div class="flex items-center gap-2 p-4">
+            {{ form_label(form.use_advanced_mode) }}
+            {{ form_widget(form.use_advanced_mode, {
+                attr: {
+                    'data-cron-toggle-target': 'toggle',
+                    'data-action': 'cron-toggle#toggleChanged'
+                }
+            }) }}
+        </div>
         <div class="grid gap-4 lg:grid-cols-2 xl:grid-cols-3 p-2 z-0" {{ stimulus_controller('radio-card') }}>
             {% for setting in form %}
                 {# Display only the capport settings #}

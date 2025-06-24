@@ -48,7 +48,10 @@ class ScheduleAutomationController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $submittedData = $form->getData();
+            /** @var User $currentUser */
+            $currentUser = $this->getUser();
+
+            $useAdvancedMode = $form->get('use_advanced_mode')->getData();
 
             $settingsToUpdate = [
                 'DELETE_UNCONFIRMED_USERS_CRON',
@@ -57,20 +60,32 @@ class ScheduleAutomationController extends AbstractController
             ];
 
             foreach ($settingsToUpdate as $settingName) {
-                $value = $submittedData[$settingName] ?? null;
+                $cronValue = '';
+                if ($useAdvancedMode) {
+                    $cronValue = $form->get($settingName . '_advanced')->getData();
+                } else {
+                    $frequency = $form->get($settingName . '_frequency')->getData();
+                    $time = $form->get($settingName . '_time')->getData(); // format: "HH:MM"
 
-                // Check if any submitted data is empty
-                if ($value === null) {
-                    $value = "";
+                    if ($time) {
+                        [$hour, $minute] = explode(':', $time);
+                        $cronValue = match ($frequency) {
+                            'daily' => "$minute $hour * * *",
+                            'weekly' => "$minute $hour * * 0",
+                            'monthly' => "$minute $hour 1 * *",
+                            default => '',
+                        };
+                    }
                 }
 
                 $setting = $this->settingRepository->findOneBy(['name' => $settingName]);
                 if ($setting !== null) {
-                    $setting->setValue($value);
+                    $setting->setValue($cronValue);
                     $this->entityManager->persist($setting);
                 }
             }
 
+            // Track event
             $eventMetadata = [
                 'ip' => $request->getClientIp(),
                 'user_agent' => $request->headers->get('User-Agent'),
@@ -83,7 +98,9 @@ class ScheduleAutomationController extends AbstractController
                 $eventMetadata
             );
 
-            $this->addFlash('success_admin', 'New Schedule configuration have been applied successfully.');
+            $this->entityManager->flush();
+            $this->addFlash('success_admin', 'New Schedule configuration has been applied successfully.');
+
             return $this->redirectToRoute('admin_dashboard_settings_schedule');
         }
 
