@@ -11,6 +11,7 @@ use Symfony\Component\Form\Extension\Core\Type\TimeType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\Callback;
+use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 class ScheduleType extends AbstractType
@@ -62,6 +63,9 @@ class ScheduleType extends AbstractType
                             }
                         }
                     }),
+                    new NotBlank([
+                        'message' => 'This field cannot be empty',
+                    ]),
                 ],
             ]);
 

@@ -47,6 +47,7 @@ class ScheduleAutomationController extends AbstractController
         ) {
             $setting = $this->settingRepository->findOneBy(['name' => $settingName]);
             $cronValue = $setting ? $setting->getValue() : '';
+            $initialData["{$settingName}_advanced"] = $cronValue;
 
             if (preg_match('/^(\d+) (\d+) \* \* \*$/', $cronValue, $matches)) {
                 // daily: "minute hour * * *"
@@ -57,7 +58,6 @@ class ScheduleAutomationController extends AbstractController
                     'H:i',
                     sprintf('%02d:%02d', $hour, $minute)
                 );
-                $initialData["{$settingName}_advanced"] = null;
                 $initialData["{$settingName}_day_of_week"] = null;
                 $initialData["{$settingName}_day_of_month"] = null;
             } elseif (preg_match('/^(\d+) (\d+) \* \* (\d+)$/', $cronValue, $matches)) {
@@ -72,7 +72,6 @@ class ScheduleAutomationController extends AbstractController
                 );
                 $initialData["{$settingName}_day_of_week"] = $dayOfWeek;
                 $initialData["{$settingName}_day_of_month"] = null;
-                $initialData["{$settingName}_advanced"] = null;
             } elseif (preg_match('/^(\d+) (\d+) (\d+) \* \*$/', $cronValue, $matches)) {
                 // monthly: "minute hour day_of_month * *"
                 [, $minute, $hour, $dayOfMonthStr] = $matches;
@@ -85,10 +84,8 @@ class ScheduleAutomationController extends AbstractController
                 );
                 $initialData["{$settingName}_day_of_month"] = $dayOfMonth;
                 $initialData["{$settingName}_day_of_week"] = null;
-                $initialData["{$settingName}_advanced"] = null;
             } else {
                 // advanced or unrecognized
-                $initialData["{$settingName}_advanced"] = $cronValue;
                 $initialData["{$settingName}_frequency"] = null;
                 $initialData["{$settingName}_time"] = null;
                 $initialData["{$settingName}_day_of_week"] = null;
