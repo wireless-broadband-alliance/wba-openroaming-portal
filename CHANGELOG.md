@@ -2,8 +2,10 @@
 
 # Release V1.8.0
 
+- New UI section on the dashboard for Schedule Automation. This page is responsible for management of the automation
+  commands time schedule.
 - Prometheus Implementation.
-- Rework Automation commands to use an official symfony bundle about automation commands.
+- Rework Automation commands to use an official symfony bundle of automation commands.
 
 > **Note**: If you are using automated CRON's from our previous guide, it's recommended you use the official symfony
 > bundle from this release. For reference, the command that takes care of the operation inside of the container web is
