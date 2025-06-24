@@ -5,7 +5,6 @@
 } %}
 
 <div {{ stimulus_controller('cron-toggle') }}>
-    {{ dump(form) }}
 
     <form action="{{ path('admin_dashboard_settings_schedule') }}" method="post" enctype="multipart/form-data">
         {{ form_row(form._token) }}
