@@ -47,10 +47,9 @@ class ScheduleType extends AbstractType
                 if ($setting->getName() === $settingName) {
                     $fieldOptions['data'] = $setting->getValue();
 
-                    // Add description from service for use in Twig attrs
                     $fieldOptions['attr']['description'] = $this->getSettings->getSettingDescription($settingName);
 
-                    // Add your validation constraints here if needed per setting
+                    // Validation constraints per setting
                     $fieldOptions['constraints'] = [
                         new Callback(function ($value, ExecutionContextInterface $context) {
                             if (!$value) {
