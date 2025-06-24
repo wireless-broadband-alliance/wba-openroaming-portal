@@ -16,29 +16,31 @@ export default class extends Controller {
 
     updateVisibility() {
         const isAdvanced = this.toggleTarget.checked;
-        // Show or hide advanced fields depending on toggle
+
+        // Toggle advanced fields visibility
         this.advancedTargets.forEach(el => {
             el.classList.toggle('hidden', !isAdvanced);
         });
 
-        // Show all frequency and time inputs ONLY if NOT advanced mode
+        // Toggle frequency and time visibility
         [...this.frequencyTargets, ...this.timeTargets].forEach(el => {
             el.classList.toggle('hidden', isAdvanced);
         });
 
-        // For each group, selectively show day_of_week or day_of_month inputs based on frequency,
-        // but ONLY if NOT advanced mode (otherwise hide them)
+        // Get unique groups
         const groups = new Set(this.frequencyTargets.map(el => el.closest('[data-cron-toggle-group]').dataset.cronToggleGroup));
 
         groups.forEach(group => {
+            // Find the frequency input for this group
             const freqEl = this.frequencyTargets.find(el => el.closest('[data-cron-toggle-group]').dataset.cronToggleGroup === group);
-            const frequency = freqEl ? freqEl.value : null;
-            const freqNormalized = frequency ? frequency.toLowerCase() : '';
+            console.log('freqEl for group', group, freqEl);
+            // Get the frequency value (string), lowercase and trim it
+            const frequency = freqEl && freqEl.value ? freqEl.value.trim().toLowerCase() : '';
 
+            // For day_of_week fields in this group:
             this.day_of_weekTargets.forEach(el => {
                 if (el.dataset.cronToggleGroup === group) {
-                    // Show day_of_week only if NOT advanced AND frequency is 'weekly'
-                    if (!isAdvanced && freqNormalized === 'weekly') {
+                    if (!isAdvanced && frequency === 'weekly') {
                         el.classList.remove('hidden');
                     } else {
                         el.classList.add('hidden');
@@ -46,10 +48,10 @@ export default class extends Controller {
                 }
             });
 
+            // For day_of_month fields in this group:
             this.day_of_monthTargets.forEach(el => {
                 if (el.dataset.cronToggleGroup === group) {
-                    // Show day_of_month only if NOT advanced AND frequency is 'monthly'
-                    if (!isAdvanced && freqNormalized === 'monthly') {
+                    if (!isAdvanced && frequency === 'monthly') {
                         el.classList.remove('hidden');
                     } else {
                         el.classList.add('hidden');
