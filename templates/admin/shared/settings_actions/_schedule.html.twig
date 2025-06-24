@@ -1,4 +1,6 @@
 <div {{ stimulus_controller('cron-toggle') }}>
+    {{ dump(form) }}
+
     <form action="{{ path('admin_dashboard_settings_schedule') }}" method="post" enctype="multipart/form-data">
         {{ form_row(form._token) }}
 
@@ -7,7 +9,7 @@
             {{ form_widget(form.use_advanced_mode, {
                 attr: {
                     'data-cron-toggle-target': 'toggle',
-                    'data-action': 'cron-toggle#toggleChanged'
+                    'data-action': 'cron-toggle#toggleChanged',
                 }
             }) }}
         </div>
@@ -15,17 +17,14 @@
         <div class="grid gap-4 lg:grid-cols-2 xl:grid-cols-3 p-2 z-0">
             {% for key, setting in form %}
                 {% if key in ['DELETE_UNCONFIRMED_USERS_CRON', 'USERS_WHEN_PROFILE_EXPIRES_CRON', 'LDAP_SYNC_CRON'] %}
-                    <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full"
-                         id="{{ key }}"
-                            {{ stimulus_controller('card') }}>
-
+                    <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full" id="{{ key }}" {{ stimulus_controller('card') }}>
                         {# Title + Info icon #}
                         <div class="flex flex-row justify-between">
                             <div class="text-base font-medium text-center break-normal md:break-all">
                                 {% set displayName = {
                                     DELETE_UNCONFIRMED_USERS_CRON: 'Delete Unconfirmed Account Automation',
                                     USERS_WHEN_PROFILE_EXPIRES_CRON: 'Profile Expiration Notification Automation',
-                                    LDAP_SYNC_CRON: 'LDAP Syncronization Automation'
+                                    LDAP_SYNC_CRON: 'LDAP Synchronization Automation'
                                 }[key] %}
                                 <h1 class="text-base md:text-lg whitespace-nowrap">{{ displayName }}</h1>
                             </div>
@@ -41,21 +40,14 @@
                         <div class="flex items-center space-x-2 mt-5">
                             {{ form_widget(setting, {
                                 attr: {
-                                    class: 'form-widget'
+                                    class: 'form-widget',
+                                    placeholder: 'e.g. 0 0 * * *',
                                 }
                             }) }}
                         </div>
 
-                        {# Advanced, frequency, time widgets (if they exist) #}
-                        {% for suffix in ['_advanced', '_frequency', '_time'] %}
-                            {% set field = attribute(form, key ~ suffix) %}
-                            {% if field is defined %}
-                                {{ form_widget(field) }}
-                            {% endif %}
-                        {% endfor %}
-
                         {{ include('/admin/shared/settings_actions/_description.html.twig', {
-                            description: setting.vars.attr.description
+                            description: setting.vars.attr.description|default('')
                         }) }}
 
                         <div class="mt-2 -mb-2 text-center text-red-500 text-base">
