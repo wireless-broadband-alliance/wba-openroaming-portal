@@ -19,7 +19,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
-class SchedulerAutomationController extends AbstractController
+class ScheduleAutomationController extends AbstractController
 {
 
     public function __construct(private readonly GetSettings $getSettings,
@@ -39,8 +39,7 @@ class SchedulerAutomationController extends AbstractController
         /** @var User $currentUser */
         $currentUser = $this->getUser();
 
-        $settingsRepository = $this->entityManager->getRepository(Setting::class);
-        $settings = $settingsRepository->findAll();
+        $settings = $this->settingRepository->findAll();
 
         $form = $this->createForm(ScheduleType::class, null, [
             'settings' => $settings,
@@ -65,7 +64,7 @@ class SchedulerAutomationController extends AbstractController
                     $value = "";
                 }
 
-                $setting = $settingsRepository->findOneBy(['name' => $settingName]);
+                $setting = $this->settingRepository->findOneBy(['name' => $settingName]);
                 if ($setting !== null) {
                     $setting->setValue($value);
                     $this->entityManager->persist($setting);
@@ -92,7 +91,7 @@ class SchedulerAutomationController extends AbstractController
             'user' => $currentUser,
             'data' => $data,
             'settings' => $settings,
-            'form' => $form->createView()
+            'form' => $form->createView(),
         ]);
     }
 }
