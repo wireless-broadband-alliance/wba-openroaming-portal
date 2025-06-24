@@ -1,24 +1,24 @@
 {% set groups = {
-    'DELETE_UNCONFIRMED_USERS_CRON': [
+    DELETE_UNCONFIRMED_USERS_CRON: [
         'DELETE_UNCONFIRMED_USERS_CRON_advanced',
         'DELETE_UNCONFIRMED_USERS_CRON_frequency',
         'DELETE_UNCONFIRMED_USERS_CRON_day_of_week',
         'DELETE_UNCONFIRMED_USERS_CRON_day_of_month',
-        'DELETE_UNCONFIRMED_USERS_CRON_time'
+        'DELETE_UNCONFIRMED_USERS_CRON_time',
     ],
-    'USERS_WHEN_PROFILE_EXPIRES_CRON': [
+    USERS_WHEN_PROFILE_EXPIRES_CRON: [
         'USERS_WHEN_PROFILE_EXPIRES_CRON_advanced',
         'USERS_WHEN_PROFILE_EXPIRES_CRON_frequency',
         'USERS_WHEN_PROFILE_EXPIRES_CRON_day_of_week',
         'USERS_WHEN_PROFILE_EXPIRES_CRON_day_of_month',
-        'USERS_WHEN_PROFILE_EXPIRES_CRON_time'
+        'USERS_WHEN_PROFILE_EXPIRES_CRON_time',
     ],
-    'LDAP_SYNC_CRON': [
+    LDAP_SYNC_CRON: [
         'LDAP_SYNC_CRON_advanced',
         'LDAP_SYNC_CRON_frequency',
         'LDAP_SYNC_CRON_day_of_week',
         'LDAP_SYNC_CRON_day_of_month',
-        'LDAP_SYNC_CRON_time'
+        'LDAP_SYNC_CRON_time',
     ],
 } %}
 
@@ -29,7 +29,7 @@
         <div class="flex flex-col mx-4 space-x-3 space-y-2">
             <div>
                 <label class="inline-flex items-center cursor-pointer gap-x-3">
-                    {{ form_label(form.use_advanced_mode, null, {'label_attr': {'class': 'me-3'}}) }}
+                    {{ form_label(form.use_advanced_mode, null, {label_attr: {class: 'me-3'}}) }}
                     {{ form_widget(form.use_advanced_mode, {attr: {class: 'sr-only peer', 'data-cron-toggle-target': 'toggle', 'data-action': 'cron-toggle#toggleChanged'}}) }}
                     <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-bg-lightGreen rounded-full
                         peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white
@@ -49,7 +49,7 @@
                             {% set displayName = {
                                 DELETE_UNCONFIRMED_USERS_CRON: 'Delete Unconfirmed Account Automation',
                                 USERS_WHEN_PROFILE_EXPIRES_CRON: 'Profile Expiration Notification Automation',
-                                LDAP_SYNC_CRON: 'LDAP Synchronization Automation'
+                                LDAP_SYNC_CRON: 'LDAP Synchronization Automation',
                             }[groupName] %}
                             <h1 class="text-base md:text-lg whitespace-nowrap">{{ displayName }}</h1>
                         </div>
@@ -76,15 +76,15 @@
                                         class: 'form-widget',
                                         placeholder: 'e.g. 0 0 * * *',
                                         'data-cron-toggle-target': toggleTarget,
-                                        'data-cron-toggle-group': groupName
-                                    }
+                                        'data-cron-toggle-group': groupName,
+                                    },
                                 }) }}
                             </div>
                         {% endfor %}
                     </div>
 
                     {{ include('/admin/shared/settings_actions/_description.html.twig', {
-                        description: attribute(form, fields[0]).vars.attr.description
+                        description: attribute(form, fields[0]).vars.attr.description,
                     }) }}
 
                     <div class="mt-2 -mb-2 text-center text-red-500 text-base">
