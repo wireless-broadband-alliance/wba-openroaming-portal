@@ -10,15 +10,17 @@
         {{ form_row(form._token) }}
 
         <div class="flex flex-col mx-4 space-x-3 space-y-2">
-            <label class="inline-flex items-center cursor-pointer gap-x-3">
-                {{ form_label(form.use_advanced_mode, null, {'label_attr': {'class': 'me-3'}}) }}
-                {{ form_widget(form.use_advanced_mode, {attr: {class: 'sr-only peer', 'data-cron-toggle-target': 'toggle', 'data-action': 'cron-toggle#toggleChanged'}}) }}
-                <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-bg-lightGreen rounded-full
-            peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white
-            after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border
-            after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#68D391]"></div>
-                {{ form_errors(form.use_advanced_mode) }}
-            </label>
+            <div>
+                <label class="inline-flex items-center cursor-pointer gap-x-3">
+                    {{ form_label(form.use_advanced_mode, null, {'label_attr': {'class': 'me-3'}}) }}
+                    {{ form_widget(form.use_advanced_mode, {attr: {class: 'sr-only peer', 'data-cron-toggle-target': 'toggle', 'data-action': 'cron-toggle#toggleChanged'}}) }}
+                    <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-bg-lightGreen rounded-full
+                peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white
+                after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border
+                after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#68D391]"></div>
+                    {{ form_errors(form.use_advanced_mode) }}
+                </label>
+            </div>
         </div>
 
         <div class="grid gap-4 lg:grid-cols-2 xl:grid-cols-3 p-2 z-0">
