@@ -90,6 +90,36 @@ class ScheduleType extends AbstractType
                     'description' => $this->getSettings->getSettingDescription($settingName),
                 ],
             ]);
+
+            // Simple mode: day of week (only relevant if weekly)
+            $builder->add("{$settingName}_day_of_week", ChoiceType::class, [
+                'choices' => [
+                    'Sunday' => 0,
+                    'Monday' => 1,
+                    'Tuesday' => 2,
+                    'Wednesday' => 3,
+                    'Thursday' => 4,
+                    'Friday' => 5,
+                    'Saturday' => 6,
+                ],
+                'placeholder' => 'Choose a day of week',
+                'required' => false,
+                'label' => false,
+                'attr' => [
+                    'description' => $this->getSettings->getSettingDescription($settingName),
+                ],
+            ]);
+
+            // Simple mode: day of month (only relevant if monthly)
+            $builder->add("{$settingName}_day_of_month", ChoiceType::class, [
+                'choices' => array_combine(range(1, 31), range(1, 31)),
+                'placeholder' => 'Choose a day of month',
+                'required' => false,
+                'label' => false,
+                'attr' => [
+                    'description' => $this->getSettings->getSettingDescription($settingName),
+                ],
+            ]);
         }
     }
 

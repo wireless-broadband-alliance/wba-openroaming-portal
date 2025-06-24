@@ -38,7 +38,6 @@ class ScheduleAutomationController extends AbstractController
 
         $initialData = [];
 
-        // Loop through the settings you want to edit
         foreach (
             [
                 'DELETE_UNCONFIRMED_USERS_CRON',
@@ -46,16 +45,12 @@ class ScheduleAutomationController extends AbstractController
                 'LDAP_SYNC_CRON'
             ] as $settingName
         ) {
-            // Find the setting value from the DB
             $setting = $this->settingRepository->findOneBy(['name' => $settingName]);
             $cronValue = $setting ? $setting->getValue() : '';
 
-            // Determine if the cronValue is an "advanced" expression or a simple "frequency + time"
-            // Matches a known pattern we parse it, else fallback to advanced
-            if (preg_match('/^\d+ \d+ \* \* \*$/', $cronValue)) {
-                // This is a daily schedule example "minute hour * * *"
-                // Parse minute and hour from the cronValue
-                [$minute, $hour] = explode(' ', $cronValue);
+            if (preg_match('/^(\d+) (\d+) \* \* \*$/', $cronValue, $matches)) {
+                // daily: "minute hour * * *"
+                [, $minute, $hour] = $matches;
 
                 $initialData["{$settingName}_frequency"] = 'daily';
                 $initialData["{$settingName}_time"] = DateTime::createFromFormat(
@@ -63,31 +58,41 @@ class ScheduleAutomationController extends AbstractController
                     sprintf('%02d:%02d', $hour, $minute)
                 );
                 $initialData["{$settingName}_advanced"] = null;
-            } elseif (preg_match('/^\d+ \d+ \* \* 0$/', $cronValue)) {
-                // weekly
-                [$minute, $hour] = explode(' ', $cronValue);
+                $initialData["{$settingName}_day_of_week"] = null;
+                $initialData["{$settingName}_day_of_month"] = null;
+            } elseif (preg_match('/^(\d+) (\d+) \* \* (\d+)$/', $cronValue, $matches)) {
+                // weekly: "minute hour * * day_of_week"
+                [, $minute, $hour, $dayOfWeekStr] = $matches;
+                $dayOfWeek = (int)$dayOfWeekStr;
 
                 $initialData["{$settingName}_frequency"] = 'weekly';
                 $initialData["{$settingName}_time"] = DateTime::createFromFormat(
                     'H:i',
                     sprintf('%02d:%02d', $hour, $minute)
                 );
+                $initialData["{$settingName}_day_of_week"] = $dayOfWeek;
+                $initialData["{$settingName}_day_of_month"] = null;
                 $initialData["{$settingName}_advanced"] = null;
-            } elseif (preg_match('/^\d+ \d+ 1 \* \*$/', $cronValue)) {
-                // monthly
-                [$minute, $hour] = explode(' ', $cronValue);
+            } elseif (preg_match('/^(\d+) (\d+) (\d+) \* \*$/', $cronValue, $matches)) {
+                // monthly: "minute hour day_of_month * *"
+                [, $minute, $hour, $dayOfMonthStr] = $matches;
+                $dayOfMonth = (int)$dayOfMonthStr;
 
                 $initialData["{$settingName}_frequency"] = 'monthly';
                 $initialData["{$settingName}_time"] = DateTime::createFromFormat(
                     'H:i',
                     sprintf('%02d:%02d', $hour, $minute)
                 );
+                $initialData["{$settingName}_day_of_month"] = $dayOfMonth;
+                $initialData["{$settingName}_day_of_week"] = null;
                 $initialData["{$settingName}_advanced"] = null;
             } else {
-                // fallback: treat as advanced expression
+                // advanced or unrecognized
                 $initialData["{$settingName}_advanced"] = $cronValue;
                 $initialData["{$settingName}_frequency"] = null;
                 $initialData["{$settingName}_time"] = null;
+                $initialData["{$settingName}_day_of_week"] = null;
+                $initialData["{$settingName}_day_of_month"] = null;
             }
         }
 
@@ -111,7 +116,6 @@ class ScheduleAutomationController extends AbstractController
                 $cronValue = '';
 
                 if ($useAdvancedMode) {
-                    // Detect if the user checked the simple/advanced mode
                     $cronValue = $form->get($settingName . '_advanced')->getData() ?: '';
                 } else {
                     $frequency = $form->get($settingName . '_frequency')->getData();
@@ -121,12 +125,19 @@ class ScheduleAutomationController extends AbstractController
                         $hour = $time->format('H');
                         $minute = $time->format('i');
 
-                        $cronValue = match ($frequency) {
-                            'daily' => "$minute $hour * * *",
-                            'weekly' => "$minute $hour * * 0",
-                            'monthly' => "$minute $hour 1 * *",
-                            default => '',
-                        };
+                        if ($frequency === 'daily') {
+                            $cronValue = "$minute $hour * * *";
+                        } elseif ($frequency === 'weekly') {
+                            $dayOfWeek = $form->get($settingName . '_day_of_week')->getData();
+                            // default to Sunday if not set
+                            $dayOfWeek = $dayOfWeek ?? 0;
+                            $cronValue = "$minute $hour * * $dayOfWeek";
+                        } elseif ($frequency === 'monthly') {
+                            $dayOfMonth = $form->get($settingName . '_day_of_month')->getData();
+                            // default to 1 if not set
+                            $dayOfMonth = $dayOfMonth ?? 1;
+                            $cronValue = "$minute $hour $dayOfMonth * *";
+                        }
                     }
                 }
 
@@ -137,7 +148,6 @@ class ScheduleAutomationController extends AbstractController
                 }
             }
 
-            // Track event
             $eventMetadata = [
                 'ip' => $request->getClientIp(),
                 'user_agent' => $request->headers->get('User-Agent'),
