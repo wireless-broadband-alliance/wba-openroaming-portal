@@ -18,7 +18,8 @@ class ScheduleType extends AbstractType
 {
     public function __construct(
         private readonly GetSettings $getSettings
-    ) {}
+    ) {
+    }
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
@@ -51,13 +52,17 @@ class ScheduleType extends AbstractType
                         }
                         $parts = preg_split('/\s+/', trim($value));
                         if (count($parts) !== 5) {
-                            $context->buildViolation('The cron expression must have exactly 5 parts separated by spaces.')
+                            $context->buildViolation(
+                                'The cron expression must have exactly 5 parts separated by spaces.'
+                            )
                                 ->addViolation();
                             return;
                         }
                         foreach ($parts as $part) {
                             if (!preg_match('/^[\d\*\/\-,]+$/', $part)) {
-                                $context->buildViolation('Each part of the cron expression can only contain digits, *, /, -, or , characters.')
+                                $context->buildViolation(
+                                    'Each part of the cron expression can only contain digits, *, /, -, or , characters.'
+                                )
                                     ->addViolation();
                                 return;
                             }
