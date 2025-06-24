@@ -64,7 +64,8 @@ class ScheduleType extends AbstractType
                         foreach ($parts as $part) {
                             if (!preg_match('/^[\d\*\/\-,]+$/', $part)) {
                                 $context->buildViolation(
-                                    'Each part of the cron expression can only contain digits, *, /, -, or , characters.'
+                                    'Each part of the cron expression can only contain digits, *, /, -, or ,
+                                     characters.'
                                 )
                                     ->addViolation();
                                 return;

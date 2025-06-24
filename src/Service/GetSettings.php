@@ -297,7 +297,8 @@ class GetSettings
             'PROFILE_LIMIT_DATE_SMS' => 'Time in days to disable profiles for users with SMS login',
 
             'DELETE_UNCONFIRMED_USERS_CRON' => 'Defines the schedule to delete unconfirmed users from the portal',
-            'USERS_WHEN_PROFILE_EXPIRES_CRON' => 'Defines the schedule to notify the users when their profile to expire',
+            'USERS_WHEN_PROFILE_EXPIRES_CRON' => 'Defines the schedule to notify the users 
+            when their profile to expire',
             'LDAP_SYNC_CRON' => 'Defines the schedule for LDAP synchronization automation command',
         ];
 
