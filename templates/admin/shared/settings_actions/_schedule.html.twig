@@ -1,0 +1,60 @@
+<div {{ stimulus_controller('radio-msg') }}>
+    <form action="{{ path('admin_dashboard_settings_schedule') }}" method="post" enctype="multipart/form-data">
+        <div class="p-2">
+            <h1 class="text-2xl font-semibold">Schedule Automation</h1>
+        </div>
+        {{ form_row(form._token) }}
+        <div class="grid gap-4 lg:grid-cols-2 xl:grid-cols-3 p-2 z-0" {{ stimulus_controller('radio-card') }}>
+            {% for setting in form %}
+                {# Display only the capport settings #}
+                {% if setting.vars.name in ['DELETE_UNCONFIRMED_USERS_CRON', 'USERS_WHEN_PROFILE_EXPIRES_CRON', 'LDAP_SYNC_CRON'] %}
+                    <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full"
+                         name="Cards"
+                         id="{{ setting.vars.name }}" {% if setting.vars.name in ['CAPPORT_PORTAL_URL', 'CAPPORT_VENUE_INFO_URL'] %} {{ stimulus_target('radio-card', 'card') }} {{ stimulus_controller('card') }} {% else %} {{ stimulus_controller('radio card') }} {% endif %}>
+                        {# Title and Icon #}
+                        <div class="flex flex-row justify-between">
+                            <div class="text-base font-medium text-center break-normal md:break-all">
+                                {% set displayName = {
+                                    DELETE_UNCONFIRMED_USERS_CRON: 'Delete Unconfirmed Account Automation',
+                                    USERS_WHEN_PROFILE_EXPIRES_CRON: 'Profile Expiration Notification Automation',
+                                    LDAP_SYNC_CRON: 'LDAP Syncronization Automation',
+                                }[setting.vars.name] ?? setting.vars.name %}
+                                <h1 class="text-base md:text-lg whitespace-nowrap">{{ displayName }}</h1>
+                            </div>
+                            <label class="flex items-center bg-opacity-40">
+                                <img class="w-6 cursor-pointer" {{ stimulus_target('card', 'button') }} {{ stimulus_action('card', 'show_info', 'mouseover')|stimulus_action('card', 'hide_info', 'mouseout') }}
+                                     src="{{ asset('resources/logos/info_icon.svg') }}"
+                                     alt="info_icon"/>
+                            </label>
+                        </div>
+                        {% if setting.vars.name in ['DELETE_UNCONFIRMED_USERS_CRON', 'USERS_WHEN_PROFILE_EXPIRES_CRON', 'LDAP_SYNC_CRON'] %}
+                            <div class="flex items-center space-x-2 mt-5">
+                                {{ form_widget(setting, {attr: {class: 'form-widget', 'data-radio-card-target': 'input'}}) }}
+                            </div>
+                        {% endif %}
+
+                        {{ include('/admin/shared/settings_actions/_description.html.twig', {description: setting.vars.attr.description}) }}
+
+                        <div class="mt-2 -mb-2 text-center text-red-500 text-base">
+                            {{ form_errors(setting) }}
+                        </div>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+
+        <div class="mt-6 divider-solid"></div>
+
+        <div class="mt-6 flex flex-row w-full justify-end items-center gap-2">
+            <a href="{{ path('app_dashboard_regenerate_code_admin', {type: 'settingSchedule'}) }}"
+               onclick="return confirm('Are you sure you want to reset to the default settings?')"
+               class="text-sm hover:text-red-600 font-bold p-2 rounded-lg transition ease-in duration-300">
+                Reset
+            </a>
+
+            <button type="submit" class="btn-primary"
+                    onclick="return confirm('Are you sure you want to apply this new changes?')">Save Changes
+            </button>
+        </div>
+    </form>
+</div>
