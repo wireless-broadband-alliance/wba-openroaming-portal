@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Repository\SettingRepository;
 use Symfony\Component\Scheduler\Attribute\AsSchedule;
 use Symfony\Component\Scheduler\Schedule as SymfonySchedule;
 use Symfony\Component\Scheduler\ScheduleProviderInterface;
@@ -14,6 +15,7 @@ readonly class Schedule implements ScheduleProviderInterface
 {
     public function __construct(
         private CacheInterface $cache,
+        private SettingRepository $settingRepository
     ) {
     }
 
@@ -26,7 +28,7 @@ readonly class Schedule implements ScheduleProviderInterface
             // daily at 00:00
             ->add(
                 RecurringMessage::cron(
-                    '0 0 * * *',
+                    $this->settingRepository->findOneBy(['name' => 'DELETE_UNCONFIRMED_USERS_CRON'])->getValue(),
                     new RunCommandMessage('clear:deleteUnconfirmedUsers')
                 )
             )
@@ -34,7 +36,7 @@ readonly class Schedule implements ScheduleProviderInterface
             // daily at 01:00
             ->add(
                 RecurringMessage::cron(
-                    '0 1 * * *',
+                    $this->settingRepository->findOneBy(['name' => 'USERS_WHEN_PROFILE_EXPIRES_CRON'])->getValue(),
                     new RunCommandMessage('notify:usersWhenProfileExpires')
                 )
             )
@@ -42,7 +44,7 @@ readonly class Schedule implements ScheduleProviderInterface
             // daily at 02:00
             ->add(
                 RecurringMessage::cron(
-                    '0 2 * * *',
+                    $this->settingRepository->findOneBy(['name' => 'LDAP_SYNC_CRON'])->getValue(),
                     new RunCommandMessage('ldap:sync')
                 )
             );
