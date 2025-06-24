@@ -64,11 +64,16 @@
 
                     <div class="space-y-2 mt-5">
                         {% for fieldName in fields %}
+                            {% set toggleTarget =
+                                fieldName ends with '_advanced' ? 'advanced' :
+                                fieldName ends with '_frequency' ? 'frequency' :
+                                fieldName ends with '_time' ? 'time' :
+                                fieldName ends with '_day_of_week' ? 'day_of_week' :
+                                fieldName ends with '_day_of_month' ? 'day_of_month' : null
+                            %}
                             <div
                                     class="form-group"
-                                    data-cron-toggle-target="{% if fieldName ends with '_advanced' %}advanced{% elseif fieldName ends with '_frequency' %}frequency{% elseif fieldName ends with '_time' %}time
-                                    {% elseif fieldName ends with '_day_of_week' %}day_of_week
-                                    {% elseif fieldName ends with '_day_of_month' %}day_of_month{% endif %}"
+                                    data-cron-toggle-target="{{ toggleTarget }}"
                                     data-cron-toggle-group="{{ groupName }}"
                             >
                                 {{ form_row(attribute(form, fieldName), {
