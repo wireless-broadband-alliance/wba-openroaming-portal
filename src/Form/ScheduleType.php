@@ -2,7 +2,7 @@
 
 namespace App\Form;
 
-use App\Service\GetSettings;
+use PHPUnit\Framework\Constraint\Callback;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -10,11 +10,11 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\TimeType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 class ScheduleType extends AbstractType
 {
     public function __construct(
-        private readonly GetSettings $getSettings,
     ) {
     }
 
@@ -33,6 +33,33 @@ class ScheduleType extends AbstractType
             $builder
                 ->add("{$settingName}_advanced", TextType::class, [
                     'required' => false,
+                    'constraints' => [
+                        new Callback(function ($value, ExecutionContextInterface $context) {
+                            if (!$value) {
+                                return;
+                            }
+                            // Validate if the expression is in the expected format
+                            $parts = preg_split('/\s+/', trim($value));
+                            if (count($parts) !== 5) {
+                                $context->buildViolation(
+                                    'The cron expression must have exactly 5 parts separated by spaces.'
+                                )
+                                    ->addViolation();
+
+                                return;
+                            }
+                            // Validate that each part is in the expected format
+                            foreach ($parts as $part) {
+                                if (!preg_match('/^[\d\*\/\-,]+$/', $part)) {
+                                    $context->buildViolation(
+                                        'Each part of the cron expression can only contain digits, *, /, -, or , characters.'
+                                    )
+                                        ->addViolation();
+                                    return;
+                                }
+                            }
+                        }),
+                    ],
                     'label' => false,
                     'attr' => ['placeholder' => '*/5 * * * *'],
                 ])
