@@ -38,7 +38,7 @@ class ScheduleType extends AbstractType
         ];
 
         foreach ($cronSettings as $settingName) {
-            // Advanced field
+            // Advanced input (optional, no required validation)
             $builder->add("{$settingName}_advanced", TextType::class, [
                 'required' => false,
                 'label' => false,
@@ -56,7 +56,8 @@ class ScheduleType extends AbstractType
                         if (count($parts) !== 5) {
                             $context->buildViolation(
                                 'The cron expression must have exactly 5 parts separated by spaces.'
-                            )->addViolation();
+                            )
+                                ->addViolation();
                             return;
                         }
 
@@ -64,7 +65,8 @@ class ScheduleType extends AbstractType
                             if (!preg_match('/^[\d\*\/\-,]+$/', $part)) {
                                 $context->buildViolation(
                                     'Each part of the cron expression can only contain digits, *, /, -, or , characters.'
-                                )->addViolation();
+                                )
+                                    ->addViolation();
                                 return;
                             }
                         }
@@ -72,7 +74,7 @@ class ScheduleType extends AbstractType
                 ],
             ]);
 
-            // Frequency
+            // Frequency (required in non-advanced mode)
             $builder->add("{$settingName}_frequency", ChoiceType::class, [
                 'choices' => [
                     'Daily' => 'daily',
@@ -87,7 +89,7 @@ class ScheduleType extends AbstractType
                 ],
             ]);
 
-            // Time
+            // Time (required in non-advanced mode)
             $builder->add("{$settingName}_time", TimeType::class, [
                 'required' => false,
                 'widget' => 'single_text',
@@ -98,7 +100,7 @@ class ScheduleType extends AbstractType
                 ],
             ]);
 
-            // Day of week
+            // Day of week (required if weekly)
             $builder->add("{$settingName}_day_of_week", ChoiceType::class, [
                 'choices' => [
                     'Sunday' => 0,
@@ -117,7 +119,7 @@ class ScheduleType extends AbstractType
                 ],
             ]);
 
-            // Day of month
+            // Day of month (required if monthly)
             $builder->add("{$settingName}_day_of_month", ChoiceType::class, [
                 'choices' => array_combine(range(1, 31), range(1, 31)),
                 'placeholder' => 'Choose a day of month',
@@ -129,36 +131,45 @@ class ScheduleType extends AbstractType
             ]);
         }
 
-        // Dynamic validation listener
+        // Dynamic validation
         $builder->addEventListener(FormEvents::POST_SUBMIT, function (FormEvent $event) use ($cronSettings) {
             $form = $event->getForm();
             $data = $form->getData();
             $isAdvanced = $form->get('use_advanced_mode')->getData();
 
             foreach ($cronSettings as $settingName) {
-                $frequency = $data["{$settingName}_frequency"] ?? null;
-
                 if ($isAdvanced) {
-                    $advancedValue = $data["{$settingName}_advanced"] ?? null;
-                    if (empty($advancedValue)) {
-                        $form->get("{$settingName}_advanced")->addError(
-                            new FormError('This field is required in advanced mode.')
-                        );
-                    }
-                } else {
-                    // Weekly → day_of_week required
-                    if ($frequency === 'weekly' && empty($data["{$settingName}_day_of_week"])) {
-                        $form->get("{$settingName}_day_of_week")->addError(
-                            new FormError('Please make sure to define the day of the week.')
-                        );
-                    }
+                    continue; // skip validation in advanced mode
+                }
 
-                    // Monthly → day_of_month required
-                    if ($frequency === 'monthly' && empty($data["{$settingName}_day_of_month"])) {
-                        $form->get("{$settingName}_day_of_month")->addError(
-                            new FormError('Please make sure to define the day of the month.')
-                        );
-                    }
+                // Frequency is always required
+                $frequency = $data["{$settingName}_frequency"] ?? null;
+                if (empty($frequency)) {
+                    $form->get("{$settingName}_frequency")->addError(
+                        new FormError('Please choose a frequency.')
+                    );
+                }
+
+                // Time is always required
+                $time = $data["{$settingName}_time"] ?? null;
+                if (empty($time)) {
+                    $form->get("{$settingName}_time")->addError(
+                        new FormError('Please choose a time for execution.')
+                    );
+                }
+
+                // Weekly → day_of_week is required
+                if ($frequency === 'weekly' && empty($data["{$settingName}_day_of_week"])) {
+                    $form->get("{$settingName}_day_of_week")->addError(
+                        new FormError('Please define the day of the week.')
+                    );
+                }
+
+                // Monthly → day_of_month is required
+                if ($frequency === 'monthly' && empty($data["{$settingName}_day_of_month"])) {
+                    $form->get("{$settingName}_day_of_month")->addError(
+                        new FormError('Please define the day of the month.')
+                    );
                 }
             }
         });
