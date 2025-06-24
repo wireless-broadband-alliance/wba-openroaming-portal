@@ -2,6 +2,7 @@
 
 namespace App\Form;
 
+use App\Service\GetSettings;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -12,60 +13,78 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 class ScheduleType extends AbstractType
 {
-    public function __construct()
-    {
+    public function __construct(
+        private readonly GetSettings $getSettings
+    ) {
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
-        // Checkbox for advanced mode
         $builder->add('use_advanced_mode', CheckboxType::class, [
             'label' => 'Use Advanced Mode (Manual CRON Expression)',
             'required' => false,
             'mapped' => false,
         ]);
 
-        // Your 3 cron settings as text fields with validation
         $cronSettings = [
             'DELETE_UNCONFIRMED_USERS_CRON',
             'USERS_WHEN_PROFILE_EXPIRES_CRON',
             'LDAP_SYNC_CRON',
         ];
 
+        $formFieldOptions = [
+            'attr' => ['autocomplete' => 'off'],
+            'required' => true,
+            'constraints' => [],
+        ];
+
         foreach ($cronSettings as $settingName) {
-            $builder->add($settingName, TextType::class, [
-                'required' => true,
-                'constraints' => [
-                    new Callback(function ($value, ExecutionContextInterface $context) {
-                        if (!$value) {
-                            // Allow empty? If not, mark violation
-                            $context->buildViolation('This field cannot be empty.')
-                                ->addViolation();
-                            return;
-                        }
+            // Reset to defaults for each iteration
+            $fieldOptions = $formFieldOptions;
 
-                        $parts = preg_split('/\s+/', trim($value));
-                        if (count($parts) !== 5) {
-                            $context->buildViolation(
-                                'The cron expression must have exactly 5 parts separated by spaces.'
-                            )
-                                ->addViolation();
-                            return;
-                        }
+            // Find matching Setting entity in options
+            foreach ($options['settings'] as $setting) {
+                if ($setting->getName() === $settingName) {
+                    $fieldOptions['data'] = $setting->getValue();
 
-                        foreach ($parts as $part) {
-                            if (!preg_match('/^[\d\*\/\-,]+$/', $part)) {
+                    // Add description from service for use in Twig attrs
+                    $fieldOptions['attr']['description'] = $this->getSettings->getSettingDescription($settingName);
+
+                    // Add your validation constraints here if needed per setting
+                    $fieldOptions['constraints'] = [
+                        new Callback(function ($value, ExecutionContextInterface $context) {
+                            if (!$value) {
+                                $context->buildViolation('This field cannot be empty.')
+                                    ->addViolation();
+                                return;
+                            }
+
+                            $parts = preg_split('/\s+/', trim($value));
+                            if (count($parts) !== 5) {
                                 $context->buildViolation(
-                                    'Each part of the cron expression can only contain digits, *, /, -, or , characters.'
+                                    'The cron expression must have exactly 5 parts separated by spaces.'
                                 )
                                     ->addViolation();
                                 return;
                             }
-                        }
-                    }),
-                ],
-                'attr' => ['placeholder' => 'e.g. 0 0 * * *'],
-            ]);
+
+                            foreach ($parts as $part) {
+                                if (!preg_match('/^[\d\*\/\-,]+$/', $part)) {
+                                    $context->buildViolation(
+                                        'Each part of the cron expression can only contain digits, *, /, -, or , characters.'
+                                    )
+                                        ->addViolation();
+                                    return;
+                                }
+                            }
+                        }),
+                    ];
+
+                    break;
+                }
+            }
+
+            $builder->add($settingName, TextType::class, $fieldOptions);
         }
     }
 
