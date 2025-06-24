@@ -10,7 +10,7 @@
                 {% if setting.vars.name in ['DELETE_UNCONFIRMED_USERS_CRON', 'USERS_WHEN_PROFILE_EXPIRES_CRON', 'LDAP_SYNC_CRON'] %}
                     <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full"
                          name="Cards"
-                         id="{{ setting.vars.name }}" {% if setting.vars.name in ['CAPPORT_PORTAL_URL', 'CAPPORT_VENUE_INFO_URL'] %} {{ stimulus_target('radio-card', 'card') }} {{ stimulus_controller('card') }} {% else %} {{ stimulus_controller('radio card') }} {% endif %}>
+                         id="{{ setting.vars.name }}" {% if setting.vars.name in ['DELETE_UNCONFIRMED_USERS_CRON', 'USERS_WHEN_PROFILE_EXPIRES_CRON', 'LDAP_SYNC_CRON'] %} {{ stimulus_target('radio-card', 'card') }} {{ stimulus_controller('card') }} {% else %} {{ stimulus_controller('radio card') }} {% endif %}>
                         {# Title and Icon #}
                         <div class="flex flex-row justify-between">
                             <div class="text-base font-medium text-center break-normal md:break-all">

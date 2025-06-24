@@ -36,6 +36,9 @@
     {% elseif app.request.attributes.get('_route') == 'admin_dashboard_settings_capport' %}
         <twig:ux:icon name="wba:wifi" class="w-10 mt-0.5" fill="none"/>
         <h1 class="text-2xl font-semibold p-5">User Engagement</h1>
+    {% elseif app.request.attributes.get('_route') == 'admin_dashboard_settings_schedule' %}
+        <twig:ux:icon name="wba:schedule" class="w-10 mt-0.5" fill="none"/>
+        <h1 class="text-2xl font-semibold p-5">Schedule Automation</h1>
     {% elseif app.request.attributes.get('_route') == 'admin_dashboard_statistics' %}
         <twig:ux:icon name="wba:piechart" class="w-10 mt-0.5" fill="none"/>
         <h1 class="text-2xl font-semibold p-5">Portal Statistics</h1>
