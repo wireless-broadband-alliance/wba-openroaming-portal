@@ -84,7 +84,7 @@ class ScheduleType extends AbstractType
             $builder->add("{$settingName}_time", TimeType::class, [
                 'required' => false,
                 'widget' => 'single_text',
-                'input' => 'string',
+                'input' => 'datetime',
                 'label' => false,
                 'attr' => [
                     'description' => $this->getSettings->getSettingDescription($settingName),
