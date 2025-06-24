@@ -5,7 +5,9 @@ namespace App\Form;
 use App\Service\GetSettings;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\TimeType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\Callback;
@@ -15,11 +17,11 @@ class ScheduleType extends AbstractType
 {
     public function __construct(
         private readonly GetSettings $getSettings
-    ) {
-    }
+    ) {}
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
+        // Checkbox to toggle advanced mode
         $builder->add('use_advanced_mode', CheckboxType::class, [
             'label' => 'Use Advanced Mode (Manual CRON Expression)',
             'required' => false,
@@ -32,58 +34,62 @@ class ScheduleType extends AbstractType
             'LDAP_SYNC_CRON',
         ];
 
-        $formFieldOptions = [
-            'attr' => ['autocomplete' => 'off'],
-            'required' => true,
-            'constraints' => [],
-        ];
-
         foreach ($cronSettings as $settingName) {
-            // Reset to defaults for each iteration
-            $fieldOptions = $formFieldOptions;
-
-            // Find matching Setting entity in options
-            foreach ($options['settings'] as $setting) {
-                if ($setting->getName() === $settingName) {
-                    $fieldOptions['data'] = $setting->getValue();
-
-                    $fieldOptions['attr']['description'] = $this->getSettings->getSettingDescription($settingName);
-
-                    // Validation constraints per setting
-                    $fieldOptions['constraints'] = [
-                        new Callback(function ($value, ExecutionContextInterface $context) {
-                            if (!$value) {
-                                $context->buildViolation('This field cannot be empty.')
+            // Advanced mode: raw CRON expression (text field)
+            $builder->add("{$settingName}_advanced", TextType::class, [
+                'required' => false,
+                'label' => false,
+                'attr' => [
+                    'placeholder' => '*/5 * * * *',
+                    'description' => $this->getSettings->getSettingDescription($settingName),
+                ],
+                'constraints' => [
+                    new Callback(function ($value, ExecutionContextInterface $context) {
+                        if ($value === null || $value === '') {
+                            return; // allow empty in advanced field, will be handled by simple mode
+                        }
+                        $parts = preg_split('/\s+/', trim($value));
+                        if (count($parts) !== 5) {
+                            $context->buildViolation('The cron expression must have exactly 5 parts separated by spaces.')
+                                ->addViolation();
+                            return;
+                        }
+                        foreach ($parts as $part) {
+                            if (!preg_match('/^[\d\*\/\-,]+$/', $part)) {
+                                $context->buildViolation('Each part of the cron expression can only contain digits, *, /, -, or , characters.')
                                     ->addViolation();
                                 return;
                             }
+                        }
+                    }),
+                ],
+            ]);
 
-                            $parts = preg_split('/\s+/', trim($value));
-                            if (count($parts) !== 5) {
-                                $context->buildViolation(
-                                    'The cron expression must have exactly 5 parts separated by spaces.'
-                                )
-                                    ->addViolation();
-                                return;
-                            }
+            // Simple mode: frequency choice
+            $builder->add("{$settingName}_frequency", ChoiceType::class, [
+                'choices' => [
+                    'Daily' => 'daily',
+                    'Weekly' => 'weekly',
+                    'Monthly' => 'monthly',
+                ],
+                'placeholder' => 'Choose a frequency',
+                'required' => false,
+                'label' => false,
+                'attr' => [
+                    'description' => $this->getSettings->getSettingDescription($settingName),
+                ],
+            ]);
 
-                            foreach ($parts as $part) {
-                                if (!preg_match('/^[\d\*\/\-,]+$/', $part)) {
-                                    $context->buildViolation(
-                                        'Each part of the cron expression can only contain digits, *, /, -, or , characters.'
-                                    )
-                                        ->addViolation();
-                                    return;
-                                }
-                            }
-                        }),
-                    ];
-
-                    break;
-                }
-            }
-
-            $builder->add($settingName, TextType::class, $fieldOptions);
+            // Simple mode: time picker
+            $builder->add("{$settingName}_time", TimeType::class, [
+                'required' => false,
+                'widget' => 'single_text',
+                'input' => 'string',
+                'label' => false,
+                'attr' => [
+                    'description' => $this->getSettings->getSettingDescription($settingName),
+                ],
+            ]);
         }
     }
 
