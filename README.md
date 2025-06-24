@@ -478,6 +478,9 @@ certificate. **Connection errors** can happen if the right SHA1 hash is not prov
 63. `PROFILE_LIMIT_DATE_MICROSOFT`: Time in days to disable profiles for users with MICROSOFT login.
 64. `PROFILE_LIMIT_DATE_EMAIL`: Time in days to disable profiles for users with EMAIL login.
 65. `PROFILE_LIMIT_DATE_SMS`: Time in days to disable profiles for users with SMS login.
+66. `DELETE_UNCONFIRMED_USERS_CRON`: Defines the schedule for delete unconfirmed users.
+67. `USERS_WHEN_PROFILE_EXPIRES_CRON`: Defines the schedule for notify users when their profile expires.
+68. `LDAP_SYNC_CRON`: Defines the schedule for LDAP synchronization.
 
 #### With these environment variables, you can configure and customize various aspects of the project, such as database connections, SAML settings, login methods, and more.
 

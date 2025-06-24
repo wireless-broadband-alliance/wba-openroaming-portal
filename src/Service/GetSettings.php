@@ -295,6 +295,10 @@ class GetSettings
             'PROFILE_LIMIT_DATE_SAML' => 'Time in days to disable profiles for users with SAML login',
             'PROFILE_LIMIT_DATE_EMAIL' => 'Time in days to disable profiles for users with EMAIL login',
             'PROFILE_LIMIT_DATE_SMS' => 'Time in days to disable profiles for users with SMS login',
+
+            'DELETE_UNCONFIRMED_USERS_CRON' => 'Defines the schedule for delete unconfirmed users',
+            'USERS_WHEN_PROFILE_EXPIRES_CRON' => 'Defines the schedule for notify users when their profile expires',
+            'LDAP_SYNC_CRON' => 'Defines the schedule for LDAP synchronization',
         ];
 
         return $descriptions[$settingName] ?? '';
