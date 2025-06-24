@@ -5,10 +5,6 @@
                 "enabled": true,
                 "fetch": "eager"
             }
-        },
-        "cron-toggle": {
-          "enabled": true,
-          "fetch": "eager"
         }
     },
     "entrypoints": []

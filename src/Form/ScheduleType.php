@@ -27,59 +27,29 @@ class ScheduleType extends AbstractType
                 'mapped' => false,
             ]);
 
-        $settingsToUpdate = [
-            'DELETE_UNCONFIRMED_USERS_CRON',
-            'USERS_WHEN_PROFILE_EXPIRES_CRON',
-            'LDAP_SYNC_CRON',
-        ];
+        $cronSettings = ['DELETE_UNCONFIRMED_USERS_CRON', 'USERS_WHEN_PROFILE_EXPIRES_CRON', 'LDAP_SYNC_CRON'];
 
-        foreach ($settingsToUpdate as $settingName) {
-            $value = '';
-            foreach ($options['settings'] as $setting) {
-                if ($setting->getName() === $settingName) {
-                    $value = $setting->getValue();
-                    break;
-                }
-            }
-
-            // Manual Cron Input (Advanced Mode)
-            $builder->add($settingName . '_advanced', TextType::class, [
-                'label' => "$settingName (Advanced Cron Input)",
-                'required' => false,
-                'attr' => [
-                    'description' => $this->getSettings->getSettingDescription($settingName),
-                    'autocomplete' => 'off',
-                    'class' => 'advanced-input',
-                ],
-                'data' => $value,
-                'mapped' => false,
-            ]);
-
-            // Simple Mode Inputs
-            $builder->add($settingName . '_frequency', ChoiceType::class, [
-                'label' => "$settingName Frequency",
-                'required' => false,
-                'choices' => [
-                    'Daily' => 'daily',
-                    'Weekly' => 'weekly',
-                    'Monthly' => 'monthly',
-                ],
-                'attr' => [
-                    'class' => 'simple-frequency',
-                ],
-                'mapped' => false,
-            ]);
-
-            $builder->add($settingName . '_time', TimeType::class, [
-                'label' => "$settingName Time",
-                'required' => false,
-                'input' => 'string',
-                'widget' => 'single_text',
-                'attr' => [
-                    'class' => 'simple-time',
-                ],
-                'mapped' => false,
-            ]);
+        foreach ($cronSettings as $settingName) {
+            $builder
+                ->add("{$settingName}_advanced", TextType::class, [
+                    'required' => false,
+                    'label' => false,
+                    'attr' => ['placeholder' => '*/5 * * * *'],
+                ])
+                ->add("{$settingName}_frequency", ChoiceType::class, [
+                    'required' => false,
+                    'choices' => [
+                        'Daily' => 'daily',
+                        'Weekly' => 'weekly',
+                        'Monthly' => 'monthly',
+                    ],
+                    'placeholder' => 'Choose a frequency',
+                ])
+                ->add("{$settingName}_time", TimeType::class, [
+                    'required' => false,
+                    'input' => 'string',
+                    'widget' => 'single_text',
+                ]);
         }
     }
 
