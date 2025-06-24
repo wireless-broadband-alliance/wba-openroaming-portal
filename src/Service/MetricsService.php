@@ -6,29 +6,28 @@ use App\Enum\UserProvider;
 use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRadiusProfileRepository;
 use App\Repository\UserRepository;
+use Exception;
 use Prometheus\CollectorRegistry;
+use Prometheus\Exception\MetricsRegistrationException;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\HttpKernel\KernelInterface;
+use RuntimeException;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Throwable;
 
-/**
- * Service for collecting and providing application metrics.
- */
-class MetricsService
+readonly class MetricsService
 {
-    public $projectDir;
-    private readonly CollectorRegistry $registry;
+    private CollectorRegistry $registry;
 
     public function __construct(
-        private readonly UserRepository $userRepository,
-        private readonly UserRadiusProfileRepository $userRadiusProfileRepository,
-        private readonly UserExternalAuthRepository $userExternalAuthRepository,
+        private UserRepository $userRepository,
+        private UserRadiusProfileRepository $userRadiusProfileRepository,
+        private UserExternalAuthRepository $userExternalAuthRepository,
         PrometheusStorageService $storageService,
-        private readonly LoggerInterface $logger,
-        private readonly KernelInterface $kernel
+        private LoggerInterface $logger,
+        #[Autowire('%kernel.project_dir%')] private string $projectDir
     ) {
         $this->registry = new CollectorRegistry($storageService->getAdapter());
     }
-
 
     public function collectMetrics(): CollectorRegistry
     {
@@ -38,7 +37,7 @@ class MetricsService
             $this->collectUserMetrics();
             $this->collectAuthProviderMetrics();
             $this->collectRadiusProfileMetrics();
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             $this->logger->error('Error collecting metrics: ' . $e->getMessage(), ['exception' => $e]);
         }
 
@@ -47,6 +46,7 @@ class MetricsService
 
     /**
      * Collect basic app metrics that don't rely on repositories.
+     * @throws MetricsRegistrationException
      */
     private function collectBasicAppMetrics(): void
     {
@@ -71,6 +71,7 @@ class MetricsService
 
     /**
      * Collect user metrics.
+     * @throws MetricsRegistrationException
      */
     private function collectUserMetrics(): void
     {
@@ -93,13 +94,14 @@ class MetricsService
             $bannedUsers = $this->userRepository->totalBannedUsers();
             $userGauge->set($bannedUsers, ['state' => 'banned']);
             $this->logger->info('Set banned users metric: ' . $bannedUsers);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->logger->error('Error collecting user metrics: ' . $e->getMessage(), ['exception' => $e]);
         }
     }
 
     /**
      * Collect authentication provider metrics.
+     * @throws MetricsRegistrationException
      */
     private function collectAuthProviderMetrics(): void
     {
@@ -129,7 +131,7 @@ class MetricsService
                 $providerCounts[$provider]++;
             }
 
-            $this->logger->info('Provider counts: ' . json_encode($providerCounts));
+            $this->logger->info('Provider counts: ' . json_encode($providerCounts, JSON_THROW_ON_ERROR));
 
             foreach ($providerCounts as $provider => $count) {
                 $authProviderGauge->set($count, ['provider' => $provider]);
@@ -161,19 +163,20 @@ class MetricsService
                 }
             }
 
-            $this->logger->info('Portal counts: ' . json_encode($portalCounts));
+            $this->logger->info('Portal counts: ' . json_encode($portalCounts, JSON_THROW_ON_ERROR));
 
             foreach ($portalCounts as $type => $count) {
                 $portalProviderGauge->set($count, ['type' => $type]);
                 $this->logger->info("Set portal type metric: $type = $count");
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->logger->error('Error collecting auth provider metrics: ' . $e->getMessage(), ['exception' => $e]);
         }
     }
 
     /**
      * Collect radius profile metrics.
+     * @throws MetricsRegistrationException
      */
     private function collectRadiusProfileMetrics(): void
     {
@@ -198,7 +201,12 @@ class MetricsService
                 $profilesByStatus[$status]++;
             }
 
-            $this->logger->info('Radius profile counts by status: ' . json_encode($profilesByStatus));
+            $this->logger->info(
+                'Radius profile counts by status: ' . json_encode(
+                    $profilesByStatus,
+                    JSON_THROW_ON_ERROR
+                )
+            );
 
             foreach ($profilesByStatus as $status => $count) {
                 $radiusProfileGauge->set($count, ['status' => (string)$status]);
@@ -214,10 +222,10 @@ class MetricsService
 
     private function getAppVersion(): ?string
     {
-        $composerJsonPath = $this->kernel->getProjectDir() . '/composer.json';
+        $composerJsonPath = $this->projectDir . '/composer.json';
 
         if (!file_exists($composerJsonPath)) {
-            throw new \RuntimeException('Unable to fetch version');
+            throw new RuntimeException('Unable to fetch version');
         }
 
         $composerJsonContent = file_get_contents($composerJsonPath);
@@ -225,7 +233,7 @@ class MetricsService
         $composerJsonDecoded = json_decode($composerJsonContent, true);
 
         if (json_last_error() !== JSON_ERROR_NONE) {
-            throw new \RuntimeException('Unable to decode composer.json: ' . json_last_error_msg());
+            throw new RuntimeException('Unable to decode composer.json: ' . json_last_error_msg());
         }
 
         return $composerJsonDecoded['version'] ?? null;
