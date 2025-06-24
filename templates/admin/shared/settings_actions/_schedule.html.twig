@@ -46,12 +46,13 @@
 
                     <div class="space-y-2 mt-5">
                         {% for fieldName in fields %}
-                            <div>
+                            <div
+                                    class="form-group"
+                                    data-cron-toggle-target="{{ fieldName ends with '_advanced' ? 'advanced' : (fieldName ends with '_frequency' ? 'frequency' : 'time') }}"
+                                    data-cron-toggle-group="{{ groupName }}"
+                            >
                                 {{ form_row(attribute(form, fieldName), {
-                                    attr: {
-                                        class: 'form-widget',
-                                        placeholder: 'e.g. 0 0 * * *',
-                                    }
+                                    attr: { class: 'form-widget', placeholder: 'e.g. 0 0 * * *' }
                                 }) }}
                             </div>
                         {% endfor %}
