@@ -71,7 +71,7 @@
                                 fieldName ends with '_day_of_week' ? 'day_of_week' :
                                 fieldName ends with '_day_of_month' ? 'day_of_month' : null %}
                             <div class="form-group" data-cron-toggle-group="{{ groupName }}">
-                                {{ form_row(attribute(form, fieldName), {
+                                {{ form_widget(attribute(form, fieldName), {
                                     attr: {
                                         class: 'form-widget',
                                         placeholder: 'e.g. 0 0 * * *',
