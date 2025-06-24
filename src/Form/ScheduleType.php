@@ -47,7 +47,7 @@ class ScheduleType extends AbstractType
                     'description' => $this->getSettings->getSettingDescription($settingName),
                 ],
                 'constraints' => [
-                    new Callback(function ($value, ExecutionContextInterface $context) {
+                    new Callback(function ($value, ExecutionContextInterface $context): void {
                         if (empty($value)) {
                             return;
                         }
@@ -133,7 +133,7 @@ class ScheduleType extends AbstractType
         }
 
         // Dynamic validation
-        $builder->addEventListener(FormEvents::POST_SUBMIT, function (FormEvent $event) use ($cronSettings) {
+        $builder->addEventListener(FormEvents::POST_SUBMIT, function (FormEvent $event) use ($cronSettings): void {
             $form = $event->getForm();
             $data = $form->getData();
             $isAdvanced = $form->get('use_advanced_mode')->getData();

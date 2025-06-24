@@ -48,7 +48,7 @@ class ScheduleAutomationController extends AbstractController
             $cronValue = $setting ? $setting->getValue() : '';
             $initialData["{$settingName}_advanced"] = $cronValue;
 
-            if (preg_match('/^(\d+) (\d+) \* \* \*$/', $cronValue, $matches)) {
+            if (preg_match('/^(\d+) (\d+) \* \* \*$/', (string) $cronValue, $matches)) {
                 // daily: "minute hour * * *"
                 [, $minute, $hour] = $matches;
 
@@ -59,7 +59,7 @@ class ScheduleAutomationController extends AbstractController
                 );
                 $initialData["{$settingName}_day_of_week"] = null;
                 $initialData["{$settingName}_day_of_month"] = null;
-            } elseif (preg_match('/^(\d+) (\d+) \* \* (\d+)$/', $cronValue, $matches)) {
+            } elseif (preg_match('/^(\d+) (\d+) \* \* (\d+)$/', (string) $cronValue, $matches)) {
                 // weekly: "minute hour * * day_of_week"
                 [, $minute, $hour, $dayOfWeekStr] = $matches;
                 $dayOfWeek = (int)$dayOfWeekStr;
@@ -71,7 +71,7 @@ class ScheduleAutomationController extends AbstractController
                 );
                 $initialData["{$settingName}_day_of_week"] = $dayOfWeek;
                 $initialData["{$settingName}_day_of_month"] = null;
-            } elseif (preg_match('/^(\d+) (\d+) (\d+) \* \*$/', $cronValue, $matches)) {
+            } elseif (preg_match('/^(\d+) (\d+) (\d+) \* \*$/', (string) $cronValue, $matches)) {
                 // monthly: "minute hour day_of_month * *"
                 [, $minute, $hour, $dayOfMonthStr] = $matches;
                 $dayOfMonth = (int)$dayOfMonthStr;
@@ -126,12 +126,12 @@ class ScheduleAutomationController extends AbstractController
                         } elseif ($frequency === 'weekly') {
                             $dayOfWeek = $form->get($settingName . '_day_of_week')->getData();
                             // default to Sunday if not set
-                            $dayOfWeek = $dayOfWeek ?? 0;
+                            $dayOfWeek ??= 0;
                             $cronValue = "$minute $hour * * $dayOfWeek";
                         } elseif ($frequency === 'monthly') {
                             $dayOfMonth = $form->get($settingName . '_day_of_month')->getData();
                             // default to 1 if not set
-                            $dayOfMonth = $dayOfMonth ?? 1;
+                            $dayOfMonth ??= 1;
                             $cronValue = "$minute $hour $dayOfMonth * *";
                         }
                     }
