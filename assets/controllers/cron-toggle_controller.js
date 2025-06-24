@@ -5,6 +5,7 @@ export default class extends Controller {
 
     connect() {
         this.updateVisibility();
+
         this.frequencyTargets.forEach(el => {
             el.addEventListener('change', () => this.updateVisibility());
         });
@@ -17,45 +18,42 @@ export default class extends Controller {
     updateVisibility() {
         const isAdvanced = this.toggleTarget.checked;
 
-        // Toggle advanced fields visibility
+        // Show/hide advanced fields
         this.advancedTargets.forEach(el => {
-            el.classList.toggle('hidden', !isAdvanced);
+            el.closest('.form-group')?.classList.toggle('hidden', !isAdvanced);
         });
 
-        // Toggle frequency and time visibility
+        // Show/hide frequency and time fields when not in advanced mode
         [...this.frequencyTargets, ...this.timeTargets].forEach(el => {
-            el.classList.toggle('hidden', isAdvanced);
+            el.closest('.form-group')?.classList.toggle('hidden', isAdvanced);
         });
 
-        // Get unique groups
-        const groups = new Set(this.frequencyTargets.map(el => el.closest('[data-cron-toggle-group]').dataset.cronToggleGroup));
+        // Extract unique groups from frequency targets
+        const groups = new Set(
+            this.frequencyTargets
+                .map(el => el.dataset.cronToggleGroup)
+                .filter(Boolean)
+        );
 
         groups.forEach(group => {
-            // Find the frequency input for this group
-            const freqEl = this.frequencyTargets.find(el => el.closest('[data-cron-toggle-group]').dataset.cronToggleGroup === group);
-            console.log('freqEl for group', group, freqEl);
-            // Get the frequency value (string), lowercase and trim it
-            const frequency = freqEl && freqEl.value ? freqEl.value.trim().toLowerCase() : '';
+            // Get frequency input element for this group
+            const freqEl = this.frequencyTargets.find(el =>
+                el.dataset.cronToggleGroup === group
+            );
 
-            // For day_of_week fields in this group:
+            const frequency = freqEl?.value?.trim().toLowerCase() || '';
+
+            // day_of_week logic (show if frequency is weekly)
             this.day_of_weekTargets.forEach(el => {
                 if (el.dataset.cronToggleGroup === group) {
-                    if (!isAdvanced && frequency === 'weekly') {
-                        el.classList.remove('hidden');
-                    } else {
-                        el.classList.add('hidden');
-                    }
+                    el.closest('.form-group')?.classList.toggle('hidden', !(frequency === 'weekly' && !isAdvanced));
                 }
             });
 
-            // For day_of_month fields in this group:
+            // day_of_month logic (show if frequency is monthly)
             this.day_of_monthTargets.forEach(el => {
                 if (el.dataset.cronToggleGroup === group) {
-                    if (!isAdvanced && frequency === 'monthly') {
-                        el.classList.remove('hidden');
-                    } else {
-                        el.classList.add('hidden');
-                    }
+                    el.closest('.form-group')?.classList.toggle('hidden', !(frequency === 'monthly' && !isAdvanced));
                 }
             });
         });
