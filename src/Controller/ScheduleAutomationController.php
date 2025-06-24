@@ -48,9 +48,6 @@ class ScheduleAutomationController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            /** @var User $currentUser */
-            $currentUser = $this->getUser();
-
             $useAdvancedMode = $form->get('use_advanced_mode')->getData();
 
             $settingsToUpdate = [
@@ -61,14 +58,17 @@ class ScheduleAutomationController extends AbstractController
 
             foreach ($settingsToUpdate as $settingName) {
                 $cronValue = '';
+
                 if ($useAdvancedMode) {
-                    $cronValue = $form->get($settingName . '_advanced')->getData();
+                    // Detect if the user checked the simple/advanced mode
+                    $cronValue = $form->get($settingName . '_advanced')->getData() ?: '';
                 } else {
                     $frequency = $form->get($settingName . '_frequency')->getData();
-                    $time = $form->get($settingName . '_time')->getData(); // format: "HH:MM"
+                    $time = $form->get($settingName . '_time')->getData(); // string "HH:MM" or null
 
-                    if ($time) {
+                    if ($frequency && $time && strpos($time, ':') !== false) {
                         [$hour, $minute] = explode(':', $time);
+
                         $cronValue = match ($frequency) {
                             'daily' => "$minute $hour * * *",
                             'weekly' => "$minute $hour * * 0",
@@ -99,6 +99,7 @@ class ScheduleAutomationController extends AbstractController
             );
 
             $this->entityManager->flush();
+
             $this->addFlash('success_admin', 'New Schedule configuration has been applied successfully.');
 
             return $this->redirectToRoute('admin_dashboard_settings_schedule');
