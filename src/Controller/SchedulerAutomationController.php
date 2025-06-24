@@ -6,6 +6,7 @@ use App\Entity\Setting;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Form\CapportType;
+use App\Form\ScheduleType;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use App\Schedule;
@@ -51,9 +52,9 @@ class SchedulerAutomationController extends AbstractController
             $submittedData = $form->getData();
 
             $settingsToUpdate = [
-                'CAPPORT_ENABLED',
-                'CAPPORT_PORTAL_URL',
-                'CAPPORT_VENUE_INFO_URL',
+                'DELETE_UNCONFIRMED_USERS_CRON',
+                'USERS_WHEN_PROFILE_EXPIRES_CRON',
+                'LDAP_SYNC_CRON',
             ];
 
             foreach ($settingsToUpdate as $settingName) {
