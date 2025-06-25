@@ -744,7 +744,7 @@ use Doctrine\ORM\Mapping as ORM;
             extraProperties: [OpenApiFactory::OVERRIDE_OPENAPI_RESPONSES => false],
         ),
     ],
-    routePrefix: '/api/v1',
+    routePrefix: '/v1',
 )]
 class Setting
 {
