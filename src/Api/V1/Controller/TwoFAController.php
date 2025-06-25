@@ -45,7 +45,7 @@ class TwoFAController extends AbstractController
      * @throws ServerExceptionInterface
      * @throws \JsonException
      */
-    #[Route('/api/v1/twoFA/request', name: 'api_twoFA_request', methods: ['POST'])]
+    #[Route('/api/v1/twoFA/request', name: 'api_v1_twoFA_request', methods: ['POST'])]
     public function twoFARequest(Request $request): JsonResponse
     {
         try {
