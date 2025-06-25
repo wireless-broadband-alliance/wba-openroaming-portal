@@ -22,6 +22,7 @@ use Doctrine\ORM\Mapping as ORM;
             uriTemplate: '/turnstile/android',
             controller: TurnstileController::class,
             openapi: new Operation(
+                tags: ['v1 - Turnstile'],
                 responses: [
                     200 => [
                         'description' => 'Turnstile HTML configuration retrieved successfully',
@@ -80,6 +81,7 @@ use Doctrine\ORM\Mapping as ORM;
             uriTemplate: '/capport/json',
             controller: CapportController::class,
             openapi: new Operation(
+                tags: ['v1 - Capport'],
                 responses: [
                     200 => [
                         'description' => 'Successful response with CAPPORT metadata.',
@@ -155,6 +157,7 @@ use Doctrine\ORM\Mapping as ORM;
             uriTemplate: '/config',
             controller: ConfigController::class,
             openapi: new Operation(
+                tags: ['v1 - Setting'],
                 responses: [
                     200 => [
                         'description' => 'Configuration settings retrieved successfully',
@@ -407,6 +410,7 @@ use Doctrine\ORM\Mapping as ORM;
             uriTemplate: '/config/profile/android',
             controller: ProfileController::class,
             openapi: new Operation(
+                tags: ['v1 - Profile Configuration'],
                 responses: [
                     200 => [
                         'description' => 'Profile configuration for Android successfully retrieved',
@@ -572,7 +576,9 @@ use Doctrine\ORM\Mapping as ORM;
         new GetCollection(
             uriTemplate: '/config/profile/ios',
             controller: ProfileController::class,
-            openapi: new Operation(
+            openapi: new Operation
+            (
+                tags: ['v1 - Profile Configuration'],
                 responses: [
                     200 => [
                         'description' => 'Profile configuration for iOS successfully retrieved',

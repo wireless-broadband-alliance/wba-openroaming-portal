@@ -11,7 +11,6 @@ use ApiPlatform\OpenApi\Model\RequestBody;
 use App\Api\V1\Controller\UserAccountController;
 use App\Repository\DeletedUserDataRepository;
 use ArrayObject;
-use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: DeletedUserDataRepository::class)]
@@ -21,6 +20,7 @@ use Doctrine\ORM\Mapping as ORM;
             uriTemplate: '/userAccount/deletion',
             controller: UserAccountController::class,
             openapi: new Operation(
+                tags: ['v2 - User Account'],
                 responses: [
                     200 => [
                         'description' => 'User Account was deleted successfully.',

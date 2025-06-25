@@ -20,6 +20,7 @@ use Doctrine\ORM\Mapping as ORM;
             uriTemplate: '/userAccount/deletion',
             controller: UserAccountController::class,
             openapi: new Operation(
+                tags: ['v1 - User Account'],
                 responses: [
                     200 => [
                         'description' => 'User Account was deleted successfully.',

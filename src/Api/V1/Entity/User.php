@@ -24,6 +24,7 @@ use Doctrine\ORM\Mapping as ORM;
             uriTemplate: '/user',
             controller: GetCurrentUserController::class,
             openapi: new Operation(
+                tags: ['v1 - User'],
                 responses: [
                     200 => [
                         'description' => 'User details retrieved successfully',
@@ -219,6 +220,7 @@ use Doctrine\ORM\Mapping as ORM;
             uriTemplate: '/twoFA/request',
             controller: TwoFAController::class,
             openapi: new Operation(
+                tags: ['v1 - User Auth'],
                 responses: [
                     200 => [
                         'description' => 'Requested two-factor authentication token',
@@ -492,6 +494,7 @@ use Doctrine\ORM\Mapping as ORM;
             uriTemplate: '/auth/local',
             controller: AuthController::class,
             openapi: new Operation(
+                tags: ['v1 - User Auth'],
                 responses: [
                     200 => [
                         'description' => 'Authenticated user details and JWT token',
@@ -804,6 +807,7 @@ use Doctrine\ORM\Mapping as ORM;
             uriTemplate: '/auth/saml',
             controller: AuthController::class,
             openapi: new Operation(
+                tags: ['v1 - User Auth'],
                 responses: [
                     200 => [
                         'description' => 'Authenticated user details and JWT token',
@@ -1115,6 +1119,7 @@ use Doctrine\ORM\Mapping as ORM;
             uriTemplate: '/auth/google',
             controller: AuthController::class,
             openapi: new Operation(
+                tags: ['v1 - User Auth'],
                 responses: [
                     200 => [
                         'description' => 'Authenticated user details and JWT token',
@@ -1393,6 +1398,7 @@ use Doctrine\ORM\Mapping as ORM;
             uriTemplate: '/auth/microsoft',
             controller: AuthController::class,
             openapi: new Operation(
+                tags: ['v1 - User Auth'],
                 responses: [
                     200 => [
                         'description' => 'Authenticated user details and JWT token',
@@ -1671,6 +1677,7 @@ use Doctrine\ORM\Mapping as ORM;
             uriTemplate: '/auth/local/register',
             controller: RegistrationController::class,
             openapi: new Operation(
+                tags: ['v1 - User Auth Register'],
                 responses: [
                     200 => [
                         'description' => 'User registered successfully',
@@ -1813,6 +1820,7 @@ use Doctrine\ORM\Mapping as ORM;
             uriTemplate: '/auth/sms/register',
             controller: RegistrationController::class,
             openapi: new Operation(
+                tags: ['v1 - User Auth Register'],
                 responses: [
                     200 => [
                         'description' => 'User registered successfully',
@@ -1996,6 +2004,7 @@ use Doctrine\ORM\Mapping as ORM;
             uriTemplate: '/auth/local/reset',
             controller: AuthController::class,
             openapi: new Operation(
+                tags: ['v1 - User Auth Reset'],
                 responses: [
                     200 => [
                         'description' => 'Password reset email sent successfully',
@@ -2123,6 +2132,7 @@ use Doctrine\ORM\Mapping as ORM;
             uriTemplate: '/auth/sms/reset',
             controller: AuthController::class,
             openapi: new Operation(
+                tags: ['v1 - User Auth Reset'],
                 responses: [
                     200 => [
                         'description' => 'Successfully sent the SMS with a new password and verification code',
