@@ -104,6 +104,7 @@ class ScheduleType extends AbstractType
                 'placeholder' => 'Choose a day of week',
                 'required' => false,
                 'label' => false,
+                'multiple' => true,
                 'attr' => [
                     'description' => $this->getSettings->getSettingDescription($settingName),
                 ],
@@ -115,26 +116,27 @@ class ScheduleType extends AbstractType
                 'placeholder' => 'Choose a day of month',
                 'required' => false,
                 'label' => false,
+                'multiple' => true,
                 'attr' => [
                     'description' => $this->getSettings->getSettingDescription($settingName),
                 ],
             ]);
 
-            // ✅ Start date (optional time frame start)
+            // Start date (optional time frame start)
             $builder->add("{$settingName}_startDate", DateTimeType::class, [
                 'required' => false,
                 'widget' => 'single_text',
                 'label' => 'Start Date',
             ]);
 
-            // ✅ End date (optional time frame end)
+            // End date (optional time frame end)
             $builder->add("{$settingName}_endDate", DateTimeType::class, [
                 'required' => false,
                 'widget' => 'single_text',
                 'label' => 'End Date',
             ]);
 
-            // ✅ Interval between runs (e.g. every 2 hours, 30 mins)
+            // Interval between runs (e.g. every 2 hours, 30 mins)
             $builder->add("{$settingName}_interval", TimeType::class, [
                 'required' => false,
                 'widget' => 'single_text',

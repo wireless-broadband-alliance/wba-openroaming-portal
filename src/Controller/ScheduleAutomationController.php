@@ -63,8 +63,8 @@ class ScheduleAutomationController extends AbstractController
                     'H:i',
                     sprintf('%02d:%02d', $hours, $minutes)
                 );
-                $initialData["{$settingName}_day_of_week"] = null;
-                $initialData["{$settingName}_day_of_month"] = null;
+                $initialData["{$settingName}_day_of_week"] = [];
+                $initialData["{$settingName}_day_of_month"] = [];
             } elseif ($days === '*' && $dayOfWeek !== '*') {
                 // weekly: "minute hour * * day_of_week"
 
@@ -73,8 +73,8 @@ class ScheduleAutomationController extends AbstractController
                     'H:i',
                     sprintf('%02d:%02d', $hours, $minutes)
                 );
-                $initialData["{$settingName}_day_of_week"] = (int)$dayOfWeek;
-                $initialData["{$settingName}_day_of_month"] = null;
+                $initialData["{$settingName}_day_of_week"] = [(int)$dayOfWeek];
+                $initialData["{$settingName}_day_of_month"] = [];
             } elseif ($days !== '*' && $dayOfWeek === '*') {
                 // monthly: "minute hour day_of_month * *"
 
@@ -83,14 +83,14 @@ class ScheduleAutomationController extends AbstractController
                     'H:i',
                     sprintf('%02d:%02d', $hours, $minutes)
                 );
-                $initialData["{$settingName}_day_of_month"] = (int)$days;
-                $initialData["{$settingName}_day_of_week"] = null;
+                $initialData["{$settingName}_day_of_month"] = [(int)$days];
+                $initialData["{$settingName}_day_of_week"] = [];
             } else {
                 // advanced or unrecognized
                 $initialData["{$settingName}_frequency"] = null;
                 $initialData["{$settingName}_time"] = null;
-                $initialData["{$settingName}_day_of_week"] = null;
-                $initialData["{$settingName}_day_of_month"] = null;
+                $initialData["{$settingName}_day_of_week"] = [];
+                $initialData["{$settingName}_day_of_month"] = [];
             }
         }
 
