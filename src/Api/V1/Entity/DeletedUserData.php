@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Entity;
+namespace App\Api\V1\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Delete;
