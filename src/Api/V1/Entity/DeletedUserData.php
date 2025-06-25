@@ -369,7 +369,7 @@ use Doctrine\ORM\Mapping as ORM;
             extraProperties: [OpenApiFactory::OVERRIDE_OPENAPI_RESPONSES => false],
         ),
     ],
-    routePrefix: '/v1',
+    extraProperties: ['api_version' => 'v1'],
 )]
 class DeletedUserData
 {

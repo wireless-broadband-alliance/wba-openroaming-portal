@@ -1,0 +1,12 @@
+# This configuration reads jsonLd format generated to render them with swagger
+api_v1_docs:
+    path: /api/v1
+    controller: api_platform.swagger_ui.action
+    defaults:
+        _api_areas: ['v1']
+
+api_v2_docs:
+    path: /api/v2
+    controller: api_platform.swagger_ui.action
+    defaults:
+        _api_areas: ['v2']
