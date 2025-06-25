@@ -9,6 +9,7 @@ use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use App\Service\EventActions;
 use App\Service\GetSettings;
+use Cron\CronExpression;
 use DateTime;
 use DateTimeInterface;
 use Doctrine\ORM\EntityManagerInterface;
@@ -48,40 +49,45 @@ class ScheduleAutomationController extends AbstractController
             $cronValue = $setting ? $setting->getValue() : '';
             $initialData["{$settingName}_advanced"] = $cronValue;
 
-            if (preg_match('/^(\d+) (\d+) \* \* \*$/', (string) $cronValue, $matches)) {
+            $cron = CronExpression::factory($cronValue);
+
+            $parts = preg_split('/\s+/', $cron);
+
+            $minutes = $parts[0];
+            $hours = $parts[1];
+            $days = $parts[2];
+            $months = $parts[3];
+            $dayOfWeek = $parts[4];
+
+            if ($days === '*' && $dayOfWeek === '*') {
                 // daily: "minute hour * * *"
-                [, $minute, $hour] = $matches;
 
                 $initialData["{$settingName}_frequency"] = 'daily';
                 $initialData["{$settingName}_time"] = DateTime::createFromFormat(
                     'H:i',
-                    sprintf('%02d:%02d', $hour, $minute)
+                    sprintf('%02d:%02d', $hours, $minutes)
                 );
                 $initialData["{$settingName}_day_of_week"] = null;
                 $initialData["{$settingName}_day_of_month"] = null;
-            } elseif (preg_match('/^(\d+) (\d+) \* \* (\d+)$/', (string) $cronValue, $matches)) {
+            } elseif ($days === '*' && $dayOfWeek !== '*') {
                 // weekly: "minute hour * * day_of_week"
-                [, $minute, $hour, $dayOfWeekStr] = $matches;
-                $dayOfWeek = (int)$dayOfWeekStr;
 
                 $initialData["{$settingName}_frequency"] = 'weekly';
                 $initialData["{$settingName}_time"] = DateTime::createFromFormat(
                     'H:i',
-                    sprintf('%02d:%02d', $hour, $minute)
+                    sprintf('%02d:%02d', $hours, $minutes)
                 );
-                $initialData["{$settingName}_day_of_week"] = $dayOfWeek;
+                $initialData["{$settingName}_day_of_week"] = (int)$dayOfWeek;
                 $initialData["{$settingName}_day_of_month"] = null;
-            } elseif (preg_match('/^(\d+) (\d+) (\d+) \* \*$/', (string) $cronValue, $matches)) {
+            } elseif ($days !== '*' && $dayOfWeek === '*') {
                 // monthly: "minute hour day_of_month * *"
-                [, $minute, $hour, $dayOfMonthStr] = $matches;
-                $dayOfMonth = (int)$dayOfMonthStr;
 
                 $initialData["{$settingName}_frequency"] = 'monthly';
                 $initialData["{$settingName}_time"] = DateTime::createFromFormat(
                     'H:i',
-                    sprintf('%02d:%02d', $hour, $minute)
+                    sprintf('%02d:%02d', $hours, $minutes)
                 );
-                $initialData["{$settingName}_day_of_month"] = $dayOfMonth;
+                $initialData["{$settingName}_day_of_month"] = (int)$months;
                 $initialData["{$settingName}_day_of_week"] = null;
             } else {
                 // advanced or unrecognized
