@@ -51,7 +51,7 @@ class ScheduleType extends AbstractType
                 'constraints' => [
                     new Callback(function ($value, ExecutionContextInterface $context): void {
                         try {
-                            CronExpression::factory($value);
+                            new CronExpression($value);
                         } catch (Exception $e) {
                             $context->buildViolation('The string "{{ value }}" is not a valid cron expression.')
                                 ->setParameter('{{ value }}', $value)
