@@ -14,6 +14,8 @@ app_dashboard_login:
     path: /dashboard/login
     controller: App\Controller\SecurityController::dashboardLogin
 
+# API V1
+
 api_v1:
     prefix: /api/v1
     resource: '../src/Api/V1/Controller/'
@@ -87,4 +89,81 @@ api_v1_config_profile_ios:
 api_v1_twoFA_request:
     path: /api/v1/twoFA/request
     controller: App\Api\V1\Controller\TwoFAController::twoFARequest
+    methods: [ 'POST' ]
+
+# API V2
+
+api_v2:
+    prefix: /api/v2
+    resource: '../src/Api/V2/Controller/'
+    type: attribute
+
+api_v2_get_current_user:
+    path: /api/v2/user
+    controller: App\Api\V2\Controller\GetCurrentUserController::getCurrentUser
+    methods: [ 'GET' ]
+
+api_v2_user_account_deletion:
+    path: /api/v2/userAccount/deletion
+    controller: App\Api\V2\Controller\UserAccountController::userAccountDeletion
+    methods: [ 'POST' ]
+
+api_v2_auth_local:
+    path: /api/v2/auth/local
+    controller: App\Api\V2\Controller\AuthController::authLocal
+    methods: [ 'POST' ]
+
+api_v2_auth_saml:
+    path: /api/v2/auth/saml
+    controller: App\Api\V2\Controller\AuthController::authSaml
+    methods: [ 'POST' ]
+
+api_v2_auth_google:
+    path: /api/v2/auth/google
+    controller: App\Api\V2\Controller\AuthController::authGoogle
+    methods: [ 'POST' ]
+
+api_v2_auth_microsoft:
+    path: /api/v2/auth/microsoft
+    controller: App\Api\V2\Controller\AuthController::authMicrosoft
+    methods: [ 'POST' ]
+
+api_v2_auth_local_register:
+    path: /api/v2/auth/local/register
+    controller: App\Api\V2\Controller\RegistrationController::localRegister
+    methods: [ 'POST' ]
+
+api_v2_auth_local_reset:
+    path: /api/v2/auth/local/reset
+    controller: App\Api\V2\Controller\RegistrationController::localReset
+    methods: [ 'POST' ]
+
+api_v2_auth_sms_register:
+    path: /api/v2/auth/sms/register
+    controller: App\Api\V2\Controller\RegistrationController::smsRegister
+    methods: [ 'POST' ]
+
+api_v2_auth_sms_reset:
+    path: /api/v2/auth/sms/reset
+    controller: App\Api\V2\Controller\RegistrationController::smsReset
+    methods: [ 'POST' ]
+
+api_v2_turnstile_html_android:
+    path: /api/v2/turnstile/android
+    controller: App\Api\V2\Controller\TurnstileController::getHtmlFromFile
+    methods: [ 'GET' ]
+
+api_v2_config_profile_android:
+    path: /api/v2/config/profile/android
+    controller: App\Api\V2\Controller\ProfileController::getProfileAndroid
+    methods: [ 'GET' ]
+
+api_v2_config_profile_ios:
+    path: /api/v2/config/profile/ios
+    controller: App\Api\V2\Controller\ProfileController::getProfileIos
+    methods: [ 'GET' ]
+
+api_v2_twoFA_request:
+    path: /api/v2/twoFA/request
+    controller: App\Api\V2\Controller\TwoFAController::twoFARequest
     methods: [ 'POST' ]

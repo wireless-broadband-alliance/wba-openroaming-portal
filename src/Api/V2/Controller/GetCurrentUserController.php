@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Api\V1\Controller;
+namespace App\Api\V2\Controller;
 
-use App\Api\V1\BaseResponse;
+use App\Api\V2\BaseResponse;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Service\EventActions;
@@ -36,7 +36,7 @@ class GetCurrentUserController extends AbstractController
      * @throws ClientExceptionInterface
      * @throws Exception
      */
-    #[Route('/api/v1/user', name: 'api_get_current_user', methods: ['GET'])]
+    #[Route('/api/v2/user', name: 'api_v2_get_current_user', methods: ['GET'])]
     public function getCurrentUser(Request $request): JsonResponse
     {
         $token = $this->tokenStorage->getToken();
