@@ -19,7 +19,7 @@ use Doctrine\ORM\Mapping as ORM;
 #[ApiResource(
     operations: [
         new GetCollection(
-            uriTemplate: '/api/v2/turnstile/android',
+            uriTemplate: '/turnstile/android',
             controller: TurnstileController::class,
             openapi: new Operation(
                 responses: [
@@ -73,11 +73,11 @@ use Doctrine\ORM\Mapping as ORM;
             shortName: 'Turnstile',
             paginationEnabled: false,
             description: 'Serves the public HTML configuration required for Turnstile integration for Android apps.',
-            name: 'api_turnstile_html_android',
+            name: 'api_v2_turnstile_html_android',
             extraProperties: [OpenApiFactory::OVERRIDE_OPENAPI_RESPONSES => false],
         ),
         new GetCollection(
-            uriTemplate: '/api/v2/capport/json',
+            uriTemplate: '/capport/json',
             controller: CapportController::class,
             openapi: new Operation(
                 responses: [
@@ -148,7 +148,7 @@ use Doctrine\ORM\Mapping as ORM;
             shortName: 'Capport',
             paginationEnabled: false,
             description: 'CAPPORT JSON metadata endpoint',
-            name: 'api_capport_json',
+            name: 'api_v2_capport_json',
             extraProperties: [OpenApiFactory::OVERRIDE_OPENAPI_RESPONSES => false],
         ),
         new GetCollection(
@@ -400,7 +400,7 @@ use Doctrine\ORM\Mapping as ORM;
             shortName: 'Setting',
             paginationEnabled: false,
             description: 'Returns public values from the Setting entity',
-            name: 'app_config_settings',
+            name: 'app_v2_config_settings',
             extraProperties: [OpenApiFactory::OVERRIDE_OPENAPI_RESPONSES => false],
         ),
         new GetCollection(
@@ -566,7 +566,7 @@ use Doctrine\ORM\Mapping as ORM;
             shortName: 'Profile Configuration',
             paginationEnabled: false,
             description: 'Returns the configuration data for an Android profile',
-            name: 'api_config_profile_android',
+            name: 'api_v2_config_profile_android',
             extraProperties: [OpenApiFactory::OVERRIDE_OPENAPI_RESPONSES => false],
         ),
         new GetCollection(
@@ -740,7 +740,7 @@ use Doctrine\ORM\Mapping as ORM;
             shortName: 'Profile Configuration',
             paginationEnabled: false,
             description: 'Returns the configuration data for an iOS profile',
-            name: 'api_config_profile_ios',
+            name: 'api_v2_config_profile_ios',
             extraProperties: [OpenApiFactory::OVERRIDE_OPENAPI_RESPONSES => false],
         ),
     ],
