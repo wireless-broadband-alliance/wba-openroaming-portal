@@ -53,11 +53,7 @@ class ScheduleAutomationController extends AbstractController
 
             $parts = preg_split('/\s+/', $cron);
 
-            $minutes = $parts[0];
-            $hours = $parts[1];
-            $days = $parts[2];
-            $months = $parts[3];
-            $dayOfWeek = $parts[4];
+            [$minutes, $hours, $days, $months, $dayOfWeek] = $parts;
 
             if ($days === '*' && $dayOfWeek === '*') {
                 // daily: "minute hour * * *"
@@ -104,7 +100,7 @@ class ScheduleAutomationController extends AbstractController
         ]);
 
         $form->handleRequest($request);
-
+        dump($form->getData());
         if ($form->isSubmitted() && $form->isValid()) {
             $useAdvancedMode = $form->get('use_advanced_mode')->getData();
 

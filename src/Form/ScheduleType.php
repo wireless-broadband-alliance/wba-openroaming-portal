@@ -4,10 +4,12 @@ namespace App\Form;
 
 use App\Service\GetSettings;
 use Cron\CronExpression;
+use DateTimeInterface;
 use Exception;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\TimeType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -20,9 +22,8 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 class ScheduleType extends AbstractType
 {
-    public function __construct(
-        private readonly GetSettings $getSettings
-    ) {
+    public function __construct(private readonly GetSettings $getSettings)
+    {
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
@@ -40,7 +41,7 @@ class ScheduleType extends AbstractType
         ];
 
         foreach ($cronSettings as $settingName) {
-            // Advanced input (optional, no required validation)
+            // Advanced cron expression
             $builder->add("{$settingName}_advanced", TextType::class, [
                 'required' => false,
                 'label' => false,
@@ -50,18 +51,20 @@ class ScheduleType extends AbstractType
                 ],
                 'constraints' => [
                     new Callback(function ($value, ExecutionContextInterface $context): void {
-                        try {
-                            new CronExpression($value);
-                        } catch (Exception $e) {
-                            $context->buildViolation('The string "{{ value }}" is not a valid cron expression.')
-                                ->setParameter('{{ value }}', $value)
-                                ->addViolation();
+                        if ($value) {
+                            try {
+                                new CronExpression($value);
+                            } catch (Exception) {
+                                $context->buildViolation('Invalid CRON expression "{{ value }}".')
+                                    ->setParameter('{{ value }}', $value)
+                                    ->addViolation();
+                            }
                         }
                     }),
                 ],
             ]);
 
-            // Frequency (required in non-advanced mode)
+            // Frequency
             $builder->add("{$settingName}_frequency", ChoiceType::class, [
                 'choices' => [
                     'Daily' => 'daily',
@@ -76,7 +79,7 @@ class ScheduleType extends AbstractType
                 ],
             ]);
 
-            // Time (required in non-advanced mode)
+            // Time
             $builder->add("{$settingName}_time", TimeType::class, [
                 'required' => false,
                 'widget' => 'single_text',
@@ -87,7 +90,7 @@ class ScheduleType extends AbstractType
                 ],
             ]);
 
-            // Day of week (required if weekly)
+            // Weekly → day of week
             $builder->add("{$settingName}_day_of_week", ChoiceType::class, [
                 'choices' => [
                     'Sunday' => 0,
@@ -106,7 +109,7 @@ class ScheduleType extends AbstractType
                 ],
             ]);
 
-            // Day of month (required if monthly)
+            // Monthly → day of month
             $builder->add("{$settingName}_day_of_month", ChoiceType::class, [
                 'choices' => array_combine(range(1, 31), range(1, 31)),
                 'placeholder' => 'Choose a day of month',
@@ -116,9 +119,44 @@ class ScheduleType extends AbstractType
                     'description' => $this->getSettings->getSettingDescription($settingName),
                 ],
             ]);
+
+            // ✅ Start date (optional time frame start)
+            $builder->add("{$settingName}_startDate", DateTimeType::class, [
+                'required' => false,
+                'widget' => 'single_text',
+                'label' => 'Start Date',
+            ]);
+
+            // ✅ End date (optional time frame end)
+            $builder->add("{$settingName}_endDate", DateTimeType::class, [
+                'required' => false,
+                'widget' => 'single_text',
+                'label' => 'End Date',
+            ]);
+
+            // ✅ Interval between runs (e.g. every 2 hours, 30 mins)
+            $builder->add("{$settingName}_interval", TimeType::class, [
+                'required' => false,
+                'widget' => 'single_text',
+                'input' => 'datetime',
+                'label' => 'Repeat Every',
+                'attr' => [
+                    'placeholder' => 'HH:MM',
+                    'step' => 60, // Allow minute-level precision
+                ],
+                'constraints' => [
+                    new Callback(function ($value, ExecutionContextInterface $context): void {
+                        if ($value instanceof \DateTimeInterface) {
+                            if ((int)$value->format('H') === 0 && (int)$value->format('i') === 0) {
+                                $context->buildViolation('Interval must be greater than 00:00.')
+                                    ->addViolation();
+                            }
+                        }
+                    }),
+                ],
+            ]);
         }
 
-        // Dynamic validation
         $builder->addEventListener(FormEvents::POST_SUBMIT, function (FormEvent $event) use ($cronSettings): void {
             $form = $event->getForm();
             $data = $form->getData();
@@ -126,37 +164,54 @@ class ScheduleType extends AbstractType
 
             foreach ($cronSettings as $settingName) {
                 if ($isAdvanced) {
-                    continue; // skip validation in advanced mode
+                    continue;
                 }
 
-                // Frequency is always required
                 $frequency = $data["{$settingName}_frequency"] ?? null;
+                $time = $data["{$settingName}_time"] ?? null;
+
                 if (empty($frequency)) {
                     $form->get("{$settingName}_frequency")->addError(
                         new FormError('Please choose a frequency.')
                     );
                 }
 
-                // Time is always required
-                $time = $data["{$settingName}_time"] ?? null;
                 if (empty($time)) {
                     $form->get("{$settingName}_time")->addError(
                         new FormError('Please choose a time for execution.')
                     );
                 }
 
-                // Weekly → day_of_week is required
                 if ($frequency === 'weekly' && empty($data["{$settingName}_day_of_week"])) {
                     $form->get("{$settingName}_day_of_week")->addError(
                         new FormError('Please define the day of the week.')
                     );
                 }
 
-                // Monthly → day_of_month is required
                 if ($frequency === 'monthly' && empty($data["{$settingName}_day_of_month"])) {
                     $form->get("{$settingName}_day_of_month")->addError(
                         new FormError('Please define the day of the month.')
                     );
+                }
+
+                // Check time frame validity
+                $start = $data["{$settingName}_startDate"] ?? null;
+                $end = $data["{$settingName}_endDate"] ?? null;
+                if ($start && $end && $start >= $end) {
+                    $form->get("{$settingName}_endDate")->addError(
+                        new FormError('End date must be after start date.')
+                    );
+                }
+
+                $interval = $data["{$settingName}_interval"] ?? null;
+                if ($interval instanceof DateTimeInterface) {
+                    $hours = (int)$interval->format('H');
+                    $minutes = (int)$interval->format('i');
+                    if ($hours === 0 && $minutes === 0) {
+                        $form->get("{$settingName}_interval")->addError(
+                            new FormError('Please set an interval greater than 00:00.')
+                        );
+                    }
                 }
             }
         });
