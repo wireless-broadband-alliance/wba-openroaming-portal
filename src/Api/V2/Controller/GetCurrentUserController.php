@@ -36,7 +36,7 @@ class GetCurrentUserController extends AbstractController
      * @throws ClientExceptionInterface
      * @throws Exception
      */
-    #[Route('/api/v2/user', name: 'api_v2_get_current_user', methods: ['GET'])]
+    #[Route('/user', name: 'api_v2_get_current_user', methods: ['GET'])]
     public function getCurrentUser(Request $request): JsonResponse
     {
         $token = $this->tokenStorage->getToken();

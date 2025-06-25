@@ -51,7 +51,7 @@ class UserAccountController extends AbstractController
      * @throws Error
      * @throws JsonException
      */
-    #[Route('/api/v2/userAccount/deletion', name: 'api_v2_user_account_deletion', methods: ['POST'])]
+    #[Route('/userAccount/deletion', name: 'api_v2_user_account_deletion', methods: ['POST'])]
     public function userAccountDeletion(Request $request, Auth $samlAuth): JsonResponse
     {
         $token = $this->tokenStorage->getToken();
