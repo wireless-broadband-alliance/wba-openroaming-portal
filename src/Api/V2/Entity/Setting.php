@@ -4,6 +4,7 @@ namespace App\Api\V2\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Post;
 use ApiPlatform\OpenApi\Factory\OpenApiFactory;
 use ApiPlatform\OpenApi\Model\Operation;
 use ApiPlatform\OpenApi\Model\Parameter;
@@ -569,7 +570,7 @@ use Doctrine\ORM\Mapping as ORM;
             name: 'api_v2_config_profile_android',
             extraProperties: [OpenApiFactory::OVERRIDE_OPENAPI_RESPONSES => false],
         ),
-        new GetCollection(
+        new Post(
             uriTemplate: '/v1/config/profile/ios',
             controller: ProfileController::class,
             openapi: new Operation(
