@@ -31,6 +31,17 @@
     ],
 } %}
 
+{% set fieldTitles = {
+    '_advanced': 'Advanced Mode',
+    '_frequency': 'Frequency',
+    '_day_of_week': 'Day of Week',
+    '_day_of_month': 'Day of Month',
+    '_time': 'Time of Execution',
+    '_interval': 'Interval (Time Between Runs)',
+    '_startDate': 'Start Date',
+    '_endDate': 'End Date',
+} %}
+
 <div {{ stimulus_controller('cron-toggle') }}>
     <form action="{{ path('admin_dashboard_settings_schedule') }}" method="post" enctype="multipart/form-data">
         {{ form_row(form._token) }}
@@ -72,16 +83,29 @@
                     </div>
 
                     <div class="space-y-2 mt-5">
+                        {% set renderedTitles = [] %}
                         {% for fieldName in fields %}
+                            {# Find suffix key for this field #}
+                            {% set suffix = fieldTitles|keys|filter(s => fieldName ends with s)|first %}
                             {% set toggleTarget =
-                                fieldName ends with '_advanced' ? 'advanced' :
-                                fieldName ends with '_frequency' ? 'frequency' :
-                                fieldName ends with '_time' ? 'time' :
-                                fieldName ends with '_day_of_week' ? 'day_of_week' :
-                                fieldName ends with '_day_of_month' ? 'day_of_month' :
-                                fieldName ends with '_interval' ? 'interval' :
-                                fieldName ends with '_startDate' ? 'startDate' :
-                                fieldName ends with '_endDate' ? 'endDate' : null %}
+                                suffix == '_advanced' ? 'advanced' :
+                                suffix == '_frequency' ? 'frequency' :
+                                suffix == '_time' ? 'time' :
+                                suffix == '_day_of_week' ? 'day_of_week' :
+                                suffix == '_day_of_month' ? 'day_of_month' :
+                                suffix == '_interval' ? 'interval' :
+                                suffix == '_startDate' ? 'startDate' :
+                                suffix == '_endDate' ? 'endDate' : null %}
+
+                            {# Show the title only once per suffix type #}
+                            {% if suffix is not null and suffix not in renderedTitles %}
+                                <div data-cron-toggle-title="{{ toggleTarget }}" data-cron-toggle-group="{{ groupName }}"
+                                     class="text-sm font-semibold text-gray-700 mt-4">
+                                    {{ fieldTitles[suffix] }}
+                                </div>
+                                {% set renderedTitles = renderedTitles|merge([suffix]) %}
+                            {% endif %}
+
                             <div class="form-group" data-cron-toggle-group="{{ groupName }}">
                                 {{ form_widget(attribute(form, fieldName), {
                                     attr: {
