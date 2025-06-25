@@ -170,7 +170,7 @@ class ProfileController extends AbstractController
     /**
      * @throws RandomException
      */
-    #[Route('/api/v2/config/profile/ios', name: 'api_v2_config_profile_ios', methods: ['GET'])]
+    #[Route('/api/v2/config/profile/ios', name: 'api_v2_config_profile_ios', methods: ['POST'])]
     public function getProfileIos(Request $request): JsonResponse
     {
         try {
