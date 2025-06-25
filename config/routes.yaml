@@ -161,7 +161,7 @@ api_v2_config_profile_android:
 api_v2_config_profile_ios:
     path: /api/v2/config/profile/ios
     controller: App\Api\V2\Controller\ProfileController::getProfileIos
-    methods: [ 'GET' ]
+    methods: [ 'POST' ]
 
 api_v2_twoFA_request:
     path: /api/v2/twoFA/request
