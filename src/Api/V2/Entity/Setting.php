@@ -152,7 +152,7 @@ use Doctrine\ORM\Mapping as ORM;
             extraProperties: [OpenApiFactory::OVERRIDE_OPENAPI_RESPONSES => false],
         ),
         new GetCollection(
-            uriTemplate: '/v1/config',
+            uriTemplate: '/config',
             controller: ConfigController::class,
             openapi: new Operation(
                 responses: [
@@ -400,7 +400,7 @@ use Doctrine\ORM\Mapping as ORM;
             shortName: 'Setting',
             paginationEnabled: false,
             description: 'Returns public values from the Setting entity',
-            name: 'app_v2_config_settings',
+            name: 'api_v2_config_settings',
             extraProperties: [OpenApiFactory::OVERRIDE_OPENAPI_RESPONSES => false],
         ),
         new GetCollection(
