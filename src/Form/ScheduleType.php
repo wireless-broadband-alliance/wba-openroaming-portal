@@ -3,6 +3,8 @@
 namespace App\Form;
 
 use App\Service\GetSettings;
+use Cron\CronExpression;
+use Exception;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -48,28 +50,12 @@ class ScheduleType extends AbstractType
                 ],
                 'constraints' => [
                     new Callback(function ($value, ExecutionContextInterface $context): void {
-                        if (empty($value)) {
-                            return;
-                        }
-
-                        $parts = preg_split('/\s+/', trim($value));
-                        if (count($parts) !== 5) {
-                            $context->buildViolation(
-                                'The cron expression must have exactly 5 parts separated by spaces.'
-                            )
+                        try {
+                            CronExpression::factory($value);
+                        } catch (Exception $e) {
+                            $context->buildViolation('The string "{{ value }}" is not a valid cron expression.')
+                                ->setParameter('{{ value }}', $value)
                                 ->addViolation();
-                            return;
-                        }
-
-                        foreach ($parts as $part) {
-                            if (!preg_match('/^[\d\*\/\-,]+$/', $part)) {
-                                $context->buildViolation(
-                                    'Each part of the cron expression can only contain digits, *, /, -, or ,
-                                     characters.'
-                                )
-                                    ->addViolation();
-                                return;
-                            }
                         }
                     }),
                 ],
