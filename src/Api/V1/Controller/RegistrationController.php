@@ -76,7 +76,7 @@ class RegistrationController extends AbstractController
      * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
      * @throws Exception
      */
-    #[Route('/api/v1/auth/local/register', name: 'api_v1_auth_local_register', methods: ['POST'])]
+    #[Route('/auth/local/register', name: 'api_v1_auth_local_register', methods: ['POST'])]
     public function localRegister(
         Request $request,
         UserPasswordHasherInterface $userPasswordHasher,
@@ -192,7 +192,7 @@ class RegistrationController extends AbstractController
      * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
      * @throws TransportExceptionInterface
      */
-    #[Route('/api/v1/auth/local/reset', name: 'api_v1_auth_local_reset', methods: ['POST'])]
+    #[Route('/auth/local/reset', name: 'api_v1_auth_local_reset', methods: ['POST'])]
     public function localReset(
         UserPasswordHasherInterface $userPasswordHasher,
         MailerInterface $mailer,
@@ -392,7 +392,7 @@ class RegistrationController extends AbstractController
      * @throws NonUniqueResultException
      * @throws Exception
      */
-    #[Route('/api/v1/auth/sms/register', name: 'api_v1_auth_sms_register', methods: ['POST'])]
+    #[Route('/auth/sms/register', name: 'api_v1_auth_sms_register', methods: ['POST'])]
     public function smsRegister(
         Request $request,
         UserPasswordHasherInterface $userPasswordHasher,
@@ -543,7 +543,7 @@ class RegistrationController extends AbstractController
      * @throws \DateMalformedIntervalStringException
      * @throws \DateMalformedStringException
      */
-    #[Route('/api/v1/auth/sms/reset', name: 'api_v1_auth_sms_reset', methods: ['POST'])]
+    #[Route('/auth/sms/reset', name: 'api_v1_auth_sms_reset', methods: ['POST'])]
     public function smsReset(
         Request $request,
         PhoneNumberUtil $phoneNumberUtil

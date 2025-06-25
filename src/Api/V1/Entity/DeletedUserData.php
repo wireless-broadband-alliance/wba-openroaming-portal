@@ -17,7 +17,7 @@ use Doctrine\ORM\Mapping as ORM;
 #[ApiResource(
     operations: [
         new Delete(
-            uriTemplate: '/api/v1/userAccount/deletion',
+            uriTemplate: '/userAccount/deletion',
             controller: UserAccountController::class,
             openapi: new Operation(
                 responses: [
@@ -365,7 +365,7 @@ use Doctrine\ORM\Mapping as ORM;
                 ],
             ),
             shortName: 'User Account',
-            name: 'api_user_account_deletion',
+            name: 'api_v1_user_account_deletion',
             extraProperties: [OpenApiFactory::OVERRIDE_OPENAPI_RESPONSES => false],
         ),
     ],

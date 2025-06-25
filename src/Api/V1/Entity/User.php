@@ -21,7 +21,7 @@ use Doctrine\ORM\Mapping as ORM;
 #[ApiResource(
     operations: [
         new GetCollection(
-            uriTemplate: '/v1/user',
+            uriTemplate: '/user',
             controller: GetCurrentUserController::class,
             openapi: new Operation(
                 responses: [
@@ -213,10 +213,10 @@ use Doctrine\ORM\Mapping as ORM;
             paginationEnabled: false,
             security: "is_granted('ROLE_USER')",
             securityMessage: 'Sorry, but you don\'t have permission to access this resource.',
-            name: 'api_get_current_user',
+            name: 'api_v1_get_current_user',
         ),
         new Post(
-            uriTemplate: '/api/v1/twoFA/request',
+            uriTemplate: '/twoFA/request',
             controller: TwoFAController::class,
             openapi: new Operation(
                 responses: [
@@ -485,11 +485,11 @@ use Doctrine\ORM\Mapping as ORM;
                 security: [],
             ),
             shortName: 'User Auth',
-            name: 'api_twoFA_request',
+            name: 'api_v1_twoFA_request',
             extraProperties: [OpenApiFactory::OVERRIDE_OPENAPI_RESPONSES => false],
         ),
         new Post(
-            uriTemplate: '/v1/auth/local',
+            uriTemplate: '/auth/local',
             controller: AuthController::class,
             openapi: new Operation(
                 responses: [
@@ -797,11 +797,11 @@ use Doctrine\ORM\Mapping as ORM;
                 security: [],
             ),
             shortName: 'User Auth',
-            name: 'api_auth_local',
+            name: 'api_v1_auth_local',
             extraProperties: [OpenApiFactory::OVERRIDE_OPENAPI_RESPONSES => false],
         ),
         new Post(
-            uriTemplate: '/v1/auth/saml',
+            uriTemplate: '/auth/saml',
             controller: AuthController::class,
             openapi: new Operation(
                 responses: [
@@ -1108,11 +1108,11 @@ use Doctrine\ORM\Mapping as ORM;
                 security: [],
             ),
             shortName: 'User Auth',
-            name: 'api_auth_saml',
+            name: 'api_v1_auth_saml',
             extraProperties: [OpenApiFactory::OVERRIDE_OPENAPI_RESPONSES => false],
         ),
         new Post(
-            uriTemplate: '/v1/auth/google',
+            uriTemplate: '/auth/google',
             controller: AuthController::class,
             openapi: new Operation(
                 responses: [
@@ -1386,11 +1386,11 @@ use Doctrine\ORM\Mapping as ORM;
                 security: [],
             ),
             shortName: 'User Auth',
-            name: 'api_auth_google',
+            name: 'api_v1_auth_google',
             extraProperties: [OpenApiFactory::OVERRIDE_OPENAPI_RESPONSES => false],
         ),
         new Post(
-            uriTemplate: '/v1/auth/microsoft',
+            uriTemplate: '/auth/microsoft',
             controller: AuthController::class,
             openapi: new Operation(
                 responses: [
@@ -1664,11 +1664,11 @@ use Doctrine\ORM\Mapping as ORM;
                 security: [],
             ),
             shortName: 'User Auth',
-            name: 'api_auth_microsoft',
+            name: 'api_v1_auth_microsoft',
             extraProperties: [OpenApiFactory::OVERRIDE_OPENAPI_RESPONSES => false],
         ),
         new Post(
-            uriTemplate: '/v1/auth/local/register',
+            uriTemplate: '/auth/local/register',
             controller: RegistrationController::class,
             openapi: new Operation(
                 responses: [
@@ -1806,11 +1806,11 @@ use Doctrine\ORM\Mapping as ORM;
                 security: [],
             ),
             shortName: 'User Auth Register',
-            name: 'api_auth_local_register',
+            name: 'api_v1_auth_local_register',
             extraProperties: [OpenApiFactory::OVERRIDE_OPENAPI_RESPONSES => false],
         ),
         new Post(
-            uriTemplate: '/v1/auth/sms/register',
+            uriTemplate: '/auth/sms/register',
             controller: RegistrationController::class,
             openapi: new Operation(
                 responses: [
@@ -1989,11 +1989,11 @@ use Doctrine\ORM\Mapping as ORM;
                 security: [],
             ),
             shortName: 'User Auth Register',
-            name: 'api_auth_sms_register',
+            name: 'api_v1_auth_sms_register',
             extraProperties: [OpenApiFactory::OVERRIDE_OPENAPI_RESPONSES => false],
         ),
         new Post(
-            uriTemplate: '/v1/auth/local/reset',
+            uriTemplate: '/auth/local/reset',
             controller: AuthController::class,
             openapi: new Operation(
                 responses: [
@@ -2116,11 +2116,11 @@ use Doctrine\ORM\Mapping as ORM;
                 security: [],
             ),
             shortName: 'User Auth Reset',
-            name: 'api_auth_local_reset',
+            name: 'api_v1_auth_local_reset',
             extraProperties: [OpenApiFactory::OVERRIDE_OPENAPI_RESPONSES => false],
         ),
         new Post(
-            uriTemplate: '/v1/auth/sms/reset',
+            uriTemplate: '/auth/sms/reset',
             controller: AuthController::class,
             openapi: new Operation(
                 responses: [
@@ -2273,7 +2273,7 @@ use Doctrine\ORM\Mapping as ORM;
                 security: [],
             ),
             shortName: 'User Auth Reset',
-            name: 'api_auth_sms_reset',
+            name: 'api_v1_auth_sms_reset',
             extraProperties: [OpenApiFactory::OVERRIDE_OPENAPI_RESPONSES => false],
         ),
     ],
