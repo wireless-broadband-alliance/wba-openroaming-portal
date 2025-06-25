@@ -2,20 +2,8 @@
 
 namespace App\Entity;
 
-use ApiPlatform\Metadata\ApiResource;
-use ApiPlatform\Metadata\GetCollection;
-use ApiPlatform\Metadata\Post;
-use ApiPlatform\OpenApi\Factory\OpenApiFactory;
-use ApiPlatform\OpenApi\Model\Operation;
-use ApiPlatform\OpenApi\Model\Parameter;
-use ApiPlatform\OpenApi\Model\RequestBody;
-use App\Api\V1\Controller\AuthController;
-use App\Api\V1\Controller\GetCurrentUserController;
-use App\Api\V1\Controller\RegistrationController;
-use App\Api\V1\Controller\TwoFAController;
 use App\Repository\UserRepository;
 use App\Security\CustomSamlUserFactory;
-use ArrayObject;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;

@@ -19,7 +19,7 @@ use Doctrine\ORM\Mapping as ORM;
 #[ApiResource(
     operations: [
         new GetCollection(
-            uriTemplate: '/api/v1/turnstile/android',
+            uriTemplate: '/api/v2/turnstile/android',
             controller: TurnstileController::class,
             openapi: new Operation(
                 responses: [
@@ -77,7 +77,7 @@ use Doctrine\ORM\Mapping as ORM;
             extraProperties: [OpenApiFactory::OVERRIDE_OPENAPI_RESPONSES => false],
         ),
         new GetCollection(
-            uriTemplate: '/api/v1/capport/json',
+            uriTemplate: '/api/v2/capport/json',
             controller: CapportController::class,
             openapi: new Operation(
                 responses: [

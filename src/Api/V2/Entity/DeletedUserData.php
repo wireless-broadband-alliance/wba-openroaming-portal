@@ -18,7 +18,7 @@ use Doctrine\ORM\Mapping as ORM;
 #[ApiResource(
     operations: [
         new Delete(
-            uriTemplate: '/api/v1/userAccount/deletion',
+            uriTemplate: '/api/v2/userAccount/deletion',
             controller: UserAccountController::class,
             openapi: new Operation(
                 responses: [

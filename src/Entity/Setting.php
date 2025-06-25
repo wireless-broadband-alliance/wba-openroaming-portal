@@ -2,16 +2,6 @@
 
 namespace App\Entity;
 
-use ApiPlatform\Metadata\ApiResource;
-use ApiPlatform\Metadata\GetCollection;
-use ApiPlatform\OpenApi\Factory\OpenApiFactory;
-use ApiPlatform\OpenApi\Model\Operation;
-use ApiPlatform\OpenApi\Model\Parameter;
-use ApiPlatform\OpenApi\Model\RequestBody;
-use App\Api\V1\Controller\CapportController;
-use App\Api\V1\Controller\ConfigController;
-use App\Api\V1\Controller\ProfileController;
-use App\Api\V1\Controller\TurnstileController;
 use App\Repository\SettingRepository;
 use Doctrine\ORM\Mapping as ORM;
 
