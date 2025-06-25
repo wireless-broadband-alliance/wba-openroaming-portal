@@ -1,4 +1,13 @@
-api_platform:
+api_platform_v1:
     resource: .
     type: api_platform
-    prefix: /api
+    prefix: /api/v1
+    defaults:
+        _api_platform_resource_class_directories: ['%kernel.project_dir%/src/Api/V1/Entity']
+
+api_platform_v2:
+    resource: .
+    type: api_platform
+    prefix: /api/v2
+    defaults:
+        _api_platform_resource_class_directories: ['%kernel.project_dir%/src/Api/V2/Entity']
