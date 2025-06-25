@@ -400,7 +400,7 @@ use Doctrine\ORM\Mapping as ORM;
             shortName: 'Setting',
             paginationEnabled: false,
             description: 'Returns public values from the Setting entity',
-            name: 'app_v1_config_settings',
+            name: 'api_v1_config_settings',
             extraProperties: [OpenApiFactory::OVERRIDE_OPENAPI_RESPONSES => false],
         ),
         new GetCollection(
@@ -744,6 +744,7 @@ use Doctrine\ORM\Mapping as ORM;
             extraProperties: [OpenApiFactory::OVERRIDE_OPENAPI_RESPONSES => false],
         ),
     ],
+    routePrefix: '/api/v1',
 )]
 class Setting
 {
