@@ -100,7 +100,6 @@ class ScheduleAutomationController extends AbstractController
         ]);
 
         $form->handleRequest($request);
-        dump($form->getData());
         if ($form->isSubmitted() && $form->isValid()) {
             $useAdvancedMode = $form->get('use_advanced_mode')->getData();
 
@@ -127,14 +126,30 @@ class ScheduleAutomationController extends AbstractController
                             $cronValue = "$minute $hour * * *";
                         } elseif ($frequency === 'weekly') {
                             $dayOfWeek = $form->get($settingName . '_day_of_week')->getData();
+                            if (count($dayOfWeek) > 1) {
+                                foreach ($dayOfWeek as $day) {
+                                    $cronValue .= $day . ',';
+                                }
+                            }
+                            else {
+                                $cronValue = $dayOfWeek[0];
+                            }
                             // default to Sunday if not set
-                            $dayOfWeek ??= 0;
-                            $cronValue = "$minute $hour * * $dayOfWeek";
+                            $cronValue ??= 0;
+                            $cronValue = "$minute $hour * * $cronValue";
                         } elseif ($frequency === 'monthly') {
                             $dayOfMonth = $form->get($settingName . '_day_of_month')->getData();
                             // default to 1 if not set
-                            $dayOfMonth ??= 1;
-                            $cronValue = "$minute $hour $dayOfMonth * *";
+                            if (count($dayOfMonth) > 1) {
+                                foreach ($dayOfMonth as $day) {
+                                    $cronValue .= $day . ',';
+                                }
+                            }
+                            else {
+                                $cronValue = $dayOfWeek[0];
+                            }
+                            $cronValue ??= 1;
+                            $cronValue = "$minute $hour $cronValue * *";
                         }
                     }
                 }
