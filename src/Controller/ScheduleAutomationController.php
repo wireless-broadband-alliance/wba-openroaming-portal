@@ -87,7 +87,7 @@ class ScheduleAutomationController extends AbstractController
                     'H:i',
                     sprintf('%02d:%02d', $hours, $minutes)
                 );
-                $initialData["{$settingName}_day_of_month"] = (int)$months;
+                $initialData["{$settingName}_day_of_month"] = (int)$days;
                 $initialData["{$settingName}_day_of_week"] = null;
             } else {
                 // advanced or unrecognized
