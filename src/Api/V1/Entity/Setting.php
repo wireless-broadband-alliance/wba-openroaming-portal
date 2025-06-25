@@ -576,8 +576,7 @@ use Doctrine\ORM\Mapping as ORM;
         new GetCollection(
             uriTemplate: '/config/profile/ios',
             controller: ProfileController::class,
-            openapi: new Operation
-            (
+            openapi: new Operation(
                 tags: ['v1 - Profile Configuration'],
                 responses: [
                     200 => [
