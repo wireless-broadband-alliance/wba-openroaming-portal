@@ -47,6 +47,9 @@ readonly class ApiResponseService
     {
         $apiResponseV1 = [
             'api_v1_auth_local' => [
+                'requestBody' => [
+
+                ],
                 200 => [
                     'Authenticated user details and JWT token'
                 ],
@@ -74,6 +77,9 @@ readonly class ApiResponseService
                 ]
             ],
             'api_v1_auth_saml' => [
+                'requestBody' => [
+
+                ],
                 200 => [
                     'Registration successful. Please check your email for further instructions',
                 ],
@@ -100,6 +106,9 @@ readonly class ApiResponseService
                 ]
             ],
             'api_v1_auth_google' => [
+                'requestBody' => [
+
+                ],
                 200 => [
                     'Authenticated user details and JWT token'
                 ],
@@ -125,6 +134,9 @@ readonly class ApiResponseService
                 ]
             ],
             'api_v1_auth_microsoft' => [
+                'requestBody' => [
+
+                ],
                 200 => [
                     'Authenticated user details and JWT token',
                 ],
@@ -150,6 +162,9 @@ readonly class ApiResponseService
                 ]
             ],
             'api_v1_capport_json' => [
+                'requestBody' => [
+
+                ],
                 200 => [
                     'Successful response with CAPPORT metadata.',
                 ],
@@ -158,11 +173,17 @@ readonly class ApiResponseService
                 ]
             ],
             'api_v1_config_settings' => [
+                'requestBody' => [
+
+                ],
                 200 => [
                     'Configuration settings retrieved successfully'
                 ]
             ],
             'api_v1_get_current_user' => [
+                'requestBody' => [
+
+                ],
                 'isProtected' => true,
                 200 => [
                     'User details retrieved successfully'
@@ -179,6 +200,9 @@ readonly class ApiResponseService
                 ],
             ],
             'api_v1_config_profile_android' => [
+                'requestBody' => [
+
+                ],
                 'isProtected' => true,
                 200 => [
                     'Profile configuration for Android successfully retrieved'
@@ -197,6 +221,9 @@ readonly class ApiResponseService
                 ]
             ],
             'api_v1_config_profile_ios' => [
+                'requestBody' => [
+
+                ],
                 'isProtected' => true,
                 200 => [
                     'Profile configuration for iOS successfully retrieved',
@@ -215,6 +242,9 @@ readonly class ApiResponseService
                 ]
             ],
             'api_v1_auth_local_register' => [
+                'requestBody' => [
+
+                ],
                 200 => [
                     'Registration successful. Please check your email for further instructions',
                 ],
@@ -226,6 +256,9 @@ readonly class ApiResponseService
                 ],
             ],
             'api_v1_auth_local_reset' => [
+                'requestBody' => [
+
+                ],
                 200 => [
                     'Password reset email sent successfully',
                 ],
@@ -237,6 +270,9 @@ readonly class ApiResponseService
                 ],
             ],
             'api_v1_auth_sms_register' => [
+                'requestBody' => [
+
+                ],
                 200 => [
                     'SMS User Account Registered Successfully. A verification code has been sent to your phone.',
                 ],
@@ -252,6 +288,9 @@ readonly class ApiResponseService
                 ]
             ],
             'api_v1_auth_sms_reset' => [
+                'requestBody' => [
+
+                ],
                 200 => [
                     'Successfully sent the SMS with a new password and verification code',
                 ],
@@ -266,6 +305,9 @@ readonly class ApiResponseService
                 ]
             ],
             'api_v1_turnstile_html_android' => [
+                'requestBody' => [
+
+                ],
                 200 => [
                     'Turnstile HTML configuration retrieved successfully',
                 ],
@@ -274,6 +316,9 @@ readonly class ApiResponseService
                 ]
             ],
             'api_v1_twoFA_request' => [
+                'requestBody' => [
+
+                ],
                 200 => [
                     'Requested two-factor authentication token',
                 ],
@@ -303,6 +348,9 @@ readonly class ApiResponseService
                 ]
             ],
             'api_v1_user_account_deletion' => [
+                'requestBody' => [
+
+                ],
                 'isProtected' => true,
                 200 => [
                     'User Account was deleted successfully.',
@@ -338,6 +386,9 @@ readonly class ApiResponseService
         ];
         $apiResponseV2 = [
             'api_v2_auth_local' => [
+                'requestBody' => [
+
+                ],
             200 => [
                 'Authenticated user details and JWT token'
             ],
@@ -365,6 +416,9 @@ readonly class ApiResponseService
             ]
         ],
             'api_v2_auth_saml' => [
+                'requestBody' => [
+
+                ],
                 200 => [
                     'Registration successful. Please check your email for further instructions',
                 ],
@@ -391,6 +445,9 @@ readonly class ApiResponseService
                 ]
             ],
             'api_v2_auth_google' => [
+                'requestBody' => [
+
+                ],
                 200 => [
                     'Authenticated user details and JWT token'
                 ],
@@ -416,6 +473,9 @@ readonly class ApiResponseService
                 ]
             ],
             'api_v2_auth_microsoft' => [
+                'requestBody' => [
+
+                ],
                 200 => [
                     'Authenticated user details and JWT token',
                 ],
@@ -441,6 +501,9 @@ readonly class ApiResponseService
                 ]
             ],
             'api_v2_capport_json' => [
+                'requestBody' => [
+
+                ],
                 200 => [
                     'Successful response with CAPPORT metadata.',
                 ],
@@ -449,11 +512,17 @@ readonly class ApiResponseService
                 ]
             ],
             'api_v2_config_settings' => [
+                'requestBody' => [
+
+                ],
                 200 => [
                     'Configuration settings retrieved successfully'
                 ]
             ],
             'api_v2_get_current_user' => [
+                'requestBody' => [
+
+                ],
                 'isProtected' => true,
                 200 => [
                     'User details retrieved successfully'
@@ -470,6 +539,9 @@ readonly class ApiResponseService
                 ],
             ],
             'api_v2_config_profile_android' => [
+                'requestBody' => [
+
+                ],
                 'isProtected' => true,
                 200 => [
                     'Profile configuration for Android successfully retrieved'
@@ -488,6 +560,9 @@ readonly class ApiResponseService
                 ]
             ],
             'api_v2_config_profile_ios' => [
+                'requestBody' => [
+
+                ],
                 'isProtected' => true,
                 200 => [
                     'Profile configuration for iOS successfully retrieved',
@@ -506,6 +581,9 @@ readonly class ApiResponseService
                 ]
             ],
             'api_v2_auth_local_register' => [
+                'requestBody' => [
+
+                ],
                 200 => [
                     'Registration successful. Please check your email for further instructions',
                 ],
@@ -517,6 +595,9 @@ readonly class ApiResponseService
                 ],
             ],
             'api_v2_auth_local_reset' => [
+                'requestBody' => [
+
+                ],
                 200 => [
                     'Password reset email sent successfully',
                 ],
@@ -528,6 +609,9 @@ readonly class ApiResponseService
                 ],
             ],
             'api_v2_auth_sms_register' => [
+                'requestBody' => [
+
+                ],
                 200 => [
                     'SMS User Account Registered Successfully. A verification code has been sent to your phone.',
                 ],
@@ -543,6 +627,9 @@ readonly class ApiResponseService
                 ]
             ],
             'api_v2_auth_sms_reset' => [
+                'requestBody' => [
+
+                ],
                 200 => [
                     'Successfully sent the SMS with a new password and verification code',
                 ],
@@ -557,6 +644,9 @@ readonly class ApiResponseService
                 ]
             ],
             'api_v2_turnstile_html_android' => [
+                'requestBody' => [
+
+                ],
                 200 => [
                     'Turnstile HTML configuration retrieved successfully',
                 ],
@@ -565,6 +655,9 @@ readonly class ApiResponseService
                 ]
             ],
             'api_v2_twoFA_request' => [
+                'requestBody' => [
+
+                ],
                 200 => [
                     'Requested two-factor authentication token',
                 ],
@@ -594,6 +687,9 @@ readonly class ApiResponseService
                 ]
             ],
             'api_v2_user_account_deletion' => [
+                'requestBody' => [
+
+                ],
                 'isProtected' => true,
                 200 => [
                     'User Account was deleted successfully.',
