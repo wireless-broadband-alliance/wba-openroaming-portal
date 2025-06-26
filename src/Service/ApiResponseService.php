@@ -48,136 +48,151 @@ readonly class ApiResponseService
         $apiResponseV1 = [
             'api_v1_auth_local' => [
                 'requestBody' => [
+                    'uuid' => 'user-uuid-example',
+                    'password' => 'user-password-example',
+                    'turnstile_token' => 'valid_test_token',
+                    'twoFACode' => '02YZR88R'
+                ],
+                'description' => 'This endpoint authenticates a user using their UUID, password, and a CAPTCHA token. Platform can require the authentication with Two-Factor, the twoFACode parameter will be asked based on the TWO_FACTOR_AUTH_STATUS setting.',
+                'responses' => [
+                    200 => [
+                        'Authenticated user details and JWT token'
+                    ],
+                    400 => [
+                        'CAPTCHA validation failed',
+                        'Missing required fields: uuid, password or turnstile_token',
+                        'Missing required configuration setting: TWO_FACTOR_AUTH_STATUS',
+                        'Invalid json format',
+                        'Invalid user provided. Please verify the user data'
+                    ],
+                    401 => [
+                        'Two-Factor Authentication is active for this account. Please ensure you provide the correct authentication code.',
+                        'Two-Factor Authentication is ENFORCED FOR PORTAL accounts.',
+                        'Two-Factor Authentication it\'s required for authentication on the portal. Please visit DOMAIN to set up 2FA and secure your account.',
+                        'Invalid credentials'
+                    ],
+                    403 => [
+                        'User account is not verified!',
+                        'User account is banned from the system!',
+                        'Your request cannot be processed at this time due to a pending action. If your account is active, re-login to complete the action',
+                    ],
+                    500 => [
+                        'An error occurred: Generic server-side error.',
+                        'JWT key files are missing. Please ensure both private and public keys exist.',
+                    ]
+                ],
 
-                ],
-                200 => [
-                    'Authenticated user details and JWT token'
-                ],
-                400 => [
-                    'CAPTCHA validation failed',
-                    'Missing required fields: uuid, password or turnstile_token',
-                    'Missing required configuration setting: TWO_FACTOR_AUTH_STATUS',
-                    'Invalid json format',
-                    'Invalid user provided. Please verify the user data'
-                ],
-                401 => [
-                    'Two-Factor Authentication is active for this account. Please ensure you provide the correct authentication code.',
-                    'Two-Factor Authentication is ENFORCED FOR PORTAL accounts.',
-                    'Two-Factor Authentication it\'s required for authentication on the portal. Please visit DOMAIN to set up 2FA and secure your account.',
-                    'Invalid credentials'
-                ],
-                403 => [
-                    'User account is not verified!',
-                    'User account is banned from the system!',
-                    'Your request cannot be processed at this time due to a pending action. If your account is active, re-login to complete the action',
-                ],
-                500 => [
-                    'An error occurred: Generic server-side error.',
-                    'JWT key files are missing. Please ensure both private and public keys exist.',
-                ]
             ],
             'api_v1_auth_saml' => [
-                'requestBody' => [
-
+                'requestBody' => [],
+                'responses' => [
+                    200 => [
+                        'Registration successful. Please check your email for further instructions',
+                    ],
+                    400 => [
+                        'SAML Response not found',
+                        'Invalid user provided. Please verify the user data',
+                    ],
+                    401 => [
+                        'Unable to validate SAML assertion',
+                        'Authentication Failed',
+                        'Two-Factor Authentication is active for this account. Please ensure you provide the correct authentication code.',
+                        'Two-Factor Authentication is ENFORCED FOR PORTAL accounts.',
+                        'Two-Factor Authentication it\'s required for authentication on the portal. Please visit DOMAIN to set up 2FA and secure your account.'
+                    ],
+                    403 => [
+                        'The provided IDP Entity is invalid or does not match the expected configuration.',
+                        'The provided certificate is invalid or does not match the expected configuration.',
+                        'User account is not verified!',
+                        'User account is banned from the system!',
+                    ],
+                    500 => [
+                        'An error occurred: Generic server-side error.',
+                        'JWT key files are missing. Please ensure both private and public keys exist.',
+                    ]
                 ],
-                200 => [
-                    'Registration successful. Please check your email for further instructions',
-                ],
-                400 => [
-                    'SAML Response not found',
-                    'Invalid user provided. Please verify the user data',
-                ],
-                401 => [
-                    'Unable to validate SAML assertion',
-                    'Authentication Failed',
-                    'Two-Factor Authentication is active for this account. Please ensure you provide the correct authentication code.',
-                    'Two-Factor Authentication is ENFORCED FOR PORTAL accounts.',
-                    'Two-Factor Authentication it\'s required for authentication on the portal. Please visit DOMAIN to set up 2FA and secure your account.'
-                ],
-                403 => [
-                    'The provided IDP Entity is invalid or does not match the expected configuration.',
-                    'The provided certificate is invalid or does not match the expected configuration.',
-                    'User account is not verified!',
-                    'User account is banned from the system!',
-                ],
-                500 => [
-                    'An error occurred: Generic server-side error.',
-                    'JWT key files are missing. Please ensure both private and public keys exist.',
-                ]
             ],
             'api_v1_auth_google' => [
                 'requestBody' => [
+                    'code' => '4/0AdKgLCxjQ74mKAg9vs_f7PuO99DR',
+                    'twoFACode' => '02YZR88R'
+                ],
+                'responses' => [
+                    200 => [
+                        'Authenticated user details and JWT token'
+                    ],
+                    400 => [
+                        'Invalid JSON format',
+                        'Missing authorization code!',
+                        'This code is not associated with a google account!',
+                        'Invalid user provided. Please verify the user data',
+                    ],
+                    401 => [
+                        'Two-Factor Authentication is active for this account. Please ensure you provide the correct authentication code.',
+                        'Two-Factor Authentication is ENFORCED FOR PORTAL accounts.',
+                        'Two-Factor Authentication it\'s required for authentication on the portal. Please visit DOMAIN to set up 2FA and secure your account.',
+                    ],
+                    403 => [
+                        'User account is not verified!',
+                        'User account is banned from the system!',
+                        'our email domain is not allowed to use this platform!',
+                    ],
+                    500 => [
+                        'An error occurred: Generic server-side error.',
+                        'JWT key files are missing. Please ensure both private and public keys exist.',
+                    ]
+                ],
 
-                ],
-                200 => [
-                    'Authenticated user details and JWT token'
-                ],
-                400 => [
-                    'Invalid JSON format',
-                    'Missing authorization code!',
-                    'This code is not associated with a google account!',
-                    'Invalid user provided. Please verify the user data',
-                ],
-                401 => [
-                    'Two-Factor Authentication is active for this account. Please ensure you provide the correct authentication code.',
-                    'Two-Factor Authentication is ENFORCED FOR PORTAL accounts.',
-                    'Two-Factor Authentication it\'s required for authentication on the portal. Please visit DOMAIN to set up 2FA and secure your account.',
-                ],
-                403 => [
-                    'User account is not verified!',
-                    'User account is banned from the system!',
-                    'our email domain is not allowed to use this platform!',
-                ],
-                500 => [
-                    'An error occurred: Generic server-side error.',
-                    'JWT key files are missing. Please ensure both private and public keys exist.',
-                ]
             ],
             'api_v1_auth_microsoft' => [
                 'requestBody' => [
-
+                    'code' => '0.AQk6Lf2I2XGhQkWlU8gBp0KmxeNn2KTcbsJh.8Qt3OeYCB4sQ2FHo',
+                    'twoFACode' => '02YZR88R'
                 ],
-                200 => [
-                    'Authenticated user details and JWT token',
-                ],
-                400 => [
-                    'Invalid JSON format',
-                    'Missing authorization code!',
-                    'This code is not associated with a microsoft account!',
-                    'Invalid user provided. Please verify the user data',
-                ],
-                401 => [
-                    'Two-Factor Authentication is active for this account. Please ensure you provide the correct authentication code.',
-                    'Two-Factor Authentication is ENFORCED FOR PORTAL accounts.',
-                    'Two-Factor Authentication it\'s required for authentication on the portal. Please visit DOMAIN to set up 2FA and secure your account.',
-                ],
-                403 => [
-                    'User account is not verified!',
-                    'User account is banned from the system!',
-                    'our email domain is not allowed to use this platform!',
-                ],
-                500 => [
-                    'An error occurred: Generic server-side error.',
-                    'JWT key files are missing. Please ensure both private and public keys exist.',
+                'responses' => [
+                    200 => [
+                        'Authenticated user details and JWT token',
+                    ],
+                    400 => [
+                        'Invalid JSON format',
+                        'Missing authorization code!',
+                        'This code is not associated with a microsoft account!',
+                        'Invalid user provided. Please verify the user data',
+                    ],
+                    401 => [
+                        'Two-Factor Authentication is active for this account. Please ensure you provide the correct authentication code.',
+                        'Two-Factor Authentication is ENFORCED FOR PORTAL accounts.',
+                        'Two-Factor Authentication it\'s required for authentication on the portal. Please visit DOMAIN to set up 2FA and secure your account.',
+                    ],
+                    403 => [
+                        'User account is not verified!',
+                        'User account is banned from the system!',
+                        'our email domain is not allowed to use this platform!',
+                    ],
+                    500 => [
+                        'An error occurred: Generic server-side error.',
+                        'JWT key files are missing. Please ensure both private and public keys exist.',
+                    ]
                 ]
+
             ],
             'api_v1_capport_json' => [
-                'requestBody' => [
-
-                ],
-                200 => [
-                    'Successful response with CAPPORT metadata.',
-                ],
-                404 => [
-                    'CAPPORT is not enabled'
+                'requestBody' => [],
+                'responses' => [
+                    200 => [
+                        'Successful response with CAPPORT metadata.',
+                    ],
+                    404 => [
+                        'CAPPORT is not enabled'
+                    ]
                 ]
             ],
             'api_v1_config_settings' => [
-                'requestBody' => [
-
-                ],
-                200 => [
-                    'Configuration settings retrieved successfully'
+                'requestBody' => [],
+                'responses' => [
+                    200 => [
+                        'Configuration settings retrieved successfully'
+                    ]
                 ]
             ],
             'api_v1_get_current_user' => [
@@ -185,44 +200,48 @@ readonly class ApiResponseService
 
                 ],
                 'isProtected' => true,
-                200 => [
-                    'User details retrieved successfully'
-                ],
-                401 => [
-                    'JWT Token not found!',
-                    'JWT Token is invalid!',
-                    'JWT Token is expired!',
-                ],
-                403 => [
-                    'Unauthorized - You do not have permission to access this resource.',
-                    'User account is not verified!',
-                    'User account is banned from the system!',
-                ],
+                'responses' => [
+                    200 => [
+                        'User details retrieved successfully'
+                    ],
+                    401 => [
+                        'JWT Token not found!',
+                        'JWT Token is invalid!',
+                        'JWT Token is expired!',
+                    ],
+                    403 => [
+                        'Unauthorized - You do not have permission to access this resource.',
+                        'User account is not verified!',
+                        'User account is banned from the system!',
+                    ],
+                ]
             ],
             'api_v1_config_profile_android' => [
                 'requestBody' => [
-
+                    'public_key' => '-----BEGIN PUBLIC KEY-----\\n<RSA_PUBLIC_KEY>\\n-----END PUBLIC KEY-----'
                 ],
                 'isProtected' => true,
-                200 => [
-                    'Profile configuration for Android successfully retrieved'
-                ],
-                400 => [
-                    'Invalid or missing public key'
-                ],
-                401 => [
-                    'JWT Token is invalid!'
-                ],
-                403 => [
-                    'Unauthorized access!'
-                ],
-                500 => [
-                    'Failed to encrypt the password',
+                'responses' => [
+                    200 => [
+                        'Profile configuration for Android successfully retrieved'
+                    ],
+                    400 => [
+                        'Invalid or missing public key'
+                    ],
+                    401 => [
+                        'JWT Token is invalid!'
+                    ],
+                    403 => [
+                        'Unauthorized access!'
+                    ],
+                    500 => [
+                        'Failed to encrypt the password',
+                    ]
                 ]
             ],
             'api_v1_config_profile_ios' => [
                 'requestBody' => [
-
+                    'public_key' => '-----BEGIN PUBLIC KEY-----\\n<RSA_PUBLIC_KEY>\\n-----END PUBLIC KEY-----'
                 ],
                 'isProtected' => true,
                 200 => [
