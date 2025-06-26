@@ -25,9 +25,22 @@ class ApiController extends AbstractController
         $routes = $this->apiResponseService->getRoutesByPrefix(ApiVersion::API_V1->value);
         $commonMessages = $this->apiResponseService->getCommonResponses();
 
+        $settings = [
+            'CUSTOMER_LOGO_ENABLED' => $this->settingRepository->findOneBy(
+                ['name' => 'CUSTOMER_LOGO_ENABLED']
+            )->getValue(),
+            'CUSTOMER_LOGO' => $this->settingRepository->findOneBy(
+                ['name' => 'CUSTOMER_LOGO']
+            )->getValue(),
+            'OPENROAMING_LOGO' => $this->settingRepository->findOneBy(
+                ['name' => 'OPENROAMING_LOGO']
+            )->getValue(),
+        ];
+
         return $this->render('api/version_one.html.twig', [
             'routes' => $routes,
             'commonMessages' => $commonMessages,
+            'settings' => $settings,
         ]);
     }
 
