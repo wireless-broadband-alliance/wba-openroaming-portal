@@ -27,8 +27,3 @@ api_platform:
             persistAuthorization: true
             filter: true
     use_symfony_listeners: true
-
-    mapping:
-        paths:
-            - '%kernel.project_dir%/src/Api/V1/Entity'
-            - '%kernel.project_dir%/src/Api/V2/Entity'

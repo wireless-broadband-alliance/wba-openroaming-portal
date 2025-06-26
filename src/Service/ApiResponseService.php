@@ -14,27 +14,32 @@ readonly class ApiResponseService
     public function getRoutesByPrefix(string $version): array
     {
         $routes = $this->router->getRouteCollection();
-        $filtered = [];
+        $grouped = [];
         $responses = $this->getResponseMetadata($version);
 
-        if ($version === ApiVersion::API_V1->value) {
-            $prefix = '/api/v1';
-        } else {
-            $prefix = '/api/v2';
-        }
+        $prefix = $version === ApiVersion::API_V1->value ? '/api/v1' : '/api/v2';
 
         foreach ($routes as $name => $route) {
-            if ($route->getPath() !== $prefix && str_starts_with($route->getPath(), $prefix)) {
-                $filtered[] = [
+            $path = $route->getPath();
+
+            if ($path !== $prefix && str_starts_with($path, $prefix)) {
+                // Extract the first segment after the version
+                $relativePath = trim(str_replace($prefix, '', $path), '/');
+                $segments = explode('/', $relativePath);
+                $groupKey = $segments[0] ?? 'general';
+
+                $grouped[$groupKey][] = [
                     'name' => $name,
-                    'path' => $route->getPath(),
+                    'path' => $path,
                     'methods' => $route->getMethods(),
                     'responses' => $responses[$name] ?? [],
                 ];
             }
         }
 
-        return $filtered;
+        ksort($grouped);
+
+        return $grouped;
     }
 
     private function getResponseMetadata(string $version): array
