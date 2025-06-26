@@ -254,7 +254,7 @@ class RegistrationController extends AbstractController
                 return new BaseResponse(200, [
                     // Forbidden request
                     'message' => sprintf(
-                        'If the phone number exists, a new code has been sent to %s.',
+                        'If the Email exists, a new code has been sent to %s.',
                         $user->getEmail()
                     )
                 ])->toResponse();
