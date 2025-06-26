@@ -45,7 +45,7 @@ class ProfileController extends AbstractController
     /**
      * @throws RandomException
      */
-    #[Route('/config/profile/android', name: 'api_v2_config_profile_android', methods: ['GET'])]
+    #[Route('/config/profile/android', name: 'api_v2_config_profile_android', methods: ['POST'])]
     public function getProfileAndroid(Request $request): JsonResponse
     {
         try {
