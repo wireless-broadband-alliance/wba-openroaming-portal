@@ -15,7 +15,6 @@ class ApiController extends AbstractController
     public function __construct(
         private readonly ApiResponseService $apiResponseService,
         private readonly SettingRepository $settingRepository,
-        private readonly Setting $setting,
     ) {
     }
 
@@ -45,7 +44,7 @@ class ApiController extends AbstractController
     }
 
     #[Route('/api/v2', name: 'api_v2_docs')]
-    public function versionTwo(SettingRepository $settingRepository): Response
+    public function versionTwo(): Response
     {
         $routes = $this->apiResponseService->getRoutesByPrefix(ApiVersion::API_V2->value);
         $commonMessages = $this->apiResponseService->getCommonResponses();
