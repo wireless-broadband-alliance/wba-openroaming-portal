@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Api\V2\Controller;
+namespace App\Api\V1\Controller;
 
 use App\Api\V2\BaseResponse;
 use App\Repository\SettingRepository;
