@@ -34,7 +34,8 @@ readonly class ApiResponseService
                     'methods' => $route->getMethods(),
                     'responses' => $responses[$name]['responses'] ?? [],
                     'isProtected' => $responses[$name]['isProtected'] ?? false,
-                    'description' => $responses[$name]['description'] ?? null,
+                    'description' => $responses[$name]['description'],
+                    'requestBody' => $responses[$name]['requestBody'],
                 ];
             }
         }
@@ -265,7 +266,11 @@ readonly class ApiResponseService
             ],
             'api_v1_auth_local_register' => [
                 'requestBody' => [
-
+                    'email' => 'user@example.com',
+                    'password' => 'strongpassword',
+                    'first_name' => 'John',
+                    'last_name' => 'Doe',
+                    'turnstile_token' => 'valid_test_token'
                 ],
                 'responses' => [
                     200 => [
@@ -284,15 +289,17 @@ readonly class ApiResponseService
                 'requestBody' => [
 
                 ],
-                200 => [
-                    'Password reset email sent successfully',
-                ],
-                400 => [
-                    'Invalid email format.',
-                    'Invalid JSON format',
-                    'Missing required fields: email or turnstile_token',
-                    'CAPTCHA validation failed'
-                ],
+                'responses' => [
+                    200 => [
+                        'Password reset email sent successfully',
+                    ],
+                    400 => [
+                        'Invalid email format.',
+                        'Invalid JSON format',
+                        'Missing required fields: email or turnstile_token',
+                        'CAPTCHA validation failed'
+                    ],
+                ]
             ],
             'api_v1_auth_sms_register' => [
                 'requestBody' => [
