@@ -11,6 +11,7 @@ intervention.
 ```bash
 - php bin/console clear:deleteUnconfirmedUsers
 - php bin/console notify:usersWhenProfileExpires
+- php bin/console ldap:sync
 ```
 
 ## Step 1: Test the portal automation Commands Manually
@@ -23,6 +24,10 @@ Before relying on cron to execute the commands, manually test if portal executio
 
 ```bash
   php bin/console notify:usersWhenProfileExpires
+```
+
+```bash
+  php bin/console ldap:sync
 ```
 
 ## Step 2: Identify the Container and Install Cron
@@ -70,6 +75,7 @@ you are on the root folder of the project to execute the following steps:
    ```bash
    0 0 * * * docker exec -it $(docker ps | grep web | grep -i web-1 | awk '{print $1}') php bin/console clear:deleteUnconfirmedUsers
    30 0 * * * docker exec -it $(docker ps | grep web | grep -i web-1 | awk '{print $1}') php bin/console notify:usersWhenProfileExpires
+   0 1 * * * docker exec -it $(docker ps | grep web | grep -i web-1 | awk '{print $1}') php bin/console ldap:sync
    ``` 
 
 **Please make sure you type this commands on the end of the file.**

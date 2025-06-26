@@ -18,9 +18,9 @@ readonly class LogoutSuccessListener implements EventSubscriberInterface
 {
     public function __construct(
         private GetSettings $getSettings,
+        private EventActions $eventActions,
         private UserRepository $userRepository,
         private SettingRepository $settingRepository,
-        private EventActions $eventActions,
     ) {
     }
 
@@ -41,10 +41,6 @@ readonly class LogoutSuccessListener implements EventSubscriberInterface
         $platformMode = $data['PLATFORM_MODE']['value'] ? PlatformMode::DEMO->value : PlatformMode::LIVE->value;
 
         if ($user instanceof User) {
-            // Remove the 'session_backup' cookie
-            $response = $event->getResponse() ?? new Response();
-            $response->headers->clearCookie('session_backup');
-
             // Defines the Event to the table
             $eventMetadata = [
                 'platform' => $platformMode,

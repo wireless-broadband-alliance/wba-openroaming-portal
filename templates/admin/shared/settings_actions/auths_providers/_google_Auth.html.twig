@@ -94,26 +94,13 @@
                             </div>
                         {% endif %}
 
-                        {{ include('/admin/shared/settings_actions/_description.html.twig', {description: setting.vars.attr.description}) }}
+                        {{ include('admin/shared/settings_actions/_description.html.twig', {description: setting.vars.attr.description}) }}
 
                         <div class="mt-2 -mb-2 text-center text-red-500 text-base">
                             {{ form_errors(setting) }}
                         </div>
                     </div>
                 {% endif %}
-            {% endfor %}
-        </div>
-    </div>
-
-    {# Google Sub-settings #}
-    <div>
-        <div class="p-2 mt-10">
-            <h1 class="text-xl md:text-2xl font-semibold">Google Sub-Settings</h1>
-        </div>
-
-        <div class="grid gap-4 lg:grid-cols-2 xl:grid-cols-3 p-2 z-0">
-            {% for setting in form %}
-                {# Display only the authentication settings #}
                 {% if setting.vars.name in ['VALID_DOMAINS_GOOGLE_LOGIN'] %}
                     <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full"
                          name="GoogleSubCards"
@@ -140,7 +127,7 @@
                             </div>
                         {% endif %}
 
-                        {{ include('/admin/shared/settings_actions/_description.html.twig', {description: setting.vars.attr.description}) }}
+                        {{ include('admin/shared/settings_actions/_description.html.twig', {description: setting.vars.attr.description}) }}
 
                         <div class="mt-2 -mb-2 text-center text-red-500 text-base">
                             {{ form_errors(setting) }}

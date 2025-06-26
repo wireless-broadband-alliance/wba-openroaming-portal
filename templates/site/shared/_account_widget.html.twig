@@ -12,20 +12,20 @@
 
     <div {{ stimulus_controller('fields') }}>
         <form method="POST" action="{{ path('app_site_account_user') }}">
-            <h1 class="text-lg mb-8 mt-10">Personal Data</h1>
+            <h1 class="text-lg mb-8 mt-10">PersonalData</h1>
 
             {{ form_start(form) }}
             {{ form_errors(form) }}
 
             <div class="flex flex-col lg:flex-row gap-x-6 gap-y-8">
                 <div class="relative w-full">
-                    {{ form_label(form.firstName, 'First Name', {label_attr: {class: 'form-label'}}) }}
+                    {{ form_label(form.firstName, 'First name', {label_attr: {class: 'form-label'}}) }}
                     {{ form_widget(form.firstName, {attr: {class: 'form-widget', 'data-fields-target': 'input', 'data-action': 'fields#input_changed'}}) }}
                     {{ form_errors(form.firstName) }}
                 </div>
 
                 <div class="relative w-full">
-                    {{ form_label(form.lastName, 'Last Name', {label_attr: {class: 'form-label'}}) }}
+                    {{ form_label(form.lastName, 'Last name', {label_attr: {class: 'form-label'}}) }}
                     {{ form_widget(form.lastName, {attr: {class: 'form-widget', 'data-fields-target': 'input', 'data-action': 'fields#input_changed'}}) }}
                     {{ form_errors(form.lastName) }}
                 </div>
@@ -44,9 +44,10 @@
     {# divider #}
     <div class="divider my-8"></div>
 
+    {# Form Password Section #}
     <div {{ stimulus_controller('fields') }}>
         <form method="POST" action="{{ path('app_site_account_user') }}">
-            <h1 class="text-lg mb-8">New Password</h1>
+            <h1 class="text-lg mb-8">Change Password</h1>
 
             {{ form_start(formPassword) }}
             {{ form_errors(formPassword) }}
@@ -94,59 +95,76 @@
         </form>
     </div>
 
-    {# Two-Factor Authenticator #}
+    {# Two-Factor Authenticator Section #}
     <div class="divider my-8"></div>
-    <h1 class="text-lg mb-8 mt-10">Two-Factor Authentication</h1>
-    {% if not (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value) %}
-        <div class="grid grid-cols-2 space-x-2">
-    {% else %}
-            <div class="grid grid-cols-1 space-x-2">
-    {% endif %}
+
+    <h1 class="text-lg mb-8 mt-10">
+        Two-Factor Authentication
+    </h1>
+
+    <div class="grid {% if user.twoFAtype != constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value %}grid-cols-2{% else %}grid-cols-1{% endif %} space-x-2">
         <a href="{{ path('app_configure2FA') }}" class="btn-secondary md:text-base text-sm">
             Configure Two-Factor Authentication
         </a>
-        {% if not (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value) %}
-            <a href="{{ path('app_disable2FA', {context: context}) }}" class="btn-logout">Disable</a>
+        {% if user.twoFAtype != constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value %}
+            <a href="{{ path('app_disable2FA', {context: context}) }}" class="btn-logout">
+                Disable
+            </a>
         {% endif %}
     </div>
 
-    {# Divider #}
+    {# Divider between sections #}
     <div class="divider my-8"></div>
 
-    {# Revoke Profile #}
+    {# Revoke Account Profile Section #}
     <div {{ stimulus_controller('alert') }}>
         <form method="POST"
               action="{{ path('app_site_account_user') }}"
               data-controller="alert"
               data-alert-target="form">
-            <h1 class="text-lg mb-8 mt-10">Profile Data</h1>
-            <div class="grid grid-cols-1 space-x-2">
-            {{ form_start(formRevokeProfiles) }}
-            {{ form_errors(formRevokeProfiles) }}
+            <h1 class="text-lg mb-8 mt-10">
+                Profile Data
+            </h1>
 
-            <button class="grid grid-cols-2 space-x-2 btn-logout"
-                    data-action="alert#revoke_profiles"
-                    data-alert-target="button"
-                    data-user-uuid="{% if userExternalAuths[user.id] is defined %}{% for auth in userExternalAuths[user.id] %}{% if auth.provider == constant('App\\Enum\\UserProvider::SAML').value %}{{ auth.providerId }}{% else %}{{ app.user.uuid }}{% endif %}{% endfor %}{% endif %}"
-                    type="button">
-                Revoke Account Profiles
-            </button>
+            <div class="grid grid-cols-1 space-y-4">
+                {{ form_start(formRevokeProfiles) }}
+                {{ form_errors(formRevokeProfiles) }}
+
+                <button class="btn-logout"
+                        type="button"
+                        data-action="alert#revoke_profiles"
+                        data-alert-target="button"
+                        data-user-uuid="{% if userExternalAuths[user.id] is defined %}{% for auth in userExternalAuths[user.id] %}{% if auth.provider == constant('App\\Enum\\UserProvider::SAML').value %}{{ auth.providerId }}{% else %}{{ app.user.uuid }}{% endif %}{% endfor %}{% endif %}">
+                    Revoke Account Profile
+                </button>
+
+                {{ form_rest(formRevokeProfiles) }}
+                {{ form_end(formRevokeProfiles) }}
             </div>
-
-            {{ form_rest(formRevokeProfiles) }}
-            {{ form_end(formRevokeProfiles) }}
         </form>
     </div>
 
+    {# Additional Option: Danger Zone for Account Deletion #}
     {% if user.email is not null or user.phoneNumber is not null %}
         {% if not is_granted('ROLE_ADMIN') %}
-            {# User Auto Delete #}
             <div class="divider my-8"></div>
-            <h1 class="text-lg mb-8 mt-10 !text-red-600 font-bold uppercase">Danger Zone</h1>
-            <div class="grid grid-cols-1 space-x-2">
-                <a href="{{ path('app_user_account_deletion_generate_code') }}" class="btn-logout">
-                    Delete Account
-                </a>
+            <h1 class="text-lg mb-8 mt-10 !text-red-600 font-bold uppercase">
+                Danger Zone
+            </h1>
+            <div class="grid grid-cols-1 space-y-4">
+                {% for auth in user.userExternalAuths %}
+                    {% if auth.provider != constant('App\\Enum\\UserProvider::PORTAL_ACCOUNT').value %}
+                        <a href="{{ path('app_user_account_deletion_external') }}" class="btn-logout"
+                           onclick="return confirm('Warning: You are about to delete your own account. This action is irreversible. Are you sure you want to proceed?')">
+                            Delete Account
+                        </a>
+                    {% else %}
+                        <a href="{{ path('app_user_account_deletion_local') }}" class="btn-logout"
+                           onclick="return confirm('Warning: You are about to delete your own account. This action is irreversible. We will send you a code to confirm this action. Are you sure you want to proceed?')">
+                            Delete Account
+                        </a>
+                    {% endif %}
+                {% endfor %}
             </div>
         {% endif %}
     {% endif %}

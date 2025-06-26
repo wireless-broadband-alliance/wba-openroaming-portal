@@ -872,6 +872,9 @@ class SettingsController extends AbstractController
                 'AUTH_METHOD_REGISTER_DESCRIPTION',
                 'PROFILE_LIMIT_DATE_EMAIL',
 
+                'EMAIL_TIMER_RESEND',
+                'LINK_VALIDITY',
+
                 'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED',
                 'AUTH_METHOD_LOGIN_TRADITIONAL_LABEL',
                 'AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION',
