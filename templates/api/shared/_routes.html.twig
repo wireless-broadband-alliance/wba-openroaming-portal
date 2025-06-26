@@ -19,7 +19,11 @@
                 {% if route.responses is defined and route.responses is not empty %}
                     {% for status, messages in route.responses %}
                         <div>
-                            <p class="text-sm font-semibold text-indigo-700 mb-2">HTTP {{ status }}</p>
+                            <p
+                                    class="text-sm font-semibold mb-2 {{ status[:1] == '2' ? 'text-[#7BBA29]' : 'text-red-600' }}"
+                            >
+                                HTTP {{ status }}
+                            </p>
                             <div class="bg-gray-800 text-white rounded-lg p-4 text-sm font-mono overflow-x-auto">
                                 {% include 'api/shared/_json_response_block.html.twig' with {status: status, messages: messages} %}
                             </div>
