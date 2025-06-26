@@ -1,27 +1,37 @@
+{% set methodColor = {
+    'GET': 'bg-green-100 text-green-700',
+    'POST': 'bg-blue-100 text-blue-700',
+    'PUT': 'bg-yellow-100 text-yellow-700',
+    'PATCH': 'bg-purple-100 text-purple-700',
+    'DELETE': 'bg-red-100 text-red-700',
+    'ANY': 'bg-gray-100 text-gray-700'
+} %}
+
 <div class="space-y-4">
     {% for route in routes %}
-        <div class="border border-gray-300 rounded-xl shadow-sm overflow-hidden">
+        {% set method = route.methods[0]|upper ?: 'ANY' %}
+        <div class="border border-gray-200 rounded-xl shadow-sm overflow-hidden">
             <button
                     type="button"
                     class="w-full flex justify-between items-center px-6 py-4 bg-gray-50 hover:bg-gray-100 transition"
                     onclick="document.getElementById('resp-{{ loop.index }}').classList.toggle('hidden')"
             >
                 <div class="flex items-center gap-4">
-                    <span class="text-sm font-medium text-indigo-600">{{ route.methods|join(', ') ?: 'ANY' }}</span>
-                    <code class="text-sm text-gray-800">{{ route.path }}</code>
+                    <span class="text-xs font-semibold px-2 py-1 rounded {{ methodColor[method] ?? 'bg-gray-100 text-gray-700' }}">
+                        {{ method }}
+                    </span>
+                    <code class="text-sm text-gray-900 font-mono">{{ route.path }}</code>
                 </div>
-                <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-5 h-5 text-gray-500 transform transition-transform group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                 </svg>
             </button>
 
-            <div id="resp-{{ loop.index }}" class="hidden px-6 py-4 bg-white border-t border-gray-200 space-y-6">
+            <div id="resp-{{ loop.index }}" class="hidden px-6 py-4 bg-white border-t border-gray-100 space-y-6">
                 {% if route.responses is defined and route.responses is not empty %}
                     {% for status, messages in route.responses %}
                         <div>
-                            <p
-                                    class="text-sm font-semibold mb-2 {{ status[:1] == '2' ? 'text-[#7BBA29]' : 'text-red-600' }}"
-                            >
+                            <p class="text-sm font-semibold mb-2 {{ status starts with '2' ? 'text-green-600' : 'text-red-600' }}">
                                 HTTP {{ status }}
                             </p>
                             <div class="bg-gray-800 text-white rounded-lg p-4 text-sm font-mono overflow-x-auto">

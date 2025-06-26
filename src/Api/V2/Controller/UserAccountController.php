@@ -51,7 +51,7 @@ class UserAccountController extends AbstractController
      * @throws Error
      * @throws JsonException
      */
-    #[Route('/userAccount/deletion', name: 'api_v2_user_account_deletion', methods: ['POST'])]
+    #[Route('/userAccount/deletion', name: 'api_v2_user_account_deletion', methods: ['DELETE'])]
     public function userAccountDeletion(Request $request, Auth $samlAuth): JsonResponse
     {
         $token = $this->tokenStorage->getToken();
@@ -316,8 +316,9 @@ class UserAccountController extends AbstractController
 
             return new BaseResponse(
                 200,
-                ['user_uuid' => $userUUID],
-                sprintf('User with UUID "%s" successfully deleted.', $userUUID)
+                [
+                    'message' => sprintf('User with UUID "%s" successfully deleted.', $userUUID)
+                ]
             )->toResponse();
         }
 
