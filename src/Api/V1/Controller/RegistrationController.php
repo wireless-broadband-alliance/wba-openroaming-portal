@@ -19,7 +19,6 @@ use App\Service\EventActions;
 use App\Service\GetSettings;
 use App\Service\RegistrationEmailGenerator;
 use App\Service\SendSMS;
-use App\Service\VerificationCodeEmailGenerator;
 use DateInterval;
 use DateTime;
 use DateTimeInterface;
@@ -252,9 +251,9 @@ class RegistrationController extends AbstractController
             if ($user->getBannedAt()) {
                 // This message exists in case of a user is banned the email/reset, to protect against RGPD
                 return new BaseResponse(200, [
-                    // Correct success response
+                    // Forbidden request
                     'message' => sprintf(
-                        'If the email exist, we have sent you a new one to: %s.', // Forbidden request
+                        'If the email address exists in our system, we have sent you a new one to: %s.',
                         $user->getEmail()
                     )
                 ])->toResponse();
@@ -359,26 +358,30 @@ class RegistrationController extends AbstractController
                     return new BaseResponse(200, [
                         // Correct success response
                         'message' => sprintf(
-                            'If the email exist, we have sent you a new one to: %s.', // Actually success
+                            'If the email address exists in our system, we have sent you a new one to: %s.',
+                            // Actually success
                             $user->getEmail()
                         )
                     ])->toResponse();
                 }
-                // This message exists in case of a user spams the email/reset, to protect against RGPD
+                // This message exists in case of user spams the email/reset, to protect against RGPD
                 return new BaseResponse(200, [
                     // Correct success response
                     'message' => sprintf(
-                        'If the email exist, we have sent you a new one to: %s.',
+                        'If the email address exists in our system, we have sent you a new one to: %s.',
                         $user->getEmail()
                     )
                 ])->toResponse(); // To many requests
             }
         }
 
-        // This message exists in case of a user spams the email/reset, to protect against RGPD
+        // This message exists in case of user tries to spam the email/reset, to protect against RGPD
         return new BaseResponse(
             200,
-            sprintf('If the email exist, we have sent you a new one to: %s', $data['email']),
+            sprintf(
+                'If the email address exists in our system, we have sent you a new one to: %s',
+                $data['email']
+            ),
             null,
         )->toResponse(); // Not Found User doesn't exist request
     }
