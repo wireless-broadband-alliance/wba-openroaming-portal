@@ -25,6 +25,9 @@ class ApiController extends AbstractController
         $commonMessages = $this->apiResponseService->getCommonResponses();
 
         $settings = [
+            'PAGE_TITLE' => $this->settingRepository->findOneBy(
+                ['name' => 'PAGE_TITLE']
+            )->getValue(),
             'CUSTOMER_LOGO_ENABLED' => $this->settingRepository->findOneBy(
                 ['name' => 'CUSTOMER_LOGO_ENABLED']
             )->getValue(),
@@ -50,6 +53,9 @@ class ApiController extends AbstractController
         $commonMessages = $this->apiResponseService->getCommonResponses();
 
         $settings = [
+            'PAGE_TITLE' => $this->settingRepository->findOneBy(
+                ['name' => 'PAGE_TITLE']
+            )->getValue(),
             'CUSTOMER_LOGO_ENABLED' => $this->settingRepository->findOneBy(
                 ['name' => 'CUSTOMER_LOGO_ENABLED']
             )->getValue(),
