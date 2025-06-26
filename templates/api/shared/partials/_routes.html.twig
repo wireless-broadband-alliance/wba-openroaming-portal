@@ -49,6 +49,13 @@
                                 </div>
                             {% endif %}
 
+                            {% if route.isProtected %}
+                                <div class="flex items-center gap-2 p-4 border-l-4 border-yellow-500 bg-yellow-50 text-yellow-800 text-sm rounded-md">
+                                    <twig:ux:icon class="w-5 h-5" name="wba:info" />
+                                    <span>This endpoint requires a valid JWT authentication token.</span>
+                                </div>
+                            {% endif %}
+
                             {# Request Body #}
                             {% if route.requestBody is defined and route.requestBody is not empty %}
                                 <div>
