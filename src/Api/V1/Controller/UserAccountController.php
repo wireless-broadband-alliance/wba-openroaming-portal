@@ -316,8 +316,9 @@ class UserAccountController extends AbstractController
 
             return new BaseResponse(
                 200,
-                ['message' => sprintf('User with UUID "%s" successfully deleted.', $userUUID)],
-                null
+                [
+                    'message' => sprintf('User with UUID "%s" successfully deleted.', $userUUID)
+                ]
             )->toResponse();
         }
 
