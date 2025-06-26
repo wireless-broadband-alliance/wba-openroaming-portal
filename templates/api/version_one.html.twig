@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}API V2 Documentation{% endblock %}
+{% block title %}API V1 Documentation{% endblock %}
 
 {% block body %}
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -11,9 +11,9 @@
                      alt="Logo"/>
             {% endif %}
             <div class="flex flex-col items-center space-y-4 mt-10">
-                <h1 class="text-4xl font-extrabold text-indigo-700 mb-2">API V2 Documentation</h1>
+                <h1 class="text-4xl font-extrabold text-indigo-700 mb-2">API V1 Documentation</h1>
                 <p class="text-center max-w-2xl text-gray-600 text-lg">
-                    Explore our RESTful API version 2 with detailed endpoints and response messages for easy integration.
+                    Explore our RESTful API version 1 with detailed endpoints and response messages for easy integration.
                 </p>
             </div>
         </div>
@@ -21,14 +21,14 @@
         <section class="mb-16">
             <h2 class="text-2xl font-semibold mb-6 border-b border-gray-300 pb-2">API URL and Versioning</h2>
             <div class="overflow-x-auto">
-                {% include 'api/shared/_routes.html.twig' %}
+                {% include 'api/shared/partials/_routes.html.twig' %}
             </div>
         </section>
 
         <section>
             <h2 class="text-2xl font-semibold mb-6 border-b border-gray-300 pb-2">Common Response Messages</h2>
             <div class="overflow-x-auto">
-                {% include 'api/shared/_common_messages.html.twig' %}
+                {% include 'api/shared/partials/_common_messages.html.twig' %}
             </div>
         </section>
 

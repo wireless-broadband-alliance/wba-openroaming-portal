@@ -1,0 +1,48 @@
+<div
+        data-controller="clipboard"
+        class="relative group max-w-full"
+>
+    <button
+            type="button"
+            title="Copy"
+            aria-label="Copy code to clipboard"
+            class="
+      absolute top-2 right-2
+      bg-indigo-600/90 hover:bg-indigo-700/95
+      text-white
+      p-2.5 rounded-lg
+      shadow-md
+      transition-colors duration-200 ease-in-out
+      focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400
+      flex items-center justify-center
+      w-9 h-9
+      z-10
+    "
+            data-action="click->clipboard#copyToClipboard"
+    >
+        <twig:ux:icon class="w-5 h-5" name="wba:copy" />
+    </button>
+
+    {# Copied message placeholder — hidden by default #}
+    <div
+            data-clipboard-target="message"
+            class="pointer-events-none select-none absolute -top-7 right-2 bg-green-600 text-white text-xs px-2 py-1 rounded shadow opacity-0 transition-opacity duration-300"
+    >
+        Copied!
+    </div>
+
+    <pre
+            data-clipboard-target="code"
+            class="whitespace-pre-wrap rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full"
+    >
+    {{ jsonMacros.jsonHighlight(
+        status starts with '2'
+        ? { 'success': true, 'data': messages }
+        : {
+            'success': false,
+            'error': messages[0]|default('An error occurred'),
+            'details': messages|length > 1 ? messages|slice(1) : null
+        }
+    )|raw }}
+  </pre>
+</div>
