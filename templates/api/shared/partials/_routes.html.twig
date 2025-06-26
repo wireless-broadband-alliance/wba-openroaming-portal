@@ -31,7 +31,7 @@
                 {% if route.responses is defined and route.responses is not empty %}
                     {% for status, messages in route.responses %}
                         <div>
-                            <p class="text-sm font-semibold mb-2 {{ status starts with '2' ? 'text-green-600' : 'text-red-600' }}">
+                            <p class="text-sm font-semibold mb-2 {{ status >= 200 and status < 300 ? 'text-green-600' : 'text-red-600' }}">
                                 HTTP {{ status }}
                             </p>
                             <div class="bg-gray-800 text-white rounded-lg p-4 text-sm font-mono overflow-x-auto">
