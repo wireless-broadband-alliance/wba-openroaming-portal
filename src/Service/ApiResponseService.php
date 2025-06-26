@@ -38,9 +38,6 @@ readonly class ApiResponseService
                     'Registration successful. Please check your email for further instructions',
                 ],
                 400 => [
-                    'Invalid JSON format',
-                    'CAPTCHA validation failed',
-                    'Missing required fields',
                     'Invalid email format.',
                 ],
             ],
@@ -50,16 +47,20 @@ readonly class ApiResponseService
     public function getCommonResponses(): array
     {
         return [
-            'api_v2_auth_local_register' => [
-                200 => [
-                    'Registration successful. Please check your email for further instructions',
-                ],
-                400 => [
-                    'Invalid JSON format',
-                    'CAPTCHA validation failed',
-                    'Missing required fields',
-                    'Invalid email format.',
-                ],
+            400 => [
+                'Invalid JSON format',
+                'Invalid data: Missing required fields.',
+                'CAPTCHA validation failed',
+            ],
+            401 => [
+                'JWT Token not found!',
+                'JWT Token is expired!',
+            ],
+            403 => [
+                'JWT Token is invalid!',
+            ],
+            500 => [
+                'Internal Server Error',
             ],
         ];
     }

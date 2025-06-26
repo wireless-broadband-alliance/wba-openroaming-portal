@@ -19,7 +19,7 @@ class ApiController extends AbstractController
     public function versionOne(): Response
     {
         $routes = $this->apiResponseService->getRoutesByPrefix('/api/v1');
-        dd($routes);
+        $commonMessages = $this->apiResponseService->getCommonResponses();
 
         return $this->render('api/version_one.html.twig', [
             'routes' => $routes,
