@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Api\V2\Entity\Setting;
+use App\Enum\ApiVersion;
 use App\Repository\SettingRepository;
 use App\Service\ApiResponseService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -21,7 +22,7 @@ class ApiController extends AbstractController
     #[Route('/api/v1', name: 'api_v1_docs')]
     public function versionOne(): Response
     {
-        $routes = $this->apiResponseService->getRoutesByPrefix('/api/v1');
+        $routes = $this->apiResponseService->getRoutesByPrefix(ApiVersion::API_V1->value);
         $commonMessages = $this->apiResponseService->getCommonResponses();
 
         return $this->render('api/version_one.html.twig', [
@@ -33,7 +34,7 @@ class ApiController extends AbstractController
     #[Route('/api/v2', name: 'api_v2_docs')]
     public function versionTwo(SettingRepository $settingRepository): Response
     {
-        $routes = $this->apiResponseService->getRoutesByPrefix('/api/v2');
+        $routes = $this->apiResponseService->getRoutesByPrefix(ApiVersion::API_V2->value);
         $commonMessages = $this->apiResponseService->getCommonResponses();
 
         $settings = [
