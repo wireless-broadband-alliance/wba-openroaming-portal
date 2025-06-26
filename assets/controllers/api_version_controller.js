@@ -9,7 +9,7 @@ export default class extends Controller {
 
     filter() {
         const searchTerm = this.inputTarget.value.toLowerCase();
-        this.itemTargets.forEach(item => {
+        this.itemTargets.forEach((item) => {
             const text = item.innerText.toLowerCase();
             item.style.display = text.includes(searchTerm) ? "" : "none";
         });

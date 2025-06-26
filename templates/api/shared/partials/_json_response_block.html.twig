@@ -1,27 +1,27 @@
 <div data-controller="clipboard" class="relative group max-w-full">
-    {% include 'api/shared/partials/_copy.html.twig' %}
+    {{ include('api/shared/partials/_copy.html.twig') }}
 
     <pre
             data-clipboard-target="code"
             class="whitespace-pre-wrap rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full"
     >
-{% if status >= 200 and status < 300  %}
+{% if status >= 200 and status < 300 %}
 {{
 {
-    'success':true,
-    'data': messages
+    success: true,
+    data: messages,
 }|json_encode(constant('JSON_PRETTY_PRINT'))|raw }}
 {% elseif status >= 400 and status < 500 %}
 {{
 {
-    'success': false,
-    'error': messages,
+    success: false,
+    error: messages,
 }|json_encode(constant('JSON_PRETTY_PRINT'))|raw }}
 {% elseif status >= 500 %}
 {{
 {
-    'success': false,
-    'message': messages,
+    success: false,
+    message: messages,
 }|json_encode(constant('JSON_PRETTY_PRINT'))|raw }}
 {% endif %}
     </pre>

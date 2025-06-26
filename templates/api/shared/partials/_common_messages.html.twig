@@ -21,7 +21,7 @@
                     class="hidden relative px-6 py-4 bg-gray-800 border-t border-gray-700 max-w-full"
                     data-controller="clipboard"
             >
-                {% include 'api/shared/partials/_copy.html.twig' %}
+                {{ include('api/shared/partials/_copy.html.twig') }}
 
                 <pre
                         data-clipboard-target="code"
@@ -29,11 +29,11 @@
                 >
 {{ (
 status starts with '2'
-? { 'success': true, 'data': messages }
+? {success: true, data: messages}
 : {
-    'success': false,
-    'error': messages[0]|default('An error occurred'),
-    'details': messages|length > 1 ? messages|slice(1) : null
+    success: false,
+    error: messages[0]|default('An error occurred'),
+    details: messages|length > 1 ? messages|slice(1) : null,
 }
 )|json_encode(constant('JSON_PRETTY_PRINT'))|raw }}
                 </pre>
