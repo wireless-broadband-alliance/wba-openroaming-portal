@@ -10,6 +10,7 @@
 <div class="space-y-10">
     {% for group, routesInGroup in routes %}
         <div>
+            {# Group Title #}
             <h2 class="text-2xl font-bold text-gray-800 mb-4 border-b pb-2 capitalize">
                 {{ group }}
             </h2>
@@ -49,6 +50,7 @@
                                 </div>
                             {% endif %}
 
+                            {# JWT TOKEN REQUIRED #}
                             {% if route.isProtected %}
                                 <div class="flex items-center gap-2 p-4 border-l-4 border-yellow-500 bg-yellow-50 text-yellow-800 text-sm rounded-md">
                                     <twig:ux:icon class="w-5 h-5" name="wba:info" />
