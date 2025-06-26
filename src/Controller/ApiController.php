@@ -51,7 +51,6 @@ class ApiController extends AbstractController
         $routes = $this->apiResponseService->getRoutesByPrefix(ApiVersion::API_V2->value);
         $commonMessages = $this->apiResponseService->getCommonResponses();
 
-        dd($routes);
         $settings = [
             'PAGE_TITLE' => $this->settingRepository->findOneBy(
                 ['name' => 'PAGE_TITLE']
