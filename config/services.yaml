@@ -26,10 +26,6 @@ parameters:
   app.metrics_enabled: '%env(bool:METRICS_ENABLED)%'
   app.metrics_allowed_ips: '%env(string:METRICS_ALLOWED_IPS)%'
 services:
-    App\Api\ApiFactoryVersions:
-        decorates: 'api_platform.openapi.factory'
-        arguments:
-            - '@App\Api\ApiFactoryVersions.inner'
     PixelOpen\CloudflareTurnstileBundle\Http\CloudflareTurnstileHttpClient:
         alias: 'turnstile.http_client'
     App\Service\JWTTokenGenerator:
