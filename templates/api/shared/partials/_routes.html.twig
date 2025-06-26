@@ -24,7 +24,7 @@
                                 onclick="document.getElementById('resp-{{ loop.parent.loop.index }}-{{ loop.index }}').classList.toggle('hidden')"
                         >
                             <div class="flex items-center gap-4">
-                                {% if route.path in protectedEndpoints %}
+                                {% if route.isProtected %}
                                     <twig:ux:icon class="w-5 h-5 text-yellow-600" name="heroicons-outline:lock-closed" />
                                 {% endif %}
                                 <span class="text-xs font-semibold px-2 py-1 rounded {{ methodColor[method] ?? 'bg-gray-100 text-gray-700' }}">
