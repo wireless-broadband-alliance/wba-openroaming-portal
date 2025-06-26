@@ -254,7 +254,7 @@ class RegistrationController extends AbstractController
                 return new BaseResponse(200, [
                     // Forbidden request
                     'message' => sprintf(
-                        'If the email address exists in our system, we have sent you a new one to: %s.',
+                        'If the phone number exists, a new code has been sent to %s.',
                         $user->getEmail()
                     )
                 ])->toResponse();
@@ -379,7 +379,7 @@ class RegistrationController extends AbstractController
         // This message exists in case of user tries to spam the email/reset, to protect against RGPD
         return new BaseResponse(
             200,
-            sprintf('If the email address exists in our system, we have sent you a new one to: %s', $data['email']),
+            sprintf('If the email address exists in our system, we’ve sent a new one to: %s.', $data['email']),
             null,
         )->toResponse(); // Not Found User doesn't exist request
     }
@@ -619,7 +619,7 @@ class RegistrationController extends AbstractController
                 // This message exists in case of a user is banned the sms/reset, to protect against RGPD
                 return new BaseResponse(
                     200,
-                    'If the phone number exist, we have sent you a new one to: %s',
+                    'If the phone number exists, a new code has been sent to %s.',
                     $user->getEmail(),
                     null,
                 )->toResponse(); // Too Many Requests Response
@@ -667,7 +667,7 @@ class RegistrationController extends AbstractController
                                 // Protect against spam and RGPD policies - simulate success without actual resend
                                 return new BaseResponse(200, [
                                     'success' => sprintf(
-                                        'If the phone number exists, we have sent a new code to: %s.',
+                                        'If the phone number exists, a new code has been sent to %s.',
                                         $user->getPhoneNumber()
                                     )
                                 ])->toResponse();
@@ -681,7 +681,7 @@ class RegistrationController extends AbstractController
                         return new BaseResponse(
                             429,
                             null,
-                            'Limit of tries exceeded for regeneration. Contact support.'
+                            'You’ve exceeded the maximum number of attempts to regenerate. Please contact support.'
                         )->toResponse();
                     }
 
