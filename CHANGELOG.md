@@ -2,7 +2,7 @@
 
 # Release V1.8.0
 
-- Update API for version 2, fix big for iOS App's with invalid format for profile generation
+- Update API for version 2, fix bug for iOS App's with invalid format for profile generation endpoint.
 - Prometheus Implementation
 - Fix bug with registration links, use could use them to re-log in to the portal at any time, can only be used once.
 - Fix bug with account deletion, the admin was able to access the page using the url. The admin cannot delete his own account.
