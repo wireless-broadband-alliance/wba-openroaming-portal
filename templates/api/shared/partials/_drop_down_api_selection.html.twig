@@ -1,0 +1,33 @@
+<div data-controller="api-version" class="relative flex flex-col items-end mb-6 w-48">
+    <label for="versionSearch" class="sr-only">Search API Version</label>
+    <input
+            data-api-version-target="input"
+            type="text"
+            id="versionSearch"
+            name="versionSearch"
+            placeholder="Search versions..."
+            class="border border-gray-300 rounded-lg px-4 py-2 mb-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            autocomplete="off"
+            data-action="input->api-version#filter focus->api-version#onFocus blur->api-version#onBlur"
+    />
+
+    <ul data-api-version-target="list"
+        class="hidden absolute right-0 top-full mt-1 border border-gray-300 rounded-lg w-full max-h-48 overflow-auto bg-white z-10 shadow-lg">
+        {% set versions = [
+            { label: 'API V2', route: 'api_v2_docs' },
+            { label: 'API V1', route: 'api_v1_docs' }
+        ] %}
+
+        {% for version in versions %}
+            <li data-api-version-target="item">
+                <a href="{{ path(version.route) }}"
+                   class="block px-4 py-2 hover:bg-blue-100 text-gray-700
+                          {% if app.request.get('_route') == version.route %}
+                             font-semibold text-indigo-700 bg-indigo-100
+                          {% endif %}">
+                    {{ version.label }}
+                </a>
+            </li>
+        {% endfor %}
+    </ul>
+</div>
