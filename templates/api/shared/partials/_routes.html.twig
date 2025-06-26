@@ -42,13 +42,24 @@
                         <div id="resp-{{ loop.parent.loop.index }}-{{ loop.index }}"
                              class="hidden px-6 py-4 bg-white border-t border-gray-100 space-y-6">
 
-                            {# Show endpoint description if available #}
+                            {# Description #}
                             {% if route.description is defined and route.description is not empty %}
                                 <div class="text-sm text-gray-600 italic">
                                     {{ route.description }}
                                 </div>
                             {% endif %}
 
+                            {# Request Body #}
+                            {% if route.requestBody is defined and route.requestBody is not empty %}
+                                <div>
+                                    <p class="text-sm font-semibold text-blue-600 mb-2">Request Body</p>
+                                    <div class="bg-gray-100 text-gray-800 rounded-lg p-4 text-sm font-mono overflow-x-auto border border-gray-200">
+                                        <pre>{{ route.requestBody|json_encode(constant('JSON_PRETTY_PRINT')) }}</pre>
+                                    </div>
+                                </div>
+                            {% endif %}
+
+                            {# Responses #}
                             {% if route.responses is defined and route.responses is not empty %}
                                 {% for status, messages in route.responses %}
                                     {% if status != 'requestBody' %}

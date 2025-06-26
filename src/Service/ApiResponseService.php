@@ -34,7 +34,7 @@ readonly class ApiResponseService
                     'methods' => $route->getMethods(),
                     'responses' => $responses[$name]['responses'] ?? [],
                     'isProtected' => $responses[$name]['isProtected'] ?? false,
-                    'description' => $responses[$name]['description'],
+                    'description' => $responses[$name]['description'] ?? null,
                     'requestBody' => $responses[$name]['requestBody'],
                 ];
             }
