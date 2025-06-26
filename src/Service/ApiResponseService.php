@@ -32,7 +32,7 @@ readonly class ApiResponseService
                     'name' => $name,
                     'path' => $path,
                     'methods' => $route->getMethods(),
-                    'responses' => $responses[$name] ?? [],
+                    'responses' => $responses[$name]['responses'] ?? [],
                     'isProtected' => $responses[$name]['isProtected'] ?? false,
                 ];
             }
@@ -244,35 +244,40 @@ readonly class ApiResponseService
                     'public_key' => '-----BEGIN PUBLIC KEY-----\\n<RSA_PUBLIC_KEY>\\n-----END PUBLIC KEY-----'
                 ],
                 'isProtected' => true,
-                200 => [
-                    'Profile configuration for iOS successfully retrieved',
-                ],
-                400 => [
-                    'Invalid or missing public key',
-                ],
-                401 => [
-                    'JWT Token is invalid!'
-                ],
-                403 => [
-                    'Unauthorized access!'
-                ],
-                500 => [
-                    'Failed to encrypt the password',
+                'responses' => [
+                    200 => [
+                        'Profile configuration for iOS successfully retrieved',
+                    ],
+                    400 => [
+                        'Invalid or missing public key',
+                    ],
+                    401 => [
+                        'JWT Token is invalid!'
+                    ],
+                    403 => [
+                        'Unauthorized access!'
+                    ],
+                    500 => [
+                        'Failed to encrypt the password',
+                    ]
                 ]
             ],
             'api_v1_auth_local_register' => [
                 'requestBody' => [
 
                 ],
-                200 => [
-                    'Registration successful. Please check your email for further instructions',
-                ],
-                400 => [
-                    'Invalid email format.',
-                    'Invalid JSON format',
-                    'Missing required fields: email, password or turnstile_token',
-                    'CAPTCHA validation failed'
-                ],
+                'responses' => [
+                    200 => [
+                        'Registration successful. Please check your email for further instructions',
+                    ],
+                    400 => [
+                        'Invalid email format.',
+                        'Invalid JSON format',
+                        'Missing required fields: email, password or turnstile_token',
+                        'CAPTCHA validation failed'
+                    ],
+                ]
+
             ],
             'api_v1_auth_local_reset' => [
                 'requestBody' => [
