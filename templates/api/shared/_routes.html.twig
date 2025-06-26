@@ -1,39 +1,38 @@
-<table class="min-w-full border border-gray-300 divide-y divide-gray-200">
-    <thead class="bg-gray-50">
-    <tr>
-        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-300">Route Name</th>
-        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-300">Method(s)</th>
-        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-300">Path</th>
-        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Responses</th>
-    </tr>
-    </thead>
-    <tbody class="bg-white divide-y divide-gray-200">
+<div class="space-y-4">
     {% for route in routes %}
-        <tr>
-            <td class="px-6 py-4 whitespace-nowrap border-r border-gray-300 font-mono text-sm text-gray-700">{{ route.name }}</td>
-            <td class="px-6 py-4 whitespace-nowrap border-r border-gray-300 font-semibold text-sm text-indigo-600">
-                {{ route.methods|join(', ') ?: 'ANY' }}
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap border-r border-gray-300 font-mono text-sm text-gray-900"><code>{{ route.path }}</code></td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">
+        <div class="border border-gray-300 rounded-xl shadow-sm overflow-hidden">
+            <button
+                    type="button"
+                    class="w-full flex justify-between items-center px-6 py-4 bg-gray-50 hover:bg-gray-100 transition"
+                    onclick="document.getElementById('resp-{{ loop.index }}').classList.toggle('hidden')"
+            >
+                <div class="flex items-center gap-4">
+                    <span class="text-sm font-medium text-indigo-600">{{ route.methods|join(', ') ?: 'ANY' }}</span>
+                    <code class="text-sm text-gray-800">{{ route.path }}</code>
+                </div>
+                <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M19 9l-7 7-7-7"/>
+                </svg>
+            </button>
+
+            <div id="resp-{{ loop.index }}" class="hidden px-6 py-4 bg-white border-t border-gray-200">
                 {% if route.responses is defined and route.responses is not empty %}
-                    <ul class="list-disc list-inside space-y-1">
-                        {% for status, messages in route.responses %}
-                            <li>
-                                <span class="font-semibold text-indigo-700">{{ status }}:</span>
-                                <ul class="list-disc list-inside ml-5 text-gray-600">
-                                    {% for message in messages %}
-                                        <li>{{ message }}</li>
-                                    {% endfor %}
-                                </ul>
-                            </li>
-                        {% endfor %}
-                    </ul>
-                {% else %}
-                    <em class="text-gray-400">N/A</em>
-                {% endif %}
-            </td>
-        </tr>
+                    <pre class="bg-gray-100 text-sm text-gray-700 rounded p-4 overflow-x-auto whitespace-pre-wrap">
+{
+{% for status, messages in route.responses %}
+    "{{ status }}": [
+    {% for message in messages %}
+        "{{ message }}"{% if not loop.last %},{% endif %}
     {% endfor %}
-    </tbody>
-</table>
+    ]{% if not loop.last %},{% endif %}
+{% endfor %}
+}
+                    </pre>
+                {% else %}
+                    <p class="text-gray-400 italic">No responses documented.</p>
+                {% endif %}
+            </div>
+        </div>
+    {% endfor %}
+</div>
