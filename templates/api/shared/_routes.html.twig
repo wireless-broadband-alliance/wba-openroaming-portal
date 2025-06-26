@@ -1,0 +1,39 @@
+<table class="min-w-full border border-gray-300 divide-y divide-gray-200">
+    <thead class="bg-gray-50">
+    <tr>
+        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-300">Route Name</th>
+        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-300">Method(s)</th>
+        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-300">Path</th>
+        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Responses</th>
+    </tr>
+    </thead>
+    <tbody class="bg-white divide-y divide-gray-200">
+    {% for route in routes %}
+        <tr>
+            <td class="px-6 py-4 whitespace-nowrap border-r border-gray-300 font-mono text-sm text-gray-700">{{ route.name }}</td>
+            <td class="px-6 py-4 whitespace-nowrap border-r border-gray-300 font-semibold text-sm text-indigo-600">
+                {{ route.methods|join(', ') ?: 'ANY' }}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap border-r border-gray-300 font-mono text-sm text-gray-900"><code>{{ route.path }}</code></td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">
+                {% if route.responses is defined and route.responses is not empty %}
+                    <ul class="list-disc list-inside space-y-1">
+                        {% for status, messages in route.responses %}
+                            <li>
+                                <span class="font-semibold text-indigo-700">{{ status }}:</span>
+                                <ul class="list-disc list-inside ml-5 text-gray-600">
+                                    {% for message in messages %}
+                                        <li>{{ message }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <em class="text-gray-400">N/A</em>
+                {% endif %}
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>

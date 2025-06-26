@@ -31,10 +31,10 @@ class ApiController extends AbstractController
     {
         $routes = $this->apiResponseService->getRoutesByPrefix('/api/v2');
         $commonMessages = $this->apiResponseService->getCommonResponses();
-        dd($commonMessages);
 
         return $this->render('api/version_two.html.twig', [
             'routes' => $routes,
+            'commonMessages' => $commonMessages,
         ]);
     }
 }
