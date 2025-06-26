@@ -24,17 +24,23 @@
                                 onclick="document.getElementById('resp-{{ loop.parent.loop.index }}-{{ loop.index }}').classList.toggle('hidden')"
                         >
                             <div class="flex items-center gap-4">
+                                {% if route.path in protectedEndpoints %}
+                                    <twig:ux:icon class="w-5 h-5 text-yellow-600" name="heroicons-outline:lock-closed" />
+                                {% endif %}
                                 <span class="text-xs font-semibold px-2 py-1 rounded {{ methodColor[method] ?? 'bg-gray-100 text-gray-700' }}">
                                     {{ method }}
                                 </span>
                                 <code class="text-sm text-gray-900 font-mono">{{ route.path }}</code>
                             </div>
-                            <svg class="w-5 h-5 text-gray-500 transform transition-transform group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                            <svg class="w-5 h-5 text-gray-500 transform transition-transform group-hover:rotate-180"
+                                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M19 9l-7 7-7-7"/>
                             </svg>
                         </button>
 
-                        <div id="resp-{{ loop.parent.loop.index }}-{{ loop.index }}" class="hidden px-6 py-4 bg-white border-t border-gray-100 space-y-6">
+                        <div id="resp-{{ loop.parent.loop.index }}-{{ loop.index }}"
+                             class="hidden px-6 py-4 bg-white border-t border-gray-100 space-y-6">
                             {% if route.responses is defined and route.responses is not empty %}
                                 {% for status, messages in route.responses %}
                                     <div>

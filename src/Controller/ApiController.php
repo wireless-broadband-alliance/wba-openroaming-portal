@@ -2,7 +2,6 @@
 
 namespace App\Controller;
 
-use App\Api\V2\Entity\Setting;
 use App\Enum\ApiVersion;
 use App\Repository\SettingRepository;
 use App\Service\ApiResponseService;
