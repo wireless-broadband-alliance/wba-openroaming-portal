@@ -162,6 +162,7 @@ readonly class ApiResponseService
                 ]
             ],
             'api_v1_get_current_user' => [
+                'isProtected' => true,
                 200 => [
                     'User details retrieved successfully'
                 ],
@@ -177,6 +178,7 @@ readonly class ApiResponseService
                 ],
             ],
             'api_v1_config_profile_android' => [
+                'isProtected' => true,
                 200 => [
                     'Profile configuration for Android successfully retrieved'
                 ],
@@ -194,6 +196,7 @@ readonly class ApiResponseService
                 ]
             ],
             'api_v1_config_profile_ios' => [
+                'isProtected' => true,
                 200 => [
                     'Profile configuration for iOS successfully retrieved',
                 ],
@@ -299,6 +302,7 @@ readonly class ApiResponseService
                 ]
             ],
             'api_v1_user_account_deletion' => [
+                'isProtected' => true,
                 200 => [
                     'User Account was deleted successfully.',
                 ],
@@ -331,7 +335,8 @@ readonly class ApiResponseService
                 ]
             ]
         ];
-        $apiResponseV2 = ['api_v2_auth_local' => [
+        $apiResponseV2 = [
+            'api_v2_auth_local' => [
             200 => [
                 'Authenticated user details and JWT token'
             ],
@@ -448,6 +453,7 @@ readonly class ApiResponseService
                 ]
             ],
             'api_v2_get_current_user' => [
+                'isProtected' => true,
                 200 => [
                     'User details retrieved successfully'
                 ],
@@ -463,6 +469,7 @@ readonly class ApiResponseService
                 ],
             ],
             'api_v2_config_profile_android' => [
+                'isProtected' => true,
                 200 => [
                     'Profile configuration for Android successfully retrieved'
                 ],
@@ -480,6 +487,7 @@ readonly class ApiResponseService
                 ]
             ],
             'api_v2_config_profile_ios' => [
+                'isProtected' => true,
                 200 => [
                     'Profile configuration for iOS successfully retrieved',
                 ],
@@ -585,6 +593,7 @@ readonly class ApiResponseService
                 ]
             ],
             'api_v2_user_account_deletion' => [
+                'isProtected' => true,
                 200 => [
                     'User Account was deleted successfully.',
                 ],

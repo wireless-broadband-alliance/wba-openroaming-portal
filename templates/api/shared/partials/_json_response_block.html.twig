@@ -5,14 +5,27 @@
             data-clipboard-target="code"
             class="whitespace-pre-wrap rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full"
     >
-{{ (
-status starts with '2'
-? { 'success': true, 'data': messages }
-: {
-    'success': false,
-    'error': messages[0]|default('An error occurred'),
-    'details': messages|length > 1 ? messages|slice(1) : null
-}
-)|json_encode(constant('JSON_PRETTY_PRINT'))|raw }}
+                {% if status >= 200 and status < 300  %}
+                    {{ (
+                    {
+                        'success':true,
+                        'data': messages
+                    }
+                    )|json_encode(constant('JSON_PRETTY_PRINT'))|raw }}
+                {% elseif status >= 400 and status < 500 %}
+                    {{ (
+                    {
+                        'success': false,
+                        'error': messages,
+                    }
+                    )|json_encode(constant('JSON_PRETTY_PRINT'))|raw }}
+                {% elseif status >= 500 %}
+                    {{ (
+                    {
+                        'success': false,
+                        'message': messages,
+                    }
+                    )|json_encode(constant('JSON_PRETTY_PRINT'))|raw }}
+                {% endif %}
     </pre>
 </div>
