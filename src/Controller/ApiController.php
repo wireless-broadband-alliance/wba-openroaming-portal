@@ -6,7 +6,6 @@ use App\Service\ApiResponseService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Routing\RouterInterface;
 
 class ApiController extends AbstractController
 {
@@ -20,6 +19,7 @@ class ApiController extends AbstractController
     public function versionOne(): Response
     {
         $routes = $this->apiResponseService->getRoutesByPrefix('/api/v1');
+        dd($routes);
 
         return $this->render('api/version_one.html.twig', [
             'routes' => $routes,
@@ -30,11 +30,11 @@ class ApiController extends AbstractController
     public function versionTwo(): Response
     {
         $routes = $this->apiResponseService->getRoutesByPrefix('/api/v2');
+        $commonMessages = $this->apiResponseService->getCommonResponses();
+        dd($commonMessages);
 
         return $this->render('api/version_two.html.twig', [
             'routes' => $routes,
         ]);
     }
-
-
 }
