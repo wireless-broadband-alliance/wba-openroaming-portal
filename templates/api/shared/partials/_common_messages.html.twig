@@ -16,9 +16,26 @@
                 </svg>
             </button>
 
-            <div id="common-{{ loop.index }}" class="hidden px-6 py-4 bg-white border-t border-gray-200">
-                <pre class="bg-gray-100 text-sm text-gray-700 rounded p-4 overflow-x-auto whitespace-pre">
-{{ { (status): messages }|json_encode(constant('JSON_PRETTY_PRINT'))|raw }}
+            <div
+                    id="common-{{ loop.index }}"
+                    class="hidden relative px-6 py-4 bg-gray-800 border-t border-gray-700 max-w-full"
+                    data-controller="clipboard"
+            >
+                {% include 'api/shared/partials/_copy.html.twig' %}
+
+                <pre
+                        data-clipboard-target="code"
+                        class="whitespace-pre-wrap rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full"
+                >
+{{ (
+status starts with '2'
+? { 'success': true, 'data': messages }
+: {
+    'success': false,
+    'error': messages[0]|default('An error occurred'),
+    'details': messages|length > 1 ? messages|slice(1) : null
+}
+)|json_encode(constant('JSON_PRETTY_PRINT'))|raw }}
                 </pre>
             </div>
         </div>
