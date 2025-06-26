@@ -17,7 +17,7 @@ readonly class ApiResponseService
         $responses = $this->getResponseMetadata();
 
         foreach ($routes as $name => $route) {
-            if (str_starts_with($route->getPath(), $prefix) && $route->getPath() !== $prefix) {
+            if ($route->getPath() !== $prefix && str_starts_with($route->getPath(), $prefix)) {
                 $filtered[] = [
                     'name' => $name,
                     'path' => $route->getPath(),

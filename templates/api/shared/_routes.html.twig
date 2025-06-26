@@ -11,24 +11,20 @@
                     <code class="text-sm text-gray-800">{{ route.path }}</code>
                 </div>
                 <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M19 9l-7 7-7-7"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                 </svg>
             </button>
 
-            <div id="resp-{{ loop.index }}" class="hidden px-6 py-4 bg-white border-t border-gray-200">
+            <div id="resp-{{ loop.index }}" class="hidden px-6 py-4 bg-white border-t border-gray-200 space-y-6">
                 {% if route.responses is defined and route.responses is not empty %}
-                    <pre class="bg-gray-100 text-sm text-gray-700 rounded p-4 overflow-x-auto whitespace-pre-wrap">
-{
-{% for status, messages in route.responses %}
-    "{{ status }}": [
-    {% for message in messages %}
-        "{{ message }}"{% if not loop.last %},{% endif %}
-    {% endfor %}
-    ]{% if not loop.last %},{% endif %}
-{% endfor %}
-}
-                    </pre>
+                    {% for status, messages in route.responses %}
+                        <div>
+                            <p class="text-sm font-semibold text-indigo-700 mb-2">HTTP {{ status }}</p>
+                            <div class="bg-gray-800 text-white rounded-lg p-4 text-sm font-mono overflow-x-auto">
+                                {% include 'api/shared/_json_response_block.html.twig' with {status: status, messages: messages} %}
+                            </div>
+                        </div>
+                    {% endfor %}
                 {% else %}
                     <p class="text-gray-400 italic">No responses documented.</p>
                 {% endif %}

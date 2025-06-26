@@ -23,6 +23,7 @@ class ApiController extends AbstractController
 
         return $this->render('api/version_one.html.twig', [
             'routes' => $routes,
+            'commonMessages' => $commonMessages,
         ]);
     }
 
