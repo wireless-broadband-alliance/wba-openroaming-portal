@@ -71,7 +71,7 @@ class ScheduleType extends AbstractType
                 ->add("{$settingName}_day_of_week", ChoiceType::class, [
                     'multiple' => true,
                     'required' => false,
-                    'choices' => array_combine(
+                    'choices' => ['All days' => 'all'] + array_combine(
                         ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
                         range(0, 6)
                     ),
@@ -81,14 +81,29 @@ class ScheduleType extends AbstractType
                 ->add("{$settingName}_day_of_month", ChoiceType::class, [
                     'multiple' => true,
                     'required' => false,
-                    'choices' => array_combine(range(1, 31), range(1, 31)),
+                    'choices' => ['All days' => 'all'] + array_combine(range(1, 31), range(1, 31)),
                     'label' => false,
                     'attr' => ['description' => $description],
                 ])
                 ->add("{$settingName}_months_of_the_year", ChoiceType::class, [
                     'multiple' => true,
                     'required' => false,
-                    'choices' => array_combine(range(1, 12), range(1, 12)),
+                    'choices' => [
+                        'All Months' => 'all',
+                        'January' => 1,
+                        'February' => 2,
+                        'March' => 3,
+                        'April' => 4,
+                        'May' => 5,
+                        'June' => 6,
+                        'July' => 7,
+                        'August' => 8,
+                        'September' => 9,
+                        'October' => 10,
+                        'November' => 11,
+                        'December' => 12,
+                    ],
+
                     'label' => false,
                     'attr' => ['description' => $description],
                 ]);
