@@ -83,7 +83,7 @@ class ScheduleType extends AbstractType
                 ->add("{$settingName}_day_of_week", ChoiceType::class, [
                     'multiple' => true,
                     'required' => false,
-                    'choices' => ['All days' => 'all'] + array_combine(
+                    'choices' => ['All days' => '*'] + array_combine(
                             ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
                             range(0, 6)
                         ),
@@ -100,7 +100,7 @@ class ScheduleType extends AbstractType
                 ->add("{$settingName}_day_of_month", ChoiceType::class, [
                     'multiple' => true,
                     'required' => false,
-                    'choices' => ['All days' => 'all'] + array_combine(range(1, 31), range(1, 31)),
+                    'choices' => ['All days' => '*'] + array_combine(range(1, 31), range(1, 31)),
                     'label' => false,
                     'attr' => ['description' => $description],
                 ])
@@ -115,7 +115,7 @@ class ScheduleType extends AbstractType
                     'multiple' => true,
                     'required' => false,
                     'choices' => [
-                        'All Months' => 'all',
+                        'All Months' => '*',
                         'January' => 1,
                         'February' => 2,
                         'March' => 3,
@@ -152,7 +152,6 @@ class ScheduleType extends AbstractType
                 }
 
                 $time = $data["{$settingName}_time"] ?? null;
-                $timeFreq = (int)($data["{$settingName}_time_frequency"] ?? 1);
 
                 $daysOfWeek = $data["{$settingName}_day_of_week"] ?? [];
                 $dayOfWeekFreq = (int)($data["{$settingName}_day_of_week_frequency"] ?? 1);
@@ -223,7 +222,6 @@ class ScheduleType extends AbstractType
                 $minute = (int)$time->format('i');
                 $hour = (int)$time->format('H');
 
-                $minutePart = $minute . ($timeFreq > 1 ? '/' . $timeFreq : '');
 
                 $dayOfMonthPart = $this->buildCronPartWithFrequency($daysOfMonth, $dayOfMonthFreq);
                 $monthPart = $this->buildCronPartWithFrequency($monthsOfYear, $monthsFreq);
@@ -231,14 +229,14 @@ class ScheduleType extends AbstractType
 
                 $cronString = sprintf(
                     '%s %d %s %s %s',
-                    $minutePart,
+                    $minute,
                     $hour,
                     $dayOfMonthPart,
                     $monthPart,
                     $dayOfWeekPart
                 );
 
-                dd($cronString);
+                //dd($cronString);
 
                 try {
                     new CronExpression($cronString);

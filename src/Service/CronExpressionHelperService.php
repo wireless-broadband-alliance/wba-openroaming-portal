@@ -139,27 +139,4 @@ class CronExpressionHelperService
             'time' => sprintf('%02d:%02d', (int)$hour, (int)$minute),
         ];
     }
-
-    /**
-     * Guess frequency label from day_of_week and day_of_month parts (optional).
-     */
-    public function guessFrequencyFromParts(array $parts): string
-    {
-        if ($parts['day_of_week']['type'] !== 'every' && $parts['day_of_month']['type'] === 'every') {
-            return 'weekly';
-        }
-
-        if ($parts['day_of_month']['type'] !== 'every' && $parts['day_of_week']['type'] === 'every') {
-            return 'monthly';
-        }
-
-        if (
-            $parts['day_of_week']['type'] === 'every' &&
-            $parts['day_of_month']['type'] === 'every'
-        ) {
-            return 'daily';
-        }
-
-        return 'custom';
-    }
 }

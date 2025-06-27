@@ -59,9 +59,21 @@ class ScheduleAutomationController extends AbstractController
                 'H:i',
                 $result['time'] ?? '00:00'
             );
-            $initialData["{$settingName}_day_of_week"] = $parts['day_of_week']['values'] ?? [];
-            $initialData["{$settingName}_day_of_month"] = $parts['day_of_month']['values'] ?? [];
-            $initialData["{$settingName}_months_of_the_year"] = $parts['month']['values'] ?? [];
+            if ($parts['day_of_week']['raw'] === '*') {
+                $initialData["{$settingName}_day_of_week"] = ['*'];
+            } else {
+                $initialData["{$settingName}_day_of_week"] = $parts['day_of_week']['values'] ?? [];
+            }
+            if ($parts['day_of_month']['raw'] === '*') {
+                $initialData["{$settingName}_day_of_month"] = ['*'];
+            } else {
+                $initialData["{$settingName}_day_of_month"] = $parts['day_of_month']['values'] ?? [];
+            }
+            if ($parts['month']['raw'] === '*') {
+                $initialData["{$settingName}_months_of_the_year"] = ['*'];
+            } else {
+                $initialData["{$settingName}_months_of_the_year"] = $parts['month']['values'] ?? [];
+            }
 
             // Initialize frequencies (default 1)
             $initialData["{$settingName}_day_of_week_frequency"] = $parts['day_of_week']['frequency'] ?? 1;

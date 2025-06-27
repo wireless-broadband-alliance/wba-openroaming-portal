@@ -8,7 +8,6 @@ export default class extends Controller {
         "day_of_month",
         "months_of_the_year",
         "time",
-        "time_frequency",
         "day_of_week_frequency",
         "day_of_month_frequency",
         "months_of_the_year_frequency"
@@ -44,7 +43,6 @@ export default class extends Controller {
         toggleGroupElements(this.timeTargets, !isAdvanced);
 
         // Show/hide new frequency fields alongside their related fields
-        toggleGroupElements(this.time_frequencyTargets, !isAdvanced);
         toggleGroupElements(this.day_of_week_frequencyTargets, !isAdvanced);
         toggleGroupElements(this.day_of_month_frequencyTargets, !isAdvanced);
         toggleGroupElements(this.months_of_the_year_frequencyTargets, !isAdvanced);
@@ -60,7 +58,6 @@ export default class extends Controller {
             "day_of_month",
             "months_of_the_year",
             "time",
-            "time_frequency",
             "day_of_week_frequency",
             "day_of_month_frequency",
             "months_of_the_year_frequency"
