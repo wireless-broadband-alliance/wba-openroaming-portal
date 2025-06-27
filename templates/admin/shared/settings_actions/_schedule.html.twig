@@ -11,14 +11,14 @@
 } %}
 
 {% set fieldTitles = {
-    '_advanced': 'Advanced Mode',
-    '_day_of_week': 'Day of Week',
-    '_day_of_week_frequency': 'Day of Week Frequency',
-    '_day_of_month': 'Day of Month',
-    '_day_of_month_frequency': 'Day of Month Frequency',
-    '_months_of_the_year': 'Months',
-    '_months_of_the_year_frequency': 'Months Frequency',
-    '_time': 'Time of Execution',
+    _advanced: 'Advanced Mode',
+    _day_of_week: 'Day of Week',
+    _day_of_week_frequency: 'Day of Week Frequency',
+    _day_of_month: 'Day of Month',
+    _day_of_month_frequency: 'Day of Month Frequency',
+    _months_of_the_year: 'Months',
+    _months_of_the_year_frequency: 'Months Frequency',
+    _time: 'Time of Execution',
 } %}
 
 {# CRON WARNING #}
@@ -104,7 +104,7 @@
                                         class: 'form-widget',
                                         'data-cron-toggle-target': toggleTarget,
                                         'data-cron-toggle-group': groupName,
-                                    }
+                                    },
                                 }) }}
                             </div>
                         {% endfor %}
