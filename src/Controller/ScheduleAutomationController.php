@@ -110,7 +110,8 @@ class ScheduleAutomationController extends AbstractController
             ];
 
             foreach ($settingsToUpdate as $settingName) {
-                $cronValue = '';
+                $cronValueMonthly = '';
+                $cronValueDayOfWeek = '';
 
                 if ($useAdvancedMode) {
                     $cronValue = $form->get($settingName . '_advanced')->getData() ?: '';
@@ -130,6 +131,7 @@ class ScheduleAutomationController extends AbstractController
                                 foreach ($dayOfWeek as $day) {
                                     $cronValue .= $day . ',';
                                 }
+                                $cronValue = substr($cronValue, 0, -1);
                             }
                             else {
                                 $cronValue = $dayOfWeek[0];
@@ -139,17 +141,28 @@ class ScheduleAutomationController extends AbstractController
                             $cronValue = "$minute $hour * * $cronValue";
                         } elseif ($frequency === 'monthly') {
                             $dayOfMonth = $form->get($settingName . '_day_of_month')->getData();
+                            $dayOfWeek = $form->get($settingName . '_day_of_week')->getData();
                             // default to 1 if not set
                             if (count($dayOfMonth) > 1) {
                                 foreach ($dayOfMonth as $day) {
-                                    $cronValue .= $day . ',';
+                                    $cronValueMonthly .= $day . ',';
                                 }
+                                $cronValueMonthly = substr($cronValueMonthly, 0, -1);
                             }
                             else {
-                                $cronValue = $dayOfWeek[0];
+                                $cronValueMonthly = $dayOfWeek[0];
                             }
-                            $cronValue ??= 1;
-                            $cronValue = "$minute $hour $cronValue * *";
+                            if (count($dayOfWeek) > 1) {
+                                foreach ($dayOfWeek as $day) {
+                                    $cronValueDayOfWeek .= $day . ',';
+                                }
+                                $cronValueDayOfWeek = substr($cronValueDayOfWeek, 0, -1);
+                            }
+                            else {
+                                $cronValueDayOfWeek = $dayOfWeek[0];
+                            }
+                            $cronValueDayOfWeek ??= 1;
+                            $cronValue = "$minute $hour $cronValueMonthly * $cronValueDayOfWeek";
                         }
                     }
                 }
