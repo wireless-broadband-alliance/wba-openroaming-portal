@@ -59,17 +59,17 @@ class ScheduleAutomationController extends AbstractController
                 'H:i',
                 $result['time'] ?? '00:00'
             );
-            if ($parts['day_of_week']['raw'] === '*') {
+            if (str_contains($parts['day_of_week']['raw'],'*' )) {
                 $initialData["{$settingName}_day_of_week"] = ['*'];
             } else {
                 $initialData["{$settingName}_day_of_week"] = $parts['day_of_week']['values'] ?? [];
             }
-            if ($parts['day_of_month']['raw'] === '*') {
+            if (str_contains($parts['day_of_month']['raw'],'*' )) {
                 $initialData["{$settingName}_day_of_month"] = ['*'];
             } else {
                 $initialData["{$settingName}_day_of_month"] = $parts['day_of_month']['values'] ?? [];
             }
-            if ($parts['month']['raw'] === '*') {
+            if (str_contains($parts['month']['raw'],'*' )) {
                 $initialData["{$settingName}_months_of_the_year"] = ['*'];
             } else {
                 $initialData["{$settingName}_months_of_the_year"] = $parts['month']['values'] ?? [];
