@@ -59,17 +59,17 @@ class ScheduleAutomationController extends AbstractController
                 'H:i',
                 $result['time'] ?? '00:00'
             );
-            if (str_contains($parts['day_of_week']['raw'], '*')) {
+            if (str_contains((string) $parts['day_of_week']['raw'], '*')) {
                 $initialData["{$settingName}_day_of_week"] = ['*'];
             } else {
                 $initialData["{$settingName}_day_of_week"] = $parts['day_of_week']['values'] ?? [];
             }
-            if (str_contains($parts['day_of_month']['raw'], '*')) {
+            if (str_contains((string) $parts['day_of_month']['raw'], '*')) {
                 $initialData["{$settingName}_day_of_month"] = ['*'];
             } else {
                 $initialData["{$settingName}_day_of_month"] = $parts['day_of_month']['values'] ?? [];
             }
-            if (str_contains($parts['month']['raw'], '*')) {
+            if (str_contains((string) $parts['month']['raw'], '*')) {
                 $initialData["{$settingName}_months_of_the_year"] = ['*'];
             } else {
                 $initialData["{$settingName}_months_of_the_year"] = $parts['month']['values'] ?? [];
@@ -214,30 +214,5 @@ class ScheduleAutomationController extends AbstractController
             $setting->setValue($value);
             $this->entityManager->persist($setting);
         }
-    }
-
-    /**
-     * Helper to build a CRON field string with frequency applied.
-     *
-     * E.g. from [1,3,5,7] and frequency 2 => "1-7/2"
-     * If frequency = 1, just returns comma separated values.
-     */
-    private function buildCronFrequencyExpression(array $values, int $frequency): string
-    {
-        if ($values === []) {
-            return '*';
-        }
-
-        sort($values);
-
-        if ($frequency <= 1) {
-            return implode(',', $values);
-        }
-
-        // Try to build ranges with step frequency (e.g., 1-31/2)
-        $min = min($values);
-        $max = max($values);
-
-        return "{$min}-{$max}/{$frequency}";
     }
 }
