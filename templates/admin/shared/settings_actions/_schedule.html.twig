@@ -21,6 +21,16 @@
     '_time': 'Time of Execution',
 } %}
 
+{# CRON WARNING #}
+<div class="my-2 mr-2 p-2 z-0 text-base font-semibold w-full">
+    <div class="flex bg-infoBgColor/50 rounded-lg p-4 text-xs md:text-sm text-infoTextColor" role="alert">
+        <twig:ux:icon name="wba:info" class="w-10 md:w-5 h-10 md:h-5 inline mr-3" fill="currentColor"/>
+        <span class="font-medium">
+                Ctrl-click (or command-click on the Mac) to select multiple entries
+            </span>
+    </div>
+</div>
+
 <div {{ stimulus_controller('cron-toggle') }}>
     <form action="{{ path('admin_dashboard_settings_schedule') }}" method="post" enctype="multipart/form-data">
         {{ form_row(form._token) }}

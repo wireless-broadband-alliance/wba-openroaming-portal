@@ -192,6 +192,26 @@ class ScheduleType extends AbstractType
                     continue;
                 }
 
+                if (count($daysOfWeek) > 1 && in_array('*', $daysOfWeek, true)) {
+                    $form->get("{$settingName}_day_of_week")->addError(
+                        new FormError('Please dont\'t select all values with additional days.')
+                    );
+                    continue;
+                }
+                if (count($daysOfMonth) > 1 && in_array('*', $daysOfMonth, true)) {
+                    $form->get("{$settingName}_day_of_month")->addError(
+                        new FormError('Please dont\'t select all values with additional days.')
+                    );
+                    continue;
+                }
+                if (count($monthsOfYear) > 1 && in_array('*', $monthsOfYear, true)) {
+                    $form->get("{$settingName}_months_of_the_year")->addError(
+                        new FormError('Please dont\'t select all values with additional months.')
+                    );
+                    continue;
+                }
+
+
                 $fieldsToCheck = [
                     'day_of_week' => [$daysOfWeek, $dayOfWeekFreq],
                     'day_of_month' => [$daysOfMonth, $dayOfMonthFreq],
@@ -235,8 +255,6 @@ class ScheduleType extends AbstractType
                     $monthPart,
                     $dayOfWeekPart
                 );
-
-                //dd($cronString);
 
                 try {
                     new CronExpression($cronString);
