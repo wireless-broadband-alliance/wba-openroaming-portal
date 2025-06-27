@@ -152,12 +152,6 @@ class ScheduleType extends AbstractType
                 $frequency = $data["{$settingName}_frequency"] ?? null;
                 $time = $data["{$settingName}_time"] ?? null;
 
-                if (empty($frequency)) {
-                    $form->get("{$settingName}_frequency")->addError(
-                        new FormError('Please choose a frequency.')
-                    );
-                }
-
                 if (empty($time)) {
                     $form->get("{$settingName}_time")->addError(
                         new FormError('Please choose a time for execution.')
