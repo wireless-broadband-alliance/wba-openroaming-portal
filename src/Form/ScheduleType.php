@@ -7,6 +7,7 @@ use Cron\CronExpression;
 use Exception;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\TimeType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -69,7 +70,8 @@ class ScheduleType extends AbstractType
                     'label' => false,
                     'attr' => ['description' => $description],
                 ])
-                ->add("{$settingName}_day_of_week", TextType::class, [
+                ->add("{$settingName}_day_of_week", ChoiceType::class, [
+                    'multiple' => true,
                     'required' => false,
                     'label' => false,
                     'attr' => [
@@ -85,7 +87,8 @@ class ScheduleType extends AbstractType
                         }),
                     ],
                 ])
-                ->add("{$settingName}_day_of_month", TextType::class, [
+                ->add("{$settingName}_day_of_month", ChoiceType::class, [
+                    'multiple' => true,
                     'required' => false,
                     'label' => false,
                     'attr' => [
@@ -101,7 +104,8 @@ class ScheduleType extends AbstractType
                         }),
                     ],
                 ])
-                ->add("{$settingName}_months_of_the_year", TextType::class, [
+                ->add("{$settingName}_months_of_the_year", ChoiceType::class, [
+                    'multiple' => true,
                     'required' => false,
                     'label' => false,
                     'attr' => [
