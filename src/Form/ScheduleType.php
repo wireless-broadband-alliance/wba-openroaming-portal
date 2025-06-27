@@ -88,8 +88,9 @@ class ScheduleType extends AbstractType
                     'multiple' => true,
                     'attr' => ['description' => $description],
                 ])
-                ->add("{$settingName}_day_of_week", ChoiceType::class, [
+                ->add("{$settingName}_months_of_the_year", ChoiceType::class, [
                     'choices' => [
+                        'All Months' => 0,
                         'January' => 1,
                         'February' => 2,
                         'March' => 3,
