@@ -173,19 +173,19 @@ class ScheduleType extends AbstractType
                 $monthsOfYear = $this->expandAllSelection($monthsOfYear, 1, 12);
 
                 // Validate non-empty
-                if (empty($daysOfWeek)) {
+                if ($daysOfWeek === []) {
                     $form->get("{$settingName}_day_of_week")->addError(
                         new FormError('Please choose at least one day of the week.')
                     );
                     continue;
                 }
-                if (empty($daysOfMonth)) {
+                if ($daysOfMonth === []) {
                     $form->get("{$settingName}_day_of_month")->addError(
                         new FormError('Please choose at least one day of the month.')
                     );
                     continue;
                 }
-                if (empty($monthsOfYear)) {
+                if ($monthsOfYear === []) {
                     $form->get("{$settingName}_months_of_the_year")->addError(
                         new FormError('Please choose at least one month.')
                     );
@@ -288,7 +288,7 @@ class ScheduleType extends AbstractType
      */
     private function buildCronPartWithFrequency(array $values, int $frequency): string
     {
-        if (empty($values)) {
+        if ($values === []) {
             return '*';
         }
 

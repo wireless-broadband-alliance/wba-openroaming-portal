@@ -108,7 +108,7 @@ class CronExpressionHelperService
     {
         try {
             $cron = new CronExpression($cronExpression);
-        } catch (\InvalidArgumentException $e) {
+        } catch (\InvalidArgumentException) {
             return [
                 'error' => 'Invalid cron expression',
                 'raw' => $cronExpression,
