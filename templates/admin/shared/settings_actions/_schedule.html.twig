@@ -1,24 +1,12 @@
 {% set groups = {
     DELETE_UNCONFIRMED_USERS_CRON: [
-        'DELETE_UNCONFIRMED_USERS_CRON_advanced',
-        'DELETE_UNCONFIRMED_USERS_CRON_day_of_week',
-        'DELETE_UNCONFIRMED_USERS_CRON_day_of_month',
-        'DELETE_UNCONFIRMED_USERS_CRON_months_of_the_year',
-        'DELETE_UNCONFIRMED_USERS_CRON_time',
+        '_advanced', '_day_of_week', '_day_of_month', '_months_of_the_year', '_time',
     ],
     USERS_WHEN_PROFILE_EXPIRES_CRON: [
-        'USERS_WHEN_PROFILE_EXPIRES_CRON_advanced',
-        'USERS_WHEN_PROFILE_EXPIRES_CRON_day_of_week',
-        'USERS_WHEN_PROFILE_EXPIRES_CRON_day_of_month',
-        'USERS_WHEN_PROFILE_EXPIRES_CRON_months_of_the_year',
-        'USERS_WHEN_PROFILE_EXPIRES_CRON_time',
+        '_advanced', '_day_of_week', '_day_of_month', '_months_of_the_year', '_time',
     ],
     LDAP_SYNC_CRON: [
-        'LDAP_SYNC_CRON_advanced',
-        'LDAP_SYNC_CRON_day_of_week',
-        'LDAP_SYNC_CRON_day_of_month',
-        'LDAP_SYNC_CRON_months_of_the_year',
-        'LDAP_SYNC_CRON_time',
+        '_advanced', '_day_of_week', '_day_of_month', '_months_of_the_year', '_time',
     ],
 } %}
 
@@ -26,6 +14,7 @@
     '_advanced': 'Advanced Mode',
     '_day_of_week': 'Day of Week',
     '_day_of_month': 'Day of Month',
+    '_months_of_the_year': 'Months',
     '_time': 'Time of Execution',
 } %}
 
@@ -37,7 +26,11 @@
             <div>
                 <label class="inline-flex items-center cursor-pointer gap-x-3">
                     {{ form_label(form.use_advanced_mode, null, {label_attr: {class: 'me-3'}}) }}
-                    {{ form_widget(form.use_advanced_mode, {attr: {class: 'sr-only peer', 'data-cron-toggle-target': 'toggle', 'data-action': 'cron-toggle#toggleChanged'}}) }}
+                    {{ form_widget(form.use_advanced_mode, {attr: {
+                        class: 'sr-only peer',
+                        'data-cron-toggle-target': 'toggle',
+                        'data-action': 'cron-toggle#toggleChanged',
+                    }}) }}
                     <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-bg-lightGreen rounded-full
                         peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white
                         after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border
@@ -48,9 +41,10 @@
         </div>
 
         <div class="grid gap-4 lg:grid-cols-2 xl:grid-cols-3 p-2 z-0 mt-4">
-            {% for groupName, fields in groups %}
+            {% for groupName, suffixes in groups %}
                 <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full"
                      id="{{ groupName }}" {{ stimulus_controller('card') }}>
+
                     <div class="flex flex-row justify-between">
                         <div class="text-base font-medium text-center break-normal md:break-all">
                             {% set displayName = {
@@ -70,30 +64,23 @@
                     </div>
 
                     <div class="space-y-2 mt-5">
-
-                        {# Card Description #}
+                        {# Description #}
+                        {% set advancedFieldName = groupName ~ '_advanced' %}
                         {{ include('/admin/shared/settings_actions/_description.html.twig', {
-                            description: attribute(form, fields[0]).vars.attr.description,
+                            description: attribute(form, advancedFieldName).vars.attr.description,
                         }) }}
 
                         {% set renderedTitles = [] %}
-                        {% for fieldName in fields %}
-                            {# Find suffix key for this field #}
-                            {% set suffix = fieldTitles|keys|filter(s => fieldName ends with s)|first %}
-                            {% set toggleTarget =
-                                suffix == '_advanced' ? 'advanced' :
-                                suffix == '_time' ? 'time' :
-                                suffix == '_day_of_week' ? 'day_of_week' :
-                                suffix == '_day_of_month' ? 'day_of_month' :
-                                suffix == '_day_of_month' ? 'months_of_the_year' : null
-                            %}
+                        {% for suffix in suffixes %}
+                            {% set fieldName = groupName ~ suffix %}
+                            {% set toggleTarget = suffix|slice(1) %}
+                            {% set labelTitle = fieldTitles[suffix] ?? null %}
 
-                            {# Show the title only once per suffix type #}
-                            {% if suffix is not null and suffix not in renderedTitles %}
+                            {% if labelTitle and suffix not in renderedTitles %}
                                 <div data-cron-toggle-title="{{ toggleTarget }}"
                                      data-cron-toggle-group="{{ groupName }}"
                                      class="text-sm font-semibold text-gray-700 mt-4">
-                                    {{ fieldTitles[suffix] }}
+                                    {{ labelTitle }}
                                 </div>
                                 {% set renderedTitles = renderedTitles|merge([suffix]) %}
                             {% endif %}
@@ -102,17 +89,17 @@
                                 {{ form_widget(attribute(form, fieldName), {
                                     attr: {
                                         class: 'form-widget',
-                                        placeholder: 'e.g. 0 0 * * *',
                                         'data-cron-toggle-target': toggleTarget,
                                         'data-cron-toggle-group': groupName,
-                                    },
+                                    }
                                 }) }}
                             </div>
                         {% endfor %}
                     </div>
 
                     <div class="mt-2 -mb-2 text-center text-red-500 text-base">
-                        {% for fieldName in fields %}
+                        {% for suffix in suffixes %}
+                            {% set fieldName = groupName ~ suffix %}
                             {{ form_errors(attribute(form, fieldName)) }}
                         {% endfor %}
                     </div>
@@ -130,26 +117,9 @@
             </a>
 
             <button type="submit" class="btn-primary"
-                    onclick="return confirm('Are you sure you want to apply this new changes?')">Save Changes
+                    onclick="return confirm('Are you sure you want to apply this new changes?')">
+                Save Changes
             </button>
         </div>
     </form>
-</div>
-
-{# Debug: Show which fields are rendered per group #}
-<div class="mt-8 p-4 bg-gray-100 rounded">
-    <h2 class="text-lg font-bold mb-2">Rendered Fields Debug</h2>
-    <ul>
-        {% for groupName, fields in groups %}
-            <li><strong>{{ groupName }}</strong>:
-                <ul>
-                    {% for fieldName in fields %}
-                        {% if attribute(form, fieldName, [], 'any', true) is not null %}
-                            <li>{{ fieldName }}</li>
-                        {% endif %}
-                    {% endfor %}
-                </ul>
-            </li>
-        {% endfor %}
-    </ul>
 </div>

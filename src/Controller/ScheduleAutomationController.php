@@ -39,53 +39,32 @@ class ScheduleAutomationController extends AbstractController
     #[Route('/dashboard/settings/schedule', name: 'admin_dashboard_settings_schedule')]
     public function settingsSchedule(Request $request): Response
     {
-        // Load all settings data for current user
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         /** @var User $currentUser */
         $currentUser = $this->getUser();
 
-        // Prepare initial form data by decoding existing cron expressions
         $initialData = [];
+
         foreach ($this->cronSettings as $settingName) {
             $setting = $this->settingRepository->findOneBy(['name' => $settingName]);
             $cronValue = $setting ? $setting->getValue() : '';
             $initialData["{$settingName}_advanced"] = $cronValue;
 
             $result = $this->cronExpressionHelperService->recognizeCronFrequency($cronValue);
+            $parts = $result['parts'] ?? [];
 
-            if ($result['frequency'] === 'daily') {
-                $initialData["{$settingName}_frequency"] = 'daily';
-                $initialData["{$settingName}_time"] = DateTime::createFromFormat('H:i', $result['time']);
-                $initialData["{$settingName}_day_of_week"] = [];
-                $initialData["{$settingName}_day_of_month"] = [];
-            } elseif ($result['frequency'] === 'weekly') {
-                $initialData["{$settingName}_frequency"] = 'weekly';
-                $initialData["{$settingName}_time"] = DateTime::createFromFormat('H:i', $result['time']);
-                $initialData["{$settingName}_day_of_week"] = array_map('intval', $result['day_of_week']);
-                $initialData["{$settingName}_day_of_month"] = [];
-            } elseif ($result['frequency'] === 'monthly') {
-                $initialData["{$settingName}_frequency"] = 'monthly';
-                $initialData["{$settingName}_time"] = DateTime::createFromFormat('H:i', $result['time']);
-                $initialData["{$settingName}_day_of_month"] = array_map('intval', $result['day_of_month']);
-                $initialData["{$settingName}_day_of_week"] = [];
-            } else {
-                // Advanced mode or unknown, set empty defaults
-                $initialData["{$settingName}_frequency"] = $this->cronExpressionHelperService->guessFrequencyFromParts(
-                    $result['parts']
-                );
-                $initialData["{$settingName}_time"] = DateTime::createFromFormat('H:i', $result['time']);
-                $initialData["{$settingName}_day_of_week"] = $result['parts']['day_of_week']['values'] ?? [];
-                $initialData["{$settingName}_day_of_month"] = $result['parts']['day_of_month']['values'] ?? [];
-            }
+            $initialData["{$settingName}_time"] = \DateTime::createFromFormat('H:i', $result['time'] ?? '00:00');
+            $initialData["{$settingName}_day_of_week"] = $parts['day_of_week']['values'] ?? [];
+            $initialData["{$settingName}_day_of_month"] = $parts['day_of_month']['values'] ?? [];
+            $initialData["{$settingName}_months_of_the_year"] = $parts['month']['values'] ?? [];
         }
 
-        $settings = $this->settingRepository->findAll();
-
         $form = $this->createForm(ScheduleType::class, $initialData, [
-            'settings' => $settings,
+            'settings' => $this->settingRepository->findAll(),
         ]);
 
         $form->handleRequest($request);
+
         if ($form->isSubmitted() && $form->isValid()) {
             $useAdvancedMode = $form->get('use_advanced_mode')->getData();
 
@@ -93,79 +72,48 @@ class ScheduleAutomationController extends AbstractController
                 $cronValue = '';
 
                 if ($useAdvancedMode) {
-                    // Use manual cron input
-                    $cronValue = $form->get("{$settingName}_advanced")->getData() ?? '';
+                    $cronValue = $form->get("{$settingName}_advanced")->getData();
                 } else {
-                    // Build cron expression from selected frequency and time
-                    $frequency = $form->get("{$settingName}_frequency")->getData();
                     $time = $form->get("{$settingName}_time")->getData();
+                    $daysOfWeek = $form->get("{$settingName}_day_of_week")->getData();
+                    $daysOfMonth = $form->get("{$settingName}_day_of_month")->getData();
+                    $monthsOfYear = $form->get("{$settingName}_months_of_the_year")->getData();
 
-                    if ($frequency && $time instanceof DateTimeInterface) {
-                        $hour = $time->format('H');
-                        $minute = $time->format('i');
+                    $hour = $time instanceof \DateTimeInterface ? $time->format('H') : '0';
+                    $minute = $time instanceof \DateTimeInterface ? $time->format('i') : '0';
 
-                        switch ($frequency) {
-                            case 'daily':
-                                $cronValue = "$minute $hour * * *";
-                                break;
+                    $dayOfMonthStr = !empty($daysOfMonth) ? implode(',', $daysOfMonth) : '*';
+                    $monthStr = !empty($monthsOfYear) ? implode(',', $monthsOfYear) : '*';
+                    $dayOfWeekStr = !empty($daysOfWeek) ? implode(',', $daysOfWeek) : '*';
 
-                            case 'weekly':
-                                $daysOfWeek = $form->get("{$settingName}_day_of_week")->getData(
-                                ) ?: [0]; // fallback Sunday
-                                $cronValue = "$minute $hour * * " . implode(',', $daysOfWeek);
-                                break;
-
-                            case 'monthly':
-                                $daysOfMonth = $form->get("{$settingName}_day_of_month")->getData(
-                                ) ?: [1]; // fallback 1st
-                                $cronValue = "$minute $hour " . implode(',', $daysOfMonth) . " * *";
-                                break;
-                        }
-                    }
+                    $cronValue = "{$minute} {$hour} {$dayOfMonthStr} {$monthStr} {$dayOfWeekStr}";
                 }
 
-                // Retrieve additional schedule info
-                $startDate = $form->get("{$settingName}_startDate")->getData();
-                $endDate = $form->get("{$settingName}_endDate")->getData();
-                $interval = $form->get("{$settingName}_interval")->getData();
-
-                // Save CRON value
-                $this->saveSetting("{$settingName}_cron", $cronValue);
-
-                // Save interval
-                $this->saveSetting("{$settingName}_interval", $interval?->format('H:i'));
-
-                // Save start date
-                $this->saveSetting("{$settingName}_startDate", $startDate?->format(DateTimeInterface::ATOM));
-
-                // Save end date
-                $this->saveSetting("{$settingName}_endDate", $endDate?->format(DateTimeInterface::ATOM));
+                $this->saveSetting($settingName, $cronValue);
             }
 
-            // Save event for analytics
-            $eventMetadata = [
-                'ip' => $request->getClientIp(),
-                'user_agent' => $request->headers->get('User-Agent'),
-                'uuid' => $currentUser->getUuid(),
-            ];
+            // Analytics
             $this->eventActions->saveEvent(
                 $currentUser,
                 AnalyticalEventType::SETTING_SCHEDULE_CONF_REQUEST->value,
-                new DateTime(),
-                $eventMetadata
+                new \DateTime(),
+                [
+                    'ip' => $request->getClientIp(),
+                    'user_agent' => $request->headers->get('User-Agent'),
+                    'uuid' => $currentUser->getUuid(),
+                ]
             );
 
             $this->entityManager->flush();
 
             $this->addFlash('success_admin', 'New Schedule configuration has been applied successfully.');
-
             return $this->redirectToRoute('admin_dashboard_settings_schedule');
         }
 
         return $this->render('admin/settings_actions.html.twig', [
             'user' => $currentUser,
             'data' => $data,
-            'settings' => $settings,
+            'settings' => $this->settingRepository->findAll(),
             'form' => $form->createView(),
         ]);
     }

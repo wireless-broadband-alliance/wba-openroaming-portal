@@ -6,39 +6,25 @@ use Cron\CronExpression;
 
 class CronExpressionHelperService
 {
-    private function parseCronField(string $field): array
+    private function parseField(string $field): array
     {
-        // Handles simple lists (e.g., "1,3,5"), returns array of integers
-        $values = [];
-        $parts = explode(',', $field);
-
-        foreach ($parts as $part) {
-            if ($part === '*') {
-                continue;
-            }
-            if (str_contains($part, '-') || str_contains($part, '/')) {
-                // Let caller handle ranges or steps
-                $values[] = $part;
-                continue;
-            }
-            $values[] = (int)$part;
+        // Type: every (wildcard or step), exact (single value), or custom
+        if ($field === '*') {
+            return ['type' => 'every', 'interval' => null, 'values' => []];
         }
 
-        return $values;
-    }
-
-    private function extractStepInterval(string $field): ?int
-    {
-        if (!str_contains($field, '/')) {
-            return null;
+        if (str_starts_with($field, '*/')) {
+            $interval = (int)substr($field, 2);
+            return ['type' => 'every', 'interval' => $interval, 'values' => []];
         }
 
-        $parts = explode('/', $field);
-        if (count($parts) === 2 && is_numeric($parts[1])) {
-            return (int)$parts[1];
+        // Check if it's a single exact value
+        if (is_numeric($field)) {
+            return ['type' => 'exact', 'interval' => null, 'values' => [(int)$field]];
         }
 
-        return null;
+        // If it's anything else (e.g., "1,2,3" or "1-5"), treat as custom
+        return ['type' => 'custom', 'interval' => null, 'values' => []];
     }
 
     public function recognizeCronFrequency(string $cronExpression): array
@@ -52,68 +38,54 @@ class CronExpressionHelperService
             ];
         }
 
-        $minutes = $cron->getExpression(CronExpression::MINUTE);
-        $hours = $cron->getExpression(CronExpression::HOUR);
-        $daysOfMonth = $cron->getExpression(CronExpression::DAY);
-        $months = $cron->getExpression(CronExpression::MONTH);
-        $daysOfWeek = $cron->getExpression(CronExpression::WEEKDAY);
+        // Get raw expressions
+        $minute = $cron->getExpression(CronExpression::MINUTE);
+        $hour = $cron->getExpression(CronExpression::HOUR);
+        $day = $cron->getExpression(CronExpression::DAY);
+        $month = $cron->getExpression(CronExpression::MONTH);
+        $weekday = $cron->getExpression(CronExpression::WEEKDAY);
 
-        $intervals = [
-            'minute' => $this->extractStepInterval($minutes),
-            'hour' => $this->extractStepInterval($hours),
-            'day_of_month' => $this->extractStepInterval($daysOfMonth),
-            'month' => $this->extractStepInterval($months),
-            'day_of_week' => $this->extractStepInterval($daysOfWeek),
-        ];
+        // Parse fields using simple logic (no regex)
+        $minuteParsed = $this->parseField($minute);
+        $hourParsed = $this->parseField($hour);
+        $dayParsed = $this->parseField($day);
+        $monthParsed = $this->parseField($month);
+        $weekdayParsed = $this->parseField($weekday);
 
         return [
-            'frequency' => 'custom', // always UI-handled
-            'time' => sprintf('%02d:%02d', (int)$hours, (int)$minutes),
             'raw' => $cronExpression,
             'parts' => [
-                'minute' => [
-                    'raw' => $minutes,
-                    'values' => $this->parseCronField($minutes),
-                    'interval' => $intervals['minute'],
-                ],
-                'hour' => [
-                    'raw' => $hours,
-                    'values' => $this->parseCronField($hours),
-                    'interval' => $intervals['hour'],
-                ],
-                'day_of_month' => [
-                    'raw' => $daysOfMonth,
-                    'values' => $this->parseCronField($daysOfMonth),
-                    'interval' => $intervals['day_of_month'],
-                ],
-                'month' => [
-                    'raw' => $months,
-                    'values' => $this->parseCronField($months),
-                    'interval' => $intervals['month'],
-                ],
-                'day_of_week' => [
-                    'raw' => $daysOfWeek,
-                    'values' => $this->parseCronField($daysOfWeek),
-                    'interval' => $intervals['day_of_week'],
-                ],
+                'minute' => array_merge(['raw' => $minute], $minuteParsed),
+                'hour' => array_merge(['raw' => $hour], $hourParsed),
+                'day_of_month' => array_merge(['raw' => $day], $dayParsed),
+                'month' => array_merge(['raw' => $month], $monthParsed),
+                'day_of_week' => array_merge(['raw' => $weekday], $weekdayParsed),
             ],
+            'time' => sprintf('%02d:%02d', (int)$hour, (int)$minute),
+            'frequency' => $this->guessFrequencyFromParts([
+                'day_of_week' => $weekdayParsed,
+                'day_of_month' => $dayParsed,
+            ]),
         ];
     }
 
-    public function guessFrequencyFromParts(array $parts): ?string
+    public function guessFrequencyFromParts(array $parts): string
     {
-        if (!empty($parts['day_of_week']['values']) && empty($parts['day_of_month']['values'])) {
+        if ($parts['day_of_week']['type'] !== 'every' && $parts['day_of_month']['type'] === 'every') {
             return 'weekly';
         }
 
-        if (!empty($parts['day_of_month']['values']) && empty($parts['day_of_week']['values'])) {
+        if ($parts['day_of_month']['type'] !== 'every' && $parts['day_of_week']['type'] === 'every') {
             return 'monthly';
         }
 
-        if (empty($parts['day_of_week']['values']) && empty($parts['day_of_month']['values'])) {
+        if (
+            $parts['day_of_week']['type'] === 'every' &&
+            $parts['day_of_month']['type'] === 'every'
+        ) {
             return 'daily';
         }
 
-        return null; // ambiguous or unsupported pattern
+        return 'custom';
     }
 }
