@@ -84,9 +84,9 @@ class ScheduleType extends AbstractType
                     'multiple' => true,
                     'required' => false,
                     'choices' => ['All days' => '*'] + array_combine(
-                            ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
-                            range(0, 6)
-                        ),
+                        ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+                        range(0, 6)
+                    ),
                     'label' => false,
                     'attr' => ['description' => $description],
                 ])

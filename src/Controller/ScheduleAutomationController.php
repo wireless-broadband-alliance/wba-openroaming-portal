@@ -108,12 +108,14 @@ class ScheduleAutomationController extends AbstractController
                     if ($dayOfMonthFreq > 1 && $dayOfWeekFreq > 1) {
                         $form->get("{$settingName}_day_of_month_frequency")->addError(
                             new FormError(
-                                'Cannot set frequency on both Day of Month and Day of Week at the same time due to cron semantics.'
+                                'Cannot set frequency on both Day of Month and
+                                 Day of Week at the same time due to cron semantics.'
                             )
                         );
                         $form->get("{$settingName}_day_of_week_frequency")->addError(
                             new FormError(
-                                'Cannot set frequency on both Day of Month and Day of Week at the same time due to cron semantics.'
+                                'Cannot set frequency on both Day of Month and
+                                 Day of Week at the same time due to cron semantics.'
                             )
                         );
                         continue; // Skip cron generation for this setting
