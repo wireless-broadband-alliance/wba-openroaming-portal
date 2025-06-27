@@ -1,45 +1,29 @@
 {% set groups = {
     DELETE_UNCONFIRMED_USERS_CRON: [
         'DELETE_UNCONFIRMED_USERS_CRON_advanced',
-        'DELETE_UNCONFIRMED_USERS_CRON_frequency',
         'DELETE_UNCONFIRMED_USERS_CRON_day_of_week',
         'DELETE_UNCONFIRMED_USERS_CRON_day_of_month',
         'DELETE_UNCONFIRMED_USERS_CRON_time',
-        'DELETE_UNCONFIRMED_USERS_CRON_interval',
-        'DELETE_UNCONFIRMED_USERS_CRON_startDate',
-        'DELETE_UNCONFIRMED_USERS_CRON_endDate',
     ],
     USERS_WHEN_PROFILE_EXPIRES_CRON: [
         'USERS_WHEN_PROFILE_EXPIRES_CRON_advanced',
-        'USERS_WHEN_PROFILE_EXPIRES_CRON_frequency',
         'USERS_WHEN_PROFILE_EXPIRES_CRON_day_of_week',
         'USERS_WHEN_PROFILE_EXPIRES_CRON_day_of_month',
         'USERS_WHEN_PROFILE_EXPIRES_CRON_time',
-        'USERS_WHEN_PROFILE_EXPIRES_CRON_interval',
-        'USERS_WHEN_PROFILE_EXPIRES_CRON_startDate',
-        'USERS_WHEN_PROFILE_EXPIRES_CRON_endDate',
     ],
     LDAP_SYNC_CRON: [
         'LDAP_SYNC_CRON_advanced',
-        'LDAP_SYNC_CRON_frequency',
         'LDAP_SYNC_CRON_day_of_week',
         'LDAP_SYNC_CRON_day_of_month',
         'LDAP_SYNC_CRON_time',
-        'LDAP_SYNC_CRON_interval',
-        'LDAP_SYNC_CRON_startDate',
-        'LDAP_SYNC_CRON_endDate',
     ],
 } %}
 
 {% set fieldTitles = {
     '_advanced': 'Advanced Mode',
-    '_frequency': 'Frequency',
     '_day_of_week': 'Day of Week',
     '_day_of_month': 'Day of Month',
     '_time': 'Time of Execution',
-    '_interval': 'Interval (Time Between Runs)',
-    '_startDate': 'Start Date',
-    '_endDate': 'End Date',
 } %}
 
 <div {{ stimulus_controller('cron-toggle') }}>
@@ -95,13 +79,10 @@
                             {% set suffix = fieldTitles|keys|filter(s => fieldName ends with s)|first %}
                             {% set toggleTarget =
                                 suffix == '_advanced' ? 'advanced' :
-                                suffix == '_frequency' ? 'frequency' :
                                 suffix == '_time' ? 'time' :
                                 suffix == '_day_of_week' ? 'day_of_week' :
-                                suffix == '_day_of_month' ? 'day_of_month' :
-                                suffix == '_interval' ? 'interval' :
-                                suffix == '_startDate' ? 'startDate' :
-                                suffix == '_endDate' ? 'endDate' : null %}
+                                suffix == '_day_of_month' ? 'day_of_month' : null
+                            %}
 
                             {# Show the title only once per suffix type #}
                             {% if suffix is not null and suffix not in renderedTitles %}
