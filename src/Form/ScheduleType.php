@@ -65,17 +65,6 @@ class ScheduleType extends AbstractType
                         }),
                     ],
                 ])
-                ->add("{$settingName}_frequency", ChoiceType::class, [
-                    'choices' => [
-                        'Daily' => 'daily',
-                        'Weekly' => 'weekly',
-                        'Monthly' => 'monthly',
-                    ],
-                    'placeholder' => 'Choose a frequency',
-                    'required' => false,
-                    'label' => false,
-                    'attr' => ['description' => $description],
-                ])
                 ->add("{$settingName}_time", TimeType::class, [
                     'required' => false,
                     'widget' => 'single_text',
@@ -99,6 +88,27 @@ class ScheduleType extends AbstractType
                     'multiple' => true,
                     'attr' => ['description' => $description],
                 ])
+                ->add("{$settingName}_day_of_week", ChoiceType::class, [
+                    'choices' => [
+                        'January' => 1,
+                        'February' => 2,
+                        'March' => 3,
+                        'April' => 4,
+                        'May' => 5,
+                        'June' => 6,
+                        'July' => 7,
+                        'August' => 8,
+                        'September' => 9,
+                        'October' => 10,
+                        'November' => 11,
+                        'December' => 12,
+                    ],
+                    'placeholder' => 'Choose a day of week',
+                    'required' => false,
+                    'label' => false,
+                    'multiple' => true,
+                    'attr' => ['description' => $description],
+                ])
                 ->add("{$settingName}_day_of_month", ChoiceType::class, [
                     'choices' => array_combine(range(1, 31), range(1, 31)),
                     'placeholder' => 'Choose a day of month',
@@ -106,36 +116,6 @@ class ScheduleType extends AbstractType
                     'label' => false,
                     'multiple' => true,
                     'attr' => ['description' => $description],
-                ])
-                ->add("{$settingName}_startDate", DateTimeType::class, [
-                    'required' => false,
-                    'widget' => 'single_text',
-                    'label' => 'Start Date',
-                ])
-                ->add("{$settingName}_endDate", DateTimeType::class, [
-                    'required' => false,
-                    'widget' => 'single_text',
-                    'label' => 'End Date',
-                ])
-                ->add("{$settingName}_interval", TimeType::class, [
-                    'required' => false,
-                    'widget' => 'single_text',
-                    'input' => 'datetime',
-                    'label' => 'Repeat Every',
-                    'attr' => [
-                        'placeholder' => 'HH:MM',
-                        'step' => 60,
-                    ],
-                    'constraints' => [
-                        new Callback(function ($value, ExecutionContextInterface $context): void {
-                            if ($value instanceof DateTimeInterface) {
-                                if ((int)$value->format('H') === 0 && (int)$value->format('i') === 0) {
-                                    $context->buildViolation('Interval must be greater than 00:00.')
-                                        ->addViolation();
-                                }
-                            }
-                        }),
-                    ],
                 ]);
         }
 
@@ -149,24 +129,11 @@ class ScheduleType extends AbstractType
                     continue;
                 }
 
-                $frequency = $data["{$settingName}_frequency"] ?? null;
                 $time = $data["{$settingName}_time"] ?? null;
 
                 if (empty($time)) {
                     $form->get("{$settingName}_time")->addError(
                         new FormError('Please choose a time for execution.')
-                    );
-                }
-
-                if ($frequency === 'weekly' && empty($data["{$settingName}_day_of_week"])) {
-                    $form->get("{$settingName}_day_of_week")->addError(
-                        new FormError('Please define the day of the week.')
-                    );
-                }
-
-                if ($frequency === 'monthly' && empty($data["{$settingName}_day_of_month"])) {
-                    $form->get("{$settingName}_day_of_month")->addError(
-                        new FormError('Please define the day of the month.')
                     );
                 }
 
