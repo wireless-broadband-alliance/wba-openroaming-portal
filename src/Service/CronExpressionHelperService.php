@@ -8,25 +8,102 @@ class CronExpressionHelperService
 {
     private function parseField(string $field): array
     {
-        // Type: every (wildcard or step), exact (single value), or custom
+        $field = trim($field);
+
+        // 1. Wildcard '*'
         if ($field === '*') {
-            return ['type' => 'every', 'interval' => null, 'values' => []];
+            return ['type' => 'every', 'frequency' => 1, 'values' => []];
         }
 
+        // 2. Step with wildcard: '*/N'
         if (str_starts_with($field, '*/')) {
-            $interval = (int)substr($field, 2);
-            return ['type' => 'every', 'interval' => $interval, 'values' => []];
+            $freqStr = substr($field, 2);
+            $freq = (int)$freqStr;
+            if ($freq > 0) {
+                return ['type' => 'every', 'frequency' => $freq, 'values' => []];
+            }
+            // Invalid frequency fallback
+            return ['type' => 'every', 'frequency' => 1, 'values' => []];
         }
 
-        // Check if it's a single exact value
+        // 3. Step with range: 'start-end/N'
+        $slashPos = strpos($field, '/');
+        if ($slashPos !== false) {
+            $rangePart = substr($field, 0, $slashPos);
+            $freqStr = substr($field, $slashPos + 1);
+            $freq = (int)$freqStr;
+
+            // Validate frequency
+            if ($freq < 1) {
+                $freq = 1;
+            }
+
+            // Parse range 'start-end'
+            $dashPos = strpos($rangePart, '-');
+            if ($dashPos !== false) {
+                $startStr = substr($rangePart, 0, $dashPos);
+                $endStr = substr($rangePart, $dashPos + 1);
+
+                if (is_numeric($startStr) && is_numeric($endStr)) {
+                    $start = (int)$startStr;
+                    $end = (int)$endStr;
+                    if ($start <= $end) {
+                        $values = range($start, $end);
+                        return ['type' => 'every', 'frequency' => $freq, 'values' => $values];
+                    }
+                }
+            }
+
+            // If no valid range found, fallback:
+            return ['type' => 'every', 'frequency' => $freq, 'values' => []];
+        }
+
+        // 4. Comma separated list: 'val1,val2,...'
+        if (str_contains($field, ',')) {
+            $parts = explode(',', $field);
+            $values = [];
+            foreach ($parts as $part) {
+                $part = trim($part);
+                if (is_numeric($part)) {
+                    $values[] = (int)$part;
+                }
+            }
+            if (count($values) > 0) {
+                return ['type' => 'custom', 'frequency' => 1, 'values' => $values];
+            }
+            // fallback empty
+            return ['type' => 'custom', 'frequency' => 1, 'values' => []];
+        }
+
+        // 5. Simple range: 'start-end'
+        $dashPos = strpos($field, '-');
+        if ($dashPos !== false) {
+            $startStr = substr($field, 0, $dashPos);
+            $endStr = substr($field, $dashPos + 1);
+            if (is_numeric($startStr) && is_numeric($endStr)) {
+                $start = (int)$startStr;
+                $end = (int)$endStr;
+                if ($start <= $end) {
+                    $values = range($start, $end);
+                    return ['type' => 'custom', 'frequency' => 1, 'values' => $values];
+                }
+            }
+            // fallback empty
+            return ['type' => 'custom', 'frequency' => 1, 'values' => []];
+        }
+
+        // 6. Single exact value
         if (is_numeric($field)) {
-            return ['type' => 'exact', 'interval' => null, 'values' => [(int)$field]];
+            return ['type' => 'exact', 'frequency' => 1, 'values' => [(int)$field]];
         }
 
-        // If it's anything else (e.g., "1,2,3" or "1-5"), treat as custom
-        return ['type' => 'custom', 'interval' => null, 'values' => []];
+        // 7. Fallback to custom empty
+        return ['type' => 'custom', 'frequency' => 1, 'values' => []];
     }
 
+    /**
+     * Recognize and parse the cron expression into parts with frequency and values.
+     */
     public function recognizeCronFrequency(string $cronExpression): array
     {
         try {
@@ -38,14 +115,12 @@ class CronExpressionHelperService
             ];
         }
 
-        // Get raw expressions
         $minute = $cron->getExpression(CronExpression::MINUTE);
         $hour = $cron->getExpression(CronExpression::HOUR);
         $day = $cron->getExpression(CronExpression::DAY);
         $month = $cron->getExpression(CronExpression::MONTH);
         $weekday = $cron->getExpression(CronExpression::WEEKDAY);
 
-        // Parse fields using simple logic (no regex)
         $minuteParsed = $this->parseField($minute);
         $hourParsed = $this->parseField($hour);
         $dayParsed = $this->parseField($day);
@@ -62,13 +137,12 @@ class CronExpressionHelperService
                 'day_of_week' => array_merge(['raw' => $weekday], $weekdayParsed),
             ],
             'time' => sprintf('%02d:%02d', (int)$hour, (int)$minute),
-            'frequency' => $this->guessFrequencyFromParts([
-                'day_of_week' => $weekdayParsed,
-                'day_of_month' => $dayParsed,
-            ]),
         ];
     }
 
+    /**
+     * Guess frequency label from day_of_week and day_of_month parts (optional).
+     */
     public function guessFrequencyFromParts(array $parts): string
     {
         if ($parts['day_of_week']['type'] !== 'every' && $parts['day_of_month']['type'] === 'every') {

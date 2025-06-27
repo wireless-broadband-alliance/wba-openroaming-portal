@@ -48,15 +48,21 @@ class ScheduleAutomationController extends AbstractController
         foreach ($this->cronSettings as $settingName) {
             $setting = $this->settingRepository->findOneBy(['name' => $settingName]);
             $cronValue = $setting ? $setting->getValue() : '';
+
             $initialData["{$settingName}_advanced"] = $cronValue;
 
             $result = $this->cronExpressionHelperService->recognizeCronFrequency($cronValue);
             $parts = $result['parts'] ?? [];
 
-            $initialData["{$settingName}_time"] = \DateTime::createFromFormat('H:i', $result['time'] ?? '00:00');
+            $initialData["{$settingName}_time"] = DateTime::createFromFormat('H:i', $result['time'] ?? '00:00');
             $initialData["{$settingName}_day_of_week"] = $parts['day_of_week']['values'] ?? [];
             $initialData["{$settingName}_day_of_month"] = $parts['day_of_month']['values'] ?? [];
             $initialData["{$settingName}_months_of_the_year"] = $parts['month']['values'] ?? [];
+
+            // Initialize frequencies (default 1)
+            $initialData["{$settingName}_day_of_week_frequency"] = $parts['day_of_week']['frequency'] ?? 1;
+            $initialData["{$settingName}_day_of_month_frequency"] = $parts['day_of_month']['frequency'] ?? 1;
+            $initialData["{$settingName}_months_of_the_year_frequency"] = $parts['month']['frequency'] ?? 1;
         }
 
         $form = $this->createForm(ScheduleType::class, $initialData, [
@@ -79,14 +85,51 @@ class ScheduleAutomationController extends AbstractController
                     $daysOfMonth = $form->get("{$settingName}_day_of_month")->getData();
                     $monthsOfYear = $form->get("{$settingName}_months_of_the_year")->getData();
 
-                    $hour = $time instanceof \DateTimeInterface ? $time->format('H') : '0';
-                    $minute = $time instanceof \DateTimeInterface ? $time->format('i') : '0';
+                    // Frequencies
+                    $dayOfWeekFreq = (int)$form->get("{$settingName}_day_of_week_frequency")->getData();
+                    $dayOfMonthFreq = (int)$form->get("{$settingName}_day_of_month_frequency")->getData();
+                    $monthsFreq = (int)$form->get("{$settingName}_months_of_the_year_frequency")->getData();
 
-                    $dayOfMonthStr = !empty($daysOfMonth) ? implode(',', $daysOfMonth) : '*';
-                    $monthStr = !empty($monthsOfYear) ? implode(',', $monthsOfYear) : '*';
-                    $dayOfWeekStr = !empty($daysOfWeek) ? implode(',', $daysOfWeek) : '*';
+                    // Validate frequency logic: frequency must be lower than the number of selected values
+                    $fieldsToCheck = [
+                        'day_of_week' => [$daysOfWeek, $dayOfWeekFreq],
+                        'day_of_month' => [$daysOfMonth, $dayOfMonthFreq],
+                        'months_of_the_year' => [$monthsOfYear, $monthsFreq],
+                    ];
 
-                    $cronValue = "{$minute} {$hour} {$dayOfMonthStr} {$monthStr} {$dayOfWeekStr}";
+                    $validationFailed = false;
+                    foreach ($fieldsToCheck as $fieldSuffix => [$selectedValues, $frequency]) {
+                        if ($frequency > 1) {
+                            $countSelected = count($selectedValues);
+                            if ($frequency >= $countSelected) {
+                                $form->get("{$settingName}_{$fieldSuffix}_frequency")->addError(
+                                    new \Symfony\Component\Form\FormError(
+                                        sprintf(
+                                            'Frequency (%d) must be less than the number of selected values (%d).',
+                                            $frequency,
+                                            $countSelected
+                                        )
+                                    )
+                                );
+                                $validationFailed = true;
+                            }
+                        }
+                    }
+
+                    if ($validationFailed) {
+                        // Stop processing this setting if validation failed
+                        continue;
+                    }
+
+                    $hour = $time instanceof DateTimeInterface ? $time->format('H') : '0';
+                    $minute = $time instanceof DateTimeInterface ? $time->format('i') : '0';
+
+                    // Build the cron parts with frequency applied, e.g., day_of_week "1-15/2,20"
+                    $dayOfMonthExpr = $this->buildCronFrequencyExpression($daysOfMonth, $dayOfMonthFreq);
+                    $monthExpr = $this->buildCronFrequencyExpression($monthsOfYear, $monthsFreq);
+                    $dayOfWeekExpr = $this->buildCronFrequencyExpression($daysOfWeek, $dayOfWeekFreq);
+
+                    $cronValue = "{$minute} {$hour} {$dayOfMonthExpr} {$monthExpr} {$dayOfWeekExpr}";
                 }
 
                 $this->saveSetting($settingName, $cronValue);
@@ -118,6 +161,9 @@ class ScheduleAutomationController extends AbstractController
         ]);
     }
 
+    /**
+     * Save or update a setting by name.
+     */
     private function saveSetting(string $name, ?string $value): void
     {
         $setting = $this->settingRepository->findOneBy(['name' => $name]);
@@ -125,5 +171,30 @@ class ScheduleAutomationController extends AbstractController
             $setting->setValue($value);
             $this->entityManager->persist($setting);
         }
+    }
+
+    /**
+     * Helper to build a CRON field string with frequency applied.
+     *
+     * E.g. from [1,3,5,7] and frequency 2 => "1-7/2"
+     * If frequency = 1, just returns comma separated values.
+     */
+    private function buildCronFrequencyExpression(array $values, int $frequency): string
+    {
+        if (empty($values)) {
+            return '*';
+        }
+
+        sort($values);
+
+        if ($frequency <= 1) {
+            return implode(',', $values);
+        }
+
+        // Try to build ranges with step frequency (e.g., 1-31/2)
+        $min = min($values);
+        $max = max($values);
+
+        return "{$min}-{$max}/{$frequency}";
     }
 }
