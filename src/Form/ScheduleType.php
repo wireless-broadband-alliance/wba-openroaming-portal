@@ -20,7 +20,9 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 class ScheduleType extends AbstractType
 {
-    public function __construct(private readonly GetSettings $getSettings) {}
+    public function __construct(private readonly GetSettings $getSettings)
+    {
+    }
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
@@ -35,6 +37,9 @@ class ScheduleType extends AbstractType
             'USERS_WHEN_PROFILE_EXPIRES_CRON',
             'LDAP_SYNC_CRON',
         ];
+
+        // Frequency choices from 1 (every) to 10 (every 10 units)
+        $freqChoices = array_combine(range(1, 10), range(1, 10));
 
         foreach ($cronSettings as $settingName) {
             $description = $this->getSettings->getSettingDescription($settingName);
@@ -68,13 +73,27 @@ class ScheduleType extends AbstractType
                     'label' => false,
                     'attr' => ['description' => $description],
                 ])
+                ->add("{$settingName}_time_frequency", ChoiceType::class, [
+                    'required' => false,
+                    'choices' => $freqChoices,
+                    'placeholder' => 'Minute frequency (e.g. every N minutes)',
+                    'label' => false,
+                    'attr' => ['description' => $description],
+                ])
                 ->add("{$settingName}_day_of_week", ChoiceType::class, [
                     'multiple' => true,
                     'required' => false,
                     'choices' => ['All days' => 'all'] + array_combine(
-                        ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
-                        range(0, 6)
-                    ),
+                            ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+                            range(0, 6)
+                        ),
+                    'label' => false,
+                    'attr' => ['description' => $description],
+                ])
+                ->add("{$settingName}_day_of_week_frequency", ChoiceType::class, [
+                    'required' => false,
+                    'choices' => $freqChoices,
+                    'placeholder' => 'Frequency (e.g. every N days)',
                     'label' => false,
                     'attr' => ['description' => $description],
                 ])
@@ -82,6 +101,13 @@ class ScheduleType extends AbstractType
                     'multiple' => true,
                     'required' => false,
                     'choices' => ['All days' => 'all'] + array_combine(range(1, 31), range(1, 31)),
+                    'label' => false,
+                    'attr' => ['description' => $description],
+                ])
+                ->add("{$settingName}_day_of_month_frequency", ChoiceType::class, [
+                    'required' => false,
+                    'choices' => $freqChoices,
+                    'placeholder' => 'Frequency (e.g. every N days)',
                     'label' => false,
                     'attr' => ['description' => $description],
                 ])
@@ -103,7 +129,13 @@ class ScheduleType extends AbstractType
                         'November' => 11,
                         'December' => 12,
                     ],
-
+                    'label' => false,
+                    'attr' => ['description' => $description],
+                ])
+                ->add("{$settingName}_months_of_the_year_frequency", ChoiceType::class, [
+                    'required' => false,
+                    'choices' => $freqChoices,
+                    'placeholder' => 'Frequency (e.g. every N months)',
                     'label' => false,
                     'attr' => ['description' => $description],
                 ]);
@@ -120,43 +152,160 @@ class ScheduleType extends AbstractType
                 }
 
                 $time = $data["{$settingName}_time"] ?? null;
+                $timeFreq = (int)($data["{$settingName}_time_frequency"] ?? 1);
+
                 $daysOfWeek = $data["{$settingName}_day_of_week"] ?? [];
+                $dayOfWeekFreq = (int)($data["{$settingName}_day_of_week_frequency"] ?? 1);
+
                 $daysOfMonth = $data["{$settingName}_day_of_month"] ?? [];
+                $dayOfMonthFreq = (int)($data["{$settingName}_day_of_month_frequency"] ?? 1);
+
                 $monthsOfYear = $data["{$settingName}_months_of_the_year"] ?? [];
+                $monthsFreq = (int)($data["{$settingName}_months_of_the_year_frequency"] ?? 1);
 
                 if (!$time) {
                     $form->get("{$settingName}_time")->addError(new FormError('Please choose a time.'));
                     continue;
                 }
 
+                // Validate "all" selections - treat as full range
+                $daysOfWeek = $this->expandAllSelection($daysOfWeek, 0, 6);
+                $daysOfMonth = $this->expandAllSelection($daysOfMonth, 1, 31);
+                $monthsOfYear = $this->expandAllSelection($monthsOfYear, 1, 12);
+
+                // Validate non-empty
                 if (empty($daysOfWeek)) {
-                    $form->get("{$settingName}_day_of_week")->addError(new FormError('Please choose at least one day.'));
+                    $form->get("{$settingName}_day_of_week")->addError(
+                        new FormError('Please choose at least one day of the week.')
+                    );
+                    continue;
                 }
-
                 if (empty($daysOfMonth)) {
-                    $form->get("{$settingName}_day_of_month")->addError(new FormError('Please choose at least one day.'));
+                    $form->get("{$settingName}_day_of_month")->addError(
+                        new FormError('Please choose at least one day of the month.')
+                    );
+                    continue;
                 }
-
                 if (empty($monthsOfYear)) {
-                    $form->get("{$settingName}_months_of_the_year")->addError(new FormError('Please choose at least one month.'));
+                    $form->get("{$settingName}_months_of_the_year")->addError(
+                        new FormError('Please choose at least one month.')
+                    );
+                    continue;
                 }
 
-                // Attempt to construct a CRON expression
+                $fieldsToCheck = [
+                    'day_of_week' => [$daysOfWeek, $dayOfWeekFreq],
+                    'day_of_month' => [$daysOfMonth, $dayOfMonthFreq],
+                    'months_of_the_year' => [$monthsOfYear, $monthsFreq],
+                ];
+
+                foreach ($fieldsToCheck as $fieldSuffix => [$selectedValues, $frequency]) {
+                    // Skip if no frequency or frequency = 1 (no restriction)
+                    if ($frequency <= 1) {
+                        continue;
+                    }
+
+                    $countSelected = count($selectedValues);
+                    if ($frequency >= $countSelected) {
+                        $form->get("{$settingName}_{$fieldSuffix}_frequency")->addError(
+                            new FormError(
+                                sprintf(
+                                    'Frequency (%d) must be less than the number of selected values (%d).',
+                                    $frequency,
+                                    $countSelected
+                                )
+                            )
+                        );
+                    }
+                }
+
+                // Construct cron parts with frequencies
+                $minute = (int)$time->format('i');
+                $hour = (int)$time->format('H');
+
+                $minutePart = $minute . ($timeFreq > 1 ? '/' . $timeFreq : '');
+
+                $dayOfMonthPart = $this->buildCronPartWithFrequency($daysOfMonth, $dayOfMonthFreq);
+                $monthPart = $this->buildCronPartWithFrequency($monthsOfYear, $monthsFreq);
+                $dayOfWeekPart = $this->buildCronPartWithFrequency($daysOfWeek, $dayOfWeekFreq);
+
+                $cronString = sprintf(
+                    '%s %d %s %s %s',
+                    $minutePart,
+                    $hour,
+                    $dayOfMonthPart,
+                    $monthPart,
+                    $dayOfWeekPart
+                );
+
                 try {
-                    $minute = (int)$time->format('i');
-                    $hour = (int)$time->format('H');
-                    $dayOfMonthExpr = implode(',', $daysOfMonth);
-                    $monthExpr = implode(',', $monthsOfYear);
-                    $dayOfWeekExpr = implode(',', $daysOfWeek);
-
-                    $cronString = sprintf('%d %d %s %s %s', $minute, $hour, $dayOfMonthExpr, $monthExpr, $dayOfWeekExpr);
-
                     new CronExpression($cronString);
                 } catch (Exception) {
-                    $form->get("{$settingName}_time")->addError(new FormError('Failed to generate a valid CRON expression from input.'));
+                    $form->get("{$settingName}_time")->addError(
+                        new FormError('Failed to generate a valid CRON expression from input.')
+                    );
                 }
             }
         });
+    }
+
+    /**
+     * Expand 'all' keyword in choices to full range.
+     */
+    private function expandAllSelection(array $values, int $min, int $max): array
+    {
+        if (in_array('all', $values, true)) {
+            return range($min, $max);
+        }
+        return $values;
+    }
+
+    /**
+     * Build a CRON part (day/month/month_of_year) with frequency, supporting ranges.
+     *
+     * Example:
+     *   values = [1,2,3,5,6,7,10]
+     *   freq = 2
+     *   => "1-3/2,5-7/2,10/2"
+     */
+    private function buildCronPartWithFrequency(array $values, int $frequency): string
+    {
+        sort($values);
+
+        if ($frequency <= 1) {
+            return implode(',', $values);
+        }
+
+        $ranges = [];
+        $start = $values[0];
+        $prev = $values[0];
+
+        for ($i = 1, $len = count($values); $i < $len; $i++) {
+            if ($values[$i] == $prev + 1) {
+                $prev = $values[$i];
+                continue;
+            }
+            // Close current range
+            if ($start == $prev) {
+                $ranges[] = (string)$start;
+            } else {
+                $ranges[] = "$start-$prev";
+            }
+            $start = $prev = $values[$i];
+        }
+        // Close last range
+        if ($start == $prev) {
+            $ranges[] = (string)$start;
+        } else {
+            $ranges[] = "$start-$prev";
+        }
+
+        // Append frequency to each range
+        foreach ($ranges as &$range) {
+            $range .= '/' . $frequency;
+        }
+
+        return implode(',', $ranges);
     }
 
     public function configureOptions(OptionsResolver $resolver): void
