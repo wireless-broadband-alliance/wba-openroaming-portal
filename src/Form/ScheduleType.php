@@ -41,122 +41,102 @@ class ScheduleType extends AbstractType
         ];
 
         foreach ($cronSettings as $settingName) {
-            // Advanced cron expression
-            $builder->add("{$settingName}_advanced", TextType::class, [
-                'required' => false,
-                'label' => false,
-                'attr' => [
-                    'placeholder' => '*/5 * * * *',
-                    'description' => $this->getSettings->getSettingDescription($settingName),
-                ],
-                'constraints' => [
-                    new Callback(function ($value, ExecutionContextInterface $context): void {
-                        if ($value) {
-                            try {
-                                new CronExpression($value);
-                            } catch (Exception) {
-                                $context->buildViolation('Invalid CRON expression "{{ value }}".')
-                                    ->setParameter('{{ value }}', $value)
-                                    ->addViolation();
+            $description = $this->getSettings->getSettingDescription($settingName);
+
+            $builder
+                ->add("{$settingName}_advanced", TextType::class, [
+                    'required' => false,
+                    'label' => false,
+                    'attr' => [
+                        'placeholder' => '*/5 * * * *',
+                        'description' => $description,
+                    ],
+                    'constraints' => [
+                        new Callback(function ($value, ExecutionContextInterface $context): void {
+                            if ($value) {
+                                try {
+                                    new CronExpression($value);
+                                } catch (Exception) {
+                                    $context->buildViolation('Invalid CRON expression "{{ value }}".')
+                                        ->setParameter('{{ value }}', $value)
+                                        ->addViolation();
+                                }
                             }
-                        }
-                    }),
-                ],
-            ]);
-
-            // Frequency
-            $builder->add("{$settingName}_frequency", ChoiceType::class, [
-                'choices' => [
-                    'Daily' => 'daily',
-                    'Weekly' => 'weekly',
-                    'Monthly' => 'monthly',
-                ],
-                'placeholder' => 'Choose a frequency',
-                'required' => false,
-                'label' => false,
-                'attr' => [
-                    'description' => $this->getSettings->getSettingDescription($settingName),
-                ],
-            ]);
-
-            // Time
-            $builder->add("{$settingName}_time", TimeType::class, [
-                'required' => false,
-                'widget' => 'single_text',
-                'input' => 'datetime',
-                'label' => false,
-                'attr' => [
-                    'description' => $this->getSettings->getSettingDescription($settingName),
-                ],
-            ]);
-
-            // Weekly → day of week
-            $builder->add("{$settingName}_day_of_week", ChoiceType::class, [
-                'choices' => [
-                    'Sunday' => 0,
-                    'Monday' => 1,
-                    'Tuesday' => 2,
-                    'Wednesday' => 3,
-                    'Thursday' => 4,
-                    'Friday' => 5,
-                    'Saturday' => 6,
-                ],
-                'placeholder' => 'Choose a day of week',
-                'required' => false,
-                'label' => false,
-                'multiple' => true,
-                'attr' => [
-                    'description' => $this->getSettings->getSettingDescription($settingName),
-                ],
-            ]);
-
-            // Monthly → day of month
-            $builder->add("{$settingName}_day_of_month", ChoiceType::class, [
-                'choices' => array_combine(range(1, 31), range(1, 31)),
-                'placeholder' => 'Choose a day of month',
-                'required' => false,
-                'label' => false,
-                'multiple' => true,
-                'attr' => [
-                    'description' => $this->getSettings->getSettingDescription($settingName),
-                ],
-            ]);
-
-            // Start date (optional time frame start)
-            $builder->add("{$settingName}_startDate", DateTimeType::class, [
-                'required' => false,
-                'widget' => 'single_text',
-                'label' => 'Start Date',
-            ]);
-
-            // End date (optional time frame end)
-            $builder->add("{$settingName}_endDate", DateTimeType::class, [
-                'required' => false,
-                'widget' => 'single_text',
-                'label' => 'End Date',
-            ]);
-
-            // Interval between runs (e.g. every 2 hours, 30 mins)
-            $builder->add("{$settingName}_interval", TimeType::class, [
-                'required' => false,
-                'widget' => 'single_text',
-                'input' => 'datetime',
-                'label' => 'Repeat Every',
-                'attr' => [
-                    'placeholder' => 'HH:MM',
-                    'step' => 60, // Allow minute-level precision
-                ],
-                'constraints' => [
-                    new Callback(function ($value, ExecutionContextInterface $context): void {
-                        if ($value instanceof \DateTimeInterface) {
-                            if ((int)$value->format('H') === 0 && (int)$value->format('i') === 0) {
-                                $context->buildViolation('Interval must be greater than 00:00.')
-                                    ->addViolation();
+                        }),
+                    ],
+                ])
+                ->add("{$settingName}_frequency", ChoiceType::class, [
+                    'choices' => [
+                        'Daily' => 'daily',
+                        'Weekly' => 'weekly',
+                        'Monthly' => 'monthly',
+                    ],
+                    'placeholder' => 'Choose a frequency',
+                    'required' => false,
+                    'label' => false,
+                    'attr' => ['description' => $description],
+                ])
+                ->add("{$settingName}_time", TimeType::class, [
+                    'required' => false,
+                    'widget' => 'single_text',
+                    'input' => 'datetime',
+                    'label' => false,
+                    'attr' => ['description' => $description],
+                ])
+                ->add("{$settingName}_day_of_week", ChoiceType::class, [
+                    'choices' => [
+                        'Sunday' => 0,
+                        'Monday' => 1,
+                        'Tuesday' => 2,
+                        'Wednesday' => 3,
+                        'Thursday' => 4,
+                        'Friday' => 5,
+                        'Saturday' => 6,
+                    ],
+                    'placeholder' => 'Choose a day of week',
+                    'required' => false,
+                    'label' => false,
+                    'multiple' => true,
+                    'attr' => ['description' => $description],
+                ])
+                ->add("{$settingName}_day_of_month", ChoiceType::class, [
+                    'choices' => array_combine(range(1, 31), range(1, 31)),
+                    'placeholder' => 'Choose a day of month',
+                    'required' => false,
+                    'label' => false,
+                    'multiple' => true,
+                    'attr' => ['description' => $description],
+                ])
+                ->add("{$settingName}_startDate", DateTimeType::class, [
+                    'required' => false,
+                    'widget' => 'single_text',
+                    'label' => 'Start Date',
+                ])
+                ->add("{$settingName}_endDate", DateTimeType::class, [
+                    'required' => false,
+                    'widget' => 'single_text',
+                    'label' => 'End Date',
+                ])
+                ->add("{$settingName}_interval", TimeType::class, [
+                    'required' => false,
+                    'widget' => 'single_text',
+                    'input' => 'datetime',
+                    'label' => 'Repeat Every',
+                    'attr' => [
+                        'placeholder' => 'HH:MM',
+                        'step' => 60,
+                    ],
+                    'constraints' => [
+                        new Callback(function ($value, ExecutionContextInterface $context): void {
+                            if ($value instanceof DateTimeInterface) {
+                                if ((int)$value->format('H') === 0 && (int)$value->format('i') === 0) {
+                                    $context->buildViolation('Interval must be greater than 00:00.')
+                                        ->addViolation();
+                                }
                             }
-                        }
-                    }),
-                ],
-            ]);
+                        }),
+                    ],
+                ]);
         }
 
         $builder->addEventListener(FormEvents::POST_SUBMIT, function (FormEvent $event) use ($cronSettings): void {

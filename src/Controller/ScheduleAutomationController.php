@@ -7,94 +7,80 @@ use App\Enum\AnalyticalEventType;
 use App\Form\ScheduleType;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
+use App\Service\CronExpressionHelperService;
 use App\Service\EventActions;
 use App\Service\GetSettings;
-use Cron\CronExpression;
 use DateTime;
 use DateTimeInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Routing\Annotation\Route;
 
 class ScheduleAutomationController extends AbstractController
 {
+    private array $cronSettings = [
+        'DELETE_UNCONFIRMED_USERS_CRON',
+        'USERS_WHEN_PROFILE_EXPIRES_CRON',
+        'LDAP_SYNC_CRON',
+    ];
+
     public function __construct(
         private readonly GetSettings $getSettings,
         private readonly UserRepository $userRepository,
         private readonly SettingRepository $settingRepository,
         private readonly EntityManagerInterface $entityManager,
-        private readonly EventActions $eventActions
+        private readonly EventActions $eventActions,
+        private readonly CronExpressionHelperService $cronExpressionHelperService
     ) {
     }
 
     #[Route('/dashboard/settings/schedule', name: 'admin_dashboard_settings_schedule')]
     public function settingsSchedule(Request $request): Response
     {
+        // Load all settings data for current user
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         /** @var User $currentUser */
         $currentUser = $this->getUser();
 
+        // Prepare initial form data by decoding existing cron expressions
         $initialData = [];
-
-        foreach (
-            [
-                'DELETE_UNCONFIRMED_USERS_CRON',
-                'USERS_WHEN_PROFILE_EXPIRES_CRON',
-                'LDAP_SYNC_CRON'
-            ] as $settingName
-        ) {
+        foreach ($this->cronSettings as $settingName) {
             $setting = $this->settingRepository->findOneBy(['name' => $settingName]);
             $cronValue = $setting ? $setting->getValue() : '';
             $initialData["{$settingName}_advanced"] = $cronValue;
 
-            $cron = CronExpression::factory($cronValue);
+            $result = $this->cronExpressionHelperService->recognizeCronFrequency($cronValue);
 
-            $parts = preg_split('/\s+/', $cron);
-
-            [$minutes, $hours, $days, $months, $dayOfWeek] = $parts;
-
-            if ($days === '*' && $dayOfWeek === '*') {
-                // daily: "minute hour * * *"
-
+            if ($result['frequency'] === 'daily') {
                 $initialData["{$settingName}_frequency"] = 'daily';
-                $initialData["{$settingName}_time"] = DateTime::createFromFormat(
-                    'H:i',
-                    sprintf('%02d:%02d', $hours, $minutes)
-                );
+                $initialData["{$settingName}_time"] = DateTime::createFromFormat('H:i', $result['time']);
                 $initialData["{$settingName}_day_of_week"] = [];
                 $initialData["{$settingName}_day_of_month"] = [];
-            } elseif ($days === '*' && $dayOfWeek !== '*') {
-                // weekly: "minute hour * * day_of_week"
-
+            } elseif ($result['frequency'] === 'weekly') {
                 $initialData["{$settingName}_frequency"] = 'weekly';
-                $initialData["{$settingName}_time"] = DateTime::createFromFormat(
-                    'H:i',
-                    sprintf('%02d:%02d', $hours, $minutes)
-                );
-                $initialData["{$settingName}_day_of_week"] = [(int)$dayOfWeek];
+                $initialData["{$settingName}_time"] = DateTime::createFromFormat('H:i', $result['time']);
+                $initialData["{$settingName}_day_of_week"] = array_map('intval', $result['day_of_week']);
                 $initialData["{$settingName}_day_of_month"] = [];
-            } elseif ($days !== '*' && $dayOfWeek === '*') {
-                // monthly: "minute hour day_of_month * *"
-
+            } elseif ($result['frequency'] === 'monthly') {
                 $initialData["{$settingName}_frequency"] = 'monthly';
-                $initialData["{$settingName}_time"] = DateTime::createFromFormat(
-                    'H:i',
-                    sprintf('%02d:%02d', $hours, $minutes)
-                );
-                $initialData["{$settingName}_day_of_month"] = [(int)$days];
+                $initialData["{$settingName}_time"] = DateTime::createFromFormat('H:i', $result['time']);
+                $initialData["{$settingName}_day_of_month"] = array_map('intval', $result['day_of_month']);
                 $initialData["{$settingName}_day_of_week"] = [];
             } else {
-                // advanced or unrecognized
-                $initialData["{$settingName}_frequency"] = null;
-                $initialData["{$settingName}_time"] = null;
-                $initialData["{$settingName}_day_of_week"] = [];
-                $initialData["{$settingName}_day_of_month"] = [];
+                // Advanced mode or unknown, set empty defaults
+                $initialData["{$settingName}_frequency"] = $this->cronExpressionHelperService->guessFrequencyFromParts(
+                    $result['parts']
+                );
+                $initialData["{$settingName}_time"] = DateTime::createFromFormat('H:i', $result['time']);
+                $initialData["{$settingName}_day_of_week"] = $result['parts']['day_of_week']['values'] ?? [];
+                $initialData["{$settingName}_day_of_month"] = $result['parts']['day_of_month']['values'] ?? [];
             }
         }
 
         $settings = $this->settingRepository->findAll();
+
         $form = $this->createForm(ScheduleType::class, $initialData, [
             'settings' => $settings,
         ]);
@@ -103,77 +89,60 @@ class ScheduleAutomationController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $useAdvancedMode = $form->get('use_advanced_mode')->getData();
 
-            $settingsToUpdate = [
-                'DELETE_UNCONFIRMED_USERS_CRON',
-                'USERS_WHEN_PROFILE_EXPIRES_CRON',
-                'LDAP_SYNC_CRON',
-            ];
-
-            foreach ($settingsToUpdate as $settingName) {
-                $cronValueMonthly = '';
-                $cronValueDayOfWeek = '';
+            foreach ($this->cronSettings as $settingName) {
+                $cronValue = '';
 
                 if ($useAdvancedMode) {
-                    $cronValue = $form->get($settingName . '_advanced')->getData() ?: '';
+                    // Use manual cron input
+                    $cronValue = $form->get("{$settingName}_advanced")->getData() ?? '';
                 } else {
-                    $frequency = $form->get($settingName . '_frequency')->getData();
-                    $time = $form->get($settingName . '_time')->getData();
+                    // Build cron expression from selected frequency and time
+                    $frequency = $form->get("{$settingName}_frequency")->getData();
+                    $time = $form->get("{$settingName}_time")->getData();
 
                     if ($frequency && $time instanceof DateTimeInterface) {
                         $hour = $time->format('H');
                         $minute = $time->format('i');
 
-                        if ($frequency === 'daily') {
-                            $cronValue = "$minute $hour * * *";
-                        } elseif ($frequency === 'weekly') {
-                            $dayOfWeek = $form->get($settingName . '_day_of_week')->getData();
-                            if (count($dayOfWeek) > 1) {
-                                foreach ($dayOfWeek as $day) {
-                                    $cronValue .= $day . ',';
-                                }
-                                $cronValue = substr($cronValue, 0, -1);
-                            }
-                            else {
-                                $cronValue = $dayOfWeek[0];
-                            }
-                            // default to Sunday if not set
-                            $cronValue ??= 0;
-                            $cronValue = "$minute $hour * * $cronValue";
-                        } elseif ($frequency === 'monthly') {
-                            $dayOfMonth = $form->get($settingName . '_day_of_month')->getData();
-                            $dayOfWeek = $form->get($settingName . '_day_of_week')->getData();
-                            // default to 1 if not set
-                            if (count($dayOfMonth) > 1) {
-                                foreach ($dayOfMonth as $day) {
-                                    $cronValueMonthly .= $day . ',';
-                                }
-                                $cronValueMonthly = substr($cronValueMonthly, 0, -1);
-                            }
-                            else {
-                                $cronValueMonthly = $dayOfWeek[0];
-                            }
-                            if (count($dayOfWeek) > 1) {
-                                foreach ($dayOfWeek as $day) {
-                                    $cronValueDayOfWeek .= $day . ',';
-                                }
-                                $cronValueDayOfWeek = substr($cronValueDayOfWeek, 0, -1);
-                            }
-                            else {
-                                $cronValueDayOfWeek = $dayOfWeek[0];
-                            }
-                            $cronValueDayOfWeek ??= 1;
-                            $cronValue = "$minute $hour $cronValueMonthly * $cronValueDayOfWeek";
+                        switch ($frequency) {
+                            case 'daily':
+                                $cronValue = "$minute $hour * * *";
+                                break;
+
+                            case 'weekly':
+                                $daysOfWeek = $form->get("{$settingName}_day_of_week")->getData(
+                                ) ?: [0]; // fallback Sunday
+                                $cronValue = "$minute $hour * * " . implode(',', $daysOfWeek);
+                                break;
+
+                            case 'monthly':
+                                $daysOfMonth = $form->get("{$settingName}_day_of_month")->getData(
+                                ) ?: [1]; // fallback 1st
+                                $cronValue = "$minute $hour " . implode(',', $daysOfMonth) . " * *";
+                                break;
                         }
                     }
                 }
 
-                $setting = $this->settingRepository->findOneBy(['name' => $settingName]);
-                if ($setting !== null) {
-                    $setting->setValue($cronValue);
-                    $this->entityManager->persist($setting);
-                }
+                // Retrieve additional schedule info
+                $startDate = $form->get("{$settingName}_startDate")->getData();
+                $endDate = $form->get("{$settingName}_endDate")->getData();
+                $interval = $form->get("{$settingName}_interval")->getData();
+
+                // Save CRON value
+                $this->saveSetting("{$settingName}_cron", $cronValue);
+
+                // Save interval
+                $this->saveSetting("{$settingName}_interval", $interval?->format('H:i'));
+
+                // Save start date
+                $this->saveSetting("{$settingName}_startDate", $startDate?->format(DateTimeInterface::ATOM));
+
+                // Save end date
+                $this->saveSetting("{$settingName}_endDate", $endDate?->format(DateTimeInterface::ATOM));
             }
 
+            // Save event for analytics
             $eventMetadata = [
                 'ip' => $request->getClientIp(),
                 'user_agent' => $request->headers->get('User-Agent'),
@@ -199,5 +168,14 @@ class ScheduleAutomationController extends AbstractController
             'settings' => $settings,
             'form' => $form->createView(),
         ]);
+    }
+
+    private function saveSetting(string $name, ?string $value): void
+    {
+        $setting = $this->settingRepository->findOneBy(['name' => $name]);
+        if ($setting !== null) {
+            $setting->setValue($value);
+            $this->entityManager->persist($setting);
+        }
     }
 }

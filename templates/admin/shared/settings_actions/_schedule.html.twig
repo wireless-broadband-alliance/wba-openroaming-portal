@@ -150,3 +150,21 @@
         </div>
     </form>
 </div>
+
+{# Debug: Show which fields are rendered per group #}
+<div class="mt-8 p-4 bg-gray-100 rounded">
+    <h2 class="text-lg font-bold mb-2">Rendered Fields Debug</h2>
+    <ul>
+        {% for groupName, fields in groups %}
+            <li><strong>{{ groupName }}</strong>:
+                <ul>
+                    {% for fieldName in fields %}
+                        {% if attribute(form, fieldName, [], 'any', true) is not null %}
+                            <li>{{ fieldName }}</li>
+                        {% endif %}
+                    {% endfor %}
+                </ul>
+            </li>
+        {% endfor %}
+    </ul>
+</div>
