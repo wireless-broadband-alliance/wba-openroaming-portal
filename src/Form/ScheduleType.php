@@ -238,6 +238,8 @@ class ScheduleType extends AbstractType
                     $dayOfWeekPart
                 );
 
+                dd($cronString);
+
                 try {
                     new CronExpression($cronString);
                 } catch (Exception) {
@@ -270,40 +272,30 @@ class ScheduleType extends AbstractType
      */
     private function buildCronPartWithFrequency(array $values, int $frequency): string
     {
+        if (empty($values)) {
+            return '*';
+        }
+
         sort($values);
 
         if ($frequency <= 1) {
             return implode(',', $values);
         }
 
-        [$start, $prev] = $values;
+        // Check if values form a continuous range
+        $min = $values[0];
+        $max = $values[count($values) - 1];
 
-        for ($i = 1, $len = count($values); $i < $len; $i++) {
-            if ($values[$i] === $prev + 1) {
-                $prev = $values[$i];
-                continue;
-            }
-            // Close current range
-            if ($start === $prev) {
-                $ranges[] = (string)$start;
-            } else {
-                $ranges[] = "$start-$prev";
-            }
-            $start = $prev = $values[$i];
-        }
-        // Close last range
-        if ($start === $prev) {
-            $ranges[] = (string)$start;
-        } else {
-            $ranges[] = "$start-$prev";
+        // Check if all values between min and max are included
+        $expectedRange = range($min, $max);
+        if ($values === $expectedRange) {
+            // Continuous range: safe to apply step frequency
+            return "{$min}-{$max}/{$frequency}";
         }
 
-        // Append frequency to each range
-        foreach ($ranges as &$range) {
-            $range .= '/' . $frequency;
-        }
-
-        return implode(',', $ranges);
+        // Non-contiguous values: steps with multiple ranges not supported,
+        // fallback to listing values without frequency steps
+        return implode(',', $values);
     }
 
     public function configureOptions(OptionsResolver $resolver): void
