@@ -14,6 +14,7 @@ use DateTime;
 use DateTimeInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -54,7 +55,10 @@ class ScheduleAutomationController extends AbstractController
             $result = $this->cronExpressionHelperService->recognizeCronFrequency($cronValue);
             $parts = $result['parts'] ?? [];
 
-            $initialData["{$settingName}_time"] = DateTime::createFromFormat('H:i', $result['time'] ?? '00:00');
+            $initialData["{$settingName}_time"] = DateTime::createFromFormat(
+                'H:i',
+                $result['time'] ?? '00:00'
+            );
             $initialData["{$settingName}_day_of_week"] = $parts['day_of_week']['values'] ?? [];
             $initialData["{$settingName}_day_of_month"] = $parts['day_of_month']['values'] ?? [];
             $initialData["{$settingName}_months_of_the_year"] = $parts['month']['values'] ?? [];
@@ -75,8 +79,6 @@ class ScheduleAutomationController extends AbstractController
             $useAdvancedMode = $form->get('use_advanced_mode')->getData();
 
             foreach ($this->cronSettings as $settingName) {
-                $cronValue = '';
-
                 if ($useAdvancedMode) {
                     $cronValue = $form->get("{$settingName}_advanced")->getData();
                 } else {
@@ -103,7 +105,7 @@ class ScheduleAutomationController extends AbstractController
                             $countSelected = count($selectedValues);
                             if ($frequency >= $countSelected) {
                                 $form->get("{$settingName}_{$fieldSuffix}_frequency")->addError(
-                                    new \Symfony\Component\Form\FormError(
+                                    new FormError(
                                         sprintf(
                                             'Frequency (%d) must be less than the number of selected values (%d).',
                                             $frequency,
@@ -139,7 +141,7 @@ class ScheduleAutomationController extends AbstractController
             $this->eventActions->saveEvent(
                 $currentUser,
                 AnalyticalEventType::SETTING_SCHEDULE_CONF_REQUEST->value,
-                new \DateTime(),
+                new DateTime(),
                 [
                     'ip' => $request->getClientIp(),
                     'user_agent' => $request->headers->get('User-Agent'),
@@ -149,7 +151,10 @@ class ScheduleAutomationController extends AbstractController
 
             $this->entityManager->flush();
 
-            $this->addFlash('success_admin', 'New Schedule configuration has been applied successfully.');
+            $this->addFlash(
+                'success_admin',
+                'New Schedule configuration has been applied successfully.'
+            );
             return $this->redirectToRoute('admin_dashboard_settings_schedule');
         }
 

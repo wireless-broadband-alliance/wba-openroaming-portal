@@ -276,17 +276,15 @@ class ScheduleType extends AbstractType
             return implode(',', $values);
         }
 
-        $ranges = [];
-        $start = $values[0];
-        $prev = $values[0];
+        [$start, $prev] = $values;
 
         for ($i = 1, $len = count($values); $i < $len; $i++) {
-            if ($values[$i] == $prev + 1) {
+            if ($values[$i] === $prev + 1) {
                 $prev = $values[$i];
                 continue;
             }
             // Close current range
-            if ($start == $prev) {
+            if ($start === $prev) {
                 $ranges[] = (string)$start;
             } else {
                 $ranges[] = "$start-$prev";
@@ -294,7 +292,7 @@ class ScheduleType extends AbstractType
             $start = $prev = $values[$i];
         }
         // Close last range
-        if ($start == $prev) {
+        if ($start === $prev) {
             $ranges[] = (string)$start;
         } else {
             $ranges[] = "$start-$prev";

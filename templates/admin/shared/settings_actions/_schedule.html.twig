@@ -1,21 +1,25 @@
 {% set groups = {
     DELETE_UNCONFIRMED_USERS_CRON: [
-        '_advanced', '_day_of_week', '_day_of_month', '_months_of_the_year', '_time',
+        '_advanced', '_day_of_week', '_day_of_week_frequency', '_day_of_month', '_day_of_month_frequency', '_months_of_the_year', '_months_of_the_year_frequency', '_time', '_time_frequency',
     ],
     USERS_WHEN_PROFILE_EXPIRES_CRON: [
-        '_advanced', '_day_of_week', '_day_of_month', '_months_of_the_year', '_time',
+        '_advanced', '_day_of_week', '_day_of_week_frequency', '_day_of_month', '_day_of_month_frequency', '_months_of_the_year', '_months_of_the_year_frequency', '_time', '_time_frequency',
     ],
     LDAP_SYNC_CRON: [
-        '_advanced', '_day_of_week', '_day_of_month', '_months_of_the_year', '_time',
+        '_advanced', '_day_of_week', '_day_of_week_frequency', '_day_of_month', '_day_of_month_frequency', '_months_of_the_year', '_months_of_the_year_frequency', '_time', '_time_frequency',
     ],
 } %}
 
 {% set fieldTitles = {
     '_advanced': 'Advanced Mode',
     '_day_of_week': 'Day of Week',
+    '_day_of_week_frequency': 'Day of Week Frequency',
     '_day_of_month': 'Day of Month',
+    '_day_of_month_frequency': 'Day of Month Frequency',
     '_months_of_the_year': 'Months',
+    '_months_of_the_year_frequency': 'Months Frequency',
     '_time': 'Time of Execution',
+    '_time_frequency': 'Time Frequency',
 } %}
 
 <div {{ stimulus_controller('cron-toggle') }}>
