@@ -22,7 +22,7 @@
         {% endif %}
 
         {# Date Submition Form #}
-        {% include 'admin/_date_filter_form.html.twig' with {
+        {% include 'admin//shared/_date_filter_form.html.twig' with {
             routeName: 'admin_dashboard_statistics_freeradius',
             method: 'get',
             selectedStartDate: selectedStartDate,

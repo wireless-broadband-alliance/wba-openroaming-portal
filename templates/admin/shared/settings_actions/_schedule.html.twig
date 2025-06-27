@@ -83,6 +83,12 @@
                     </div>
 
                     <div class="space-y-2 mt-5">
+
+                        {# Card Description #}
+                        {{ include('/admin/shared/settings_actions/_description.html.twig', {
+                            description: attribute(form, fields[0]).vars.attr.description,
+                        }) }}
+
                         {% set renderedTitles = [] %}
                         {% for fieldName in fields %}
                             {# Find suffix key for this field #}
@@ -99,7 +105,8 @@
 
                             {# Show the title only once per suffix type #}
                             {% if suffix is not null and suffix not in renderedTitles %}
-                                <div data-cron-toggle-title="{{ toggleTarget }}" data-cron-toggle-group="{{ groupName }}"
+                                <div data-cron-toggle-title="{{ toggleTarget }}"
+                                     data-cron-toggle-group="{{ groupName }}"
                                      class="text-sm font-semibold text-gray-700 mt-4">
                                     {{ fieldTitles[suffix] }}
                                 </div>
@@ -118,10 +125,6 @@
                             </div>
                         {% endfor %}
                     </div>
-
-                    {{ include('/admin/shared/settings_actions/_description.html.twig', {
-                        description: attribute(form, fields[0]).vars.attr.description,
-                    }) }}
 
                     <div class="mt-2 -mb-2 text-center text-red-500 text-base">
                         {% for fieldName in fields %}

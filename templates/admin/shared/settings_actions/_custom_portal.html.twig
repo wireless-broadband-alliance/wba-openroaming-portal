@@ -39,6 +39,7 @@
                     <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full"
                          name="statusCards"
                          id="{{ setting.vars.name }}" {{ stimulus_controller('radio card') }}>
+
                         {# Title and Icon #}
                         <div class="flex flex-row justify-between">
                             <div class="text-base font-medium text-center break-normal md:break-all">
@@ -53,6 +54,9 @@
                                      alt="info_icon"/>
                             </label>
                         </div>
+
+                        {# Card Description #}
+                        {{ include('/admin/shared/settings_actions/_description.html.twig', {description: setting.vars.attr.description}) }}
 
                         {% if setting.vars.name in ['CUSTOMER_LOGO_ENABLED'] %}
                             <div class="flex items-center space-x-2 mt-5">
@@ -99,8 +103,6 @@
                                 </label>
                             </div>
                         {% endif %}
-
-                        {{ include('/admin/shared/settings_actions/_description.html.twig', {description: setting.vars.attr.description}) }}
 
                         <div class="mt-2 -mb-2 text-center text-red-500 text-base">
                             {{ form_errors(setting) }}
