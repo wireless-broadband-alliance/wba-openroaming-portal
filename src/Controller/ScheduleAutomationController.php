@@ -130,7 +130,7 @@ class ScheduleAutomationController extends AbstractController
 
                     $validationFailed = false;
                     foreach ($fieldsToCheck as $fieldSuffix => [$selectedValues, $frequency]) {
-                        if ($frequency > 1) {
+                        if ($frequency > 1 && !in_array('*', $selectedValues, true)) {
                             $countSelected = count($selectedValues);
                             if ($frequency >= $countSelected) {
                                 $form->get("{$settingName}_{$fieldSuffix}_frequency")->addError(
@@ -156,9 +156,9 @@ class ScheduleAutomationController extends AbstractController
                     $minute = $time instanceof DateTimeInterface ? $time->format('i') : '0';
 
                     // Build the cron parts with frequency applied, e.g., day_of_week "1-15/2,20"
-                    $dayOfMonthExpr = $this->buildCronFrequencyExpression($daysOfMonth, $dayOfMonthFreq);
-                    $monthExpr = $this->buildCronFrequencyExpression($monthsOfYear, $monthsFreq);
-                    $dayOfWeekExpr = $this->buildCronFrequencyExpression($daysOfWeek, $dayOfWeekFreq);
+                    $dayOfMonthExpr = $this->cronExpressionHelperService->selectAllWithFreqConverter($daysOfMonth, $dayOfMonthFreq);
+                    $monthExpr = $this->cronExpressionHelperService->selectAllWithFreqConverter($monthsOfYear, $monthsFreq);
+                    $dayOfWeekExpr = $this->cronExpressionHelperService->selectAllWithFreqConverter($daysOfWeek, $dayOfWeekFreq);
 
                     $cronValue = "{$minute} {$hour} {$dayOfMonthExpr} {$monthExpr} {$dayOfWeekExpr}";
                 }

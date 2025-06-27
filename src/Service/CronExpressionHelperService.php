@@ -101,6 +101,53 @@ class CronExpressionHelperService
         return ['type' => 'custom', 'frequency' => 1, 'values' => []];
     }
 
+    public function selectAllWithFreqConverter(array $values,int $freq): string
+    {
+        if ($freq === 1) {
+            return '*';
+        }
+        if (in_array('*', $values, true)) {
+            return "*/$freq";
+        }
+            return $this->buildCronPartWithFrequency($values, $freq);
+    }
+
+    /**
+     * Build a CRON part (day/month/month_of_year) with frequency, supporting ranges.
+     *
+     * Example:
+     *   values = [1,2,3,5,6,7,10]
+     *   freq = 2
+     *   => "1-3/2,5-7/2,10/2"
+     */
+    private function buildCronPartWithFrequency(array $values, int $frequency): string
+    {
+        if ($values === []) {
+            return '*';
+        }
+
+        sort($values);
+
+        if ($frequency <= 1) {
+            return implode(',', $values);
+        }
+
+        // Check if values form a continuous range
+        $min = $values[0];
+        $max = $values[count($values) - 1];
+
+        // Check if all values between min and max are included
+        $expectedRange = range($min, $max);
+        if ($values === $expectedRange) {
+            // Continuous range: safe to apply step frequency
+            return "{$min}-{$max}/{$frequency}";
+        }
+
+        // Non-contiguous values: steps with multiple ranges not supported,
+        // fallback to listing values without frequency steps
+        return implode(',', $values);
+    }
+
     /**
      * Recognize and parse the cron expression into parts with frequency and values.
      */

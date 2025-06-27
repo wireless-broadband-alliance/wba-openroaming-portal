@@ -225,7 +225,7 @@ class ScheduleType extends AbstractType
                     }
 
                     $countSelected = count($selectedValues);
-                    if ($frequency >= $countSelected) {
+                    if ($frequency >= $countSelected && !in_array('*', $selectedValues, true)) {
                         $form->get("{$settingName}_{$fieldSuffix}_frequency")->addError(
                             new FormError(
                                 sprintf(
@@ -242,10 +242,21 @@ class ScheduleType extends AbstractType
                 $minute = (int)$time->format('i');
                 $hour = (int)$time->format('H');
 
-
-                $dayOfMonthPart = $this->buildCronPartWithFrequency($daysOfMonth, $dayOfMonthFreq);
-                $monthPart = $this->buildCronPartWithFrequency($monthsOfYear, $monthsFreq);
-                $dayOfWeekPart = $this->buildCronPartWithFrequency($daysOfWeek, $dayOfWeekFreq);
+                if (in_array('*', $daysOfMonth, true)) {
+                    $dayOfMonthPart = "*/$monthsFreq";
+                } else {
+                    $dayOfMonthPart = $this->buildCronPartWithFrequency($daysOfMonth, $dayOfMonthFreq);
+                }
+                if (in_array('*', $monthsOfYear, true)) {
+                    $monthPart = "*/$monthsFreq";
+                } else {
+                    $monthPart = $this->buildCronPartWithFrequency($monthsOfYear, $monthsFreq);
+                }
+                if (in_array('*', $daysOfWeek, true)) {
+                    $dayOfWeekPart = "*/$dayOfWeekFreq";
+                } else {
+                    $dayOfWeekPart = $this->buildCronPartWithFrequency($daysOfWeek, $dayOfWeekFreq);
+                }
 
                 $cronString = sprintf(
                     '%s %d %s %s %s',
