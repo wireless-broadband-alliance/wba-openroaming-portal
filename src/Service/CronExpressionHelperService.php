@@ -101,7 +101,7 @@ class CronExpressionHelperService
         return ['type' => 'custom', 'frequency' => 1, 'values' => []];
     }
 
-    public function selectAllWithFreqConverter(array $values,int $freq): string
+    public function selectAllWithFreqConverter(array $values, int $freq): string
     {
         if ($freq === 1) {
             return '*';
