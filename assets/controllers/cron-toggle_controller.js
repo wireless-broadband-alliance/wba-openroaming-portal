@@ -51,7 +51,7 @@ export default class extends Controller {
         this.toggleGroupTitles(isAdvanced);
     }
 
-    toggleGroupTitles(isAdvanced) {
+    toggleGroupTitles() {
         const fieldTypes = [
             "advanced",
             "day_of_week",
