@@ -675,7 +675,19 @@ configuration for the Android App.</p></body></html>'
                 To be able to request a authentication code the account needs to have setup a 2fa with email or SMS.',
                 'responses' => [
                     200 => [
-                        'Requested two-factor authentication token',
+                        // phpcs:disable Generic.Files.LineLength.TooLong
+                        json_decode(
+                            '{
+                              "success": true,
+                              "data": {
+                                "message": "Two-Factor authentication code successfully sent. You have X attempts remaining to request a new one."
+                              }
+                            }',
+                            false,
+                            512,
+                            JSON_THROW_ON_ERROR
+                        )
+                        // phpcs:enable
                     ],
                     400 => [
                         'CAPTCHA validation failed',
