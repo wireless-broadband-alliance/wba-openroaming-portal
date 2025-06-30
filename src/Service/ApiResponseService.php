@@ -117,9 +117,9 @@ readonly class ApiResponseService
             ],
             'api_v1_auth_saml' => [
                 'requestBody' => [],
-                'description' => 'This endpoint authenticates a user using their SAML response. 
-                If the user is not found in the database, a new user will be created based on the SAML assertion. 
-                The response includes user details along with a JWT token if authentication is successful. 
+                'description' => 'This endpoint authenticates a user using their SAML response in the header of the 
+                endpoint. If the user is not found in the database, a new user will be created based on the SAML 
+                assertion. The response includes user details along with a JWT token if authentication is successful. 
                 Also if the platform requires authentication with Two-Factor, the twoFACode parameter will 
                 be asked based on the TWO_FACTOR_AUTH_STATUS setting.',
                 'responses' => [
@@ -618,7 +618,17 @@ readonly class ApiResponseService
                 time interval between requests and limits the number of attempts allowed.',
                 'responses' => [
                     200 => [
-                        'Successfully sent the SMS with a new password and verification code',
+                        json_decode(
+                            '{
+                                      "success": true,
+                                      "data": {
+                                        "success": "If the phone number exists, we have sent a new code to: Country Code: 351 National Number: 925544896."
+                                      }
+                                    }',
+                            false,
+                            512,
+                            JSON_THROW_ON_ERROR
+                        )
                     ],
                     400 => [
                         'CAPTCHA validation failed',
