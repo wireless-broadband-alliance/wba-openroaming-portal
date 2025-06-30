@@ -2665,18 +2665,6 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
         return $this;
     }
 
-    public function getVerificationCode(): ?string
-    {
-        return $this->verificationCode;
-    }
-
-    public function setVerificationCode(?string $verificationCode): self
-    {
-        $this->verificationCode = $verificationCode;
-
-        return $this;
-    }
-
     public function getCreatedAt(): ?\DateTimeInterface
     {
         return $this->createdAt;
