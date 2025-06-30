@@ -60,25 +60,29 @@ readonly class ApiResponseService
                 Platform can require the authentication with Two-Factor, the twoFACode parameter will be asked based on 
                 the TWO_FACTOR_AUTH_STATUS setting.',
                 'responses' => [
-                    200 => ['{
-                                "success": true,
-                                "data": {
-                                        "uuid": "apitest2@api.com",
+                    200 => [
+                        json_decode(
+                            '{
+                            "success": true,
+                            "data": {
+                                "uuid": "apitest2@api.com",
                                 "email": "apitest2@api.com",
-                                "roles": [
-                                       "ROLE_USER"
-                                    ],
+                                "roles": ["ROLE_USER"],
                                 "first_name": null,
                                 "last_name": null,
                                 "user_external_auths": [
-                                  {
-                                      "provider": "Portal Account",
-                                      "provider_id": "Email"
-                                  }
+                                    {
+                                        "provider": "Portal Account",
+                                        "provider_id": "Email"
+                                    }
                                 ],
                                 "token": "validToken"
-                                }
-                            }'
+                            }
+                        }',
+                            true,
+                            512,
+                            JSON_THROW_ON_ERROR
+                        )
                     ],
                     400 => [
                         'CAPTCHA validation failed',
