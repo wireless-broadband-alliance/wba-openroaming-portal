@@ -1,5 +1,6 @@
 <div class="space-y-4">
     {% for status, messages in commonMessages %}
+
         <div class="border border-gray-300 rounded-xl shadow-sm overflow-hidden">
             <button
                     type="button"
@@ -16,28 +17,34 @@
                 </svg>
             </button>
 
-            <div
+            <div class="my-2">
+
+                <div
                     id="common-{{ loop.index }}"
-                    class="hidden relative px-6 py-4 bg-gray-800 border-t border-gray-700 max-w-full"
+                    class="hidden relative px-6 py-4 bg-gray-800 border-t my-2 max-w-full space-y-6"
                     data-controller="clipboard"
             >
-                {{ include('api/shared/partials/_copy.html.twig') }}
+                {% for msg in messages %}
+                    <div class="relative" data-controller="clipboard">
+                        {# Unique ID for each code block #}
+                        {% set codeId = 'code-' ~ status ~ '-' ~ loop.index0 %}
 
-                <pre
-                        data-clipboard-target="code"
-                        class="whitespace-pre-wrap rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full"
-                >
+                        {{ include('api/shared/partials/_copy.html.twig') }}
+                        <pre
+                                id="{{ codeId }}"
+                                class="whitespace-pre-wrap rounded bg-gray-800 text-white p-4 pt-10 font-mono overflow-x-auto max-w-full border border-gray-600"
+                        >
 {{ (
 status starts with '2'
-? {success: true, data: messages}
-: {
-    success: false,
-    error: messages[0]|default('An error occurred'),
-    details: messages|length > 1 ? messages|slice(1) : null,
-}
+? { success: true, data: msg }
+: { success: false, error: msg }
 )|json_encode(constant('JSON_PRETTY_PRINT'))|raw }}
-                </pre>
+            </pre>
+                    </div>
+                {% endfor %}
+            </div>
             </div>
         </div>
+
     {% endfor %}
 </div>
