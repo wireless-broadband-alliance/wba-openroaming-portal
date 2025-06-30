@@ -624,6 +624,7 @@ readonly class ApiResponseService
                 time interval between requests and limits the number of attempts allowed.',
                 'responses' => [
                     200 => [
+                        // phpcs:disable Generic.Files.LineLength.TooLong
                         json_decode(
                             '{
                                       "success": true,
@@ -635,6 +636,7 @@ readonly class ApiResponseService
                             512,
                             JSON_THROW_ON_ERROR
                         )
+                        // phpcs:enable
                     ],
                     400 => [
                         'CAPTCHA validation failed',
@@ -794,7 +796,28 @@ readonly class ApiResponseService
                 the twoFACode parameter will be asked based on the TWO_FACTOR_AUTH_STATUS setting.',
                 'responses' => [
                     200 => [
-                        'Authenticated user details and JWT token'
+                        json_decode(
+                            '{
+                            "success": true,
+                            "data": {
+                                "uuid": "test@example.com",
+                                "email": "test@example.com",
+                                "roles": ["ROLE_USER"],
+                                "first_name": null,
+                                "last_name": null,
+                                "user_external_auths": [
+                                    {
+                                        "provider": "Portal Account",
+                                        "provider_id": "Email"
+                                    }
+                                ],
+                                "token": "validToken"
+                            }
+                        }',
+                            true,
+                            512,
+                            JSON_THROW_ON_ERROR
+                        )
                     ],
                     400 => [
                         'CAPTCHA validation failed',
@@ -833,7 +856,28 @@ readonly class ApiResponseService
                 be asked based on the TWO_FACTOR_AUTH_STATUS setting.',
                 'responses' => [
                     200 => [
-                        'Registration successful. Please check your email for further instructions',
+                        json_decode(
+                            '{
+                            "success": true,
+                            "data": {
+                                "uuid": "test@example.com",
+                                "email": "test@example.com",
+                                "roles": ["ROLE_USER"],
+                                "first_name": null,
+                                "last_name": null,
+                                "user_external_auths": [
+                                    {
+                                        "provider": "SAML Account",
+                                        "provider_id": "saml_account_name"
+                                    }
+                                ],
+                                "token": "validToken"
+                            }
+                        }',
+                            true,
+                            512,
+                            JSON_THROW_ON_ERROR
+                        )
                     ],
                     400 => [
                         'SAML Response not found',
@@ -871,7 +915,28 @@ readonly class ApiResponseService
                  Two-Factor, the twoFACode parameter will be asked based on the TWO_FACTOR_AUTH_STATUS setting.',
                 'responses' => [
                     200 => [
-                        'Authenticated user details and JWT token'
+                        json_decode(
+                            '{
+                            "success": true,
+                            "data": {
+                                "uuid": "test@example.com",
+                                "email": "test@example.com",
+                                "roles": ["ROLE_USER"],
+                                "first_name": null,
+                                "last_name": null,
+                                "user_external_auths": [
+                                    {
+                                        "provider": "Google Account",
+                                        "provider_id": "google_id_example"
+                                    }
+                                ],
+                                "token": "validToken"
+                            }
+                        }',
+                            true,
+                            512,
+                            JSON_THROW_ON_ERROR
+                        )
                     ],
                     400 => [
                         'Invalid JSON format',
@@ -908,7 +973,28 @@ readonly class ApiResponseService
                 Two-Factor, the twoFACode parameter will be asked based on the TWO_FACTOR_AUTH_STATUS setting.',
                 'responses' => [
                     200 => [
-                        'Authenticated user details and JWT token',
+                        json_decode(
+                            '{
+                            "success": true,
+                            "data": {
+                                "uuid": "test@example.com",
+                                "email": "test@example.com",
+                                "roles": ["ROLE_USER"],
+                                "first_name": null,
+                                "last_name": null,
+                                "user_external_auths": [
+                                    {
+                                        "provider": "Microsoft Account",
+                                        "provider_id": "microsoft_id_example"
+                                    }
+                                ],
+                                "token": "validToken"
+                            }
+                        }',
+                            true,
+                            512,
+                            JSON_THROW_ON_ERROR
+                        )
                     ],
                     400 => [
                         'Invalid JSON format',
@@ -940,7 +1026,16 @@ readonly class ApiResponseService
                 'description' => 'Returns JSON metadata for the Captive Portal (CAPPORT) configuration.',
                 'responses' => [
                     200 => [
-                        'Successful response with CAPPORT metadata.',
+                        json_decode(
+                            '{
+                                  "captive": false,
+                                  "user-portal-url": "https://example.com/",
+                                  "venue-info-url": "https://openroaming.org/"
+                                }',
+                            true,
+                            512,
+                            JSON_THROW_ON_ERROR
+                        )
                     ],
                     404 => [
                         'CAPPORT is not enabled'
@@ -953,8 +1048,49 @@ readonly class ApiResponseService
                 'requestBody' => [],
                 'responses' => [
                     200 => [
-                        'Configuration settings retrieved successfully'
-                    ]
+                        json_decode(
+                            '{
+                          "success": true,
+                          "data": {
+                            "platform": {
+                              "PLATFORM_MODE": "Live",
+                              "USER_VERIFICATION": true,
+                              "TURNSTILE_CHECKER": true,
+                              "CONTACT_EMAIL": "support@example.com",
+                              "TOS": "LINK",
+                              "PRIVACY_POLICY": "LINK",
+                              "TWO_FACTOR_AUTH_STATUS": "NOT_ENFORCED"
+                            },
+                            "auth": {
+                              "AUTH_METHOD_SAML_ENABLED": true,
+                              "AUTH_METHOD_GOOGLE_LOGIN_ENABLED": true,
+                              "AUTH_METHOD_MICROSOFT_LOGIN_ENABLED": true,
+                              "AUTH_METHOD_REGISTER_ENABLED": true,
+                              "AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED": true,
+                              "AUTH_METHOD_SMS_REGISTER_ENABLED": true
+                            },
+                            "turnstile": {
+                              "TURNSTILE_KEY": "example_turnstile_key"
+                            },
+                            "google": {
+                              "GOOGLE_CLIENT_ID": "example_google_client_id"
+                            },
+                            "microsoft": {
+                              "MICROSOFT_CLIENT_ID": "example_microsoft_client_id"
+                            },
+                            "saml": {
+                              "SAML_IDP_ENTITY_ID": "https://example.com/saml/metadata",
+                              "SAML_IDP_SSO_URL": "https://example.com/saml/sso",
+                              "SAML_IDP_X509_CERT": "MIIC...AB",
+                              "SAML_SP_ENTITY_ID": "https://example.com/saml/sp"
+                            }
+                          }
+                        }',
+                            false,
+                            512,
+                            JSON_THROW_ON_ERROR
+                        )
+                    ],
                 ]
             ],
             'api_v2_get_current_user' => [
@@ -963,7 +1099,33 @@ readonly class ApiResponseService
                 'isProtected' => true,
                 'responses' => [
                     200 => [
-                        'User details retrieved successfully'
+                        json_decode(
+                            '{
+                                  "success": true,
+                                  "data": {
+                                    "uuid": "apitest2@api.com",
+                                    "email": "apitest2@api.com",
+                                    "roles": [
+                                      "ROLE_USER"
+                                    ],
+                                    "first_name": null,
+                                    "last_name": null,
+                                    "user_external_auths": [
+                                      {
+                                        "provider": "Portal Account",
+                                        "provider_id": "Email"
+                                      }
+                                    ],
+                                    "phone_number": null,
+                                    "is_verified": true,
+                                    "created_at": "2025-06-30T10:55:24+00:00",
+                                    "forgot_password_request": null
+                                  }
+                                }',
+                            true,
+                            512,
+                            JSON_THROW_ON_ERROR
+                        )
                     ],
                     401 => [
                         'JWT Token not found!',
@@ -987,7 +1149,29 @@ readonly class ApiResponseService
                 'isProtected' => true,
                 'responses' => [
                     200 => [
-                        'Profile configuration for Android successfully retrieved'
+                        json_decode(
+                            '{
+                              "success": true,
+                              "data": {
+                                "config_android": {
+                                  "radiusUsername": "user123",
+                                  "radiusPassword": "encrypted_password_here",
+                                  "friendlyName": "My Android Profile",
+                                  "fqdn": "example.com",
+                                  "roamingConsortiumOis": [
+                                    "5a03ba0000",
+                                    "004096"
+                                  ],
+                                  "eapType": 21,
+                                  "nonEapInnerMethod": "MS-CHAP-V2",
+                                  "realm": "example.com"
+                                }
+                              }
+                            }',
+                            false,
+                            512,
+                            JSON_THROW_ON_ERROR
+                        )
                     ],
                     400 => [
                         'Invalid or missing public key'
@@ -1012,7 +1196,33 @@ readonly class ApiResponseService
                 'isProtected' => true,
                 'responses' => [
                     200 => [
-                        'Profile configuration for iOS successfully retrieved',
+                        json_decode(
+                            '{
+                              "success": true,
+                              "data": {
+                                "payloadIdentifier": "com.apple.wifi.managed.<random_payload_identifier>-2",
+                                "payloadType": "com.apple.wifi.managed",
+                                "payloadUUID": "<random_payload_identifier>-1",
+                                "domainName": "example.com",
+                                "EAPClientConfiguration": {
+                                  "acceptEAPTypes": 21,
+                                  "radiusUsername": "user123",
+                                  "radiusPassword": "encrypted_password_here",
+                                  "outerIdentity": "anonymous@example.com",
+                                  "TTLSInnerAuthentication": "MSCHAPv2"
+                                },
+                                "encryptionType": "WPA2",
+                                "roamingConsortiumOis": [
+                                  "5A03BA0000",
+                                  "004096"
+                                ],
+                                "NAIRealmNames": "example.com"
+                              }
+                            }',
+                            false,
+                            512,
+                            JSON_THROW_ON_ERROR
+                        )
                     ],
                     400 => [
                         'Invalid or missing public key',
@@ -1041,7 +1251,19 @@ readonly class ApiResponseService
                 and CAPTCHA verification. If the user already exists, it returns a conflict error.',
                 'responses' => [
                     200 => [
-                        'Registration successful. Please check your email for further instructions',
+                        // phpcs:disable Generic.Files.LineLength.TooLong
+                        json_decode(
+                            '{
+                              "success": true,
+                              "data": {
+                                "message": "SMS User Account Registered Successfully. A verification code has been sent to your phone."
+                              }
+                            }',
+                            false,
+                            512,
+                            JSON_THROW_ON_ERROR
+                        )
+                        // phpcs:enable
                     ],
                     400 => [
                         'Invalid email format.',
@@ -1062,7 +1284,19 @@ readonly class ApiResponseService
                 password reset if the conditions are met.',
                 'responses' => [
                     200 => [
-                        'Password reset email sent successfully',
+                        // phpcs:disable Generic.Files.LineLength.TooLong
+                        json_decode(
+                            '{
+                                      "success": true,
+                                      "data": {
+                                        "success": "If the phone number exists, we have sent a new code to: Country Code: 351 National Number: 925544896."
+                                      }
+                                    }',
+                            false,
+                            512,
+                            JSON_THROW_ON_ERROR
+                        )
+                        // phpcs:enable
                     ],
                     400 => [
                         'Invalid email format.',
@@ -1085,7 +1319,19 @@ readonly class ApiResponseService
                  request with a CAPTCHA token.',
                 'responses' => [
                     200 => [
-                        'SMS User Account Registered Successfully. A verification code has been sent to your phone.',
+                        // phpcs:disable Generic.Files.LineLength.TooLong
+                        json_decode(
+                            '{
+                              "success": true,
+                              "data": {
+                                "message": "SMS User Account Registered Successfully. A verification code has been sent to your phone."
+                              }
+                            }',
+                            false,
+                            512,
+                            JSON_THROW_ON_ERROR
+                        )
+                        // phpcs:enable
                     ],
                     400 => [
                         'CAPTCHA validation failed',
@@ -1110,7 +1356,19 @@ readonly class ApiResponseService
                 time interval between requests and limits the number of attempts allowed.',
                 'responses' => [
                     200 => [
-                        'Successfully sent the SMS with a new password and verification code',
+                        // phpcs:disable Generic.Files.LineLength.TooLong
+                        json_decode(
+                            '{
+                                      "success": true,
+                                      "data": {
+                                        "success": "If the phone number exists, we have sent a new code to: Country Code: 351 National Number: 925544896."
+                                      }
+                                    }',
+                            false,
+                            512,
+                            JSON_THROW_ON_ERROR
+                        )
+                        // phpcs:enable
                     ],
                     400 => [
                         'CAPTCHA validation failed',
@@ -1134,7 +1392,15 @@ configuration for the Android App.</p></body></html>'
                 App to integrate with the Turnstile feature.',
                 'responses' => [
                     200 => [
-                        'Turnstile HTML configuration retrieved successfully',
+                        json_decode(
+                            '{
+                                      "success": true,
+                                      "data": "<html><body><h1>Turnstile Configuration</h1><p>This is the required HTML configuration for the Android App.</p></body></html>"
+                                    }',
+                            false,
+                            512,
+                            JSON_THROW_ON_ERROR
+                        )
                     ],
                     404 => [
                         'HTML file not found.',
@@ -1151,7 +1417,19 @@ configuration for the Android App.</p></body></html>'
                  To be able to request a authentication code the account needs to have setup a 2fa with email or SMS.',
                 'responses' => [
                     200 => [
-                        'Requested two-factor authentication token',
+                        // phpcs:disable Generic.Files.LineLength.TooLong
+                        json_decode(
+                            '{
+                              "success": true,
+                              "data": {
+                                "message": "Two-Factor authentication code successfully sent. You have X attempts remaining to request a new one."
+                              }
+                            }',
+                            false,
+                            512,
+                            JSON_THROW_ON_ERROR
+                        )
+                        // phpcs:enable
                     ],
                     400 => [
                         'CAPTCHA validation failed',
@@ -1197,7 +1475,17 @@ configuration for the Android App.</p></body></html>'
                 'isProtected' => true,
                 'responses' => [
                     200 => [
-                        'User Account was deleted successfully.',
+                        json_decode(
+                            '{
+                              "success": true,
+                              "data": {
+                                "message": "User with UUID \"test@example.com\" successfully deleted."
+                              }
+                            }',
+                            false,
+                            512,
+                            JSON_THROW_ON_ERROR
+                        )
                     ],
                     400 => [
                         'Invalid data: Missing required fields.',
