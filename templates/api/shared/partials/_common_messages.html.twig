@@ -1,6 +1,5 @@
 <div class="space-y-4">
     {% for status, messages in commonMessages %}
-
         <div class="border border-gray-300 rounded-xl shadow-sm overflow-hidden">
             <button
                     type="button"
@@ -17,34 +16,31 @@
                 </svg>
             </button>
 
-            <div class="my-2">
-
-                <div
-                    id="common-{{ loop.index }}"
-                    class="hidden relative px-6 py-4 bg-gray-800 border-t my-2 max-w-full space-y-6"
-                    data-controller="clipboard"
+            <div id="common-{{ loop.index }}"
+                 class="hidden px-6 py-4 bg-gray-100 space-y-6"
             >
                 {% for msg in messages %}
                     <div class="relative" data-controller="clipboard">
-                        {# Unique ID for each code block #}
-                        {% set codeId = 'code-' ~ status ~ '-' ~ loop.index0 %}
+                        {% set codeId = 'code-' ~ status ~ '-' ~ loop.parent.loop.index0 ~ '-' ~ loop.index0 %}
 
-                        {{ include('api/shared/partials/_copy.html.twig') }}
+                        {{ include('api/shared/partials/_copy.html.twig', {
+                            clipboard_target: '#' ~ codeId
+                        }) }}
+
                         <pre
                                 id="{{ codeId }}"
-                                class="whitespace-pre-wrap rounded bg-gray-800 text-white p-4 pt-10 font-mono overflow-x-auto max-w-full border border-gray-600"
+                                data-clipboard-target="code"
+                                class="whitespace-pre-wrap rounded-lg bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto"
                         >
 {{ (
 status starts with '2'
 ? { success: true, data: msg }
 : { success: false, error: msg }
 )|json_encode(constant('JSON_PRETTY_PRINT'))|raw }}
-            </pre>
+                        </pre>
                     </div>
                 {% endfor %}
             </div>
-            </div>
         </div>
-
     {% endfor %}
 </div>
