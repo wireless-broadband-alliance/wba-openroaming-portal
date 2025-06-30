@@ -728,7 +728,6 @@ readonly class ApiResponseService
                         Please wait %d minute(s) before trying again.',
                     ]
                 ]
-
             ],
             'api_v1_user_account_deletion' => [
                 'requestBody' => [
