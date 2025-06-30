@@ -519,7 +519,17 @@ readonly class ApiResponseService
                  and CAPTCHA verification. If the user already exists, it returns a conflict error.',
                 'responses' => [
                     200 => [
-                        'Registration successful. Please check your email for further instructions',
+                        json_decode(
+                            '{
+                              "success": true,
+                              "data": {
+                                "message": "Registration successful. Please check your email for further instructions."
+                              }
+                            }',
+                            false,
+                            512,
+                            JSON_THROW_ON_ERROR
+                        )
                     ],
                     400 => [
                         'Invalid email format.',
@@ -540,7 +550,17 @@ readonly class ApiResponseService
                 reset if the conditions are met.',
                 'responses' => [
                     200 => [
-                        'Password reset email sent successfully',
+                        json_decode(
+                            '{
+                              "success": true,
+                              "data": {
+                                "message": "If the email address exists in our system, we have sent you a new one to: user@example.com"
+                              }
+                            }',
+                            false,
+                            512,
+                            JSON_THROW_ON_ERROR
+                        )
                     ],
                     400 => [
                         'Invalid email format.',
@@ -563,7 +583,17 @@ readonly class ApiResponseService
                 request with a CAPTCHA token.',
                 'responses' => [
                     200 => [
-                        'SMS User Account Registered Successfully. A verification code has been sent to your phone.',
+                        json_decode(
+                            '{
+                              "success": true,
+                              "data": {
+                                "message": "SMS User Account Registered Successfully. A verification code has been sent to your phone."
+                              }
+                            }',
+                            false,
+                            512,
+                            JSON_THROW_ON_ERROR
+                        )
                     ],
                     400 => [
                         'CAPTCHA validation failed',
