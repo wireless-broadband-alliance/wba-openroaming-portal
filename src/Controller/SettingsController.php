@@ -71,7 +71,7 @@ class SettingsController extends AbstractController
         $enteredCode = $requestStack->getCurrentRequest()->request->get('code');
         /** @var User $currentUser */
         $currentUser = $this->getUser();
-        if ($enteredCode === $currentUser->getVerificationCode()) {
+        if ($enteredCode === $currentUser->getTwoFAcode()) {
             if ($type === 'settingCustom') {
                 $command = 'php bin/console reset:customSettings --yes';
                 $projectRootDir = $this->getParameter('kernel.project_dir');

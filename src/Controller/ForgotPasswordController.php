@@ -148,7 +148,9 @@ class ForgotPasswordController extends AbstractController
                         $latestEventMetadata['lastVerificationCodeTime'] =
                             $currentTime->format(DateTimeInterface::ATOM);
                         $latestEvent->setEventMetadata($latestEventMetadata);
-                        $user->setVerificationCode(random_int(100000, 999999));
+                        $user->setTwoFAcode(random_int(100000, 999999));
+                        $user->setTwoFACodeGeneratedAt(new DateTime());
+                        $user->setTwoFAcodeIsActive(true);
 
                         $entityManager->persist($latestEvent);
                         $entityManager->persist($user);
@@ -171,7 +173,7 @@ class ForgotPasswordController extends AbstractController
                                 'uuid' => $user->getUuid(),
                                 'emailTitle' => $data['title']['value'],
                                 'contactEmail' => $data['contactEmail']['value'],
-                                'verificationCode' => $user->getVerificationCode(),
+                                'verificationCode' => $user->getTwoFAcode(),
                                 'context' => FirewallType::LANDING->value,
                             ]);
 
@@ -293,7 +295,9 @@ class ForgotPasswordController extends AbstractController
                         $latestEventMetadata['verificationAttempts'] = $attempts;
                         $latestEvent->setEventMetadata($latestEventMetadata);
 
-                        $user->setVerificationCode(random_int(100000, 999999));
+                        $user->setTwoFAcode(random_int(100000, 999999));
+                        $user->setTwoFACodeGeneratedAt(new DateTime());
+                        $user->setTwoFAcodeIsActive(true);
                         $this->eventRepository->save($latestEvent, true);
 
                         $entityManager->persist($user);
@@ -303,7 +307,7 @@ class ForgotPasswordController extends AbstractController
                             $user->getPhoneNumber()->getNationalNumber();
 
                         $message = "If you requested a password reset for your OpenRoaming account, " .
-                            "use this code to proceed: {$user->getVerificationCode()}";
+                            "use this code to proceed: {$user->getTwoFAcode()}";
                         $this->sendSMS->sendSmsNoValidation($recipient, $message);
 
                         $attemptsLeft = 3 - $verificationAttempts;
@@ -377,7 +381,7 @@ class ForgotPasswordController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
-        if ($user->getUuid() === $uuid && $user->getVerificationCode() === $verificationCode) {
+        if ($user->getUuid() === $uuid && $user->getTwoFAcode() === $verificationCode) {
             $lastEvent = $this->eventRepository->findLatest2FACodeAttemptEvent(
                 $user,
                 AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST->value
@@ -461,7 +465,7 @@ class ForgotPasswordController extends AbstractController
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $code = $form->get('verificationCode')->getData();
-            if ($user->getUuid() === $uuid && $user->getVerificationCode() === $code) {
+            if ($user->getUuid() === $uuid && $user->getTwoFAcode() === $code) {
                 // Create a token manually for the user
                 $this->passwordResetRequestHandler->handle($user);
 
@@ -564,7 +568,9 @@ class ForgotPasswordController extends AbstractController
             );
             $currentUser->setForgotPasswordRequest(false);
             $currentUser->setIsVerified(true);
-            $currentUser->setVerificationCode(random_int(100000, 999999));
+            $currentUser->setTwoFAcode(random_int(100000, 999999));
+            $currentUser->setTwoFACodeGeneratedAt(new DateTime());
+            $currentUser->setTwoFAcodeIsActive(true);
             $session = $request->getSession();
             $session->set('session_verified', true);
             $entityManager->persist($currentUser);
