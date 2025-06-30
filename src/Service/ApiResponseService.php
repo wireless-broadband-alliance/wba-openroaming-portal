@@ -46,6 +46,9 @@ readonly class ApiResponseService
         return $grouped;
     }
 
+    /**
+     * @throws \JsonException
+     */
     private function getResponseMetadata(string $version): array
     {
         $apiResponseV1 = [

@@ -6,10 +6,7 @@
             class="whitespace-pre-wrap rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full"
     >
 {% if status >= 200 and status < 300 %}
-{{
-{
-    message
-}|json_encode(constant('JSON_PRETTY_PRINT'))|raw }}
+{{ message|json_encode(constant('JSON_PRETTY_PRINT'))|raw }}
 {% elseif status >= 400 and status < 500 %}
 {{
 {
