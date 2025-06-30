@@ -62,9 +62,12 @@
                             {% if route.requestBody is defined and route.requestBody is not empty %}
                                 <div>
                                     <p class="text-sm font-semibold text-blue-600 mb-2">Request Body</p>
-                                    <div class="bg-gray-100 text-gray-800 rounded-lg p-4 text-sm font-mono overflow-x-auto border border-gray-200">
-                                        <pre>{{ route.requestBody|json_encode(constant('JSON_PRETTY_PRINT')) }}</pre>
+                                    {% for request in route.requestBody %}
+                                        <p class="text-sm font-semibold text-blue-600 mb-2">Title</p>
+                                    <div class="bg-gray-100 text-gray-800 rounded-lg p-4 text-sm font-mono overflow-x-auto border border-gray-200 my-2">
+                                        <pre>{{ request|json_encode(constant('JSON_PRETTY_PRINT')) }}</pre>
                                     </div>
+                                    {% endfor %}
                                 </div>
                             {% endif %}
 

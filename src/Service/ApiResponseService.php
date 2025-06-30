@@ -732,7 +732,19 @@ readonly class ApiResponseService
             ],
             'api_v1_user_account_deletion' => [
                 'requestBody' => [
-                    'password' => 'user-password-example'
+                    'Portal Account' => [
+                        'password' => 'user-password-example'
+                    ],
+                    'SAML Account' => [
+                        'SAMLResponse' => 'samlResponseExample'
+                    ],
+                    'Google Account' => [
+                        'code' => 'googleCodeExample'
+                    ],
+                    'Microsoft Account' => [
+                        'code' => 'microsoftCodeExample'
+                    ],
+
                 ],
                 'description' => 'This endpoint deletes the currently authenticated user account. 
                 Depending on the authentication method, the request body may require a password (Portal Account), 
