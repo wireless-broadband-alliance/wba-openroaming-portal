@@ -68,8 +68,8 @@ readonly class ApiResponseService
                             '{
                             "success": true,
                             "data": {
-                                "uuid": "apitest2@api.com",
-                                "email": "apitest2@api.com",
+                                "uuid": "test@example.com",
+                                "email": "test@example.com",
                                 "roles": ["ROLE_USER"],
                                 "first_name": null,
                                 "last_name": null,
@@ -124,7 +124,28 @@ readonly class ApiResponseService
                 be asked based on the TWO_FACTOR_AUTH_STATUS setting.',
                 'responses' => [
                     200 => [
-                        'Registration successful. Please check your email for further instructions',
+                        json_decode(
+                            '{
+                            "success": true,
+                            "data": {
+                                "uuid": "test@example.com",
+                                "email": "test@example.com",
+                                "roles": ["ROLE_USER"],
+                                "first_name": null,
+                                "last_name": null,
+                                "user_external_auths": [
+                                    {
+                                        "provider": "SAML Account",
+                                        "provider_id": "saml_account_name"
+                                    }
+                                ],
+                                "token": "validToken"
+                            }
+                        }',
+                            true,
+                            512,
+                            JSON_THROW_ON_ERROR
+                        )
                     ],
                     400 => [
                         'SAML Response not found',
