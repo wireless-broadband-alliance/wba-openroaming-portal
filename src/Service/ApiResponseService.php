@@ -326,7 +326,33 @@ readonly class ApiResponseService
                 'isProtected' => true,
                 'responses' => [
                     200 => [
-                        'User details retrieved successfully'
+                        json_decode(
+                            '{
+                                  "success": true,
+                                  "data": {
+                                    "uuid": "apitest2@api.com",
+                                    "email": "apitest2@api.com",
+                                    "roles": [
+                                      "ROLE_USER"
+                                    ],
+                                    "first_name": null,
+                                    "last_name": null,
+                                    "user_external_auths": [
+                                      {
+                                        "provider": "Portal Account",
+                                        "provider_id": "Email"
+                                      }
+                                    ],
+                                    "phone_number": null,
+                                    "is_verified": true,
+                                    "created_at": "2025-06-30T10:55:24+00:00",
+                                    "forgot_password_request": null
+                                  }
+                                }',
+                            true,
+                            512,
+                            JSON_THROW_ON_ERROR
+                        )
                     ],
                     401 => [
                         'JWT Token not found!',
