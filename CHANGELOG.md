@@ -4,10 +4,11 @@
 
 - Prometheus Implementation
 - Fix bug with registration links, use could use them to re-log in to the portal at any time, can only be used once.
-- Fix bug with account deletion, the admin was able to access the page using the url. The admin cannot delete his own account.
+- Fix bug with account deletion, the admin was able to access the page using the url. The admin cannot delete his own
+  account.
 - Fix bug on the pagination page with the table `Access Points Usage` on the `dashboard/statistics/freeradius` page (Add
   new custom display of results per page).
-- Fix bug about when the user session should be restored. Only when the firewall "landing".
+- Fix bug about when the user session should be restored. Only when the firewall "landing."
 - Invalidate session on the dashboard in case the admin changes is password on the landing firewall.
 - Fix bug with return detector for expired links on registration email, now it returns to the login page with the input
   pre-fielded.
@@ -22,9 +23,18 @@
   proceeding.
 - New Setting for time configuration of email resend on the `ForgotPasswordRequest`, present on the Authentications
   methods page (EMAIL_TIMER_RESEND).
-- New Setting for time configuration of an email link validly. This same time reflect for link present on the
-  `ForgotPasswordRequest` & on the  `RegistrationWithEmail` (LINK_VALIDITY)
-- Also for this release, it's required to run the new migrations to set up the new settings:
+- New Setting for time configuration of an email link validly. These same times reflect for link present on the
+  `ForgotPasswordRequest` & on the  `RegistrationWithEmail` (LINK_VALIDITY).
+
+> **Important**: In this release, the field **verificationCode** was eliminated.
+> If you are upgrading from version 1.7.3 or lower, and your portal or database still has the
+> **verificationCode** field, please ensure any necessary data migrations are handled when upgrading to version 1.8.0.
+> - This change is part of an optimization process to improve the handling of the user account confirmation on the
+    portal,
+    and other confirmation methods.
+
+- Also for this release, it's required to run the new migrations to set up the new settings and the new update on the
+  `User Entity`:
   Run the migrations with:
 
 ```bash
