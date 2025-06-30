@@ -417,7 +417,29 @@ readonly class ApiResponseService
                 'isProtected' => true,
                 'responses' => [
                     200 => [
-                        'Profile configuration for Android successfully retrieved'
+                        json_decode(
+                            '{
+                              "success": true,
+                              "data": {
+                                "config_android": {
+                                  "radiusUsername": "user123",
+                                  "radiusPassword": "encrypted_password_here",
+                                  "friendlyName": "My Android Profile",
+                                  "fqdn": "example.com",
+                                  "roamingConsortiumOis": [
+                                    "5a03ba0000",
+                                    "004096"
+                                  ],
+                                  "eapType": 21,
+                                  "nonEapInnerMethod": "MS-CHAP-V2",
+                                  "realm": "example.com"
+                                }
+                              }
+                            }',
+                            false,
+                            512,
+                            JSON_THROW_ON_ERROR
+                        )
                     ],
                     400 => [
                         'Invalid or missing public key'
@@ -442,7 +464,33 @@ readonly class ApiResponseService
                 'isProtected' => true,
                 'responses' => [
                     200 => [
-                        'Profile configuration for iOS successfully retrieved',
+                        json_decode(
+                            '{
+                              "success": true,
+                              "data": {
+                                "payloadIdentifier": "com.apple.wifi.managed.<random_payload_identifier>-2",
+                                "payloadType": "com.apple.wifi.managed",
+                                "payloadUUID": "<random_payload_identifier>-1",
+                                "domainName": "example.com",
+                                "EAPClientConfiguration": {
+                                  "acceptEAPTypes": 21,
+                                  "radiusUsername": "user123",
+                                  "radiusPassword": "encrypted_password_here",
+                                  "outerIdentity": "anonymous@example.com",
+                                  "TTLSInnerAuthentication": "MSCHAPv2"
+                                },
+                                "encryptionType": "WPA2",
+                                "roamingConsortiumOis": [
+                                  "5A03BA0000",
+                                  "004096"
+                                ],
+                                "NAIRealmNames": "example.com"
+                              }
+                            }',
+                            false,
+                            512,
+                            JSON_THROW_ON_ERROR
+                        )
                     ],
                     400 => [
                         'Invalid or missing public key',
