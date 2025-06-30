@@ -9,19 +9,19 @@
 {{
 {
     success: true,
-    data: messages,
+    data: message,
 }|json_encode(constant('JSON_PRETTY_PRINT'))|raw }}
 {% elseif status >= 400 and status < 500 %}
 {{
 {
     success: false,
-    error: messages,
+    error: message,
 }|json_encode(constant('JSON_PRETTY_PRINT'))|raw }}
 {% elseif status >= 500 %}
 {{
 {
     success: false,
-    message: messages,
+    message: message,
 }|json_encode(constant('JSON_PRETTY_PRINT'))|raw }}
 {% endif %}
     </pre>
