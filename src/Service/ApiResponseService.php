@@ -519,6 +519,7 @@ readonly class ApiResponseService
                  and CAPTCHA verification. If the user already exists, it returns a conflict error.',
                 'responses' => [
                     200 => [
+                        // phpcs:disable Generic.Files.LineLength.TooLong
                         json_decode(
                             '{
                               "success": true,
@@ -530,6 +531,7 @@ readonly class ApiResponseService
                             512,
                             JSON_THROW_ON_ERROR
                         )
+                        // phpcs:enable
                     ],
                     400 => [
                         'Invalid email format.',
@@ -550,6 +552,7 @@ readonly class ApiResponseService
                 reset if the conditions are met.',
                 'responses' => [
                     200 => [
+                        // phpcs:disable Generic.Files.LineLength.TooLong
                         json_decode(
                             '{
                               "success": true,
@@ -561,6 +564,7 @@ readonly class ApiResponseService
                             512,
                             JSON_THROW_ON_ERROR
                         )
+                        // phpcs:enable
                     ],
                     400 => [
                         'Invalid email format.',
@@ -583,6 +587,7 @@ readonly class ApiResponseService
                 request with a CAPTCHA token.',
                 'responses' => [
                     200 => [
+                        // phpcs:disable Generic.Files.LineLength.TooLong
                         json_decode(
                             '{
                               "success": true,
@@ -594,6 +599,7 @@ readonly class ApiResponseService
                             512,
                             JSON_THROW_ON_ERROR
                         )
+                        // phpcs:enable
                     ],
                     400 => [
                         'CAPTCHA validation failed',
