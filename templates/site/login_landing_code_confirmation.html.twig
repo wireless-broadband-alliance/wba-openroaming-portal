@@ -1,0 +1,50 @@
+{% extends 'site/base.html.twig' %}
+
+{% block title %}
+    {{ data.title.value }}
+{% endblock %}
+
+{% block second_col %}
+
+    {# Toasts #}
+    {{ block('toast_messages') }}
+
+    {% if data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\OperationMode::ON').value %}
+        <img class="w-[120px] h-[58px] object-scale-down mt-[75px]" src="{{ data.customerLogoName.value }}"
+             alt="Customer Logo"/>
+    {% endif %}
+
+    <div class="{{ data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\OperationMode::ON').value ? 'pt-[28px]' : 'pt-[161px]' }} leading-7">
+        <p class="font-bold text-xl">Welcome back</p>
+        <p class="text-lg">You have selected to login via email or phone number. An code has been sent to you to confirm
+            your identity.</p>
+    </div>
+
+    {# Form Column #}
+    {{ form_start(form) }}
+    <div class="relative mt-10 mb-6">
+        {{ form_label(form.code, null, {label_attr: {class: 'form-label'}}) }}
+        {{ form_widget(form.code, {
+            attr: {
+                class: 'form-widget',
+                placeholder: 'Enter your code',
+            }}) }}
+    </div>
+
+    {# Action Buttons #}
+    <div class="grid mt-4 grid-cols-1 sm:gap-4 lg:gap-6 sm:[grid-template-columns:repeat(auto-fit,minmax(150px,1fr))] md:my-2 my-3 space-y-4 sm:space-y-0">
+        <button class="btn-primary"
+                type="submit">Log in</button>
+        <a href="{{ path('app_local_resend_code', {
+            context: context,
+            type: constant('App\\Enum\\CodeVerificationType::VERIFICATION_CODE_LOGIN_RESEND').value},
+        ) }}"
+           class="w-[220px] btn-secondary">
+            Resend Code
+        </a>
+    </div>
+    {{ form_end(form) }}
+
+    {{ include('site/shared/returnActions/_logout.html.twig') }}
+
+{% endblock %}
