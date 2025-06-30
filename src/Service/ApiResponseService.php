@@ -220,7 +220,28 @@ readonly class ApiResponseService
                 with Two-Factor, the twoFACode parameter will be asked based on the TWO_FACTOR_AUTH_STATUS setting.',
                 'responses' => [
                     200 => [
-                        'Authenticated user details and JWT token',
+                        json_decode(
+                            '{
+                            "success": true,
+                            "data": {
+                                "uuid": "apitest2@api.com",
+                                "email": "apitest2@api.com",
+                                "roles": ["ROLE_USER"],
+                                "first_name": null,
+                                "last_name": null,
+                                "user_external_auths": [
+                                    {
+                                        "provider": "Microsoft Account",
+                                        "provider_id": "microsoft_id_example"
+                                    }
+                                ],
+                                "token": "validToken"
+                            }
+                        }',
+                            true,
+                            512,
+                            JSON_THROW_ON_ERROR
+                        )
                     ],
                     400 => [
                         'Invalid JSON format',
