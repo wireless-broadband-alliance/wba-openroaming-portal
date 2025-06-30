@@ -656,6 +656,7 @@ readonly class ApiResponseService
                 to integrate with the Turnstile feature.',
                 'responses' => [
                     200 => [
+                        // phpcs:disable Generic.Files.LineLength.TooLong
                         json_decode(
                             '{
                                       "success": true,
@@ -665,6 +666,7 @@ readonly class ApiResponseService
                             512,
                             JSON_THROW_ON_ERROR
                         )
+                        // phpcs:enable
                     ],
                     404 => [
                         'HTML file not found.',
@@ -1392,6 +1394,7 @@ configuration for the Android App.</p></body></html>'
                 App to integrate with the Turnstile feature.',
                 'responses' => [
                     200 => [
+                        // phpcs:disable Generic.Files.LineLength.TooLong
                         json_decode(
                             '{
                                       "success": true,
@@ -1401,6 +1404,7 @@ configuration for the Android App.</p></body></html>'
                             512,
                             JSON_THROW_ON_ERROR
                         )
+                        // phpcs:enable
                     ],
                     404 => [
                         'HTML file not found.',
