@@ -10,7 +10,7 @@ export default class extends Controller {
         "time",
         "day_of_week_frequency",
         "day_of_month_frequency",
-        "months_of_the_year_frequency"
+        "months_of_the_year_frequency",
     ];
 
     connect() {
@@ -28,7 +28,7 @@ export default class extends Controller {
         const isAdvanced = this.toggleTarget.checked;
 
         const toggleGroupElements = (targets, show) => {
-            targets.forEach(el => {
+            targets.forEach((el) => {
                 el.closest(".form-group")?.classList.toggle("hidden", !show);
             });
         };
@@ -60,17 +60,17 @@ export default class extends Controller {
             "time",
             "day_of_week_frequency",
             "day_of_month_frequency",
-            "months_of_the_year_frequency"
+            "months_of_the_year_frequency",
         ];
 
         // Get all group names from any target with group data
-        const allTargets = fieldTypes.flatMap(type => this[`${type}Targets`] || []);
-        const groupNames = [...new Set(allTargets.map(el => el.dataset.cronToggleGroup).filter(Boolean))];
+        const allTargets = fieldTypes.flatMap((type) => this[`${type}Targets`] || []);
+        const groupNames = [...new Set(allTargets.map((el) => el.dataset.cronToggleGroup).filter(Boolean))];
 
-        groupNames.forEach(group => {
-            fieldTypes.forEach(type => {
-                const inputs = this[`${type}Targets`].filter(el => el.dataset.cronToggleGroup === group);
-                const anyVisible = inputs.some(el => !el.closest(".form-group")?.classList.contains("hidden"));
+        groupNames.forEach((group) => {
+            fieldTypes.forEach((type) => {
+                const inputs = this[`${type}Targets`].filter((el) => el.dataset.cronToggleGroup === group);
+                const anyVisible = inputs.some((el) => !el.closest(".form-group")?.classList.contains("hidden"));
 
                 this.toggleTitleVisibility(group, type, anyVisible);
             });
