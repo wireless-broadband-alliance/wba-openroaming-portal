@@ -316,8 +316,49 @@ readonly class ApiResponseService
                 'requestBody' => [],
                 'responses' => [
                     200 => [
-                        'Configuration settings retrieved successfully'
-                    ]
+                        json_decode(
+                            '{
+                          "success": true,
+                          "data": {
+                            "platform": {
+                              "PLATFORM_MODE": "Live",
+                              "USER_VERIFICATION": true,
+                              "TURNSTILE_CHECKER": true,
+                              "CONTACT_EMAIL": "support@example.com",
+                              "TOS": "LINK",
+                              "PRIVACY_POLICY": "LINK",
+                              "TWO_FACTOR_AUTH_STATUS": "NOT_ENFORCED"
+                            },
+                            "auth": {
+                              "AUTH_METHOD_SAML_ENABLED": true,
+                              "AUTH_METHOD_GOOGLE_LOGIN_ENABLED": true,
+                              "AUTH_METHOD_MICROSOFT_LOGIN_ENABLED": true,
+                              "AUTH_METHOD_REGISTER_ENABLED": true,
+                              "AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED": true,
+                              "AUTH_METHOD_SMS_REGISTER_ENABLED": true
+                            },
+                            "turnstile": {
+                              "TURNSTILE_KEY": "example_turnstile_key"
+                            },
+                            "google": {
+                              "GOOGLE_CLIENT_ID": "example_google_client_id"
+                            },
+                            "microsoft": {
+                              "MICROSOFT_CLIENT_ID": "example_microsoft_client_id"
+                            },
+                            "saml": {
+                              "SAML_IDP_ENTITY_ID": "https://example.com/saml/metadata",
+                              "SAML_IDP_SSO_URL": "https://example.com/saml/sso",
+                              "SAML_IDP_X509_CERT": "MIIC...AB",
+                              "SAML_SP_ENTITY_ID": "https://example.com/saml/sp"
+                            }
+                          }
+                        }',
+                            false,
+                            512,
+                            JSON_THROW_ON_ERROR
+                        )
+                    ],
                 ]
             ],
             'api_v1_get_current_user' => [
