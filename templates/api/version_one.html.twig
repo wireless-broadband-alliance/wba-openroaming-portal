@@ -25,7 +25,13 @@
 
         <div class="flex items-center p-4 border-l-4 gap-2 border-yellow-500 bg-yellow-50 text-yellow-800 text-sm rounded-md mb-4">
             <twig:ux:icon class="w-5 h-5" name="wba:info" />
-            <span>This version of the API has been deprecated and is no longer supported. Please upgrade to the latest version for continued access and security updates.</span>
+            <span>This version of the API has been deprecated and is no longer supported. Please upgrade to the latest version for continued access and security updates.
+                <br>
+            Click
+                <a href="{{ path('api_v2_docs') }}"
+                   class="font-bold underline text-primary">here</a>
+                to switch to api v2 documentation
+            </span>
         </div>
 
         <section class="mb-16">
