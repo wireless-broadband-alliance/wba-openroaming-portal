@@ -294,7 +294,16 @@ readonly class ApiResponseService
                 'description' => 'Returns JSON metadata for the Captive Portal (CAPPORT) configuration.',
                 'responses' => [
                     200 => [
-                        'Successful response with CAPPORT metadata.',
+                        json_decode(
+                            '{
+                                  "captive": false,
+                                  "user-portal-url": "https://example.com/",
+                                  "venue-info-url": "https://openroaming.org/"
+                                }',
+                            true,
+                            512,
+                            JSON_THROW_ON_ERROR
+                        )
                     ],
                     404 => [
                         'CAPPORT is not enabled'
