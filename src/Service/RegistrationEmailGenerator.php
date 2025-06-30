@@ -42,7 +42,7 @@ readonly class RegistrationEmailGenerator
                 'uuid' => $user->getEmail(),
                 'supportTeam' => $supportTeam,
                 'contactEmail' => $contactEmail,
-                'verificationCode' => $user->getVerificationCode(),
+                'verificationCode' => $user->getTwoFAcode(),
                 'isNewUser' => true,
                 // This variable informs if the user it's new our if it's just a password reset request
                 'password' => $password,

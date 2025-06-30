@@ -42,8 +42,9 @@ readonly class VerificationCodeEmailGenerator
         $emailSender = $this->parameterBag->get('app.email_address');
         $nameSender = $this->parameterBag->get('app.sender_name');
 
-        $verificationCode = random_int(100000, 999999);
-        $user->setVerificationCode($verificationCode);
+        $user->setTwoFAcode(random_int(100000, 999999));
+        $user->setTwoFACodeGeneratedAt(new DateTime());
+        $user->setTwoFAcodeIsActive(true);
         $this->userRepository->save($user, true);
 
         $eventMetaData = [
@@ -65,39 +66,8 @@ readonly class VerificationCodeEmailGenerator
             ->subject('Your Settings Reset Details')
             ->htmlTemplate('email/admin_reset.html.twig')
             ->context([
-                'verificationCode' => $verificationCode,
+                'verificationCode' => $user->getTwoFAcode(),
                 'resetPassword' => false
-            ]);
-    }
-
-    /**
-     * Create an email message with the verification code.
-     *
-     * @return Email The email with the code.
-     * @throws Exception
-     */
-    public function createEmailLanding(User $user): Email
-    {
-        // Get the values from the services.yaml file using $parameterBag on the __construct
-        $emailSender = $this->parameterBag->get('app.email_address');
-        $nameSender = $this->parameterBag->get('app.sender_name');
-
-        // If the verification code is not provided, generate a new one
-        $verificationCode = random_int(100000, 999999);
-        $user->setVerificationCode($verificationCode);
-        $this->userRepository->save($user, true);
-        $emailTitle = $this->settingRepository->findOneBy(['name' => 'PAGE_TITLE'])->getValue();
-
-        return new TemplatedEmail()
-            ->from(new Address($emailSender, $nameSender))
-            ->to($user->getEmail())
-            ->subject('Your OpenRoaming Authentication Code is: ' . $verificationCode)
-            ->htmlTemplate('email/user_code.html.twig')
-            ->context([
-                'verificationCode' => $verificationCode,
-                'uuid' => $user->getEmail(),
-                'emailTitle' => $emailTitle,
-                'is2FATemplate' => false,
             ]);
     }
 

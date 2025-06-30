@@ -178,8 +178,10 @@ class SendSMS
                 }
 
                 // Generate a new verification code and resend the SMS
-                $user->setVerificationCode(random_int(100000, 999999));
-                $verificationCode = $user->getVerificationCode();
+                $user->setTwoFAcode(random_int(100000, 999999));
+                $user->setTwoFACodeGeneratedAt(new DateTime());
+                $user->setTwoFAcodeIsActive(true);
+                $verificationCode = $user->getTwoFAcode();
                 $this->userRepository->save($user, true);
                 $message = 'Your new verification code is: ' . $verificationCode;
                 $this->sendSms($user->getPhoneNumber(), $message);
