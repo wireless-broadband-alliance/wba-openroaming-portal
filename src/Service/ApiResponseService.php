@@ -543,7 +543,7 @@ readonly class ApiResponseService
             ],
             'api_v1_auth_local_reset' => [
                 'requestBody' => [
-                    'email' => 'user@example.com',
+                    'email' => 'test@example.com',
                     'turnstile_token' => 'valid_test_token'
                 ],
                 'description' => 'This endpoint triggers a password reset for a local auth account. 
@@ -737,7 +737,17 @@ readonly class ApiResponseService
                 'isProtected' => true,
                 'responses' => [
                     200 => [
-                        'User Account was deleted successfully.',
+                        json_decode(
+                            '{
+                              "success": true,
+                              "data": {
+                                "message": "User with UUID \"test@example.com\" successfully deleted."
+                              }
+                            }',
+                            false,
+                            512,
+                            JSON_THROW_ON_ERROR
+                        )
                     ],
                     400 => [
                         'Invalid data: Missing required fields.',
