@@ -187,8 +187,8 @@ readonly class ApiResponseService
                             '{
                             "success": true,
                             "data": {
-                                "uuid": "apitest2@api.com",
-                                "email": "apitest2@api.com",
+                                "uuid": "test@example.com",
+                                "email": "test@example.com",
                                 "roles": ["ROLE_USER"],
                                 "first_name": null,
                                 "last_name": null,
@@ -245,8 +245,8 @@ readonly class ApiResponseService
                             '{
                             "success": true,
                             "data": {
-                                "uuid": "apitest2@api.com",
-                                "email": "apitest2@api.com",
+                                "uuid": "test@example.com",
+                                "email": "test@example.com",
                                 "roles": ["ROLE_USER"],
                                 "first_name": null,
                                 "last_name": null,
