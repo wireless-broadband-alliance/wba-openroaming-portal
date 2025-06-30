@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Api\V1\Controller;
+namespace App\Api\V2\Controller;
 
-use App\Api\V1\BaseResponse;
+use App\Api\V2\BaseResponse;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Enum\OperationMode;
@@ -45,7 +45,7 @@ class TwoFAController extends AbstractController
      * @throws ServerExceptionInterface
      * @throws \JsonException
      */
-    #[Route('/twoFA/request', name: 'api_v1_twoFA_request', methods: ['POST'])]
+    #[Route('/twoFA/request', name: 'api_v2_twoFA_request', methods: ['POST'])]
     public function twoFARequest(Request $request): JsonResponse
     {
         try {

@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Api\V1\Controller;
+namespace App\Api\V2\Controller;
 
-use App\Api\V1\BaseResponse;
+use App\Api\V2\BaseResponse;
 use App\Controller\GoogleController;
 use App\Controller\MicrosoftController;
 use App\Entity\User;
@@ -62,7 +62,7 @@ class AuthController extends AbstractController
      * @throws ServerExceptionInterface
      * @throws Exception
      */
-    #[Route('auth/local', name: 'api_v1_auth_local', methods: ['POST'])]
+    #[Route('/auth/local', name: 'api_v2_auth_local', methods: ['POST'])]
     public function authLocal(Request $request): JsonResponse
     {
         try {
@@ -213,7 +213,7 @@ class AuthController extends AbstractController
         return new BaseResponse(200, $responseData)->toResponse(); # Success Response
     }
 
-    #[Route('/auth/saml', name: 'api_v1_auth_saml', methods: ['POST'])]
+    #[Route('/auth/saml', name: 'api_v2_auth_saml', methods: ['POST'])]
     public function authSaml(Request $request, Auth $samlAuth): JsonResponse
     {
         // Get SAML Response
@@ -394,7 +394,7 @@ class AuthController extends AbstractController
         }
     }
 
-    #[Route('/auth/google', name: 'api_v1_auth_google', methods: ['POST'])]
+    #[Route('/auth/google', name: 'api_v2_auth_google', methods: ['POST'])]
     public function authGoogle(Request $request): JsonResponse
     {
         try {
@@ -522,7 +522,7 @@ class AuthController extends AbstractController
         }
     }
 
-    #[Route('/auth/microsoft', name: 'api_v1_auth_microsoft', methods: ['POST'])]
+    #[Route('/auth/microsoft', name: 'api_v2_auth_microsoft', methods: ['POST'])]
     public function authMicrosoft(Request $request): JsonResponse
     {
         try {

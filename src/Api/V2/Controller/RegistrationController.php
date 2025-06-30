@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Api\V1\Controller;
+namespace App\Api\V2\Controller;
 
-use App\Api\V1\BaseResponse;
+use App\Api\V2\BaseResponse;
 use App\Entity\Event;
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
@@ -19,6 +19,7 @@ use App\Service\EventActions;
 use App\Service\GetSettings;
 use App\Service\RegistrationEmailGenerator;
 use App\Service\SendSMS;
+use App\Service\VerificationCodeEmailGenerator;
 use DateInterval;
 use DateTime;
 use DateTimeInterface;
@@ -74,7 +75,7 @@ class RegistrationController extends AbstractController
      * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
      * @throws Exception
      */
-    #[Route('/auth/local/register', name: 'api_v1_auth_local_register', methods: ['POST'])]
+    #[Route('/auth/local/register', name: 'api_v2_auth_local_register', methods: ['POST'])]
     public function localRegister(
         Request $request,
         UserPasswordHasherInterface $userPasswordHasher,
@@ -190,7 +191,7 @@ class RegistrationController extends AbstractController
      * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
      * @throws TransportExceptionInterface
      */
-    #[Route('/auth/local/reset', name: 'api_v1_auth_local_reset', methods: ['POST'])]
+    #[Route('/auth/local/reset', name: 'api_v2_auth_local_reset', methods: ['POST'])]
     public function localReset(
         UserPasswordHasherInterface $userPasswordHasher,
         MailerInterface $mailer,
@@ -253,7 +254,7 @@ class RegistrationController extends AbstractController
                 return new BaseResponse(200, [
                     // Forbidden request
                     'message' => sprintf(
-                        'If the email address exists in our system, we have sent you a new one to: %s.',
+                        'If the Email exists, a new code has been sent to %s.',
                         $user->getEmail()
                     )
                 ])->toResponse();
@@ -325,7 +326,7 @@ class RegistrationController extends AbstractController
                             )
                         )
                         ->to($user->getEmail())
-                        ->subject('Reset Your OpenRoaming Password')
+                        ->subject('OpenRoaming Portal - Password Request')
                         ->htmlTemplate('email/user_forgot_password_request.html.twig')
                         ->context([
                             'password' => $randomPassword,
@@ -358,8 +359,8 @@ class RegistrationController extends AbstractController
                     return new BaseResponse(200, [
                         // Correct success response
                         'message' => sprintf(
-                            'If the email address exists in our system, we have sent you a new one to: %s.',
                             // Actually success
+                            'If the email address exists in our system, we’ve sent a new one to: %s.',
                             $user->getEmail()
                         )
                     ])->toResponse();
@@ -368,7 +369,7 @@ class RegistrationController extends AbstractController
                 return new BaseResponse(200, [
                     // Correct success response
                     'message' => sprintf(
-                        'If the email address exists in our system, we have sent you a new one to: %s.',
+                        'If the email address exists in our system, we’ve sent a new one to: %s.',
                         $user->getEmail()
                     )
                 ])->toResponse(); // To many requests
@@ -378,10 +379,7 @@ class RegistrationController extends AbstractController
         // This message exists in case of user tries to spam the email/reset, to protect against RGPD
         return new BaseResponse(
             200,
-            sprintf(
-                'If the email address exists in our system, we have sent you a new one to: %s',
-                $data['email']
-            ),
+            sprintf('If the email address exists in our system, we’ve sent a new one to: %s.', $data['email']),
             null,
         )->toResponse(); // Not Found User doesn't exist request
     }
@@ -394,7 +392,7 @@ class RegistrationController extends AbstractController
      * @throws NonUniqueResultException
      * @throws Exception
      */
-    #[Route('/auth/sms/register', name: 'api_v1_auth_sms_register', methods: ['POST'])]
+    #[Route('/auth/sms/register', name: 'api_v2_auth_sms_register', methods: ['POST'])]
     public function smsRegister(
         Request $request,
         UserPasswordHasherInterface $userPasswordHasher,
@@ -545,7 +543,7 @@ class RegistrationController extends AbstractController
      * @throws \DateMalformedIntervalStringException
      * @throws \DateMalformedStringException
      */
-    #[Route('/auth/sms/reset', name: 'api_v1_auth_sms_reset', methods: ['POST'])]
+    #[Route('/auth/sms/reset', name: 'api_v2_auth_sms_reset', methods: ['POST'])]
     public function smsReset(
         Request $request,
         PhoneNumberUtil $phoneNumberUtil
@@ -621,7 +619,7 @@ class RegistrationController extends AbstractController
                 // This message exists in case of a user is banned the sms/reset, to protect against RGPD
                 return new BaseResponse(
                     200,
-                    'If the phone number exist, we have sent you a new one to: %s',
+                    'If the phone number exists, a new code has been sent to %s.',
                     $user->getEmail(),
                     null,
                 )->toResponse(); // Too Many Requests Response
@@ -669,7 +667,7 @@ class RegistrationController extends AbstractController
                                 // Protect against spam and RGPD policies - simulate success without actual resend
                                 return new BaseResponse(200, [
                                     'success' => sprintf(
-                                        'If the phone number exists, we have sent a new code to: %s.',
+                                        'If the phone number exists, a new code has been sent to %s.',
                                         $user->getPhoneNumber()
                                     )
                                 ])->toResponse();
@@ -683,7 +681,7 @@ class RegistrationController extends AbstractController
                         return new BaseResponse(
                             429,
                             null,
-                            'Limit of tries exceeded for regeneration. Contact support.'
+                            'You’ve exceeded the maximum number of attempts to regenerate. Please contact support.'
                         )->toResponse();
                     }
 

@@ -1,0 +1,52 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ settings.PAGE_TITLE }} - API V1 Documentation{% endblock %}
+
+{% block body %}
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {# Logo & Header #}
+        <div class="flex flex-col items-center mb-8">
+            {% if settings.CUSTOMER_LOGO_ENABLED == constant('App\\Enum\\OperationMode::ON').value %}
+                <img class="w-96 h-[58px] object-scale-down" src="{{ settings.CUSTOMER_LOGO }}"
+                     alt="Logo"/>
+            {% endif %}
+            <div class="flex flex-col items-center space-y-4 mt-10">
+                <h1 class="text-4xl font-extrabold text-indigo-700 mb-2">{{ settings.PAGE_TITLE }} - API V1 Documentation</h1>
+                <p class="text-center max-w-2xl text-gray-600 text-lg">
+                    Explore our RESTful API version 1 with detailed endpoints and response messages for easy integration.
+                </p>
+            </div>
+        </div>
+
+        {# API VERSION SELECTOR #}
+        <div class="flex justify-end mb-4">
+            {{ include('api/shared/partials/_drop_down_api_selection.html.twig') }}
+        </div>
+
+        <div class="flex items-center p-4 border-l-4 gap-2 border-yellow-500 bg-yellow-50 text-yellow-800 text-sm rounded-md mb-4">
+            <twig:ux:icon class="w-5 h-5" name="wba:info" />
+            <span>This version of the API has been deprecated and is no longer supported. Please upgrade to the latest version for continued access and security updates.
+                <br>
+            Click
+                <a href="{{ path('api_v2_docs') }}"
+                   class="font-bold underline text-primary">here</a>
+                to switch to api v2 documentation
+            </span>
+        </div>
+
+        <section class="mb-16">
+            <h2 class="text-2xl font-semibold mb-6 border-b border-gray-300 pb-2">API URL & Versioning</h2>
+            <div class="overflow-x-auto">
+                {{ include('api/shared/partials/_routes.html.twig') }}
+            </div>
+        </section>
+
+        <section>
+            <h2 class="text-2xl font-semibold mb-6 border-b border-gray-300 pb-2">Common Response Messages</h2>
+            <div class="overflow-x-auto">
+                {{ include('api/shared/partials/_common_messages.html.twig') }}
+            </div>
+        </section>
+
+    </div>
+{% endblock %}
