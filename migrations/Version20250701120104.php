@@ -19,11 +19,11 @@ final class Version20250701120104 extends AbstractMigration
 
     public function up(Schema $schema): void
     {
-        $this->addSql("INSERT INTO Setting (name, value) VALUES ('CRON_ADVANCE_STATUS', 'OFF')");
+        $this->addSql("INSERT INTO Setting (name, value) VALUES ('CRON_ADVANCED_STATUS', 'OFF')");
     }
 
     public function down(Schema $schema): void
     {
-        $this->addSql("DELETE FROM Setting WHERE name = 'CRON_ADVANCE_STATUS'");
+        $this->addSql("DELETE FROM Setting WHERE name = 'CRON_ADVANCED_STATUS'");
     }
 }

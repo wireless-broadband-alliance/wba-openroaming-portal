@@ -300,6 +300,8 @@ class GetSettings
             'USERS_WHEN_PROFILE_EXPIRES_CRON' => 'Defines the schedule to notify the users 
             when their profile to expire',
             'LDAP_SYNC_CRON' => 'Defines the schedule for LDAP synchronization automation command',
+            'CRON_ADVANCED_STATUS' =>
+                'Saves the previous status mode on the schedule cron configuration page (Simple/Advanced)'
         ];
 
         return $descriptions[$settingName] ?? '';
