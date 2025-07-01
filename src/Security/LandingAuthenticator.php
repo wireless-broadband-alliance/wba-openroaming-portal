@@ -3,7 +3,6 @@
 namespace App\Security;
 
 use App\Entity\User;
-use App\Enum\AnalyticalEventType;
 use App\Enum\OperationMode;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
@@ -13,7 +12,9 @@ use PixelOpen\CloudflareTurnstileBundle\Http\CloudflareTurnstileHttpClient;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;
@@ -37,6 +38,7 @@ class LandingAuthenticator extends AbstractLoginFormAuthenticator
         private readonly CloudflareTurnstileHttpClient $turnstileHttpClient,
         private readonly UserRepository $userRepository,
         private readonly TwoFAService $twoFAService,
+        private readonly RequestStack $requestStack,
     ) {
     }
 
@@ -120,6 +122,20 @@ class LandingAuthenticator extends AbstractLoginFormAuthenticator
 
             return new RedirectResponse($this->urlGenerator->generate('app_landing'));
         }
+
+        if ($user->isForgotPasswordRequest()) {
+            $session = $this->requestStack->getSession();
+
+            if ($session instanceof Session) {
+                $session->getFlashBag()->add(
+                    'error',
+                    'You need to confirm the new password before download a profile!'
+                );
+            }
+
+            return new RedirectResponse($this->urlGenerator->generate('app_site_forgot_password_checker'));
+        }
+
         return new RedirectResponse($this->urlGenerator->generate('app_landing'));
     }
 

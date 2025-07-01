@@ -25,4 +25,5 @@ api_platform:
                 type: header
         swagger_ui_extra_configuration:
             persistAuthorization: true
+            filter: true
     use_symfony_listeners: true

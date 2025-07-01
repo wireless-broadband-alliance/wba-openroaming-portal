@@ -2,8 +2,10 @@
 
 # Release V1.8.0
 
+<<<<<<< CHANGELOG.md
 - New UI section on the dashboard for Schedule Automation. This page is responsible for management of the automation
   commands time schedule.
+- Update API for version 2, fix bug for iOS App's with invalid format for profile generation endpoint.
 - Prometheus Implementation.
 - Rework Automation commands to use an official symfony bundle of automation commands.
 
@@ -17,6 +19,10 @@ php:bin/console messenger:consume scheduler_default -vv
 
 - Rework AutoDeleteUnconfirmedAccounts command, now saves on the database an array with all the deleted uuids, on the
   Event table, important for logs and security concerns.
+=======
+- Update API for version 2, fix bug for iOS App's with invalid format for profile generation endpoint.
+- Prometheus Implementation
+>>>>>>> CHANGELOG.md
 - Fix bug with registration links, use could use them to re-log in to the portal at any time, can only be used once.
 - Fix bug with account deletion, the admin was able to access the page using the url. The admin cannot delete his own
   account.

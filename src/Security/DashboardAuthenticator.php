@@ -9,12 +9,13 @@ use App\Enum\TwoFAType;
 use App\Enum\UserTwoFactorAuthenticationStatus;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
-use DateTimeInterface;
 use PixelOpen\CloudflareTurnstileBundle\Http\CloudflareTurnstileHttpClient;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;
@@ -36,6 +37,7 @@ class DashboardAuthenticator extends AbstractLoginFormAuthenticator
         private readonly SettingRepository $settingRepository,
         private readonly CloudflareTurnstileHttpClient $turnstileHttpClient,
         private readonly UserRepository $userRepository,
+        private readonly RequestStack $requestStack,
     ) {
     }
 
@@ -78,12 +80,26 @@ class DashboardAuthenticator extends AbstractLoginFormAuthenticator
             ]
         );
     }
+
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
     {
         $user = $token->getUser();
 
         // Check if the user is already logged in and redirect them accordingly
         if ($user instanceof User) {
+            if ($user->isForgotPasswordRequest()) {
+                $session = $this->requestStack->getSession();
+
+                if ($session instanceof Session) {
+                    $session->getFlashBag()->add(
+                        'error',
+                        'You need to confirm the new password before download a profile!'
+                    );
+                }
+
+                return new RedirectResponse($this->urlGenerator->generate('app_site_forgot_password_checker'));
+            }
+
             $twoFAPlatformStatus = $this->settingRepository->findOneBy([
                 'name' => 'TWO_FACTOR_AUTH_STATUS'
             ])->getValue();

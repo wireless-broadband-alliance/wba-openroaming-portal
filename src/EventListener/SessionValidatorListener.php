@@ -45,6 +45,7 @@ readonly class SessionValidatorListener
 
         /** @var User $userToken */
         $userToken = $token->getUser();
+
         $url = [
             '/dashboard/login',
             '/dashboard/verify2FA',
@@ -66,7 +67,8 @@ readonly class SessionValidatorListener
             '/dashboard/enable2FA/resend',
             '/dashboard/validate2FA/resend',
         ];
-        if ($userToken && str_starts_with($path, '/dashboard')) {
+
+        if (str_starts_with($path, '/dashboard')) {
             // Make an exception to ignore the '/dashboard/login' route
             if (in_array($path, $url)) {
                 return;
