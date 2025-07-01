@@ -63,7 +63,7 @@ class GetSettings
 
         $data['code'] = [
             'value' =>
-                ($user = $userRepository->findOneBy(['verificationCode' => null]))
+                ($user = $userRepository->findOneBy(['twoFAcode' => null]))
                     ? $user->getTwoFAcode()
                     : null,
             'description' => $this->getSettingDescription('code'),
