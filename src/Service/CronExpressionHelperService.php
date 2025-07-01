@@ -103,13 +103,13 @@ class CronExpressionHelperService
 
     public function selectAllWithFreqConverter(array $values, int $freq): string
     {
-        if ($freq === 1) {
-            return '*';
-        }
         if (in_array('*', $values, true)) {
+            if ($freq === 1) {
+                return '*';
+            }
             return "*/$freq";
         }
-            return $this->buildCronPartWithFrequency($values, $freq);
+        return $this->buildCronPartWithFrequency($values, $freq);
     }
 
     /**

@@ -88,13 +88,6 @@ class ScheduleType extends AbstractType
                     'label' => false,
                     'attr' => ['description' => $description],
                 ])
-                ->add("{$settingName}_time_frequency", ChoiceType::class, [
-                    'required' => false,
-                    'choices' => $freqChoices,
-                    'placeholder' => 'Minute frequency (e.g. every N minutes)',
-                    'label' => false,
-                    'attr' => ['description' => $description],
-                ])
                 ->add("{$settingName}_day_of_week", ChoiceType::class, [
                     'multiple' => true,
                     'required' => false,
@@ -106,9 +99,8 @@ class ScheduleType extends AbstractType
                     'attr' => ['description' => $description],
                 ])
                 ->add("{$settingName}_day_of_week_frequency", ChoiceType::class, [
-                    'required' => false,
+                    'required' => true,
                     'choices' => $freqChoices,
-                    'placeholder' => 'Frequency (e.g. every N days)',
                     'label' => false,
                     'attr' => ['description' => $description],
                 ])
@@ -120,9 +112,8 @@ class ScheduleType extends AbstractType
                     'attr' => ['description' => $description],
                 ])
                 ->add("{$settingName}_day_of_month_frequency", ChoiceType::class, [
-                    'required' => false,
+                    'required' => true,
                     'choices' => $freqChoices,
-                    'placeholder' => 'Frequency (e.g. every N days)',
                     'label' => false,
                     'attr' => ['description' => $description],
                 ])
@@ -148,9 +139,8 @@ class ScheduleType extends AbstractType
                     'attr' => ['description' => $description],
                 ])
                 ->add("{$settingName}_months_of_the_year_frequency", ChoiceType::class, [
-                    'required' => false,
+                    'required' => true,
                     'choices' => $freqChoices,
-                    'placeholder' => 'Frequency (e.g. every N months)',
                     'label' => false,
                     'attr' => ['description' => $description],
                 ]);
