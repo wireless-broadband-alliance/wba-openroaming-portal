@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Api\V1\Controller;
+namespace App\Api\V2\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -8,7 +8,7 @@ use Symfony\Component\Routing\Attribute\Route;
 
 class TurnstileController extends AbstractController
 {
-    #[Route('/turnstile/android', name: 'api_v1_turnstile_html_android', methods: ['GET'])]
+    #[Route('/turnstile/android', name: 'api_v2_turnstile_html_android', methods: ['GET'])]
     public function getHtmlFromFile(): Response
     {
         $filePath = $this->getParameter('kernel.project_dir') . '/public/resources/turnstile_android_html/index.html';

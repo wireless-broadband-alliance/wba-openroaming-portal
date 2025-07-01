@@ -1,0 +1,46 @@
+<div class="space-y-4">
+    {% for status, messages in commonMessages %}
+        <div class="border border-gray-300 rounded-xl shadow-sm overflow-hidden">
+            <button
+                    type="button"
+                    class="w-full flex justify-between items-center px-6 py-4 bg-gray-50 hover:bg-gray-100 transition"
+                    onclick="document.getElementById('common-{{ loop.index }}').classList.toggle('hidden')"
+            >
+                <div class="flex items-center space-x-4">
+                    <span class="text-sm font-medium text-indigo-700">HTTP {{ status }}</span>
+                </div>
+                <svg class="w-5 h-5 text-gray-500 transform transition-transform duration-200"
+                     fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M19 9l-7 7-7-7"/>
+                </svg>
+            </button>
+
+            <div id="common-{{ loop.index }}"
+                 class="hidden px-6 py-4 bg-gray-100 space-y-6"
+            >
+                {% for msg in messages %}
+                    <div class="relative" data-controller="clipboard">
+                        {% set codeId = 'code-' ~ status ~ '-' ~ loop.parent.loop.index0 ~ '-' ~ loop.index0 %}
+
+                        {{ include('api/shared/partials/_copy.html.twig', {
+                            clipboard_target: '#' ~ codeId,
+                        }) }}
+
+                        <pre
+                                id="{{ codeId }}"
+                                data-clipboard-target="code"
+                                class="whitespace-pre-wrap rounded-lg bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto"
+                        >
+{{ (
+status starts with '2'
+? {success: true, data: msg}
+: {success: false, error: msg}
+)|json_encode(constant('JSON_PRETTY_PRINT'))|raw }}
+                        </pre>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endfor %}
+</div>

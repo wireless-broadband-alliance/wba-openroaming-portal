@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Api\V1\Controller;
+namespace App\Api\V2\Controller;
 
-use App\Api\V1\BaseResponse;
+use App\Api\V2\BaseResponse;
 use App\Entity\User;
 use App\Entity\UserRadiusProfile;
 use App\Enum\AnalyticalEventType;
@@ -45,7 +45,7 @@ class ProfileController extends AbstractController
     /**
      * @throws RandomException
      */
-    #[Route('/config/profile/android', name: 'api_v1_config_profile_android', methods: ['GET'])]
+    #[Route('/config/profile/android', name: 'api_v2_config_profile_android', methods: ['POST'])]
     public function getProfileAndroid(Request $request): JsonResponse
     {
         try {
@@ -170,7 +170,7 @@ class ProfileController extends AbstractController
     /**
      * @throws RandomException
      */
-    #[Route('/config/profile/ios', name: 'api_v1_config_profile_ios', methods: ['GET'])]
+    #[Route('/config/profile/ios', name: 'api_v2_config_profile_ios', methods: ['POST'])]
     public function getProfileIos(Request $request): JsonResponse
     {
         try {

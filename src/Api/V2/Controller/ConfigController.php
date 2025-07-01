@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Api\V1\Controller;
+namespace App\Api\V2\Controller;
 
-use App\Api\V1\BaseResponse;
+use App\Api\V2\BaseResponse;
 use App\Enum\OperationMode;
 use App\Enum\TextInputType;
 use App\Repository\SettingRepository;
@@ -30,7 +30,7 @@ class ConfigController extends AbstractController
      * @throws ClientExceptionInterface
      * @throws Exception
      */
-    #[Route('/config', name: 'api_v1_config_settings', methods: ['GET'])]
+    #[Route('/config', name: 'api_v2_config_settings', methods: ['GET'])]
     public function returnCofig(): JsonResponse
     {
         $settings = $this->getSettings();

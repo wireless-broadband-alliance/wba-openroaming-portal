@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Api\V1\Controller;
+namespace App\Api\V2\Controller;
 
 use App\Api\V2\BaseResponse;
 use App\Repository\SettingRepository;
@@ -11,7 +11,7 @@ use Symfony\Component\Routing\Attribute\Route;
 
 class CapportController extends AbstractController
 {
-    #[Route('/capport/json', name: 'api_v1_capport_json', methods: ['GET'])]
+    #[Route('/capport/json', name: 'api_v2_capport_json', methods: ['GET'])]
     public function capportJson(SettingRepository $settingRepository): JsonResponse
     {
         if ($settingRepository->findOneBy(['name' => 'CAPPORT_ENABLED'])->getValue() !== 'true') {

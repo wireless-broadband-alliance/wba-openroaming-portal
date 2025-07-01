@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Api\V1\Controller;
+namespace App\Api\V2\Controller;
 
-use App\Api\V1\BaseResponse;
+use App\Api\V2\BaseResponse;
 use App\Controller\GoogleController;
 use App\Controller\MicrosoftController;
 use App\Entity\User;
@@ -51,7 +51,7 @@ class UserAccountController extends AbstractController
      * @throws Error
      * @throws JsonException
      */
-    #[Route('/userAccount/deletion', name: 'api_v1_user_account_deletion', methods: ['DELETE'])]
+    #[Route('/userAccount/deletion', name: 'api_v2_user_account_deletion', methods: ['DELETE'])]
     public function userAccountDeletion(Request $request, Auth $samlAuth): JsonResponse
     {
         $token = $this->tokenStorage->getToken();
