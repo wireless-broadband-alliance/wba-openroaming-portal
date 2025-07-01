@@ -19,7 +19,6 @@ use App\Service\EventActions;
 use App\Service\GetSettings;
 use App\Service\RegistrationEmailGenerator;
 use App\Service\SendSMS;
-use App\Service\VerificationCodeEmailGenerator;
 use DateInterval;
 use DateTime;
 use DateTimeInterface;
@@ -146,7 +145,9 @@ class RegistrationController extends AbstractController
         $hashedPassword = $userPasswordHasher->hashPassword($user, $data['password']);
         $user->setPassword($hashedPassword);
         $user->setIsVerified(false);
-        $user->setVerificationCode(random_int(100000, 999999));
+        $user->setTwoFAcode(random_int(100000, 999999));
+        $user->setTwoFAcodeGeneratedAt(new DateTime());
+        $user->setTwoFAcodeIsActive(true);
         $user->setFirstName($data['first_name'] ?? null);
         $user->setLastName($data['last_name'] ?? null);
         $user->setCreatedAt(new DateTime());
@@ -333,7 +334,7 @@ class RegistrationController extends AbstractController
                             'forgotPasswordUser' => true,
                             'uuid' => $user->getUuid(),
                             'currentPassword' => $randomPassword,
-                            'verificationCode' => $user->getVerificationCode(),
+                            'verificationCode' => $user->getTwoFAcode(),
                             'emailTitle' => $this->settingRepository->findOneBy(['name' => 'PAGE_TITLE'])->getValue(),
                             'contactEmail' => $this->settingRepository->findOneBy(
                                 ['name' => 'CONTACT_EMAIL']
@@ -481,7 +482,9 @@ class RegistrationController extends AbstractController
         $hashedPassword = $userPasswordHasher->hashPassword($user, $data['password']);
         $user->setPassword($hashedPassword);
         $user->setIsVerified(false);
-        $user->setVerificationCode(random_int(100000, 999999));
+        $user->setTwoFAcode(random_int(100000, 999999));
+        $user->setTwoFAcodeIsActive(true);
+        $user->setTwoFAcodeGeneratedAt(new DateTime());
         $user->setFirstName($data['first_name'] ?? null);
         $user->setLastName($data['last_name'] ?? null);
         $user->setCreatedAt(new DateTime());
@@ -514,7 +517,7 @@ class RegistrationController extends AbstractController
         try {
             $message = "Your account password is: "
                 . $data['password'] . "%0A" . "Verification code is: "
-                . $user->getVerificationCode();
+                . $user->getTwoFAcode();
             $result = $this->sendSMSService->sendSms($user->getPhoneNumber(), $message);
 
             if ($result) {
@@ -719,7 +722,7 @@ class RegistrationController extends AbstractController
                     $message = sprintf(
                         "Your account password is: %s\n Verification code is: %s",
                         $randomPassword,
-                        $user->getVerificationCode()
+                        $user->getTwoFAcode()
                     );
 
                     $result = $this->sendSMSService->sendSms($user->getPhoneNumber(), $message);
