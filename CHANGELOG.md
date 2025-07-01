@@ -2,7 +2,6 @@
 
 # Release V1.8.0
 
-<<<<<<< CHANGELOG.md
 - New UI section on the dashboard for Schedule Automation. This page is responsible for management of the automation
   commands time schedule.
 - Update API for version 2, fix bug for iOS App's with invalid format for profile generation endpoint.
