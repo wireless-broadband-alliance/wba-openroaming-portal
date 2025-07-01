@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
+use App\Enum\OperationMode;
 use App\Form\ScheduleType;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
@@ -45,6 +46,7 @@ class ScheduleAutomationController extends AbstractController
         $currentUser = $this->getUser();
 
         $initialData = [];
+        $initialData["use_advanced_mode"] = $data["CRON_ADVANCE_STATUS"] ?? OperationMode::OFF->value;
 
         foreach ($this->cronSettings as $settingName) {
             $setting = $this->settingRepository->findOneBy(['name' => $settingName]);
