@@ -174,7 +174,7 @@ class ScheduleAutomationController extends AbstractController
                     $cronValue = "{$minute} {$hour} {$dayOfMonthExpr} {$monthExpr} {$dayOfWeekExpr}";
                 }
 
-                $this->saveSetting($settingName, $cronValue);
+                $this->saveSetting($settingName, $cronValue, $useAdvancedMode);
             }
 
             // Analytics
@@ -209,12 +209,22 @@ class ScheduleAutomationController extends AbstractController
     /**
      * Save or update a setting by name.
      */
-    private function saveSetting(string $name, ?string $value): void
+    private function saveSetting(string $name, ?string $value, bool $advancedMode): void
     {
         $setting = $this->settingRepository->findOneBy(['name' => $name]);
         if ($setting !== null) {
             $setting->setValue($value);
             $this->entityManager->persist($setting);
+        }
+        $advancedModeStatus = $this->settingRepository->findOneBy(['name' => 'CRON_ADVANCED_STATUS']);
+        if ($advancedMode) {
+            $advancedModeValue = OperationMode::ON->value;
+        } else {
+            $advancedModeValue = OperationMode::OFF->value;
+        }
+        if ($advancedModeStatus !== null) {
+            $advancedModeStatus->setValue($advancedModeValue);
+            $this->entityManager->persist($advancedModeStatus);
         }
     }
 }

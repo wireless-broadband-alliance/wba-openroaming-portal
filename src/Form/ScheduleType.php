@@ -2,6 +2,8 @@
 
 namespace App\Form;
 
+use App\Enum\OperationMode;
+use App\Repository\SettingRepository;
 use App\Service\GetSettings;
 use Cron\CronExpression;
 use Exception;
@@ -20,16 +22,28 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 class ScheduleType extends AbstractType
 {
-    public function __construct(private readonly GetSettings $getSettings)
-    {
+    public function __construct(
+        private readonly GetSettings $getSettings,
+        private readonly SettingRepository $settingRepository,
+    ) {
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
+        if ($this->settingRepository->findOneBy(
+                ['name' => 'CRON_ADVANCED_STATUS']
+            )->getValue() === OperationMode::ON->value)
+        {
+            $selected = true;
+        } else {
+            $selected = false;
+        }
+
         $builder->add('use_advanced_mode', CheckboxType::class, [
             'label' => 'Use Advanced Mode (Manual CRON Expression)',
             'required' => false,
             'mapped' => false,
+            'data' => $selected,
         ]);
 
         $cronSettings = [
@@ -84,9 +98,9 @@ class ScheduleType extends AbstractType
                     'multiple' => true,
                     'required' => false,
                     'choices' => ['All days' => '*'] + array_combine(
-                        ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
-                        range(0, 6)
-                    ),
+                            ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+                            range(0, 6)
+                        ),
                     'label' => false,
                     'attr' => ['description' => $description],
                 ])
@@ -286,6 +300,7 @@ class ScheduleType extends AbstractType
         if (in_array('all', $values, true)) {
             return range($min, $max);
         }
+
         return $values;
     }
 
