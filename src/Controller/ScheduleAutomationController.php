@@ -217,11 +217,7 @@ class ScheduleAutomationController extends AbstractController
             $this->entityManager->persist($setting);
         }
         $advancedModeStatus = $this->settingRepository->findOneBy(['name' => 'CRON_ADVANCED_STATUS']);
-        if ($advancedMode) {
-            $advancedModeValue = OperationMode::ON->value;
-        } else {
-            $advancedModeValue = OperationMode::OFF->value;
-        }
+        $advancedModeValue = $advancedMode ? OperationMode::ON->value : OperationMode::OFF->value;
         if ($advancedModeStatus !== null) {
             $advancedModeStatus->setValue($advancedModeValue);
             $this->entityManager->persist($advancedModeStatus);
