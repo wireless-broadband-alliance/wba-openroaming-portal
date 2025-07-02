@@ -216,8 +216,12 @@ class ScheduleAutomationController extends AbstractController
             return $this->redirectToRoute('admin_dashboard_settings_schedule');
         }
 
-        $deleteUnconfirmed = $this->settingRepository->findOneBy(['name' => 'DELETE_UNCONFIRMED_USERS_CRON'])->getValue();
-        $profileExpired = $this->settingRepository->findOneBy(['name' => 'USERS_WHEN_PROFILE_EXPIRES_CRON'])->getValue();
+        $deleteUnconfirmed = $this->settingRepository->findOneBy(
+            ['name' => 'DELETE_UNCONFIRMED_USERS_CRON']
+        )->getValue();
+        $profileExpired = $this->settingRepository->findOneBy(
+            ['name' => 'USERS_WHEN_PROFILE_EXPIRES_CRON']
+        )->getValue();
         $ldapCron = $this->settingRepository->findOneBy(['name' => 'LDAP_SYNC_CRON'])->getValue();
         $deleteUnconfirmedWarning = $this->verifyHoursAndMinutesFrequency($deleteUnconfirmed);
         $profileExpiredWarning = $this->verifyHoursAndMinutesFrequency($profileExpired);
@@ -307,16 +311,13 @@ class ScheduleAutomationController extends AbstractController
         }
         $result = $this->cronExpressionHelperService->recognizeCronFrequency($cron);
         $parts = $result['parts'] ?? [];
-        if ($parts['minute']['frequency'] > 1 && $parts['hour']['frequency'] > 1)
-        {
+        if ($parts['minute']['frequency'] > 1 && $parts['hour']['frequency'] > 1) {
             return 'minutes and hours';
         }
-        if ($parts['minute']['frequency'] > 1)
-        {
+        if ($parts['minute']['frequency'] > 1) {
             return 'minutes';
         }
-        if ($parts['hour']['frequency'] > 1)
-        {
+        if ($parts['hour']['frequency'] > 1) {
             return 'hours';
         }
         return null;
