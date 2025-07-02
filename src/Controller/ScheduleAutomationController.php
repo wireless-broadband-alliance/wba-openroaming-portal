@@ -12,6 +12,7 @@ use App\Service\CronExpressionHelperService;
 use App\Service\EventActions;
 use App\Service\GetSettings;
 use DateTime;
+use DateTimeImmutable;
 use DateTimeInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -57,30 +58,62 @@ class ScheduleAutomationController extends AbstractController
             $result = $this->cronExpressionHelperService->recognizeCronFrequency($cronValue);
             $parts = $result['parts'] ?? [];
 
-            $initialData["{$settingName}_time"] = DateTime::createFromFormat(
-                'H:i',
-                $result['time'] ?? '00:00'
-            );
-            if (str_contains((string) $parts['day_of_week']['raw'], '*')) {
-                $initialData["{$settingName}_day_of_week"] = ['*'];
-            } else {
-                $initialData["{$settingName}_day_of_week"] = $parts['day_of_week']['values'] ?? [];
-            }
-            if (str_contains((string) $parts['day_of_month']['raw'], '*')) {
-                $initialData["{$settingName}_day_of_month"] = ['*'];
-            } else {
-                $initialData["{$settingName}_day_of_month"] = $parts['day_of_month']['values'] ?? [];
-            }
-            if (str_contains((string) $parts['month']['raw'], '*')) {
-                $initialData["{$settingName}_months_of_the_year"] = ['*'];
-            } else {
-                $initialData["{$settingName}_months_of_the_year"] = $parts['month']['values'] ?? [];
+            // Extract representative time from minutes/hours (ignoring frequency)
+            $hourValues = $parts['hour']['values'] ?? [];
+            $minuteValues = $parts['minute']['values'] ?? [];
+
+            $hour = is_array($hourValues) && count($hourValues) > 0 ? (int)min($hourValues) : 0;
+            $minute = is_array($minuteValues) && count($minuteValues) > 0 ? (int)min($minuteValues) : 0;
+
+            try {
+                $initialData["{$settingName}_time"] = new DateTimeImmutable()->setTime($hour, $minute);
+            } catch (\Exception $e) {
+                $initialData["{$settingName}_time"] = new DateTimeImmutable('00:00');
             }
 
-            // Initialize frequencies (default 1)
-            $initialData["{$settingName}_day_of_week_frequency"] = $parts['day_of_week']['frequency'] ?? 1;
-            $initialData["{$settingName}_day_of_month_frequency"] = $parts['day_of_month']['frequency'] ?? 1;
-            $initialData["{$settingName}_months_of_the_year_frequency"] = $parts['month']['frequency'] ?? 1;
+            // Helper function to map cron part name to form field suffix
+            $mapFieldKey = static fn(string $cronField) => match ($cronField) {
+                'day_of_week' => 'day_of_week',
+                'day_of_month' => 'day_of_month',
+                'month' => 'months_of_the_year',
+                default => $cronField,
+            };
+
+            // Helper function to expand cron expressions like "28-31/2" into [28, 30]
+            // Handle day_of_week, day_of_month, and month values and frequencies
+            foreach (['day_of_week', 'day_of_month', 'month'] as $field) {
+                $fieldKey = $mapFieldKey($field);
+                $raw = (string)($parts[$field]['raw'] ?? '*');
+
+                // Set min and max depending on field
+                switch ($field) {
+                    case 'day_of_week':
+                        $min = 0;
+                        $max = 6; // Sunday=0 to Saturday=6
+                        break;
+                    case 'day_of_month':
+                        $min = 1;
+                        $max = 31;
+                        break;
+                    case 'month':
+                        $min = 1;
+                        $max = 12; // January=1 to December=12
+                        break;
+                    default:
+                        $min = 0;
+                        $max = 59;
+                }
+
+                if ($raw === '*' || $raw === '') {
+                    // Set "All" when '*' is in the array so the form ChoiceType can show "All" option checked
+                    $initialData["{$settingName}_{$fieldKey}"] = ['*'];
+                } else {
+                    // Expand expression like "28-31/2" on the array of values
+                    $initialData["{$settingName}_{$fieldKey}"] = $this->expandCronPart($raw, $min, $max);
+                }
+
+                $initialData["{$settingName}_{$fieldKey}_frequency"] = $parts[$field]['frequency'] ?? 1;
+            }
         }
 
         $form = $this->createForm(ScheduleType::class, $initialData, [
@@ -207,5 +240,50 @@ class ScheduleAutomationController extends AbstractController
             $advancedModeStatus->setValue($advancedModeValue);
             $this->entityManager->persist($advancedModeStatus);
         }
+    }
+
+    private function expandCronPart(string $expr, int $min, int $max): array
+    {
+        if ($expr === '*' || $expr === '') {
+            // Wildcard means all possible values
+            return range($min, $max);
+        }
+
+        $result = [];
+
+        // Split comma-separated parts
+        foreach (explode(',', $expr) as $part) {
+            $step = 1;
+
+            // Check for step, e.g. "28-31/2"
+            if (str_contains($part, '/')) {
+                [$rangePart, $stepPart] = explode('/', $part, 2);
+                $step = (int)$stepPart;
+            } else {
+                $rangePart = $part;
+            }
+
+            // Determine range or single value
+            if ($rangePart === '*') {
+                $rangeStart = $min;
+                $rangeEnd = $max;
+            } elseif (str_contains($rangePart, '-')) {
+                [$rangeStart, $rangeEnd] = explode('-', $rangePart, 2);
+                $rangeStart = (int)$rangeStart;
+                $rangeEnd = (int)$rangeEnd;
+            } else {
+                $rangeStart = $rangeEnd = (int)$rangePart;
+            }
+
+            // Add values in the range with the step
+            for ($i = $rangeStart; $i <= $rangeEnd; $i += $step) {
+                if ($i >= $min && $i <= $max) {
+                    $result[] = $i;
+                }
+            }
+        }
+
+        // Remove duplicates and sort values
+        return array_values(array_unique($result));
     }
 }
