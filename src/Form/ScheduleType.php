@@ -266,17 +266,17 @@ class ScheduleType extends AbstractType
                 if (in_array('*', $daysOfMonth, true)) {
                     $dayOfMonthPart = "*/$monthsFreq";
                 } else {
-                    $dayOfMonthPart = $this->buildCronPartWithFrequency($daysOfMonth, $dayOfMonthFreq);
+                    $dayOfMonthPart = $this->buildCronPartWithFrequency($daysOfMonth, $dayOfMonthFreq, $form, $settingName);
                 }
                 if (in_array('*', $monthsOfYear, true)) {
                     $monthPart = "*/$monthsFreq";
                 } else {
-                    $monthPart = $this->buildCronPartWithFrequency($monthsOfYear, $monthsFreq);
+                    $monthPart = $this->buildCronPartWithFrequency($monthsOfYear, $monthsFreq, $form, $settingName);
                 }
                 if (in_array('*', $daysOfWeek, true)) {
                     $dayOfWeekPart = "*/$dayOfWeekFreq";
                 } else {
-                    $dayOfWeekPart = $this->buildCronPartWithFrequency($daysOfWeek, $dayOfWeekFreq);
+                    $dayOfWeekPart = $this->buildCronPartWithFrequency($daysOfWeek, $dayOfWeekFreq, $form, $settingName);
                 }
 
                 $cronString = sprintf(
@@ -319,7 +319,7 @@ class ScheduleType extends AbstractType
      *   freq = 2
      *   => "1-3/2,5-7/2,10/2"
      */
-    private function buildCronPartWithFrequency(array $values, int $frequency): string
+    private function buildCronPartWithFrequency(array $values, int $frequency, $form, string $settingName): string
     {
         if ($values === []) {
             return '*';
@@ -344,6 +344,9 @@ class ScheduleType extends AbstractType
 
         // Non-contiguous values: steps with multiple ranges not supported,
         // fallback to listing values without frequency steps
+        $form->get("{$settingName}_time")->addError(
+            new FormError('Please don\'t select Non-contiguous values with frequency greater than 1.')
+        );
         return implode(',', $values);
     }
 
