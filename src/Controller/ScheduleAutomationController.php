@@ -107,21 +107,6 @@ class ScheduleAutomationController extends AbstractController
                     $monthsFreq = (int)$form->get("{$settingName}_months_of_the_year_frequency")->getData();
 
                     // Prevent both day_of_month and day_of_week frequencies being > 1 at the same time
-                    if ($dayOfMonthFreq > 1 && $dayOfWeekFreq > 1) {
-                        $form->get("{$settingName}_day_of_month_frequency")->addError(
-                            new FormError(
-                                'Cannot set frequency on both Day of Month and
-                                 Day of Week at the same time due to cron semantics.'
-                            )
-                        );
-                        $form->get("{$settingName}_day_of_week_frequency")->addError(
-                            new FormError(
-                                'Cannot set frequency on both Day of Month and
-                                 Day of Week at the same time due to cron semantics.'
-                            )
-                        );
-                        continue; // Skip cron generation for this setting
-                    }
 
                     // Validate frequency logic: frequency must be lower than the number of selected values
                     $fieldsToCheck = [

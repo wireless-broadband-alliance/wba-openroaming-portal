@@ -173,6 +173,16 @@ class ScheduleType extends AbstractType
                 $monthsOfYear = $data["{$settingName}_months_of_the_year"] ?? [];
                 $monthsFreq = (int)($data["{$settingName}_months_of_the_year_frequency"] ?? 1);
 
+                // Prevent both day_of_month and day_of_week frequencies being > 1 at the same time
+                if ($dayOfMonthFreq > 1 && $dayOfWeekFreq > 1) {
+                    $form->get("{$settingName}_day_of_month_frequency")->addError(
+                        new FormError(
+                            'Cannot set frequency on both Day of Month and
+                                 Day of Week at the same time due to cron semantics.'
+                        )
+                    );
+                }
+
                 if (!$time) {
                     $form->get("{$settingName}_time")->addError(new FormError('Please choose a time.'));
                     continue;
