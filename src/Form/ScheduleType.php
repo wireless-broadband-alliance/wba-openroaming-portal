@@ -153,7 +153,13 @@ class ScheduleType extends AbstractType
 
             foreach ($cronSettings as $settingName) {
                 if ($isAdvanced) {
-                    continue;
+                    $cronField = "{$settingName}_advanced";
+                    if (empty($data[$cronField])) {
+                        $form->get($cronField)->addError(
+                            new FormError('Please provide a CRON expression for advanced mode.')
+                        );
+                        continue;
+                    }
                 }
 
                 $time = $data["{$settingName}_time"] ?? null;
