@@ -216,11 +216,23 @@ class ScheduleAutomationController extends AbstractController
             return $this->redirectToRoute('admin_dashboard_settings_schedule');
         }
 
+        $deleteUnconfirmed = $this->settingRepository->findOneBy(['name' => 'DELETE_UNCONFIRMED_USERS_CRON'])->getValue();
+        $profileExpired = $this->settingRepository->findOneBy(['name' => 'USERS_WHEN_PROFILE_EXPIRES_CRON'])->getValue();
+        $ldapCron = $this->settingRepository->findOneBy(['name' => 'LDAP_SYNC_CRON'])->getValue();
+        $deleteUnconfirmedWarning = $this->verifyHoursAndMinutesFrequency($deleteUnconfirmed);
+        $profileExpiredWarning = $this->verifyHoursAndMinutesFrequency($profileExpired);
+        $ldapCronWarning = $this->verifyHoursAndMinutesFrequency($ldapCron);
+
+
         return $this->render('admin/settings_actions.html.twig', [
             'user' => $currentUser,
             'data' => $data,
             'settings' => $this->settingRepository->findAll(),
             'form' => $form->createView(),
+            'deleteUnconfirmedWarning' => $deleteUnconfirmedWarning,
+            'profileExpiredWarning' => $profileExpiredWarning,
+            'ldapCronWarning' => $ldapCronWarning,
+
         ]);
     }
 
@@ -285,5 +297,28 @@ class ScheduleAutomationController extends AbstractController
 
         // Remove duplicates and sort values
         return array_values(array_unique($result));
+    }
+
+    private function verifyHoursAndMinutesFrequency(string $cron): ?string
+    {
+        $advancedMode = $this->settingRepository->findOneBy(['name' => 'CRON_ADVANCED_STATUS']);
+        if ($advancedMode && $advancedMode->getValue() === OperationMode::OFF->value) {
+            return null;
+        }
+        $result = $this->cronExpressionHelperService->recognizeCronFrequency($cron);
+        $parts = $result['parts'] ?? [];
+        if ($parts['minute']['frequency'] > 1 && $parts['hour']['frequency'] > 1)
+        {
+            return 'minutes and hours';
+        }
+        if ($parts['minute']['frequency'] > 1)
+        {
+            return 'minutes';
+        }
+        if ($parts['hour']['frequency'] > 1)
+        {
+            return 'hours';
+        }
+        return null;
     }
 }
