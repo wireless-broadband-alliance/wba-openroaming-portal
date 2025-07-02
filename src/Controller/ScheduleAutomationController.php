@@ -15,6 +15,7 @@ use DateTime;
 use DateTimeImmutable;
 use DateTimeInterface;
 use Doctrine\ORM\EntityManagerInterface;
+use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
@@ -67,7 +68,7 @@ class ScheduleAutomationController extends AbstractController
 
             try {
                 $initialData["{$settingName}_time"] = new DateTimeImmutable()->setTime($hour, $minute);
-            } catch (\Exception $e) {
+            } catch (Exception) {
                 $initialData["{$settingName}_time"] = new DateTimeImmutable('00:00');
             }
 
