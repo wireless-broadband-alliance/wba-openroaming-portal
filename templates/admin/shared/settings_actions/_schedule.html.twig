@@ -148,39 +148,38 @@
             {% endfor %}
         </div>
 
-        <div>
-            {# Lose Frequency values WARNING #}
-            {% if deleteUnconfirmedWarning %}
-                <div class="my-2 mr-2 p-2 z-0 text-base font-semibold w-full">
-                    <div class="flex items-center gap-2 p-4 border-l-4 border-yellow-500 bg-yellow-50 text-yellow-800 text-sm rounded-md" role="alert">
-                        <twig:ux:icon name="wba:info" class="w-10 md:w-5 h-10 md:h-5 inline mr-3" fill="currentColor"/>
-                        <span class="font-medium">
-                If you save in simple mode, {{ deleteUnconfirmedWarning }} frequency settings for the 'Delete Unconfirmed Account Automation' Cron will be lost.
-            </span>
+            <div data-cron-toggle-target="alerts">
+                {% if deleteUnconfirmedWarning %}
+                    <div class="alert-block my-4 p-2">
+                        <div class="flex items-center gap-2 p-4 border-l-4 border-yellow-500 bg-yellow-50 text-yellow-800 text-sm rounded-md" role="alert">
+                            <twig:ux:icon name="wba:info" class="w-10 md:w-5 h-10 md:h-5 inline mr-3" fill="currentColor"/>
+                            <span class="font-medium">
+                        If you save in simple mode, {{ deleteUnconfirmedWarning }} frequency settings for the 'Delete Unconfirmed Account Automation' Cron will be lost.
+                    </span>
+                        </div>
                     </div>
-                </div>
-            {% endif %}
-            {% if profileExpiredWarning %}
-                <div class="my-2 mr-2 p-2 z-0 text-base font-semibold w-full">
-                    <div class="flex items-center gap-2 p-4 border-l-4 border-yellow-500 bg-yellow-50 text-yellow-800 text-sm rounded-md" role="alert">
-                        <twig:ux:icon name="wba:info" class="w-10 md:w-5 h-10 md:h-5 inline mr-3" fill="currentColor"/>
-                        <span class="font-medium">
-                If you save in simple mode, {{ profileExpiredWarning }} frequency settings for the 'Profile Expiration Notification Automation' Cron will be lost.
-            </span>
+                {% endif %}
+                {% if profileExpiredWarning %}
+                    <div class="alert-block my-4 p-2">
+                        <div class="flex items-center gap-2 p-4 border-l-4 border-yellow-500 bg-yellow-50 text-yellow-800 text-sm rounded-md" role="alert">
+                            <twig:ux:icon name="wba:info" class="w-10 md:w-5 h-10 md:h-5 inline mr-3" fill="currentColor"/>
+                            <span class="font-medium">
+                        If you save in simple mode, {{ profileExpiredWarning }} frequency settings for the 'Profile Expiration Notification Automation' Cron will be lost.
+                    </span>
+                        </div>
                     </div>
-                </div>
-            {% endif %}
-            {% if ldapCronWarning %}
-                <div class="my-2 mr-2 p-2 z-0 text-base font-semibold w-full">
-                    <div class="flex items-center gap-2 p-4 border-l-4 border-yellow-500 bg-yellow-50 text-yellow-800 text-sm rounded-md" role="alert">
-                        <twig:ux:icon name="wba:info" class="w-10 md:w-5 h-10 md:h-5 inline mr-3" fill="currentColor"/>
-                        <span class="font-medium">
-                If you save in simple mode, {{ ldapCronWarning }} frequency settings for the 'LDAP Synchronization Automation' Cron will be lost.
-            </span>
+                {% endif %}
+                {% if ldapCronWarning %}
+                    <div class="alert-block my-4 p-2">
+                        <div class="flex items-center gap-2 p-4 border-l-4 border-yellow-500 bg-yellow-50 text-yellow-800 text-sm rounded-md" role="alert">
+                            <twig:ux:icon name="wba:info" class="w-10 md:w-5 h-10 md:h-5 inline mr-3" fill="currentColor"/>
+                            <span class="font-medium">
+                        If you save in simple mode, {{ ldapCronWarning }} frequency settings for the 'LDAP Synchronization Automation' Cron will be lost.
+                    </span>
+                        </div>
                     </div>
-                </div>
-            {% endif %}
-        </div>
+                {% endif %}
+            </div>
 
         <div class="mt-6 divider-solid"></div>
 

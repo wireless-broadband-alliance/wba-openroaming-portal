@@ -11,6 +11,7 @@ export default class extends Controller {
         "day_of_week_frequency",
         "day_of_month_frequency",
         "months_of_the_year_frequency",
+        "alerts"
     ];
 
     connect() {
@@ -32,6 +33,10 @@ export default class extends Controller {
                 el.closest(".form-group")?.classList.toggle("hidden", !show);
             });
         };
+
+        if (this.hasAlertsTarget) {
+            this.alertsTarget.style.display = isAdvanced ? "none" : "block";
+        }
 
         // Advanced field shown when advanced mode is on
         toggleGroupElements(this.advancedTargets, isAdvanced);
