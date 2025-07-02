@@ -11,7 +11,7 @@ export default class extends Controller {
         "day_of_week_frequency",
         "day_of_month_frequency",
         "months_of_the_year_frequency",
-        "alerts"
+        "alerts",
     ];
 
     connect() {
