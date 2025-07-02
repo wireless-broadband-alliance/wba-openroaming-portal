@@ -153,6 +153,7 @@ class ScheduleType extends AbstractType
 
             foreach ($cronSettings as $settingName) {
                 if ($isAdvanced) {
+                    // Only validate advanced CRON expression
                     $cronField = "{$settingName}_advanced";
                     if (empty($data[$cronField])) {
                         $form->get($cronField)->addError(
@@ -160,6 +161,18 @@ class ScheduleType extends AbstractType
                         );
                         continue;
                     }
+
+                    // Validate the CRON expression format for the advanced field
+                    try {
+                        new CronExpression($data[$cronField]);
+                    } catch (Exception) {
+                        $form->get($cronField)->addError(
+                            new FormError('Invalid CRON expression.')
+                        );
+                    }
+
+                    // Skip the rest of the detailed validation
+                    continue;
                 }
 
                 $time = $data["{$settingName}_time"] ?? null;
