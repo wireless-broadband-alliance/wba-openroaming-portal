@@ -279,7 +279,12 @@ class ScheduleType extends AbstractType
                 if (in_array('*', $daysOfMonth, true)) {
                     $dayOfMonthPart = "*/$monthsFreq";
                 } else {
-                    $dayOfMonthPart = $this->buildCronPartWithFrequency($daysOfMonth, $dayOfMonthFreq, $form, $settingName);
+                    $dayOfMonthPart = $this->buildCronPartWithFrequency(
+                        $daysOfMonth,
+                        $dayOfMonthFreq,
+                        $form,
+                        $settingName
+                    );
                 }
                 if (in_array('*', $monthsOfYear, true)) {
                     $monthPart = "*/$monthsFreq";
@@ -289,7 +294,12 @@ class ScheduleType extends AbstractType
                 if (in_array('*', $daysOfWeek, true)) {
                     $dayOfWeekPart = "*/$dayOfWeekFreq";
                 } else {
-                    $dayOfWeekPart = $this->buildCronPartWithFrequency($daysOfWeek, $dayOfWeekFreq, $form, $settingName);
+                    $dayOfWeekPart = $this->buildCronPartWithFrequency(
+                        $daysOfWeek,
+                        $dayOfWeekFreq,
+                        $form,
+                        $settingName
+                    );
                 }
 
                 $cronString = sprintf(
