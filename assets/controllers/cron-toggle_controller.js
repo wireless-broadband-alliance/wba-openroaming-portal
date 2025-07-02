@@ -47,11 +47,10 @@ export default class extends Controller {
         toggleGroupElements(this.day_of_month_frequencyTargets, !isAdvanced);
         toggleGroupElements(this.months_of_the_year_frequencyTargets, !isAdvanced);
 
-        // Toggle section titles per group
-        this.toggleGroupTitles(isAdvanced);
+        this.toggleGroupTitlesAndIcons(isAdvanced);
     }
 
-    toggleGroupTitles() {
+    toggleGroupTitlesAndIcons() {
         const fieldTypes = [
             "advanced",
             "day_of_week",
@@ -63,7 +62,6 @@ export default class extends Controller {
             "months_of_the_year_frequency",
         ];
 
-        // Get all group names from any target with group data
         const allTargets = fieldTypes.flatMap((type) => this[`${type}Targets`] || []);
         const groupNames = [...new Set(allTargets.map((el) => el.dataset.cronToggleGroup).filter(Boolean))];
 
@@ -72,18 +70,25 @@ export default class extends Controller {
                 const inputs = this[`${type}Targets`].filter((el) => el.dataset.cronToggleGroup === group);
                 const anyVisible = inputs.some((el) => !el.closest(".form-group")?.classList.contains("hidden"));
 
-                this.toggleTitleVisibility(group, type, anyVisible);
+                this.toggleTitleAndIcon(group, type, anyVisible);
             });
         });
     }
 
-    toggleTitleVisibility(group, type, show) {
+    toggleTitleAndIcon(group, type, show) {
         const groupEl = document.getElementById(group);
         if (!groupEl) return;
 
         const titleEl = groupEl.querySelector(`[data-cron-toggle-title="${type}"]`);
-        if (titleEl) {
-            titleEl.classList.toggle("hidden", !show);
+        if (!titleEl) return;
+
+        const parentRow = titleEl.closest(".flex");
+        if (!parentRow) return;
+
+        const iconEl = parentRow.querySelector("img");
+        titleEl.classList.toggle("hidden", !show);
+        if (iconEl) {
+            iconEl.classList.toggle("hidden", !show);
         }
     }
 }

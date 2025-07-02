@@ -51,6 +51,7 @@ class ResetScheduleSettingsCommand extends Command
             ['name' => 'DELETE_UNCONFIRMED_USERS_CRON', 'value' => '0 0 * * *'],
             ['name' => 'USERS_WHEN_PROFILE_EXPIRES_CRON', 'value' => '0 1 * * *'],
             ['name' => 'LDAP_SYNC_CRON', 'value' => '0 2 * * *'],
+            ['name' => 'CRON_ADVANCED_STATUS', 'value' => 'OFF'],
         ];
 
         // Begin a database transaction to ensure data consistency
