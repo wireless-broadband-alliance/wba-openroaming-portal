@@ -95,18 +95,15 @@ readonly class ApiResponseService
                         'Invalid user provided. Please verify the user data'
                     ],
                     401 => [
-                        'Two-Factor Authentication is active for this account. Please ensure you provide the correct 
-                        authentication code.',
+                        'Two-Factor Authentication is active for this account. Please ensure you provide the correct authentication code.',
                         'Two-Factor Authentication is ENFORCED FOR PORTAL accounts.',
-                        'Two-Factor Authentication it\'s required for authentication on the portal. 
-                        Please visit DOMAIN to set up 2FA and secure your account.',
+                        'Two-Factor Authentication it\'s required for authentication on the portal. Please visit DOMAIN to set up 2FA and secure your account.',
                         'Invalid credentials'
                     ],
                     403 => [
                         'User account is not verified!',
                         'User account is banned from the system!',
-                        'Your request cannot be processed at this time due to a pending action. 
-                        If your account is active, re-login to complete the action',
+                        'Your request cannot be processed at this time due to a pending action. If your account is active, re-login to complete the action',
                     ],
                     500 => [
                         'An error occurred: Generic server-side error.',
@@ -154,11 +151,9 @@ readonly class ApiResponseService
                     401 => [
                         'Unable to validate SAML assertion',
                         'Authentication Failed',
-                        'Two-Factor Authentication is active for this account. Please ensure you provide the correct 
-                        authentication code.',
+                        'Two-Factor Authentication is active for this account. Please ensure you provide the correct authentication code.',
                         'Two-Factor Authentication is ENFORCED FOR PORTAL accounts.',
-                        'Two-Factor Authentication it\'s required for authentication on the portal. 
-                        Please visit DOMAIN to set up 2FA and secure your account.'
+                        'Two-Factor Authentication it\'s required for authentication on the portal. Please visit DOMAIN to set up 2FA and secure your account.'
                     ],
                     403 => [
                         'The provided IDP Entity is invalid or does not match the expected configuration.',
@@ -213,11 +208,9 @@ readonly class ApiResponseService
                         'Invalid user provided. Please verify the user data',
                     ],
                     401 => [
-                        'Two-Factor Authentication is active for this account. Please ensure you provide the correct 
-                        authentication code.',
+                        'Two-Factor Authentication is active for this account. Please ensure you provide the correct authentication code.',
                         'Two-Factor Authentication is ENFORCED FOR PORTAL accounts.',
-                        'Two-Factor Authentication it\'s required for authentication on the portal. 
-                        Please visit DOMAIN to set up 2FA and secure your account.',
+                        'Two-Factor Authentication it\'s required for authentication on the portal. Please visit DOMAIN to set up 2FA and secure your account.',
                     ],
                     403 => [
                         'User account is not verified!',
@@ -271,11 +264,9 @@ readonly class ApiResponseService
                         'Invalid user provided. Please verify the user data',
                     ],
                     401 => [
-                        'Two-Factor Authentication is active for this account. Please ensure you provide the correct 
-                        authentication code.',
+                        'Two-Factor Authentication is active for this account. Please ensure you provide the correct authentication code.',
                         'Two-Factor Authentication is ENFORCED FOR PORTAL accounts.',
-                        'Two-Factor Authentication it\'s required for authentication on the portal. 
-                        Please visit DOMAIN to set up 2FA and secure your account.',
+                        'Two-Factor Authentication it\'s required for authentication on the portal. Please visit DOMAIN to set up 2FA and secure your account.',
                     ],
                     403 => [
                         'User account is not verified!',
@@ -713,19 +704,14 @@ readonly class ApiResponseService
                         'User account is not verified!',
                         'User account is banned from the system!',
                         'Invalid account type. Please only use email/phone number accounts from the portal',
-                        'Invalid Two-Factor Authentication configuration Please ensure that 2FA is set up using either 
-                        email or SMS for this account',
-                        'The Two-Factor Authentication (2FA) configuration is incomplete. Please set up 2FA using 
-                        either email or SMS',
-                        'Your request cannot be processed at this time due to a pending action. If your account is
-                         active, re-login to complete the action',
+                        'Invalid Two-Factor Authentication configuration Please ensure that 2FA is set up using either email or SMS for this account',
+                        'The Two-Factor Authentication (2FA) configuration is incomplete. Please set up 2FA using either email or SMS',
+                        'Your request cannot be processed at this time due to a pending action. If your account is active, re-login to complete the action',
                     ],
                     429 => [
                         'You need to wait %d seconds before asking for a new code.',
-                        'Too many attempts. You have exceeded the limit of %d attempts. 
-                        Please wait %d minutes before trying again.',
-                        'Too many validation attempts. You have exceeded the limit of %d attempts. 
-                        Please wait %d minute(s) before trying again.',
+                        'Too many attempts. You have exceeded the limit of %d attempts. Please wait %d minutes before trying again.',
+                        'Too many validation attempts. You have exceeded the limit of %d attempts. Please wait %d minute(s) before trying again.',
                     ]
                 ]
             ],
@@ -778,10 +764,8 @@ readonly class ApiResponseService
                         'Unauthorized - You do not have permission to access this resource.',
                         'Unauthorized: The SAML assertion email does not match the user account email.',
                         'The configured IDP Entity ID does not match the expected value. Access denied.',
-                        'Invalid Two-Factor Authentication configuration. Please ensure that 2FA is set up using 
-                        either email or SMS for this account.',
-                        'The Two-Factor Authentication (2FA) configuration is incomplete. Please set up 2FA using 
-                        either email or SMS.',
+                        'Invalid Two-Factor Authentication configuration. Please ensure that 2FA is set up using either email or SMS for this account.',
+                        'The Two-Factor Authentication (2FA) configuration is incomplete. Please set up 2FA using either email or SMS.',
                         'Invalid account type. Please only use email/phone number accounts from the portal.',
                     ],
                     404 => [
@@ -840,18 +824,15 @@ readonly class ApiResponseService
                         'Invalid user provided. Please verify the user data'
                     ],
                     401 => [
-                        'Two-Factor Authentication is active for this account. 
-                        Please ensure you provide the correct authentication code.',
+                        'Two-Factor Authentication is active for this account. Please ensure you provide the correct authentication code.',
                         'Two-Factor Authentication is ENFORCED FOR PORTAL accounts.',
-                        'Two-Factor Authentication it\'s required for authentication on the portal.
-                         Please visit DOMAIN to set up 2FA and secure your account.',
+                        'Two-Factor Authentication it\'s required for authentication on the portal. Please visit DOMAIN to set up 2FA and secure your account.',
                         'Invalid credentials'
                     ],
                     403 => [
                         'User account is not verified!',
                         'User account is banned from the system!',
-                        'Your request cannot be processed at this time due to a pending action. 
-                        If your account is active, re-login to complete the action',
+                        'Your request cannot be processed at this time due to a pending action. If your account is active, re-login to complete the action',
                     ],
                     500 => [
                         'An error occurred: Generic server-side error.',
@@ -899,11 +880,9 @@ readonly class ApiResponseService
                     401 => [
                         'Unable to validate SAML assertion',
                         'Authentication Failed',
-                        'Two-Factor Authentication is active for this account. 
-                        Please ensure you provide the correct authentication code.',
+                        'Two-Factor Authentication is active for this account. Please ensure you provide the correct authentication code.',
                         'Two-Factor Authentication is ENFORCED FOR PORTAL accounts.',
-                        'Two-Factor Authentication it\'s required for authentication on the portal. 
-                        Please visit DOMAIN to set up 2FA and secure your account.'
+                        'Two-Factor Authentication it\'s required for authentication on the portal. Please visit DOMAIN to set up 2FA and secure your account.'
                     ],
                     403 => [
                         'The provided IDP Entity is invalid or does not match the expected configuration.',
@@ -958,11 +937,9 @@ readonly class ApiResponseService
                         'Invalid user provided. Please verify the user data',
                     ],
                     401 => [
-                        'Two-Factor Authentication is active for this account. 
-                        Please ensure you provide the correct authentication code.',
+                        'Two-Factor Authentication is active for this account. Please ensure you provide the correct authentication code.',
                         'Two-Factor Authentication is ENFORCED FOR PORTAL accounts.',
-                        'Two-Factor Authentication it\'s required for authentication on the portal.
-                         Please visit DOMAIN to set up 2FA and secure your account.',
+                        'Two-Factor Authentication it\'s required for authentication on the portal. Please visit DOMAIN to set up 2FA and secure your account.',
                     ],
                     403 => [
                         'User account is not verified!',
@@ -1016,11 +993,9 @@ readonly class ApiResponseService
                         'Invalid user provided. Please verify the user data',
                     ],
                     401 => [
-                        'Two-Factor Authentication is active for this account. 
-                        Please ensure you provide the correct authentication code.',
+                        'Two-Factor Authentication is active for this account. Please ensure you provide the correct authentication code.',
                         'Two-Factor Authentication is ENFORCED FOR PORTAL accounts.',
-                        'Two-Factor Authentication it\'s required for authentication on the portal. 
-                        Please visit DOMAIN to set up 2FA and secure your account.',
+                        'Two-Factor Authentication it\'s required for authentication on the portal. Please visit DOMAIN to set up 2FA and secure your account.',
                     ],
                     403 => [
                         'User account is not verified!',
@@ -1449,8 +1424,7 @@ configuration for the Android App.</p></body></html>'
                     400 => [
                         'CAPTCHA validation failed',
                         'Missing required fields: uuid, password or turnstile_token',
-                        'Missing required configuration setting: TWO_FACTOR_AUTH_RESEND_INTERVAL 
-                        TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS',
+                        'Missing required configuration setting: TWO_FACTOR_AUTH_RESEND_INTERVAL TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS',
                         'Invalid json format',
                         'Invalid credentials'
                     ],
@@ -1462,19 +1436,14 @@ configuration for the Android App.</p></body></html>'
                         'User account is not verified!',
                         'User account is banned from the system!',
                         'Invalid account type. Please only use email/phone number accounts from the portal',
-                        'Invalid Two-Factor Authentication configuration Please ensure that 2FA is set up using 
-                        either email or SMS for this account',
-                        'The Two-Factor Authentication (2FA) configuration is incomplete. Please set up 2FA using
-                         either email or SMS',
-                        'Your request cannot be processed at this time due to a pending action. If your account is
-                         active, re-login to complete the action',
+                        'Invalid Two-Factor Authentication configuration Please ensure that 2FA is set up using either email or SMS for this account',
+                        'The Two-Factor Authentication (2FA) configuration is incomplete. Please set up 2FA using either email or SMS',
+                        'Your request cannot be processed at this time due to a pending action. If your account is active, re-login to complete the action',
                     ],
                     429 => [
                         'You need to wait %d seconds before asking for a new code.',
-                        'Too many attempts. You have exceeded the limit of %d attempts. 
-                        Please wait %d minutes before trying again.',
-                        'Too many validation attempts. You have exceeded the limit of %d attempts. 
-                        Please wait %d minute(s) before trying again.',
+                        'Too many attempts. You have exceeded the limit of %d attempts. Please wait %d minutes before trying again.',
+                        'Too many validation attempts. You have exceeded the limit of %d attempts. Please wait %d minute(s) before trying again.',
                     ]
                 ]
 
@@ -1516,10 +1485,8 @@ configuration for the Android App.</p></body></html>'
                         'Unauthorized - You do not have permission to access this resource.',
                         'Unauthorized: The SAML assertion email does not match the user account email.',
                         'The configured IDP Entity ID does not match the expected value. Access denied.',
-                        'Invalid Two-Factor Authentication configuration. Please ensure that 2FA is set up 
-                        using either email or SMS for this account.',
-                        'The Two-Factor Authentication (2FA) configuration is incomplete. Please set up 2FA 
-                        using either email or SMS.',
+                        'Invalid Two-Factor Authentication configuration. Please ensure that 2FA is set up using either email or SMS for this account.',
+                        'The Two-Factor Authentication (2FA) configuration is incomplete. Please set up 2FA using either email or SMS.',
                         'Invalid account type. Please only use email/phone number accounts from the portal.',
                     ],
                     404 => [
