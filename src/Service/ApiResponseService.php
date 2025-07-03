@@ -95,16 +95,22 @@ readonly class ApiResponseService
                         'Invalid user provided. Please verify the user data'
                     ],
                     401 => [
+                        // phpcs:disable Generic.Files.LineLength.TooLong
                         'Two-Factor Authentication is active for this account. Please ensure you provide the correct authentication code.',
+                        // phpcs:enable
                         'Two-Factor Authentication is ENFORCED FOR PORTAL accounts.',
+                        // phpcs:disable Generic.Files.LineLength.TooLong
                         'Two-Factor Authentication it\'s required for authentication on the portal. Please visit DOMAIN to set up 2FA and secure your account.',
+                        // phpcs:enable
                         'Invalid credentials'
                     ],
                     403 => [
                         'User account is not verified!',
                         'User account is banned from the system!',
+                        // phpcs:disable Generic.Files.LineLength.TooLong
                         'Your request cannot be processed at this time due to a pending action. If your account is active, re-login to complete the action',
-                    ],
+                        // phpcs:enable
+                        ],
                     500 => [
                         'An error occurred: Generic server-side error.',
                         'JWT key files are missing. Please ensure both private and public keys exist.',
@@ -151,9 +157,13 @@ readonly class ApiResponseService
                     401 => [
                         'Unable to validate SAML assertion',
                         'Authentication Failed',
+                        // phpcs:disable Generic.Files.LineLength.TooLong
                         'Two-Factor Authentication is active for this account. Please ensure you provide the correct authentication code.',
+                        // phpcs:enable
                         'Two-Factor Authentication is ENFORCED FOR PORTAL accounts.',
+                        // phpcs:disable Generic.Files.LineLength.TooLong
                         'Two-Factor Authentication it\'s required for authentication on the portal. Please visit DOMAIN to set up 2FA and secure your account.'
+                        // phpcs:enable
                     ],
                     403 => [
                         'The provided IDP Entity is invalid or does not match the expected configuration.',
@@ -208,9 +218,13 @@ readonly class ApiResponseService
                         'Invalid user provided. Please verify the user data',
                     ],
                     401 => [
+                        // phpcs:disable Generic.Files.LineLength.TooLong
                         'Two-Factor Authentication is active for this account. Please ensure you provide the correct authentication code.',
+                        // phpcs:enable
                         'Two-Factor Authentication is ENFORCED FOR PORTAL accounts.',
+                        // phpcs:disable Generic.Files.LineLength.TooLong
                         'Two-Factor Authentication it\'s required for authentication on the portal. Please visit DOMAIN to set up 2FA and secure your account.',
+                        // phpcs:enable
                     ],
                     403 => [
                         'User account is not verified!',
@@ -264,9 +278,13 @@ readonly class ApiResponseService
                         'Invalid user provided. Please verify the user data',
                     ],
                     401 => [
+                        // phpcs:disable Generic.Files.LineLength.TooLong
                         'Two-Factor Authentication is active for this account. Please ensure you provide the correct authentication code.',
+                        // phpcs:enable
                         'Two-Factor Authentication is ENFORCED FOR PORTAL accounts.',
+                        // phpcs:disable Generic.Files.LineLength.TooLong
                         'Two-Factor Authentication it\'s required for authentication on the portal. Please visit DOMAIN to set up 2FA and secure your account.',
+                        // phpcs:enable
                     ],
                     403 => [
                         'User account is not verified!',
@@ -704,15 +722,19 @@ readonly class ApiResponseService
                         'User account is not verified!',
                         'User account is banned from the system!',
                         'Invalid account type. Please only use email/phone number accounts from the portal',
+                        // phpcs:disable Generic.Files.LineLength.TooLong
                         'Invalid Two-Factor Authentication configuration Please ensure that 2FA is set up using either email or SMS for this account',
                         'The Two-Factor Authentication (2FA) configuration is incomplete. Please set up 2FA using either email or SMS',
                         'Your request cannot be processed at this time due to a pending action. If your account is active, re-login to complete the action',
+                        // phpcs:enable
                     ],
                     429 => [
                         'You need to wait %d seconds before asking for a new code.',
+                        // phpcs:disable Generic.Files.LineLength.TooLong
                         'Too many attempts. You have exceeded the limit of %d attempts. Please wait %d minutes before trying again.',
                         'Too many validation attempts. You have exceeded the limit of %d attempts. Please wait %d minute(s) before trying again.',
-                    ]
+                        // phpcs:enable
+                        ]
                 ]
             ],
             'api_v1_user_account_deletion' => [
@@ -764,8 +786,10 @@ readonly class ApiResponseService
                         'Unauthorized - You do not have permission to access this resource.',
                         'Unauthorized: The SAML assertion email does not match the user account email.',
                         'The configured IDP Entity ID does not match the expected value. Access denied.',
+                        // phpcs:disable Generic.Files.LineLength.TooLong
                         'Invalid Two-Factor Authentication configuration. Please ensure that 2FA is set up using either email or SMS for this account.',
                         'The Two-Factor Authentication (2FA) configuration is incomplete. Please set up 2FA using either email or SMS.',
+                        // phpcs:enable
                         'Invalid account type. Please only use email/phone number accounts from the portal.',
                     ],
                     404 => [
@@ -824,15 +848,21 @@ readonly class ApiResponseService
                         'Invalid user provided. Please verify the user data'
                     ],
                     401 => [
+                        // phpcs:disable Generic.Files.LineLength.TooLong
                         'Two-Factor Authentication is active for this account. Please ensure you provide the correct authentication code.',
+                        // phpcs:enable
                         'Two-Factor Authentication is ENFORCED FOR PORTAL accounts.',
+                        // phpcs:disable Generic.Files.LineLength.TooLong
                         'Two-Factor Authentication it\'s required for authentication on the portal. Please visit DOMAIN to set up 2FA and secure your account.',
+                        // phpcs:enable
                         'Invalid credentials'
                     ],
                     403 => [
                         'User account is not verified!',
                         'User account is banned from the system!',
+                        // phpcs:disable Generic.Files.LineLength.TooLong
                         'Your request cannot be processed at this time due to a pending action. If your account is active, re-login to complete the action',
+                        // phpcs:enable
                     ],
                     500 => [
                         'An error occurred: Generic server-side error.',
@@ -880,9 +910,13 @@ readonly class ApiResponseService
                     401 => [
                         'Unable to validate SAML assertion',
                         'Authentication Failed',
+                        // phpcs:disable Generic.Files.LineLength.TooLong
                         'Two-Factor Authentication is active for this account. Please ensure you provide the correct authentication code.',
+                        // phpcs:enable
                         'Two-Factor Authentication is ENFORCED FOR PORTAL accounts.',
+                        // phpcs:disable Generic.Files.LineLength.TooLong
                         'Two-Factor Authentication it\'s required for authentication on the portal. Please visit DOMAIN to set up 2FA and secure your account.'
+                        // phpcs:enable
                     ],
                     403 => [
                         'The provided IDP Entity is invalid or does not match the expected configuration.',
@@ -937,9 +971,13 @@ readonly class ApiResponseService
                         'Invalid user provided. Please verify the user data',
                     ],
                     401 => [
+                        // phpcs:disable Generic.Files.LineLength.TooLong
                         'Two-Factor Authentication is active for this account. Please ensure you provide the correct authentication code.',
+                        // phpcs:enable
                         'Two-Factor Authentication is ENFORCED FOR PORTAL accounts.',
+                        // phpcs:disable Generic.Files.LineLength.TooLong
                         'Two-Factor Authentication it\'s required for authentication on the portal. Please visit DOMAIN to set up 2FA and secure your account.',
+                        // phpcs:enable
                     ],
                     403 => [
                         'User account is not verified!',
@@ -993,9 +1031,13 @@ readonly class ApiResponseService
                         'Invalid user provided. Please verify the user data',
                     ],
                     401 => [
+                        // phpcs:disable Generic.Files.LineLength.TooLong
                         'Two-Factor Authentication is active for this account. Please ensure you provide the correct authentication code.',
+                        // phpcs:enable
                         'Two-Factor Authentication is ENFORCED FOR PORTAL accounts.',
+                        // phpcs:disable Generic.Files.LineLength.TooLong
                         'Two-Factor Authentication it\'s required for authentication on the portal. Please visit DOMAIN to set up 2FA and secure your account.',
+                        // phpcs:enable
                     ],
                     403 => [
                         'User account is not verified!',
@@ -1424,7 +1466,9 @@ configuration for the Android App.</p></body></html>'
                     400 => [
                         'CAPTCHA validation failed',
                         'Missing required fields: uuid, password or turnstile_token',
+                        // phpcs:disable Generic.Files.LineLength.TooLong
                         'Missing required configuration setting: TWO_FACTOR_AUTH_RESEND_INTERVAL TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS',
+                        // phpcs:enable
                         'Invalid json format',
                         'Invalid credentials'
                     ],
@@ -1436,14 +1480,18 @@ configuration for the Android App.</p></body></html>'
                         'User account is not verified!',
                         'User account is banned from the system!',
                         'Invalid account type. Please only use email/phone number accounts from the portal',
+                        // phpcs:disable Generic.Files.LineLength.TooLong
                         'Invalid Two-Factor Authentication configuration Please ensure that 2FA is set up using either email or SMS for this account',
                         'The Two-Factor Authentication (2FA) configuration is incomplete. Please set up 2FA using either email or SMS',
                         'Your request cannot be processed at this time due to a pending action. If your account is active, re-login to complete the action',
+                        // phpcs:enable
                     ],
                     429 => [
                         'You need to wait %d seconds before asking for a new code.',
+                        // phpcs:disable Generic.Files.LineLength.TooLong
                         'Too many attempts. You have exceeded the limit of %d attempts. Please wait %d minutes before trying again.',
                         'Too many validation attempts. You have exceeded the limit of %d attempts. Please wait %d minute(s) before trying again.',
+                        // phpcs:enable
                     ]
                 ]
 
@@ -1485,8 +1533,10 @@ configuration for the Android App.</p></body></html>'
                         'Unauthorized - You do not have permission to access this resource.',
                         'Unauthorized: The SAML assertion email does not match the user account email.',
                         'The configured IDP Entity ID does not match the expected value. Access denied.',
+                        // phpcs:disable Generic.Files.LineLength.TooLong
                         'Invalid Two-Factor Authentication configuration. Please ensure that 2FA is set up using either email or SMS for this account.',
                         'The Two-Factor Authentication (2FA) configuration is incomplete. Please set up 2FA using either email or SMS.',
+                        // phpcs:enable
                         'Invalid account type. Please only use email/phone number accounts from the portal.',
                     ],
                     404 => [
