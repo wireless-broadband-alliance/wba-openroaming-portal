@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Event;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
+use App\Enum\CodeVerificationType;
 use App\Enum\FirewallType;
 use App\Enum\UserTwoFactorAuthenticationStatus;
 use App\Form\TwoFACode;
@@ -44,6 +45,9 @@ class TwoFAController extends AbstractController
     #[Route(
         '/{context}/configure2FA',
         name: 'app_configure2FA',
+        requirements: [
+            'context' => 'landing|dashboard'
+        ],
         defaults: [
             'context' => FirewallType::LANDING->value
         ]
@@ -77,6 +81,9 @@ class TwoFAController extends AbstractController
     #[Route(
         '/{context}/enable2FA/TOTP',
         name: 'app_enable2FA_TOTP',
+        requirements: [
+            'context' => 'landing|dashboard'
+        ],
         defaults: [
             'context' => FirewallType::LANDING->value
         ]
@@ -175,6 +182,9 @@ class TwoFAController extends AbstractController
     #[Route(
         '/{context}/verify2FA/TOTP',
         name: 'app_verify2FA_TOTP',
+        requirements: [
+            'context' => 'landing|dashboard'
+        ],
         defaults: [
             'context' => FirewallType::LANDING->value
         ]
@@ -251,6 +261,9 @@ class TwoFAController extends AbstractController
     #[Route(
         '/{context}/verify2FA',
         name: 'app_verify2FA_portal',
+        requirements: [
+            'context' => 'landing|dashboard'
+        ],
         defaults: [
             'context' => FirewallType::LANDING->value
         ]
@@ -320,6 +333,9 @@ class TwoFAController extends AbstractController
     #[Route(
         '/{context}/disable2FA',
         name: 'app_disable2FA',
+        requirements: [
+            'context' => 'landing|dashboard'
+        ],
         defaults: [
             'context' => FirewallType::LANDING->value
         ]
@@ -394,6 +410,9 @@ class TwoFAController extends AbstractController
     #[Route(
         '/{context}/disable2FA/local',
         name: 'app_disable2FA_local',
+        requirements: [
+            'context' => 'landing|dashboard'
+        ],
         defaults: [
             'context' => FirewallType::LANDING->value
         ]
@@ -440,6 +459,7 @@ class TwoFAController extends AbstractController
                 }
                 return $this->redirectToRoute('app_landing');
             }
+            $this->addFlash('error', 'Invalid code please try again or resend the code');
         }
         return $this->render('site/twoFAAuthentication/actions/disable2FA.html.twig', [
             'data' => $data,
@@ -453,6 +473,9 @@ class TwoFAController extends AbstractController
     #[Route(
         '/{context}/disable2FA/TOTP',
         name: 'app_disable2FA_TOTP',
+        requirements: [
+            'context' => 'landing|dashboard'
+        ],
         defaults: [
             'context' => FirewallType::LANDING->value
         ]
@@ -513,6 +536,9 @@ class TwoFAController extends AbstractController
     #[Route(
         '/{context}/2FAFirstSetup/codes',
         name: 'app_otpCodes',
+        requirements: [
+            'context' => 'landing|dashboard'
+        ],
         defaults: [
             'context' => FirewallType::LANDING->value
         ]
@@ -569,6 +595,9 @@ class TwoFAController extends AbstractController
     #[Route(
         '/{context}/2FAFirstSetup/codes/save',
         name: 'app_otpCodes_save',
+        requirements: [
+            'context' => 'landing|dashboard'
+        ],
         defaults: [
             'context' => FirewallType::LANDING->value
         ]
@@ -608,13 +637,16 @@ class TwoFAController extends AbstractController
      * @throws RandomException
      */
     #[Route(
-        '/{context}/verify2FA/resend',
-        name: 'app_2FA_local_resend_code',
+        '/{context}/{type}/resend',
+        name: 'app_local_resend_code',
+        requirements: [
+            'context' => 'landing|dashboard'
+        ],
         defaults: [
-            'context' => FirewallType::LANDING->value
+            'context' => FirewallType::LANDING->value,
         ]
     )]
-    public function resendCode(string $context, Request $request): RedirectResponse
+    public function resendCode(string $context, string $type, Request $request): RedirectResponse
     {
         /** @var User $user */
         $user = $this->getUser();
@@ -636,18 +668,37 @@ class TwoFAController extends AbstractController
         $timeIntervalToResendCode = $data["TWO_FACTOR_AUTH_RESEND_INTERVAL"]["value"];
         $limitTime = new DateTime();
         $limitTime->modify('-' . $timeToResetAttempts . ' minutes');
-        if ($this->twoFAService->canResendCode($user) && $this->twoFAService->timeIntervalToResendCode($user)) {
+
+        $eventTypeMapping = [
+            CodeVerificationType::TWO_FA_VERIFY_RESEND->value =>
+                AnalyticalEventType::TWO_FA_CODE_VERIFY_RESEND->value,
+            CodeVerificationType::TWO_FA_DISABLE_RESEND->value =>
+                AnalyticalEventType::TWO_FA_CODE_DISABLE_RESEND->value,
+            CodeVerificationType::AUTO_DELETE_RESEND->value =>
+                AnalyticalEventType::USER_AUTO_DELETE_CODE->value,
+            CodeVerificationType::TWO_FA_VALIDATE_RESEND->value =>
+                AnalyticalEventType::TWO_FA_CODE_VALIDATE_RESEND->value,
+        ];
+        $eventType = $eventTypeMapping[$type] ?? null;
+
+        $autoDeletion = $eventType === AnalyticalEventType::USER_AUTO_DELETE_CODE->value;
+
+        if (
+            $this->twoFAService->canResendCode($user, $eventType) &&
+            $this->twoFAService->timeIntervalToResendCode($user, $eventType)
+        ) {
             $this->twoFAService->resendCode(
                 $user,
                 $request->getClientIp(),
                 $request->headers->get('User-Agent'),
-                AnalyticalEventType::TWO_FA_CODE_RESEND->value
+                $eventType,
+                $autoDeletion
             );
             $attempts = $this->eventRepository->find2FACodeAttemptEvent(
                 $user,
                 $nrAttempts,
                 $limitTime,
-                AnalyticalEventType::TWO_FA_CODE_RESEND->value
+                $eventType
             );
             $attemptsLeft = $nrAttempts - count($attempts);
             $this->addFlash(
@@ -657,10 +708,10 @@ class TwoFAController extends AbstractController
         } else {
             $lastEvent = $this->eventRepository->findLatest2FACodeAttemptEvent(
                 $user,
-                AnalyticalEventType::TWO_FA_CODE_RESEND->value
+                $eventType
             );
             $now = new DateTime();
-            if (!$this->twoFAService->canResendCode($user)) {
+            if (!$this->twoFAService->canResendCode($user, $eventType)) {
                 $lastAttemptTime = $lastEvent instanceof Event ?
                     $lastEvent->getEventDatetime() : $timeToResetAttempts;
                 $limitTime = $lastAttemptTime;
@@ -698,6 +749,9 @@ class TwoFAController extends AbstractController
     #[Route(
         '/{context}/generate2FACode',
         name: 'app_2FA_generate_code',
+        requirements: [
+            'context' => 'landing|dashboard'
+        ],
         defaults: [
             'context' => FirewallType::LANDING->value
         ]
@@ -756,6 +810,9 @@ class TwoFAController extends AbstractController
     #[Route(
         '/{context}/downloadCodes',
         name: 'app_download_codes',
+        requirements: [
+            'context' => 'landing|dashboard'
+        ],
         defaults: [
             'context' => FirewallType::LANDING->value
         ]
@@ -800,6 +857,9 @@ class TwoFAController extends AbstractController
     #[Route(
         '/{context}/2FAFirstSetup/portal',
         name: 'app_2FA_firstSetup_local',
+        requirements: [
+            'context' => 'landing|dashboard'
+        ],
         defaults: [
             'context' => FirewallType::LANDING->value
         ]
@@ -875,6 +935,9 @@ class TwoFAController extends AbstractController
     #[Route(
         '/{context}/2FAFirstSetup/verification',
         name: 'app_2FA_first_verification_local',
+        requirements: [
+            'context' => 'landing|dashboard'
+        ],
         defaults: [
             'context' => FirewallType::LANDING->value
         ]
@@ -978,6 +1041,9 @@ class TwoFAController extends AbstractController
     #[Route(
         '/{context}/2FASwapMethod/disableLocal',
         name: 'app_swap2FA_disable_Local',
+        requirements: [
+            'context' => 'landing|dashboard'
+        ],
         defaults: [
             'context' => FirewallType::LANDING->value
         ]
@@ -1047,6 +1113,9 @@ class TwoFAController extends AbstractController
     #[Route(
         '/{context}/generate2FACode/swapMethod',
         name: 'app_2FA_generate_code_swap_method',
+        requirements: [
+            'context' => 'landing|dashboard'
+        ],
         defaults: [
             'context' => FirewallType::LANDING->value
         ]
@@ -1100,6 +1169,9 @@ class TwoFAController extends AbstractController
     #[Route(
         '/{context}/2FASwapMethod/disable/TOTP',
         name: 'app_swap2FA_disable_TOTP',
+        requirements: [
+            'context' => 'landing|dashboard'
+        ],
         defaults: [
             'context' => FirewallType::LANDING->value
         ]

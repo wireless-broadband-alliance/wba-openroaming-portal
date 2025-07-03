@@ -1,5 +1,53 @@
 # Changelog
 
+# Release V1.8.0
+
+- Update API for version 2, fix bug for iOS App's with invalid format for profile generation endpoint.
+- Prometheus Implementation
+- Fix bug with registration links, use could use them to re-log in to the portal at any time, can only be used once.
+- Fix bug with account deletion, the admin was able to access the page using the url. The admin cannot delete his own account.
+- Fix bug on the pagination page with the table `Access Points Usage` on the `dashboard/statistics/freeradius` page (Add
+  new custom display of results per page).
+- Fix bug about when the user session should be restored. Only when the firewall "landing".
+- Invalidate session on the dashboard in case the admin changes is password on the landing firewall.
+- Fix bug with return detector for expired links on registration email, now it returns to the login page with the input
+  pre-fielded.
+- For security reasons, 2FA is now required to be configured for admin users; now the dashboard is no longer assessable
+  without it.
+- For security reasons,`UserAccountDeletion` now simulates a login to confirm the account action for external providers.
+- Fix bug with the forgot-password request, checks if the user is not verified and skips that extra unnecessary steps to
+  avoid many codes and interactions with the user.
+- Fix bug for capport endpoint, it's now independent of the API. Required for AP's configuration with captive portal
+- For security reasons, the `ForgotPasswordRequest` process was reworked: email-based resets now require confirming a
+  link before any database changes occur, and SMS-based resets require validating a code on a dedicated page before
+  proceeding.
+- New Setting for time configuration of email resend on the `ForgotPasswordRequest`, present on the Authentications
+  methods page (EMAIL_TIMER_RESEND).
+- New Setting for time configuration of an email link validly. This same time reflect for link present on the
+  `ForgotPasswordRequest` & on the  `RegistrationWithEmail` (LINK_VALIDITY)
+- Also for this release, it's required to run the new migrations to set up the new settings:
+  Run the migrations with:
+
+```bash
+php bin/console doctrine:migrations:migrate
+```
+
+---
+
+# Release V1.7.3
+
+- Update docker add new geoLite volume, to save the previous geoLite database schema.
+- Fix CAPPORT endpoint `/api/v1/capport/json` is independent of the current state of the `API_STATUS`.
+- The user can now delete its own account from the account_widget popup
+- New endpoint on the API to delete the user account for APP's
+- Rework Two Factor Authenticator to have a type of validation. Now the page knows what type of request is being made
+  when
+  a new code is generated, to having problems of saving the previous number of attempts on new requests (disable,
+  validate, verify, etc.)
+- Rework Two Factor Authenticator request API endpoint to also now the type of request
+
+---
+
 # Release V1.7.2
 
 - Fix minor detail with an invalid comparison to show the cookie banner on the landing page
@@ -10,7 +58,8 @@
 
 - Removed the "Reset Password" option for admins editing their own account.
 - Resolved an issue where logout didn't invalidate the session token, causing 2FA issues.
-- Resolved an issue where editing a user account caused the ban action to also disable the account, which conflicted with the error messages in the landing page authenticator
+- Resolved an issue where editing a user account caused the ban action to also disable the account, which conflicted
+  with the error messages in the landing page authenticator
 - Migrated from the deprecated to its actively maintained forks:
     - [nbgrp/onelogin-saml-bundle](https://github.com/nbgrp/onelogin-saml-bundle) for ongoing support and updates.
     - [tetrapi/onelogin-saml-bundle](https://github.com/tetrapi/onelogin-saml-bundle) as an alternative with additional

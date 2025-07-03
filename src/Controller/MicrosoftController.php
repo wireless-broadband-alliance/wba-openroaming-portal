@@ -31,6 +31,7 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
+use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
 
 class MicrosoftController extends AbstractController
@@ -45,14 +46,18 @@ class MicrosoftController extends AbstractController
         private readonly EventActions $eventActions,
         private readonly GetSettings $getSettings,
         private readonly UserRepository $userRepository,
-        private readonly SettingRepository $settingRepository,
         private readonly UserStatusChecker $userStatusChecker,
         private readonly UserExternalAuthRepository $userExternalAuthRepository,
+        private readonly CsrfTokenManagerInterface $csrfTokenManager,
+        private readonly SettingRepository $settingRepository,
     ) {
     }
 
+    /**
+     * @throws \JsonException
+     */
     #[Route('/connect/microsoft', name: 'connect_microsoft')]
-    public function connect(): RedirectResponse
+    public function connect(Request $request): RedirectResponse
     {
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
@@ -66,6 +71,8 @@ class MicrosoftController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
+        $previousLoggedID = $request->get('previousLoggedID');
+
         // Retrieve the "microsoft" client
         $client = $this->clientRegistry->getClient('microsoft');
 
@@ -76,7 +83,8 @@ class MicrosoftController extends AbstractController
                 // 'wl.basic',
                 // 'wl.offline_access',
                 // 'wl.signin'
-            ]
+            ],
+            'state' => json_encode(['previousLoggedID' => $previousLoggedID], JSON_THROW_ON_ERROR),
         ];
 
         // Get the authorization URL with scopes
@@ -98,9 +106,22 @@ class MicrosoftController extends AbstractController
 
         $code = $request->query->get('code');
         if ($code === null) {
-            $this->addFlash('error', 'Authentication process cancelled.');
+            $this->addFlash(
+                'error',
+                'Authentication process cancelled.'
+            );
             return $this->redirectToRoute('app_landing');
         }
+
+        // Retrieve the `state` parameter and decode it
+        $state = $request->query->get('state');
+        $stateParams = $state !== null ? json_decode(
+            $state,
+            true,
+            512,
+            JSON_THROW_ON_ERROR
+        ) : [];
+        $previousLoggedID = $stateParams['previousLoggedID'] ?? null;
 
         // Exchange the authorization code for an access token
         $accessToken = $client->getOAuth2Provider()->getAccessToken('authorization_code', [
@@ -120,7 +141,10 @@ class MicrosoftController extends AbstractController
 
         // Check if the email is valid
         if (!$this->userStatusChecker->isValidEmail($email, UserProvider::MICROSOFT_ACCOUNT->value)) {
-            $this->addFlash('error', 'Sorry! Your email domain is not allowed to use this platform');
+            $this->addFlash(
+                'error',
+                'Sorry! Your email domain is not allowed to use this platform'
+            );
             return $this->redirectToRoute('app_landing');
         }
 
@@ -134,8 +158,21 @@ class MicrosoftController extends AbstractController
 
         // Check if the user is banned
         if ($user->getBannedAt() instanceof DateTimeInterface) {
-            $this->addFlash('error', "Your account has been banned");
+            $this->addFlash(
+                'error',
+                'Your account is banned. Please, for more information contact our support.'
+            );
             return $this->redirectToRoute('app_landing');
+        }
+
+        // Check if the previousLoggedID exist to trigger the user Account deletion
+        $csrfToken = $this->csrfTokenManager->getToken('user_deletion_check_token')->getValue();
+        if ($previousLoggedID) {
+            return $this->redirectToRoute('app_user_account_deletion_external_check', [
+                'previousLoggedID' => $previousLoggedID,
+                'currentLoggedUserID' => $user->getId(),
+                '_csrf_token' => $csrfToken
+            ]);
         }
 
         // Authenticate the user
@@ -168,7 +205,8 @@ class MicrosoftController extends AbstractController
 
             $this->addFlash(
                 'error',
-                "Email is already in use but is associated with a different provider!"
+                'Email is already in use but is associated with a different provider! 
+                Please use the original one.'
             );
 
             return null;
@@ -242,11 +280,28 @@ class MicrosoftController extends AbstractController
             $eventDispatcher = $this->eventDispatcher;
             $eventDispatcher->dispatch(new InteractiveLoginEvent($request, $token));
 
+            // Defines the Event to the table
+            $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+            $platformMode = $data['PLATFORM_MODE']['value'] ? PlatformMode::DEMO->value : PlatformMode::LIVE->value;
+            $eventMetadata = [
+                'platform' => $platformMode,
+                'ip' => $_SERVER['REMOTE_ADDR'],
+                'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? 'Unknown',
+                'uuid' => $user->getUuid(),
+            ];
+            $this->eventActions->saveEvent(
+                $user,
+                AnalyticalEventType::MICROSOFT_LOGIN_REQUEST->value,
+                new DateTime(),
+                $eventMetadata
+            );
+
             // Save the changes
             $this->entityManager->flush();
         } catch (AuthenticationException $exception) {
             // Handle authentication failure
-            $errorMessage = 'Authentication failed: ' . $exception->getMessage();
+            $errorMessage = 'Authentication failed:'
+                . $exception->getMessage();
             $this->addFlash('error', $errorMessage);
             $this->redirectToRoute('app_landing');
             return;

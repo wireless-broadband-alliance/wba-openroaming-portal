@@ -108,19 +108,6 @@
                         </div>
                     </div>
                 {% endif %}
-            {% endfor %}
-        </div>
-    </div>
-
-    {# Microsoft Sub-settings #}
-    <div>
-        <div class="p-2 mt-10">
-            <h1 class="text-xl md:text-2xl font-semibold">Microsoft Sub-Settings</h1>
-        </div>
-
-        <div class="grid gap-4 lg:grid-cols-2 xl:grid-cols-3 p-2 z-0">
-            {% for setting in form %}
-                {# Display only the authentication settings #}
                 {% if setting.vars.name in ['VALID_DOMAINS_MICROSOFT_LOGIN'] %}
                     <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full"
                          name="MicrosoftSubCards"

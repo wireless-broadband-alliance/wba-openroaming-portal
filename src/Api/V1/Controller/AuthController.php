@@ -62,7 +62,7 @@ class AuthController extends AbstractController
      * @throws ServerExceptionInterface
      * @throws Exception
      */
-    #[Route('/api/v1/auth/local', name: 'api_auth_local', methods: ['POST'])]
+    #[Route('auth/local', name: 'api_v1_auth_local', methods: ['POST'])]
     public function authLocal(Request $request): JsonResponse
     {
         try {
@@ -213,7 +213,7 @@ class AuthController extends AbstractController
         return new BaseResponse(200, $responseData)->toResponse(); # Success Response
     }
 
-    #[Route('/api/v1/auth/saml', name: 'api_auth_saml', methods: ['POST'])]
+    #[Route('/auth/saml', name: 'api_v1_auth_saml', methods: ['POST'])]
     public function authSaml(Request $request, Auth $samlAuth): JsonResponse
     {
         // Get SAML Response
@@ -269,7 +269,7 @@ class AuthController extends AbstractController
             $sAMAccountName = $samlAuth->getNameId();
             $attributes = $samlAuth->getAttributes();
 
-            // Extract necessary attributes
+            // Extract the necessary attributes
             $uuid = $attributes['samlUuid'][0] ?? null;
             $email = $attributes['urn:oid:1.2.840.113549.1.9.1'][0] ?? null;
             $firstName = $attributes['urn:oid:2.5.4.42'][0] ?? null;
@@ -394,7 +394,7 @@ class AuthController extends AbstractController
         }
     }
 
-    #[Route('/api/v1/auth/google', name: 'api_auth_google', methods: ['POST'])]
+    #[Route('/auth/google', name: 'api_v1_auth_google', methods: ['POST'])]
     public function authGoogle(Request $request): JsonResponse
     {
         try {
@@ -522,7 +522,7 @@ class AuthController extends AbstractController
         }
     }
 
-    #[Route('/api/v1/auth/microsoft', name: 'api_auth_microsoft', methods: ['POST'])]
+    #[Route('/auth/microsoft', name: 'api_v1_auth_microsoft', methods: ['POST'])]
     public function authMicrosoft(Request $request): JsonResponse
     {
         try {

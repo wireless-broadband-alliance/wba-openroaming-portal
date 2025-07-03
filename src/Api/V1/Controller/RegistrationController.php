@@ -19,7 +19,6 @@ use App\Service\EventActions;
 use App\Service\GetSettings;
 use App\Service\RegistrationEmailGenerator;
 use App\Service\SendSMS;
-use App\Service\VerificationCodeEmailGenerator;
 use DateInterval;
 use DateTime;
 use DateTimeInterface;
@@ -60,7 +59,6 @@ class RegistrationController extends AbstractController
         private readonly GetSettings $getSettings,
         private readonly SettingRepository $settingRepository,
         private readonly UserPasswordHasherInterface $userPasswordHasher,
-        private readonly VerificationCodeEmailGenerator $verificationCodeGenerator,
         private readonly CaptchaValidator $captchaValidator,
         private readonly RegistrationEmailGenerator $emailGenerator,
         private readonly ValidatorInterface $validator
@@ -76,7 +74,7 @@ class RegistrationController extends AbstractController
      * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
      * @throws Exception
      */
-    #[Route('/api/v1/auth/local/register', name: 'api_auth_local_register', methods: ['POST'])]
+    #[Route('/auth/local/register', name: 'api_v1_auth_local_register', methods: ['POST'])]
     public function localRegister(
         Request $request,
         UserPasswordHasherInterface $userPasswordHasher,
@@ -147,7 +145,7 @@ class RegistrationController extends AbstractController
         $hashedPassword = $userPasswordHasher->hashPassword($user, $data['password']);
         $user->setPassword($hashedPassword);
         $user->setIsVerified(false);
-        $user->setVerificationCode($this->verificationCodeGenerator->generateVerificationCode($user));
+        $user->setVerificationCode(random_int(100000, 999999));
         $user->setFirstName($data['first_name'] ?? null);
         $user->setLastName($data['last_name'] ?? null);
         $user->setCreatedAt(new DateTime());
@@ -192,7 +190,7 @@ class RegistrationController extends AbstractController
      * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
      * @throws TransportExceptionInterface
      */
-    #[Route('/api/v1/auth/local/reset', name: 'api_auth_local_reset', methods: ['POST'])]
+    #[Route('/auth/local/reset', name: 'api_v1_auth_local_reset', methods: ['POST'])]
     public function localReset(
         UserPasswordHasherInterface $userPasswordHasher,
         MailerInterface $mailer,
@@ -253,9 +251,9 @@ class RegistrationController extends AbstractController
             if ($user->getBannedAt()) {
                 // This message exists in case of a user is banned the email/reset, to protect against RGPD
                 return new BaseResponse(200, [
-                    // Correct success response
+                    // Forbidden request
                     'message' => sprintf(
-                        'If the email exist, we have sent you a new one to: %s.', // Forbidden request
+                        'If the email address exists in our system, we have sent you a new one to: %s.',
                         $user->getEmail()
                     )
                 ])->toResponse();
@@ -327,7 +325,7 @@ class RegistrationController extends AbstractController
                             )
                         )
                         ->to($user->getEmail())
-                        ->subject('OpenRoaming Portal - Password Request')
+                        ->subject('Reset Your OpenRoaming Password')
                         ->htmlTemplate('email/user_forgot_password_request.html.twig')
                         ->context([
                             'password' => $randomPassword,
@@ -360,26 +358,30 @@ class RegistrationController extends AbstractController
                     return new BaseResponse(200, [
                         // Correct success response
                         'message' => sprintf(
-                            'If the email exist, we have sent you a new one to: %s.', // Actually success
+                            'If the email address exists in our system, we have sent you a new one to: %s.',
+                            // Actually success
                             $user->getEmail()
                         )
                     ])->toResponse();
                 }
-                // This message exists in case of a user spams the email/reset, to protect against RGPD
+                // This message exists in case of user spams the email/reset, to protect against RGPD
                 return new BaseResponse(200, [
                     // Correct success response
                     'message' => sprintf(
-                        'If the email exist, we have sent you a new one to: %s.',
+                        'If the email address exists in our system, we have sent you a new one to: %s.',
                         $user->getEmail()
                     )
                 ])->toResponse(); // To many requests
             }
         }
 
-        // This message exists in case of a user spams the email/reset, to protect against RGPD
+        // This message exists in case of user tries to spam the email/reset, to protect against RGPD
         return new BaseResponse(
             200,
-            sprintf('If the email exist, we have sent you a new one to: %s', $data['email']),
+            sprintf(
+                'If the email address exists in our system, we have sent you a new one to: %s',
+                $data['email']
+            ),
             null,
         )->toResponse(); // Not Found User doesn't exist request
     }
@@ -392,7 +394,7 @@ class RegistrationController extends AbstractController
      * @throws NonUniqueResultException
      * @throws Exception
      */
-    #[Route('/api/v1/auth/sms/register', name: 'api_auth_sms_register', methods: ['POST'])]
+    #[Route('/auth/sms/register', name: 'api_v1_auth_sms_register', methods: ['POST'])]
     public function smsRegister(
         Request $request,
         UserPasswordHasherInterface $userPasswordHasher,
@@ -481,7 +483,7 @@ class RegistrationController extends AbstractController
         $hashedPassword = $userPasswordHasher->hashPassword($user, $data['password']);
         $user->setPassword($hashedPassword);
         $user->setIsVerified(false);
-        $user->setVerificationCode($this->verificationCodeGenerator->generateVerificationCode($user));
+        $user->setVerificationCode(random_int(100000, 999999));
         $user->setFirstName($data['first_name'] ?? null);
         $user->setLastName($data['last_name'] ?? null);
         $user->setCreatedAt(new DateTime());
@@ -543,7 +545,7 @@ class RegistrationController extends AbstractController
      * @throws \DateMalformedIntervalStringException
      * @throws \DateMalformedStringException
      */
-    #[Route('/api/v1/auth/sms/reset', name: 'api_auth_sms_reset', methods: ['POST'])]
+    #[Route('/auth/sms/reset', name: 'api_v1_auth_sms_reset', methods: ['POST'])]
     public function smsReset(
         Request $request,
         PhoneNumberUtil $phoneNumberUtil

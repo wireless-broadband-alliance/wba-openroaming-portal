@@ -3,12 +3,31 @@
 This document provides an overview of the key API endpoints introduced in this project. Each endpoint is designed to
 improve user authentication and management processes, with integrated CAPTCHA validation to ensure security.
 
+## User Account Deletion
+
+This endpoint allows users authenticated with a valid JWT to permanently delete their accounts. The request requirements
+vary based on the authentication provider:
+
+- **Portal Account**: Requires the account password in the request body.
+- **SAML**: Requires the account's `SAMLResponse`.
+- **Google/Microsoft**: Requires the authentication code.
+
+For external providers, the endpoint performs a simulated authentication with the provider to validate and confirm
+account deletion.
+
 ## Turnstile Configuration
 
-- **Retrieves an empty HTML file for Turnstile configuration for Android App integration**
+- **Retrieve an empty HTML file for Turnstile configuration for Android App integration**
     - The HTML serves as a base configuration page required for the Turnstile integration.
     - This content is specifically designed for use in the public Android Turnstile functionality.
     - Includes placeholder elements for Android-specific app setup.
+
+## Capport Configuration
+
+- **Retrieves a JSON metadata for the Captive Portal (CAPPORT) configuration.**
+    - This metadata enables admins to configure enforced messages when a user connects to a specific SSID
+      associated with a profile on any access point. It ensures consistent messaging across all access
+      points for that network.
 
 ## Setting
 
@@ -51,11 +70,11 @@ improve user authentication and management processes, with integrated CAPTCHA va
 ## User Auth Register
 
 - **Local Registration**
-    - Registers a new user via local authentication using their email.
+    - Register a new user via local authentication using their email.
     - Validates the request with a Turnstile CAPTCHA token.
 
 - **SMS Registration**
-    - Registers a new user via SMS authentication using their phone number.
+    - Register a new user via SMS authentication using their phone number.
     - Requires Turnstile CAPTCHA token validation.
 
 ## User Auth Reset

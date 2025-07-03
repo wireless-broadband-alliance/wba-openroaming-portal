@@ -4,6 +4,7 @@ namespace App\EventListener;
 
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
+use App\Enum\OperationMode;
 use App\Enum\PlatformMode;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
@@ -11,16 +12,17 @@ use App\Service\EventActions;
 use App\Service\GetSettings;
 use DateTime;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
 use Symfony\Component\Security\Http\SecurityEvents;
 
-class LoginSuccessListener implements EventSubscriberInterface
+readonly class LoginSuccessListener implements EventSubscriberInterface
 {
     public function __construct(
-        private readonly GetSettings $getSettings,
-        private readonly UserRepository $userRepository,
-        private readonly SettingRepository $settingRepository,
-        private readonly EventActions $eventActions
+        private GetSettings $getSettings,
+        private EventActions $eventActions,
+        private UserRepository $userRepository,
+        private SettingRepository $settingRepository
     ) {
     }
 

@@ -63,7 +63,7 @@ configuration:
 
 `RADIUS_TRUSTED_ROOT_CA_SHA1_HASH`: The SHA1 hash of your RADIUS server's trusted root CA. The default value is set to
 the SHA1 hash of the LetsEncrypt CA.
-For that, you need to access the **Back Office Page**, and in the radius configuration section change the setting.
+For that, you need to access the **Dashboard Page**, and in the radius configuration section change the setting.
 Or just access the mysql container and update it there.
 
 This hash is needed to validate the RADIUS server's certificate. If you use a different CA for your RADIUS server, you
@@ -117,7 +117,7 @@ environment.
 
 ## 🛑 Important References Configurations 🛑
 
-### For a complete installation of the portal please follow these steps
+### For a complete installation of the portal, please follow these steps
 
 These steps will enhance the portal's security and enable key features required for its full functionality 
 (Cron Commands, Microsoft login, Google Login, SAML login and GeoLite2).
@@ -137,7 +137,7 @@ Once obtained, you will use the following environment variables in your portal c
 
 ### Microsoft Authenticator Credentials
 
-For detailed instructions on how to obtain your **Microsoft Client ID** and **Microsoft Client Secret**, please refer to
+For detailed instructions on how to get your **Microsoft Client ID** and **Microsoft Client Secret**, please refer to
 the [Microsoft Client ID and Secret Guide](../docs/ProvidersGuides/MICROSOFT_CLIENT.md).
 
 Once obtained, you will use the following environment variables in your portal configuration:
@@ -149,7 +149,7 @@ Once obtained, you will use the following environment variables in your portal c
 
 These variables are needed to set up the SAML Service Provider (SP) and Identity Provider (IdP):
 
-For detailed instructions on how to obtain your **SAML IDP Credentials**, please refer to
+For detailed instructions on how to get your **SAML IDP Credentials**, please refer to
 the [SAML Service Provider (SP)](../docs/ProvidersGuides/SAML_IDP_CREDENTIALS.md).
 
 - `SAML_IDP_ENTITY_ID`: This is the entity ID (URI) of the IdP.

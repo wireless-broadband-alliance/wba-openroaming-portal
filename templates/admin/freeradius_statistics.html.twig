@@ -1,4 +1,4 @@
-{% extends '/admin/base.html.twig' %}
+{% extends 'admin/base.html.twig' %}
 
 {% block title %}Admin Page WBA{% endblock %}
 
@@ -22,7 +22,7 @@
         {% endif %}
 
         <form data-controller="date-filter" action="{{ path('admin_dashboard_statistics_freeradius') }}"
-              method="post"
+              method="get"
               class="flex flex-col sm:flex-row items-center gap-2">
             <input data-date-filter-target="start" type="datetime-local" name="startDate" id="startDate"
                    class="rounded text-sm bg-transparent py-1 px-2 border border-gray-300 focus:ring-0 w-auto"
@@ -40,7 +40,7 @@
     <div class="mt-10 grid xl:gap-8 gap-y-8 xl:grid-cols-3 md:grid-cols-1">
         {# Authentications Attempts #}
         <div class="col-span-3 md:col-span-1 w-full bg-white rounded-lg px-5 py-3 flex flex-col gap-6 shadow">
-            <h1 class="text-lg font-medium text-left sm:pt-2">Authentication Attempts</h1>
+            <h1 class="text-lg font-medium text-left sm:pt-2">{{ 'authenticationAttempts'|trans({}, 'freeradius_statistics') }}</h1>
             <div class="flex flex-col sm:flex-row justify-center items-center space-y-6 sm:space-y-0 sm:space-x-4">
                 <a class="cursor-default flex flex-row group hover:text-[#7DB928] hover:border-b-2 hover:border-y-[#7DB928]/50 transition-all duration-100">
                     <h1 class="px-2 text-lg sm:text-base">
@@ -78,7 +78,7 @@
             <div class="flex flex-col sm:flex-row justify-center items-center space-y-6 sm:space-y-0 sm:space-x-4">
                 <a class="cursor-default flex flex-row group hover:text-[#7DB928] hover:border-b-2 hover:border-y-[#7DB928]/50 transition-all duration-100">
                     <h1 class="px-2 text-lg sm:text-base">
-                        Total Average of
+                       Total Average of
                     </h1>
                     <div class="mb-1 bg-veryLightGreen group-hover:bg-[#7DB928] rounded-md group-hover:text-white text-center transition-all duration-100">
                         <span class="w-auto h-6 mb-1 px-2">{{ sessionTimeAverage }}</span>
@@ -125,7 +125,7 @@
         {# Total of Traffic #}
         <div class="col-span-3 md:col-span-1 w-full bg-white rounded-lg px-4 p-4 gap-4 shadow">
             <div class="flex justify-between items-center pb-4">
-                <h1 class="text-lg font-medium text-left">Traffic total</h1>
+                <h1 class="text-lg font-medium text-left">Traffic Total</h1>
                 <h2 class="text-base font-medium text-gray-400 text-right">(in Gigabyte)</h2>
             </div>
             <div class="md:mt-6 flex md:flex-row flex-col justify-center md:justify-around items-center xl:space-x-6 space-x-0">

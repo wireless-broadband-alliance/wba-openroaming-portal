@@ -12,6 +12,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\Callback;
+use Symfony\Component\Validator\Constraints\GreaterThanOrEqual;
 use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Constraints\Range;
@@ -334,6 +335,40 @@ class AuthType extends AbstractType
                         }
                     }),
                 ],
+            ],
+            'EMAIL_TIMER_RESEND' => [
+                'type' => IntegerType::class,
+                'constraints' => [
+                    new Length([
+                        'max' => 3,
+                        'maxMessage' => ' This field cannot be longer than {{ limit }} characters',
+                    ]),
+                    new GreaterThanOrEqual([
+                        'value' => 1,
+                        'message' => 'This timer should never be less than 1.',
+                    ]),
+                    new NotBlank([
+                        'message' => 'Please make sure to set a timer',
+                    ]),
+
+                ]
+            ],
+            'LINK_VALIDITY' => [
+                'type' => IntegerType::class,
+                'constraints' => [
+                    new Length([
+                        'max' => 3,
+                        'maxMessage' => ' This field cannot be longer than {{ limit }} characters',
+                    ]),
+                    new GreaterThanOrEqual([
+                        'value' => 1,
+                        'message' => 'This timer should never be less than 1.',
+                    ]),
+                    new NotBlank([
+                        'message' => 'Please make sure to set a timer',
+                    ]),
+
+                ]
             ],
             // Login
             'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED' => [

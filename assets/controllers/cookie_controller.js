@@ -17,11 +17,6 @@ export default class extends Controller {
         const hasAcceptedCookies = this.getCookie("cookies_accepted");
         const hasSavedPreferences = this.getCookie("cookie_preferences");
 
-        // Ensure the session_backup cookie is removed if rememberMe is false
-        if (this.cookieScopes.rememberMe === false) {
-            this.clearSessionBackupCookie();
-        }
-
         // If either cookies_accepted or cookie_preferences exists and cookies were not rejected, hide the banner
         if (hasAcceptedCookies || hasSavedPreferences) {
             this.hideBanner();
@@ -66,9 +61,12 @@ export default class extends Controller {
 
         this.setCookiePreferences();
 
-        // Only remove the session_backup cookie if rememberMe is false
-        if (this.cookieScopes.rememberMe === false) {
-            this.clearSessionBackupCookie();
+        const allEnabled = Object.values(this.cookieScopes).every((val) => val === true);
+        if (allEnabled) {
+            this.setCookiesAccepted();
+        } else {
+            // If even one is false, remove cookies_accepted
+            document.cookie = "cookies_accepted=; path=/; max-age=0";
         }
 
         this.closeModal();
@@ -116,11 +114,6 @@ export default class extends Controller {
         });
 
         localStorage.clear();
-    }
-
-    clearSessionBackupCookie() {
-        // Clear the session_backup cookie
-        document.cookie = "session_backup=; path=/; max-age=0";
     }
 
     closeModal() {

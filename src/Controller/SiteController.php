@@ -19,8 +19,6 @@ use App\Enum\UserProvider;
 use App\Enum\UserRadiusProfileRevokeReason;
 use App\Enum\UserTwoFactorAuthenticationStatus;
 use App\Form\AccountUserUpdateLandingType;
-use App\Form\ForgotPasswordEmailType;
-use App\Form\ForgotPasswordSMSType;
 use App\Form\NewPasswordAccountType;
 use App\Form\RegistrationFormType;
 use App\Form\RevokeProfilesType;
@@ -35,6 +33,7 @@ use App\Service\GetSettings;
 use App\Service\ProfileManager;
 use App\Service\SendSMS;
 use App\Service\TwoFAService;
+use App\Service\UserDeletionService;
 use App\Service\VerificationCodeEmailGenerator;
 use DateInterval;
 use DateTime;
@@ -42,16 +41,13 @@ use DateTimeInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Exception;
-use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\MailerInterface;
-use Symfony\Component\Mime\Address;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -68,28 +64,23 @@ class SiteController extends AbstractController
      *
      * @param UserRepository $userRepository The repository for accessing user data.
      * @param UserExternalAuthRepository $userExternalAuthRepository The repository required to fetch the provider.
-     * @param ParameterBagInterface $parameterBag The parameter bag for accessing application configuration.
      * @param SettingRepository $settingRepository The setting repository is used to create the getSettings function.
      * @param GetSettings $getSettings The instance of GetSettings class.
-     * @param EventRepository $eventRepository The entity returns the last events data related to each user.
      * @param EventActions $eventActions Used to generate event related to the User creation
      * @param VerificationCodeEmailGenerator $verificationCodeGenerator Generates a new verification code
      * of the user account
      * @param ProfileManager $profileManager Calls the functions to enable/disable provisioning profiles
-     * @param SendSMS $sendSMS Call the function to send SMS using BudgetSms api
      */
     public function __construct(
         private readonly UserRepository $userRepository,
         private readonly UserExternalAuthRepository $userExternalAuthRepository,
-        private readonly ParameterBagInterface $parameterBag,
         private readonly SettingRepository $settingRepository,
         private readonly GetSettings $getSettings,
-        private readonly EventRepository $eventRepository,
         private readonly EventActions $eventActions,
         private readonly VerificationCodeEmailGenerator $verificationCodeGenerator,
         private readonly ProfileManager $profileManager,
-        private readonly SendSMS $sendSMS,
-        private readonly TwoFAService $twoFAService
+        private readonly TwoFAService $twoFAService,
+        private readonly UserDeletionService $userDeletionService,
     ) {
     }
 
@@ -109,18 +100,47 @@ class SiteController extends AbstractController
         $session = $request->getSession();
 
         // Check if the user is logged in and verification of the user
-        // And check if the user don't have a forgot_password_request active
+        // And check if the user doesn't have a forgot_password_request active
         if (
             isset($data["USER_VERIFICATION"]["value"]) &&
             $data["USER_VERIFICATION"]["value"] === OperationMode::ON->value &&
-            $this->getUser()
+            $currentUser
         ) {
-            $verification = $currentUser->isVerified();
+            // Retrieve the cookie about SAML_ACCOUNT Deletion from the request
+            $previousLoggedID = $request->cookies->get('previousLoggedID');
+
+            // $previousLoggedID it's a string
+            // currentUser->getID it's an int
+            if ($previousLoggedID && $previousLoggedID == $currentUser->getId()) {
+                $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $currentUser]);
+                $this->userDeletionService->deleteUser(
+                    $currentUser,
+                    $userExternalAuths,
+                    $request,
+                    $currentUser
+                );
+
+                return $this->redirectToRoute('app_logout');
+            }
+
+            // Checks if the user has a "forgot_password_request", if yes, return to password reset form
+            if ($currentUser->isForgotPasswordRequest()) {
+                $this->addFlash(
+                    'error',
+                    'You need to confirm the new password before download a profile!'
+                );
+                return $this->redirectToRoute('app_site_forgot_password_checker');
+            }
+            if ($currentUser->getDeletedAt()) {
+                return $this->redirectToRoute('app_logout');
+            }
+
             // Check if the user is verified
-            if (!$verification) {
+            if (!$session->has('session_verified') && !$currentUser->isVerified()) {
                 return $this->redirectToRoute('app_email_code');
             }
-            // Checks the 2FA status of the platform, if mandatory forces the user to configure it
+
+            // Checks the 2FA status of the platform if mandatory forces the user to configure it
             if (
                 $currentUser->getUserExternalAuths() &&
                 ($data['TWO_FACTOR_AUTH_STATUS']['value'] ===
@@ -139,17 +159,6 @@ class SiteController extends AbstractController
                     UserTwoFactorAuthenticationStatus::DISABLED->value)
             ) {
                 return $this->redirectToRoute('app_configure2FA');
-            }
-            // Checks if the user has a "forgot_password_request", if yes, return to password reset form
-            if ($currentUser->isForgotPasswordRequest()) {
-                $this->addFlash(
-                    'error',
-                    'You need to confirm the new password before download a profile!'
-                );
-                return $this->redirectToRoute('app_site_forgot_password_checker');
-            }
-            if ($currentUser->getDeletedAt()) {
-                return $this->redirectToRoute('app_logout');
             }
         }
 
@@ -524,6 +533,12 @@ class SiteController extends AbstractController
             }
 
             $user->setPassword($passwordHasher->hashPassword($user, $formPassword->get('newPassword')->getData()));
+            $session = $request->getSession();
+
+            // Check and kill the dashboard session if the admin is logged at both firewalls at the same time
+            if ($session->has('_security_dashboard')) {
+                $session->remove('_security_dashboard');
+            }
 
             $em->persist($user);
             $em->flush();
@@ -545,386 +560,6 @@ class SiteController extends AbstractController
         }
 
         return $this->redirectToRoute('app_landing');
-    }
-
-    /**
-     * @throws TransportExceptionInterface
-     * @throws Exception
-     */
-    #[Route('/forgot-password/email', name: 'app_site_forgot_password_email')]
-    public function forgotPasswordUserEmail(
-        Request $request,
-        UserPasswordHasherInterface $userPasswordHasher,
-        EntityManagerInterface $entityManager,
-        MailerInterface $mailer
-    ): Response {
-        if ($this->getUser() instanceof UserInterface) {
-            $this->addFlash('error', 'You can\'t access this page logged in. ');
-            return $this->redirectToRoute('app_landing');
-        }
-
-        // Call the getSettings method of GetSettings class to retrieve the data
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
-
-        // Check if the user clicked on the 'sms' variable present only on the SMS authentication buttons
-        if ($data['PLATFORM_MODE']['value'] === true) {
-            $this->addFlash(
-                'error',
-                'The portal is in Demo mode - it is not possible to use this verification method.'
-            );
-            return $this->redirectToRoute('app_landing');
-        }
-
-        if ($data['EMAIL_REGISTER_ENABLED']['value'] !== true) {
-            $this->addFlash('error', 'This verification method it\'s not enabled!');
-            return $this->redirectToRoute('app_landing');
-        }
-
-        $user = new User();
-        $form = $this->createForm(ForgotPasswordEmailType::class, $user);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $user = $this->userRepository->findOneBy(['email' => $user->getEmail()]);
-            if ($user) {
-                // Check if the provider is "PORTAL_ACCOUNT" and the providerId "EMAIL"
-                $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $user]);
-                $hasValidPortalAccount = false;
-                // Check if the user has an external auth with PortalAccount and a valid email as providerId
-                foreach ($userExternalAuths as $auth) {
-                    if (
-                        $auth->getProvider() === UserProvider::PORTAL_ACCOUNT->value &&
-                        $auth->getProviderId() === UserProvider::EMAIL->value
-                    ) {
-                        $hasValidPortalAccount = true;
-                        break;
-                    }
-                }
-                if ($hasValidPortalAccount) {
-                    $latestEvent = $this->eventRepository->findLatestRequestAttemptEvent(
-                        $user,
-                        AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST->value
-                    );
-                    $minInterval = new DateInterval('PT2M');
-                    $currentTime = new DateTime();
-                    // Check if enough time has passed since the last attempt
-                    $latestEventMetadata = $latestEvent instanceof Event ? $latestEvent->getEventMetadata() : [];
-                    $lastVerificationCodeTime = isset($latestEventMetadata['lastVerificationCodeTime'])
-                        ? new DateTime($latestEventMetadata['lastVerificationCodeTime'])
-                        : null;
-
-                    if (
-                        !$latestEvent || ($lastVerificationCodeTime instanceof DateTime &&
-                            $lastVerificationCodeTime->add($minInterval) < $currentTime)
-                    ) {
-                        // Save event with attempt count and current time
-                        if (!$latestEvent instanceof Event) {
-                            $latestEvent = new Event();
-                            $latestEvent->setUser($user);
-                            $latestEvent->setEventDatetime(new DateTime());
-                            $latestEvent->setEventName(AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST->value);
-                            $latestEventMetadata = [
-                                'platform' => PlatformMode::LIVE->value,
-                                'ip' => $request->getClientIp(),
-                                'uuid' => $user->getUuid(),
-                            ];
-                        }
-
-                        $latestEventMetadata['lastVerificationCodeTime'] =
-                            $currentTime->format(DateTimeInterface::ATOM);
-                        $latestEvent->setEventMetadata($latestEventMetadata);
-
-                        $user->setForgotPasswordRequest(true);
-                        $user->setIsVerified(true);
-                        $this->eventRepository->save($latestEvent, true);
-
-                        $randomPassword = bin2hex(random_bytes(4));
-                        $hashedPassword = $userPasswordHasher->hashPassword($user, $randomPassword);
-                        $user->setPassword($hashedPassword);
-                        $entityManager->persist($user);
-                        $entityManager->flush();
-
-                        $email = new TemplatedEmail()
-                            ->from(
-                                new Address(
-                                    $this->parameterBag->get('app.email_address'),
-                                    $this->parameterBag->get('app.sender_name')
-                                )
-                            )
-                            ->to($user->getEmail())
-                            ->subject('Your OpenRoaming - Password Request')
-                            ->htmlTemplate('email/user_forgot_password_request.html.twig')
-                            ->context([
-                                'password' => $randomPassword,
-                                'forgotPasswordUser' => true,
-                                'uuid' => $user->getUuid(),
-                                'emailTitle' => $data['title']['value'],
-                                'contactEmail' => $data['contactEmail']['value'],
-                                'currentPassword' => $randomPassword,
-                                'verificationCode' => $user->getVerificationCode(),
-                                'context' => FirewallType::LANDING->value,
-                            ]);
-
-                        $mailer->send($email);
-
-                        $message = sprintf('We have sent you a new email to: %s.', $user->getEmail());
-                        $this->addFlash('success', $message);
-                    } else {
-                        // Inform the user to wait before trying again
-                        $this->addFlash('warning', 'Please wait 2 minutes before trying again.');
-                    }
-                } else {
-                    $this->addFlash(
-                        'warning',
-                        'This email is not associated with a valid account. 
-                        Please submit a valid email from the system, 
-                        ensuring it is from the platform and not from another provider.'
-                    );
-                }
-            } else {
-                $this->addFlash(
-                    'warning',
-                    'This email doesn\'t exist, please make sure to create a account with a email on the platform!'
-                );
-            }
-        }
-        return $this->render('site/forgot_password_email_landing.html.twig', [
-            'forgotPasswordEmailForm' => $form->createView(),
-            'data' => $data,
-            'context' => FirewallType::LANDING->value,
-        ]);
-    }
-
-    /**
-     * @throws Exception
-     */
-    #[Route('{context}/forgot-password/sms', name: 'app_site_forgot_password_sms', defaults: [
-        'context' => FirewallType::LANDING->value
-    ])]
-    public function forgotPasswordUserSMS(
-        string $context,
-        Request $request,
-        UserPasswordHasherInterface $userPasswordHasher,
-        EntityManagerInterface $entityManager,
-    ): Response {
-        // Call the getSettings method of GetSettings class to retrieve the data
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
-
-        if ($this->getUser() instanceof UserInterface) {
-            $this->addFlash('error', 'You can\'t access this page logged in.');
-            return $this->redirectToRoute('app_landing');
-        }
-
-        // Check if the user clicked on the 'sms' variable present only on the SMS authentication buttons
-        if ($data['PLATFORM_MODE']['value']) {
-            $this->addFlash(
-                'error',
-                'The portal is in Demo mode - it is not possible to use this verification method.'
-            );
-            return $this->redirectToRoute('app_landing');
-        }
-
-        if ($data['EMAIL_REGISTER_ENABLED']['value'] !== true) {
-            $this->addFlash('error', 'This verification method it\'s not enabled!');
-            return $this->redirectToRoute('app_landing');
-        }
-
-        $user = new User();
-        $form = $this->createForm(ForgotPasswordSMSType::class, $user);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $user = $this->userRepository->findOneBy(['phoneNumber' => $user->getPhoneNumber()]);
-            if ($user) {
-                $latestEvent = $this->eventRepository->findLatestRequestAttemptEvent(
-                    $user,
-                    AnalyticalEventType::FORGOT_PASSWORD_SMS_REQUEST->value
-                );
-                // Retrieve the SMS resend interval from the settings
-                $smsResendInterval = $data['SMS_TIMER_RESEND']['value'];
-                $minInterval = new DateInterval('PT' . $smsResendInterval . 'M');
-                $currentTime = new DateTime();
-                // Check if the user has not exceeded the attempt limit
-                $latestEventMetadata = $latestEvent instanceof \App\Entity\Event ? $latestEvent->getEventMetadata(
-                ) : [];
-                $lastVerificationCodeTime = isset($latestEventMetadata['lastVerificationCodeTime'])
-                    ? new DateTime($latestEventMetadata['lastVerificationCodeTime'])
-                    : null;
-                $verificationAttempts = $latestEventMetadata['verificationAttempts'] ?? 0;
-                if (!$latestEvent || $verificationAttempts < 4) {
-                    // Check if enough time has passed since the last attempt
-                    if (
-                        !$latestEvent || ($lastVerificationCodeTime instanceof DateTime &&
-                            $lastVerificationCodeTime->add($minInterval) < $currentTime)
-                    ) {
-                        // Increment the attempt count
-                        $attempts = $verificationAttempts + 1;
-
-                        // Save event with attempt count and current time
-                        if (!$latestEvent instanceof Event) {
-                            $latestEvent = new Event();
-                            $latestEvent->setUser($user);
-                            $latestEvent->setEventDatetime(new DateTime());
-                            $latestEvent->setEventName(AnalyticalEventType::FORGOT_PASSWORD_SMS_REQUEST->value);
-                            $latestEventMetadata = [
-                                'platform' => PlatformMode::LIVE->value,
-                                'ip' => $request->getClientIp(),
-                                'uuid' => $user->getUuid(),
-                            ];
-                        }
-
-                        $latestEventMetadata['lastVerificationCodeTime'] = $currentTime->format(
-                            DateTimeInterface::ATOM
-                        );
-                        $latestEventMetadata['verificationAttempts'] = $attempts;
-                        $latestEvent->setEventMetadata($latestEventMetadata);
-
-                        $user->setForgotPasswordRequest(true);
-                        $user->setIsVerified(true);
-                        $this->eventRepository->save($latestEvent, true);
-
-                        // save new password hashed on the db for the user
-                        $randomPassword = bin2hex(random_bytes(4));
-                        $hashedPassword = $userPasswordHasher->hashPassword($user, $randomPassword);
-                        $user->setPassword($hashedPassword);
-                        $entityManager->persist($user);
-                        $entityManager->flush();
-                        $recipient = "+" .
-                            $user->getPhoneNumber()->getCountryCode() .
-                            $user->getPhoneNumber()->getNationalNumber();
-                        // Send SMS
-                        $message = "Your new random account password is: "
-                            . $randomPassword
-                            . "%0A" . "Please make sure to login to complete the request";
-                        $this->sendSMS->sendSmsNoValidation($recipient, $message);
-
-                        $attemptsLeft = 3 - $verificationAttempts;
-                        $message = sprintf(
-                            'We have sent you a message to: %s. You have %d attempt(s) left.',
-                            $user->getUuid(),
-                            $attemptsLeft
-                        );
-                        $this->addFlash('success', $message);
-                    } else {
-                        // Inform the user to wait before trying again
-                        $this->addFlash(
-                            'warning',
-                            "Please wait " . $data['SMS_TIMER_RESEND']['value'] . " minutes before trying again."
-                        );
-                    }
-                } else {
-                    $this->addFlash(
-                        'warning',
-                        'You have exceeded the limits of request for a new password. 
-                            Please contact our support for help.'
-                    );
-                }
-            } else {
-                $this->addFlash(
-                    'warning',
-                    'This phone number doesn\'t exist, please submit a valid one from the system!'
-                );
-            }
-        }
-        return $this->render('site/forgot_password_sms_landing.html.twig', [
-            'forgotPasswordSMSForm' => $form->createView(),
-            'data' => $data,
-            'context' => $context
-        ]);
-    }
-
-    /**
-     * @throws TransportExceptionInterface
-     * @throws Exception
-     */
-    #[Route('/forgot-password/checker', name: 'app_site_forgot_password_checker')]
-    public function forgotPasswordUserChecker(
-        Request $request,
-        EntityManagerInterface $entityManager,
-        UserPasswordHasherInterface $userPasswordHasher,
-    ): Response {
-        // Call the getSettings method of GetSettings class to retrieve the data
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
-
-        if ($data['PLATFORM_MODE']['value']) {
-            $this->addFlash(
-                'error',
-                'The portal is in Demo mode - it is not possible to use this verification method!'
-            );
-            return $this->redirectToRoute('app_landing');
-        }
-
-        /** @var User $currentUser */
-        $currentUser = $this->getUser();
-        if (!$currentUser) {
-            $this->addFlash('error', 'You can only access this page logged in.');
-            return $this->redirectToRoute('app_landing');
-        }
-
-        if (!$currentUser->isForgotPasswordRequest()) {
-            $this->addFlash('error', 'You can not access this page without a valid request!');
-            return $this->redirectToRoute('app_landing');
-        }
-
-        // Checks if the user has a "forgot_password_request", if doesn't, return to the landing page
-        if ($this->userRepository->findOneBy(['id' => $currentUser->getId(), 'forgot_password_request' => false])) {
-            $this->addFlash('error', 'You can\'t access this page if you don\'t have a request!');
-            return $this->redirectToRoute('app_landing');
-        }
-
-        $user = new User();
-        $form = $this->createForm(NewPasswordAccountType::class, $user);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            /** @var User $user */
-            $user = $this->getUser();
-
-            $currentPasswordDB = $user->getPassword();
-            $typedPassword = $form->get('password')->getData();
-
-            // Compare the typed password with the hashed password from the database
-            if (!password_verify((string)$typedPassword, $currentPasswordDB)) {
-                $this->addFlash('error', 'Current password Invalid. Please try again.');
-                return $this->redirectToRoute('app_landing');
-            }
-
-            if ($form->get('newPassword')->getData() !== $form->get('confirmPassword')->getData()) {
-                $this->addFlash(
-                    'error',
-                    'Please make sure to type the same password on both fields. 
-                    If the problem keep occurring contact our support!'
-                );
-                return $this->redirectToRoute('app_landing');
-            }
-
-            $user->setPassword($userPasswordHasher->hashPassword($user, $form->get('newPassword')->getData()));
-            $user->setForgotPasswordRequest(false);
-            $entityManager->persist($user);
-            $entityManager->flush();
-
-            $eventMetadata = [
-                'ip' => $request->getClientIp(),
-                'user_agent' => $request->headers->get('User-Agent'),
-                'platform' => PlatformMode::LIVE->value,
-                'uuid' => $user->getUuid(),
-            ];
-            $this->eventActions->saveEvent(
-                $user,
-                AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST_ACCEPTED->value,
-                new DateTime(),
-                $eventMetadata
-            );
-
-            $this->addFlash('success', 'Your password has been updated successfully!');
-            return $this->redirectToRoute('app_landing');
-        }
-
-        return $this->render('site/forgot_password_checker_landing.html.twig', [
-            'forgotPasswordChecker' => $form->createView(),
-            'data' => $data,
-            'context' => FirewallType::LANDING->value
-        ]);
     }
 
     private function detectDevice($userAgent): string
@@ -1076,6 +711,7 @@ class SiteController extends AbstractController
         // Get the current user
         /** @var User $currentUser */
         $currentUser = $this->getUser();
+        $session = $request->getSession();
 
         if (!$currentUser) {
             $this->addFlash('error', 'You can only access this page logged in.');
@@ -1092,9 +728,10 @@ class SiteController extends AbstractController
         $enteredCode = $requestStack->getCurrentRequest()->request->get('code');
 
         if ($enteredCode === $currentUser->getVerificationCode()) {
-            $event = new Event();
             // Set the user as verified
+            $currentUser->setVerificationCode(random_int(100000, 999999));
             $currentUser->setIsVerified(true);
+            $session->set('session_verified', true);
             $userRepository->save($currentUser, true);
 
             $eventMetadata = [

@@ -77,19 +77,29 @@ readonly class TwoFAService
         return $verificationCode;
     }
 
-    public function generate2FACode(User $user, string $ip, string $userAgent, string $eventType): ?string
-    {
+    public function generate2FACode(
+        User $user,
+        string $ip,
+        string $userAgent,
+        string $eventType,
+        ?bool $autoDeletion = false
+    ): ?string {
         // Generate code
         $code = $this->twoFACode($user);
         // Send code
-        $this->sendCode($user, $code, $ip, $userAgent, $eventType);
+        $this->sendCode($user, $code, $ip, $userAgent, $eventType, $autoDeletion);
         return $user->getTwoFAcode();
     }
 
-    public function resendCode(User $user, ?string $ip, ?string $userAgent, string $eventType): void
-    {
+    public function resendCode(
+        User $user,
+        ?string $ip,
+        ?string $userAgent,
+        string $eventType,
+        ?bool $autoDeletion = false
+    ): void {
         $code = $this->twoFACode($user);
-        $this->sendCode($user, $code, $ip, $userAgent, $eventType);
+        $this->sendCode($user, $code, $ip, $userAgent, $eventType, $autoDeletion);
     }
 
     /**
@@ -157,37 +167,62 @@ readonly class TwoFAService
      * @throws RedirectionExceptionInterface
      * @throws ClientExceptionInterface
      */
-    private function sendCode(User $user, string $code, ?string $ip, ?string $userAgent, string $eventType): void
-    {
+    private function sendCode(
+        User $user,
+        string $code,
+        ?string $ip,
+        ?string $userAgent,
+        string $eventType,
+        ?bool $autoDeletion = false
+    ): void {
         $messageType = $user->getTwoFAtype();
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $secondsLeft = $data["TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME"]["value"];
         if ($messageType === UserTwoFactorAuthenticationStatus::EMAIL->value || $user->getEmail()) {
             $emailTitle = $this->settingRepository->findOneBy(['name' => 'PAGE_TITLE'])->getValue();
-            // Send email to the user with the verification code
-            $email = new TemplatedEmail()
-                ->from(
-                    new Address(
-                        $this->parameterBag->get('app.email_address'),
-                        $this->parameterBag->get('app.sender_name')
-                    )
-                )
-                ->to($user->getEmail())
-                ->subject('Your OpenRoaming Two Factor Authentication code is ' . $code . '.')
-                ->htmlTemplate('email/user_code.html.twig')
-                ->context([
-                    'uuid' => $user->getEmail(),
-                    'emailTitle' => $emailTitle,
-                    'verificationCode' => $code,
-                    'is2FATemplate' => true,
-                    'secondsLeft' => $secondsLeft,
-                ]);
 
+            // Send email to the user with the verification code
+            if ($autoDeletion === true) {
+                $email = new TemplatedEmail()
+                    ->from(
+                        new Address(
+                            $this->parameterBag->get('app.email_address'),
+                            $this->parameterBag->get('app.sender_name')
+                        )
+                    )
+                    ->to($user->getEmail())
+                    ->subject('Account Deletion Confirmation Code')
+                    ->htmlTemplate('email/auto_delete_notice.html.twig')
+                    ->context([
+                        'uuid' => $user->getEmail(),
+                        'emailTitle' => $emailTitle,
+                        'deletionCode' => $code,
+                    ]);
+            } else {
+                $email = new TemplatedEmail()
+                    ->from(
+                        new Address(
+                            $this->parameterBag->get('app.email_address'),
+                            $this->parameterBag->get('app.sender_name')
+                        )
+                    )
+                    ->to($user->getEmail())
+                    ->subject('Your OpenRoaming Two Factor Authentication code is ' . $code . '.')
+                    ->htmlTemplate('email/user_code.html.twig')
+                    ->context([
+                        'uuid' => $user->getEmail(),
+                        'emailTitle' => $emailTitle,
+                        'verificationCode' => $code,
+                        'is2FATemplate' => true,
+                        'secondsLeft' => $secondsLeft,
+                    ]);
+            }
             $this->mailer->send($email);
         } elseif ($messageType === UserTwoFactorAuthenticationStatus::SMS->value || $user->getPhoneNumber()) {
             $message = "Your Two Factor Authentication Code is " . $code;
             $this->sendSMS->sendSms($user->getPhoneNumber(), $message);
         }
+
         $eventMetaData = [
             'platform' => PlatformMode::LIVE->value,
             'user_agent' => $userAgent ?? null,
@@ -219,7 +254,7 @@ readonly class TwoFAService
         $this->entityManager->flush();
     }
 
-    public function canResendCode(User $user): bool
+    public function canResendCode(User $user, string $eventType): bool
     {
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $nrAttempts = $data["TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE"]["value"];
@@ -230,12 +265,12 @@ readonly class TwoFAService
             $user,
             $nrAttempts,
             $limitTime,
-            AnalyticalEventType::TWO_FA_CODE_RESEND->value
+            $eventType
         );
         return count($attempts) < $nrAttempts;
     }
 
-    public function timeIntervalToResendCode(User $user): bool
+    public function timeIntervalToResendCode(User $user, string $eventType): bool
     {
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $timeIntervalToResendCode = $data["TWO_FACTOR_AUTH_RESEND_INTERVAL"]["value"];
@@ -245,7 +280,7 @@ readonly class TwoFAService
             $user,
             1,
             $limitTime,
-            AnalyticalEventType::TWO_FA_CODE_RESEND->value
+            $eventType
         );
         return count($attempts) < 1;
     }

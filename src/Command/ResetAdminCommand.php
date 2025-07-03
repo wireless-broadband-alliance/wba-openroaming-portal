@@ -10,6 +10,7 @@ use App\Repository\UserRepository;
 use App\Service\EventActions;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
+use Random\RandomException;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\QuestionHelper;
@@ -42,6 +43,9 @@ class ResetAdminCommand extends Command
             ->addOption('yes', 'y', InputOption::VALUE_NONE, 'Automatically confirm the reset');
     }
 
+    /**
+     * @throws RandomException
+     */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         // Check if the --yes option is provided (comes from a controller), then skip the confirmation prompt
@@ -66,6 +70,9 @@ class ResetAdminCommand extends Command
         return Command::SUCCESS;
     }
 
+    /**
+     * @throws RandomException
+     */
     protected function resetAdminUser(): void
     {
         $admin = $this->userRepository->findAdmin();
@@ -77,6 +84,8 @@ class ResetAdminCommand extends Command
             $admin->setPassword($this->userPasswordHashed->hashPassword($admin, 'gnimaornepo'));
             $admin->setRoles(['ROLE_ADMIN']);
             $admin->setIsVerified(true);
+            $admin->setForgotPasswordRequest(true);
+            $admin->setVerificationCode(random_int(100000, 999999));
             $admin->setCreatedAt(new DateTime());
             $this->entityManager->persist($admin);
 
@@ -93,7 +102,10 @@ class ResetAdminCommand extends Command
         }
 
         // Set password
+        $admin->setUuid('admin@example.com');
+        $admin->setEmail('admin@example.com');
         $admin->setPassword($this->userPasswordHashed->hashPassword($admin, 'gnimaornepo'));
+        $admin->setForgotPasswordRequest(true);
 
         $this->entityManager->flush();
     }

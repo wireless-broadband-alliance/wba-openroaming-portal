@@ -45,7 +45,7 @@ class TwoFAController extends AbstractController
      * @throws ServerExceptionInterface
      * @throws \JsonException
      */
-    #[Route('/api/v1/twoFA/request', name: 'api_twoFA_request', methods: ['POST'])]
+    #[Route('/twoFA/request', name: 'api_v1_twoFA_request', methods: ['POST'])]
     public function twoFARequest(Request $request): JsonResponse
     {
         try {
@@ -153,8 +153,11 @@ class TwoFAController extends AbstractController
         );
         $timeToResetAttemptsValue = $timeToResetAttemptsValue ? (int)$timeToResetAttemptsValue->getValue() : 60;
 
-        // 1. Validate waiting interval before resending
-        $timeInterval = $this->twoFAService->timeIntervalToResendCode($user);
+        // 1. Validate a waiting interval before resending
+        $timeInterval = $this->twoFAService->timeIntervalToResendCode(
+            $user,
+            AnalyticalEventType::TWO_FA_CODE_VALIDATE_RESEND->value
+        );
         if ($timeInterval === false) {
             return new BaseResponse(
                 429,
@@ -167,7 +170,10 @@ class TwoFAController extends AbstractController
         }
 
         // 2. Validate resend attempts - Resend attempts restriction
-        $canResendCode = $this->twoFAService->canResendCode($user);
+        $canResendCode = $this->twoFAService->canResendCode(
+            $user,
+            AnalyticalEventType::TWO_FA_CODE_VALIDATE_RESEND->value
+        );
         if ($canResendCode === false) {
             return new BaseResponse(
                 429,
@@ -184,7 +190,7 @@ class TwoFAController extends AbstractController
         // 3. Validate code validation restrictions - Attempt validation restriction
         $canValidationCode = $this->twoFAService->canValidationCode(
             $user,
-            AnalyticalEventType::TWO_FA_CODE_RESEND->value
+            AnalyticalEventType::TWO_FA_CODE_VALIDATE_RESEND->value
         );
         if ($canValidationCode === false) {
             return new BaseResponse(
@@ -204,7 +210,7 @@ class TwoFAController extends AbstractController
             $user,
             null,
             null,
-            AnalyticalEventType::TWO_FA_CODE_RESEND->value
+            AnalyticalEventType::TWO_FA_CODE_VALIDATE_RESEND->value,
         );
 
         // Defines the Event to the table
@@ -214,7 +220,7 @@ class TwoFAController extends AbstractController
         ];
         $this->eventActions->saveEvent(
             $user,
-            AnalyticalEventType::TWO_FA_CODE_RESEND->value,
+            AnalyticalEventType::TWO_FA_CODE_VALIDATE_RESEND->value,
             new DateTime(),
             $eventMetadata
         );
@@ -226,7 +232,7 @@ class TwoFAController extends AbstractController
             $user,
             $nrAttemptsValue,
             $limitTime,
-            AnalyticalEventType::TWO_FA_CODE_RESEND->value
+            AnalyticalEventType::TWO_FA_CODE_VALIDATE_RESEND->value
         );
 
         $attemptsLeft = $nrAttemptsValue - count($attempts);
