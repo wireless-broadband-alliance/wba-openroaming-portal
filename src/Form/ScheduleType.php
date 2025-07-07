@@ -7,6 +7,7 @@ use App\Enum\MonthsOfYear;
 use App\Enum\OperationMode;
 use App\Repository\SettingRepository;
 use App\Service\GetSettings;
+use App\Validator\Constraints\ValidCronSettings;
 use Cron\CronExpression;
 use Exception;
 use Symfony\Component\Form\AbstractType;
@@ -15,15 +16,18 @@ use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\TimeType;
 use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Component\Form\FormError;
-use Symfony\Component\Form\FormEvent;
-use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\Callback;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 class ScheduleType extends AbstractType
 {
+    private array $cronSettings = [
+        'DELETE_UNCONFIRMED_USERS_CRON',
+        'USERS_WHEN_PROFILE_EXPIRES_CRON',
+        'LDAP_SYNC_CRON',
+    ];
+
     public function __construct(
         private readonly GetSettings $getSettings,
         private readonly SettingRepository $settingRepository,
@@ -32,16 +36,9 @@ class ScheduleType extends AbstractType
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
-        $cronSettings = [
-            'DELETE_UNCONFIRMED_USERS_CRON',
-            'USERS_WHEN_PROFILE_EXPIRES_CRON',
-            'LDAP_SYNC_CRON',
-        ];
-
         $selected = $this->settingRepository->findOneBy([
-                    'name' => 'CRON_ADVANCED_STATUS'
-                ]
-            )->getValue() === OperationMode::ON->value;
+                'name' => 'CRON_ADVANCED_STATUS'
+            ])?->getValue() === OperationMode::ON->value;
 
         $builder->add('use_advanced_mode', CheckboxType::class, [
             'label' => 'Use Advanced Mode (Manual CRON Expression)',
@@ -50,10 +47,9 @@ class ScheduleType extends AbstractType
             'data' => $selected,
         ]);
 
-        // Frequency choices from 1 (every) to 10 (every 10 units)
         $freqChoices = array_combine(range(1, 10), range(1, 10));
 
-        foreach ($cronSettings as $settingName) {
+        foreach ($this->cronSettings as $settingName) {
             $description = $this->getSettings->getSettingDescription($settingName);
 
             $builder
@@ -125,238 +121,17 @@ class ScheduleType extends AbstractType
                     'attr' => ['description' => $description],
                 ]);
         }
-
-        $builder->addEventListener(FormEvents::POST_SUBMIT, function (FormEvent $event) use ($cronSettings): void {
-            $form = $event->getForm();
-            $data = $form->getData();
-            $isAdvanced = $form->get('use_advanced_mode')->getData();
-
-            foreach ($cronSettings as $settingName) {
-                if ($isAdvanced) {
-                    // Only validate advanced CRON expression
-                    $cronField = "{$settingName}_advanced";
-                    if (empty($data[$cronField])) {
-                        $form->get($cronField)->addError(
-                            new FormError('Please provide a CRON expression for advanced mode.')
-                        );
-                        continue;
-                    }
-
-                    // Validate the CRON expression format for the advanced field
-                    try {
-                        new CronExpression($data[$cronField]);
-                    } catch (Exception) {
-                        $form->get($cronField)->addError(
-                            new FormError('Invalid CRON expression.')
-                        );
-                    }
-
-                    // Skip the rest of the detailed validation
-                    continue;
-                }
-
-                $time = $data["{$settingName}_time"] ?? null;
-
-                $daysOfWeek = $data["{$settingName}_day_of_week"] ?? [];
-                $dayOfWeekFreq = (int)($data["{$settingName}_day_of_week_frequency"] ?? 1);
-
-                $daysOfMonth = $data["{$settingName}_day_of_month"] ?? [];
-                $dayOfMonthFreq = (int)($data["{$settingName}_day_of_month_frequency"] ?? 1);
-
-                $monthsOfYear = $data["{$settingName}_months_of_the_year"] ?? [];
-                $monthsFreq = (int)($data["{$settingName}_months_of_the_year_frequency"] ?? 1);
-
-                // Prevent both day_of_month and day_of_week frequencies being > 1 at the same time
-                if ($dayOfMonthFreq > 1 && $dayOfWeekFreq > 1) {
-                    $form->get("{$settingName}_day_of_month_frequency")->addError(
-                        new FormError(
-                            'Cannot set frequency on both Day of Month and
-                                 Day of Week at the same time due to cron semantics.'
-                        )
-                    );
-                }
-
-                if (!$time) {
-                    $form->get("{$settingName}_time")->addError(new FormError('Please choose a time.'));
-                    continue;
-                }
-
-                // Validate "all" selections - treat as full range
-                $daysOfWeek = $this->expandAllSelection($daysOfWeek, 0, 6);
-                $daysOfMonth = $this->expandAllSelection($daysOfMonth, 1, 31);
-                $monthsOfYear = $this->expandAllSelection($monthsOfYear, 1, 12);
-
-                // Validate non-empty
-                if ($daysOfWeek === []) {
-                    $form->get("{$settingName}_day_of_week")->addError(
-                        new FormError('Please choose at least one day of the week.')
-                    );
-                    continue;
-                }
-                if ($daysOfMonth === []) {
-                    $form->get("{$settingName}_day_of_month")->addError(
-                        new FormError('Please choose at least one day of the month.')
-                    );
-                    continue;
-                }
-                if ($monthsOfYear === []) {
-                    $form->get("{$settingName}_months_of_the_year")->addError(
-                        new FormError('Please choose at least one month.')
-                    );
-                    continue;
-                }
-
-                if (count($daysOfWeek) > 1 && in_array('*', $daysOfWeek, true)) {
-                    $form->get("{$settingName}_day_of_week")->addError(
-                        new FormError('Please dont\'t select all values with additional days.')
-                    );
-                    continue;
-                }
-                if (count($daysOfMonth) > 1 && in_array('*', $daysOfMonth, true)) {
-                    $form->get("{$settingName}_day_of_month")->addError(
-                        new FormError('Please dont\'t select all values with additional days.')
-                    );
-                    continue;
-                }
-                if (count($monthsOfYear) > 1 && in_array('*', $monthsOfYear, true)) {
-                    $form->get("{$settingName}_months_of_the_year")->addError(
-                        new FormError('Please dont\'t select all values with additional months.')
-                    );
-                    continue;
-                }
-
-
-                $fieldsToCheck = [
-                    'day_of_week' => [$daysOfWeek, $dayOfWeekFreq],
-                    'day_of_month' => [$daysOfMonth, $dayOfMonthFreq],
-                    'months_of_the_year' => [$monthsOfYear, $monthsFreq],
-                ];
-
-                foreach ($fieldsToCheck as $fieldSuffix => [$selectedValues, $frequency]) {
-                    // Skip if no frequency or frequency = 1 (no restriction)
-                    if ($frequency <= 1) {
-                        continue;
-                    }
-
-                    $countSelected = count($selectedValues);
-                    if ($frequency >= $countSelected && !in_array('*', $selectedValues, true)) {
-                        $form->get("{$settingName}_{$fieldSuffix}_frequency")->addError(
-                            new FormError(
-                                sprintf(
-                                    'Frequency (%d) must be less than the number of selected values (%d).',
-                                    $frequency,
-                                    $countSelected
-                                )
-                            )
-                        );
-                    }
-                }
-
-                // Construct cron parts with frequencies
-                $minute = (int)$time->format('i');
-                $hour = (int)$time->format('H');
-
-                if (in_array('*', $daysOfMonth, true)) {
-                    $dayOfMonthPart = "*/$monthsFreq";
-                } else {
-                    $dayOfMonthPart = $this->buildCronPartWithFrequency(
-                        $daysOfMonth,
-                        $dayOfMonthFreq,
-                        $form,
-                        $settingName
-                    );
-                }
-                if (in_array('*', $monthsOfYear, true)) {
-                    $monthPart = "*/$monthsFreq";
-                } else {
-                    $monthPart = $this->buildCronPartWithFrequency($monthsOfYear, $monthsFreq, $form, $settingName);
-                }
-                if (in_array('*', $daysOfWeek, true)) {
-                    $dayOfWeekPart = "*/$dayOfWeekFreq";
-                } else {
-                    $dayOfWeekPart = $this->buildCronPartWithFrequency(
-                        $daysOfWeek,
-                        $dayOfWeekFreq,
-                        $form,
-                        $settingName
-                    );
-                }
-
-                $cronString = sprintf(
-                    '%s %d %s %s %s',
-                    $minute,
-                    $hour,
-                    $dayOfMonthPart,
-                    $monthPart,
-                    $dayOfWeekPart
-                );
-
-                try {
-                    new CronExpression($cronString);
-                } catch (Exception) {
-                    $form->get("{$settingName}_time")->addError(
-                        new FormError('Failed to generate a valid CRON expression from input.')
-                    );
-                }
-            }
-        });
-    }
-
-    /**
-     * Expand 'all' keyword in choices to full range.
-     */
-    private function expandAllSelection(array $values, int $min, int $max): array
-    {
-        if (in_array('all', $values, true)) {
-            return range($min, $max);
-        }
-
-        return $values;
-    }
-
-    /**
-     * Build a CRON part (day/month/month_of_year) with frequency, supporting ranges.
-     *
-     * Example:
-     *   values = [1,2,3,5,6,7,10]
-     *   freq = 2
-     *   => "1-3/2,5-7/2,10/2"
-     */
-    private function buildCronPartWithFrequency(array $values, int $frequency, $form, string $settingName): string
-    {
-        if ($values === []) {
-            return '*';
-        }
-
-        sort($values);
-
-        if ($frequency <= 1) {
-            return implode(',', $values);
-        }
-
-        // Check if values form a continuous range
-        $min = $values[0];
-        $max = $values[count($values) - 1];
-
-        // Check if all values between min and max are included
-        $expectedRange = range($min, $max);
-        if ($values === $expectedRange) {
-            // Continuous range: safe to apply step frequency
-            return "{$min}-{$max}/{$frequency}";
-        }
-
-        // Non-contiguous values: steps with multiple ranges not supported,
-        // fallback to listing values without frequency steps
-        $form->get("{$settingName}_time")->addError(
-            new FormError('Please don\'t select Non-contiguous values with frequency greater than 1.')
-        );
-        return implode(',', $values);
     }
 
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
             'settings' => [],
+            'constraints' => [
+                new ValidCronSettings([
+                    'cronSettings' => $this->cronSettings,
+                ]),
+            ],
         ]);
     }
 }
