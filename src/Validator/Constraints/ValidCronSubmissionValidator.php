@@ -2,6 +2,7 @@
 
 namespace App\Validator\Constraints;
 
+use App\Enum\OperationMode;
 use Cron\CronExpression;
 use Exception;
 use Symfony\Component\Validator\Constraint;
@@ -24,10 +25,8 @@ class ValidCronSubmissionValidator extends ConstraintValidator
         // Get cronSettings from the constraint options instead of constructor injection
         $cronSettings = $constraint->cronSettings;
 
-        $isAdvanced = $value['use_advanced_mode'] ?? false;
-
         foreach ($cronSettings as $settingName) {
-            if ($isAdvanced) {
+            if ($value['use_advanced_mode'] === OperationMode::ON->value) {
                 $this->validateAdvanced($value, $settingName);
             } else {
                 $this->validateSimple($value, $settingName);
