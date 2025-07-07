@@ -134,15 +134,9 @@
                                         'data-cron-toggle-group': groupName,
                                     },
                                 }) }}
+                                {# TODO FIX THIS PROBLEM WITH THIS FORM DISPLAY, its on the profile but doesn't render on the twig UI #}
+                                {{ form_errors(attribute(form, fieldName)) }}
                             </div>
-                        {% endfor %}
-                    </div>
-
-                    <div class="mt-2 -mb-2 text-center text-red-500 text-base">
-                        {% for suffix in suffixes %}
-                            {% set fieldName = groupName ~ suffix %}
-                            {# TODO FIX THIS PROBLEM WITH THIS FORM DISPLAY, its on the profile but doesn't render on the twig UI #}
-                            {{ form_errors(attribute(form, fieldName)) }}
                         {% endfor %}
                     </div>
                 </div>
