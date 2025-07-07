@@ -1,14 +1,14 @@
 <?php
 
-namespace App;
+namespace App\Scheduler;
 
 use App\Repository\SettingRepository;
+use Symfony\Component\Console\Messenger\RunCommandMessage;
 use Symfony\Component\Scheduler\Attribute\AsSchedule;
+use Symfony\Component\Scheduler\RecurringMessage;
 use Symfony\Component\Scheduler\Schedule as SymfonySchedule;
 use Symfony\Component\Scheduler\ScheduleProviderInterface;
-use Symfony\Component\Scheduler\RecurringMessage;
 use Symfony\Contracts\Cache\CacheInterface;
-use Symfony\Component\Console\Messenger\RunCommandMessage;
 
 #[AsSchedule]
 readonly class Schedule implements ScheduleProviderInterface
@@ -25,7 +25,7 @@ readonly class Schedule implements ScheduleProviderInterface
             ->stateful($this->cache)
             ->processOnlyLastMissedRun(true)
 
-            // daily at 00:00
+            // By default, daily at 00:00
             ->add(
                 RecurringMessage::cron(
                     $this->settingRepository->findOneBy(['name' => 'DELETE_UNCONFIRMED_USERS_CRON'])->getValue(),
@@ -33,7 +33,7 @@ readonly class Schedule implements ScheduleProviderInterface
                 )
             )
 
-            // daily at 01:00
+            // By default, daily at 01:00
             ->add(
                 RecurringMessage::cron(
                     $this->settingRepository->findOneBy(['name' => 'USERS_WHEN_PROFILE_EXPIRES_CRON'])->getValue(),
@@ -41,7 +41,7 @@ readonly class Schedule implements ScheduleProviderInterface
                 )
             )
 
-            // daily at 02:00
+            // By default, daily at 02:00
             ->add(
                 RecurringMessage::cron(
                     $this->settingRepository->findOneBy(['name' => 'LDAP_SYNC_CRON'])->getValue(),
