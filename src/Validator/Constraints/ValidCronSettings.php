@@ -1,6 +1,5 @@
 <?php
 
-
 namespace App\Validator\Constraints;
 
 use Symfony\Component\Validator\Constraint;
@@ -23,5 +22,3 @@ class ValidCronSettings extends Constraint
         return ValidCronSubmissionValidator::class;
     }
 }
-
-
