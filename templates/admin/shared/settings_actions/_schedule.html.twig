@@ -135,7 +135,9 @@
                                     },
                                 }) }}
                                 {# TODO FIX THIS PROBLEM WITH THIS FORM DISPLAY, its on the profile but doesn't render on the twig UI #}
+                                <div class="text-red-500 text-sm mt-1">
                                 {{ form_errors(attribute(form, fieldName)) }}
+                                </div>
                             </div>
                         {% endfor %}
                     </div>
