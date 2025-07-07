@@ -10,7 +10,7 @@ class ValidCronSettings extends Constraint
 {
     public array $cronSettings = [];
 
-    public function __construct(array $options = null)
+    public function __construct(array $options)
     {
         parent::__construct($options);
         if (isset($options['cronSettings'])) {
