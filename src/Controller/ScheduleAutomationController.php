@@ -123,77 +123,87 @@ class ScheduleAutomationController extends AbstractController
 
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $useAdvancedMode = $form->get('use_advanced_mode')->getData();
-
+        if ($form->isSubmitted()) {
             foreach ($this->cronSettings as $settingName) {
+                $useAdvancedMode = $form->get('use_advanced_mode')->getData();
                 if ($useAdvancedMode) {
-                    $cronValue = $form->get("{$settingName}_advanced")->getData();
-                } else {
-                    $time = $form->get("{$settingName}_time")->getData();
-                    $daysOfWeek = $form->get("{$settingName}_day_of_week")->getData();
-                    $daysOfMonth = $form->get("{$settingName}_day_of_month")->getData();
-                    $monthsOfYear = $form->get("{$settingName}_months_of_the_year")->getData();
+                    $form->get("{$settingName}_advanced")->addError(
+                        new FormError('Please provide a CRON expression for advanced mode.')
+                    );
+                }
+            }
 
-                    // Frequencies
-                    $dayOfWeekFreq = (int)$form->get("{$settingName}_day_of_week_frequency")->getData();
-                    $dayOfMonthFreq = (int)$form->get("{$settingName}_day_of_month_frequency")->getData();
-                    $monthsFreq = (int)$form->get("{$settingName}_months_of_the_year_frequency")->getData();
+            if ($form->isValid()) {
+                $useAdvancedMode = $form->get('use_advanced_mode')->getData();
+                foreach ($this->cronSettings as $settingName) {
+                    if ($useAdvancedMode) {
+                        $cronValue = $form->get("{$settingName}_advanced")->getData();
+                    } else {
+                        $time = $form->get("{$settingName}_time")->getData();
+                        $daysOfWeek = $form->get("{$settingName}_day_of_week")->getData();
+                        $daysOfMonth = $form->get("{$settingName}_day_of_month")->getData();
+                        $monthsOfYear = $form->get("{$settingName}_months_of_the_year")->getData();
 
-                    // Prevent both day_of_month and day_of_week frequencies being > 1 at the same time
+                        // Frequencies
+                        $dayOfWeekFreq = (int)$form->get("{$settingName}_day_of_week_frequency")->getData();
+                        $dayOfMonthFreq = (int)$form->get("{$settingName}_day_of_month_frequency")->getData();
+                        $monthsFreq = (int)$form->get("{$settingName}_months_of_the_year_frequency")->getData();
 
-                    // Validate frequency logic: frequency must be lower than the number of selected values
-                    $fieldsToCheck = [
-                        'day_of_week' => [$daysOfWeek, $dayOfWeekFreq],
-                        'day_of_month' => [$daysOfMonth, $dayOfMonthFreq],
-                        'months_of_the_year' => [$monthsOfYear, $monthsFreq],
-                    ];
+                        // Prevent both day_of_month and day_of_week frequencies being > 1 at the same time
 
-                    $validationFailed = false;
-                    foreach ($fieldsToCheck as $fieldSuffix => [$selectedValues, $frequency]) {
-                        if ($frequency > 1 && !in_array('*', $selectedValues, true)) {
-                            $countSelected = count($selectedValues);
-                            if ($frequency >= $countSelected) {
-                                $form->get("{$settingName}_{$fieldSuffix}_frequency")->addError(
-                                    new FormError(
-                                        sprintf(
-                                            'Frequency (%d) must be less than the number of selected values (%d).',
-                                            $frequency,
-                                            $countSelected
+                        // Validate frequency logic: frequency must be lower than the number of selected values
+                        $fieldsToCheck = [
+                            'day_of_week' => [$daysOfWeek, $dayOfWeekFreq],
+                            'day_of_month' => [$daysOfMonth, $dayOfMonthFreq],
+                            'months_of_the_year' => [$monthsOfYear, $monthsFreq],
+                        ];
+
+                        $validationFailed = false;
+                        foreach ($fieldsToCheck as $fieldSuffix => [$selectedValues, $frequency]) {
+                            if ($frequency > 1 && !in_array('*', $selectedValues, true)) {
+                                $countSelected = count($selectedValues);
+                                if ($frequency >= $countSelected) {
+                                    $form->get("{$settingName}_{$fieldSuffix}_frequency")->addError(
+                                        new FormError(
+                                            sprintf(
+                                                'Frequency (%d) must be less than the number of selected values (%d).',
+                                                $frequency,
+                                                $countSelected
+                                            )
                                         )
-                                    )
-                                );
-                                $validationFailed = true;
+                                    );
+                                    $validationFailed = true;
+                                }
                             }
                         }
+
+                        if ($validationFailed) {
+                            // Stop processing this setting if validation failed
+                            continue;
+                        }
+
+                        $hour = $time instanceof DateTimeInterface ? $time->format('H') : '0';
+                        $minute = $time instanceof DateTimeInterface ? $time->format('i') : '0';
+
+                        // Build the cron parts with frequency applied, e.g., day_of_week "1-15/2,20"
+                        $dayOfMonthExpr = $this->cronExpressionHelperService->selectAllWithFreqConverter(
+                            $daysOfMonth,
+                            $dayOfMonthFreq
+                        );
+                        $monthExpr = $this->cronExpressionHelperService->selectAllWithFreqConverter(
+                            $monthsOfYear,
+                            $monthsFreq
+                        );
+                        $dayOfWeekExpr = $this->cronExpressionHelperService->selectAllWithFreqConverter(
+                            $daysOfWeek,
+                            $dayOfWeekFreq
+                        );
+
+                        $cronValue = "{$minute} {$hour} {$dayOfMonthExpr} {$monthExpr} {$dayOfWeekExpr}";
                     }
 
-                    if ($validationFailed) {
-                        // Stop processing this setting if validation failed
-                        continue;
-                    }
-
-                    $hour = $time instanceof DateTimeInterface ? $time->format('H') : '0';
-                    $minute = $time instanceof DateTimeInterface ? $time->format('i') : '0';
-
-                    // Build the cron parts with frequency applied, e.g., day_of_week "1-15/2,20"
-                    $dayOfMonthExpr = $this->cronExpressionHelperService->selectAllWithFreqConverter(
-                        $daysOfMonth,
-                        $dayOfMonthFreq
-                    );
-                    $monthExpr = $this->cronExpressionHelperService->selectAllWithFreqConverter(
-                        $monthsOfYear,
-                        $monthsFreq
-                    );
-                    $dayOfWeekExpr = $this->cronExpressionHelperService->selectAllWithFreqConverter(
-                        $daysOfWeek,
-                        $dayOfWeekFreq
-                    );
-
-                    $cronValue = "{$minute} {$hour} {$dayOfMonthExpr} {$monthExpr} {$dayOfWeekExpr}";
+                    $this->saveSetting($settingName, $cronValue, $useAdvancedMode);
                 }
-
-                $this->saveSetting($settingName, $cronValue, $useAdvancedMode);
             }
 
             // Analytics
