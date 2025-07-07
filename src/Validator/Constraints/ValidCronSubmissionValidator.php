@@ -97,21 +97,21 @@ class ValidCronSubmissionValidator extends ConstraintValidator
             12
         );
 
-        if (empty($daysOfWeek)) {
+        if ($daysOfWeek === []) {
             $this->addError(
                 "{$settingName}_day_of_week",
                 'Please choose at least one day of the week.'
             );
         }
 
-        if (empty($daysOfMonth)) {
+        if ($daysOfMonth === []) {
             $this->addError(
                 "{$settingName}_day_of_month",
                 'Please choose at least one day of the month.'
             );
         }
 
-        if (empty($monthsOfYear)) {
+        if ($monthsOfYear === []) {
             $this->addError(
                 "{$settingName}_months_of_the_year",
                 'Please choose at least one month.'
@@ -153,21 +153,18 @@ class ValidCronSubmissionValidator extends ConstraintValidator
             $daysOfMonth,
             $dayOfMonthFreq,
             $monthsFreq,
-            $settingName,
             'day_of_month'
         );
         $monthPart = $this->buildPart(
             $monthsOfYear,
             $monthsFreq,
             $monthsFreq,
-            $settingName,
             'months_of_the_year'
         );
         $dayOfWeekPart = $this->buildPart(
             $daysOfWeek,
             $dayOfWeekFreq,
             $dayOfWeekFreq,
-            $settingName,
             'day_of_week'
         );
 
@@ -197,13 +194,13 @@ class ValidCronSubmissionValidator extends ConstraintValidator
         }
     }
 
-    private function buildPart(array $values, int $freq, int $defaultFreq, string $settingName, string $suffix): string
+    private function buildPart(array $values, int $freq, int $defaultFreq, string $suffix): string
     {
         if (in_array('*', $values, true)) {
             return "*/$defaultFreq";
         }
 
-        return $this->buildCronPartWithFrequency($values, $freq, $settingName, $suffix);
+        return $this->buildCronPartWithFrequency($values, $freq, $suffix);
     }
 
     private function expandAllSelection(array $values, int $min, int $max): array
@@ -218,7 +215,6 @@ class ValidCronSubmissionValidator extends ConstraintValidator
     private function buildCronPartWithFrequency(
         array $values,
         int $frequency,
-        string $form,
         string $settingName
     ): string {
         if ($values === []) {

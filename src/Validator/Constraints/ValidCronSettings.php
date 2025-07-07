@@ -18,6 +18,7 @@ class ValidCronSettings extends Constraint
         }
     }
 
+    #[\Override]
     public function validatedBy(): string
     {
         return ValidCronSubmissionValidator::class;
