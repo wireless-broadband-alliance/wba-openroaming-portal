@@ -30,15 +30,10 @@ class ScheduleType extends AbstractType
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
-        if (
-            $this->settingRepository->findOneBy(
-                ['name' => 'CRON_ADVANCED_STATUS']
-            )->getValue() === OperationMode::ON->value
-        ) {
-            $selected = true;
-        } else {
-            $selected = false;
-        }
+        $selected = $this->settingRepository->findOneBy([
+                    'name' => 'CRON_ADVANCED_STATUS'
+                ]
+            )->getValue() === OperationMode::ON->value;
 
         $builder->add('use_advanced_mode', CheckboxType::class, [
             'label' => 'Use Advanced Mode (Manual CRON Expression)',
@@ -92,9 +87,9 @@ class ScheduleType extends AbstractType
                     'multiple' => true,
                     'required' => false,
                     'choices' => ['All days' => '*'] + array_combine(
-                        ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
-                        range(0, 6)
-                    ),
+                            ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+                            range(0, 6)
+                        ),
                     'label' => false,
                     'attr' => ['description' => $description],
                 ])
