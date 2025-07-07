@@ -24,3 +24,4 @@ class ValidCronSettings extends Constraint
     }
 }
 
+

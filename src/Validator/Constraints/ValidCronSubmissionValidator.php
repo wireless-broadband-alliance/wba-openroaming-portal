@@ -7,6 +7,7 @@ use Exception;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 use Symfony\Component\Validator\Exception\UnexpectedTypeException;
+use UnexpectedValueException;
 
 class ValidCronSubmissionValidator extends ConstraintValidator
 {
@@ -16,6 +17,11 @@ class ValidCronSubmissionValidator extends ConstraintValidator
             throw new UnexpectedTypeException($constraint, ValidCronSettings::class);
         }
 
+        if (!is_array($value)) {
+            throw new UnexpectedValueException($value, 'array');
+        }
+
+        // Get cronSettings from the constraint options instead of constructor injection
         $cronSettings = $constraint->cronSettings;
 
         $isAdvanced = $value['use_advanced_mode'] ?? false;
@@ -38,7 +44,6 @@ class ValidCronSubmissionValidator extends ConstraintValidator
             $this->context->buildViolation('Please provide a CRON expression for advanced mode.')
                 ->atPath($cronField)
                 ->addViolation();
-
             return;
         }
 
