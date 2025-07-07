@@ -3,6 +3,7 @@
 namespace App\Form;
 
 use App\Enum\DaysOfWeek;
+use App\Enum\MonthsOfYear;
 use App\Enum\OperationMode;
 use App\Repository\SettingRepository;
 use App\Service\GetSettings;
@@ -113,21 +114,7 @@ class ScheduleType extends AbstractType
                 ->add("{$settingName}_months_of_the_year", ChoiceType::class, [
                     'multiple' => true,
                     'required' => false,
-                    'choices' => [
-                        'All Months' => '*',
-                        'January' => 1,
-                        'February' => 2,
-                        'March' => 3,
-                        'April' => 4,
-                        'May' => 5,
-                        'June' => 6,
-                        'July' => 7,
-                        'August' => 8,
-                        'September' => 9,
-                        'October' => 10,
-                        'November' => 11,
-                        'December' => 12,
-                    ],
+                    'choices' => ['All Months' => '*'] + MonthsOfYear::choices(),
                     'label' => false,
                     'attr' => ['description' => $description],
                 ])
