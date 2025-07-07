@@ -2,6 +2,7 @@
 
 namespace App\Form;
 
+use App\Enum\DaysOfWeek;
 use App\Enum\OperationMode;
 use App\Repository\SettingRepository;
 use App\Service\GetSettings;
@@ -30,6 +31,12 @@ class ScheduleType extends AbstractType
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
+        $cronSettings = [
+            'DELETE_UNCONFIRMED_USERS_CRON',
+            'USERS_WHEN_PROFILE_EXPIRES_CRON',
+            'LDAP_SYNC_CRON',
+        ];
+
         $selected = $this->settingRepository->findOneBy([
                     'name' => 'CRON_ADVANCED_STATUS'
                 ]
@@ -41,12 +48,6 @@ class ScheduleType extends AbstractType
             'mapped' => false,
             'data' => $selected,
         ]);
-
-        $cronSettings = [
-            'DELETE_UNCONFIRMED_USERS_CRON',
-            'USERS_WHEN_PROFILE_EXPIRES_CRON',
-            'LDAP_SYNC_CRON',
-        ];
 
         // Frequency choices from 1 (every) to 10 (every 10 units)
         $freqChoices = array_combine(range(1, 10), range(1, 10));
@@ -86,10 +87,7 @@ class ScheduleType extends AbstractType
                 ->add("{$settingName}_day_of_week", ChoiceType::class, [
                     'multiple' => true,
                     'required' => false,
-                    'choices' => ['All days' => '*'] + array_combine(
-                            ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
-                            range(0, 6)
-                        ),
+                    'choices' => ['All days' => '*'] + DaysOfWeek::choices(),
                     'label' => false,
                     'attr' => ['description' => $description],
                 ])
