@@ -183,7 +183,7 @@ class ValidCronSubmissionValidator extends ConstraintValidator
     private function addError(string $path, string $message): void
     {
         $this->context->buildViolation($message)
-            ->atPath($path)
+            ->atPath("[$path]")
             ->addViolation();
     }
 
