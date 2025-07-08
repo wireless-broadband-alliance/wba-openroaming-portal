@@ -44,7 +44,18 @@ class FreeradiusLastConnectionCommand extends Command
 
             return Command::FAILURE;
         }
+        $lastData = [];  // get data from last interaction on this variable
+        $radacctData = $this->radiusAccountingRepository->findConnectionTime();
+        if ($lastData == $radacctData)
+        {
+            $output->writeln('<error>No changes required</error>');
 
+            return Command::SUCCESS;
+        }
+        $userRadProfData = $this->userRadiusProfileRepository->getLastConnectionData();
+        foreach ($userRadProfData as $userRadProf) {
+
+        }
         // TODO FOR THIS COMMAND
         /*
          * 1 - Check if the connection to the freeradius table exist with the .env DATABASE_FREERADIUS -> make service
@@ -55,10 +66,6 @@ class FreeradiusLastConnectionCommand extends Command
          * 5 - Output a response message like: "Execution ignored same data checked" if the content on the step 2 is the same
          * 5.1 - Output a response message like: "Freeradius Connection Times Updated" if the content on the step 2 is diferent
         */
-
-        $radacctData = $this->radiusAccountingRepository->findConnectionTime();
-        $userRadProfData = $this->userRadiusProfileRepository->getLastConnectionData();
-        dd($userRadProfData);
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
