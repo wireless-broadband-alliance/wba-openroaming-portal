@@ -30,10 +30,11 @@ class FreeradiusConnectionService
                 'success' => true,
                 'message' => 'FreeRADIUS DB connection - Successfully connected.',
             ];
-        } catch (Throwable $e) {
+        } catch (Throwable) {
             return [
                 'success' => false,
-                'message' => 'FreeRADIUS DB connection failed: ' . $e->getMessage(),
+                'message' => 'FreeRADIUS DB connection failed: Failed to connect to the database. ' .
+                    'Please check your connection details on the .env configuration.',
             ];
         }
     }

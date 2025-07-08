@@ -10,6 +10,7 @@ use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use App\Service\EscapeSpreadSheet;
 use App\Service\EventActions;
+use App\Service\FreeradiusConnectionService;
 use App\Service\GetSettings;
 use App\Service\Statistics;
 use DateTime;
@@ -19,6 +20,7 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
@@ -35,7 +37,8 @@ class FreeradiusController extends AbstractController
         private readonly ParameterBagInterface $parameterBag,
         private readonly EventActions $eventActions,
         private readonly RadiusAuthsRepository $radiusAuthsRepository,
-        private readonly RadiusAccountingRepository $radiusAccountingRepository
+        private readonly RadiusAccountingRepository $radiusAccountingRepository,
+        private readonly FreeradiusConnectionService $freeradiusConnectionService
     ) {
     }
 
@@ -54,7 +57,13 @@ class FreeradiusController extends AbstractController
         #[MapQueryParameter] int $page = 1,
         #[MapQueryParameter] ?int $count = 5
     ): Response {
-        // TODO - Make a checker for freeradius DATABASE_FREERADIUS env if its valid and the connection exist, like the backup command
+        $result = $this->freeradiusConnectionService->checkConnection();
+        if ($result['success'] === false) {
+            return new JsonResponse([
+                'success' => false,
+                'message' => $result['message'],
+            ], Response::HTTP_SERVICE_UNAVAILABLE); // 503 -> Freeradius server is temporarily unable
+        }
 
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
