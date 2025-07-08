@@ -45,7 +45,7 @@ class FreeradiusLastConnectionCommand extends Command
     {
         $result = $this->freeradiusConnectionService->checkConnection();
         if ($result['success'] === false) {
-            $output->writeln('<error>'.$result['message'].'</error>');
+            $output->writeln('<error>' . $result['message'] . '</error>');
 
             return Command::FAILURE;
         }
@@ -77,10 +77,13 @@ class FreeradiusLastConnectionCommand extends Command
          * 1 - Check if the connection to the freeradius table exist with the .env DATABASE_FREERADIUS -> make service
          * 2 - Make the query1 to check the radAccount table content -> make the query on the Repo
          * 3 - Check if the query1 content is the same of the previous execution -> php memory
-         * 4 - Make the logic to update the profile row on the OpenRoaming db UserRadiusProfile "lastConnection" (start/end Connections)
+         * 4 - Make the logic to update the profile row on the OpenRoaming db UserRadiusProfile
+         * "lastConnection" (start/end Connections)
          * 4.1 - Make the query2 on the OpenRoaming db to get update the rows of each profile if need it
-         * 5 - Output a response message like: "Execution ignored same data checked" if the content on the step 2 is the same
-         * 5.1 - Output a response message like: "Freeradius Connection Times Updated" if the content on the step 2 is diferent
+         * 5 - Output a response message like: "Execution ignored same data checked"
+         * if the content on the step 2 is the same
+         * 5.1 - Output a response message like: "Freeradius Connection Times Updated"
+         * if the content on the step 2 is diferent
         */
 
         // Save new data in cache for next execution comparison
@@ -105,7 +108,7 @@ class FreeradiusLastConnectionCommand extends Command
             return $this->backupFreeradiusLastConnection($output);
         } catch (Exception $e) {
             $this->entityManager->rollback();
-            $output->writeln('<error>An error occurred: '.$e->getMessage().'</error>');
+            $output->writeln('<error>An error occurred: ' . $e->getMessage() . '</error>');
 
             return Command::FAILURE;
         } finally {
