@@ -10,6 +10,7 @@ use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Lock\LockFactory;
 use Symfony\Component\Lock\Store\FlockStore;
 
@@ -33,9 +34,14 @@ class FreeradiusLastConnectionCommand extends Command
         $this->lockFactory = new LockFactory($store);
     }
 
-    public function backupFreeradiusLastConnection(): int
+    public function backupFreeradiusLastConnection(OutputInterface $output): int
     {
-        dd($this->freeradiusConnectionService->checkConnection());
+        $result = $this->freeradiusConnectionService->checkConnection();
+        if ($result['success'] === false) {
+            $output->writeln('<error>' . $result['message'] . '</error>');
+
+            return Command::FAILURE;
+        }
 
         // TODO FOR THIS COMMAND
         /*
@@ -48,8 +54,8 @@ class FreeradiusLastConnectionCommand extends Command
          * 5.1 - Output a response message like: "Freeradius Connection Times Updated" if the content on the step 2 is diferent
         */
 
-        $radacctData = $this->radiusAccountingRepository->findConnectionTime();
-        dd('Freeradius last command logic', $radacctData);
+        $radAcctData = $this->radiusAccountingRepository->findConnectionTime();
+        dd('Freeradius last command logic', $radAcctData);
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -64,13 +70,14 @@ class FreeradiusLastConnectionCommand extends Command
         }
 
         try {
-            $this->backupFreeradiusLastConnection();
+            // Pass $output to your method and get the result code
+            $resultCode = $this->backupFreeradiusLastConnection($output);
+            dd($resultCode);
         } catch (Exception $e) {
             $this->entityManager->rollback();
-            $output->writeln('<error>An error occurred:</error> ' . $e->getMessage());
+            $output->writeln('<error>An error occurred: ' . $e->getMessage() . '</error>');
             return Command::FAILURE;
         } finally {
-            // Always release the lock (even if exception happens)
             $lock->release();
         }
 
