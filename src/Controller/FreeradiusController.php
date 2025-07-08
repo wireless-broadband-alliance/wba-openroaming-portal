@@ -54,6 +54,8 @@ class FreeradiusController extends AbstractController
         #[MapQueryParameter] int $page = 1,
         #[MapQueryParameter] ?int $count = 5
     ): Response {
+        // TODO - Make a checker for freeradius DATABASE_FREERADIUS env if its valid and the connection exist, like the backup command
+
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
         $user = $this->getUser();

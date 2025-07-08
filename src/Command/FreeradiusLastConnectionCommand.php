@@ -25,7 +25,7 @@ class FreeradiusLastConnectionCommand extends Command
     {
         // TODO FOR THIS COMMAND
         /*
-         * 1 - Check if the connection to the freeradius table exist with the .env DATABASE_FREERADIUS
+         * 1 - Check if the connection to the freeradius table exist with the .env DATABASE_FREERADIUS -> make service
          * 2 - Make the query1 to check the radAccount table content -> make the query on the Repo
          * 3 - Check if the query1 content is the same of the previous execution -> php memory
          * 4 - Make the logic to update the profile row on the OpenRoaming db UserRadiusProfile "lastConnection" (start/end Connections)
