@@ -1,11 +1,20 @@
 # Changelog
 
+# Release V1.9.0
+
+- **Fix bug 500** on `dashboard/statistics/freeradius` in case the connection details are invalid and the portal can reach
+  the server, added a new JSON error message for details.
+- New command for freeradius profile connection of each user, now the `UserRadiusProfile` entity saves the start/end
+  connection of the user profiles when the freeradius server gets a new request. (For later graphics generations and
+  user details)
+
 # Release V1.8.0
 
 - Update API for version 2, fix bug for iOS App's with invalid format for profile generation endpoint.
 - Prometheus Implementation
 - Fix bug with registration links, use could use them to re-log in to the portal at any time, can only be used once.
-- Fix bug with account deletion, the admin was able to access the page using the url. The admin cannot delete his own account.
+- Fix bug with account deletion, the admin was able to access the page using the url. The admin cannot delete his own
+  account.
 - Fix bug on the pagination page with the table `Access Points Usage` on the `dashboard/statistics/freeradius` page (Add
   new custom display of results per page).
 - Fix bug about when the user session should be restored. Only when the firewall "landing".
