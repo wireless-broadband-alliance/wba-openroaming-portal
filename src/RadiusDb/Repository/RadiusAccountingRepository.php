@@ -201,4 +201,12 @@ class RadiusAccountingRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+
+    public function findConnectionTime(): array
+    {
+        return $this->createQueryBuilder('ra')
+            ->select('ra.username', 'ra.acctStartTime', 'ra.acctStopTime')
+            ->getQuery()
+            ->getResult();
+    }
 }

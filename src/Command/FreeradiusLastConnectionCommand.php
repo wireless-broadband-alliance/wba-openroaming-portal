@@ -2,6 +2,7 @@
 
 namespace App\Command;
 
+use App\RadiusDb\Repository\RadiusAccountingRepository;
 use App\Service\FreeradiusConnectionService;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
@@ -22,6 +23,7 @@ class FreeradiusLastConnectionCommand extends Command
 
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
+        private readonly RadiusAccountingRepository $radiusAccountingRepository,
         private readonly FreeradiusConnectionService $freeradiusConnectionService,
     ) {
         parent::__construct();
@@ -33,9 +35,6 @@ class FreeradiusLastConnectionCommand extends Command
 
     public function backupFreeradiusLastConnection(): int
     {
-        // Your debug line - keeps showing connection check result for dev purposes
-        dd($this->freeradiusConnectionService->checkConnection());
-
         // TODO FOR THIS COMMAND
         /*
          * 1 - Check if the connection to the freeradius table exist with the .env DATABASE_FREERADIUS -> make service
@@ -47,7 +46,7 @@ class FreeradiusLastConnectionCommand extends Command
          * 5.1 - Output a response message like: "Freeradius Connection Times Updated" if the content on the step 2 is diferent
         */
 
-        dd('Freeradius last connection');
+        $radacctData = $this->radiusAccountingRepository->findConnectionTime();
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
