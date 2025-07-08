@@ -39,6 +39,14 @@ class UserRadiusProfileRepository extends ServiceEntityRepository
         }
     }
 
+    public function getLastConnectionData(): array
+    {
+        return $this->createQueryBuilder('ur')
+            ->select('ur.lastConnectionAt', 'ur.radius_user')
+            ->getQuery()
+            ->getResult();
+    }
+
 //    /**
 //     * @return UserRadiusProfile[] Returns an array of UserRadiusProfile objects
 //     */

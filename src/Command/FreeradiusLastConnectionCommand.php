@@ -3,6 +3,7 @@
 namespace App\Command;
 
 use App\RadiusDb\Repository\RadiusAccountingRepository;
+use App\Repository\UserRadiusProfileRepository;
 use App\Service\FreeradiusConnectionService;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
@@ -26,6 +27,7 @@ class FreeradiusLastConnectionCommand extends Command
         private readonly EntityManagerInterface $entityManager,
         private readonly RadiusAccountingRepository $radiusAccountingRepository,
         private readonly FreeradiusConnectionService $freeradiusConnectionService,
+        private readonly UserRadiusProfileRepository $userRadiusProfileRepository,
     ) {
         parent::__construct();
 
@@ -54,8 +56,9 @@ class FreeradiusLastConnectionCommand extends Command
          * 5.1 - Output a response message like: "Freeradius Connection Times Updated" if the content on the step 2 is diferent
         */
 
-        $radAcctData = $this->radiusAccountingRepository->findConnectionTime();
-        dd('Freeradius last command logic', $radAcctData);
+        $radacctData = $this->radiusAccountingRepository->findConnectionTime();
+        $userRadProfData = $this->userRadiusProfileRepository->getLastConnectionData();
+        dd($userRadProfData);
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -72,7 +75,6 @@ class FreeradiusLastConnectionCommand extends Command
         try {
             // Pass $output to your method and get the result code
             $resultCode = $this->backupFreeradiusLastConnection($output);
-            dd($resultCode);
         } catch (Exception $e) {
             $this->entityManager->rollback();
             $output->writeln('<error>An error occurred: ' . $e->getMessage() . '</error>');
