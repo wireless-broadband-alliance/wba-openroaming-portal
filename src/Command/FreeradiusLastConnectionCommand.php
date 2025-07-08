@@ -52,11 +52,9 @@ class FreeradiusLastConnectionCommand extends Command
 
         $lastData = $this->getLastData(); // Get data from last command execution
         $radAcctData = $this->radiusAccountingRepository->findConnectionTime();
-        dd($radAcctData, $lastData);
 
-        if ($lastData === $radAcctData) {
+        if ($lastData == $radAcctData) {
             $output->writeln('<comment>No changes required</comment>');
-
             return Command::SUCCESS;
         }
 
