@@ -5,6 +5,7 @@ namespace App\DataFixtures;
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
 use App\Enum\AnalyticalEventType;
+use App\Enum\DefaultUsers;
 use App\Enum\UserProvider;
 use App\Service\EventActions;
 use DateTime;
@@ -23,8 +24,8 @@ class AdminUserFixture extends Fixture
     public function load(ObjectManager $manager): void
     {
         $admin = new User();
-        $admin->setUuid('admin@example.com');
-        $admin->setEmail('admin@example.com');
+        $admin->setUuid(DefaultUsers::ADMIN->value);
+        $admin->setEmail(DefaultUsers::ADMIN->value);
         $admin->setPassword($this->userPasswordHashed->hashPassword($admin, 'gnimaornepo'));
         $admin->setRoles(['ROLE_ADMIN']);
         $admin->setIsVerified(true);

@@ -6,6 +6,7 @@ use App\Entity\Event;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Enum\CodeVerificationType;
+use App\Enum\DefaultUsers;
 use App\Enum\FirewallType;
 use App\Enum\UserTwoFactorAuthenticationStatus;
 use App\Form\TwoFACode;
@@ -953,7 +954,7 @@ class TwoFAController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
-        // Ensure the can only access this route if it has an email || phone number
+        // Ensure the user can only access this route if it has an email || phone number
         if (!$user->getEmail() && !$user->getPhoneNumber()) {
             $this->addFlash(
                 'error',
@@ -961,6 +962,20 @@ class TwoFAController extends AbstractController
                 Please select another valid two-factor authentication if you want to configure one for this account.'
             );
             return $this->redirectToRoute('app_configure2FA');
+        }
+
+        if (
+            $user->getEmail() === DefaultUsers::ADMIN->value
+        ) {
+            $this->addFlash(
+                'error',
+                'This account does not have a valid contact identifier (email) please don\'t use 
+                the default from the portal. Please select another valid two-factor authentication for this account.'
+            );
+
+            return $this->redirectToRoute('app_configure2FA', [
+                'context' => $context,
+            ]);
         }
 
         if ($user->getTwoFAtype() !== UserTwoFactorAuthenticationStatus::DISABLED->value) {
