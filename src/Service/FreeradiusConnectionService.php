@@ -3,37 +3,33 @@
 namespace App\Service;
 
 use Doctrine\DBAL\Connection;
-use Doctrine\ORM\EntityManager;
+use Doctrine\Persistence\ManagerRegistry;
+use RuntimeException;
 use Throwable;
 
-readonly class FreeradiusConnectionService
+class FreeradiusConnectionService
 {
-    public function __construct(
-        private Connection $freeradiusConnection
-    ) {
+    private Connection $freeradiusConnection;
+
+    public function __construct(ManagerRegistry $doctrine)
+    {
+        $connection = $doctrine->getConnection('freeradius');
+
+        if (!$connection instanceof Connection) {
+            throw new RuntimeException('Invalid connection type.');
+        }
+
+        $this->freeradiusConnection = $connection;
     }
 
-    /**
-     * Check if the freeradius connection is alive.
-     */
     public function checkConnection(): array
     {
         try {
-            // Explicitly try to connect
-            $this->freeradiusConnection->connect();
-
-            if ($this->freeradiusConnection->isConnected()) {
-                return [
-                    'success' => true,
-                    'message' => 'FreeRADIUS DB connection - Successfully connected.',
-                ];
-            }
-
+            $this->freeradiusConnection->executeQuery('SELECT 1');
             return [
-                'success' => false,
-                'message' => 'FreeRADIUS DB connection - Failed to connect (unknown reason).',
+                'success' => true,
+                'message' => 'FreeRADIUS DB connection - Successfully connected.',
             ];
-
         } catch (Throwable $e) {
             return [
                 'success' => false,

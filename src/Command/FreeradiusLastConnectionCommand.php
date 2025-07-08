@@ -35,6 +35,8 @@ class FreeradiusLastConnectionCommand extends Command
 
     public function backupFreeradiusLastConnection(): int
     {
+        dd($this->freeradiusConnectionService->checkConnection());
+
         // TODO FOR THIS COMMAND
         /*
          * 1 - Check if the connection to the freeradius table exist with the .env DATABASE_FREERADIUS -> make service
@@ -47,6 +49,7 @@ class FreeradiusLastConnectionCommand extends Command
         */
 
         $radacctData = $this->radiusAccountingRepository->findConnectionTime();
+        dd('Freeradius last command logic', $radacctData);
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
