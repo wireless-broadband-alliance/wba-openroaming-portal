@@ -2,12 +2,15 @@
 
 namespace App\Command;
 
+use App\Service\FreeradiusConnectionService;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Lock\LockFactory;
+use Symfony\Component\Lock\Store\FlockStore;
 
 #[AsCommand(
     name: 'backup:freeradiusLastConnection',
@@ -15,14 +18,24 @@ use Symfony\Component\Console\Output\OutputInterface;
 )]
 class FreeradiusLastConnectionCommand extends Command
 {
+    private LockFactory $lockFactory;
+
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
+        private readonly FreeradiusConnectionService $freeradiusConnectionService,
     ) {
         parent::__construct();
+
+        // Set up a filesystem lock (uses /tmp by default)
+        $store = new FlockStore();
+        $this->lockFactory = new LockFactory($store);
     }
 
     public function backupFreeradiusLastConnection(): int
     {
+        // Your debug line - keeps showing connection check result for dev purposes
+        dd($this->freeradiusConnectionService->checkConnection());
+
         // TODO FOR THIS COMMAND
         /*
          * 1 - Check if the connection to the freeradius table exist with the .env DATABASE_FREERADIUS -> make service
@@ -39,13 +52,24 @@ class FreeradiusLastConnectionCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
+        // Create a lock named uniquely for this command
+        $lock = $this->lockFactory->createLock('backup_freeradius_last_connection');
+
+        // Try to acquire the lock, if failed means command is already running
+        if (!$lock->acquire()) {
+            $output->writeln('<comment>The command is already running in another process.</comment>');
+            return Command::SUCCESS;
+        }
+
         try {
             $this->backupFreeradiusLastConnection();
         } catch (Exception $e) {
-            // Handle any exceptions and roll back in case of an error
             $this->entityManager->rollback();
             $output->writeln('<error>An error occurred:</error> ' . $e->getMessage());
             return Command::FAILURE;
+        } finally {
+            // Always release the lock (even if exception happens)
+            $lock->release();
         }
 
         return Command::SUCCESS;
