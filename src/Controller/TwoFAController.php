@@ -969,8 +969,8 @@ class TwoFAController extends AbstractController
         ) {
             $this->addFlash(
                 'error',
-                'This account does not have a valid contact identifier (email) please don\'t use the default from the portal.
-                Please select another valid two-factor authentication for this account.'
+                'This account does not have a valid contact identifier (email) please don\'t use 
+                the default from the portal. Please select another valid two-factor authentication for this account.'
             );
 
             return $this->redirectToRoute('app_configure2FA', [
