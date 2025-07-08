@@ -7,13 +7,14 @@ use App\Repository\UserRadiusProfileRepository;
 use App\Service\FreeradiusConnectionService;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
+use Psr\Cache\InvalidArgumentException;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Lock\LockFactory;
 use Symfony\Component\Lock\Store\FlockStore;
+use Symfony\Contracts\Cache\CacheInterface;
 
 #[AsCommand(
     name: 'backup:freeradiusLastConnection',
@@ -27,6 +28,7 @@ class FreeradiusLastConnectionCommand extends Command
         private readonly EntityManagerInterface $entityManager,
         private readonly RadiusAccountingRepository $radiusAccountingRepository,
         private readonly FreeradiusConnectionService $freeradiusConnectionService,
+        private readonly CacheInterface $cache,
         private readonly UserRadiusProfileRepository $userRadiusProfileRepository,
     ) {
         parent::__construct();
@@ -40,21 +42,22 @@ class FreeradiusLastConnectionCommand extends Command
     {
         $result = $this->freeradiusConnectionService->checkConnection();
         if ($result['success'] === false) {
-            $output->writeln('<error>' . $result['message'] . '</error>');
+            $output->writeln('<error>'.$result['message'].'</error>');
 
             return Command::FAILURE;
         }
-        $lastData = [];  // get data from last interaction on this variable
-        $radacctData = $this->radiusAccountingRepository->findConnectionTime();
-        if ($lastData == $radacctData)
-        {
+
+        $lastData = [];  // Get data from last interaction command execution
+        $radAcctData = $this->radiusAccountingRepository->findConnectionTime();
+
+        if ($lastData === $radAcctData) {
             $output->writeln('<error>No changes required</error>');
 
             return Command::SUCCESS;
         }
+
         $userRadProfData = $this->userRadiusProfileRepository->getLastConnectionData();
         foreach ($userRadProfData as $userRadProf) {
-
         }
         // TODO FOR THIS COMMAND
         /*
@@ -66,6 +69,8 @@ class FreeradiusLastConnectionCommand extends Command
          * 5 - Output a response message like: "Execution ignored same data checked" if the content on the step 2 is the same
          * 5.1 - Output a response message like: "Freeradius Connection Times Updated" if the content on the step 2 is diferent
         */
+
+        return Command::SUCCESS;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -76,6 +81,7 @@ class FreeradiusLastConnectionCommand extends Command
         // Try to acquire the lock, if failed means command is already running
         if (!$lock->acquire()) {
             $output->writeln('<comment>The command is already running in another process.</comment>');
+
             return Command::SUCCESS;
         }
 
@@ -84,12 +90,36 @@ class FreeradiusLastConnectionCommand extends Command
             $resultCode = $this->backupFreeradiusLastConnection($output);
         } catch (Exception $e) {
             $this->entityManager->rollback();
-            $output->writeln('<error>An error occurred: ' . $e->getMessage() . '</error>');
+            $output->writeln('<error>An error occurred: '.$e->getMessage().'</error>');
+
             return Command::FAILURE;
         } finally {
             $lock->release();
         }
 
         return Command::SUCCESS;
+    }
+
+    /**
+     * @throws InvalidArgumentException
+     */
+    private function getLastData(): ?array
+    {
+        return $this->cache->get('freeradius_last_data', function () {
+            // Return null if caches miss
+            return null;
+        });
+    }
+
+    /**
+     * @throws InvalidArgumentException
+     */
+    private function saveLastData(array $data): void
+    {
+        // Save indefinitely (or set a TTL)
+        $this->cache->delete('freeradius_last_data');
+        $this->cache->get('freeradius_last_data', function () use ($data) {
+            return $data;
+        });
     }
 }
