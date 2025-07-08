@@ -61,8 +61,12 @@ class FreeradiusLastConnectionCommand extends Command
         }
 
         $userRadProfData = $this->userRadiusProfileRepository->getLastConnectionData();
-        foreach ($userRadProfData as $userRadProf) {
-            // ... update profiles logic
+        foreach ($radAcctData as $radAcct) {
+            foreach ($userRadProfData as $userRadProf) {
+                if ($userRadProf['radius_user'] === $radAcct['username']) {
+                    $userRadProf['lastConnectionAt'] = $radAcct['acctStopTime'];
+                }
+            }
         }
 
         // TODO FOR THIS COMMAND
