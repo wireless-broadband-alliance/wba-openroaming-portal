@@ -7,6 +7,7 @@ use App\Repository\UserRadiusProfileRepository;
 use App\Service\FreeradiusConnectionService;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
+use Psr\Cache\CacheItemPoolInterface;
 use Psr\Cache\InvalidArgumentException;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -14,7 +15,6 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Lock\LockFactory;
 use Symfony\Component\Lock\Store\FlockStore;
-use Symfony\Contracts\Cache\CacheInterface;
 
 #[AsCommand(
     name: 'backup:freeradiusLastConnection',
@@ -28,7 +28,7 @@ class FreeradiusLastConnectionCommand extends Command
         private readonly EntityManagerInterface $entityManager,
         private readonly RadiusAccountingRepository $radiusAccountingRepository,
         private readonly FreeradiusConnectionService $freeradiusConnectionService,
-        private readonly CacheInterface $cache,
+        private readonly CacheItemPoolInterface $cache, // concrete adapter to get set()
         private readonly UserRadiusProfileRepository $userRadiusProfileRepository,
     ) {
         parent::__construct();
@@ -38,6 +38,9 @@ class FreeradiusLastConnectionCommand extends Command
         $this->lockFactory = new LockFactory($store);
     }
 
+    /**
+     * @throws InvalidArgumentException
+     */
     public function backupFreeradiusLastConnection(OutputInterface $output): int
     {
         $result = $this->freeradiusConnectionService->checkConnection();
@@ -47,18 +50,21 @@ class FreeradiusLastConnectionCommand extends Command
             return Command::FAILURE;
         }
 
-        $lastData = [];  // Get data from last interaction command execution
+        $lastData = $this->getLastData(); // Get data from last command execution
         $radAcctData = $this->radiusAccountingRepository->findConnectionTime();
+        dd($radAcctData, $lastData);
 
         if ($lastData === $radAcctData) {
-            $output->writeln('<error>No changes required</error>');
+            $output->writeln('<comment>No changes required</comment>');
 
             return Command::SUCCESS;
         }
 
         $userRadProfData = $this->userRadiusProfileRepository->getLastConnectionData();
         foreach ($userRadProfData as $userRadProf) {
+            // ... update profiles logic
         }
+
         // TODO FOR THIS COMMAND
         /*
          * 1 - Check if the connection to the freeradius table exist with the .env DATABASE_FREERADIUS -> make service
@@ -70,15 +76,18 @@ class FreeradiusLastConnectionCommand extends Command
          * 5.1 - Output a response message like: "Freeradius Connection Times Updated" if the content on the step 2 is diferent
         */
 
+        // Save new data in cache for next execution comparison
+        $this->saveLastData($radAcctData);
+
+        $output->writeln('<info>Freeradius Connection Times Updated</info>');
+
         return Command::SUCCESS;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        // Create a lock named uniquely for this command
         $lock = $this->lockFactory->createLock('backup_freeradius_last_connection');
 
-        // Try to acquire the lock, if failed means command is already running
         if (!$lock->acquire()) {
             $output->writeln('<comment>The command is already running in another process.</comment>');
 
@@ -86,8 +95,7 @@ class FreeradiusLastConnectionCommand extends Command
         }
 
         try {
-            // Pass $output to your method and get the result code
-            $resultCode = $this->backupFreeradiusLastConnection($output);
+            return $this->backupFreeradiusLastConnection($output);
         } catch (Exception $e) {
             $this->entityManager->rollback();
             $output->writeln('<error>An error occurred: '.$e->getMessage().'</error>');
@@ -96,8 +104,6 @@ class FreeradiusLastConnectionCommand extends Command
         } finally {
             $lock->release();
         }
-
-        return Command::SUCCESS;
     }
 
     /**
@@ -105,10 +111,8 @@ class FreeradiusLastConnectionCommand extends Command
      */
     private function getLastData(): ?array
     {
-        return $this->cache->get('freeradius_last_data', function () {
-            // Return null if caches miss
-            return null;
-        });
+        $item = $this->cache->getItem('freeradius_last_data');
+        return $item->isHit() ? $item->get() : null;
     }
 
     /**
@@ -116,10 +120,9 @@ class FreeradiusLastConnectionCommand extends Command
      */
     private function saveLastData(array $data): void
     {
-        // Save indefinitely (or set a TTL)
-        $this->cache->delete('freeradius_last_data');
-        $this->cache->get('freeradius_last_data', function () use ($data) {
-            return $data;
-        });
+        $item = $this->cache->getItem('freeradius_last_data');
+        $item->set($data);
+        $item->expiresAfter(3600); // For security reason, this query will be cleared after this time frame
+        $this->cache->save($item);
     }
 }
