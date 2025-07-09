@@ -4,6 +4,7 @@ namespace App\RadiusDb\Repository;
 
 use App\RadiusDb\Entity\RadiusAccounting;
 use DateTime;
+use DateTimeImmutable;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\Query;
 use Doctrine\Persistence\ManagerRegistry;
@@ -200,6 +201,23 @@ class RadiusAccountingRepository extends ServiceEntityRepository
         return $queryBuilder
             ->getQuery()
             ->getResult();
+    }
+
+    public function findLatestConnectionTime(?int $sinceTimestamp = null): ?array
+    {
+        $qb = $this->createQueryBuilder('ra')
+            ->select('ra.acctStartTime')
+            ->orderBy('ra.acctStartTime', 'DESC')
+            ->setMaxResults(1);
+
+        if ($sinceTimestamp !== null) {
+            $sinceDateTime = new DateTimeImmutable()->setTimestamp($sinceTimestamp);
+
+            $qb->where('ra.acctStartTime >= :since')
+                ->setParameter('since', $sinceDateTime);
+        }
+
+        return $qb->getQuery()->getOneOrNullResult();
     }
 
     public function findConnectionTime(int $sinceTimestamp): array

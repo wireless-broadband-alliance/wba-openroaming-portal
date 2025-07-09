@@ -67,18 +67,22 @@ class FreeradiusLastConnectionCommand extends Command
             return Command::FAILURE;
         }
 
-        // Freeradius MASSIVE Query with the correct $timestampFreeradiusCron increase from the end of the connected execution
-        $radAcctData = $this->radiusAccountingRepository->findConnectionTime(
-            (int) $timestampFreeradiusCron->getValue()
-        );
-        dd($radAcctData);
-        if ($timestampFreeradiusCron === $radAcctData) {
+        // Check if the last time execution time is newer then the lasted value on the freeradius DB
+        if ($timestampFreeradiusCron < $this->radiusAccountingRepository->findLatestConnectionTime()) {
+            // TODO REMAKE THIS QUERY TO USE DISTINCT to filter result also needs to be reworked
+            // Freeradius MASSIVE Query with the correct $timestampFreeradiusCron increase from the end of the connected execution
+            $radAcctData = $this->radiusAccountingRepository->findConnectionTime(
+                (int) $timestampFreeradiusCron->getValue()
+            );
+
+            dd($radAcctData, $this->radiusAccountingRepository->findLatestConnectionTime());
+
             $output->writeln('<comment>No changes required</comment>');
 
             return Command::SUCCESS;
         }
 
-
+        dd($radAcctData);
         // TODO REVIEW THIS CODE NEEDS TO USE UPSERT TO IMPROVE OPTIMIZATIONS AND RESOURCES EXECUTION OF THE MACHINE
         $userRadProfData = $this->userRadiusProfileRepository->getLastConnectionData();
         $userRadProfIndexed = [];
