@@ -8,8 +8,6 @@ use App\Repository\UserRadiusProfileRepository;
 use App\Service\FreeradiusConnectionService;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
-use Psr\Cache\CacheItemPoolInterface;
-use Psr\Cache\InvalidArgumentException;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -29,7 +27,6 @@ class FreeradiusLastConnectionCommand extends Command
         private readonly EntityManagerInterface $entityManager,
         private readonly RadiusAccountingRepository $radiusAccountingRepository,
         private readonly FreeradiusConnectionService $freeradiusConnectionService,
-        private readonly CacheItemPoolInterface $cache, // concrete adapter to get set()
         private readonly UserRadiusProfileRepository $userRadiusProfileRepository,
         private readonly SettingRepository $settingRepository,
     ) {
@@ -40,9 +37,6 @@ class FreeradiusLastConnectionCommand extends Command
         $this->lockFactory = new LockFactory($store);
     }
 
-    /**
-     * @throws InvalidArgumentException
-     */
     public function backupFreeradiusLastConnection(OutputInterface $output): int
     {
         $timestampFreeradius = $this->settingRepository->findOneBy(['name' => 'TIME_STAMP_FREERADIUS_CRON']);
@@ -54,16 +48,18 @@ class FreeradiusLastConnectionCommand extends Command
         }
         $result = $this->freeradiusConnectionService->checkConnection();
         if ($result['success'] === false) {
-            $output->writeln('<error>' . $result['message'] . '</error>');
+            $output->writeln('<error>'.$result['message'].'</error>');
 
             return Command::FAILURE;
         }
 
-        $lastData = $this->getLastData(); // Get data from last command execution
+        $lastExecutionTime = $this->settingRepository->findOneBy(['name' => 'TIME_STAMP_FREERADIUS_CRON']->getValue());
+
         $radAcctData = $this->radiusAccountingRepository->findConnectionTime();
 
-        if ($lastData === $radAcctData) {
+        if ($lastExecutionTime === $radAcctData) {
             $output->writeln('<comment>No changes required</comment>');
+
             return Command::SUCCESS;
         }
 
@@ -89,6 +85,7 @@ class FreeradiusLastConnectionCommand extends Command
          * 3.1 - Find a way to add the timeStamp of the last query made -> need to save this on the DB new setting will not be displayed on the UI
          * 3.2 - EPOCH - TIMESTAMP -> save in this format valid for linux based
          * 3.3 - Find a way to get the timeStamp and add 1 for the next query
+         * 3.4 - Find a way to increase the setting TIME_STAMP_FREERADIUS_CRON when the command finished the execution
          * 4 - Make the logic to update the profile row on the OpenRoaming db UserRadiusProfile
          * "lastConnection" (start/end Connections)
          * 4.1 - Make the query2 on the OpenRoaming db to get update the rows of each profile if need it
@@ -123,31 +120,11 @@ class FreeradiusLastConnectionCommand extends Command
             return $this->backupFreeradiusLastConnection($output);
         } catch (Exception $e) {
             $this->entityManager->rollback();
-            $output->writeln('<error>An error occurred: ' . $e->getMessage() . '</error>');
+            $output->writeln('<error>An error occurred: '.$e->getMessage().'</error>');
 
             return Command::FAILURE;
         } finally {
             $lock->release();
         }
-    }
-
-    /**
-     * @throws InvalidArgumentException
-     */
-    private function getLastData(): ?array
-    {
-        $item = $this->cache->getItem('freeradius_last_data');
-        return $item->isHit() ? $item->get() : null;
-    }
-
-    /**
-     * @throws InvalidArgumentException
-     */
-    private function saveLastData(array $data): void
-    {
-        $item = $this->cache->getItem('freeradius_last_data');
-        $item->set($data);
-        $item->expiresAfter(3600); // For security reason, this query will be cleared after this time frame
-        $this->cache->save($item);
     }
 }
