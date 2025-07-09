@@ -39,8 +39,16 @@ class FreeradiusLastConnectionCommand extends Command
 
     public function backupFreeradiusLastConnection(OutputInterface $output): int
     {
-        $timestampFreeradiusCron = $this->settingRepository->findOneBy(['name' => 'TIME_STAMP_FREERADIUS_CRON']);
+        // Check if the check if the connection to the freeradius db is valid
+        $result = $this->freeradiusConnectionService->checkConnection();
+        if ($result['success'] === false) {
+            $output->writeln('<error>'.$result['message'].'</error>');
 
+            return Command::FAILURE;
+        }
+
+        // Check if the TIME_STAMP_FREERADIUS_CRON is valid
+        $timestampFreeradiusCron = $this->settingRepository->findOneBy(['name' => 'TIME_STAMP_FREERADIUS_CRON']);
         if (!$timestampFreeradiusCron) {
             $output->writeln(
                 '<error>Setting "TIME_STAMP_FREERADIUS_CRON" not found. Please run the command "reset:timeStampFreeradiusCron" to create it.</error>'
@@ -48,7 +56,6 @@ class FreeradiusLastConnectionCommand extends Command
 
             return Command::FAILURE;
         }
-
         if ((int)$timestampFreeradiusCron->getValue() < 0 ||
             $timestampFreeradiusCron->getValue() === null ||
             !ctype_digit($timestampFreeradiusCron->getValue())
@@ -60,24 +67,19 @@ class FreeradiusLastConnectionCommand extends Command
             return Command::FAILURE;
         }
 
-        $timestamp = (int)$timestampFreeradiusCron->getValue(); // Valid Cron
-
-        dd($timestamp);
-        $result = $this->freeradiusConnectionService->checkConnection();
-        if ($result['success'] === false) {
-            $output->writeln('<error>'.$result['message'].'</error>');
-
-            return Command::FAILURE;
-        }
-
-        $radAcctData = $this->radiusAccountingRepository->findConnectionTime();
-
+        // Freeradius MASSIVE Query with the correct $timestampFreeradiusCron increase from the end of the connected execution
+        $radAcctData = $this->radiusAccountingRepository->findConnectionTime(
+            (int) $timestampFreeradiusCron->getValue()
+        );
+        dd($radAcctData);
         if ($timestampFreeradiusCron === $radAcctData) {
             $output->writeln('<comment>No changes required</comment>');
 
             return Command::SUCCESS;
         }
 
+
+        // TODO REVIEW THIS CODE NEEDS TO USE UPSERT TO IMPROVE OPTIMIZATIONS AND RESOURCES EXECUTION OF THE MACHINE
         $userRadProfData = $this->userRadiusProfileRepository->getLastConnectionData();
         $userRadProfIndexed = [];
         foreach ($userRadProfData as $user) {
@@ -94,27 +96,25 @@ class FreeradiusLastConnectionCommand extends Command
 
         // TODO FOR THIS COMMAND
         /*
-         * 1 - Check if the connection to the freeradius table exist with the .env DATABASE_FREERADIUS -> make service
-         * 2 - Make the query1 to check the radAccount table content -> make the query on the Repo
-         * 3 - Check if the query1 content is the same of the previous execution -> php memory
-         * 3.1 - Find a way to add the timeStamp of the last query made -> need to save this on the DB new setting will not be displayed on the UI
-         * 3.2 - EPOCH - TIMESTAMP -> save in this format valid for linux based
-         * 3.3 - Find a way to get the timeStamp and add 1 for the next query
-         * 3.4 - Find a way to increase the setting TIME_STAMP_FREERADIUS_CRON when the command finished the execution
-         * 4 - Make the logic to update the profile row on the OpenRoaming db UserRadiusProfile
-         * "lastConnection" (start/end Connections)
+         * done 1 - Check if the connection to the freeradius table exist with the .env DATABASE_FREERADIUS -> make service
+         * done 2 - Check if the TIME_STAMP_FREERADIUS_CRON is valid
+         * done 3 - Check if the query1 content is the same of the previous execution -> use the $timestampFreeradiusCron execution time
+         * done 3.1 - Make the query1 (radAccount) only after the timestamp validation is complete and valid
+         * 4 - Make the logic to update the profile row on the OpenRoaming db, UserRadiusProfile table, "lastConnection" column (start/end Connections)
          * 4.1 - Make the query2 on the OpenRoaming db to get update the rows of each profile if need it
-         * 4.2 - Search more for a upsert (insert + update) -> this can be better instead of using a foreach with a extra query for the Operoaming DB
+         * 4.2 - Find a way to check if the content is the same to ignore the radAcct query
+         * 4.3 - Search more for a upsert (insert + update) -> this can be better instead of using a foreach with a extra query for the Operoaming DB
          * 5 - Output a response message like: "Execution ignored same data checked"
          * if the content on the step 2 is the same
          * 5.1 - Output a response message like: "Freeradius Connection Times Updated"
          * if the content on the step 2 is diferent
+         * done 6 - Find a way to always get the timeStamp and updated for the next query of the execution
         */
 
-        // Save new data in cache for next execution comparison
-        ++$timestampFreeradius;
-        $this->saveLastData($radAcctData);
-        $this->settingRepository->save($timestampFreeradius, true);
+        // Save new data in Db for next execution comparison
+        $timestampFreeradiusCron->setValue(time());
+        $this->entityManager->persist($timestampFreeradiusCron);
+        $this->entityManager->flush();
 
         $output->writeln('<info>Freeradius Connection Times Updated</info>');
 
