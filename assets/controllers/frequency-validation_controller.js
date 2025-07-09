@@ -6,7 +6,7 @@ export default class extends Controller {
     connect() {
         this.updateAllFrequencyOptions();
 
-        this.mainSelectTargets.forEach(main => {
+        this.mainSelectTargets.forEach((main) => {
             main.addEventListener("change", () => {
                 // Main select changed
                 this.updateFrequencyFor(main);
@@ -16,7 +16,7 @@ export default class extends Controller {
 
     updateAllFrequencyOptions() {
         // Updating frequency options for all main selects
-        this.mainSelectTargets.forEach(main => this.updateFrequencyFor(main));
+        this.mainSelectTargets.forEach((main) => this.updateFrequencyFor(main));
     }
 
     updateFrequencyFor(mainSelect) {
@@ -27,7 +27,7 @@ export default class extends Controller {
         const frequencyId = mainId + "_frequency";
 
         // Find frequency select by ID (using Stimulus frequencySelectTargets array)
-        const frequencySelect = this.frequencySelectTargets.find(f => f.id === frequencyId);
+        const frequencySelect = this.frequencySelectTargets.find((f) => f.id === frequencyId);
 
         if (!frequencySelect) {
             // No frequencies selected found for the main field
@@ -35,11 +35,11 @@ export default class extends Controller {
         }
 
         // Check if the "*" option (All days) is selected
-        const allSelected = Array.from(mainSelect.selectedOptions).some(opt => opt.value === "*");
+        const allSelected = Array.from(mainSelect.selectedOptions).some((opt) => opt.value === "*");
 
         if (allSelected) {
             // Ignore frequency logic - enable all options
-            Array.from(frequencySelect.options).forEach(option => {
+            Array.from(frequencySelect.options).forEach((option) => {
                 option.disabled = false;
             });
             return; // Skip frequency validation logic
@@ -47,9 +47,9 @@ export default class extends Controller {
 
         // Normal frequency validation logic when "*" not selected
         const selectedCount = mainSelect.selectedOptions.length;
-        const maxAllowed = (selectedCount > 1) ? selectedCount - 1 : 1;
+        const maxAllowed = selectedCount > 1 ? selectedCount - 1 : 1;
 
-        Array.from(frequencySelect.options).forEach(option => {
+        Array.from(frequencySelect.options).forEach((option) => {
             const val = parseInt(option.value, 10);
             const disabled = val > maxAllowed;
             option.disabled = disabled;
