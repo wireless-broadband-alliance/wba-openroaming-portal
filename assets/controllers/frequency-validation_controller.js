@@ -4,19 +4,18 @@ export default class extends Controller {
     static targets = ["mainSelect", "frequencySelect"];
 
     connect() {
-        console.log("Stimulus controller connected");
         this.updateAllFrequencyOptions();
 
         this.mainSelectTargets.forEach(main => {
             main.addEventListener("change", () => {
-                console.log(`Main select changed: ${main.name}, selected count: ${main.selectedOptions.length}`);
+                // Main select changed
                 this.updateFrequencyFor(main);
             });
         });
     }
 
     updateAllFrequencyOptions() {
-        console.log("Updating frequency options for all main selects");
+        // Updating frequency options for all main selects
         this.mainSelectTargets.forEach(main => this.updateFrequencyFor(main));
     }
 
@@ -31,7 +30,7 @@ export default class extends Controller {
         const frequencySelect = this.frequencySelectTargets.find(f => f.id === frequencyId);
 
         if (!frequencySelect) {
-            console.warn(`No frequency select found for main field ${mainId}`);
+            // No frequencies selected found for the main field
             return;
         }
 
@@ -40,7 +39,6 @@ export default class extends Controller {
 
         if (allSelected) {
             // Ignore frequency logic - enable all options
-            console.log(`"All days" (*) option selected for ${mainId}, enabling all frequency options`);
             Array.from(frequencySelect.options).forEach(option => {
                 option.disabled = false;
             });
@@ -51,22 +49,14 @@ export default class extends Controller {
         const selectedCount = mainSelect.selectedOptions.length;
         const maxAllowed = (selectedCount > 1) ? selectedCount - 1 : 1;
 
-        console.log(`For main field ${mainId}: selectedCount = ${selectedCount}, maxAllowed frequency = ${maxAllowed}`);
-
         Array.from(frequencySelect.options).forEach(option => {
             const val = parseInt(option.value, 10);
             const disabled = val > maxAllowed;
             option.disabled = disabled;
-            if (disabled) {
-                console.log(`Disabling frequency option ${option.value} on ${frequencySelect.id}`);
-            } else {
-                console.log(`Enabling frequency option ${option.value} on ${frequencySelect.id}`);
-            }
         });
 
         const currentFrequency = parseInt(frequencySelect.value, 10);
         if (currentFrequency > maxAllowed) {
-            console.log(`Current frequency ${currentFrequency} is greater than maxAllowed ${maxAllowed}, resetting value`);
             frequencySelect.value = maxAllowed.toString();
             frequencySelect.dispatchEvent(new Event("change"));
         }
