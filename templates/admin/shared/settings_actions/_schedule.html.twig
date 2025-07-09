@@ -134,15 +134,23 @@
                                         'data-cron-toggle-group': groupName,
                                     },
                                 }) }}
-                                {# TODO FIX THIS PROBLEM WITH THIS FORM DISPLAY, its on the profile but doesn't render on the twig UI #}
                                 <div class="text-red-500 text-sm mt-1">
-                                {{ form_errors(attribute(form, fieldName)) }}
+                                    {{ form_errors(attribute(form, fieldName)) }}
                                 </div>
                             </div>
                         {% endfor %}
                     </div>
                 </div>
             {% endfor %}
+        </div>
+        <div class="alert-block my-4 p-2 hidden" data-cron-toggle-target="modeChangeAlert">
+            <div class="flex items-center gap-2 p-4 border-l-4 border-yellow-500 bg-yellow-50 text-yellow-800 text-sm rounded-md"
+                 role="alert">
+                <twig:ux:icon name="wba:info" class="w-10 md:w-5 h-10 md:h-5 inline mr-3" fill="currentColor"/>
+                <span class="font-medium">
+                    You have changed modes. Saving now will discard any changes made in the previous mode.
+                </span>
+            </div>
         </div>
 
         <div data-cron-toggle-target="alerts">

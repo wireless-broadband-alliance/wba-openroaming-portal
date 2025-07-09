@@ -12,9 +12,11 @@ export default class extends Controller {
         "day_of_month_frequency",
         "months_of_the_year_frequency",
         "alerts",
+        "modeChangeAlert"
     ];
 
     connect() {
+        this.initialToggleValue = this.toggleTarget.checked;
         this.updateVisibility();
 
         // Listen for toggle change
@@ -51,6 +53,11 @@ export default class extends Controller {
         toggleGroupElements(this.day_of_week_frequencyTargets, !isAdvanced);
         toggleGroupElements(this.day_of_month_frequencyTargets, !isAdvanced);
         toggleGroupElements(this.months_of_the_year_frequencyTargets, !isAdvanced);
+
+        if (this.hasModeChangeAlertTarget) {
+            const changed = this.toggleTarget.checked !== this.initialToggleValue;
+            this.modeChangeAlertTarget.classList.toggle("hidden", !changed);
+        }
 
         this.toggleGroupTitlesAndIcons(isAdvanced);
     }
