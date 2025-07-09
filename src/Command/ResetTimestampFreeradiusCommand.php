@@ -39,7 +39,9 @@ class ResetTimestampFreeradiusCommand extends Command
         // Check if the --yes option is provided (comes from a controller), then skip the confirmation prompt
         if (!$input->getOption('yes')) {
             $helper = $this->getHelper('question');
-            $question = new ConfirmationQuestion('This action will reset TIMESTAMP FOR FREERADIUS CRON ON THE PORTAL. [y/N] ', false);
+            $question = new ConfirmationQuestion('This action will RESET the TIMESTAMP used by the FREERADIUS cron job on the portal. ' .
+                'This is a sensitive operation and should only be performed in **very specific scenarios**. ' .
+                'Are you sure you want to proceed? [y/N]', false);
             /** @var QuestionHelper $helper */
             if (!$helper->ask($input, $output, $question)) {
                 $output->writeln('Command aborted.');
@@ -81,7 +83,7 @@ class ResetTimestampFreeradiusCommand extends Command
 
             $message = <<<EOL
 
-<info>Success:</info> Timestamp for Freeradius cron have been set to the default values.
+<info>Success:</info> Timestamp for Freeradius cron have been set to the current time.
 <comment>Note:</comment> If you want to reset any another setting please check using this command:
       <fg=blue>php bin/console reset</>
 EOL;
