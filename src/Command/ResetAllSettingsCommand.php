@@ -139,6 +139,7 @@ class ResetAllSettingsCommand extends Command
             ['name' => 'PROFILE_LIMIT_DATE_SAML', 'value' => '5'],
             ['name' => 'PROFILE_LIMIT_DATE_EMAIL', 'value' => '5'],
             ['name' => 'PROFILE_LIMIT_DATE_SMS', 'value' => '5'],
+            ['name' => 'TIME_STAMP_FREERADIUS_CRON', 'value' => time()],
         ];
 
         // Begin a database transaction to ensure data consistency
