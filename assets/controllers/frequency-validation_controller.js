@@ -35,6 +35,19 @@ export default class extends Controller {
             return;
         }
 
+        // Check if the "*" option (All days) is selected
+        const allSelected = Array.from(mainSelect.selectedOptions).some(opt => opt.value === "*");
+
+        if (allSelected) {
+            // Ignore frequency logic - enable all options
+            console.log(`"All days" (*) option selected for ${mainId}, enabling all frequency options`);
+            Array.from(frequencySelect.options).forEach(option => {
+                option.disabled = false;
+            });
+            return; // Skip frequency validation logic
+        }
+
+        // Normal frequency validation logic when "*" not selected
         const selectedCount = mainSelect.selectedOptions.length;
         const maxAllowed = (selectedCount > 1) ? selectedCount - 1 : 1;
 
