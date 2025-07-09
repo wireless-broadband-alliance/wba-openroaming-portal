@@ -39,13 +39,30 @@ class FreeradiusLastConnectionCommand extends Command
 
     public function backupFreeradiusLastConnection(OutputInterface $output): int
     {
-        $timestampFreeradius = $this->settingRepository->findOneBy(['name' => 'TIME_STAMP_FREERADIUS_CRON']);
+        $timestampFreeradiusCron = $this->settingRepository->findOneBy(['name' => 'TIME_STAMP_FREERADIUS_CRON']);
 
-        if (!$timestampFreeradius) {
-            $output->writeln('<error>' . 'Setting not found' . '</error>');
+        if (!$timestampFreeradiusCron) {
+            $output->writeln(
+                '<error>Setting "TIME_STAMP_FREERADIUS_CRON" not found. Please run the command "reset:timeStampFreeradiusCron" to create it.</error>'
+            );
 
             return Command::FAILURE;
         }
+
+        if ((int)$timestampFreeradiusCron->getValue() < 0 ||
+            $timestampFreeradiusCron->getValue() === null ||
+            !ctype_digit($timestampFreeradiusCron->getValue())
+        ) {
+            $output->writeln(
+                '<error>Setting "TIME_STAMP_FREERADIUS_CRON" is invalid or empty. Please reset it using "reset:timeStampFreeradiusCron".</error>'
+            );
+
+            return Command::FAILURE;
+        }
+
+        $timestamp = (int)$timestampFreeradiusCron->getValue(); // Valid Cron
+
+        dd($timestamp);
         $result = $this->freeradiusConnectionService->checkConnection();
         if ($result['success'] === false) {
             $output->writeln('<error>'.$result['message'].'</error>');
@@ -53,11 +70,9 @@ class FreeradiusLastConnectionCommand extends Command
             return Command::FAILURE;
         }
 
-        $lastExecutionTime = $this->settingRepository->findOneBy(['name' => 'TIME_STAMP_FREERADIUS_CRON']->getValue());
-
         $radAcctData = $this->radiusAccountingRepository->findConnectionTime();
 
-        if ($lastExecutionTime === $radAcctData) {
+        if ($timestampFreeradiusCron === $radAcctData) {
             $output->writeln('<comment>No changes required</comment>');
 
             return Command::SUCCESS;
