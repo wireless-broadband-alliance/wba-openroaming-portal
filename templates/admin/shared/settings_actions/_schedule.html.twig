@@ -126,18 +126,37 @@
                                 {% set renderedTitles = renderedTitles|merge([suffix]) %}
                             {% endif %}
 
-                            <div class="form-group" data-cron-toggle-group="{{ groupName }}">
-                                {{ form_widget(attribute(form, fieldName), {
-                                    attr: {
-                                        class: 'form-widget',
-                                        'data-cron-toggle-target': toggleTarget,
-                                        'data-cron-toggle-group': groupName,
-                                    },
-                                }) }}
-                                <div class="text-red-500 text-sm mt-1">
-                                    {{ form_errors(attribute(form, fieldName)) }}
+                            {% if fieldName ends with '_frequency' %}
+                                {# This is the frequency field — render it with the frequency target #}
+                                <div class="form-group" data-cron-toggle-group="{{ groupName }}">
+                                    {{ form_widget(attribute(form, fieldName), {
+                                        attr: {
+                                            class: 'form-widget',
+                                            'data-frequency-validation-target': 'frequencySelect',
+                                            'data-cron-toggle-target': toggleTarget,
+                                            'data-cron-toggle-group': groupName,
+                                        }
+                                    }) }}
+                                    <div class="text-red-500 text-sm mt-1">
+                                        {{ form_errors(attribute(form, fieldName)) }}
+                                    </div>
                                 </div>
-                            </div>
+                            {% else %}
+                                {# Regular field — not a frequency field #}
+                                <div class="form-group" data-cron-toggle-group="{{ groupName }}">
+                                    {{ form_widget(attribute(form, fieldName), {
+                                        attr: {
+                                            class: 'form-widget',
+                                            'data-frequency-validation-target': 'mainSelect',
+                                            'data-cron-toggle-target': toggleTarget,
+                                            'data-cron-toggle-group': groupName,
+                                        }
+                                    }) }}
+                                    <div class="text-red-500 text-sm mt-1">
+                                        {{ form_errors(attribute(form, fieldName)) }}
+                                    </div>
+                                </div>
+                            {% endif %}
                         {% endfor %}
                     </div>
                 </div>
