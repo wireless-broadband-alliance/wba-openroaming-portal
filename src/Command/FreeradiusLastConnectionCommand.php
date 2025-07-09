@@ -53,7 +53,7 @@ class FreeradiusLastConnectionCommand extends Command
         $lastData = $this->getLastData(); // Get data from last command execution
         $radAcctData = $this->radiusAccountingRepository->findConnectionTime();
 
-        if ($lastData == $radAcctData) {
+        if ($lastData === $radAcctData) {
             $output->writeln('<comment>No changes required</comment>');
             return Command::SUCCESS;
         }
@@ -77,9 +77,13 @@ class FreeradiusLastConnectionCommand extends Command
          * 1 - Check if the connection to the freeradius table exist with the .env DATABASE_FREERADIUS -> make service
          * 2 - Make the query1 to check the radAccount table content -> make the query on the Repo
          * 3 - Check if the query1 content is the same of the previous execution -> php memory
+         * 3.1 - Find a way to add the timeStamp of the last query made -> need to save this on the DB new setting will not be displayed on the UI
+         * 3.2 - EPOCH - TIMESTAMP -> save in this format valid for linux based
+         * 3.3 - Find a way to get the timeStamp and add 1 for the next query
          * 4 - Make the logic to update the profile row on the OpenRoaming db UserRadiusProfile
          * "lastConnection" (start/end Connections)
          * 4.1 - Make the query2 on the OpenRoaming db to get update the rows of each profile if need it
+         * 4.2 - Search more for a upsert (insert + update) -> this can be better instead of using a foreach with a extra query for the Operoaming DB
          * 5 - Output a response message like: "Execution ignored same data checked"
          * if the content on the step 2 is the same
          * 5.1 - Output a response message like: "Freeradius Connection Times Updated"
