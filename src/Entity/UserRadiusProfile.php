@@ -36,8 +36,11 @@ class UserRadiusProfile
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $revoked_reason = null;
 
-    #[ORM\Column(type: 'json', nullable: true)]
-    private ?array $lastConnectionAt = null;
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?array $lastStartConnectionAt = null;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?array $lastStopConnectionAt = null;
 
     public function getId(): ?int
     {
@@ -128,13 +131,23 @@ class UserRadiusProfile
         return $this;
     }
 
-    public function getLastConnectionAt(): ?array
+    public function getLastStartConnectionAt(): ?array
     {
-        return $this->lastConnectionAt;
+        return $this->lastStartConnectionAt;
     }
 
-    public function setLastConnectionAt(?array $lastConnectionAt): void
+    public function setLastStartConnectionAt(?array $lastStartConnectionAt): void
     {
-        $this->lastConnectionAt = $lastConnectionAt;
+        $this->lastStartConnectionAt = $lastStartConnectionAt;
+    }
+
+    public function getLastStopConnectionAt(): ?array
+    {
+        return $this->lastStopConnectionAt;
+    }
+
+    public function setLastStopConnectionAt(?array $lastStopConnectionAt): void
+    {
+        $this->lastStopConnectionAt = $lastStopConnectionAt;
     }
 }
