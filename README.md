@@ -469,6 +469,7 @@ certificate. **Connection errors** can happen if the right SHA1 hash is not prov
 63. `PROFILE_LIMIT_DATE_MICROSOFT`: Time in days to disable profiles for users with MICROSOFT login.
 64. `PROFILE_LIMIT_DATE_EMAIL`: Time in days to disable profiles for users with EMAIL login.
 65. `PROFILE_LIMIT_DATE_SMS`: Time in days to disable profiles for users with SMS login.
+66. `TIME_STAMP_FREERADIUS_CRON`: Tracks the last run (UNIX epoch) of the backup:freeradiusLastConnection command. Internal use only, not shown in UI.
 
 #### With these environment variables, you can configure and customize various aspects of the project, such as database connections, SAML settings, login methods, and more.
 

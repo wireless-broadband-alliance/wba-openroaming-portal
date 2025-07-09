@@ -3,6 +3,7 @@
 namespace App\Command;
 
 use App\RadiusDb\Repository\RadiusAccountingRepository;
+use App\Repository\SettingRepository;
 use App\Repository\UserRadiusProfileRepository;
 use App\Service\FreeradiusConnectionService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -30,6 +31,7 @@ class FreeradiusLastConnectionCommand extends Command
         private readonly FreeradiusConnectionService $freeradiusConnectionService,
         private readonly CacheItemPoolInterface $cache, // concrete adapter to get set()
         private readonly UserRadiusProfileRepository $userRadiusProfileRepository,
+        private readonly SettingRepository $settingRepository,
     ) {
         parent::__construct();
 
@@ -43,6 +45,13 @@ class FreeradiusLastConnectionCommand extends Command
      */
     public function backupFreeradiusLastConnection(OutputInterface $output): int
     {
+        $timestampFreeradius = $this->settingRepository->findOneBy(['name' => 'TIME_STAMP_FREERADIUS_CRON']);
+
+        if (!$timestampFreeradius) {
+            $output->writeln('<error>' . 'Setting not found' . '</error>');
+
+            return Command::FAILURE;
+        }
         $result = $this->freeradiusConnectionService->checkConnection();
         if ($result['success'] === false) {
             $output->writeln('<error>' . $result['message'] . '</error>');
@@ -91,7 +100,9 @@ class FreeradiusLastConnectionCommand extends Command
         */
 
         // Save new data in cache for next execution comparison
+        ++$timestampFreeradius;
         $this->saveLastData($radAcctData);
+        $this->settingRepository->save($timestampFreeradius, true);
 
         $output->writeln('<info>Freeradius Connection Times Updated</info>');
 
