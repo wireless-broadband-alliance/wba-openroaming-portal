@@ -50,7 +50,7 @@ class ResetTimestampFreeradiusCommand extends Command
         }
 
         $settings = [
-            ['name' => 'TIME_STAMP_FREERADIUS_CRON', 'value' => (string)time()],
+            ['name' => 'TIME_STAMP_FREERADIUS_CRON', 'value' => '0'],
         ];
 
         // Begin a database transaction to ensure data consistency
