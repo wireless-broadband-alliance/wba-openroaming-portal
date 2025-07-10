@@ -223,10 +223,11 @@ class RadiusAccountingRepository extends ServiceEntityRepository
     public function findConnectionTime(int $sinceTimestamp): array
     {
         return $this->createQueryBuilder('ra')
-            ->select('ra.username', 'ra.acctStartTime', 'ra.acctStopTime')
+            ->select('ra.username, MAX(ra.acctStartTime) AS lastStartTime')
             ->where('ra.acctStartTime >= :since')
-            ->setParameter('since', (new \DateTimeImmutable())->setTimestamp($sinceTimestamp))
+            ->groupBy('ra.username')
+            ->setParameter('since', new \DateTimeImmutable('@' . $sinceTimestamp))
             ->getQuery()
-            ->getResult();
+            ->getArrayResult();
     }
 }
