@@ -13,6 +13,7 @@ use Exception;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\RangeType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\TimeType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -60,19 +61,6 @@ class ScheduleType extends AbstractType
                         'placeholder' => '*/5 * * * *',
                         'description' => $description,
                     ],
-                    'constraints' => [
-                        new Callback(function ($value, ExecutionContextInterface $context): void {
-                            if ($value) {
-                                try {
-                                    new CronExpression($value);
-                                } catch (Exception) {
-                                    $context->buildViolation('Invalid CRON expression "{{ value }}".')
-                                        ->setParameter('{{ value }}', $value)
-                                        ->addViolation();
-                                }
-                            }
-                        }),
-                    ],
                 ])
                 ->add("{$settingName}_time", TimeType::class, [
                     'required' => false,
@@ -88,11 +76,14 @@ class ScheduleType extends AbstractType
                     'label' => false,
                     'attr' => ['description' => $description],
                 ])
-                ->add("{$settingName}_day_of_week_frequency", ChoiceType::class, [
+                ->add("{$settingName}_day_of_week_frequency", RangeType::class, [
                     'required' => true,
-                    'choices' => $freqChoices,
                     'label' => false,
-                    'attr' => ['description' => $description],
+                    'attr' => [
+                        'min' => 1,
+                        'max' => 10,
+                        'description' => $description,
+                    ],
                 ])
                 ->add("{$settingName}_day_of_month", ChoiceType::class, [
                     'multiple' => true,
@@ -101,11 +92,14 @@ class ScheduleType extends AbstractType
                     'label' => false,
                     'attr' => ['description' => $description],
                 ])
-                ->add("{$settingName}_day_of_month_frequency", ChoiceType::class, [
+                ->add("{$settingName}_day_of_month_frequency", RangeType::class, [
                     'required' => true,
-                    'choices' => $freqChoices,
                     'label' => false,
-                    'attr' => ['description' => $description],
+                    'attr' => [
+                        'min' => 1,
+                        'max' => 10,
+                        'description' => $description,
+                    ],
                 ])
                 ->add("{$settingName}_months_of_the_year", ChoiceType::class, [
                     'multiple' => true,
@@ -114,11 +108,14 @@ class ScheduleType extends AbstractType
                     'label' => false,
                     'attr' => ['description' => $description],
                 ])
-                ->add("{$settingName}_months_of_the_year_frequency", ChoiceType::class, [
+                ->add("{$settingName}_months_of_the_year_frequency", RangeType::class, [
                     'required' => true,
-                    'choices' => $freqChoices,
                     'label' => false,
-                    'attr' => ['description' => $description],
+                    'attr' => [
+                        'min' => 1,
+                        'max' => 10,
+                        'description' => $description,
+                    ],
                 ]);
         }
     }
