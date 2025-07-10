@@ -128,17 +128,22 @@
                             <div>
                                 {% if fieldName ends with '_frequency' %}
                                     {# This is the frequency field — render it with the frequency target #}
-                                    <div class="form-group"
-                                         data-cron-toggle-group="{{ groupName }}">
-                                        {{ form_widget(attribute(form, fieldName), {
-                                            attr: {
-                                                class: 'form-widget',
-                                                'data-frequency-validation-target': 'frequencySelect',
-                                                'data-cron-toggle-target': toggleTarget,
-                                                'data-cron-toggle-group': groupName,
-                                                id: fieldName|upper,
-                                            },
-                                        }) }}
+                                    <div class="form-group" data-cron-toggle-group="{{ groupName }}">
+                                        <div class="flex items-center gap-3 py-2">
+                                            {{ form_widget(attribute(form, fieldName), {
+                                                attr: {
+                                                    class: 'form-widget-range flex-1',
+                                                    'data-frequency-validation-target': 'frequencySelect',
+                                                    'data-cron-toggle-target': toggleTarget,
+                                                    'data-cron-toggle-group': groupName,
+                                                    id: fieldName|upper,
+                                                    oninput: 'document.getElementById("'~fieldName~'_output").textContent = this.value'
+                                                },
+                                            }) }}
+                                            <span id="{{ fieldName }}_output" class="text-sm text-gray-700 font-medium">
+            {{ form[fieldName].vars.value ?? 1 }}
+        </span>
+                                        </div>
                                         <div class="text-red-500 text-sm mt-1">
                                             {{ form_errors(attribute(form, fieldName)) }}
                                         </div>

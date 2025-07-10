@@ -26,9 +26,10 @@ class ValidCronSubmissionValidator extends ConstraintValidator
         $cronSettings = $constraint->cronSettings;
 
         foreach ($cronSettings as $settingName) {
-            if ($value['use_advanced_mode'] === OperationMode::ON->value) {
+            if ($value['use_advanced_mode'] === true) {
                 $this->validateAdvanced($value, $settingName);
-            } else {
+            }
+            if ($value['use_advanced_mode'] === false) {
                 $this->validateSimple($value, $settingName);
             }
         }

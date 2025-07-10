@@ -4,9 +4,11 @@ export default class extends Controller {
     static targets = ["mainSelect", "frequencySelect"];
 
     connect() {
-        this.updateAllFrequencyOptions();
+        // On connect, update all frequencies initially
+        this.updateAllFrequencies();
 
-        this.mainSelectTargets.forEach((main) => {
+        // Attach change event to each main select
+        this.mainSelectTargets.forEach(main => {
             main.addEventListener("change", () => {
                 // Main select changed
                 this.updateFrequencyFor(main);
@@ -14,51 +16,63 @@ export default class extends Controller {
         });
     }
 
-    updateAllFrequencyOptions() {
-        // Updating frequency options for all main selects
-        this.mainSelectTargets.forEach((main) => this.updateFrequencyFor(main));
+    updateAllFrequencies() {
+        // Updating frequency for all main selects
+        this.mainSelectTargets.forEach(main => this.updateFrequencyFor(main));
     }
 
     updateFrequencyFor(mainSelect) {
         // Get the ID of the main select, e.g. "schedule_DELETE_UNCONFIRMED_USERS_CRON_day_of_week"
         const mainId = mainSelect.id;
 
-        // Build frequency select ID by appending "_frequency"
+        // Build frequency input ID by appending "_frequency"
         const frequencyId = mainId + "_frequency";
 
-        // Find frequency select by ID (using Stimulus frequencySelectTargets array)
-        const frequencySelect = this.frequencySelectTargets.find((f) => f.id === frequencyId);
+        // Find frequency input by ID (using Stimulus frequencySelectTargets array)
+        const frequencyInput = this.frequencySelectTargets.find(f => f.id === frequencyId);
 
-        if (!frequencySelect) {
-            // No frequencies selected found for the main field
+        if (!frequencyInput) {
+            // No frequency input found for the main field
             return;
         }
 
-        // Check if the "*" option (All days) is selected
-        const allSelected = Array.from(mainSelect.selectedOptions).some((opt) => opt.value === "*");
+        // Get selected options of the main select
+        const selectedOptions = Array.from(mainSelect.selectedOptions);
 
-        if (allSelected) {
-            // Ignore frequency logic - enable all options
-            Array.from(frequencySelect.options).forEach((option) => {
-                option.disabled = false;
-            });
-            return; // Skip frequency validation logic
+        // Check if the "*" option (All days) is selected
+        const hasAll = selectedOptions.some(opt => opt.value === "*");
+
+        if (hasAll) {
+            // If '*' is selected — restore full range
+            frequencyInput.max = 10;
+            frequencyInput.min = 1;
+
+            // If the current value is out of range, reset it
+            if (parseInt(frequencyInput.value, 10) > 10) {
+                frequencyInput.value = "10";
+            }
+
+            frequencyInput.disabled = false;
+            return; // Skip further validation logic
         }
 
         // Normal frequency validation logic when "*" not selected
-        const selectedCount = mainSelect.selectedOptions.length;
-        const maxAllowed = selectedCount > 1 ? selectedCount - 1 : 1;
+        const count = selectedOptions.length || 1;
 
-        Array.from(frequencySelect.options).forEach((option) => {
-            const val = parseInt(option.value, 10);
-            const disabled = val > maxAllowed;
-            option.disabled = disabled;
-        });
+        // The Maximum allowed frequency is (number of selected options - 1) or at least 1
+        const maxAllowed = count > 1 ? count - 1 : 1;
 
-        const currentFrequency = parseInt(frequencySelect.value, 10);
-        if (currentFrequency > maxAllowed) {
-            frequencySelect.value = maxAllowed.toString();
-            frequencySelect.dispatchEvent(new Event("change"));
+        // Set new min and max for the frequency range input
+        frequencyInput.max = maxAllowed;
+        frequencyInput.min = 1;
+        frequencyInput.disabled = false;
+
+        // If the current frequency value is greater than max allowed, reset it
+        if (parseInt(frequencyInput.value, 10) > maxAllowed) {
+            frequencyInput.value = String(maxAllowed);
+
+            // Trigger input event so any listeners or UI updates react
+            frequencyInput.dispatchEvent(new Event("input"));
         }
     }
 }
