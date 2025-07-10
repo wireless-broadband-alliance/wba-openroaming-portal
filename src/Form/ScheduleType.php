@@ -51,6 +51,7 @@ class ScheduleType extends AbstractType
             $description = $this->getSettings->getSettingDescription($settingName);
 
             $builder
+                // Advanced field
                 ->add("{$settingName}_advanced", TextType::class, [
                     'required' => false,
                     'label' => false,
@@ -59,21 +60,16 @@ class ScheduleType extends AbstractType
                         'description' => $description,
                     ],
                 ])
-                ->add("{$settingName}_time", TimeType::class, [
-                    'required' => false,
-                    'widget' => 'single_text',
-                    'input' => 'datetime',
-                    'label' => false,
-                    'attr' => ['description' => $description],
-                ])
-                ->add("{$settingName}_day_of_week", ChoiceType::class, [
+
+                // months of the year + frequency
+                ->add("{$settingName}_months_of_the_year", ChoiceType::class, [
                     'multiple' => true,
                     'required' => false,
-                    'choices' => ['All days' => '*'] + DaysOfWeek::choices(),
+                    'choices' => ['All Months' => '*'] + MonthsOfYear::choices(),
                     'label' => false,
                     'attr' => ['description' => $description],
                 ])
-                ->add("{$settingName}_day_of_week_frequency", RangeType::class, [
+                ->add("{$settingName}_months_of_the_year_frequency", RangeType::class, [
                     'required' => true,
                     'label' => false,
                     'attr' => [
@@ -82,6 +78,8 @@ class ScheduleType extends AbstractType
                         'description' => $description,
                     ],
                 ])
+
+                // day of month + frequency
                 ->add("{$settingName}_day_of_month", ChoiceType::class, [
                     'multiple' => true,
                     'required' => false,
@@ -98,14 +96,16 @@ class ScheduleType extends AbstractType
                         'description' => $description,
                     ],
                 ])
-                ->add("{$settingName}_months_of_the_year", ChoiceType::class, [
+
+                // day of week + frequency
+                ->add("{$settingName}_day_of_week", ChoiceType::class, [
                     'multiple' => true,
                     'required' => false,
-                    'choices' => ['All Months' => '*'] + MonthsOfYear::choices(),
+                    'choices' => ['All days' => '*'] + DaysOfWeek::choices(),
                     'label' => false,
                     'attr' => ['description' => $description],
                 ])
-                ->add("{$settingName}_months_of_the_year_frequency", RangeType::class, [
+                ->add("{$settingName}_day_of_week_frequency", RangeType::class, [
                     'required' => true,
                     'label' => false,
                     'attr' => [
@@ -113,6 +113,15 @@ class ScheduleType extends AbstractType
                         'max' => 10,
                         'description' => $description,
                     ],
+                ])
+
+                // Time
+                ->add("{$settingName}_time", TimeType::class, [
+                    'required' => false,
+                    'widget' => 'single_text',
+                    'input' => 'datetime',
+                    'label' => false,
+                    'attr' => ['description' => $description],
                 ]);
         }
     }
