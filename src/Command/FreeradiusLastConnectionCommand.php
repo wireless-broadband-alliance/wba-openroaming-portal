@@ -69,12 +69,13 @@ class FreeradiusLastConnectionCommand extends Command
 
         // Check if the last time execution time is newer then the latest value on the freeradius DB
         if ($timestampFreeradiusCron->getValue() < $this->radiusAccountingRepository->findLatestConnectionTime()) {
-            // TODO REMAKE THIS QUERY TO USE DISTINCT to filter result also needs to be reworked
             // Freeradius MASSIVE Query with the correct $timestampFreeradiusCron increase from the end of the connected execution
             $radAcct = $this->radiusAccountingRepository->findConnectionTime(
                 (int) $timestampFreeradiusCron->getValue()
             );
-            dd($radAcct);
+
+            $userRadiusProfile = $this->userRadiusProfileRepository->findActiveProfiles();
+
             // Makes sure the timestamp is updated after executing the radAcct query
             $timestampFreeradiusCron->setValue(time());
             $this->entityManager->persist($timestampFreeradiusCron);

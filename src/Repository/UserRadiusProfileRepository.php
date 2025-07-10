@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\UserRadiusProfile;
+use App\Enum\UserRadiusProfileStatus;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -71,4 +72,17 @@ class UserRadiusProfileRepository extends ServiceEntityRepository
 //            ->getOneOrNullResult()
 //        ;
 //    }
+
+    /**
+     * Get all active profiles with radius_user + start/stop times
+     */
+    public function findActiveProfiles(): array
+    {
+        return $this->createQueryBuilder('e')
+            ->select('e.radius_user', 'e.lastStartConnectionAt', 'e.lastStopConnectionAt')
+            ->where('e.status = :active')
+            ->setParameter('active', UserRadiusProfileStatus::ACTIVE->value)
+            ->getQuery()
+            ->getArrayResult(); // or ->getResult() if you want entities
+    }
 }
