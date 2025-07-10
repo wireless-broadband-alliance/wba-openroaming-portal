@@ -67,36 +67,22 @@ class FreeradiusLastConnectionCommand extends Command
             return Command::FAILURE;
         }
 
-        // Check if the last time execution time is newer then the lasted value on the freeradius DB
-        if ($timestampFreeradiusCron < $this->radiusAccountingRepository->findLatestConnectionTime()) {
+        // Check if the last time execution time is newer then the latest value on the freeradius DB
+        if ($timestampFreeradiusCron->getValue() < $this->radiusAccountingRepository->findLatestConnectionTime()) {
             // TODO REMAKE THIS QUERY TO USE DISTINCT to filter result also needs to be reworked
             // Freeradius MASSIVE Query with the correct $timestampFreeradiusCron increase from the end of the connected execution
-            $radAcctData = $this->radiusAccountingRepository->findConnectionTime(
+            $radAcct = $this->radiusAccountingRepository->findConnectionTime(
                 (int) $timestampFreeradiusCron->getValue()
             );
-
-            dd($radAcctData, $this->radiusAccountingRepository->findLatestConnectionTime());
-
-            $output->writeln('<comment>No changes required</comment>');
-
-            return Command::SUCCESS;
+            dd($radAcct);
+            // Makes sure the timestamp is updated after executing the radAcct query
+            $timestampFreeradiusCron->setValue(time());
+            $this->entityManager->persist($timestampFreeradiusCron);
+            $this->entityManager->flush();
         }
 
-        dd($radAcctData);
+        dd('die pls');
         // TODO REVIEW THIS CODE NEEDS TO USE UPSERT TO IMPROVE OPTIMIZATIONS AND RESOURCES EXECUTION OF THE MACHINE
-        $userRadProfData = $this->userRadiusProfileRepository->getLastConnectionData();
-        $userRadProfIndexed = [];
-        foreach ($userRadProfData as $user) {
-            $userRadProfIndexed[$user['radius_user']] = &$user;
-        }
-
-        foreach ($radAcctData as $radAcct) {
-            $username = $radAcct['username'];
-
-            if (isset($userRadProfIndexed[$username])) {
-                $userRadProfIndexed[$username]['lastConnectionAt'] = $radAcct['acctStopTime'];
-            }
-        }
 
         // TODO FOR THIS COMMAND
         /*
@@ -114,11 +100,6 @@ class FreeradiusLastConnectionCommand extends Command
          * if the content on the step 2 is diferent
          * done 6 - Find a way to always get the timeStamp and updated for the next query of the execution
         */
-
-        // Save new data in Db for next execution comparison
-        $timestampFreeradiusCron->setValue(time());
-        $this->entityManager->persist($timestampFreeradiusCron);
-        $this->entityManager->flush();
 
         $output->writeln('<info>Freeradius Connection Times Updated</info>');
 
