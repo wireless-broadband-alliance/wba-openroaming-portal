@@ -80,6 +80,8 @@ class UserRadiusProfileRepository extends ServiceEntityRepository
     {
         return $this->createQueryBuilder('u')
             ->select('u.radius_user', 'u.lastStartConnectionAt', 'u.lastStopConnectionAt')
+            ->where('u.status = :active')
+            ->setParameter('active', UserRadiusProfileStatus::ACTIVE->value)
             ->getQuery()
             ->getArrayResult();
     }
