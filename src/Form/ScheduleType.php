@@ -43,12 +43,9 @@ class ScheduleType extends AbstractType
 
         $builder->add('use_advanced_mode', CheckboxType::class, [
             'label' => 'Use Advanced Mode (Manual CRON Expression)',
-            'required' => false,
-            'mapped' => false,
+            'required' => true,
             'data' => $selected,
         ]);
-
-        $freqChoices = array_combine(range(1, 10), range(1, 10));
 
         foreach ($this->cronSettings as $settingName) {
             $description = $this->getSettings->getSettingDescription($settingName);
