@@ -2,6 +2,7 @@
 
 namespace App\Command;
 
+use App\Enum\UserRadiusProfileStatus;
 use App\RadiusDb\Repository\RadiusAccountingRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserRadiusProfileRepository;
@@ -37,6 +38,9 @@ class FreeradiusLastConnectionCommand extends Command
         $this->lockFactory = new LockFactory($store);
     }
 
+    /**
+     * @throws \DateMalformedStringException
+     */
     public function backupFreeradiusLastConnection(OutputInterface $output): int
     {
         // Check if the check if the connection to the freeradius db is valid
@@ -71,10 +75,54 @@ class FreeradiusLastConnectionCommand extends Command
         if ($timestampFreeradiusCron->getValue() < $this->radiusAccountingRepository->findLatestConnectionTime()) {
             // Freeradius MASSIVE Query with the correct $timestampFreeradiusCron increase from the end of the connected execution
             $radAcct = $this->radiusAccountingRepository->findConnectionTime(
-                (int) $timestampFreeradiusCron->getValue()
+                (int)$timestampFreeradiusCron->getValue()
             );
 
-            $userRadiusProfile = $this->userRadiusProfileRepository->findActiveProfiles();
+            // fetch full entities already
+            $activeProfiles = $this->userRadiusProfileRepository->findRadiusUserAndConnectionTimes();
+
+            // map entities by radius_user
+            $profileMap = [];
+            foreach ($activeProfiles as $profileData) {
+                $profileMap[$profileData['radius_user']] = $profileData;
+            }
+
+            // now loop radAcct
+            foreach ($radAcct as $row) {
+                $username = $row['username'] ?? null;
+                $startTime = $row['acctStartTime'] ?? null;
+                $stopTime = $row['acctStopTime'] ?? null;
+
+                if (!$username || !$startTime || !$stopTime) {
+                    continue;
+                }
+
+                if (!isset($profileMap[$username])) {
+                    continue; // no matching profile
+                }
+
+                $entity = $profileMap[$username];
+
+                $needsUpdate = false;
+
+                if ($entity->getLastStartConnectionAt() === null ||
+                    $startTime > $entity->getLastStartConnectionAt()
+                ) {
+                    $entity->setLastStartConnectionAt($startTime);
+                    $needsUpdate = true;
+                }
+
+                if ($entity->getLastStopConnectionAt() === null ||
+                    $stopTime > $entity->getLastStopConnectionAt()
+                ) {
+                    $entity->setLastStopConnectionAt($stopTime);
+                    $needsUpdate = true;
+                }
+
+                if ($needsUpdate) {
+                    $this->entityManager->persist($entity);
+                }
+            }
 
             // Makes sure the timestamp is updated after executing the radAcct query
             $timestampFreeradiusCron->setValue(time());

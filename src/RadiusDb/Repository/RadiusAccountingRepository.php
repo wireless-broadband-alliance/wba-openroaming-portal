@@ -220,6 +220,7 @@ class RadiusAccountingRepository extends ServiceEntityRepository
         return $qb->getQuery()->getOneOrNullResult();
     }
 
+
     /**
      * @throws \DateMalformedStringException
      */
@@ -237,7 +238,7 @@ class RadiusAccountingRepository extends ServiceEntityRepository
         // Main query to fetch the rows where acctStartTime is the latest per user
         $qb->select('ra.username, ra.acctStartTime, ra.acctStopTime')
             ->where('ra.acctStartTime = (' . $sub . ')')
-            ->setParameter('since', new \DateTimeImmutable('@' . $sinceTimestamp));
+            ->setParameter('since', new DateTimeImmutable('@' . $sinceTimestamp));
 
         return $qb->getQuery()->getArrayResult();
     }
