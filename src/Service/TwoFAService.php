@@ -207,7 +207,7 @@ readonly class TwoFAService
                         )
                     )
                     ->to($user->getEmail())
-                    ->subject('Your OpenRoaming Two Factor Authentication code is ' . $code . '.')
+                    ->subject('Your OpenRoaming Two Factor Authentication code is ' . $code)
                     ->htmlTemplate('email/user_code.html.twig')
                     ->context([
                         'uuid' => $user->getEmail(),
