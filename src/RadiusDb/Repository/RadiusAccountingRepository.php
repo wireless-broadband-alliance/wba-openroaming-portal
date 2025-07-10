@@ -220,14 +220,25 @@ class RadiusAccountingRepository extends ServiceEntityRepository
         return $qb->getQuery()->getOneOrNullResult();
     }
 
+    /**
+     * @throws \DateMalformedStringException
+     */
     public function findConnectionTime(int $sinceTimestamp): array
     {
-        return $this->createQueryBuilder('ra')
-            ->select('ra.username, MAX(ra.acctStartTime) AS lastStartTime')
-            ->where('ra.acctStartTime >= :since')
-            ->groupBy('ra.username')
-            ->setParameter('since', new \DateTimeImmutable('@' . $sinceTimestamp))
-            ->getQuery()
-            ->getArrayResult();
+        $qb = $this->createQueryBuilder('ra');
+
+        // Subquery to get the maximum acctStartTime per user since the given timestamp
+        $sub = $this->createQueryBuilder('sub')
+            ->select('MAX(sub.acctStartTime)')
+            ->where('sub.username = ra.username')
+            ->andWhere('sub.acctStartTime >= :since')
+            ->getDQL();
+
+        // Main query to fetch the rows where acctStartTime is the latest per user
+        $qb->select('ra.username, ra.acctStartTime, ra.acctStopTime')
+            ->where('ra.acctStartTime = (' . $sub . ')')
+            ->setParameter('since', new \DateTimeImmutable('@' . $sinceTimestamp));
+
+        return $qb->getQuery()->getArrayResult();
     }
 }
