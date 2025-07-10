@@ -469,7 +469,10 @@ certificate. **Connection errors** can happen if the right SHA1 hash is not prov
 63. `PROFILE_LIMIT_DATE_MICROSOFT`: Time in days to disable profiles for users with MICROSOFT login.
 64. `PROFILE_LIMIT_DATE_EMAIL`: Time in days to disable profiles for users with EMAIL login.
 65. `PROFILE_LIMIT_DATE_SMS`: Time in days to disable profiles for users with SMS login.
-66. `TIME_STAMP_FREERADIUS_CRON`: Tracks the last run (UNIX epoch) of the backup:freeradiusLastConnection command. Internal use only, not shown in UI.
+66. `TIME_STAMP_FREERADIUS_CRON`: Tracks the last run (UNIX epoch) of the backup:freeradiusLastConnection command.
+    Internal use only, not shown in UI.
+67. `FREERADIUS_LAST_CONNECTION_CRON`: Defines the schedule for Freeradius server & the user profile
+    last connection.
 
 #### With these environment variables, you can configure and customize various aspects of the project, such as database connections, SAML settings, login methods, and more.
 
@@ -484,7 +487,8 @@ The portal exposes metrics for monitoring using Prometheus. The metrics are avai
 ### Available Metrics
 
 - **Users**: Total users, verified users, and banned users
-- **Authentication Providers**: Users by provider (Portal Account, SAML Account, Google Account, Microsoft Account) and portal users by type (Email, Phone Number)
+- **Authentication Providers**: Users by provider (Portal Account, SAML Account, Google Account, Microsoft Account) and
+  portal users by type (Email, Phone Number)
 - **Radius Profiles**: Profiles by status, total profiles, and total radius users from the radius database
 
 ### Configuration

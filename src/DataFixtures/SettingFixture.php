@@ -106,6 +106,7 @@ class SettingFixture extends Fixture
             ['name' => 'PROFILE_LIMIT_DATE_EMAIL', 'value' => '5'],
             ['name' => 'PROFILE_LIMIT_DATE_SMS', 'value' => '5'],
             ['name' => 'TIME_STAMP_FREERADIUS_CRON', 'value' => '0'],
+            ['name' => 'FREERADIUS_LAST_CONNECTION_CRON', 'value' => '* * * * *'],
         ];
 
         foreach ($settings as $settingData) {

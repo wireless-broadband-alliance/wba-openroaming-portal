@@ -295,6 +295,8 @@ class GetSettings
             'PROFILE_LIMIT_DATE_SAML' => 'Time in days to disable profiles for users with SAML login',
             'PROFILE_LIMIT_DATE_EMAIL' => 'Time in days to disable profiles for users with EMAIL login',
             'PROFILE_LIMIT_DATE_SMS' => 'Time in days to disable profiles for users with SMS login',
+            'FREERADIUS_LAST_CONNECTION_CRON' => 'Defines the schedule for Freeradius server & the user profile
+             last connection',
         ];
 
         return $descriptions[$settingName] ?? '';
