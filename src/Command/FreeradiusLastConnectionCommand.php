@@ -84,7 +84,7 @@ class FreeradiusLastConnectionCommand extends Command
             // map entities by radius_user
             $profileMap = [];
             foreach ($activeProfiles as $profileData) {
-                $profileMap[$profileData['radius_user']] = $profileData;
+                $profileMap[$profileData->getRadiusUser()] = $profileData;
             }
 
             // now loop radAcct
@@ -129,26 +129,6 @@ class FreeradiusLastConnectionCommand extends Command
             $this->entityManager->persist($timestampFreeradiusCron);
             $this->entityManager->flush();
         }
-
-        dd('die pls');
-        // TODO REVIEW THIS CODE NEEDS TO USE UPSERT TO IMPROVE OPTIMIZATIONS AND RESOURCES EXECUTION OF THE MACHINE
-
-        // TODO FOR THIS COMMAND
-        /*
-         * done 1 - Check if the connection to the freeradius table exist with the .env DATABASE_FREERADIUS -> make service
-         * done 2 - Check if the TIME_STAMP_FREERADIUS_CRON is valid
-         * done 3 - Check if the query1 content is the same of the previous execution -> use the $timestampFreeradiusCron execution time
-         * done 3.1 - Make the query1 (radAccount) only after the timestamp validation is complete and valid
-         * 4 - Make the logic to update the profile row on the OpenRoaming db, UserRadiusProfile table, "lastConnection" column (start/end Connections)
-         * 4.1 - Make the query2 on the OpenRoaming db to get update the rows of each profile if need it
-         * 4.2 - Find a way to check if the content is the same to ignore the radAcct query
-         * 4.3 - Search more for a upsert (insert + update) -> this can be better instead of using a foreach with a extra query for the Operoaming DB
-         * 5 - Output a response message like: "Execution ignored same data checked"
-         * if the content on the step 2 is the same
-         * 5.1 - Output a response message like: "Freeradius Connection Times Updated"
-         * if the content on the step 2 is diferent
-         * done 6 - Find a way to always get the timeStamp and updated for the next query of the execution
-        */
 
         $output->writeln('<info>Freeradius Connection Times Updated</info>');
 

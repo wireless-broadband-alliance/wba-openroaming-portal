@@ -143,8 +143,14 @@ class UserRadiusProfile
         return $this;
     }
 
-    public function setLastStopConnectionAt(?array $lastStopConnectionAt): void
+    public function getLastStopConnectionAt(): ?\DateTimeInterface
+    {
+        return $this->lastStopConnectionAt;
+    }
+
+    public function setLastStopConnectionAt(?\DateTimeInterface $lastStopConnectionAt): self
     {
         $this->lastStopConnectionAt = $lastStopConnectionAt;
+        return $this;
     }
 }
