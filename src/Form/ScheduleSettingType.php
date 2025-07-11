@@ -13,6 +13,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\TimeType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfonycasts\DynamicForms\DependentField;
 use Symfonycasts\DynamicForms\DynamicFormBuilder;
 
 class ScheduleSettingType extends AbstractType
@@ -53,16 +54,29 @@ class ScheduleSettingType extends AbstractType
                     'class' => $useAdvancedMode === true ? 'hidden' : '',
                 ],
             ])
-            ->add("months_of_the_year_frequency", RangeType::class, [
-                'required' => false,
-                'label' => false,
-                'attr' => [
-                    'min' => 1,
-                    'max' => 10,
-                    'description' => $description,
-                    'class' => $useAdvancedMode === true ? 'hidden' : '',
-                ],
-            ])
+            ->addDependent(
+                "months_of_the_year_frequency",
+                "months_of_the_year",
+                function (DependentField $field, $selectedMonths) use ($description, $useAdvancedMode) {
+                    if (in_array('*', $selectedMonths ?? [], true)) {
+                        $max = 11; // total months in year less 1
+                    } else {
+                        // subtract 1, but at least 1
+                        $max = max(count($selectedMonths ?? []) - 1, 1);
+                    }
+
+                    $field->add(RangeType::class, [
+                        'required' => false,
+                        'label' => false,
+                        'attr' => [
+                            'min' => 1,
+                            'max' => $max,
+                            'description' => $description,
+                            'class' => $useAdvancedMode === true ? 'hidden' : '',
+                        ],
+                    ]);
+                }
+            )
 
             // day of month + frequency
             ->add("day_of_month", ChoiceType::class, [
@@ -75,16 +89,29 @@ class ScheduleSettingType extends AbstractType
                     'class' => $useAdvancedMode === true ? 'hidden' : '',
                 ],
             ])
-            ->add("day_of_month_frequency", RangeType::class, [
-                'required' => false,
-                'label' => false,
-                'attr' => [
-                    'min' => 1,
-                    'max' => 10,
-                    'description' => $description,
-                    'class' => $useAdvancedMode === true ? 'hidden' : '',
-                ],
-            ])
+            ->addDependent(
+                "day_of_month_frequency",
+                "day_of_month",
+                function (DependentField $field, $selectedDays) use ($description, $useAdvancedMode) {
+                    if (in_array('*', $selectedDays ?? [], true)) {
+                        $max = 30; // max days in month less 1
+                    } else {
+                        // subtract 1, but at least 1
+                        $max = max(count($selectedDays ?? []) - 1, 1);
+                    }
+
+                    $field->add(RangeType::class, [
+                        'required' => false,
+                        'label' => false,
+                        'attr' => [
+                            'min' => 1,
+                            'max' => $max,
+                            'description' => $description,
+                            'class' => $useAdvancedMode === true ? 'hidden' : '',
+                        ],
+                    ]);
+                }
+            )
 
             // day of week + frequency
             ->add("day_of_week", ChoiceType::class, [
@@ -97,16 +124,28 @@ class ScheduleSettingType extends AbstractType
                     'class' => $useAdvancedMode === true ? 'hidden' : '',
                 ],
             ])
-            ->add("day_of_week_frequency", RangeType::class, [
-                'required' => false,
-                'label' => false,
-                'attr' => [
-                    'min' => 1,
-                    'max' => 10,
-                    'description' => $description,
-                    'class' => $useAdvancedMode === true ? 'hidden' : '',
-                ],
-            ])
+            ->addDependent(
+                'day_of_week_frequency',
+                'day_of_week',
+                function (DependentField $field, $selectedDays) use ($description, $useAdvancedMode) {
+                    if (in_array('*', $selectedDays ?? [], true)) {
+                        $max = 6; // total of days in a week less 1
+                    } else {
+                        $max = max(count($selectedDays ?? []) - 1, 1);
+                    }
+
+                    $field->add(RangeType::class, [
+                        'required' => false,
+                        'label' => false,
+                        'attr' => [
+                            'min' => 1,
+                            'max' => $max,
+                            'description' => $description,
+                            'class' => $useAdvancedMode === true ? 'hidden' : '',
+                        ],
+                    ]);
+                }
+            )
 
             // Time
             ->add("time", TimeType::class, [
