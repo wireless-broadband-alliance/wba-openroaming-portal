@@ -2,6 +2,7 @@
 
 namespace App\DTO;
 
+use Cron\CronExpression;
 use Symfony\Component\Validator\Constraints as Assert;
 use App\Repository\SettingRepository;
 use App\Service\CronExpressionHelperService;
@@ -216,6 +217,22 @@ class ScheduleSettingDTO
         ) {
             $context->buildViolation('Frequency cannot be greater than the number of selected days.')
                 ->atPath('day_of_week_frequency')
+                ->addViolation();
+        }
+    }
+
+    #[Callback]
+    public function validateCronExpression(ExecutionContextInterface $context): void
+    {
+        if ($this->advanced === null) {
+            return;
+        }
+
+        try {
+            new CronExpression($this->advanced);
+        } catch (\InvalidArgumentException $e) {
+            $context->buildViolation('The cron expression is not valid.')
+                ->atPath('advanced')
                 ->addViolation();
         }
     }
