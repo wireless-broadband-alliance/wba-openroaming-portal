@@ -45,7 +45,7 @@ class ScheduleDTO
         ?CronExpressionHelperService $cronExpressionHelperService = null
     ) {
         if (!is_null($settingRepository)) {
-            $cronAdvanceStatus = $settingRepository->findOneBy(["name" => "CRON_ADVANCE_STATUS"]);
+            $cronAdvanceStatus = $settingRepository->findOneBy(["name" => "CRON_ADVANCED_STATUS"]);
             if (!is_null($cronAdvanceStatus)) {
                 $this->use_advanced_mode = $cronAdvanceStatus->getValue() === OperationMode::ON->value;
             }
