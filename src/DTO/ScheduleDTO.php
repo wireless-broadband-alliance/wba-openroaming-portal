@@ -14,12 +14,30 @@ class ScheduleDTO
     public ?bool $use_advanced_mode = false;
 
     #[Assert\Valid]
+    #[Assert\When(
+        expression: "this.use_advanced_mode != null and this.use_advanced_mode",
+        constraints: [
+            new AcmeAssert\CronNotEmpty()
+        ],
+    )]
     public ?ScheduleSettingDTO $delete_unconfirmed_users_cron = null;
 
     #[Assert\Valid]
+    #[Assert\When(
+        expression: "this.use_advanced_mode != null and this.use_advanced_mode",
+        constraints: [
+            new AcmeAssert\CronNotEmpty()
+        ],
+    )]
     public ?ScheduleSettingDTO $users_when_profile_expires_cron = null;
 
     #[Assert\Valid]
+    #[Assert\When(
+        expression: "this.use_advanced_mode != null and this.use_advanced_mode",
+        constraints: [
+            new AcmeAssert\CronNotEmpty()
+        ],
+    )]
     public ?ScheduleSettingDTO $ldap_sync_cron = null;
 
     public function __construct(

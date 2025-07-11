@@ -82,6 +82,7 @@ class ScheduleAutomationController extends AbstractController
             ['name' => 'USERS_WHEN_PROFILE_EXPIRES_CRON']
         )->getValue();
         $ldapCron = $this->settingRepository->findOneBy(['name' => 'LDAP_SYNC_CRON'])->getValue();
+
         $deleteUnconfirmedWarning = $this->verifyHoursAndMinutesFrequency($deleteUnconfirmed);
         $profileExpiredWarning = $this->verifyHoursAndMinutesFrequency($profileExpired);
         $ldapCronWarning = $this->verifyHoursAndMinutesFrequency($ldapCron);
