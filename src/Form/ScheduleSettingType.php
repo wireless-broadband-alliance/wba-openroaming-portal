@@ -13,6 +13,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\TimeType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfonycasts\DynamicForms\DependentField;
 use Symfonycasts\DynamicForms\DynamicFormBuilder;
 
 class ScheduleSettingType extends AbstractType
@@ -97,16 +98,28 @@ class ScheduleSettingType extends AbstractType
                     'class' => $useAdvancedMode === true ? 'hidden' : '',
                 ],
             ])
-            ->add("day_of_week_frequency", RangeType::class, [
-                'required' => false,
-                'label' => false,
-                'attr' => [
-                    'min' => 1,
-                    'max' => 10,
-                    'description' => $description,
-                    'class' => $useAdvancedMode === true ? 'hidden' : '',
-                ],
-            ])
+            ->addDependent(
+                'day_of_week_frequency',
+                'day_of_week',
+                function (DependentField $field, $selectedDays) use ($description, $useAdvancedMode) {
+                    if (in_array('*', $selectedDays ?? [], true)) {
+                        $max = 7;
+                    } else {
+                        $max = max(count($selectedDays ?? []) - 1, 1);
+                    }
+
+                    $field->add(RangeType::class, [
+                        'required' => false,
+                        'label' => false,
+                        'attr' => [
+                            'min' => 1,
+                            'max' => $max,
+                            'description' => $description,
+                            'class' => $useAdvancedMode === true ? 'hidden' : '',
+                        ],
+                    ]);
+                }
+            )
 
             // Time
             ->add("time", TimeType::class, [
