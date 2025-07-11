@@ -2,139 +2,67 @@
 
 namespace App\Form;
 
-use App\Enum\DaysOfWeek;
-use App\Enum\MonthsOfYear;
-use App\Enum\OperationMode;
-use App\Repository\SettingRepository;
-use App\Service\GetSettings;
-use App\Validator\Constraints\ValidCronSettings;
-use Cron\CronExpression;
-use Exception;
+use App\DTO\ScheduleDTO;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-use Symfony\Component\Form\Extension\Core\Type\RangeType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\Form\Extension\Core\Type\TimeType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Validator\Constraints\Callback;
-use Symfony\Component\Validator\Context\ExecutionContextInterface;
+use Symfonycasts\DynamicForms\DependentField;
+use Symfonycasts\DynamicForms\DynamicFormBuilder;
 
 class ScheduleType extends AbstractType
 {
-    private array $cronSettings = [
-        'DELETE_UNCONFIRMED_USERS_CRON',
-        'USERS_WHEN_PROFILE_EXPIRES_CRON',
-        'LDAP_SYNC_CRON',
-    ];
-
-    public function __construct(
-        private readonly GetSettings $getSettings,
-        private readonly SettingRepository $settingRepository,
-    ) {
-    }
-
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
-        $selected = $this->settingRepository->findOneBy([
-                'name' => 'CRON_ADVANCED_STATUS'
-            ])?->getValue() === OperationMode::ON->value;
+        $builder = new DynamicFormBuilder($builder);
 
-        $builder->add('use_advanced_mode', CheckboxType::class, [
-            'label' => 'Use Advanced Mode (Manual CRON Expression)',
-            'required' => true,
-            'data' => $selected,
-        ]);
-
-        foreach ($this->cronSettings as $settingName) {
-            $description = $this->getSettings->getSettingDescription($settingName);
-
-            $builder
-                // Advanced field
-                ->add("{$settingName}_advanced", TextType::class, [
-                    'required' => false,
-                    'label' => false,
-                    'attr' => [
-                        'placeholder' => '*/5 * * * *',
-                        'description' => $description,
-                    ],
-                ])
-
-                // months of the year + frequency
-                ->add("{$settingName}_months_of_the_year", ChoiceType::class, [
-                    'multiple' => true,
-                    'required' => false,
-                    'choices' => ['All Months' => '*'] + MonthsOfYear::choices(),
-                    'label' => false,
-                    'attr' => ['description' => $description],
-                ])
-                ->add("{$settingName}_months_of_the_year_frequency", RangeType::class, [
-                    'required' => true,
-                    'label' => false,
-                    'attr' => [
-                        'min' => 1,
-                        'max' => 10,
-                        'description' => $description,
-                    ],
-                ])
-
-                // day of month + frequency
-                ->add("{$settingName}_day_of_month", ChoiceType::class, [
-                    'multiple' => true,
-                    'required' => false,
-                    'choices' => ['All days' => '*'] + array_combine(range(1, 31), range(1, 31)),
-                    'label' => false,
-                    'attr' => ['description' => $description],
-                ])
-                ->add("{$settingName}_day_of_month_frequency", RangeType::class, [
-                    'required' => true,
-                    'label' => false,
-                    'attr' => [
-                        'min' => 1,
-                        'max' => 10,
-                        'description' => $description,
-                    ],
-                ])
-
-                // day of week + frequency
-                ->add("{$settingName}_day_of_week", ChoiceType::class, [
-                    'multiple' => true,
-                    'required' => false,
-                    'choices' => ['All days' => '*'] + DaysOfWeek::choices(),
-                    'label' => false,
-                    'attr' => ['description' => $description],
-                ])
-                ->add("{$settingName}_day_of_week_frequency", RangeType::class, [
-                    'required' => true,
-                    'label' => false,
-                    'attr' => [
-                        'min' => 1,
-                        'max' => 10,
-                        'description' => $description,
-                    ],
-                ])
-
-                // Time
-                ->add("{$settingName}_time", TimeType::class, [
-                    'required' => false,
-                    'widget' => 'single_text',
-                    'input' => 'datetime',
-                    'label' => false,
-                    'attr' => ['description' => $description],
-                ]);
-        }
+        $builder
+            ->add('use_advanced_mode', CheckboxType::class, [
+                'label' => 'Use Advanced Mode (Manual CRON Expression)',
+                'required' => false,
+            ])
+            ->addDependent(
+                'delete_unconfirmed_users_cron',
+                'use_advanced_mode',
+                function (DependentField $field, ?bool $use_advanced_mode) {
+                    $field->add(ScheduleSettingType::class, [
+                        'label' => false,
+                        'required' => false,
+                        'use_advanced_mode' => $use_advanced_mode,
+                        'settingName' => 'DELETE_UNCONFIRMED_USERS_CRON',
+                    ]);
+                }
+            )
+            ->addDependent(
+                'users_when_profile_expires_cron',
+                'use_advanced_mode',
+                function (DependentField $field, ?bool $use_advanced_mode) {
+                    $field->add(ScheduleSettingType::class, [
+                        'label' => false,
+                        'required' => false,
+                        'use_advanced_mode' => $use_advanced_mode,
+                        'settingName' => 'USERS_WHEN_PROFILE_EXPIRES_CRON',
+                    ]);
+                }
+            )
+            ->addDependent(
+                'ldap_sync_cron',
+                'use_advanced_mode',
+                function (DependentField $field, ?bool $use_advanced_mode) {
+                    $field->add(ScheduleSettingType::class, [
+                        'label' => false,
+                        'required' => false,
+                        'use_advanced_mode' => $use_advanced_mode,
+                        'settingName' => 'LDAP_SYNC_CRON',
+                    ]);
+                }
+            );
     }
 
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'settings' => [],
-            'constraints' => [
-                new ValidCronSettings([
-                    'cronSettings' => $this->cronSettings,
-                ]),
-            ],
+            'data_class' => ScheduleDTO::class,
         ]);
     }
 }

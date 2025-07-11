@@ -4,18 +4,18 @@ namespace App\Enum;
 
 enum MonthsOfYear: int
 {
-    case January = 1;
-    case February = 2;
-    case March = 3;
-    case April = 4;
-    case May = 5;
-    case June = 6;
-    case July = 7;
-    case August = 8;
-    case September = 9;
-    case October = 10;
-    case November = 11;
-    case December = 12;
+    case january = 1;
+    case february = 2;
+    case march = 3;
+    case april = 4;
+    case may = 5;
+    case june = 6;
+    case july = 7;
+    case august = 8;
+    case september = 9;
+    case october = 10;
+    case november = 11;
+    case december = 12;
 
     /**
      * Returns an array for ChoiceType.
