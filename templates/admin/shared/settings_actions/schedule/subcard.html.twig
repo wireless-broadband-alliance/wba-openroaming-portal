@@ -27,7 +27,7 @@
         {% if frequency_field is defined and frequency_field is not null %}
             <div class="form-group">
                 <div class="flex items-center gap-3 py-2">
-                    {{ form_widget(frequency_field, { attr: { class: 'form-widget-range flex-1' } }) }}
+                    {{ form_widget(frequency_field, {attr: {class: 'form-widget-range flex-1'}}) }}
                     <span class="text-sm text-gray-700 font-medium"> {{ frequency_field.vars.value is null or frequency_field.vars.value is empty ? 1 : frequency_field.vars.value }}</span>
                 </div>
                 <div class="text-red-500 text-sm mt-1">
@@ -38,7 +38,7 @@
 
         {# Field #}
         <div class="form-group">
-            {{ form_widget(field, {attr: { class: 'form-widget' } }) }}
+            {{ form_widget(field, {attr: {class: 'form-widget'}}) }}
             <div class="text-red-500 text-sm mt-1">
                 {{ form_errors(field) }}
             </div>

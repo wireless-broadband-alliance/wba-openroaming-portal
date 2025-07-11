@@ -24,7 +24,7 @@ class ScheduleType extends AbstractType
             ->addDependent(
                 'delete_unconfirmed_users_cron',
                 'use_advanced_mode',
-                function (DependentField $field, ?bool $use_advanced_mode) {
+                function (DependentField $field, ?bool $use_advanced_mode): void {
                     $field->add(ScheduleSettingType::class, [
                         'label' => false,
                         'required' => false,
@@ -36,7 +36,7 @@ class ScheduleType extends AbstractType
             ->addDependent(
                 'users_when_profile_expires_cron',
                 'use_advanced_mode',
-                function (DependentField $field, ?bool $use_advanced_mode) {
+                function (DependentField $field, ?bool $use_advanced_mode): void {
                     $field->add(ScheduleSettingType::class, [
                         'label' => false,
                         'required' => false,
@@ -48,7 +48,7 @@ class ScheduleType extends AbstractType
             ->addDependent(
                 'ldap_sync_cron',
                 'use_advanced_mode',
-                function (DependentField $field, ?bool $use_advanced_mode) {
+                function (DependentField $field, ?bool $use_advanced_mode): void {
                     $field->add(ScheduleSettingType::class, [
                         'label' => false,
                         'required' => false,

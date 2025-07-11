@@ -7,8 +7,6 @@ use App\Service\CronExpressionHelperService;
 use DateTimeImmutable;
 use DateTimeInterface;
 use Exception;
-use Symfony\Component\Validator\Constraints as Assert;
-use App\Validator as AcmeAssert;
 
 class ScheduleSettingDTO
 {
@@ -55,10 +53,10 @@ class ScheduleSettingDTO
             $this->day_of_week = $this->setDayValues($parts, "day_of_week");
             $this->day_of_week_frequency = $parts["day_of_week"]['frequency'] ?? 1;
 
-            $this->day_of_month = $this->setDayValues($parts,"day_of_month");
+            $this->day_of_month = $this->setDayValues($parts, "day_of_month");
             $this->day_of_month_frequency = $parts["day_of_month"]['frequency'] ?? 1;
 
-            $this->months_of_the_year = $this->setDayValues($parts,"month");
+            $this->months_of_the_year = $this->setDayValues($parts, "month");
             $this->months_of_the_year_frequency = $parts["month"]['frequency'] ?? 1;
         }
     }

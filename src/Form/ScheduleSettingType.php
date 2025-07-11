@@ -17,7 +17,6 @@ use Symfonycasts\DynamicForms\DynamicFormBuilder;
 
 class ScheduleSettingType extends AbstractType
 {
-
     public function __construct(private readonly GetSettings $getSettings)
     {
     }
