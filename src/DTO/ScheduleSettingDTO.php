@@ -2,11 +2,14 @@
 
 namespace App\DTO;
 
+use Symfony\Component\Validator\Constraints as Assert;
 use App\Repository\SettingRepository;
 use App\Service\CronExpressionHelperService;
 use DateTimeImmutable;
 use DateTimeInterface;
 use Exception;
+use Symfony\Component\Validator\Constraints\Callback;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 class ScheduleSettingDTO
 {
@@ -170,5 +173,50 @@ class ScheduleSettingDTO
 
         // Remove duplicates and sort values
         return array_values(array_unique($result));
+    }
+
+    #[Callback]
+    public function validateMonthsFrequency(ExecutionContextInterface $context): void
+    {
+        if (
+            is_array($this->months_of_the_year) &&
+            $this->months_of_the_year_frequency !== null &&
+            $this->months_of_the_year_frequency > count($this->months_of_the_year) &&
+            $this->months_of_the_year !== ['*']
+        ) {
+            $context->buildViolation('Frequency cannot be greater than the number of selected months.')
+                ->atPath('months_of_the_year_frequency')
+                ->addViolation();
+        }
+    }
+
+    #[Callback]
+    public function validateDayMonthFrequency(ExecutionContextInterface $context): void
+    {
+        if (
+            is_array($this->day_of_month) &&
+            $this->day_of_month_frequency !== null &&
+            $this->day_of_month_frequency > count($this->day_of_month) &&
+            $this->day_of_month !== ['*']
+        ) {
+            $context->buildViolation('Frequency cannot be greater than the number of selected days.')
+                ->atPath('day_of_month_frequency')
+                ->addViolation();
+        }
+    }
+
+    #[Callback]
+    public function validateDayWeekFrequency(ExecutionContextInterface $context): void
+    {
+        if (
+            is_array($this->day_of_week) &&
+            $this->day_of_week_frequency !== null &&
+            $this->day_of_week_frequency > count($this->day_of_week) &&
+            $this->day_of_week !== ['*']
+        ) {
+            $context->buildViolation('Frequency cannot be greater than the number of selected days.')
+                ->atPath('day_of_week_frequency')
+                ->addViolation();
+        }
     }
 }
