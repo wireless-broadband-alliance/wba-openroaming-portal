@@ -32,11 +32,23 @@
         </div>
 
         <div class="grid gap-4 lg:grid-cols-2 xl:grid-cols-3 p-2 z-0 mt-4">
-            {{ include('admin/shared/settings_actions/schedule/card.html.twig', {label: 'Delete Unconfirmed Account Automation', field: form.delete_unconfirmed_users_cron}) }}
+            {{ include('admin/shared/settings_actions/schedule/card.html.twig', {
+                label: 'Delete Unconfirmed Account Automation',
+                description: 'Defines the schedule to delete unconfirmed users from the portal.',
+                field: form.delete_unconfirmed_users_cron
+            }) }}
 
-            {{ include('admin/shared/settings_actions/schedule/card.html.twig', {label: 'Profile Expiration Notification Automation', field: form.users_when_profile_expires_cron}) }}
+            {{ include('admin/shared/settings_actions/schedule/card.html.twig', {
+                label: 'Profile Expiration Notification Automation',
+                description: 'Defines the schedule to notify the users when their profile to expire.',
+                field: form.users_when_profile_expires_cron
+            }) }}
 
-            {{ include('admin/shared/settings_actions/schedule/card.html.twig', {label: 'LDAP Synchronization Automation', field: form.ldap_sync_cron}) }}
+            {{ include('admin/shared/settings_actions/schedule/card.html.twig', {
+                label: 'LDAP Synchronization Automation',
+                description: 'Defines the schedule for LDAP synchronization automation command.',
+                field: form.ldap_sync_cron
+            }) }}
         </div>
 
         <div class="alert-block my-4 p-2 {{ form.use_advanced_mode.vars.data != default_use_advanced_mode ? '' : 'hidden' }}">

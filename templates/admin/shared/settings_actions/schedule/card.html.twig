@@ -11,6 +11,13 @@
              alt="info_icon"/>
     </div>
 
+    {# Description #}
+    <div class="mt-2">
+        {{ include('/admin/shared/settings_actions/_description.html.twig', {
+            description: description,
+        }) }}
+    </div>
+
     <div class="{{ 'hidden' in field.advanced.vars.attr.class ? 'hidden' : '' }}">
         {{ include('admin/shared/settings_actions/schedule/subcard.html.twig', {
             field: field.advanced,
