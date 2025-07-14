@@ -179,11 +179,11 @@ class ScheduleSettingDTO
     #[Callback]
     public function validateMonthsFrequency(ExecutionContextInterface $context): void
     {
-        if ($this->months_of_the_year !== ['*'] &&
+        if (
+            $this->months_of_the_year !== ['*'] &&
             is_array($this->months_of_the_year) &&
             $this->months_of_the_year_frequency !== null &&
             $this->months_of_the_year_frequency > count($this->months_of_the_year)
-
         ) {
             $context->buildViolation('Frequency cannot be greater than the number of selected months.')
                 ->atPath('months_of_the_year_frequency')
@@ -194,7 +194,8 @@ class ScheduleSettingDTO
     #[Callback]
     public function validateDayMonthFrequency(ExecutionContextInterface $context): void
     {
-        if ($this->day_of_month !== ['*'] &&
+        if (
+            $this->day_of_month !== ['*'] &&
             is_array($this->day_of_month) &&
             $this->day_of_month_frequency !== null &&
             $this->day_of_month_frequency > count($this->day_of_month)
@@ -208,7 +209,8 @@ class ScheduleSettingDTO
     #[Callback]
     public function validateDayWeekFrequency(ExecutionContextInterface $context): void
     {
-        if ($this->day_of_week !== ['*'] &&
+        if (
+            $this->day_of_week !== ['*'] &&
             is_array($this->day_of_week) &&
             $this->day_of_week_frequency !== null &&
             $this->day_of_week_frequency > count($this->day_of_week)
