@@ -1,7 +1,7 @@
-import { Controller } from '@hotwired/stimulus';
+import { Controller } from "@hotwired/stimulus";
 
 export default class extends Controller {
-    static targets = ['input', 'warning'];
+    static targets = ["input", "warning"];
 
     connect() {
         this.checkFrequencyOnLoad();
@@ -21,9 +21,9 @@ export default class extends Controller {
         const hasFrequency = this.hasRelevantFrequency(cron);
 
         if (hasFrequency) {
-            this.warningTarget.style.display = 'block';
+            this.warningTarget.style.display = "block";
         } else {
-            this.warningTarget.style.display = 'none';
+            this.warningTarget.style.display = "none";
         }
     }
 
@@ -44,7 +44,7 @@ export default class extends Controller {
     }
 
     parseFrequency(part) {
-        if (part === '*') {
+        if (part === "*") {
             return 1;
         }
 
