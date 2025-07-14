@@ -39,8 +39,23 @@
         {% endif %}
 
         {# Field #}
-        <div class="form-group">
-            {{ form_widget(field, {attr: {class: 'form-widget'}}) }}
+        <div class="form-group" data-controller="cron">
+            {% if field.vars.name == 'advanced' %}
+                <div>
+                    {{ form_widget(field, {
+                        attr: {
+                            class: 'form-widget',
+                            'data-cron-target': 'input',
+                            'data-action': 'input->cron#checkChange',
+                        }
+                    }) }}
+                </div>
+                <div data-cron-target="warning" style="display:none;">
+                    {{ include('admin/shared/settings_actions/schedule/alert_warning.html.twig') }}
+                </div>
+            {% else %}
+                {{ form_widget(field, {attr: {class: 'form-widget'}}) }}
+            {% endif %}
             <div class="text-red-500 text-sm mt-1">
                 {{ form_errors(field) }}
             </div>
