@@ -4,7 +4,6 @@ export default class extends Controller {
     static targets = ['input', 'warning', 'frequencyText'];
 
     connect() {
-        // On connect, simulate a check with current input value
         this.checkFrequencyOnLoad();
     }
 
@@ -22,11 +21,9 @@ export default class extends Controller {
         const frequency = this.verifyHoursAndMinutesFrequency(cron);
 
         if (frequency) {
-            console.log(`Frequency detected: ${frequency}`);
             this.frequencyTextTarget.textContent = frequency;
             this.warningTarget.style.display = 'block';
         } else {
-            console.log('No special frequency detected.');
             this.warningTarget.style.display = 'none';
             this.frequencyTextTarget.textContent = '';
         }
