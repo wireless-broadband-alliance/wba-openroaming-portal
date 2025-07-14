@@ -8,7 +8,7 @@ use App\Enum\OperationMode;
 use App\Form\ScheduleType;
 use App\Repository\SettingRepository;
 use App\Service\CronExpressionHelperService;
-use DateTimeImmutable;
+use App\Service\SchedulerService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormInterface;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
@@ -42,7 +42,8 @@ final class ScheduleForm extends AbstractController
 
     public function __construct(
         private readonly SettingRepository $settingRepository,
-        private readonly CronExpressionHelperService $cronHelper
+        private readonly CronExpressionHelperService $cronHelper,
+        private readonly SchedulerService $schedulerService
     ) {
         $cronAdvanceStatus = $this->settingRepository->findOneBy(["name" => "CRON_ADVANCED_STATUS"]);
         if (!is_null($cronAdvanceStatus)) {
@@ -68,6 +69,39 @@ final class ScheduleForm extends AbstractController
 
         $this->default_use_advanced_mode = !$this->default_use_advanced_mode;
         $this->scheduleDTO->use_advanced_mode = $this->default_use_advanced_mode;
+
+        // Check Delete Unconfirmed Users Cron frequency warning
+        if ($this->schedulerService->verifyHoursAndMinutesFrequency(
+            $this->scheduleDTO->delete_unconfirmed_users_cron->advanced
+        )) {
+            $this->deleteUnconfirmedWarning = $this->schedulerService->verifyHoursAndMinutesFrequency(
+                $this->scheduleDTO->delete_unconfirmed_users_cron->advanced
+            );
+        } else {
+            $this->deleteUnconfirmedWarning = null;
+        }
+
+        // Check Profile Expired Cron frequency warning
+        if ($this->schedulerService->verifyHoursAndMinutesFrequency(
+            $this->scheduleDTO->users_when_profile_expires_cron->advanced
+        )) {
+            $this->profileExpiredWarning = $this->schedulerService->verifyHoursAndMinutesFrequency(
+                $this->scheduleDTO->users_when_profile_expires_cron->advanced
+            );
+        } else {
+            $this->profileExpiredWarning = null;
+        }
+        
+        // Check LDAP Sync Cron frequency warning
+        if ($this->schedulerService->verifyHoursAndMinutesFrequency(
+            $this->scheduleDTO->ldap_sync_cron->advanced
+        )) {
+            $this->ldapCronWarning = $this->schedulerService->verifyHoursAndMinutesFrequency(
+                $this->scheduleDTO->ldap_sync_cron->advanced
+            );
+        } else {
+            $this->ldapCronWarning = null;
+        }
 
         if ($this->default_use_advanced_mode) {
             // Switching to advanced mode → regenerate cron strings

@@ -62,7 +62,7 @@
             </div>
         </div>
 
-        <div class="{{ form.use_advanced_mode.vars.data != default_use_advanced_mode ? '' : 'hidden' }}">
+        <div>
             {% if deleteUnconfirmedWarning %}
                 {{ include('admin/shared/settings_actions/schedule/alert_warning.html.twig', {
                     message: "Saving in <strong>simple mode</strong> will remove the #{deleteUnconfirmedWarning} frequency settings for the <strong>Delete Unconfirmed Account Automation</strong> cron.",
