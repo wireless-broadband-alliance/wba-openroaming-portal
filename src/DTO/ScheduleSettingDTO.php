@@ -222,6 +222,46 @@ class ScheduleSettingDTO
     }
 
     #[Callback]
+    public function validateDayOfWeekAllOption(ExecutionContextInterface $context): void
+    {
+        if (is_array($this->day_of_week) &&
+            in_array('*', $this->day_of_week, true) &&
+            count($this->day_of_week) > 1) {
+            $context->buildViolation('"All days of the week" cannot be selected together with specific days.')
+                ->atPath('day_of_week')
+                ->addViolation();
+        }
+    }
+
+    #[Callback]
+    public function validateDayOfMonthAllOption(ExecutionContextInterface $context): void
+    {
+        if (is_array($this->day_of_month) &&
+            in_array('*', $this->day_of_month, true) &&
+            count(
+                $this->day_of_month
+            ) > 1) {
+            $context->buildViolation('"All days of the month" cannot be selected together with specific days.')
+                ->atPath('day_of_month')
+                ->addViolation();
+        }
+    }
+
+    #[Callback]
+    public function validateMonthsOfYearAllOption(ExecutionContextInterface $context): void
+    {
+        if (is_array($this->months_of_the_year) &&
+            in_array('*', $this->months_of_the_year, true)
+            && count(
+                $this->months_of_the_year
+            ) > 1) {
+            $context->buildViolation('"All months" cannot be selected together with specific months.')
+                ->atPath('months_of_the_year')
+                ->addViolation();
+        }
+    }
+
+    #[Callback]
     public function validateCronExpression(ExecutionContextInterface $context): void
     {
         if ($this->advanced === null) {
