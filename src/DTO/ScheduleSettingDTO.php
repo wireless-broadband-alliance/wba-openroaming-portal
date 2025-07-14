@@ -30,13 +30,17 @@ class ScheduleSettingDTO
     public function __construct(
         ?string $setting = null,
         ?SettingRepository $settingRepository = null,
-        ?CronExpressionHelperService $cronExpressionHelperService = null
+        ?CronExpressionHelperService $cronExpressionHelperService = null,
+        ?string $cronExpression = null,
     ) {
         if (!is_null($settingRepository)) {
-            $this->advanced = $settingRepository->findOneBy(
-                ['name' => $setting]
-            )->getValue() ?? "";
-
+            if (!is_null($cronExpression)) {
+                $this->advanced = $cronExpression;
+            } else {
+                $this->advanced = $settingRepository->findOneBy(
+                    ['name' => $setting]
+                )->getValue() ?? "";
+            }
             $parts = $cronExpressionHelperService->recognizeCronFrequency(
                 $this->advanced
             )['parts'] ?? [];

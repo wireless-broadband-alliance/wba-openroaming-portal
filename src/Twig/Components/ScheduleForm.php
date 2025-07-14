@@ -85,37 +85,29 @@ final class ScheduleForm extends AbstractController
                 new ScheduleSettingDTO(
                     'DELETE_UNCONFIRMED_USERS_CRON',
                     $this->settingRepository,
-                    $this->cronHelper
+                    $this->cronHelper,
+                    $this->scheduleDTO->delete_unconfirmed_users_cron->advanced
                 );
 
             $this->scheduleDTO->users_when_profile_expires_cron =
                 new ScheduleSettingDTO(
                     'USERS_WHEN_PROFILE_EXPIRES_CRON',
                     $this->settingRepository,
-                    $this->cronHelper
+                    $this->cronHelper,
+                    $this->scheduleDTO->users_when_profile_expires_cron->advanced
                 );
 
             $this->scheduleDTO->ldap_sync_cron =
                 new ScheduleSettingDTO(
                     'LDAP_SYNC_CRON',
                     $this->settingRepository,
-                    $this->cronHelper
+                    $this->cronHelper,
+                    $this->scheduleDTO->ldap_sync_cron->advanced
                 );
 
 
         }
 
         $this->resetForm();
-
-//        // Dump and stop here to check advanced cron expressions
-//        dd([
-//            'ADVANDED_delete_unconfirmed_users_cron_advanced' => $this->scheduleDTO->delete_unconfirmed_users_cron->advanced,
-//            'ADVANDED_users_when_profile_expires_cron_advanced' => $this->scheduleDTO->users_when_profile_expires_cron->advanced,
-//            'ADVANDED_ldap_sync_cron_advanced' => $this->scheduleDTO->ldap_sync_cron->advanced,
-//            'delete_unconfirmed_users_cron' => $this->scheduleDTO->delete_unconfirmed_users_cron,
-//            'users_when_profile_expires_cron' => $this->scheduleDTO->users_when_profile_expires_cron,
-//            'ldap_sync_cron' => $this->scheduleDTO->ldap_sync_cron,
-//            'ALL_THE_CONTENT' => $this->scheduleDTO
-//        ]);
     }
 }
