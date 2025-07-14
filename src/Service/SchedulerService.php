@@ -2,7 +2,6 @@
 
 namespace App\Service;
 
-
 use App\Enum\OperationMode;
 use App\Repository\SettingRepository;
 
