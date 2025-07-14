@@ -2,13 +2,13 @@
 
 namespace App\DTO;
 
-use Cron\CronExpression;
-use Symfony\Component\Validator\Constraints as Assert;
 use App\Repository\SettingRepository;
 use App\Service\CronExpressionHelperService;
+use Cron\CronExpression;
 use DateTimeImmutable;
 use DateTimeInterface;
 use Exception;
+use InvalidArgumentException;
 use Symfony\Component\Validator\Constraints\Callback;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
@@ -124,11 +124,11 @@ class ScheduleSettingDTO
         if ($raw === '*' || $raw === '') {
             // Set "All" when '*' is in the array so the form ChoiceType can show "All" option checked
             return ['*'];
-        } else {
-            // Expand expression like "28-31/2" on the array of values
-
-            return $this->expandCronPart($raw, $min, $max);
         }
+
+        // Expand expression like "28-31/2" on the array of values
+
+        return $this->expandCronPart($raw, $min, $max);
     }
 
     private function expandCronPart(string $expr, int $min, int $max): array
@@ -179,11 +179,11 @@ class ScheduleSettingDTO
     #[Callback]
     public function validateMonthsFrequency(ExecutionContextInterface $context): void
     {
-        if (
+        if ($this->months_of_the_year !== ['*'] &&
             is_array($this->months_of_the_year) &&
             $this->months_of_the_year_frequency !== null &&
-            $this->months_of_the_year_frequency > count($this->months_of_the_year) &&
-            $this->months_of_the_year !== ['*']
+            $this->months_of_the_year_frequency > count($this->months_of_the_year)
+
         ) {
             $context->buildViolation('Frequency cannot be greater than the number of selected months.')
                 ->atPath('months_of_the_year_frequency')
@@ -194,11 +194,10 @@ class ScheduleSettingDTO
     #[Callback]
     public function validateDayMonthFrequency(ExecutionContextInterface $context): void
     {
-        if (
+        if ($this->day_of_month !== ['*'] &&
             is_array($this->day_of_month) &&
             $this->day_of_month_frequency !== null &&
-            $this->day_of_month_frequency > count($this->day_of_month) &&
-            $this->day_of_month !== ['*']
+            $this->day_of_month_frequency > count($this->day_of_month)
         ) {
             $context->buildViolation('Frequency cannot be greater than the number of selected days.')
                 ->atPath('day_of_month_frequency')
@@ -209,11 +208,10 @@ class ScheduleSettingDTO
     #[Callback]
     public function validateDayWeekFrequency(ExecutionContextInterface $context): void
     {
-        if (
+        if ($this->day_of_week !== ['*'] &&
             is_array($this->day_of_week) &&
             $this->day_of_week_frequency !== null &&
-            $this->day_of_week_frequency > count($this->day_of_week) &&
-            $this->day_of_week !== ['*']
+            $this->day_of_week_frequency > count($this->day_of_week)
         ) {
             $context->buildViolation('Frequency cannot be greater than the number of selected days.')
                 ->atPath('day_of_week_frequency')
@@ -230,7 +228,7 @@ class ScheduleSettingDTO
 
         try {
             new CronExpression($this->advanced);
-        } catch (\InvalidArgumentException $e) {
+        } catch (InvalidArgumentException) {
             $context->buildViolation('The cron expression is not valid.')
                 ->atPath('advanced')
                 ->addViolation();
