@@ -109,25 +109,4 @@ final class ScheduleForm extends AbstractController
 
         $this->resetForm();
     }
-
-    #[LiveAction]
-    public function checkCronFrequency(string $cronExpression, string $type): void
-    {
-        $frequency = $this->schedulerService->verifyHoursAndMinutesFrequency($cronExpression);
-
-        // Update the corresponding warning property
-        switch ($type) {
-            case 'deleteUnconfirmed':
-                $this->deleteUnconfirmedWarning = $frequency ?: null;
-                break;
-
-            case 'profileExpired':
-                $this->profileExpiredWarning = $frequency ?: null;
-                break;
-
-            case 'ldapSync':
-                $this->ldapCronWarning = $frequency ?: null;
-                break;
-        }
-    }
 }

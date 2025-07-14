@@ -4,6 +4,7 @@ namespace App\DTO;
 
 use App\Repository\SettingRepository;
 use App\Service\CronExpressionHelperService;
+use App\Validator\CronFrequencyWarning;
 use Cron\CronExpression;
 use DateTimeImmutable;
 use DateTimeInterface;
@@ -14,6 +15,7 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 class ScheduleSettingDTO
 {
+    #[CronFrequencyWarning]
     public ?string $advanced = null;
 
     public ?array $day_of_week = ["*"];

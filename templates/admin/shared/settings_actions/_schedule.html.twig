@@ -8,8 +8,7 @@
     </div>
 </div>
 
-<twig:ScheduleForm :scheduleDTO="formDTO" :form="form" :deleteUnconfirmedWarning="deleteUnconfirmedWarning"
-                   :profileExpiredWarning="profileExpiredWarning" :ldapCronWarning="ldapCronWarning">
+<twig:ScheduleForm :scheduleDTO="formDTO" :form="form">
     <div>
         {{ form_start(form) }}
 
@@ -62,23 +61,6 @@
             </div>
         </div>
 
-        <div>
-            {% if deleteUnconfirmedWarning %}
-                {{ include('admin/shared/settings_actions/schedule/alert_warning.html.twig', {
-                    message: "Saving in <strong>simple mode</strong> will remove the #{deleteUnconfirmedWarning} frequency settings for the <strong>Delete Unconfirmed Account Automation</strong> cron.",
-                }) }}
-            {% endif %}
-            {% if profileExpiredWarning %}
-                {{ include('admin/shared/settings_actions/schedule/alert_warning.html.twig', {
-                    message: "Saving in <strong>simple mode</strong> will reset the #{profileExpiredWarning} frequency settings for the <strong>Profile Expiration Notification Automation</strong> cron.",
-                }) }}
-            {% endif %}
-            {% if ldapCronWarning %}
-                {{ include('admin/shared/settings_actions/schedule/alert_warning.html.twig', {
-                    message: "Saving in <strong>simple mode</strong> will remove the #{ldapCronWarning} frequency settings for the <strong>LDAP Synchronization Automation</strong> cron.",
-                }) }}
-            {% endif %}
-        </div>
         <div class="mt-6 divider-solid"></div>
 
         <div class="mt-6 flex flex-row w-full justify-end items-center gap-2">

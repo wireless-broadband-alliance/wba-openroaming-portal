@@ -75,15 +75,6 @@ class ScheduleAutomationController extends AbstractController
             return $this->redirectToRoute('admin_dashboard_settings_schedule');
         }
 
-        $deleteUnconfirmed = $this->settingRepository->findOneBy(
-            ['name' => 'DELETE_UNCONFIRMED_USERS_CRON']
-        )->getValue();
-        $profileExpired = $this->settingRepository->findOneBy(
-            ['name' => 'USERS_WHEN_PROFILE_EXPIRES_CRON']
-        )->getValue();
-        $ldapCron = $this->settingRepository->findOneBy(['name' => 'LDAP_SYNC_CRON'])->getValue();
-
-
         return $this->render('admin/settings_actions.html.twig', [
             'user' => $currentUser,
             'data' => $data,
