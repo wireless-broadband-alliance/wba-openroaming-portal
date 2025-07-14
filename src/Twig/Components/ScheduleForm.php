@@ -70,39 +70,6 @@ final class ScheduleForm extends AbstractController
         $this->default_use_advanced_mode = !$this->default_use_advanced_mode;
         $this->scheduleDTO->use_advanced_mode = $this->default_use_advanced_mode;
 
-        // Check Delete Unconfirmed Users Cron frequency warning
-        if ($this->schedulerService->verifyHoursAndMinutesFrequency(
-            $this->scheduleDTO->delete_unconfirmed_users_cron->advanced
-        )) {
-            $this->deleteUnconfirmedWarning = $this->schedulerService->verifyHoursAndMinutesFrequency(
-                $this->scheduleDTO->delete_unconfirmed_users_cron->advanced
-            );
-        } else {
-            $this->deleteUnconfirmedWarning = null;
-        }
-
-        // Check Profile Expired Cron frequency warning
-        if ($this->schedulerService->verifyHoursAndMinutesFrequency(
-            $this->scheduleDTO->users_when_profile_expires_cron->advanced
-        )) {
-            $this->profileExpiredWarning = $this->schedulerService->verifyHoursAndMinutesFrequency(
-                $this->scheduleDTO->users_when_profile_expires_cron->advanced
-            );
-        } else {
-            $this->profileExpiredWarning = null;
-        }
-        
-        // Check LDAP Sync Cron frequency warning
-        if ($this->schedulerService->verifyHoursAndMinutesFrequency(
-            $this->scheduleDTO->ldap_sync_cron->advanced
-        )) {
-            $this->ldapCronWarning = $this->schedulerService->verifyHoursAndMinutesFrequency(
-                $this->scheduleDTO->ldap_sync_cron->advanced
-            );
-        } else {
-            $this->ldapCronWarning = null;
-        }
-
         if ($this->default_use_advanced_mode) {
             // Switching to advanced mode → regenerate cron strings
             $this->scheduleDTO->delete_unconfirmed_users_cron->advanced =
@@ -141,5 +108,26 @@ final class ScheduleForm extends AbstractController
         }
 
         $this->resetForm();
+    }
+
+    #[LiveAction]
+    public function checkCronFrequency(string $cronExpression, string $type): void
+    {
+        $frequency = $this->schedulerService->verifyHoursAndMinutesFrequency($cronExpression);
+
+        // Update the corresponding warning property
+        switch ($type) {
+            case 'deleteUnconfirmed':
+                $this->deleteUnconfirmedWarning = $frequency ?: null;
+                break;
+
+            case 'profileExpired':
+                $this->profileExpiredWarning = $frequency ?: null;
+                break;
+
+            case 'ldapSync':
+                $this->ldapCronWarning = $frequency ?: null;
+                break;
+        }
     }
 }
