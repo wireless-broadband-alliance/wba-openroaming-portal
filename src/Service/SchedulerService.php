@@ -6,15 +6,15 @@ namespace App\Service;
 use App\Enum\OperationMode;
 use App\Repository\SettingRepository;
 
-class SchedulerService
+readonly class SchedulerService
 {
     public function __construct(
-        private readonly SettingRepository $settingRepository,
-        private readonly CronExpressionHelperService $cronExpressionHelperService
+        private SettingRepository $settingRepository,
+        private CronExpressionHelperService $cronExpressionHelperService
     ) {
     }
 
-    private function verifyHoursAndMinutesFrequency(string $cron): ?string
+    public function verifyHoursAndMinutesFrequency(string $cron): ?string
     {
         $advancedMode = $this->settingRepository->findOneBy(['name' => 'CRON_ADVANCED_STATUS']);
         if ($advancedMode && $advancedMode->getValue() === OperationMode::OFF->value) {
@@ -33,5 +33,4 @@ class SchedulerService
         }
         return null;
     }
-
 }
