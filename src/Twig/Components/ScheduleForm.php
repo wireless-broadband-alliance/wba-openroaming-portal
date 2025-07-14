@@ -79,7 +79,6 @@ final class ScheduleForm extends AbstractController
 
             $this->scheduleDTO->ldap_sync_cron->advanced =
                 $this->scheduleDTO->ldap_sync_cron->toCronExpression(false, $this->cronHelper);
-
         } else {
             // Switching to simple mode → recreate DTOs from cron expression values
             $this->scheduleDTO->delete_unconfirmed_users_cron =
@@ -102,6 +101,21 @@ final class ScheduleForm extends AbstractController
                     $this->settingRepository,
                     $this->cronHelper
                 );
+
+
         }
+
+        $this->resetForm();
+
+//        // Dump and stop here to check advanced cron expressions
+//        dd([
+//            'ADVANDED_delete_unconfirmed_users_cron_advanced' => $this->scheduleDTO->delete_unconfirmed_users_cron->advanced,
+//            'ADVANDED_users_when_profile_expires_cron_advanced' => $this->scheduleDTO->users_when_profile_expires_cron->advanced,
+//            'ADVANDED_ldap_sync_cron_advanced' => $this->scheduleDTO->ldap_sync_cron->advanced,
+//            'delete_unconfirmed_users_cron' => $this->scheduleDTO->delete_unconfirmed_users_cron,
+//            'users_when_profile_expires_cron' => $this->scheduleDTO->users_when_profile_expires_cron,
+//            'ldap_sync_cron' => $this->scheduleDTO->ldap_sync_cron,
+//            'ALL_THE_CONTENT' => $this->scheduleDTO
+//        ]);
     }
 }
