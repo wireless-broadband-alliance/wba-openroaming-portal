@@ -104,8 +104,6 @@ final class ScheduleForm extends AbstractController
                     $this->cronHelper,
                     $this->scheduleDTO->ldap_sync_cron->advanced
                 );
-
-
         }
 
         $this->resetForm();
