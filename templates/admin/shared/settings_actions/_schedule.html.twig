@@ -35,19 +35,19 @@
             {{ include('admin/shared/settings_actions/schedule/card.html.twig', {
                 label: 'Delete Unconfirmed Account Automation',
                 description: 'Defines the schedule to delete unconfirmed users from the portal.',
-                field: form.delete_unconfirmed_users_cron
+                field: form.delete_unconfirmed_users_cron,
             }) }}
 
             {{ include('admin/shared/settings_actions/schedule/card.html.twig', {
                 label: 'Profile Expiration Notification Automation',
                 description: 'Defines the schedule to notify the users when their profile to expire.',
-                field: form.users_when_profile_expires_cron
+                field: form.users_when_profile_expires_cron,
             }) }}
 
             {{ include('admin/shared/settings_actions/schedule/card.html.twig', {
                 label: 'LDAP Synchronization Automation',
                 description: 'Defines the schedule for LDAP synchronization automation command.',
-                field: form.ldap_sync_cron
+                field: form.ldap_sync_cron,
             }) }}
         </div>
 
