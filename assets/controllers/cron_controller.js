@@ -1,15 +1,26 @@
 import { Controller } from "@hotwired/stimulus";
 
 export default class extends Controller {
-    static targets = ["input", "warning"];
+    static targets = ["input", "warning", "label"];
 
     connect() {
+        if (this.hasInputTarget && this.hasLabelTarget) {
+            this.updateLabel(this.inputTarget.value);
+        }
         this.checkFrequencyOnLoad();
     }
 
-    checkChange(event) {
-        const cron = event.target.value.trim();
-        this.updateFrequency(cron);
+    onInputChange(event) {
+        let value = event.target.value;
+        const max = parseInt(this.inputTarget.getAttribute('max'), 10) || 1;
+
+        if (parseInt(value, 10) > max) {
+            value = max;
+            this.inputTarget.value = max;
+        }
+
+        this.updateLabel(value);
+        this.checkFrequencyOnLoad();
     }
 
     checkFrequencyOnLoad() {
@@ -20,22 +31,15 @@ export default class extends Controller {
     updateFrequency(cron) {
         const hasFrequency = this.hasRelevantFrequency(cron);
 
-        if (hasFrequency) {
-            this.warningTarget.style.display = "block";
-        } else {
-            this.warningTarget.style.display = "none";
+        if (this.hasWarningTarget) {
+            this.warningTarget.style.display = hasFrequency ? "block" : "none";
         }
     }
 
     hasRelevantFrequency(cron) {
-        if (!cron) {
-            return false;
-        }
-
+        if (!cron) return false;
         const parts = cron.split(/\s+/);
-        if (parts.length < 2) {
-            return false;
-        }
+        if (parts.length < 2) return false;
 
         const minuteFrequency = this.parseFrequency(parts[0]);
         const hourFrequency = this.parseFrequency(parts[1]);
@@ -44,15 +48,17 @@ export default class extends Controller {
     }
 
     parseFrequency(part) {
-        if (part === "*") {
-            return 1;
-        }
+        if (part === "*") return 1;
 
         const match = part.match(/^\*\/(\d+)$/);
-        if (match) {
-            return parseInt(match[1], 10);
-        }
+        if (match) return parseInt(match[1], 10);
 
         return 1;
+    }
+
+    updateLabel(value) {
+        if (this.hasLabelTarget) {
+            this.labelTarget.textContent = value;
+        }
     }
 }
