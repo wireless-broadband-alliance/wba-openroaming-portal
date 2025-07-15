@@ -39,7 +39,8 @@ class ResetTimestampFreeradiusCommand extends Command
         // Check if the --yes option is provided (comes from a controller), then skip the confirmation prompt
         if (!$input->getOption('yes')) {
             $helper = $this->getHelper('question');
-            $question = new ConfirmationQuestion('This action will RESET the TIMESTAMP used by the FREERADIUS cron job on the portal. ' .
+            $question = new ConfirmationQuestion('This action will RESET the TIMESTAMP used by the' .
+                'FREERADIUS cron job on the portal. ' .
                 'This is a sensitive operation and should only be performed in **very specific scenarios**. ' .
                 'Are you sure you want to proceed? [y/N]', false);
             /** @var QuestionHelper $helper */

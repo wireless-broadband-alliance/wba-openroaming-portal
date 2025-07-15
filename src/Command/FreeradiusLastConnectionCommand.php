@@ -42,12 +42,12 @@ class FreeradiusLastConnectionCommand extends Command
      */
     public function backupFreeradiusLastConnection(OutputInterface $output): int
     {
-        $output->writeln('<comment>Starting Freeradius backup at '.date('Y-m-d H:i:s').'</comment>');
+        $output->writeln('<comment>Starting Freeradius backup at ' . date('Y-m-d H:i:s') . '</comment>');
 
         // Check FreeRadius DB connection
         $result = $this->freeradiusConnectionService->checkConnection();
         if ($result['success'] === false) {
-            $output->writeln('<error>'.$result['message'].'</error>');
+            $output->writeln('<error>' . $result['message'] . '</error>');
 
             return Command::FAILURE;
         }
@@ -56,15 +56,19 @@ class FreeradiusLastConnectionCommand extends Command
         $timestampFreeradiusCron = $this->settingRepository->findOneBy(['name' => 'TIME_STAMP_FREERADIUS_CRON']);
         if (!$timestampFreeradiusCron) {
             $output->writeln(
-                '<error>Setting "TIME_STAMP_FREERADIUS_CRON" not found. Please run the command "reset:timeStampFreeradiusCron" to create it.</error>'
+                '<error>Setting "TIME_STAMP_FREERADIUS_CRON" not found. 
+                        Please run the command "reset:timeStampFreeradiusCron" to create it.</error>'
             );
 
             return Command::FAILURE;
         }
-        if ((int)$timestampFreeradiusCron->getValue() < 0 || $timestampFreeradiusCron->getValue(
-            ) === null || !ctype_digit($timestampFreeradiusCron->getValue())) {
+        if (
+            (int)$timestampFreeradiusCron->getValue() < 0 || $timestampFreeradiusCron->getValue(
+            ) === null || !ctype_digit($timestampFreeradiusCron->getValue())
+        ) {
             $output->writeln(
-                '<error>Setting "TIME_STAMP_FREERADIUS_CRON" is invalid or empty. Please reset it using "reset:timeStampFreeradiusCron".</error>'
+                '<error>Setting "TIME_STAMP_FREERADIUS_CRON" is invalid or empty. 
+                          Please reset it using "reset:timeStampFreeradiusCron".</error>'
             );
 
             return Command::FAILURE;
@@ -104,12 +108,16 @@ class FreeradiusLastConnectionCommand extends Command
                     $entity = $profileMap[$username];
                     $needsUpdate = false;
 
-                    if ($entity->getLastStartConnectionAt() === null || $startTime > $entity->getLastStartConnectionAt(
-                        )) {
+                    if (
+                        $entity->getLastStartConnectionAt() === null || $startTime > $entity->getLastStartConnectionAt(
+                        )
+                    ) {
                         $entity->setLastStartConnectionAt($startTime);
                         $needsUpdate = true;
                     }
-                    if ($entity->getLastStopConnectionAt() === null || $stopTime > $entity->getLastStopConnectionAt()) {
+                    if (
+                        $entity->getLastStopConnectionAt() === null || $stopTime > $entity->getLastStopConnectionAt()
+                    ) {
                         $entity->setLastStopConnectionAt($stopTime);
                         $needsUpdate = true;
                     }
@@ -163,7 +171,7 @@ class FreeradiusLastConnectionCommand extends Command
             return $this->backupFreeradiusLastConnection($output);
         } catch (Exception $e) {
             $this->entityManager->rollback();
-            $output->writeln('<error>An error occurred: '.$e->getMessage().'</error>');
+            $output->writeln('<error>An error occurred: ' . $e->getMessage() . '</error>');
 
             return Command::FAILURE;
         } finally {
