@@ -140,11 +140,11 @@ class ResetAllSettingsCommand extends Command
             ['name' => 'PROFILE_LIMIT_DATE_EMAIL', 'value' => '5'],
             ['name' => 'PROFILE_LIMIT_DATE_SMS', 'value' => '5'],
             ['name' => 'TIME_STAMP_FREERADIUS_CRON', 'value' => '0'],
-            ['name' => 'FREERADIUS_LAST_CONNECTION_CRON', 'value' => '* * * * *'],
 
             ['name' => 'DELETE_UNCONFIRMED_USERS_CRON', 'value' => '0 0 * * *'],
             ['name' => 'USERS_WHEN_PROFILE_EXPIRES_CRON', 'value' => '0 1 * * *'],
             ['name' => 'LDAP_SYNC_CRON', 'value' => '0 2 * * *'],
+            ['name' => 'FREERADIUS_LAST_CONNECTION_CRON', 'value' => '* * * * *'],
 
         ];
 
