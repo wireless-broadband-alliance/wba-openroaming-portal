@@ -2,17 +2,22 @@
 
 # Release V1.9.0
 
-- **Fix bug 500** on `dashboard/statistics/freeradius` in case the connection details are invalid and the portal can reach
+- **Fix bug 500** on `dashboard/statistics/freeradius` in case the connection details are invalid and the portal can
+  reach
   the server, added a new JSON error message for details.
 - New command for freeradius profile connection of each user, now the `UserRadiusProfile` entity saves the start/end
   connection of the user profiles when the freeradius server gets a new request. (For later graphics generations and
   user details)
+- Also, this new command is configurable on the page `dashboard/settings/schedule` because he is also cron based.
+- New bundle installed `composer require symfony/lock` required for the command next execution only start when the
+  current active ends.
 
 # Release V1.8.0
 
 - New UI section on the dashboard for Schedule Automation. This page is responsible for management of the automation
   commands time schedule.
 - Rework Automation commands to use an official symfony bundle of automation commands.
+
 > **Note**: If you are using automated CRON's from our previous guide, it's recommended you use the official symfony
 > bundle from this release. For reference, the command that takes care of the operation inside of the container web is
 > this one:
@@ -20,6 +25,7 @@
 ```
 php:bin/console messenger:consume scheduler_default -vv
 ```
+
 - Update API for version 2, fix bug for iOS App's with invalid format for profile generation endpoint.
 - Prometheus Implementation.
 - Fix bug with registration links, use could use them to re-log in to the portal at any time, can only be used once.
