@@ -21,7 +21,7 @@ use Symfony\Component\Lock\Store\FlockStore;
 )]
 class FreeradiusLastConnectionCommand extends Command
 {
-    private LockFactory $lockFactory;
+    private readonly LockFactory $lockFactory;
 
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
