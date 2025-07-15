@@ -133,6 +133,7 @@ php bin/console messenger:consume scheduler_default -vv
 ```
 
 Also, all this setup is configured on the following file: `src/Schedule.php`
+
 ### Google Authenticator Credentials
 
 For detailed steps on how to obtain your **Google Client ID** and **Google Client Secret**, please refer to

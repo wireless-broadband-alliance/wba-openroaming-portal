@@ -5,6 +5,7 @@ namespace App\Command;
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
 use App\Enum\AnalyticalEventType;
+use App\Enum\DefaultUsers;
 use App\Enum\UserProvider;
 use App\Repository\UserRepository;
 use App\Service\EventActions;
@@ -79,8 +80,8 @@ class ResetAdminCommand extends Command
 
         if (!$admin instanceof User) {
             $admin = new User();
-            $admin->setUuid('admin@example.com');
-            $admin->setEmail('admin@example.com');
+            $admin->setUuid(DefaultUsers::ADMIN->value);
+            $admin->setEmail(DefaultUsers::ADMIN->value);
             $admin->setPassword($this->userPasswordHashed->hashPassword($admin, 'gnimaornepo'));
             $admin->setRoles(['ROLE_ADMIN']);
             $admin->setIsVerified(true);
@@ -104,8 +105,8 @@ class ResetAdminCommand extends Command
         }
 
         // Set password
-        $admin->setUuid('admin@example.com');
-        $admin->setEmail('admin@example.com');
+        $admin->setUuid(DefaultUsers::ADMIN->value);
+        $admin->setEmail(DefaultUsers::ADMIN->value);
         $admin->setPassword($this->userPasswordHashed->hashPassword($admin, 'gnimaornepo'));
         $admin->setForgotPasswordRequest(true);
 

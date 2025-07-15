@@ -358,6 +358,7 @@ php bin/console messenger:consume scheduler_default -vv
 ```
 
 Also, all this setup is configured on the following file: `src/Schedule.php`
+
 ## 🔑 Admin Page Access Page
 
 Follow this link for a portal user/admin interface overview: [Portal Guide](docs/PORTALGUI.md).
@@ -476,6 +477,10 @@ certificate. **Connection errors** can happen if the right SHA1 hash is not prov
 63. `PROFILE_LIMIT_DATE_MICROSOFT`: Time in days to disable profiles for users with MICROSOFT login.
 64. `PROFILE_LIMIT_DATE_EMAIL`: Time in days to disable profiles for users with EMAIL login.
 65. `PROFILE_LIMIT_DATE_SMS`: Time in days to disable profiles for users with SMS login.
+66. `DELETE_UNCONFIRMED_USERS_CRON`: Defines the schedule to delete unconfirmed users from the portal.
+67. `USERS_WHEN_PROFILE_EXPIRES_CRON`: Defines the schedule to notify the users when their profile to expire.
+68. `LDAP_SYNC_CRON`: Defines the schedule for LDAP synchronization automation command.
+69. `CRON_ADVANCED_STATUS`:  Saves the previous status mode on the schedule cron configuration page (Simple/Advanced)
 
 #### With these environment variables, you can configure and customize various aspects of the project, such as database connections, SAML settings, login methods, and more.
 
@@ -490,7 +495,8 @@ The portal exposes metrics for monitoring using Prometheus. The metrics are avai
 ### Available Metrics
 
 - **Users**: Total users, verified users, and banned users
-- **Authentication Providers**: Users by provider (Portal Account, SAML Account, Google Account, Microsoft Account) and portal users by type (Email, Phone Number)
+- **Authentication Providers**: Users by provider (Portal Account, SAML Account, Google Account, Microsoft Account) and
+  portal users by type (Email, Phone Number)
 - **Radius Profiles**: Profiles by status, total profiles, and total radius users from the radius database
 
 ### Configuration

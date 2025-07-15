@@ -7,6 +7,7 @@
             {% if setting.vars.name in ['SYNC_LDAP_ENABLED', 'SYNC_LDAP_SERVER', 'SYNC_LDAP_BIND_USER_DN', 'SYNC_LDAP_BIND_USER_PASSWORD', 'SYNC_LDAP_SEARCH_BASE_DN', 'SYNC_LDAP_SEARCH_FILTER'] %}
                 <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full"
                         {% if setting.vars.name in ['SYNC_LDAP_SERVER', 'SYNC_LDAP_BIND_USER_DN', 'SYNC_LDAP_BIND_USER_PASSWORD', 'SYNC_LDAP_SEARCH_BASE_DN', 'SYNC_LDAP_SEARCH_FILTER'] %} {{ stimulus_target('radio-card', 'card') }} {{ stimulus_controller('card') }}  {% else %} {{ stimulus_controller('radio card') }} {% endif %}>
+
                     {# Title and Icon #}
                     <div class="flex flex-row justify-between">
                         <div class="text-base font-medium text-center break-normal md:break-all">
@@ -26,6 +27,10 @@
                                  alt="info_icon"/>
                         </label>
                     </div>
+
+                    {# Card Description #}
+                    {{ include('/admin/shared/settings_actions/_description.html.twig', {description: setting.vars.attr.description}) }}
+
                     {% if setting.vars.name in ['SYNC_LDAP_SERVER', 'SYNC_LDAP_BIND_USER_DN', 'SYNC_LDAP_SEARCH_BASE_DN', 'SYNC_LDAP_SEARCH_FILTER'] %}
                         <div class="flex items-center space-x-2 mt-5">
                             {{ form_widget(setting, {attr: {class: 'form-widget', 'data-radio-card-target': 'input'}}) }}
@@ -76,8 +81,6 @@
                             </label>
                         </div>
                     {% endif %}
-
-                    {{ include('/admin/shared/settings_actions/_description.html.twig', {description: setting.vars.attr.description}) }}
 
                     <div class="mt-2 -mb-2 text-center text-red-500 text-base">
                         {{ form_errors(setting) }}
