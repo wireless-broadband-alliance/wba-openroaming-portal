@@ -2,7 +2,7 @@
 
 # Release V1.8.1
 
-- Database Optimations, removed duplicated field relative to the user account verification, (Account Verification & User
+- Removed duplicated field relative to the user account verification, (Account Verification & User
   2FA Configuration).
 
 > **Important**: In this release, the field **verificationCode** was eliminated.
