@@ -31,8 +31,8 @@
                         attr: {
                             class: 'form-widget-range flex-1',
                             'data-cron-target': 'input',
-                            'data-action': 'input->cron#onInputChange'
-                        }
+                            'data-action': 'input->cron#onInputChange',
+                        },
                     }) }}
                     <span class="text-sm text-gray-700 font-medium" data-cron-target="label">
                     {{ frequency_field.vars.value is null or frequency_field.vars.value is empty ? 1 : frequency_field.vars.value }}
