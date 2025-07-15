@@ -31,7 +31,7 @@
             </div>
         </div>
 
-        <div class="grid gap-4 lg:grid-cols-2 xl:grid-cols-3 p-2 z-0 mt-4">
+        <div class="grid gap-4 lg:grid-cols-2 xl:grid-cols-4 p-2 z-0 mt-4">
             {{ include('admin/shared/settings_actions/schedule/card.html.twig', {
                 label: 'Delete Unconfirmed Account Automation',
                 description: 'Defines the schedule to delete unconfirmed users from the portal.',
@@ -48,6 +48,12 @@
                 label: 'LDAP Synchronization Automation',
                 description: 'Defines the schedule for LDAP synchronization automation command.',
                 field: form.ldap_sync_cron,
+            }) }}
+
+            {{ include('admin/shared/settings_actions/schedule/card.html.twig', {
+                label: 'Freeradius Synchronization Automation',
+                description: 'Defines the schedule for Freeradius server & the user profile last connection',
+                field: form.freeradius_last_connection_cron,
             }) }}
         </div>
 

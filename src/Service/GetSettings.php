@@ -295,13 +295,13 @@ class GetSettings
             'PROFILE_LIMIT_DATE_SAML' => 'Time in days to disable profiles for users with SAML login',
             'PROFILE_LIMIT_DATE_EMAIL' => 'Time in days to disable profiles for users with EMAIL login',
             'PROFILE_LIMIT_DATE_SMS' => 'Time in days to disable profiles for users with SMS login',
-            'FREERADIUS_LAST_CONNECTION_CRON' => 'Defines the schedule for Freeradius server & the user profile
-             last connection',
 
             'DELETE_UNCONFIRMED_USERS_CRON' => 'Defines the schedule to delete unconfirmed users from the portal',
             'USERS_WHEN_PROFILE_EXPIRES_CRON' => 'Defines the schedule to notify the users 
             when their profile to expire',
             'LDAP_SYNC_CRON' => 'Defines the schedule for LDAP synchronization automation command',
+            'FREERADIUS_LAST_CONNECTION_CRON' => 'Defines the schedule for Freeradius server & the user profile
+             last connection',
             'CRON_ADVANCED_STATUS' =>
                 'Saves the previous status mode on the schedule cron configuration page (Simple/Advanced)'
         ];

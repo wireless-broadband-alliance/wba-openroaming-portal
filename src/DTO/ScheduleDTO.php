@@ -40,6 +40,15 @@ class ScheduleDTO
     )]
     public ?ScheduleSettingDTO $ldap_sync_cron = null;
 
+    #[Assert\Valid]
+    #[Assert\When(
+        expression: "this.use_advanced_mode != null and this.use_advanced_mode",
+        constraints: [
+            new AcmeAssert\CronNotEmpty()
+        ],
+    )]
+    public ?ScheduleSettingDTO $freeradius_last_connection_cron = null;
+
     public function __construct(
         ?SettingRepository $settingRepository = null,
         ?CronExpressionHelperService $cronExpressionHelperService = null
@@ -68,6 +77,12 @@ class ScheduleDTO
             $settingRepository,
             $cronExpressionHelperService
         );
+
+        $this->freeradius_last_connection_cron = new ScheduleSettingDTO(
+            "FREERADIUS_LAST_CONNECTION_CRON",
+            $settingRepository,
+            $cronExpressionHelperService
+        );
     }
 
     public function toCronExpressions(CronExpressionHelperService $cronExpressionHelperService): array
@@ -84,7 +99,11 @@ class ScheduleDTO
             "LDAP_SYNC_CRON" => $this->ldap_sync_cron->toCronExpression(
                 $this->use_advanced_mode,
                 $cronExpressionHelperService
-            )
+            ),
+            "FREERADIUS_LAST_CONNECTION_CRON" => $this->ldap_sync_cron->toCronExpression(
+                $this->use_advanced_mode,
+                $cronExpressionHelperService
+    )
         ];
     }
 }

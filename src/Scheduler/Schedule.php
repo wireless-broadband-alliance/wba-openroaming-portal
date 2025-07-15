@@ -47,6 +47,13 @@ readonly class Schedule implements ScheduleProviderInterface
                     $this->settingRepository->findOneBy(['name' => 'LDAP_SYNC_CRON'])->getValue(),
                     new RunCommandMessage('ldap:sync')
                 )
+            )
+            // By default, every second
+            ->add(
+                RecurringMessage::cron(
+                    $this->settingRepository->findOneBy(['name' => 'FREERADIUS_LAST_CONNECTION_CRON'])->getValue(),
+                    new RunCommandMessage('backup:freeradiusLastConnection')
+                )
             );
     }
 }
