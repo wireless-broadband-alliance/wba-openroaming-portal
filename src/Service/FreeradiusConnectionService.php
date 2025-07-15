@@ -9,7 +9,7 @@ use Throwable;
 
 class FreeradiusConnectionService
 {
-    private Connection $freeradiusConnection;
+    private readonly Connection $freeradiusConnection;
 
     public function __construct(ManagerRegistry $doctrine)
     {

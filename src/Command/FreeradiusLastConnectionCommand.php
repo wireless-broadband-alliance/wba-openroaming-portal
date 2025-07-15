@@ -21,7 +21,7 @@ use Symfony\Component\Lock\Store\FlockStore;
 )]
 class FreeradiusLastConnectionCommand extends Command
 {
-    private LockFactory $lockFactory;
+    private readonly LockFactory $lockFactory;
 
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
@@ -78,7 +78,7 @@ class FreeradiusLastConnectionCommand extends Command
 
         $latestConnectionTime = $this->radiusAccountingRepository->findLatestConnectionTime();
 
-        if ((int)$timestampFreeradiusCron->getValue() < $latestConnectionTime) {
+        if ((int)$timestampFreeradiusCron->getValue() < (int)$latestConnectionTime) {
             $this->entityManager->beginTransaction();
 
             try {
