@@ -12,7 +12,7 @@ export default class extends Controller {
 
     onInputChange(event) {
         let value = event.target.value;
-        const max = parseInt(this.inputTarget.getAttribute('max'), 10) || 1;
+        const max = parseInt(this.inputTarget.getAttribute("max"), 10) || 1;
 
         if (parseInt(value, 10) > max) {
             value = max;
