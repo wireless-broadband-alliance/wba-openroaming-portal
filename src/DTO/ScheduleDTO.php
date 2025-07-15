@@ -100,7 +100,7 @@ class ScheduleDTO
                 $this->use_advanced_mode,
                 $cronExpressionHelperService
             ),
-            "FREERADIUS_LAST_CONNECTION_CRON" => $this->ldap_sync_cron->toCronExpression(
+            "FREERADIUS_LAST_CONNECTION_CRON" => $this->freeradius_last_connection_cron->toCronExpression(
                 $this->use_advanced_mode,
                 $cronExpressionHelperService
     )
