@@ -189,7 +189,7 @@ class ScheduleSettingDTO
             $this->months_of_the_year_frequency !== null &&
             $this->months_of_the_year_frequency > count($this->months_of_the_year)
         ) {
-            $context->buildViolation('Frequency cannot be greater than the number of selected months.')
+            $context->buildViolation('Frequency cannot be greater than the number of selected months. The value has been reseted to the maximum possible value.')
                 ->atPath('months_of_the_year_frequency')
                 ->addViolation();
         }
@@ -204,7 +204,7 @@ class ScheduleSettingDTO
             $this->day_of_month_frequency !== null &&
             $this->day_of_month_frequency > count($this->day_of_month)
         ) {
-            $context->buildViolation('Frequency cannot be greater than the number of selected days.')
+            $context->buildViolation('Frequency cannot be greater than the number of selected days. The value has been reseted to the maximum possible value.')
                 ->atPath('day_of_month_frequency')
                 ->addViolation();
         }
@@ -219,7 +219,7 @@ class ScheduleSettingDTO
             $this->day_of_week_frequency !== null &&
             $this->day_of_week_frequency > count($this->day_of_week)
         ) {
-            $context->buildViolation('Frequency cannot be greater than the number of selected days.')
+            $context->buildViolation('Frequency cannot be greater than the number of selected days. The value has been reseted to the maximum possible value.')
                 ->atPath('day_of_week_frequency')
                 ->addViolation();
         }
