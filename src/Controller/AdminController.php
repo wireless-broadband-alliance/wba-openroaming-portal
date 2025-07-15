@@ -135,7 +135,8 @@ class AdminController extends AbstractController
                     'settingCAPPORT',
                     'settingAUTH',
                     'settingTwoFA',
-                    'settingSMS'
+                    'settingSMS',
+                    'settingSchedule'
                 ]
             )
         ) {

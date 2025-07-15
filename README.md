@@ -349,7 +349,15 @@ check the `.env.sample`.
 
 ### 🔧 Set up a CRON Job for automation commands
 
-For detailed steps on how to set up CRONS, please refer to the [Cron Configuration Guide](docs/CRONGUI.md)
+For reference, all the previous documentation related to the **CRONGUI.md** was discontinued. Now the framework
+handles all this automation, and the supervisor configuration takes cares of the process. If you want to run the
+configuration command by yourself, you can run the following command:
+
+```bash
+php bin/console messenger:consume scheduler_default -vv
+```
+
+Also, all this setup is configured on the following file: `src/Schedule.php`
 
 ## 🔑 Admin Page Access Page
 
@@ -473,6 +481,10 @@ certificate. **Connection errors** can happen if the right SHA1 hash is not prov
     Internal use only, not shown in UI.
 67. `FREERADIUS_LAST_CONNECTION_CRON`: Defines the schedule for Freeradius server & the user profile
     last connection.
+66. `DELETE_UNCONFIRMED_USERS_CRON`: Defines the schedule to delete unconfirmed users from the portal.
+67. `USERS_WHEN_PROFILE_EXPIRES_CRON`: Defines the schedule to notify the users when their profile to expire.
+68. `LDAP_SYNC_CRON`: Defines the schedule for LDAP synchronization automation command.
+69. `CRON_ADVANCED_STATUS`:  Saves the previous status mode on the schedule cron configuration page (Simple/Advanced)
 
 #### With these environment variables, you can configure and customize various aspects of the project, such as database connections, SAML settings, login methods, and more.
 

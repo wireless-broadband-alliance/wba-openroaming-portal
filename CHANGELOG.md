@@ -10,8 +10,18 @@
 
 # Release V1.8.0
 
+- New UI section on the dashboard for Schedule Automation. This page is responsible for management of the automation
+  commands time schedule.
+- Rework Automation commands to use an official symfony bundle of automation commands.
+> **Note**: If you are using automated CRON's from our previous guide, it's recommended you use the official symfony
+> bundle from this release. For reference, the command that takes care of the operation inside of the container web is
+> this one:
+
+```
+php:bin/console messenger:consume scheduler_default -vv
+```
 - Update API for version 2, fix bug for iOS App's with invalid format for profile generation endpoint.
-- Prometheus Implementation
+- Prometheus Implementation.
 - Fix bug with registration links, use could use them to re-log in to the portal at any time, can only be used once.
 - Fix bug with account deletion, the admin was able to access the page using the url. The admin cannot delete his own
   account.

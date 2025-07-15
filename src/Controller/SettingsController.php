@@ -155,7 +155,6 @@ class SettingsController extends AbstractController
                 return $this->redirectToRoute('admin_dashboard_settings_radius');
             }
 
-
             if ($type === 'settingLDAP') {
                 $command = 'php bin/console reset:ldapSettings --yes';
                 $projectRootDir = $this->getParameter('kernel.project_dir');
@@ -325,6 +324,37 @@ class SettingsController extends AbstractController
                 );
 
                 return $this->redirectToRoute('admin_dashboard_settings_sms');
+            }
+
+            if ($type === 'settingSchedule') {
+                $command = 'php bin/console reset:ScheduleSettings --yes';
+                $projectRootDir = $this->getParameter('kernel.project_dir');
+                $process = new Process(explode(' ', $command), $projectRootDir);
+                $process->run();
+                if (!$process->isSuccessful()) {
+                    throw new ProcessFailedException($process);
+                }
+                // if you want to dd("$output, $errorOutput"), please use the following variables
+                $output = $process->getOutput();
+                $errorOutput = $process->getErrorOutput();
+                $this->addFlash(
+                    'success_admin',
+                    'The configuration Schedule settings has been clear successfully!'
+                );
+
+                $eventMetadata = [
+                    'ip' => $request->getClientIp(),
+                    'user_agent' => $request->headers->get('User-Agent'),
+                    'uuid' => $currentUser->getUuid(),
+                ];
+                $this->eventActions->saveEvent(
+                    $currentUser,
+                    AnalyticalEventType::SETTING_SMS_CONF_CLEAR_REQUEST->value,
+                    new DateTime(),
+                    $eventMetadata
+                );
+
+                return $this->redirectToRoute('admin_dashboard_settings_schedule');
             }
         }
 

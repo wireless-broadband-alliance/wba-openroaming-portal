@@ -2,10 +2,10 @@
 
 namespace App\Command;
 
-use App\Entity\Setting;
-use App\Entity\User;
-use App\Entity\UserExternalAuth;
-use App\Entity\UserRadiusProfile;
+use App\Repository\SettingRepository;
+use App\Repository\UserExternalAuthRepository;
+use App\Repository\UserRepository;
+use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -23,50 +23,71 @@ class AutoDeleteUnconfirmedUsersCommand extends Command
 {
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
+        private readonly UserRepository $userRepository,
+        private readonly UserExternalAuthRepository $userExternalAuthRepository,
+        private readonly SettingRepository $settingRepository,
     ) {
         parent::__construct();
     }
 
-    public function deleteUnconfirmedUsers(): int
+    public function deleteUnconfirmedUsers(): array
     {
-        $userRepository = $this->entityManager->getRepository(User::class);
-        $settingsRepository = $this->entityManager->getRepository(Setting::class);
-        $userExternalAuthRepository = $this->entityManager->getRepository(UserExternalAuth::class);
-        $userRadiusProfileRepository = $this->entityManager->getRepository(UserRadiusProfile::class);
-        $users = $userRepository->findAll();
-        $settingTime = $settingsRepository->findBy(['name' => 'USER_DELETE_TIME']);
-        $usersDeleted = 0;
+        $users = $this->userRepository->findAll();
+        $settingTime = $this->settingRepository->findBy(['name' => 'USER_DELETE_TIME']);
+
+        if (empty($settingTime)) {
+            return [];
+        }
+
+        $timeString = $settingTime[0]->getValue();
+        $time = (int)$timeString;
+
+        $deletedUserUuids = [];
+
         foreach ($users as $user) {
-            $timeString = $settingTime[0]->getValue();
-            $time = (int)$timeString;
-            $limitTime = $user->getCreatedAt();
+            $limitTime = clone $user->getCreatedAt(); // clone to avoid modifying original
             /** @var \DateTime $limitTime */
-            $limitTime->modify("+ {$time} hours");
-            $realTime = new \DateTime();
+            $limitTime->modify("+{$time} hours");
+
+            $realTime = new DateTime();
+
             if ($limitTime < $realTime && !($user->isVerified() && !$user->isDisabled())) {
                 $uuid = $user->getUuid();
                 if (!(u($uuid)->containsAny('-DEMO-'))) {
-                    $userExternalAuths = $userExternalAuthRepository->findBy(['user' => $user]);
+                    // Remove related external auths
+                    $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $user]);
                     foreach ($userExternalAuths as $userExternalAuth) {
                         $this->entityManager->remove($userExternalAuth);
                     }
-                    $userRadiusProfiles = $userRadiusProfileRepository->findBy(['user' => $user]);
+
+                    // Remove related radius profiles
+                    $userRadiusProfiles = $this->userExternalAuthRepository->findBy(['user' => $user]);
                     foreach ($userRadiusProfiles as $userRadiusProfile) {
                         $this->entityManager->remove($userRadiusProfile);
                     }
+
+                    // Remove the user itself
                     $this->entityManager->remove($user);
-                    $usersDeleted++;
+
+                    // Save UUID of deleted user
+                    $deletedUserUuids[] = $uuid;
                 }
             }
-            $this->entityManager->flush();
         }
-        return $usersDeleted;
+
+        // Flush once after processing all users
+        $this->entityManager->flush();
+
+        return $deletedUserUuids;
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output): int
-    {
+    protected function execute(
+        InputInterface $input,
+        OutputInterface $output
+    ): int {
         try {
-            $deletedCount = $this->deleteUnconfirmedUsers();
+            $deletedUserUuids = $this->deleteUnconfirmedUsers();
+            $deletedCount = count($deletedUserUuids);
 
             $output->writeln(
                 "<info>Success:</info> $deletedCount user(s) with unverified accounts have been deleted."

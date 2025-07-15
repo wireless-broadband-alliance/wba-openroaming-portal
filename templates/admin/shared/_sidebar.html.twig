@@ -18,12 +18,17 @@
     {# SideBar Buttons #}
     <div class="py-4 flex flex-col space-y-2 font-medium">
         {% set portalSettingsRoutes = [
-            'admin_dashboard_settings_status', 'admin_dashboard_customize',
-            'admin_dashboard_settings_terms', 'admin_dashboard_settings_capport',
+            'admin_dashboard_settings_status',
+            'admin_dashboard_customize',
+            'admin_dashboard_settings_terms',
+            'admin_dashboard_settings_capport',
+            'admin_dashboard_settings_schedule',
         ] %}
         {% set userAuthenticationRoutes = [
-            'admin_dashboard_settings_auth', 'admin_dashboard_settings_radius',
-            'admin_dashboard_settings_LDAP', 'admin_dashboard_settings_sms',
+            'admin_dashboard_settings_auth',
+            'admin_dashboard_settings_radius',
+            'admin_dashboard_settings_LDAP',
+            'admin_dashboard_settings_sms',
             'admin_dashboard_settings_two_fa',
         ] %}
         {% set portalStatisticsRoutes = [
@@ -86,6 +91,13 @@
                            href="{{ path('admin_dashboard_settings_terms') }}">
                             <twig:ux:icon name="wba:file-check" class="w-5 mr-4" fill="none"/>
                             Terms and Policies
+                        </a>
+                    </li>
+                    <li>
+                        <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300 {% if app.request.attributes.get('_route') == 'admin_dashboard_settings_schedule' %}selected{% endif %}"
+                           href="{{ path('admin_dashboard_settings_schedule') }}">
+                            <twig:ux:icon name="wba:schedule" class="w-5 mr-4" fill="none"/>
+                            CRON Schedule Automation
                         </a>
                     </li>
                 </ul>
