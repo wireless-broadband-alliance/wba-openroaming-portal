@@ -103,7 +103,7 @@ class ScheduleDTO
             "FREERADIUS_LAST_CONNECTION_CRON" => $this->freeradius_last_connection_cron->toCronExpression(
                 $this->use_advanced_mode,
                 $cronExpressionHelperService
-    )
+            )
         ];
     }
 }
