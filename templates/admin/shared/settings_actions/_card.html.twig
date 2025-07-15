@@ -2,6 +2,7 @@
 
 <div name="customCards" {{ stimulus_controller('card') }}
      class="bg-white w-full flex flex-col px-5 py-3 rounded-lg shadow transition hover:-translate-y-1">
+
     {# Title and info icon #}
     <div class="flex justify-between">
         <h1 class="text-lg font-medium">{{ displayName }}</h1>
@@ -9,6 +10,8 @@
              src="{{ asset('resources/logos/info_icon.svg') }}"/>
     </div>
 
+    {# Card Description #}
+    {{ include('/admin/shared/settings_actions/_description.html.twig', {description: setting.vars.attr.description}) }}
     {% if settingType == 'image' %}
         <div class="flex flex-grow items-center justify-between gap-4 mt-5 lg:mt-3 mb-2" {{ stimulus_controller('img') }}>
             {# Image Preview #}
@@ -46,8 +49,6 @@
             {{ form_widget(setting, {attr: {class: 'p-2 bg-transparent border outline-none text-left text-base block w-full rounded-md  focus:shadow-sm'}}) }}
         </div>
     {% endif %}
-
-    {{ include('/admin/shared/settings_actions/_description.html.twig', {description: setting.vars.attr.description}) }}
 
     <div class="mt-2 -mb-2 text-center text-red-500 text-base">
         {{ form_errors(setting) }}
