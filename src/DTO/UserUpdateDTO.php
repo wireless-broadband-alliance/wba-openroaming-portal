@@ -3,6 +3,7 @@
 namespace App\DTO;
 
 use App\Entity\User;
+use DateTimeInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 
 class UserUpdateDTO
@@ -21,9 +22,6 @@ class UserUpdateDTO
     #[Assert\Length(max: 100)]
     public ?string $lastName = null;
 
-    /**
-     * @var mixed
-     */
     #[Assert\Length(max: 20)]
     public mixed $phoneNumber = null;
 
@@ -42,7 +40,7 @@ class UserUpdateDTO
             $this->lastName = $user->getLastName();
             $this->phoneNumber = $user->getPhoneNumber();
             $this->isVerified = $user->isVerified();
-            $this->banned = $user->getBannedAt() !== null;
+            $this->banned = $user->getBannedAt() instanceof DateTimeInterface;
             $this->editingAdmin = in_array('ROLE_ADMIN', $user->getRoles(), true);
         }
     }
