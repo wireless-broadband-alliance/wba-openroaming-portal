@@ -5,6 +5,8 @@
 - **Fix bug 500** on `dashboard/statistics/freeradius` in case the connection details are invalid and the portal can
   reach
   the server, added a new JSON error message for details.
+- Fix bug with returns with admin reset password, the problem was related with the previous firewall configuration
+  implementation where no context has returned.
 - New command for freeradius profile connection of each user, now the `UserRadiusProfile` entity saves the start/end
   connection of the user profiles when the freeradius server gets a new request. (For later graphics generations and
   user details)
