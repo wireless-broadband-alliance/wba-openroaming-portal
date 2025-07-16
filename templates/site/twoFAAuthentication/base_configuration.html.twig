@@ -18,14 +18,8 @@
 
     {# Toasts #}
     <div class="grid grid-cols-1 gap-[5px]">
-        {% for message in app.session.flashbag.get('success') %}
-            {{ include('site/shared/_toast.html.twig', {toast_type: 'toast-success'}) }}
-        {% endfor %}
+        {{ block('toast_messages') }}
 
-        {# Flash error message #}
-        {% for message in app.session.flashbag.get('error') %}
-            {{ include('site/shared/_toast.html.twig', {toast_type: 'toast-warning'}) }}
-        {% endfor %}
         {% if twoFAEnabled %}
             <div class="toast-success">
                 You already have two-factor authentication configured for this account.
@@ -34,7 +28,8 @@
         {% if is2FAEnforced %}
             <div class="toast-warning">
                 Two-factor authentication is mandatory for account security on the portal.
-                You cannot proceed without enabling it. Please activate it immediately to continue.
+                You cannot proceed without enabling it.
+                Please activate it immediately to continue.
             </div>
         {% endif %}
     </div>

@@ -2,7 +2,6 @@
 
 namespace App\Controller;
 
-use App\Entity\Event;
 use App\Entity\Setting;
 use App\Entity\TextEditor;
 use App\Entity\User;
@@ -23,7 +22,6 @@ use App\Form\NewPasswordAccountType;
 use App\Form\RegistrationFormType;
 use App\Form\RevokeProfilesType;
 use App\Form\TOSType;
-use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
@@ -31,27 +29,19 @@ use App\Security\LandingAuthenticator;
 use App\Service\EventActions;
 use App\Service\GetSettings;
 use App\Service\ProfileManager;
-use App\Service\SendSMS;
 use App\Service\TwoFAService;
 use App\Service\UserDeletionService;
-use App\Service\VerificationCodeEmailGenerator;
-use DateInterval;
 use DateTime;
-use DateTimeInterface;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\NonUniqueResultException;
 use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
-use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\User\UserInterface;
-use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface;
 
 /**
@@ -67,7 +57,6 @@ class SiteController extends AbstractController
      * @param SettingRepository $settingRepository The setting repository is used to create the getSettings function.
      * @param GetSettings $getSettings The instance of GetSettings class.
      * @param EventActions $eventActions Used to generate event related to the User creation
-     * @param VerificationCodeEmailGenerator $verificationCodeGenerator Generates a new verification code
      * of the user account
      * @param ProfileManager $profileManager Calls the functions to enable/disable provisioning profiles
      */
@@ -77,7 +66,6 @@ class SiteController extends AbstractController
         private readonly SettingRepository $settingRepository,
         private readonly GetSettings $getSettings,
         private readonly EventActions $eventActions,
-        private readonly VerificationCodeEmailGenerator $verificationCodeGenerator,
         private readonly ProfileManager $profileManager,
         private readonly TwoFAService $twoFAService,
         private readonly UserDeletionService $userDeletionService,
@@ -137,7 +125,7 @@ class SiteController extends AbstractController
 
             // Check if the user is verified
             if (!$session->has('session_verified') && !$currentUser->isVerified()) {
-                return $this->redirectToRoute('app_email_code');
+                return $this->redirectToRoute('app_login_confirmation');
             }
 
             // Checks the 2FA status of the platform if mandatory forces the user to configure it
@@ -257,7 +245,7 @@ class SiteController extends AbstractController
                     }
 
                     if ($data["USER_VERIFICATION"]['value'] === OperationMode::ON->value) {
-                        return $this->redirectToRoute('app_regenerate_email_code');
+                        return $this->redirectToRoute('app_login_confirmation');
                     }
                     if ($data["USER_VERIFICATION"]['value'] === OperationMode::OFF->value) {
                         return $this->redirectToRoute('app_landing');
@@ -592,236 +580,6 @@ class SiteController extends AbstractController
 //        }
 
         return $os;
-    }
-
-    /**
-     * Regenerate the verification code for the user and send a new email.
-     *
-     * @return RedirectResponse A redirect response.
-     * @throws TransportExceptionInterface
-     * @throws \DateMalformedStringException
-     * @throws NonUniqueResultException
-     */
-    #[Route('/email/regenerate', name: 'app_regenerate_email_code')]
-    #[IsGranted('ROLE_USER')]
-    public function regenerateCode(
-        EventRepository $eventRepository,
-        MailerInterface $mailer,
-        Request $request
-    ): RedirectResponse {
-        /** @var User $currentUser */
-        $currentUser = $this->getUser();
-        $isVerified = $currentUser->isVerified();
-
-        if (!$isVerified) {
-            $latestEvent = $eventRepository->findLatestRequestAttemptEvent(
-                $currentUser,
-                AnalyticalEventType::USER_EMAIL_ATTEMPT->value
-            );
-            $minInterval = new DateInterval('PT2M');
-            $currentTime = new DateTime();
-
-            // Check if enough time has passed since the last attempt
-            $latestEventMetadata = $latestEvent instanceof Event ? $latestEvent->getEventMetadata() : [];
-            $lastVerificationCodeTime = isset($latestEventMetadata['lastVerificationCodeTime'])
-                ? new DateTime($latestEventMetadata['lastVerificationCodeTime'])
-                : null;
-            $verificationAttempts = $latestEventMetadata['verificationAttempts'] ?? 0;
-
-            if (
-                !$latestEvent || ($lastVerificationCodeTime instanceof DateTime &&
-                    $lastVerificationCodeTime->add($minInterval) < $currentTime)
-            ) {
-                // Increment the attempt count
-                $attempts = $verificationAttempts + 1;
-
-                $email = $this->verificationCodeGenerator->createEmailLanding($currentUser);
-                $mailer->send($email);
-
-                // Save event with attempt count and current time
-                if (!$latestEvent instanceof Event) {
-                    $latestEvent = new Event();
-                    $latestEvent->setUser($currentUser);
-                    $latestEvent->setEventDatetime(new DateTime());
-                    $latestEvent->setEventName(AnalyticalEventType::USER_EMAIL_ATTEMPT->value);
-                    $latestEventMetadata = [
-                        'platform' => PlatformMode::LIVE->value,
-                        'uuid' => $currentUser->getEmail(),
-                        'ip' => $request->getClientIp(),
-                    ];
-                }
-
-                $latestEventMetadata['lastVerificationCodeTime'] = $currentTime->format(DateTimeInterface::ATOM);
-                $latestEventMetadata['verificationAttempts'] = $attempts;
-                $latestEvent->setEventMetadata($latestEventMetadata);
-
-                $eventRepository->save($latestEvent, true);
-
-                $message = sprintf('We have sent you a new code to: %s.', $currentUser->getEmail());
-                $this->addFlash('success', $message);
-            } else {
-                // Inform the user to wait before trying again
-                $this->addFlash('error', 'Please wait 2 minutes before trying again.');
-            }
-        }
-
-        return $this->redirectToRoute('app_landing');
-    }
-
-    /**
-     * @throws Exception
-     */
-    #[Route('/email', name: 'app_email_code')]
-    #[IsGranted('ROLE_USER')]
-    public function sendCode(): Response
-    {
-        // Call the getSettings method of GetSettings class to retrieve the data
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
-
-        // Get the current user
-        /** @var User $currentUser */
-        $currentUser = $this->getUser();
-
-        if (!$currentUser) {
-            $this->addFlash('error', 'You can only access this page logged in.');
-            return $this->redirectToRoute('app_landing');
-        }
-
-        if (!$currentUser->isVerified()) {
-            $formTOS = $this->createForm(TOSType::class);
-            // Render the template with the verification code
-            return $this->render('site/landing.html.twig', [
-                'data' => $data,
-                'formTOS' => $formTOS,
-                'user' => $currentUser
-            ]);
-        }
-
-        // User is already verified, render the landing template
-        return $this->redirectToRoute('app_landing');
-    }
-
-    #[Route('/email/check', name: 'app_check_email_code')]
-    #[IsGranted('ROLE_USER')]
-    public function verifyCode(
-        RequestStack $requestStack,
-        UserRepository $userRepository,
-        Request $request
-    ): Response {
-        // Get the current user
-        /** @var User $currentUser */
-        $currentUser = $this->getUser();
-        $session = $request->getSession();
-
-        if (!$currentUser) {
-            $this->addFlash('error', 'You can only access this page logged in.');
-            return $this->redirectToRoute('app_landing');
-        }
-
-        // Checks if the user has a "forgot_password_request", if yes, return to password reset form
-        if ($this->userRepository->findOneBy(['id' => $currentUser->getId(), 'forgot_password_request' => true])) {
-            $this->addFlash('error', 'You need to confirm the new password before download a profile!');
-            return $this->redirectToRoute('app_site_forgot_password_checker');
-        }
-
-        // Get the entered code from the form
-        $enteredCode = $requestStack->getCurrentRequest()->request->get('code');
-
-        if ($enteredCode === $currentUser->getVerificationCode()) {
-            // Set the user as verified
-            $currentUser->setVerificationCode(random_int(100000, 999999));
-            $currentUser->setIsVerified(true);
-            $session->set('session_verified', true);
-            $userRepository->save($currentUser, true);
-
-            $eventMetadata = [
-                'ip' => $request->getClientIp(),
-                'user_agent' => $request->headers->get('User-Agent'),
-                'platform' => PlatformMode::LIVE->value,
-                'uuid' => $currentUser->getUuid(),
-            ];
-            $this->eventActions->saveEvent(
-                $currentUser,
-                AnalyticalEventType::USER_VERIFICATION->value,
-                new DateTime(),
-                $eventMetadata
-            );
-
-            $this->addFlash('success', 'Your account is now successfully verified');
-            return $this->redirectToRoute('app_landing');
-        }
-
-        // Code is incorrect, display error message and redirect again to the check email page
-        $this->addFlash('error', 'The verification code is incorrect. Please try again.');
-        return $this->redirectToRoute('app_email_code');
-    }
-
-
-    /**
-     * Regenerate the verification code for the user and send a new SMS.
-     *
-     * @return RedirectResponse A redirect response.
-     * @throws Exception
-     * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
-     */
-    #[Route('/sms/regenerate', name: 'app_regenerate_sms_code')]
-    #[IsGranted('ROLE_USER')]
-    public function regenerateCodeSMS(EventRepository $eventRepository, SendSMS $sendSmsService): RedirectResponse
-    {
-        // Call the getSettings method of GetSettings class to retrieve the data
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
-
-        /** @var User $currentUser */
-        $currentUser = $this->getUser();
-
-        if (!$currentUser) {
-            $this->addFlash('error', 'You can only access this page logged in.');
-            return $this->redirectToRoute('app_landing');
-        }
-
-        // Checks if the user has a "forgot_password_request", if yes, return to password reset form
-        if ($this->userRepository->findOneBy(['id' => $currentUser->getId(), 'forgot_password_request' => true])) {
-            $this->addFlash('error', 'You need to confirm the new password before downloading a profile!');
-            return $this->redirectToRoute('app_site_forgot_password_checker');
-        }
-
-        try {
-            $result = $sendSmsService->regenerateSmsCode($currentUser);
-
-            if ($result) {
-                // If the service returns true, show the attempts left with a message
-                $latestEvent = $eventRepository->findLatestSmsAttemptEvent($currentUser);
-
-                // Check if $latestEvent to avoid null conflicts
-                if ($latestEvent instanceof \App\Entity\Event) {
-                    $latestEventMetadata = $latestEvent->getEventMetadata();
-                    $verificationAttempts = $latestEventMetadata['verificationAttempts'] ?? 0;
-                    $attemptsLeft = 3 - $verificationAttempts;
-
-                    $message = sprintf(
-                        'We have sent you a new code to: %s. You have %d attempt(s) left.',
-                        $currentUser->getPhoneNumber(),
-                        $attemptsLeft
-                    );
-                    $this->addFlash('success', $message);
-                }
-            } else {
-                // If regeneration failed, show an appropriate error message
-                $this->addFlash(
-                    'error',
-                    'Failed to regenerate SMS code. Please, wait '
-                    . $data['SMS_TIMER_RESEND']['value']
-                    . ' minute(s) before generating a new code.'
-                );
-            }
-        } catch (\RuntimeException $e) {
-            // Handle generic exception and display a message to the user
-            $this->addFlash('error', $e->getMessage());
-        } catch (Exception) {
-            // Handle exceptions thrown by the service (e.g., network issues, API errors)
-            $this->addFlash('error', 'An error occurred while regenerating the SMS code. Please try again later.');
-        }
-        return $this->redirectToRoute('app_landing');
     }
 
     #[Route('/change-locale/{locale}', name: 'change_locale')]

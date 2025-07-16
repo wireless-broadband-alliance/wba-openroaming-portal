@@ -9,4 +9,5 @@ enum CodeVerificationType: string
     case TWO_FA_ENABLE_RESEND = 'enable2FA';
     case TWO_FA_VALIDATE_RESEND = 'validate2FA';
     case AUTO_DELETE_RESEND = 'accountDeletion';
+    case VERIFICATION_CODE_LOGIN_RESEND = 'verificationCodeLogin';
 }

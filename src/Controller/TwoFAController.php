@@ -675,14 +675,12 @@ class TwoFAController extends AbstractController
                 AnalyticalEventType::TWO_FA_CODE_VERIFY_RESEND->value,
             CodeVerificationType::TWO_FA_DISABLE_RESEND->value =>
                 AnalyticalEventType::TWO_FA_CODE_DISABLE_RESEND->value,
-            CodeVerificationType::AUTO_DELETE_RESEND->value =>
-                AnalyticalEventType::USER_AUTO_DELETE_CODE->value,
             CodeVerificationType::TWO_FA_VALIDATE_RESEND->value =>
                 AnalyticalEventType::TWO_FA_CODE_VALIDATE_RESEND->value,
+            CodeVerificationType::VERIFICATION_CODE_LOGIN_RESEND->value =>
+                AnalyticalEventType::VERIFICATION_CODE_LOGIN_RESEND->value
         ];
         $eventType = $eventTypeMapping[$type] ?? null;
-
-        $autoDeletion = $eventType === AnalyticalEventType::USER_AUTO_DELETE_CODE->value;
 
         if (
             $this->twoFAService->canResendCode($user, $eventType) &&
@@ -692,8 +690,7 @@ class TwoFAController extends AbstractController
                 $user,
                 $request->getClientIp(),
                 $request->headers->get('User-Agent'),
-                $eventType,
-                $autoDeletion
+                $eventType
             );
             $attempts = $this->eventRepository->find2FACodeAttemptEvent(
                 $user,
