@@ -328,7 +328,7 @@ class UsersManagementController extends AbstractController
         }
 
         // Prepare DTO
-        $userUpdateDTO = new UserUpdateDTO();
+        $userUpdateDTO = new UserUpdateDTO($user);
         $initialBannedAt = $user->getBannedAt();
 
         // Create & handle form
