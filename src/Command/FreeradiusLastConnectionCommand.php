@@ -78,7 +78,7 @@ class FreeradiusLastConnectionCommand extends Command
 
         $latestConnectionTime = $this->radiusAccountingRepository->findLatestConnectionTime();
 
-        if ((int)$timestampFreeradiusCron->getValue() < (int)$latestConnectionTime) {
+        if ((int)$timestampFreeradiusCron->getValue() < $latestConnectionTime['acctStartTime']->getTimestamp()) {
             $this->entityManager->beginTransaction();
 
             try {
