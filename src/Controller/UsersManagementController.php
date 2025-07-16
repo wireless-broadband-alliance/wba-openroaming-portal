@@ -329,32 +329,32 @@ class UsersManagementController extends AbstractController
         }
 
         // Prepare DTO
-        $dto = new UserUpdateDTO();
-        $dto->uuid = $user->getUuid();
-        $dto->email = $user->getEmail();
-        $dto->firstName = $user->getFirstName();
-        $dto->lastName = $user->getLastName();
-        $dto->phoneNumber = $user->getPhoneNumber();
-        $dto->isVerified = $user->isVerified();
-        $dto->banned = $user->getBannedAt() !== null;
-        $dto->editingAdmin = in_array('ROLE_ADMIN', $user->getRoles(), true);
+        $userUpdatedto = new UserUpdateDTO();
+        $userUpdatedto->uuid = $user->getUuid();
+        $userUpdatedto->email = $user->getEmail();
+        $userUpdatedto->firstName = $user->getFirstName();
+        $userUpdatedto->lastName = $user->getLastName();
+        $userUpdatedto->phoneNumber = $user->getPhoneNumber();
+        $userUpdatedto->isVerified = $user->isVerified();
+        $userUpdatedto->banned = $user->getBannedAt() !== null;
+        $userUpdatedto->editingAdmin = in_array('ROLE_ADMIN', $user->getRoles(), true);
 
         $initialBannedAt = $user->getBannedAt();
 
         // Create & handle form
-        $form = $this->createForm(UserUpdateType::class, $dto);
+        $form = $this->createForm(UserUpdateType::class, $userUpdatedto);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             // Map DTO → entity
-            $user->setUuid($dto->uuid);
-            $user->setEmail($dto->email);
-            $user->setFirstName($dto->firstName);
-            $user->setLastName($dto->lastName);
-            $user->setPhoneNumber($dto->phoneNumber);
+            $user->setUuid($userUpdatedto->uuid);
+            $user->setEmail($userUpdatedto->email);
+            $user->setFirstName($userUpdatedto->firstName);
+            $user->setLastName($userUpdatedto->lastName);
+            $user->setPhoneNumber($userUpdatedto->phoneNumber);
 
-            if (!$dto->editingAdmin) {
-                if ($dto->banned) {
+            if (!$userUpdatedto->editingAdmin) {
+                if ($userUpdatedto->banned) {
                     if ($initialBannedAt === null) {
                         $user->setBannedAt(new DateTime());
                         $this->profileManager->disableProfiles(
@@ -367,7 +367,7 @@ class UsersManagementController extends AbstractController
                     $user->setBannedAt(null);
                 }
 
-                if ($dto->isVerified) {
+                if ($userUpdatedto->isVerified) {
                     $this->profileManager->enableProfiles($user);
                 } else {
                     $this->profileManager->disableProfiles(
@@ -521,6 +521,7 @@ class UsersManagementController extends AbstractController
                 'data' => $data,
                 'current_user' => $currentUser,
                 'context' => FirewallType::DASHBOARD->value,
+                'userUpdateDTO' => $userUpdatedto,
             ]
         );
     }
