@@ -538,7 +538,11 @@ class ForgotPasswordController extends AbstractController
                 'You can not access this page without a valid request!'
             );
 
-            return $this->redirectToRoute('app_landing');
+            return $this->redirectToRoute(
+                $context === FirewallType::DASHBOARD->value
+                    ? 'admin_page'
+                    : 'app_landing'
+            );
         }
 
         // Checks if the user has a "forgot_password_request", if not, return to the landing page
@@ -548,7 +552,11 @@ class ForgotPasswordController extends AbstractController
                 'You can\'t access this page if you don\'t have a request!'
             );
 
-            return $this->redirectToRoute('app_landing');
+            return $this->redirectToRoute(
+                $context === FirewallType::DASHBOARD->value
+                    ? 'admin_page'
+                    : 'app_landing'
+            );
         }
 
         $form = $this->createForm(
@@ -566,7 +574,11 @@ class ForgotPasswordController extends AbstractController
                     If the problem keep occurring contact our support!'
                 );
 
-                return $this->redirectToRoute('app_landing');
+                return $this->redirectToRoute(
+                    $context === FirewallType::DASHBOARD->value
+                        ? 'admin_page'
+                        : 'app_landing'
+                );
             }
 
             $currentUser->setPassword(
@@ -603,7 +615,11 @@ class ForgotPasswordController extends AbstractController
                 'Your password has been updated successfully!'
             );
 
-            return $this->redirectToRoute('app_landing');
+            return $this->redirectToRoute(
+                $context === FirewallType::DASHBOARD->value
+                    ? 'admin_page'
+                    : 'app_landing'
+            );
         }
 
         return $this->render('site/forgot_password_checker_landing.html.twig', [

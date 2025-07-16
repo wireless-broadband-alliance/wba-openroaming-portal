@@ -12,7 +12,6 @@ use App\Service\TwoFAService;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
@@ -46,6 +45,7 @@ readonly class SessionValidatorListener
         /** @var User $userToken */
         $userToken = $token->getUser();
 
+        // Note: ALl the following route should be ignored in case the user has a request already before 2FA
         $url = [
             '/dashboard/login',
             '/dashboard/verify2FA',
@@ -66,24 +66,14 @@ readonly class SessionValidatorListener
             '/dashboard/disable2FA/resend',
             '/dashboard/enable2FA/resend',
             '/dashboard/validate2FA/resend',
+            '/dashboard/forgot-password/checker'
         ];
 
-        if (str_starts_with($path, '/dashboard')) {
+        $user = $this->userRepository->find($userToken->getId());
+        if ($user && str_starts_with($path, '/dashboard')) {
             // Make an exception to ignore the '/dashboard/login' route
             if (in_array($path, $url)) {
                 return;
-            }
-
-            $user = $this->userRepository->find($userToken->getId());
-            if (!$user) {
-                throw new AccessDeniedHttpException('Access denied.');
-            }
-
-            if ($userToken->isForgotPasswordRequest()) {
-                $url = $this->router->generate('app_site_forgot_password_checker', [
-                    'context' => FirewallType::DASHBOARD->value,
-                ]);
-                $event->setResponse(new RedirectResponse($url));
             }
 
             // Check if the 2FA process is completed
@@ -120,13 +110,6 @@ readonly class SessionValidatorListener
                 $url = $this->router->generate('app_otpCodes', ['context' => FirewallType::DASHBOARD->value]);
                 $event->setResponse(new RedirectResponse($url));
             }
-        }
-
-        if ($userToken->isForgotPasswordRequest()) {
-            $url = $this->router->generate('app_site_forgot_password_checker', [
-                'context' => FirewallType::LANDING->value,
-            ]);
-            $event->setResponse(new RedirectResponse($url));
         }
     }
 }
