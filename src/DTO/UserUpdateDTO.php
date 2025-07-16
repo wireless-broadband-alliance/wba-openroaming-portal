@@ -2,13 +2,14 @@
 
 namespace App\DTO;
 
+use App\Entity\User;
 use Symfony\Component\Validator\Constraints as Assert;
 
 class UserUpdateDTO
 {
-    #[Assert\NotBlank]
     #[Assert\Uuid]
-    public string $uuid;
+    #[Assert\NotBlank(message: 'UUID cannot be blank.')]
+    public ?string $uuid = null;
 
     #[Assert\Email]
     #[Assert\Length(max: 180)]
@@ -22,7 +23,6 @@ class UserUpdateDTO
 
     /**
      * @var mixed
-     * Can be a string or the bundle string concatenation result of the countryCode and the actual Number
      */
     #[Assert\Length(max: 20)]
     public mixed $phoneNumber = null;
@@ -31,10 +31,29 @@ class UserUpdateDTO
 
     public bool $banned = false;
 
-    /**
-     * Flag so the form knows if the user being edited is an admin.
-     * Not mapped to the entity.
-     */
     public bool $editingAdmin = false;
-}
 
+    public function __construct(User $user)
+    {
+        $this->uuid = $user->getUuid();
+        $this->email = $user->getEmail();
+        $this->firstName = $user->getFirstName();
+        $this->lastName = $user->getLastName();
+        $this->phoneNumber = $user->getPhoneNumber();
+        $this->isVerified = $user->isVerified();
+        $this->banned = $user->getBannedAt() !== null;
+        $this->editingAdmin = in_array('ROLE_ADMIN', $user->getRoles(), true);
+    }
+
+    /**
+     * Map this DTO's data back to the given User entity.
+     */
+    public function updateUser(User $user): void
+    {
+        $user->setUuid($this->uuid);
+        $user->setEmail($this->email);
+        $user->setFirstName($this->firstName);
+        $user->setLastName($this->lastName);
+        $user->setPhoneNumber($this->phoneNumber);
+    }
+}
