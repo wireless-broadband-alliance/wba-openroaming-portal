@@ -33,16 +33,18 @@ class UserUpdateDTO
 
     public bool $editingAdmin = false;
 
-    public function __construct(User $user)
+    public function __construct(?User $user = null)
     {
-        $this->uuid = $user->getUuid();
-        $this->email = $user->getEmail();
-        $this->firstName = $user->getFirstName();
-        $this->lastName = $user->getLastName();
-        $this->phoneNumber = $user->getPhoneNumber();
-        $this->isVerified = $user->isVerified();
-        $this->banned = $user->getBannedAt() !== null;
-        $this->editingAdmin = in_array('ROLE_ADMIN', $user->getRoles(), true);
+        if (!is_null($user)) {
+            $this->uuid = $user->getUuid();
+            $this->email = $user->getEmail();
+            $this->firstName = $user->getFirstName();
+            $this->lastName = $user->getLastName();
+            $this->phoneNumber = $user->getPhoneNumber();
+            $this->isVerified = $user->isVerified();
+            $this->banned = $user->getBannedAt() !== null;
+            $this->editingAdmin = in_array('ROLE_ADMIN', $user->getRoles(), true);
+        }
     }
 
     /**
