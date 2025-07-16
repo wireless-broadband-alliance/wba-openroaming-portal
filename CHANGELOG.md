@@ -15,6 +15,8 @@
   current active ends.
 - NPM webpack-cli deprecations fixed to the latest stabled release (
     - (https://www.npmjs.com/package/webpack-cli/v/5.1.4)) compatable with "@symfony/webpack-encore": "^5.1.0".
+- New validation on the Admin Authentication Methods page to check whether the project has all required certificates.
+
 
 # Release V1.8.1
 
