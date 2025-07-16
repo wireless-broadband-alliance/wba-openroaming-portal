@@ -107,6 +107,9 @@ class ResetAllSettingsCommand extends Command
             ['name' => 'AUTH_METHOD_SMS_REGISTER_LABEL', 'value' => 'Create Account with Phone Number'],
             ['name' => 'AUTH_METHOD_SMS_REGISTER_DESCRIPTION', 'value' => 'Don\'t have an account? Create one'],
 
+            ['name' => 'EMAIL_TIMER_RESEND', 'value' => '2'],
+            ['name' => 'LINK_VALIDITY', 'value' => '10'],
+
             ['name' => 'TOS', 'value' => 'LINK'],
             ['name' => 'PRIVACY_POLICY', 'value' => 'LINK'],
             ['name' => 'TOS_LINK', 'value' => 'https://wballiance.com/openroaming/toc/'],
