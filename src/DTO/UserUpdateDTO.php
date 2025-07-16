@@ -8,7 +8,6 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 class UserUpdateDTO
 {
-    #[Assert\Uuid]
     #[Assert\NotBlank(message: 'UUID cannot be blank.')]
     public ?string $uuid = null;
 
