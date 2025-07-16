@@ -33,6 +33,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpClient\Exception\JsonException;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
@@ -40,6 +41,8 @@ use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+
+use function PHPUnit\Framework\isEmpty;
 
 class SettingsController extends AbstractController
 {
@@ -50,7 +53,8 @@ class SettingsController extends AbstractController
         private readonly UserRepository $userRepository,
         private readonly EntityManagerInterface $entityManager,
         private readonly RadiusAuthsRepository $radiusAuthsRepository,
-        private readonly RadiusAccountingRepository $radiusAccountingRepository
+        private readonly RadiusAccountingRepository $radiusAccountingRepository,
+        private readonly CertificateService $certificateService,
     ) {
     }
 
@@ -847,6 +851,14 @@ class SettingsController extends AbstractController
         GetSettings $getSettings,
         CertificateService $certificateService
     ): Response {
+        $missingfiles = $this->certificateService->verifyCertificates();
+        if ($missingfiles !== []) {
+            return new JsonResponse([
+                'success' => false,
+                'message' => 'Cert files are missing',
+                'missingfiles' => $missingfiles,
+            ], Response::HTTP_NOT_FOUND);
+        }
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
         $currentUser = $this->getUser();
