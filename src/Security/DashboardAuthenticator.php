@@ -97,7 +97,12 @@ class DashboardAuthenticator extends AbstractLoginFormAuthenticator
                     );
                 }
 
-                return new RedirectResponse($this->urlGenerator->generate('app_site_forgot_password_checker'));
+                return new RedirectResponse(
+                    $this->urlGenerator->generate(
+                        'app_site_forgot_password_checker',
+                        ['context' => FirewallType::DASHBOARD->value]
+                    )
+                );
             }
 
             $twoFAPlatformStatus = $this->settingRepository->findOneBy([

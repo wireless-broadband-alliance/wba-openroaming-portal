@@ -493,12 +493,21 @@ class ForgotPasswordController extends AbstractController
     /**
      * @throws Exception
      */
-    #[Route('/forgot-password/checker', name: 'app_site_forgot_password_checker')]
+    #[Route('{context}/forgot-password/checker',
+        name: 'app_site_forgot_password_checker',
+        requirements: [
+            'context' => 'landing|dashboard'
+        ],
+        defaults: [
+            'context' => FirewallType::LANDING->value
+        ]
+    )]
     #[IsGranted('ROLE_USER')]
     public function forgotPasswordUserChecker(
         Request $request,
         EntityManagerInterface $entityManager,
         UserPasswordHasherInterface $userPasswordHasher,
+        string $context
     ): Response {
         /** @var User $currentUser */
         $currentUser = $this->getUser();
@@ -600,7 +609,7 @@ class ForgotPasswordController extends AbstractController
         return $this->render('site/forgot_password_checker_landing.html.twig', [
             'forgotPasswordChecker' => $form->createView(),
             'data' => $data,
-            'context' => FirewallType::LANDING->value,
+            'context' => $context,
             'user' => $currentUser,
         ]);
     }

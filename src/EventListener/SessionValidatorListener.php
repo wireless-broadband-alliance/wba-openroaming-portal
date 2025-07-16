@@ -79,6 +79,13 @@ readonly class SessionValidatorListener
                 throw new AccessDeniedHttpException('Access denied.');
             }
 
+            if ($userToken->isForgotPasswordRequest()) {
+                $url = $this->router->generate('app_site_forgot_password_checker', [
+                    'context' => FirewallType::DASHBOARD->value,
+                ]);
+                $event->setResponse(new RedirectResponse($url));
+            }
+
             // Check if the 2FA process is completed
             if (
                 ($user->getTwoFAtype() !== UserTwoFactorAuthenticationStatus::DISABLED->value)
@@ -113,6 +120,13 @@ readonly class SessionValidatorListener
                 $url = $this->router->generate('app_otpCodes', ['context' => FirewallType::DASHBOARD->value]);
                 $event->setResponse(new RedirectResponse($url));
             }
+        }
+
+        if ($userToken->isForgotPasswordRequest()) {
+            $url = $this->router->generate('app_site_forgot_password_checker', [
+                'context' => FirewallType::LANDING->value,
+            ]);
+            $event->setResponse(new RedirectResponse($url));
         }
     }
 }
