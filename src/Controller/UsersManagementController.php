@@ -304,7 +304,6 @@ class UsersManagementController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function editUsers(
         Request $request,
-        UserRepository $userRepository,
         UserPasswordHasherInterface $passwordHasher,
         EntityManagerInterface $em,
         MailerInterface $mailer,
@@ -329,45 +328,32 @@ class UsersManagementController extends AbstractController
         }
 
         // Prepare DTO
-        $userUpdatedto = new UserUpdateDTO();
-        $userUpdatedto->uuid = $user->getUuid();
-        $userUpdatedto->email = $user->getEmail();
-        $userUpdatedto->firstName = $user->getFirstName();
-        $userUpdatedto->lastName = $user->getLastName();
-        $userUpdatedto->phoneNumber = $user->getPhoneNumber();
-        $userUpdatedto->isVerified = $user->isVerified();
-        $userUpdatedto->banned = $user->getBannedAt() !== null;
-        $userUpdatedto->editingAdmin = in_array('ROLE_ADMIN', $user->getRoles(), true);
-
+        $userUpdateDTO = new UserUpdateDTO();
         $initialBannedAt = $user->getBannedAt();
 
         // Create & handle form
-        $form = $this->createForm(UserUpdateType::class, $userUpdatedto);
+        $form = $this->createForm(UserUpdateType::class, $userUpdateDTO);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // Map DTO → entity
-            $user->setUuid($userUpdatedto->uuid);
-            $user->setEmail($userUpdatedto->email);
-            $user->setFirstName($userUpdatedto->firstName);
-            $user->setLastName($userUpdatedto->lastName);
-            $user->setPhoneNumber($userUpdatedto->phoneNumber);
+            // Use DTO method to map data back
+            $userUpdateDTO->updateUser($user);
 
-            if (!$userUpdatedto->editingAdmin) {
-                if ($userUpdatedto->banned) {
-                    if ($initialBannedAt === null) {
-                        $user->setBannedAt(new DateTime());
-                        $this->profileManager->disableProfiles(
-                            $user,
-                            UserRadiusProfileRevokeReason::ADMIN_BANNED_USER->value,
-                            true
-                        );
-                    }
-                } else {
+            if (!$userUpdateDTO->editingAdmin) {
+                if ($userUpdateDTO->banned && $initialBannedAt === null) {
+                    $user->setBannedAt(new DateTime());
+                    $this->profileManager->disableProfiles(
+                        $user,
+                        UserRadiusProfileRevokeReason::ADMIN_BANNED_USER->value,
+                        true
+                    );
+                }
+
+                if (!$userUpdateDTO->banned) {
                     $user->setBannedAt(null);
                 }
 
-                if ($userUpdatedto->isVerified) {
+                if ($userUpdateDTO->isVerified) {
                     $this->profileManager->enableProfiles($user);
                 } else {
                     $this->profileManager->disableProfiles(
@@ -378,24 +364,25 @@ class UsersManagementController extends AbstractController
                 }
             }
 
-            // Save
             $this->userRepository->save($user, true);
 
-            // Log event
-            $eventMetadata = [
-                'ip' => $request->getClientIp(),
-                'user_agent' => $request->headers->get('User-Agent'),
-                'edited' => $user->getUuid(),
-                'by' => $currentUser->getUuid(),
-            ];
             $this->eventActions->saveEvent(
                 $user,
                 AnalyticalEventType::USER_ACCOUNT_UPDATE_FROM_UI->value,
-                new \DateTime(),
-                $eventMetadata
+                new DateTime(),
+                [
+                    'ip' => $request->getClientIp(),
+                    'user_agent' => $request->headers->get('User-Agent'),
+                    'edited' => $user->getUuid(),
+                    'by' => $currentUser->getUuid(),
+                ]
             );
 
-            $this->addFlash('success_admin', sprintf('"%s" has been updated successfully.', $user->getUuid()));
+            $this->addFlash(
+                'success_admin',
+                sprintf('"%s" has been updated successfully.', $user->getUuid())
+            );
+
             return $this->redirectToRoute('admin_page');
         }
 
@@ -521,7 +508,7 @@ class UsersManagementController extends AbstractController
                 'data' => $data,
                 'current_user' => $currentUser,
                 'context' => FirewallType::DASHBOARD->value,
-                'userUpdateDTO' => $userUpdatedto,
+                'userUpdateDTO' => $userUpdateDTO,
             ]
         );
     }

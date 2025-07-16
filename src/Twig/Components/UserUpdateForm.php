@@ -3,11 +3,7 @@
 namespace App\Twig\Components;
 
 use App\DTO\UserUpdateDTO;
-use App\Enum\OperationMode;
 use App\Form\UserUpdateType;
-use App\Repository\SettingRepository;
-use App\Service\CronExpressionHelperService;
-use App\Service\SchedulerService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormInterface;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;

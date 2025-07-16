@@ -14,6 +14,7 @@ use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\NotBlank;
 
 class UserUpdateType extends AbstractType
 {
@@ -37,6 +38,9 @@ class UserUpdateType extends AbstractType
             ->add('uuid', TextType::class, [
                 'label' => 'UUID',
                 'required' => false,
+                'constraints' => [
+                    new NotBlank(['message' => 'UUID cannot be blank.']),
+                ],
             ])
             ->add('email', EmailType::class, [
                 'label' => 'Email',
@@ -62,7 +66,7 @@ class UserUpdateType extends AbstractType
             ]);
 
         // Only add banned/isVerified if NOT editing an admin
-        if (!$dto->editingAdmin) {
+        if ($dto instanceof UserUpdateDTO && !$dto->editingAdmin) {
             $builder
                 ->add('banned', CheckboxType::class, [
                     'label' => 'Banned',
