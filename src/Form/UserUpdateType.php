@@ -38,9 +38,6 @@ class UserUpdateType extends AbstractType
             ->add('uuid', TextType::class, [
                 'label' => 'UUID',
                 'required' => false,
-                'constraints' => [
-                    new NotBlank(['message' => 'UUID cannot be blank.']),
-                ],
             ])
             ->add('email', EmailType::class, [
                 'label' => 'Email',
