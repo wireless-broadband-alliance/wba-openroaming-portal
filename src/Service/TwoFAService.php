@@ -45,7 +45,7 @@ readonly class TwoFAService
     {
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $codeDate = $user->getTwoFACodeGeneratedAt();
-        // If the user doesn't have code in the BD return false
+        // If the user doesn't have code in the DB return false
         if (!$codeDate instanceof DateTimeInterface) {
             return false;
         }
@@ -65,16 +65,15 @@ readonly class TwoFAService
     /**
      * @throws RandomException
      */
-    private function twoFACode(User $user): int
+    private function twoFACode(User $user): string
     {
-        // Generate a random verification code with 7 digits
-        $verificationCode = random_int(1000000, 9999999);
-        $user->setTwoFACode($verificationCode);
+        // Generate a random verification code with 6 digits
+        $user->setTwoFACode(random_int(100000, 999999));
         $user->setTwoFACodeGeneratedAt(new DateTime());
         $user->setTwoFAcodeIsActive(true);
         $this->userRepository->save($user, true);
 
-        return $verificationCode;
+        return $user->getTwoFAcode();
     }
 
     public function generate2FACode(
@@ -82,12 +81,11 @@ readonly class TwoFAService
         string $ip,
         string $userAgent,
         string $eventType,
-        ?bool $autoDeletion = false
     ): ?string {
         // Generate code
         $code = $this->twoFACode($user);
         // Send code
-        $this->sendCode($user, $code, $ip, $userAgent, $eventType, $autoDeletion);
+        $this->sendCode($user, $code, $ip, $userAgent, $eventType);
         return $user->getTwoFAcode();
     }
 
@@ -96,10 +94,9 @@ readonly class TwoFAService
         ?string $ip,
         ?string $userAgent,
         string $eventType,
-        ?bool $autoDeletion = false
     ): void {
         $code = $this->twoFACode($user);
-        $this->sendCode($user, $code, $ip, $userAgent, $eventType, $autoDeletion);
+        $this->sendCode($user, $code, $ip, $userAgent, $eventType);
     }
 
     /**
@@ -173,16 +170,19 @@ readonly class TwoFAService
         ?string $ip,
         ?string $userAgent,
         string $eventType,
-        ?bool $autoDeletion = false
     ): void {
         $messageType = $user->getTwoFAtype();
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $secondsLeft = $data["TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME"]["value"];
         if ($messageType === UserTwoFactorAuthenticationStatus::EMAIL->value || $user->getEmail()) {
             $emailTitle = $this->settingRepository->findOneBy(['name' => 'PAGE_TITLE'])->getValue();
+            $contactEmail = $this->settingRepository->findOneBy(['name' => 'CONTACT_EMAIL'])->getValue();
+            $supportTeam = $this->settingRepository->findOneBy(['name' => 'PAGE_TITLE'])->getValue();
 
-            // Send email to the user with the verification code
-            if ($autoDeletion === true) {
+            if (
+                $eventType === AnalyticalEventType::LOGIN_TRADITIONAL_REQUEST->value
+            ) {
+                // LOGIN_TRADITIONAL_REQUEST || LOGIN_CODE_RESEND
                 $email = new TemplatedEmail()
                     ->from(
                         new Address(
@@ -191,14 +191,18 @@ readonly class TwoFAService
                         )
                     )
                     ->to($user->getEmail())
-                    ->subject('Account Deletion Confirmation Code')
-                    ->htmlTemplate('email/auto_delete_notice.html.twig')
+                    ->subject('Verify Your Account')
+                    ->htmlTemplate('email/user_code.html.twig')
                     ->context([
                         'uuid' => $user->getEmail(),
                         'emailTitle' => $emailTitle,
-                        'deletionCode' => $code,
+                        'supportTeam' => $emailTitle,
+                        'contactEmail' => $contactEmail,
+                        'twoFaCode' => $code,
+                        'is2FATemplate' => false
                     ]);
             } else {
+                // 2FA VERIFICATION REQUESTS
                 $email = new TemplatedEmail()
                     ->from(
                         new Address(
@@ -212,29 +216,39 @@ readonly class TwoFAService
                     ->context([
                         'uuid' => $user->getEmail(),
                         'emailTitle' => $emailTitle,
-                        'verificationCode' => $code,
+                        'contactEmail' => $contactEmail,
+                        'supportTeam' => $supportTeam,
+                        'twoFaCode' => $code,
                         'is2FATemplate' => true,
                         'secondsLeft' => $secondsLeft,
                     ]);
             }
             $this->mailer->send($email);
         } elseif ($messageType === UserTwoFactorAuthenticationStatus::SMS->value || $user->getPhoneNumber()) {
-            $message = "Your Two Factor Authentication Code is " . $code;
+            if (
+                $eventType === AnalyticalEventType::LOGIN_TRADITIONAL_REQUEST->value
+            ) {
+                $message = "Your verification Code is " . $code;
+            } else {
+                $message = "Your Two Factor Authentication Code is " . $code;
+            }
             $this->sendSMS->sendSms($user->getPhoneNumber(), $message);
         }
 
-        $eventMetaData = [
-            'platform' => PlatformMode::LIVE->value,
-            'user_agent' => $userAgent ?? null,
-            'uuid' => $user->getUuid(),
-            'ip' => $ip ?? null,
-        ];
-        $this->eventActions->saveEvent(
-            $user,
-            $eventType,
-            new DateTime(),
-            $eventMetaData
-        );
+        if ($eventType !== AnalyticalEventType::LOGIN_TRADITIONAL_REQUEST->value) {
+            $eventMetaData = [
+                'platform' => PlatformMode::LIVE->value,
+                'user_agent' => $userAgent ?? 'Unknown',
+                'uuid' => $user->getUuid(),
+                'ip' => $ip ?? null,
+            ];
+            $this->eventActions->saveEvent(
+                $user,
+                $eventType,
+                new DateTime(),
+                $eventMetaData
+            );
+        }
     }
 
     public function twoFAisActive(User $user): bool

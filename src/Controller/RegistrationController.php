@@ -116,7 +116,9 @@ class RegistrationController extends AbstractController
                 $user->setPassword($hashedPassword);
                 $user->setUuid($form->get('email')->getData());
                 $user->setEmail($form->get('email')->getData());
-                $user->setVerificationCode(random_int(100000, 999999));
+                $user->setTwoFAcode(random_int(100000, 999999));
+                $user->setTwoFAcodeGeneratedAt(new DateTime());
+                $user->setTwoFAcodeIsActive(true);
                 $user->setCreatedAt(new DateTime());
                 $userAuths->setProvider(UserProvider::PORTAL_ACCOUNT->value);
                 $userAuths->setProviderId(UserProvider::EMAIL->value);
@@ -218,7 +220,9 @@ class RegistrationController extends AbstractController
                     );
                 }
 
-                $user->setVerificationCode(random_int(100000, 999999));
+                $user->setTwoFAcode(random_int(100000, 999999));
+                $user->setTwoFACodeGeneratedAt(new DateTime());
+                $user->setTwoFAcodeIsActive(true);
                 $user->setCreatedAt(new DateTime());
                 $userAuths->setProvider(UserProvider::PORTAL_ACCOUNT->value);
                 $userAuths->setProviderId(UserProvider::PHONE_NUMBER->value);
@@ -241,14 +245,12 @@ class RegistrationController extends AbstractController
                     $eventMetadata
                 );
 
-                $verificationCode = $user->getVerificationCode();
-
                 // Send SMS
                 $message = "Your account password is: "
                     . $randomPassword
                     . "%0A"
                     . "Verification code is: "
-                    . $verificationCode;
+                    . $user->getTwoFAcode();
                 $this->sendSMS->sendSms($user->getPhoneNumber(), $message);
                 $this->addFlash(
                     'success',
@@ -302,7 +304,7 @@ class RegistrationController extends AbstractController
             return $this->redirectToRoute('app_login', ['uuid' => $uuid]);
         }
 
-        if ($user && $user->getVerificationCode() === $verificationCode) {
+        if ($user && $user->getTwoFAcode() === $verificationCode) {
             try {
                 // Create a token manually for the user
                 $token = new UsernamePasswordToken($user, 'main', $user->getRoles());

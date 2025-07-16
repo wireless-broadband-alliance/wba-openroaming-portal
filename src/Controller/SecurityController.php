@@ -4,10 +4,15 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Enum\FirewallType;
+use App\Enum\UserProvider;
 use App\Form\LoginFormType;
+use App\Form\TwoFACode;
 use App\Repository\SettingRepository;
+use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
 use App\Service\GetSettings;
+use App\Service\TwoFAService;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -29,6 +34,9 @@ class SecurityController extends AbstractController
         private readonly UserRepository $userRepository,
         private readonly SettingRepository $settingRepository,
         private readonly GetSettings $getSettings,
+        private readonly UserExternalAuthRepository $userExternalAuthRepository,
+        private readonly TwoFAService $twoFAService,
+        private readonly EntityManagerInterface $entityManager,
     ) {
     }
 
@@ -127,6 +135,58 @@ class SecurityController extends AbstractController
         $session = $request->getSession();
         $session->clear();
         return $this->redirectToRoute('app_dashboard_login');
+    }
+
+    #[Route('/login/confirmation', name: 'app_login_confirmation')]
+    public function loginConfirmation(
+        Request $request,
+    ): Response {
+        /** @var User $user */
+        $user = $this->getUser();
+
+        if (!$user instanceof User) {
+            return $this->redirectToRoute('app_login');
+        }
+
+        $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $user]);
+
+        // Check if the user is already verified
+        $session = $request->getSession();
+        if (
+            $userExternalAuths[0]->getProvider() !== UserProvider::PORTAL_ACCOUNT->value ||
+            $session->has('session_verified')
+        ) {
+            return $this->redirectToRoute('app_landing');
+        }
+
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+
+        $form = $this->createForm(TwoFACode::class);
+        $form->handleRequest($request);
+        $session = $request->getSession();
+        if ($form->isSubmitted() && $form->isValid()) {
+            $code = $form->getData()['code'];
+            if ($this->twoFAService->validate2FACode($user, $code)) {
+                $user->setIsVerified(true);
+                $user->setForgotPasswordRequest(false);
+                $this->entityManager->persist($user);
+                $this->entityManager->flush();
+                $session->set('session_verified', true);
+                return $this->redirectToRoute('app_landing');
+            }
+
+            $this->addFlash(
+                'error',
+                'Code Invalid. Please try again.'
+            );
+        }
+
+        return $this->render('site/login_landing_code_confirmation.html.twig', [
+            'data' => $data,
+            'form' => $form,
+            'context' => FirewallType::LANDING->value,
+            'user' => $user
+        ]);
     }
 
     #[Route(path: '/logout', name: 'app_logout')]

@@ -7,18 +7,11 @@
 {% block second_col %}
     {# Form Column #}
     {# Toasts #}
-    <div class="grid grid-cols-1 gap-[5px]">
-        {% for message in app.session.flashbag.get('success') %}
-            {{ include('site/shared/_toast.html.twig', {toast_type: 'toast-success'}) }}
-        {% endfor %}
-
-        {# Flash error message #}
-        {% for message in app.session.flashbag.get('error') %}
-            {{ include('site/shared/_toast.html.twig', {toast_type: 'toast-warning'}) }}
-        {% endfor %}
-        <p class="toast-warning">You are on the page to permanently delete your account.
-            This action cannot be undone, and all your data will be irreversibly erased.</p>
-    </div>
+    {{ block('toast_messages') }}
+    <p class="toast-warning">
+        You are on the page to permanently delete your account.
+        This action cannot be undone, and all your data will be irreversibly erased.
+    </p>
 
     {% if data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\OperationMode::ON').value %}
         <img class="w-[120px] h-[58px] object-scale-down mt-[75px]" src="{{ data.customerLogoName.value }}" alt="Logo"/>
