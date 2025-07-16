@@ -71,7 +71,8 @@
                 </div>
             </div>
 
-            <div class="w-full lg:w-1/2 ">
+            {% if 'ROLE_ADMIN' not in user.roles %}
+            <div class="w-full lg:w-1/2">
                 <div class="flex md:flex-row flex-col items-center sm:justify-start">
                     <div class="flex flex-col mx-4 space-x-3 space-y-2">
                         <p class="font-bold">Verification</p>
@@ -91,7 +92,9 @@
                     </div>
                 </div>
             </div>
+            {% endif %}
         </div>
+
         <div class="flex flex-row justify-end md:w-full mt-6">
             <button type="submit" class="btn-primary">Apply Changes</button>
         </div>

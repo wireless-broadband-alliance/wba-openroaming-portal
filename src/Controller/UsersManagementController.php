@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\DTO\UserUpdateDTO;
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
 use App\Enum\AnalyticalEventType;
@@ -327,36 +328,46 @@ class UsersManagementController extends AbstractController
             return $this->redirectToRoute('admin_page');
         }
 
-        // Store the initial bannedAt value before form submission
-        $initialBannedAtValue = $user->getBannedAt();
+        // Prepare DTO
+        $dto = new UserUpdateDTO();
+        $dto->uuid = $user->getUuid();
+        $dto->email = $user->getEmail();
+        $dto->firstName = $user->getFirstName();
+        $dto->lastName = $user->getLastName();
+        $dto->phoneNumber = $user->getPhoneNumber();
+        $dto->isVerified = $user->isVerified();
+        $dto->banned = $user->getBannedAt() !== null;
+        $dto->editingAdmin = in_array('ROLE_ADMIN', $user->getRoles(), true);
 
-        $form = $this->createForm(UserUpdateType::class, $user);
+        $initialBannedAt = $user->getBannedAt();
+
+        // Create & handle form
+        $form = $this->createForm(UserUpdateType::class, $dto);
         $form->handleRequest($request);
+
         if ($form->isSubmitted() && $form->isValid()) {
-            $user = $form->getData();
+            // Map DTO → entity
+            $user->setUuid($dto->uuid);
+            $user->setEmail($dto->email);
+            $user->setFirstName($dto->firstName);
+            $user->setLastName($dto->lastName);
+            $user->setPhoneNumber($dto->phoneNumber);
 
-            // Verifies if the isVerified is removed to the logged account
-            if (($currentUser->getId() === $user->getId()) && $form->get('isVerified')->getData() === 0) {
-                $user->isVerified();
-                $this->addFlash('error_admin', 'Sorry, administrators cannot remove is own verification.');
-                return $this->redirectToRoute('admin_user_edit', ['id' => $user->getId()]);
-            }
-
-            // Verifies if the bannedAt was submitted and compares the form value "banned" to the current value
-            if ($form->get('bannedAt')->getData() && $user->getBannedAt() !== $initialBannedAtValue) {
-                if ($currentUser->getId() === $user->getId()) {
-                    $this->addFlash('error_admin', 'Sorry, administrators cannot ban themselves.');
-                    return $this->redirectToRoute('admin_user_edit', ['id' => $user->getId()]);
+            if (!$dto->editingAdmin) {
+                if ($dto->banned) {
+                    if ($initialBannedAt === null) {
+                        $user->setBannedAt(new DateTime());
+                        $this->profileManager->disableProfiles(
+                            $user,
+                            UserRadiusProfileRevokeReason::ADMIN_BANNED_USER->value,
+                            true
+                        );
+                    }
+                } else {
+                    $user->setBannedAt(null);
                 }
-                $user->setBannedAt(new DateTime());
-                $this->profileManager->disableProfiles(
-                    $user,
-                    UserRadiusProfileRevokeReason::ADMIN_BANNED_USER->value,
-                    true
-                );
-            } else {
-                $user->setBannedAt(null);
-                if ($form->get('isVerified')->getData()) {
+
+                if ($dto->isVerified) {
                     $this->profileManager->enableProfiles($user);
                 } else {
                     $this->profileManager->disableProfiles(
@@ -367,8 +378,10 @@ class UsersManagementController extends AbstractController
                 }
             }
 
-            $userRepository->save($user, true);
+            // Save
+            $this->userRepository->save($user, true);
 
+            // Log event
             $eventMetadata = [
                 'ip' => $request->getClientIp(),
                 'user_agent' => $request->headers->get('User-Agent'),
@@ -378,13 +391,11 @@ class UsersManagementController extends AbstractController
             $this->eventActions->saveEvent(
                 $user,
                 AnalyticalEventType::USER_ACCOUNT_UPDATE_FROM_UI->value,
-                new DateTime(),
+                new \DateTime(),
                 $eventMetadata
             );
 
-            $uuid = $user->getUuid();
-            $this->addFlash('success_admin', sprintf('"%s" has been updated successfully.', $uuid));
-
+            $this->addFlash('success_admin', sprintf('"%s" has been updated successfully.', $user->getUuid()));
             return $this->redirectToRoute('admin_page');
         }
 
