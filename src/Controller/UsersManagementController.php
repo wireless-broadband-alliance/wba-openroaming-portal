@@ -383,7 +383,7 @@ class UsersManagementController extends AbstractController
                 sprintf('"%s" has been updated successfully.', $user->getUuid())
             );
 
-            return $this->redirectToRoute('admin_page');
+            return $this->redirectToRoute('admin_user_edit', ['id' => $user->getId()]);
         }
 
         $emailSender = $this->parameterBag->get('app.email_address');
