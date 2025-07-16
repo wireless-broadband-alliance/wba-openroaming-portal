@@ -493,7 +493,8 @@ class ForgotPasswordController extends AbstractController
     /**
      * @throws Exception
      */
-    #[Route('{context}/forgot-password/checker',
+    #[Route(
+        '{context}/forgot-password/checker',
         name: 'app_site_forgot_password_checker',
         requirements: [
             'context' => 'landing|dashboard'
