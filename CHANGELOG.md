@@ -11,6 +11,8 @@
 - Also, this new command is configurable on the page `dashboard/settings/schedule` because he is also cron based.
 - New bundle installed `composer require symfony/lock` required for the command next execution only start when the
   current active ends.
+- NPM webpack-cli deprecations fixed to the latest stabled release (
+    - (https://www.npmjs.com/package/webpack-cli/v/5.1.4)) compatable with "@symfony/webpack-encore": "^5.1.0".
 
 # Release V1.8.1
 
