@@ -15,7 +15,7 @@
 - New bundle installed `composer require symfony/lock` required for the command next execution only start when the
   current active ends.
 - NPM webpack-cli deprecations fixed to the latest stabled release (
-    - (https://www.npmjs.com/package/webpack-cli/v/5.1.4)) compatable with "@symfony/webpack-encore": "^5.1.0".
+    - (https://www.npmjs.com/package/webpack-cli/v/5.1.4)) compatible with "@symfony/webpack-encore": "^5.1.0".
 - New validation on the Admin Authentication Methods page to check whether the project has all required certificates.
 
 
