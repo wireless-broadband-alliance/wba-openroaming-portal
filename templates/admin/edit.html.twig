@@ -12,10 +12,29 @@
         <div class="p-6 bg-white">
             <div class="mx-auto rounded-lg grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div class="relative">
-                    {{ form_label(form.uuid, 'UUID', {label_attr: {class: 'form-label'}}) }}
-                    {{ form_widget(form.uuid, {attr: {class: 'form-widget'}}) }}
-                    <div class="text-red-500 m-2">
-                        {{ form_errors(form.uuid) }}
+                    <div class="flex items-center justify-between relative" data-controller="card">
+                        {{ form_label(form.uuid, 'UUID', {label_attr: {class: 'form-label'}}) }}
+
+                        {{ form_widget(form.uuid, {attr: {class: 'form-widget'}}) }}
+
+                        <div class="">
+                            <img class="w-6 h-6 cursor-pointer ml-4"
+                                    {{ stimulus_target('card', 'button') }}
+                                    {{ stimulus_action('card', 'show_info', 'mouseover')|stimulus_action('card', 'hide_info', 'mouseout') }}
+                                 src="{{ asset('resources/logos/info_icon.svg') }}"
+                                 alt="Info icon"/>
+
+                            {# Description #}
+                            <div class="absolute w-2/3 left-1/2 top-full transform -translate-x-1/2 -mt-11
+            bg-indigo-400 rounded-lg p-2 text-white text-center hidden z-10"
+                                 data-card-target="info">
+                                Universally Unique Identifier - Unique name for User authentication
+                            </div>
+                        </div>
+
+                        <div class="text-red-500 ml-2">
+                            {{ form_errors(form.uuid) }}
+                        </div>
                     </div>
                 </div>
 
