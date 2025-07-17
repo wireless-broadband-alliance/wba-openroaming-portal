@@ -91,7 +91,7 @@ readonly class GetSettings
         return $settings;
     }
 
-    public function getSettingDescription($settingName): string
+    public function getSettingDescription($settingName): ?string
     {
         // Retrieve current locale from the session, default to 'en' if not found
         $request = $this->requestStack->getCurrentRequest();
@@ -142,8 +142,7 @@ readonly class GetSettings
                 'AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION' => 'The description for Google authentication on the login page',
                 'AUTH_METHOD_MICROSOFT_LOGIN_ENABLED' => 'Enable or disable Microsoft authentication method',
                 'AUTH_METHOD_MICROSOFT_LOGIN_LABEL' => 'The label for Microsoft authentication button on the login page',
-                'AUTH_METHOD_MICROSOFT_LOGIN_DESCRIPTION' =>
-                    'The description for Microsoft authentication on the login page',
+                'AUTH_METHOD_MICROSOFT_LOGIN_DESCRIPTION' => 'The description for Microsoft authentication on the login page',
                 'AUTH_METHOD_REGISTER_ENABLED' => 'Enable or disable Register authentication method',
                 'AUTH_METHOD_REGISTER_LABEL' => 'The label for Register authentication button on the login page',
                 'AUTH_METHOD_REGISTER_DESCRIPTION' => 'The description for Register authentication on the login page',
@@ -176,9 +175,10 @@ readonly class GetSettings
                 'SMS_HANDLE' => 'Budget SMS Handle hash',
                 'SMS_FROM' => 'Entity sending the SMS for the users',
                 'SMS_TIMER_RESEND' => 'Time in minutes to make the user wait to resend a new SMS',
+                'EMAIL_TIMER_RESEND' => 'Time in minutes to make the user wait to resend a new email for reset password requests',
+                'LINK_VALIDITY' => 'Time in minutes a link stays active before it expires.',
                 'USER_DELETE_TIME' => 'Time in hours to delete the unverified user',
-                'TIME_INTERVAL_NOTIFICATION' =>
-                    'The notification interval (in days) to alert a user before their profile expires',
+                'TIME_INTERVAL_NOTIFICATION' => 'The notification interval (in days) to alert a user before their profile expires',
                 'DEFAULT_REGION_PHONE_INPUTS' => 'Set the default regions for the phone number inputs',
                 'PROFILE_LIMIT_DATE_GOOGLE' => 'Time in days to disable profiles for users with Google login',
                 'PROFILE_LIMIT_DATE_MICROSOFT' => 'Time in days to disable profiles for users with Microsoft login',
@@ -186,13 +186,10 @@ readonly class GetSettings
                 'PROFILE_LIMIT_DATE_EMAIL' => 'Time in days to disable profiles for users with EMAIL login',
                 'PROFILE_LIMIT_DATE_SMS' => 'Time in days to disable profiles for users with SMS login',
                 'DELETE_UNCONFIRMED_USERS_CRON' => 'Defines the schedule to delete unconfirmed users from the portal',
-                'USERS_WHEN_PROFILE_EXPIRES_CRON' =>
-                    'Defines the schedule to notify the users when their profile to expire',
+                'USERS_WHEN_PROFILE_EXPIRES_CRON' => 'Defines the schedule to notify the users when their profile to expire',
                 'LDAP_SYNC_CRON' => 'Defines the schedule for LDAP synchronization automation command',
-                'FREERADIUS_LAST_CONNECTION_CRON' =>
-                    'Defines the schedule for Freeradius server & the user profile last connection',
-                'CRON_ADVANCED_STATUS' =>
-                    'Saves the previous status mode on the schedule cron configuration page (Simple/Advanced)'
+                'FREERADIUS_LAST_CONNECTION_CRON' => 'Defines the schedule for Freeradius server & the user profile last connection',
+                'CRON_ADVANCED_STATUS' => 'Saves the previous status mode on the schedule cron configuration page (Simple/Advanced)'
             ],
             LanguagesType::PT->value => [
                 'RADIUS_REALM_NAME' => 'O nome do realm para o seu servidor RADIUS',
@@ -265,6 +262,8 @@ readonly class GetSettings
                 'SMS_HANDLE' => 'Hash de identificação do Budget SMS',
                 'SMS_FROM' => 'Entidade que envia o SMS para os utilizadores',
                 'SMS_TIMER_RESEND' => 'Tempo em minutos que o utilizador tem de esperar para reenviar um novo SMS',
+                'EMAIL_TIMER_RESEND' => 'Tempo em minutos que o utilizador deve aguardar para reenviar um novo e-mail para pedidos de redefinição de palavra-passe',
+                'LINK_VALIDITY' => 'Tempo em minutos durante o qual um link permanece ativo antes de expirar.',
                 'USER_DELETE_TIME' => 'Tempo em horas para eliminar o utilizador não verificado',
                 'TIME_INTERVAL_NOTIFICATION' => 'Intervalo de notificação (em dias) para alertar o utilizador antes de o perfil expirar',
                 'DEFAULT_REGION_PHONE_INPUTS' => 'Definir as regiões padrão para os campos de número de telefone',
@@ -274,18 +273,17 @@ readonly class GetSettings
                 'PROFILE_LIMIT_DATE_EMAIL' => 'Tempo em dias para desativar perfis de utilizadores com login por e-mail',
                 'PROFILE_LIMIT_DATE_SMS' => 'Tempo em dias para desativar perfis de utilizadores com login por SMS',
                 'DELETE_UNCONFIRMED_USERS_CRON' => 'Define o agendamento para eliminar utilizadores não confirmados do portal',
-                'USERS_WHEN_PROFILE_EXPIRES_CRON' =>
-                    'Define o agendamento para notificar os utilizadores quando o perfil estiver prestes a expirar',
+                'USERS_WHEN_PROFILE_EXPIRES_CRON' => 'Define o agendamento para notificar os utilizadores quando o perfil estiver prestes a expirar',
                 'LDAP_SYNC_CRON' => 'Define o agendamento para o comando automático de sincronização LDAP',
-                'FREERADIUS_LAST_CONNECTION_CRON' =>
-                    'Define o agendamento para o servidor Freeradius e a última ligação do perfil do utilizador',
-                'CRON_ADVANCED_STATUS' =>
-                    'Guarda o modo de estado anterior na página de configuração do cron (Simples/Avançado)'
+                'FREERADIUS_LAST_CONNECTION_CRON' => 'Define o agendamento para o servidor Freeradius e a última ligação do perfil do utilizador',
+                'CRON_ADVANCED_STATUS' => 'Guarda o modo de estado anterior na página de configuração do cron (Simples/Avançado)'
             ]
         ];
         // phpcs:enable
 
-        return $descriptions[$locale][$settingName] ?? $descriptions[LanguagesType::EN->value][$settingName];
+        return $descriptions[$locale][$settingName]
+            ?? $descriptions[LanguagesType::EN->value][$settingName]
+            ?? null;
     }
 
     public function arraySettingsToTranslate(): array

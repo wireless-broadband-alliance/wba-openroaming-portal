@@ -65,7 +65,6 @@ services:
             $userRepository: '@App\Repository\UserRepository'
             $entityManager: '@doctrine.orm.entity_manager'
             $getSettings: '@App\Service\GetSettings'
-            $settingRepository: '@App\Repository\SettingRepository'
             $requestStack: '@request_stack'
         tags:
             - { name: 'nbgrp_oneloginsaml.user_factory' }
