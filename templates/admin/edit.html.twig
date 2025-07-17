@@ -13,7 +13,7 @@
             <div class="mx-auto rounded-lg grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div class="relative">
                     <div class="flex items-center justify-between relative" data-controller="card">
-                        {{ form_label(form.uuid, 'UUID', {label_attr: {class: 'form-label'}}) }}
+                        {{ form_label(form.uuid, 'Unique Identifier', {label_attr: {class: 'form-label'}}) }}
 
                         {{ form_widget(form.uuid, {attr: {class: 'form-widget'}}) }}
 
@@ -28,7 +28,7 @@
                             <div class="absolute w-2/3 left-1/2 top-full transform -translate-x-1/2 -mt-11
             bg-indigo-400 rounded-lg p-2 text-white text-center hidden z-10"
                                  data-card-target="info">
-                                Universally Unique Identifier - Unique name for User authentication
+                                Internal System - Universally Unique Identifier (UUID)
                             </div>
                         </div>
 
