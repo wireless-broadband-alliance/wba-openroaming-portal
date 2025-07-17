@@ -30,8 +30,7 @@ class MetricsController extends AbstractController
     #[Route('/metrics', name: 'app_metrics', methods: ['GET'])]
     public function index(Request $request): Response
     {
-        if (isset($_ENV['METRICS_ENABLED']))
-        {
+        if (isset($_ENV['METRICS_ENABLED'])) {
             $metricsEnabled = filter_var(
                 $this->params->get('app.metrics_enabled'),
                 FILTER_VALIDATE_BOOLEAN
