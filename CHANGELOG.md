@@ -7,6 +7,7 @@
   the server, added a new JSON error message for details.
 - Fix bug with returns with admin reset password, the problem was related with the previous firewall configuration
   implementation where no context has returned.
+- Update `dashboard/edit` to use DTO's and live components for validation.
 - New command for freeradius profile connection of each user, now the `UserRadiusProfile` entity saves the start/end
   connection of the user profiles when the freeradius server gets a new request. (For later graphics generations and
   user details)
@@ -14,7 +15,7 @@
 - New bundle installed `composer require symfony/lock` required for the command next execution only start when the
   current active ends.
 - NPM webpack-cli deprecations fixed to the latest stabled release (
-    - (https://www.npmjs.com/package/webpack-cli/v/5.1.4)) compatable with "@symfony/webpack-encore": "^5.1.0".
+    - (https://www.npmjs.com/package/webpack-cli/v/5.1.4)) compatible with "@symfony/webpack-encore": "^5.1.0".
 - New validation on the Admin Authentication Methods page to check whether the project has all required certificates.
 
 
