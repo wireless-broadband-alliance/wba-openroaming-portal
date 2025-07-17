@@ -1,0 +1,2 @@
+valueNotValid: 'The value {{ value }} is not a valid URL.'
+selectOption: 'Select an option'

@@ -1,0 +1,27 @@
+title: 'Definições de Conta'
+close: 'Fechar'
+personalData:
+    title: 'Dados Pessoais'
+    firstName: 'Primeiro Nome'
+    lastName: 'Último Nome'
+    apply: 'Aplicar Alterações'
+changePassword:
+    title: 'Alterar Palavra-Passe'
+    current: 'Palavra-Passe Atual'
+    new: 'Palavra-Passe Nova'
+    confirm: 'Palavra-Passe Confirmação'
+    changeBtn: 'Alterar Palavra-Passe'
+twoFactorAuth:
+    title: 'Autenticação de Dois Fatores'
+    configure: 'Configurar Autenticação de Dois Fatores'
+    disable: 'Desativar'
+    goBack: 'Voltar'
+    logout: 'Terminar Sessão'
+profileData:
+    title: 'Dados do Perfil'
+    revokeProfiles: 'Revogar Perfis de Conta'
+dangerZone:
+    title: 'Zona de Perigo'
+    deleteAccount: 'Eliminar Conta'
+    deleteAccountWarningMessage: 'Aviso: Está prestes a eliminar a sua conta. Esta ação é irreversível. Tem a certeza de que pretende prosseguir?'
+    deleteAccountWarningMessageLocal: 'Aviso: Está prestes a eliminar a sua conta. Esta ação é irreversível. Enviaremos um código para confirmar esta ação. Tem a certeza de que pretende prosseguir?'

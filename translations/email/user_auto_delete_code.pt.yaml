@@ -1,0 +1,10 @@
+subject_auto_deletion_code: 'O seu código de  confirmação de eliminação de conta do OpenRoaming é %code%.'
+subject: 'Eliminação de conta'
+warning: 'Esta ação não pode ser desfeita e todos os seus dados serão apagados de forma irreversível.'
+auto_deletion_message: 'O seu código de confirmação de eliminação de conta é:'
+valid_for_message: 'Este <strong>código só pode ser usado uma vez</strong> e <strong>é válido nos próximos %seconds% segundos.</strong>'
+confidential_message: 'Por favor, <strong>mantenha este código confidencial</strong> e <strong>não o compartilhe com terceiros.</strong>'
+footer:
+  support_team: 'Equipa de apoio:'
+  thank_you: 'Obrigado,'
+  team: 'A Equipa %supportTeam%'

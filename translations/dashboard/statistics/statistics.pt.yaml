@@ -1,0 +1,8 @@
+adminPageWBA: 'Página de Administração WBA - Estatísticas'
+to: 'até'
+portalSMSorEmail: 'Portal com SMS ou Email'
+authentication: 'Autenticação'
+devices: 'Dispositivos'
+userCreatedIn: 'Utilizador criado em'
+usersManagement: 'Gestão de Utilizadores'
+users2FAStatus: 'Estado da Configuração de 2FA dos Utilizadores'

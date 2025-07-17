@@ -1,0 +1,9 @@
+setting_type.settingCustom: Configuração da Página Inicial
+setting_type.settingTerms: Termos e Políticas
+setting_type.settingRadius: Configuração do Perfil Radius
+setting_type.settingStatus: Estado da Plataforma
+setting_type.settingLDAP: Sincronização LDAP
+setting_type.settingCAPPORT: Interação com Utilizadores
+setting_type.settingAUTH: Métodos de Autenticação
+setting_type.settingTwoFA: Autenticador de Dois Fatores
+setting_type.settingSMS: Configuração SMS
