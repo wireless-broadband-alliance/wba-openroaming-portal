@@ -42,7 +42,7 @@ class UserAccountDeletionController extends AbstractController
     #[IsGranted('ROLE_USER')]
     public function autoDeleteUserLocalRequest(Request $request): Response
     {
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
 
         /** @var User $currentUser */
         $currentUser = $this->getUser();
@@ -108,7 +108,7 @@ class UserAccountDeletionController extends AbstractController
     #[IsGranted('ROLE_USER')]
     public function userAccountDeletionLocalConfirm(Request $request): Response
     {
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
 
         /** @var User $currentUser */
         $currentUser = $this->getUser();

@@ -4,8 +4,6 @@ namespace App\Form;
 
 use App\Entity\User;
 use App\Form\Transformer\BooleanToDateTimeTransformer;
-use App\Repository\SettingRepository;
-use App\Repository\UserRepository;
 use App\Service\GetSettings;
 use libphonenumber\PhoneNumberFormat;
 use Misd\PhoneNumberBundle\Form\Type\PhoneNumberType;
@@ -19,15 +17,13 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 class UserUpdateType extends AbstractType
 {
     public function __construct(
-        private readonly UserRepository $userRepository,
         private readonly GetSettings $getSettings,
-        private readonly SettingRepository $settingRepository,
     ) {
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
         $regionInputs = explode(',', (string) $data['DEFAULT_REGION_PHONE_INPUTS']['value']);
         $regionInputs = array_map('trim', $regionInputs);
 

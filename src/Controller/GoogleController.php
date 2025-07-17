@@ -8,7 +8,6 @@ use App\Enum\AnalyticalEventType;
 use App\Enum\FirewallType;
 use App\Enum\PlatformMode;
 use App\Enum\UserProvider;
-use App\Repository\SettingRepository;
 use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
 use App\Service\EventActions;
@@ -52,7 +51,6 @@ class GoogleController extends AbstractController
         private readonly UserStatusChecker $userStatusChecker,
         private readonly UserExternalAuthRepository $userExternalAuthRepository,
         private readonly CsrfTokenManagerInterface $csrfTokenManager,
-        private readonly SettingRepository $settingRepository,
     ) {
     }
 
@@ -60,7 +58,7 @@ class GoogleController extends AbstractController
     public function connect(Request $request): RedirectResponse
     {
         // Call the getSettings method of GetSettings class to retrieve the data
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
 
         // Check if the user clicked on the 'sms' variable present only on the SMS authentication buttons
         if ($data['PLATFORM_MODE']['value'] === true) {
@@ -273,7 +271,7 @@ class GoogleController extends AbstractController
             $eventDispatcher->dispatch(new InteractiveLoginEvent($request, $token));
 
             // Defines the Event to the table
-            $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+            $data = $this->getSettings->getSettings();
             $platformMode = $data['PLATFORM_MODE']['value'] ? PlatformMode::DEMO->value : PlatformMode::LIVE->value;
             $eventMetadata = [
                 'platform' => $platformMode,

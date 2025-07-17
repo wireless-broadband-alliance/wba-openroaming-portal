@@ -43,7 +43,7 @@ readonly class TwoFAService
 
     public function validate2FACode(User $user, string $formCode): bool
     {
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
         $codeDate = $user->getTwoFACodeGeneratedAt();
         // If the user doesn't have code in the DB return false
         if (!$codeDate instanceof DateTimeInterface) {
@@ -172,7 +172,7 @@ readonly class TwoFAService
         string $eventType,
     ): void {
         $messageType = $user->getTwoFAtype();
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
         $secondsLeft = $data["TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME"]["value"];
         if ($messageType === UserTwoFactorAuthenticationStatus::EMAIL->value || $user->getEmail()) {
             $emailTitle = $this->settingRepository->findOneBy(['name' => 'PAGE_TITLE'])->getValue();
@@ -270,7 +270,7 @@ readonly class TwoFAService
 
     public function canResendCode(User $user, string $eventType): bool
     {
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
         $nrAttempts = $data["TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE"]["value"];
         $timeToResetAttempts = $data["TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS"]["value"];
         $limitTime = new DateTime();
@@ -286,7 +286,7 @@ readonly class TwoFAService
 
     public function timeIntervalToResendCode(User $user, string $eventType): bool
     {
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
         $timeIntervalToResendCode = $data["TWO_FACTOR_AUTH_RESEND_INTERVAL"]["value"];
         $limitTime = new DateTime();
         $limitTime->modify('-' . $timeIntervalToResendCode . ' seconds');
@@ -301,7 +301,7 @@ readonly class TwoFAService
 
     public function timeIntervalToSendCode(User $user, string $event): bool
     {
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
         $timeIntervalToResendCode = $data["TWO_FACTOR_AUTH_RESEND_INTERVAL"]["value"];
         $limitTime = new DateTime();
         $limitTime->modify('-' . $timeIntervalToResendCode . ' seconds');
@@ -353,7 +353,7 @@ readonly class TwoFAService
 
     public function canValidationCode(User $user, string $eventType): bool
     {
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
         $timeToResetAttempts = $data["TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS"]["value"];
         $nrAttempts = $data["TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE"]["value"];
         $limitTime = new DateTime();
@@ -375,7 +375,7 @@ readonly class TwoFAService
 
     public function timeLeftToResendCode(User $user, string $eventType): int
     {
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
         $timeToResetAttempts = $data["TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS"]["value"];
         $lastEvent = $this->eventRepository->findLatest2FACodeAttemptEvent(
             $user,
@@ -393,7 +393,7 @@ readonly class TwoFAService
 
     public function timeLeftToResendCodeTimeInterval(User $user, string $eventType): int
     {
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
         $timeToResetAttempts = $data["TWO_FACTOR_AUTH_RESEND_INTERVAL"]["value"];
         $lastEvent = $this->eventRepository->findLatest2FACodeAttemptEvent(
             $user,
@@ -412,7 +412,7 @@ readonly class TwoFAService
 
     public function isTwoFARequired(User $user): bool
     {
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
         if ($data["TWO_FACTOR_AUTH_STATUS"]["value"] === TwoFAType::ENFORCED_FOR_LOCAL->value) {
             if (
                 $user->getUserExternalAuths()[0] &&

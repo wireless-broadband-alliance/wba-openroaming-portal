@@ -7,7 +7,6 @@ use App\Enum\FirewallType;
 use App\Enum\UserProvider;
 use App\Form\LoginFormType;
 use App\Form\TwoFACode;
-use App\Repository\SettingRepository;
 use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
 use App\Service\GetSettings;
@@ -26,13 +25,11 @@ class SecurityController extends AbstractController
     /**
      * SiteController constructor.
      * @param UserRepository $userRepository The repository for accessing user data.
-     * @param SettingRepository $settingRepository The setting repository is used to create the getSettings function.
      * @param GetSettings $getSettings The instance of GetSettings class.
      *  of the user account
      */
     public function __construct(
         private readonly UserRepository $userRepository,
-        private readonly SettingRepository $settingRepository,
         private readonly GetSettings $getSettings,
         private readonly UserExternalAuthRepository $userExternalAuthRepository,
         private readonly TwoFAService $twoFAService,
@@ -57,7 +54,7 @@ class SecurityController extends AbstractController
         }
 
         // Call the getSettings method of GetSettings class to retrieve the data
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
         if ($data['PLATFORM_MODE']['value'] === true) {
             return $this->redirectToRoute('app_landing');
         }
@@ -101,7 +98,7 @@ class SecurityController extends AbstractController
         }
 
         // Call the getSettings method of GetSettings class to retrieve the data
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
 
         // Last username entered by the user (this will be empty if the user clicked the verification link)
         $lastUsername = $authenticationUtils->getLastUsername();
@@ -159,7 +156,7 @@ class SecurityController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
 
         $form = $this->createForm(TwoFACode::class);
         $form->handleRequest($request);

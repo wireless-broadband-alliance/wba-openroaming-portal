@@ -77,7 +77,7 @@ class ForgotPasswordController extends AbstractController
         }
 
         // Call the getSettings method of GetSettings class to retrieve the data
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
 
         if ($data['PLATFORM_MODE']['value'] === true) {
             $this->addFlash(
@@ -225,7 +225,7 @@ class ForgotPasswordController extends AbstractController
         EntityManagerInterface $entityManager,
     ): Response {
         // Call the getSettings method of GetSettings class to retrieve the data
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
 
         if ($this->getUser() instanceof UserInterface) {
             $this->addFlash(
@@ -430,7 +430,7 @@ class ForgotPasswordController extends AbstractController
     public function forgotPasswordCode(
         Request $request,
     ): Response {
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
 
         // Get the uuid and verification code from the URL query parameters
         $uuid = $request->getSession()->get('forgot_password_uuid');
@@ -512,7 +512,7 @@ class ForgotPasswordController extends AbstractController
         }
 
         // Call the getSettings method of GetSettings class to retrieve the data
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
 
         if ($data['PLATFORM_MODE']['value']) {
             $this->addFlash(

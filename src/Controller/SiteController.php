@@ -22,9 +22,7 @@ use App\Form\NewPasswordAccountType;
 use App\Form\RegistrationFormType;
 use App\Form\RevokeProfilesType;
 use App\Form\TOSType;
-use App\Repository\SettingRepository;
 use App\Repository\UserExternalAuthRepository;
-use App\Repository\UserRepository;
 use App\Security\LandingAuthenticator;
 use App\Service\EventActions;
 use App\Service\GetSettings;
@@ -52,23 +50,23 @@ class SiteController extends AbstractController
     /**
      * SiteController constructor.
      *
-     * @param UserRepository $userRepository The repository for accessing user data.
      * @param UserExternalAuthRepository $userExternalAuthRepository The repository required to fetch the provider.
-     * @param SettingRepository $settingRepository The setting repository is used to create the getSettings function.
      * @param GetSettings $getSettings The instance of GetSettings class.
      * @param EventActions $eventActions Used to generate event related to the User creation
      * of the user account
      * @param ProfileManager $profileManager Calls the functions to enable/disable provisioning profiles
+     * @param TwoFAService $twoFAService Calls the functions to manage the 2fa configuration request
+     * @param UserDeletionService $userDeletionService Calls the functions responsible for user account deletion
+     * @param EntityManagerInterface $entityManager Call the symfony responsible bundle for data submission to DB
      */
     public function __construct(
-        private readonly UserRepository $userRepository,
         private readonly UserExternalAuthRepository $userExternalAuthRepository,
-        private readonly SettingRepository $settingRepository,
         private readonly GetSettings $getSettings,
         private readonly EventActions $eventActions,
         private readonly ProfileManager $profileManager,
         private readonly TwoFAService $twoFAService,
         private readonly UserDeletionService $userDeletionService,
+        private readonly EntityManagerInterface $entityManager,
     ) {
     }
 
@@ -82,7 +80,7 @@ class SiteController extends AbstractController
         RequestStack $requestStack
     ): Response {
         // Call the getSettings method of GetSettings class to retrieve the data
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
         /** @var User $currentUser */
         $currentUser = $this->getUser();
         $session = $request->getSession();
@@ -350,72 +348,75 @@ class SiteController extends AbstractController
     }
 
     #[Route('/terms-conditions', name: 'app_terms_conditions')]
-    public function termsConditions(EntityManagerInterface $em): RedirectResponse|Response
+    public function termsConditions(): RedirectResponse|Response
     {
         // Call the getSettings method of GetSettings class to retrieve the data
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
 
-        $settingsRepository = $em->getRepository(Setting::class);
+        $settingsRepository = $this->entityManager->getRepository(Setting::class);
         $tosFormat = $settingsRepository->findOneBy(['name' => 'TOS']);
-        $textEditorRepository = $em->getRepository(TextEditor::class);
+        $textEditorRepository = $this->entityManager->getRepository(TextEditor::class);
+
         if (
             $tosFormat &&
             $tosFormat->getValue() === TextInputType::TEXT_EDITOR->value
         ) {
-            if ($textEditorRepository->findOneBy(['name' => TextEditorName::TOS->value]) !== null) {
-                $content = $textEditorRepository->findOneBy(['name' => TextEditorName::TOS->value])->getContent();
-            } else {
-                $content = '';
-            }
+            $textEditorEntry = $textEditorRepository->findOneBy(['name' => TextEditorName::TOS->value]);
+            $content = $textEditorEntry !== null ? $textEditorEntry->getContent() : '';
+
             return $this->render('site/shared/tos/_tos.html.twig', [
                 'content' => $content,
                 'data' => $data
             ]);
         }
+
         if (
             $tosFormat &&
             $tosFormat->getValue() === TextInputType::LINK->value &&
             $settingsRepository->findOneBy(['name' => 'TOS_LINK'])
         ) {
-            return $this->redirect($settingsRepository->findOneBy(['name' => 'TOS_LINK'])->getValue());
+            $tosLink = $settingsRepository->findOneBy(['name' => 'TOS_LINK'])->getValue();
+            return $this->redirect($tosLink);
         }
+
         return $this->redirectToRoute('app_landing');
     }
 
     #[Route('/privacy-policy', name: 'app_privacy_policy')]
-    public function privacyPolicy(EntityManagerInterface $em): RedirectResponse|Response
+    public function privacyPolicy(): RedirectResponse|Response
     {
         // Call the getSettings method of GetSettings class to retrieve the data
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
 
-        $settingsRepository = $em->getRepository(Setting::class);
-        $textEditorRepository = $em->getRepository(TextEditor::class);
+        $settingsRepository = $this->entityManager->getRepository(Setting::class);
+        $textEditorRepository = $this->entityManager->getRepository(TextEditor::class);
         $privacyPolicyFormat = $settingsRepository->findOneBy(['name' => 'PRIVACY_POLICY']);
+
         if (
             $privacyPolicyFormat &&
             $privacyPolicyFormat->getValue() === TextInputType::TEXT_EDITOR->value
         ) {
-            if ($textEditorRepository->findOneBy(['name' => TextEditorName::PRIVACY_POLICY->value]) !== null) {
-                $content = $textEditorRepository->findOneBy(
-                    ['name' => TextEditorName::PRIVACY_POLICY->value]
-                )->getContent();
-            } else {
-                $content = '';
-            }
+            $privacyPolicyEntry = $textEditorRepository->findOneBy(['name' => TextEditorName::PRIVACY_POLICY->value]);
+            $content = $privacyPolicyEntry !== null ? $privacyPolicyEntry->getContent() : '';
+
             return $this->render('site/shared/tos/_privacy_policy.html.twig', [
                 'content' => $content,
                 'data' => $data
             ]);
         }
+
         if (
             $privacyPolicyFormat &&
             $privacyPolicyFormat->getValue() === TextInputType::LINK->value &&
             $settingsRepository->findOneBy(['name' => 'PRIVACY_POLICY_LINK'])
         ) {
-            return $this->redirect($settingsRepository->findOneBy(['name' => 'PRIVACY_POLICY_LINK'])->getValue());
+            $privacyPolicyLink = $settingsRepository->findOneBy(['name' => 'PRIVACY_POLICY_LINK'])->getValue();
+            return $this->redirect($privacyPolicyLink);
         }
+
         return $this->redirectToRoute('app_landing');
     }
+
 
     /**
      * Widget with data about the account of the user / upload new password
@@ -426,7 +427,6 @@ class SiteController extends AbstractController
     #[Route('/account/user', name: 'app_site_account_user', methods: ['POST'])]
     public function accountUser(
         Request $request,
-        EntityManagerInterface $em,
         UserPasswordHasherInterface $passwordHasher,
     ): Response {
         /** @var User $user */
@@ -528,8 +528,8 @@ class SiteController extends AbstractController
                 $session->remove('_security_dashboard');
             }
 
-            $em->persist($user);
-            $em->flush();
+            $this->entityManager->persist($user);
+            $this->entityManager->flush();
 
             $eventMetaData = [
                 'ip' => $request->getClientIp(),

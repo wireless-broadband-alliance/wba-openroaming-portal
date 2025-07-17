@@ -11,13 +11,11 @@ use App\Enum\PlatformMode;
 use App\Enum\UserProvider;
 use App\Form\RegistrationFormSMSType;
 use App\Form\RegistrationFormType;
-use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use App\Service\EventActions;
 use App\Service\GetSettings;
 use App\Service\RegistrationEmailGenerator;
 use App\Service\SendSMS;
-use App\Service\VerificationCodeEmailGenerator;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
@@ -45,7 +43,6 @@ class RegistrationController extends AbstractController
      * Registration constructor.
      *
      * @param UserRepository $userRepository The repository for accessing user data.
-     * @param SettingRepository $settingRepository The setting repository is used to create the getSettings function.
      * @param GetSettings $getSettings The instance of GetSettings class.
      * @param SendSMS $sendSMS Calls the sendSMS service
      * @param TokenStorageInterface $tokenStorage Used to authenticate users after register with SMS
@@ -54,7 +51,6 @@ class RegistrationController extends AbstractController
      */
     public function __construct(
         private readonly UserRepository $userRepository,
-        private readonly SettingRepository $settingRepository,
         private readonly GetSettings $getSettings,
         private readonly SendSMS $sendSMS,
         private readonly TokenStorageInterface $tokenStorage,
@@ -78,7 +74,7 @@ class RegistrationController extends AbstractController
         EntityManagerInterface $entityManager,
     ): Response {
         // Call the getSettings method of GetSettings class to retrieve the data
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
 
         // Check if the user clicked on the 'sms' variable present only on the SMS authentication buttons
         if ($data['PLATFORM_MODE']['value'] === true) {
@@ -177,7 +173,7 @@ class RegistrationController extends AbstractController
         SessionInterface $session
     ): Response {
         // Call the getSettings method of GetSettings class to retrieve the data
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
 
         // Check if the user clicked on the 'sms' variable present only on the SMS authentication buttons
         if ($data['PLATFORM_MODE']['value'] === true) {

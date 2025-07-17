@@ -8,7 +8,6 @@ use App\Enum\AnalyticalEventType;
 use App\Enum\OperationMode;
 use App\Form\ScheduleType;
 use App\Repository\SettingRepository;
-use App\Repository\UserRepository;
 use App\Service\CronExpressionHelperService;
 use App\Service\EventActions;
 use App\Service\GetSettings;
@@ -23,7 +22,6 @@ class ScheduleAutomationController extends AbstractController
 {
     public function __construct(
         private readonly GetSettings $getSettings,
-        private readonly UserRepository $userRepository,
         private readonly SettingRepository $settingRepository,
         private readonly EntityManagerInterface $entityManager,
         private readonly EventActions $eventActions,
@@ -37,7 +35,7 @@ class ScheduleAutomationController extends AbstractController
         /** @var User $currentUser */
         $currentUser = $this->getUser();
 
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
 
         $scheduleDTO = new ScheduleDTO($this->settingRepository, $this->cronExpressionHelperService);
 

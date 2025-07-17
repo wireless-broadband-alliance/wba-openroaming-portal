@@ -10,22 +10,18 @@ use libphonenumber\PhoneNumberFormat;
 use Misd\PhoneNumberBundle\Form\Type\PhoneNumberType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Validator\Constraints\NotBlank;
 
 class TwoFactorPhoneNumber extends AbstractType
 {
     public function __construct(
-        private readonly UserRepository $userRepository,
         private readonly GetSettings $getSettings,
-        private readonly SettingRepository $settingRepository,
     ) {
     }
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
         $regionInputs = explode(',', (string) $data['DEFAULT_REGION_PHONE_INPUTS']['value']);
         $regionInputs = array_map('trim', $regionInputs);
         $builder

@@ -48,7 +48,7 @@ class SendSMS
      */
     public function sendSms($recipient, string $message): bool
     {
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
         $apiUrl = $this->parameterBag->get('app.budget_api_url');
 
         // Fetch SMS credentials from the database
@@ -77,7 +77,7 @@ class SendSMS
 
     public function sendSmsNoValidation($recipient, string $message): bool
     {
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
         $apiUrl = $this->parameterBag->get('app.budget_api_url');
 
         // Fetch SMS credentials from the database
@@ -133,7 +133,7 @@ class SendSMS
      */
     public function regenerateSmsCode(User $user): bool
     {
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
         $latestEvent = $this->eventRepository->findLatestSmsAttemptEvent($user);
 
         // Retrieve metadata from the latest event

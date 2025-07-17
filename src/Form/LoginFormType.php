@@ -4,8 +4,6 @@ namespace App\Form;
 
 use App\Entity\User;
 use App\Enum\OperationMode;
-use App\Repository\SettingRepository;
-use App\Repository\UserRepository;
 use App\Service\GetSettings;
 use PixelOpen\CloudflareTurnstileBundle\Type\TurnstileType;
 use Symfony\Component\Form\AbstractType;
@@ -21,14 +19,12 @@ class LoginFormType extends AbstractType
      */
     public function __construct(
         private readonly GetSettings $getSettings,
-        private readonly UserRepository $userRepository,
-        private readonly SettingRepository $settingRepository
     ) {
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
         $turnstileCheckerValue = $data['TURNSTILE_CHECKER']['value'];
 
         $builder->add('uuid', TextType::class, [

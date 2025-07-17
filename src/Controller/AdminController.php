@@ -54,7 +54,7 @@ class AdminController extends AbstractController
         #[MapQueryParameter] ?int $count = 7
     ): Response {
         // Call the getSettings method of GetSettings class to retrieve the data
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
 
         $searchTerm = $request->query->get('u');
 
@@ -177,7 +177,7 @@ class AdminController extends AbstractController
     public function customize(Request $request, EntityManagerInterface $em, GetSettings $getSettings): Response
     {
         // Call the getSettings method of GetSettings class to retrieve the data
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
         $currentUser = $this->getUser();

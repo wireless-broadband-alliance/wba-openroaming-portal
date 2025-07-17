@@ -641,7 +641,7 @@ class RegistrationController extends AbstractController
                 }
             }
 
-            $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+            $data = $this->getSettings->getSettings();
 
             if ($hasValidPortalAccount) {
                 try {

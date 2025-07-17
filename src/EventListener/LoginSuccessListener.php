@@ -4,15 +4,11 @@ namespace App\EventListener;
 
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
-use App\Enum\OperationMode;
 use App\Enum\PlatformMode;
-use App\Repository\SettingRepository;
-use App\Repository\UserRepository;
 use App\Service\EventActions;
 use App\Service\GetSettings;
 use DateTime;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
 use Symfony\Component\Security\Http\SecurityEvents;
 
@@ -21,8 +17,6 @@ readonly class LoginSuccessListener implements EventSubscriberInterface
     public function __construct(
         private GetSettings $getSettings,
         private EventActions $eventActions,
-        private UserRepository $userRepository,
-        private SettingRepository $settingRepository
     ) {
     }
 
@@ -37,7 +31,7 @@ readonly class LoginSuccessListener implements EventSubscriberInterface
     {
         $user = $event->getAuthenticationToken()->getUser();
         // Call the getSettings method of GetSettings class to retrieve the data
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
         $platformMode = $data['PLATFORM_MODE']['value'] ? PlatformMode::DEMO->value : PlatformMode::LIVE->value;
 
         if ($user instanceof User) {
