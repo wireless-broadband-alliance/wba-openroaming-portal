@@ -3,6 +3,7 @@
 namespace App\Form;
 
 use App\Entity\User;
+use App\Enum\FirewallType;
 use App\Enum\OperationMode;
 use App\Service\GetSettings;
 use PixelOpen\CloudflareTurnstileBundle\Type\TurnstileType;
@@ -11,6 +12,8 @@ use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Security\Http\Firewall;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class LoginFormType extends AbstractType
 {
@@ -19,32 +22,49 @@ class LoginFormType extends AbstractType
      */
     public function __construct(
         private readonly GetSettings $getSettings,
+        private readonly TranslatorInterface $translator
     ) {
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
+        $firewallType = $options['firewallType'];
+
         $data = $this->getSettings->getSettings();
         $turnstileCheckerValue = $data['TURNSTILE_CHECKER']['value'];
+        $loginWithUuidOnlyValue = $data['LOGIN_WITH_UUID_ONLY']['value'];
 
         $builder->add('uuid', TextType::class, [
-            'label' => 'Email or Phone Number',
+            'label' => $this->translator->trans('emailOrPhoneNumber', [], 'LoginFormType'),
             'attr' => [
-                'placeholder' => 'Enter your email or phone number',
+                'placeholder' => $this->translator->trans('EnterEmailOrPhoneNumber', [], 'LoginFormType'),
                 'name' => 'uuid',
                 'full_name' => 'uuid',
             ],
             'required' => true,
         ]);
 
-        $builder->add('password', PasswordType::class, [
-            'label' => 'Password',
-            'attr' => [
-                'placeholder' => 'Enter your password',
-                'name' => 'password',
-                'full_name' => 'password',
-            ],
-        ]);
+        if ($firewallType === FirewallType::DASHBOARD->value) {
+            $builder->add('password', PasswordType::class, [
+                'label' => 'Password',
+                'attr' => [
+                    'placeholder' => $this->translator->trans('EnterPassword', [], 'LoginFormType'),
+                    'name' => 'password',
+                    'full_name' => 'password',
+                ],
+            ]);
+        }
+
+        if ($loginWithUuidOnlyValue === OperationMode::OFF->value) {
+            $builder->add('password', PasswordType::class, [
+                'label' => 'Password',
+                'attr' => [
+                    'placeholder' => $this->translator->trans('EnterPassword', [], 'LoginFormType'),
+                    'name' => 'password',
+                    'full_name' => 'password',
+                ],
+            ]);
+        }
 
         if ($turnstileCheckerValue === OperationMode::ON->value) {
             $builder->add('security', TurnstileType::class, [

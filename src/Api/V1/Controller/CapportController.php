@@ -11,17 +11,34 @@ use Symfony\Component\Routing\Attribute\Route;
 
 class CapportController extends AbstractController
 {
-    #[Route('/capport/json', name: 'api_v1_capport_json', methods: ['GET'])]
-    public function capportJson(SettingRepository $settingRepository): JsonResponse
+    public function __construct(
+        private readonly SettingRepository $settingRepository
+    ) {
+    }
+
+    #[Route('/capport/json', name: 'api_capport_json', methods: ['GET'])]
+    public function capportJson(): JsonResponse
     {
-        if ($settingRepository->findOneBy(['name' => 'CAPPORT_ENABLED'])->getValue() !== 'true') {
-            return new BaseResponse(Response::HTTP_BAD_REQUEST, null, 'CAPPORT is not enabled')->toResponse();
+        if (
+            $this->settingRepository->findOneBy(
+                ['name' => 'CAPPORT_ENABLED']
+            )->getValue() !== 'true'
+        ) {
+            return new BaseResponse(
+                Response::HTTP_BAD_REQUEST,
+                null,
+                'CAPPORT is not enabled'
+            )->toResponse();
         }
         return new JsonResponse(
             [
                 'captive' => false,
-                'user-portal-url' => $settingRepository->findOneBy(['name' => 'CAPPORT_PORTAL_URL'])->getValue(),
-                'venue-info-url' => $settingRepository->findOneBy(['name' => 'CAPPORT_VENUE_INFO_URL'])->getValue()
+                'user-portal-url' => $this->settingRepository->findOneBy(
+                    ['name' => 'CAPPORT_PORTAL_URL']
+                )->getValue(),
+                'venue-info-url' => $this->settingRepository->findOneBy(
+                    ['name' => 'CAPPORT_VENUE_INFO_URL']
+                )->getValue()
             ],
             Response::HTTP_OK
         );

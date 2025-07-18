@@ -72,6 +72,7 @@ smsRegenerationError: 'Failed to regenerate SMS code. Please, wait %minutes% min
 errorOccurredWhileRegeneratingSMSCode: 'An error occurred while regenerating the SMS code. Please try again later.'
 confirmationCodeSentToEmail: 'A confirmation code was sent to your email.'
 codeAlreadySent: 'Your code has already been sent to you previously. Wait %minutes% minute(s) to request a code again.'
+invalidPassword: 'Current password Invalid. Please try again.'
 invalidCode: 'Code Invalid. Please try again.'
 verificationCodeIncorrect: 'The verification code is incorrect. Please try again.'
 verificationMethodNotEnabled: "This verification method it's not enabled!"
@@ -97,3 +98,4 @@ userUpdated: '"%uuid%" has been updated successfully.'
 PasswordPasswordConfirmationMustMatch: 'Both the password and password confirmation fields must match.'
 passwordUpdated: '"%uuid%" password was updated.'
 accountAlreadyVerified: 'This account is already verified.'
+verificationCodeSent: 'A login verification code has been sent to your email.'

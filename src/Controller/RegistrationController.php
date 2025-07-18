@@ -5,7 +5,6 @@ namespace App\Controller;
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
 use App\Enum\AnalyticalEventType;
-use App\Enum\FirewallType;
 use App\Enum\OperationMode;
 use App\Enum\PlatformMode;
 use App\Enum\UserProvider;
@@ -36,6 +35,7 @@ use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class RegistrationController extends AbstractController
 {
@@ -43,7 +43,7 @@ class RegistrationController extends AbstractController
      * Registration constructor.
      *
      * @param UserRepository $userRepository The repository for accessing user data.
-     * @param GetSettings $getSettings The instance of GetSettings class.
+     * @param GetSettings $getSettings The instance of the GetSettings class.
      * @param SendSMS $sendSMS Calls the sendSMS service
      * @param TokenStorageInterface $tokenStorage Used to authenticate users after register with SMS
      * @param EventActions $eventActions Used to generate event related to the User creation
@@ -56,6 +56,7 @@ class RegistrationController extends AbstractController
         private readonly TokenStorageInterface $tokenStorage,
         private readonly EventActions $eventActions,
         private readonly RegistrationEmailGenerator $emailGenerator,
+        private readonly TranslatorInterface $translator
     ) {
     }
 
@@ -80,13 +81,24 @@ class RegistrationController extends AbstractController
         if ($data['PLATFORM_MODE']['value'] === true) {
             $this->addFlash(
                 'error',
-                'The portal is in Demo mode - it is not possible to use this authentication method.'
+                $this->translator->trans(
+                    'portalInDemoMode',
+                    [],
+                    'controllers'
+                )
             );
             return $this->redirectToRoute('app_landing');
         }
 
-        if ($data['EMAIL_REGISTER_ENABLED']['value'] !== true) {
-            $this->addFlash('error', 'This authentication method it\'s not enabled!');
+        if ($data['AUTH_METHOD_REGISTER_ENABLED']['value'] !== 'true') {
+            $this->addFlash(
+                'error',
+                $this->translator->trans(
+                    'authenticationMethodNotEnabled',
+                    [],
+                    'controllers'
+                )
+            );
             return $this->redirectToRoute('app_landing');
         }
 
@@ -99,7 +111,11 @@ class RegistrationController extends AbstractController
             if ($this->userRepository->findOneBy(['uuid' => $form->get('email')->getData()])) {
                 $this->addFlash(
                     'warning',
-                    'User with the same email already exists, please try to Login using the link below.'
+                    $this->translator->trans(
+                        'userWithSameEmail',
+                        [],
+                        'controllers'
+                    )
                 );
             } elseif ($data['USER_VERIFICATION']['value'] === OperationMode::ON->value) {
                 // Generate a random password
@@ -110,12 +126,11 @@ class RegistrationController extends AbstractController
 
                 // Set the hashed password for the user
                 $user->setPassword($hashedPassword);
-                $user->setUuid($form->get('email')->getData());
-                $user->setEmail($form->get('email')->getData());
-                $user->setTwoFAcode(random_int(100000, 999999));
-                $user->setTwoFAcodeGeneratedAt(new DateTime());
-                $user->setTwoFAcodeIsActive(true);
+                $user->setUuid($user->getEmail());
                 $user->setCreatedAt(new DateTime());
+                $user->setTwoFAcode(random_int(100000, 999999));
+                $user->setTwoFACodeGeneratedAt(new DateTime());
+                $user->setTwoFAcodeIsActive(true);
                 $userAuths->setProvider(UserProvider::PORTAL_ACCOUNT->value);
                 $userAuths->setProviderId(UserProvider::EMAIL->value);
                 $userAuths->setUser($user);
@@ -142,12 +157,16 @@ class RegistrationController extends AbstractController
 
                 $this->addFlash(
                     'success',
-                    'We have sent an email with your account password and verification code'
+                    $this->translator->trans(
+                        'emailSentWithPasswordAndVerificationCode',
+                        [],
+                        'controllers'
+                    )
                 );
             }
         }
 
-        return $this->render('site/register_landing.html.twig', [
+        return $this->render('landing/register/register_landing.html.twig', [
             'registrationForm' => $form->createView(),
             'data' => $data,
         ]);
@@ -179,13 +198,24 @@ class RegistrationController extends AbstractController
         if ($data['PLATFORM_MODE']['value'] === true) {
             $this->addFlash(
                 'error',
-                'The portal is in Demo mode - it is not possible to use this authentication method.'
+                $this->translator->trans(
+                    'portalInDemoMode',
+                    [],
+                    'controllers'
+                )
             );
             return $this->redirectToRoute('app_landing');
         }
 
-        if ($data['AUTH_METHOD_SMS_REGISTER_ENABLED']['value'] !== true) {
-            $this->addFlash('error', 'This authentication method is not enabled!');
+        if ($data['AUTH_METHOD_SMS_REGISTER_ENABLED']['value'] !== 'true') {
+            $this->addFlash(
+                'error',
+                $this->translator->trans(
+                    'authenticationMethodNotEnabled',
+                    [],
+                    'controllers'
+                )
+            );
             return $this->redirectToRoute('app_landing');
         }
 
@@ -198,7 +228,11 @@ class RegistrationController extends AbstractController
             if ($this->userRepository->findOneBy(['phoneNumber' => $user->getPhoneNumber()])) {
                 $this->addFlash(
                     'warning',
-                    'User with the same phone number already exists, please try to "Log in" using the link below.'
+                    $this->translator->trans(
+                        'userWithSamePhoneNumber',
+                        [],
+                        'controllers'
+                    )
                 );
             } else {
                 // Generate a random password
@@ -216,15 +250,16 @@ class RegistrationController extends AbstractController
                     );
                 }
 
+                $user->setCreatedAt(new DateTime());
                 $user->setTwoFAcode(random_int(100000, 999999));
                 $user->setTwoFACodeGeneratedAt(new DateTime());
                 $user->setTwoFAcodeIsActive(true);
-                $user->setCreatedAt(new DateTime());
                 $userAuths->setProvider(UserProvider::PORTAL_ACCOUNT->value);
                 $userAuths->setProviderId(UserProvider::PHONE_NUMBER->value);
                 $userAuths->setUser($user);
                 $entityManager->persist($user);
                 $entityManager->persist($userAuths);
+                $entityManager->flush();
 
                 // Defines the Event to the table
                 $eventMetadata = [
@@ -241,16 +276,17 @@ class RegistrationController extends AbstractController
                     $eventMetadata
                 );
 
+
                 // Send SMS
-                $message = "Your account password is: "
+                $message = $this->translator->trans('yourAccountPasswordIs', [], 'controllers')
                     . $randomPassword
                     . "%0A"
-                    . "Verification code is: "
+                    . $this->translator->trans('verificationCodeIs', [], 'controllers')
                     . $user->getTwoFAcode();
                 $this->sendSMS->sendSms($user->getPhoneNumber(), $message);
                 $this->addFlash(
                     'success',
-                    'We have sent a message to your phone with your password and verification code'
+                    $this->translator->trans('messageSentWithPasswordAndVerificationCode', [], 'controllers')
                 );
 
                 // Authenticate the user
@@ -265,7 +301,7 @@ class RegistrationController extends AbstractController
             }
         }
 
-        return $this->render('site/register_landing_sms.html.twig', [
+        return $this->render('landing/register/register_landing_sms.html.twig', [
             'registrationSMSForm' => $form->createView(),
             'data' => $data,
         ]);
@@ -284,9 +320,9 @@ class RegistrationController extends AbstractController
         TokenStorageInterface $tokenStorage,
         EventDispatcherInterface $eventDispatcher,
     ): Response {
-        // Get the uuid and verification code from the URL query parameters
+        // Get the email and verification code from the URL query parameters
         $uuid = $request->query->get('uuid');
-        $verificationCode = $request->query->get('verificationCode');
+        $verificationCode = $request->query->get('twoFaCode');
 
         // Get the user with the matching email, excluding admin users
         $user = $userRepository->findOneByUUIDExcludingAdmin($uuid);
@@ -295,7 +331,7 @@ class RegistrationController extends AbstractController
         if ($user && $user->isVerified() && !$user->isForgotPasswordRequest()) {
             $this->addFlash(
                 'error',
-                'This account is already verified.'
+                $this->translator->trans('accountAlreadyVerified', [], 'controllers')
             );
             return $this->redirectToRoute('app_login', ['uuid' => $uuid]);
         }
@@ -315,6 +351,8 @@ class RegistrationController extends AbstractController
                 // Update the verified status and save the user
                 $user->setIsVerified(true);
                 $userRepository->save($user, true);
+                $session = $request->getSession();
+                $session->set('session_verified', true);
 
                 // Defines the Event to the table
                 $eventMetadata = [
@@ -332,21 +370,21 @@ class RegistrationController extends AbstractController
 
                 $this->addFlash(
                     'success',
-                    'Your account has been verified!'
+                    $this->translator->trans('accountVerified', [], 'controllers')
                 );
 
                 return $this->redirectToRoute('app_landing');
             } catch (CustomUserMessageAuthenticationException) {
                 $this->addFlash(
                     'error',
-                    'Authentication failed. Please try to log in manually.'
+                    $this->translator->trans('authenticationFailedTryAgain', [], 'controllers')
                 );
             }
         } else {
             // If the verification code is invalid or not found, display an error message and redirect to the login page
             $this->addFlash(
                 'error',
-                'Invalid verification code or link expired. Please try to log in manually'
+                $this->translator->trans('invalidVerificationCodeLink', [], 'controllers')
             );
         }
 

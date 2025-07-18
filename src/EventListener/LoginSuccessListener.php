@@ -4,11 +4,13 @@ namespace App\EventListener;
 
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
+use App\Enum\OperationMode;
 use App\Enum\PlatformMode;
 use App\Service\EventActions;
 use App\Service\GetSettings;
 use DateTime;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
 use Symfony\Component\Security\Http\SecurityEvents;
 
@@ -17,6 +19,7 @@ readonly class LoginSuccessListener implements EventSubscriberInterface
     public function __construct(
         private GetSettings $getSettings,
         private EventActions $eventActions,
+        private RequestStack $requestStack
     ) {
     }
 
@@ -33,8 +36,13 @@ readonly class LoginSuccessListener implements EventSubscriberInterface
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings();
         $platformMode = $data['PLATFORM_MODE']['value'] ? PlatformMode::DEMO->value : PlatformMode::LIVE->value;
+        $session = $this->requestStack->getSession();
 
         if ($user instanceof User) {
+            if ($data["LOGIN_WITH_UUID_ONLY"]["value"] === OperationMode::OFF->value && $user->isVerified()) {
+                $session->set('session_verified', true);
+            }
+
             // Defines the Event to the table
             $eventMetadata = [
                 'platform' => $platformMode,

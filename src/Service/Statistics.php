@@ -681,9 +681,6 @@ readonly class Statistics
             str_contains($connectInfo, '802.11ax') => 'Wi-Fi 6',
             str_contains($connectInfo, '802.11ac') => 'Wi-Fi 5',
             str_contains($connectInfo, '802.11n') => 'Wi-Fi 4',
-            str_contains($connectInfo, '802.11g') => 'Wi-Fi 3',
-            str_contains($connectInfo, '802.11a') => 'Wi-Fi 2',
-            str_contains($connectInfo, '802.11b') => 'Wi-Fi 1',
             default => 'Unknown',
         };
     }

@@ -4,15 +4,20 @@ namespace App\Security;
 
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
+use App\Enum\FirewallType;
 use App\Enum\OperationMode;
+use App\Enum\UserProvider;
+use App\Enum\UserTwoFactorAuthenticationStatus;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use App\Service\TwoFAService;
 use DateTimeInterface;
 use PixelOpen\CloudflareTurnstileBundle\Http\CloudflareTurnstileHttpClient;
+use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
@@ -21,10 +26,12 @@ use Symfony\Component\Security\Http\Authenticator\AbstractLoginFormAuthenticator
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\CsrfTokenBadge;
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\RememberMeBadge;
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
+use Symfony\Component\Security\Http\Authenticator\Passport\Credentials\CustomCredentials;
 use Symfony\Component\Security\Http\Authenticator\Passport\Credentials\PasswordCredentials;
 use Symfony\Component\Security\Http\Authenticator\Passport\Passport;
 use Symfony\Component\Security\Http\SecurityRequestAttributes;
 use Symfony\Component\Security\Http\Util\TargetPathTrait;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class LandingAuthenticator extends AbstractLoginFormAuthenticator
 {
@@ -37,6 +44,8 @@ class LandingAuthenticator extends AbstractLoginFormAuthenticator
         private readonly CloudflareTurnstileHttpClient $turnstileHttpClient,
         private readonly UserRepository $userRepository,
         private readonly TwoFAService $twoFAService,
+        private readonly TranslatorInterface $translator,
+        private readonly RequestStack $requestStack,
     ) {
     }
 
@@ -46,6 +55,9 @@ class LandingAuthenticator extends AbstractLoginFormAuthenticator
         $uuid = $request->request->get('uuid');
         $password = $request->request->get('password');
         $turnstileResponse = $request->request->get('cf-turnstile-response'); // Captcha
+
+        $loginWithUUIDOnly = $this->settingRepository
+                ->findOneBy(['name' => 'LOGIN_WITH_UUID_ONLY'])?->getValue() === OperationMode::ON->value;
 
         if ($uuid) {
             $user = $this->userRepository->findOneBy([
@@ -100,6 +112,24 @@ class LandingAuthenticator extends AbstractLoginFormAuthenticator
             $badges[] = $rememberMeBadge;
         }
 
+        $user = $this->userRepository->findOneBy([
+            'uuid' => $uuid,
+            'deletedAt' => null,
+        ]);
+
+        // Create a Passport with user, credentials, and CSRF token
+        if ($loginWithUUIDOnly) {
+            // No password check – assume pre-validated (e.g., via confirmation code)
+            return new Passport(
+                new UserBadge($uuid),
+                new CustomCredentials(
+                    fn() => true,
+                    $user
+                ),
+                $badges
+            );
+        }
+
         // Standard login with password
         return new Passport(
             new UserBadge($uuid),
@@ -120,8 +150,61 @@ class LandingAuthenticator extends AbstractLoginFormAuthenticator
 
             return new RedirectResponse($this->urlGenerator->generate('app_landing'));
         }
+
+        if ($user->isVerified()) {
+            return new RedirectResponse($this->urlGenerator->generate('app_landing'));
+        }
+
+        $loginModeSetting = $this->settingRepository->findOneBy(['name' => 'LOGIN_WITH_UUID_ONLY']);
+        $mode = OperationMode::from($loginModeSetting?->getValue() ?? OperationMode::OFF->value);
+
+        $eventType = match ($mode) {
+            OperationMode::ON => AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE,
+            OperationMode::OFF => AnalyticalEventType::LOGIN_TRADITIONAL_REQUEST,
+        };
+
+        if (
+            $this->settingRepository->findOneBy(['name' => 'USER_VERIFICATION'])->getValue() ===
+            OperationMode::ON->value
+        ) {
+            if ($this->twoFAService->canValidationCode($user, $eventType->value)) {
+                $this->twoFAService->generate2FACode(
+                    $user,
+                    $request->getClientIp(),
+                    $request->headers->get('User-Agent'),
+                    $eventType->value
+                );
+
+                $session = $this->requestStack->getSession();
+                if ($session instanceof Session) {
+                    $session->getFlashBag()->add(
+                        'success',
+                        $this->translator->trans(
+                            'verificationCodeSent',
+                            [],
+                            'controllers'
+                        )
+                    );
+                }
+
+
+                return new RedirectResponse($this->urlGenerator->generate('app_login_confirmation'));
+            }
+
+            $intervalMinutes = $this->twoFAService->timeLeftToResendCode($user, $eventType->value);
+
+            throw new CustomUserMessageAuthenticationException(
+                $this->translator->trans(
+                    'codeAlreadySent',
+                    ['%minutes%' => $intervalMinutes],
+                    'controllers'
+                )
+            );
+        }
+
         return new RedirectResponse($this->urlGenerator->generate('app_landing'));
     }
+
 
     protected function getLoginUrl(Request $request): string
     {

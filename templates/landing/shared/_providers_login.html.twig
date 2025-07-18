@@ -1,0 +1,108 @@
+{# Auth Providers #}
+<div class="grid grid-cols-1 sm:gap-4 lg:gap-6 sm:[grid-template-columns:repeat(auto-fit,minmax(150px,1fr))] md:my-2 my-3">
+    {% if data.AUTH_METHOD_SAML_ENABLED.value == 'true' %}
+        <div class="w-full">
+            <a href="{{ path('saml_login') }}"
+               class="terms-widget__link"
+               data-action="click->terms-widget#showModal">
+                <button {{ stimulus_target('terms-widget', 'button') }}
+                        type="button"
+                        class="w-full btn-primary btn-disabled">
+                    {{ data.AUTH_METHOD_SAML_LABEL.value }}
+                </button>
+            </a>
+            <p class="text-xs md:my-1 my-2 text-center text-gray-600">
+                {{ data.AUTH_METHOD_SAML_DESCRIPTION.value }}
+            </p>
+        </div>
+    {% endif %}
+
+    {% if data.AUTH_METHOD_GOOGLE_LOGIN_ENABLED.value == 'true' %}
+        <div class="w-full">
+            <a href="{{ path('connect_google') }}"
+               class="terms-widget__link"
+               data-action="click->terms-widget#showModal">
+                <button {{ stimulus_target('terms-widget', 'button') }}
+                        type="button"
+                        class="w-full btn-primary btn-disabled">
+                    {{ data.AUTH_METHOD_GOOGLE_LOGIN_LABEL.value }}
+                </button>
+            </a>
+            <p class="text-xs md:my-1 my-2 text-center text-gray-600">
+                {{ data.AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION.value }}
+            </p>
+        </div>
+    {% endif %}
+
+    {% if data.AUTH_METHOD_MICROSOFT_LOGIN_ENABLED.value == 'true' %}
+        <div class="w-full">
+            <a href="{{ path('connect_microsoft') }}"
+               class="terms-widget__link"
+               data-action="click->terms-widget#showModal">
+                <button {{ stimulus_target('terms-widget', 'button') }}
+                        type="button"
+                        class="w-full btn-primary btn-disabled">
+                    {{ data.AUTH_METHOD_MICROSOFT_LOGIN_LABEL.value }}
+                </button>
+            </a>
+            <p class="text-xs md:my-1 my-2 text-center text-gray-600">
+                {{ data.AUTH_METHOD_MICROSOFT_LOGIN_DESCRIPTION.value }}
+            </p>
+        </div>
+    {% endif %}
+</div>
+
+{# Portal Auth Methods #}
+<div class="grid grid-cols-1 sm:gap-4 lg:gap-6 sm:[grid-template-columns:repeat(auto-fit,minmax(150px,1fr))] md:my-2 my-3">
+    {% if data.AUTH_METHOD_REGISTER_ENABLED.value == 'true' %}
+        <div class="w-full">
+            <a href="{{ path('app_register') }}"
+               class="terms-widget__link"
+               data-action="click->terms-widget#showModal">
+                <button {{ stimulus_target('terms-widget', 'button') }}
+                        type="button"
+                        class="w-full btn-primary btn-disabled">
+                    {{ data.AUTH_METHOD_REGISTER_LABEL.value }}
+                </button>
+            </a>
+            <p class="text-xs md:my-1 my-2 text-center text-gray-600">
+                {{ data.AUTH_METHOD_REGISTER_DESCRIPTION.value }}
+            </p>
+        </div>
+    {% endif %}
+
+    {% if data.AUTH_METHOD_SMS_REGISTER_ENABLED.value == 'true' %}
+        <div class="w-full">
+            <a href="{{ path('app_register_sms') }}"
+               class="terms-widget__link"
+               data-action="click->terms-widget#showModal">
+                <button {{ stimulus_target('terms-widget', 'button') }}
+                        type="button"
+                        class="w-full btn-primary btn-disabled">
+                    {{ data.AUTH_METHOD_SMS_REGISTER_LABEL.value }}
+                </button>
+            </a>
+            <p class="text-xs md:my-1 my-2 text-center text-gray-600">
+                {{ data.AUTH_METHOD_SMS_REGISTER_DESCRIPTION.value }}
+            </p>
+        </div>
+    {% endif %}
+</div>
+
+{# Portal Login #}
+{% if data.AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED.value == 'true' %}
+    <div class="w-full">
+        <a href="{{ path('app_login') }}"
+           class="terms-widget__link"
+           data-action="click->terms-widget#showModal">
+            <button {{ stimulus_target('terms-widget', 'button') }}
+                    type="button"
+                    class="w-full h-12 btn-secondary btn-disabled">
+                {{ data.AUTH_METHOD_LOGIN_TRADITIONAL_LABEL.value }}
+            </button>
+        </a>
+        <p class="text-xs md:my-1 my-2 text-center text-gray-600">
+            {{ data.AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION.value }}
+        </p>
+    </div>
+{% endif %}

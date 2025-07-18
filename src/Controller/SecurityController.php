@@ -19,6 +19,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class SecurityController extends AbstractController
 {
@@ -30,9 +31,10 @@ class SecurityController extends AbstractController
      */
     public function __construct(
         private readonly UserRepository $userRepository,
-        private readonly GetSettings $getSettings,
         private readonly UserExternalAuthRepository $userExternalAuthRepository,
+        private readonly GetSettings $getSettings,
         private readonly TwoFAService $twoFAService,
+        private readonly TranslatorInterface $translator,
         private readonly EntityManagerInterface $entityManager,
     ) {
     }
@@ -41,10 +43,8 @@ class SecurityController extends AbstractController
      * @throws NonUniqueResultException
      */
     #[Route('/login', name: 'app_login')]
-    public function login(
-        Request $request,
-        AuthenticationUtils $authenticationUtils
-    ): Response {
+    public function login(Request $request, AuthenticationUtils $authenticationUtils): Response
+    {
         $uuidFromExpiredLinkRegistration = $request->query->get('uuid');
 
         /** @var User $user */
@@ -65,7 +65,9 @@ class SecurityController extends AbstractController
             'uuid' => $lastUsername,
         ]);
 
-        $form = $this->createForm(LoginFormType::class, $user);
+        $form = $this->createForm(LoginFormType::class, $user, [
+            'firewallType' => FirewallType::LANDING->value,
+        ]);
         $form->handleRequest($request);
 
         // Get the login error if there is one
@@ -76,12 +78,64 @@ class SecurityController extends AbstractController
             $this->addFlash('error', $error->getMessage());
         }
 
-        return $this->render('site/login_landing.html.twig', [
+        return $this->render('landing/login/login_landing.html.twig', [
             'last_username' => $lastUsername,
             'error' => $error,
             'data' => $data,
             'form' => $form,
             'context' => FirewallType::LANDING->value,
+        ]);
+    }
+
+    #[Route('/login/confirmation', name: 'app_login_confirmation')]
+    public function loginConfirmation(
+        Request $request,
+    ): Response {
+        /** @var User $user */
+        $user = $this->getUser();
+
+        if (!$user instanceof User) {
+            return $this->redirectToRoute('app_login');
+        }
+
+        $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $user]);
+
+        // Check if the user is already verified
+        $session = $request->getSession();
+        if (
+            $userExternalAuths[0]->getProvider() !== UserProvider::PORTAL_ACCOUNT->value ||
+            $session->has('session_verified')
+        ) {
+            return $this->redirectToRoute('app_landing');
+        }
+
+        $data = $this->getSettings->getSettings();
+
+        $form = $this->createForm(TwoFACode::class);
+        $form->handleRequest($request);
+        $session = $request->getSession();
+        if ($form->isSubmitted() && $form->isValid()) {
+            $code = $form->getData()['code'];
+            if ($this->twoFAService->validate2FACode($user, $code)) {
+                $user->setIsVerified(true);
+                $user->setForgotPasswordRequest(false);
+                $this->entityManager->persist($user);
+                $this->entityManager->flush();
+                $session->set('session_verified', true);
+                return $this->redirectToRoute('app_landing');
+            }
+
+            $this->addFlash(
+                'error',
+                $this->translator->trans('invalidCode', [], 'controllers')
+            );
+        }
+
+        return $this->render('landing/login/login_landing_code_confirmation.html.twig', [
+            'data' => $data,
+            'form' => $form,
+            'context' => FirewallType::LANDING->value,
+            'user' => $user
         ]);
     }
 
@@ -105,7 +159,10 @@ class SecurityController extends AbstractController
         $user = $this->userRepository->findOneBy([
             'uuid' => $lastUsername,
         ]);
-        $form = $this->createForm(LoginFormType::class, $user);
+
+        $form = $this->createForm(LoginFormType::class, $user, [
+            'firewallType' => FirewallType::DASHBOARD->value,
+        ]);
         $form->handleRequest($request);
 
         // Get the login error if there is one
@@ -116,7 +173,7 @@ class SecurityController extends AbstractController
             $this->addFlash('error', $error->getMessage());
         }
 
-        return $this->render('admin/login_admin_landing.html.twig', [
+        return $this->render('dashboard/login/login_admin_landing.html.twig', [
             'last_username' => $lastUsername,
             'error' => $error,
             'data' => $data,

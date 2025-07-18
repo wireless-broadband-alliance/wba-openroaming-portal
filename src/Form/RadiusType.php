@@ -11,11 +11,13 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class RadiusType extends AbstractType
 {
     public function __construct(
-        private readonly GetSettings $getSettings
+        private readonly GetSettings $getSettings,
+        private readonly TranslatorInterface $translator
     ) {
     }
 
@@ -26,11 +28,11 @@ class RadiusType extends AbstractType
                 'type' => TextType::class,
                 'constraints' => [
                     new NotBlank([
-                        'message' => 'This field cannot be empty',
+                        'message' => $this->translator->trans('fieldCannotBeEmpty', [], 'CustomType'),
                     ]),
                     new Length([
                         'max' => 253,
-                        'maxMessage' => ' This field cannot be longer than {{ limit }} characters',
+                        'maxMessage' => $this->translator->trans('fieldCannotBeLongerThan', [], 'CustomType'),
                     ])
                 ],
             ],
@@ -38,11 +40,11 @@ class RadiusType extends AbstractType
                 'type' => TextType::class,
                 'constraints' => [
                     new NotBlank([
-                        'message' => 'This field cannot be empty',
+                        'message' => $this->translator->trans('fieldCannotBeEmpty', [], 'CustomType'),
                     ]),
                     new Length([
                         'max' => 253,
-                        'maxMessage' => ' This field cannot be longer than {{ limit }} characters',
+                        'maxMessage' => $this->translator->trans('fieldCannotBeLongerThan', [], 'CustomType'),
                     ])
                 ],
             ],
@@ -50,11 +52,11 @@ class RadiusType extends AbstractType
                 'type' => TextType::class,
                 'constraints' => [
                     new NotBlank([
-                        'message' => 'This field cannot be empty',
+                        'message' => $this->translator->trans('fieldCannotBeEmpty', [], 'CustomType'),
                     ]),
                     new Length([
                         'max' => 253,
-                        'maxMessage' => ' This field cannot be longer than {{ limit }} characters',
+                        'maxMessage' => $this->translator->trans('fieldCannotBeLongerThan', [], 'CustomType'),
                     ])
                 ],
             ],
@@ -62,11 +64,11 @@ class RadiusType extends AbstractType
                 'type' => TextType::class,
                 'constraints' => [
                     new NotBlank([
-                        'message' => 'This field cannot be empty',
+                        'message' => $this->translator->trans('fieldCannotBeEmpty', [], 'CustomType'),
                     ]),
                     new Length([
                         'max' => 253,
-                        'maxMessage' => ' This field cannot be longer than {{ limit }} characters',
+                        'maxMessage' => $this->translator->trans('fieldCannotBeLongerThan', [], 'CustomType'),
                     ])
                 ],
             ],
@@ -74,11 +76,11 @@ class RadiusType extends AbstractType
                 'type' => TextType::class,
                 'constraints' => [
                     new NotBlank([
-                        'message' => 'This field cannot be empty',
+                        'message' => $this->translator->trans('fieldCannotBeEmpty', [], 'CustomType'),
                     ]),
                     new Length([
                         'max' => 253,
-                        'maxMessage' => ' This field cannot be longer than {{ limit }} characters',
+                        'maxMessage' => $this->translator->trans('fieldCannotBeLongerThan', [], 'CustomType'),
                     ])
                 ],
             ],
@@ -86,11 +88,11 @@ class RadiusType extends AbstractType
                 'type' => TextType::class,
                 'constraints' => [
                     new NotBlank([
-                        'message' => 'This field cannot be empty',
+                        'message' => $this->translator->trans('fieldCannotBeEmpty', [], 'CustomType'),
                     ]),
                     new Length([
                         'max' => 253,
-                        'maxMessage' => ' This field cannot be longer than {{ limit }} characters',
+                        'maxMessage' => $this->translator->trans('fieldCannotBeLongerThan', [], 'CustomType'),
                     ])
                 ],
             ],
@@ -98,11 +100,11 @@ class RadiusType extends AbstractType
                 'type' => TextType::class,
                 'constraints' => [
                     new NotBlank([
-                        'message' => 'This field cannot be empty',
+                        'message' => $this->translator->trans('fieldCannotBeEmpty', [], 'CustomType'),
                     ]),
                     new Length([
                         'max' => 253,
-                        'maxMessage' => ' This field cannot be longer than {{ limit }} characters',
+                        'maxMessage' => $this->translator->trans('fieldCannotBeLongerThan', [], 'CustomType'),
                     ])
                 ],
             ],
@@ -110,11 +112,11 @@ class RadiusType extends AbstractType
                 'type' => TextType::class,
                 'constraints' => [
                     new NotBlank([
-                        'message' => 'This field cannot be empty',
+                        'message' => $this->translator->trans('fieldCannotBeEmpty', [], 'CustomType'),
                     ]),
                     new Length([
                         'max' => 253,
-                        'maxMessage' => ' This field cannot be longer than {{ limit }} characters',
+                        'maxMessage' => $this->translator->trans('fieldCannotBeLongerThan', [], 'CustomType'),
                     ])
                 ],
             ],
@@ -122,7 +124,7 @@ class RadiusType extends AbstractType
                 'type' => ChoiceType::class,
                 'constraints' => [
                     new NotBlank([
-                        'message' => 'Please select an option',
+                        'message' => $this->translator->trans('selectOption', [], 'CustomType'),
                     ]),
                 ],
             ],
@@ -138,7 +140,7 @@ class RadiusType extends AbstractType
                             'WPA 2' => ProfileType::WPA2->value,
                             'WPA 3' => ProfileType::WPA3->value,
                         ];
-                        $formFieldOptions['placeholder'] = 'Select an option';
+                        $formFieldOptions['placeholder'] = $this->translator->trans('selectOption', [], 'CustomType');
                         $formFieldOptions['required'] = true;
                     }
                     $formFieldOptions['attr']['description'] = $this->getSettings->getSettingDescription($settingName);

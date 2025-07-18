@@ -14,7 +14,7 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 class NewPasswordAccountType extends AbstractType
 {
     /**
-     * @param GetSettings $getSettings The instance of GetSettings class.
+     * @param GetSettings $getSettings The instance of the GetSettings class.
      */
     public function __construct(
         private readonly GetSettings $getSettings

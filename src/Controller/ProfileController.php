@@ -29,6 +29,7 @@ use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class ProfileController extends AbstractController
 {
@@ -41,6 +42,7 @@ class ProfileController extends AbstractController
         private readonly UserExternalAuthRepository $userExternalAuthRepository,
         private readonly ExpirationProfileService $expirationProfileService,
         private readonly TwoFAService $twoFAService,
+        private readonly TranslatorInterface $translator
     ) {
     }
 
@@ -242,7 +244,11 @@ class ProfileController extends AbstractController
             unlink($unSignedFilePath);
         } catch (ProcessFailedException $exception) {
             throw new RuntimeException(
-                'Signing failed: ' . $exception->getMessage(),
+                $this->translator->trans(
+                    'signingFailed',
+                    [],
+                    'controllers'
+                ) . $exception->getMessage(),
                 $exception->getCode(),
                 $exception
             );
@@ -359,7 +365,11 @@ class ProfileController extends AbstractController
             unlink($unSignedFilePath);
         } catch (ProcessFailedException $exception) {
             throw new RuntimeException(
-                'Signing failed: ' . $exception->getMessage(),
+                $this->translator->trans(
+                    'signingFailed',
+                    [],
+                    'controllers'
+                ) . $exception->getMessage(),
                 $exception->getCode(),
                 $exception
             );
@@ -400,7 +410,14 @@ class ProfileController extends AbstractController
         $cache = new CacheUtils();
         $profileData = $cache->read('profile_' . $request->query->get("uuid"));
         if (!$profileData) {
-            $this->addFlash('error', 'Profile not found');
+            $this->addFlash(
+                'error',
+                $this->translator->trans(
+                    'profileNotFound',
+                    [],
+                    'controllers'
+                )
+            );
             return $this->redirectToRoute('app_landing');
         }
         $response = new Response($profileData);
@@ -512,20 +529,38 @@ class ProfileController extends AbstractController
         if ($user->getDeletedAt() instanceof DateTimeInterface) {
             $this->addFlash(
                 'error',
-                'Your account has been deleted. Please, for more information contact our support.'
+                $this->translator->trans(
+                    'accountDeletedMessage',
+                    [],
+                    'controllers'
+                )
             );
             $this->redirectToRoute('app_landing');
             return true;
         }
 
         if ($user->getBannedAt() instanceof DateTimeInterface) {
-            $this->addFlash('error', 'Your account is banned. Please, for more information contact our support.');
+            $this->addFlash(
+                'error',
+                $this->translator->trans(
+                    'accountBanned',
+                    [],
+                    'controllers'
+                )
+            );
             $this->redirectToRoute('app_landing');
             return true;
         }
 
         if ($user->isDisabled()) {
-            $this->addFlash('error', 'Your account currently is disabled.');
+            $this->addFlash(
+                'error',
+                $this->translator->trans(
+                    'accountDisabled',
+                    [],
+                    'controllers'
+                )
+            );
             $this->redirectToRoute('app_landing');
             return true;
         }
@@ -540,16 +575,20 @@ class ProfileController extends AbstractController
             if ($userExternalAuths === UserProvider::EMAIL->value) {
                 $this->addFlash(
                     'error',
-                    'Your account is not verified to download a profile, 
-                    before being able to download a profile you need to confirm your account by 
-                    clicking on the link send to you via email!'
+                    $this->translator->trans(
+                        'accountNotVerifiedToDownloadProfile',
+                        [],
+                        'controllers'
+                    )
                 );
             } elseif ($userExternalAuths === UserProvider::PHONE_NUMBER->value) {
                 $this->addFlash(
                     'error',
-                    'Your account is not verified to download a profile, 
-                    before being able to download a profile you need to confirm your account by 
-                   inserting the code send to you via SMS!'
+                    $this->translator->trans(
+                        'accountNotVerifiedToDownloadProfileSMS',
+                        [],
+                        'controllers'
+                    )
                 );
             }
             $this->redirectToRoute('app_landing');
@@ -557,7 +596,14 @@ class ProfileController extends AbstractController
         }
 
         if ($user->isForgotPasswordRequest()) {
-            $this->addFlash('error', 'Your account is currently with a request pending approval!');
+            $this->addFlash(
+                'error',
+                $this->translator->trans(
+                    'accountCurrentlyPendingApproval',
+                    [],
+                    'controllers'
+                )
+            );
             $this->redirectToRoute('app_landing');
             return true;
         }

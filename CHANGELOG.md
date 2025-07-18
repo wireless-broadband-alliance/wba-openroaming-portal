@@ -1,5 +1,13 @@
 # Changelog
 
+- New Feature: Responsive Translations (Available: EN & PT-PT) - Administrator can just add new configurations for YAML
+  files in the translations folder, and the page auto-detects the added language.
+- New Listener to auto-detection of the user language.
+- Session token to auto-detect the new required `_locale`.
+- Fix bug with registration links, use could use them to re-log in to the portal at any time, can only be used once.
+- Optimized the `GetSettings` service to significantly reduce the loading process, improving application performance by
+  minimizing redundant data processing and database queries.
+- Rework Automation commands to use official symfony bundle about CRON's.
 # Release V1.8.1
 
 - Removed duplicated field relative to the user account verification, (Account Verification & User

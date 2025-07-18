@@ -14,7 +14,7 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 class ForgotPasswordSMSType extends AbstractType
 {
     /**
-     * @param GetSettings $getSettings The instance of GetSettings class.
+     * @param GetSettings $getSettings The instance of the GetSettings class.
      */
     public function __construct(
         private readonly GetSettings $getSettings
@@ -24,7 +24,7 @@ class ForgotPasswordSMSType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $data = $this->getSettings->getSettings();
-        $regionInputs = explode(',', (string) $data['DEFAULT_REGION_PHONE_INPUTS']['value']);
+        $regionInputs = explode(',', (string)$data['DEFAULT_REGION_PHONE_INPUTS']['value']);
         $regionInputs = array_map('trim', $regionInputs);
         $turnstileCheckerValue = $data['TURNSTILE_CHECKER']['value'];
 

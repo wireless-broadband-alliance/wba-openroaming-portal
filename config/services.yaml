@@ -26,6 +26,9 @@ parameters:
   app.metrics_enabled: '%env(bool:METRICS_ENABLED)%'
   app.metrics_allowed_ips: '%env(string:METRICS_ALLOWED_IPS)%'
 services:
+    App\EventListener\LocaleListener:
+      tags:
+        - { name: kernel.event_listener, event: kernel.request, priority: 20 }
     PixelOpen\CloudflareTurnstileBundle\Http\CloudflareTurnstileHttpClient:
         alias: 'turnstile.http_client'
     App\Service\JWTTokenGenerator:

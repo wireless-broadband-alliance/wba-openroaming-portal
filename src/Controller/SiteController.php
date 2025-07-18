@@ -2,8 +2,7 @@
 
 namespace App\Controller;
 
-use App\Entity\Setting;
-use App\Entity\TextEditor;
+use App\Entity\Event;
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
 use App\Enum\AnalyticalEventType;
@@ -11,8 +10,6 @@ use App\Enum\FirewallType;
 use App\Enum\OperationMode;
 use App\Enum\OSTypes;
 use App\Enum\PlatformMode;
-use App\Enum\TextEditorName;
-use App\Enum\TextInputType;
 use App\Enum\TwoFAType;
 use App\Enum\UserProvider;
 use App\Enum\UserRadiusProfileRevokeReason;
@@ -22,6 +19,7 @@ use App\Form\NewPasswordAccountType;
 use App\Form\RegistrationFormType;
 use App\Form\RevokeProfilesType;
 use App\Form\TOSType;
+use App\Repository\EventRepository;
 use App\Repository\UserExternalAuthRepository;
 use App\Security\LandingAuthenticator;
 use App\Service\EventActions;
@@ -35,12 +33,12 @@ use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * @method getParameterBag()
@@ -50,14 +48,11 @@ class SiteController extends AbstractController
     /**
      * SiteController constructor.
      *
-     * @param UserExternalAuthRepository $userExternalAuthRepository The repository required to fetch the provider.
-     * @param GetSettings $getSettings The instance of GetSettings class.
+     * @param UserExternalAuthRepository $userExternalAuthRepository The repository is required to fetch the provider.
+     * @param GetSettings $getSettings The instance of the GetSettings class.
      * @param EventActions $eventActions Used to generate event related to the User creation
      * of the user account
      * @param ProfileManager $profileManager Calls the functions to enable/disable provisioning profiles
-     * @param TwoFAService $twoFAService Calls the functions to manage the 2fa configuration request
-     * @param UserDeletionService $userDeletionService Calls the functions responsible for user account deletion
-     * @param EntityManagerInterface $entityManager Call the symfony responsible bundle for data submission to DB
      */
     public function __construct(
         private readonly UserExternalAuthRepository $userExternalAuthRepository,
@@ -65,6 +60,7 @@ class SiteController extends AbstractController
         private readonly EventActions $eventActions,
         private readonly ProfileManager $profileManager,
         private readonly TwoFAService $twoFAService,
+        private readonly TranslatorInterface $translator,
         private readonly UserDeletionService $userDeletionService,
         private readonly EntityManagerInterface $entityManager,
     ) {
@@ -77,10 +73,10 @@ class SiteController extends AbstractController
         UserAuthenticatorInterface $userAuthenticator,
         LandingAuthenticator $authenticator,
         EntityManagerInterface $entityManager,
-        RequestStack $requestStack
     ): Response {
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings();
+
         /** @var User $currentUser */
         $currentUser = $this->getUser();
         $session = $request->getSession();
@@ -94,11 +90,8 @@ class SiteController extends AbstractController
         ) {
             // Retrieve the cookie about SAML_ACCOUNT Deletion from the request
             $previousLoggedID = $request->cookies->get('previousLoggedID');
-
-            // $previousLoggedID it's a string
-            // currentUser->getID it's an int
+            $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $currentUser]);
             if ($previousLoggedID && $previousLoggedID == $currentUser->getId()) {
-                $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $currentUser]);
                 $this->userDeletionService->deleteUser(
                     $currentUser,
                     $userExternalAuths,
@@ -109,11 +102,11 @@ class SiteController extends AbstractController
                 return $this->redirectToRoute('app_logout');
             }
 
-            // Checks if the user has a "forgot_password_request", if yes, return to password reset form
+            // Checks if the user has a "forgot_password_request", if yes, return to the password-reset form
             if ($currentUser->isForgotPasswordRequest()) {
                 $this->addFlash(
                     'error',
-                    'You need to confirm the new password before download a profile!'
+                    $this->translator->trans('confirmNewPasswordBeforeDownloadProfile', [], 'controllers')
                 );
                 return $this->redirectToRoute('app_site_forgot_password_checker');
             }
@@ -122,65 +115,112 @@ class SiteController extends AbstractController
             }
 
             // Check if the user is verified
-            if (!$session->has('session_verified') && !$currentUser->isVerified()) {
+            if (
+                $userExternalAuths[0]->getProvider() === UserProvider::PORTAL_ACCOUNT->value &&
+                !$session->has('session_verified')
+            ) {
+                if (
+                    $this->twoFAService->canValidationCode(
+                        $currentUser,
+                        AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE->value
+                    )
+                ) {
+                    $this->twoFAService->generate2FACode(
+                        $currentUser,
+                        $request->getClientIp(),
+                        $request->headers->get('User-Agent'),
+                        AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE->value
+                    );
+                    $this->addFlash(
+                        'success',
+                        $this->translator->trans('codeSentSuccessfully', [], 'controllers')
+                    );
+                    return $this->redirectToRoute('app_login_confirmation');
+                }
+                $interval_minutes = $this->twoFAService->timeLeftToResendCode(
+                    $currentUser,
+                    AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE->value
+                );
+                $this->addFlash(
+                    'error',
+                    $this->translator->trans(
+                        'codeAlreadySent',
+                        [
+                            '%minutes%' => $interval_minutes
+                        ],
+                        'controllers'
+                    )
+                );
                 return $this->redirectToRoute('app_login_confirmation');
             }
 
-            // Checks the 2FA status of the platform if mandatory forces the user to configure it
-            if (
-                $currentUser->getUserExternalAuths() &&
-                ($data['TWO_FACTOR_AUTH_STATUS']['value'] ===
-                    TwoFAType::ENFORCED_FOR_LOCAL->value &&
-                    $currentUser->getUserExternalAuths()->get(0)->getProvider() ===
-                    UserProvider::PORTAL_ACCOUNT->value && ($currentUser->getTwoFAType() === null ||
-                        $currentUser->getTwoFAType() ===
-                        UserTwoFactorAuthenticationStatus::DISABLED->value))
-            ) {
-                return $this->redirectToRoute('app_configure2FA');
-            }
-            if (
-                $data['TWO_FACTOR_AUTH_STATUS']['value'] === TwoFAType::ENFORCED_FOR_ALL->value &&
-                ($currentUser->getTwoFAType() === null ||
-                    $currentUser->getTwoFAType() ===
-                    UserTwoFactorAuthenticationStatus::DISABLED->value)
-            ) {
-                return $this->redirectToRoute('app_configure2FA');
-            }
-        }
 
-        if (
-            $currentUser &&
-            (
-                $currentUser->getTwoFAType() !==
-                UserTwoFactorAuthenticationStatus::DISABLED->value &&
-                !$session->has('2fa_verified_landing'))
-        ) {
             if (
-                $currentUser->getTwoFAType() ===
-                UserTwoFactorAuthenticationStatus::SMS->value
+                $currentUser &&
+                ($data["LOGIN_WITH_UUID_ONLY"]["value"] === OperationMode::OFF->value ||
+                $currentUser->getUserExternalAuths()[0]->getProvider() !== UserProvider::PORTAL_ACCOUNT->value)
             ) {
-                return $this->redirectToRoute('app_2FA_generate_code');
-            }
-            if (
-                $currentUser->getTwoFAType() ===
-                UserTwoFactorAuthenticationStatus::EMAIL->value
-            ) {
-                return $this->redirectToRoute('app_2FA_generate_code');
-            }
-            if (
-                $currentUser->getTwoFAType() ===
-                UserTwoFactorAuthenticationStatus::TOTP->value
-            ) {
-                return $this->redirectToRoute('app_verify2FA_TOTP');
+                // Checks the 2FA status of the platform if mandatory forces the user to configure it
+                if (
+                    $currentUser->getUserExternalAuths() &&
+                    ($data['TWO_FACTOR_AUTH_STATUS']['value'] ===
+                        TwoFAType::ENFORCED_FOR_LOCAL->value &&
+                        $currentUser->getUserExternalAuths()->get(0)->getProvider() ===
+                        UserProvider::PORTAL_ACCOUNT->value && ($currentUser->getTwoFAType() === null ||
+                            $currentUser->getTwoFAType() ===
+                            UserTwoFactorAuthenticationStatus::DISABLED->value))
+                ) {
+                    return $this->redirectToRoute('app_configure2FA');
+                }
+                if (
+                    $data['TWO_FACTOR_AUTH_STATUS']['value'] === TwoFAType::ENFORCED_FOR_ALL->value &&
+                    ($currentUser->getTwoFAType() === null ||
+                        $currentUser->getTwoFAType() ===
+                        UserTwoFactorAuthenticationStatus::DISABLED->value)
+                ) {
+                    return $this->redirectToRoute('app_configure2FA');
+                }
             }
         }
-        // check if the user have otpCodes
         if (
             $currentUser &&
-            $currentUser->getTwoFAtype() !== UserTwoFactorAuthenticationStatus::DISABLED->value &&
-            !$this->twoFAService->hasValidOTPCodes($currentUser)
+            ($data["LOGIN_WITH_UUID_ONLY"]["value"] === OperationMode::OFF->value ||
+            $currentUser->getUserExternalAuths()[0]->getProvider() !== UserProvider::PORTAL_ACCOUNT->value)
         ) {
-            return $this->redirectToRoute('app_otpCodes');
+            if (
+                $currentUser &&
+                (
+                    $currentUser->getTwoFAType() !==
+                    UserTwoFactorAuthenticationStatus::DISABLED->value &&
+                    !$session->has('2fa_verified_landing'))
+            ) {
+                if (
+                    $currentUser->getTwoFAType() ===
+                    UserTwoFactorAuthenticationStatus::SMS->value
+                ) {
+                    return $this->redirectToRoute('app_2FA_generate_code');
+                }
+                if (
+                    $currentUser->getTwoFAType() ===
+                    UserTwoFactorAuthenticationStatus::EMAIL->value
+                ) {
+                    return $this->redirectToRoute('app_2FA_generate_code');
+                }
+                if (
+                    $currentUser->getTwoFAType() ===
+                    UserTwoFactorAuthenticationStatus::TOTP->value
+                ) {
+                    return $this->redirectToRoute('app_verify2FA_TOTP');
+                }
+            }
+            // Check if the user has OTPCodes
+            if (
+                $currentUser &&
+                $currentUser->getTwoFAtype() !== UserTwoFactorAuthenticationStatus::DISABLED->value &&
+                !$this->twoFAService->hasValidOTPCodes($currentUser)
+            ) {
+                return $this->redirectToRoute('app_otpCodes');
+            }
         }
 
         // Check if the current user has a provider
@@ -197,12 +237,27 @@ class SiteController extends AbstractController
         }
 
         $userAgent = $request->headers->get('User-Agent');
-        $actionName = $requestStack->getCurrentRequest()->attributes->get('_route');
+        $actionName = $request->attributes->get('_route');
+
         if ($data['PLATFORM_MODE']['value']) {
             if ($request->isMethod('POST')) {
                 $payload = $request->request->all();
+                if ($data['TURNSTILE_CHECKER']['value'] === OperationMode::ON->value) {
+                    $turnstileResponse = $request->request->get('cf-turnstile-response');
+                    // Validate the Turnstile CAPTCHA
+                    if ((empty($turnstileResponse) && !$this->getUser())) {
+                        $this->addFlash(
+                            'error',
+                            $this->translator->trans('invalidCaptcha', [], 'landing')
+                        );
+                        return $this->redirectToRoute('app_landing');
+                    }
+                }
                 if (empty($payload['radio-os']) && empty($payload['detected-os'])) {
-                    $this->addFlash('error', 'Please select Operating System!');
+                    $this->addFlash(
+                        'error',
+                        $this->translator->trans('selectOperatingSystem', [], 'controllers')
+                    );
                 } elseif (!$this->getUser() instanceof UserInterface) {
                     $user = new User();
                     $userAuths = new UserExternalAuth();
@@ -245,6 +300,7 @@ class SiteController extends AbstractController
                     if ($data["USER_VERIFICATION"]['value'] === OperationMode::ON->value) {
                         return $this->redirectToRoute('app_login_confirmation');
                     }
+
                     if ($data["USER_VERIFICATION"]['value'] === OperationMode::OFF->value) {
                         return $this->redirectToRoute('app_landing');
                     }
@@ -279,7 +335,10 @@ class SiteController extends AbstractController
         } elseif ($request->isMethod('POST')) {
             $payload = $request->request->all();
             if (empty($payload['radio-os']) && empty($payload['detected-os'])) {
-                $this->addFlash('error', 'Please select Operating System!');
+                $this->addFlash(
+                    'error',
+                    $this->translator->trans('selectOperatingSystem', [], 'controllers')
+                );
             }
             if (!array_key_exists('radio-os', $payload)) {
                 if (!array_key_exists('detected-os', $payload)) {
@@ -325,7 +384,10 @@ class SiteController extends AbstractController
         ];
 
         if ($data['os']['selected'] === OSTypes::NONE->value && $currentUser && $currentUser->isVerified()) {
-            $this->addFlash('error', 'Please select Operating System!');
+            $this->addFlash(
+                'error',
+                $this->translator->trans('selectOperatingSystem', [], 'controllers')
+            );
         }
 
         $form = $this->createForm(AccountUserUpdateLandingType::class, $this->getUser());
@@ -334,7 +396,7 @@ class SiteController extends AbstractController
         $formRevokeProfiles = $this->createForm(RevokeProfilesType::class, $this->getUser());
         $formTOS = $this->createForm(TOSType::class);
 
-        return $this->render('site/landing.html.twig', [
+        return $this->render('landing/landing.html.twig', [
             'form' => $form->createView(),
             'formPassword' => $formPassword->createView(),
             'formTOS' => $formTOS,
@@ -343,78 +405,8 @@ class SiteController extends AbstractController
             'data' => $data,
             'userExternalAuths' => $externalAuthsData,
             'user' => $currentUser,
-            'context' => FirewallType::LANDING->value
+            'context' => FirewallType::LANDING->value,
         ]);
-    }
-
-    #[Route('/terms-conditions', name: 'app_terms_conditions')]
-    public function termsConditions(): RedirectResponse|Response
-    {
-        // Call the getSettings method of GetSettings class to retrieve the data
-        $data = $this->getSettings->getSettings();
-
-        $settingsRepository = $this->entityManager->getRepository(Setting::class);
-        $tosFormat = $settingsRepository->findOneBy(['name' => 'TOS']);
-        $textEditorRepository = $this->entityManager->getRepository(TextEditor::class);
-
-        if (
-            $tosFormat &&
-            $tosFormat->getValue() === TextInputType::TEXT_EDITOR->value
-        ) {
-            $textEditorEntry = $textEditorRepository->findOneBy(['name' => TextEditorName::TOS->value]);
-            $content = $textEditorEntry !== null ? $textEditorEntry->getContent() : '';
-
-            return $this->render('site/shared/tos/_tos.html.twig', [
-                'content' => $content,
-                'data' => $data
-            ]);
-        }
-
-        if (
-            $tosFormat &&
-            $tosFormat->getValue() === TextInputType::LINK->value &&
-            $settingsRepository->findOneBy(['name' => 'TOS_LINK'])
-        ) {
-            $tosLink = $settingsRepository->findOneBy(['name' => 'TOS_LINK'])->getValue();
-            return $this->redirect($tosLink);
-        }
-
-        return $this->redirectToRoute('app_landing');
-    }
-
-    #[Route('/privacy-policy', name: 'app_privacy_policy')]
-    public function privacyPolicy(): RedirectResponse|Response
-    {
-        // Call the getSettings method of GetSettings class to retrieve the data
-        $data = $this->getSettings->getSettings();
-
-        $settingsRepository = $this->entityManager->getRepository(Setting::class);
-        $textEditorRepository = $this->entityManager->getRepository(TextEditor::class);
-        $privacyPolicyFormat = $settingsRepository->findOneBy(['name' => 'PRIVACY_POLICY']);
-
-        if (
-            $privacyPolicyFormat &&
-            $privacyPolicyFormat->getValue() === TextInputType::TEXT_EDITOR->value
-        ) {
-            $privacyPolicyEntry = $textEditorRepository->findOneBy(['name' => TextEditorName::PRIVACY_POLICY->value]);
-            $content = $privacyPolicyEntry !== null ? $privacyPolicyEntry->getContent() : '';
-
-            return $this->render('site/shared/tos/_privacy_policy.html.twig', [
-                'content' => $content,
-                'data' => $data
-            ]);
-        }
-
-        if (
-            $privacyPolicyFormat &&
-            $privacyPolicyFormat->getValue() === TextInputType::LINK->value &&
-            $settingsRepository->findOneBy(['name' => 'PRIVACY_POLICY_LINK'])
-        ) {
-            $privacyPolicyLink = $settingsRepository->findOneBy(['name' => 'PRIVACY_POLICY_LINK'])->getValue();
-            return $this->redirect($privacyPolicyLink);
-        }
-
-        return $this->redirectToRoute('app_landing');
     }
 
 
@@ -444,7 +436,10 @@ class SiteController extends AbstractController
                 true
             );
             if (!$revokeProfiles) {
-                $this->addFlash('error', 'This account doesn\'t have profiles associated!');
+                $this->addFlash(
+                    'error',
+                    $this->translator->trans('accountWithoutProfilesAssociated', [], 'controllers')
+                );
                 return $this->redirectToRoute('app_landing');
             }
             $eventMetaData = [
@@ -460,7 +455,10 @@ class SiteController extends AbstractController
                 $eventMetaData
             );
 
-            $this->addFlash('success', 'Your profiles associated with this account have been revoked.');
+            $this->addFlash(
+                'success',
+                $this->translator->trans('profilesAssociatedRevoked', [], 'controllers')
+            );
             return $this->redirectToRoute('app_landing');
         }
 
@@ -489,7 +487,10 @@ class SiteController extends AbstractController
                 $eventMetaData
             );
 
-            $this->addFlash('success', 'Your account information has been updated');
+            $this->addFlash(
+                'success',
+                $this->translator->trans('accountInformationUpdated', [], 'controllers')
+            );
 
             // Redirect the user upon successful form submission
             return $this->redirectToRoute('app_landing');
@@ -507,15 +508,17 @@ class SiteController extends AbstractController
 
             // Compare the typed password with the hashed password from the database
             if (!password_verify((string)$typedPassword, $currentPasswordDB)) {
-                $this->addFlash('error', 'Current password Invalid. Please try again.');
+                $this->addFlash(
+                    'error',
+                    $this->translator->trans('passwordInvalid', [], 'controllers')
+                );
                 return $this->redirectToRoute('app_landing');
             }
 
             if ($formPassword->get('newPassword')->getData() !== $formPassword->get('confirmPassword')->getData()) {
                 $this->addFlash(
                     'error',
-                    'Please make sure to type the same password on both fields. 
-                    If the problem keep occurring contact our support!'
+                    $this->translator->trans('typeTheSamePasswordBothFields', [], 'controllers')
                 );
                 return $this->redirectToRoute('app_landing');
             }
@@ -527,6 +530,9 @@ class SiteController extends AbstractController
             if ($session->has('_security_dashboard')) {
                 $session->remove('_security_dashboard');
             }
+
+            $em->persist($user);
+            $em->flush();
 
             $this->entityManager->persist($user);
             $this->entityManager->flush();
@@ -544,7 +550,10 @@ class SiteController extends AbstractController
                 $eventMetaData
             );
 
-            $this->addFlash('success', 'Your password has been updated successfully!');
+            $this->addFlash(
+                'success',
+                $this->translator->trans('passwordUpdatedSuccessfully', [], 'controllers')
+            );
         }
 
         return $this->redirectToRoute('app_landing');

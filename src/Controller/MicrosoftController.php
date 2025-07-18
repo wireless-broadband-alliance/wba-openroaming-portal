@@ -32,6 +32,7 @@ use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class MicrosoftController extends AbstractController
 {
@@ -47,6 +48,7 @@ class MicrosoftController extends AbstractController
         private readonly UserRepository $userRepository,
         private readonly UserStatusChecker $userStatusChecker,
         private readonly UserExternalAuthRepository $userExternalAuthRepository,
+        private readonly TranslatorInterface $translator,
         private readonly CsrfTokenManagerInterface $csrfTokenManager,
     ) {
     }
@@ -64,7 +66,11 @@ class MicrosoftController extends AbstractController
         if ($data['PLATFORM_MODE']['value'] === true) {
             $this->addFlash(
                 'error',
-                'The portal is in Demo mode - it is not possible to use this verification method.'
+                $this->translator->trans(
+                    'portalInDemoMode',
+                    [],
+                    'controllers'
+                )
             );
             return $this->redirectToRoute('app_landing');
         }
@@ -106,7 +112,11 @@ class MicrosoftController extends AbstractController
         if ($code === null) {
             $this->addFlash(
                 'error',
-                'Authentication process cancelled.'
+                $this->translator->trans(
+                    'authenticationProcessCancelled',
+                    [],
+                    'controllers'
+                )
             );
             return $this->redirectToRoute('app_landing');
         }
@@ -141,7 +151,11 @@ class MicrosoftController extends AbstractController
         if (!$this->userStatusChecker->isValidEmail($email, UserProvider::MICROSOFT_ACCOUNT->value)) {
             $this->addFlash(
                 'error',
-                'Sorry! Your email domain is not allowed to use this platform'
+                $this->translator->trans(
+                    'emailDomainNotAllowed',
+                    [],
+                    'controllers'
+                )
             );
             return $this->redirectToRoute('app_landing');
         }
@@ -158,7 +172,11 @@ class MicrosoftController extends AbstractController
         if ($user->getBannedAt() instanceof DateTimeInterface) {
             $this->addFlash(
                 'error',
-                'Your account is banned. Please, for more information contact our support.'
+                $this->translator->trans(
+                    'accountBanned',
+                    [],
+                    'controllers'
+                )
             );
             return $this->redirectToRoute('app_landing');
         }
@@ -203,8 +221,11 @@ class MicrosoftController extends AbstractController
 
             $this->addFlash(
                 'error',
-                'Email is already in use but is associated with a different provider! 
-                Please use the original one.'
+                $this->translator->trans(
+                    'emailIsAlreadyInUse',
+                    [],
+                    'controllers'
+                )
             );
 
             return null;
@@ -298,7 +319,7 @@ class MicrosoftController extends AbstractController
             $this->entityManager->flush();
         } catch (AuthenticationException $exception) {
             // Handle authentication failure
-            $errorMessage = 'Authentication failed:'
+            $errorMessage = $this->translator->trans('authenticationFailed', [], 'controllers')
                 . $exception->getMessage();
             $this->addFlash('error', $errorMessage);
             $this->redirectToRoute('app_landing');

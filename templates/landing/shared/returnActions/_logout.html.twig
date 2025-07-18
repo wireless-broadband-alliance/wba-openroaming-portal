@@ -1,0 +1,22 @@
+{# Divider #}
+<div class="my-[25px] divider"></div>
+
+<p class="text-[#212529] text-opacity-40 text-sm my-5">
+    {{ 'authenticatedAs'|trans({}, 'landing') }}
+    {% for auth in user.userExternalAuths %}
+        {% if auth.provider == constant('App\\Enum\\UserProvider::SAML').value %}
+            {{ auth.providerId }}
+        {% else %}
+            {{ app.user.uuid }}
+        {% endif %}
+    {% endfor %}
+</p>
+
+<a {% if context == constant('App\\Enum\\FirewallType::DASHBOARD').value %}
+            href="{{ path('app_dashboard_logout') }}"
+        {% else %}
+            href="{{ path('app_logout') }}"
+        {% endif %}
+        class="w-[160px] btn-logout">
+    {{ 'twoFactorAuth.logout'|trans({}, '_account_widget') }}
+</a>
