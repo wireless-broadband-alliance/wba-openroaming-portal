@@ -13,13 +13,13 @@
 
     {# Description #}
     <div class="mt-2">
-        {{ include('/admin/shared/settings_actions/_description.html.twig', {
+        {{ include('/dashboard/shared/settings_actions/_description.html.twig', {
             description: description,
         }) }}
     </div>
 
     <div class="{{ 'hidden' in field.advanced.vars.attr.class ? 'hidden' : '' }}">
-        {{ include('admin/shared/settings_actions/schedule/subcard.html.twig', {
+        {{ include('dashboard/shared/settings_actions/schedule/subcard.html.twig', {
             field: field.advanced,
             field_label: 'Advanced Mode',
             description: 'Write a complete CRON expression.',
@@ -27,7 +27,7 @@
     </div>
 
     <div class="{{ 'hidden' in field.day_of_week.vars.attr.class ? 'hidden' : '' }}">
-        {{ include('admin/shared/settings_actions/schedule/subcard.html.twig', {
+        {{ include('dashboard/shared/settings_actions/schedule/subcard.html.twig', {
             field: field.day_of_week,
             frequency_field: field.day_of_week_frequency,
             field_label: 'Day of the Week',
@@ -38,7 +38,7 @@
     </div>
 
     <div class="{{ 'hidden' in field.day_of_month.vars.attr.class ? 'hidden' : '' }}">
-        {{ include('admin/shared/settings_actions/schedule/subcard.html.twig', {
+        {{ include('dashboard/shared/settings_actions/schedule/subcard.html.twig', {
             field: field.day_of_month,
             frequency_field: field.day_of_month_frequency,
             field_label: 'Day of the Month',
@@ -49,7 +49,7 @@
     </div>
 
     <div class="{{ 'hidden' in field.months_of_the_year.vars.attr.class ? 'hidden' : '' }}">
-        {{ include('admin/shared/settings_actions/schedule/subcard.html.twig', {
+        {{ include('dashboard/shared/settings_actions/schedule/subcard.html.twig', {
             field: field.months_of_the_year,
             frequency_field: field.months_of_the_year_frequency,
             field_label: 'Months of the Year',
@@ -60,7 +60,7 @@
     </div>
 
     <div class="{{ 'hidden' in field.time.vars.attr.class ? 'hidden' : '' }}">
-        {{ include('admin/shared/settings_actions/schedule/subcard.html.twig', {
+        {{ include('dashboard/shared/settings_actions/schedule/subcard.html.twig', {
             field: field.time,
             field_label: 'Execution Time',
             description: 'Set the time of day it should run.',

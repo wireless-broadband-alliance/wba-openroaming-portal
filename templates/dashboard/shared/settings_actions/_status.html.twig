@@ -32,7 +32,7 @@
                         </div>
 
                         {# Card Description #}
-                        {{ include('/admin/shared/settings_actions/_description.html.twig', {description: setting.vars.attr.description}) }}
+                        {{ include('/dashboard/shared/settings_actions/_description.html.twig', {description: setting.vars.attr.description}) }}
 
                         {% if setting.vars.name in ['PLATFORM_MODE', 'USER_VERIFICATION', 'TURNSTILE_CHECKER', 'API_STATUS'] %}
                             <div class="flex items-center space-x-2 mt-5">
