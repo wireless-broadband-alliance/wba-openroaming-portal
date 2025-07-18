@@ -77,7 +77,7 @@
                                 <label class="w-full">
                                     <input type="text"
                                            class="form-widget w-full p-2 bg-transparent border-none outline-none"
-                                           placeholder="Search Users ..." name="u"
+                                           placeholder= {{ 'searchUsers'|trans({}, 'dashboard') }} name="u"
                                            value="{{ app.request.query.get('u', '') }}">
                                 </label>
                                 {# Hidden Filter Input #}
