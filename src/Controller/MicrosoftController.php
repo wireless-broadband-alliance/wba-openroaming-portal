@@ -17,8 +17,10 @@ use DateTime;
 use DateTimeInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
+use GuzzleHttp\Exception\GuzzleException;
 use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
+use Random\RandomException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -54,7 +56,7 @@ class MicrosoftController extends AbstractController
     }
 
     /**
-     * @throws \JsonException
+     * @throws Exception
      */
     #[Route('/connect/microsoft', name: 'connect_microsoft')]
     public function connect(Request $request): RedirectResponse
@@ -101,6 +103,7 @@ class MicrosoftController extends AbstractController
     /**
      * @throws IdentityProviderException
      * @throws Exception
+     * @throws GuzzleException
      */
     #[Route('/connect/microsoft/check', name: 'connect_microsoft_check', methods: ['GET'])]
     public function connectCheck(Request $request): RedirectResponse
@@ -198,6 +201,9 @@ class MicrosoftController extends AbstractController
         return $this->redirectToRoute('app_landing');
     }
 
+    /**
+     * @throws RandomException
+     */
     private function findOrCreateMicrosoftUser(
         string $microsoftUserId,
         string $email,
@@ -329,7 +335,7 @@ class MicrosoftController extends AbstractController
 
     /**
      * @throws IdentityProviderException
-     * @throws Exception
+     * @throws Exception|GuzzleException
      */
     public function fetchUserFromMicrosoft(string $code): ?User
     {

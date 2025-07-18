@@ -14,6 +14,7 @@ use App\Service\EventActions;
 use App\Service\GetSettings;
 use App\Service\UserStatusChecker;
 use DateTime;
+use DateTimeInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use GuzzleHttp\Exception\GuzzleException;
@@ -56,6 +57,9 @@ class GoogleController extends AbstractController
     ) {
     }
 
+    /**
+     * @throws Exception
+     */
     #[Route('/connect/google', name: 'connect_google')]
     public function connect(Request $request): RedirectResponse
     {
@@ -158,7 +162,7 @@ class GoogleController extends AbstractController
         }
 
         // Check if the user is banned
-        if ($user->getBannedAt() instanceof \DateTimeInterface) {
+        if ($user->getBannedAt() instanceof DateTimeInterface) {
             $this->addFlash(
                 'error',
                 $this->translator->trans(
@@ -321,7 +325,7 @@ class GoogleController extends AbstractController
 
     /**
      * @throws IdentityProviderException
-     * @throws Exception
+     * @throws Exception|GuzzleException
      */
     public function fetchUserFromGoogle(string $code): ?User
     {
