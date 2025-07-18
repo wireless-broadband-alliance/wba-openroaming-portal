@@ -1,13 +1,15 @@
 # Changelog
 
 # Release V1.9.0
+
 - Responsive Translations (Available: EN & PT-PT) - Administrator can just add new configurations for YAML
   files in the translations folder, and the page auto-detects the added language.
 - New Listener to auto-detection of the user language.
 - Session token to auto-detect the new required `_locale`.
+- Login only with uuid → This new feature simplifies the process of authentication on the portal using only the account
+  uuid. This way the user confirms himself every time to get the confirmation code for authentication.
 - Optimized the `GetSettings` service to significantly reduce the loading process, improving application performance by
   minimizing redundant data processing and database queries.
-
 
 # Release V1.8.1
 
