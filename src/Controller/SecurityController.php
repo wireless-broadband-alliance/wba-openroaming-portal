@@ -191,58 +191,6 @@ class SecurityController extends AbstractController
         return $this->redirectToRoute('app_dashboard_login');
     }
 
-    #[Route('/login/confirmation', name: 'app_login_confirmation')]
-    public function loginConfirmation(
-        Request $request,
-    ): Response {
-        /** @var User $user */
-        $user = $this->getUser();
-
-        if (!$user instanceof User) {
-            return $this->redirectToRoute('app_login');
-        }
-
-        $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $user]);
-
-        // Check if the user is already verified
-        $session = $request->getSession();
-        if (
-            $userExternalAuths[0]->getProvider() !== UserProvider::PORTAL_ACCOUNT->value ||
-            $session->has('session_verified')
-        ) {
-            return $this->redirectToRoute('app_landing');
-        }
-
-        $data = $this->getSettings->getSettings();
-
-        $form = $this->createForm(TwoFACode::class);
-        $form->handleRequest($request);
-        $session = $request->getSession();
-        if ($form->isSubmitted() && $form->isValid()) {
-            $code = $form->getData()['code'];
-            if ($this->twoFAService->validate2FACode($user, $code)) {
-                $user->setIsVerified(true);
-                $user->setForgotPasswordRequest(false);
-                $this->entityManager->persist($user);
-                $this->entityManager->flush();
-                $session->set('session_verified', true);
-                return $this->redirectToRoute('app_landing');
-            }
-
-            $this->addFlash(
-                'error',
-                'Code Invalid. Please try again.'
-            );
-        }
-
-        return $this->render('site/login_landing_code_confirmation.html.twig', [
-            'data' => $data,
-            'form' => $form,
-            'context' => FirewallType::LANDING->value,
-            'user' => $user
-        ]);
-    }
-
     #[Route(path: '/logout', name: 'app_logout')]
     public function logout(Request $request): Response
     {
