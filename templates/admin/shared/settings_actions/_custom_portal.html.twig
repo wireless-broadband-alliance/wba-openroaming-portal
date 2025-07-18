@@ -1,34 +1,41 @@
+{{ include('shared/_select_language.html.twig', {
+    currentLocale: language,
+    routeName: 'admin_dashboard_customize',
+    warningMessage: true,
+}) }}
+
 {% set imageSettings = [
     {
         name: 'CUSTOMER_LOGO',
-        displayName: 'Customer Logo',
+        displayName: 'customerLogo'|trans({}, '_custom_portal'),
         imagePath: asset(data.CUSTOMER_LOGO.value),
     },
     {
         name: 'OPENROAMING_LOGO',
-        displayName: 'OpenRoaming Logo',
+        displayName: 'openRoamingLogo'|trans({}, '_custom_portal'),
         imagePath: asset(data.OPENROAMING_LOGO.value),
     },
     {
         name: 'WALLPAPER_IMAGE',
-        displayName: 'Wallpaper Image',
+        displayName: 'wallpaperImage'|trans({}, '_custom_portal'),
         imagePath: asset(data.WALLPAPER_IMAGE.value),
     },
 ] %}
 
 {% set textSettings = [
-    {name: 'PAGE_TITLE', displayName: 'Page Title'},
-    {name: 'WELCOME_TEXT', displayName: 'Welcome Text'},
-    {name: 'WELCOME_DESCRIPTION', displayName: 'Welcome Description'},
-    {name: 'ADDITIONAL_LABEL', displayName: 'Additional Label'},
-    {name: 'CONTACT_EMAIL', displayName: 'Contact Email'},
+    {name: 'PAGE_TITLE', displayName: 'pageTitle'|trans({}, '_custom_portal')},
+    {name: 'WELCOME_TEXT', displayName: 'welcomeText'|trans({}, '_custom_portal')},
+    {name: 'WELCOME_DESCRIPTION', displayName: 'welcomeDescription'|trans({}, '_custom_portal')},
+    {name: 'ADDITIONAL_LABEL', displayName: 'additionalLabel'|trans({}, '_custom_portal')},
+    {name: 'CONTACT_EMAIL', displayName: 'contactEmail'|trans({}, '_custom_portal')},
 ] %}
 
 {% set choiceSettings = [
-    {name: 'CUSTOMER_LOGO_ENABLED', displayName: 'Show Customer Logo'},
+    {name: 'CUSTOMER_LOGO_ENABLED', displayName: 'showCustomerLogo'|trans({}, '_custom_portal')},
 ] %}
 
-<form action="{{ path('admin_dashboard_customize') }}" method="post" enctype="multipart/form-data">
+<form action="{{ path('admin_dashboard_customize', {language: language}) }}" method="post"
+      enctype="multipart/form-data">
     {{ form_row(form._token) }}
     <div class="flex flex-col gap-8 z-0 justify-start">
         {# Choice and Images Settings #}
@@ -39,12 +46,11 @@
                     <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full"
                          name="statusCards"
                          id="{{ setting.vars.name }}" {{ stimulus_controller('radio card') }}>
-
                         {# Title and Icon #}
                         <div class="flex flex-row justify-between">
                             <div class="text-base font-medium text-center break-normal md:break-all">
                                 {% set displayName = {
-                                    CUSTOMER_LOGO_ENABLED: 'Show Customer Logo',
+                                    CUSTOMER_LOGO_ENABLED: 'showCustomerLogo'|trans({}, '_custom_portal'),
                                 }[setting.vars.name] ?? setting.vars.name %}
                                 <h1 class="text-lg md:text-xl whitespace-nowrap">{{ displayName }}</h1>
                             </div>
@@ -54,9 +60,6 @@
                                      alt="info_icon"/>
                             </label>
                         </div>
-
-                        {# Card Description #}
-                        {{ include('/admin/shared/settings_actions/_description.html.twig', {description: setting.vars.attr.description}) }}
 
                         {% if setting.vars.name in ['CUSTOMER_LOGO_ENABLED'] %}
                             <div class="flex items-center space-x-2 mt-5">
@@ -104,6 +107,8 @@
                             </div>
                         {% endif %}
 
+                        {{ include('dashboard/shared/settings_actions/_description.html.twig', {description: setting.vars.attr.description}) }}
+
                         <div class="mt-2 -mb-2 text-center text-red-500 text-base">
                             {{ form_errors(setting) }}
                         </div>
@@ -112,13 +117,13 @@
             {% endfor %}
 
             {% for imgSetting in imageSettings %}
-                {{ include('/admin/shared/settings_actions/_card.html.twig', {...imgSetting, settingType: 'image'}) }}
+                {{ include('/dashboard/shared/settings_actions/_card.html.twig', {...imgSetting, settingType: 'image'}) }}
             {% endfor %}
         </div>
         {# Text Settings #}
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {% for textSetting in textSettings %}
-                {{ include('/admin/shared/settings_actions/_card.html.twig', {...textSetting, settingType: 'text'}) }}
+                {{ include('/dashboard/shared/settings_actions/_card.html.twig', {...textSetting, settingType: 'text'}) }}
             {% endfor %}
         </div>
     </div>
@@ -127,14 +132,14 @@
 
     <div class="mt-6 flex flex-row w-full justify-end items-center gap-2">
         <a href="{{ path('app_dashboard_regenerate_code_admin', {type: 'settingCustom'}) }}"
-           onclick="return confirm('Are you sure you want to reset to the default settings?')"
+           onclick="return confirm('{{ 'resetMessage'|trans({}, 'settings_actions_general') }}')"
            class="text-base font-semibold hover:text-red-600 transition ease-in duration-300 p-2 rounded-lg">
-            Reset
+            {{ 'reset'|trans({}, 'settings_actions_general') }}
         </a>
 
         <button type="submit" class="btn-primary"
-                onclick="return confirm('Are you sure you want to apply this new changes?')">
-            Save Changes
+                onclick="return confirm('{{ 'saveChangesMessage'|trans({}, 'settings_actions_general') }}')">
+            {{ 'saveChanges'|trans({}, 'settings_actions_general') }}
         </button>
     </div>
 </form>
