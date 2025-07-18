@@ -2,7 +2,6 @@
 
 namespace App\Controller;
 
-use App\Entity\Event;
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
 use App\Enum\AnalyticalEventType;
@@ -19,7 +18,6 @@ use App\Form\NewPasswordAccountType;
 use App\Form\RegistrationFormType;
 use App\Form\RevokeProfilesType;
 use App\Form\TOSType;
-use App\Repository\EventRepository;
 use App\Repository\UserExternalAuthRepository;
 use App\Security\LandingAuthenticator;
 use App\Service\EventActions;
@@ -81,8 +79,7 @@ class SiteController extends AbstractController
         $currentUser = $this->getUser();
         $session = $request->getSession();
 
-        // Check if the user is logged in and verification of the user
-        // And check if the user doesn't have a forgot_password_request active
+        // Check if the user_verification setting is active
         if (
             isset($data["USER_VERIFICATION"]["value"]) &&
             $data["USER_VERIFICATION"]["value"] === OperationMode::ON->value &&
@@ -158,9 +155,9 @@ class SiteController extends AbstractController
             if (
                 $currentUser &&
                 ($data["LOGIN_WITH_UUID_ONLY"]["value"] === OperationMode::OFF->value ||
-                $currentUser->getUserExternalAuths()[0]->getProvider() !== UserProvider::PORTAL_ACCOUNT->value)
+                    $currentUser->getUserExternalAuths()[0]->getProvider() !== UserProvider::PORTAL_ACCOUNT->value)
             ) {
-                // Checks the 2FA status of the platform if mandatory forces the user to configure it
+                // Checks the 2FA status of the platform if mandatory and force the user to configure it
                 if (
                     $currentUser->getUserExternalAuths() &&
                     ($data['TWO_FACTOR_AUTH_STATUS']['value'] ===
@@ -185,38 +182,30 @@ class SiteController extends AbstractController
         if (
             $currentUser &&
             ($data["LOGIN_WITH_UUID_ONLY"]["value"] === OperationMode::OFF->value ||
-            $currentUser->getUserExternalAuths()[0]->getProvider() !== UserProvider::PORTAL_ACCOUNT->value)
+                $currentUser->getUserExternalAuths()[0]->getProvider() !== UserProvider::PORTAL_ACCOUNT->value)
         ) {
-            if (
-                $currentUser &&
-                (
-                    $currentUser->getTwoFAType() !==
-                    UserTwoFactorAuthenticationStatus::DISABLED->value &&
-                    !$session->has('2fa_verified_landing'))
+            if ($currentUser->getTwoFAType() !==
+                UserTwoFactorAuthenticationStatus::DISABLED->value &&
+                !$session->has('2fa_verified_landing')
             ) {
-                if (
-                    $currentUser->getTwoFAType() ===
+                if ($currentUser->getTwoFAType() ===
                     UserTwoFactorAuthenticationStatus::SMS->value
                 ) {
                     return $this->redirectToRoute('app_2FA_generate_code');
                 }
-                if (
-                    $currentUser->getTwoFAType() ===
+                if ($currentUser->getTwoFAType() ===
                     UserTwoFactorAuthenticationStatus::EMAIL->value
                 ) {
                     return $this->redirectToRoute('app_2FA_generate_code');
                 }
-                if (
-                    $currentUser->getTwoFAType() ===
+                if ($currentUser->getTwoFAType() ===
                     UserTwoFactorAuthenticationStatus::TOTP->value
                 ) {
                     return $this->redirectToRoute('app_verify2FA_TOTP');
                 }
             }
             // Check if the user has OTPCodes
-            if (
-                $currentUser &&
-                $currentUser->getTwoFAtype() !== UserTwoFactorAuthenticationStatus::DISABLED->value &&
+            if ($currentUser->getTwoFAtype() !== UserTwoFactorAuthenticationStatus::DISABLED->value &&
                 !$this->twoFAService->hasValidOTPCodes($currentUser)
             ) {
                 return $this->redirectToRoute('app_otpCodes');
