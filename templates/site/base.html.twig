@@ -13,17 +13,14 @@
                  style="background-image: url('{{ data.WALLPAPER_IMAGE.value }}');">
                 <div class="h-full w-full flex flex-col">
                     <img class="w-96 max-w-full" src="{{ data.OPENROAMING_LOGO.value }}" alt="OpenRoaming Logo"/>
-
                     <h1 class="text-5xl font-segoe text-white mt-[55px] font-bold break-words">
                         {{ data.WELCOME_TEXT.value }}
                     </h1>
-
                     <p class="text-white text-2xl mt-[45px] leading-7 break-words">
                         {{ data.WELCOME_DESCRIPTION.value }}
                     </p>
-
                     <p class="text-white text-lg mt-[55px] mb-6 break-words">
-                        Should you have any questions or require assistance, please contact us at
+                        {{ 'contactText'|trans({}, 'landing') }}
                         <a href="mailto:{{ data.CONTACT_EMAIL.value }}"
                            class="font-semibold underline text-primary break-words">{{ data.CONTACT_EMAIL.value }}</a>
                     </p>
@@ -34,6 +31,15 @@
         {# Scrollable Second Section #}
         <div class="w-full xl:w-1/2 xl:overflow-y-auto xl:h-screen p-8 xl:pl-[90px] xl:pr-[130px] xl:pt-[74px] overflow-hidden"
                 {{ stimulus_controller('visibility') }}>
+
+            {# Language Selector #}
+            {% block language %}
+                {{ include('shared/_select_language.html.twig', {
+                    currentLocale: app.request.locale,
+                    routeName: 'change_language',
+                    warningMessage: false,
+                }) }}
+            {% endblock %}
 
             {% block toast_messages %}
                 {{ include('site/shared/_render_toasts.html.twig') }}
