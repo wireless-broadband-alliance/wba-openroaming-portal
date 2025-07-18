@@ -4,7 +4,7 @@ personalData:
     title: 'Dados Pessoais'
     firstName: 'Primeiro Nome'
     lastName: 'Último Nome'
-    apply: 'Aplicar Alterações'
+    applyBtn: 'Aplicar Alterações'
 changePassword:
     title: 'Alterar Palavra-Passe'
     current: 'Palavra-Passe Atual'
