@@ -6,11 +6,8 @@
     {# Header #}
     <div class="flex flex-col lg:flex-row space-y-4 lg:space-y-0 justify-end items-center mb-10">
         {# Date Submition Form #}
-        {{ include('admin/shared/_date_filter_form.html.twig', {
+        {{ include('dashboard/shared/_date_filter_form.html.twig', {
             routeName: 'admin_dashboard_statistics',
-            method: 'post',
-            selectedStartDate: selectedStartDate,
-            selectedEndDate: selectedEndDate,
         }) }}
     </div>
 
