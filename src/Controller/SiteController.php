@@ -520,9 +520,6 @@ class SiteController extends AbstractController
                 $session->remove('_security_dashboard');
             }
 
-            $em->persist($user);
-            $em->flush();
-
             $this->entityManager->persist($user);
             $this->entityManager->flush();
 
