@@ -90,7 +90,7 @@ readonly class GetSettings
         return $settings;
     }
 
-    public function getSettingDescription($settingName): string
+    public function getSettingDescription($settingName): ?string
     {
         // Retrieve current locale from the session, default to 'en' if not found
         $request = $this->requestStack->getCurrentRequest();
@@ -269,7 +269,9 @@ readonly class GetSettings
         ];
         // phpcs:enable
 
-        return $descriptions[$locale][$settingName] ?? $descriptions[LanguagesType::EN->value][$settingName];
+        return $descriptions[$locale][$settingName]
+            ?? $descriptions[LanguagesType::EN->value][$settingName]
+            ?? null;
     }
 
     public function arraySettingsToTranslate(): array
