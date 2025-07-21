@@ -369,7 +369,7 @@ class ForgotPasswordController extends AbstractController
     ): Response {
         // Get the uuid and verification code from the URL query parameters
         $uuid = $request->query->get('uuid');
-        $verificationCode = $request->query->get('verificationCode');
+        $twoFaCode = $request->query->get('twoFaCode');
 
 
         // Get the user with the matching email, excluding admin users
@@ -394,7 +394,7 @@ class ForgotPasswordController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
-        if ($user->getUuid() === $uuid && $user->getTwoFAcode() === $verificationCode) {
+        if ($user->getUuid() === $uuid && $user->getTwoFAcode() === $twoFaCode) {
             $lastEvent = $this->eventRepository->findLatest2FACodeAttemptEvent(
                 $user,
                 AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST->value
@@ -518,9 +518,8 @@ class ForgotPasswordController extends AbstractController
         if (!$currentUser) {
             $this->addFlash(
                 'error',
-                'You can only access this page logged in.'
+                $this->translator->trans('onlyAccessThisPageLoggedIn', [], 'controllers')
             );
-
             return $this->redirectToRoute('app_landing');
         }
 
@@ -530,18 +529,16 @@ class ForgotPasswordController extends AbstractController
         if ($data['PLATFORM_MODE']['value']) {
             $this->addFlash(
                 'error',
-                'The portal is in Demo mode - it is not possible to use this verification method.'
+                $this->translator->trans('portalInDemoMode', [], 'controllers')
             );
-
             return $this->redirectToRoute('app_landing');
         }
 
         if (!$currentUser->isForgotPasswordRequest()) {
             $this->addFlash(
                 'error',
-                'You can not access this page without a valid request!'
+                $this->translator->trans('cannotAccessThisPageWithoutValidRequest', [], 'controllers')
             );
-
             return $this->redirectToRoute('app_landing');
         }
 
@@ -549,9 +546,8 @@ class ForgotPasswordController extends AbstractController
         if ($this->userRepository->findOneBy(['id' => $currentUser->getId(), 'forgot_password_request' => false])) {
             $this->addFlash(
                 'error',
-                'You can\'t access this page if you don\'t have a request!'
+                $this->translator->trans('cantAccessThisPageWithoutRequest', [], 'controllers')
             );
-
             return $this->redirectToRoute('app_landing');
         }
 
@@ -566,10 +562,8 @@ class ForgotPasswordController extends AbstractController
             if ($form->get('newPassword')->getData() !== $form->get('confirmPassword')->getData()) {
                 $this->addFlash(
                     'error',
-                    'Please make sure to type the same password on both fields. 
-                    If the problem keep occurring contact our support!'
+                    $this->translator->trans('typeTheSamePasswordBothFields', [], 'controllers')
                 );
-
                 return $this->redirectToRoute('app_landing');
             }
 
@@ -604,13 +598,12 @@ class ForgotPasswordController extends AbstractController
 
             $this->addFlash(
                 'success',
-                'Your password has been updated successfully!'
+                $this->translator->trans('passwordUpdatedSuccessfully', [], 'controllers')
             );
-
             return $this->redirectToRoute('app_landing');
         }
 
-        return $this->render('site/forgot_password_checker_landing.html.twig', [
+        return $this->render('landing/forgotPassword/forgot_password_checker.html.twig', [
             'forgotPasswordChecker' => $form->createView(),
             'data' => $data,
             'context' => FirewallType::LANDING->value,
