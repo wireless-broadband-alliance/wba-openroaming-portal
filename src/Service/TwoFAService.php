@@ -292,13 +292,22 @@ readonly class TwoFAService
             if (
                 $eventType === AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE->value ||
                 $eventType === AnalyticalEventType::LOGIN_TRADITIONAL_REQUEST->value ||
-                $eventType === AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE_RESEND->value
+                $eventType === AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE_RESEND->value ||
+                $eventType === AnalyticalEventType::VERIFICATION_CODE_LOGIN_RESEND->value
             ) {
-                $message = "Your verification Code is " . $code;
+                $message = $this->translator->trans(
+                    'verification_code_message',
+                    ['%code%' => $code],
+                    'TwoFAService'
+                );
             } else {
-                $message = "Your Two Factor Authentication Code is " . $code;
+                $message = $this->translator->trans(
+                    'two_factor_code_message',
+                    ['%code%' => $code],
+                    'TwoFAService'
+                );
             }
-            $this->sendSMS->sendSms($user->getPhoneNumber(), $message);
+            $this->sendSMS->sendSmsNoValidation($user, $message);
         }
 
         if ($eventType !== AnalyticalEventType::LOGIN_TRADITIONAL_REQUEST->value) {

@@ -142,8 +142,8 @@ class NotifyUsersWhenProfileExpiresCommand extends Command
                             $user->getPhoneNumber() &&
                             $externalAuth->getProviderId() === UserProvider::PHONE_NUMBER->value
                         ) {
-                            $this->sendSMS->sendSms(
-                                $user->getPhoneNumber(),
+                            $this->sendSMS->sendSmsNoValidation(
+                                $user,
                                 'Your OpenRoaming profile will expire in ' . ($timeLeftDays + 1) . ' days.'
                             );
                             $output->writeln("SMS sent to user ID {$user->getId()}");

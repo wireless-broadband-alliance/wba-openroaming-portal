@@ -312,16 +312,13 @@ class ForgotPasswordController extends AbstractController
 
                         $entityManager->persist($user);
                         $entityManager->flush();
-                        $recipient = "+" .
-                            $user->getPhoneNumber()->getCountryCode() .
-                            $user->getPhoneNumber()->getNationalNumber();
 
                         $message = $this->translator->trans(
                             'password_reset_code',
                             ['%code%' => $user->getTwoFAcode()],
                             'controllers'
                         );
-                        $this->sendSMS->sendSmsNoValidation($recipient, $message);
+                        $this->sendSMS->sendSmsNoValidation($user, $message);
 
                         $attemptsLeft = 3 - $verificationAttempts;
                         $message = $this->translator->trans(

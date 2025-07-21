@@ -284,7 +284,7 @@ class RegistrationController extends AbstractController
                     . "%0A"
                     . $this->translator->trans('verificationCodeIs', [], 'controllers')
                     . $user->getTwoFAcode();
-                $this->sendSMS->sendSms($user->getPhoneNumber(), $message);
+                $this->sendSMS->sendSmsNoValidation($user, $message);
                 $this->addFlash(
                     'success',
                     $this->translator->trans('messageSentWithPasswordAndVerificationCode', [], 'controllers')
