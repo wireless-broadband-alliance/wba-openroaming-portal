@@ -73,7 +73,7 @@ errorOccurredWhileRegeneratingSMSCode: 'An error occurred while regenerating the
 confirmationCodeSentToEmail: 'A confirmation code was sent to your email.'
 codeAlreadySent: 'Your code has already been sent to you previously. Wait %minutes% minute(s) to request a code again.'
 invalidPassword: 'Current password Invalid. Please try again.'
-invalidCode: 'Code Invalid. Please try again.'
+invalidCode: 'Code Invalid. Please try again or resend the code.'
 verificationCodeIncorrect: 'The verification code is incorrect. Please try again.'
 verificationMethodNotEnabled: "This verification method it's not enabled!"
 onlyAdminCanAccessThisPage: 'Only admin users can access this page.'
@@ -102,3 +102,4 @@ verificationCodeSent: 'A login verification code has been sent to your email.'
 configurationScheduleClearSuccessfully: 'The configuration Schedule settings has been clear successfully!'
 password_reset_code: "If you requested a password reset for your OpenRoaming account, use this code to proceed: %code%"
 passwordRequestAccepted: 'Your account password request has been accepted!'
+invalidContactIdentifier: "This account does not have a valid contact identifier (email). Please don't use the default from the portal. Please select another valid two-factor authentication for this account."

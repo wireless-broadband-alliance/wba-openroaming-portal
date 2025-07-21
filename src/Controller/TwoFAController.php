@@ -515,7 +515,10 @@ class TwoFAController extends AbstractController
                 }
                 return $this->redirectToRoute('app_landing');
             }
-            $this->addFlash('error', 'Invalid code please try again or resend the code');
+            $this->addFlash(
+                'error',
+                $this->translator->trans('invalidCode', [], 'controllers')
+            );
         }
         return $this->render('landing/twoFAAuthentication/actions/disable2FA.html.twig', [
             'data' => $data,
@@ -1095,8 +1098,7 @@ class TwoFAController extends AbstractController
         ) {
             $this->addFlash(
                 'error',
-                'This account does not have a valid contact identifier (email) please don\'t use 
-                the default from the portal. Please select another valid two-factor authentication for this account.'
+                $this->translator->trans('invalidContactIdentifier')
             );
 
             return $this->redirectToRoute('app_configure2FA', [

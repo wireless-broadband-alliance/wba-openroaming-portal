@@ -73,7 +73,7 @@ errorOccurredWhileRegeneratingSMSCode: 'Ocorreu um erro ao regenerar o código S
 confirmationCodeSentToEmail: 'Um código de confirmação foi enviado para o seu email.'
 codeAlreadySent: 'O seu código já foi enviado anteriormente. Aguarde %minutes% minuto(s) para solicitar um código novamente.'
 invalidPassword: 'A palavra-passe atual é inválida. Por favor, tente novamente.'
-invalidCode: 'O código é inválido. Por favor, tente novamente.'
+invalidCode: 'O código é inválido. Por favor, tente novamente ou reenvie o código.'
 verificationCodeIncorrect: 'O código de verificação está incorreto. Por favor, tente novamente.'
 verificationMethodNotEnabled: 'Este método de verificação não está ativado!'
 onlyAdminCanAccessThisPage: 'Apenas administradores podem aceder a esta página.'
@@ -102,3 +102,4 @@ verificationCodeSent: 'Foi enviado um código de verificação de login para o s
 configurationScheduleClearSuccessfully: 'A configuração do agendamento das crons foi restaurado com sucesso!'
 password_reset_code: "Se pediu a redefinição da palavra-passe da sua conta OpenRoaming, utilize este código para prosseguir: %code%"
 passwordRequestAccepted: 'O pedido de alteração da palavra-passe da sua conta foi aceite!'
+invalidContactIdentifier: "Esta conta não tem um identificador de contacto válido (email). Por favor, não utilizes o padrão do portal. Seleciona outro método válido de autenticação de dois fatores para esta conta."
