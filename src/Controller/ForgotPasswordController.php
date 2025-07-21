@@ -237,15 +237,13 @@ class ForgotPasswordController extends AbstractController
         Request $request,
         EntityManagerInterface $entityManager,
     ): Response {
-        // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings();
 
         if ($this->getUser() instanceof UserInterface) {
             $this->addFlash(
                 'error',
-                'You can\'t access this page logged in.'
+                $this->translator->trans('cantAccessThisPageLoggedIn', [], 'controllers')
             );
-
             return $this->redirectToRoute('app_landing');
         }
 
@@ -253,9 +251,8 @@ class ForgotPasswordController extends AbstractController
         if ($data['PLATFORM_MODE']['value']) {
             $this->addFlash(
                 'error',
-                'The portal is in Demo mode - it is not possible to use this verification method.'
+                $this->translator->trans('portalInDemoMode', [], 'controllers')
             );
-
             return $this->redirectToRoute('app_landing');
         }
 
@@ -319,13 +316,22 @@ class ForgotPasswordController extends AbstractController
                             $user->getPhoneNumber()->getCountryCode() .
                             $user->getPhoneNumber()->getNationalNumber();
 
-                        $message = "If you requested a password reset for your OpenRoaming account, " .
-                            "use this code to proceed: {$user->getTwoFAcode()}";
+                        $message = $this->translator->trans(
+                            'password_reset_code',
+                            ['%code%' => $user->getTwoFAcode()],
+                            'controllers'
+                        );
                         $this->sendSMS->sendSmsNoValidation($recipient, $message);
 
                         $attemptsLeft = 3 - $verificationAttempts;
-                        $message = "We have sent you a message to: {$user->getUuid()}. 
-                        You have {$attemptsLeft} attempt(s) left.";
+                        $message = $this->translator->trans(
+                            'messageSentWithAttemptsLeft',
+                            [
+                                '%uuid%' => $user->getUuid(),
+                                '%attempts%' => $attemptsLeft,
+                            ],
+                            'controllers'
+                        );
                         $this->addFlash('success', $message);
 
                         $request->getSession()->set('forgot_password_uuid', $user->getUuid());
@@ -333,27 +339,39 @@ class ForgotPasswordController extends AbstractController
                         return $this->redirectToRoute('app_site_forgot_password_code');
                     }
 
-                    // Inform the user to wait before trying again
                     $this->addFlash(
                         'warning',
-                        "Please wait {$data['SMS_TIMER_RESEND']['value']} minute(s) before trying again."
+                        $this->translator->trans(
+                            'waitBeforeRetry',
+                            [
+                                '%minutes%' => $data['SMS_TIMER_RESEND']['value']
+                            ],
+                            'controllers'
+                        )
                     );
                 } else {
                     $this->addFlash(
                         'warning',
-                        'You have exceeded the limits of request for a new password. 
-                        Please contact our support for help.'
+                        $this->translator->trans(
+                            'exceededLimitsRequestForNewPassword',
+                            [],
+                            'controllers'
+                        )
                     );
                 }
             } else {
                 $this->addFlash(
                     'warning',
-                    'This phone number doesn\'t exist, please submit a valid one from the system!'
+                    $this->translator->trans(
+                        'PhoneNumberDoesntExist',
+                        [],
+                        'controllers'
+                    )
                 );
             }
         }
 
-        return $this->render('site/forgot_password_sms_landing.html.twig', [
+        return $this->render('landing/forgotPassword/forgot_password_sms.html.twig', [
             'forgotPasswordSMSForm' => $form->createView(),
             'data' => $data,
             'context' => FirewallType::LANDING->value,
@@ -376,8 +394,12 @@ class ForgotPasswordController extends AbstractController
         $user = $this->userRepository->findOneBy([ 'uuid' => $uuid]);
         if (!$user instanceof User) {
             $this->addFlash(
-                'error',
-                'You can not access this page without a valid request!'
+                'warning',
+                $this->translator->trans(
+                    'cannotAccessThisPageWithoutValidRequest',
+                    [],
+                    'controllers'
+                )
             );
 
             return $this->redirectToRoute('app_landing');
@@ -387,10 +409,13 @@ class ForgotPasswordController extends AbstractController
             $this->settingRepository->findOneBy(['name' => 'PLATFORM_MODE'])->getValue() !== PlatformMode::LIVE->value
         ) {
             $this->addFlash(
-                'error',
-                'The portal is in Demo mode - it is not possible to use this verification method.'
+                'warning',
+                $this->translator->trans(
+                    'portalInDemoMode',
+                    [],
+                    'controllers'
+                )
             );
-
             return $this->redirectToRoute('app_landing');
         }
 
@@ -409,8 +434,12 @@ class ForgotPasswordController extends AbstractController
             $interval_minutes += $interval->i;
             if ($interval_minutes > ((int)$linkTimeInterval)) {
                 $this->addFlash(
-                    'error',
-                    'Link expired. Please try to log in manually'
+                    'warning',
+                    $this->translator->trans(
+                        'invalidVerificationCodeLink',
+                        [],
+                        'controllers'
+                    )
                 );
                 return $this->redirectToRoute('app_landing');
             }
@@ -419,7 +448,11 @@ class ForgotPasswordController extends AbstractController
 
             $this->addFlash(
                 'success',
-                'Your account password-request has been accepted!'
+                $this->translator->trans(
+                    'passwordRequestAccepted',
+                    [],
+                    'controllers'
+                )
             );
             if (in_array('ROLE_ADMIN', $user->getRoles(), true)) {
                 $session = $request->getSession();
@@ -429,10 +462,13 @@ class ForgotPasswordController extends AbstractController
         }
 
         $this->addFlash(
-            'error',
-            'Invalid verification code or link expired. Please try to log in manually'
+            'warning',
+            $this->translator->trans(
+                'invalidVerificationCodeLink',
+                [],
+                'controllers'
+            )
         );
-
         return $this->redirectToRoute('app_landing');
     }
 
@@ -496,7 +532,7 @@ class ForgotPasswordController extends AbstractController
             );
         }
 
-        return $this->render('site/forgot_password_code_landing.html.twig', [
+        return $this->render('landing/forgotPassword/forgot_password_code_landing.html.twig', [
             'forgotPasswordCode' => $form->createView(),
             'data' => $data,
             'context' => FirewallType::LANDING->value,

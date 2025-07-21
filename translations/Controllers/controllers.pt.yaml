@@ -99,3 +99,5 @@ PasswordPasswordConfirmationMustMatch: 'Os campos palavra-passe e confirmação 
 passwordUpdated: '"%uuid%" palavra-passe foi atualizada.'
 accountAlreadyVerified: 'Esta conta já foi verificada.'
 verificationCodeSent: 'Foi enviado um código de verificação de login para o seu e-mail.'
+password_reset_code: "Se pediu a redefinição da palavra-passe da sua conta OpenRoaming, utilize este código para prosseguir: %code%"
+passwordRequestAccepted: 'O pedido de alteração da palavra-passe da sua conta foi aceite!'
