@@ -22,7 +22,7 @@ emailSentWithPasswordAndVerificationCode: 'We have sent an email with your accou
 userWithSamePhoneNumber: 'User with the same phone number already exists, please try to "Log in" using the link below.'
 yourAccountPasswordIs: 'Your account password is: '
 verificationCodeIs: 'Verification code is: '
-messageSentWithPasswordAndVerificationCode: 'We have sent a message to your phone with your password and verification code'
+messageSentWithPasswordAndVerificationCode: 'We have sent a message to your phone with your password and verification code.'
 accountVerified: 'Your account has been verified!'
 authenticationFailedTryAgain: 'Authentication failed. Please try to log in manually.'
 invalidVerificationCodeLink: 'Invalid verification code or link expired. Please try to log in manually'
