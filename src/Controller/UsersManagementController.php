@@ -286,7 +286,9 @@ class UsersManagementController extends AbstractController
         $user = $this->userRepository->find($id);
         $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $id]);
         if (!$user) {
-            throw $this->createNotFoundException('User not found.');
+            throw $this->createNotFoundException(
+                $this->translator->trans('userNotFound', [], 'controllers')
+            );
         }
         $getUserUuid = $user->getUuid();
 
