@@ -73,7 +73,7 @@ class ScheduleAutomationController extends AbstractController
             return $this->redirectToRoute('admin_dashboard_settings_schedule');
         }
 
-        return $this->render('admin/settings_actions.html.twig', [
+        return $this->render('dashboard/shared/settings_actions.html.twig', [
             'user' => $currentUser,
             'data' => $data,
             'settings' => $this->settingRepository->findAll(),
