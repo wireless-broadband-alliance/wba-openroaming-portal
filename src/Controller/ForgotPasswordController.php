@@ -38,6 +38,7 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * @method getParameterBag()
@@ -54,6 +55,7 @@ class ForgotPasswordController extends AbstractController
         private readonly SendSMS $sendSMS,
         private readonly SettingRepository $settingRepository,
         private readonly PasswordResetRequestHandler $passwordResetRequestHandler,
+        private readonly TranslatorInterface $translator,
     ) {
     }
 
@@ -70,9 +72,8 @@ class ForgotPasswordController extends AbstractController
         if ($this->getUser() instanceof UserInterface) {
             $this->addFlash(
                 'error',
-                "You can't access this page logged in."
+                $this->translator->trans('cantAccessThisPageLoggedIn', [], 'controllers')
             );
-
             return $this->redirectToRoute('app_landing');
         }
 
@@ -82,18 +83,16 @@ class ForgotPasswordController extends AbstractController
         if ($data['PLATFORM_MODE']['value'] === true) {
             $this->addFlash(
                 'error',
-                'The portal is in Demo mode - it is not possible to use this verification method.'
+                $this->translator->trans('portalInDemoMode', [], 'controllers')
             );
-
             return $this->redirectToRoute('app_landing');
         }
 
         if ($data['AUTH_METHOD_REGISTER_ENABLED']['value'] !== 'true') {
             $this->addFlash(
                 'error',
-                "This verification method it's not enabled!"
+                $this->translator->trans('verificationMethodNotEnabled', [], 'controllers')
             );
-
             return $this->redirectToRoute('app_landing');
         }
 
@@ -156,6 +155,10 @@ class ForgotPasswordController extends AbstractController
                         $entityManager->persist($user);
                         $entityManager->flush();
 
+
+                        $customerLogo = $data['CUSTOMER_LOGO']['value'];
+                        $projectDir =  $this->parameterBag->get('kernel.project_dir');
+                        $logoPath = $projectDir . '/public' . $customerLogo;
                         $email = new TemplatedEmail()
                             ->from(
                                 new Address(
@@ -165,48 +168,58 @@ class ForgotPasswordController extends AbstractController
                             )
                             ->to($user->getEmail())
                             ->subject(
-                                'Reset Your OpenRoaming Password'
+                                $this->translator->trans(
+                                    'subject_forgot_password',
+                                    [],
+                                    'user_forgot_password_request'
+                                )
                             )
                             ->htmlTemplate('email/user_forgot_password_request.html.twig')
                             ->context([
                                 'forgotPasswordUser' => true,
                                 'uuid' => $user->getUuid(),
-                                'emailTitle' => $data['title']['value'],
-                                'contactEmail' => $data['contactEmail']['value'],
+                                'emailTitle' => $data['PAGE_TITLE']['value'],
+                                'contactEmail' => $data['CONTACT_EMAIL']['value'],
                                 'verificationCode' => $user->getTwoFAcode(),
                                 'context' => FirewallType::LANDING->value,
-                            ]);
+                            ])
+                            ->embedFromPath($logoPath, 'logo_cid');
 
                         $mailer->send($email);
 
-                        $message = "We have sent you a new email to: {$user->getEmail()}.";
+                        $message = $this->translator->trans(
+                            'emailSentMessage',
+                            ['%email%' => $user->getEmail()],
+                            'controllers'
+                        );
                         $this->addFlash('success', $message);
                     } else {
                         // Inform the user to wait before trying again
                         $emailTimeIntervalSetting = $data['EMAIL_TIMER_RESEND']['value'];
                         $this->addFlash(
                             'warning',
-                            'Please wait ' . $emailTimeIntervalSetting . ' minutes before trying again.'
+                            $this->translator->trans(
+                                'waitBeforeTryingAgain',
+                                ['%minutes%' => $emailTimeIntervalSetting],
+                                'controllers'
+                            )
                         );
                     }
                 } else {
                     $this->addFlash(
                         'warning',
-                        'This email is not associated with a valid account. 
-                        Please submit a valid email from the system, ensuring it is from the platform 
-                        and not from another provider.'
+                        $this->translator->trans('emailNotAssociatedWithValidAccount', [], 'controllers')
                     );
                 }
             } else {
                 $this->addFlash(
                     'warning',
-                    'This email doesn\'t exist, 
-                    please make sure to create a account with a email on the platform!'
+                    $this->translator->trans('emailDoesntExist', [], 'controllers')
                 );
             }
         }
 
-        return $this->render('site/forgot_password_email_landing.html.twig', [
+        return $this->render('landing/forgotPassword/forgot_password_email.html.twig', [
             'forgotPasswordEmailForm' => $form->createView(),
             'data' => $data,
             'context' => FirewallType::LANDING->value,

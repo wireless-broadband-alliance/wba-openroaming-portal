@@ -54,7 +54,7 @@ passwordInvalid: 'Current password Invalid. Please try again.'
 typeTheSamePasswordBothFields: 'Please make sure to type the same password on both fields. If the problem keep occurring contact our support!'
 passwordUpdatedSuccessfully: 'Your password has been updated successfully!'
 emailSentMessage: 'We have sent you a new email to: %email%.'
-waitBeforeTryingAgain: 'Please wait 2 minutes before trying again.'
+waitBeforeTryingAgain: 'Please wait %minutes% minutes before trying again.'
 emailNotAssociatedWithValidAccount: 'This email is not associated with a valid account. Please submit a valid email from the system, ensuring it is from the platform and not from another provider.'
 emailDoesntExist: "This email doesn't exist, please make sure to create a account with a email on the platform!"
 cantAccessThisPageLoggedIn: "You can't access this page logged in."

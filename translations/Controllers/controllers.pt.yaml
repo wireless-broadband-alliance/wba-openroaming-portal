@@ -54,7 +54,7 @@ passwordInvalid: 'A palavra-passe atual é inválida. Por favor, tente novamente
 typeTheSamePasswordBothFields: 'Por favor, certifique-se de que insere a mesma palavra-passe em ambos os campos. Se o problema persistir, contacte o nosso suporte!'
 passwordUpdatedSuccessfully: 'A sua palavra-passe foi atualizada com sucesso!'
 emailSentMessage: 'Enviámos um novo email para: %email%.'
-waitBeforeTryingAgain: 'Por favor, aguarde 2 minutos antes de tentar novamente.'
+waitBeforeTryingAgain: 'Por favor, aguarde %minutes% minutos antes de tentar novamente.'
 emailNotAssociatedWithValidAccount: 'Este email não está associado a uma conta válida. Por favor, insira um email válido do sistema, garantindo que é da plataforma e não de outro fornecedor.'
 emailDoesntExist: 'Este email não existe. Certifique-se de que cria uma conta com um email na plataforma!'
 cantAccessThisPageLoggedIn: 'Não pode aceder a esta página enquanto estiver com sessão iniciada.'
