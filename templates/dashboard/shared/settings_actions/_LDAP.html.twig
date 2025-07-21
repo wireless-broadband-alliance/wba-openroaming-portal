@@ -29,7 +29,7 @@
                     </div>
 
                     {# Card Description #}
-                    {{ include('/admin/shared/settings_actions/_description.html.twig', {description: setting.vars.attr.description}) }}
+                    {{ include('/dashboard/shared/settings_actions/_description.html.twig', {description: setting.vars.attr.description}) }}
 
                     {% if setting.vars.name in ['SYNC_LDAP_SERVER', 'SYNC_LDAP_BIND_USER_DN', 'SYNC_LDAP_SEARCH_BASE_DN', 'SYNC_LDAP_SEARCH_FILTER'] %}
                         <div class="flex items-center space-x-2 mt-5">
