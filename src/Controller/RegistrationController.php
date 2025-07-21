@@ -111,7 +111,7 @@ class RegistrationController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             if ($this->userRepository->findOneBy(['uuid' => $form->get('email')->getData()])) {
                 $this->addFlash(
-                    'warning',
+                    'error',
                     $this->translator->trans(
                         'userWithSameEmail',
                         [],
@@ -228,7 +228,7 @@ class RegistrationController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             if ($this->userRepository->findOneBy(['phoneNumber' => $user->getPhoneNumber()])) {
                 $this->addFlash(
-                    'warning',
+                    'error',
                     $this->translator->trans(
                         'userWithSamePhoneNumber',
                         [],
