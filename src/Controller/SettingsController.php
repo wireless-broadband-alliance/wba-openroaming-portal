@@ -370,7 +370,7 @@ class SettingsController extends AbstractController
                 $errorOutput = $process->getErrorOutput();
                 $this->addFlash(
                     'success_admin',
-                    'The configuration Schedule settings has been clear successfully!'
+                    $this->translator->trans('configurationScheduleClearSuccessfully', [], 'controllers'),
                 );
 
                 $eventMetadata = [

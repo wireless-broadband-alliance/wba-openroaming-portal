@@ -99,5 +99,6 @@ PasswordPasswordConfirmationMustMatch: 'Both the password and password confirmat
 passwordUpdated: '"%uuid%" password was updated.'
 accountAlreadyVerified: 'This account is already verified.'
 verificationCodeSent: 'A login verification code has been sent to your email.'
+configurationScheduleClearSuccessfully: 'The configuration Schedule settings has been clear successfully!'
 password_reset_code: "If you requested a password reset for your OpenRoaming account, use this code to proceed: %code%"
 passwordRequestAccepted: 'Your account password request has been accepted!'

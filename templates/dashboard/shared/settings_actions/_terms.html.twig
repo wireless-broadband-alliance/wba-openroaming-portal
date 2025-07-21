@@ -60,7 +60,7 @@
                             </div>
 
                             {# Card Description #}
-                            {{ include('/admin/shared/settings_actions/_description.html.twig', {description: setting.vars.attr.description}) }}
+                            {{ include('/dashboard/shared/settings_actions/_description.html.twig', {description: setting.vars.attr.description}) }}
 
                             {% if setting.vars.name in ['TOS'] %}
                                 <div class="flex flex-col items-center space-y-2 mt-5" data-controller="radio">
@@ -115,7 +115,7 @@
                             <div class="mt-2 -mb-2 text-center text-red-500 text-base">
                                 {{ form_errors(setting) }}
                             </div>
-                        {% endif %}
+
                         {{ include('/dashboard/shared/settings_actions/_description.html.twig', {description: setting.vars.attr.description}) }}
                         <div class="mt-2 -mb-2 text-center text-red-500 text-base">
                             {{ form_errors(setting) }}
@@ -155,7 +155,7 @@
                                 </label>
                             </div>
 
-                            {{ include('/admin/shared/settings_actions/_description.html.twig', {description: setting.vars.attr.description}) }}
+                            {{ include('/dashboard/shared/settings_actions/_description.html.twig', {description: setting.vars.attr.description}) }}
 
                             {% if setting.vars.name in ['PRIVACY_POLICY'] %}
                                 <div class="flex flex-col items-center space-y-2 mt-5" data-controller="radio">
