@@ -38,10 +38,10 @@ class UserRadiusProfile
     private ?string $revoked_reason = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
-    private ?DateTimeInterface $lastStartConnectionAt = null;
+    private ?DateTimeInterface $lastConnectionStartAt = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
-    private ?DateTimeInterface $lastStopConnectionAt = null;
+    private ?DateTimeInterface $lastConnectionStopAt = null;
 
     public function getId(): ?int
     {
@@ -132,25 +132,25 @@ class UserRadiusProfile
         return $this;
     }
 
-    public function getLastStartConnectionAt(): ?\DateTimeInterface
+    public function getLastConnectionStartAt(): ?\DateTimeInterface
     {
-        return $this->lastStartConnectionAt;
+        return $this->lastConnectionStartAt;
     }
 
-    public function setLastStartConnectionAt(?\DateTimeInterface $lastStartConnectionAt): self
+    public function setLastConnectionStartAt(?\DateTimeInterface $lastConnectionStartAt): self
     {
-        $this->lastStartConnectionAt = $lastStartConnectionAt;
+        $this->lastConnectionStartAt = $lastConnectionStartAt;
         return $this;
     }
 
-    public function getLastStopConnectionAt(): ?\DateTimeInterface
+    public function getLastConnectionStopAt(): ?\DateTimeInterface
     {
-        return $this->lastStopConnectionAt;
+        return $this->lastConnectionStopAt;
     }
 
-    public function setLastStopConnectionAt(?\DateTimeInterface $lastStopConnectionAt): self
+    public function setLastConnectionStopAt(?\DateTimeInterface $lastConnectionStopAt): self
     {
-        $this->lastStopConnectionAt = $lastStopConnectionAt;
+        $this->lastConnectionStopAt = $lastConnectionStopAt;
         return $this;
     }
 }

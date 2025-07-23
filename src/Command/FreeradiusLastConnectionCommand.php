@@ -62,9 +62,11 @@ class FreeradiusLastConnectionCommand extends Command
 
             return Command::FAILURE;
         }
+        $freeradiusCronValue = $timestampFreeradiusCron->getValue();
         if (
-            (int)$timestampFreeradiusCron->getValue() < 0 || $timestampFreeradiusCron->getValue(
-            ) === null || !ctype_digit($timestampFreeradiusCron->getValue())
+            (int)$freeradiusCronValue < 0 ||
+            $freeradiusCronValue === null ||
+            !ctype_digit($freeradiusCronValue)
         ) {
             $output->writeln(
                 '<error>Setting "TIME_STAMP_FREERADIUS_CRON" is invalid or empty. 
@@ -109,16 +111,16 @@ class FreeradiusLastConnectionCommand extends Command
                     $needsUpdate = false;
 
                     if (
-                        $entity->getLastStartConnectionAt() === null || $startTime > $entity->getLastStartConnectionAt(
+                        $entity->getLastConnectionStartAt() === null || $startTime > $entity->getLastConnectionStartAt(
                         )
                     ) {
-                        $entity->setLastStartConnectionAt($startTime);
+                        $entity->setLastConnectionStartAt($startTime);
                         $needsUpdate = true;
                     }
                     if (
-                        $entity->getLastStopConnectionAt() === null || $stopTime > $entity->getLastStopConnectionAt()
+                        $entity->getLastConnectionStopAt() === null || $stopTime > $entity->getLastConnectionStopAt()
                     ) {
-                        $entity->setLastStopConnectionAt($stopTime);
+                        $entity->setLastConnectionStopAt($stopTime);
                         $needsUpdate = true;
                     }
 

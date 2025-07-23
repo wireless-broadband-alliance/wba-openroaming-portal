@@ -19,9 +19,8 @@ final class Version20250709115521 extends AbstractMigration
 
     public function up(Schema $schema): void
     {
-        $timestamp = time();
         // this up() migration is auto-generated, please modify it to your needs
-        $this->addSql("INSERT INTO Setting (name, value) VALUES ('TIME_STAMP_FREERADIUS_CRON', $timestamp)");
+        $this->addSql("INSERT INTO Setting (name, value) VALUES ('TIME_STAMP_FREERADIUS_CRON', null)");
     }
 
     public function down(Schema $schema): void
