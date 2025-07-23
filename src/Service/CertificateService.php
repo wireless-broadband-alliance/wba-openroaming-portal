@@ -30,22 +30,22 @@ class CertificateService
 
     public function verifyCertificates(): array
     {
-        $missingfiles = [];
+        $missingFiles = [];
         if (!file_exists('/var/www/openroaming/signing-keys/ca.pem')) {
-            $missingfiles[] = 'ca.pem';
+            $missingFiles[] = 'ca.pem';
         }
         if (!file_exists('/var/www/openroaming/signing-keys/cert.pem')) {
-            $missingfiles[] = 'cert.pem';
+            $missingFiles[] = 'cert.pem';
         }
         if (!file_exists('/var/www/openroaming/signing-keys/chain.pem')) {
-            $missingfiles[] = 'chain.pem';
+            $missingFiles[] = 'chain.pem';
         }
         if (!file_exists('/var/www/openroaming/signing-keys/fullchain.pem')) {
-            $missingfiles[] = 'fullchain.pem';
+            $missingFiles[] = 'fullchain.pem';
         }
         if (!file_exists('/var/www/openroaming/signing-keys/privkey.pem')) {
-            $missingfiles[] = 'privkey.pem';
+            $missingFiles[] = 'privkey.pem';
         }
-        return $missingfiles;
+        return $missingFiles;
     }
 }
