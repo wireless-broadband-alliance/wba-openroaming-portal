@@ -42,7 +42,7 @@ readonly class ExceptionListener
             );
 
             $content = $this->twig->render('bundles/TwigBundle/Exception/error.html.twig', [
-                'status_code' => 500,
+                'status_code' => 404,
                 'status_title' => 'Not Found',
                 'exception' => $exception,
                 'data' => $data,
