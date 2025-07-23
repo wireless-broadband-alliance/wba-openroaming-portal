@@ -6,11 +6,9 @@ use App\Enum\LanguagesType;
 use App\Enum\SettingName;
 use App\Repository\SettingRepository;
 use App\Repository\SettingTranslationRepository;
-use Psr\Cache\InvalidArgumentException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Contracts\Cache\CacheInterface;
 
 readonly class GetSettings
 {
@@ -18,13 +16,9 @@ readonly class GetSettings
         private SettingRepository $settingRepository,
         private SettingTranslationRepository $settingTranslationRepository,
         private RequestStack $requestStack,
-        private CacheInterface $cache,
     ) {
     }
 
-    /**
-     * @throws InvalidArgumentException
-     */
     public function getSettings(?string $language = null): array|JsonResponse
     {
         // Get the current request from the RequestStack
@@ -38,9 +32,9 @@ readonly class GetSettings
             return [];
         }
 
-        // Only make the query once and then check with the symfony cache the lasted valid contents
         // Always fetch the latest setting names from the DB
-        $currentSettings = $this->settingRepository->findAllNames();
+        $allSettings = $this->settingRepository->findAll();
+        $currentSettings = array_map(static fn($s) => $s->getName(), $allSettings);
         $expectedSettings = array_map(static fn($e) => $e->value, SettingName::cases());
 
         // Compare both sets
@@ -75,35 +69,14 @@ readonly class GetSettings
             ];
         }
 
-        $specialSettings = [
-            'TURNSTILE_CHECKER',
-            'PLATFORM_MODE',
-        ];
+        foreach ($allSettings as $setting) {
+            $name = $setting->getName();
 
-        foreach ($this->settingRepository->findAll() as $setting) {
-            if (in_array($setting->getName(), $specialSettings, true)) {
-                continue;
-            }
-
-            $settingName = $setting->getName();
-            $data[$settingName] = [
-                'value' => $localizedSettings[$settingName]['value'] ?? $setting->getValue(),
-                'description' => $this->getSettingDescription($settingName),
+            $data[$name] = [
+                'value' => $localizedSettings[$name]['value'] ?? $setting->getValue(),
+                'description' => $this->getSettingDescription($name),
             ];
         }
-
-        $turnstile_checker = $this->settingRepository->findOneBy(['name' => 'TURNSTILE_CHECKER']);
-        if ($turnstile_checker !== null) {
-            $data['TURNSTILE_CHECKER'] = [
-                'value' => $turnstile_checker->getValue(),
-                'description' => $this->getSettingDescription('TURNSTILE_CHECKER'),
-            ];
-        }
-
-        $data['PLATFORM_MODE'] = [
-            'value' => $this->settingRepository->findOneBy(['name' => 'PLATFORM_MODE'])->getValue() === 'Demo',
-            'description' => $this->getSettingDescription('PLATFORM_MODE'),
-        ];
 
         return $data;
     }
