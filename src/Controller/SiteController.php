@@ -571,7 +571,7 @@ class SiteController extends AbstractController
 
         // Linux
 //        if (preg_match('/linux/i', $userAgent)) {
-//            $os = OSTypes::LINUX;
+//            $os = OSType::LINUX;
 //        }
 
         return $os;

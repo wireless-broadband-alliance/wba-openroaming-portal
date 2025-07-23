@@ -45,10 +45,10 @@
         {% if (data.TWO_FACTOR_AUTH_STATUS.value == constant('App\\Enum\\TwoFAType::NOT_ENFORCED').value) %}
             {% if (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value) %}
                 {% if
-                    (user.email is not null and user.email != constant('App\\Enum\\DefaultUsers::ADMIN').value)
+                    (user.email is not null and user.email != constant('App\\Enum\\DefaultUser::ADMIN').value)
                     or user.phoneNumber is not null %}
                     <a href="{{ path('app_2FA_firstSetup_local', {context: context}) }}" class="btn-primary">
-                        {% if user.email is not null and user.email != constant('App\\Enum\\DefaultUsers::ADMIN').value %}
+                        {% if user.email is not null and user.email != constant('App\\Enum\\DefaultUser::ADMIN').value %}
                             Email
                         {% endif %}
                         {% if user.phoneNumber is not null %}
