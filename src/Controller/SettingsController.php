@@ -37,6 +37,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Routing\Attribute\Route;
@@ -851,14 +852,11 @@ class SettingsController extends AbstractController
         GetSettings $getSettings,
         CertificateService $certificateService
     ): Response {
-        $missingfiles = $this->certificateService->verifyCertificates();
-        if ($missingfiles !== []) {
-            return new JsonResponse([
-                'success' => false,
-                'message' => 'Cert files are missing',
-                'missingfiles' => $missingfiles,
-            ], Response::HTTP_NOT_FOUND);
+        $missingFiles = $this->certificateService->verifyCertificates();
+        if ($missingFiles !== []) {
+            throw new NotFoundHttpException('Cert files are missing: ' . implode(', ', $missingFiles));
         }
+
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
         $currentUser = $this->getUser();
