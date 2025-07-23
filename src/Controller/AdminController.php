@@ -5,7 +5,7 @@ namespace App\Controller;
 use App\Entity\Setting;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
-use App\Enum\LanguagesType;
+use App\Enum\LanguageType;
 use App\Enum\SettingType;
 use App\Form\CustomType;
 use App\Form\RevokeProfilesType;
@@ -185,7 +185,7 @@ class AdminController extends AbstractController
     #[Route(
         '/dashboard/customize/{language}',
         name: 'admin_dashboard_customize',
-        defaults: ['language' => LanguagesType::EN->value]
+        defaults: ['language' => LanguageType::EN->value]
     )]
     #[IsGranted('ROLE_ADMIN')]
     public function customize(Request $request, EntityManagerInterface $em, string $language): Response
@@ -235,7 +235,7 @@ class AdminController extends AbstractController
                     if (in_array($settingName, $this->getSettings->arraySettingsToTranslate(), true)) {
                         $locale = $language;
                         $submittedValue = $submittedData[$settingName];
-                        if ($locale === LanguagesType::EN->value) {
+                        if ($locale === LanguageType::EN->value) {
                             // Update the setting value
                             $setting->setValue($submittedValue);
                         }

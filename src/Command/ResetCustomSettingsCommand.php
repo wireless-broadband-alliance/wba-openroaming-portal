@@ -4,7 +4,7 @@ namespace App\Command;
 
 use App\Entity\Setting;
 use App\Entity\SettingTranslation;
-use App\Enum\LanguagesType;
+use App\Enum\LanguageType;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -77,24 +77,24 @@ class ResetCustomSettingsCommand extends Command
                 'name' => 'WELCOME_TEXT',
                 'value' => 'Welcome to OpenRoaming Provisioning Service',
                 'translations' => [
-                    LanguagesType::EN->value => 'Welcome to OpenRoaming Provisioning Service',
-                    LanguagesType::PT->value => 'Bem-vindo ao Serviço de OpenRoaming Provisioning',
+                    LanguageType::EN->value => 'Welcome to OpenRoaming Provisioning Service',
+                    LanguageType::PT->value => 'Bem-vindo ao Serviço de OpenRoaming Provisioning',
                 ],
             ],
             [
                 'name' => 'WELCOME_DESCRIPTION',
                 'value' => 'This portal allows you to download and install an OpenRoaming profile tailored to your device, allowing you to connect automatically to OpenRoaming Wi-Fi networks across the world.',
                 'translations' => [
-                    LanguagesType::EN->value => 'This portal allows you to download and install an OpenRoaming profile tailored to your device, allowing you to connect automatically to OpenRoaming Wi-Fi networks across the world.',
-                    LanguagesType::PT->value => 'Este portal permite que você faça o download e instale um perfil OpenRoaming adaptado ao seu dispositivo, permitindo-lhe conectar-se automaticamente às redes OpenRoaming Wi-Fi em todo o mundo.',
+                    LanguageType::EN->value => 'This portal allows you to download and install an OpenRoaming profile tailored to your device, allowing you to connect automatically to OpenRoaming Wi-Fi networks across the world.',
+                    LanguageType::PT->value => 'Este portal permite que você faça o download e instale um perfil OpenRoaming adaptado ao seu dispositivo, permitindo-lhe conectar-se automaticamente às redes OpenRoaming Wi-Fi em todo o mundo.',
                 ],
             ],
             [
                 'name' => 'ADDITIONAL_LABEL',
                 'value' => 'This label is used to add extra content if necessary',
                 'translations' => [
-                    LanguagesType::EN->value => 'This label is used to add extra content if necessary',
-                    LanguagesType::PT->value => 'Este rótulo é usado para adicionar conteúdo extra, se necessário',
+                    LanguageType::EN->value => 'This label is used to add extra content if necessary',
+                    LanguageType::PT->value => 'Este rótulo é usado para adicionar conteúdo extra, se necessário',
                 ],
             ],
         ];

@@ -2,7 +2,7 @@
 
 namespace App\Enum;
 
-enum DefaultUsers: string
+enum DefaultUser: string
 {
     case ADMIN = 'admin@example.com';
 }

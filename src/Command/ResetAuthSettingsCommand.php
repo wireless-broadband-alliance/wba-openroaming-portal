@@ -4,7 +4,7 @@ namespace App\Command;
 
 use App\Entity\Setting;
 use App\Entity\SettingTranslation;
-use App\Enum\LanguagesType;
+use App\Enum\LanguageType;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -86,96 +86,96 @@ class ResetAuthSettingsCommand extends Command
                 'name' => 'AUTH_METHOD_SAML_LABEL',
                 'value' => 'Login with SAML',
                 'translations' => [
-                    LanguagesType::EN->value => 'Login with SAML',
-                    LanguagesType::PT->value => 'Entrar com SAML',
+                    LanguageType::EN->value => 'Login with SAML',
+                    LanguageType::PT->value => 'Entrar com SAML',
                 ],
             ],
             [
                 'name' => 'AUTH_METHOD_SAML_DESCRIPTION',
                 'value' => 'Authenticate with your SAML account',
                 'translations' => [
-                    LanguagesType::EN->value => 'Authenticate with your SAML account',
-                    LanguagesType::PT->value => 'Autentique-se com sua conta SAML',
+                    LanguageType::EN->value => 'Authenticate with your SAML account',
+                    LanguageType::PT->value => 'Autentique-se com sua conta SAML',
                 ],
             ],
             [
                 'name' => 'AUTH_METHOD_GOOGLE_LOGIN_LABEL',
                 'value' => 'Login with Google',
                 'translations' => [
-                    LanguagesType::EN->value => 'Login with Google',
-                    LanguagesType::PT->value => 'Entrar com Google',
+                    LanguageType::EN->value => 'Login with Google',
+                    LanguageType::PT->value => 'Entrar com Google',
                 ],
             ],
             [
                 'name' => 'AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION',
                 'value' => 'Authenticate with your Google account',
                 'translations' => [
-                    LanguagesType::EN->value => 'Authenticate with your Google account',
-                    LanguagesType::PT->value => 'Autentique-se com sua conta Google',
+                    LanguageType::EN->value => 'Authenticate with your Google account',
+                    LanguageType::PT->value => 'Autentique-se com sua conta Google',
                 ],
             ],
             [
                 'name' => 'AUTH_METHOD_MICROSOFT_LOGIN_LABEL',
                 'value' => 'Login with Microsoft',
                 'translations' => [
-                    LanguagesType::EN->value => 'Login with Microsoft',
-                    LanguagesType::PT->value => 'Entrar com Microsoft',
+                    LanguageType::EN->value => 'Login with Microsoft',
+                    LanguageType::PT->value => 'Entrar com Microsoft',
                 ],
             ],
             [
                 'name' => 'AUTH_METHOD_MICROSOFT_LOGIN_DESCRIPTION',
                 'value' => 'Authenticate with your Microsoft account',
                 'translations' => [
-                    LanguagesType::EN->value => 'Authenticate with your Microsoft account',
-                    LanguagesType::PT->value => 'Autentique-se com sua conta Microsoft',
+                    LanguageType::EN->value => 'Authenticate with your Microsoft account',
+                    LanguageType::PT->value => 'Autentique-se com sua conta Microsoft',
                 ],
             ],
             [
                 'name' => 'AUTH_METHOD_REGISTER_LABEL',
                 'value' => 'Create Account with Email',
                 'translations' => [
-                    LanguagesType::EN->value => 'Create Account with Email',
-                    LanguagesType::PT->value => 'Criar Conta com Email',
+                    LanguageType::EN->value => 'Create Account with Email',
+                    LanguageType::PT->value => 'Criar Conta com Email',
                 ],
             ],
             [
                 'name' => 'AUTH_METHOD_REGISTER_DESCRIPTION',
                 'value' => "Don't have an account? Create one",
                 'translations' => [
-                    LanguagesType::EN->value => "Don't have an account? Create one",
-                    LanguagesType::PT->value => 'Não tem uma conta? Crie uma',
+                    LanguageType::EN->value => "Don't have an account? Create one",
+                    LanguageType::PT->value => 'Não tem uma conta? Crie uma',
                 ],
             ],
             [
                 'name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_LABEL',
                 'value' => 'Login Here',
                 'translations' => [
-                    LanguagesType::EN->value => 'Login Here',
-                    LanguagesType::PT->value => 'Entre Aqui',
+                    LanguageType::EN->value => 'Login Here',
+                    LanguageType::PT->value => 'Entre Aqui',
                 ],
             ],
             [
                 'name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION',
                 'value' => 'Already have an account? Login then',
                 'translations' => [
-                    LanguagesType::EN->value => 'Already have an account? Login then',
-                    LanguagesType::PT->value => 'Já tem uma conta? Faça login então',
+                    LanguageType::EN->value => 'Already have an account? Login then',
+                    LanguageType::PT->value => 'Já tem uma conta? Faça login então',
                 ],
             ],
             [
                 'name' => 'AUTH_METHOD_SMS_REGISTER_LABEL',
                 'value' => 'Create Account with Phone Number',
                 'translations' => [
-                    LanguagesType::EN->value => 'Create Account with Phone Number',
-                    LanguagesType::PT->value => 'Criar Conta com Número de Telefone',
+                    LanguageType::EN->value => 'Create Account with Phone Number',
+                    LanguageType::PT->value => 'Criar Conta com Número de Telefone',
                 ],
             ],
             [
                 'name' => 'AUTH_METHOD_SMS_REGISTER_DESCRIPTION',
                 'value' => "Don't have an account? Create one",
                 'translations' => [
-                    LanguagesType::EN->value => "Don't have an account? Create one",
-                    LanguagesType::PT->value => 'Não tem uma conta? Crie uma',
+                    LanguageType::EN->value => "Don't have an account? Create one",
+                    LanguageType::PT->value => 'Não tem uma conta? Crie uma',
                 ],
             ],
         ];

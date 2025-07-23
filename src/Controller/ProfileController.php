@@ -6,7 +6,7 @@ use App\Entity\User;
 use App\Entity\UserRadiusProfile;
 use App\Enum\AnalyticalEventType;
 use App\Enum\OperationMode;
-use App\Enum\OSTypes;
+use App\Enum\OSType;
 use App\Enum\UserProvider;
 use App\Enum\UserRadiusProfileStatus;
 use App\RadiusDb\Entity\RadiusUser;
@@ -131,7 +131,7 @@ class ProfileController extends AbstractController
             'ip' => $request->getClientIp(),
             'user_agent' => $request->headers->get('User-Agent'),
             'platform' => $this->settingRepository->findOneBy(['name' => 'PLATFORM_MODE'])->getValue(),
-            'type' => OSTypes::ANDROID->value,
+            'type' => OSType::ANDROID->value,
         ];
 
         // Save the event Action using the service
@@ -269,14 +269,14 @@ class ProfileController extends AbstractController
                 'ip' => $request->getClientIp(),
                 'user_agent' => $request->headers->get('User-Agent'),
                 'platform' => $this->settingRepository->findOneBy(['name' => ['PLATFORM_MODE']])->getValue(),
-                'type' => OSTypes::IOS->value,
+                'type' => OSType::IOS->value,
             ];
         } elseif (stripos((string)$userAgent, 'Mac OS') !== false) {
             $eventMetadata = [
                 'ip' => $request->getClientIp(),
                 'user_agent' => $request->headers->get('User-Agent'),
                 'platform' => $this->settingRepository->findOneBy(['name' => ['PLATFORM_MODE']])->getValue(),
-                'type' => OSTypes::MACOS->value
+                'type' => OSType::MACOS->value
             ];
         }
 
@@ -384,7 +384,7 @@ class ProfileController extends AbstractController
             'ip' => $request->getClientIp(),
             'user_agent' => $request->headers->get('User-Agent'),
             'platform' => $this->settingRepository->findOneBy(['name' => ['PLATFORM_MODE']])->getValue(),
-            'type' => OSTypes::WINDOWS->value,
+            'type' => OSType::WINDOWS->value,
         ];
 
         // Save the event Action using the service

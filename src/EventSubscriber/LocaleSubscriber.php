@@ -2,7 +2,7 @@
 
 namespace App\EventSubscriber;
 
-use App\Enum\LanguagesType;
+use App\Enum\LanguageType;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
@@ -10,7 +10,7 @@ use Symfony\Component\HttpKernel\KernelEvents;
 readonly class LocaleSubscriber implements EventSubscriberInterface
 {
     public function __construct(
-        private string $defaultLocale = LanguagesType::EN->value
+        private string $defaultLocale = LanguageType::EN->value
     ) {
     }
 

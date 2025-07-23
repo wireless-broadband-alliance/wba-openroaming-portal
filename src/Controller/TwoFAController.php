@@ -6,7 +6,7 @@ use App\Entity\Event;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Enum\CodeVerificationType;
-use App\Enum\DefaultUsers;
+use App\Enum\DefaultUser;
 use App\Enum\FirewallType;
 use App\Enum\UserTwoFactorAuthenticationStatus;
 use App\Form\TwoFACode;
@@ -1094,7 +1094,7 @@ class TwoFAController extends AbstractController
         }
 
         if (
-            $user->getEmail() === DefaultUsers::ADMIN->value
+            $user->getEmail() === DefaultUser::ADMIN->value
         ) {
             $this->addFlash(
                 'error',

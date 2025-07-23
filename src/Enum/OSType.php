@@ -2,7 +2,7 @@
 
 namespace App\Enum;
 
-enum OSTypes: string
+enum OSType: string
 {
     case ANDROID = 'Android';
     case IOS = 'iOS';

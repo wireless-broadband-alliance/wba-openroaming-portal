@@ -6,7 +6,7 @@ use App\Entity\Setting;
 use App\Entity\TextEditor;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
-use App\Enum\LanguagesType;
+use App\Enum\LanguageType;
 use App\Enum\OperationMode;
 use App\Enum\PlatformMode;
 use App\Enum\TextEditorName;
@@ -888,7 +888,7 @@ class SettingsController extends AbstractController
     #[Route(
         '/dashboard/settings/auth/{language}',
         name: 'admin_dashboard_settings_auth',
-        defaults: ['language' => LanguagesType::EN->value]
+        defaults: ['language' => LanguageType::EN->value]
     )]
     #[IsGranted('ROLE_ADMIN')]
     public function settingsAuths(

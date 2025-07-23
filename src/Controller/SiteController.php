@@ -7,7 +7,7 @@ use App\Entity\UserExternalAuth;
 use App\Enum\AnalyticalEventType;
 use App\Enum\FirewallType;
 use App\Enum\OperationMode;
-use App\Enum\OSTypes;
+use App\Enum\OSType;
 use App\Enum\PlatformMode;
 use App\Enum\TwoFAType;
 use App\Enum\UserProvider;
@@ -312,8 +312,8 @@ class SiteController extends AbstractController
                      * Overriding macOS to iOS due to the profiles being the same and there being no route for the macOS
                      * enum value, so the UI shows macOS but on the logic to generate the profile iOS is used instead
                      */
-                    if ($payload['radio-os'] === OSTypes::MACOS->value) {
-                        $payload['radio-os'] = OSTypes::IOS->value;
+                    if ($payload['radio-os'] === OSType::MACOS->value) {
+                        $payload['radio-os'] = OSType::IOS->value;
                     }
                     return $this->redirectToRoute(
                         'profile_' . strtolower((string)$payload['radio-os']),
@@ -348,8 +348,8 @@ class SiteController extends AbstractController
                  * Overriding macOS to iOS due to the profiles being the same and there being no route for the macOS
                  * enum value, so the UI shows macOS but on the logic to generate the profile iOS is used instead
                  */
-                if ($payload['radio-os'] === OSTypes::MACOS->value) {
-                    $payload['radio-os'] = OSTypes::IOS->value;
+                if ($payload['radio-os'] === OSType::MACOS->value) {
+                    $payload['radio-os'] = OSType::IOS->value;
                 }
                 return $this->redirectToRoute(
                     'profile_' . strtolower((string)$payload['radio-os']),
@@ -366,13 +366,13 @@ class SiteController extends AbstractController
         $data['os'] = [
             'selected' => $payload['radio-os'] ?? $this->detectDevice($userAgent),
             'items' => [
-                OSTypes::WINDOWS->value => ['alt' => 'Windows Logo'],
-                OSTypes::IOS->value => ['alt' => 'Apple Logo'],
-                OSTypes::ANDROID->value => ['alt' => 'Android Logo']
+                OSType::WINDOWS->value => ['alt' => 'Windows Logo'],
+                OSType::IOS->value => ['alt' => 'Apple Logo'],
+                OSType::ANDROID->value => ['alt' => 'Android Logo']
             ]
         ];
 
-        if ($data['os']['selected'] === OSTypes::NONE->value && $currentUser && $currentUser->isVerified()) {
+        if ($data['os']['selected'] === OSType::NONE->value && $currentUser && $currentUser->isVerified()) {
             $this->addFlash(
                 'error',
                 $this->translator->trans('selectOperatingSystem', [], 'controllers')
@@ -547,26 +547,26 @@ class SiteController extends AbstractController
 
     private function detectDevice($userAgent): string
     {
-        $os = OSTypes::NONE->value;
+        $os = OSType::NONE->value;
 
         // Windows
         if (preg_match('/windows|win32/i', (string)$userAgent)) {
-            $os = OSTypes::WINDOWS->value;
+            $os = OSType::WINDOWS->value;
         }
 
         // macOS
         if (preg_match('/macintosh|mac os x/i', (string)$userAgent)) {
-            $os = OSTypes::MACOS->value;
+            $os = OSType::MACOS->value;
         }
 
         // iOS
         if (preg_match('/iphone|ipod|ipad/i', (string)$userAgent)) {
-            $os = OSTypes::IOS->value;
+            $os = OSType::IOS->value;
         }
 
         // Android
         if (preg_match('/android/i', (string)$userAgent)) {
-            $os = OSTypes::ANDROID->value;
+            $os = OSType::ANDROID->value;
         }
 
         // Linux

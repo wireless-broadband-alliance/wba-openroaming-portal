@@ -2,7 +2,8 @@
 
 namespace App\Service;
 
-use App\Enum\LanguagesType;
+use App\Enum\LanguageType;
+use App\Enum\SettingNames;
 use App\Repository\SettingRepository;
 use App\Repository\SettingTranslationRepository;
 use Symfony\Component\HttpFoundation\Request;
@@ -32,7 +33,7 @@ readonly class GetSettings
 
         $locale = $language
             ?? $request->getSession()->get('_locale')
-            ?? LanguagesType::EN->value;
+            ?? LanguageType::EN->value;
 
         $data = [];
 
@@ -100,11 +101,11 @@ readonly class GetSettings
         }
 
         $session = $request->getSession();
-        $locale = $session->get('_locale') ?: LanguagesType::EN->value;
+        $locale = $session->get('_locale') ?: LanguageType::EN->value;
 
         // phpcs:disable Generic.Files.LineLength.TooLong
         $descriptions = [
-            LanguagesType::EN->value => [
+            LanguageType::EN->value => [
                 'RADIUS_REALM_NAME' => 'The realm name for your RADIUS server',
                 'DISPLAY_NAME' => 'The name used on the profiles',
                 'PAYLOAD_IDENTIFIER' => 'The identifier for the payload used on the profiles. This is only used to create iOS/macOS profiles.',
@@ -191,7 +192,7 @@ readonly class GetSettings
                 'FREERADIUS_LAST_CONNECTION_CRON' => 'Defines the schedule for Freeradius server & the user profile last connection',
                 'CRON_ADVANCED_STATUS' => 'Saves the previous status mode on the schedule cron configuration page (Simple/Advanced)'
             ],
-            LanguagesType::PT->value => [
+            LanguageType::PT->value => [
                 'RADIUS_REALM_NAME' => 'O nome do realm para o seu servidor RADIUS',
                 'DISPLAY_NAME' => 'O nome utilizado nos perfis',
                 'PAYLOAD_IDENTIFIER' => 'O identificador da carga útil utilizada nos perfis. Apenas usado para criar perfis iOS/macOS.',
@@ -282,7 +283,7 @@ readonly class GetSettings
         // phpcs:enable
 
         return $descriptions[$locale][$settingName]
-            ?? $descriptions[LanguagesType::EN->value][$settingName]
+            ?? $descriptions[LanguageType::EN->value][$settingName]
             ?? null;
     }
 

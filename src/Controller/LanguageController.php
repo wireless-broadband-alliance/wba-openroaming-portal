@@ -2,7 +2,7 @@
 
 namespace App\Controller;
 
-use App\Enum\LanguagesType;
+use App\Enum\LanguageType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -14,7 +14,7 @@ class LanguageController extends AbstractController
     #[Route('/change-language', name: 'change_language')]
     public function changeLanguage(Request $request, SessionInterface $session): RedirectResponse
     {
-        $locale = $request->query->get('locale', LanguagesType::EN->value);
+        $locale = $request->query->get('locale', LanguageType::EN->value);
 
         $session->set('_locale', $locale);
 
