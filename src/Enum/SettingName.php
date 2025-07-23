@@ -2,7 +2,7 @@
 
 namespace App\Enum;
 
-enum SettingNames: string
+enum SettingName: string
 {
     case RADIUS_REALM_NAME = 'RADIUS_REALM_NAME';
     case DISPLAY_NAME = 'DISPLAY_NAME';
