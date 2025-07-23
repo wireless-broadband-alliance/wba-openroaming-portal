@@ -62,9 +62,11 @@ class FreeradiusLastConnectionCommand extends Command
 
             return Command::FAILURE;
         }
+        $freeradiusCronValue = $timestampFreeradiusCron->getValue();
         if (
-            (int)$timestampFreeradiusCron->getValue() < 0 || $timestampFreeradiusCron->getValue(
-            ) === null || !ctype_digit($timestampFreeradiusCron->getValue())
+            (int)$freeradiusCronValue < 0 ||
+            $freeradiusCronValue === null ||
+            !ctype_digit($freeradiusCronValue)
         ) {
             $output->writeln(
                 '<error>Setting "TIME_STAMP_FREERADIUS_CRON" is invalid or empty. 
