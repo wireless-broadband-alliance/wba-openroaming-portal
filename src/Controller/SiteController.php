@@ -184,28 +184,33 @@ class SiteController extends AbstractController
             ($data["LOGIN_WITH_UUID_ONLY"]["value"] === OperationMode::OFF->value ||
                 $currentUser->getUserExternalAuths()[0]->getProvider() !== UserProvider::PORTAL_ACCOUNT->value)
         ) {
-            if ($currentUser->getTwoFAType() !==
+            if (
+                $currentUser->getTwoFAType() !==
                 UserTwoFactorAuthenticationStatus::DISABLED->value &&
                 !$session->has('2fa_verified_landing')
             ) {
-                if ($currentUser->getTwoFAType() ===
+                if (
+                    $currentUser->getTwoFAType() ===
                     UserTwoFactorAuthenticationStatus::SMS->value
                 ) {
                     return $this->redirectToRoute('app_2FA_generate_code');
                 }
-                if ($currentUser->getTwoFAType() ===
+                if (
+                    $currentUser->getTwoFAType() ===
                     UserTwoFactorAuthenticationStatus::EMAIL->value
                 ) {
                     return $this->redirectToRoute('app_2FA_generate_code');
                 }
-                if ($currentUser->getTwoFAType() ===
+                if (
+                    $currentUser->getTwoFAType() ===
                     UserTwoFactorAuthenticationStatus::TOTP->value
                 ) {
                     return $this->redirectToRoute('app_verify2FA_TOTP');
                 }
             }
             // Check if the user has OTPCodes
-            if ($currentUser->getTwoFAtype() !== UserTwoFactorAuthenticationStatus::DISABLED->value &&
+            if (
+                $currentUser->getTwoFAtype() !== UserTwoFactorAuthenticationStatus::DISABLED->value &&
                 !$this->twoFAService->hasValidOTPCodes($currentUser)
             ) {
                 return $this->redirectToRoute('app_otpCodes');
