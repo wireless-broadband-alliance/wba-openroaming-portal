@@ -8,6 +8,7 @@ use App\Enum\AnalyticalEventType;
 use App\Enum\FirewallType;
 use App\Enum\PlatformMode;
 use App\Enum\UserProvider;
+use App\Repository\SettingRepository;
 use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
 use App\Service\EventActions;
@@ -54,6 +55,7 @@ class GoogleController extends AbstractController
         private readonly UserExternalAuthRepository $userExternalAuthRepository,
         private readonly TranslatorInterface $translator,
         private readonly CsrfTokenManagerInterface $csrfTokenManager,
+        private readonly SettingRepository $settingRepository,
     ) {
     }
 
@@ -67,7 +69,7 @@ class GoogleController extends AbstractController
         $data = $this->getSettings->getSettings();
 
         // Check if the user clicked on the 'sms' variable present only on the SMS authentication buttons
-        if ($data['PLATFORM_MODE']['value'] === true) {
+        if ($data['PLATFORM_MODE']['value'] === PlatformMode::DEMO->value) {
             $this->addFlash(
                 'error',
                 $this->translator->trans(
@@ -296,10 +298,8 @@ class GoogleController extends AbstractController
             $eventDispatcher->dispatch(new InteractiveLoginEvent($request, $token));
 
             // Defines the Event to the table
-            $data = $this->getSettings->getSettings();
-            $platformMode = $data['PLATFORM_MODE']['value'] ? PlatformMode::DEMO->value : PlatformMode::LIVE->value;
             $eventMetadata = [
-                'platform' => $platformMode,
+                'platform' => $this->settingRepository->findOneBy(['name' => 'PLATFORM_MODE'])->getValue(),
                 'ip' => $_SERVER['REMOTE_ADDR'],
                 'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? 'Unknown',
                 'uuid' => $user->getUuid(),

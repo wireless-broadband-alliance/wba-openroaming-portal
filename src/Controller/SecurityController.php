@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Enum\FirewallType;
+use App\Enum\PlatformMode;
 use App\Enum\UserProvider;
 use App\Form\LoginFormType;
 use App\Form\TwoFACode;
@@ -55,7 +56,7 @@ class SecurityController extends AbstractController
 
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings();
-        if ($data['PLATFORM_MODE']['value'] === true) {
+        if ($data['PLATFORM_MODE']['value'] === PlatformMode::DEMO->value) {
             return $this->redirectToRoute('app_landing');
         }
 
