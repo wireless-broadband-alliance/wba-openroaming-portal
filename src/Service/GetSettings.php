@@ -6,9 +6,13 @@ use App\Enum\LanguagesType;
 use App\Enum\SettingName;
 use App\Repository\SettingRepository;
 use App\Repository\SettingTranslationRepository;
+use Psr\Cache\InvalidArgumentException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Contracts\Cache\CacheInterface;
 
 readonly class GetSettings
 {
@@ -34,24 +38,6 @@ readonly class GetSettings
 
         // Always fetch the latest setting names from the DB
         $allSettings = $this->settingRepository->findAll();
-        $currentSettings = array_map(static fn($s) => $s->getName(), $allSettings);
-        $expectedSettings = array_map(static fn($e) => $e->value, SettingName::cases());
-
-        // Compare both sets
-        $missingInDb = array_diff($expectedSettings, $currentSettings);
-        $notInEnum = array_diff($currentSettings, $expectedSettings);
-
-        // Check if all the settings on the DB are set and valid
-        if (!empty($missingInDb) || !empty($notInEnum)) {
-            $responseData = [
-                'success' => false,
-                'message' => 'There are differences',
-                'missingSettings' => $missingInDb,
-                'unexpectedSettings' => $notInEnum,
-            ];
-
-            return new JsonResponse($responseData, 422); // Server-side configuration is incomplete or invalid
-        }
 
         $locale = $language
             ?? $request->getSession()->get('_locale')
@@ -76,6 +62,25 @@ readonly class GetSettings
                 'value' => $localizedSettings[$name]['value'] ?? $setting->getValue(),
                 'description' => $this->getSettingDescription($name),
             ];
+        }
+
+        $currentSettingsName = array_keys($data);
+        $expectedSettings = array_map(static fn($e) => $e->value, SettingName::cases());
+
+        // Compare both sets
+        $missingInDb = array_diff($expectedSettings, $currentSettingsName);
+        $notInEnum = array_diff($currentSettingsName, $expectedSettings);
+
+        // Check if all the settings on the DB are set and valid
+        if (!empty($missingInDb)) {
+            throw new HttpException(
+                Response::HTTP_UNPROCESSABLE_ENTITY,
+                'Some settings are missing in the database: ' . implode(', ', $missingInDb),);
+        }
+        if (!empty($notInEnum)) {
+            throw new HttpException(
+                Response::HTTP_UNPROCESSABLE_ENTITY,
+                'Some settings found in the database are not defined in the project.: ' . implode(', ', $notInEnum),);
         }
 
         return $data;
