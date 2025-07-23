@@ -109,16 +109,16 @@ class FreeradiusLastConnectionCommand extends Command
                     $needsUpdate = false;
 
                     if (
-                        $entity->getLastStartConnectionAt() === null || $startTime > $entity->getLastStartConnectionAt(
+                        $entity->getLastConnectionStartAt() === null || $startTime > $entity->getLastConnectionStartAt(
                         )
                     ) {
-                        $entity->setLastStartConnectionAt($startTime);
+                        $entity->setLastConnectionStartAt($startTime);
                         $needsUpdate = true;
                     }
                     if (
-                        $entity->getLastStopConnectionAt() === null || $stopTime > $entity->getLastStopConnectionAt()
+                        $entity->getLastConnectionStopAt() === null || $stopTime > $entity->getLastConnectionStopAt()
                     ) {
-                        $entity->setLastStopConnectionAt($stopTime);
+                        $entity->setLastConnectionStopAt($stopTime);
                         $needsUpdate = true;
                     }
 
