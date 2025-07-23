@@ -10,6 +10,7 @@
   uuid. This way the user confirms himself every time to get the confirmation code for authentication.
 - Optimized the `GetSettings` service to significantly reduce the loading process, improving application performance by
   minimizing redundant data processing and database queries.
+- Renamed some enums to singular form to follow symfony guidelines for enum classes.
 
 # Release V1.8.1
 
