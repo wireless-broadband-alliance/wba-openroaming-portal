@@ -7,10 +7,10 @@ use App\Enum\SettingName;
 use App\Repository\SettingRepository;
 use App\Repository\SettingTranslationRepository;
 use Psr\Cache\InvalidArgumentException;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Contracts\Cache\CacheInterface;
-use Symfony\Contracts\Cache\ItemInterface;
 
 readonly class GetSettings
 {
@@ -25,7 +25,7 @@ readonly class GetSettings
     /**
      * @throws InvalidArgumentException
      */
-    public function getSettings(?string $language = null): array
+    public function getSettings(?string $language = null): array|JsonResponse
     {
         // Get the current request from the RequestStack
         $request = $this->requestStack->getCurrentRequest();
@@ -38,30 +38,25 @@ readonly class GetSettings
             return [];
         }
 
-        // Only make the query once and then check with the symfony cache the lasted valid content
-        $names = $this->cache->get('db_setting_names', function (ItemInterface $item) {
-            $item->expiresAfter(86400); // 24 hours = 86,400 seconds
+        // Only make the query once and then check with the symfony cache the lasted valid contents
+        // Always fetch the latest setting names from the DB
+        $currentSettings = $this->settingRepository->findAllNames();
+        $expectedSettings = array_map(static fn($e) => $e->value, SettingName::cases());
 
-            return $this->settingRepository->findAllNames();
-        });
+        // Compare both sets
+        $missingInDb = array_diff($expectedSettings, $currentSettings);
+        $notInEnum = array_diff($currentSettings, $expectedSettings);
 
-        $expected = array_map(static fn($e) => $e->value, SettingName::cases());
-        $actual = $names; // from cache or DB
-
-        $missingInDb = array_diff($expected, $actual);
-        $notInEnum = array_diff($actual, $expected);
-
-        // Check if all the settings on the db are set and valid
+        // Check if all the settings on the DB are set and valid
         if (!empty($missingInDb) || !empty($notInEnum)) {
-            if (!empty($missingInDb)) {
-                dump('Settings missing in DB: ', $missingInDb);
-            }
+            $responseData = [
+                'success' => false,
+                'message' => 'There are differences',
+                'missingSettings' => $missingInDb,
+                'unexpectedSettings' => $notInEnum,
+            ];
 
-            if (!empty($notInEnum)) {
-                dump('Settings in DB but not in Enum: ', $notInEnum);
-            }
-
-            dd('There are differences');
+            return new JsonResponse($responseData, 422); // Server-side configuration is incomplete or invalid
         }
 
         $locale = $language
