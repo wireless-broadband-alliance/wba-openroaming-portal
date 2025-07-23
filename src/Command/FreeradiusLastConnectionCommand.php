@@ -125,7 +125,6 @@ class FreeradiusLastConnectionCommand extends Command
                     }
 
                     if ($needsUpdate) {
-                        $this->entityManager->persist($entity);
                         $updated = true;
                     }
                 }
