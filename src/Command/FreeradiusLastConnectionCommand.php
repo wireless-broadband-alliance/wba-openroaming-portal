@@ -147,12 +147,16 @@ class FreeradiusLastConnectionCommand extends Command
                     $this->entityManager->clear();
                 } else {
                     // Rollback transaction if nothing updated
-                    $this->entityManager->rollback();
+                    if ($this->entityManager->getConnection()->isTransactionActive()) {
+                        $this->entityManager->rollback();
+                    }
 
                     $output->writeln('<comment>No changes detected, timestamp not updated.</comment>');
                 }
             } catch (Exception $e) {
-                $this->entityManager->rollback();
+                if ($this->entityManager->getConnection()->isTransactionActive()) {
+                    $this->entityManager->rollback();
+                }
                 throw $e;
             }
         } else {
@@ -175,7 +179,9 @@ class FreeradiusLastConnectionCommand extends Command
         try {
             return $this->backupFreeradiusLastConnection($output);
         } catch (Exception $e) {
-            $this->entityManager->rollback();
+            if ($this->entityManager->getConnection()->isTransactionActive()) {
+                $this->entityManager->rollback();
+            }
             $output->writeln('<error>An error occurred: ' . $e->getMessage() . '</error>');
 
             return Command::FAILURE;
