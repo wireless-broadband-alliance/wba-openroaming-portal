@@ -30,24 +30,13 @@ class MetricsController extends AbstractController
     #[Route('/metrics', name: 'app_metrics', methods: ['GET'])]
     public function index(Request $request): Response
     {
-        if (isset($_ENV['METRICS_ENABLED'])) {
-            $metricsEnabled = filter_var(
-                $this->params->get('app.metrics_enabled'),
-                FILTER_VALIDATE_BOOLEAN
-            );
-        } else {
-            return new JsonResponse([
-                'success' => false,
-                'message' => 'Metrics configuration is missing.',
-            ], Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
-
+        $metricsEnabled = filter_var(
+            $this->params->get('app.metrics_enabled'),
+            FILTER_VALIDATE_BOOLEAN
+        );
 
         if (!$metricsEnabled) {
-            return new JsonResponse([
-                'success' => false,
-                'message' => 'Metrics endpoint is disabled',
-            ], Response::HTTP_NOT_FOUND);
+            return new Response('Metrics endpoint is disabled', Response::HTTP_NOT_FOUND);
         }
 
         $clientIp = $request->getClientIp();
