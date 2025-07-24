@@ -7,9 +7,9 @@ use Doctrine\Persistence\ManagerRegistry;
 use RuntimeException;
 use Throwable;
 
-class FreeradiusConnectionService
+readonly class FreeradiusConnectionService
 {
-    private readonly Connection $freeradiusConnection;
+    private Connection $freeradiusConnection;
 
     public function __construct(ManagerRegistry $doctrine)
     {
