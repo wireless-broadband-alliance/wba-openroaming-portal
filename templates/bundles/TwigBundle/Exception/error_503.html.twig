@@ -1,4 +1,7 @@
-{# templates/bundles/TwigBundle/Exception/error.html.twig #}
+{% set bgUrl = data.wallpaperImageName.value != '/resources/images/wallpaper.png'
+    ? data.wallpaperImageName.value
+    : '/resources/images/background.png' %}
+
 {% extends 'base.html.twig' %}
 
 {% block title %}
@@ -6,56 +9,54 @@
 {% endblock %}
 
 {% block body %}
-    <div class="min-h-screen bg-gray-50 flex flex-col justify-center items-center px-4 sm:px-6 lg:px-8">
+    <div class="relative min-h-screen px-4 sm:px-6 lg:px-8 bg-center bg-cover"
+         style="background-image: url('{{ bgUrl }}');">
+        <div class="relative w-full h-full p-8 xl:pl-[130px] xl:pr-[150px] xl:pt-[210px] bg-center bg-cover z-10">
 
-        {# Customer Logo #}
-        {% if data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\OperationMode::ON').value %}
-            <div class="mb-10">
-                <img class="h-14 object-contain" src="{{ data.customerLogoName.value }}" alt="Logo">
-            </div>
-        {% endif %}
+            <div class="bg-white rounded-2xl shadow-xl max-w-2xl w-full p-10 text-center mx-auto">
 
-        <div class="text-center">
-            <div class="inline-flex items-center justify-center space-x-4">
-                <p class="text-7xl font-extrabold text-indigo-700">{{ status_code }}</p>
-
-                <div class="flex items-center justify-center w-12 h-12 rounded-full bg-indigo-600 text-white shadow-lg
-              transition-transform duration-300
-              hover:animate-spin hover:scale-110 hover:shadow-2xl cursor-pointer">
-                    <twig:ux:icon name="wba:maintenance" class="w-6 h-6" />
+                {# Icon on top, bigger and centered #}
+                <div class="flex justify-center mb-4">
+                    <div class="flex items-center justify-center w-48 h-24 rounded-full">
+                        <twig:ux:icon name="wba:info-error"/>
+                    </div>
                 </div>
-            </div>
 
-            <h1 class="mt-2 text-3xl font-bold text-gray-900">{{ status_title }}</h1>
+                {# Title with custom colour #}
+                <h1 class="text-3xl font-bold mb-4" style="color: #3F474D;">
+                    {{ status_title }} {{ status_code }}
+                </h1>
 
-            <p class="mt-4 text-lg text-gray-600">
-                {% if status_code == 404 %}
-                    The page or resource you’re looking for could not be found.
-                {% elseif status_code >= 500 %}
-                    The server encountered an error. Please try again later.
-                {% else %}
-                    Something went wrong. Please try again.
+                <p class="text-base text-gray-600 mb-2">
+                    Oops, it looks like something went wrong!
+                </p>
+
+                <p class="text-sm text-gray-500 mb-6">
+                    Please let us know what you were doing when this error occurred.<br>
+                    We'll fix it as soon as possible. Our apologies for any inconvenience caused.
+                </p>
+
+                <div class="flex justify-center mb-4">
+                    <a href="{{ path('app_landing') }}"
+                            class="my-6 w-[250px] btn-primary inline-block">
+                        Return to the Homepage
+                    </a>
+                </div>
+
+                {% if exception is defined and exception.message is not empty %}
+                    <div class="mt-12 w-full bg-gray-100 shadow-inner rounded-lg p-6 text-left text-sm text-gray-700 overflow-x-auto">
+                        <h2 class="text-xl font-semibold text-gray-800 mb-4">Error Details</h2>
+                        {{ exception.message|nl2br }}
+                    </div>
                 {% endif %}
-            </p>
 
-            <div class="mt-6">
-                <button
-                        class="inline-block bg-red-600 text-white px-4 py-2 rounded-lg shadow hover:bg-red-700 transition"
-                        onClick="window.history.back();"
-                >
-                    Go Back
-                </button>
+                {% if data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\OperationMode::ON').value %}
+                    <div class="mt-10 flex justify-center items-center gap-8">
+                        <img class="h-10 object-contain" src="{{ data.customerLogoName.value }}" alt="Logo">
+                    </div>
+                {% endif %}
+
             </div>
         </div>
-
-        {# Optional: Technical Details in Dev or if exception is passed #}
-        {% if exception is defined and exception.message is not empty %}
-            <div class="mt-12 w-full max-w-3xl bg-white shadow-md rounded-lg p-6">
-                <h2 class="text-xl font-semibold text-gray-800 mb-4">Error Details</h2>
-                <div class="overflow-x-auto text-sm text-gray-700">
-                    {{ exception.message|nl2br }}
-                </div>
-            </div>
-        {% endif %}
     </div>
 {% endblock %}
