@@ -6,13 +6,11 @@ use App\Enum\LanguagesType;
 use App\Enum\SettingName;
 use App\Repository\SettingRepository;
 use App\Repository\SettingTranslationRepository;
-use Psr\Cache\InvalidArgumentException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
-use Symfony\Contracts\Cache\CacheInterface;
 
 readonly class GetSettings
 {
@@ -74,13 +72,16 @@ readonly class GetSettings
         // Check if all the settings on the DB are set and valid
         if (!empty($missingInDb)) {
             throw new HttpException(
-                Response::HTTP_UNPROCESSABLE_ENTITY,
-                'Some settings are missing in the database: ' . implode(', ', $missingInDb),);
+                Response::HTTP_INTERNAL_SERVER_ERROR,
+                'Some settings are missing in the database: ' . implode(', ', $missingInDb)
+            );
         }
         if (!empty($notInEnum)) {
             throw new HttpException(
-                Response::HTTP_UNPROCESSABLE_ENTITY,
-                'Some settings found in the database are not defined in the project.: ' . implode(', ', $notInEnum),);
+                Response::HTTP_INTERNAL_SERVER_ERROR,
+                'Some settings found in the database are not defined in the project.: ' . implode(', ', $notInEnum),
+
+            );
         }
 
         return $data;
