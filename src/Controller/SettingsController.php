@@ -33,17 +33,14 @@ use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpClient\Exception\JsonException;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
-
-use function PHPUnit\Framework\isEmpty;
 
 class SettingsController extends AbstractController
 {
@@ -854,7 +851,9 @@ class SettingsController extends AbstractController
     ): Response {
         $missingFiles = $this->certificateService->verifyCertificates();
         if ($missingFiles !== []) {
-            throw new NotFoundHttpException('Cert files are missing: ' . implode(', ', $missingFiles));
+            throw new ServiceUnavailableHttpException(
+                'Cert files are missing: ' . implode(', ', $missingFiles)
+            );
         }
 
         // Get the current logged-in user (admin)

@@ -45,7 +45,7 @@ readonly class ExceptionListener
         }
 
         // Custom status codes to handle
-        $handleCodes = [400, 404, 422, 500];
+        $handleCodes = [400, 404, 422, 500, 503];
         if (!in_array($statusCode, $handleCodes, true)) {
             return;
         }
