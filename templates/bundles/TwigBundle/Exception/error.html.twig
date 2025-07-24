@@ -51,11 +51,10 @@
                 {% endif %}
 
                 {% if data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\OperationMode::ON').value %}
-                    <div class="mt-10 flex justify-center items-center gap-8">
+                    <div class="mt-10 flex justify-center items-center gap-10">
                         <img class="h-10 object-contain" src="{{ data.customerLogoName.value }}" alt="Logo">
                     </div>
                 {% endif %}
-
             </div>
         </div>
     </div>
