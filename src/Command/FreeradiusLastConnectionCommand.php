@@ -54,18 +54,18 @@ class FreeradiusLastConnectionCommand extends Command
 
         // Load timestamp setting
         $timestampFreeradiusCron = $this->settingRepository->findOneBy(['name' => 'TIME_STAMP_FREERADIUS_CRON']);
-        if ($timestampFreeradiusCron || is_null($timestampFreeradiusCron->getValue())) {
-
+        if ($timestampFreeradiusCron && is_null($timestampFreeradiusCron->getValue())) {
             $timestampFreeradiusCron->setValue(0);
         }
+
         if (!$timestampFreeradiusCron) {
             $output->writeln(
                 '<error>Setting "TIME_STAMP_FREERADIUS_CRON" not found. 
                         Please run the command "reset:timeStampFreeradiusCron" to create it.</error>'
             );
-
             return Command::FAILURE;
         }
+
         $freeradiusCronValue = $timestampFreeradiusCron->getValue();
         if (
             (int)$freeradiusCronValue < 0 ||
