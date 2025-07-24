@@ -24,6 +24,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
+use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
@@ -59,10 +60,10 @@ class FreeradiusController extends AbstractController
     ): Response {
         $result = $this->freeradiusConnectionService->checkConnection();
         if ($result['success'] === false) {
-            return new JsonResponse([
-                'success' => false,
-                'message' => $result['message'],
-            ], Response::HTTP_SERVICE_UNAVAILABLE); // 503 -> Freeradius server is temporarily unable
+            throw new ServiceUnavailableHttpException(
+                null,
+                'FreeRADIUS DB connection failed: ' . $result['message']
+            );
         }
 
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);

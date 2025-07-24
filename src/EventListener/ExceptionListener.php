@@ -8,7 +8,7 @@ use App\Service\GetSettings;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Twig\Environment;
 use Twig\Error\LoaderError;
@@ -35,21 +35,40 @@ readonly class ExceptionListener
     {
         $exception = $event->getThrowable();
 
-        if ($exception instanceof NotFoundHttpException) {
-            $data = $this->getSettings->getSettings(
-                $this->userRepository,
-                $this->settingRepository
-            );
+        // Default values
+        $statusCode = 500;
+        $statusTitle = 'Internal Server Error';
 
-            $content = $this->twig->render('bundles/TwigBundle/Exception/error.html.twig', [
-                'status_code' => 404,
-                'status_title' => 'Not Found',
-                'exception' => $exception,
-                'data' => $data,
-            ]);
-
-            $response = new Response($content, 404);
-            $event->setResponse($response);
+        if ($exception instanceof HttpExceptionInterface) {
+            $statusCode = $exception->getStatusCode();
+            $statusTitle = Response::$statusTexts[$statusCode] ?? 'Error';
         }
+
+        // Custom status codes to handle
+        $handleCodes = [400, 404, 422, 500, 503];
+        if (!in_array($statusCode, $handleCodes, true)) {
+            return;
+        }
+
+        $data = $this->getSettings->getSettings(
+            $this->userRepository,
+            $this->settingRepository
+        );
+
+        // Try specific error template first
+        $template = sprintf('bundles/TwigBundle/Exception/error_%d.html.twig', $statusCode);
+        if (!$this->twig->getLoader()->exists($template)) {
+            $template = 'bundles/TwigBundle/Exception/error.html.twig';
+        }
+
+        $content = $this->twig->render($template, [
+            'status_code' => $statusCode,
+            'status_title' => $statusTitle,
+            'exception' => $exception,
+            'data' => $data,
+        ]);
+
+        $response = new Response($content, $statusCode);
+        $event->setResponse($response);
     }
 }
