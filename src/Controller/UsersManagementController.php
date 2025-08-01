@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\DTO\UserUpdateDTO;
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
+use App\Entity\UserRadiusProfile;
 use App\Enum\AnalyticalEventType;
 use App\Enum\FirewallType;
 use App\Enum\OperationMode;
@@ -503,7 +504,7 @@ class UsersManagementController extends AbstractController
 
         $lastConnectedProfile = $this->radiusProfileRepository->findUserLastConnection($user);
 
-        if ($lastConnectedProfile) {
+        if ($lastConnectedProfile instanceof UserRadiusProfile) {
             $lastStartConnection = $lastConnectedProfile->getLastConnectionStartAt();
             $lastStopConnection = $lastConnectedProfile->getLastConnectionStopAt();
         } else {
