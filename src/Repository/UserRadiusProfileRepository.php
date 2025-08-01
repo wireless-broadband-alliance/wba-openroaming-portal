@@ -2,6 +2,7 @@
 
 namespace App\Repository;
 
+use App\Entity\User;
 use App\Entity\UserRadiusProfile;
 use App\Enum\UserRadiusProfileStatus;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
@@ -84,5 +85,16 @@ class UserRadiusProfileRepository extends ServiceEntityRepository
             ->setParameter('active', UserRadiusProfileStatus::ACTIVE->value)
             ->getQuery()
             ->getResult();
+    }
+
+    public function findUserLastConnection(User $user): ?UserRadiusProfile
+    {
+        return $this->createQueryBuilder('u')
+            ->where('u.user = :user')
+            ->setParameter('user', $user)
+            ->orderBy('u.lastConnectionStopAt', 'DESC')
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
     }
 }

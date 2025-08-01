@@ -17,6 +17,7 @@ use App\Form\UserUpdateType;
 use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserExternalAuthRepository;
+use App\Repository\UserRadiusProfileRepository;
 use App\Repository\UserRepository;
 use App\Service\EscapeSpreadSheet;
 use App\Service\EventActions;
@@ -61,6 +62,7 @@ class UsersManagementController extends AbstractController
         private readonly UserDeletionService $userDeletionService,
         private readonly TwoFAService $twoFAService,
         private readonly VerificationCodeEmailGenerator $verificationCodeEmailGenerator,
+        private readonly UserRadiusProfileRepository $radiusProfileRepository,
     ) {
     }
 
@@ -499,6 +501,16 @@ class UsersManagementController extends AbstractController
             return $this->redirectToRoute('admin_page');
         }
 
+        $lastConnectedProfile = $this->radiusProfileRepository->findUserLastConnection($user);
+
+        if ($lastConnectedProfile) {
+            $lastStartConnection = $lastConnectedProfile->getLastConnectionStartAt();
+            $lastStopConnection = $lastConnectedProfile->getLastConnectionStopAt();
+        } else {
+            $lastStartConnection = null;
+            $lastStopConnection = null;
+        }
+
         return $this->render(
             'admin/edit.html.twig',
             [
@@ -509,6 +521,8 @@ class UsersManagementController extends AbstractController
                 'current_user' => $currentUser,
                 'context' => FirewallType::DASHBOARD->value,
                 'userUpdateDTO' => $userUpdateDTO,
+                'lastStartConnection' => $lastStartConnection,
+                'lastStopConnection' => $lastStopConnection,
             ]
         );
     }
