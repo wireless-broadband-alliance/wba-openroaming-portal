@@ -4,6 +4,7 @@ namespace App\RadiusDb\Repository;
 
 use App\RadiusDb\Entity\RadiusAccounting;
 use DateTime;
+use DateTimeImmutable;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\Query;
 use Doctrine\Persistence\ManagerRegistry;
@@ -200,5 +201,45 @@ class RadiusAccountingRepository extends ServiceEntityRepository
         return $queryBuilder
             ->getQuery()
             ->getResult();
+    }
+
+    public function findLatestConnectionTime(?int $sinceTimestamp = null): ?array
+    {
+        $qb = $this->createQueryBuilder('ra')
+            ->select('ra.acctStartTime')
+            ->orderBy('ra.acctStartTime', 'DESC')
+            ->setMaxResults(1);
+
+        if ($sinceTimestamp !== null) {
+            $sinceDateTime = new DateTimeImmutable()->setTimestamp($sinceTimestamp);
+
+            $qb->where('ra.acctStartTime >= :since')
+                ->setParameter('since', $sinceDateTime);
+        }
+
+        return $qb->getQuery()->getOneOrNullResult();
+    }
+
+
+    /**
+     * @throws \DateMalformedStringException
+     */
+    public function findConnectionTime(int $sinceTimestamp): array
+    {
+        $qb = $this->createQueryBuilder('ra');
+
+        // Subquery to get the maximum acctStartTime per user since the given timestamp
+        $sub = $this->createQueryBuilder('sub')
+            ->select('MAX(sub.acctStartTime)')
+            ->where('sub.username = ra.username')
+            ->andWhere('sub.acctStartTime >= :since')
+            ->getDQL();
+
+        // Main query to fetch the rows where acctStartTime is the latest per user
+        $qb->select('ra.username, ra.acctStartTime, ra.acctStopTime')
+            ->where('ra.acctStartTime = (' . $sub . ')')
+            ->setParameter('since', new DateTimeImmutable('@' . $sinceTimestamp));
+
+        return $qb->getQuery()->getArrayResult();
     }
 }

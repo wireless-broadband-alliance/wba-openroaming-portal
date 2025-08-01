@@ -56,6 +56,18 @@ class ScheduleType extends AbstractType
                         'settingName' => 'LDAP_SYNC_CRON',
                     ]);
                 }
+            )
+            ->addDependent(
+                'freeradius_last_connection_cron',
+                'use_advanced_mode',
+                function (DependentField $field, ?bool $use_advanced_mode): void {
+                    $field->add(ScheduleSettingType::class, [
+                        'label' => false,
+                        'required' => false,
+                        'use_advanced_mode' => $use_advanced_mode,
+                        'settingName' => 'FREERADIUS_LAST_CONNECTION_CRON',
+                    ]);
+                }
             );
     }
 

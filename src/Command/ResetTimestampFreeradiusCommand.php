@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Command;
 
 use App\Entity\Setting;
@@ -14,10 +16,10 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 
 #[AsCommand(
-    name: 'reset:authSettings',
-    description: 'Reset Authentication Settings',
+    name: 'reset:timeStampFreeradiusCron',
+    description: 'Reset Timestamp for Freeradius cron'
 )]
-class ResetAuthSettingsCommand extends Command
+class ResetTimestampFreeradiusCommand extends Command
 {
     public function __construct(
         private readonly EntityManagerInterface $entityManager
@@ -28,17 +30,19 @@ class ResetAuthSettingsCommand extends Command
     protected function configure(): void
     {
         $this
-            ->setName('reset:authSettings')
-            ->setDescription('Reset Authentication Settings')
+            ->setName('reset:timeStampFreeradiusCron')
+            ->setDescription('Reset Timestamp for Freeradius cron')
             ->addOption('yes', 'y', InputOption::VALUE_NONE, 'Automatically confirm the reset');
     }
-
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         // Check if the --yes option is provided (comes from a controller), then skip the confirmation prompt
         if (!$input->getOption('yes')) {
             $helper = $this->getHelper('question');
-            $question = new ConfirmationQuestion('This action will reset the authentication settings. [y/N] ', false);
+            $question = new ConfirmationQuestion('This action will RESET the TIMESTAMP used by the' .
+                'FREERADIUS cron job on the portal. ' .
+                'This is a sensitive operation and should only be performed in **very specific scenarios**. ' .
+                'Are you sure you want to proceed? [y/N]', false);
             /** @var QuestionHelper $helper */
             if (!$helper->ask($input, $output, $question)) {
                 $output->writeln('Command aborted.');
@@ -47,39 +51,7 @@ class ResetAuthSettingsCommand extends Command
         }
 
         $settings = [
-            ['name' => 'AUTH_METHOD_SAML_ENABLED', 'value' => 'false'],
-            ['name' => 'AUTH_METHOD_SAML_LABEL', 'value' => 'Login with SAML'],
-            ['name' => 'AUTH_METHOD_SAML_DESCRIPTION', 'value' => 'Authenticate with your SAML account'],
-            ['name' => 'AUTH_METHOD_GOOGLE_LOGIN_ENABLED', 'value' => 'false'],
-            ['name' => 'AUTH_METHOD_GOOGLE_LOGIN_LABEL', 'value' => 'Login with Google'],
-            ['name' => 'AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION', 'value' => 'Authenticate with your Google account'],
-            ['name' => 'AUTH_METHOD_MICROSOFT_LOGIN_ENABLED', 'value' => 'false'],
-            ['name' => 'AUTH_METHOD_MICROSOFT_LOGIN_LABEL', 'value' => 'Login with Microsoft'],
-            [
-                'name' => 'AUTH_METHOD_MICROSOFT_LOGIN_DESCRIPTION',
-                'value' => 'Authenticate with your Microsoft account'
-            ],
-            ['name' => 'VALID_DOMAINS_GOOGLE_LOGIN', 'value' => ''],
-            ['name' => 'AUTH_METHOD_REGISTER_ENABLED', 'value' => 'true'],
-            ['name' => 'AUTH_METHOD_REGISTER_LABEL', 'value' => 'Create Account with Email'],
-            ['name' => 'AUTH_METHOD_REGISTER_DESCRIPTION', 'value' => 'Don\'t have an account? Create one'],
-
-            ['name' => 'EMAIL_TIMER_RESEND', 'value' => '2'],
-            ['name' => 'LINK_VALIDITY', 'value' => '10'],
-
-            ['name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED', 'value' => 'true'],
-            ['name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_LABEL', 'value' => 'Account Login'],
-            ['name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION', 'value' => 'Already have an account? Login then'],
-            ['name' => 'AUTH_METHOD_SMS_REGISTER_ENABLED', 'value' => 'false'],
-            ['name' => 'AUTH_METHOD_SMS_REGISTER_LABEL', 'value' => 'Create Account with Phone Number'],
-            ['name' => 'AUTH_METHOD_SMS_REGISTER_DESCRIPTION', 'value' => 'Don\'t have an account? Create one'],
-            ['name' => 'VALID_DOMAINS_GOOGLE_LOGIN', 'value' => ''],
-            ['name' => 'VALID_DOMAINS_MICROSOFT_LOGIN', 'value' => ''],
-            ['name' => 'PROFILE_LIMIT_DATE_GOOGLE', 'value' => '5'],
-            ['name' => 'PROFILE_LIMIT_DATE_MICROSOFT', 'value' => '5'],
-            ['name' => 'PROFILE_LIMIT_DATE_SAML', 'value' => '5'],
-            ['name' => 'PROFILE_LIMIT_DATE_EMAIL', 'value' => '5'],
-            ['name' => 'PROFILE_LIMIT_DATE_SMS', 'value' => '5'],
+            ['name' => 'TIME_STAMP_FREERADIUS_CRON', 'value' => null],
         ];
 
         // Begin a database transaction to ensure data consistency
@@ -112,7 +84,7 @@ class ResetAuthSettingsCommand extends Command
 
             $message = <<<EOL
 
-<info>Success:</info> All the authentication settings have been set to the default values.
+<info>Success:</info> Timestamp for Freeradius cron have been set to the current time.
 <comment>Note:</comment> If you want to reset any another setting please check using this command:
       <fg=blue>php bin/console reset</>
 EOL;

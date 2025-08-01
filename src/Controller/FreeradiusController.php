@@ -10,6 +10,7 @@ use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use App\Service\EscapeSpreadSheet;
 use App\Service\EventActions;
+use App\Service\FreeradiusConnectionService;
 use App\Service\GetSettings;
 use App\Service\Statistics;
 use DateTime;
@@ -19,9 +20,11 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
+use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
@@ -35,7 +38,8 @@ class FreeradiusController extends AbstractController
         private readonly ParameterBagInterface $parameterBag,
         private readonly EventActions $eventActions,
         private readonly RadiusAuthsRepository $radiusAuthsRepository,
-        private readonly RadiusAccountingRepository $radiusAccountingRepository
+        private readonly RadiusAccountingRepository $radiusAccountingRepository,
+        private readonly FreeradiusConnectionService $freeradiusConnectionService
     ) {
     }
 
@@ -54,6 +58,14 @@ class FreeradiusController extends AbstractController
         #[MapQueryParameter] int $page = 1,
         #[MapQueryParameter] ?int $count = 5
     ): Response {
+        $result = $this->freeradiusConnectionService->checkConnection();
+        if ($result['success'] === false) {
+            throw new ServiceUnavailableHttpException(
+                null,
+                'FreeRADIUS DB connection failed: ' . $result['message']
+            );
+        }
+
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
         $user = $this->getUser();

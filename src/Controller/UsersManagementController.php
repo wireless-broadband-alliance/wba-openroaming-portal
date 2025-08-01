@@ -2,8 +2,10 @@
 
 namespace App\Controller;
 
+use App\DTO\UserUpdateDTO;
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
+use App\Entity\UserRadiusProfile;
 use App\Enum\AnalyticalEventType;
 use App\Enum\FirewallType;
 use App\Enum\OperationMode;
@@ -16,6 +18,7 @@ use App\Form\UserUpdateType;
 use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserExternalAuthRepository;
+use App\Repository\UserRadiusProfileRepository;
 use App\Repository\UserRepository;
 use App\Service\EscapeSpreadSheet;
 use App\Service\EventActions;
@@ -60,6 +63,7 @@ class UsersManagementController extends AbstractController
         private readonly UserDeletionService $userDeletionService,
         private readonly TwoFAService $twoFAService,
         private readonly VerificationCodeEmailGenerator $verificationCodeEmailGenerator,
+        private readonly UserRadiusProfileRepository $radiusProfileRepository,
     ) {
     }
 
@@ -303,7 +307,6 @@ class UsersManagementController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function editUsers(
         Request $request,
-        UserRepository $userRepository,
         UserPasswordHasherInterface $passwordHasher,
         EntityManagerInterface $em,
         MailerInterface $mailer,
@@ -327,36 +330,33 @@ class UsersManagementController extends AbstractController
             return $this->redirectToRoute('admin_page');
         }
 
-        // Store the initial bannedAt value before form submission
-        $initialBannedAtValue = $user->getBannedAt();
+        // Prepare DTO
+        $userUpdateDTO = new UserUpdateDTO($user);
+        $initialBannedAt = $user->getBannedAt();
 
-        $form = $this->createForm(UserUpdateType::class, $user);
+        // Create & handle form
+        $form = $this->createForm(UserUpdateType::class, $userUpdateDTO);
         $form->handleRequest($request);
+
         if ($form->isSubmitted() && $form->isValid()) {
-            $user = $form->getData();
+            // Use DTO method to map data back
+            $userUpdateDTO->updateUser($user);
 
-            // Verifies if the isVerified is removed to the logged account
-            if (($currentUser->getId() === $user->getId()) && $form->get('isVerified')->getData() === 0) {
-                $user->isVerified();
-                $this->addFlash('error_admin', 'Sorry, administrators cannot remove is own verification.');
-                return $this->redirectToRoute('admin_user_edit', ['id' => $user->getId()]);
-            }
-
-            // Verifies if the bannedAt was submitted and compares the form value "banned" to the current value
-            if ($form->get('bannedAt')->getData() && $user->getBannedAt() !== $initialBannedAtValue) {
-                if ($currentUser->getId() === $user->getId()) {
-                    $this->addFlash('error_admin', 'Sorry, administrators cannot ban themselves.');
-                    return $this->redirectToRoute('admin_user_edit', ['id' => $user->getId()]);
+            if (!$userUpdateDTO->editingAdmin) {
+                if ($userUpdateDTO->banned && $initialBannedAt === null) {
+                    $user->setBannedAt(new DateTime());
+                    $this->profileManager->disableProfiles(
+                        $user,
+                        UserRadiusProfileRevokeReason::ADMIN_BANNED_USER->value,
+                        true
+                    );
                 }
-                $user->setBannedAt(new DateTime());
-                $this->profileManager->disableProfiles(
-                    $user,
-                    UserRadiusProfileRevokeReason::ADMIN_BANNED_USER->value,
-                    true
-                );
-            } else {
-                $user->setBannedAt(null);
-                if ($form->get('isVerified')->getData()) {
+
+                if (!$userUpdateDTO->banned) {
+                    $user->setBannedAt(null);
+                }
+
+                if ($userUpdateDTO->isVerified) {
                     $this->profileManager->enableProfiles($user);
                 } else {
                     $this->profileManager->disableProfiles(
@@ -367,25 +367,26 @@ class UsersManagementController extends AbstractController
                 }
             }
 
-            $userRepository->save($user, true);
+            $this->userRepository->save($user, true);
 
-            $eventMetadata = [
-                'ip' => $request->getClientIp(),
-                'user_agent' => $request->headers->get('User-Agent'),
-                'edited' => $user->getUuid(),
-                'by' => $currentUser->getUuid(),
-            ];
             $this->eventActions->saveEvent(
                 $user,
                 AnalyticalEventType::USER_ACCOUNT_UPDATE_FROM_UI->value,
                 new DateTime(),
-                $eventMetadata
+                [
+                    'ip' => $request->getClientIp(),
+                    'user_agent' => $request->headers->get('User-Agent'),
+                    'edited' => $user->getUuid(),
+                    'by' => $currentUser->getUuid(),
+                ]
             );
 
-            $uuid = $user->getUuid();
-            $this->addFlash('success_admin', sprintf('"%s" has been updated successfully.', $uuid));
+            $this->addFlash(
+                'success_admin',
+                sprintf('"%s" has been updated successfully.', $user->getUuid())
+            );
 
-            return $this->redirectToRoute('admin_page');
+            return $this->redirectToRoute('admin_user_edit', ['id' => $user->getId()]);
         }
 
         $emailSender = $this->parameterBag->get('app.email_address');
@@ -501,6 +502,16 @@ class UsersManagementController extends AbstractController
             return $this->redirectToRoute('admin_page');
         }
 
+        $lastConnectedProfile = $this->radiusProfileRepository->findUserLastConnection($user);
+
+        if ($lastConnectedProfile instanceof UserRadiusProfile) {
+            $lastStartConnection = $lastConnectedProfile->getLastConnectionStartAt();
+            $lastStopConnection = $lastConnectedProfile->getLastConnectionStopAt();
+        } else {
+            $lastStartConnection = null;
+            $lastStopConnection = null;
+        }
+
         return $this->render(
             'admin/edit.html.twig',
             [
@@ -510,6 +521,9 @@ class UsersManagementController extends AbstractController
                 'data' => $data,
                 'current_user' => $currentUser,
                 'context' => FirewallType::DASHBOARD->value,
+                'userUpdateDTO' => $userUpdateDTO,
+                'lastStartConnection' => $lastStartConnection,
+                'lastStopConnection' => $lastStopConnection,
             ]
         );
     }
