@@ -407,14 +407,26 @@ class AuthType extends AbstractType
                 'constraints' => [
                     new Length([
                         'max' => 3,
-                        'maxMessage' => ' This field cannot be longer than {{ limit }} characters',
+                        'maxMessage' => $this->translator->trans(
+                            'descriptionMaximumCharactersMessage',
+                            [],
+                            'AuthType'
+                        ),
                     ]),
                     new GreaterThanOrEqual([
                         'value' => 1,
-                        'message' => 'This timer should never be less than 1.',
+                        'message' =>  $this->translator->trans(
+                            'timerNeverLessThan1',
+                            [],
+                            'AuthType'
+                        ),
                     ]),
                     new NotBlank([
-                        'message' => 'Please make sure to set a timer',
+                        'message' => $this->translator->trans(
+                            'timerNotBlank',
+                            [],
+                            'AuthType'
+                        ),
                     ]),
 
                 ]
@@ -424,14 +436,26 @@ class AuthType extends AbstractType
                 'constraints' => [
                     new Length([
                         'max' => 3,
-                        'maxMessage' => ' This field cannot be longer than {{ limit }} characters',
+                        'maxMessage' => $this->translator->trans(
+                            'descriptionMaximumCharactersMessage',
+                            [],
+                            'AuthType'
+                        ),
                     ]),
                     new GreaterThanOrEqual([
                         'value' => 1,
-                        'message' => 'This timer should never be less than 1.',
+                        'message' =>  $this->translator->trans(
+                            'timerNeverLessThan1',
+                            [],
+                            'AuthType'
+                        ),
                     ]),
                     new NotBlank([
-                        'message' => 'Please make sure to set a timer',
+                        'message' => $this->translator->trans(
+                            'timerNotBlank',
+                            [],
+                            'AuthType'
+                        ),
                     ]),
 
                 ]

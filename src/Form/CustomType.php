@@ -46,7 +46,7 @@ class CustomType extends AbstractType
                 'type' => TextType::class,
                 'constraints' => [
                     new Assert\NotBlank([
-                        'message' => 'This field cannot be empty'
+                        'message' => $this->translator->trans('fieldCannotBeEmpty', [], 'CustomType')
                     ]),
                     new Length([
                         'max' => 255,

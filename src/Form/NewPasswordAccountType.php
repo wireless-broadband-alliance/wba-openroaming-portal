@@ -10,6 +10,7 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class NewPasswordAccountType extends AbstractType
 {
@@ -17,7 +18,8 @@ class NewPasswordAccountType extends AbstractType
      * @param GetSettings $getSettings The instance of the GetSettings class.
      */
     public function __construct(
-        private readonly GetSettings $getSettings
+        private readonly GetSettings $getSettings,
+        private readonly TranslatorInterface $translator
     ) {
     }
 
@@ -28,7 +30,7 @@ class NewPasswordAccountType extends AbstractType
 
         if ($options['require_current_password'] ?? true) {
             $builder->add('password', PasswordType::class, [
-                'label' => 'Current Password',
+                'label' => $this->translator->trans('currentPassword', [], 'NewPasswordAccountType'),
                 'required' => true,
                 'mapped' => false,
             ]);
@@ -36,12 +38,12 @@ class NewPasswordAccountType extends AbstractType
 
         $builder
             ->add('newPassword', PasswordType::class, [
-                'label' => 'New Password',
+                'label' => $this->translator->trans('newPassword', [], 'NewPasswordAccountType'),
                 'required' => true,
                 'mapped' => false,
             ])
             ->add('confirmPassword', PasswordType::class, [
-                'label' => 'Confirm New Password',
+                'label' => $this->translator->trans('confirmNewPassword', [], 'NewPasswordAccountType'),
                 'required' => true,
                 'mapped' => false,
             ]);
