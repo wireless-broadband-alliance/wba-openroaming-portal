@@ -27,4 +27,25 @@ class CertificateService
         }
         return date('Y-m-d H:i:s', $certInfo['validTo_time_t']);
     }
+
+    public function verifyCertificates(): array
+    {
+        $missingFiles = [];
+        if (!file_exists('/var/www/openroaming/signing-keys/ca.pem')) {
+            $missingFiles[] = 'ca.pem';
+        }
+        if (!file_exists('/var/www/openroaming/signing-keys/cert.pem')) {
+            $missingFiles[] = 'cert.pem';
+        }
+        if (!file_exists('/var/www/openroaming/signing-keys/chain.pem')) {
+            $missingFiles[] = 'chain.pem';
+        }
+        if (!file_exists('/var/www/openroaming/signing-keys/fullchain.pem')) {
+            $missingFiles[] = 'fullchain.pem';
+        }
+        if (!file_exists('/var/www/openroaming/signing-keys/privkey.pem')) {
+            $missingFiles[] = 'privkey.pem';
+        }
+        return $missingFiles;
+    }
 }

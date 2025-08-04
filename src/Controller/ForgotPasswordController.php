@@ -550,12 +550,22 @@ class ForgotPasswordController extends AbstractController
     /**
      * @throws Exception
      */
-    #[Route('/forgot-password/checker', name: 'app_site_forgot_password_checker')]
+    #[Route(
+        '{context}/forgot-password/checker',
+        name: 'app_site_forgot_password_checker',
+        requirements: [
+            'context' => 'landing|dashboard'
+        ],
+        defaults: [
+            'context' => FirewallType::LANDING->value
+        ]
+    )]
     #[IsGranted('ROLE_USER')]
     public function forgotPasswordUserChecker(
         Request $request,
         EntityManagerInterface $entityManager,
         UserPasswordHasherInterface $userPasswordHasher,
+        string $context
     ): Response {
         /** @var User $currentUser */
         $currentUser = $this->getUser();
@@ -583,7 +593,12 @@ class ForgotPasswordController extends AbstractController
                 'error',
                 $this->translator->trans('cannotAccessThisPageWithoutValidRequest', [], 'controllers')
             );
-            return $this->redirectToRoute('app_landing');
+
+            return $this->redirectToRoute(
+                $context === FirewallType::DASHBOARD->value
+                    ? 'admin_page'
+                    : 'app_landing'
+            );
         }
 
         // Checks if the user has a "forgot_password_request", if not, return to the landing page
@@ -592,7 +607,12 @@ class ForgotPasswordController extends AbstractController
                 'error',
                 $this->translator->trans('cantAccessThisPageWithoutRequest', [], 'controllers')
             );
-            return $this->redirectToRoute('app_landing');
+
+            return $this->redirectToRoute(
+                $context === FirewallType::DASHBOARD->value
+                    ? 'admin_page'
+                    : 'app_landing'
+            );
         }
 
         $form = $this->createForm(
@@ -608,7 +628,12 @@ class ForgotPasswordController extends AbstractController
                     'error',
                     $this->translator->trans('typeTheSamePasswordBothFields', [], 'controllers')
                 );
-                return $this->redirectToRoute('app_landing');
+
+                return $this->redirectToRoute(
+                    $context === FirewallType::DASHBOARD->value
+                        ? 'admin_page'
+                        : 'app_landing'
+                );
             }
 
             $currentUser->setPassword(
@@ -644,13 +669,18 @@ class ForgotPasswordController extends AbstractController
                 'success',
                 $this->translator->trans('passwordUpdatedSuccessfully', [], 'controllers')
             );
-            return $this->redirectToRoute('app_landing');
+
+            return $this->redirectToRoute(
+                $context === FirewallType::DASHBOARD->value
+                    ? 'admin_page'
+                    : 'app_landing'
+            );
         }
 
         return $this->render('landing/forgotPassword/forgot_password_checker.html.twig', [
             'forgotPasswordChecker' => $form->createView(),
             'data' => $data,
-            'context' => FirewallType::LANDING->value,
+            'context' => $context,
             'user' => $currentUser,
         ]);
     }

@@ -11,7 +11,6 @@ use App\Service\TwoFAService;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
@@ -44,6 +43,7 @@ readonly class SessionValidatorListener
         /** @var User $userToken */
         $userToken = $token->getUser();
 
+        // Note: ALl the following route should be ignored in case the user has a request already before 2FA
         $url = [
             '/dashboard/login',
             '/dashboard/verify2FA',
@@ -64,17 +64,14 @@ readonly class SessionValidatorListener
             '/dashboard/disable2FA/resend',
             '/dashboard/enable2FA/resend',
             '/dashboard/validate2FA/resend',
+            '/dashboard/forgot-password/checker'
         ];
 
-        if (str_starts_with($path, '/dashboard')) {
+        $user = $this->userRepository->find($userToken->getId());
+        if ($user && str_starts_with($path, '/dashboard')) {
             // Make an exception to ignore the '/dashboard/login' route
             if (in_array($path, $url)) {
                 return;
-            }
-
-            $user = $this->userRepository->find($userToken->getId());
-            if (!$user) {
-                throw new AccessDeniedHttpException('Access denied.');
             }
 
             // Check if the 2FA process is completed

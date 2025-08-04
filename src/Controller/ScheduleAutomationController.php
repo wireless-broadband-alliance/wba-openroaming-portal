@@ -17,6 +17,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 class ScheduleAutomationController extends AbstractController
 {
@@ -30,6 +31,7 @@ class ScheduleAutomationController extends AbstractController
     }
 
     #[Route('/dashboard/settings/schedule', name: 'admin_dashboard_settings_schedule')]
+    #[IsGranted('ROLE_ADMIN')]
     public function settingsSchedule(Request $request): Response
     {
         /** @var User $currentUser */

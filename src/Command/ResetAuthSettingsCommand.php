@@ -65,6 +65,10 @@ class ResetAuthSettingsCommand extends Command
             ['name' => 'AUTH_METHOD_REGISTER_ENABLED', 'value' => 'true'],
             ['name' => 'AUTH_METHOD_REGISTER_LABEL', 'value' => 'Create Account with Email'],
             ['name' => 'AUTH_METHOD_REGISTER_DESCRIPTION', 'value' => 'Don\'t have an account? Create one'],
+
+            ['name' => 'EMAIL_TIMER_RESEND', 'value' => '2'],
+            ['name' => 'LINK_VALIDITY', 'value' => '10'],
+
             ['name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED', 'value' => 'true'],
             ['name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_LABEL', 'value' => 'Account Login'],
             ['name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION', 'value' => 'Already have an account? Login then'],

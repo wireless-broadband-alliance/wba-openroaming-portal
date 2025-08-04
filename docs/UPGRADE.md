@@ -89,12 +89,13 @@ Upgrading your system requires caution and preparation. Follow these general gui
 
 | Current Version | Intermediate Version | Target Version | Notes                                                                                                                  |
 |-----------------|----------------------|----------------|------------------------------------------------------------------------------------------------------------------------|
-| < 1.4.0         | 1.4.0                | Latest Release | Run `php bin/console clear:eventEntity` to clean up invalid records.                                                   |
-| 1.4.0           | 1.5                  | Latest Release | Run `php bin/console lexik:jwt:generate-keypair` before upgrading.                                                     |
-| 1.5             | 1.6                  | Latest Release | Run `php bin/console reset:allocate-providers` before proceeding.                                                      |
-| 1.6             | N/A                  | Latest Release | Proceed directly to latest release after reviewing the changelog.                                                      |
-| 1.7.x           | N/A                  | Latest Release | Run `php bin/console doctrine:schema:update --force` to apply required schema changes.                                 |
-| 1.8.0 or lower  | N/A                  | 1.8.1 (Latest) | Run `php bin/console doctrine:migrations:migrate` to apply optimizations & remove deprecated `verificationCode` field. |
+| < 1.4.0         | 1.4.0                | 1.7.0          | Run `php bin/console clear:eventEntity` to clean up invalid records.                                                   |
+| 1.4.0           | 1.5                  | 1.7.0          | Run `php bin/console lexik:jwt:generate-keypair` before upgrading.                                                     |
+| 1.5             | 1.6                  | 1.7.0          | Run `php bin/console reset:allocate-providers` before proceeding.                                                      |
+| 1.6             | N/A                  | 1.7.0          | Proceed directly to the release (1.7.0) after reviewing the changelog.                                                 |
+| 1.7.x           | N/A                  | 1.7.0          | Run `php bin/console doctrine:schema:update --force` to apply required schema changes.                                 |
+| 1.8.0 or lower  | N/A                  | 1.8.1          | Run `php bin/console doctrine:migrations:migrate` to apply optimizations & remove deprecated `verificationCode` field. |
+| 1.8.1           | N/A                  | 1.9.0 (Latest) | Proceed directly to latest release after reviewing the changelog.                                                      |
 
 Use this table to determine the exact upgrade steps based on your current version.
 

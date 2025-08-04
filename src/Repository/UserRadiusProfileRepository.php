@@ -2,7 +2,9 @@
 
 namespace App\Repository;
 
+use App\Entity\User;
 use App\Entity\UserRadiusProfile;
+use App\Enum\UserRadiusProfileStatus;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -39,6 +41,14 @@ class UserRadiusProfileRepository extends ServiceEntityRepository
         }
     }
 
+    public function getLastConnectionData(): array
+    {
+        return $this->createQueryBuilder('ur')
+            ->select('ur.lastConnectionAt', 'ur.radius_user')
+            ->getQuery()
+            ->getResult();
+    }
+
 //    /**
 //     * @return UserRadiusProfile[] Returns an array of UserRadiusProfile objects
 //     */
@@ -63,4 +73,28 @@ class UserRadiusProfileRepository extends ServiceEntityRepository
 //            ->getOneOrNullResult()
 //        ;
 //    }
+
+    /**
+     * Returns array of arrays with only radius_user, lastConnectionStartAt, lastConnectionStopAt
+     */
+    public function findRadiusUserAndConnectionTimes(): array
+    {
+        return $this->createQueryBuilder('u')
+            ->select('partial u.{id, radius_user, lastConnectionStartAt, lastConnectionStopAt}')
+            ->where('u.status = :active')
+            ->setParameter('active', UserRadiusProfileStatus::ACTIVE->value)
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function findUserLastConnection(User $user): ?UserRadiusProfile
+    {
+        return $this->createQueryBuilder('u')
+            ->where('u.user = :user')
+            ->setParameter('user', $user)
+            ->orderBy('u.lastConnectionStopAt', 'DESC')
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
 }

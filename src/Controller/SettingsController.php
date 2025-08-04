@@ -36,6 +36,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpClient\Exception\JsonException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Routing\Attribute\Route;
@@ -52,7 +53,8 @@ class SettingsController extends AbstractController
         private readonly RadiusAccountingRepository $radiusAccountingRepository,
         private readonly TranslatorInterface $translator,
         private readonly SettingTranslationRepository $settingTranslationRepository,
-        private readonly EnforcePasswordResetService $enforcePasswordResetService
+        private readonly EnforcePasswordResetService $enforcePasswordResetService,
+        private readonly CertificateService $certificateService,
     ) {
     }
 
@@ -896,6 +898,14 @@ class SettingsController extends AbstractController
         CertificateService $certificateService,
         string $language
     ): Response {
+        $missingFiles = $this->certificateService->verifyCertificates();
+        if ($missingFiles !== []) {
+            throw new HttpException(
+                424,
+                'Cert files are missing: ' . implode(', ', $missingFiles)
+            );
+        }
+
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
         $currentUser = $this->getUser();

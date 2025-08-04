@@ -110,6 +110,9 @@ class ResetAllSettingsCommand extends Command
             ['name' => 'AUTH_METHOD_SMS_REGISTER_LABEL', 'value' => 'Create Account with Phone Number'],
             ['name' => 'AUTH_METHOD_SMS_REGISTER_DESCRIPTION', 'value' => 'Don\'t have an account? Create one'],
 
+            ['name' => 'EMAIL_TIMER_RESEND', 'value' => '2'],
+            ['name' => 'LINK_VALIDITY', 'value' => '10'],
+
             ['name' => 'TOS', 'value' => 'LINK'],
             ['name' => 'PRIVACY_POLICY', 'value' => 'LINK'],
             ['name' => 'TOS_LINK', 'value' => 'https://wballiance.com/openroaming/toc/'],
@@ -142,10 +145,12 @@ class ResetAllSettingsCommand extends Command
             ['name' => 'PROFILE_LIMIT_DATE_SAML', 'value' => '5'],
             ['name' => 'PROFILE_LIMIT_DATE_EMAIL', 'value' => '5'],
             ['name' => 'PROFILE_LIMIT_DATE_SMS', 'value' => '5'],
+            ['name' => 'TIME_STAMP_FREERADIUS_CRON', 'value' => null],
 
             ['name' => 'DELETE_UNCONFIRMED_USERS_CRON', 'value' => '0 0 * * *'],
             ['name' => 'USERS_WHEN_PROFILE_EXPIRES_CRON', 'value' => '0 1 * * *'],
             ['name' => 'LDAP_SYNC_CRON', 'value' => '0 2 * * *'],
+            ['name' => 'FREERADIUS_LAST_CONNECTION_CRON', 'value' => '* * * * *'],
 
         ];
 

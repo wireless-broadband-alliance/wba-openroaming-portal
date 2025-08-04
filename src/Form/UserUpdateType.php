@@ -4,6 +4,9 @@ namespace App\Form;
 
 use App\Entity\User;
 use App\Form\Transformer\BooleanToDateTimeTransformer;
+use App\DTO\UserUpdateDTO;
+use App\Repository\SettingRepository;
+use App\Repository\UserRepository;
 use App\Service\GetSettings;
 use libphonenumber\PhoneNumberFormat;
 use Misd\PhoneNumberBundle\Form\Type\PhoneNumberType;
@@ -29,10 +32,13 @@ class UserUpdateType extends AbstractType
         $regionInputs = explode(',', (string)$data['DEFAULT_REGION_PHONE_INPUTS']['value']);
         $regionInputs = array_map('trim', $regionInputs);
 
+        /** @var UserUpdateDTO $dto */
+        $dto = $options['data'];
+
         $builder
             ->add('uuid', TextType::class, [
                 'label' => 'UUID',
-                'required' => true,
+                'required' => false,
             ])
             ->add('email', EmailType::class, [
                 'label' => 'Email',
@@ -64,15 +70,25 @@ class UserUpdateType extends AbstractType
                 'required' => false,
                 'attr' => ['autocomplete' => 'tel'],
             ]);
-        // Transforms the bannedAt bool to datetime when checked
-        $builder->get('bannedAt')->addModelTransformer(new BooleanToDateTimeTransformer());
-    }
 
+        // Only add banned/isVerified if NOT editing an admin
+        if ($dto instanceof UserUpdateDTO && !$dto->editingAdmin) {
+            $builder
+                ->add('banned', CheckboxType::class, [
+                    'label' => 'Banned',
+                    'required' => false,
+                ])
+                ->add('isVerified', CheckboxType::class, [
+                    'label' => 'Verification',
+                    'required' => false,
+                ]);
+        }
+    }
 
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'data_class' => User::class,
+            'data_class' => UserUpdateDTO::class,
         ]);
     }
 }
