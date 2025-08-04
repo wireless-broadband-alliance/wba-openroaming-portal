@@ -1,11 +1,11 @@
-{% set bgUrl = data.wallpaperImageName.value != '/resources/images/wallpaper.png'
-    ? data.wallpaperImageName.value
+{% set bgUrl = data.WALLPAPER_IMAGE.value != '/resources/images/wallpaper.png'
+    ? data.WALLPAPER_IMAGE.value
     : '/resources/images/background.png' %}
 
 {% extends 'base.html.twig' %}
 
 {% block title %}
-    {{ data.title.value }} - {{ status_code }} {{ status_title }}
+    {{ data.PAGE_TITLE.value }} - {{ status_code }} {{ status_title }}
 {% endblock %}
 
 {% block body %}
@@ -52,7 +52,7 @@
 
                 {% if data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\OperationMode::ON').value %}
                     <div class="mt-10 flex justify-center items-center gap-10">
-                        <img class="h-10 object-contain" src="{{ data.customerLogoName.value }}" alt="Logo">
+                        <img class="h-10 object-contain" src="{{ data.CUSTOMER_LOGO.value }}" alt="Logo">
                     </div>
                 {% endif %}
             </div>

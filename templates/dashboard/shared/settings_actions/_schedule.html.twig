@@ -50,7 +50,7 @@
                 field: form.ldap_sync_cron,
             }) }}
 
-            {{ include('admin/shared/settings_actions/schedule/card.html.twig', {
+            {{ include('dashboard/shared/settings_actions/schedule/card.html.twig', {
                 label: 'Freeradius Synchronization Automation',
                 description: 'Defines the schedule for Freeradius server & the user profile last connection',
                 field: form.freeradius_last_connection_cron,

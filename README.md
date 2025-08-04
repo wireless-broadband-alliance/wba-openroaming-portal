@@ -470,23 +470,23 @@ certificate. **Connection errors** can happen if the right SHA1 hash is not prov
 56. `EMAIL_TIMER_RESEND`: Time in minutes to make the user wait to resend a new EMAIL for reset password request.
 57. `LINK_VALIDITY`: Time in minutes a link stays active before it expires.
 
-57. `TOS_LINK`: Term's and Conditions URL.
-58. `PRIVACY_POLICY_LINK`: Privacy and Policy URL.
-59. `USER_DELETE_TIME`: Time in hours to delete the unverified user.
-60. `TIME_INTERVAL_NOTIFICATION`: Time in days to resend the notification when the profile is about to expire.
-61. `PROFILE_LIMIT_DATE_SAML`: Time in days to disable profiles for SAML users with login.
-62. `PROFILE_LIMIT_DATE_GOOGLE`: Time in days to disable profiles for users with GOOGLE login.
-63. `PROFILE_LIMIT_DATE_MICROSOFT`: Time in days to disable profiles for users with MICROSOFT login.
-64. `PROFILE_LIMIT_DATE_EMAIL`: Time in days to disable profiles for users with EMAIL login.
-65. `PROFILE_LIMIT_DATE_SMS`: Time in days to disable profiles for users with SMS login.
-66. `TIME_STAMP_FREERADIUS_CRON`: Tracks the last run (UNIX epoch) of the backup:freeradiusLastConnection command.
+58. `TOS_LINK`: Term's and Conditions URL.
+59. `PRIVACY_POLICY_LINK`: Privacy and Policy URL.
+60. `USER_DELETE_TIME`: Time in hours to delete the unverified user.
+61. `TIME_INTERVAL_NOTIFICATION`: Time in days to resend the notification when the profile is about to expire.
+62. `PROFILE_LIMIT_DATE_SAML`: Time in days to disable profiles for SAML users with login.
+63. `PROFILE_LIMIT_DATE_GOOGLE`: Time in days to disable profiles for users with GOOGLE login.
+64. `PROFILE_LIMIT_DATE_MICROSOFT`: Time in days to disable profiles for users with MICROSOFT login.
+65. `PROFILE_LIMIT_DATE_EMAIL`: Time in days to disable profiles for users with EMAIL login.
+66. `PROFILE_LIMIT_DATE_SMS`: Time in days to disable profiles for users with SMS login.
+67. `TIME_STAMP_FREERADIUS_CRON`: Tracks the last run (UNIX epoch) of the backup:freeradiusLastConnection command.
     Internal use only, not shown in UI.
-67. `DELETE_UNCONFIRMED_USERS_CRON`: Defines the schedule to delete unconfirmed users from the portal.
-68. `USERS_WHEN_PROFILE_EXPIRES_CRON`: Defines the schedule to notify the users when their profile to expire.
-69. `LDAP_SYNC_CRON`: Defines the schedule for LDAP synchronization automation command.
-70. `FREERADIUS_LAST_CONNECTION_CRON`: Defines the schedule for Freeradius server & the user profile
+68. `DELETE_UNCONFIRMED_USERS_CRON`: Defines the schedule to delete unconfirmed users from the portal.
+69. `USERS_WHEN_PROFILE_EXPIRES_CRON`: Defines the schedule to notify the users when their profile to expire.
+70. `LDAP_SYNC_CRON`: Defines the schedule for LDAP synchronization automation command.
+71. `FREERADIUS_LAST_CONNECTION_CRON`: Defines the schedule for Freeradius server & the user profile
         last connection.
-71. `CRON_ADVANCED_STATUS`:  Saves the previous status mode on the schedule cron configuration page (Simple/Advanced)
+72. `CRON_ADVANCED_STATUS`:  Saves the previous status mode on the schedule cron configuration page (Simple/Advanced)
 
 #### With these environment variables, you can configure and customize various aspects of the project, such as database connections, SAML settings, login methods, and more.
 

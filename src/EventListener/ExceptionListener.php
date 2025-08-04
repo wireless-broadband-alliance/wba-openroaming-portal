@@ -50,10 +50,7 @@ readonly class ExceptionListener
             return;
         }
 
-        $data = $this->getSettings->getSettings(
-            $this->userRepository,
-            $this->settingRepository
-        );
+        $data = $this->getSettings->getSettings();
 
         // Try specific error template first
         $template = sprintf('bundles/TwigBundle/Exception/error_%d.html.twig', $statusCode);

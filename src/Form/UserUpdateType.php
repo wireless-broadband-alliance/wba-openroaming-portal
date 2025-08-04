@@ -52,7 +52,7 @@ class UserUpdateType extends AbstractType
                 'label' => $this->translator->trans('lastName', [], 'UserUpdateType'),
                 'required' => false,
             ])
-            ->add('bannedAt', CheckboxType::class, [
+            ->add('banned', CheckboxType::class, [
                 'label' => $this->translator->trans('banned', [], 'UserUpdateType'),
                 'required' => false,
             ])
