@@ -7,9 +7,15 @@ use Lexik\Bundle\JWTAuthenticationBundle\Event\JWTExpiredEvent;
 use Lexik\Bundle\JWTAuthenticationBundle\Event\JWTInvalidEvent;
 use Lexik\Bundle\JWTAuthenticationBundle\Event\JWTNotFoundEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class JWTExceptionListener implements EventSubscriberInterface
 {
+
+    public function __construct(
+        private readonly TranslatorInterface $translator,
+    ) {
+    }
     public static function getSubscribedEvents(): array
     {
         return [
@@ -25,7 +31,11 @@ class JWTExceptionListener implements EventSubscriberInterface
             new BaseResponse(
                 401,
                 null,
-                'JWT Token not found!'
+                $this->translator->trans(
+                    'JWTTokenNotFound',
+                    [],
+                    'eventListener'
+                )
             );
         $event->setResponse($response->toResponse());
     }
@@ -36,7 +46,11 @@ class JWTExceptionListener implements EventSubscriberInterface
             new BaseResponse(
                 403,
                 null,
-                'JWT Token is invalid!'
+                $this->translator->trans(
+                    'JWTTokenIsInvalid',
+                    [],
+                    'eventListener'
+                )
             );
         $event->setResponse($response->toResponse());
     }
@@ -48,7 +62,11 @@ class JWTExceptionListener implements EventSubscriberInterface
             new BaseResponse(
                 401,
                 null,
-                'JWT Token is expired!'
+                $this->translator->trans(
+                    'JWTTokenIsExpired',
+                    [],
+                    'eventListener'
+                )
             );
         $event->setResponse($response->toResponse());
     }
