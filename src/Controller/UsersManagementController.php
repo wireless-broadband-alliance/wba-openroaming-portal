@@ -534,7 +534,11 @@ class UsersManagementController extends AbstractController
                 ) {
                     $attempts = $resetAttempts + 1;
 
-                    $message = "Your new account password is: " . $newPassword . "%0A";
+                    $message = $this->translator->trans(
+                        'newPasswordMessage',
+                        ['%password%' => $newPassword],
+                        'controllers'
+                    );
                     $this->sendSMS->sendSmsNoValidation($user, $message);
 
                     $eventMetadata = [
@@ -656,7 +660,7 @@ class UsersManagementController extends AbstractController
             $user->getPhoneNumber() &&
             $userExternalAuths->getProviderId() === UserProvider::PHONE_NUMBER->value
         ) {
-            $message = "Your OpenRoaming 2FA has been disabled. Please re-enable it as soon as possible.";
+            $message = $this->translator->trans('2faDisabledMessage', [], 'controllers');
             $this->sendSMS->sendSmsNoValidation($user, $message);
         }
 

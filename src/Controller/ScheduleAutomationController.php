@@ -18,6 +18,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class ScheduleAutomationController extends AbstractController
 {
@@ -26,6 +27,7 @@ class ScheduleAutomationController extends AbstractController
         private readonly SettingRepository $settingRepository,
         private readonly EntityManagerInterface $entityManager,
         private readonly EventActions $eventActions,
+        private readonly TranslatorInterface $translator,
         private readonly CronExpressionHelperService $cronExpressionHelperService
     ) {
     }
@@ -70,7 +72,7 @@ class ScheduleAutomationController extends AbstractController
 
             $this->addFlash(
                 'success_admin',
-                'New Schedule configuration has been applied successfully.'
+                $this->translator->trans('scheduleConfigSuccess', [], 'controllers')
             );
             return $this->redirectToRoute('admin_dashboard_settings_schedule');
         }

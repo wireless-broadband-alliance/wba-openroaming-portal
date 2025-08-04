@@ -103,3 +103,6 @@ configurationScheduleClearSuccessfully: 'The configuration Schedule settings has
 password_reset_code: "If you requested a password reset for your OpenRoaming account, use this code to proceed: %code%"
 passwordRequestAccepted: 'Your account password request has been accepted!'
 invalidContactIdentifier: "This account does not have a valid contact identifier (email). Please don't use the default from the portal. Please select another valid two-factor authentication for this account."
+newPasswordMessage: 'Your new account password is: %password%'
+2faDisabledMessage: 'Your OpenRoaming 2FA has been disabled. Please re-enable it as soon as possible.'
+scheduleConfigSuccess: 'New Schedule configuration has been applied successfully.'

@@ -103,3 +103,6 @@ configurationScheduleClearSuccessfully: 'A configuração do agendamento das cro
 password_reset_code: "Se pediu a redefinição da palavra-passe da sua conta OpenRoaming, utilize este código para prosseguir: %code%"
 passwordRequestAccepted: 'O pedido de alteração da palavra-passe da sua conta foi aceite!'
 invalidContactIdentifier: "Esta conta não tem um identificador de contacto válido (email). Por favor, não utilizes o padrão do portal. Seleciona outro método válido de autenticação de dois fatores para esta conta."
+newPasswordMessage: 'A sua nova palavra-passe é: %password%'
+2faDisabledMessage: 'A sua autenticação 2FA do OpenRoaming foi desativada. Por favor, volte a ativá-la o mais brevemente possível.'
+scheduleConfigSuccess: 'A nova configuração das Crons foi aplicada com sucesso.'
