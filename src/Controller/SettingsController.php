@@ -902,7 +902,8 @@ class SettingsController extends AbstractController
         if ($missingFiles !== []) {
             throw new HttpException(
                 424,
-                'Cert files are missing: ' . implode(', ', $missingFiles)
+                $this->translator->trans('certFilesMissing', [], 'controllers') .
+                implode(', ', $missingFiles)
             );
         }
 
