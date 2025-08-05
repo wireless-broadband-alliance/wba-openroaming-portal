@@ -20,10 +20,10 @@
             <div class="flex items-center space-x-2">
                 {% if currentLocale == constant('App\\Enum\\LanguageType::EN').value %}
                     <twig:ux:icon class="w-4 h-4 rounded-full" name="wba:gb-flag" />
-                    <span>English</span>
+                    <span>{{ 'english'|trans({}, 'select_language') }}</span>
                 {% else %}
                     <twig:ux:icon class="w-4 h-4 rounded-full" name="wba:portugal-flag" />
-                    <span>Portuguese</span>
+                    <span>{{ 'portuguese'|trans({}, 'select_language') }}</span>
                 {% endif %}
             </div>
             <twig:ux:icon class="w-4 h-4 text-gray-500" name="wba:arrow-down" />
@@ -37,23 +37,23 @@
                 <li
                         class="flex items-center space-x-2 px-4 py-2 cursor-pointer hover:text-lightGreen {{ currentLocale == constant('App\\Enum\\LanguageType::EN').value ? 'bg-gray-100 font-semibold' : '' }}">
                     <twig:ux:icon class="w-4 h-4 rounded-full" name="wba:gb-flag"/>
-                    <a href="{{ path(routeName, {language: constant('App\\Enum\\LanguageType::EN').value}) }}" class="block w-full">English</a>
+                    <a href="{{ path(routeName, {language: constant('App\\Enum\\LanguageType::EN').value}) }}" class="block w-full">{{ 'english'|trans({}, 'select_language') }}</a>
                 </li>
                 <li
                         class="flex items-center space-x-2 px-4 py-2 cursor-pointer hover:text-lightGreen {{ currentLocale == constant('App\\Enum\\LanguageType::PT').value ? 'bg-gray-100 font-semibold' : '' }}">
                     <twig:ux:icon class="w-4 h-4 rounded-full" name="wba:portugal-flag"/>
-                    <a href="{{ path(routeName, {language: constant('App\\Enum\\LanguageType::PT').value}) }}" class="block w-full">Portuguese</a>
+                    <a href="{{ path(routeName, {language: constant('App\\Enum\\LanguageType::PT').value}) }}" class="block w-full">{{ 'portuguese'|trans({}, 'select_language') }}</a>
                 </li>
             {% else %}
                 <li
                         class="flex items-center space-x-2 px-4 py-2 cursor-pointer hover:text-lightGreen {{ currentLocale == constant('App\\Enum\\LanguageType::EN').value ? 'bg-gray-100 font-semibold' : '' }}">
                     <twig:ux:icon class="w-4 h-4 rounded-full" name="wba:gb-flag"/>
-                    <a href="{{ path(routeName, {locale: constant('App\\Enum\\LanguageType::EN').value}) }}" class="block w-full">English</a>
+                    <a href="{{ path(routeName, {locale: constant('App\\Enum\\LanguageType::EN').value}) }}" class="block w-full">{{ 'english'|trans({}, 'select_language') }}</a>
                 </li>
                 <li
                         class="flex items-center space-x-2 px-4 py-2 cursor-pointer hover:text-lightGreen {{ currentLocale == constant('App\\Enum\\LanguageType::PT').value ? 'bg-gray-100 font-semibold' : '' }}">
                     <twig:ux:icon class="w-4 h-4 rounded-full" name="wba:portugal-flag"/>
-                    <a href="{{ path(routeName, {locale: constant('App\\Enum\\LanguageType::PT').value}) }}" class="block w-full">Portuguese</a>
+                    <a href="{{ path(routeName, {locale: constant('App\\Enum\\LanguageType::PT').value}) }}" class="block w-full">{{ 'portuguese'|trans({}, 'select_language') }}</a>
                 </li>
             {% endif %}
         </ul>
