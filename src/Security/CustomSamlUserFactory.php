@@ -22,6 +22,7 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 use function is_string;
 
@@ -39,6 +40,7 @@ class CustomSamlUserFactory implements SamlUserFactoryInterface
         private readonly GetSettings $getSettings,
         private readonly UrlGeneratorInterface $urlGenerator,
         RequestStack $requestStack,
+        private readonly TranslatorInterface $translator
     ) {
         $this->session = $requestStack->getSession();
         $this->attribute_mapping = [
@@ -63,8 +65,7 @@ class CustomSamlUserFactory implements SamlUserFactoryInterface
 
         if ($data['PLATFORM_MODE']['value'] === true) {
             throw new RuntimeException(
-                "Get Away. 
-            It's impossible to use this authentication method in demo mode"
+                $this->translator->trans('impossibleUseThisAuthenticationMethodInDemoMode', [], 'Security')
             );
         }
 
@@ -79,7 +80,7 @@ class CustomSamlUserFactory implements SamlUserFactoryInterface
                 /** @phpstan-ignore-next-line */ // To avoid conflicts with RECTOR
                 $this->session->getFlashBag()->add(
                     'error',
-                    'This account is disabled. Please contact support.'
+                    $this->translator->trans('accountDisabled', [], 'Security')
                 );
                 $redirect = new RedirectResponse($this->urlGenerator->generate('app_landing'));
                 $redirect->send();
@@ -149,7 +150,11 @@ class CustomSamlUserFactory implements SamlUserFactoryInterface
         $attribute = $isArrayValue ? substr($attribute, 0, -2) : $attribute;
 
         if (!\array_key_exists($attribute, $attributes)) {
-            throw new RuntimeException('Attribute "' . $attribute . '" not found in SAML data.');
+            throw new RuntimeException($this->translator->trans(
+                'attributeNotFoundSAMLData',
+                ['%attribute%' => $attribute],
+                'Security'
+            ));
         }
 
         $attributeValue = (array)$attributes[$attribute];

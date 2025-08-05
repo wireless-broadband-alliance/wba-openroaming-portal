@@ -1,0 +1,9 @@
+loginToAccessThisPage.: 'Precisa de fazer login para aceder a esta página.'
+impossibleUseThisAuthenticationMethodInDemoMode: "Não é possível utilizar este método de autenticação no modo de demonstração."
+accountDisabled: 'Esta conta está desativada. Entre em contacto com o suporte.'
+attributeNotFoundSAMLData: 'Atributo %attribute% não encontrado nos dados SAML.'
+invalidCredentials: 'Credenciais inválidas.'
+invalidCAPTCHAValidation: 'Validação de CAPTCHA inválida.'
+confirmNewPasswordBeforeDownloadProfile: 'Precisa de confirmar a nova palavra-passe antes de descarregar um perfil!'
+accountCurrentlyDisabled: 'Esta conta está desativada de momento.'
+accountCurrentlyBanned: 'Esta conta está banida de momento.'

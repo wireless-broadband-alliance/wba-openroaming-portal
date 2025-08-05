@@ -66,15 +66,21 @@ class LandingAuthenticator extends AbstractLoginFormAuthenticator
             ]);
             if (!$user) {
                 // Validate if the user account exists
-                throw new CustomUserMessageAuthenticationException('Invalid Credentials.');
+                throw new CustomUserMessageAuthenticationException(
+                    $this->translator->trans('invalidCredentials', [], 'Security')
+                );
             }
             if ($user->isDisabled() === true) {
                 // Validate if the user account is disabled
-                throw new CustomUserMessageAuthenticationException('This account is currently disabled.');
+                throw new CustomUserMessageAuthenticationException(
+                    $this->translator->trans('accountCurrentlyDisabled', [], 'Security')
+                );
             }
             if ($user->getBannedAt() instanceof DateTimeInterface) {
                 // Validate if the user account exists
-                throw new CustomUserMessageAuthenticationException('This account is currently banned.');
+                throw new CustomUserMessageAuthenticationException(
+                    $this->translator->trans('accountCurrentlyBanned', [], 'Security')
+                );
             }
         }
 
@@ -87,7 +93,9 @@ class LandingAuthenticator extends AbstractLoginFormAuthenticator
             $isTurnstileEnabled &&
             (empty($turnstileResponse) || !$this->turnstileHttpClient->verifyResponse($turnstileResponse))
         ) {
-            throw new CustomUserMessageAuthenticationException('Invalid CAPTCHA validation.');
+            throw new CustomUserMessageAuthenticationException(
+                $this->translator->trans('invalidCAPTCHAValidation', [], 'Security')
+            );
         }
 
         // Add LAST_USERNAME to the session (optional)

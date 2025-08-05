@@ -2,11 +2,8 @@
 
 namespace App\Form;
 
-use App\Entity\User;
 use App\Form\Transformer\BooleanToDateTimeTransformer;
 use App\DTO\UserUpdateDTO;
-use App\Repository\SettingRepository;
-use App\Repository\UserRepository;
 use App\Service\GetSettings;
 use libphonenumber\PhoneNumberFormat;
 use Misd\PhoneNumberBundle\Form\Type\PhoneNumberType;
