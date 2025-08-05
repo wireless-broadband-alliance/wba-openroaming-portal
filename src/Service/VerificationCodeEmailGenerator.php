@@ -109,7 +109,11 @@ readonly class VerificationCodeEmailGenerator
         return new TemplatedEmail()
             ->from(new Address($emailSender, $nameSender))
             ->to($user->getEmail())
-            ->subject('Your OpenRoaming Two-Factor Authentication has been disabled')
+            ->subject($this->translator->trans(
+                'OpenRoamingTwoFactorAuthenticationDisabled',
+                [],
+                'TwoFAService'
+            ))
             ->htmlTemplate('email/admin_disabled_2fa.html.twig')
             ->subject(
                 $this->translator->trans(

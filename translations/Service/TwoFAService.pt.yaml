@@ -1,2 +1,3 @@
 verification_code_message: "O seu código de verificação é %code%"
 two_factor_code_message: "O seu código de autenticação de dois fatores é %code%"
+OpenRoamingTwoFactorAuthenticationDisabled: 'A sua autenticação de dois fatores do OpenRoaming foi desativada'

@@ -3,9 +3,14 @@
 namespace App\Service;
 
 use Cron\CronExpression;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class CronExpressionHelperService
 {
+    public function __construct(
+        private readonly TranslatorInterface $translator
+    ) {
+    }
     private function parseField(string $field): array
     {
         $field = trim($field);
@@ -157,7 +162,7 @@ class CronExpressionHelperService
             $cron = new CronExpression($cronExpression);
         } catch (\InvalidArgumentException) {
             return [
-                'error' => 'Invalid cron expression',
+                'error' => $this->translator->trans('invalidCronExpression', [], 'CronExpressionHelper'),
                 'raw' => $cronExpression,
             ];
         }

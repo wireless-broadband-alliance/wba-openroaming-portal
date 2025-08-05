@@ -11,6 +11,7 @@ use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 readonly class CaptchaValidator
 {
@@ -18,7 +19,8 @@ readonly class CaptchaValidator
         private HttpClientInterface $httpClient,
         private ParameterBagInterface $parameterBag,
         private KernelInterface $kernel,
-        private LoggerInterface $logger
+        private LoggerInterface $logger,
+        private TranslatorInterface $translator
     ) {
     }
 
@@ -34,12 +36,13 @@ readonly class CaptchaValidator
         }
 
         if ($token === '' || $token === '0') {
-            $this->logger->warning('CAPTCHA validation token is empty.', [
-                'client_ip' => $clientIp,
-            ]);
+            $this->logger->warning(
+                $this->translator->trans('CAPTCHATokenEmpty', [], 'CaptchaValidator'),
+                ['client_ip' => $clientIp]
+            );
             return [
                 'success' => false,
-                'error' => 'CAPTCHA validation token is empty'
+                'error' => $this->translator->trans('CAPTCHATokenEmpty', [], 'CaptchaValidator')
             ];
         }
 
@@ -66,14 +69,14 @@ readonly class CaptchaValidator
                 ];
             }
 
-            $this->logger->warning('CAPTCHA validation failed.', [
+            $this->logger->warning($this->translator->trans('CAPTCHAValidationFailed', [], 'CaptchaValidator'), [
                 'response' => $responseData,
                 'client_ip' => $clientIp,
             ]);
 
             return [
                 'success' => false,
-                'error' => 'CAPTCHA validation failed!',
+                'error' => $this->translator->trans('CAPTCHAValidationFailed', [], 'CaptchaValidator'),
             ];
         } catch (
             TransportExceptionInterface |
@@ -83,14 +86,14 @@ readonly class CaptchaValidator
             DecodingExceptionInterface $e
         ) {
             // Log exception details for debugging
-            $this->logger->error('Exception occurred during CAPTCHA validation.', [
+            $this->logger->error($this->translator->trans('CAPTCHAValidationFailed', [], 'CaptchaValidator'), [
                 'error' => $e->getMessage(),
                 'payload' => $payload,
             ]);
 
             return [
                 'success' => false,
-                'error' => 'CAPTCHA validation failed!',
+                'error' => $this->translator->trans('CAPTCHAValidationFailed', [], 'CaptchaValidator'),
             ];
         }
     }

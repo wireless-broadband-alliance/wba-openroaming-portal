@@ -1,0 +1,2 @@
+invalidProviderName: 'Invalid provider name provided.'
+validDomainsNotFound: 'Valid domains setting not found for the provider: %providerName%'

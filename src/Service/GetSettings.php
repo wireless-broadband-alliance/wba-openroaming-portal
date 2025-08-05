@@ -8,13 +8,15 @@ use App\Repository\SettingRepository;
 use App\Repository\SettingTranslationRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 readonly class GetSettings
 {
     public function __construct(
         private SettingRepository $settingRepository,
         private SettingTranslationRepository $settingTranslationRepository,
-        private RequestStack $requestStack
+        private RequestStack $requestStack,
+        private TranslatorInterface $translator
     ) {
     }
 
@@ -23,7 +25,9 @@ readonly class GetSettings
         // Get the current request from the RequestStack
         $request = $this->requestStack->getCurrentRequest();
         if (!$request instanceof Request) {
-            throw new \RuntimeException('No current request available.');
+            throw new \RuntimeException(
+                $this->translator->trans('noRequestAvailable', [], 'GetSettings')
+            );
         }
 
         // Ignore locale logic for API requests
@@ -97,7 +101,9 @@ readonly class GetSettings
         // Retrieve current locale from the session, default to 'en' if not found
         $request = $this->requestStack->getCurrentRequest();
         if (!$request instanceof Request) {
-            throw new \RuntimeException('No current request available.');
+            throw new \RuntimeException(
+                $this->translator->trans('noRequestAvailable', [], 'GetSettings')
+            );
         }
 
         $session = $request->getSession();
