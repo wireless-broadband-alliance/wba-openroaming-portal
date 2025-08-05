@@ -75,11 +75,11 @@ class UserUpdateType extends AbstractType
         if ($dto instanceof UserUpdateDTO && !$dto->editingAdmin) {
             $builder
                 ->add('banned', CheckboxType::class, [
-                    'label' => 'Banned',
+                    'label' => $this->translator->trans('banned', [], 'UserUpdateType'),
                     'required' => false,
                 ])
                 ->add('isVerified', CheckboxType::class, [
-                    'label' => 'Verification',
+                    'label' => $this->translator->trans('verification', [], 'UserUpdateType'),
                     'required' => false,
                 ]);
         }

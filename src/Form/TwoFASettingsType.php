@@ -88,7 +88,7 @@ class TwoFASettingsType extends AbstractType
                         ]),
                         new NoSpecialCharacters()
                     ],
-                    'invalid_message' => 'Please enter a valid label.',
+                    'invalid_message' => $this->translator->trans('enterValidLabel', [], 'TwoFA'),
                 ]);
             } elseif ($settingName === 'TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME') {
                 $builder->add('TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME', IntegerType::class, [
