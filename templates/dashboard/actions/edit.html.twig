@@ -28,7 +28,7 @@
                             <div class="absolute w-2/3 left-1/2 top-full transform -translate-x-1/2 -mt-11
             bg-indigo-400 rounded-lg p-2 text-white text-center hidden z-10"
                                  data-card-target="info">
-                                Internal System - Universally Unique Identifier (UUID)
+                                {{ 'UUID'|trans({}, 'edit') }}
                             </div>
                         </div>
 
@@ -190,14 +190,14 @@
 
     {# Content - Profile Connection Status #}
     {% if lastStartConnection is not null or lastStopConnection is not null %}
-        <h1 class="text-2xl font-semibold mt-6 mb-6">Profile Connection Status</h1>
+        <h1 class="text-2xl font-semibold mt-6 mb-6">{{ 'profileConnectionStatus'|trans({}, 'edit') }}</h1>
         <div class="bg-white p-6 rounded-xl shadow-sm w-full grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div>
-                <p class="text-gray-600 font-medium mb-1">Last Start Connection:</p>
+                <p class="text-gray-600 font-medium mb-1">{{ 'lastStartConnection'|trans({}, 'edit') }}</p>
                 <p class="text-gray-900 font-semibold">{{ lastStartConnection|date('d/m/Y H:i') }} UTC</p>
             </div>
             <div>
-                <p class="text-gray-600 font-medium mb-1">Last Stop Connection:</p>
+                <p class="text-gray-600 font-medium mb-1">{{ 'lastStopConnection'|trans({}, 'edit') }}</p>
                 <p class="text-gray-900 font-semibold">{{ lastStopConnection|date('d/m/Y H:i') }} UTC</p>
             </div>
         </div>

@@ -21,8 +21,8 @@
     <div class="{{ 'hidden' in field.advanced.vars.attr.class ? 'hidden' : '' }}">
         {{ include('dashboard/shared/settings_actions/schedule/subcard.html.twig', {
             field: field.advanced,
-            field_label: 'Advanced Mode',
-            description: 'Write a complete CRON expression.',
+            field_label: 'advancedMode'|trans({}, 'schedule'),
+            description: 'advancedModeDescription'|trans({}, 'schedule'),
         }) }}
     </div>
 
@@ -30,10 +30,10 @@
         {{ include('dashboard/shared/settings_actions/schedule/subcard.html.twig', {
             field: field.day_of_week,
             frequency_field: field.day_of_week_frequency,
-            field_label: 'Day of the Week',
-            frequency_label: 'Frequency on the Day of the Week',
-            description: 'Select which weekdays it should run.',
-            frequency_description: 'Define how often it runs on selected weekdays.',
+            field_label: 'dayWeek'|trans({}, 'schedule'),
+            frequency_label: 'frequencyDayWeek'|trans({}, 'schedule'),
+            description: 'dayWeekDescription'|trans({}, 'schedule'),
+            frequency_description: 'frequencyDayWeekDescription'|trans({}, 'schedule'),
         }) }}
     </div>
 
@@ -41,10 +41,10 @@
         {{ include('dashboard/shared/settings_actions/schedule/subcard.html.twig', {
             field: field.day_of_month,
             frequency_field: field.day_of_month_frequency,
-            field_label: 'Day of the Month',
-            frequency_label: 'Frequency on the Day of the Month',
-            description: 'Select which days of the month it should run.',
-            frequency_description: 'Define how often it runs on selected month days.',
+            field_label: 'dayMonth'|trans({}, 'schedule'),
+            frequency_label: 'frequencyDayMonth'|trans({}, 'schedule'),
+            description: 'dayMonthDescription'|trans({}, 'schedule'),
+            frequency_description: 'frequencyDayMonthDescription'|trans({}, 'schedule'),
         }) }}
     </div>
 
@@ -52,18 +52,18 @@
         {{ include('dashboard/shared/settings_actions/schedule/subcard.html.twig', {
             field: field.months_of_the_year,
             frequency_field: field.months_of_the_year_frequency,
-            field_label: 'Months of the Year',
-            frequency_label: 'Frequency in the Months',
-            description: 'Select the months it should run.',
-            frequency_description: 'Define how often it runs during selected months.',
+            field_label: 'monthsYear'|trans({}, 'schedule'),
+            frequency_label: 'frequencyMonthsYear'|trans({}, 'schedule'),
+            description: 'monthsYearDescription'|trans({}, 'schedule'),
+            frequency_description: 'frequencyMonthsYearDescription'|trans({}, 'schedule'),
         }) }}
     </div>
 
     <div class="{{ 'hidden' in field.time.vars.attr.class ? 'hidden' : '' }}">
         {{ include('dashboard/shared/settings_actions/schedule/subcard.html.twig', {
             field: field.time,
-            field_label: 'Execution Time',
-            description: 'Set the time of day it should run.',
+            field_label: 'executionTime'|trans({}, 'schedule'),
+            description: 'executionTimeDescription'|trans({}, 'schedule'),
         }) }}
     </div>
 </div>

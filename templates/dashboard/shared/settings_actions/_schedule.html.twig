@@ -33,26 +33,26 @@
 
         <div class="grid gap-4 lg:grid-cols-2 xl:grid-cols-4 p-2 z-0 mt-4">
             {{ include('dashboard/shared/settings_actions/schedule/card.html.twig', {
-                label: 'Delete Unconfirmed Account Automation',
-                description: 'Defines the schedule to delete unconfirmed users from the portal.',
+                label: 'deleteUnconfirmedAccount'|trans({}, 'schedule'),
+                description: 'deleteUnconfirmedAccountDescription'|trans({}, 'schedule'),
                 field: form.delete_unconfirmed_users_cron,
             }) }}
 
             {{ include('dashboard/shared/settings_actions/schedule/card.html.twig', {
-                label: 'Profile Expiration Notification Automation',
-                description: 'Defines the schedule to notify the users when their profile to expire.',
+                label: 'profileExpirationNotification'|trans({}, 'schedule'),
+                description: 'profileExpirationNotificationDescription'|trans({}, 'schedule'),
                 field: form.users_when_profile_expires_cron,
             }) }}
 
             {{ include('dashboard/shared/settings_actions/schedule/card.html.twig', {
-                label: 'LDAP Synchronization Automation',
-                description: 'Defines the schedule for LDAP synchronization automation command.',
+                label: 'LDAPSynchronization'|trans({}, 'schedule'),
+                description: 'LDAPSynchronizationDescription'|trans({}, 'schedule'),
                 field: form.ldap_sync_cron,
             }) }}
 
             {{ include('dashboard/shared/settings_actions/schedule/card.html.twig', {
-                label: 'Freeradius Synchronization Automation',
-                description: 'Defines the schedule for Freeradius server & the user profile last connection',
+                label: 'freeradiusSynchronization'|trans({}, 'schedule'),
+                description: 'freeradiusSynchronizationDescription'|trans({}, 'schedule'),
                 field: form.freeradius_last_connection_cron,
             }) }}
         </div>
@@ -62,7 +62,7 @@
                  role="alert">
                 <twig:ux:icon name="wba:info" class="w-10 md:w-5 h-10 md:h-5 inline mr-3" fill="currentColor"/>
                 <span class="font-medium">
-                    You have changed modes. Saving now will discard any changes made in the previous mode.
+                    {{ 'changeMode'|trans({}, 'schedule')|raw }}
                 </span>
             </div>
         </div>
@@ -71,14 +71,14 @@
 
         <div class="mt-6 flex flex-row w-full justify-end items-center gap-2">
             <a href="{{ path('app_dashboard_regenerate_code_admin', {type: 'settingSchedule'}) }}"
-               onclick="return confirm('Are you sure you want to reset to the default settings?')"
+               onclick="return confirm({{ 'resetDefaultSettings'|trans({}, 'schedule')|raw }})"
                class="text-sm hover:text-red-600 font-bold p-2 rounded-lg transition ease-in duration-300">
-                Reset
+                {{ 'reset'|trans({}, 'schedule')|raw }}
             </a>
 
             <button type="submit" class="btn-primary"
-                    onclick="return confirm('Are you sure you want to apply this new changes?')">
-                Save Changes
+                    onclick="return confirm({{ 'applyChanges'|trans({}, 'schedule')|raw }})">
+                {{ 'saveChanges'|trans({}, 'schedule')|raw }}
             </button>
         </div>
 
