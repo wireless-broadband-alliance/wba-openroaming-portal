@@ -2,6 +2,10 @@
 
 namespace App\Command;
 
+use App\Entity\User;
+use App\Entity\UserExternalAuth;
+use App\Enum\AnalyticalEventType;
+use App\Enum\UserProvider;
 use App\Repository\SettingRepository;
 use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
@@ -12,7 +16,6 @@ use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 use function Symfony\Component\String\u;
 
@@ -22,6 +25,9 @@ use function Symfony\Component\String\u;
 )]
 class AutoDeleteUnconfirmedUsersCommand extends Command
 {
+    public $userPasswordHasher;
+    public $eventActions;
+
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
         private readonly UserRepository $userRepository,

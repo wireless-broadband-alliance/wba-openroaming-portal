@@ -138,9 +138,7 @@ class ValidCronSubmissionValidator extends ConstraintValidator
             if ($frequency >= $count && !in_array('*', $selectedValues, true)) {
                 $this->addError(
                     "{$settingName}_{$fieldSuffix}_frequency",
-                    sprintf(
-                        'frequencyLessThanSelectedValues'
-                    )
+                    'frequencyLessThanSelectedValues'
                 );
             }
         }
