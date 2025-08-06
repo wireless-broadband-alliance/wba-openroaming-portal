@@ -38,7 +38,7 @@
         <h1 class="text-2xl font-semibold p-5">{{ 'userEngagement'|trans({}, '_header_admin') }}</h1>
     {% elseif app.request.attributes.get('_route') == 'admin_dashboard_settings_schedule' %}
         <twig:ux:icon name="wba:schedule" class="w-10 mt-0.5" fill="none"/>
-        <h1 class="text-2xl font-semibold p-5">CRON Schedule Automation</h1>
+        <h1 class="text-2xl font-semibold p-5">{{ 'scheduleAutomation'|trans({}, '_header_admin') }}</h1>
     {% elseif app.request.attributes.get('_route') == 'admin_dashboard_statistics' %}
         <twig:ux:icon name="wba:piechart" class="w-10 mt-0.5" fill="none"/>
         <h1 class="text-2xl font-semibold p-5">{{ 'portalStatistics'|trans({}, '_header_admin') }}</h1>

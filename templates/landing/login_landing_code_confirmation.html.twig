@@ -15,9 +15,8 @@
     {% endif %}
 
     <div class="{{ data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\OperationMode::ON').value ? 'pt-[28px]' : 'pt-[161px]' }} leading-7">
-        <p class="font-bold text-xl">Welcome back</p>
-        <p class="text-lg">You have selected to login via email or phone number. An code has been sent to you to confirm
-            your identity.</p>
+        <p class="font-bold text-xl">{{ 'welcomeBack'|trans({}, 'login_landing_code_confirmation') }}</p>
+        <p class="text-lg">{{ 'welcomeMessage'|trans({}, 'login_landing_code_confirmation') }}</p>
     </div>
 
     {# Form Column #}
@@ -27,20 +26,20 @@
         {{ form_widget(form.code, {
             attr: {
                 class: 'form-widget',
-                placeholder: 'Enter your code',
+                placeholder: 'enterCode'|trans({}, 'login_landing_code_confirmation'),
             }}) }}
     </div>
 
     {# Action Buttons #}
     <div class="grid mt-4 grid-cols-1 sm:gap-4 lg:gap-6 sm:[grid-template-columns:repeat(auto-fit,minmax(150px,1fr))] md:my-2 my-3 space-y-4 sm:space-y-0">
         <button class="btn-primary"
-                type="submit">Log in</button>
+                type="submit">{{ 'login'|trans({}, 'login_landing_code_confirmation') }}</button>
         <a href="{{ path('app_local_resend_code', {
             context: context,
             type: constant('App\\Enum\\CodeVerificationType::VERIFICATION_CODE_LOGIN_RESEND').value},
         ) }}"
            class="w-[220px] btn-secondary">
-            Resend Code
+            {{ 'resendCode'|trans({}, 'login_landing_code_confirmation') }}
         </a>
     </div>
     {{ form_end(form) }}

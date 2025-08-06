@@ -7,3 +7,4 @@ setting_type.settingCAPPORT: User Engagement
 setting_type.settingAUTH: Authentication Methods
 setting_type.settingTwoFA: Two Factor Authenticator
 setting_type.settingSMS: SMS Configuration
+setting_type.settingSchedule: Schedule Automation

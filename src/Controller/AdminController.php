@@ -138,6 +138,7 @@ class AdminController extends AbstractController
                 SettingType::SettingAUTH->value,
                 SettingType::SettingTwoFA->value,
                 SettingType::SettingSMS->value,
+                SettingType::SettingSchedule->value,
             ], true)
         ) {
             $lastResend = $this->eventRepository->findLatest2FACodeAttemptEvent(

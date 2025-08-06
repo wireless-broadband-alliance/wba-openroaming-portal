@@ -13,6 +13,7 @@ enum SettingType: string
     case SettingAUTH = 'settingAUTH';
     case SettingTwoFA = 'settingTwoFA';
     case SettingSMS = 'settingSMS';
+    case SettingSchedule = 'settingSchedule';
 
     public function getTranslationKey(): string
     {
