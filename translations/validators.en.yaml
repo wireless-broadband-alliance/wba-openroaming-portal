@@ -15,4 +15,4 @@ chooseMonth: 'Please choose at least one month.'
 frequencyLessThanSelectedValues: 'Frequency must be less than the number of selected values.'
 failedGenerateValidCRONExpression: 'Failed to generate a valid CRON expression from input.'
 allValueWithSpecificDaysNotAllowed: '"All" value cannot be selected together with specific values.'
-selectNonContiguousValuesWithFrequencyGreaterThan1NotAllowed: "Please don\'t select Non-contiguous values with frequency greater than 1."
+selectNonContiguousValuesWithFrequencyGreaterThan1NotAllowed: "Please don't select Non-contiguous values with frequency greater than 1."
