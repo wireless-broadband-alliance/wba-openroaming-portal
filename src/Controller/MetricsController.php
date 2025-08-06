@@ -7,12 +7,10 @@ use Prometheus\RenderTextFormat;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
-
 
 class MetricsController extends AbstractController
 {
@@ -53,10 +51,10 @@ class MetricsController extends AbstractController
 
         if (!$isIpAllowed) {
             $this->logger->warning($this->translator->trans(
-                    'unauthorizedMetrics',
-                    ['%clientIp%' =>$clientIp],
-                    'controllers'
-                ));
+                'unauthorizedMetrics',
+                ['%clientIp%' => $clientIp],
+                'controllers'
+            ));
             return new Response('Access denied', Response::HTTP_FORBIDDEN);
         }
 
@@ -68,7 +66,7 @@ class MetricsController extends AbstractController
 
             $this->logger->info($this->translator->trans(
                 'metricsCollectedSuccessfully',
-                ['%clientIp%' =>$clientIp],
+                ['%clientIp%' => $clientIp],
                 'controllers'
             ));
 

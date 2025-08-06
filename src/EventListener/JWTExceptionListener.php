@@ -11,7 +11,6 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
 class JWTExceptionListener implements EventSubscriberInterface
 {
-
     public function __construct(
         private readonly TranslatorInterface $translator,
     ) {

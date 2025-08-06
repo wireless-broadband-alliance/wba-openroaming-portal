@@ -15,12 +15,15 @@ readonly class FreeradiusConnectionService
     public function __construct(
         ManagerRegistry $doctrine,
         private TranslatorInterface $translator
-    )
-    {
+    ) {
         $connection = $doctrine->getConnection('freeradius');
 
         if (!$connection instanceof Connection) {
-            throw new RuntimeException($this->translator->trans('invalidConnectionType', [], 'FreeradiusConnectionService'));
+            throw new RuntimeException($this->translator->trans(
+                'invalidConnectionType',
+                [],
+                'FreeradiusConnectionService'
+            ));
         }
 
         $this->freeradiusConnection = $connection;
@@ -32,7 +35,11 @@ readonly class FreeradiusConnectionService
             $this->freeradiusConnection->executeQuery('SELECT 1');
             return [
                 'success' => true,
-                'message' => $this->translator->trans('freeRADIUSConnectionSuccessfully', [], 'FreeradiusConnectionService'),
+                'message' => $this->translator->trans(
+                    'freeRADIUSConnectionSuccessfully',
+                    [],
+                    'FreeradiusConnectionService'
+                ),
             ];
         } catch (Throwable) {
             return [
