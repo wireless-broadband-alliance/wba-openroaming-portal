@@ -41,7 +41,7 @@ class ValidCronSubmissionValidator extends ConstraintValidator
         $expr = $value[$cronField] ?? null;
 
         if (empty($expr)) {
-            $this->context->buildViolation('Please provide a CRON expression for advanced mode.')
+            $this->context->buildViolation('provideCRONAdvancedMode')
                 ->atPath($cronField)
                 ->addViolation();
             return;
@@ -50,7 +50,7 @@ class ValidCronSubmissionValidator extends ConstraintValidator
         try {
             new CronExpression($expr);
         } catch (Exception) {
-            $this->context->buildViolation('Invalid CRON expression.')
+            $this->context->buildViolation('cronExpressionNotValid')
                 ->atPath($cronField)
                 ->addViolation();
         }
@@ -72,12 +72,12 @@ class ValidCronSubmissionValidator extends ConstraintValidator
         if ($dayOfMonthFreq > 1 && $dayOfWeekFreq > 1) {
             $this->addError(
                 "{$settingName}_day_of_month_frequency",
-                'Cannot set frequency on both Day of Month and Day of Week at the same time due to cron semantics.'
+                'frequencyDayMonthAndDayWeekNotAllowed'
             );
         }
 
         if (!$time) {
-            $this->addError("{$settingName}_time", 'Please choose a time.');
+            $this->addError("{$settingName}_time", 'chooseTime');
 
             return;
         }
@@ -101,21 +101,21 @@ class ValidCronSubmissionValidator extends ConstraintValidator
         if ($daysOfWeek === []) {
             $this->addError(
                 "{$settingName}_day_of_week",
-                'Please choose at least one day of the week.'
+                'chooseDayWeek'
             );
         }
 
         if ($daysOfMonth === []) {
             $this->addError(
                 "{$settingName}_day_of_month",
-                'Please choose at least one day of the month.'
+                'chooseDayMonth'
             );
         }
 
         if ($monthsOfYear === []) {
             $this->addError(
                 "{$settingName}_months_of_the_year",
-                'Please choose at least one month.'
+                'chooseMonth'
             );
         }
 
@@ -139,9 +139,7 @@ class ValidCronSubmissionValidator extends ConstraintValidator
                 $this->addError(
                     "{$settingName}_{$fieldSuffix}_frequency",
                     sprintf(
-                        'Frequency (%d) must be less than the number of selected values (%d).',
-                        $frequency,
-                        $count
+                        'frequencyLessThanSelectedValues'
                     )
                 );
             }
@@ -174,7 +172,7 @@ class ValidCronSubmissionValidator extends ConstraintValidator
         try {
             new CronExpression($cronString);
         } catch (Exception) {
-            $this->addError("{$settingName}_time", 'Failed to generate a valid CRON expression from input.');
+            $this->addError("{$settingName}_time", 'failedGenerateValidCRONExpression');
         }
     }
 
@@ -190,7 +188,7 @@ class ValidCronSubmissionValidator extends ConstraintValidator
         if (count($values) > 1 && in_array('*', $values, true)) {
             $this->addError(
                 "{$settingName}_{$suffix}",
-                "Please don't select all values with additional {$suffix}."
+                'allValueWithSpecificDaysNotAllowed'
             );
         }
     }
@@ -237,7 +235,7 @@ class ValidCronSubmissionValidator extends ConstraintValidator
         }
 
         $this->context->buildViolation(
-            'Please don\'t select Non-contiguous values with frequency greater than 1.'
+            'selectNonContiguousValuesWithFrequencyGreaterThan1NotAllowed'
         )
             ->atPath("{$settingName}_time")
             ->addViolation();
