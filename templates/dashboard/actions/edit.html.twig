@@ -13,7 +13,7 @@
             <div class="mx-auto rounded-lg grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div class="relative">
                     <div class="flex items-center justify-between relative" data-controller="card">
-                        {{ form_label(form.uuid, 'Unique Identifier', {label_attr: {class: 'form-label'}}) }}
+                        {{ form_label(form.uuid, 'uniqueIdentifier'|trans({}, 'edit'), {label_attr: {class: 'form-label'}}) }}
 
                         {{ form_widget(form.uuid, {attr: {class: 'form-widget'}}) }}
 
