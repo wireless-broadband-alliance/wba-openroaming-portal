@@ -84,10 +84,10 @@ class ScheduleSettingType extends AbstractType
                 'multiple' => true,
                 'required' => false,
                 'choices' => [$this->translator->trans(
-                        'allDays',
-                        [],
-                        'ScheduleSettingType'
-                    ) => '*'] + array_combine(range(1, 31), range(1, 31)),
+                    'allDays',
+                    [],
+                    'ScheduleSettingType'
+                ) => '*'] + array_combine(range(1, 31), range(1, 31)),
                 'label' => false,
                 'attr' => [
                     'description' => $description,
@@ -116,10 +116,10 @@ class ScheduleSettingType extends AbstractType
                 'multiple' => true,
                 'required' => false,
                 'choices' => [$this->translator->trans(
-                        'allDays',
-                        [],
-                        'ScheduleSettingType'
-                    ) => '*'] + DaysOfWeek::choices(),
+                    'allDays',
+                    [],
+                    'ScheduleSettingType'
+                ) => '*'] + DaysOfWeek::choices(),
                 'label' => false,
                 'attr' => [
                     'description' => $description,
