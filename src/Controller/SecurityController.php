@@ -305,6 +305,11 @@ class SecurityController extends AbstractController
                 $event = new InteractiveLoginEvent($request, $token);
                 $eventDispatcher->dispatch($event);
 
+                if (!$user->isVerified()) {
+                    $user->setIsVerified(true);
+                    $userRepository->save($user, true);
+                }
+
                 // Defines the Event to the table
                 $eventMetadata = [
                     'ip' => $request->getClientIp(),

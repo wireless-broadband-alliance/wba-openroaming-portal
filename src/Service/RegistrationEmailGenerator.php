@@ -3,6 +3,7 @@
 namespace App\Service;
 
 use App\Entity\User;
+use App\Enum\OperationMode;
 use App\Repository\SettingRepository;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -26,6 +27,12 @@ readonly class RegistrationEmailGenerator
     {
         $supportTeam = $this->settingRepository->findOneBy(['name' => 'PAGE_TITLE'])->getValue();
         $contactEmail = $this->settingRepository->findOneBy(['name' => 'CONTACT_EMAIL'])->getValue();
+        $loginWithUUID = $this->settingRepository->findOneBy(['name' => 'LOGIN_WITH_UUID_ONLY'])->getValue();
+        if ($loginWithUUID === OperationMode::ON->value) {
+            $magicLink = true;
+        } else {
+            $magicLink = false;
+        }
 
         // Send email to the user with the verification code
         $email = new TemplatedEmail()
@@ -44,6 +51,7 @@ readonly class RegistrationEmailGenerator
                 'contactEmail' => $contactEmail,
                 'verificationCode' => $user->getTwoFAcode(),
                 'isNewUser' => true,
+                'magicLink' => $magicLink,
                 // This variable informs if the user it's new our if it's just a password reset request
                 'password' => $password,
             ]);
