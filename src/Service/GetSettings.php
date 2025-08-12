@@ -241,6 +241,7 @@ class GetSettings
             'AUTH_METHOD_LOGIN_TRADITIONAL_LABEL' => 'The label for Login authentication button on the login page',
             'AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION' => 'The description for Login authentication on the login page',
             'AUTH_METHOD_SMS_REGISTER_ENABLED' => 'Enable or disable authentication register with the phone number',
+            'LOGIN_WITH_UUID_ONLY' => 'Defines whether authentication is performed using a link sent to the user or a tradicional uuid & password.',
 
             'AUTH_METHOD_SMS_REGISTER_LABEL' => 'The label for authentication with the phone number,
              on button of the login page',

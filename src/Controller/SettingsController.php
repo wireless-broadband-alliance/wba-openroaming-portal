@@ -894,6 +894,8 @@ class SettingsController extends AbstractController
 
             $settingsToUpdate = [
                 'AUTH_METHOD_SAML_ENABLED',
+                'AUTH_METHOD_SAML_LABEL',
+                'AUTH_METHOD_SAML_DESCRIPTION',
 
                 'AUTH_METHOD_GOOGLE_LOGIN_ENABLED',
                 'AUTH_METHOD_GOOGLE_LOGIN_LABEL',
@@ -918,6 +920,7 @@ class SettingsController extends AbstractController
                 'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED',
                 'AUTH_METHOD_LOGIN_TRADITIONAL_LABEL',
                 'AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION',
+                'LOGIN_WITH_UUID_ONLY',
 
                 'AUTH_METHOD_SMS_REGISTER_ENABLED',
                 'AUTH_METHOD_SMS_REGISTER_LABEL',
