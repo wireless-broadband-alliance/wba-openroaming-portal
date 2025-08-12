@@ -2,24 +2,39 @@
 
 namespace App\Controller;
 
+use App\Entity\Event;
 use App\Entity\User;
+use App\Enum\AnalyticalEventType;
 use App\Enum\FirewallType;
+use App\Enum\OperationMode;
+use App\Enum\PlatformMode;
 use App\Enum\UserProvider;
 use App\Form\LoginFormType;
+use App\Form\LoginUUIDType;
 use App\Form\TwoFACode;
+use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
+use App\Service\EventActions;
 use App\Service\GetSettings;
+use App\Service\MagicLinkService;
 use App\Service\TwoFAService;
+use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
+use Psr\EventDispatcher\EventDispatcherInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
+use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
+use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
 
 class SecurityController extends AbstractController
 {
@@ -37,6 +52,8 @@ class SecurityController extends AbstractController
         private readonly UserExternalAuthRepository $userExternalAuthRepository,
         private readonly TwoFAService $twoFAService,
         private readonly EntityManagerInterface $entityManager,
+        private readonly MagicLinkService  $magicLinkService,
+        private readonly EventActions $eventActions,
     ) {
     }
 
@@ -60,6 +77,10 @@ class SecurityController extends AbstractController
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         if ($data['PLATFORM_MODE']['value'] === true) {
             return $this->redirectToRoute('app_landing');
+        }
+
+        if ($data['LOGIN_WITH_UUID_ONLY']['value'] === OperationMode::ON->value) {
+            return $this->redirectToRoute('app_login_UUID');
         }
 
         // Last username entered by the user (this will be empty if the user clicked the verification link)
@@ -86,6 +107,67 @@ class SecurityController extends AbstractController
             'form' => $form,
             'context' => FirewallType::LANDING->value,
         ]);
+    }
+
+    /**
+     * @throws TransportExceptionInterface
+     */
+    #[Route('/login/UUID', name: 'app_login_UUID')]
+    public function loginUUID(
+        Request $request,
+    ): Response {
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+
+        $form = $this->createForm(LoginUUIDType::class);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $loginUser = $this->userRepository->findOneBy(['uuid' => $form->get('uuid')->getData()]);
+            if ($loginUser instanceof User) {
+                $event = $this->magicLinkService->canSendLink($loginUser);
+                if (!($event instanceof Event)) {
+                    $this->magicLinkService->sendEmail(
+                        $loginUser,
+                        $request->getClientIp(),
+                        $request->headers->get('User-Agent')
+                    );
+                    $this->addFlash(
+                        'success',
+                        'Login link sent to you successfully'
+                    );
+                } else {
+                    $timeIntervalToResendCode = $data["TWO_FACTOR_AUTH_RESEND_INTERVAL"]["value"];
+                    $lastAttemptTime = $event instanceof Event ?
+                        $event->getEventDatetime() : $timeIntervalToResendCode;
+                    $limitTime = $lastAttemptTime;
+                    $limitTime->modify('+' . $timeIntervalToResendCode . ' seconds');
+                    $now = new DateTime();
+                    $interval = date_diff($now, $limitTime);
+                    $interval_seconds = $interval->days * 1440;
+                    $interval_seconds += $interval->h * 60;
+                    $interval_seconds += $interval->i;
+                    $interval_seconds += $interval->s;
+                    $this->addFlash(
+                        'error',
+                        'Login link Invalid. Please wait ' .
+                        $interval_seconds .
+                        ' seconds before trying to send again.'
+                    );
+                }
+            } else {
+                $this->addFlash(
+                    'error',
+                    'User not found'
+                );
+            }
+        }
+
+        return $this->render('site/login_UUID_landing.html.twig', [
+            'data' => $data,
+            'form' => $form,
+            'context' => FirewallType::LANDING->value,
+        ]);
+
     }
 
     /**
@@ -195,5 +277,68 @@ class SecurityController extends AbstractController
         $session = $request->getSession();
         $session->clear();
         return $this->redirectToRoute('app_landing');
+    }
+
+    #[Route('/login/MagicLink', name: 'app_login_magic_link')]
+    public function confirmAccount(
+        Request $request,
+        UserRepository $userRepository,
+        TokenStorageInterface $tokenStorage,
+        EventDispatcherInterface $eventDispatcher,
+    ): Response {
+        // Get the uuid and verification code from the URL query parameters
+        $uuid = $request->query->get('uuid');
+        $verificationCode = $request->query->get('verificationCode');
+
+        // Get the user with the matching email, excluding admin users
+        $user = $userRepository->findOneByUUIDExcludingAdmin($uuid);
+
+        if ($user && $user->getTwoFAcode() === $verificationCode) {
+            try {
+                // Create a token manually for the user
+                $token = new UsernamePasswordToken($user, 'main', $user->getRoles());
+
+                // Set the token in the token storage
+                $tokenStorage->setToken($token);
+
+                // Dispatch the login event
+                $event = new InteractiveLoginEvent($request, $token);
+                $eventDispatcher->dispatch($event);
+
+                // Defines the Event to the table
+                $eventMetadata = [
+                    'ip' => $request->getClientIp(),
+                    'user_agent' => $request->headers->get('User-Agent'),
+                    'platform' => PlatformMode::LIVE->value,
+                    'uuid' => $user->getUuid(),
+                ];
+                $this->eventActions->saveEvent(
+                    $user,
+                    AnalyticalEventType::LOGIN_WITH_UUID_ONLY_LOGIN->value,
+                    new DateTime(),
+                    $eventMetadata
+                );
+
+                $this->addFlash(
+                    'success',
+                    'Login successfully'
+                );
+
+                return $this->redirectToRoute('app_landing');
+            } catch (CustomUserMessageAuthenticationException) {
+                $this->addFlash(
+                    'error',
+                    'Authentication failed. Please try to log in manually.'
+                );
+            }
+        } else {
+            // If the verification code is invalid or not found, display an error message and redirect to the login page
+            $this->addFlash(
+                'error',
+                'Invalid verification code or link expired. Please try to log in manually'
+            );
+        }
+
+        return $this->redirectToRoute('app_login');
     }
 }
