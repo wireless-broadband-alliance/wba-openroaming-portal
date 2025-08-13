@@ -71,6 +71,7 @@ class SettingFixture extends Fixture
             ['name' => 'AUTH_METHOD_SMS_REGISTER_ENABLED', 'value' => 'false'],
             ['name' => 'AUTH_METHOD_SMS_REGISTER_LABEL', 'value' => 'Create Account with Phone Number'],
             ['name' => 'AUTH_METHOD_SMS_REGISTER_DESCRIPTION', 'value' => 'Don\'t have an account? Create one'],
+            ['name' => 'LOGIN_WITH_UUID_ONLY', 'value' => 'OFF'],
 
             ['name' => 'EMAIL_TIMER_RESEND', 'value' => '2'],
             ['name' => 'LINK_VALIDITY', 'value' => '10'],

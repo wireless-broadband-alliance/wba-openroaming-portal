@@ -292,13 +292,12 @@ class SecurityController extends AbstractController
         EventDispatcherInterface $eventDispatcher,
     ): Response {
         // Get the uuid and verification code from the URL query parameters
-        $uuid = $request->query->get('uuid');
-        $verificationCode = $request->query->get('verificationCode');
+        $token = $request->query->get('token');
 
         // Get the user with the matching email, excluding admin users
-        $user = $userRepository->findOneByUUIDExcludingAdmin($uuid);
+        $user = $userRepository->findOneBy(['twoFAcode' => $token]);
 
-        if ($user && $user->getTwoFAcode() === $verificationCode && $user->getTwoFAcodeIsActive()) {
+        if ($user && $user->getTwoFAcodeIsActive() && $this->magicLinkService->linkValidity($user)) {
             try {
                 // Create a token manually for the user
                 $token = new UsernamePasswordToken($user, 'main', $user->getRoles());

@@ -15,6 +15,7 @@ use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use App\Service\EventActions;
 use App\Service\GetSettings;
+use App\Service\MagicLinkService;
 use App\Service\RegistrationEmailGenerator;
 use App\Service\SendSMS;
 use App\Service\VerificationCodeEmailGenerator;
@@ -62,6 +63,7 @@ class RegistrationController extends AbstractController
         private readonly EventActions $eventActions,
         private readonly RegistrationEmailGenerator $emailGenerator,
         private readonly UrlGeneratorInterface $urlGenerator,
+        private readonly MagicLinkService $magicLinkService,
     ) {
     }
 
@@ -248,14 +250,7 @@ class RegistrationController extends AbstractController
                 );
 
                 if ($data['LOGIN_WITH_UUID_ONLY']['value'] === OperationMode::ON->value) {
-                    $link = $this->urlGenerator->generate(
-                        'app_login_magic_link',
-                        [
-                            'uuid' => $user->getUuid(),
-                            'verificationCode' => $user->getTwoFAcode()
-                        ],
-                        UrlGeneratorInterface::ABSOLUTE_URL
-                    );
+                    $link = $this->magicLinkService->magicToken($user);
                     $message = "Welcome to OpenRoaming! Click the link to confirm and login with your account: $link";
                 } else {
                     $message = "Your account password is: "
@@ -265,12 +260,20 @@ class RegistrationController extends AbstractController
                         . $user->getTwoFAcode();
                 }
 
+                if ($data['LOGIN_WITH_UUID_ONLY']['value'] === OperationMode::ON->value) {
+                    $this->addFlash(
+                        'success',
+                        'We have sent a link to your phone number to login and verify your account.'
+                    );
+                    return $this->redirectToRoute('app_register_sms');
+                }
                 // Send SMS
                 $this->sendSMS->sendSms($user->getPhoneNumber(), $message);
                 $this->addFlash(
                     'success',
                     'We have sent a message to your phone with your password and verification code'
                 );
+
 
                 // Authenticate the user
                 $token = new UsernamePasswordToken($user, FirewallType::LANDING->value, $user->getRoles());

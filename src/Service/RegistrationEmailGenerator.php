@@ -17,6 +17,7 @@ readonly class RegistrationEmailGenerator
         private ParameterBagInterface $parameterBag,
         private MailerInterface $mailer,
         private SettingRepository $settingRepository,
+        private MagicLinkService $magicLinkService,
     ) {
     }
 
@@ -29,6 +30,9 @@ readonly class RegistrationEmailGenerator
         $contactEmail = $this->settingRepository->findOneBy(['name' => 'CONTACT_EMAIL'])->getValue();
         $loginWithUUID = $this->settingRepository->findOneBy(['name' => 'LOGIN_WITH_UUID_ONLY'])->getValue();
         $magicLink = $loginWithUUID === OperationMode::ON->value;
+        if ($magicLink) {
+            $magicURL = $this->magicLinkService->magicToken($user);
+        }
 
         // Send email to the user with the verification code
         $email = new TemplatedEmail()
@@ -50,6 +54,7 @@ readonly class RegistrationEmailGenerator
                 'magicLink' => $magicLink,
                 // This variable informs if the user it's new our if it's just a password reset request
                 'password' => $password,
+                'magicURL' => $magicURL,
             ]);
 
         $this->mailer->send($email);

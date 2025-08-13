@@ -85,7 +85,7 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
     #[ORM\Column(length: 255)]
     private int $twoFAtype = 0;
 
-    #[ORM\Column(length: 10, nullable: true)]
+    #[ORM\Column(length: 64, nullable: true)]
     private ?string $twoFAcode = null;
 
     #[ORM\Column(type: 'boolean', options: ['default' => false])]

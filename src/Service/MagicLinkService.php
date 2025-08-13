@@ -30,7 +30,6 @@ class MagicLinkService
         private readonly EventActions $eventActions,
         private readonly SendSMS $sendSMS,
         private readonly UrlGeneratorInterface $urlGenerator,
-        private readonly TwoFAService $twoFactorService,
     ) {
     }
 
@@ -52,7 +51,7 @@ class MagicLinkService
         ?string $ip,
         ?string $userAgent,
     ): void {
-        $this->twoFactorService->twoFACode($user);
+        $magicLinkUrl = $this->magicToken($user);
         if ($user->getUserExternalAuths()[0]->getProviderId() === UserProvider::EMAIL->value) {
             $emailTitle = $this->settingRepository->findOneBy(['name' => 'PAGE_TITLE'])->getValue();
             $contactEmail = $this->settingRepository->findOneBy(['name' => 'CONTACT_EMAIL'])->getValue();
@@ -73,20 +72,11 @@ class MagicLinkService
                     'emailTitle' => $emailTitle,
                     'supportTeam' => $emailTitle,
                     'contactEmail' => $contactEmail,
-                    'verificationCode' => $user->getTwoFAcode()
+                    'magicLink' => $magicLinkUrl,
                 ]);
             $this->mailer->send($email);
         } elseif ($user->getUserExternalAuths()[0]->getProviderId() === UserProvider::PHONE_NUMBER->value) {
-            $link = $this->urlGenerator->generate(
-                'app_login_magic_link',
-                [
-                    'uuid' => $user->getUuid(),
-                    'verificationCode' => $user->getTwoFAcode()
-                ],
-                UrlGeneratorInterface::ABSOLUTE_URL
-            );
-
-            $message = "Welcome back to OpenRoaming! Click the link to login: $link";
+            $message = "Welcome back to OpenRoaming! Click the link to login: $magicLinkUrl";
             $this->sendSMS->sendSms($user->getPhoneNumber(), $message);
         }
 
@@ -103,5 +93,25 @@ class MagicLinkService
             new DateTime(),
             $eventMetaData
         );
+    }
+
+    public function magicToken (User $user): string
+    {
+        $token = bin2hex(random_bytes(32));
+        $user->setTwoFACode($token);
+        $user->setTwoFAcodeIsActive(true);
+        $user->setTwoFAcodeGeneratedAt(new DateTime());
+        $this->userRepository->save($user, true);
+        return $this->urlGenerator->generate('app_login_magic_link', [
+            'token' => $user->getTwoFAcode()
+        ], UrlGeneratorInterface::ABSOLUTE_URL);
+    }
+
+    public function linkValidity(User $user): bool
+    {
+        $linkValidity = $this->settingRepository->findOneBy(['name' => 'LINK_VALIDITY'])->getValue();
+        $limitTime = new DateTime();
+        $limitTime->modify('-' . $linkValidity . ' minutes');
+        return $limitTime < $user->getTwoFAcodeGeneratedAt();
     }
 }
