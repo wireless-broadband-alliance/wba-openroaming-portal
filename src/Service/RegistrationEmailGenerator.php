@@ -28,11 +28,7 @@ readonly class RegistrationEmailGenerator
         $supportTeam = $this->settingRepository->findOneBy(['name' => 'PAGE_TITLE'])->getValue();
         $contactEmail = $this->settingRepository->findOneBy(['name' => 'CONTACT_EMAIL'])->getValue();
         $loginWithUUID = $this->settingRepository->findOneBy(['name' => 'LOGIN_WITH_UUID_ONLY'])->getValue();
-        if ($loginWithUUID === OperationMode::ON->value) {
-            $magicLink = true;
-        } else {
-            $magicLink = false;
-        }
+        $magicLink = $loginWithUUID === OperationMode::ON->value;
 
         // Send email to the user with the verification code
         $email = new TemplatedEmail()

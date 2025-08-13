@@ -52,7 +52,6 @@ class MagicLinkService
         ?string $ip,
         ?string $userAgent,
     ): void {
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $this->twoFactorService->twoFACode($user);
         if ($user->getUserExternalAuths()[0]->getProviderId() === UserProvider::EMAIL->value) {
             $emailTitle = $this->settingRepository->findOneBy(['name' => 'PAGE_TITLE'])->getValue();
