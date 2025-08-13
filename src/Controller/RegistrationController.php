@@ -31,6 +31,7 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;
@@ -60,6 +61,7 @@ class RegistrationController extends AbstractController
         private readonly TokenStorageInterface $tokenStorage,
         private readonly EventActions $eventActions,
         private readonly RegistrationEmailGenerator $emailGenerator,
+        private readonly UrlGeneratorInterface $urlGenerator,
     ) {
     }
 
@@ -245,12 +247,25 @@ class RegistrationController extends AbstractController
                     $eventMetadata
                 );
 
+                if ($data['LOGIN_WITH_UUID_ONLY']['value'] === OperationMode::ON->value) {
+                    $link = $this->urlGenerator->generate(
+                        'app_login_magic_link',
+                        [
+                            'uuid' => $user->getUuid(),
+                            'verificationCode' => $user->getTwoFAcode()
+                        ],
+                        UrlGeneratorInterface::ABSOLUTE_URL
+                    );
+                    $message = "Welcome to OpenRoaming! Click the link to confirm and login with your account: $link";
+                } else {
+                    $message = "Your account password is: "
+                        . $randomPassword
+                        . "%0A"
+                        . "Verification code is: "
+                        . $user->getTwoFAcode();
+                }
+
                 // Send SMS
-                $message = "Your account password is: "
-                    . $randomPassword
-                    . "%0A"
-                    . "Verification code is: "
-                    . $user->getTwoFAcode();
                 $this->sendSMS->sendSms($user->getPhoneNumber(), $message);
                 $this->addFlash(
                     'success',

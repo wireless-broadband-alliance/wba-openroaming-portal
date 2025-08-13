@@ -5,7 +5,9 @@ namespace App\Service;
 use App\Entity\Event;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use App\Enum\PlatformMode;
+use App\Enum\UserProvider;
 use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
@@ -26,6 +28,9 @@ class MagicLinkService
         private readonly MailerInterface $mailer,
         private readonly ParameterBagInterface $parameterBag,
         private readonly EventActions $eventActions,
+        private readonly SendSMS $sendSMS,
+        private readonly UrlGeneratorInterface $urlGenerator,
+        private readonly TwoFAService $twoFactorService,
     ) {
     }
 
@@ -48,29 +53,45 @@ class MagicLinkService
         ?string $userAgent,
     ): void
     {
-        $emailTitle = $this->settingRepository->findOneBy(['name' => 'PAGE_TITLE'])->getValue();
-        $contactEmail = $this->settingRepository->findOneBy(['name' => 'CONTACT_EMAIL'])->getValue();
-        $supportTeam = $this->settingRepository->findOneBy(['name' => 'PAGE_TITLE'])->getValue();
+        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $this->twoFactorService->twoFACode($user);
+        if ($user->getUserExternalAuths()[0]->getProviderId() === UserProvider::EMAIL->value){
+            $emailTitle = $this->settingRepository->findOneBy(['name' => 'PAGE_TITLE'])->getValue();
+            $contactEmail = $this->settingRepository->findOneBy(['name' => 'CONTACT_EMAIL'])->getValue();
 
-        // LOGIN_TRADITIONAL_REQUEST || LOGIN_CODE_RESEND
-        $email = new TemplatedEmail()
-            ->from(
-                new Address(
-                    $this->parameterBag->get('app.email_address'),
-                    $this->parameterBag->get('app.sender_name')
+            // LOGIN_TRADITIONAL_REQUEST || LOGIN_CODE_RESEND
+            $email = new TemplatedEmail()
+                ->from(
+                    new Address(
+                        $this->parameterBag->get('app.email_address'),
+                        $this->parameterBag->get('app.sender_name')
+                    )
                 )
-            )
-            ->to($user->getEmail())
-            ->subject('Magic Link Login')
-            ->htmlTemplate('email/user_login_link.html.twig')
-            ->context([
-                'uuid' => $user->getEmail(),
-                'emailTitle' => $emailTitle,
-                'supportTeam' => $emailTitle,
-                'contactEmail' => $contactEmail,
-                'verificationCode' => $user->getTwoFAcode()
-            ]);
-        $this->mailer->send($email);
+                ->to($user->getEmail())
+                ->subject('Magic Link Login')
+                ->htmlTemplate('email/user_login_link.html.twig')
+                ->context([
+                    'uuid' => $user->getEmail(),
+                    'emailTitle' => $emailTitle,
+                    'supportTeam' => $emailTitle,
+                    'contactEmail' => $contactEmail,
+                    'verificationCode' => $user->getTwoFAcode()
+                ]);
+            $this->mailer->send($email);
+        } elseif ($user->getUserExternalAuths()[0]->getProviderId() === UserProvider::PHONE_NUMBER->value){
+            $link = $this->urlGenerator->generate(
+                'app_login_magic_link',
+                [
+                    'uuid' => $user->getUuid(),
+                    'verificationCode' => $user->getTwoFAcode()
+                ],
+                UrlGeneratorInterface::ABSOLUTE_URL
+            );
+
+            $message = "Welcome back to OpenRoaming! Click the link to login: $link";
+            $this->sendSMS->sendSms($user->getPhoneNumber(), $message);
+        }
+
 
         $eventMetaData = [
             'platform' => PlatformMode::LIVE->value,

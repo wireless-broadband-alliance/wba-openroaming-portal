@@ -65,7 +65,7 @@ readonly class TwoFAService
     /**
      * @throws RandomException
      */
-    private function twoFACode(User $user): string
+    public function twoFACode(User $user): string
     {
         // Generate a random verification code with 6 digits
         $user->setTwoFACode(random_int(100000, 999999));
