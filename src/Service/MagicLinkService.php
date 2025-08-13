@@ -51,11 +51,10 @@ class MagicLinkService
         User $user,
         ?string $ip,
         ?string $userAgent,
-    ): void
-    {
+    ): void {
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         $this->twoFactorService->twoFACode($user);
-        if ($user->getUserExternalAuths()[0]->getProviderId() === UserProvider::EMAIL->value){
+        if ($user->getUserExternalAuths()[0]->getProviderId() === UserProvider::EMAIL->value) {
             $emailTitle = $this->settingRepository->findOneBy(['name' => 'PAGE_TITLE'])->getValue();
             $contactEmail = $this->settingRepository->findOneBy(['name' => 'CONTACT_EMAIL'])->getValue();
 
@@ -78,7 +77,7 @@ class MagicLinkService
                     'verificationCode' => $user->getTwoFAcode()
                 ]);
             $this->mailer->send($email);
-        } elseif ($user->getUserExternalAuths()[0]->getProviderId() === UserProvider::PHONE_NUMBER->value){
+        } elseif ($user->getUserExternalAuths()[0]->getProviderId() === UserProvider::PHONE_NUMBER->value) {
             $link = $this->urlGenerator->generate(
                 'app_login_magic_link',
                 [

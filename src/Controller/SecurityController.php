@@ -53,7 +53,7 @@ class SecurityController extends AbstractController
         private readonly UserExternalAuthRepository $userExternalAuthRepository,
         private readonly TwoFAService $twoFAService,
         private readonly EntityManagerInterface $entityManager,
-        private readonly MagicLinkService  $magicLinkService,
+        private readonly MagicLinkService $magicLinkService,
         private readonly EventActions $eventActions,
     ) {
     }
@@ -172,7 +172,6 @@ class SecurityController extends AbstractController
             'form' => $form,
             'context' => FirewallType::LANDING->value,
         ]);
-
     }
 
     /**
