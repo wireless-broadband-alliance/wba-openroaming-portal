@@ -9,6 +9,7 @@ use App\Enum\FirewallType;
 use App\Enum\OperationMode;
 use App\Enum\PlatformMode;
 use App\Enum\UserProvider;
+use App\Enum\UserTwoFactorAuthenticationStatus;
 use App\Form\LoginFormType;
 use App\Form\LoginUUIDType;
 use App\Form\TwoFACode;
@@ -117,6 +118,10 @@ class SecurityController extends AbstractController
         Request $request,
     ): Response {
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+
+        if ($data['LOGIN_WITH_UUID_ONLY']['value'] === OperationMode::OFF->value) {
+            return $this->redirectToRoute('app_login');
+        }
 
         $form = $this->createForm(LoginUUIDType::class);
         $form->handleRequest($request);
@@ -308,6 +313,14 @@ class SecurityController extends AbstractController
                 if (!$user->isVerified()) {
                     $user->setIsVerified(true);
                     $userRepository->save($user, true);
+                }
+
+                if (
+                    $user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::EMAIL->value ||
+                    $user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::SMS->value
+                ) {
+                    $session = $request->getSession();
+                    $session->set('2fa_verified_' . FirewallType::LANDING->value, true);
                 }
 
                 // Defines the Event to the table
