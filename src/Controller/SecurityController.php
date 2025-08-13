@@ -145,6 +145,7 @@ class SecurityController extends AbstractController
                     $lastAttemptTime = $event instanceof Event ?
                         $event->getEventDatetime() : $timeIntervalToResendCode;
                     $limitTime = $lastAttemptTime;
+                    /** @var DateTime $limitTime */
                     $limitTime->modify('+' . $timeIntervalToResendCode . ' seconds');
                     $now = new DateTime();
                     $interval = date_diff($now, $limitTime);
