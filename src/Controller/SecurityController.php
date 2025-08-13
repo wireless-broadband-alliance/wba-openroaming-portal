@@ -298,7 +298,7 @@ class SecurityController extends AbstractController
         // Get the user with the matching email, excluding admin users
         $user = $userRepository->findOneByUUIDExcludingAdmin($uuid);
 
-        if ($user && $user->getTwoFAcode() === $verificationCode) {
+        if ($user && $user->getTwoFAcode() === $verificationCode && $user->getTwoFAcodeIsActive()) {
             try {
                 // Create a token manually for the user
                 $token = new UsernamePasswordToken($user, 'main', $user->getRoles());
@@ -312,8 +312,10 @@ class SecurityController extends AbstractController
 
                 if (!$user->isVerified()) {
                     $user->setIsVerified(true);
-                    $userRepository->save($user, true);
                 }
+
+                $user->setTwoFAcodeIsActive(false);
+                $userRepository->save($user, true);
 
                 if (
                     $user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::EMAIL->value ||
