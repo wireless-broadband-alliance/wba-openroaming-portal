@@ -147,10 +147,18 @@ class RegistrationController extends AbstractController
 
                 $this->emailGenerator->sendRegistrationEmail($user, $randomPassword);
 
-                $this->addFlash(
-                    'success',
-                    'We have sent an email with your account password and verification code'
-                );
+                if ($data['LOGIN_WITH_UUID_ONLY']['value'] === OperationMode::ON->value) {
+                    $this->addFlash(
+                        'success',
+                        'We have sent an email with your login link'
+                    );
+                } else {
+                    $this->addFlash(
+                        'success',
+                        'We have sent an email with your account password and verification code'
+                    );
+                }
+
             }
         }
 
