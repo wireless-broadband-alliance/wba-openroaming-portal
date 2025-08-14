@@ -62,7 +62,6 @@ class RegistrationController extends AbstractController
         private readonly TokenStorageInterface $tokenStorage,
         private readonly EventActions $eventActions,
         private readonly RegistrationEmailGenerator $emailGenerator,
-        private readonly UrlGeneratorInterface $urlGenerator,
         private readonly MagicLinkService $magicLinkService,
     ) {
     }

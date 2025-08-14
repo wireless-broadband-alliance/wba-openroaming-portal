@@ -60,7 +60,7 @@ class SendSMS
         if ($user && $this->canRegenerateSmsCode($user, $this->eventRepository)) {
             $client = HttpClient::create();
 
-            $recipient = preg_replace('/\D+/', '', $recipient);
+            $recipient = preg_replace('/\D+/', '', (string) $recipient);
 
             // Adjust the API endpoint and parameters based on the Budget SMS documentation
             $apiUrl .= "?username=$username&userid=$userId&handle=$handle&to=$recipient&from=$from&msg=$message";
