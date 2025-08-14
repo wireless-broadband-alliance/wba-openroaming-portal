@@ -14,8 +14,6 @@ use DateTime;
 use DateTimeInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Exception;
-use libphonenumber\PhoneNumberFormat;
-use libphonenumber\PhoneNumberUtil;
 use RuntimeException;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpClient\HttpClient;
