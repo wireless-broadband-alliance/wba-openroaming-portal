@@ -30,11 +30,7 @@ readonly class RegistrationEmailGenerator
         $contactEmail = $this->settingRepository->findOneBy(['name' => 'CONTACT_EMAIL'])->getValue();
         $loginWithUUID = $this->settingRepository->findOneBy(['name' => 'LOGIN_WITH_UUID_ONLY'])->getValue();
         $magicLink = $loginWithUUID === OperationMode::ON->value;
-        if ($magicLink) {
-            $magicURL = $this->magicLinkService->magicToken($user);
-        } else {
-            $magicURL = null;
-        }
+        $magicURL = $magicLink ? $this->magicLinkService->magicToken($user) : null;
 
         // Send email to the user with the verification code
         $email = new TemplatedEmail()
