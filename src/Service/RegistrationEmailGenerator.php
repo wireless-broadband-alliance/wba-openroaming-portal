@@ -32,6 +32,8 @@ readonly class RegistrationEmailGenerator
         $magicLink = $loginWithUUID === OperationMode::ON->value;
         if ($magicLink) {
             $magicURL = $this->magicLinkService->magicToken($user);
+        } else {
+            $magicURL = null;
         }
 
         // Send email to the user with the verification code
