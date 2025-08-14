@@ -95,7 +95,7 @@ class MagicLinkService
         );
     }
 
-    public function magicToken (User $user): string
+    public function magicToken(User $user): string
     {
         $token = bin2hex(random_bytes(32));
         $user->setTwoFACode($token);
