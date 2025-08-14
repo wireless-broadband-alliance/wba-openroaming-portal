@@ -354,7 +354,7 @@ class SecurityController extends AbstractController
             // If the verification code is invalid or not found, display an error message and redirect to the login page
             $this->addFlash(
                 'error',
-                'Invalid verification code or link expired. Please try to log in manually'
+                'Expired or already used link. Please try again.'
             );
         }
 
