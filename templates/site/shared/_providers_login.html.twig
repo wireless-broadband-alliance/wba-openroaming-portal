@@ -50,7 +50,7 @@
 
 {# Portal Auth Methods #}
 <div class="grid grid-cols-1 sm:gap-4 lg:gap-6 sm:[grid-template-columns:repeat(auto-fit,minmax(150px,1fr))] md:my-2 my-3">
-    {% if data.EMAIL_REGISTER_ENABLED.value %}
+    {% if data.EMAIL_REGISTER_ENABLED.value and data.LOGIN_WITH_UUID_ONLY.value == constant('App\\Enum\\OperationMode::OFF').value %}
         <div class="w-full">
             <a href="{{ path('app_register') }}"
                class="terms-widget__link"
@@ -65,7 +65,7 @@
         </div>
     {% endif %}
 
-    {% if data.AUTH_METHOD_SMS_REGISTER_ENABLED.value %}
+    {% if data.AUTH_METHOD_SMS_REGISTER_ENABLED.value and data.LOGIN_WITH_UUID_ONLY.value == constant('App\\Enum\\OperationMode::OFF').value %}
         <div class="w-full">
             <a href="{{ path('app_register_sms') }}"
                class="terms-widget__link"
