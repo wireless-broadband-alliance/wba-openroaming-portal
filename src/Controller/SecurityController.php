@@ -144,9 +144,7 @@ class SecurityController extends AbstractController
                     );
                 } else {
                     $timeIntervalToResendCode = $data["TWO_FACTOR_AUTH_RESEND_INTERVAL"]["value"];
-                    $lastAttemptTime = $event instanceof Event ?
-                        $event->getEventDatetime() : $timeIntervalToResendCode;
-                    $limitTime = $lastAttemptTime;
+                    $limitTime = $event->getEventDatetime();
                     /** @var DateTime $limitTime */
                     $limitTime->modify('+' . $timeIntervalToResendCode . ' seconds');
                     $now = new DateTime();

@@ -18,18 +18,18 @@ use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
 
-class MagicLinkService
+readonly class MagicLinkService
 {
     public function __construct(
-        private readonly GetSettings $getSettings,
-        private readonly UserRepository $userRepository,
-        private readonly SettingRepository $settingRepository,
-        private readonly EventRepository $eventRepository,
-        private readonly MailerInterface $mailer,
-        private readonly ParameterBagInterface $parameterBag,
-        private readonly EventActions $eventActions,
-        private readonly SendSMS $sendSMS,
-        private readonly UrlGeneratorInterface $urlGenerator,
+        private GetSettings $getSettings,
+        private UserRepository $userRepository,
+        private SettingRepository $settingRepository,
+        private EventRepository $eventRepository,
+        private MailerInterface $mailer,
+        private ParameterBagInterface $parameterBag,
+        private EventActions $eventActions,
+        private SendSMS $sendSMS,
+        private UrlGeneratorInterface $urlGenerator,
     ) {
     }
 
