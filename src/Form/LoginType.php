@@ -37,13 +37,13 @@ class LoginType extends AbstractType
         // Let user select if they want to log in with email
         $builder->add('loginMethod', ChoiceType::class, [
             'choices' => [
-                UserProvider::EMAIL->value => 'email',
-                UserProvider::PHONE_NUMBER->value => 'phone',
+                'Email' => UserProvider::EMAIL->value,
+                'Phone Number' => UserProvider::PHONE_NUMBER->value,
             ],
             'expanded' => true,
             'multiple' => false,
-            'label' => 'Login with',
-            'required' => true,
+            'label' => 'Login via',
+            'data' => $builder->getData()?->loginMethod ?? UserProvider::EMAIL->value,
         ]);
 
         $builder->add('email', EmailType::class, [

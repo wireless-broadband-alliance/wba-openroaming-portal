@@ -114,6 +114,7 @@ class SecurityController extends AbstractController
             'data' => $data,
             'form' => $form,
             'context' => FirewallType::LANDING->value,
+            'loginChoiceDTO' => $dto
         ]);
     }
 
