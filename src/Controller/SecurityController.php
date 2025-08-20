@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\DTO\LoginChoiceDTO;
 use App\Entity\Event;
 use App\Entity\User;
+use App\Entity\UserExternalAuth;
 use App\Enum\AnalyticalEventType;
 use App\Enum\FirewallType;
 use App\Enum\OperationMode;
@@ -20,6 +21,7 @@ use App\Repository\UserRepository;
 use App\Service\EventActions;
 use App\Service\GetSettings;
 use App\Service\MagicLinkService;
+use App\Service\RegistrationEmailGenerator;
 use App\Service\TwoFAService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
@@ -29,6 +31,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
@@ -55,6 +58,7 @@ class SecurityController extends AbstractController
         private readonly EntityManagerInterface $entityManager,
         private readonly MagicLinkService $magicLinkService,
         private readonly EventActions $eventActions,
+        private readonly RegistrationEmailGenerator $emailGenerator,
     ) {
     }
 
@@ -124,6 +128,8 @@ class SecurityController extends AbstractController
     #[Route('/login/UUID', name: 'app_login_UUID')]
     public function loginUUID(
         Request $request,
+        UserPasswordHasherInterface $userPasswordHasher,
+        EntityManagerInterface $entityManager,
     ): Response {
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
@@ -137,58 +143,96 @@ class SecurityController extends AbstractController
         $form = $this->createForm(LoginUUIDType::class, $loginChoiceDTO);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted()) {
-            dd($form->getData(), $form->isValid());
-        }
         if ($form->isSubmitted() && $form->isValid()) {
-            dd($form->getData());
-            $loginUser =  null;//$this->userRepository->findOneBy(['uuid' => $form->get('uuid')->getData()]);
-            if ($loginUser instanceof User) {
-                $event = $this->magicLinkService->canSendLink($loginUser);
-                if (!($event instanceof Event)) {
-                    $this->magicLinkService->sendEmail(
-                        $loginUser,
-                        $request->getClientIp(),
-                        $request->headers->get('User-Agent')
+            if ($loginChoiceDTO->loginMethod === UserProvider::EMAIL->value) {
+                $loginUser = $this->userRepository->findOneBy(['uuid' => $loginChoiceDTO->email]);
+                if ($loginUser instanceof User) {
+                    $event = $this->magicLinkService->canSendLink($loginUser);
+                    if (!($event instanceof Event)) {
+                        $this->magicLinkService->sendEmail(
+                            $loginUser,
+                            $request->getClientIp(),
+                            $request->headers->get('User-Agent')
+                        );
+                        $this->addFlash(
+                            'success',
+                            'Login link sent to you successfully'
+                        );
+                    } else {
+                        $timeIntervalToResendCode = $data["TWO_FACTOR_AUTH_RESEND_INTERVAL"]["value"];
+                        $lastAttemptTime = $event instanceof Event ?
+                            $event->getEventDatetime() : $timeIntervalToResendCode;
+                        $limitTime = $lastAttemptTime;
+                        /** @var DateTime $limitTime */
+                        $limitTime->modify('+' . $timeIntervalToResendCode . ' seconds');
+                        $now = new DateTime();
+                        $interval = date_diff($now, $limitTime);
+                        $interval_seconds = $interval->days * 1440;
+                        $interval_seconds += $interval->h * 60;
+                        $interval_seconds += $interval->i;
+                        $interval_seconds += $interval->s;
+                        $this->addFlash(
+                            'error',
+                            'Login link Invalid. Please wait ' .
+                            $interval_seconds .
+                            ' seconds before trying to send again.'
+                        );
+                    }
+                } elseif (filter_var($loginChoiceDTO->email, FILTER_VALIDATE_EMAIL)) {
+                    $user = new User();
+                    $userAuths = new UserExternalAuth();
+
+                    // Generate a random password
+                    $randomPassword = bin2hex(random_bytes(4));
+
+                    // Hash the password
+                    $hashedPassword = $userPasswordHasher->hashPassword($user, $randomPassword);
+
+                    // Set the hashed password for the user
+                    $user->setPassword($hashedPassword);
+                    $user->setUuid($loginChoiceDTO->email);
+                    $user->setEmail($loginChoiceDTO->email);
+                    $user->setTwoFAcode(random_int(100000, 999999));
+                    $user->setTwoFAcodeGeneratedAt(new DateTime());
+                    $user->setTwoFAcodeIsActive(true);
+                    $user->setCreatedAt(new DateTime());
+                    $userAuths->setProvider(UserProvider::PORTAL_ACCOUNT->value);
+                    $userAuths->setProviderId(UserProvider::EMAIL->value);
+                    $userAuths->setUser($user);
+                    $entityManager->persist($user);
+                    $entityManager->persist($userAuths);
+                    $entityManager->flush();
+
+                    // Defines the Event to the table
+                    $eventMetaData = [
+                        'ip' => $request->getClientIp(),
+                        'user_agent' => $request->headers->get('User-Agent'),
+                        'platform' => PlatformMode::LIVE->value,
+                        'uuid' => $user->getUuid(),
+                        'registrationType' => UserProvider::EMAIL->value,
+                    ];
+                    $this->eventActions->saveEvent(
+                        $user,
+                        AnalyticalEventType::USER_CREATION->value,
+                        new DateTime(),
+                        $eventMetaData
                     );
+
+                    $this->emailGenerator->sendRegistrationEmail($user, $randomPassword);
+
                     $this->addFlash(
                         'success',
-                        'Login link sent to you successfully'
+                        'We have sent an email with your login link'
                     );
+
                 } else {
-                    $timeIntervalToResendCode = $data["TWO_FACTOR_AUTH_RESEND_INTERVAL"]["value"];
-                    $lastAttemptTime = $event instanceof Event ?
-                        $event->getEventDatetime() : $timeIntervalToResendCode;
-                    $limitTime = $lastAttemptTime;
-                    /** @var DateTime $limitTime */
-                    $limitTime->modify('+' . $timeIntervalToResendCode . ' seconds');
-                    $now = new DateTime();
-                    $interval = date_diff($now, $limitTime);
-                    $interval_seconds = $interval->days * 1440;
-                    $interval_seconds += $interval->h * 60;
-                    $interval_seconds += $interval->i;
-                    $interval_seconds += $interval->s;
                     $this->addFlash(
                         'error',
-                        'Login link Invalid. Please wait ' .
-                        $interval_seconds .
-                        ' seconds before trying to send again.'
+                        'Invalid email Format'
                     );
                 }
-            } else {
-                if (filter_var($form->get('uuid')->getData(), FILTER_VALIDATE_EMAIL)) {
-                    $this->addFlash(
-                        'success',
-                        'Valid Format'
-                    );
-                } else {
-                    $this->addFlash(
-                        'error',
-                        'Invalid Format'
-                    );
                 }
 
-            }
         }
 
         return $this->render('site/login_UUID_landing.html.twig', [
