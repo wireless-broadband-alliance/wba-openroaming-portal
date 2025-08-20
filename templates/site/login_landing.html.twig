@@ -31,11 +31,35 @@
     <twig:LoginForm :loginChoiceDTO="loginChoiceDTO" :form="form">
         {{ form_start(form) }}
 
-        {# Login Method #}
-        <div class="mt-[32px]">
-            {{ form_widget(form.loginMethod, {
-                attr: { class: 'form-radio', 'wire:model': 'loginChoiceDTO.loginMethod' }
-            }) }}
+        {# Login Method Toggle #}
+        <div class="flex justify-center mt-8">
+            <div class="flex bg-gray-300 rounded-lg overflow-hidden w-full max-w-md p-1">
+                {# Email Option #}
+                <label
+                        class="cursor-pointer flex-1 text-center px-4 py-3 transition-colors duration-200 rounded-md
+                   {{ loginChoiceDTO.loginMethod == constant('App\\Enum\\UserProvider::EMAIL').value ? 'bg-white text-black font-semibold shadow-md' : 'text-gray-700' }}"
+                >
+                    <input type="radio"
+                           name="{{ form.loginMethod.vars.full_name }}"
+                           value="{{ constant('App\\Enum\\UserProvider::EMAIL').value }}"
+                           class="hidden"
+                           wire:model="loginChoiceDTO.loginMethod" />
+                    Email
+                </label>
+
+                {# Phone Number Option #}
+                <label
+                        class="cursor-pointer flex-1 text-center px-4 py-3 transition-colors duration-200 rounded-md
+                   {{ loginChoiceDTO.loginMethod == constant('App\\Enum\\UserProvider::PHONE_NUMBER').value ? 'bg-white text-black font-semibold shadow-md' : 'text-gray-700' }}"
+                >
+                    <input type="radio"
+                           name="{{ form.loginMethod.vars.full_name }}"
+                           value="{{ constant('App\\Enum\\UserProvider::PHONE_NUMBER').value }}"
+                           class="hidden"
+                           wire:model="loginChoiceDTO.loginMethod" />
+                    PhoneNumber
+                </label>
+            </div>
         </div>
 
         {# Email Field #}
@@ -51,7 +75,6 @@
             <div class="flex flex-row items-end space-x-4 mt-[32px]">
                 {# Country Code Dropdown #}
                 <div class="flex flex-col w-1/3">
-                    {{ form_label(form.phoneNumber.children.country, 'Country', { label_attr: { class: 'text-gray-700 font-medium mb-2' } }) }}
                     {{ form_widget(form.phoneNumber.children.country, {
                         attr: {
                             class: 'block w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary',
@@ -80,7 +103,6 @@
                 {{ form_widget(form['password'], { attr: { class: 'form-widget', placeholder: 'Enter your password' } }) }}
             </div>
         {% endif %}
-
     </twig:LoginForm>
 
     {# Turnstile Checker #}
