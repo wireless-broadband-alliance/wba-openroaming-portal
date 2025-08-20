@@ -93,7 +93,7 @@ class SecurityController extends AbstractController
 
         // Create the DTO with injected default regions and required password for this login method
         $dto = new LoginChoiceDTO();
-        $dto->requirePassword = false;
+        $dto->requirePassword = true;
 
         // Create the form bound to the DTO
         $form = $this->createForm(LoginType::class, $dto, [
