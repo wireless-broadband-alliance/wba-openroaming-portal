@@ -5,6 +5,7 @@ namespace App\Security;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Enum\OperationMode;
+use App\Enum\UserProvider;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use App\Service\TwoFAService;
@@ -42,14 +43,29 @@ class LandingAuthenticator extends AbstractLoginFormAuthenticator
 
     public function authenticate(Request $request): Passport
     {
-        // Retrieve the data from the login form
-        $uuid = $request->request->get('uuid');
-        $password = $request->request->get('password');
+        $formData = $request->request->get('login', []);
+        $loginMethod = $formData['loginMethod'] ?? null;
+
+        if ($loginMethod === UserProvider::EMAIL->value) {
+            $identifier = $formData['email'] ?? null; // <-- no extra 'login'
+        } elseif ($loginMethod === UserProvider::PHONE_NUMBER->value) {
+            $phoneData = $formData['phoneNumber'] ?? [];
+            $identifier = null;
+            if (!empty($phoneData['country']) && !empty($phoneData['number'])) {
+                // Combine country code + number
+                $identifier = '+' . $phoneData['country'] . $phoneData['number'];
+            }
+        } else {
+            throw new CustomUserMessageAuthenticationException('Invalid login method.');
+        }
+
+        $password = $formData['password'] ?? null;
+        dd($identifier, $password);
         $turnstileResponse = $request->request->get('cf-turnstile-response'); // Captcha
 
-        if ($uuid) {
+        if ($identifier) {
             $user = $this->userRepository->findOneBy([
-                'uuid' => $uuid,
+                'uuid' => $identifier,
                 'deletedAt' => null,
             ]);
             if (!$user) {
@@ -79,7 +95,7 @@ class LandingAuthenticator extends AbstractLoginFormAuthenticator
         }
 
         // Add LAST_USERNAME to the session (optional)
-        $request->getSession()->set(SecurityRequestAttributes::LAST_USERNAME, $uuid);
+        $request->getSession()->set(SecurityRequestAttributes::LAST_USERNAME, $identifier);
 
         // Preferences Checker
         $rememberMe = false;
@@ -102,7 +118,7 @@ class LandingAuthenticator extends AbstractLoginFormAuthenticator
 
         // Standard login with password
         return new Passport(
-            new UserBadge($uuid),
+            new UserBadge($identifier),
             new PasswordCredentials($password),
             $badges
         );
