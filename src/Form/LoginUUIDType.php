@@ -47,7 +47,7 @@ class LoginUUIDType extends AbstractType
             ],
             'expanded' => true,
             'multiple' => false,
-            'mapped' => false,
+            'mapped' => true,
             'data' => UserProvider::EMAIL->value,
         ]);
 
