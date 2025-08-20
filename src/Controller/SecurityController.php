@@ -94,8 +94,8 @@ class SecurityController extends AbstractController
         $lastUsername = $lastUUIDInserted ?? $authenticationUtils->getLastUsername();
 
         // Fetch default regions (PhoneNumber)
-        $regionSetting = $this->settingRepository->findOneBy(['name' => 'DEFAULT_REGION_PHONE_INPUTS']);
-        $defaultRegions = $regionSetting ? explode(',', $regionSetting->getValue()) : ['PT, US, GB'];
+        $regionSetting = $data['DEFAULT_REGION_PHONE_INPUTS']['value'];
+        $defaultRegions = $regionSetting ? explode(',', $regionSetting) : ['PT, US, GB'];
 
         // Create the DTO with injected default regions and required password for this login method
         $dto = new LoginChoiceDTO();
