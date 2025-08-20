@@ -36,7 +36,7 @@
             <div class="flex bg-gray-300 rounded-lg overflow-hidden w-full max-w-md p-1">
                 {# Email Option #}
                 <label
-                        class="cursor-pointer flex-1 text-center px-4 py-3 transition-colors duration-200 rounded-md
+                        class="cursor-pointer flex-1 text-center px-4 py-2 transition-colors duration-200 rounded-md
                    {{ loginChoiceDTO.loginMethod == constant('App\\Enum\\UserProvider::EMAIL').value ? 'bg-white text-black font-semibold shadow-md' : 'text-gray-700' }}"
                 >
                     <input type="radio"
@@ -49,7 +49,7 @@
 
                 {# Phone Number Option #}
                 <label
-                        class="cursor-pointer flex-1 text-center px-4 py-3 transition-colors duration-200 rounded-md
+                        class="cursor-pointer flex-1 text-center px-4 py-2 transition-colors duration-200 rounded-md
                    {{ loginChoiceDTO.loginMethod == constant('App\\Enum\\UserProvider::PHONE_NUMBER').value ? 'bg-white text-black font-semibold shadow-md' : 'text-gray-700' }}"
                 >
                     <input type="radio"
@@ -114,7 +114,7 @@
 
     <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
 
-    <div class="my-[32px] flex justify-start gap-4">
+    <div class="my-[32px] flex justify-center gap-4">
         <button type="submit" class="w-[220px] btn-primary">Log in</button>
         {% if data.PLATFORM_MODE.value != constant('App\\Enum\\PlatformMode::DEMO').value %}
             <a href="{{ path('app_landing') }}" class="w-[220px] btn-secondary">Choose Another</a>
