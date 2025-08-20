@@ -20,6 +20,11 @@ class LoginChoiceDTO
 
     public ?string $phoneNumber = null;
 
+    public ?string $password = null;
+
+    // Controls whether password is required or not
+    public bool $requirePassword = true;
+
     #[Callback]
     public function validateLoginChoice(ExecutionContextInterface $context): void
     {
@@ -34,8 +39,12 @@ class LoginChoiceDTO
                 ->atPath('phoneNumber')
                 ->addViolation();
         }
+
+        // Password validation
+        if ($this->requirePassword && empty($this->password)) {
+            $context->buildViolation('Password is required.')
+                ->atPath('password')
+                ->addViolation();
+        }
     }
 }
-
-
-

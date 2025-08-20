@@ -11,7 +11,7 @@ use App\Enum\OperationMode;
 use App\Enum\PlatformMode;
 use App\Enum\UserProvider;
 use App\Enum\UserTwoFactorAuthenticationStatus;
-use App\Form\LoginFormType;
+use App\Form\LoginType;
 use App\Form\LoginUUIDType;
 use App\Form\TwoFACode;
 use App\Repository\SettingRepository;
@@ -91,11 +91,12 @@ class SecurityController extends AbstractController
         $regionSetting = $this->settingRepository->findOneBy(['name' => 'DEFAULT_REGION_PHONE_INPUTS']);
         $defaultRegions = $regionSetting ? explode(',', $regionSetting->getValue()) : ['PT, US, GB'];
 
-        // Create the DTO with injected PhoneNumberUtil and default regions
+        // Create the DTO with injected default regions and required password for this login method
         $dto = new LoginChoiceDTO();
+        $dto->requirePassword = false;
 
         // Create the form bound to the DTO
-        $form = $this->createForm(LoginFormType::class, $dto, [
+        $form = $this->createForm(LoginType::class, $dto, [
             'region_inputs' => $defaultRegions, // pass to form for PhoneNumberType
         ]);
 
@@ -212,7 +213,7 @@ class SecurityController extends AbstractController
         $user = $this->userRepository->findOneBy([
             'uuid' => $lastUsername,
         ]);
-        $form = $this->createForm(LoginFormType::class, $user);
+        $form = $this->createForm(LoginType::class, $user);
         $form->handleRequest($request);
 
         // Get the login error if there is one

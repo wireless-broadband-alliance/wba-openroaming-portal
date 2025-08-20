@@ -15,10 +15,11 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
+use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class LoginFormType extends AbstractType
+class LoginType extends AbstractType
 {
     public function __construct(
         private readonly GetSettings $getSettings,
@@ -63,6 +64,17 @@ class LoginFormType extends AbstractType
             'country_display_emoji_flag' => true,
             'attr' => ['autocomplete' => 'tel'],
         ]);
+
+        // Only add password if DTO requires it
+        if ($builder->getData()?->requirePassword ?? true) {
+            $builder->add('password', PasswordType::class, [
+                'label' => 'Password',
+                'required' => true,
+                'attr' => [
+                    'placeholder' => 'Enter your password',
+                ],
+            ]);
+        }
 
         if ($turnstileCheckerValue === OperationMode::ON->value) {
             $builder->add('security', TurnstileType::class, [
