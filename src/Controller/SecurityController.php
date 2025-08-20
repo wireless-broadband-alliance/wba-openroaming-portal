@@ -309,7 +309,7 @@ class SecurityController extends AbstractController
         if ($user && $user->getTwoFAcodeIsActive() && $this->magicLinkService->linkValidity($user)) {
             try {
                 // Create a token manually for the user
-                $token = new UsernamePasswordToken($user, 'main', $user->getRoles());
+                $token = new UsernamePasswordToken($user, FirewallType::LANDING->value, $user->getRoles());
 
                 // Set the token in the token storage
                 $tokenStorage->setToken($token);
