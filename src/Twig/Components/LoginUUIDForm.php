@@ -2,7 +2,7 @@
 
 namespace App\Twig\Components;
 
-use App\DTO\MagicLinkDTO;
+use App\DTO\LoginChoiceDTO;
 use App\Form\LoginUUIDType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormInterface;
@@ -21,7 +21,7 @@ final class LoginUUIDForm extends AbstractController
     use LiveCollectionTrait;
 
     #[LiveProp]
-    public MagicLinkDTO|null $magicLinkDTO = null;
+    public LoginChoiceDTO|null $loginChoiceDTO = null;
 
     #[LiveProp]
     public ?string $email = null;
@@ -36,14 +36,14 @@ final class LoginUUIDForm extends AbstractController
     #[\Override]
     protected function instantiateForm(): FormInterface
     {
-        if (!$this->magicLinkDTO) {
-            $this->magicLinkDTO = new MagicLinkDTO();
+        if (!$this->loginChoiceDTO) {
+            $this->loginChoiceDTO = new LoginChoiceDTO();
         }
 
-        $form = $this->createForm(LoginUUIDType::class, $this->magicLinkDTO);
+        $form = $this->createForm(LoginUUIDType::class, $this->loginChoiceDTO);
 
-        $this->email = $this->magicLinkDTO->email;
-        $this->phoneNumber = $this->magicLinkDTO->phoneNumber;
+        $this->email = $this->loginChoiceDTO->email;
+        $this->phoneNumber = $this->loginChoiceDTO->phoneNumber;
 
         return $form;
     }
@@ -51,7 +51,7 @@ final class LoginUUIDForm extends AbstractController
     #[LiveAction]
     public function validate(): void
     {
-        $form = $this->createForm(LoginUUIDType::class, $this->magicLinkDTO);
+        $form = $this->createForm(LoginUUIDType::class, $this->loginChoiceDTO);
 
         $form->submit([
             'email' => $this->email,

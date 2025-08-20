@@ -2,8 +2,9 @@
 
 namespace App\Form;
 
-use App\DTO\MagicLinkDTO;
+use App\DTO\LoginChoiceDTO;
 use App\Enum\OperationMode;
+use App\Enum\UserProvider;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use App\Service\GetSettings;
@@ -11,12 +12,13 @@ use libphonenumber\PhoneNumberFormat;
 use Misd\PhoneNumberBundle\Form\Type\PhoneNumberType;
 use PixelOpen\CloudflareTurnstileBundle\Type\TurnstileType;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\FormEvent;
+use Symfony\Component\Form\FormEvents;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfonycasts\DynamicForms\DynamicFormBuilder;
 
 class LoginUUIDType extends AbstractType
 {
@@ -33,42 +35,67 @@ class LoginUUIDType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
-        $builder = new DynamicFormBuilder($builder);
-        $turnstileCheckerValue = $data['TURNSTILE_CHECKER']['value'];
-        $regionInputs = explode(',', (string)$data['DEFAULT_REGION_PHONE_INPUTS']['value']);
+        $regionInputs = explode(',', (string) $data['DEFAULT_REGION_PHONE_INPUTS']['value']);
         $regionInputs = array_map('trim', $regionInputs);
+        $turnstileCheckerValue = $data['TURNSTILE_CHECKER']['value'];
 
-        $builder
-            ->add('useEmail', CheckboxType::class, [
-            'label' => '',
-            'required' => false,
-        ])
-
-            ->add('email', EmailType::class, [
-            'label' => 'Email ',
-            'attr' => [
-                'placeholder' => 'Enter your email',
+        $builder->add('loginMethod', ChoiceType::class, [
+            'label' => 'Login via',
+            'choices' => [
+                'Email' => UserProvider::EMAIL->value,
+                'Phone Number' => UserProvider::PHONE_NUMBER->value,
             ],
-            'required' => false,
-        ])
-        ->add('phoneNumber', PhoneNumberType::class, [
-            'label' => 'Phone Number',
-            'default_region' => $regionInputs[0],  // This will be dynamically changed -> Dropdown Country
-            'format' => PhoneNumberFormat::INTERNATIONAL,
-            'widget' => PhoneNumberType::WIDGET_COUNTRY_CHOICE,
-            'preferred_country_choices' => $regionInputs,
-            'country_display_emoji_flag' => true,
-            'required' => false,
-            'attr' => ['autocomplete' => 'tel'],
-    ]);
+            'expanded' => true,
+            'multiple' => false,
+            'mapped' => false,
+            'data' => UserProvider::EMAIL->value,
+        ]);
 
+        $formModifier = static function (FormInterface $form, string $method) use ($regionInputs) {
+            if ($method === UserProvider::EMAIL->value) {
+                $form->add('email', EmailType::class, [
+                    'label' => 'Email',
+                    'required' => true,
+                    'attr' => ['placeholder' => 'Enter your email'],
+                ]);
+                $form->remove('phoneNumber');
+            } else {
+                $form->add('phoneNumber', PhoneNumberType::class, [
+                    'label' => 'Phone Number',
+                    'default_region' => $regionInputs[0],
+                    'format' => PhoneNumberFormat::INTERNATIONAL,
+                    'widget' => PhoneNumberType::WIDGET_COUNTRY_CHOICE,
+                    'preferred_country_choices' => $regionInputs,
+                    'country_display_emoji_flag' => true,
+                    'required' => true,
+                    'attr' => ['autocomplete' => 'tel'],
+                ]);
+                $form->remove('email');
+            }
+        };
+
+        $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use ($formModifier) {
+            $form = $event->getForm();
+            $formModifier($form, UserProvider::EMAIL->value);
+        });
+
+        $builder->get('loginMethod')->addEventListener(FormEvents::POST_SUBMIT, function (FormEvent $event) use ($formModifier) {
+            $form = $event->getForm()->getParent();
+            $method = $event->getForm()->getData();
+            if ($form) {
+                $formModifier($form, $method);
+            }
+
+        });
+
+        // Turnstile
         if ($turnstileCheckerValue === OperationMode::ON->value) {
             $builder->add('security', TurnstileType::class, [
                 'attr' => [
                     'data-action' => 'contact',
-                    'data-theme' => 'light'
+                    'data-theme' => 'light',
                 ],
-                'label' => false
+                'label' => false,
             ]);
         }
     }
@@ -77,7 +104,7 @@ class LoginUUIDType extends AbstractType
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'data_class' => MagicLinkDTO::class,
+            'data_class' => LoginChoiceDTO::class,
         ]);
     }
 }

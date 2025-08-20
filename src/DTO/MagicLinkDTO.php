@@ -2,6 +2,7 @@
 
 namespace App\DTO;
 
+use App\Enum\UserProvider;
 use Misd\PhoneNumberBundle\Validator\Constraints\PhoneNumber as AssertPhoneNumber;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Constraints\Callback;
@@ -9,7 +10,7 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 class MagicLinkDTO
 {
-    public ?bool $useEmail = true;
+    public ?string $type = UserProvider::EMAIL->value;
 
     #[Assert\Email]
     public ?string $email = null;

@@ -3,7 +3,6 @@
 namespace App\Controller;
 
 use App\DTO\LoginChoiceDTO;
-use App\DTO\MagicLinkDTO;
 use App\Entity\Event;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
@@ -130,9 +129,9 @@ class SecurityController extends AbstractController
             return $this->redirectToRoute('app_login');
         }
 
-        $magicLoginDTO = new MagicLinkDTO();
+        $loginChoiceDTO = new LoginChoiceDTO();
 
-        $form = $this->createForm(LoginUUIDType::class, $magicLoginDTO);
+        $form = $this->createForm(LoginUUIDType::class, $loginChoiceDTO);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -151,7 +150,9 @@ class SecurityController extends AbstractController
                     );
                 } else {
                     $timeIntervalToResendCode = $data["TWO_FACTOR_AUTH_RESEND_INTERVAL"]["value"];
-                    $limitTime = $event->getEventDatetime();
+                    $lastAttemptTime = $event instanceof Event ?
+                        $event->getEventDatetime() : $timeIntervalToResendCode;
+                    $limitTime = $lastAttemptTime;
                     /** @var DateTime $limitTime */
                     $limitTime->modify('+' . $timeIntervalToResendCode . ' seconds');
                     $now = new DateTime();
@@ -187,7 +188,7 @@ class SecurityController extends AbstractController
             'data' => $data,
             'form' => $form,
             'context' => FirewallType::LANDING->value,
-            'magicLinkDTO' => $magicLoginDTO
+            'loginChoiceDTO' => $loginChoiceDTO
         ]);
     }
 
