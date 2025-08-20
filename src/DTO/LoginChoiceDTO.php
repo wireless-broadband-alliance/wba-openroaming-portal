@@ -3,6 +3,7 @@
 namespace App\DTO;
 
 use App\Enum\UserProvider;
+use libphonenumber\PhoneNumber;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Constraints\Callback;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
@@ -18,7 +19,7 @@ class LoginChoiceDTO
     #[Assert\Email(message: 'Please enter a valid email address.')]
     public ?string $email = null;
 
-    public ?string $phoneNumber = null;
+    public ?PhoneNumber $phoneNumber = null;
 
     public ?string $password = null;
 
