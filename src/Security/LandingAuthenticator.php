@@ -47,7 +47,7 @@ class LandingAuthenticator extends AbstractLoginFormAuthenticator
         $loginMethod = $formData['loginMethod'] ?? null;
 
         if ($loginMethod === UserProvider::EMAIL->value) {
-            $identifier = $formData['email'] ?? null; // <-- no extra 'login'
+            $identifier = $formData['email'] ?? null;
         } elseif ($loginMethod === UserProvider::PHONE_NUMBER->value) {
             $phoneData = $formData['phoneNumber'] ?? [];
             $identifier = null;
