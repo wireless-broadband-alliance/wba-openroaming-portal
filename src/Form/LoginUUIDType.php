@@ -40,15 +40,14 @@ class LoginUUIDType extends AbstractType
         $turnstileCheckerValue = $data['TURNSTILE_CHECKER']['value'];
 
         $builder->add('loginMethod', ChoiceType::class, [
-            'label' => 'Login via',
             'choices' => [
                 'Email' => UserProvider::EMAIL->value,
                 'Phone Number' => UserProvider::PHONE_NUMBER->value,
             ],
             'expanded' => true,
             'multiple' => false,
-            'mapped' => true,
-            'data' => UserProvider::EMAIL->value,
+            'label' => 'Login via',
+            'data' => $builder->getData()?->loginMethod ?? UserProvider::EMAIL->value,
         ]);
 
         $formModifier = static function (FormInterface $form, string $method) use ($regionInputs) {

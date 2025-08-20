@@ -27,8 +27,35 @@
 <twig:LoginUUIDForm :loginChoiceDTO="loginChoiceDTO" :form="form">
 
     {{ form_start(form) }}
-    <div class="relative mt-[32px]">
-        {{ form_row(form.loginMethod) }}
+    {# Login Method Toggle #}
+    <div class="flex justify-center mt-8">
+        <div class="flex bg-gray-300 rounded-lg overflow-hidden w-full max-w-md p-1">
+            {# Email Option #}
+            <label
+                    class="cursor-pointer flex-1 text-center px-4 py-2 transition-colors duration-200 rounded-md
+                   {{ loginChoiceDTO.loginMethod == constant('App\\Enum\\UserProvider::EMAIL').value ? 'bg-white text-black font-semibold shadow-md' : 'text-gray-700' }}"
+            >
+                <input type="radio"
+                       name="{{ form.loginMethod.vars.full_name }}"
+                       value="{{ constant('App\\Enum\\UserProvider::EMAIL').value }}"
+                       class="hidden"
+                       wire:model="loginChoiceDTO.loginMethod" />
+                Email
+            </label>
+
+            {# Phone Number Option #}
+            <label
+                    class="cursor-pointer flex-1 text-center px-4 py-2 transition-colors duration-200 rounded-md
+                   {{ loginChoiceDTO.loginMethod == constant('App\\Enum\\UserProvider::PHONE_NUMBER').value ? 'bg-white text-black font-semibold shadow-md' : 'text-gray-700' }}"
+            >
+                <input type="radio"
+                       name="{{ form.loginMethod.vars.full_name }}"
+                       value="{{ constant('App\\Enum\\UserProvider::PHONE_NUMBER').value }}"
+                       class="hidden"
+                       wire:model="loginChoiceDTO.loginMethod" />
+                PhoneNumber
+            </label>
+        </div>
     </div>
 
     {% if form.email is defined %}
@@ -74,7 +101,7 @@
         </div>
     {% endif %}
 
-    <div class="my-[32px] flex justify-start gap-4">
+    <div class="my-[32px] flex justify-center gap-4">
         <button type="submit" class="w-[220px] btn-primary">
             Send Link
         </button>
@@ -83,7 +110,6 @@
         </a>
     </div>
 
-    {{ form_rest(form) }}
-    {{ form_end(form) }}
+    {{ form_end(form, {'render_rest': false}) }}
 
 {% endblock %}
