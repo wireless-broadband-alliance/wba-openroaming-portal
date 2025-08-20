@@ -22,6 +22,7 @@ use App\Service\EventActions;
 use App\Service\GetSettings;
 use App\Service\MagicLinkService;
 use App\Service\RegistrationEmailGenerator;
+use App\Service\SendSMS;
 use App\Service\TwoFAService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
@@ -56,6 +57,7 @@ class SecurityController extends AbstractController
         private readonly UserExternalAuthRepository $userExternalAuthRepository,
         private readonly TwoFAService $twoFAService,
         private readonly EntityManagerInterface $entityManager,
+        private readonly SendSMS $sendSMS,
         private readonly MagicLinkService $magicLinkService,
         private readonly EventActions $eventActions,
         private readonly RegistrationEmailGenerator $emailGenerator,
@@ -231,8 +233,105 @@ class SecurityController extends AbstractController
                         'Invalid email Format'
                     );
                 }
-                }
+            }
+            else {
+                $phoneNumber = '+' . $loginChoiceDTO->phoneNumber->getCountryCode() . $loginChoiceDTO->phoneNumber->getNationalNumber();
+                $loginUser = $this->userRepository->findOneBy(['uuid' => $phoneNumber]);
+                if ($loginUser instanceof User) {
+                    $event = $this->magicLinkService->canSendLink($loginUser);
+                    if (!($event instanceof Event)) {
+                        $link = $this->magicLinkService->magicToken($loginUser);
+                        $message = "Welcome to OpenRoaming! Click the link to confirm and login with your account: $link";
+                        $this->sendSMS->sendSms($loginUser->getPhoneNumber(), $message);
 
+                        $eventMetaData = [
+                            'platform' => PlatformMode::LIVE->value,
+                            'user_agent' => $request->headers->get('User-Agent'),
+                            'uuid' => $loginUser->getUuid(),
+                            'ip' => $request->getClientIp(),
+                        ];
+                        $this->eventActions->saveEvent(
+                            $loginUser,
+                            AnalyticalEventType::LOGIN_WITH_UUID_ONLY_LINK->value,
+                            new DateTime(),
+                            $eventMetaData
+                        );
+
+                        $this->addFlash(
+                            'success',
+                            'We have sent a link to your phone number to login and verify your account.'
+                        );
+                    } else {
+                        $timeIntervalToResendCode = $data["TWO_FACTOR_AUTH_RESEND_INTERVAL"]["value"];
+                        $lastAttemptTime = $event instanceof Event ?
+                            $event->getEventDatetime() : $timeIntervalToResendCode;
+                        $limitTime = $lastAttemptTime;
+                        /** @var DateTime $limitTime */
+                        $limitTime->modify('+' . $timeIntervalToResendCode . ' seconds');
+                        $now = new DateTime();
+                        $interval = date_diff($now, $limitTime);
+                        $interval_seconds = $interval->days * 1440;
+                        $interval_seconds += $interval->h * 60;
+                        $interval_seconds += $interval->i;
+                        $interval_seconds += $interval->s;
+                        $this->addFlash(
+                            'error',
+                            'Login link Invalid. Please wait ' .
+                            $interval_seconds .
+                            ' seconds before trying to send again.'
+                        );
+                    }
+                } else {
+                    $user = new User();
+                    $userAuths = new UserExternalAuth();
+
+                    // Generate a random password
+                    $randomPassword = bin2hex(random_bytes(4));
+
+                    // Hash the password
+                    $hashedPassword = $userPasswordHasher->hashPassword($user, $randomPassword);
+
+                    $phoneNumber = '+' . $loginChoiceDTO->phoneNumber->getCountryCode() . $loginChoiceDTO->phoneNumber->getNationalNumber();
+
+                    // Set the hashed password for the user
+                    $user->setPassword($hashedPassword);
+                    $user->setUuid($phoneNumber);
+                    $user->setPhoneNumber($loginChoiceDTO->phoneNumber);
+                    $user->setTwoFAcode(random_int(100000, 999999));
+                    $user->setTwoFAcodeGeneratedAt(new DateTime());
+                    $user->setTwoFAcodeIsActive(true);
+                    $user->setCreatedAt(new DateTime());
+                    $userAuths->setProvider(UserProvider::PORTAL_ACCOUNT->value);
+                    $userAuths->setProviderId(UserProvider::EMAIL->value);
+                    $userAuths->setUser($user);
+                    $entityManager->persist($user);
+                    $entityManager->persist($userAuths);
+                    $entityManager->flush();
+
+                    // Defines the Event to the table
+                    $eventMetaData = [
+                        'ip' => $request->getClientIp(),
+                        'user_agent' => $request->headers->get('User-Agent'),
+                        'platform' => PlatformMode::LIVE->value,
+                        'uuid' => $user->getUuid(),
+                        'registrationType' => UserProvider::EMAIL->value,
+                    ];
+                    $this->eventActions->saveEvent(
+                        $user,
+                        AnalyticalEventType::USER_CREATION->value,
+                        new DateTime(),
+                        $eventMetaData
+                    );
+
+                    $link = $this->magicLinkService->magicToken($user);
+                    $message = "Welcome to OpenRoaming! Click the link to confirm and login with your account: $link";
+                    $this->sendSMS->sendSms($user->getPhoneNumber(), $message);
+                    $this->addFlash(
+                        'success',
+                        'We have sent a link to your phone number to login and verify your account.'
+                    );
+                }
+            }
         }
 
         return $this->render('site/login_UUID_landing.html.twig', [
