@@ -131,11 +131,16 @@ class SecurityController extends AbstractController
         }
 
         $loginChoiceDTO = new LoginChoiceDTO();
+        $loginChoiceDTO->requirePassword = false;
 
         $form = $this->createForm(LoginUUIDType::class, $loginChoiceDTO);
         $form->handleRequest($request);
 
+        if ($form->isSubmitted()) {
+            dd($form->getData(), $form->isValid());
+        }
         if ($form->isSubmitted() && $form->isValid()) {
+            dd($form->getData());
             $loginUser =  null;//$this->userRepository->findOneBy(['uuid' => $form->get('uuid')->getData()]);
             if ($loginUser instanceof User) {
                 $event = $this->magicLinkService->canSendLink($loginUser);

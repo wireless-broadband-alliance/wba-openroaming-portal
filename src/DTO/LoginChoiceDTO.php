@@ -13,7 +13,7 @@ class LoginChoiceDTO
         UserProvider::EMAIL->value,
         UserProvider::PHONE_NUMBER->value
     ], message: 'Select a valid login method')]
-    public ?string $loginMethod = UserProvider::EMAIL->value;
+    public ?string $loginMethod = null;
 
     #[Assert\Email(message: 'Please enter a valid email address.')]
     public ?string $email = null;

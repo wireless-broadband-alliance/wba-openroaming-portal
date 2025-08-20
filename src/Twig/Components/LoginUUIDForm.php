@@ -3,6 +3,7 @@
 namespace App\Twig\Components;
 
 use App\DTO\LoginChoiceDTO;
+use App\Enum\UserProvider;
 use App\Form\LoginUUIDType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormInterface;
@@ -22,6 +23,9 @@ final class LoginUUIDForm extends AbstractController
 
     #[LiveProp]
     public LoginChoiceDTO|null $loginChoiceDTO = null;
+
+    #[LiveProp]
+    public ?string $loginMethod = UserProvider::EMAIL->value;
 
     #[LiveProp]
     public ?string $email = null;
@@ -44,6 +48,7 @@ final class LoginUUIDForm extends AbstractController
 
         $this->email = $this->loginChoiceDTO->email;
         $this->phoneNumber = $this->loginChoiceDTO->phoneNumber;
+        $this->loginMethod = $this->loginChoiceDTO->loginMethod;
 
         return $form;
     }
