@@ -46,7 +46,6 @@ class LoginUUIDType extends AbstractType
             ],
             'expanded' => true,
             'multiple' => false,
-            'label' => 'Login via',
             'data' => $builder->getData()?->loginMethod ?? UserProvider::EMAIL->value,
         ]);
 
