@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\DTO\LoginChoiceDTO;
 use App\DTO\MagicLinkDTO;
 use App\Entity\Event;
 use App\Entity\User;
@@ -66,13 +67,13 @@ class SecurityController extends AbstractController
         Request $request,
         AuthenticationUtils $authenticationUtils
     ): Response {
-        $uuidFromExpiredLinkRegistration = $request->query->get('uuid');
-
         /** @var User $user */
         $user = $this->getUser();
         if ($user instanceof User) {
             return $this->redirectToRoute('app_landing');
         }
+
+        $lastUUIDInserted = $request->query->get('uuid');
 
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
@@ -85,13 +86,19 @@ class SecurityController extends AbstractController
         }
 
         // Last username entered by the user (this will be empty if the user clicked the verification link)
-        $lastUsername = $uuidFromExpiredLinkRegistration ?? $authenticationUtils->getLastUsername();
-        $user = $this->userRepository->findOneBy([
-            'uuid' => $lastUsername,
-        ]);
+        $lastUsername = $lastUUIDInserted ?? $authenticationUtils->getLastUsername();
 
-        $form = $this->createForm(LoginFormType::class, $user);
-        $form->handleRequest($request);
+        // Fetch default regions (PhoneNumber)
+        $regionSetting = $this->settingRepository->findOneBy(['name' => 'DEFAULT_REGION_PHONE_INPUTS']);
+        $defaultRegions = $regionSetting ? explode(',', $regionSetting->getValue()) : ['PT, US, GB'];
+
+        // Create the DTO with injected PhoneNumberUtil and default regions
+        $dto = new LoginChoiceDTO();
+
+        // Create the form bound to the DTO
+        $form = $this->createForm(LoginFormType::class, $dto, [
+            'region_inputs' => $defaultRegions, // pass to form for PhoneNumberType
+        ]);
 
         // Get the login error if there is one
         $error = $authenticationUtils->getLastAuthenticationError();

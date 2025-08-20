@@ -2,23 +2,24 @@
 
 namespace App\Form;
 
-use App\Entity\User;
+use App\DTO\LoginChoiceDTO;
 use App\Enum\OperationMode;
+use App\Enum\UserProvider;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use App\Service\GetSettings;
+use libphonenumber\PhoneNumberFormat;
+use Misd\PhoneNumberBundle\Form\Type\PhoneNumberType;
 use PixelOpen\CloudflareTurnstileBundle\Type\TurnstileType;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\PasswordType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class LoginFormType extends AbstractType
 {
-    /**
-     * @param GetSettings $getSettings The instance of GetSettings class.
-     */
     public function __construct(
         private readonly GetSettings $getSettings,
         private readonly UserRepository $userRepository,
@@ -29,25 +30,38 @@ class LoginFormType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
-        $turnstileCheckerValue = $data['TURNSTILE_CHECKER']['value'];
 
-        $builder->add('uuid', TextType::class, [
-            'label' => 'Email or Phone Number',
-            'attr' => [
-                'placeholder' => 'Enter your email or phone number',
-                'name' => 'uuid',
-                'full_name' => 'uuid',
+        $turnstileCheckerValue = $data['TURNSTILE_CHECKER']['value'] ?? null;
+
+        // Let user select if they want to log in with email
+        $builder->add('loginMethod', ChoiceType::class, [
+            'choices' => [
+                UserProvider::EMAIL->value => 'email',
+                UserProvider::PHONE_NUMBER->value => 'phone',
             ],
+            'expanded' => true,
+            'multiple' => false,
+            'label' => 'Login with',
             'required' => true,
         ]);
 
-        $builder->add('password', PasswordType::class, [
-            'label' => 'Password',
+        $builder->add('email', EmailType::class, [
+            'required' => false,
+            'label' => 'Email',
             'attr' => [
-                'placeholder' => 'Enter your password',
-                'name' => 'password',
-                'full_name' => 'password',
+                'placeholder' => 'Enter your email',
             ],
+        ]);
+
+        $builder->add('phoneNumber', PhoneNumberType::class, [
+            'required' => false,
+            'label' => 'Phone Number',
+            'default_region' => $options['region_inputs'][0] ?? 'US',
+            'preferred_country_choices' => $options['region_inputs'] ?? ['PT, US, GB'],
+            'format' => PhoneNumberFormat::INTERNATIONAL,
+            'widget' => PhoneNumberType::WIDGET_COUNTRY_CHOICE,
+            'country_display_emoji_flag' => true,
+            'attr' => ['autocomplete' => 'tel'],
         ]);
 
         if ($turnstileCheckerValue === OperationMode::ON->value) {
@@ -61,12 +75,11 @@ class LoginFormType extends AbstractType
         }
     }
 
-
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'firewallType' => null,
-            'data_class' => User::class,
+            'data_class' => LoginChoiceDTO::class,
+            'region_inputs' => ['PT, US, GB'], // default fallback
         ]);
     }
 }
