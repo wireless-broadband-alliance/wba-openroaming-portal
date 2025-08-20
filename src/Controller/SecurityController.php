@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\DTO\MagicLinkDTO;
 use App\Entity\Event;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
@@ -13,7 +14,6 @@ use App\Enum\UserTwoFactorAuthenticationStatus;
 use App\Form\LoginFormType;
 use App\Form\LoginUUIDType;
 use App\Form\TwoFACode;
-use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
@@ -123,11 +123,13 @@ class SecurityController extends AbstractController
             return $this->redirectToRoute('app_login');
         }
 
-        $form = $this->createForm(LoginUUIDType::class);
+        $magicLoginDTO = new MagicLinkDTO();
+
+        $form = $this->createForm(LoginUUIDType::class, $magicLoginDTO);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $loginUser = $this->userRepository->findOneBy(['uuid' => $form->get('uuid')->getData()]);
+            $loginUser =  null;//$this->userRepository->findOneBy(['uuid' => $form->get('uuid')->getData()]);
             if ($loginUser instanceof User) {
                 $event = $this->magicLinkService->canSendLink($loginUser);
                 if (!($event instanceof Event)) {
@@ -161,10 +163,18 @@ class SecurityController extends AbstractController
                     );
                 }
             } else {
-                $this->addFlash(
-                    'error',
-                    'User not found'
-                );
+                if (filter_var($form->get('uuid')->getData(), FILTER_VALIDATE_EMAIL)) {
+                    $this->addFlash(
+                        'success',
+                        'Valid Format'
+                    );
+                } else {
+                    $this->addFlash(
+                        'error',
+                        'Invalid Format'
+                    );
+                }
+
             }
         }
 
@@ -172,6 +182,7 @@ class SecurityController extends AbstractController
             'data' => $data,
             'form' => $form,
             'context' => FirewallType::LANDING->value,
+            'magicLinkDTO' => $magicLoginDTO
         ]);
     }
 
