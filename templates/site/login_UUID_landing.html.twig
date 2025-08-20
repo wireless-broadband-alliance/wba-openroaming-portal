@@ -28,6 +28,7 @@
 
     {{ form_start(form) }}
     {# Login Method Toggle #}
+    {{ form_widget(form.loginMethod, { attr: { class: 'hidden' } }) }}
     <div class="flex justify-center mt-8">
         <div class="flex bg-gray-300 rounded-lg overflow-hidden w-full max-w-md p-1">
             {# Email Option #}
@@ -110,6 +111,8 @@
         </a>
     </div>
 
-    {{ form_end(form, {'render_rest': false}) }}
+    {{ form_rest(form) }}
+    {{ form_end(form) }}
+
 
 {% endblock %}
