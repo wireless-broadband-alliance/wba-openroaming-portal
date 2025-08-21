@@ -24,6 +24,7 @@ use App\Service\MagicLinkService;
 use App\Service\RegistrationEmailGenerator;
 use App\Service\SendSMS;
 use App\Service\TwoFAService;
+use App\Service\UserCreationService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
@@ -61,6 +62,7 @@ class SecurityController extends AbstractController
         private readonly MagicLinkService $magicLinkService,
         private readonly EventActions $eventActions,
         private readonly RegistrationEmailGenerator $emailGenerator,
+        private readonly UserCreationService  $userCreationService,
     ) {
     }
 
@@ -211,7 +213,8 @@ class SecurityController extends AbstractController
                     }
                 } elseif (filter_var($loginChoiceDTO->email, FILTER_VALIDATE_EMAIL)) {
                     $user = new User();
-                    $userAuths = new UserExternalAuth();
+                    $user->setUuid($loginChoiceDTO->email);
+                    $user->setEmail($loginChoiceDTO->email);
 
                     // Generate a random password
                     $randomPassword = bin2hex(random_bytes(4));
@@ -219,35 +222,7 @@ class SecurityController extends AbstractController
                     // Hash the password
                     $hashedPassword = $userPasswordHasher->hashPassword($user, $randomPassword);
 
-                    // Set the hashed password for the user
-                    $user->setPassword($hashedPassword);
-                    $user->setUuid($loginChoiceDTO->email);
-                    $user->setEmail($loginChoiceDTO->email);
-                    $user->setTwoFAcode(random_int(100000, 999999));
-                    $user->setTwoFAcodeGeneratedAt(new DateTime());
-                    $user->setTwoFAcodeIsActive(true);
-                    $user->setCreatedAt(new DateTime());
-                    $userAuths->setProvider(UserProvider::PORTAL_ACCOUNT->value);
-                    $userAuths->setProviderId(UserProvider::EMAIL->value);
-                    $userAuths->setUser($user);
-                    $entityManager->persist($user);
-                    $entityManager->persist($userAuths);
-                    $entityManager->flush();
-
-                    // Defines the Event to the table
-                    $eventMetaData = [
-                        'ip' => $request->getClientIp(),
-                        'user_agent' => $request->headers->get('User-Agent'),
-                        'platform' => PlatformMode::LIVE->value,
-                        'uuid' => $user->getUuid(),
-                        'registrationType' => UserProvider::EMAIL->value,
-                    ];
-                    $this->eventActions->saveEvent(
-                        $user,
-                        AnalyticalEventType::USER_CREATION->value,
-                        new DateTime(),
-                        $eventMetaData
-                    );
+                    $user = $this->userCreationService->createUserMagicLink($user, $hashedPassword, $request);
 
                     $this->emailGenerator->sendRegistrationEmail($user, $randomPassword);
 
@@ -312,7 +287,6 @@ class SecurityController extends AbstractController
                     }
                 } else {
                     $user = new User();
-                    $userAuths = new UserExternalAuth();
 
                     // Generate a random password
                     $randomPassword = bin2hex(random_bytes(4));
@@ -322,35 +296,11 @@ class SecurityController extends AbstractController
 
                     $phoneNumber = '+' . $loginChoiceDTO->phoneNumber->getCountryCode() . $loginChoiceDTO->phoneNumber->getNationalNumber();
 
-                    // Set the hashed password for the user
-                    $user->setPassword($hashedPassword);
                     $user->setUuid($phoneNumber);
-                    $user->setPhoneNumber($loginChoiceDTO->phoneNumber);
-                    $user->setTwoFAcode(random_int(100000, 999999));
-                    $user->setTwoFAcodeGeneratedAt(new DateTime());
-                    $user->setTwoFAcodeIsActive(true);
-                    $user->setCreatedAt(new DateTime());
-                    $userAuths->setProvider(UserProvider::PORTAL_ACCOUNT->value);
-                    $userAuths->setProviderId(UserProvider::EMAIL->value);
-                    $userAuths->setUser($user);
-                    $entityManager->persist($user);
-                    $entityManager->persist($userAuths);
-                    $entityManager->flush();
 
-                    // Defines the Event to the table
-                    $eventMetaData = [
-                        'ip' => $request->getClientIp(),
-                        'user_agent' => $request->headers->get('User-Agent'),
-                        'platform' => PlatformMode::LIVE->value,
-                        'uuid' => $user->getUuid(),
-                        'registrationType' => UserProvider::EMAIL->value,
-                    ];
-                    $this->eventActions->saveEvent(
-                        $user,
-                        AnalyticalEventType::USER_CREATION->value,
-                        new DateTime(),
-                        $eventMetaData
-                    );
+                    $user->setPhoneNumber($loginChoiceDTO->phoneNumber);
+
+                    $user = $this->userCreationService->createUserMagicLink($user, $hashedPassword, $request);
 
                     $link = $this->magicLinkService->magicToken($user);
                     $message = "Welcome to OpenRoaming! Click the link to confirm and login with your account: $link";
