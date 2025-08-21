@@ -842,6 +842,7 @@ readonly class ApiResponseService
                             512,
                             JSON_THROW_ON_ERROR
                         ),
+                        // phpcs:disable Generic.Files.LineLength.TooLong
                         'uuid_only_mode' => json_decode(
                             '{
                                     "success": true,
@@ -851,6 +852,7 @@ readonly class ApiResponseService
                             512,
                             JSON_THROW_ON_ERROR
                         ),
+                        // phpcs:enable
                     ],
                     400 => [
                         'CAPTCHA validation failed',
