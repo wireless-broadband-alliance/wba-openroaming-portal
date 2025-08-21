@@ -107,6 +107,7 @@ class EventRepository extends ServiceEntityRepository
             ->setParameter('user', $user)
             ->setParameter('event_name', AnalyticalEventType::LOGIN_WITH_UUID_ONLY_LINK->value)
             ->setParameter('datetime', $time)
+            ->setMaxResults(1)
             ->getQuery()
             ->getOneOrNullResult();
     }

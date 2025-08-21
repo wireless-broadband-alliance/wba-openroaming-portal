@@ -42,7 +42,7 @@ final class LoginForm extends AbstractController
      */
     protected function instantiateForm(): FormInterface
     {
-        if (!$this->loginChoiceDTO) {
+        if (!$this->loginChoiceDTO instanceof LoginChoiceDTO) {
             $this->loginChoiceDTO = new LoginChoiceDTO();
         }
 

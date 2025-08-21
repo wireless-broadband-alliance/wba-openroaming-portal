@@ -59,7 +59,7 @@ class LoginUUIDType extends AbstractType
             ]);
         }
 
-        $formModifier = static function (FormInterface $form, string $method) use ($regionInputs) {
+        $formModifier = static function (FormInterface $form, string $method) use ($regionInputs): void {
             if ($method === UserProvider::EMAIL->value) {
                 $form->add('email', EmailType::class, [
                     'label' => 'Email',

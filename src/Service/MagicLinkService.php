@@ -48,8 +48,6 @@ readonly class MagicLinkService
      */
     public function sendEmail(
         User $user,
-        ?string $ip,
-        ?string $userAgent,
     ): void {
         $magicLinkUrl = $this->magicToken($user);
         if ($user->getUserExternalAuths()[0]->getProviderId() === UserProvider::EMAIL->value) {
@@ -79,20 +77,6 @@ readonly class MagicLinkService
             $message = "Welcome back to OpenRoaming! Click the link to login: $magicLinkUrl";
             $this->sendSMS->sendSms($user->getPhoneNumber(), $message);
         }
-
-
-        $eventMetaData = [
-            'platform' => PlatformMode::LIVE->value,
-            'user_agent' => $userAgent ?? 'Unknown',
-            'uuid' => $user->getUuid(),
-            'ip' => $ip ?? null,
-        ];
-        $this->eventActions->saveEvent(
-            $user,
-            AnalyticalEventType::LOGIN_WITH_UUID_ONLY_LINK->value,
-            new DateTime(),
-            $eventMetaData
-        );
     }
 
     public function magicToken(User $user): string

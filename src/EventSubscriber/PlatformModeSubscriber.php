@@ -35,7 +35,7 @@ readonly class PlatformModeSubscriber implements EventSubscriberInterface
         $env = $this->kernel->getEnvironment();
 
         // Only enforce in prod environments
-        if ($env != 'prod') {
+        if ($env !== 'prod') {
             return;
         }
 

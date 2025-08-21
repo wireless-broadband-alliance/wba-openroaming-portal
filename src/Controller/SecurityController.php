@@ -185,8 +185,19 @@ class SecurityController extends AbstractController
                     if (!($event instanceof Event)) {
                         $this->magicLinkService->sendEmail(
                             $loginUser,
-                            $request->getClientIp(),
-                            $request->headers->get('User-Agent')
+                        );
+
+                        $eventMetaData = [
+                            'platform' => PlatformMode::LIVE->value,
+                            'user_agent' => $request->headers->get('User-Agent'),
+                            'uuid' => $loginUser->getUuid(),
+                            'ip' => $request->getClientIp(),
+                        ];
+                        $this->eventActions->saveEvent(
+                            $loginUser,
+                            AnalyticalEventType::LOGIN_WITH_UUID_ONLY_LINK->value,
+                            new DateTime(),
+                            $eventMetaData
                         );
                         $this->addFlash(
                             'success',

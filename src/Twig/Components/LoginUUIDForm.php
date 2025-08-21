@@ -39,7 +39,7 @@ final class LoginUUIDForm extends AbstractController
     #[\Override]
     protected function instantiateForm(): FormInterface
     {
-        if (!$this->loginChoiceDTO) {
+        if (!$this->loginChoiceDTO instanceof LoginChoiceDTO) {
             $this->loginChoiceDTO = new LoginChoiceDTO();
         }
 

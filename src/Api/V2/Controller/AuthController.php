@@ -102,6 +102,7 @@ class AuthController extends AbstractController
 
             if (!$turnstileValidation['success']) {
                 $errorMessage = $turnstileValidation['error'] ?? 'CAPTCHA validation failed';
+
                 return new BaseResponse(400, null, $errorMessage)->toResponse();
             }
         }
@@ -113,10 +114,8 @@ class AuthController extends AbstractController
         }
 
         $isLoginWithUUIDOnly = $this->settingRepository->findOneBy(['name' => 'LOGIN_WITH_UUID_ONLY'])->getValue();
-        if ($isLoginWithUUIDOnly === OperationMode::OFF->value) {
-            if (empty($data['password'])) {
-                $errors[] = 'password';
-            }
+        if ($isLoginWithUUIDOnly === OperationMode::OFF->value && empty($data['password'])) {
+            $errors[] = 'password';
         }
 
         if ($errors !== []) {
@@ -205,6 +204,7 @@ class AuthController extends AbstractController
             $token = $this->tokenGenerator->generateToken($user);
             if (is_array($token) && isset($token['success']) && $token['success'] === false) {
                 $statusCode = $token['error'] === 'Invalid user provided. Please verify the user data.' ? 400 : 500;
+
                 return new BaseResponse($statusCode, null, $token['error'])->toResponse();
             }
 
@@ -237,22 +237,22 @@ class AuthController extends AbstractController
             if ($user->getUserExternalAuths()[0]->getProviderId() === UserProvider::EMAIL->value) {
                 $this->magicLinkService->sendEmail(
                     $user,
-                    $request->getClientIp(),
-                    $request->headers->get('User-Agent')
                 );
             } else {
                 $link = $this->magicLinkService->magicToken($user);
                 $message = "Welcome to OpenRoaming! Click the link to confirm and login with your account: $link";
                 $this->sendSMS->sendSms($user->getPhoneNumber(), $message);
+
             }
         } else {
-            dd('potato die here pls');
-            $timeIntervalToResendCode = $data["TWO_FACTOR_AUTH_RESEND_INTERVAL"]["value"];
+            $timeIntervalToResendCode = $this->settingRepository->findOneBy(
+                ['name' => 'TWO_FACTOR_AUTH_RESEND_INTERVAL']
+            )->getValue();
             $message = $this->magicLinkService->timeToResend($timeIntervalToResendCode, $event);
+
             return new BaseResponse(
                 429,
-                null,
-                $message
+                ['message' => $message]
             )->toResponse();
         }
 
@@ -425,6 +425,7 @@ class AuthController extends AbstractController
             $token = $this->tokenGenerator->generateToken($user);
             if (is_array($token) && isset($token['success']) && $token['success'] === false) {
                 $statusCode = $token['error'] === 'Invalid user provided. Please verify the user data.' ? 400 : 500;
+
                 return new BaseResponse($statusCode, null, $token['error'])->toResponse();
             }
 
@@ -555,6 +556,7 @@ class AuthController extends AbstractController
             $token = $this->tokenGenerator->generateToken($user);
             if (is_array($token) && isset($token['success']) && $token['success'] === false) {
                 $statusCode = $token['error'] === 'Invalid user provided. Please verify the user data.' ? 400 : 500;
+
                 return new BaseResponse($statusCode, null, $token['error'])->toResponse();
             }
 
@@ -683,6 +685,7 @@ class AuthController extends AbstractController
             $token = $this->tokenGenerator->generateToken($user);
             if (is_array($token) && isset($token['success']) && $token['success'] === false) {
                 $statusCode = $token['error'] === 'Invalid user provided. Please verify the user data.' ? 400 : 500;
+
                 return new BaseResponse($statusCode, null, $token['error'])->toResponse();
             }
 
