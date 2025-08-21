@@ -35,7 +35,6 @@ final class LoginUUIDForm extends AbstractController
 
     public function __construct()
     {
-
     }
     #[\Override]
     protected function instantiateForm(): FormInterface
@@ -64,7 +63,5 @@ final class LoginUUIDForm extends AbstractController
         ], false);
 
         $this->form = $form;
-
     }
-
 }

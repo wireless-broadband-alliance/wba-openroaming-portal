@@ -64,7 +64,7 @@ class RegistrationController extends AbstractController
         private readonly EventActions $eventActions,
         private readonly RegistrationEmailGenerator $emailGenerator,
         private readonly MagicLinkService $magicLinkService,
-        private readonly UserCreationService  $userCreationService,
+        private readonly UserCreationService $userCreationService,
     ) {
     }
 
@@ -136,7 +136,6 @@ class RegistrationController extends AbstractController
                         'We have sent an email with your account password and verification code'
                     );
                 }
-
             }
         }
 

@@ -16,7 +16,8 @@ readonly class PlatformModeSubscriber implements EventSubscriberInterface
         private KernelInterface $kernel,
         private EntityManagerInterface $entityManager,
         private SettingRepository $settingRepository,
-    ) {}
+    ) {
+    }
 
     public static function getSubscribedEvents(): array
     {

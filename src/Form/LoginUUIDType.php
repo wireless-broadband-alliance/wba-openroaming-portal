@@ -35,7 +35,7 @@ class LoginUUIDType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
-        $regionInputs = explode(',', (string) $data['DEFAULT_REGION_PHONE_INPUTS']['value']);
+        $regionInputs = explode(',', (string)$data['DEFAULT_REGION_PHONE_INPUTS']['value']);
         $regionInputs = array_map('trim', $regionInputs);
         $turnstileCheckerValue = $data['TURNSTILE_CHECKER']['value'];
         $emailMethod = $data['AUTH_METHOD_REGISTER_ENABLED']['value'];
@@ -82,13 +82,17 @@ class LoginUUIDType extends AbstractType
             }
         };
 
-        $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use ($formModifier, $defaultMethod) {
-            $data = $event->getData();
-            $method = $data?->loginMethod ?? $defaultMethod;
-            $formModifier($event->getForm(), $method);
-        });
+        $builder->addEventListener(
+            FormEvents::PRE_SET_DATA,
+            function (FormEvent $event) use ($formModifier, $defaultMethod) {
+                $data = $event->getData();
+                $method = $data?->loginMethod ?? $defaultMethod;
+                $formModifier($event->getForm(), $method);
+            }
+        );
 
-        if ($emailMethod === 'true' && $phoneNumberMethod
+        if (
+            $emailMethod === 'true' && $phoneNumberMethod
         ) {
             $builder->get('loginMethod')->addEventListener(
                 FormEvents::POST_SUBMIT,

@@ -58,7 +58,6 @@ class DashboardAuthenticator extends AbstractLoginFormAuthenticator
                 'email' => $id,
                 'deletedAt' => null,
             ]);
-
         } elseif ($loginMethod === UserProvider::PHONE_NUMBER->value) {
             $phoneUtil = PhoneNumberUtil::getInstance();
             $phoneData = $formData['login']['phoneNumber'];
@@ -99,7 +98,10 @@ class DashboardAuthenticator extends AbstractLoginFormAuthenticator
         $turnstileSetting = $this->settingRepository->findOneBy(['name' => 'TURNSTILE_CHECKER']);
         $isTurnstileEnabled = $turnstileSetting && $turnstileSetting->getValue() === OperationMode::ON->value;
 
-        if ($isTurnstileEnabled && (empty($turnstileResponse) || !$this->turnstileHttpClient->verifyResponse($turnstileResponse))) {
+        if (
+            $isTurnstileEnabled && (empty($turnstileResponse) ||
+                !$this->turnstileHttpClient->verifyResponse($turnstileResponse))
+        ) {
             throw new CustomUserMessageAuthenticationException('Invalid CAPTCHA validation.');
         }
 

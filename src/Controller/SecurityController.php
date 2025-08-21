@@ -29,6 +29,7 @@ use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Psr\EventDispatcher\EventDispatcherInterface;
+use Random\RandomException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -62,7 +63,7 @@ class SecurityController extends AbstractController
         private readonly MagicLinkService $magicLinkService,
         private readonly EventActions $eventActions,
         private readonly RegistrationEmailGenerator $emailGenerator,
-        private readonly UserCreationService  $userCreationService,
+        private readonly UserCreationService $userCreationService,
     ) {
     }
 
@@ -150,6 +151,7 @@ class SecurityController extends AbstractController
 
     /**
      * @throws TransportExceptionInterface
+     * @throws RandomException
      */
     #[Route('/login/magic', name: 'app_login_magic')]
     public function loginMagic(
@@ -209,7 +211,12 @@ class SecurityController extends AbstractController
                     // Hash the password
                     $hashedPassword = $userPasswordHasher->hashPassword($user, $randomPassword);
 
-                    $user = $this->userCreationService->createUser($user, $hashedPassword, UserProvider::EMAIL->value, $request);
+                    $user = $this->userCreationService->createUser(
+                        $user,
+                        $hashedPassword,
+                        UserProvider::EMAIL->value,
+                        $request
+                    );
 
                     $this->emailGenerator->sendRegistrationEmail($user, $randomPassword);
 
@@ -217,16 +224,15 @@ class SecurityController extends AbstractController
                         'success',
                         'We have sent an email with your login link'
                     );
-
                 } else {
                     $this->addFlash(
                         'error',
                         'Invalid email Format'
                     );
                 }
-            }
-            else {
-                $phoneNumber = '+' . $loginChoiceDTO->phoneNumber->getCountryCode() . $loginChoiceDTO->phoneNumber->getNationalNumber();
+            } else {
+                $phoneNumber = '+' . $loginChoiceDTO->phoneNumber->getCountryCode(
+                ) . $loginChoiceDTO->phoneNumber->getNationalNumber();
                 $loginUser = $this->userRepository->findOneBy(['uuid' => $phoneNumber]);
                 if ($loginUser instanceof User) {
                     $event = $this->magicLinkService->canSendLink($loginUser);
@@ -269,13 +275,19 @@ class SecurityController extends AbstractController
                     // Hash the password
                     $hashedPassword = $userPasswordHasher->hashPassword($user, $randomPassword);
 
-                    $phoneNumber = '+' . $loginChoiceDTO->phoneNumber->getCountryCode() . $loginChoiceDTO->phoneNumber->getNationalNumber();
+                    $phoneNumber = '+' . $loginChoiceDTO->phoneNumber->getCountryCode(
+                    ) . $loginChoiceDTO->phoneNumber->getNationalNumber();
 
                     $user->setUuid($phoneNumber);
 
                     $user->setPhoneNumber($loginChoiceDTO->phoneNumber);
 
-                    $user = $this->userCreationService->createUser($user, $hashedPassword, UserProvider::PHONE_NUMBER->value, $request);
+                    $user = $this->userCreationService->createUser(
+                        $user,
+                        $hashedPassword,
+                        UserProvider::PHONE_NUMBER->value,
+                        $request
+                    );
 
                     $link = $this->magicLinkService->magicToken($user);
                     $message = "Welcome to OpenRoaming! Click the link to confirm and login with your account: $link";

@@ -115,7 +115,7 @@ readonly class MagicLinkService
         return $limitTime < $user->getTwoFAcodeGeneratedAt();
     }
 
-    public function timeToResend (string $timeInterval, Event $event): string
+    public function timeToResend(string $timeInterval, Event $event): string
     {
         $lastAttemptTime = $event instanceof Event ?
             $event->getEventDatetime() : $timeInterval;
