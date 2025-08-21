@@ -50,12 +50,11 @@ class LandingAuthenticator extends AbstractLoginFormAuthenticator
     public function authenticate(Request $request): Passport
     {
         $formData = $request->request->all();
-        $login = $formData['login'] ?? [];
-        $loginMethod = $login['loginMethod'] ?? UserProvider::EMAIL->value;
-        $password = $login['password'] ?? null;
+        $loginMethod = $formData['login']['loginMethod'] ?? UserProvider::EMAIL->value;
+        $password = $formData['login']['password'];
 
         if ($loginMethod === UserProvider::EMAIL->value) {
-            $identifier = $login['email'] ?? null;
+            $identifier = $formData['login']['email'];
 
             $userLoader = fn(string $id) => $this->userRepository->findOneBy([
                 'email' => $id,
@@ -64,7 +63,7 @@ class LandingAuthenticator extends AbstractLoginFormAuthenticator
 
         } elseif ($loginMethod === UserProvider::PHONE_NUMBER->value) {
             $phoneUtil = PhoneNumberUtil::getInstance();
-            $phoneData = $login['phoneNumber'] ?? [];
+            $phoneData = $formData['login']['phoneNumber'] ?? [];
             if (!empty($phoneData['country']) && !empty($phoneData['number'])) {
                 try {
                     $phoneNumberObj = $phoneUtil->parse($phoneData['number'], $phoneData['country']);
