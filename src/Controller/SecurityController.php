@@ -424,8 +424,8 @@ class SecurityController extends AbstractController
         return $this->redirectToRoute('app_landing');
     }
 
-    #[Route('/login/MagicLink', name: 'app_login_magic_link')]
-    public function confirmAccount(
+    #[Route('/login/magic/link', name: 'app_login_magic_link')]
+    public function confirmAccountMagicLink(
         Request $request,
         UserRepository $userRepository,
         TokenStorageInterface $tokenStorage,
