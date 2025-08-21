@@ -19,7 +19,7 @@ class UserCreationService
     ) {
     }
 
-    public function createUserMagicLink(User $user, string $password, Request $request): User {
+    public function createUserMagicLink(User $user, string $password, string $provider, Request $request): User {
         $userAuths = new UserExternalAuth();
 
         // Set the hashed password for the user
@@ -29,7 +29,7 @@ class UserCreationService
         $user->setTwoFAcodeIsActive(true);
         $user->setCreatedAt(new DateTime());
         $userAuths->setProvider(UserProvider::PORTAL_ACCOUNT->value);
-        $userAuths->setProviderId(UserProvider::EMAIL->value);
+        $userAuths->setProviderId($provider);
         $userAuths->setUser($user);
         $this->entityManager->persist($user);
         $this->entityManager->persist($userAuths);
