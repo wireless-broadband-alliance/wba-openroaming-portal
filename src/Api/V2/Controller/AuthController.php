@@ -230,7 +230,8 @@ class AuthController extends AbstractController
             return new BaseResponse(200, $responseData)->toResponse(); # Success Response
         }
 
-        if ($user->getUserExternalAuths()[0]->getProvideID() === UserProvider::EMAIL->value) {
+        // If the login with uuid is enabled generate the sms or the email with the login link
+        if ($user->getUserExternalAuths()[0]->getProviderId() === UserProvider::EMAIL->value) {
             $this->magicLinkService->sendEmail(
                 $user,
                 $request->getClientIp(),
