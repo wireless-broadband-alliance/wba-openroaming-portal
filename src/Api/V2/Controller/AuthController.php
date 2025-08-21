@@ -34,6 +34,7 @@ use RuntimeException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
@@ -67,6 +68,8 @@ class AuthController extends AbstractController
      * @throws RedirectionExceptionInterface
      * @throws ServerExceptionInterface
      * @throws Exception
+     * @throws TransportExceptionInterface
+     * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
      */
     #[Route('/auth/local', name: 'api_v2_auth_local', methods: ['POST'])]
     public function authLocal(Request $request): JsonResponse
@@ -237,20 +240,20 @@ class AuthController extends AbstractController
             $link = $this->magicLinkService->magicToken($user);
             $message = "Welcome to OpenRoaming! Click the link to confirm and login with your account: $link";
             $this->sendSMS->sendSms($user->getPhoneNumber(), $message);
-
-            $eventMetaData = [
-                'platform' => PlatformMode::LIVE->value,
-                'user_agent' => $request->headers->get('User-Agent'),
-                'uuid' => $user->getUuid(),
-                'ip' => $request->getClientIp(),
-            ];
-            $this->eventActions->saveEvent(
-                $user,
-                AnalyticalEventType::LOGIN_WITH_UUID_ONLY_LINK->value,
-                new DateTime(),
-                $eventMetaData
-            );
         }
+
+        $eventMetaData = [
+            'platform' => PlatformMode::LIVE->value,
+            'user_agent' => $request->headers->get('User-Agent'),
+            'uuid' => $user->getUuid(),
+            'ip' => $request->getClientIp(),
+        ];
+        $this->eventActions->saveEvent(
+            $user,
+            AnalyticalEventType::LOGIN_WITH_UUID_ONLY_LINK->value,
+            new DateTime(),
+            $eventMetaData
+        );
 
         return new BaseResponse(
             200,
