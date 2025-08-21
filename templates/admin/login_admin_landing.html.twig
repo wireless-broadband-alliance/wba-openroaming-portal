@@ -63,8 +63,8 @@
         {# Email Field #}
         {% if loginChoiceDTO.loginMethod == constant('App\\Enum\\UserProvider::EMAIL').value and form['email'] is defined %}
             <div class="relative mt-[32px]">
-                {{ form_label(form['email'], constant('App\\Enum\\UserProvider::EMAIL').value, { label_attr: { class: 'form-label' } }) }}
-                {{ form_widget(form['email'], { attr: { class: 'form-widget', placeholder: 'Enter your email' } }) }}
+                {{ form_label(form['email'], constant('App\\Enum\\UserProvider::EMAIL').value, {label_attr: {class: 'form-label'}}) }}
+                {{ form_widget(form['email'], {attr: {class: 'form-widget', placeholder: 'Enter your email'}}) }}
             </div>
         {% endif %}
 
@@ -76,8 +76,8 @@
                     {{ form_widget(form.phoneNumber.children.country, {
                         attr: {
                             class: 'block w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary',
-                            autocomplete: 'tel-country'
-                        }
+                            autocomplete: 'tel-country',
+                        },
                     }) }}
                 </div>
 
@@ -87,8 +87,8 @@
                         attr: {
                             class: 'block w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary',
                             placeholder: 'Enter your phone number',
-                            autocomplete: 'tel'
-                        }
+                            autocomplete: 'tel',
+                        },
                     }) }}
                 </div>
             </div>
@@ -97,8 +97,8 @@
         {# Password Field #}
         {% if form['password'] is defined %}
             <div class="relative mt-[32px]">
-                {{ form_label(form['password'], 'Password', { label_attr: { class: 'form-label' } }) }}
-                {{ form_widget(form['password'], { attr: { class: 'form-widget', placeholder: 'Enter your password' } }) }}
+                {{ form_label(form['password'], 'Password', {label_attr: {class: 'form-label'}}) }}
+                {{ form_widget(form['password'], {attr: {class: 'form-widget', placeholder: 'Enter your password'}}) }}
             </div>
         {% endif %}
     </twig:LoginForm>
@@ -114,9 +114,9 @@
 
     <div class="my-[32px] flex justify-center gap-4">
        <button type="submit" class="w-[220px] btn-primary">Log in</button>
-{#        {% if data.PLATFORM_MODE.value != constant('App\\Enum\\PlatformMode::DEMO').value %}#}
-{#            <a href="{{ path('app_landing') }}" class="w-[220px] btn-secondary">Choose Another</a>#}
-{#        {% endif %}#}
+{# {% if data.PLATFORM_MODE.value != constant('App\\Enum\\PlatformMode::DEMO').value %} #}
+{# <a href="{{ path('app_landing') }}" class="w-[220px] btn-secondary">Choose Another</a> #}
+{# {% endif %} #}
     </div>
 
     {# Divider & Links #}
@@ -157,5 +157,5 @@
         {% endif %}
     {% endif %}
 
-    {{ form_end(form, {'render_rest': false}) }}
+    {{ form_end(form, {render_rest: false}) }}
 {% endblock %}
