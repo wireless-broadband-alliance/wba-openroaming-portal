@@ -1,5 +1,15 @@
 # Changelog
 
+# Release V1.10.0
+
+- New feature - Now the admin can configure if the landing login authentication, instead of being the traditional (
+  email/password), it sends a verification link, for both cases (emails || phoneNumbers), to reduce the amount of steps
+  for new user account creations.
+- Rework landing/dashboard authentications because of the new feature - DTO Implementation to improve code optimization
+  and add a new login method
+  selector emails || phoneNumber authentication.
+- Fix minor bugs & conflicts with the new DTO and authentication form.
+
 # Release V1.9.0
 
 - **Fix bug 500** on `/dashboard/statistics/freeradius` in case the connection details are invalid and the portal can
@@ -10,7 +20,8 @@
 - Fix bug with returns with admin reset password, the problem was related with the previous firewall configuration
   implementation where no context has returned.
 - Update `/dashboard/edit/{id}` to use DTO's and live components for validation.
-- New info icon about uuid explanation when admin is editing a user. Check the following page `/dashboard/edit/{id}` for more details.
+- New info icon about uuid explanation when admin is editing a user. Check the following page `/dashboard/edit/{id}` for
+  more details.
 - New command for freeradius profile connection of each user, now the `UserRadiusProfile` entity saves the start/end
   connection of the user profiles when the freeradius server gets a new request. (For later graphics generations and
   user details)

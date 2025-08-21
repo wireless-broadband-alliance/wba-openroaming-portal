@@ -267,21 +267,21 @@ class RegistrationController extends AbstractController
                         . $user->getTwoFAcode();
                 }
 
+                $this->sendSMS->sendSms($user->getPhoneNumber(), $message);
+
                 if ($data['LOGIN_WITH_UUID_ONLY']['value'] === OperationMode::ON->value) {
-                    $this->sendSMS->sendSms($user->getPhoneNumber(), $message);
                     $this->addFlash(
                         'success',
                         'We have sent a link to your phone number to login and verify your account.'
                     );
                     return $this->redirectToRoute('app_register_sms');
                 }
+
                 // Send SMS
-                $this->sendSMS->sendSms($user->getPhoneNumber(), $message);
                 $this->addFlash(
                     'success',
                     'We have sent a message to your phone with your password and verification code'
                 );
-
 
                 // Authenticate the user
                 $token = new UsernamePasswordToken($user, FirewallType::LANDING->value, $user->getRoles());
