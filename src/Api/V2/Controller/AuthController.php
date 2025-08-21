@@ -232,7 +232,6 @@ class AuthController extends AbstractController
         }
 
         // If the login with uuid is enabled generate the sms or the email with the login link
-
         $event = $this->magicLinkService->canSendLink($user);
         if (!($event instanceof Event)) {
             if ($user->getUserExternalAuths()[0]->getProviderId() === UserProvider::EMAIL->value) {
@@ -241,13 +240,13 @@ class AuthController extends AbstractController
                     $request->getClientIp(),
                     $request->headers->get('User-Agent')
                 );
-            }
-            else {
+            } else {
                 $link = $this->magicLinkService->magicToken($user);
                 $message = "Welcome to OpenRoaming! Click the link to confirm and login with your account: $link";
                 $this->sendSMS->sendSms($user->getPhoneNumber(), $message);
             }
         } else {
+            dd('potato die here pls');
             $timeIntervalToResendCode = $data["TWO_FACTOR_AUTH_RESEND_INTERVAL"]["value"];
             $message = $this->magicLinkService->timeToResend($timeIntervalToResendCode, $event);
             return new BaseResponse(
@@ -256,7 +255,6 @@ class AuthController extends AbstractController
                 $message
             )->toResponse();
         }
-
 
         $eventMetaData = [
             'platform' => PlatformMode::LIVE->value,
