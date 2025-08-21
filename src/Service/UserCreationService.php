@@ -9,18 +9,23 @@ use App\Enum\PlatformMode;
 use App\Enum\UserProvider;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
+use Random\RandomException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
-class UserCreationService
+readonly class UserCreationService
 {
     public function __construct(
-        private readonly EntityManagerInterface $entityManager,
-        private readonly EventActions $eventActions,
+        private EntityManagerInterface $entityManager,
+        private EventActions $eventActions,
     ) {
     }
 
-    public function createUser(User $user, string $password, string $provider, Request $request): User {
+    /**
+     * @throws RandomException
+     */
+    public function createUser(User $user, string $password, string $provider, Request $request): User
+    {
         $userAuths = new UserExternalAuth();
 
         // Set the hashed password for the user
