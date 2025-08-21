@@ -78,8 +78,6 @@ class SecurityController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
-        $lastUUIDInserted = $request->query->get('uuid');
-
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
         if ($data['PLATFORM_MODE']['value'] === true) {
@@ -91,7 +89,17 @@ class SecurityController extends AbstractController
         }
 
         // Last username entered by the user (this will be empty if the user clicked the verification link)
-        $lastUsername = $lastUUIDInserted ?? $authenticationUtils->getLastUsername();
+        $email = $request->request->get('email') ?? $request->query->get('email');
+        $phoneNumber = $request->request->get('phoneNumber') ?? $request->query->get('phoneNumber');
+
+        if (!empty($email)) {
+            $lastUsername = $email;
+        } elseif (!empty($phoneNumber)) {
+            $lastUsername = $phoneNumber;
+        } else {
+            // Fallback to Symfony's AuthenticationUtils
+            $lastUsername = $authenticationUtils->getLastUsername();
+        }
 
         // Fetch default regions (PhoneNumber)
         $regionSetting = $data['DEFAULT_REGION_PHONE_INPUTS']['value'];
@@ -100,6 +108,7 @@ class SecurityController extends AbstractController
         // Create the DTO with injected default regions and required password for this login method
         $dto = new LoginChoiceDTO();
         $dto->requirePassword = true;
+        $dto->requireLoginMethod = true;
 
         // Create the form bound to the DTO
         $form = $this->createForm(LoginType::class, $dto, [
@@ -358,12 +367,30 @@ class SecurityController extends AbstractController
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
         // Last username entered by the user (this will be empty if the user clicked the verification link)
-        $lastUsername = $authenticationUtils->getLastUsername();
-        $user = $this->userRepository->findOneBy([
-            'uuid' => $lastUsername,
+        $email = $request->request->get('email') ?? $request->query->get('email');
+        $phoneNumber = $request->request->get('phoneNumber') ?? $request->query->get('phoneNumber');
+        if (!empty($email)) {
+            $lastUsername = $email;
+        } elseif (!empty($phoneNumber)) {
+            $lastUsername = $phoneNumber;
+        } else {
+            // Fallback to Symfony's AuthenticationUtils
+            $lastUsername = $authenticationUtils->getLastUsername();
+        }
+
+        // Fetch default regions (PhoneNumber)
+        $regionSetting = $data['DEFAULT_REGION_PHONE_INPUTS']['value'];
+        $defaultRegions = $regionSetting ? explode(',', $regionSetting) : ['PT, US, GB'];
+
+        // Create the DTO with injected default regions and required password for this login method
+        $dto = new LoginChoiceDTO();
+        $dto->requirePassword = true;
+        $dto->requireLoginMethod = false;
+
+        // Create the form bound to the DTO
+        $form = $this->createForm(LoginType::class, $dto, [
+            'region_inputs' => $defaultRegions, // pass to form for PhoneNumberType
         ]);
-        $form = $this->createForm(LoginType::class, $user);
-        $form->handleRequest($request);
 
         // Get the login error if there is one
         $error = $authenticationUtils->getLastAuthenticationError();
@@ -379,9 +406,9 @@ class SecurityController extends AbstractController
             'data' => $data,
             'form' => $form,
             'context' => FirewallType::DASHBOARD->value,
+            'loginChoiceDTO' => $dto
         ]);
     }
-
 
     #[Route(path: '/dashboard/logout', name: 'app_dashboard_logout')]
     public function dashboardLogout(Request $request): Response

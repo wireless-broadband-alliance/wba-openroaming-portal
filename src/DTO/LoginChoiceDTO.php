@@ -26,15 +26,27 @@ class LoginChoiceDTO
     // Controls whether password is required or not
     public bool $requirePassword = true;
 
+    // Controls whether loginMethod is required or not
+    public bool $requireLoginMethod = true;
+
     #[Callback]
     public function validateLoginChoice(ExecutionContextInterface $context): void
     {
+        // Require loginMethod only if the flag is true
+        if ($this->requireLoginMethod && empty($this->loginMethod)) {
+            $context->buildViolation('Login method is required.')
+                ->atPath('loginMethod')
+                ->addViolation();
+        }
+
+        // Validate email case
         if ($this->loginMethod === UserProvider::EMAIL->value && empty($this->email)) {
             $context->buildViolation('Email cannot be empty when login with email is selected.')
                 ->atPath('email')
                 ->addViolation();
         }
 
+        // Validate phone case
         if ($this->loginMethod === UserProvider::PHONE_NUMBER->value && empty($this->phoneNumber)) {
             $context->buildViolation('Phone number cannot be empty when login with phone is selected.')
                 ->atPath('phoneNumber')

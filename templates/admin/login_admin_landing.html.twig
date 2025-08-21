@@ -6,9 +6,13 @@
 
 {% block second_col %}
     {# Form Column #}
-
     {# Toasts #}
-    {{ block('toast_messages') }}
+    <div class="grid grid-cols-1 gap-[5px]">
+        {# Flash error messages #}
+        {% for message in app.session.flashbag.get('error') %}
+            {{ include('site/shared/_toast.html.twig', {toast_type: 'toast-warning'}) }}
+        {% endfor %}
+    </div>
 
     {% if data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\OperationMode::ON').value %}
         <img class="w-[120px] h-[58px] object-scale-down mt-[75px]" src="{{ data.customerLogoName.value }}" alt="Logo"/>
@@ -19,65 +23,103 @@
         <p class="text-lg">Please login using your admin credentials. Once logged in, you'll have access to the admin
             dashboard.</p>
     </div>
-    {{ form_start(form) }}
 
-    {% if data.EMAIL_REGISTER_ENABLED.value and data.AUTH_METHOD_SMS_REGISTER_ENABLED.value %}
-        {% set label = 'Email or Phone Number' %}
-    {% elseif data.EMAIL_REGISTER_ENABLED.value %}
-        {% set label = 'Email' %}
-    {% elseif data.AUTH_METHOD_SMS_REGISTER_ENABLED.value %}
-        {% set label = 'Phone Number' %}
-    {% else %}
-        {% set label = 'Email' %}
-    {% endif %}
+    <twig:LoginForm :loginChoiceDTO="loginChoiceDTO" :form="form">
+        {{ form_start(form) }}
 
-    {# UUID #}
-    <div class="relative mt-[32px]">
-        {{ form_label(form.uuid, label, {label_attr: {class: 'form-label'}}) }}
-        {{ form_widget(form.uuid, {
-            attr: {
-                class: 'form-widget',
-                placeholder: 'Enter your ' ~ label|lower,
-            },
-            full_name: 'uuid',
-        }) }}
-    </div>
+        {# Login Method Toggle - only show if loginMethod is required #}
+        {% if loginChoiceDTO.requireLoginMethod %}
+            <div class="flex justify-center mt-8">
+                <div class="flex bg-gray-300 rounded-lg overflow-hidden w-full max-w-md p-1">
+                    {# Email Option #}
+                    <label
+                            class="cursor-pointer flex-1 text-center px-4 py-2 transition-colors duration-200 rounded-md
+               {{ loginChoiceDTO.loginMethod == constant('App\\Enum\\UserProvider::EMAIL').value ? 'bg-white text-black font-semibold shadow-md' : 'text-gray-700' }}"
+                    >
+                        <input type="radio"
+                               name="{{ form.loginMethod.vars.full_name }}"
+                               value="{{ constant('App\\Enum\\UserProvider::EMAIL').value }}"
+                               class="hidden"
+                               wire:model="loginChoiceDTO.loginMethod" />
+                        Email
+                    </label>
 
-    {# Password #}
-    <div class="relative mt-[32px]">
-        {{ form_label(form.password, null, {label_attr: {class: 'form-label'}}) }}
-        {{ form_widget(form.password, {
-            attr: {
-                class: 'form-widget',
-                placeholder: 'Enter your password',
-            },
-            full_name: 'password',
-        }) }}
-    </div>
+                    {# Phone Number Option #}
+                    <label
+                            class="cursor-pointer flex-1 text-center px-4 py-2 transition-colors duration-200 rounded-md
+               {{ loginChoiceDTO.loginMethod == constant('App\\Enum\\UserProvider::PHONE_NUMBER').value ? 'bg-white text-black font-semibold shadow-md' : 'text-gray-700' }}"
+                    >
+                        <input type="radio"
+                               name="{{ form.loginMethod.vars.full_name }}"
+                               value="{{ constant('App\\Enum\\UserProvider::PHONE_NUMBER').value }}"
+                               class="hidden"
+                               wire:model="loginChoiceDTO.loginMethod" />
+                        PhoneNumber
+                    </label>
+                </div>
+            </div>
+        {% endif %}
+
+        {# Email Field #}
+        {% if loginChoiceDTO.loginMethod == constant('App\\Enum\\UserProvider::EMAIL').value and form['email'] is defined %}
+            <div class="relative mt-[32px]">
+                {{ form_label(form['email'], constant('App\\Enum\\UserProvider::EMAIL').value, { label_attr: { class: 'form-label' } }) }}
+                {{ form_widget(form['email'], { attr: { class: 'form-widget', placeholder: 'Enter your email' } }) }}
+            </div>
+        {% endif %}
+
+        {# Phone Number Field #}
+        {% if loginChoiceDTO.loginMethod == constant('App\\Enum\\UserProvider::PHONE_NUMBER').value and form['phoneNumber'] is defined %}
+            <div class="flex flex-row items-end space-x-4 mt-[32px]">
+                {# Country Code Dropdown #}
+                <div class="flex flex-col w-1/3">
+                    {{ form_widget(form.phoneNumber.children.country, {
+                        attr: {
+                            class: 'block w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary',
+                            autocomplete: 'tel-country'
+                        }
+                    }) }}
+                </div>
+
+                {# Phone Number Input #}
+                <div class="flex flex-col w-2/3">
+                    {{ form_widget(form.phoneNumber.children.number, {
+                        attr: {
+                            class: 'block w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary',
+                            placeholder: 'Enter your phone number',
+                            autocomplete: 'tel'
+                        }
+                    }) }}
+                </div>
+            </div>
+        {% endif %}
+
+        {# Password Field #}
+        {% if form['password'] is defined %}
+            <div class="relative mt-[32px]">
+                {{ form_label(form['password'], 'Password', { label_attr: { class: 'form-label' } }) }}
+                {{ form_widget(form['password'], { attr: { class: 'form-widget', placeholder: 'Enter your password' } }) }}
+            </div>
+        {% endif %}
+    </twig:LoginForm>
 
     {# Turnstile Checker #}
     {% if data.TURNSTILE_CHECKER.value == constant('App\\Enum\\OperationMode::ON').value %}
         <div class="ml-3 mt-5">
-            {{ form_row(form.security, {full_name: 'security'}) }}
+            {{ form_row(form.security) }}
         </div>
     {% endif %}
 
     <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
 
-    <div class="my-[32px] flex justify-start gap-4">
-        <button type="submit" class="w-[220px] btn-primary">
-            Log in
-        </button>
-        <!--
-        {% if data.PLATFORM_MODE.value != constant('App\\Enum\\PlatformMode::DEMO').value %}
-            <a href="{{ path('app_landing') }}" class="w-[220px] btn-secondary">
-                Choose Another
-            </a>
-        {% endif %}
-       -->
+    <div class="my-[32px] flex justify-center gap-4">
+       <button type="submit" class="w-[220px] btn-primary">Log in</button>
+{#        {% if data.PLATFORM_MODE.value != constant('App\\Enum\\PlatformMode::DEMO').value %}#}
+{#            <a href="{{ path('app_landing') }}" class="w-[220px] btn-secondary">Choose Another</a>#}
+{#        {% endif %}#}
     </div>
 
-    {# Divider #}
+    {# Divider & Links #}
     <div class="my-[25px] divider"></div>
     {% if data.PLATFORM_MODE.value != constant('App\\Enum\\PlatformMode::DEMO').value %}
 
@@ -115,6 +157,5 @@
         {% endif %}
     {% endif %}
 
-    {{ form_rest(form) }}
-    {{ form_end(form) }}
+    {{ form_end(form, {'render_rest': false}) }}
 {% endblock %}
