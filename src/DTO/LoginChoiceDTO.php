@@ -35,28 +35,28 @@ class LoginChoiceDTO
     public function validateLoginChoice(ExecutionContextInterface $context): void
     {
         // Require loginMethod only if the flag is true
-        if ($this->requireLoginMethod && empty($this->loginMethod)) {
+        if ($this->requireLoginMethod && ($this->loginMethod === null || $this->loginMethod === '' || $this->loginMethod === '0')) {
             $context->buildViolation('Login method is required.')
                 ->atPath('loginMethod')
                 ->addViolation();
         }
 
         // Validate email case
-        if ($this->loginMethod === UserProvider::EMAIL->value && empty($this->email)) {
+        if ($this->loginMethod === UserProvider::EMAIL->value && ($this->email === null || $this->email === '' || $this->email === '0')) {
             $context->buildViolation('Email cannot be empty when login with email is selected.')
                 ->atPath('email')
                 ->addViolation();
         }
 
         // Validate phone case
-        if ($this->loginMethod === UserProvider::PHONE_NUMBER->value && empty($this->phoneNumber)) {
+        if ($this->loginMethod === UserProvider::PHONE_NUMBER->value && !$this->phoneNumber instanceof PhoneNumber) {
             $context->buildViolation('Phone number cannot be empty when login with phone is selected.')
                 ->atPath('phoneNumber')
                 ->addViolation();
         }
 
         // Password validation
-        if ($this->requirePassword && empty($this->password)) {
+        if ($this->requirePassword && ($this->password === null || $this->password === '' || $this->password === '0')) {
             $context->buildViolation('Password is required.')
                 ->atPath('password')
                 ->addViolation();

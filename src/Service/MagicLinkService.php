@@ -27,7 +27,6 @@ readonly class MagicLinkService
         private EventRepository $eventRepository,
         private MailerInterface $mailer,
         private ParameterBagInterface $parameterBag,
-        private EventActions $eventActions,
         private SendSMS $sendSMS,
         private UrlGeneratorInterface $urlGenerator,
     ) {

@@ -106,7 +106,7 @@ class SecurityController extends AbstractController
 
         // Fetch default regions (PhoneNumber)
         $regionSetting = $data['DEFAULT_REGION_PHONE_INPUTS']['value'];
-        $defaultRegions = $regionSetting ? explode(',', $regionSetting) : ['PT, US, GB'];
+        $defaultRegions = $regionSetting ? explode(',', (string) $regionSetting) : ['PT, US, GB'];
 
         // Create the DTO with injected default regions and required password for this login method
         $dto = new LoginChoiceDTO();
@@ -349,7 +349,7 @@ class SecurityController extends AbstractController
 
         // Fetch default regions (PhoneNumber)
         $regionSetting = $data['DEFAULT_REGION_PHONE_INPUTS']['value'];
-        $defaultRegions = $regionSetting ? explode(',', $regionSetting) : ['PT, US, GB'];
+        $defaultRegions = $regionSetting ? explode(',', (string) $regionSetting) : ['PT, US, GB'];
 
         // Create the DTO with injected default regions and required password for this login method
         $dto = new LoginChoiceDTO();

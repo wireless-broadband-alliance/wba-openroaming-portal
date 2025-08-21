@@ -84,7 +84,7 @@ class LoginUUIDType extends AbstractType
 
         $builder->addEventListener(
             FormEvents::PRE_SET_DATA,
-            function (FormEvent $event) use ($formModifier, $defaultMethod) {
+            function (FormEvent $event) use ($formModifier, $defaultMethod): void {
                 $data = $event->getData();
                 $method = $data?->loginMethod ?? $defaultMethod;
                 $formModifier($event->getForm(), $method);
@@ -96,10 +96,10 @@ class LoginUUIDType extends AbstractType
         ) {
             $builder->get('loginMethod')->addEventListener(
                 FormEvents::POST_SUBMIT,
-                function (FormEvent $event) use ($formModifier) {
+                function (FormEvent $event) use ($formModifier): void {
                     $form = $event->getForm()->getParent();
                     $method = $event->getForm()->getData();
-                    if ($form) {
+                    if ($form instanceof FormInterface) {
                         $formModifier($form, $method);
                     }
                 }
