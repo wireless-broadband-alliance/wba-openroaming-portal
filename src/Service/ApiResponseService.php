@@ -110,7 +110,7 @@ readonly class ApiResponseService
                         // phpcs:disable Generic.Files.LineLength.TooLong
                         'Your request cannot be processed at this time due to a pending action. If your account is active, re-login to complete the action',
                         // phpcs:enable
-                        ],
+                    ],
                     500 => [
                         'An error occurred: Generic server-side error.',
                         'JWT key files are missing. Please ensure both private and public keys exist.',
@@ -734,7 +734,7 @@ readonly class ApiResponseService
                         'Too many attempts. You have exceeded the limit of %d attempts. Please wait %d minutes before trying again.',
                         'Too many validation attempts. You have exceeded the limit of %d attempts. Please wait %d minute(s) before trying again.',
                         // phpcs:enable
-                        ]
+                    ]
                 ]
             ],
             'api_v1_user_account_deletion' => [
@@ -813,32 +813,44 @@ readonly class ApiResponseService
                     'twoFACode' => '02YZR88R'
                 ],
                 'description' => 'This endpoint authenticates a user using their UUID, password, 
-                and a CAPTCHA token. Platform can require the authentication with Two-Factor, 
-                the twoFACode parameter will be asked based on the TWO_FACTOR_AUTH_STATUS setting.',
+        and a CAPTCHA token. Platform can require the authentication with Two-Factor, 
+        the twoFACode parameter will be asked based on the TWO_FACTOR_AUTH_STATUS setting.
+        When the setting LOGIN_WITH_UUID_ONLY is enabled:
+        The authentication process does not require a password. Instead, a success message is returned
+        and the platform will send a login link via email or phone number.',
                 'responses' => [
                     200 => [
-                        json_decode(
+                        'default' => json_decode(
                             '{
-                            "success": true,
-                            "data": {
-                                "uuid": "test@example.com",
-                                "email": "test@example.com",
-                                "roles": ["ROLE_USER"],
-                                "first_name": null,
-                                "last_name": null,
-                                "user_external_auths": [
-                                    {
-                                        "provider": "Portal Account",
-                                        "provider_id": "Email"
-                                    }
-                                ],
-                                "token": "validToken"
+                    "success": true,
+                    "data": {
+                        "uuid": "test@example.com",
+                        "email": "test@example.com",
+                        "roles": ["ROLE_USER"],
+                        "first_name": null,
+                        "last_name": null,
+                        "user_external_auths": [
+                            {
+                                "provider": "Portal Account",
+                                "provider_id": "Email"
+                            }
+                        ],
+                        "token": "validToken"
                             }
                         }',
                             true,
                             512,
                             JSON_THROW_ON_ERROR
-                        )
+                        ),
+                        'uuid_only_mode' => json_decode(
+                            '{
+                                    "success": true,
+                                    "message": "Authentication request sent. Please check your email or phone for the login link."
+                                }',
+                            true,
+                            512,
+                            JSON_THROW_ON_ERROR
+                        ),
                     ],
                     400 => [
                         'CAPTCHA validation failed',
@@ -869,7 +881,6 @@ readonly class ApiResponseService
                         'JWT key files are missing. Please ensure both private and public keys exist.',
                     ]
                 ],
-
             ],
             'api_v2_auth_saml' => [
                 'requestBody' => [],
