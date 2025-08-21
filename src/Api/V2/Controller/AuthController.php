@@ -9,6 +9,7 @@ use App\Entity\User;
 use App\Entity\UserExternalAuth;
 use App\Enum\AnalyticalEventType;
 use App\Enum\OperationMode;
+use App\Enum\PlatformMode;
 use App\Enum\UserProvider;
 use App\Enum\UserTwoFactorAuthenticationStatus;
 use App\Repository\SettingRepository;
@@ -16,7 +17,9 @@ use App\Repository\UserRepository;
 use App\Service\CaptchaValidator;
 use App\Service\EventActions;
 use App\Service\JWTTokenGenerator;
+use App\Service\MagicLinkService;
 use App\Service\SamlResolverService;
+use App\Service\SendSMS;
 use App\Service\TOTPService;
 use App\Service\TwoFAAPIService;
 use App\Service\TwoFAService;
@@ -54,6 +57,8 @@ class AuthController extends AbstractController
         private readonly TwoFAService $twoFAService,
         private readonly TOTPService $TOTPService,
         private readonly SettingRepository $settingRepository,
+        private readonly MagicLinkService $magicLinkService,
+        private readonly SendSMS $sendSMS,
     ) {
     }
 
@@ -222,11 +227,30 @@ class AuthController extends AbstractController
             return new BaseResponse(200, $responseData)->toResponse(); # Success Response
         }
 
-        /* TODO ADD THE LOGIC ABOUT SENDING THE SMS OR THE EMAIL HERE */
-        /*
-         * SEND THE SMS or EMAIL
-         * TRIGGER THE DB EVENT
-         */
+        if ($user->getUserExternalAuths()[0]->getProvideID() === UserProvider::EMAIL->value) {
+            $this->magicLinkService->sendEmail(
+                $user,
+                $request->getClientIp(),
+                $request->headers->get('User-Agent')
+            );
+        } else {
+            $link = $this->magicLinkService->magicToken($user);
+            $message = "Welcome to OpenRoaming! Click the link to confirm and login with your account: $link";
+            $this->sendSMS->sendSms($user->getPhoneNumber(), $message);
+
+            $eventMetaData = [
+                'platform' => PlatformMode::LIVE->value,
+                'user_agent' => $request->headers->get('User-Agent'),
+                'uuid' => $user->getUuid(),
+                'ip' => $request->getClientIp(),
+            ];
+            $this->eventActions->saveEvent(
+                $user,
+                AnalyticalEventType::LOGIN_WITH_UUID_ONLY_LINK->value,
+                new DateTime(),
+                $eventMetaData
+            );
+        }
 
         return new BaseResponse(
             200,
