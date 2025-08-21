@@ -2,17 +2,16 @@
 
 # Release V1.10.0
 
-- New feature - Now the admin can configure if the landing login authentication, instead of being the traditional (
+- New feature - Now the admin can configure the landing login authentication, instead of being the traditional (
   email/password), it sends a verification link, for both cases (emails || phoneNumbers), to reduce the amount of steps
-  for new user account creations.
+  for new users account creation.
 - Rework landing/dashboard authentications because of the new feature - DTO Implementation to improve code optimization
-  and add a new login method
-  selector emails || phoneNumber authentication.
+  and add a new login method selector emails || phoneNumber authentication.
 - Fix minor bugs & conflicts with the new DTO and authentication form.
 - Add a new eventSubscriber to avoid the admin of hard changing the DB value `USER_VERIFICATION` setting to `OFF`, when
-  the
-  `PLATFORM_MODE` setting is `ON`, When that happens, that could brake the user account registration system for
-  email & phoneNumbers on the landing page.
+  the `PLATFORM_MODE` setting is `ON`.
+    - When that happens, it could brake the user account registration system for email & phoneNumbers on the landing
+      page.
 
 # Release V1.9.0
 
