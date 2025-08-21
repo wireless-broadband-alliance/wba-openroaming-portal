@@ -35,14 +35,26 @@ class LoginChoiceDTO
     public function validateLoginChoice(ExecutionContextInterface $context): void
     {
         // Require loginMethod only if the flag is true
-        if ($this->requireLoginMethod && ($this->loginMethod === null || $this->loginMethod === '' || $this->loginMethod === '0')) {
+        if (
+            $this->requireLoginMethod &&
+            ($this->loginMethod === null ||
+                $this->loginMethod === '' ||
+                $this->loginMethod === '0'
+            )
+        ) {
             $context->buildViolation('Login method is required.')
                 ->atPath('loginMethod')
                 ->addViolation();
         }
 
         // Validate email case
-        if ($this->loginMethod === UserProvider::EMAIL->value && ($this->email === null || $this->email === '' || $this->email === '0')) {
+        if (
+            $this->loginMethod === UserProvider::EMAIL->value &&
+            ($this->email === null ||
+                $this->email === '' ||
+                $this->email === '0'
+            )
+        ) {
             $context->buildViolation('Email cannot be empty when login with email is selected.')
                 ->atPath('email')
                 ->addViolation();
