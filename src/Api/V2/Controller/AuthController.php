@@ -5,6 +5,7 @@ namespace App\Api\V2\Controller;
 use App\Api\V2\BaseResponse;
 use App\Controller\GoogleController;
 use App\Controller\MicrosoftController;
+use App\Entity\Event;
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
 use App\Enum\AnalyticalEventType;
@@ -231,17 +232,31 @@ class AuthController extends AbstractController
         }
 
         // If the login with uuid is enabled generate the sms or the email with the login link
-        if ($user->getUserExternalAuths()[0]->getProviderId() === UserProvider::EMAIL->value) {
-            $this->magicLinkService->sendEmail(
-                $user,
-                $request->getClientIp(),
-                $request->headers->get('User-Agent')
-            );
+
+        $event = $this->magicLinkService->canSendLink($user);
+        if (!($event instanceof Event)) {
+            if ($user->getUserExternalAuths()[0]->getProviderId() === UserProvider::EMAIL->value) {
+                $this->magicLinkService->sendEmail(
+                    $user,
+                    $request->getClientIp(),
+                    $request->headers->get('User-Agent')
+                );
+            }
+            else {
+                $link = $this->magicLinkService->magicToken($user);
+                $message = "Welcome to OpenRoaming! Click the link to confirm and login with your account: $link";
+                $this->sendSMS->sendSms($user->getPhoneNumber(), $message);
+            }
         } else {
-            $link = $this->magicLinkService->magicToken($user);
-            $message = "Welcome to OpenRoaming! Click the link to confirm and login with your account: $link";
-            $this->sendSMS->sendSms($user->getPhoneNumber(), $message);
+            $timeIntervalToResendCode = $data["TWO_FACTOR_AUTH_RESEND_INTERVAL"]["value"];
+            $message = $this->magicLinkService->timeToResend($timeIntervalToResendCode, $event);
+            return new BaseResponse(
+                429,
+                null,
+                $message
+            )->toResponse();
         }
+
 
         $eventMetaData = [
             'platform' => PlatformMode::LIVE->value,
