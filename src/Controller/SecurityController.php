@@ -107,8 +107,21 @@ class SecurityController extends AbstractController
 
         // Create the DTO with injected default regions and required password for this login method
         $dto = new LoginChoiceDTO();
+
+        $emailMethod = $data['AUTH_METHOD_REGISTER_ENABLED']['value'];
+        $phoneNumberMethod = $data['AUTH_METHOD_SMS_REGISTER_ENABLED']['value'];
+        if ($emailMethod === 'false' && $phoneNumberMethod) {
+            $dto->loginMethod = UserProvider::PHONE_NUMBER->value;
+            $dto->requireLoginMethod = false;
+        } elseif ($emailMethod === 'true' && !$phoneNumberMethod) {
+            $dto->loginMethod = UserProvider::EMAIL->value;
+            $dto->requireLoginMethod = false;
+        } else {
+            $dto->loginMethod = UserProvider::EMAIL->value;
+            $dto->requireLoginMethod = true;
+        }
+
         $dto->requirePassword = true;
-        $dto->requireLoginMethod = true;
 
         // Create the form bound to the DTO
         $form = $this->createForm(LoginType::class, $dto, [

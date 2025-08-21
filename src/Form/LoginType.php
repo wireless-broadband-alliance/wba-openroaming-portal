@@ -34,17 +34,22 @@ class LoginType extends AbstractType
 
         $turnstileCheckerValue = $data['TURNSTILE_CHECKER']['value'] ?? null;
 
+        $emailMethod = $data['AUTH_METHOD_REGISTER_ENABLED']['value'];
+        $phoneNumberMethod = $data['AUTH_METHOD_SMS_REGISTER_ENABLED']['value'];
+
         // Let user select if they want to log in with email
-        $builder->add('loginMethod', ChoiceType::class, [
-            'choices' => [
-                'Email' => UserProvider::EMAIL->value,
-                'Phone Number' => UserProvider::PHONE_NUMBER->value,
-            ],
-            'expanded' => true,
-            'multiple' => false,
-            'label' => 'Login via',
-            'data' => $builder->getData()?->loginMethod ?? UserProvider::EMAIL->value,
-        ]);
+        if ($emailMethod === 'true' && $phoneNumberMethod) {
+            $builder->add('loginMethod', ChoiceType::class, [
+                'choices' => [
+                    'Email' => UserProvider::EMAIL->value,
+                    'Phone Number' => UserProvider::PHONE_NUMBER->value,
+                ],
+                'expanded' => true,
+                'multiple' => false,
+                'label' => 'Login via',
+                'data' => $builder->getData()?->loginMethod ?? UserProvider::EMAIL->value,
+            ]);
+        }
 
         $builder->add('email', EmailType::class, [
             'required' => false,

@@ -31,6 +31,7 @@
     <twig:LoginForm :loginChoiceDTO="loginChoiceDTO" :form="form">
         {{ form_start(form) }}
 
+        {% if form.loginMethod is defined %}
         {# Login Method Toggle #}
         <div class="flex justify-center mt-8">
             <div class="flex bg-gray-300 rounded-lg overflow-hidden w-full max-w-md p-1">
@@ -61,6 +62,7 @@
                 </label>
             </div>
         </div>
+        {% endif %}
 
         {# Email Field #}
         {% if loginChoiceDTO.loginMethod == constant('App\\Enum\\UserProvider::EMAIL').value and form['email'] is defined %}
