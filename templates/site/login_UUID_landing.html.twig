@@ -28,7 +28,9 @@
 
     {{ form_start(form) }}
     {# Login Method Toggle #}
-    {{ form_widget(form.loginMethod, { attr: { class: 'hidden' } }) }}
+
+    {% if form.loginMethod is defined %}
+        {{ form_widget(form.loginMethod, { attr: { class: 'hidden' } }) }}
     <div class="flex justify-center mt-8">
         <div class="flex bg-gray-300 rounded-lg overflow-hidden w-full max-w-md p-1">
             {# Email Option #}
@@ -58,10 +60,12 @@
             </label>
         </div>
     </div>
+    {% endif %}
 
     {% if form.email is defined %}
     {# Email #}
     <div class="relative mt-[32px]">
+        {{ form_label(form.email, constant('App\\Enum\\UserProvider::EMAIL').value, { label_attr: { class: 'form-label' } }) }}
         {{ form_widget(form.email, {
             attr: {
                 class: 'form-widget',

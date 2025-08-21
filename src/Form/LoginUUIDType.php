@@ -38,16 +38,26 @@ class LoginUUIDType extends AbstractType
         $regionInputs = explode(',', (string) $data['DEFAULT_REGION_PHONE_INPUTS']['value']);
         $regionInputs = array_map('trim', $regionInputs);
         $turnstileCheckerValue = $data['TURNSTILE_CHECKER']['value'];
+        $emailMethod = $data['AUTH_METHOD_REGISTER_ENABLED']['value'];
+        $phoneNumberMethod = $data['AUTH_METHOD_SMS_REGISTER_ENABLED']['value'];
 
-        $builder->add('loginMethod', ChoiceType::class, [
-            'choices' => [
-                'Email' => UserProvider::EMAIL->value,
-                'Phone Number' => UserProvider::PHONE_NUMBER->value,
-            ],
-            'expanded' => true,
-            'multiple' => false,
-            'data' => $builder->getData()?->loginMethod ?? UserProvider::EMAIL->value,
-        ]);
+        if ($emailMethod === 'false' && $phoneNumberMethod) {
+            $defaultMethod = UserProvider::PHONE_NUMBER->value;
+        } else {
+            $defaultMethod = UserProvider::EMAIL->value;
+        }
+
+        if ($emailMethod === 'true' && $phoneNumberMethod) {
+            $builder->add('loginMethod', ChoiceType::class, [
+                'choices' => [
+                    'Email' => UserProvider::EMAIL->value,
+                    'Phone Number' => UserProvider::PHONE_NUMBER->value,
+                ],
+                'expanded' => true,
+                'multiple' => false,
+                'data' => $builder->getData()?->loginMethod ?? $defaultMethod,
+            ]);
+        }
 
         $formModifier = static function (FormInterface $form, string $method) use ($regionInputs) {
             if ($method === UserProvider::EMAIL->value) {
@@ -72,19 +82,25 @@ class LoginUUIDType extends AbstractType
             }
         };
 
-        $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use ($formModifier) {
-            $form = $event->getForm();
-            $formModifier($form, UserProvider::EMAIL->value);
+        $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use ($formModifier, $defaultMethod) {
+            $data = $event->getData();
+            $method = $data?->loginMethod ?? $defaultMethod;
+            $formModifier($event->getForm(), $method);
         });
 
-        $builder->get('loginMethod')->addEventListener(FormEvents::POST_SUBMIT, function (FormEvent $event) use ($formModifier) {
-            $form = $event->getForm()->getParent();
-            $method = $event->getForm()->getData();
-            if ($form) {
-                $formModifier($form, $method);
-            }
-
-        });
+        if ($emailMethod === 'true' && $phoneNumberMethod
+        ) {
+            $builder->get('loginMethod')->addEventListener(
+                FormEvents::POST_SUBMIT,
+                function (FormEvent $event) use ($formModifier) {
+                    $form = $event->getForm()->getParent();
+                    $method = $event->getForm()->getData();
+                    if ($form) {
+                        $formModifier($form, $method);
+                    }
+                }
+            );
+        }
 
         // Turnstile
         if ($turnstileCheckerValue === OperationMode::ON->value) {

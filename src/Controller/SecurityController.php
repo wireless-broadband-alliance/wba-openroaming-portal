@@ -149,6 +149,13 @@ class SecurityController extends AbstractController
         }
 
         $loginChoiceDTO = new LoginChoiceDTO();
+        $emailMethod = $data['AUTH_METHOD_REGISTER_ENABLED']['value'];
+        $phoneNumberMethod = $data['AUTH_METHOD_SMS_REGISTER_ENABLED']['value'];
+        if ($emailMethod === 'false' && $phoneNumberMethod) {
+            $loginChoiceDTO->loginMethod = UserProvider::PHONE_NUMBER->value;
+        } else {
+            $loginChoiceDTO->loginMethod = UserProvider::EMAIL->value;
+        }
         $loginChoiceDTO->requirePassword = false;
 
         $form = $this->createForm(LoginUUIDType::class, $loginChoiceDTO);
