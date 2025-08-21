@@ -18,6 +18,7 @@ use App\Service\GetSettings;
 use App\Service\MagicLinkService;
 use App\Service\RegistrationEmailGenerator;
 use App\Service\SendSMS;
+use App\Service\UserCreationService;
 use App\Service\VerificationCodeEmailGenerator;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
@@ -63,6 +64,7 @@ class RegistrationController extends AbstractController
         private readonly EventActions $eventActions,
         private readonly RegistrationEmailGenerator $emailGenerator,
         private readonly MagicLinkService $magicLinkService,
+        private readonly UserCreationService  $userCreationService,
     ) {
     }
 
@@ -78,7 +80,6 @@ class RegistrationController extends AbstractController
     public function register(
         Request $request,
         UserPasswordHasherInterface $userPasswordHasher,
-        EntityManagerInterface $entityManager,
     ): Response {
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
@@ -98,7 +99,6 @@ class RegistrationController extends AbstractController
         }
 
         $user = new User();
-        $userAuths = new UserExternalAuth();
         $form = $this->createForm(RegistrationFormType::class, $user);
         $form->handleRequest($request);
 
@@ -115,34 +115,12 @@ class RegistrationController extends AbstractController
                 // Hash the password
                 $hashedPassword = $userPasswordHasher->hashPassword($user, $randomPassword);
 
-                // Set the hashed password for the user
-                $user->setPassword($hashedPassword);
-                $user->setUuid($form->get('email')->getData());
-                $user->setEmail($form->get('email')->getData());
-                $user->setTwoFAcode(random_int(100000, 999999));
-                $user->setTwoFAcodeGeneratedAt(new DateTime());
-                $user->setTwoFAcodeIsActive(true);
-                $user->setCreatedAt(new DateTime());
-                $userAuths->setProvider(UserProvider::PORTAL_ACCOUNT->value);
-                $userAuths->setProviderId(UserProvider::EMAIL->value);
-                $userAuths->setUser($user);
-                $entityManager->persist($user);
-                $entityManager->persist($userAuths);
-                $entityManager->flush();
-
-                // Defines the Event to the table
-                $eventMetaData = [
-                    'ip' => $request->getClientIp(),
-                    'user_agent' => $request->headers->get('User-Agent'),
-                    'platform' => PlatformMode::LIVE->value,
-                    'uuid' => $user->getUuid(),
-                    'registrationType' => UserProvider::EMAIL->value,
-                ];
-                $this->eventActions->saveEvent(
+                $user = $this->userCreationService->setEmail($form->get('email')->getData(), $user);
+                $user = $this->userCreationService->createUser(
                     $user,
-                    AnalyticalEventType::USER_CREATION->value,
-                    new DateTime(),
-                    $eventMetaData
+                    $hashedPassword,
+                    UserProvider::EMAIL->value,
+                    $request
                 );
 
                 $this->emailGenerator->sendRegistrationEmail($user, $randomPassword);
@@ -205,7 +183,6 @@ class RegistrationController extends AbstractController
         }
 
         $user = new User();
-        $userAuths = new UserExternalAuth();
         $form = $this->createForm(RegistrationFormSMSType::class, $user);
         $form->handleRequest($request);
 
@@ -222,38 +199,12 @@ class RegistrationController extends AbstractController
                 // Hash the password
                 $hashedPassword = $userPasswordHasher->hashPassword($user, $randomPassword);
 
-                // Set the hashed password for the user
-                $user->setPassword($hashedPassword);
-
-                if (!is_null($user->getPhoneNumber())) {
-                    $user->setUuid(
-                        "+" . $user->getPhoneNumber()->getCountryCode() . $user->getPhoneNumber()->getNationalNumber()
-                    );
-                }
-
-                $user->setTwoFAcode(random_int(100000, 999999));
-                $user->setTwoFACodeGeneratedAt(new DateTime());
-                $user->setTwoFAcodeIsActive(true);
-                $user->setCreatedAt(new DateTime());
-                $userAuths->setProvider(UserProvider::PORTAL_ACCOUNT->value);
-                $userAuths->setProviderId(UserProvider::PHONE_NUMBER->value);
-                $userAuths->setUser($user);
-                $entityManager->persist($user);
-                $entityManager->persist($userAuths);
-
-                // Defines the Event to the table
-                $eventMetadata = [
-                    'ip' => $request->getClientIp(),
-                    'user_agent' => $request->headers->get('User-Agent'),
-                    'platform' => PlatformMode::LIVE->value,
-                    'uuid' => $user->getUuid(),
-                    'registrationType' => UserProvider::PHONE_NUMBER->value,
-                ];
-                $this->eventActions->saveEvent(
+                $user = $this->userCreationService->setPhoneNumber($user);
+                $user = $this->userCreationService->createUser(
                     $user,
-                    AnalyticalEventType::USER_CREATION->value,
-                    new DateTime(),
-                    $eventMetadata
+                    $hashedPassword,
+                    UserProvider::PHONE_NUMBER->value,
+                    $request
                 );
 
                 if ($data['LOGIN_WITH_UUID_ONLY']['value'] === OperationMode::ON->value) {

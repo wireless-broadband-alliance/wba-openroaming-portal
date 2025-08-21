@@ -210,7 +210,7 @@ class SecurityController extends AbstractController
                     // Hash the password
                     $hashedPassword = $userPasswordHasher->hashPassword($user, $randomPassword);
 
-                    $user = $this->userCreationService->createUserMagicLink($user, $hashedPassword, UserProvider::EMAIL->value, $request);
+                    $user = $this->userCreationService->createUser($user, $hashedPassword, UserProvider::EMAIL->value, $request);
 
                     $this->emailGenerator->sendRegistrationEmail($user, $randomPassword);
 
@@ -276,7 +276,7 @@ class SecurityController extends AbstractController
 
                     $user->setPhoneNumber($loginChoiceDTO->phoneNumber);
 
-                    $user = $this->userCreationService->createUserMagicLink($user, $hashedPassword, UserProvider::PHONE_NUMBER->value, $request);
+                    $user = $this->userCreationService->createUser($user, $hashedPassword, UserProvider::PHONE_NUMBER->value, $request);
 
                     $link = $this->magicLinkService->magicToken($user);
                     $message = "Welcome to OpenRoaming! Click the link to confirm and login with your account: $link";

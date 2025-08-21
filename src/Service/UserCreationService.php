@@ -10,6 +10,7 @@ use App\Enum\UserProvider;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class UserCreationService
 {
@@ -19,7 +20,7 @@ class UserCreationService
     ) {
     }
 
-    public function createUserMagicLink(User $user, string $password, string $provider, Request $request): User {
+    public function createUser(User $user, string $password, string $provider, Request $request): User {
         $userAuths = new UserExternalAuth();
 
         // Set the hashed password for the user
@@ -41,7 +42,7 @@ class UserCreationService
             'user_agent' => $request->headers->get('User-Agent'),
             'platform' => PlatformMode::LIVE->value,
             'uuid' => $user->getUuid(),
-            'registrationType' => UserProvider::EMAIL->value,
+            'registrationType' => $provider,
         ];
         $this->eventActions->saveEvent(
             $user,
@@ -50,6 +51,24 @@ class UserCreationService
             $eventMetaData
         );
 
+        return $user;
+    }
+
+    public function setEmail(string $email, User $user): User
+    {
+        $user->setEmail($email);
+        $user->setUuid($email);
+
+        return $user;
+    }
+
+    public function setPhoneNumber(User $user): User
+    {
+        if (!is_null($user->getPhoneNumber())) {
+            $user->setUuid(
+                "+" . $user->getPhoneNumber()->getCountryCode() . $user->getPhoneNumber()->getNationalNumber()
+            );
+        }
         return $user;
     }
 }
