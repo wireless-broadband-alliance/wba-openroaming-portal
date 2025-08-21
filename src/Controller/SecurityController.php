@@ -193,22 +193,10 @@ class SecurityController extends AbstractController
                         );
                     } else {
                         $timeIntervalToResendCode = $data["TWO_FACTOR_AUTH_RESEND_INTERVAL"]["value"];
-                        $lastAttemptTime = $event instanceof Event ?
-                            $event->getEventDatetime() : $timeIntervalToResendCode;
-                        $limitTime = $lastAttemptTime;
-                        /** @var DateTime $limitTime */
-                        $limitTime->modify('+' . $timeIntervalToResendCode . ' seconds');
-                        $now = new DateTime();
-                        $interval = date_diff($now, $limitTime);
-                        $interval_seconds = $interval->days * 1440;
-                        $interval_seconds += $interval->h * 60;
-                        $interval_seconds += $interval->i;
-                        $interval_seconds += $interval->s;
+                        $message = $this->magicLinkService->timeToResend($timeIntervalToResendCode, $event);
                         $this->addFlash(
                             'error',
-                            'Login link Invalid. Please wait ' .
-                            $interval_seconds .
-                            ' seconds before trying to send again.'
+                            $message
                         );
                     }
                 } elseif (filter_var($loginChoiceDTO->email, FILTER_VALIDATE_EMAIL)) {
@@ -267,22 +255,10 @@ class SecurityController extends AbstractController
                         );
                     } else {
                         $timeIntervalToResendCode = $data["TWO_FACTOR_AUTH_RESEND_INTERVAL"]["value"];
-                        $lastAttemptTime = $event instanceof Event ?
-                            $event->getEventDatetime() : $timeIntervalToResendCode;
-                        $limitTime = $lastAttemptTime;
-                        /** @var DateTime $limitTime */
-                        $limitTime->modify('+' . $timeIntervalToResendCode . ' seconds');
-                        $now = new DateTime();
-                        $interval = date_diff($now, $limitTime);
-                        $interval_seconds = $interval->days * 1440;
-                        $interval_seconds += $interval->h * 60;
-                        $interval_seconds += $interval->i;
-                        $interval_seconds += $interval->s;
+                        $message = $this->magicLinkService->timeToResend($timeIntervalToResendCode, $event);
                         $this->addFlash(
                             'error',
-                            'Login link Invalid. Please wait ' .
-                            $interval_seconds .
-                            ' seconds before trying to send again.'
+                            $message
                         );
                     }
                 } else {

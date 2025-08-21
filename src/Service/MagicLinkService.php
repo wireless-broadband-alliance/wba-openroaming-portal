@@ -103,7 +103,7 @@ readonly class MagicLinkService
         $user->setTwoFAcodeGeneratedAt(new DateTime());
         $this->userRepository->save($user, true);
         return $this->urlGenerator->generate('app_login_magic_link', [
-            'token' => $user->getTwoFAcode()
+            'token' => $user->getTwoFAcode(),
         ], UrlGeneratorInterface::ABSOLUTE_URL);
     }
 
@@ -113,5 +113,21 @@ readonly class MagicLinkService
         $limitTime = new DateTime();
         $limitTime->modify('-' . $linkValidity . ' minutes');
         return $limitTime < $user->getTwoFAcodeGeneratedAt();
+    }
+
+    public function timeToResend (string $timeInterval, Event $event): string
+    {
+        $lastAttemptTime = $event instanceof Event ?
+            $event->getEventDatetime() : $timeInterval;
+        $limitTime = $lastAttemptTime;
+        /** @var DateTime $limitTime */
+        $limitTime->modify('+' . $timeInterval . ' seconds');
+        $now = new DateTime();
+        $interval = date_diff($now, $limitTime);
+        $interval_seconds = $interval->days * 1440;
+        $interval_seconds += $interval->h * 60;
+        $interval_seconds += $interval->i;
+        $interval_seconds += $interval->s;
+        return 'Login link Invalid. Please wait ' . $interval_seconds . ' seconds before trying to send again.';
     }
 }
