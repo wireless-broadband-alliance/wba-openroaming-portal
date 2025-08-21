@@ -845,9 +845,11 @@ readonly class ApiResponseService
                         // phpcs:disable Generic.Files.LineLength.TooLong
                         'uuid_only_mode' => json_decode(
                             '{
-                                    "success": true,
+                                "success": true,
+                                "data": {
                                     "message": "Authentication request sent. Please check your email or phone for the login link."
-                                }',
+                                }
+                            }',
                             true,
                             512,
                             JSON_THROW_ON_ERROR
