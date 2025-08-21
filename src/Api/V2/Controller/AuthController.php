@@ -171,13 +171,20 @@ class AuthController extends AbstractController
             }
 
             // --- TOTP / OTP validation ---
-            if ($user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::TOTP->value && (!$this->twoFAService->validateOTPCodes($user, $data['twoFACode']) && !$this->TOTPService->verifyTOTP($user->getTwoFAsecret(), $data['twoFACode']))) {
+            if (
+                $user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::TOTP->value &&
+                (!$this->twoFAService->validateOTPCodes($user, $data['twoFACode']) &&
+                    !$this->TOTPService->verifyTOTP(
+                        $user->getTwoFAsecret(),
+                        $data['twoFACode']
+                    ))
+            ) {
                 return new BaseResponse(
                     401,
                     null,
                     $twoFAEnforcementResult['message']
-                    )->toResponse();
-             }
+                )->toResponse();
+            }
 
             // --- Email/SMS / OTP validation ---
             if ($isLoginWithUUIDOnly === OperationMode::ON->value) {
