@@ -9,6 +9,10 @@
   and add a new login method
   selector emails || phoneNumber authentication.
 - Fix minor bugs & conflicts with the new DTO and authentication form.
+- Add a new eventSubscriber to avoid the admin of hard changing the DB value `USER_VERIFICATION` setting to `OFF`, when
+  the
+  `PLATFORM_MODE` setting is `ON`, When that happens, that could brake the user account registration system for
+  email & phoneNumbers on the landing page.
 
 # Release V1.9.0
 
