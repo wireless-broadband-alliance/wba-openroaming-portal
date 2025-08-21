@@ -155,7 +155,6 @@ class SecurityController extends AbstractController
     public function loginMagic(
         Request $request,
         UserPasswordHasherInterface $userPasswordHasher,
-        EntityManagerInterface $entityManager,
     ): Response {
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
@@ -332,6 +331,7 @@ class SecurityController extends AbstractController
         $dto = new LoginChoiceDTO();
         $dto->requirePassword = true;
         $dto->requireLoginMethod = false;
+        $dto->loginMethod = UserProvider::EMAIL->value;
 
         // Create the form bound to the DTO
         $form = $this->createForm(LoginType::class, $dto, [
