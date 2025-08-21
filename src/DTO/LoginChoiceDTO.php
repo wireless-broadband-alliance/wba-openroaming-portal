@@ -7,6 +7,7 @@ use libphonenumber\PhoneNumber;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Constraints\Callback;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
+use Misd\PhoneNumberBundle\Validator\Constraints as AssertPhoneNumber;
 
 class LoginChoiceDTO
 {
@@ -19,6 +20,7 @@ class LoginChoiceDTO
     #[Assert\Email(message: 'Please enter a valid email address.')]
     public ?string $email = null;
 
+    #[AssertPhoneNumber\PhoneNumber(type: AssertPhoneNumber\PhoneNumber::MOBILE, defaultRegion: "US")]
     public ?PhoneNumber $phoneNumber = null;
 
     public ?string $password = null;
