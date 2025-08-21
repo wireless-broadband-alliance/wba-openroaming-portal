@@ -85,7 +85,7 @@ class SecurityController extends AbstractController
         }
 
         if ($data['LOGIN_WITH_UUID_ONLY']['value'] === OperationMode::ON->value) {
-            return $this->redirectToRoute('app_login_UUID');
+            return $this->redirectToRoute('app_login_magic');
         }
 
         // Last username entered by the user (this will be empty if the user clicked the verification link)
@@ -136,8 +136,8 @@ class SecurityController extends AbstractController
     /**
      * @throws TransportExceptionInterface
      */
-    #[Route('/login/UUID', name: 'app_login_UUID')]
-    public function loginUUID(
+    #[Route('/login/magic', name: 'app_login_magic')]
+    public function loginMagic(
         Request $request,
         UserPasswordHasherInterface $userPasswordHasher,
         EntityManagerInterface $entityManager,
