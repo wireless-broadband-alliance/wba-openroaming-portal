@@ -5,6 +5,8 @@ namespace App\Service;
 use App\Entity\User;
 use App\Enum\SMSResponse;
 use App\Repository\SettingRepository;
+use App\Repository\UserRepository;
+use DateTime;
 use Random\RandomException;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpClient\HttpClient;
@@ -21,7 +23,7 @@ readonly class SendSMS
     public function __construct(
         private SettingRepository $settingRepository,
         private ParameterBagInterface $parameterBag,
-        private TwoFAService  $twoFAService,
+        private UserRepository $userRepository,
     ) {
     }
 
@@ -50,7 +52,13 @@ readonly class SendSMS
         $client = HttpClient::create();
         $messageLength = $this->verifyMessageLength($message);
         if ($messageLength) {
-            $code = $this->twoFAService->twoFACode($user);
+            $user->setTwoFACode(random_int(100000, 999999));
+            $user->setTwoFACodeGeneratedAt(new DateTime());
+            $user->setTwoFAcodeIsActive(true);
+            $this->userRepository->save($user, true);
+
+            $code = $user->getTwoFACode();
+
             $message = 'Verification code is: ' . $code;
         }
 
