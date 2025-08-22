@@ -188,7 +188,7 @@ class AuthController extends AbstractController
 
             // --- Email/SMS / OTP validation ---
             if ($isLoginWithUUIDOnly === OperationMode::ON->value) {
-                // 🚨 If LOGIN_WITH_UUID_ONLY is ON, skip this entire 2FA validation for email/SMS accounts
+                // If LOGIN_WITH_UUID_ONLY is ON, skip this entire 2FA validation for email/SMS accounts
             } elseif (
                 !$this->twoFAService->validate2FACode($user, $data['twoFACode']) &&
                 !$this->twoFAService->validateOTPCodes($user, $data['twoFACode'])
