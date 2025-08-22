@@ -34,6 +34,7 @@ use Random\RandomException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
@@ -65,6 +66,7 @@ class SecurityController extends AbstractController
         private readonly EventActions $eventActions,
         private readonly RegistrationEmailGenerator $emailGenerator,
         private readonly UserCreationService $userCreationService,
+        private readonly TokenStorageInterface $tokenStorage,
     ) {
     }
 
@@ -146,7 +148,7 @@ class SecurityController extends AbstractController
             'data' => $data,
             'form' => $form,
             'context' => FirewallType::LANDING->value,
-            'loginChoiceDTO' => $dto
+            'loginChoiceDTO' => $dto,
         ]);
     }
 
@@ -158,6 +160,7 @@ class SecurityController extends AbstractController
     public function loginMagic(
         Request $request,
         UserPasswordHasherInterface $userPasswordHasher,
+        SessionInterface $session,
     ): Response {
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
 
@@ -243,8 +246,8 @@ class SecurityController extends AbstractController
                     );
                 }
             } else {
-                $phoneNumber = '+' . $loginChoiceDTO->phoneNumber->getCountryCode(
-                    ) . $loginChoiceDTO->phoneNumber->getNationalNumber();
+                $phoneNumber = '+'.$loginChoiceDTO->phoneNumber->getCountryCode(
+                    ).$loginChoiceDTO->phoneNumber->getNationalNumber();
                 $loginUser = $this->userRepository->findOneBy(['uuid' => $phoneNumber]);
                 if ($loginUser instanceof User) {
                     $event = $this->magicLinkService->canSendLink($loginUser);
@@ -290,8 +293,19 @@ class SecurityController extends AbstractController
                                 'success',
                                 'We have sent a login verification code to your phone number. Please check your SMS messages to continue.'
                             );
-                            return $this->redirectToRoute('app_login_confirmation');
 
+                            // Soft Authenticate the user for code confirmation
+                            $token = new UsernamePasswordToken(
+                                $loginUser,
+                                FirewallType::LANDING->value,
+                                $loginUser->getRoles()
+                            );
+                            $this->tokenStorage->setToken($token);
+
+                            // Store the authentication token in the session
+                            $session->set('_security_main', serialize($token));
+
+                            return $this->redirectToRoute('app_login_confirmation');
                         } else {
                             $this->addFlash(
                                 'error',
@@ -336,6 +350,18 @@ class SecurityController extends AbstractController
                             'success',
                             'We have sent a login verification code to your phone number. Please check your SMS messages to continue.'
                         );
+
+                        // Soft Authenticate the user for code confirmation
+                        $token = new UsernamePasswordToken(
+                            $loginUser,
+                            FirewallType::LANDING->value,
+                            $loginUser->getRoles()
+                        );
+                        $this->tokenStorage->setToken($token);
+
+                        // Store the authentication token in the session
+                        $session->set('_security_main', serialize($token));
+
                         return $this->redirectToRoute('app_login_confirmation');
                     } else {
                         $this->addFlash(
@@ -351,7 +377,7 @@ class SecurityController extends AbstractController
             'data' => $data,
             'form' => $form,
             'context' => FirewallType::LANDING->value,
-            'loginChoiceDTO' => $loginChoiceDTO
+            'loginChoiceDTO' => $loginChoiceDTO,
         ]);
     }
 
@@ -411,7 +437,7 @@ class SecurityController extends AbstractController
             'data' => $data,
             'form' => $form,
             'context' => FirewallType::DASHBOARD->value,
-            'loginChoiceDTO' => $dto
+            'loginChoiceDTO' => $dto,
         ]);
     }
 
@@ -420,6 +446,7 @@ class SecurityController extends AbstractController
     {
         $session = $request->getSession();
         $session->clear();
+
         return $this->redirectToRoute('app_dashboard_login');
     }
 
@@ -458,6 +485,7 @@ class SecurityController extends AbstractController
                 $this->entityManager->persist($user);
                 $this->entityManager->flush();
                 $session->set('session_verified', true);
+
                 return $this->redirectToRoute('app_landing');
             }
 
@@ -471,7 +499,7 @@ class SecurityController extends AbstractController
             'data' => $data,
             'form' => $form,
             'context' => FirewallType::LANDING->value,
-            'user' => $user
+            'user' => $user,
         ]);
     }
 
@@ -480,6 +508,7 @@ class SecurityController extends AbstractController
     {
         $session = $request->getSession();
         $session->clear();
+
         return $this->redirectToRoute('app_landing');
     }
 
@@ -520,7 +549,7 @@ class SecurityController extends AbstractController
                     $user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::SMS->value
                 ) {
                     $session = $request->getSession();
-                    $session->set('2fa_verified_' . FirewallType::LANDING->value, true);
+                    $session->set('2fa_verified_'.FirewallType::LANDING->value, true);
                 }
 
                 // Defines the Event to the table

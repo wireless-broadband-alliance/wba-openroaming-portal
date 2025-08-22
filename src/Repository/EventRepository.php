@@ -102,10 +102,13 @@ class EventRepository extends ServiceEntityRepository
     {
         return $this->createQueryBuilder('e')
             ->andWhere('e.user = :user')
-            ->andWhere('e.event_name = :event_name')
+            ->andWhere('e.event_name IN (:event_names)')
             ->andWhere('e.event_datetime >= :datetime')
             ->setParameter('user', $user)
-            ->setParameter('event_name', AnalyticalEventType::LOGIN_WITH_UUID_ONLY_LINK->value)
+            ->setParameter('event_names', [
+                AnalyticalEventType::LOGIN_WITH_UUID_ONLY_LINK->value,
+                AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE->value
+            ])
             ->setParameter('datetime', $time)
             ->setMaxResults(1)
             ->getQuery()
