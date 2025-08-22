@@ -250,15 +250,15 @@ class AuthController extends AbstractController
 
                 $smsResponse = $this->sendSMS->sendSmsNoValidation($user, $message);
 
-                if ($smsResponse === SMSResponse::SMS_SUCCESS->value) {
+                if ($smsResponse === SMSResponse::SMS_SUCCESS_LINK->value) {
                     $this->addFlash(
                         'success',
-                        'A login link has been sent to your phone number via SMS.'
+                        'We have sent a login link to your phone number. Please check your SMS messages to continue.'
                     );
-                } elseif ($smsResponse === SMSResponse::SMS_INVALID_MESSAGE_LENGTH->value) {
+                } elseif ($smsResponse === SMSResponse::SMS_SUCCESS_CODE->value) {
                     $this->addFlash(
-                        'error',
-                        'The login link could not be sent because the SMS message was too long. Please try again later.'
+                        'success',
+                        'We have sent a login verification code to your phone number. Please check your SMS messages to continue.'
                     );
                 } else {
                     $this->addFlash(

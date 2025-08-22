@@ -484,7 +484,7 @@ class UsersManagementController extends AbstractController
                     $message = "Your new account password is: " . $newPassword . "%0A";
                     $smsResponse = $this->sendSMS->sendSmsNoValidation($user, $message);
 
-                    if ($smsResponse === SMSResponse::SMS_SUCCESS->value) {
+                    if ($smsResponse) {
                         $this->addFlash(
                             'success',
                             'A new account password has been sent to your phone number via SMS.'
@@ -502,11 +502,6 @@ class UsersManagementController extends AbstractController
                             AnalyticalEventType::USER_ACCOUNT_UPDATE_PASSWORD_FROM_UI->value,
                             new DateTime(),
                             $eventMetadata
-                        );
-                    } elseif ($smsResponse === SMSResponse::SMS_INVALID_MESSAGE_LENGTH->value) {
-                        $this->addFlash(
-                            'error',
-                            'The new password could not be sent because the SMS message was too long. Please try again.'
                         );
                     } else {
                         $this->addFlash(
