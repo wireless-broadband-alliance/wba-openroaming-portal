@@ -5,8 +5,13 @@ namespace App\Service;
 use App\Entity\User;
 use App\Enum\SMSResponse;
 use App\Repository\SettingRepository;
+use Random\RandomException;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpClient\HttpClient;
+use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 
 readonly class SendSMS
 {
@@ -20,6 +25,13 @@ readonly class SendSMS
     ) {
     }
 
+    /**
+     * @throws TransportExceptionInterface
+     * @throws RandomException
+     * @throws ServerExceptionInterface
+     * @throws RedirectionExceptionInterface
+     * @throws ClientExceptionInterface
+     */
     public function sendSmsNoValidation(User $user, string $message): string
     {
         $recipient = "+" .
