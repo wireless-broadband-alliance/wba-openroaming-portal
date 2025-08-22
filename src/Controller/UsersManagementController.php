@@ -10,6 +10,7 @@ use App\Enum\AnalyticalEventType;
 use App\Enum\FirewallType;
 use App\Enum\OperationMode;
 use App\Enum\PlatformMode;
+use App\Enum\SMSResponse;
 use App\Enum\UserProvider;
 use App\Enum\UserRadiusProfileRevokeReason;
 use App\Enum\UserTwoFactorAuthenticationStatus;
@@ -472,32 +473,50 @@ class UsersManagementController extends AbstractController
 
                 if (
                     (!$latestEvent || $resetAttempts < 3)
-                    && (!$latestEvent
+                    && (
+                        !$latestEvent
                         || ($lastResetAccountPasswordTime instanceof DateTime
-                            && $lastResetAccountPasswordTime->add(
-                                $minInterval
-                            ) < $currentTime))
+                            && $lastResetAccountPasswordTime->add($minInterval) < $currentTime)
+                    )
                 ) {
                     $attempts = $resetAttempts + 1;
 
                     $message = "Your new account password is: " . $newPassword . "%0A";
-                    $this->sendSMS->sendSmsNoValidation($user->getPhoneNumber(), $message);
+                    $smsResponse = $this->sendSMS->sendSmsNoValidation($user, $message);
 
-                    $eventMetadata = [
-                        'ip' => $request->getClientIp(),
-                        'edited' => $user->getUuid(),
-                        'by' => $currentUser->getUuid(),
-                        'resetAttempts' => $attempts,
-                        'lastResetAccountPasswordTime' => $currentTime->format('Y-m-d H:i:s'),
-                    ];
-                    $this->eventActions->saveEvent(
-                        $user,
-                        AnalyticalEventType::USER_ACCOUNT_UPDATE_PASSWORD_FROM_UI->value,
-                        new DateTime(),
-                        $eventMetadata
-                    );
+                    if ($smsResponse === SMSResponse::SMS_SUCCESS->value) {
+                        $this->addFlash(
+                            'success',
+                            'A new account password has been sent to your phone number via SMS.'
+                        );
+
+                        $eventMetadata = [
+                            'ip' => $request->getClientIp(),
+                            'edited' => $user->getUuid(),
+                            'by' => $currentUser->getUuid(),
+                            'resetAttempts' => $attempts,
+                            'lastResetAccountPasswordTime' => $currentTime->format('Y-m-d H:i:s'),
+                        ];
+                        $this->eventActions->saveEvent(
+                            $user,
+                            AnalyticalEventType::USER_ACCOUNT_UPDATE_PASSWORD_FROM_UI->value,
+                            new DateTime(),
+                            $eventMetadata
+                        );
+                    } elseif ($smsResponse === SMSResponse::SMS_INVALID_MESSAGE_LENGTH->value) {
+                        $this->addFlash(
+                            'error',
+                            'The new password could not be sent because the SMS message was too long. Please try again.'
+                        );
+                    } else {
+                        $this->addFlash(
+                            'error',
+                            'We were unable to send the new password to your phone number. Please try again.'
+                        );
+                    }
                 }
             }
+
             $this->addFlash('success_admin', sprintf('"%s" is password was updated.', $user->getUuid()));
             return $this->redirectToRoute('admin_page');
         }
@@ -549,6 +568,7 @@ class UsersManagementController extends AbstractController
 
     /**
      * @throws \Exception
+     * @throws TransportExceptionInterface
      */
     #[Route('/dashboard/disable2FA/{id<\d+>}', name: 'app_disable2FA_admin')]
     #[IsGranted('ROLE_ADMIN')]
@@ -558,11 +578,10 @@ class UsersManagementController extends AbstractController
         MailerInterface $mailer
     ): RedirectResponse {
         if (!$user = $this->userRepository->find($id)) {
-            // Get the 'id' parameter from the route URL
             $this->addFlash('error_admin', 'The user does not exist.');
             return $this->redirectToRoute('admin_page');
         }
-        // Get the User Provider && ProviderId
+
         $userExternalAuths = $this->userExternalAuthRepository->findOneBy(['user' => $user]);
 
         // Disable current associated Profile
@@ -572,7 +591,7 @@ class UsersManagementController extends AbstractController
             true
         );
 
-        // Change user 2fa status
+        // Change user 2FA status
         $this->twoFAService->disable2FA($user);
         $this->twoFAService->event2FA(
             $request->getClientIp(),
@@ -588,13 +607,19 @@ class UsersManagementController extends AbstractController
             $userExternalAuths->getProviderId() === UserProvider::PHONE_NUMBER->value
         ) {
             $message = "Your OpenRoaming 2FA has been disabled. Please re-enable it as soon as possible.";
-            $this->sendSMS->sendSmsNoValidation($user->getPhoneNumber(), $message);
+            $smsResponse = $this->sendSMS->sendSmsNoValidation($user, $message);
+
+            if ($smsResponse === SMSResponse::SMS_SUCCESS->value) {
+                $this->addFlash('success_admin', 'Two-factor authentication successfully disabled and SMS notification sent.');
+            } elseif ($smsResponse === SMSResponse::SMS_INVALID_MESSAGE_LENGTH->value) {
+                $this->addFlash('error_admin', '2FA disabled, but the SMS notification could not be sent (message too long).');
+            } else {
+                $this->addFlash('error_admin', '2FA disabled, but the SMS notification failed to send. Please notify the user manually.');
+            }
+        } else {
+            $this->addFlash('success_admin', 'Two-factor authentication successfully disabled.');
         }
 
-        $this->addFlash(
-            'success_admin',
-            'Two factor authentication successfully disabled'
-        );
         return $this->redirectToRoute('admin_user_edit', [
             'id' => $user->getId(),
         ]);
