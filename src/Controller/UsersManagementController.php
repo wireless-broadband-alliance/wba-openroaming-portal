@@ -604,10 +604,8 @@ class UsersManagementController extends AbstractController
             $message = "Your OpenRoaming 2FA has been disabled. Please re-enable it as soon as possible.";
             $smsResponse = $this->sendSMS->sendSmsNoValidation($user, $message);
 
-            if ($smsResponse === SMSResponse::SMS_SUCCESS->value) {
+            if ($smsResponse) {
                 $this->addFlash('success_admin', 'Two-factor authentication successfully disabled and SMS notification sent.');
-            } elseif ($smsResponse === SMSResponse::SMS_INVALID_MESSAGE_LENGTH->value) {
-                $this->addFlash('error_admin', '2FA disabled, but the SMS notification could not be sent (message too long).');
             } else {
                 $this->addFlash('error_admin', '2FA disabled, but the SMS notification failed to send. Please notify the user manually.');
             }
