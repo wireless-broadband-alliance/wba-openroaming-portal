@@ -3,7 +3,6 @@
 namespace App\Controller;
 
 use App\Entity\User;
-use App\Entity\UserExternalAuth;
 use App\Enum\AnalyticalEventType;
 use App\Enum\FirewallType;
 use App\Enum\OperationMode;
@@ -15,13 +14,10 @@ use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use App\Service\EventActions;
 use App\Service\GetSettings;
-use App\Service\MagicLinkService;
 use App\Service\RegistrationEmailGenerator;
 use App\Service\SendSMS;
 use App\Service\UserCreationService;
-use App\Service\VerificationCodeEmailGenerator;
 use DateTime;
-use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Exception;
 use Psr\EventDispatcher\EventDispatcherInterface;
@@ -33,7 +29,6 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;
@@ -63,7 +58,6 @@ class RegistrationController extends AbstractController
         private readonly TokenStorageInterface $tokenStorage,
         private readonly EventActions $eventActions,
         private readonly RegistrationEmailGenerator $emailGenerator,
-        private readonly MagicLinkService $magicLinkService,
         private readonly UserCreationService $userCreationService,
     ) {
     }
@@ -98,6 +92,11 @@ class RegistrationController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
+        if ($data['LOGIN_WITH_UUID_ONLY']['value'] === OperationMode::ON->value) {
+            $this->addFlash('error', 'This authentication method it\'s not enabled!');
+            return $this->redirectToRoute('app_landing');
+        }
+
         $user = new User();
         $form = $this->createForm(RegistrationFormType::class, $user);
         $form->handleRequest($request);
@@ -125,20 +124,13 @@ class RegistrationController extends AbstractController
 
                 $this->emailGenerator->sendRegistrationEmail($user, $randomPassword);
 
-                if ($data['LOGIN_WITH_UUID_ONLY']['value'] === OperationMode::ON->value) {
-                    $this->addFlash(
-                        'success',
-                        sprintf('We have sent an email with your login link to: %s', $user->getEmail())
-                    );
-                } else {
-                    $this->addFlash(
-                        'success',
-                        sprintf(
-                            'We have sent an email with your account password and verification code to: %s',
-                            $user->getEmail()
-                        )
-                    );
-                }
+                $this->addFlash(
+                    'success',
+                    sprintf(
+                        'We have sent an email with your account password and verification code to: %s',
+                        $user->getEmail()
+                    )
+                );
             }
         }
 
@@ -164,7 +156,6 @@ class RegistrationController extends AbstractController
     public function registerSMS(
         Request $request,
         UserPasswordHasherInterface $userPasswordHasher,
-        EntityManagerInterface $entityManager,
         SessionInterface $session
     ): Response {
         // Call the getSettings method of GetSettings class to retrieve the data
@@ -180,7 +171,12 @@ class RegistrationController extends AbstractController
         }
 
         if ($data['AUTH_METHOD_SMS_REGISTER_ENABLED']['value'] !== true) {
-            $this->addFlash('error', 'This authentication method is not enabled!');
+            $this->addFlash('error', 'This authentication method it\'s not enabled!');
+            return $this->redirectToRoute('app_landing');
+        }
+
+        if ($data['LOGIN_WITH_UUID_ONLY']['value'] === OperationMode::ON->value) {
+            $this->addFlash('error', 'This authentication method it\'s not enabled!');
             return $this->redirectToRoute('app_landing');
         }
 
@@ -209,26 +205,12 @@ class RegistrationController extends AbstractController
                     $request
                 );
 
-                if ($data['LOGIN_WITH_UUID_ONLY']['value'] === OperationMode::ON->value) {
-                    $link = $this->magicLinkService->magicToken($user);
-                    $message = "Welcome to OpenRoaming! Click the link to confirm and login with your account: $link";
-                } else {
-                    $message = "Your account password is: "
-                        . $randomPassword
-                        . "%0A"
-                        . "Verification code is: "
-                        . $user->getTwoFAcode();
-                }
-
-                $this->sendSMS->sendSmsNoValidation($user, $message);
-
-                if ($data['LOGIN_WITH_UUID_ONLY']['value'] === OperationMode::ON->value) {
-                    $this->addFlash(
-                        'success',
-                        'We have sent a link to your phone number to login and verify your account.'
-                    );
-                    return $this->redirectToRoute('app_register_sms');
-                }
+                $message = "Your account password is: "
+                    . $randomPassword
+                    . "%0A"
+                    . "Verification code is: "
+                    . $user->getTwoFAcode();
+                $this->sendSMS->sendSms($user->getPhoneNumber(), $message);
 
                 // Send SMS
                 $this->addFlash(
