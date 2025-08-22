@@ -8,14 +8,14 @@ use App\Repository\SettingRepository;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpClient\HttpClient;
 
-class SendSMS
+readonly class SendSMS
 {
     /**
      * SendSMS constructor.
      */
     public function __construct(
-        private readonly SettingRepository $settingRepository,
-        private readonly ParameterBagInterface $parameterBag,
+        private SettingRepository $settingRepository,
+        private ParameterBagInterface $parameterBag,
     ) {
     }
 
