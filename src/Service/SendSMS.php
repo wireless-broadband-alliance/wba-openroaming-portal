@@ -16,6 +16,7 @@ readonly class SendSMS
     public function __construct(
         private SettingRepository $settingRepository,
         private ParameterBagInterface $parameterBag,
+        private TwoFAService  $twoFAService,
     ) {
     }
 
@@ -35,9 +36,10 @@ readonly class SendSMS
 
         // Check if the user can regenerate the SMS code
         $client = HttpClient::create();
-
-        if ($this->verifyMessageLength($message)) {
-            return SMSResponse::SMS_INVALID_MESSAGE_LENGTH->value;
+        $messageLength = $this->verifyMessageLength($message);
+        if ($messageLength) {
+            $code = $this->twoFAService->twoFACode($user);
+            $message = 'Verification code is: ' . $code;
         }
 
         // Adjust the API endpoint and parameters based on the Budget SMS documentation
@@ -48,12 +50,15 @@ readonly class SendSMS
         $response->getStatusCode();
         $response->getContent();
 
-        return SMSResponse::SMS_SUCCESS->value;
+        if ($messageLength) {
+            return SMSResponse::SMS_SUCCESS_CODE->value;
+        }
+        return SMSResponse::SMS_SUCCESS_LINK->value;
     }
 
     public function verifyMessageLength(string $message): bool
     {
-        return strlen($message) <= 612;
+        return strlen($message) > 612;
     }
 
 }
