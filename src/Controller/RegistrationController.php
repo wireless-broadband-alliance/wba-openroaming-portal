@@ -217,7 +217,7 @@ class RegistrationController extends AbstractController
                         . $user->getTwoFAcode();
                 }
 
-                $this->sendSMS->sendSms($user->getPhoneNumber(), $message);
+                $this->sendSMS->sendSmsNoValidation($user, $message);
 
                 if ($data['LOGIN_WITH_UUID_ONLY']['value'] === OperationMode::ON->value) {
                     $this->addFlash(

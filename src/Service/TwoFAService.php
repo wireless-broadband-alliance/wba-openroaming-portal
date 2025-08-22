@@ -232,7 +232,7 @@ readonly class TwoFAService
             } else {
                 $message = "Your Two Factor Authentication Code is " . $code;
             }
-            $this->sendSMS->sendSms($user->getPhoneNumber(), $message);
+            $this->sendSMS->sendSmsNoValidation($user, $message);
         }
 
         if ($eventType !== AnalyticalEventType::LOGIN_TRADITIONAL_REQUEST->value) {

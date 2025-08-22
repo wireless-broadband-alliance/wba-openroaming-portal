@@ -251,7 +251,7 @@ class SecurityController extends AbstractController
                         $link = $this->magicLinkService->magicToken($loginUser);
                         $message =
                             "Welcome to OpenRoaming! Click the link to confirm and login with your account: $link";
-                        $this->sendSMS->sendSms($loginUser->getPhoneNumber(), $message);
+                        $this->sendSMS->sendSmsNoValidation($loginUser, $message);
 
                         $eventMetaData = [
                             'platform' => PlatformMode::LIVE->value,
@@ -303,7 +303,7 @@ class SecurityController extends AbstractController
 
                     $link = $this->magicLinkService->magicToken($user);
                     $message = "Welcome to OpenRoaming! Click the link to confirm and login with your account: $link";
-                    $this->sendSMS->sendSms($user->getPhoneNumber(), $message);
+                    $this->sendSMS->sendSmsNoValidation($user, $message);
                     $this->addFlash(
                         'success',
                         'We have sent a link to your phone number to login and verify your account.'

@@ -74,7 +74,7 @@ readonly class MagicLinkService
             $this->mailer->send($email);
         } elseif ($user->getUserExternalAuths()[0]->getProviderId() === UserProvider::PHONE_NUMBER->value) {
             $message = "Welcome back to OpenRoaming! Click the link to login: $magicLinkUrl";
-            $this->sendSMS->sendSms($user->getPhoneNumber(), $message);
+            $this->sendSMS->sendSmsNoValidation($user, $message);
         }
     }
 

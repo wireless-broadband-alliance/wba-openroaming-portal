@@ -243,7 +243,7 @@ class AuthController extends AbstractController
             } else {
                 $link = $this->magicLinkService->magicToken($user);
                 $message = "Welcome to OpenRoaming! Click the link to confirm and login with your account: $link";
-                $this->sendSMS->sendSms($user->getPhoneNumber(), $message);
+                $this->sendSMS->sendSmsNoValidation($user, $message);
             }
         } else {
             $timeIntervalToResendCode = $this->settingRepository->findOneBy(
