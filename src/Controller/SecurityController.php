@@ -253,7 +253,8 @@ class SecurityController extends AbstractController
                         $message = "Welcome to OpenRoaming! Click the link to confirm and login with your account: $link";
                         $smsResponse = $this->sendSMS->sendSmsNoValidation($loginUser, $message);
 
-                        if ($smsResponse === SMSResponse::SMS_SUCCESS->value) {
+                        if ($smsResponse === SMSResponse::SMS_SUCCESS_LINK->value) {
+                            // Save event for link sent
                             $eventMetaData = [
                                 'platform' => PlatformMode::LIVE->value,
                                 'user_agent' => $request->headers->get('User-Agent'),
@@ -271,15 +272,30 @@ class SecurityController extends AbstractController
                                 'success',
                                 'We have sent a login link to your phone number. Please check your SMS messages to continue.'
                             );
-                        } elseif ($smsResponse === SMSResponse::SMS_INVALID_MESSAGE_LENGTH->value) {
-                            $this->addFlash(
-                                'error',
-                                'The SMS could not be sent because the message length is invalid. Please try again later.'
+                        } elseif ($smsResponse === SMSResponse::SMS_SUCCESS_CODE->value) {
+                            // Save event for code sent
+                            $eventMetaData = [
+                                'platform' => PlatformMode::LIVE->value,
+                                'user_agent' => $request->headers->get('User-Agent'),
+                                'uuid' => $loginUser->getUuid(),
+                                'ip' => $request->getClientIp(),
+                            ];
+                            $this->eventActions->saveEvent(
+                                $loginUser,
+                                AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE->value,
+                                new DateTime(),
+                                $eventMetaData
                             );
+                            $this->addFlash(
+                                'success',
+                                'We have sent a login verification code to your phone number. Please check your SMS messages to continue.'
+                            );
+                            return $this->redirectToRoute('app_login_confirmation');
+
                         } else {
                             $this->addFlash(
                                 'error',
-                                'We were unable to send the login link to your phone number. Please try again later.'
+                                'We were unable to send the login link or verification code to your phone number. Please try again later.'
                             );
                         }
                     } else {
@@ -320,7 +336,6 @@ class SecurityController extends AbstractController
                             'success',
                             'We have sent a login verification code to your phone number. Please check your SMS messages to continue.'
                         );
-
                         return $this->redirectToRoute('app_login_confirmation');
                     } else {
                         $this->addFlash(
