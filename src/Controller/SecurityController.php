@@ -106,7 +106,7 @@ class SecurityController extends AbstractController
 
         // Fetch default regions (PhoneNumber)
         $regionSetting = $data['DEFAULT_REGION_PHONE_INPUTS']['value'];
-        $defaultRegions = $regionSetting ? explode(',', (string) $regionSetting) : ['PT, US, GB'];
+        $defaultRegions = $regionSetting ? explode(',', (string)$regionSetting) : ['PT, US, GB'];
 
         // Create the DTO with injected default regions and required password for this login method
         $dto = new LoginChoiceDTO();
@@ -233,7 +233,7 @@ class SecurityController extends AbstractController
 
                     $this->addFlash(
                         'success',
-                        'We have sent an email with your login link'
+                        sprintf('We have sent an email with your login link to: %s', $user->getEmail())
                     );
                 } else {
                     $this->addFlash(
@@ -243,7 +243,7 @@ class SecurityController extends AbstractController
                 }
             } else {
                 $phoneNumber = '+' . $loginChoiceDTO->phoneNumber->getCountryCode(
-                ) . $loginChoiceDTO->phoneNumber->getNationalNumber();
+                    ) . $loginChoiceDTO->phoneNumber->getNationalNumber();
                 $loginUser = $this->userRepository->findOneBy(['uuid' => $phoneNumber]);
                 if ($loginUser instanceof User) {
                     $event = $this->magicLinkService->canSendLink($loginUser);
@@ -288,7 +288,7 @@ class SecurityController extends AbstractController
                     $hashedPassword = $userPasswordHasher->hashPassword($user, $randomPassword);
 
                     $phoneNumber = '+' . $loginChoiceDTO->phoneNumber->getCountryCode(
-                    ) . $loginChoiceDTO->phoneNumber->getNationalNumber();
+                        ) . $loginChoiceDTO->phoneNumber->getNationalNumber();
 
                     $user->setUuid($phoneNumber);
 
@@ -349,7 +349,7 @@ class SecurityController extends AbstractController
 
         // Fetch default regions (PhoneNumber)
         $regionSetting = $data['DEFAULT_REGION_PHONE_INPUTS']['value'];
-        $defaultRegions = $regionSetting ? explode(',', (string) $regionSetting) : ['PT, US, GB'];
+        $defaultRegions = $regionSetting ? explode(',', (string)$regionSetting) : ['PT, US, GB'];
 
         // Create the DTO with injected default regions and required password for this login method
         $dto = new LoginChoiceDTO();
