@@ -4,6 +4,6 @@ namespace App\Enum;
 
 enum SMSResponse: string
 {
-    case SMS_SUCCESS = 'SMS_SUCCESS';
-    case SMS_INVALID_MESSAGE_LENGTH = 'SMS_INVALID_MESSAGE_LENGTH';
+    case SMS_SUCCESS_LINK = 'SMS_SUCCESS_LINK';
+    case SMS_SUCCESS_CODE = 'SMS_SUCCESS_CODE';
 }
