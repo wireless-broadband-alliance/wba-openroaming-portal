@@ -80,5 +80,4 @@ readonly class SendSMS
     {
         return strlen($message) > 612;
     }
-
 }

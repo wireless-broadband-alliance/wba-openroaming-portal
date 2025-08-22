@@ -246,14 +246,15 @@ class SecurityController extends AbstractController
                     );
                 }
             } else {
-                $phoneNumber = '+'.$loginChoiceDTO->phoneNumber->getCountryCode(
-                    ).$loginChoiceDTO->phoneNumber->getNationalNumber();
+                $phoneNumber = '+' . $loginChoiceDTO->phoneNumber->getCountryCode() .
+                    $loginChoiceDTO->phoneNumber->getNationalNumber();
                 $loginUser = $this->userRepository->findOneBy(['uuid' => $phoneNumber]);
                 if ($loginUser instanceof User) {
                     $event = $this->magicLinkService->canSendLink($loginUser);
                     if (!($event instanceof Event)) {
                         $link = $this->magicLinkService->magicToken($loginUser);
-                        $message = "Welcome to OpenRoaming! Click the link to confirm and login with your account: $link";
+                        $message = "Welcome to OpenRoaming! Click the link to confirm 
+                        and login with your account: $link";
                         $smsResponse = $this->sendSMS->sendSmsNoValidation($loginUser, $message);
 
                         if ($smsResponse === SMSResponse::SMS_SUCCESS_LINK->value) {
@@ -273,7 +274,8 @@ class SecurityController extends AbstractController
 
                             $this->addFlash(
                                 'success',
-                                'We have sent a login link to your phone number. Please check your SMS messages to continue.'
+                                'We have sent a login link to your phone number. 
+                                Please check your SMS messages to continue.'
                             );
                         } elseif ($smsResponse === SMSResponse::SMS_SUCCESS_CODE->value) {
                             // Save event for code sent
@@ -291,7 +293,8 @@ class SecurityController extends AbstractController
                             );
                             $this->addFlash(
                                 'success',
-                                'We have sent a login verification code to your phone number. Please check your SMS messages to continue.'
+                                'We have sent a login verification code to your phone number. 
+                                Please check your SMS messages to continue.'
                             );
 
                             // Soft Authenticate the user for code confirmation
@@ -309,7 +312,8 @@ class SecurityController extends AbstractController
                         } else {
                             $this->addFlash(
                                 'error',
-                                'We were unable to send the login link or verification code to your phone number. Please try again later.'
+                                'We were unable to send the login link or verification code to your 
+                                phone number. Please try again later.'
                             );
                         }
                     } else {
@@ -343,12 +347,14 @@ class SecurityController extends AbstractController
                     if ($smsResponse === SMSResponse::SMS_SUCCESS_LINK->value) {
                         $this->addFlash(
                             'success',
-                            'We have sent a login link to your phone number. Please check your SMS messages to continue.'
+                            'We have sent a login link to your phone number. 
+                            Please check your SMS messages to continue.'
                         );
                     } elseif ($smsResponse === SMSResponse::SMS_SUCCESS_CODE->value) {
                         $this->addFlash(
                             'success',
-                            'We have sent a login verification code to your phone number. Please check your SMS messages to continue.'
+                            'We have sent a login verification code to your phone number. 
+                            Please check your SMS messages to continue.'
                         );
 
                         // Soft Authenticate the user for code confirmation
@@ -549,7 +555,7 @@ class SecurityController extends AbstractController
                     $user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::SMS->value
                 ) {
                     $session = $request->getSession();
-                    $session->set('2fa_verified_'.FirewallType::LANDING->value, true);
+                    $session->set('2fa_verified_' . FirewallType::LANDING->value, true);
                 }
 
                 // Defines the Event to the table

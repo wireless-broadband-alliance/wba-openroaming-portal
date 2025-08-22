@@ -258,7 +258,8 @@ class AuthController extends AbstractController
                 } elseif ($smsResponse === SMSResponse::SMS_SUCCESS_CODE->value) {
                     $this->addFlash(
                         'success',
-                        'We have sent a login verification code to your phone number. Please check your SMS messages to continue.'
+                        'We have sent a login verification code to your phone number. 
+                        Please check your SMS messages to continue.'
                     );
                 } else {
                     $this->addFlash(

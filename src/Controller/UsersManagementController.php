@@ -605,9 +605,15 @@ class UsersManagementController extends AbstractController
             $smsResponse = $this->sendSMS->sendSmsNoValidation($user, $message);
 
             if ($smsResponse) {
-                $this->addFlash('success_admin', 'Two-factor authentication successfully disabled and SMS notification sent.');
+                $this->addFlash(
+                    'success_admin',
+                    'Two-factor authentication successfully disabled and SMS notification sent.'
+                );
             } else {
-                $this->addFlash('error_admin', '2FA disabled, but the SMS notification failed to send. Please notify the user manually.');
+                $this->addFlash(
+                    'error_admin',
+                    '2FA disabled, but the SMS notification failed to send. Please notify the user manually.'
+                );
             }
         } else {
             $this->addFlash('success_admin', 'Two-factor authentication successfully disabled.');

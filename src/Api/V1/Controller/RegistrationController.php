@@ -527,7 +527,8 @@ class RegistrationController extends AbstractController
             if ($result === SMSResponse::SMS_SUCCESS_LINK->value) {
                 $messageAPI = 'SMS User Account Registered Successfully. A link has been sent to your phone.';
             } else {
-                $messageAPI = 'SMS User Account Registered Successfully. A verification code has been sent to your phone.';
+                $messageAPI = 'SMS User Account Registered Successfully. 
+                A verification code has been sent to your phone.';
             }
             return new BaseResponse(
                 200,
