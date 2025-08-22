@@ -128,13 +128,13 @@ class RegistrationController extends AbstractController
                 if ($data['LOGIN_WITH_UUID_ONLY']['value'] === OperationMode::ON->value) {
                     $this->addFlash(
                         'success',
-                        sprintf('We have sent an email with your login link to %s', $user->getEmail())
+                        sprintf('We have sent an email with your login link to: %s', $user->getEmail())
                     );
                 } else {
                     $this->addFlash(
                         'success',
                         sprintf(
-                            'We have sent an email with your account password and verification code to %s',
+                            'We have sent an email with your account password and verification code to: %s',
                             $user->getEmail()
                         )
                     );
