@@ -10,6 +10,7 @@ use App\Enum\AnalyticalEventType;
 use App\Enum\FirewallType;
 use App\Enum\OperationMode;
 use App\Enum\PlatformMode;
+use App\Enum\SMSResponse;
 use App\Enum\UserProvider;
 use App\Enum\UserTwoFactorAuthenticationStatus;
 use App\Form\LoginType;
@@ -249,27 +250,38 @@ class SecurityController extends AbstractController
                     $event = $this->magicLinkService->canSendLink($loginUser);
                     if (!($event instanceof Event)) {
                         $link = $this->magicLinkService->magicToken($loginUser);
-                        $message =
-                            "Welcome to OpenRoaming! Click the link to confirm and login with your account: $link";
-                        $this->sendSMS->sendSmsNoValidation($loginUser, $message);
+                        $message = "Welcome to OpenRoaming! Click the link to confirm and login with your account: $link";
+                        $smsResponse = $this->sendSMS->sendSmsNoValidation($loginUser, $message);
 
-                        $eventMetaData = [
-                            'platform' => PlatformMode::LIVE->value,
-                            'user_agent' => $request->headers->get('User-Agent'),
-                            'uuid' => $loginUser->getUuid(),
-                            'ip' => $request->getClientIp(),
-                        ];
-                        $this->eventActions->saveEvent(
-                            $loginUser,
-                            AnalyticalEventType::LOGIN_WITH_UUID_ONLY_LINK->value,
-                            new DateTime(),
-                            $eventMetaData
-                        );
+                        if ($smsResponse === SMSResponse::SMS_SUCCESS->value) {
+                            $eventMetaData = [
+                                'platform' => PlatformMode::LIVE->value,
+                                'user_agent' => $request->headers->get('User-Agent'),
+                                'uuid' => $loginUser->getUuid(),
+                                'ip' => $request->getClientIp(),
+                            ];
+                            $this->eventActions->saveEvent(
+                                $loginUser,
+                                AnalyticalEventType::LOGIN_WITH_UUID_ONLY_LINK->value,
+                                new DateTime(),
+                                $eventMetaData
+                            );
 
-                        $this->addFlash(
-                            'success',
-                            'We have sent a link to your phone number to login and verify your account.'
-                        );
+                            $this->addFlash(
+                                'success',
+                                'We have sent a login link to your phone number. Please check your SMS messages to continue.'
+                            );
+                        } elseif ($smsResponse === SMSResponse::SMS_INVALID_MESSAGE_LENGTH->value) {
+                            $this->addFlash(
+                                'error',
+                                'The SMS could not be sent because the message length is invalid. Please try again later.'
+                            );
+                        } else {
+                            $this->addFlash(
+                                'error',
+                                'We were unable to send the login link to your phone number. Please try again later.'
+                            );
+                        }
                     } else {
                         $timeIntervalToResendCode = $data["TWO_FACTOR_AUTH_RESEND_INTERVAL"]["value"];
                         $message = $this->magicLinkService->timeToResend($timeIntervalToResendCode, $event);
@@ -280,20 +292,13 @@ class SecurityController extends AbstractController
                     }
                 } else {
                     $user = new User();
-
                     // Generate a random password
                     $randomPassword = bin2hex(random_bytes(4));
-
                     // Hash the password
                     $hashedPassword = $userPasswordHasher->hashPassword($user, $randomPassword);
 
-                    $phoneNumber = '+' . $loginChoiceDTO->phoneNumber->getCountryCode(
-                        ) . $loginChoiceDTO->phoneNumber->getNationalNumber();
-
                     $user->setUuid($phoneNumber);
-
                     $user->setPhoneNumber($loginChoiceDTO->phoneNumber);
-
                     $user = $this->userCreationService->createUser(
                         $user,
                         $hashedPassword,
@@ -303,11 +308,24 @@ class SecurityController extends AbstractController
 
                     $link = $this->magicLinkService->magicToken($user);
                     $message = "Welcome to OpenRoaming! Click the link to confirm and login with your account: $link";
-                    $this->sendSMS->sendSmsNoValidation($user, $message);
-                    $this->addFlash(
-                        'success',
-                        'We have sent a link to your phone number to login and verify your account.'
-                    );
+                    $smsResponse = $this->sendSMS->sendSmsNoValidation($user, $message);
+
+                    if ($smsResponse === SMSResponse::SMS_SUCCESS->value) {
+                        $this->addFlash(
+                            'success',
+                            'We have sent a login link to your phone number. Please check your SMS messages to continue.'
+                        );
+                    } elseif ($smsResponse === SMSResponse::SMS_INVALID_MESSAGE_LENGTH->value) {
+                        $this->addFlash(
+                            'error',
+                            'The login link could not be sent because the SMS message was too long. Please try again later.'
+                        );
+                    } else {
+                        $this->addFlash(
+                            'error',
+                            'We were unable to send the login link to your phone number. Please try again.'
+                        );
+                    }
                 }
             }
         }
