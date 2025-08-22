@@ -11,6 +11,7 @@ use App\Entity\UserExternalAuth;
 use App\Enum\AnalyticalEventType;
 use App\Enum\OperationMode;
 use App\Enum\PlatformMode;
+use App\Enum\SMSResponse;
 use App\Enum\UserProvider;
 use App\Enum\UserTwoFactorAuthenticationStatus;
 use App\Repository\SettingRepository;
@@ -233,17 +234,38 @@ class AuthController extends AbstractController
             return new BaseResponse(200, $responseData)->toResponse(); # Success Response
         }
 
-        // If the login with uuid is enabled generate the sms or the email with the login link
+        // If login with UUID is enabled, generate the SMS or email with the login link
         $event = $this->magicLinkService->canSendLink($user);
         if (!($event instanceof Event)) {
-            if ($user->getUserExternalAuths()[0]->getProviderId() === UserProvider::EMAIL->value) {
-                $this->magicLinkService->sendEmail(
-                    $user,
+            $providerId = $user->getUserExternalAuths()[0]->getProviderId();
+            if ($providerId === UserProvider::EMAIL->value) {
+                $this->magicLinkService->sendEmail($user);
+                $this->addFlash(
+                    'success',
+                    'A login link has been sent to your email address.'
                 );
             } else {
                 $link = $this->magicLinkService->magicToken($user);
                 $message = "Welcome to OpenRoaming! Click the link to confirm and login with your account: $link";
-                $this->sendSMS->sendSmsNoValidation($user, $message);
+
+                $smsResponse = $this->sendSMS->sendSmsNoValidation($user, $message);
+
+                if ($smsResponse === SMSResponse::SMS_SUCCESS->value) {
+                    $this->addFlash(
+                        'success',
+                        'A login link has been sent to your phone number via SMS.'
+                    );
+                } elseif ($smsResponse === SMSResponse::SMS_INVALID_MESSAGE_LENGTH->value) {
+                    $this->addFlash(
+                        'error',
+                        'The login link could not be sent because the SMS message was too long. Please try again later.'
+                    );
+                } else {
+                    $this->addFlash(
+                        'error',
+                        'We were unable to send the login link to your phone number. Please try again.'
+                    );
+                }
             }
         } else {
             $timeIntervalToResendCode = $this->settingRepository->findOneBy(
