@@ -111,6 +111,7 @@ readonly class MagicLinkService
         $interval_seconds += $interval->h * 60;
         $interval_seconds += $interval->i;
         $interval_seconds += $interval->s;
-        return 'Login link Invalid. Please wait ' . $interval_seconds . ' seconds before trying to send again.';
+
+        return 'Too many requests. Please wait ' . $interval_seconds . ' seconds before requesting a new login link.';
     }
 }
