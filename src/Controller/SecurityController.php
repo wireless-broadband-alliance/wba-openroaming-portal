@@ -509,16 +509,17 @@ class SecurityController extends AbstractController
 
                 return $this->redirectToRoute('app_landing');
             } catch (CustomUserMessageAuthenticationException) {
+                // Invalid link in case the try catch fails
                 $this->addFlash(
                     'error',
-                    'Authentication failed. Please try to log in manually.'
+                    'Your login link is invalid or has expired. Please request a new login link to continue.'
                 );
             }
         } else {
-            // If the verification code is invalid or not found, display an error message and redirect to the login page
+            // Invalid operation in case the link is actually expired based on the service timer
             $this->addFlash(
                 'error',
-                'Expired or already used link. Please try again.'
+                'Your login link is invalid or has expired. Please request a new login link to continue.'
             );
         }
 
