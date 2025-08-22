@@ -12,6 +12,11 @@
   the `PLATFORM_MODE` setting is `ON`.
     - When that happens, it could brake the user account registration system for email & phoneNumbers on the landing
       page.
+- Also for this release, it's required to run the new migrations to set up the new setting: `LOGIN_WITH_UUID_ONLY`
+  - Run the migrations with:
+    ```bash
+    php bin/console doctrine:migrations:migrate
+    ```
 
 # Release V1.9.0
 
