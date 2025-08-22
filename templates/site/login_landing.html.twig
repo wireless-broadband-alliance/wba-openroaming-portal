@@ -69,6 +69,9 @@
             <div class="relative mt-[32px]">
                 {{ form_label(form['email'], constant('App\\Enum\\UserProvider::EMAIL').value, {label_attr: {class: 'form-label'}}) }}
                 {{ form_widget(form['email'], {attr: {class: 'form-widget', placeholder: 'Enter your email'}}) }}
+                <div class="text-red-500 m-2">
+                    {{ form_errors(form.email) }}
+                </div>
             </div>
         {% endif %}
 
@@ -96,6 +99,10 @@
                     }) }}
                 </div>
             </div>
+            <div class="text-red-500 m-2">
+                {{ form_errors(form.phoneNumber.children.country) }}
+                {{ form_errors(form.phoneNumber.children.number) }}
+            </div>
         {% endif %}
 
         {# Password Field #}
@@ -104,13 +111,20 @@
                 {{ form_label(form['password'], 'Password', {label_attr: {class: 'form-label'}}) }}
                 {{ form_widget(form['password'], {attr: {class: 'form-widget', placeholder: 'Enter your password'}}) }}
             </div>
+            <div class="text-red-500 m-2">
+                {{ form_errors(form.password) }}
+            </div>
         {% endif %}
     </twig:LoginForm>
 
     {# Turnstile Checker #}
     {% if data.TURNSTILE_CHECKER.value == constant('App\\Enum\\OperationMode::ON').value %}
         <div class="ml-3 mt-5">
-            {{ form_row(form.security) }}
+            {{ form_label(form.security) }}
+            {{ form_widget(form.security) }}
+            <div class="text-red-500">
+                {{ form_errors(form.security) }}
+            </div>
         </div>
     {% endif %}
 

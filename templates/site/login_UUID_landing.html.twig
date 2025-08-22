@@ -24,85 +24,91 @@
             Please enter your email or phone number to receive the login link</p>
     </div>
 
-<twig:LoginUUIDForm :loginChoiceDTO="loginChoiceDTO" :form="form">
+    <twig:LoginUUIDForm :loginChoiceDTO="loginChoiceDTO" :form="form">
 
-    {{ form_start(form) }}
-    {# Login Method Toggle #}
+        {{ form_start(form) }}
+        {# Login Method Toggle #}
+        {% if form.loginMethod is defined %}
+            {{ form_widget(form.loginMethod, {attr: {class: 'hidden'}}) }}
+            <div class="flex justify-center mt-8">
+                <div class="flex bg-gray-300 rounded-lg overflow-hidden w-full max-w-md p-1">
+                    {# Email Option #}
+                    <label class="cursor-pointer flex-1 text-center px-4 py-2 transition-colors duration-200 rounded-md
+                   {{ loginChoiceDTO.loginMethod == constant('App\\Enum\\UserProvider::EMAIL').value ? 'bg-white text-black font-semibold shadow-md' : 'text-gray-700' }}">
+                        <input type="radio"
+                               name="{{ form.loginMethod.vars.full_name }}"
+                               value="{{ constant('App\\Enum\\UserProvider::EMAIL').value }}"
+                               class="hidden"
+                               wire:model="loginChoiceDTO.loginMethod"/>
+                        Email
+                    </label>
 
-    {% if form.loginMethod is defined %}
-        {{ form_widget(form.loginMethod, {attr: {class: 'hidden'}}) }}
-    <div class="flex justify-center mt-8">
-        <div class="flex bg-gray-300 rounded-lg overflow-hidden w-full max-w-md p-1">
-            {# Email Option #}
-            <label
-                    class="cursor-pointer flex-1 text-center px-4 py-2 transition-colors duration-200 rounded-md
-                   {{ loginChoiceDTO.loginMethod == constant('App\\Enum\\UserProvider::EMAIL').value ? 'bg-white text-black font-semibold shadow-md' : 'text-gray-700' }}"
-            >
-                <input type="radio"
-                       name="{{ form.loginMethod.vars.full_name }}"
-                       value="{{ constant('App\\Enum\\UserProvider::EMAIL').value }}"
-                       class="hidden"
-                       wire:model="loginChoiceDTO.loginMethod" />
-                Email
-            </label>
+                    {# Phone Number Option #}
+                    <label class="cursor-pointer flex-1 text-center px-4 py-2 transition-colors duration-200 rounded-md
+                   {{ loginChoiceDTO.loginMethod == constant('App\\Enum\\UserProvider::PHONE_NUMBER').value ? 'bg-white text-black font-semibold shadow-md' : 'text-gray-700' }}">
+                        <input type="radio"
+                               name="{{ form.loginMethod.vars.full_name }}"
+                               value="{{ constant('App\\Enum\\UserProvider::PHONE_NUMBER').value }}"
+                               class="hidden"
+                               wire:model="loginChoiceDTO.loginMethod"/>
+                        PhoneNumber
+                    </label>
+                </div>
+            </div>
+        {% endif %}
 
-            {# Phone Number Option #}
-            <label
-                    class="cursor-pointer flex-1 text-center px-4 py-2 transition-colors duration-200 rounded-md
-                   {{ loginChoiceDTO.loginMethod == constant('App\\Enum\\UserProvider::PHONE_NUMBER').value ? 'bg-white text-black font-semibold shadow-md' : 'text-gray-700' }}"
-            >
-                <input type="radio"
-                       name="{{ form.loginMethod.vars.full_name }}"
-                       value="{{ constant('App\\Enum\\UserProvider::PHONE_NUMBER').value }}"
-                       class="hidden"
-                       wire:model="loginChoiceDTO.loginMethod" />
-                PhoneNumber
-            </label>
-        </div>
-    </div>
-    {% endif %}
+        {% if form.email is defined %}
+            <div class="relative mt-[32px]">
+                {{ form_label(form.email, constant('App\\Enum\\UserProvider::EMAIL').value, {label_attr: {class: 'form-label'}}) }}
+                {{ form_widget(form.email, {
+                    attr: {
+                        class: 'form-widget',
+                        placeholder: 'Enter your Email',
+                    },
+                }) }}
+                <div class="text-red-500 m-2">
+                    {{ form_errors(form.email) }}
+                </div>
+            </div>
+        {% endif %}
 
-    {% if form.email is defined %}
-    {# Email #}
-    <div class="relative mt-[32px]">
-        {{ form_label(form.email, constant('App\\Enum\\UserProvider::EMAIL').value, {label_attr: {class: 'form-label'}}) }}
-        {{ form_widget(form.email, {
-            attr: {
-                class: 'form-widget',
-                placeholder: 'Enter your Email',
-            },
-        }) }}
-    </div>
-    {% endif %}
-    {% if form.phoneNumber is defined %}
-    <div class="flex flex-row items-end space-x-4 mt-8">
-        {# Phone Number Input #}
-        <div class="flex flex-col w-1/3">
-            {{ form_widget(form.phoneNumber.children.country, {
-                attr: {
-                    class: 'block w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary',
-                    placeholder: 'Enter your phone number',
-                    autocomplete: 'tel',
-                },
-            }) }}
+        {% if form.phoneNumber is defined %}
+            <div class="flex flex-row items-end space-x-4 mt-8">
+                {# Phone Number Input #}
+                <div class="flex flex-col w-1/3">
+                    {{ form_widget(form.phoneNumber.children.country, {
+                        attr: {
+                            class: 'block w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary',
+                            placeholder: 'Enter your phone number',
+                            autocomplete: 'tel',
+                        },
+                    }) }}
+                </div>
+                <div class="flex flex-col w-2/3">
+                    {{ form_widget(form.phoneNumber.children.number, {
+                        attr: {
+                            class: 'block w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary',
+                            placeholder: 'Enter your phone number',
+                            autocomplete: 'tel',
+                        },
+                    }) }}
+                </div>
+                <div class="text-red-500 m-2">
+                    {{ form_errors(form.phoneNumber.children.country) }}
+                    {{ form_errors(form.phoneNumber.children.number) }}
+                </div>
+            </div>
+        {% endif %}
+    </twig:LoginUUIDForm>
 
-        </div>
-        <div class="flex flex-col w-2/3">
-            {{ form_widget(form.phoneNumber.children.number, {
-                attr: {
-                    class: 'block w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary',
-                    placeholder: 'Enter your phone number',
-                    autocomplete: 'tel',
-                },
-            }) }}
-        </div>
-    </div>
-    {% endif %}
-</twig:LoginUUIDForm>
     {# Turnstile Checker #}
     {% if data.TURNSTILE_CHECKER.value == constant('App\\Enum\\OperationMode::ON').value %}
         <div class="ml-3 mt-5">
-            {{ form_row(form.security, {full_name: 'security'}) }}
+            {{ form_label(form.security) }}
+            {{ form_widget(form.security) }}
+            <div class="text-red-500">
+                {{ form_errors(form.security) }}
+            </div>
         </div>
     {% endif %}
 
