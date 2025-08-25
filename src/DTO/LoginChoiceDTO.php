@@ -17,10 +17,31 @@ class LoginChoiceDTO
     ], message: 'Select a valid login method')]
     public ?string $loginMethod = null;
 
-    #[Assert\Email(message: 'Please enter a valid email address.')]
+    #[Assert\When(
+        expression: "this.loginMethod === constant('App\\\\Enum\\\\UserProvider::EMAIL').value",
+        constraints: [
+            new Assert\NotBlank([
+                'message' => 'Email cannot be empty when login with email is selected.',
+            ]),
+            new Assert\Email([
+                'message' => 'Please enter a valid email address.',
+            ]),
+        ]
+    )]
     public ?string $email = null;
 
-    #[AssertPhoneNumber\PhoneNumber(type: AssertPhoneNumber\PhoneNumber::MOBILE, defaultRegion: "US")]
+
+    #[Assert\When(
+        expression: "this.loginMethod === constant('App\\\\Enum\\\\UserProvider::PHONE_NUMBER').value",
+        constraints: [
+            new Assert\NotNull(message: 'Phone number cannot be empty.'),
+            new AssertPhoneNumber\PhoneNumber(
+                type: AssertPhoneNumber\PhoneNumber::MOBILE,
+                defaultRegion: 'US',
+                message: 'Please enter a valid phone number.'
+            ),
+        ]
+    )]
     public ?PhoneNumber $phoneNumber = null;
 
     public ?string $password = null;
@@ -44,26 +65,6 @@ class LoginChoiceDTO
         ) {
             $context->buildViolation('Login method is required.')
                 ->atPath('loginMethod')
-                ->addViolation();
-        }
-
-        // Validate email case
-        if (
-            $this->loginMethod === UserProvider::EMAIL->value &&
-            ($this->email === null ||
-                $this->email === '' ||
-                $this->email === '0'
-            )
-        ) {
-            $context->buildViolation('Email cannot be empty when login with email is selected.')
-                ->atPath('email')
-                ->addViolation();
-        }
-
-        // Validate phone case
-        if ($this->loginMethod === UserProvider::PHONE_NUMBER->value && !$this->phoneNumber instanceof PhoneNumber) {
-            $context->buildViolation('Phone number cannot be empty when login with phone is selected.')
-                ->atPath('phoneNumber')
                 ->addViolation();
         }
     }

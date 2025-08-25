@@ -5,6 +5,9 @@ namespace App\Twig\Components;
 use App\DTO\LoginChoiceDTO;
 use App\Enum\UserProvider;
 use App\Form\LoginType;
+use libphonenumber\NumberParseException;
+use libphonenumber\PhoneNumber;
+use libphonenumber\PhoneNumberUtil;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormInterface;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
@@ -29,7 +32,7 @@ final class LoginForm extends AbstractController
     public ?string $email = null;
 
     #[LiveProp(writable: true)]
-    public ?string $phoneNumber = null;
+    public ?PhoneNumber $phoneNumber = null;
 
     #[LiveProp(writable: true)]
     public ?string $password = null;
@@ -84,19 +87,25 @@ final class LoginForm extends AbstractController
         ]);
     }
 
-    /**
-     * Validate form inputs
-     */
     #[LiveAction]
     public function validate(): void
     {
-        // Sync DTO with LiveProps
         $this->loginChoiceDTO->email = $this->email;
-        $this->loginChoiceDTO->phoneNumber = $this->phoneNumber;
         $this->loginChoiceDTO->password = $this->password;
         $this->loginChoiceDTO->loginMethod = $this->loginMethod;
 
-        // Rebuild form with current data and validate
+        // Transform string phone number to PhoneNumber object if not null
+        if ($this->phoneNumber) {
+            $phoneUtil = PhoneNumberUtil::getInstance();
+            try {
+                $this->loginChoiceDTO->phoneNumber = $phoneUtil->parse($this->phoneNumber, 'US');
+            } catch (NumberParseException) {
+                $this->loginChoiceDTO->phoneNumber = null; // will trigger NotNull + PhoneNumber validation
+            }
+        } else {
+            $this->loginChoiceDTO->phoneNumber = null;
+        }
+
         $form = $this->createForm(LoginType::class, $this->loginChoiceDTO, [
             'region_inputs' => $this->defaultRegions,
         ]);
