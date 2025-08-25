@@ -107,10 +107,10 @@
         {% endif %}
 
         {# Password Field #}
-        {% if form['password'] is defined %}
+        {% if form.password is defined %}
             <div class="relative mt-[32px]">
-                {{ form_label(form['password'], 'Password', {label_attr: {class: 'form-label'}}) }}
-                {{ form_widget(form['password'], {attr: {class: 'form-widget', placeholder: 'Enter your password'}}) }}
+                {{ form_label(form.password, 'Password', {label_attr: {class: 'form-label'}}) }}
+                {{ form_widget(form.password, {attr: {class: 'form-widget', placeholder: 'Enter your password'}}) }}
             </div>
             <div class="text-red-500 m-2">
                 {{ form_errors(form.password) }}

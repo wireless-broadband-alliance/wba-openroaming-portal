@@ -77,6 +77,7 @@ class LoginType extends AbstractType
                 'required' => true,
                 'attr' => [
                     'placeholder' => 'Enter your password',
+                    'data-live-ignore' => 'true',
                 ],
             ]);
         }

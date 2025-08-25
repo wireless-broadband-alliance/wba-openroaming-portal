@@ -66,12 +66,5 @@ class LoginChoiceDTO
                 ->atPath('phoneNumber')
                 ->addViolation();
         }
-
-        // Password validation
-        if ($this->requirePassword && ($this->password === null || $this->password === '' || $this->password === '0')) {
-            $context->buildViolation('Password is required.')
-                ->atPath('password')
-                ->addViolation();
-        }
     }
 }
