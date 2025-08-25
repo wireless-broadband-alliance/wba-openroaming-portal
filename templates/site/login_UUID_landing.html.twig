@@ -23,9 +23,6 @@
         <p class="text-lg">You have selected to login via magic link.
             Please enter your email or phone number to receive the login link</p>
     </div>
-
-
-
     <twig:LoginUUIDForm :loginChoiceDTO="loginChoiceDTO" :form="form">
         {{ form_start(form) }}
         {# Login Method Toggle #}
@@ -110,8 +107,6 @@
                 </div>
             </div>
         {% endif %}
-
-
 
     <div class="my-[32px] flex justify-center gap-4">
         <button type="submit" class="w-[220px] btn-primary">
