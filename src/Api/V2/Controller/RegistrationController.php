@@ -520,7 +520,7 @@ class RegistrationController extends AbstractController
                 . $user->getTwoFAcode();
             $result = $this->sendSMSService->sendSmsNoValidation($user, $message);
 
-            if ($result) {
+            if ($result !== '' && $result !== '0') {
                 return new BaseResponse(
                     200,
                     [
@@ -741,7 +741,7 @@ class RegistrationController extends AbstractController
                         $eventMetadata
                     );
 
-                    if ($result) {
+                    if ($result !== '' && $result !== '0') {
                         return new BaseResponse(200, [
                             'success' => sprintf(
                                 'If the phone number exists,' .

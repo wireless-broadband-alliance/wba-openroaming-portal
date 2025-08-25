@@ -484,7 +484,7 @@ class UsersManagementController extends AbstractController
                     $message = "Your new account password is: " . $newPassword . "%0A";
                     $smsResponse = $this->sendSMS->sendSmsNoValidation($user, $message);
 
-                    if ($smsResponse) {
+                    if ($smsResponse !== '' && $smsResponse !== '0') {
                         $this->addFlash(
                             'success',
                             'A new account password has been sent to your phone number via SMS.'
@@ -604,7 +604,7 @@ class UsersManagementController extends AbstractController
             $message = "Your OpenRoaming 2FA has been disabled. Please re-enable it as soon as possible.";
             $smsResponse = $this->sendSMS->sendSmsNoValidation($user, $message);
 
-            if ($smsResponse) {
+            if ($smsResponse !== '' && $smsResponse !== '0') {
                 $this->addFlash(
                     'success_admin',
                     'Two-factor authentication successfully disabled and SMS notification sent.'

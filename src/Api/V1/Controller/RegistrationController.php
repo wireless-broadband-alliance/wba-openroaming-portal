@@ -745,7 +745,7 @@ class RegistrationController extends AbstractController
                         $eventMetadata
                     );
 
-                    if ($result) {
+                    if ($result !== '' && $result !== '0') {
                         return new BaseResponse(200, [
                             'success' => sprintf(
                                 'If the phone number exists,' .
