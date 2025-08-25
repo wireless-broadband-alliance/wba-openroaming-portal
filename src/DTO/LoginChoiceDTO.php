@@ -23,6 +23,7 @@ class LoginChoiceDTO
     #[AssertPhoneNumber\PhoneNumber(type: AssertPhoneNumber\PhoneNumber::MOBILE, defaultRegion: "US")]
     public ?PhoneNumber $phoneNumber = null;
 
+    #[Assert\NotBlank(message: 'Password cannot be empty.')]
     public ?string $password = null;
 
     // Controls whether password is required or not

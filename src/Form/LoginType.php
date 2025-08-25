@@ -18,6 +18,7 @@ use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\NotBlank;
 
 class LoginType extends AbstractType
 {
@@ -78,6 +79,11 @@ class LoginType extends AbstractType
                 'attr' => [
                     'placeholder' => 'Enter your password',
                     'data-live-ignore' => 'true',
+                ],
+                'constraints' => [
+                    new NotBlank([
+                        'message' => 'Password cannot be empty.',
+                    ]),
                 ],
             ]);
         }
