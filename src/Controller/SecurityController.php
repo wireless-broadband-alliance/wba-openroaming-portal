@@ -253,8 +253,8 @@ class SecurityController extends AbstractController
                     $event = $this->magicLinkService->canSendLink($loginUser);
                     if (!($event instanceof Event)) {
                         $link = $this->magicLinkService->magicToken($loginUser);
-                        $message = "Welcome to OpenRoaming! Click the link to confirm" .
-                            "and login with your account: $link";
+                        $message = "Welcome to OpenRoaming! Click the link to" .
+                            " login with your account: $link";
                         $smsResponse = $this->sendSMS->sendSmsNoValidation($loginUser, $message);
 
                         if ($smsResponse === SMSResponse::SMS_SUCCESS_LINK->value) {
