@@ -95,7 +95,7 @@ final class LoginForm extends AbstractController
         $this->loginChoiceDTO->loginMethod = $this->loginMethod;
 
         // Transform string phone number to PhoneNumber object if not null
-        if ($this->phoneNumber) {
+        if ($this->phoneNumber instanceof PhoneNumber) {
             $phoneUtil = PhoneNumberUtil::getInstance();
             try {
                 $this->loginChoiceDTO->phoneNumber = $phoneUtil->parse($this->phoneNumber, 'US');
