@@ -237,7 +237,7 @@ class SecurityController extends AbstractController
 
                     $this->addFlash(
                         'success',
-                        sprintf('We have sent an email with your login link to: %s', $user->getEmail())
+                        'A login link has been sent to your email',
                     );
                 } else {
                     $this->addFlash(

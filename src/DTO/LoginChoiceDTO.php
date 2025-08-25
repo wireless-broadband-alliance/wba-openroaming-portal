@@ -30,7 +30,6 @@ class LoginChoiceDTO
     )]
     public ?string $email = null;
 
-
     #[Assert\When(
         expression: "this.loginMethod === constant('App\\\\Enum\\\\UserProvider::PHONE_NUMBER').value",
         constraints: [

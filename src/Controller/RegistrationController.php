@@ -126,10 +126,7 @@ class RegistrationController extends AbstractController
 
                 $this->addFlash(
                     'success',
-                    sprintf(
-                        'We have sent an email with your account password and verification code to: %s',
-                        $user->getEmail()
-                    )
+                    'An email with your account password and verification code has been sent to you',
                 );
             }
         }
@@ -215,7 +212,7 @@ class RegistrationController extends AbstractController
                 // Send SMS
                 $this->addFlash(
                     'success',
-                    'We have sent a message to your phone with your password and verification code'
+                    'A message with your account password and verification code has been sent to your phone.'
                 );
 
                 // Authenticate the user
