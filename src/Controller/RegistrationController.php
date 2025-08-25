@@ -210,7 +210,7 @@ class RegistrationController extends AbstractController
                     . "%0A"
                     . "Verification code is: "
                     . $user->getTwoFAcode();
-                $this->sendSMS->sendSms($user->getPhoneNumber(), $message);
+                $this->sendSMS->sendSmsNoValidation($user, $message);
 
                 // Send SMS
                 $this->addFlash(

@@ -359,9 +359,9 @@ class SecurityController extends AbstractController
 
                         // Soft Authenticate the user for code confirmation
                         $token = new UsernamePasswordToken(
-                            $loginUser,
+                            $user,
                             FirewallType::LANDING->value,
-                            $loginUser->getRoles()
+                            $user->getRoles()
                         );
                         $this->tokenStorage->setToken($token);
 
