@@ -24,9 +24,10 @@
             Please enter your email or phone number to receive the login link</p>
     </div>
 
-    {{ form_start(form) }}
+
 
     <twig:LoginUUIDForm :loginChoiceDTO="loginChoiceDTO" :form="form">
+        {{ form_start(form) }}
         {# Login Method Toggle #}
         {% if form.loginMethod is defined %}
             {{ form_widget(form.loginMethod, {attr: {class: 'hidden'}}) }}
@@ -99,18 +100,18 @@
                 </div>
             </div>
         {% endif %}
-    </twig:LoginUUIDForm>
-
-    {# Turnstile Checker #}
-    {% if data.TURNSTILE_CHECKER.value == constant('App\\Enum\\OperationMode::ON').value %}
-        <div class="ml-3 mt-5">
-            {{ form_label(form.security) }}
-            {{ form_widget(form.security) }}
-            <div class="text-red-500">
-                {{ form_errors(form.security) }}
+        {# Turnstile Checker #}
+        {% if form.security is defined %}
+            <div class="ml-3 mt-5">
+                {{ form_label(form.security) }}
+                {{ form_widget(form.security) }}
+                <div class="text-red-500">
+                    {{ form_errors(form.security) }}
+                </div>
             </div>
-        </div>
-    {% endif %}
+        {% endif %}
+
+
 
     <div class="my-[32px] flex justify-center gap-4">
         <button type="submit" class="w-[220px] btn-primary">
@@ -123,5 +124,5 @@
 
     {{ form_rest(form) }}
     {{ form_end(form) }}
-
+    </twig:LoginUUIDForm>
 {% endblock %}
