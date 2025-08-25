@@ -27,9 +27,8 @@
             Please select your login method and enter the required credentials.
         </p>
     </div>
-
+    {{ form_start(form) }}
     <twig:LoginForm :loginChoiceDTO="loginChoiceDTO" :form="form">
-        {{ form_start(form) }}
 
         {% if form.loginMethod is defined %}
         {# Login Method Toggle #}
