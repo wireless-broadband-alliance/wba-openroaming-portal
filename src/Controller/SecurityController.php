@@ -191,7 +191,7 @@ class SecurityController extends AbstractController
                             'error',
                             'Login Link only with portal accounts'
                         );
-                        $this->redirectToRoute('app_login_magic');
+                        return $this->redirectToRoute('app_login_magic');
                     }
                     $event = $this->magicLinkService->canSendLink($loginUser);
                     if (!($event instanceof Event)) {
