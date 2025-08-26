@@ -302,25 +302,4 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
 
         return $qb->getQuery()->getOneOrNullResult();
     }
-
-    public function findOneForLoginUUID(string $value, string $providerId): ?User
-    {
-        $qb = $this->createQueryBuilder('u')
-            ->leftJoin('u.userExternalAuths', 'uea', 'WITH', 'uea.provider = :provider')
-            ->setParameter('provider', UserProvider::PORTAL_ACCOUNT->value)
-            ->setParameter('providerId', $providerId);
-
-        // Always allow direct login by uuid
-        $qb->andWhere('u.uuid = :value')
-            ->setParameter('value', $value);
-
-        // Add condition depending on providerId
-        if ($providerId === UserProvider::EMAIL->value) {
-            $qb->orWhere('(uea.provider_id = :providerId AND u.email = :value)');
-        } elseif ($providerId === UserProvider::PHONE_NUMBER->value) {
-            $qb->orWhere('(uea.provider_id = :providerId AND u.phoneNumber = :value)');
-        }
-
-        return $qb->getQuery()->getOneOrNullResult();
-    }
 }
