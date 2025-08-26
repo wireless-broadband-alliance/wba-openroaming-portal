@@ -192,7 +192,7 @@ class SecurityController extends AbstractController
                             'Email is already in use but is associated with a different provider!
                             Please use the original one.'
                         );
-                        $this->redirectToRoute('app_login_magic');
+                        return $this->redirectToRoute('app_login_magic');
                     }
 
                     $event = $this->magicLinkService->canSendLink($loginUser);
