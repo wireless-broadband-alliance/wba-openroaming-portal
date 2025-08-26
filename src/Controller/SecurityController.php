@@ -183,7 +183,11 @@ class SecurityController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             if ($loginChoiceDTO->loginMethod === UserProvider::EMAIL->value) {
-                $loginUser = $this->userRepository->findOneBy(['uuid' => $loginChoiceDTO->email]);
+
+                // Should only return PORTAL_ACCOUNTS
+                $loginUser = $this->userRepository->findOneForLoginUUID($loginChoiceDTO->email);
+                dd($loginUser->getUserExternalAuths()->toArray());
+
                 if ($loginUser instanceof User) {
                     $event = $this->magicLinkService->canSendLink($loginUser);
                     if (!($event instanceof Event)) {
