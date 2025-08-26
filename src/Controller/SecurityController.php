@@ -189,10 +189,12 @@ class SecurityController extends AbstractController
                     if ($loginUser->getUserExternalAuths()[0]->getProvider() !== UserProvider::PORTAL_ACCOUNT->value) {
                         $this->addFlash(
                             'error',
-                            'Login Link only with portal accounts'
+                            'Email is already in use but is associated with a different provider!
+                            Please use the original one.'
                         );
                         $this->redirectToRoute('app_login_magic');
                     }
+
                     $event = $this->magicLinkService->canSendLink($loginUser);
                     if (!($event instanceof Event)) {
                         $this->magicLinkService->sendEmail(
@@ -261,7 +263,8 @@ class SecurityController extends AbstractController
                     if ($loginUser->getUserExternalAuths()[0]->getProvider() !== UserProvider::PORTAL_ACCOUNT->value) {
                         $this->addFlash(
                             'error',
-                            'Login Link only with portal accounts'
+                            'PhoneNumber is already in use but is associated with a different provider!
+                            Please use the original one.'
                         );
                         return $this->redirectToRoute('app_login_magic');
                     }
