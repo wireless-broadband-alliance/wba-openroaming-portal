@@ -68,8 +68,8 @@
         {# Email Field #}
         {% if loginChoiceDTO.loginMethod == constant('App\\Enum\\UserProvider::EMAIL').value and form['email'] is defined %}
             <div class="relative mt-[32px]">
-                {{ form_label(form['email'], constant('App\\Enum\\UserProvider::EMAIL').value, {label_attr: {class: 'form-label'}}) }}
-                {{ form_widget(form['email'], {attr: {class: 'form-widget', placeholder: 'Enter your email'}}) }}
+                {{ form_label(form.email, constant('App\\Enum\\UserProvider::EMAIL').value, {label_attr: {class: 'form-label'}}) }}
+                {{ form_widget(form.email, {attr: {class: 'form-widget', placeholder: 'Enter your email'}}) }}
                 <div class="text-red-500 m-2">
                     {{ form_errors(form.email) }}
                 </div>
