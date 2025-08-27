@@ -25,18 +25,13 @@ final class LoginForm extends AbstractController
     #[LiveProp]
     public LoginChoiceDTO|null $loginChoiceDTO = null;
 
-    #[LiveProp]
-    public array $defaultRegions = ['PT', 'US', 'GB']; // default phone regions
-
     /**
      * @return FormInterface<mixed>
      */
     #[\Override]
     protected function instantiateForm(): FormInterface
     {
-        return $this->createForm(LoginType::class, $this->loginChoiceDTO, [
-            'region_inputs' => $this->defaultRegions,
-        ]);
+        return $this->createForm(LoginType::class, $this->loginChoiceDTO);
     }
 
     #[LiveAction]
@@ -50,16 +45,17 @@ final class LoginForm extends AbstractController
         if (is_string($this->loginChoiceDTO->phoneNumber) && !empty($this->loginChoiceDTO->phoneNumber)) {
             try {
                 $phoneUtil = PhoneNumberUtil::getInstance();
-                $this->loginChoiceDTO->phoneNumber = $phoneUtil->parse($this->loginChoiceDTO->phoneNumber, 'US');
+                $this->loginChoiceDTO->phoneNumber = $phoneUtil->parse(
+                    $this->loginChoiceDTO->phoneNumber,
+                    'US'
+                );
             } catch (NumberParseException) {
                 $this->loginChoiceDTO->phoneNumber = null;
             }
         }
 
         // Rebuild form with DTO data
-        $form = $this->createForm(LoginType::class, $this->loginChoiceDTO, [
-            'region_inputs' => $this->defaultRegions,
-        ]);
+        $form = $this->createForm(LoginType::class, $this->loginChoiceDTO);
 
         // Submit the form data to trigger validation
         $form->submit([

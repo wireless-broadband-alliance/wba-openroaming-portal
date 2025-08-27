@@ -105,10 +105,6 @@ class SecurityController extends AbstractController
             $lastUsername = $authenticationUtils->getLastUsername();
         }
 
-        // Fetch default regions (PhoneNumber)
-        $regionSetting = $data['DEFAULT_REGION_PHONE_INPUTS']['value'];
-        $defaultRegions = $regionSetting ? explode(',', (string)$regionSetting) : ['PT, US, GB'];
-
         // Create the DTO with injected default regions and required password for this login method
         $dto = new LoginChoiceDTO();
 
@@ -128,9 +124,7 @@ class SecurityController extends AbstractController
         $dto->requirePassword = true;
 
         // Create the form bound to the DTO
-        $form = $this->createForm(LoginType::class, $dto, [
-            'region_inputs' => $defaultRegions, // pass to form for PhoneNumberType
-        ]);
+        $form = $this->createForm(LoginType::class, $dto);
 
         // Get the login error if there is one
         $error = $authenticationUtils->getLastAuthenticationError();
@@ -435,10 +429,6 @@ class SecurityController extends AbstractController
             $lastUsername = $authenticationUtils->getLastUsername();
         }
 
-        // Fetch default regions (PhoneNumber)
-        $regionSetting = $data['DEFAULT_REGION_PHONE_INPUTS']['value'];
-        $defaultRegions = $regionSetting ? explode(',', (string)$regionSetting) : ['PT, US, GB'];
-
         // Create the DTO with injected default regions and required password for this login method
         $dto = new LoginChoiceDTO();
         $dto->requirePassword = true;
@@ -446,9 +436,7 @@ class SecurityController extends AbstractController
         $dto->loginMethod = UserProvider::EMAIL->value;
 
         // Create the form bound to the DTO
-        $form = $this->createForm(LoginType::class, $dto, [
-            'region_inputs' => $defaultRegions, // pass to form for PhoneNumberType
-        ]);
+        $form = $this->createForm(LoginType::class, $dto);
 
         // Get the login error if there is one
         $error = $authenticationUtils->getLastAuthenticationError();
