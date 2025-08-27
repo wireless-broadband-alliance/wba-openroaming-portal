@@ -26,6 +26,7 @@ use App\Service\RegistrationEmailGenerator;
 use App\Service\SendSMS;
 use App\Service\TwoFAService;
 use App\Service\UserCreationService;
+use App\Twig\Components\LoginForm;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
@@ -173,12 +174,17 @@ class SecurityController extends AbstractController
         $phoneNumberMethod = $data['AUTH_METHOD_SMS_REGISTER_ENABLED']['value'];
         if ($emailMethod === 'false' && $phoneNumberMethod) {
             $loginChoiceDTO->loginMethod = UserProvider::PHONE_NUMBER->value;
+            $loginChoiceDTO->requireLoginMethod = false;
+        } elseif ($emailMethod === 'true' && !$phoneNumberMethod) {
+            $loginChoiceDTO->loginMethod = UserProvider::EMAIL->value;
+            $loginChoiceDTO->requireLoginMethod = false;
         } else {
             $loginChoiceDTO->loginMethod = UserProvider::EMAIL->value;
+            $loginChoiceDTO->requireLoginMethod = true;
         }
         $loginChoiceDTO->requirePassword = false;
 
-        $form = $this->createForm(LoginUUIDType::class, $loginChoiceDTO);
+        $form = $this->createForm(LoginType::class, $loginChoiceDTO);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {

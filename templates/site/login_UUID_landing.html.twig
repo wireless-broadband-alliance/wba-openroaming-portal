@@ -8,7 +8,7 @@
     {# Form Column #}
     {# Toasts #}
     <div class="grid grid-cols-1 gap-[5px]">
-        {# Flash error message #}
+        {# Flash error messages #}
         {% for message in app.session.flashbag.get('error') %}
             {{ include('site/shared/_toast.html.twig', {toast_type: 'toast-warning'}) }}
         {% endfor %}
@@ -26,14 +26,15 @@
 
     <twig:LoginUUIDForm :loginChoiceDTO="loginChoiceDTO" :form="form">
         {{ form_start(form) }}
-        {# Login Method Toggle #}
         {% if form.loginMethod is defined %}
-            {{ form_widget(form.loginMethod, {attr: {class: 'hidden'}}) }}
+            {# Login Method Toggle #}
             <div class="flex justify-center mt-8">
                 <div class="flex bg-gray-300 rounded-lg overflow-hidden w-full max-w-md p-1">
                     {# Email Option #}
-                    <label class="cursor-pointer flex-1 text-center px-4 py-2 transition-colors duration-200 rounded-md
-                   {{ loginChoiceDTO.loginMethod == constant('App\\Enum\\UserProvider::EMAIL').value ? 'bg-white text-black font-semibold shadow-md' : 'text-gray-700' }}">
+                    <label
+                            class="cursor-pointer flex-1 text-center px-4 py-2 transition-colors duration-200 rounded-md
+                   {{ loginChoiceDTO.loginMethod == constant('App\\Enum\\UserProvider::EMAIL').value ? 'bg-white text-black font-semibold shadow-md' : 'text-gray-700' }}"
+                    >
                         <input type="radio"
                                name="{{ form.loginMethod.vars.full_name }}"
                                value="{{ constant('App\\Enum\\UserProvider::EMAIL').value }}"
@@ -43,8 +44,10 @@
                     </label>
 
                     {# Phone Number Option #}
-                    <label class="cursor-pointer flex-1 text-center px-4 py-2 transition-colors duration-200 rounded-md
-                   {{ loginChoiceDTO.loginMethod == constant('App\\Enum\\UserProvider::PHONE_NUMBER').value ? 'bg-white text-black font-semibold shadow-md' : 'text-gray-700' }}">
+                    <label
+                            class="cursor-pointer flex-1 text-center px-4 py-2 transition-colors duration-200 rounded-md
+                   {{ loginChoiceDTO.loginMethod == constant('App\\Enum\\UserProvider::PHONE_NUMBER').value ? 'bg-white text-black font-semibold shadow-md' : 'text-gray-700' }}"
+                    >
                         <input type="radio"
                                name="{{ form.loginMethod.vars.full_name }}"
                                value="{{ constant('App\\Enum\\UserProvider::PHONE_NUMBER').value }}"
@@ -56,33 +59,31 @@
             </div>
         {% endif %}
 
-        {% if form.email is defined %}
+        {# Email Field #}
+        {% if loginChoiceDTO.loginMethod == constant('App\\Enum\\UserProvider::EMAIL').value and form['email'] is defined %}
             <div class="relative mt-[32px]">
                 {{ form_label(form.email, constant('App\\Enum\\UserProvider::EMAIL').value, {label_attr: {class: 'form-label'}}) }}
-                {{ form_widget(form.email, {
-                    attr: {
-                        class: 'form-widget',
-                        placeholder: 'Enter your Email',
-                    },
-                }) }}
+                {{ form_widget(form.email, {attr: {class: 'form-widget', placeholder: 'Enter your email'}}) }}
                 <div class="text-red-500 m-2">
                     {{ form_errors(form.email) }}
                 </div>
             </div>
         {% endif %}
 
-        {% if form.phoneNumber is defined %}
-            <div class="flex flex-row items-end space-x-4 mt-8">
-                {# Phone Number Input #}
+        {# Phone Number Field #}
+        {% if loginChoiceDTO.loginMethod == constant('App\\Enum\\UserProvider::PHONE_NUMBER').value and form['phoneNumber'] is defined %}
+            <div class="flex flex-row items-end space-x-4 mt-[32px]">
+                {# Country Code Dropdown #}
                 <div class="flex flex-col w-1/3">
                     {{ form_widget(form.phoneNumber.children.country, {
                         attr: {
                             class: 'block w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary',
-                            placeholder: 'Enter your phone number',
-                            autocomplete: 'tel',
+                            autocomplete: 'tel-country',
                         },
                     }) }}
                 </div>
+
+                {# Phone Number Input #}
                 <div class="flex flex-col w-2/3">
                     {{ form_widget(form.phoneNumber.children.number, {
                         attr: {
@@ -108,16 +109,12 @@
             </div>
         {% endif %}
 
-    <div class="my-[32px] flex justify-center gap-4">
-        <button type="submit" class="w-[220px] btn-primary">
-            Send Link
-        </button>
-        <a href="{{ path('app_landing') }}" class="w-[220px] btn-secondary">
-            Choose Another
-        </a>
-    </div>
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+        <div class="my-[32px] flex justify-center gap-4">
+            <button type="submit" class="w-[220px] btn-primary">Send Link</button>
+            <a href="{{ path('app_landing') }}" class="w-[220px] btn-secondary">Choose Another</a>
+        </div>
 
-    {{ form_rest(form) }}
-    {{ form_end(form) }}
+        {{ form_end(form, {render_rest: false}) }}
     </twig:LoginUUIDForm>
 {% endblock %}
