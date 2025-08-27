@@ -21,7 +21,7 @@ class LoginChoiceDTO
         expression: "this.loginMethod === constant('App\\\\Enum\\\\UserProvider::EMAIL').value",
         constraints: [
             new Assert\NotBlank([
-                'message' => 'Email cannot be empty when login with email is selected.',
+                'message' => 'Email number cannot be empty.',
             ]),
             new Assert\Email([
                 'message' => 'Please enter a valid email address.',
