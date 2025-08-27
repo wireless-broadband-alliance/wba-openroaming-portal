@@ -6,8 +6,6 @@ use App\DTO\LoginChoiceDTO;
 use App\Enum\OperationMode;
 use App\Enum\UserProvider;
 use App\Repository\SettingRepository;
-use App\Repository\UserRepository;
-use App\Service\GetSettings;
 use libphonenumber\PhoneNumberFormat;
 use Misd\PhoneNumberBundle\Form\Type\PhoneNumberType;
 use PixelOpen\CloudflareTurnstileBundle\Type\TurnstileType;
@@ -21,20 +19,29 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 class LoginType extends AbstractType
 {
     public function __construct(
-        private readonly GetSettings $getSettings,
-        private readonly UserRepository $userRepository,
         private readonly SettingRepository $settingRepository
     ) {
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        // Fetch the setting from the database
+        $regionsSetting = $this->settingRepository->findOneBy(['name' => 'DEFAULT_REGION_PHONE_INPUTS']);
 
-        $turnstileCheckerValue = $data['TURNSTILE_CHECKER']['value'] ?? null;
+        // If the setting exists, explode and trim; otherwise use a default
+        $regionInputs = $regionsSetting && $regionsSetting->getValue()
+            ? array_map('trim', explode(',', $regionsSetting->getValue()))
+            : ['PT', 'US', 'GB']; // fallback default
 
-        $emailMethod = $data['AUTH_METHOD_REGISTER_ENABLED']['value'];
-        $phoneNumberMethod = $data['AUTH_METHOD_SMS_REGISTER_ENABLED']['value'];
+        $turnstileCheckerValue = $this->settingRepository->findOneBy(
+            ['name' => 'TURNSTILE_CHECKER']
+        )?->getValue();
+        $emailMethod = $this->settingRepository->findOneBy(
+            ['name' => 'AUTH_METHOD_REGISTER_ENABLED']
+        )?->getValue();
+        $phoneNumberMethod = $this->settingRepository->findOneBy(
+            ['name' => 'AUTH_METHOD_SMS_REGISTER_ENABLED']
+        )?->getValue();
 
         // Let user select if they want to log in with email
         if ($emailMethod === 'true' && $phoneNumberMethod) {
@@ -59,13 +66,13 @@ class LoginType extends AbstractType
         ]);
 
         $builder->add('phoneNumber', PhoneNumberType::class, [
-            'required' => false,
             'label' => 'Phone Number',
-            'default_region' => $options['region_inputs'][0] ?? 'US',
-            'preferred_country_choices' => $options['region_inputs'] ?? ['PT, US, GB'],
+            'default_region' => $regionInputs[0],
             'format' => PhoneNumberFormat::INTERNATIONAL,
             'widget' => PhoneNumberType::WIDGET_COUNTRY_CHOICE,
+            'preferred_country_choices' => $regionInputs,
             'country_display_emoji_flag' => true,
+            'required' => false,
             'attr' => ['autocomplete' => 'tel'],
         ]);
 
@@ -96,7 +103,6 @@ class LoginType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => LoginChoiceDTO::class,
-            'region_inputs' => ['PT, US, GB'], // default fallback
         ]);
     }
 }
