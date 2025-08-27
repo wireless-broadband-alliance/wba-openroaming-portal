@@ -45,7 +45,9 @@
                                name="{{ form.loginMethod.vars.full_name }}"
                                value="{{ constant('App\\Enum\\UserProvider::EMAIL').value }}"
                                class="hidden"
-                               wire:model="loginChoiceDTO.loginMethod"/>
+                               wire:model="loginMethod"
+                               wire:click="changeLoginMethod('{{ constant('App\\Enum\\UserProvider::EMAIL').value }}')"
+                        />
                         Email
                     </label>
 
@@ -58,7 +60,9 @@
                                name="{{ form.loginMethod.vars.full_name }}"
                                value="{{ constant('App\\Enum\\UserProvider::PHONE_NUMBER').value }}"
                                class="hidden"
-                               wire:model="loginChoiceDTO.loginMethod"/>
+                               wire:model="loginMethod"
+                               wire:click="changeLoginMethod('{{ constant('App\\Enum\\UserProvider::EMAIL').value }}')"
+                        />
                         Phone Number
                     </label>
                 </div>
