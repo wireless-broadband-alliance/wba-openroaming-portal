@@ -184,7 +184,17 @@ class SecurityController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             if ($loginChoiceDTO->loginMethod === UserProvider::EMAIL->value) {
                 $loginUser = $this->userRepository->findOneBy(['uuid' => $loginChoiceDTO->email]);
+
                 if ($loginUser instanceof User) {
+                    if ($loginUser->getUserExternalAuths()[0]->getProvider() !== UserProvider::PORTAL_ACCOUNT->value) {
+                        $this->addFlash(
+                            'error',
+                            'Email is already in use but is associated with a different provider!
+                            Please use the original one.'
+                        );
+                        return $this->redirectToRoute('app_login_magic');
+                    }
+
                     $event = $this->magicLinkService->canSendLink($loginUser);
                     if (!($event instanceof Event)) {
                         $this->magicLinkService->sendEmail(
@@ -250,6 +260,14 @@ class SecurityController extends AbstractController
                     $loginChoiceDTO->phoneNumber->getNationalNumber();
                 $loginUser = $this->userRepository->findOneBy(['uuid' => $phoneNumber]);
                 if ($loginUser instanceof User) {
+                    if ($loginUser->getUserExternalAuths()[0]->getProvider() !== UserProvider::PORTAL_ACCOUNT->value) {
+                        $this->addFlash(
+                            'error',
+                            'PhoneNumber is already in use but is associated with a different provider!
+                            Please use the original one.'
+                        );
+                        return $this->redirectToRoute('app_login_magic');
+                    }
                     $event = $this->magicLinkService->canSendLink($loginUser);
                     if (!($event instanceof Event)) {
                         $link = $this->magicLinkService->magicToken($loginUser);
