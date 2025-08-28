@@ -37,7 +37,7 @@ final class LoginUUIDForm extends AbstractController
     #[LiveAction]
     public function validate(): void
     {
-        if (!$this->loginChoiceDTO) {
+        if (!$this->loginChoiceDTO instanceof LoginChoiceDTO) {
             $this->loginChoiceDTO = new LoginChoiceDTO();
         }
 
