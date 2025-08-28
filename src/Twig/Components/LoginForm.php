@@ -77,6 +77,7 @@ final class LoginForm extends AbstractController
 
         $this->loginChoiceDTO->loginMethod = $method;
 
+        // TODO - CHECK WHY THIS dd() IS UNREACHABLE, for testing
         dd('Radio clicked! Current method: ' . $this->loginChoiceDTO->loginMethod);
     }
 }
