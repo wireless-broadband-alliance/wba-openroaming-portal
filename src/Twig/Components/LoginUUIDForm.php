@@ -3,8 +3,9 @@
 namespace App\Twig\Components;
 
 use App\DTO\LoginChoiceDTO;
-use App\Enum\UserProvider;
-use App\Form\LoginUUIDType;
+use App\Form\LoginType;
+use libphonenumber\NumberParseException;
+use libphonenumber\PhoneNumberUtil;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormInterface;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
@@ -24,42 +25,43 @@ final class LoginUUIDForm extends AbstractController
     #[LiveProp]
     public LoginChoiceDTO|null $loginChoiceDTO = null;
 
-    #[LiveProp]
-    public ?string $loginMethod = UserProvider::EMAIL->value;
-
-    #[LiveProp]
-    public ?string $email = null;
-
-    #[LiveProp]
-    public ?string $phoneNumber = null;
-
-    public function __construct()
-    {
-    }
+    /**
+     * @return FormInterface<mixed>
+     */
     #[\Override]
     protected function instantiateForm(): FormInterface
     {
-        if (!$this->loginChoiceDTO instanceof LoginChoiceDTO) {
-            $this->loginChoiceDTO = new LoginChoiceDTO();
-        }
-
-        $form = $this->createForm(LoginUUIDType::class, $this->loginChoiceDTO);
-
-        $this->email = $this->loginChoiceDTO->email;
-        $this->phoneNumber = $this->loginChoiceDTO->phoneNumber;
-        $this->loginMethod = $this->loginChoiceDTO->loginMethod;
-
-        return $form;
+        return $this->createForm(LoginType::class, $this->loginChoiceDTO);
     }
 
     #[LiveAction]
     public function validate(): void
     {
-        $form = $this->createForm(LoginUUIDType::class, $this->loginChoiceDTO);
+        if (!$this->loginChoiceDTO instanceof LoginChoiceDTO) {
+            $this->loginChoiceDTO = new LoginChoiceDTO();
+        }
 
+        // Transform phone number string into PhoneNumber object
+        if (is_string($this->loginChoiceDTO->phoneNumber) && !empty($this->loginChoiceDTO->phoneNumber)) {
+            try {
+                $phoneUtil = PhoneNumberUtil::getInstance();
+                $this->loginChoiceDTO->phoneNumber = $phoneUtil->parse(
+                    $this->loginChoiceDTO->phoneNumber,
+                    'US'
+                );
+            } catch (NumberParseException) {
+                $this->loginChoiceDTO->phoneNumber = null;
+            }
+        }
+
+        // Rebuild form with DTO data
+        $form = $this->createForm(LoginType::class, $this->loginChoiceDTO);
+
+        // Submit the form data to trigger validation
         $form->submit([
-            'email' => $this->email,
-            'phoneNumber' => $this->phoneNumber,
+            'loginMethod' => $this->loginChoiceDTO->loginMethod,
+            'email' => $this->loginChoiceDTO->email,
+            'phoneNumber' => $this->loginChoiceDTO->phoneNumber,
         ], false);
 
         $this->form = $form;

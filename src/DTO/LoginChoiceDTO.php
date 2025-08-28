@@ -11,21 +11,17 @@ use Misd\PhoneNumberBundle\Validator\Constraints as AssertPhoneNumber;
 
 class LoginChoiceDTO
 {
-    #[Assert\Choice(choices: [
-        UserProvider::EMAIL->value,
-        UserProvider::PHONE_NUMBER->value
-    ], message: 'Select a valid login method')]
+    #[Assert\Choice(
+        choices: [UserProvider::EMAIL->value, UserProvider::PHONE_NUMBER->value],
+        message: 'Select a valid login method'
+    )]
     public ?string $loginMethod = null;
 
     #[Assert\When(
         expression: "this.loginMethod === constant('App\\\\Enum\\\\UserProvider::EMAIL').value",
         constraints: [
-            new Assert\NotBlank([
-                'message' => 'Email number cannot be empty.',
-            ]),
-            new Assert\Email([
-                'message' => 'Please enter a valid email address.',
-            ]),
+            new Assert\NotBlank(message: 'Email cannot be empty.'),
+            new Assert\Email(message: 'Please enter a valid email address.')
         ]
     )]
     public ?string $email = null;
@@ -38,29 +34,32 @@ class LoginChoiceDTO
                 type: AssertPhoneNumber\PhoneNumber::MOBILE,
                 defaultRegion: 'US',
                 message: 'Please enter a valid phone number.'
-            ),
+            )
         ]
     )]
     public ?PhoneNumber $phoneNumber = null;
 
+    #[Assert\When(
+        expression: "this.requirePassword === true",
+        constraints: [
+            new Assert\NotBlank(message: 'Password cannot be empty.')
+        ]
+    )]
     public ?string $password = null;
 
-    // Controls whether password is required or not
+    // Controls whether password is required
     public bool $requirePassword = true;
 
-    // Controls whether loginMethod is required or not
+
+    // Controls whether loginMethod is required
     public bool $requireLoginMethod = true;
 
     #[Callback]
     public function validateLoginChoice(ExecutionContextInterface $context): void
     {
-        // Require loginMethod only if the flag is true
         if (
             $this->requireLoginMethod &&
-            ($this->loginMethod === null ||
-                $this->loginMethod === '' ||
-                $this->loginMethod === '0'
-            )
+            ($this->loginMethod === null || $this->loginMethod === '' || $this->loginMethod === '0')
         ) {
             $context->buildViolation('Login method is required.')
                 ->atPath('loginMethod')

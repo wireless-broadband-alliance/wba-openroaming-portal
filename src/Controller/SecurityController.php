@@ -5,7 +5,6 @@ namespace App\Controller;
 use App\DTO\LoginChoiceDTO;
 use App\Entity\Event;
 use App\Entity\User;
-use App\Entity\UserExternalAuth;
 use App\Enum\AnalyticalEventType;
 use App\Enum\FirewallType;
 use App\Enum\OperationMode;
@@ -14,7 +13,6 @@ use App\Enum\SMSResponse;
 use App\Enum\UserProvider;
 use App\Enum\UserTwoFactorAuthenticationStatus;
 use App\Form\LoginType;
-use App\Form\LoginUUIDType;
 use App\Form\TwoFACode;
 use App\Repository\SettingRepository;
 use App\Repository\UserExternalAuthRepository;
@@ -107,10 +105,6 @@ class SecurityController extends AbstractController
             $lastUsername = $authenticationUtils->getLastUsername();
         }
 
-        // Fetch default regions (PhoneNumber)
-        $regionSetting = $data['DEFAULT_REGION_PHONE_INPUTS']['value'];
-        $defaultRegions = $regionSetting ? explode(',', (string)$regionSetting) : ['PT, US, GB'];
-
         // Create the DTO with injected default regions and required password for this login method
         $dto = new LoginChoiceDTO();
 
@@ -130,9 +124,7 @@ class SecurityController extends AbstractController
         $dto->requirePassword = true;
 
         // Create the form bound to the DTO
-        $form = $this->createForm(LoginType::class, $dto, [
-            'region_inputs' => $defaultRegions, // pass to form for PhoneNumberType
-        ]);
+        $form = $this->createForm(LoginType::class, $dto);
 
         // Get the login error if there is one
         $error = $authenticationUtils->getLastAuthenticationError();
@@ -173,12 +165,17 @@ class SecurityController extends AbstractController
         $phoneNumberMethod = $data['AUTH_METHOD_SMS_REGISTER_ENABLED']['value'];
         if ($emailMethod === 'false' && $phoneNumberMethod) {
             $loginChoiceDTO->loginMethod = UserProvider::PHONE_NUMBER->value;
+            $loginChoiceDTO->requireLoginMethod = false;
+        } elseif ($emailMethod === 'true' && !$phoneNumberMethod) {
+            $loginChoiceDTO->loginMethod = UserProvider::EMAIL->value;
+            $loginChoiceDTO->requireLoginMethod = false;
         } else {
             $loginChoiceDTO->loginMethod = UserProvider::EMAIL->value;
+            $loginChoiceDTO->requireLoginMethod = true;
         }
         $loginChoiceDTO->requirePassword = false;
 
-        $form = $this->createForm(LoginUUIDType::class, $loginChoiceDTO);
+        $form = $this->createForm(LoginType::class, $loginChoiceDTO);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -432,10 +429,6 @@ class SecurityController extends AbstractController
             $lastUsername = $authenticationUtils->getLastUsername();
         }
 
-        // Fetch default regions (PhoneNumber)
-        $regionSetting = $data['DEFAULT_REGION_PHONE_INPUTS']['value'];
-        $defaultRegions = $regionSetting ? explode(',', (string)$regionSetting) : ['PT, US, GB'];
-
         // Create the DTO with injected default regions and required password for this login method
         $dto = new LoginChoiceDTO();
         $dto->requirePassword = true;
@@ -443,9 +436,7 @@ class SecurityController extends AbstractController
         $dto->loginMethod = UserProvider::EMAIL->value;
 
         // Create the form bound to the DTO
-        $form = $this->createForm(LoginType::class, $dto, [
-            'region_inputs' => $defaultRegions, // pass to form for PhoneNumberType
-        ]);
+        $form = $this->createForm(LoginType::class, $dto);
 
         // Get the login error if there is one
         $error = $authenticationUtils->getLastAuthenticationError();
