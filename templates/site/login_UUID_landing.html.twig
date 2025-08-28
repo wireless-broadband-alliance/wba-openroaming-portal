@@ -105,6 +105,10 @@
             </div>
         {% endif %}
 
+        <div class="ml-3 mt-5 hidden">
+            {{ form_row(form.formID) }}
+        </div>
+
         {# Turnstile Checker #}
         {% if form.security is defined %}
             <div class="ml-3 mt-5">

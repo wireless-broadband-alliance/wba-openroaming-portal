@@ -67,17 +67,4 @@ final class LoginForm extends AbstractController
 
         $this->form = $form;
     }
-
-    #[LiveAction]
-    public function changeLoginMethod(string $method): void
-    {
-        if (!$this->loginChoiceDTO) {
-            $this->loginChoiceDTO = new LoginChoiceDTO();
-        }
-
-        $this->loginChoiceDTO->loginMethod = $method;
-
-        // TODO - CHECK WHY THIS dd() IS UNREACHABLE, for testing
-        dd('Radio clicked! Current method: ' . $this->loginChoiceDTO->loginMethod);
-    }
 }

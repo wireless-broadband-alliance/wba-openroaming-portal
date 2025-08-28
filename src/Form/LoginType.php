@@ -13,6 +13,7 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -87,6 +88,12 @@ class LoginType extends AbstractType
                 ],
             ]);
         }
+
+        $builder->add('formID', TextType::class, [
+            'required' => false,
+            'label' => 'Form ID',
+            'mapped' => false,
+        ]);
 
         if ($turnstileCheckerValue === OperationMode::ON->value) {
             $builder->add('security', TurnstileType::class, [
