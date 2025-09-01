@@ -2,9 +2,8 @@
 
 namespace App\Form;
 
-use App\Form\Transformer\BooleanToDateTimeTransformer;
 use App\DTO\UserUpdateDTO;
-use App\Service\GetSettings;
+use App\Repository\SettingRepository;
 use libphonenumber\PhoneNumberFormat;
 use Misd\PhoneNumberBundle\Form\Type\PhoneNumberType;
 use Symfony\Component\Form\AbstractType;
