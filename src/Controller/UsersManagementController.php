@@ -676,28 +676,26 @@ class UsersManagementController extends AbstractController
         ) {
             $message = $this->translator->trans('2faDisabledMessage', [], 'controllers');
             $this->sendSMS->sendSmsNoValidation($user, $message);
-            $message = "Your OpenRoaming 2FA has been disabled. Please re-enable it as soon as possible.";
             $smsResponse = $this->sendSMS->sendSmsNoValidation($user, $message);
 
             if ($smsResponse !== '' && $smsResponse !== '0') {
                 $this->addFlash(
                     'success_admin',
-                    'Two-factor authentication successfully disabled and SMS notification sent.'
+                    $this->translator->trans('2faDisabledSMSSent', [], 'controllers')
                 );
             } else {
                 $this->addFlash(
-                    'error_admin',
-                    '2FA disabled, but the SMS notification failed to send. Please notify the user manually.'
+                    'success_admin',
+                    $this->translator->trans('2faDisabledSMSFailed', [], 'controllers')
                 );
             }
         } else {
-            $this->addFlash('success_admin', 'Two-factor authentication successfully disabled.');
+            $this->addFlash(
+                'success_admin',
+                $this->translator->trans('twoFASuccessfullyDisabled', [], 'controllers')
+            );
         }
 
-        $this->addFlash(
-            'success_admin',
-            $this->translator->trans('twoFASuccessfullyDisabled', [], 'controllers')
-        );
         return $this->redirectToRoute('admin_user_edit', [
             'id' => $user->getId(),
         ]);

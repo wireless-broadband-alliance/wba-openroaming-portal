@@ -105,6 +105,8 @@ passwordRequestAccepted: 'Your account password request has been accepted!'
 invalidContactIdentifier: "This account does not have a valid contact identifier (email). Please don't use the default from the portal. Please select another valid two-factor authentication for this account."
 newPasswordMessage: 'Your new account password is: %password%'
 2faDisabledMessage: 'Your OpenRoaming 2FA has been disabled. Please re-enable it as soon as possible.'
+2faDisabledSMSSent: 'Two-factor authentication successfully disabled and SMS notification sent.'
+2faDisabledSMSFailed: '2FA disabled, but the SMS notification failed to send. Please notify the user manually.'
 scheduleConfigSuccess: 'New Schedule configuration has been applied successfully.'
 metricsEndpointDisabled: 'Metrics endpoint is disabled'
 unauthorizedMetrics: 'Unauthorized metrics access attempt from IP: %clientIp%'
