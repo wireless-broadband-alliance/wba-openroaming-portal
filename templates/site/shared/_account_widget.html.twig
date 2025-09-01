@@ -44,6 +44,7 @@
     {# divider #}
     <div class="divider my-8"></div>
 
+    {% if data.LOGIN_WITH_UUID_ONLY.value == constant('App\\Enum\\OperationMode::OFF').value %}
     {# Form Password Section #}
     <div {{ stimulus_controller('fields') }}>
         <form method="POST" action="{{ path('app_site_account_user') }}">
@@ -94,6 +95,7 @@
             {{ form_end(formPassword) }}
         </form>
     </div>
+    {% endif %}
 
     {# Two-Factor Authenticator Section #}
     <div class="divider my-8"></div>

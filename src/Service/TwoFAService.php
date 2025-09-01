@@ -65,7 +65,7 @@ readonly class TwoFAService
     /**
      * @throws RandomException
      */
-    private function twoFACode(User $user): string
+    public function twoFACode(User $user): string
     {
         // Generate a random verification code with 6 digits
         $user->setTwoFACode(random_int(100000, 999999));
@@ -232,7 +232,7 @@ readonly class TwoFAService
             } else {
                 $message = "Your Two Factor Authentication Code is " . $code;
             }
-            $this->sendSMS->sendSms($user->getPhoneNumber(), $message);
+            $this->sendSMS->sendSmsNoValidation($user, $message);
         }
 
         if ($eventType !== AnalyticalEventType::LOGIN_TRADITIONAL_REQUEST->value) {

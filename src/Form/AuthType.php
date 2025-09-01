@@ -412,6 +412,10 @@ class AuthType extends AbstractType
                     ],
                 ],
             ],
+            // Login with UUID only Settings
+            'LOGIN_WITH_UUID_ONLY' => [
+                'type' => ChoiceType::class,
+            ],
             // SMS
             'AUTH_METHOD_SMS_REGISTER_ENABLED' => [
                 'type' => ChoiceType::class,
@@ -508,6 +512,12 @@ class AuthType extends AbstractType
                         $formFieldOptions['choices'] = [
                             OperationMode::ON->value => 'true',
                             OperationMode::OFF->value => 'false',
+                        ];
+                        $formFieldOptions['placeholder'] = 'Select an option';
+                    } elseif ($settingName === 'LOGIN_WITH_UUID_ONLY') {
+                        $formFieldOptions['choices'] = [
+                            OperationMode::ON->value => OperationMode::ON->value,
+                            OperationMode::OFF->value => OperationMode::OFF->value,
                         ];
                         $formFieldOptions['placeholder'] = 'Select an option';
                     }

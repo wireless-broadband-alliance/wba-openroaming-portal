@@ -3,7 +3,6 @@
 namespace App\Controller;
 
 use App\Entity\User;
-use App\Entity\UserExternalAuth;
 use App\Enum\AnalyticalEventType;
 use App\Enum\FirewallType;
 use App\Enum\OperationMode;
@@ -17,9 +16,8 @@ use App\Service\EventActions;
 use App\Service\GetSettings;
 use App\Service\RegistrationEmailGenerator;
 use App\Service\SendSMS;
-use App\Service\VerificationCodeEmailGenerator;
+use App\Service\UserCreationService;
 use DateTime;
-use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Exception;
 use Psr\EventDispatcher\EventDispatcherInterface;
@@ -60,6 +58,7 @@ class RegistrationController extends AbstractController
         private readonly TokenStorageInterface $tokenStorage,
         private readonly EventActions $eventActions,
         private readonly RegistrationEmailGenerator $emailGenerator,
+        private readonly UserCreationService $userCreationService,
     ) {
     }
 
@@ -75,7 +74,6 @@ class RegistrationController extends AbstractController
     public function register(
         Request $request,
         UserPasswordHasherInterface $userPasswordHasher,
-        EntityManagerInterface $entityManager,
     ): Response {
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
@@ -94,8 +92,12 @@ class RegistrationController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
+        if ($data['LOGIN_WITH_UUID_ONLY']['value'] === OperationMode::ON->value) {
+            $this->addFlash('error', 'This authentication method it\'s not enabled!');
+            return $this->redirectToRoute('app_landing');
+        }
+
         $user = new User();
-        $userAuths = new UserExternalAuth();
         $form = $this->createForm(RegistrationFormType::class, $user);
         $form->handleRequest($request);
 
@@ -112,41 +114,19 @@ class RegistrationController extends AbstractController
                 // Hash the password
                 $hashedPassword = $userPasswordHasher->hashPassword($user, $randomPassword);
 
-                // Set the hashed password for the user
-                $user->setPassword($hashedPassword);
-                $user->setUuid($form->get('email')->getData());
-                $user->setEmail($form->get('email')->getData());
-                $user->setTwoFAcode(random_int(100000, 999999));
-                $user->setTwoFAcodeGeneratedAt(new DateTime());
-                $user->setTwoFAcodeIsActive(true);
-                $user->setCreatedAt(new DateTime());
-                $userAuths->setProvider(UserProvider::PORTAL_ACCOUNT->value);
-                $userAuths->setProviderId(UserProvider::EMAIL->value);
-                $userAuths->setUser($user);
-                $entityManager->persist($user);
-                $entityManager->persist($userAuths);
-                $entityManager->flush();
-
-                // Defines the Event to the table
-                $eventMetaData = [
-                    'ip' => $request->getClientIp(),
-                    'user_agent' => $request->headers->get('User-Agent'),
-                    'platform' => PlatformMode::LIVE->value,
-                    'uuid' => $user->getUuid(),
-                    'registrationType' => UserProvider::EMAIL->value,
-                ];
-                $this->eventActions->saveEvent(
+                $user = $this->userCreationService->setEmail($form->get('email')->getData(), $user);
+                $user = $this->userCreationService->createUser(
                     $user,
-                    AnalyticalEventType::USER_CREATION->value,
-                    new DateTime(),
-                    $eventMetaData
+                    $hashedPassword,
+                    UserProvider::EMAIL->value,
+                    $request
                 );
 
                 $this->emailGenerator->sendRegistrationEmail($user, $randomPassword);
 
                 $this->addFlash(
                     'success',
-                    'We have sent an email with your account password and verification code'
+                    'An email with your account password and verification code has been sent to you',
                 );
             }
         }
@@ -173,7 +153,6 @@ class RegistrationController extends AbstractController
     public function registerSMS(
         Request $request,
         UserPasswordHasherInterface $userPasswordHasher,
-        EntityManagerInterface $entityManager,
         SessionInterface $session
     ): Response {
         // Call the getSettings method of GetSettings class to retrieve the data
@@ -189,12 +168,16 @@ class RegistrationController extends AbstractController
         }
 
         if ($data['AUTH_METHOD_SMS_REGISTER_ENABLED']['value'] !== true) {
-            $this->addFlash('error', 'This authentication method is not enabled!');
+            $this->addFlash('error', 'This authentication method it\'s not enabled!');
+            return $this->redirectToRoute('app_landing');
+        }
+
+        if ($data['LOGIN_WITH_UUID_ONLY']['value'] === OperationMode::ON->value) {
+            $this->addFlash('error', 'This authentication method it\'s not enabled!');
             return $this->redirectToRoute('app_landing');
         }
 
         $user = new User();
-        $userAuths = new UserExternalAuth();
         $form = $this->createForm(RegistrationFormSMSType::class, $user);
         $form->handleRequest($request);
 
@@ -211,50 +194,25 @@ class RegistrationController extends AbstractController
                 // Hash the password
                 $hashedPassword = $userPasswordHasher->hashPassword($user, $randomPassword);
 
-                // Set the hashed password for the user
-                $user->setPassword($hashedPassword);
-
-                if (!is_null($user->getPhoneNumber())) {
-                    $user->setUuid(
-                        "+" . $user->getPhoneNumber()->getCountryCode() . $user->getPhoneNumber()->getNationalNumber()
-                    );
-                }
-
-                $user->setTwoFAcode(random_int(100000, 999999));
-                $user->setTwoFACodeGeneratedAt(new DateTime());
-                $user->setTwoFAcodeIsActive(true);
-                $user->setCreatedAt(new DateTime());
-                $userAuths->setProvider(UserProvider::PORTAL_ACCOUNT->value);
-                $userAuths->setProviderId(UserProvider::PHONE_NUMBER->value);
-                $userAuths->setUser($user);
-                $entityManager->persist($user);
-                $entityManager->persist($userAuths);
-
-                // Defines the Event to the table
-                $eventMetadata = [
-                    'ip' => $request->getClientIp(),
-                    'user_agent' => $request->headers->get('User-Agent'),
-                    'platform' => PlatformMode::LIVE->value,
-                    'uuid' => $user->getUuid(),
-                    'registrationType' => UserProvider::PHONE_NUMBER->value,
-                ];
-                $this->eventActions->saveEvent(
+                $user = $this->userCreationService->setPhoneNumber($user);
+                $user = $this->userCreationService->createUser(
                     $user,
-                    AnalyticalEventType::USER_CREATION->value,
-                    new DateTime(),
-                    $eventMetadata
+                    $hashedPassword,
+                    UserProvider::PHONE_NUMBER->value,
+                    $request
                 );
 
-                // Send SMS
                 $message = "Your account password is: "
                     . $randomPassword
                     . "%0A"
                     . "Verification code is: "
                     . $user->getTwoFAcode();
-                $this->sendSMS->sendSms($user->getPhoneNumber(), $message);
+                $this->sendSMS->sendSmsNoValidation($user, $message);
+
+                // Send SMS
                 $this->addFlash(
                     'success',
-                    'We have sent a message to your phone with your password and verification code'
+                    'A message with your account password and verification code has been sent to your phone.'
                 );
 
                 // Authenticate the user

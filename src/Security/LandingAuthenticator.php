@@ -5,10 +5,14 @@ namespace App\Security;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Enum\OperationMode;
+use App\Enum\UserProvider;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use App\Service\TwoFAService;
 use DateTimeInterface;
+use libphonenumber\NumberParseException;
+use libphonenumber\PhoneNumberFormat;
+use libphonenumber\PhoneNumberUtil;
 use PixelOpen\CloudflareTurnstileBundle\Http\CloudflareTurnstileHttpClient;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -40,69 +44,86 @@ class LandingAuthenticator extends AbstractLoginFormAuthenticator
     ) {
     }
 
+    /**
+     * @throws \JsonException
+     */
     public function authenticate(Request $request): Passport
     {
-        // Retrieve the data from the login form
-        $uuid = $request->request->get('uuid');
-        $password = $request->request->get('password');
-        $turnstileResponse = $request->request->get('cf-turnstile-response'); // Captcha
+        $formData = $request->request->all();
+        $loginMethod = $formData['login']['loginMethod'] ?? UserProvider::EMAIL->value;
+        $password = $formData['login']['password'];
 
-        if ($uuid) {
-            $user = $this->userRepository->findOneBy([
-                'uuid' => $uuid,
+        if ($loginMethod === UserProvider::EMAIL->value) {
+            $identifier = $formData['login']['email'];
+
+            $userLoader = fn(string $id) => $this->userRepository->findOneBy([
+                'email' => $id,
                 'deletedAt' => null,
             ]);
-            if (!$user) {
-                // Validate if the user account exists
-                throw new CustomUserMessageAuthenticationException('Invalid Credentials.');
+        } elseif ($loginMethod === UserProvider::PHONE_NUMBER->value) {
+            $phoneUtil = PhoneNumberUtil::getInstance();
+            $phoneData = $formData['login']['phoneNumber'] ?? [];
+            if (!empty($phoneData['country']) && !empty($phoneData['number'])) {
+                try {
+                    $phoneNumberObj = $phoneUtil->parse($phoneData['number'], $phoneData['country']);
+                    // Use E164 format string as identifier for UserBadge
+                    $identifier = $phoneUtil->format($phoneNumberObj, PhoneNumberFormat::E164);
+                } catch (NumberParseException) {
+                    throw new CustomUserMessageAuthenticationException('Invalid phone number.');
+                }
+            } else {
+                $identifier = null;
             }
-            if ($user->isDisabled() === true) {
-                // Validate if the user account is disabled
-                throw new CustomUserMessageAuthenticationException('This account is currently disabled.');
-            }
-            if ($user->getBannedAt() instanceof DateTimeInterface) {
-                // Validate if the user account exists
-                throw new CustomUserMessageAuthenticationException('This account is currently banned.');
-            }
+
+            // The callback will convert the string back to PhoneNumber object for repository
+            $userLoader = function (string $id) use ($phoneUtil) {
+                try {
+                    $phoneNumberObj = $phoneUtil->parse($id); // parse E164 string back to object
+                } catch (NumberParseException) {
+                    return null;
+                }
+                return $this->userRepository->findOneBy([
+                    'phoneNumber' => $phoneNumberObj,
+                    'deletedAt' => null,
+                ]);
+            };
+        } else {
+            throw new CustomUserMessageAuthenticationException('Invalid login method.');
         }
 
-        // Check if Turnstile validation is enabled in the database
+        if (empty($identifier)) {
+            throw new CustomUserMessageAuthenticationException('Missing user identifier.');
+        }
+
+        // Turnstile CAPTCHA check
+        $turnstileResponse = $request->request->get('cf-turnstile-response');
         $turnstileSetting = $this->settingRepository->findOneBy(['name' => 'TURNSTILE_CHECKER']);
         $isTurnstileEnabled = $turnstileSetting && $turnstileSetting->getValue() === OperationMode::ON->value;
-
-        // Validate the Turnstile CAPTCHA
         if (
-            $isTurnstileEnabled &&
-            (empty($turnstileResponse) || !$this->turnstileHttpClient->verifyResponse($turnstileResponse))
+            $isTurnstileEnabled && (empty($turnstileResponse) || !$this->turnstileHttpClient->verifyResponse(
+                $turnstileResponse
+            ))
         ) {
             throw new CustomUserMessageAuthenticationException('Invalid CAPTCHA validation.');
         }
 
-        // Add LAST_USERNAME to the session (optional)
-        $request->getSession()->set(SecurityRequestAttributes::LAST_USERNAME, $uuid);
+        $request->getSession()->set(SecurityRequestAttributes::LAST_USERNAME, $identifier);
 
-        // Preferences Checker
-        $rememberMe = false;
+        // Remember-me badge
+        $badges = [new CsrfTokenBadge('authenticate', $request->request->get('_csrf_token'))];
         $cookie = $request->cookies->get('cookie_preferences');
         if ($cookie) {
             $preferences = json_decode($cookie, true, 512, JSON_THROW_ON_ERROR);
-            $rememberMe = isset($preferences['rememberMe']) && $preferences['rememberMe'] === true;
+            if (!empty($preferences['rememberMe'])) {
+                $rememberMeBadge = new RememberMeBadge();
+                $rememberMeBadge->enable();
+                $badges[] = $rememberMeBadge;
+            }
         }
 
-        // Prepare badges
-        $badges = [
-            new CsrfTokenBadge('authenticate', $request->request->get('_csrf_token')),
-        ];
-
-        if ($rememberMe) {
-            $rememberMeBadge = new RememberMeBadge();
-            $rememberMeBadge->enable();
-            $badges[] = $rememberMeBadge;
-        }
-
-        // Standard login with password
+        // Passport
         return new Passport(
-            new UserBadge($uuid),
+            new UserBadge($identifier, $userLoader),
             new PasswordCredentials($password),
             $badges
         );

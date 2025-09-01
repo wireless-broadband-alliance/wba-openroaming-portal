@@ -518,9 +518,9 @@ class RegistrationController extends AbstractController
             $message = "Your account password is: "
                 . $data['password'] . "%0A" . "Verification code is: "
                 . $user->getTwoFAcode();
-            $result = $this->sendSMSService->sendSms($user->getPhoneNumber(), $message);
+            $result = $this->sendSMSService->sendSmsNoValidation($user, $message);
 
-            if ($result) {
+            if ($result !== '' && $result !== '0') {
                 return new BaseResponse(
                     200,
                     [
@@ -725,7 +725,7 @@ class RegistrationController extends AbstractController
                         $user->getTwoFAcode()
                     );
 
-                    $result = $this->sendSMSService->sendSms($user->getPhoneNumber(), $message);
+                    $result = $this->sendSMSService->sendSmsNoValidation($user, $message);
 
                     // Defines the Event to the table
                     $eventMetadata = [
@@ -741,7 +741,7 @@ class RegistrationController extends AbstractController
                         $eventMetadata
                     );
 
-                    if ($result) {
+                    if ($result !== '' && $result !== '0') {
                         return new BaseResponse(200, [
                             'success' => sprintf(
                                 'If the phone number exists,' .
