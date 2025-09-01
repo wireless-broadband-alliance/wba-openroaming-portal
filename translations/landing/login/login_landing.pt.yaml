@@ -1,5 +1,6 @@
 logoAlt: 'Logotipo do Cliente'
 welcome_back: 'Bem-vindo de volta'
+magicLinkDescription: 'Optou por fazer login via link mágico. Introduza o seu e-mail ou número de telefone para receber o link de login.'
 description: >
     Selecionou iniciar sessão via email e palavra-passe. Assim que iniciar sessão,
     instale o perfil no seu dispositivo.
@@ -21,6 +22,7 @@ form:
     password: 'Palavra-passe'
     password_placeholder: 'Introduza a sua palavra-passe'
 btn:
+    sendLink: 'Enviar Link'
     login: 'Iniciar sessão'
     choose_another: 'Escolher Outra'
     send_code: 'Enviar Código'

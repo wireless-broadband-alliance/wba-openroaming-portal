@@ -1,7 +1,7 @@
-{% extends '/site/base.html.twig' %}
+{% extends '/landing/base.html.twig' %}
 
 {% block title %}
-    {{ data.title.value }}
+    {{ data.PAGE_TITLE.value }}
 {% endblock %}
 
 {% block second_col %}
@@ -10,18 +10,17 @@
     <div class="grid grid-cols-1 gap-[5px]">
         {# Flash error messages #}
         {% for message in app.session.flashbag.get('error') %}
-            {{ include('site/shared/_toast.html.twig', {toast_type: 'toast-warning'}) }}
+            {{ include('landing/shared/_toast.html.twig', {toast_type: 'toast-warning'}) }}
         {% endfor %}
     </div>
 
     {% if data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\OperationMode::ON').value %}
-        <img class="w-[120px] h-[58px] object-scale-down mt-[75px]" src="{{ data.customerLogoName.value }}" alt="Logo"/>
+        <img class="w-[120px] h-[58px] object-scale-down mt-[75px]" src="{{ data.CUSTOMER_LOGO.value }}" alt={{ 'logoAlt'|trans({}, 'login_landing') }}/>
     {% endif %}
 
     <div class="{{ data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\OperationMode::ON').value ? 'pt-[28px]' : 'pt-[161px]' }} leading-7">
-        <p class="font-bold text-xl">Welcome back</p>
-        <p class="text-lg">You have selected to login via magic link.
-            Please enter your email or phone number to receive the login link</p>
+        <p class="font-bold text-xl">{{ 'welcome_back'|trans({}, 'login_landing') }}</p>
+        <p class="text-lg">{{ 'magicLinkDescription'|trans({}, 'login_landing') }}</p>
     </div>
 
     <twig:LoginUUIDForm :loginChoiceDTO="loginChoiceDTO" :form="form">
@@ -54,7 +53,7 @@
                                value="{{ constant('App\\Enum\\UserProvider::PHONE_NUMBER').value }}"
                                class="hidden"
                                {% if form.loginMethod.vars.value == constant('App\\Enum\\UserProvider::PHONE_NUMBER').value %}checked{% endif %} />
-                        Phone Number
+                        {{ 'form.phone_number'|trans({}, 'login_landing') }}
                     </label>
                 </div>
             </div>
@@ -69,7 +68,7 @@
         {% if loginChoiceDTO.loginMethod == constant('App\\Enum\\UserProvider::EMAIL').value and form['email'] is defined %}
             <div class="relative mt-[32px]">
                 {{ form_label(form.email, constant('App\\Enum\\UserProvider::EMAIL').value, {label_attr: {class: 'form-label'}}) }}
-                {{ form_widget(form.email, {attr: {class: 'form-widget', placeholder: 'Enter your email'}}) }}
+                {{ form_widget(form.email, {attr: {class: 'form-widget', placeholder: 'form.enter_email'|trans({}, 'login_landing')}}) }}
                 <div class="text-red-500 m-2">
                     {{ form_errors(form.email) }}
                 </div>
@@ -94,7 +93,7 @@
                     {{ form_widget(form.phoneNumber.children.number, {
                         attr: {
                             class: 'block w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary',
-                            placeholder: 'Enter your phone number',
+                            placeholder: 'form.enter_phone'|trans({}, 'login_landing'),
                             autocomplete: 'tel',
                         },
                     }) }}
@@ -121,8 +120,8 @@
         {% endif %}
 
         <div class="my-[32px] flex justify-center gap-4">
-            <button type="submit" class="w-[220px] btn-primary">Send Link</button>
-            <a href="{{ path('app_landing') }}" class="w-[220px] btn-secondary">Choose Another</a>
+            <button type="submit" class="w-[220px] btn-primary">{{ 'btn.sendLink'|trans({}, 'login_landing') }}</button>
+            <a href="{{ path('app_landing') }}" class="w-[220px] btn-secondary">{{ 'btn.choose_another'|trans({}, 'login_landing') }}</a>
         </div>
 
         {{ form_row(form._token) }}
