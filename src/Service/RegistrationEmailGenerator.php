@@ -31,33 +31,47 @@ readonly class RegistrationEmailGenerator
         $supportTeam = $this->settingRepository->findOneBy(['name' => 'PAGE_TITLE'])->getValue();
         $contactEmail = $this->settingRepository->findOneBy(['name' => 'CONTACT_EMAIL'])->getValue();
         $loginWithUUID = $this->settingRepository->findOneBy(['name' => 'LOGIN_WITH_UUID_ONLY'])->getValue();
-        $magicLink = $loginWithUUID === OperationMode::ON->value;
-        $magicURL = $magicLink ? $this->magicLinkService->magicToken($user) : null;
+        $magicURL =  $this->magicLinkService->magicToken($user);
         $customerLogo = $this->settingRepository->findOneBy(['name' => 'CUSTOMER_LOGO'])->getValue();
         $projectDir =  $this->parameterBag->get('kernel.project_dir');
         $logoPath = $projectDir . '/public' . $customerLogo;
 
-        // Send email to the user with the verification code
-        $email = new TemplatedEmail()
-            ->from(new Address(
-                $this->parameterBag->get('app.email_address'),
-                $this->parameterBag->get('app.sender_name')
-            ))
-            ->to($user->getEmail())
-            ->subject($this->translator->trans('subject_registration_details', [], 'user_registration'))
-            ->htmlTemplate('email/user_registration.html.twig')
-            ->context([
-                'uuid' => $user->getEmail(),
-                'supportTeam' => $supportTeam,
-                'contactEmail' => $contactEmail,
-                'verificationCode' => $user->getTwoFAcode(),
-                'isNewUser' => true,
-                'magicLink' => $magicLink,
-                // This variable informs if the user it's new our if it's just a password reset request
-                'password' => $password,
-                'magicURL' => $magicURL,
-            ])
-            ->embedFromPath($logoPath, 'logo_cid');
+        if ($loginWithUUID === OperationMode::ON->value) {
+            // Send email to the user with the verification link for authentications
+            $email = new TemplatedEmail()
+                ->from(new Address(
+                    $this->parameterBag->get('app.email_address'),
+                    $this->parameterBag->get('app.sender_name')
+                ))
+                ->to($user->getEmail())
+                ->subject($this->translator->trans('subject_registration_details', [], 'user_registration'))
+                ->htmlTemplate('email/user_registration_login_uuid.html.twig')
+                ->context([
+                    'uuid' => $user->getEmail(),
+                    'supportTeam' => $supportTeam,
+                    'contactEmail' => $contactEmail,
+                    'magicURL' => $magicURL,
+                ])
+                ->embedFromPath($logoPath, 'logo_cid');
+        } else {
+            // Send email to the user with the verification code
+            $email = new TemplatedEmail()
+                ->from(new Address(
+                    $this->parameterBag->get('app.email_address'),
+                    $this->parameterBag->get('app.sender_name')
+                ))
+                ->to($user->getEmail())
+                ->subject($this->translator->trans('subject_registration_details', [], 'user_registration'))
+                ->htmlTemplate('email/user_registration.html.twig')
+                ->context([
+                    'uuid' => $user->getEmail(),
+                    'supportTeam' => $supportTeam,
+                    'contactEmail' => $contactEmail,
+                    'verificationCode' => $user->getTwoFAcode(),
+                    'password' => $password,
+                ])
+                ->embedFromPath($logoPath, 'logo_cid');
+        }
 
         $this->mailer->send($email);
     }
