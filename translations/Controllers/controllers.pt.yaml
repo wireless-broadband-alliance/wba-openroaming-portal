@@ -18,7 +18,7 @@ accountCurrentlyPendingApproval: 'A sua conta está atualmente com um pedido pen
 profileNotFound: 'Perfil não encontrado'
 authenticationMethodNotEnabled: "Este método de autenticação não está ativado!"
 userWithSameEmail: 'Já existe um utilizador com o mesmo email. Por favor, tente iniciar sessão usando o link abaixo.'
-emailSentWithPasswordAndVerificationCode: 'Enviámos um email com a sua palavra-passe e o código de verificação da conta.'
+emailSentWithPasswordAndVerificationCode: 'Um email com a palavra-passe da sua conta e o código de verificação foi-lhe enviado'
 userWithSamePhoneNumber: 'Já existe um utilizador com o mesmo número de telefone. Por favor, tente "Iniciar sessão" usando o link abaixo.'
 yourAccountPasswordIs: 'A palavra-passe da sua conta é: '
 verificationCodeIs: 'O código de verificação é: '
