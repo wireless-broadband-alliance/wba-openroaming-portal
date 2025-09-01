@@ -1,5 +1,15 @@
 # Changelog
 
+# Release v1.11.0
+
+- Responsive Translations (Available: EN & PT-PT) - Administrator can just add new configurations for YAML
+  files in the translations folder, and the page auto-detects the added language.
+- New Listener to auto-detection of the user language.
+- Session token to auto-detect the new required `_locale`.
+- Optimized the `GetSettings` service to significantly reduce the loading process, improving application performance by
+  minimizing redundant data processing and database queries.
+- Renamed some enums to singular form to follow symfony guidelines for enum classes.
+
 # Release V1.10.0
 
 - New feature - Now the admin can configure the landing login authentication, instead of being the traditional (
@@ -39,16 +49,6 @@
 - NPM webpack-cli deprecations fixed to the latest stabled release (
     - (https://www.npmjs.com/package/webpack-cli/v/5.1.4)) compatible with "@symfony/webpack-encore": "^5.1.0".
 - New validation on the Admin Authentication Methods page to check whether the project has all required certificates.
-
-- Responsive Translations (Available: EN & PT-PT) - Administrator can just add new configurations for YAML
-    files in the translations folder, and the page auto-detects the added language.
-- New Listener to auto-detection of the user language.
-- Session token to auto-detect the new required `_locale`.
-- Login only with uuid → This new feature simplifies the process of authentication on the portal using only the account
-  uuid. This way the user confirms himself every time to get the confirmation code for authentication.
-- Optimized the `GetSettings` service to significantly reduce the loading process, improving application performance by
-  minimizing redundant data processing and database queries.
-- Renamed some enums to singular form to follow symfony guidelines for enum classes.
 
 # Release V1.8.1
 
