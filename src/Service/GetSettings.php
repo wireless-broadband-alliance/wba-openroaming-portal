@@ -3,7 +3,6 @@
 namespace App\Service;
 
 use App\Enum\LanguageType;
-use App\Enum\SettingNames;
 use App\Repository\SettingRepository;
 use App\Repository\SettingTranslationRepository;
 use Symfony\Component\HttpFoundation\Request;
