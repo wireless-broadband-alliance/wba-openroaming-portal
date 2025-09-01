@@ -2,17 +2,13 @@
 
 namespace App\Controller;
 
-use App\Entity\Setting;
-use App\Entity\TextEditor;
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
 use App\Enum\AnalyticalEventType;
 use App\Enum\FirewallType;
 use App\Enum\OperationMode;
-use App\Enum\OSTypes;
+use App\Enum\OSType;
 use App\Enum\PlatformMode;
-use App\Enum\TextEditorName;
-use App\Enum\TextInputType;
 use App\Enum\TwoFAType;
 use App\Enum\UserProvider;
 use App\Enum\UserRadiusProfileRevokeReason;
@@ -22,9 +18,7 @@ use App\Form\NewPasswordAccountType;
 use App\Form\RegistrationFormType;
 use App\Form\RevokeProfilesType;
 use App\Form\TOSType;
-use App\Repository\SettingRepository;
 use App\Repository\UserExternalAuthRepository;
-use App\Repository\UserRepository;
 use App\Security\LandingAuthenticator;
 use App\Service\EventActions;
 use App\Service\GetSettings;
@@ -37,12 +31,12 @@ use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * @method getParameterBag()
@@ -52,23 +46,21 @@ class SiteController extends AbstractController
     /**
      * SiteController constructor.
      *
-     * @param UserRepository $userRepository The repository for accessing user data.
-     * @param UserExternalAuthRepository $userExternalAuthRepository The repository required to fetch the provider.
-     * @param SettingRepository $settingRepository The setting repository is used to create the getSettings function.
-     * @param GetSettings $getSettings The instance of GetSettings class.
+     * @param UserExternalAuthRepository $userExternalAuthRepository The repository is required to fetch the provider.
+     * @param GetSettings $getSettings The instance of the GetSettings class.
      * @param EventActions $eventActions Used to generate event related to the User creation
      * of the user account
      * @param ProfileManager $profileManager Calls the functions to enable/disable provisioning profiles
      */
     public function __construct(
-        private readonly UserRepository $userRepository,
         private readonly UserExternalAuthRepository $userExternalAuthRepository,
-        private readonly SettingRepository $settingRepository,
         private readonly GetSettings $getSettings,
         private readonly EventActions $eventActions,
         private readonly ProfileManager $profileManager,
         private readonly TwoFAService $twoFAService,
+        private readonly TranslatorInterface $translator,
         private readonly UserDeletionService $userDeletionService,
+        private readonly EntityManagerInterface $entityManager,
     ) {
     }
 
@@ -79,16 +71,15 @@ class SiteController extends AbstractController
         UserAuthenticatorInterface $userAuthenticator,
         LandingAuthenticator $authenticator,
         EntityManagerInterface $entityManager,
-        RequestStack $requestStack
     ): Response {
         // Call the getSettings method of GetSettings class to retrieve the data
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
+
         /** @var User $currentUser */
         $currentUser = $this->getUser();
         $session = $request->getSession();
 
-        // Check if the user is logged in and verification of the user
-        // And check if the user doesn't have a forgot_password_request active
+        // Check if the user_verification setting is active
         if (
             isset($data["USER_VERIFICATION"]["value"]) &&
             $data["USER_VERIFICATION"]["value"] === OperationMode::ON->value &&
@@ -96,11 +87,8 @@ class SiteController extends AbstractController
         ) {
             // Retrieve the cookie about SAML_ACCOUNT Deletion from the request
             $previousLoggedID = $request->cookies->get('previousLoggedID');
-
-            // $previousLoggedID it's a string
-            // currentUser->getID it's an int
+            $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $currentUser]);
             if ($previousLoggedID && $previousLoggedID == $currentUser->getId()) {
-                $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $currentUser]);
                 $this->userDeletionService->deleteUser(
                     $currentUser,
                     $userExternalAuths,
@@ -111,11 +99,11 @@ class SiteController extends AbstractController
                 return $this->redirectToRoute('app_logout');
             }
 
-            // Checks if the user has a "forgot_password_request", if yes, return to password reset form
+            // Checks if the user has a "forgot_password_request", if yes, return to the password-reset form
             if ($currentUser->isForgotPasswordRequest()) {
                 $this->addFlash(
                     'error',
-                    'You need to confirm the new password before download a profile!'
+                    $this->translator->trans('confirmNewPasswordBeforeDownloadProfile', [], 'controllers')
                 );
                 return $this->redirectToRoute('app_site_forgot_password_checker');
             }
@@ -124,65 +112,109 @@ class SiteController extends AbstractController
             }
 
             // Check if the user is verified
-            if (!$session->has('session_verified') && !$currentUser->isVerified()) {
+            if (
+                $userExternalAuths[0]->getProvider() === UserProvider::PORTAL_ACCOUNT->value &&
+                !$session->has('session_verified')
+            ) {
+                if (
+                    $this->twoFAService->canValidationCode(
+                        $currentUser,
+                        AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE->value
+                    )
+                ) {
+                    $this->twoFAService->generate2FACode(
+                        $currentUser,
+                        $request->getClientIp(),
+                        $request->headers->get('User-Agent'),
+                        AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE->value
+                    );
+                    $this->addFlash(
+                        'success',
+                        $this->translator->trans('codeSentSuccessfully', [], 'controllers')
+                    );
+                    return $this->redirectToRoute('app_login_confirmation');
+                }
+                $interval_minutes = $this->twoFAService->timeLeftToResendCode(
+                    $currentUser,
+                    AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE->value
+                );
+                $this->addFlash(
+                    'error',
+                    $this->translator->trans(
+                        'codeAlreadySent',
+                        [
+                            '%minutes%' => $interval_minutes
+                        ],
+                        'controllers'
+                    )
+                );
                 return $this->redirectToRoute('app_login_confirmation');
             }
 
-            // Checks the 2FA status of the platform if mandatory forces the user to configure it
+
             if (
-                $currentUser->getUserExternalAuths() &&
-                ($data['TWO_FACTOR_AUTH_STATUS']['value'] ===
-                    TwoFAType::ENFORCED_FOR_LOCAL->value &&
-                    $currentUser->getUserExternalAuths()->get(0)->getProvider() ===
-                    UserProvider::PORTAL_ACCOUNT->value && ($currentUser->getTwoFAType() === null ||
+                $currentUser &&
+                ($data["LOGIN_WITH_UUID_ONLY"]["value"] === OperationMode::OFF->value ||
+                    $currentUser->getUserExternalAuths()[0]->getProvider() !== UserProvider::PORTAL_ACCOUNT->value)
+            ) {
+                // Checks the 2FA status of the platform if mandatory and force the user to configure it
+                if (
+                    $currentUser->getUserExternalAuths() &&
+                    ($data['TWO_FACTOR_AUTH_STATUS']['value'] ===
+                        TwoFAType::ENFORCED_FOR_LOCAL->value &&
+                        $currentUser->getUserExternalAuths()->get(0)->getProvider() ===
+                        UserProvider::PORTAL_ACCOUNT->value && ($currentUser->getTwoFAType() === null ||
+                            $currentUser->getTwoFAType() ===
+                            UserTwoFactorAuthenticationStatus::DISABLED->value))
+                ) {
+                    return $this->redirectToRoute('app_configure2FA');
+                }
+                if (
+                    $data['TWO_FACTOR_AUTH_STATUS']['value'] === TwoFAType::ENFORCED_FOR_ALL->value &&
+                    ($currentUser->getTwoFAType() === null ||
                         $currentUser->getTwoFAType() ===
-                        UserTwoFactorAuthenticationStatus::DISABLED->value))
-            ) {
-                return $this->redirectToRoute('app_configure2FA');
-            }
-            if (
-                $data['TWO_FACTOR_AUTH_STATUS']['value'] === TwoFAType::ENFORCED_FOR_ALL->value &&
-                ($currentUser->getTwoFAType() === null ||
-                    $currentUser->getTwoFAType() ===
-                    UserTwoFactorAuthenticationStatus::DISABLED->value)
-            ) {
-                return $this->redirectToRoute('app_configure2FA');
+                        UserTwoFactorAuthenticationStatus::DISABLED->value)
+                ) {
+                    return $this->redirectToRoute('app_configure2FA');
+                }
             }
         }
-
         if (
             $currentUser &&
-            (
+            ($data["LOGIN_WITH_UUID_ONLY"]["value"] === OperationMode::OFF->value ||
+                $currentUser->getUserExternalAuths()[0]->getProvider() !== UserProvider::PORTAL_ACCOUNT->value)
+        ) {
+            if (
                 $currentUser->getTwoFAType() !==
                 UserTwoFactorAuthenticationStatus::DISABLED->value &&
-                !$session->has('2fa_verified_landing'))
-        ) {
-            if (
-                $currentUser->getTwoFAType() ===
-                UserTwoFactorAuthenticationStatus::SMS->value
+                !$session->has('2fa_verified_landing')
             ) {
-                return $this->redirectToRoute('app_2FA_generate_code');
+                if (
+                    $currentUser->getTwoFAType() ===
+                    UserTwoFactorAuthenticationStatus::SMS->value
+                ) {
+                    return $this->redirectToRoute('app_2FA_generate_code');
+                }
+                if (
+                    $currentUser->getTwoFAType() ===
+                    UserTwoFactorAuthenticationStatus::EMAIL->value
+                ) {
+                    return $this->redirectToRoute('app_2FA_generate_code');
+                }
+                if (
+                    $currentUser->getTwoFAType() ===
+                    UserTwoFactorAuthenticationStatus::TOTP->value
+                ) {
+                    return $this->redirectToRoute('app_verify2FA_TOTP');
+                }
             }
+            // Check if the user has OTPCodes
             if (
-                $currentUser->getTwoFAType() ===
-                UserTwoFactorAuthenticationStatus::EMAIL->value
+                $currentUser->getTwoFAtype() !== UserTwoFactorAuthenticationStatus::DISABLED->value &&
+                !$this->twoFAService->hasValidOTPCodes($currentUser)
             ) {
-                return $this->redirectToRoute('app_2FA_generate_code');
+                return $this->redirectToRoute('app_otpCodes');
             }
-            if (
-                $currentUser->getTwoFAType() ===
-                UserTwoFactorAuthenticationStatus::TOTP->value
-            ) {
-                return $this->redirectToRoute('app_verify2FA_TOTP');
-            }
-        }
-        // check if the user have otpCodes
-        if (
-            $currentUser &&
-            $currentUser->getTwoFAtype() !== UserTwoFactorAuthenticationStatus::DISABLED->value &&
-            !$this->twoFAService->hasValidOTPCodes($currentUser)
-        ) {
-            return $this->redirectToRoute('app_otpCodes');
         }
 
         // Check if the current user has a provider
@@ -199,12 +231,27 @@ class SiteController extends AbstractController
         }
 
         $userAgent = $request->headers->get('User-Agent');
-        $actionName = $requestStack->getCurrentRequest()->attributes->get('_route');
+        $actionName = $request->attributes->get('_route');
+
         if ($data['PLATFORM_MODE']['value']) {
             if ($request->isMethod('POST')) {
                 $payload = $request->request->all();
+                if ($data['TURNSTILE_CHECKER']['value'] === OperationMode::ON->value) {
+                    $turnstileResponse = $request->request->get('cf-turnstile-response');
+                    // Validate the Turnstile CAPTCHA
+                    if ((empty($turnstileResponse) && !$this->getUser())) {
+                        $this->addFlash(
+                            'error',
+                            $this->translator->trans('invalidCaptcha', [], 'landing')
+                        );
+                        return $this->redirectToRoute('app_landing');
+                    }
+                }
                 if (empty($payload['radio-os']) && empty($payload['detected-os'])) {
-                    $this->addFlash('error', 'Please select Operating System!');
+                    $this->addFlash(
+                        'error',
+                        $this->translator->trans('selectOperatingSystem', [], 'controllers')
+                    );
                 } elseif (!$this->getUser() instanceof UserInterface) {
                     $user = new User();
                     $userAuths = new UserExternalAuth();
@@ -247,6 +294,7 @@ class SiteController extends AbstractController
                     if ($data["USER_VERIFICATION"]['value'] === OperationMode::ON->value) {
                         return $this->redirectToRoute('app_login_confirmation');
                     }
+
                     if ($data["USER_VERIFICATION"]['value'] === OperationMode::OFF->value) {
                         return $this->redirectToRoute('app_landing');
                     }
@@ -269,8 +317,8 @@ class SiteController extends AbstractController
                      * Overriding macOS to iOS due to the profiles being the same and there being no route for the macOS
                      * enum value, so the UI shows macOS but on the logic to generate the profile iOS is used instead
                      */
-                    if ($payload['radio-os'] === OSTypes::MACOS->value) {
-                        $payload['radio-os'] = OSTypes::IOS->value;
+                    if ($payload['radio-os'] === OSType::MACOS->value) {
+                        $payload['radio-os'] = OSType::IOS->value;
                     }
                     return $this->redirectToRoute(
                         'profile_' . strtolower((string)$payload['radio-os']),
@@ -281,7 +329,10 @@ class SiteController extends AbstractController
         } elseif ($request->isMethod('POST')) {
             $payload = $request->request->all();
             if (empty($payload['radio-os']) && empty($payload['detected-os'])) {
-                $this->addFlash('error', 'Please select Operating System!');
+                $this->addFlash(
+                    'error',
+                    $this->translator->trans('selectOperatingSystem', [], 'controllers')
+                );
             }
             if (!array_key_exists('radio-os', $payload)) {
                 if (!array_key_exists('detected-os', $payload)) {
@@ -302,8 +353,8 @@ class SiteController extends AbstractController
                  * Overriding macOS to iOS due to the profiles being the same and there being no route for the macOS
                  * enum value, so the UI shows macOS but on the logic to generate the profile iOS is used instead
                  */
-                if ($payload['radio-os'] === OSTypes::MACOS->value) {
-                    $payload['radio-os'] = OSTypes::IOS->value;
+                if ($payload['radio-os'] === OSType::MACOS->value) {
+                    $payload['radio-os'] = OSType::IOS->value;
                 }
                 return $this->redirectToRoute(
                     'profile_' . strtolower((string)$payload['radio-os']),
@@ -320,14 +371,17 @@ class SiteController extends AbstractController
         $data['os'] = [
             'selected' => $payload['radio-os'] ?? $this->detectDevice($userAgent),
             'items' => [
-                OSTypes::WINDOWS->value => ['alt' => 'Windows Logo'],
-                OSTypes::IOS->value => ['alt' => 'Apple Logo'],
-                OSTypes::ANDROID->value => ['alt' => 'Android Logo']
+                OSType::WINDOWS->value => ['alt' => 'Windows Logo'],
+                OSType::IOS->value => ['alt' => 'Apple Logo'],
+                OSType::ANDROID->value => ['alt' => 'Android Logo']
             ]
         ];
 
-        if ($data['os']['selected'] === OSTypes::NONE->value && $currentUser && $currentUser->isVerified()) {
-            $this->addFlash('error', 'Please select Operating System!');
+        if ($data['os']['selected'] === OSType::NONE->value && $currentUser && $currentUser->isVerified()) {
+            $this->addFlash(
+                'error',
+                $this->translator->trans('selectOperatingSystem', [], 'controllers')
+            );
         }
 
         $form = $this->createForm(AccountUserUpdateLandingType::class, $this->getUser());
@@ -336,7 +390,7 @@ class SiteController extends AbstractController
         $formRevokeProfiles = $this->createForm(RevokeProfilesType::class, $this->getUser());
         $formTOS = $this->createForm(TOSType::class);
 
-        return $this->render('site/landing.html.twig', [
+        return $this->render('landing/landing.html.twig', [
             'form' => $form->createView(),
             'formPassword' => $formPassword->createView(),
             'formTOS' => $formTOS,
@@ -345,77 +399,10 @@ class SiteController extends AbstractController
             'data' => $data,
             'userExternalAuths' => $externalAuthsData,
             'user' => $currentUser,
-            'context' => FirewallType::LANDING->value
+            'context' => FirewallType::LANDING->value,
         ]);
     }
 
-    #[Route('/terms-conditions', name: 'app_terms_conditions')]
-    public function termsConditions(EntityManagerInterface $em): RedirectResponse|Response
-    {
-        // Call the getSettings method of GetSettings class to retrieve the data
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
-
-        $settingsRepository = $em->getRepository(Setting::class);
-        $tosFormat = $settingsRepository->findOneBy(['name' => 'TOS']);
-        $textEditorRepository = $em->getRepository(TextEditor::class);
-        if (
-            $tosFormat &&
-            $tosFormat->getValue() === TextInputType::TEXT_EDITOR->value
-        ) {
-            if ($textEditorRepository->findOneBy(['name' => TextEditorName::TOS->value]) !== null) {
-                $content = $textEditorRepository->findOneBy(['name' => TextEditorName::TOS->value])->getContent();
-            } else {
-                $content = '';
-            }
-            return $this->render('site/shared/tos/_tos.html.twig', [
-                'content' => $content,
-                'data' => $data
-            ]);
-        }
-        if (
-            $tosFormat &&
-            $tosFormat->getValue() === TextInputType::LINK->value &&
-            $settingsRepository->findOneBy(['name' => 'TOS_LINK'])
-        ) {
-            return $this->redirect($settingsRepository->findOneBy(['name' => 'TOS_LINK'])->getValue());
-        }
-        return $this->redirectToRoute('app_landing');
-    }
-
-    #[Route('/privacy-policy', name: 'app_privacy_policy')]
-    public function privacyPolicy(EntityManagerInterface $em): RedirectResponse|Response
-    {
-        // Call the getSettings method of GetSettings class to retrieve the data
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
-
-        $settingsRepository = $em->getRepository(Setting::class);
-        $textEditorRepository = $em->getRepository(TextEditor::class);
-        $privacyPolicyFormat = $settingsRepository->findOneBy(['name' => 'PRIVACY_POLICY']);
-        if (
-            $privacyPolicyFormat &&
-            $privacyPolicyFormat->getValue() === TextInputType::TEXT_EDITOR->value
-        ) {
-            if ($textEditorRepository->findOneBy(['name' => TextEditorName::PRIVACY_POLICY->value]) !== null) {
-                $content = $textEditorRepository->findOneBy(
-                    ['name' => TextEditorName::PRIVACY_POLICY->value]
-                )->getContent();
-            } else {
-                $content = '';
-            }
-            return $this->render('site/shared/tos/_privacy_policy.html.twig', [
-                'content' => $content,
-                'data' => $data
-            ]);
-        }
-        if (
-            $privacyPolicyFormat &&
-            $privacyPolicyFormat->getValue() === TextInputType::LINK->value &&
-            $settingsRepository->findOneBy(['name' => 'PRIVACY_POLICY_LINK'])
-        ) {
-            return $this->redirect($settingsRepository->findOneBy(['name' => 'PRIVACY_POLICY_LINK'])->getValue());
-        }
-        return $this->redirectToRoute('app_landing');
-    }
 
     /**
      * Widget with data about the account of the user / upload new password
@@ -426,7 +413,6 @@ class SiteController extends AbstractController
     #[Route('/account/user', name: 'app_site_account_user', methods: ['POST'])]
     public function accountUser(
         Request $request,
-        EntityManagerInterface $em,
         UserPasswordHasherInterface $passwordHasher,
     ): Response {
         /** @var User $user */
@@ -444,7 +430,10 @@ class SiteController extends AbstractController
                 true
             );
             if (!$revokeProfiles) {
-                $this->addFlash('error', 'This account doesn\'t have profiles associated!');
+                $this->addFlash(
+                    'error',
+                    $this->translator->trans('accountWithoutProfilesAssociated', [], 'controllers')
+                );
                 return $this->redirectToRoute('app_landing');
             }
             $eventMetaData = [
@@ -460,7 +449,10 @@ class SiteController extends AbstractController
                 $eventMetaData
             );
 
-            $this->addFlash('success', 'Your profiles associated with this account have been revoked.');
+            $this->addFlash(
+                'success',
+                $this->translator->trans('profilesAssociatedRevoked', [], 'controllers')
+            );
             return $this->redirectToRoute('app_landing');
         }
 
@@ -489,7 +481,10 @@ class SiteController extends AbstractController
                 $eventMetaData
             );
 
-            $this->addFlash('success', 'Your account information has been updated');
+            $this->addFlash(
+                'success',
+                $this->translator->trans('accountInformationUpdated', [], 'controllers')
+            );
 
             // Redirect the user upon successful form submission
             return $this->redirectToRoute('app_landing');
@@ -507,15 +502,17 @@ class SiteController extends AbstractController
 
             // Compare the typed password with the hashed password from the database
             if (!password_verify((string)$typedPassword, $currentPasswordDB)) {
-                $this->addFlash('error', 'Current password Invalid. Please try again.');
+                $this->addFlash(
+                    'error',
+                    $this->translator->trans('passwordInvalid', [], 'controllers')
+                );
                 return $this->redirectToRoute('app_landing');
             }
 
             if ($formPassword->get('newPassword')->getData() !== $formPassword->get('confirmPassword')->getData()) {
                 $this->addFlash(
                     'error',
-                    'Please make sure to type the same password on both fields. 
-                    If the problem keep occurring contact our support!'
+                    $this->translator->trans('typeTheSamePasswordBothFields', [], 'controllers')
                 );
                 return $this->redirectToRoute('app_landing');
             }
@@ -528,8 +525,8 @@ class SiteController extends AbstractController
                 $session->remove('_security_dashboard');
             }
 
-            $em->persist($user);
-            $em->flush();
+            $this->entityManager->persist($user);
+            $this->entityManager->flush();
 
             $eventMetaData = [
                 'ip' => $request->getClientIp(),
@@ -544,7 +541,10 @@ class SiteController extends AbstractController
                 $eventMetaData
             );
 
-            $this->addFlash('success', 'Your password has been updated successfully!');
+            $this->addFlash(
+                'success',
+                $this->translator->trans('passwordUpdatedSuccessfully', [], 'controllers')
+            );
         }
 
         return $this->redirectToRoute('app_landing');
@@ -552,43 +552,33 @@ class SiteController extends AbstractController
 
     private function detectDevice($userAgent): string
     {
-        $os = OSTypes::NONE->value;
+        $os = OSType::NONE->value;
 
         // Windows
         if (preg_match('/windows|win32/i', (string)$userAgent)) {
-            $os = OSTypes::WINDOWS->value;
+            $os = OSType::WINDOWS->value;
         }
 
         // macOS
         if (preg_match('/macintosh|mac os x/i', (string)$userAgent)) {
-            $os = OSTypes::MACOS->value;
+            $os = OSType::MACOS->value;
         }
 
         // iOS
         if (preg_match('/iphone|ipod|ipad/i', (string)$userAgent)) {
-            $os = OSTypes::IOS->value;
+            $os = OSType::IOS->value;
         }
 
         // Android
         if (preg_match('/android/i', (string)$userAgent)) {
-            $os = OSTypes::ANDROID->value;
+            $os = OSType::ANDROID->value;
         }
 
         // Linux
 //        if (preg_match('/linux/i', $userAgent)) {
-//            $os = OSTypes::LINUX;
+//            $os = OSType::LINUX;
 //        }
 
         return $os;
-    }
-
-    #[Route('/change-locale/{locale}', name: 'change_locale')]
-    public function changeLocale(string $locale, Request $request): Response
-    {
-        // Store the locale in the session
-        $request->getSession()->set('_locale', $locale);
-
-        $referer = $request->headers->get('referer', $this->generateUrl('app_landing'));
-        return $this->redirect($referer);
     }
 }

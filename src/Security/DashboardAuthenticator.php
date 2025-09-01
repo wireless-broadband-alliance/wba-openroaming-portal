@@ -31,6 +31,7 @@ use Symfony\Component\Security\Http\Authenticator\Passport\Credentials\PasswordC
 use Symfony\Component\Security\Http\Authenticator\Passport\Passport;
 use Symfony\Component\Security\Http\SecurityRequestAttributes;
 use Symfony\Component\Security\Http\Util\TargetPathTrait;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class DashboardAuthenticator extends AbstractLoginFormAuthenticator
 {
@@ -43,6 +44,7 @@ class DashboardAuthenticator extends AbstractLoginFormAuthenticator
         private readonly CloudflareTurnstileHttpClient $turnstileHttpClient,
         private readonly UserRepository $userRepository,
         private readonly RequestStack $requestStack,
+        private readonly TranslatorInterface $translator
     ) {
     }
 
@@ -102,7 +104,9 @@ class DashboardAuthenticator extends AbstractLoginFormAuthenticator
             $isTurnstileEnabled && (empty($turnstileResponse) ||
                 !$this->turnstileHttpClient->verifyResponse($turnstileResponse))
         ) {
-            throw new CustomUserMessageAuthenticationException('Invalid CAPTCHA validation.');
+            throw new CustomUserMessageAuthenticationException(
+                $this->translator->trans('invalidCAPTCHAValidation', [], 'Security')
+            );
         }
 
         // Store last username/identifier in session
@@ -141,7 +145,7 @@ class DashboardAuthenticator extends AbstractLoginFormAuthenticator
                 if ($session instanceof Session) {
                     $session->getFlashBag()->add(
                         'error',
-                        'You need to confirm the new password before download a profile!'
+                        $this->translator->trans('confirmNewPasswordBeforeDownloadProfile', [], 'Security')
                     );
                 }
 

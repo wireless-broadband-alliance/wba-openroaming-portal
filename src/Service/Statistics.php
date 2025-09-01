@@ -5,7 +5,7 @@ namespace App\Service;
 use App\Entity\Event;
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
-use App\Enum\OSTypes;
+use App\Enum\OSType;
 use App\Enum\PlatformMode;
 use App\Enum\UserProvider;
 use App\Enum\UserTwoFactorAuthenticationStatus;
@@ -41,10 +41,10 @@ readonly class Statistics
         $events = $repository->findBy(['event_name' => 'DOWNLOAD_PROFILE']);
 
         $profileCounts = [
-            OSTypes::ANDROID->value => 0,
-            OSTypes::WINDOWS->value => 0,
-            OSTypes::MACOS->value => 0,
-            OSTypes::IOS->value => 0,
+            OSType::ANDROID->value => 0,
+            OSType::WINDOWS->value => 0,
+            OSType::MACOS->value => 0,
+            OSType::IOS->value => 0,
         ];
 
         // Filter and count profile types based on the date criteria
@@ -681,9 +681,6 @@ readonly class Statistics
             str_contains($connectInfo, '802.11ax') => 'Wi-Fi 6',
             str_contains($connectInfo, '802.11ac') => 'Wi-Fi 5',
             str_contains($connectInfo, '802.11n') => 'Wi-Fi 4',
-            str_contains($connectInfo, '802.11g') => 'Wi-Fi 3',
-            str_contains($connectInfo, '802.11a') => 'Wi-Fi 2',
-            str_contains($connectInfo, '802.11b') => 'Wi-Fi 1',
             default => 'Unknown',
         };
     }

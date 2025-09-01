@@ -1,0 +1,6 @@
+selectOption: 'Please select an option'
+fieldCannotBeLongerThan: 'This field cannot be longer than {{ limit }} characters'
+timerShouldNotBeLessThan: 'This timer should never be less than 0 for user auto-deletion.'
+timerValueRequired: 'The timer value is required. Please provide a valid timer'
+timerShouldNotBeLessThanProfileNotification: 'This timer should never be less than 0 for user profile notification.'
+PleaseSetTimer: 'Please make sure to set a timer'

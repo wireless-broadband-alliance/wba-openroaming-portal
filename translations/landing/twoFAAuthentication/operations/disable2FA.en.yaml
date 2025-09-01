@@ -1,0 +1,15 @@
+title:
+    swap: 'Disable Two-Factor Authentication - Swap Method'
+    default: 'Disable Two-Factor Authentication'
+heading:
+    swap: 'Disable Two-Factor Authentication - Swap Method'
+    default: 'Disable Two-Factor Authentication'
+description:
+    swap: 'To change your authentication method, you must first disable your current method.'
+    default: 'Please enter your code to disable Two-Factor Authentication.'
+instructions: 'Please enter your code to disable Two-Factor Authentication.'
+logoAlt: 'Customer Logo'
+form:
+    placeholder: 'Enter your Code'
+    submit: 'Submit'
+    resend: 'Resend code'

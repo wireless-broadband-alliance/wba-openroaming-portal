@@ -8,17 +8,22 @@ use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\Length;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class ResetPasswordType extends AbstractType
 {
+    public function __construct(
+        private readonly TranslatorInterface $translator
+    ) {
+    }
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
             ->add('password', PasswordType::class, [
-                'label' => 'New Password',
+                'label' => $this->translator->trans('newPassword', [], 'ResetPasswordType'),
                 'attr' => [
                     'mapped' => false,
-                    'placeholder' => 'Enter New password',
+                    'placeholder' => $this->translator->trans('enterNewPassword', [], 'ResetPasswordType'),
                 ],
                 'constraints' => [
                     new Length([
@@ -30,10 +35,10 @@ class ResetPasswordType extends AbstractType
                 ],
             ])
             ->add('confirmPassword', PasswordType::class, [
-                'label' => 'Confirm New Password',
+                'label' => $this->translator->trans('confirmNewPassword', [], 'ResetPasswordType'),
                 'mapped' => false,
                 'attr' => [
-                    'placeholder' => 'Enter the confirmation',
+                    'placeholder' => $this->translator->trans('enterTheConfirmation', [], 'ResetPasswordType'),
                 ],
             ]);
     }

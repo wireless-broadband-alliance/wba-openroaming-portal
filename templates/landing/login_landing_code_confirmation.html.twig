@@ -1,0 +1,49 @@
+{% extends 'site/base.html.twig' %}
+
+{% block title %}
+    {{ data.PAGE_TITLE.value }}
+{% endblock %}
+
+{% block second_col %}
+
+    {# Toasts #}
+    {{ block('toast_messages') }}
+
+    {% if data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\OperationMode::ON').value %}
+        <img class="w-[120px] h-[58px] object-scale-down mt-[75px]" src="{{ data.CUSTOMER_LOGO.value }}"
+             alt="Customer Logo"/>
+    {% endif %}
+
+    <div class="{{ data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\OperationMode::ON').value ? 'pt-[28px]' : 'pt-[161px]' }} leading-7">
+        <p class="font-bold text-xl">{{ 'welcomeBack'|trans({}, 'login_landing_code_confirmation') }}</p>
+        <p class="text-lg">{{ 'welcomeMessage'|trans({}, 'login_landing_code_confirmation') }}</p>
+    </div>
+
+    {# Form Column #}
+    {{ form_start(form) }}
+    <div class="relative mt-10 mb-6">
+        {{ form_label(form.code, null, {label_attr: {class: 'form-label'}}) }}
+        {{ form_widget(form.code, {
+            attr: {
+                class: 'form-widget',
+                placeholder: 'enterCode'|trans({}, 'login_landing_code_confirmation'),
+            }}) }}
+    </div>
+
+    {# Action Buttons #}
+    <div class="grid mt-4 grid-cols-1 sm:gap-4 lg:gap-6 sm:[grid-template-columns:repeat(auto-fit,minmax(150px,1fr))] md:my-2 my-3 space-y-4 sm:space-y-0">
+        <button class="btn-primary"
+                type="submit">{{ 'login'|trans({}, 'login_landing_code_confirmation') }}</button>
+        <a href="{{ path('app_local_resend_code', {
+            context: context,
+            type: constant('App\\Enum\\CodeVerificationType::VERIFICATION_CODE_LOGIN_RESEND').value},
+        ) }}"
+           class="w-[220px] btn-secondary">
+            {{ 'resendCode'|trans({}, 'login_landing_code_confirmation') }}
+        </a>
+    </div>
+    {{ form_end(form) }}
+
+    {{ include('site/shared/returnActions/_logout.html.twig') }}
+
+{% endblock %}

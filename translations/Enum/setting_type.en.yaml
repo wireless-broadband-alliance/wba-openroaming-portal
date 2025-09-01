@@ -1,0 +1,10 @@
+setting_type.settingCustom: Landing Page Configuration
+setting_type.settingTerms: Terms & Policies
+setting_type.settingRadius: Radius Profile Configuration
+setting_type.settingStatus: Platform Status
+setting_type.settingLDAP: LDAP Synchronization
+setting_type.settingCAPPORT: User Engagement
+setting_type.settingAUTH: Authentication Methods
+setting_type.settingTwoFA: Two Factor Authenticator
+setting_type.settingSMS: SMS Configuration
+setting_type.settingSchedule: Schedule Automation

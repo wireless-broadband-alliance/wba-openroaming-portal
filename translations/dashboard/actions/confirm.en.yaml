@@ -1,0 +1,5 @@
+enterVerificationCode: 'Enter the verification code from your email'
+code: 'Code'
+generateNewEmail: "Click <a href=\"%url%\" class=\"font-bold underline text-primary\">here</a> to generate a new email with a new code"
+verify: 'Verify'
+invalidSetting: 'Not a valid setting.'

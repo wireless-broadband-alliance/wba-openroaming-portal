@@ -3,9 +3,14 @@
 namespace App\Service;
 
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class SamlResolverService
 {
+    public function __construct(
+        private readonly TranslatorInterface $translator
+    ) {
+    }
     public function decodeSamlResponse(string $samlResponse): array
     {
         // Decode the SamlResponse for data validation with the DB
@@ -14,7 +19,9 @@ class SamlResolverService
             $decodedSamlResponse = base64_decode($samlResponse, true);
 
             if ($decodedSamlResponse === false) {
-                throw new AuthenticationException('Failed to decode SAMLResponse.');
+                throw new AuthenticationException(
+                    $this->translator->trans('failedDecodeSAMLResponse', [], 'SamlResolverService')
+                );
             }
 
             // Load the response as an XML document
@@ -25,14 +32,18 @@ class SamlResolverService
             // Extract the "Issuer" field (idp_entity_id)
             $issuerNode = $dom->getElementsByTagName('Issuer')->item(0);
             if (!$issuerNode) {
-                throw new AuthenticationException('Issuer (idp_entity_id) not found in the SAMLResponse.');
+                throw new AuthenticationException(
+                    $this->translator->trans('issuerNotFoundSAMLResponse', [], 'SamlResolverService')
+                );
             }
             $idpEntityId = $issuerNode->textContent;
 
             // Extract the certificate
             $certificateNode = $dom->getElementsByTagName('X509Certificate')->item(0);
             if (!$certificateNode) {
-                throw new AuthenticationException('Certificate not found in the SAMLResponse.');
+                throw new AuthenticationException(
+                    $this->translator->trans('certificateNotFoundSAMLResponse', [], 'SamlResolverService')
+                );
             }
             $certificate = $certificateNode->textContent;
 
@@ -43,7 +54,11 @@ class SamlResolverService
             ];
         } catch (\Exception $e) {
             throw new AuthenticationException(
-                'An error occurred while processing the SAMLResponse: ' . $e->getMessage()
+                $this->translator->trans(
+                    'certificateNotFoundSAMLResponse',
+                    ['%message%' => $e->getMessage()],
+                    'SamlResolverService'
+                )
             );
         }
     }

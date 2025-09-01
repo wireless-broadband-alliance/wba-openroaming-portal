@@ -5,10 +5,12 @@ namespace App\Controller;
 use App\Entity\Setting;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
+use App\Enum\LanguageType;
+use App\Enum\SettingType;
 use App\Form\CustomType;
 use App\Form\RevokeProfilesType;
 use App\Repository\EventRepository;
-use App\Repository\SettingRepository;
+use App\Repository\SettingTranslationRepository;
 use App\Repository\UserRepository;
 use App\Service\EventActions;
 use App\Service\GetSettings;
@@ -26,6 +28,7 @@ use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class AdminController extends AbstractController
 {
@@ -34,10 +37,11 @@ class AdminController extends AbstractController
         private readonly UserRepository $userRepository,
         private readonly ParameterBagInterface $parameterBag,
         private readonly GetSettings $getSettings,
-        private readonly SettingRepository $settingRepository,
         private readonly EventActions $eventActions,
         private readonly VerificationCodeEmailGenerator $verificationCodeGenerator,
-        private readonly EventRepository $eventRepository
+        private readonly EventRepository $eventRepository,
+        private readonly TranslatorInterface $translator,
+        private readonly SettingTranslationRepository $settingTranslationRepository
     ) {
     }
 
@@ -54,7 +58,7 @@ class AdminController extends AbstractController
         #[MapQueryParameter] ?int $count = 7
     ): Response {
         // Call the getSettings method of GetSettings class to retrieve the data
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
 
         $searchTerm = $request->query->get('u');
 
@@ -86,7 +90,7 @@ class AdminController extends AbstractController
 
         /** @var User $user */
         $user = $this->getUser();
-        return $this->render('admin/index.html.twig', [
+        return $this->render('dashboard/dashboard.html.twig', [
             'user' => $user,
             'users' => $users,
             'currentPage' => $page,
@@ -124,21 +128,18 @@ class AdminController extends AbstractController
         // Regenerate the verification code for the admin to reset settings
 
         if (
-            in_array(
-                $type,
-                [
-                    'settingCustom',
-                    'settingTerms',
-                    'settingRadius',
-                    'settingStatus',
-                    'settingLDAP',
-                    'settingCAPPORT',
-                    'settingAUTH',
-                    'settingTwoFA',
-                    'settingSMS',
-                    'settingSchedule'
-                ]
-            )
+            in_array($type, [
+                SettingType::SettingCustom->value,
+                SettingType::SettingTerms->value,
+                SettingType::SettingRadius->value,
+                SettingType::SettingStatus->value,
+                SettingType::SettingLDAP->value,
+                SettingType::SettingCAPPORT->value,
+                SettingType::SettingAUTH->value,
+                SettingType::SettingTwoFA->value,
+                SettingType::SettingSMS->value,
+                SettingType::SettingSchedule->value,
+            ], true)
         ) {
             $lastResend = $this->eventRepository->findLatest2FACodeAttemptEvent(
                 $currentUser,
@@ -149,19 +150,29 @@ class AdminController extends AbstractController
                 $email = $this->verificationCodeGenerator->createEmailAdminPage(
                     $currentUser,
                     $request->getClientIp(),
-                    $request->headers->get('User-Agent')
+                    $request->headers->get('User-Agent'),
+                    $type
                 );
+
                 $this->mailer->send($email);
                 $this->addFlash(
                     'success_admin',
-                    'We have send to you a new code to: ' . $currentUser->getEmail()
+                    $this->translator->trans(
+                        'successResendAdmin',
+                        ['%email%' => $currentUser->getEmail()],
+                        'controllers'
+                    )
                 );
                 return $this->redirectToRoute('admin_confirm_reset', ['type' => $type]);
             }
             $timeLeft = $this->verificationCodeGenerator->timeLeftToResendCode($timeIntervalInSeconds, $lastResend);
             $this->addFlash(
                 'error_admin',
-                'You must wait ' . $timeLeft . ' seconds before requesting a new code. Please try again later.'
+                $this->translator->trans(
+                    'errorAdminWait',
+                    ['%time%' => $timeLeft],
+                    'controllers'
+                )
             );
             return $this->redirectToRoute('admin_confirm_reset', ['type' => $type]);
         }
@@ -172,12 +183,17 @@ class AdminController extends AbstractController
     /**
      * Handles the Page Style on the dashboard
      */
-    #[Route('/dashboard/customize', name: 'admin_dashboard_customize')]
+    #[Route(
+        '/dashboard/customize/{language}',
+        name: 'admin_dashboard_customize',
+        defaults: ['language' => LanguageType::EN->value]
+    )]
     #[IsGranted('ROLE_ADMIN')]
-    public function customize(Request $request, EntityManagerInterface $em, GetSettings $getSettings): Response
+    public function customize(Request $request, EntityManagerInterface $em, string $language): Response
     {
+
         // Call the getSettings method of GetSettings class to retrieve the data
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings($language);
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
         $currentUser = $this->getUser();
@@ -185,9 +201,12 @@ class AdminController extends AbstractController
         $settingsRepository = $em->getRepository(Setting::class);
         $settings = $settingsRepository->findAll();
 
+        // Get the settings value according to the language
+        $settingsTranslated = $this->getSettings->getSettingsByLocale($settings, $data);
+
         // Create the form with the CustomType and pass the relevant settings
         $form = $this->createForm(CustomType::class, null, [
-            'settings' => $settings,
+            'settings' => $settingsTranslated,
         ]);
 
         $form->handleRequest($request);
@@ -214,11 +233,29 @@ class AdminController extends AbstractController
                         ]
                     )
                 ) {
-                    // Get the value from the submitted form data
-                    $submittedValue = $submittedData[$settingName];
+                    if (in_array($settingName, $this->getSettings->arraySettingsToTranslate(), true)) {
+                        $locale = $language;
+                        $submittedValue = $submittedData[$settingName];
+                        if ($locale === LanguageType::EN->value) {
+                            // Update the setting value
+                            $setting->setValue($submittedValue);
+                        }
+                        // Get the translated setting
+                        $settingTranslation = $this->settingTranslationRepository->findOneBy(
+                            ['setting' => $setting, 'locale' => $locale]
+                        );
+                        if ($settingName === 'ADDITIONAL_LABEL' && $submittedValue === null) {
+                            $settingTranslation?->setTranslation('');
+                        } else {
+                            $settingTranslation?->setTranslation($submittedValue);
+                        }
+                    } else {
+                        // Get the value from the submitted form data
+                        $submittedValue = $submittedData[$settingName];
 
-                    // Update the setting value
-                    $setting->setValue($submittedValue);
+                        // Update the setting value
+                        $setting->setValue($submittedValue);
+                    }
                 } elseif (in_array($settingName, ['CUSTOMER_LOGO', 'OPENROAMING_LOGO', 'WALLPAPER_IMAGE'])) {
                     // Handle file uploads for logos and wallpaper image
                     $file = $form->get($settingName)->getData();
@@ -244,7 +281,14 @@ class AdminController extends AbstractController
                 }
             }
 
-            $this->addFlash('success_admin', 'Customization settings have been updated successfully.');
+            $this->addFlash(
+                'success_admin',
+                $this->translator->trans(
+                    'settingsUpdatedSuccessfully',
+                    [],
+                    'controllers'
+                )
+            );
 
             $eventMetadata = [
                 'ip' => $request->getClientIp(),
@@ -258,15 +302,15 @@ class AdminController extends AbstractController
                 $eventMetadata
             );
 
-            return $this->redirectToRoute('admin_dashboard_customize');
+            return $this->redirectToRoute('admin_dashboard_customize', ['language' => $language]);
         }
 
-        return $this->render('admin/settings_actions.html.twig', [
+        return $this->render('dashboard/shared/settings_actions.html.twig', [
             'user' => $currentUser,
-            'settings' => $settings,
+            'settings' => $settingsTranslated,
             'form' => $form->createView(),
             'data' => $data,
-            'getSettings' => $getSettings
+            'language' => $language
         ]);
     }
 }

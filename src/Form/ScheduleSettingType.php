@@ -15,11 +15,14 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfonycasts\DynamicForms\DependentField;
 use Symfonycasts\DynamicForms\DynamicFormBuilder;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class ScheduleSettingType extends AbstractType
 {
-    public function __construct(private readonly GetSettings $getSettings)
-    {
+    public function __construct(
+        private readonly GetSettings $getSettings,
+        private readonly TranslatorInterface $translator
+    ) {
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
@@ -47,7 +50,12 @@ class ScheduleSettingType extends AbstractType
             ->add("months_of_the_year", ChoiceType::class, [
                 'multiple' => true,
                 'required' => false,
-                'choices' => ['All Months' => '*'] + MonthsOfYear::choices(),
+                'choices' => [
+                    $this->translator->trans(
+                        'allMonths',
+                        [],
+                        'ScheduleSettingType'
+                    ) => '*'] + MonthsOfYear::choices(),
                 'label' => false,
                 'attr' => [
                     'description' => $description,
@@ -75,7 +83,11 @@ class ScheduleSettingType extends AbstractType
             ->add("day_of_month", ChoiceType::class, [
                 'multiple' => true,
                 'required' => false,
-                'choices' => ['All days' => '*'] + array_combine(range(1, 31), range(1, 31)),
+                'choices' => [$this->translator->trans(
+                    'allDays',
+                    [],
+                    'ScheduleSettingType'
+                ) => '*'] + array_combine(range(1, 31), range(1, 31)),
                 'label' => false,
                 'attr' => [
                     'description' => $description,
@@ -103,7 +115,11 @@ class ScheduleSettingType extends AbstractType
             ->add("day_of_week", ChoiceType::class, [
                 'multiple' => true,
                 'required' => false,
-                'choices' => ['All days' => '*'] + DaysOfWeek::choices(),
+                'choices' => [$this->translator->trans(
+                    'allDays',
+                    [],
+                    'ScheduleSettingType'
+                ) => '*'] + DaysOfWeek::choices(),
                 'label' => false,
                 'attr' => [
                     'description' => $description,

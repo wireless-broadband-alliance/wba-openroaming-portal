@@ -1,0 +1,5 @@
+welcomeBack: 'Welcome back'
+welcomeMessage: 'You have selected to login via email or phone number. An code has been sent to you to confirm your identity.'
+enterCode: 'Enter your code'
+resendCode: 'Resend Code'
+login: 'Log in'

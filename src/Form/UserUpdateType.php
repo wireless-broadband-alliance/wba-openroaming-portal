@@ -2,9 +2,8 @@
 
 namespace App\Form;
 
+use App\Form\Transformer\BooleanToDateTimeTransformer;
 use App\DTO\UserUpdateDTO;
-use App\Repository\SettingRepository;
-use App\Repository\UserRepository;
 use App\Service\GetSettings;
 use libphonenumber\PhoneNumberFormat;
 use Misd\PhoneNumberBundle\Form\Type\PhoneNumberType;
@@ -14,11 +13,13 @@ use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class UserUpdateType extends AbstractType
 {
     public function __construct(
         private readonly SettingRepository $settingRepository,
+        private readonly TranslatorInterface $translator
     ) {
     }
 
@@ -45,15 +46,23 @@ class UserUpdateType extends AbstractType
                 'required' => false,
             ])
             ->add('firstName', TextType::class, [
-                'label' => 'First Name',
+                'label' => $this->translator->trans('firstName', [], 'UserUpdateType'),
                 'required' => false,
             ])
             ->add('lastName', TextType::class, [
-                'label' => 'Last Name',
+                'label' => $this->translator->trans('lastName', [], 'UserUpdateType'),
+                'required' => false,
+            ])
+            ->add('banned', CheckboxType::class, [
+                'label' => $this->translator->trans('banned', [], 'UserUpdateType'),
+                'required' => false,
+            ])
+            ->add('isVerified', CheckboxType::class, [
+                'label' => $this->translator->trans('verification', [], 'UserUpdateType'),
                 'required' => false,
             ])
             ->add('phoneNumber', PhoneNumberType::class, [
-                'label' => 'Phone Number',
+                'label' => $this->translator->trans('phoneNumber', [], 'UserUpdateType'),
                 'default_region' => $regionInputs[0],
                 'format' => PhoneNumberFormat::INTERNATIONAL,
                 'widget' => PhoneNumberType::WIDGET_COUNTRY_CHOICE,
@@ -67,11 +76,11 @@ class UserUpdateType extends AbstractType
         if ($dto instanceof UserUpdateDTO && !$dto->editingAdmin) {
             $builder
                 ->add('banned', CheckboxType::class, [
-                    'label' => 'Banned',
+                    'label' => $this->translator->trans('banned', [], 'UserUpdateType'),
                     'required' => false,
                 ])
                 ->add('isVerified', CheckboxType::class, [
-                    'label' => 'Verification',
+                    'label' => $this->translator->trans('verification', [], 'UserUpdateType'),
                     'required' => false,
                 ]);
         }

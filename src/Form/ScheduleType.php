@@ -9,16 +9,21 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfonycasts\DynamicForms\DependentField;
 use Symfonycasts\DynamicForms\DynamicFormBuilder;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class ScheduleType extends AbstractType
 {
+    public function __construct(
+        private readonly TranslatorInterface $translator
+    ) {
+    }
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder = new DynamicFormBuilder($builder);
 
         $builder
             ->add('use_advanced_mode', CheckboxType::class, [
-                'label' => 'Use Advanced Mode (Manual CRON Expression)',
+                'label' => $this->translator->trans('useAdvancedMode', [], 'ScheduleType'),
                 'required' => false,
             ])
             ->addDependent(

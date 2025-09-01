@@ -8,7 +8,6 @@ use App\Enum\AnalyticalEventType;
 use App\Enum\FirewallType;
 use App\Enum\PlatformMode;
 use App\Enum\UserProvider;
-use App\Repository\SettingRepository;
 use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
 use App\Service\EventActions;
@@ -18,8 +17,10 @@ use DateTime;
 use DateTimeInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
+use GuzzleHttp\Exception\GuzzleException;
 use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
+use Random\RandomException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -33,6 +34,7 @@ use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class MicrosoftController extends AbstractController
 {
@@ -48,25 +50,29 @@ class MicrosoftController extends AbstractController
         private readonly UserRepository $userRepository,
         private readonly UserStatusChecker $userStatusChecker,
         private readonly UserExternalAuthRepository $userExternalAuthRepository,
+        private readonly TranslatorInterface $translator,
         private readonly CsrfTokenManagerInterface $csrfTokenManager,
-        private readonly SettingRepository $settingRepository,
     ) {
     }
 
     /**
-     * @throws \JsonException
+     * @throws Exception
      */
     #[Route('/connect/microsoft', name: 'connect_microsoft')]
     public function connect(Request $request): RedirectResponse
     {
         // Call the getSettings method of GetSettings class to retrieve the data
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
 
         // Check if the user clicked on the 'sms' variable present only on the SMS authentication buttons
         if ($data['PLATFORM_MODE']['value'] === true) {
             $this->addFlash(
                 'error',
-                'The portal is in Demo mode - it is not possible to use this verification method.'
+                $this->translator->trans(
+                    'portalInDemoMode',
+                    [],
+                    'controllers'
+                )
             );
             return $this->redirectToRoute('app_landing');
         }
@@ -97,6 +103,7 @@ class MicrosoftController extends AbstractController
     /**
      * @throws IdentityProviderException
      * @throws Exception
+     * @throws GuzzleException
      */
     #[Route('/connect/microsoft/check', name: 'connect_microsoft_check', methods: ['GET'])]
     public function connectCheck(Request $request): RedirectResponse
@@ -108,7 +115,11 @@ class MicrosoftController extends AbstractController
         if ($code === null) {
             $this->addFlash(
                 'error',
-                'Authentication process cancelled.'
+                $this->translator->trans(
+                    'authenticationProcessCancelled',
+                    [],
+                    'controllers'
+                )
             );
             return $this->redirectToRoute('app_landing');
         }
@@ -143,7 +154,11 @@ class MicrosoftController extends AbstractController
         if (!$this->userStatusChecker->isValidEmail($email, UserProvider::MICROSOFT_ACCOUNT->value)) {
             $this->addFlash(
                 'error',
-                'Sorry! Your email domain is not allowed to use this platform'
+                $this->translator->trans(
+                    'emailDomainNotAllowed',
+                    [],
+                    'controllers'
+                )
             );
             return $this->redirectToRoute('app_landing');
         }
@@ -160,7 +175,11 @@ class MicrosoftController extends AbstractController
         if ($user->getBannedAt() instanceof DateTimeInterface) {
             $this->addFlash(
                 'error',
-                'Your account is banned. Please, for more information contact our support.'
+                $this->translator->trans(
+                    'accountBanned',
+                    [],
+                    'controllers'
+                )
             );
             return $this->redirectToRoute('app_landing');
         }
@@ -182,6 +201,9 @@ class MicrosoftController extends AbstractController
         return $this->redirectToRoute('app_landing');
     }
 
+    /**
+     * @throws RandomException
+     */
     private function findOrCreateMicrosoftUser(
         string $microsoftUserId,
         string $email,
@@ -205,8 +227,11 @@ class MicrosoftController extends AbstractController
 
             $this->addFlash(
                 'error',
-                'Email is already in use but is associated with a different provider! 
-                Please use the original one.'
+                $this->translator->trans(
+                    'emailIsAlreadyInUse',
+                    [],
+                    'controllers'
+                )
             );
 
             return null;
@@ -281,7 +306,7 @@ class MicrosoftController extends AbstractController
             $eventDispatcher->dispatch(new InteractiveLoginEvent($request, $token));
 
             // Defines the Event to the table
-            $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+            $data = $this->getSettings->getSettings();
             $platformMode = $data['PLATFORM_MODE']['value'] ? PlatformMode::DEMO->value : PlatformMode::LIVE->value;
             $eventMetadata = [
                 'platform' => $platformMode,
@@ -300,7 +325,7 @@ class MicrosoftController extends AbstractController
             $this->entityManager->flush();
         } catch (AuthenticationException $exception) {
             // Handle authentication failure
-            $errorMessage = 'Authentication failed:'
+            $errorMessage = $this->translator->trans('authenticationFailed', [], 'controllers')
                 . $exception->getMessage();
             $this->addFlash('error', $errorMessage);
             $this->redirectToRoute('app_landing');
@@ -310,7 +335,7 @@ class MicrosoftController extends AbstractController
 
     /**
      * @throws IdentityProviderException
-     * @throws Exception
+     * @throws Exception|GuzzleException
      */
     public function fetchUserFromMicrosoft(string $code): ?User
     {

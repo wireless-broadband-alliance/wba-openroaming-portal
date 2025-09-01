@@ -11,11 +11,14 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\GreaterThanOrEqual;
 use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class SMSType extends AbstractType
 {
-    public function __construct(private readonly GetSettings $getSettings)
-    {
+    public function __construct(
+        private readonly GetSettings $getSettings,
+        private readonly TranslatorInterface $translator
+    ) {
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
@@ -26,10 +29,10 @@ class SMSType extends AbstractType
                 'constraints' => [
                     new Length([
                         'max' => 32,
-                        'maxMessage' => ' This field cannot be longer than {{ limit }} characters',
+                        'maxMessage' => $this->translator->trans('fieldCannotBeLongerThan', [], 'CustomType'),
                     ]),
                     new NotBlank([
-                        'message' => 'This field cannot be empty',
+                        'message' => $this->translator->trans('fieldCannotBeEmpty', [], 'CustomType'),
                     ]),
                 ],
             ],
@@ -38,10 +41,10 @@ class SMSType extends AbstractType
                 'constraints' => [
                     new Length([
                         'max' => 32,
-                        'maxMessage' => ' This field cannot be longer than {{ limit }} characters',
+                        'maxMessage' => $this->translator->trans('fieldCannotBeLongerThan', [], 'CustomType'),
                     ]),
                     new NotBlank([
-                        'message' => 'This field cannot be empty',
+                        'message' => $this->translator->trans('fieldCannotBeEmpty', [], 'CustomType'),
                     ]),
                 ],
             ],
@@ -50,10 +53,10 @@ class SMSType extends AbstractType
                 'constraints' => [
                     new Length([
                         'max' => 32,
-                        'maxMessage' => ' This field cannot be longer than {{ limit }} characters',
+                        'maxMessage' => $this->translator->trans('fieldCannotBeLongerThan', [], 'CustomType'),
                     ]),
                     new NotBlank([
-                        'message' => 'This field cannot be empty',
+                        'message' => $this->translator->trans('fieldCannotBeEmpty', [], 'CustomType'),
                     ]),
                 ],
             ],
@@ -63,10 +66,10 @@ class SMSType extends AbstractType
                 'constraints' => [
                     new Length([
                         'max' => 11,
-                        'maxMessage' => ' This field cannot be longer than {{ limit }} characters',
+                        'maxMessage' => $this->translator->trans('fieldCannotBeLongerThan', [], 'CustomType'),
                     ]),
                     new NotBlank([
-                        'message' => 'This field cannot be empty',
+                        'message' => $this->translator->trans('fieldCannotBeEmpty', [], 'CustomType'),
                     ]),
                 ],
             ],
@@ -75,14 +78,14 @@ class SMSType extends AbstractType
                 'constraints' => [
                     new Length([
                         'max' => 3,
-                        'maxMessage' => ' This field cannot be longer than {{ limit }} characters',
+                        'maxMessage' => $this->translator->trans('fieldCannotBeLongerThan', [], 'CustomType'),
                     ]),
                     new GreaterThanOrEqual([
                         'value' => 1,
-                        'message' => 'This timer should never be less than 1.',
+                        'message' => $this->translator->trans('timerShouldNeverBeLessThan', [], 'CustomType'),
                     ]),
                     new NotBlank([
-                        'message' => 'Please make sure to set a timer',
+                        'message' => $this->translator->trans('pleaseSetTimer', [], 'CustomType'),
                     ]),
                 ],
             ],
@@ -90,7 +93,7 @@ class SMSType extends AbstractType
                 'type' => TextType::class,
                 'constraints' => [
                     new NotBlank([
-                        'message' => 'This field cannot be empty',
+                        'message' => $this->translator->trans('fieldCannotBeEmpty', [], 'CustomType'),
                     ]),
                 ],
             ],

@@ -6,6 +6,7 @@ use App\Entity\Setting;
 use App\Entity\TextEditor;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
+use App\Enum\LanguageType;
 use App\Enum\OperationMode;
 use App\Enum\PlatformMode;
 use App\Enum\TextEditorName;
@@ -19,10 +20,10 @@ use App\Form\TermsType;
 use App\Form\TwoFASettingsType;
 use App\RadiusDb\Repository\RadiusAccountingRepository;
 use App\RadiusDb\Repository\RadiusAuthsRepository;
-use App\Repository\SettingRepository;
-use App\Repository\UserRepository;
+use App\Repository\SettingTranslationRepository;
 use App\Service\CertificateService;
 use App\Service\Domain;
+use App\Service\EnforcePasswordResetService;
 use App\Service\EventActions;
 use App\Service\GetSettings;
 use App\Service\SanitizeHTML;
@@ -34,24 +35,25 @@ use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpClient\Exception\JsonException;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class SettingsController extends AbstractController
 {
     public function __construct(
         private readonly EventActions $eventActions,
         private readonly GetSettings $getSettings,
-        private readonly SettingRepository $settingRepository,
-        private readonly UserRepository $userRepository,
         private readonly EntityManagerInterface $entityManager,
         private readonly RadiusAuthsRepository $radiusAuthsRepository,
         private readonly RadiusAccountingRepository $radiusAccountingRepository,
+        private readonly TranslatorInterface $translator,
+        private readonly SettingTranslationRepository $settingTranslationRepository,
+        private readonly EnforcePasswordResetService $enforcePasswordResetService,
         private readonly CertificateService $certificateService,
     ) {
     }
@@ -65,14 +67,15 @@ class SettingsController extends AbstractController
     #[Route('/dashboard/confirm-checker/{type}', name: 'admin_confirm_checker')]
     #[IsGranted('ROLE_ADMIN')]
     public function checkSettings(
-        RequestStack $requestStack,
         Request $request,
         string $type
     ): Response {
         // Get the entered code from the form
-        $enteredCode = $requestStack->getCurrentRequest()->request->get('code');
+        $enteredCode = $request->get('code');
+
         /** @var User $currentUser */
         $currentUser = $this->getUser();
+
         if ($enteredCode === $currentUser->getTwoFAcode()) {
             if ($type === 'settingCustom') {
                 $command = 'php bin/console reset:customSettings --yes';
@@ -85,7 +88,14 @@ class SettingsController extends AbstractController
                 // if you want to dd("$output, $errorOutput"), please use the following variables
                 $output = $process->getOutput();
                 $errorOutput = $process->getErrorOutput();
-                $this->addFlash('success_admin', 'The setting has been reset successfully!');
+                $this->addFlash(
+                    'success_admin',
+                    $this->translator->trans(
+                        'settingResetSuccessfully',
+                        [],
+                        'controllers'
+                    )
+                );
                 $eventMetadata = [
                     'ip' => $request->getClientIp(),
                     'user_agent' => $request->headers->get('User-Agent'),
@@ -112,7 +122,10 @@ class SettingsController extends AbstractController
                 // if you want to dd("$output, $errorOutput"), please use the following variables
                 $output = $process->getOutput();
                 $errorOutput = $process->getErrorOutput();
-                $this->addFlash('success_admin', 'The terms and policies settings has been reset successfully!');
+                $this->addFlash(
+                    'success_admin',
+                    $this->translator->trans('termsPoliciesSettingsResetSuccessfully', [], 'controllers')
+                );
 
                 $eventMetadata = [
                     'ip' => $request->getClientIp(),
@@ -140,7 +153,10 @@ class SettingsController extends AbstractController
                 // if you want to dd("$output, $errorOutput"), please use the following variables
                 $output = $process->getOutput();
                 $errorOutput = $process->getErrorOutput();
-                $this->addFlash('success_admin', 'The Radius configurations has been reset successfully!');
+                $this->addFlash(
+                    'success_admin',
+                    $this->translator->trans('radiusConfigurationsResetSuccessfully', [], 'controllers')
+                );
 
                 $eventMetadata = [
                     'ip' => $request->getClientIp(),
@@ -168,7 +184,10 @@ class SettingsController extends AbstractController
                 // if you want to dd("$output, $errorOutput"), please use the following variables
                 $output = $process->getOutput();
                 $errorOutput = $process->getErrorOutput();
-                $this->addFlash('success_admin', 'The LDAP settings has been reset successfully!');
+                $this->addFlash(
+                    'success_admin',
+                    $this->translator->trans('LDAPSettingsResetSuccessfully', [], 'controllers')
+                );
 
                 $eventMetadata = [
                     'ip' => $request->getClientIp(),
@@ -196,7 +215,10 @@ class SettingsController extends AbstractController
                 // if you want to dd("$output, $errorOutput"), please use the following variables
                 $output = $process->getOutput();
                 $errorOutput = $process->getErrorOutput();
-                $this->addFlash('success_admin', 'The platform mode status has been reset successfully!');
+                $this->addFlash(
+                    'success_admin',
+                    $this->translator->trans('platformModeStatusResetSuccessfully', [], 'controllers')
+                );
 
                 $eventMetadata = [
                     'ip' => $request->getClientIp(),
@@ -224,7 +246,10 @@ class SettingsController extends AbstractController
                 // if you want to dd("$output, $errorOutput"), please use the following variables
                 $output = $process->getOutput();
                 $errorOutput = $process->getErrorOutput();
-                $this->addFlash('success_admin', 'The CAPPORT settings has been reset successfully!');
+                $this->addFlash(
+                    'success_admin',
+                    $this->translator->trans('platformModeStatusResetSuccessfully', [], 'controllers')
+                );
 
                 $eventMetadata = [
                     'ip' => $request->getClientIp(),
@@ -252,7 +277,10 @@ class SettingsController extends AbstractController
                 // if you want to dd("$output, $errorOutput"), please use the following variables
                 $output = $process->getOutput();
                 $errorOutput = $process->getErrorOutput();
-                $this->addFlash('success_admin', 'The authentication settings has been reset successfully!');
+                $this->addFlash(
+                    'success_admin',
+                    $this->translator->trans('authenticationSettingsResetSuccessfully', [], 'controllers')
+                );
 
                 $eventMetadata = [
                     'ip' => $request->getClientIp(),
@@ -280,7 +308,10 @@ class SettingsController extends AbstractController
                 // if you want to dd("$output, $errorOutput"), please use the following variables
                 $output = $process->getOutput();
                 $errorOutput = $process->getErrorOutput();
-                $this->addFlash('success_admin', 'The Two Factor settings has been reset successfully!');
+                $this->addFlash(
+                    'success_admin',
+                    $this->translator->trans('authenticationSettingsResetSuccessfully', [], 'controllers')
+                );
 
                 $eventMetadata = [
                     'ip' => $request->getClientIp(),
@@ -310,7 +341,7 @@ class SettingsController extends AbstractController
                 $errorOutput = $process->getErrorOutput();
                 $this->addFlash(
                     'success_admin',
-                    'The configuration SMS settings has been clear successfully!'
+                    $this->translator->trans('SMSSettingsClearSuccessfully', [], 'controllers')
                 );
 
                 $eventMetadata = [
@@ -341,7 +372,7 @@ class SettingsController extends AbstractController
                 $errorOutput = $process->getErrorOutput();
                 $this->addFlash(
                     'success_admin',
-                    'The configuration Schedule settings has been clear successfully!'
+                    $this->translator->trans('configurationScheduleClearSuccessfully', [], 'controllers'),
                 );
 
                 $eventMetadata = [
@@ -360,7 +391,10 @@ class SettingsController extends AbstractController
             }
         }
 
-        $this->addFlash('error_admin', 'The verification code is incorrect. Please try again.');
+        $this->addFlash(
+            'error_admin',
+            $this->translator->trans('incorrectVerificationCode', [], 'controllers')
+        );
         return $this->redirectToRoute('admin_confirm_reset', ['type' => $type]);
     }
 
@@ -368,7 +402,6 @@ class SettingsController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function settingsTerms(
         Request $request,
-        GetSettings $getSettings
     ): Response {
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
@@ -391,7 +424,7 @@ class SettingsController extends AbstractController
         }
         $this->entityManager->flush();
 
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
 
         $settingsRepository = $this->entityManager->getRepository(Setting::class);
         $settings = $settingsRepository->findAll();
@@ -488,16 +521,18 @@ class SettingsController extends AbstractController
 
 
             $this->entityManager->flush();
-            $this->addFlash('success_admin', 'Terms and Policies links changes have been applied successfully.');
+            $this->addFlash(
+                'success_admin',
+                $this->translator->trans('termsPoliciesLinksChangesAppliedSuccessfully', [], 'controllers')
+            );
             return $this->redirectToRoute('admin_dashboard_settings_terms');
         }
 
 
-        return $this->render('admin/settings_actions.html.twig', [
+        return $this->render('dashboard/shared/settings_actions.html.twig', [
             'user' => $currentUser,
             'data' => $data,
             'settings' => $settings,
-            'getSettings' => $getSettings,
             'current_user' => $currentUser,
             'form' => $form->createView(),
         ]);
@@ -509,9 +544,8 @@ class SettingsController extends AbstractController
     public function settingsLDAP(
         Request $request,
         EntityManagerInterface $em,
-        GetSettings $getSettings
     ): Response {
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
         $currentUser = $this->getUser();
@@ -565,14 +599,16 @@ class SettingsController extends AbstractController
             );
 
 
-            $this->addFlash('success_admin', 'New LDAP configuration have been applied successfully.');
+            $this->addFlash(
+                'success_admin',
+                $this->translator->trans('LDAPConfigurationAppliedSuccessfully', [], 'controllers')
+            );
             return $this->redirectToRoute('admin_dashboard_settings_LDAP');
         }
 
-        return $this->render('admin/settings_actions.html.twig', [
+        return $this->render('dashboard/shared/settings_actions.html.twig', [
             'data' => $data,
             'settings' => $settings,
-            'getSettings' => $getSettings,
             'form' => $form->createView()
         ]);
     }
@@ -581,9 +617,8 @@ class SettingsController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function settingsRadius(
         Request $request,
-        GetSettings $getSettings
     ): Response {
-        $data = $getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
         $currentUser = $this->getUser();
@@ -602,7 +637,10 @@ class SettingsController extends AbstractController
 
             $staticValue = '887FAE2A-F051-4CC9-99BB-8DFD66F553A9';
             if ($submittedData['PAYLOAD_IDENTIFIER'] === $staticValue) {
-                $this->addFlash('error_admin', 'Please do not use the default value from the Payload Identifier card.');
+                $this->addFlash(
+                    'error_admin',
+                    $this->translator->trans('notUseDefaultPayloadIdentifierCard', [], 'controllers')
+                );
             } else {
                 $settingsToUpdate = [
                     'RADIUS_REALM_NAME',
@@ -633,7 +671,11 @@ class SettingsController extends AbstractController
                     ) {
                         $this->addFlash(
                             'error_admin',
-                            "The value for $settingName is not a valid domain or does not resolve to an IP address."
+                            $this->translator->trans(
+                                'invalidDomainOrIP',
+                                ['%settingName%' => $settingName],
+                                'controllers'
+                            )
                         );
                         return $this->redirectToRoute('admin_dashboard_settings_radius');
                     }
@@ -657,16 +699,18 @@ class SettingsController extends AbstractController
                     $eventMetadata
                 );
 
-                $this->addFlash('success_admin', 'Radius configuration have been applied successfully.');
+                $this->addFlash(
+                    'success_admin',
+                    $this->translator->trans('radiusConfigurationAppliedSuccessfully', [], 'controllers')
+                );
                 return $this->redirectToRoute('admin_dashboard_settings_radius');
             }
         }
 
-        return $this->render('admin/settings_actions.html.twig', [
+        return $this->render('dashboard/shared/settings_actions.html.twig', [
             'user' => $currentUser,
             'data' => $data,
             'settings' => $settings,
-            'getSettings' => $getSettings,
             'form' => $form->createView()
         ]);
     }
@@ -674,13 +718,12 @@ class SettingsController extends AbstractController
     #[Route('/dashboard/settings/status', name: 'admin_dashboard_settings_status')]
     #[IsGranted('ROLE_ADMIN')]
     public function settingsStatus(
-        Request $request,
-        GetSettings $getSettings
+        Request $request
     ): Response {
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
         $currentUser = $this->getUser();
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
 
         $settingsRepository = $this->entityManager->getRepository(Setting::class);
         $settings = $settingsRepository->findAll();
@@ -736,7 +779,6 @@ class SettingsController extends AbstractController
             $timeIntervalNotificationsSetting = $settingsRepository->findOneBy([
                 'name' => 'TIME_INTERVAL_NOTIFICATION'
             ]);
-
             if ($timeIntervalNotificationsSetting !== null) {
                 $timeIntervalNotificationsSetting->setValue($timeIntervalNotifications);
                 $this->entityManager->persist($timeIntervalNotificationsSetting);
@@ -756,16 +798,18 @@ class SettingsController extends AbstractController
                 $eventMetadata
             );
 
-            $this->addFlash('success_admin', 'The new changes have been applied successfully.');
+            $this->addFlash(
+                'success_admin',
+                $this->translator->trans('newChangesAppliedSuccessfully', [], 'controllers')
+            );
             return $this->redirectToRoute('admin_dashboard_settings_status');
         }
 
 
-        return $this->render('admin/settings_actions.html.twig', [
+        return $this->render('dashboard/shared/settings_actions.html.twig', [
             'user' => $currentUser,
             'data' => $data,
             'settings' => $settings,
-            'getSettings' => $getSettings,
             'current_user' => $currentUser,
             'form' => $form->createView(),
         ]);
@@ -776,12 +820,11 @@ class SettingsController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function settingsTwoFA(
         Request $request,
-        GetSettings $getSettings
     ): Response {
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
         $currentUser = $this->getUser();
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
 
         $settingsRepository = $this->entityManager->getRepository(Setting::class);
         $settings = $settingsRepository->findAll();
@@ -828,39 +871,46 @@ class SettingsController extends AbstractController
                 $eventMetadata
             );
 
-            $this->addFlash('success_admin', 'The new changes have been applied successfully.');
+            $this->addFlash(
+                'success_admin',
+                $this->translator->trans('newChangesAppliedSuccessfully', [], 'controllers')
+            );
             return $this->redirectToRoute('admin_dashboard_settings_two_fa');
         }
 
-        return $this->render('admin/settings_actions.html.twig', [
+        return $this->render('dashboard/shared/settings_actions.html.twig', [
             'user' => $currentUser,
             'data' => $data,
             'settings' => $settings,
-            'getSettings' => $getSettings,
             'current_user' => $currentUser,
             'formTwoFA' => $formTwoFA->createView(),
         ]);
     }
 
-    #[Route('/dashboard/settings/auth', name: 'admin_dashboard_settings_auth')]
+    #[Route(
+        '/dashboard/settings/auth/{language}',
+        name: 'admin_dashboard_settings_auth',
+        defaults: ['language' => LanguageType::EN->value]
+    )]
     #[IsGranted('ROLE_ADMIN')]
     public function settingsAuths(
         Request $request,
-        GetSettings $getSettings,
-        CertificateService $certificateService
+        CertificateService $certificateService,
+        string $language
     ): Response {
         $missingFiles = $this->certificateService->verifyCertificates();
         if ($missingFiles !== []) {
             throw new HttpException(
                 424,
-                'Cert files are missing: ' . implode(', ', $missingFiles)
+                $this->translator->trans('certFilesMissing', [], 'controllers') .
+                implode(', ', $missingFiles)
             );
         }
 
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
         $currentUser = $this->getUser();
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings($language);
 
         $settingsRepository = $this->entityManager->getRepository(Setting::class);
         $settings = $settingsRepository->findAll();
@@ -881,8 +931,12 @@ class SettingsController extends AbstractController
 
         // Convert to human-readable format
         $humanReadableExpirationDate = $dateTime->format('Y-m-d H:i:s T');
+
+        // Get the settings value according to the language
+        $settingsTranslated = $this->getSettings->getSettingsByLocale($settings, $data);
+
         $form = $this->createForm(AuthType::class, null, [
-            'settings' => $settings,
+            'settings' => $settingsTranslated,
             'profileLimitDate' => $profileLimitDate,
             'humanReadableExpirationDate' => $humanReadableExpirationDate
         ]);
@@ -937,8 +991,32 @@ class SettingsController extends AbstractController
                 'AUTH_METHOD_SMS_REGISTER_LABEL',
             ];
 
+            $descriptionsFields = [
+                'AUTH_METHOD_SAML_DESCRIPTION',
+                'AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION',
+                'AUTH_METHOD_MICROSOFT_LOGIN_DESCRIPTION',
+                'AUTH_METHOD_REGISTER_DESCRIPTION',
+                'AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION',
+                'AUTH_METHOD_SMS_REGISTER_DESCRIPTION',
+            ];
+
             foreach ($settingsToUpdate as $settingName) {
                 $value = $submittedData[$settingName] ?? null;
+
+                if (in_array($settingName, $this->getSettings->arraySettingsToTranslate())) {
+                    $locale = $language;
+                    $submittedValue = $submittedData[$settingName];
+                    // Get the translated setting
+                    $setting = $settingsRepository->findOneBy(['name' => $settingName]);
+                    $settingTranslation = $this->settingTranslationRepository->findOneBy(
+                        ['setting' => $setting, 'locale' => $locale]
+                    );
+                    if (in_array($settingName, $descriptionsFields) && $submittedValue === null) {
+                        $settingTranslation?->setTranslation('');
+                    } else {
+                        $settingTranslation?->setTranslation($submittedValue);
+                    }
+                }
 
                 // Check if the setting is a label, to be impossible to set it null of empty
                 if (($value === null || $value === "") && in_array($settingName, $labelsFields)) {
@@ -946,10 +1024,25 @@ class SettingsController extends AbstractController
                 }
 
                 $setting = $settingsRepository->findOneBy(['name' => $settingName]);
+
                 if ($setting !== null) {
                     $setting->setValue($value);
                     $this->entityManager->persist($setting);
                 }
+
+                if (
+                    $settingName === 'LOGIN_WITH_UUID_ONLY' &&
+                    $setting &&
+                    ($setting->getValue() === OperationMode::OFF->value && $value === OperationMode::OFF->value)
+                ) {
+                    // Set every portal account with a password reset action, to require everyone to use a new password
+                    $this->enforcePasswordResetService->enforceReset(
+                        $currentUser,
+                        $request->getClientIp(),
+                        $request->headers->get('User-Agent')
+                    );
+                }
+
                 if ($settingName === 'VALID_DOMAINS_GOOGLE_LOGIN' || $settingName === 'VALID_DOMAINS_MICROSOFT_LOGIN') {
                     continue;
                 }
@@ -967,19 +1060,22 @@ class SettingsController extends AbstractController
                 new DateTime(),
                 $eventMetadata
             );
-            $this->addFlash('success_admin', 'New authentication configuration have been applied successfully.');
-            return $this->redirectToRoute('admin_dashboard_settings_auth');
+            $this->addFlash(
+                'success_admin',
+                $this->translator->trans('authenticationConfigurationAppliedSuccessfully', [], 'controllers')
+            );
+            return $this->redirectToRoute('admin_dashboard_settings_auth', ['language' => $language]);
         }
 
-        return $this->render('admin/settings_actions.html.twig', [
+        return $this->render('dashboard/shared/settings_actions.html.twig', [
             'user' => $currentUser,
             'data' => $data,
-            'settings' => $settings,
-            'getSettings' => $getSettings,
+            'settings' => $settingsTranslated,
             'current_user' => $currentUser,
             'form' => $form->createView(),
             'profileLimitDate' => $profileLimitDate,
-            'humanReadableExpirationDate' => $humanReadableExpirationDate
+            'humanReadableExpirationDate' => $humanReadableExpirationDate,
+            'language' => $language,
         ]);
     }
 
@@ -987,9 +1083,8 @@ class SettingsController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function settingsCAPPORT(
         Request $request,
-        GetSettings $getSettings
     ): Response {
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
         $currentUser = $this->getUser();
@@ -1039,15 +1134,17 @@ class SettingsController extends AbstractController
                 $eventMetadata
             );
 
-            $this->addFlash('success_admin', 'New CAPPORT configuration have been applied successfully.');
+            $this->addFlash(
+                'success_admin',
+                $this->translator->trans('CAPPORTConfigurationAppliedSuccessfully', [], 'controllers')
+            );
             return $this->redirectToRoute('admin_dashboard_settings_capport');
         }
 
-        return $this->render('admin/settings_actions.html.twig', [
+        return $this->render('dashboard/shared/settings_actions.html.twig', [
             'user' => $currentUser,
             'data' => $data,
             'settings' => $settings,
-            'getSettings' => $getSettings,
             'form' => $form->createView()
         ]);
     }
@@ -1055,13 +1152,12 @@ class SettingsController extends AbstractController
     #[Route('/dashboard/settings/sms', name: 'admin_dashboard_settings_sms')]
     #[IsGranted('ROLE_ADMIN')]
     public function settingsSMS(
-        Request $request,
-        GetSettings $getSettings
+        Request $request
     ): Response {
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
         $currentUser = $this->getUser();
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
 
         $settingsRepository = $this->entityManager->getRepository(Setting::class);
         $settings = $settingsRepository->findAll();
@@ -1111,15 +1207,17 @@ class SettingsController extends AbstractController
                 $eventMetadata
             );
 
-            $this->addFlash('success_admin', 'New SMS configuration have been applied successfully.');
+            $this->addFlash(
+                'success_admin',
+                $this->translator->trans('SMSConfigurationAppliedSuccessfully', [], 'controllers')
+            );
             return $this->redirectToRoute('admin_dashboard_settings_sms');
         }
 
-        return $this->render('admin/settings_actions.html.twig', [
+        return $this->render('dashboard/shared/settings_actions.html.twig', [
             'user' => $currentUser,
             'data' => $data,
             'settings' => $settings,
-            'getSettings' => $getSettings,
             'current_user' => $currentUser,
             'form' => $form->createView(),
         ]);
@@ -1136,14 +1234,14 @@ class SettingsController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function statisticsData(Request $request): Response
     {
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
 
         /** @var User $currentUser */
         $currentUser = $this->getUser();
 
         // Get the submitted start and end dates from the form
-        $startDateString = $request->request->get('startDate');
-        $endDateString = $request->request->get('endDate');
+        $startDateString = $request->query->get('startDate');
+        $endDateString = $request->query->get('endDate');
 
         // Convert the date strings to DateTime objects
         $startDate = $startDateString ? new DateTime($startDateString) : new DateTime()->modify(
@@ -1155,7 +1253,10 @@ class SettingsController extends AbstractController
         $interval = $startDate->diff($endDate);
 
         if ($interval->days > 366) {
-            $this->addFlash('error_admin', 'Maximum date range is 1 year');
+            $this->addFlash(
+                'error_admin',
+                $this->translator->trans('maximumDateRange1Year', [], 'controllers')
+            );
             return $this->redirectToRoute('admin_dashboard_statistics');
         }
 
@@ -1179,12 +1280,12 @@ class SettingsController extends AbstractController
         if ($memory_diff > 134217728) {
             $this->addFlash(
                 'error_admin',
-                'The data you requested is too large to be processed. Please try a smaller date range.'
+                $this->translator->trans('dataRequestedTooLarge', [], 'controllers')
             );
             return $this->redirectToRoute('admin_dashboard_statistics');
         }
 
-        return $this->render('admin/statistics.html.twig', [
+        return $this->render('dashboard/statistics/statistics.html.twig', [
             'user' => $currentUser,
             'data' => $data,
             'devicesDataJson' => json_encode($fetchChartDevices, JSON_THROW_ON_ERROR),

@@ -1,0 +1,179 @@
+<div class="bg-white rounded-lg transition-all duration-300 px-10 py-[35px] h-[calc(90%)] lg:h-[calc(80%)] w-[810px] overflow-auto">
+
+    <div class="flex flex-row justify-start items-center">
+        <h1 class="text-primary text-xl font-semibold">{{ 'title'|trans({}, '_account_widget') }}</h1>
+        <button type="button"
+                class="ml-auto flex flex-row justify-end gap-x-[12px] items-center text-[#707070]" {{ stimulus_action('widget', 'close') }}>
+            <span>{{ 'close'|trans({}, '_account_widget') }}</span>
+
+            <twig:ux:icon name="wba:cross" fill="fill-current"/>
+        </button>
+    </div>
+
+    <div {{ stimulus_controller('fields') }}>
+        <form method="POST" action="{{ path('app_site_account_user') }}">
+            <h1 class="text-lg mb-8 mt-10">{{ 'personalData.title'|trans({}, '_account_widget') }}</h1>
+
+            {{ form_start(form) }}
+            {{ form_errors(form) }}
+
+            <div class="flex flex-col lg:flex-row gap-x-6 gap-y-8">
+                <div class="relative w-full">
+                    {{ form_label(form.firstName, 'personalData.firstName'|trans({}, '_account_widget'), {label_attr: {class: 'form-label'}}) }}
+                    {{ form_widget(form.firstName, {attr: {class: 'form-widget', 'data-fields-target': 'input', 'data-action': 'fields#input_changed'}}) }}
+                    {{ form_errors(form.firstName) }}
+                </div>
+
+                <div class="relative w-full">
+                    {{ form_label(form.lastName, 'personalData.lastName'|trans({}, '_account_widget'), {label_attr: {class: 'form-label'}}) }}
+                    {{ form_widget(form.lastName, {attr: {class: 'form-widget', 'data-fields-target': 'input', 'data-action': 'fields#input_changed'}}) }}
+                    {{ form_errors(form.lastName) }}
+                </div>
+            </div>
+
+            <button {{ stimulus_target('fields', 'button') }} class="mt-6 w-[180px] btn-primary cursor-not-allowed"
+                                                              type="submit" disabled>
+                {{ 'personalData.applyBtn'|trans({}, '_account_widget') }}
+            </button>
+
+            {{ form_rest(form) }}
+            {{ form_end(form) }}
+        </form>
+    </div>
+
+    {% if data.LOGIN_WITH_UUID_ONLY.value == constant('App\\Enum\\OperationMode::OFF').value %}
+    {# divider #}
+    <div class="divider my-8"></div>
+
+    {% if data.LOGIN_WITH_UUID_ONLY.value == constant('App\\Enum\\OperationMode::OFF').value %}
+    {# Form Password Section #}
+    <div {{ stimulus_controller('fields') }}>
+        <form method="POST" action="{{ path('app_site_account_user') }}">
+            <h1 class="text-lg mb-8">{{ 'changePassword.title'|trans({}, '_account_widget') }}</h1>
+
+            {{ form_start(formPassword) }}
+            {{ form_errors(formPassword) }}
+
+            <div class="flex flex-col gap-x-6 gap-y-8">
+                <div class="flex flex-col lg:flex-row gap-x-6 gap-y-8">
+                    <div class="relative w-full">
+                        {{ form_label(formPassword.password, 'changePassword.current'|trans({}, '_account_widget'), {label_attr: {class: 'form-label'}}) }}
+                        {{ form_widget(formPassword.password, {attr: {class: 'form-widget', 'data-fields-target': 'input', 'data-action': 'fields#input_changed'}}) }}
+                        {{ form_errors(formPassword.password) }}
+                    </div>
+
+                    <div class="hidden lg:flex w-full"></div>
+                </div>
+
+                <div class="flex flex-col lg:flex-row gap-x-6 gap-y-8">
+                    <div class="relative w-full">
+                        {{ form_label(formPassword.newPassword, 'changePassword.new'|trans({}, '_account_widget'), {label_attr: {class: 'form-label'}}) }}
+                        {{ form_widget(formPassword.newPassword, {attr: {class: 'form-widget', minlength: 7, 'data-fields-target': 'input', 'data-action': 'fields#input_changed'}}) }}
+                        {{ form_errors(formPassword.newPassword) }}
+                    </div>
+
+                    <div class="relative w-full">
+                        {{ form_label(formPassword.confirmPassword, 'changePassword.confirm'|trans({}, '_account_widget'), {label_attr: {class: 'form-label'}}) }}
+                        {{ form_widget(formPassword.confirmPassword, {attr: {class: 'form-widget', minlength: 7, 'data-fields-target': 'input', 'data-action': 'fields#input_changed'}}) }}
+                        {{ form_errors(formPassword.confirmPassword) }}
+                    </div>
+                </div>
+            </div>
+
+            {# Turnstile Checker #}
+            {% if data.TURNSTILE_CHECKER.value == constant('App\\Enum\\OperationMode::ON').value %}
+                <div class="ml-3 mt-5">
+                    {{ form_widget(formPassword.security) }}
+                </div>
+            {% endif %}
+
+            <button {{ stimulus_target('fields', 'button') }} class="mt-6 w-[180px] btn-primary cursor-not-allowed"
+                                                              type="submit" disabled>
+                {{ 'changePassword.changeBtn'|trans({}, '_account_widget') }}
+            </button>
+
+            {{ form_rest(formPassword) }}
+            {{ form_end(formPassword) }}
+        </form>
+    </div>
+    {% endif %}
+
+    {% if data.LOGIN_WITH_UUID_ONLY.value == constant('App\\Enum\\OperationMode::OFF').value or
+        user.userExternalAuths[0].provider != constant('App\\Enum\\UserProvider::PORTAL_ACCOUNT').value %}
+
+    {# Two-Factor Authenticator Section #}
+    <div class="divider my-8"></div>
+
+    <h1 class="text-lg mb-8 mt-10">
+        {{ 'twoFactorAuth.title'|trans({}, '_account_widget') }}
+    </h1>
+
+    <div class="grid {% if user.twoFAtype != constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value %}grid-cols-2{% else %}grid-cols-1{% endif %} space-x-2">
+        <a href="{{ path('app_configure2FA') }}" class="btn-secondary md:text-base text-sm">
+            {{ 'twoFactorAuth.configure'|trans({}, '_account_widget') }}
+        </a>
+        {% if user.twoFAtype != constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value %}
+            <a href="{{ path('app_disable2FA', {context: context}) }}" class="btn-logout">
+                {{ 'twoFactorAuth.disable'|trans({}, '_account_widget') }}
+            </a>
+        {% endif %}
+    </div>
+
+    {% endif %}
+
+    {# Divider between sections #}
+    <div class="divider my-8"></div>
+
+    {# Revoke Account Profile Section #}
+    <div {{ stimulus_controller('alert') }}>
+        <form method="POST"
+              action="{{ path('app_site_account_user') }}"
+              data-controller="alert"
+              data-alert-target="form">
+            <h1 class="text-lg mb-8 mt-10">
+                {{ 'profileData.title'|trans({}, '_account_widget') }}
+            </h1>
+
+            <div class="grid grid-cols-1 space-y-4">
+                {{ form_start(formRevokeProfiles) }}
+                {{ form_errors(formRevokeProfiles) }}
+
+                <button class="btn-logout"
+                        type="button"
+                        data-action="alert#revoke_profiles"
+                        data-alert-target="button"
+                        data-user-uuid="{% if userExternalAuths[user.id] is defined %}{% for auth in userExternalAuths[user.id] %}{% if auth.provider == constant('App\\Enum\\UserProvider::SAML').value %}{{ auth.providerId }}{% else %}{{ app.user.uuid }}{% endif %}{% endfor %}{% endif %}">
+                    {{ 'profileData.revokeProfiles'|trans({}, '_account_widget') }}
+                </button>
+
+                {{ form_rest(formRevokeProfiles) }}
+                {{ form_end(formRevokeProfiles) }}
+            </div>
+        </form>
+    </div>
+
+    {# Additional Option: Danger Zone for Account Deletion #}
+    {% if user.email is not null or user.phoneNumber is not null %}
+        {% if not is_granted('ROLE_ADMIN') %}
+            <div class="divider my-8"></div>
+            <h1 class="text-lg mb-8 mt-10 !text-red-600 font-bold uppercase">
+                {{ 'dangerZone.title'|trans({}, '_account_widget') }}
+            </h1>
+            <div class="grid grid-cols-1 space-y-4">
+                {% for auth in user.userExternalAuths %}
+                    {% if auth.provider != constant('App\\Enum\\UserProvider::PORTAL_ACCOUNT').value %}
+                        <a href="{{ path('app_user_account_deletion_external') }}" class="btn-logout"
+                           onclick="return confirm('{{ 'dangerZone.deleteAccountWarningMessage'|trans({}, '_account_widget') }}')">
+                            {{ 'dangerZone.deleteAccount'|trans({}, '_account_widget') }}
+                        </a>
+                    {% else %}
+                        <a href="{{ path('app_user_account_deletion_local') }}" class="btn-logout"
+                            onclick="return confirm('{{ 'dangerZone.deleteAccountWarningMessageLocal'|trans({}, '_account_widget') }}')">
+                            {{ 'dangerZone.deleteAccount'|trans({}, '_account_widget') }}
+                        </a>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endif %}
+</div>

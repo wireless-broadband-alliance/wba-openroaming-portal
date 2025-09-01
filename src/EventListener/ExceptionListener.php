@@ -2,14 +2,13 @@
 
 namespace App\EventListener;
 
-use App\Repository\SettingRepository;
-use App\Repository\UserRepository;
 use App\Service\GetSettings;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Symfony\Component\HttpKernel\KernelEvents;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use Twig\Environment;
 use Twig\Error\LoaderError;
 use Twig\Error\RuntimeError;
@@ -21,8 +20,7 @@ readonly class ExceptionListener
     public function __construct(
         private Environment $twig,
         private GetSettings $getSettings,
-        private UserRepository $userRepository,
-        private SettingRepository $settingRepository,
+        private readonly TranslatorInterface $translator,
     ) {
     }
 
@@ -37,7 +35,11 @@ readonly class ExceptionListener
 
         // Default values
         $statusCode = 500;
-        $statusTitle = 'Internal Server Error';
+        $statusTitle = $this->translator->trans(
+            'internalServerError',
+            [],
+            'eventListener'
+        );
 
         if ($exception instanceof HttpExceptionInterface) {
             $statusCode = $exception->getStatusCode();
@@ -50,10 +52,7 @@ readonly class ExceptionListener
             return;
         }
 
-        $data = $this->getSettings->getSettings(
-            $this->userRepository,
-            $this->settingRepository
-        );
+        $data = $this->getSettings->getSettings();
 
         // Try specific error template first
         $template = sprintf('bundles/TwigBundle/Exception/error_%d.html.twig', $statusCode);

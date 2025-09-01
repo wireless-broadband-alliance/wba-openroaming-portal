@@ -3,6 +3,8 @@
 namespace App\Command;
 
 use App\Entity\Setting;
+use App\Entity\SettingTranslation;
+use App\Enum\LanguageType;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -30,14 +32,22 @@ class ResetCustomSettingsCommand extends Command
         $this
             ->setName('reset:customSettings')
             ->setDescription('Reset Customization Settings')
-            ->addOption('yes', 'y', InputOption::VALUE_NONE, 'Automatically confirm the reset');
+            ->addOption(
+                'yes',
+                'y',
+                InputOption::VALUE_NONE,
+                'Automatically confirm the reset'
+            );
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         if (!$input->getOption('yes')) {
             $helper = $this->getHelper('question');
-            $question = new ConfirmationQuestion('This action will reset the main settings. [y/N] ', false);
+            $question = new ConfirmationQuestion(
+                'This action will reset the page customization settings. [y/N] ',
+                false
+            );
             /** @var QuestionHelper $helper */
             if (!$helper->ask($input, $output, $question)) {
                 $output->writeln('Command aborted.');
@@ -61,25 +71,66 @@ class ResetCustomSettingsCommand extends Command
             ['name' => 'CONTACT_EMAIL', 'value' => 'openroaming-help@example.com'],
         ];
 
+        // phpcs:disable Generic.Files.LineLength.TooLong
+        $settingsToTranslate = [
+            [
+                'name' => 'WELCOME_TEXT',
+                'value' => 'Welcome to OpenRoaming Provisioning Service',
+                'translations' => [
+                    LanguageType::EN->value => 'Welcome to OpenRoaming Provisioning Service',
+                    LanguageType::PT->value => 'Bem-vindo ao Serviço de OpenRoaming Provisioning',
+                ],
+            ],
+            [
+                'name' => 'WELCOME_DESCRIPTION',
+                'value' => 'This portal allows you to download and install an OpenRoaming profile tailored to your device, allowing you to connect automatically to OpenRoaming Wi-Fi networks across the world.',
+                'translations' => [
+                    LanguageType::EN->value => 'This portal allows you to download and install an OpenRoaming profile tailored to your device, allowing you to connect automatically to OpenRoaming Wi-Fi networks across the world.',
+                    LanguageType::PT->value => 'Este portal permite que você faça o download e instale um perfil OpenRoaming adaptado ao seu dispositivo, permitindo-lhe conectar-se automaticamente às redes OpenRoaming Wi-Fi em todo o mundo.',
+                ],
+            ],
+            [
+                'name' => 'ADDITIONAL_LABEL',
+                'value' => 'This label is used to add extra content if necessary',
+                'translations' => [
+                    LanguageType::EN->value => 'This label is used to add extra content if necessary',
+                    LanguageType::PT->value => 'Este rótulo é usado para adicionar conteúdo extra, se necessário',
+                ],
+            ],
+        ];
+        // phpcs:enable
         $this->entityManager->beginTransaction();
 
         try {
             $settingsRepository = $this->entityManager->getRepository(Setting::class);
+            $translationsRepository = $this->entityManager->getRepository(SettingTranslation::class);
 
+            // Insert or update settings
             foreach ($settings as $settingData) {
-                $name = $settingData['name'];
-                $value = $settingData['value'];
+                $setting = $settingsRepository->findOneBy(['name' => $settingData['name']]) ?? new Setting();
+                $setting->setName($settingData['name']);
+                $setting->setValue($settingData['value']);
+                $this->entityManager->persist($setting);
+            }
 
-                $setting = $settingsRepository->findOneBy(['name' => $name]);
+            // Insert or update settings with translations
+            foreach ($settingsToTranslate as $settingData) {
+                $setting = $settingsRepository->findOneBy(['name' => $settingData['name']]) ?? new Setting();
+                $setting->setName($settingData['name']);
+                $setting->setValue($settingData['value']);
+                $this->entityManager->persist($setting);
 
-                if ($setting !== null) {
-                    // Update the already existing value
-                    $setting->setValue($value);
-                } else {
-                    $setting = new Setting();
-                    $setting->setName($name);
-                    $setting->setValue($value);
-                    $this->entityManager->persist($setting);
+                // Handle translations
+                foreach ($settingData['translations'] as $locale => $translationText) {
+                    $translation = $translationsRepository->findOneBy([
+                        'setting' => $setting,
+                        'locale' => $locale,
+                    ]) ?? new SettingTranslation();
+
+                    $translation->setSetting($setting);
+                    $translation->setLocale($locale);
+                    $translation->setTranslation($translationText);
+                    $this->entityManager->persist($translation);
                 }
             }
 

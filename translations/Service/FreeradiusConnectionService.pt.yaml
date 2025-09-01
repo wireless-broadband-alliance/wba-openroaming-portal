@@ -1,0 +1,3 @@
+invalidConnectionType: 'Tipo de ligação inválido.'
+freeRADIUSConnectionSuccessfully: 'Ligação à base de dados FreeRADIUS - Ligado com sucesso.'
+FreeRADIUSConnectionFailed: 'Falha na ligação à base de dados FreeRADIUS: Falha ao ligar à base de dados. Verifique os detalhes da sua ligação na configuração .env.'

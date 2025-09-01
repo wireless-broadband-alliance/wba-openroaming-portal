@@ -14,7 +14,6 @@ use App\Enum\UserProvider;
 use App\Enum\UserTwoFactorAuthenticationStatus;
 use App\Form\LoginType;
 use App\Form\TwoFACode;
-use App\Repository\SettingRepository;
 use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
 use App\Service\EventActions;
@@ -42,22 +41,22 @@ use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class SecurityController extends AbstractController
 {
     /**
      * SiteController constructor.
      * @param UserRepository $userRepository The repository for accessing user data.
-     * @param SettingRepository $settingRepository The setting repository is used to create the getSettings function.
      * @param GetSettings $getSettings The instance of GetSettings class.
      *  of the user account
      */
     public function __construct(
         private readonly UserRepository $userRepository,
-        private readonly SettingRepository $settingRepository,
-        private readonly GetSettings $getSettings,
         private readonly UserExternalAuthRepository $userExternalAuthRepository,
+        private readonly GetSettings $getSettings,
         private readonly TwoFAService $twoFAService,
+        private readonly TranslatorInterface $translator,
         private readonly EntityManagerInterface $entityManager,
         private readonly SendSMS $sendSMS,
         private readonly MagicLinkService $magicLinkService,
@@ -83,7 +82,7 @@ class SecurityController extends AbstractController
         }
 
         // Call the getSettings method of GetSettings class to retrieve the data
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
         if ($data['PLATFORM_MODE']['value'] === true) {
             return $this->redirectToRoute('app_landing');
         }
@@ -134,7 +133,7 @@ class SecurityController extends AbstractController
             $this->addFlash('error', $error->getMessage());
         }
 
-        return $this->render('site/login_landing.html.twig', [
+        return $this->render('landing/login/login_landing.html.twig', [
             'last_username' => $lastUsername,
             'error' => $error,
             'data' => $data,
@@ -487,7 +486,7 @@ class SecurityController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
 
         $form = $this->createForm(TwoFACode::class);
         $form->handleRequest($request);
@@ -506,16 +505,68 @@ class SecurityController extends AbstractController
 
             $this->addFlash(
                 'error',
-                'Code Invalid. Please try again.'
+                $this->translator->trans('invalidCode', [], 'controllers')
             );
         }
 
-        return $this->render('site/login_landing_code_confirmation.html.twig', [
+        return $this->render('landing/login/login_landing_code_confirmation.html.twig', [
             'data' => $data,
             'form' => $form,
             'context' => FirewallType::LANDING->value,
             'user' => $user,
         ]);
+    }
+
+    /**
+     * @throws NonUniqueResultException
+     */
+    #[Route('/dashboard/login', name: 'app_dashboard_login')]
+    public function dashboardLogin(Request $request, AuthenticationUtils $authenticationUtils): Response
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+        if ($user instanceof User) {
+            return $this->redirectToRoute('admin_page');
+        }
+
+        // Call the getSettings method of GetSettings class to retrieve the data
+        $data = $this->getSettings->getSettings();
+
+        // Last username entered by the user (this will be empty if the user clicked the verification link)
+        $lastUsername = $authenticationUtils->getLastUsername();
+        $user = $this->userRepository->findOneBy([
+            'uuid' => $lastUsername,
+        ]);
+
+        $form = $this->createForm(LoginFormType::class, $user, [
+            'firewallType' => FirewallType::DASHBOARD->value,
+        ]);
+        $form->handleRequest($request);
+
+        // Get the login error if there is one
+        $error = $authenticationUtils->getLastAuthenticationError();
+
+        // Show an error message if the login attempt fails
+        if ($error instanceof AuthenticationException) {
+            $this->addFlash('error', $error->getMessage());
+        }
+
+        return $this->render('dashboard/login/login_admin_landing.html.twig', [
+            'last_username' => $lastUsername,
+            'error' => $error,
+            'data' => $data,
+            'form' => $form,
+            'context' => FirewallType::DASHBOARD->value,
+        ]);
+    }
+
+
+    #[Route(path: '/dashboard/logout', name: 'app_dashboard_logout')]
+    public function dashboardLogout(Request $request): Response
+    {
+        $session = $request->getSession();
+        $session->clear();
+        return $this->redirectToRoute('app_dashboard_login');
     }
 
     #[Route(path: '/logout', name: 'app_logout')]
