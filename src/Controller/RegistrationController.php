@@ -103,7 +103,14 @@ class RegistrationController extends AbstractController
         }
 
         if ($data['LOGIN_WITH_UUID_ONLY']['value'] === OperationMode::ON->value) {
-            $this->addFlash('error', 'This authentication method it\'s not enabled!');
+            $this->addFlash(
+                'error',
+                $this->translator->trans(
+                    'authenticationMethodNotEnabled',
+                    [],
+                    'controllers'
+                )
+            );
             return $this->redirectToRoute('app_landing');
         }
 
@@ -202,7 +209,14 @@ class RegistrationController extends AbstractController
         }
 
         if ($data['LOGIN_WITH_UUID_ONLY']['value'] === OperationMode::ON->value) {
-            $this->addFlash('error', 'This authentication method it\'s not enabled!');
+            $this->addFlash(
+                'error',
+                $this->translator->trans(
+                    'authenticationMethodNotEnabled',
+                    [],
+                    'controllers'
+                )
+            );
             return $this->redirectToRoute('app_landing');
         }
 
