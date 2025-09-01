@@ -133,9 +133,13 @@ final class Version20250717141617 extends AbstractMigration
             foreach ($translation['translations'] as $locale => $translationText) {
                 $this->addSql(
                     'INSERT INTO SettingTranslation (locale, translation, setting_id)
-                    SELECT :locale, :translation, s.id
-                    FROM Setting s
-                    WHERE s.name = :setting_name',
+                 SELECT :locale, :translation, s.id
+                 FROM Setting s
+                 WHERE s.name = :setting_name
+                 AND NOT EXISTS (
+                     SELECT 1 FROM SettingTranslation st
+                     WHERE st.setting_id = s.id AND st.locale = :locale
+                 )', // Checks first if the setting exist before insert them
                     [
                         'locale' => $locale,
                         'translation' => $translationText,
