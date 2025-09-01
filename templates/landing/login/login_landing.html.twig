@@ -5,6 +5,7 @@
 {% endblock %}
 
 {% block second_col %}
+    {# Form Column #}
     {# Toasts #}
     {{ block('toast_messages') }}
 
@@ -27,114 +28,153 @@
         </p>
     </div>
 
-    {# Form Column #}
-    {{ form_start(form) }}
+    <twig:LoginForm :loginChoiceDTO="loginChoiceDTO" :form="form">
+        {{ form_start(form) }}
 
-    {% if data.AUTH_METHOD_REGISTER_ENABLED.value and data.AUTH_METHOD_SMS_REGISTER_ENABLED.value == 'true' %}
-        {% set label = 'form.email_or_phone'|trans({}, 'login_landing') %}
-    {% elseif data.AUTH_METHOD_REGISTER_ENABLED.value == 'true' %}
-        {% set label = 'form.email'|trans({}, 'login_landing') %}
-    {% elseif data.AUTH_METHOD_SMS_REGISTER_ENABLED.value == 'true' %}
-        {% set label = 'form.phone_number'|trans({}, 'login_landing') %}
-    {% else %}
-        {% set label = 'form.email'|trans({}, 'login_landing') %}
-    {% endif %}
+        {% if form.loginMethod is defined %}
+            {# Login Method Toggle #}
+            <div class="flex justify-center mt-8">
+                <div class="flex bg-gray-300 rounded-lg overflow-hidden w-full max-w-md p-1">
+                    {# Email Option #}
+                    <label
+                            class="cursor-pointer flex-1 text-center px-4 py-2 transition-colors duration-200 rounded-md
+                   {{ loginChoiceDTO.loginMethod == constant('App\\Enum\\UserProvider::EMAIL').value ? 'bg-white text-black font-semibold shadow-md' : 'text-gray-700' }}"
+                    >
+                        <input type="radio"
+                               name="{{ form.loginMethod.vars.full_name }}"
+                               value="{{ constant('App\\Enum\\UserProvider::EMAIL').value }}"
+                               class="hidden"
+                               wire:model="loginMethod"
+                               wire:click="changeLoginMethod('{{ constant('App\\Enum\\UserProvider::EMAIL').value }}')"
+                        />
+                        Email
+                    </label>
 
-    {# UUID Field #}
-    <div class="relative mt-[32px]">
-        {{ form_label(form.uuid, label, {label_attr: {class: 'form-label'}}) }}
-        {{ form_widget(form.uuid, {
-            attr: {
-                class: 'form-widget',
-                placeholder: 'form.enter_placeholder'|trans({'%label%': label|lower}, 'login_landing'),
-            },
-            full_name: 'uuid',
-        }) }}
-    </div>
-
-    {% if data.LOGIN_WITH_UUID_ONLY.value == constant('App\\Enum\\OperationMode::OFF').value %}
-        {# Password Field #}
-        <div class="relative mt-[32px]">
-            {{ form_label(form.password, 'form.password'|trans({}, 'login_landing'), {label_attr: {class: 'form-label'}}) }}
-            {{ form_widget(form.password, {
-                attr: {
-                    class: 'form-widget',
-                    placeholder: 'form.password_placeholder'|trans({}, 'login_landing'),
-                },
-                full_name: 'password',
-            }) }}
-        </div>
-    {% endif %}
-
-    {# Turnstile Checker #}
-    {% if data.TURNSTILE_CHECKER.value == constant('App\\Enum\\OperationMode::ON').value %}
-        <div class="ml-3 mt-5">
-            {{ form_row(form.security, {full_name: 'security'}) }}
-        </div>
-    {% endif %}
-
-    <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
-
-    <div class="my-[32px] flex justify-start gap-4">
-        <button type="submit" class="w-[220px] btn-primary">
-            {{ 'btn.login'|trans({}, 'login_landing') }}
-        </button>
-        {% if data.PLATFORM_MODE.value != constant('App\\Enum\\PlatformMode::DEMO').value %}
-            <a href="{{ path('app_landing') }}" class="w-[220px] btn-secondary">
-                {{ 'btn.choose_another'|trans({}, 'login_landing') }}
-            </a>
+                    {# Phone Number Option #}
+                    <label
+                            class="cursor-pointer flex-1 text-center px-4 py-2 transition-colors duration-200 rounded-md
+                   {{ loginChoiceDTO.loginMethod == constant('App\\Enum\\UserProvider::PHONE_NUMBER').value ? 'bg-white text-black font-semibold shadow-md' : 'text-gray-700' }}"
+                    >
+                        <input type="radio"
+                               name="{{ form.loginMethod.vars.full_name }}"
+                               value="{{ constant('App\\Enum\\UserProvider::PHONE_NUMBER').value }}"
+                               class="hidden"
+                               wire:model="loginMethod"
+                               wire:click="changeLoginMethod('{{ constant('App\\Enum\\UserProvider::EMAIL').value }}')"
+                        />
+                        {{ 'form.phone_number'|trans({}, 'login_landing') }}
+                    </label>
+                </div>
+            </div>
         {% endif %}
-    </div>
 
-    {# Divider #}
+        {# Email Field #}
+        {% if loginChoiceDTO.loginMethod == constant('App\\Enum\\UserProvider::EMAIL').value and form['email'] is defined %}
+            <div class="relative mt-[32px]">
+                {{ form_label(form.email, constant('App\\Enum\\UserProvider::EMAIL').value, {label_attr: {class: 'form-label'}}) }}
+                {{ form_widget(form.email, {attr: {class: 'form-widget', placeholder: 'form.enter_email'|trans({}, 'login_landing')}}) }}
+                <div class="text-red-500 m-2">
+                    {{ form_errors(form.email) }}
+                </div>
+            </div>
+        {% endif %}
+
+        {# Phone Number Field #}
+        {% if loginChoiceDTO.loginMethod == constant('App\\Enum\\UserProvider::PHONE_NUMBER').value and form['phoneNumber'] is defined %}
+            <div class="flex flex-row items-end space-x-4 mt-[32px]">
+                {# Country Code Dropdown #}
+                <div class="flex flex-col w-1/3">
+                    {{ form_widget(form.phoneNumber.children.country, {
+                        attr: {
+                            class: 'block w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary',
+                            autocomplete: 'tel-country',
+                        },
+                    }) }}
+                </div>
+
+                {# Phone Number Input #}
+                <div class="flex flex-col w-2/3">
+                    {{ form_widget(form.phoneNumber.children.number, {
+                        attr: {
+                            class: 'block w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary',
+                            placeholder: 'form.enter_phone'|trans({}, 'login_landing'),
+                            autocomplete: 'tel',
+                        },
+                    }) }}
+                </div>
+            </div>
+            <div class="text-red-500 m-2">
+                {{ form_errors(form.phoneNumber) }}
+            </div>
+        {% endif %}
+
+        {# Password Field #}
+        {% if form.password is defined %}
+            <div class="relative mt-[32px]">
+                {{ form_label(form.password, 'Password', {label_attr: {class: 'form-label'}}) }}
+                {{ form_widget(form.password, {attr: {class: 'form-widget', placeholder: 'form.password_placeholder'|trans({}, 'login_landing')}}) }}
+            </div>
+            <div class="text-red-500 m-2">
+                {{ form_errors(form.password) }}
+            </div>
+        {% endif %}
+
+        {# Turnstile Checker #}
+        {% if form.security is defined %}
+            <div class="ml-3 mt-5">
+                {{ form_label(form.security) }}
+                {{ form_widget(form.security) }}
+                <div class="text-red-500">
+                    {{ form_errors(form.security) }}
+                </div>
+            </div>
+        {% endif %}
+
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+        <div class="my-[32px] flex justify-center gap-4">
+            <button type="submit" class="w-[220px] btn-primary">Log in</button>
+            <a href="{{ path('app_landing') }}" class="w-[220px] btn-secondary">{{ 'btn.choose_another'|trans({}, 'login_landing') }}</a>
+        </div>
+
+        {{ form_end(form, {render_rest: false}) }}
+    </twig:LoginForm>
+
+    {# Divider & Links #}
     <div class="my-[25px] divider"></div>
     {% if data.PLATFORM_MODE.value != constant('App\\Enum\\PlatformMode::DEMO').value %}
 
-        {% if data.AUTH_METHOD_REGISTER_ENABLED.value or data.AUTH_METHOD_SMS_REGISTER_ENABLED.value == 'true' %}
-            <p class="mt-2 text-sm">
-                {{ 'forgot_password'|trans({}, 'login_landing') }}
+        {% if data.AUTH_METHOD_REGISTER_ENABLED.value or data.AUTH_METHOD_SMS_REGISTER_ENABLED.value %}
+            <p class="mt-2 text-sm">{{ 'forgot_password'|trans({}, 'login_landing') }}
 
-                {% if data.AUTH_METHOD_REGISTER_ENABLED.value == 'true' %}
-                    <a href="{{ path('app_site_forgot_password_email') }}"
-                       class="font-semibold text-primary underline">
-                        {{ 'forgot_password_email'|trans({}, 'login_landing') }}
-                    </a>
-                {% endif %}
+            {% if data.AUTH_METHOD_REGISTER_ENABLED.value %}
+                <a href="{{ path('app_site_forgot_password_email') }}" class="font-semibold text-primary underline">email</a>
+            {% endif %}
 
-                {% if data.AUTH_METHOD_REGISTER_ENABLED.value == 'true' and data.AUTH_METHOD_SMS_REGISTER_ENABLED.value == 'true' %}
-                    {{ 'or'|trans({}, 'login_landing') }}
-                {% endif %}
+            {% if data.AUTH_METHOD_REGISTER_ENABLED.value and data.AUTH_METHOD_SMS_REGISTER_ENABLED.value %}{{ 'or'|trans({}, 'login_landing') }}{% endif %}
 
-                {% if data.AUTH_METHOD_SMS_REGISTER_ENABLED.value == 'true' %}
-                    <a href="{{ path('app_site_forgot_password_sms') }}"
-                       class="font-semibold text-primary underline">
-                        {{ 'forgot_password_phone'|trans({}, 'login_landing') }}
-                    </a>.
-                {% endif %}
-            </p>
+            {% if data.AUTH_METHOD_SMS_REGISTER_ENABLED.value %}
+                <a href="{{ path('app_site_forgot_password_sms') }}"
+                   class="font-semibold text-primary underline">{{ 'forgot_password_phone'|trans({}, 'login_landing') }}</a>.
+            {% endif %}
 
-            <p class="mt-2 text-sm">
-                {{ 'no_account_register'|trans({}, 'login_landing') }}
+            {% if data.AUTH_METHOD_REGISTER_ENABLED.value or data.AUTH_METHOD_SMS_REGISTER_ENABLED.value %}
 
-                {% if data.AUTH_METHOD_REGISTER_ENABLED.value == 'true' %}
-                    <a href="{{ path('app_register') }}" class="font-semibold text-primary underline">
-                        {{ 'register_email'|trans({}, 'login_landing') }}
-                    </a>
-                {% endif %}
+                <p class="mt-2 text-sm">{{ 'no_account_register'|trans({}, 'login_landing') }}
 
-                {% if data.AUTH_METHOD_REGISTER_ENABLED.value == 'true' and data.AUTH_METHOD_SMS_REGISTER_ENABLED.value == 'true' %}
-                    {{ 'or'|trans({}, 'login_landing') }}
-                {% endif %}
+                    {% if data.AUTH_METHOD_REGISTER_ENABLED.value %}
+                        <a href="{{ path('app_register') }}"
+                           class="font-semibold text-primary underline">email</a>
+                    {% endif %}
 
-                {% if data.AUTH_METHOD_SMS_REGISTER_ENABLED.value == 'true' %}
-                    <a href="{{ path('app_register_sms') }}" class="font-semibold text-primary underline">
-                        {{ 'register_phone'|trans({}, 'login_landing') }}
-                    </a>.
-                {% endif %}
-            </p>
+                    {% if data.AUTH_METHOD_REGISTER_ENABLED.value and data.AUTH_METHOD_SMS_REGISTER_ENABLED.value %}{{ 'or'|trans({}, 'login_landing') }}{% endif %}
+
+                    {% if data.AUTH_METHOD_SMS_REGISTER_ENABLED.value %}
+                        <a href="{{ path('app_register_sms') }}"
+                           class="font-semibold text-primary underline">{{ 'register_phone'|trans({}, 'login_landing') }}</a>.
+                    {% endif %}
+                </p>
+            {% endif %}
         {% endif %}
     {% endif %}
 
-    {{ form_rest(form) }}
-    {{ form_end(form) }}
 {% endblock %}

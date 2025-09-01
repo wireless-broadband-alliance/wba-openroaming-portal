@@ -14,6 +14,8 @@ form:
     email: 'Email'
     phone_number: 'Número de Telefone'
     enter_placeholder: 'Introduza o seu %label%'
+    enter_email: 'Introduza o seu email'
+    enter_phone: 'Introduza o seu Número de Telefone'
     enter_placeholder_both_methods: 'Introduza o seu Email ou Número de Telefone'
     enter_code: 'Introduza o seu código'
     password: 'Palavra-passe'
