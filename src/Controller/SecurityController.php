@@ -185,8 +185,7 @@ class SecurityController extends AbstractController
                     if ($loginUser->getUserExternalAuths()[0]->getProvider() !== UserProvider::PORTAL_ACCOUNT->value) {
                         $this->addFlash(
                             'error',
-                            'Email is already in use but is associated with a different provider!
-                            Please use the original one.'
+                            $this->translator->trans('emailInUse', [], 'controllers')
                         );
                         return $this->redirectToRoute('app_login_magic');
                     }
@@ -211,7 +210,7 @@ class SecurityController extends AbstractController
                         );
                         $this->addFlash(
                             'success',
-                            'Login link sent to you successfully'
+                            $this->translator->trans('loginSentSuccessfully', [], 'controllers')
                         );
                     } else {
                         $timeIntervalToResendCode = $data["TWO_FACTOR_AUTH_RESEND_INTERVAL"]["value"];
@@ -243,12 +242,12 @@ class SecurityController extends AbstractController
 
                     $this->addFlash(
                         'success',
-                        'A login link has been sent to your email',
+                        $this->translator->trans('loginLinkSent', [], 'controllers'),
                     );
                 } else {
                     $this->addFlash(
                         'error',
-                        'Invalid email Format'
+                        $this->translator->trans('invalidEmailFormat', [], 'controllers')
                     );
                 }
             } else {
@@ -259,16 +258,22 @@ class SecurityController extends AbstractController
                     if ($loginUser->getUserExternalAuths()[0]->getProvider() !== UserProvider::PORTAL_ACCOUNT->value) {
                         $this->addFlash(
                             'error',
-                            'PhoneNumber is already in use but is associated with a different provider!
-                            Please use the original one.'
+                            $this->translator->trans('phoneInUse', [], 'controllers')
                         );
                         return $this->redirectToRoute('app_login_magic');
                     }
                     $event = $this->magicLinkService->canSendLink($loginUser);
                     if (!($event instanceof Event)) {
                         $link = $this->magicLinkService->magicToken($loginUser);
-                        $message = "Welcome to OpenRoaming! Click the link to" .
-                            " login with your account: $link";
+
+                        $message = $this->translator->trans(
+                            'loginLinkMessage',
+                            [
+                                '%link%' => $link
+                            ],
+                            'controllers'
+                        );
+
                         $smsResponse = $this->sendSMS->sendSmsNoValidation($loginUser, $message);
 
                         if ($smsResponse === SMSResponse::SMS_SUCCESS_LINK->value) {
@@ -288,8 +293,7 @@ class SecurityController extends AbstractController
 
                             $this->addFlash(
                                 'success',
-                                'We have sent a login link to your phone number. 
-                                Please check your SMS messages to continue.'
+                                $this->translator->trans('loginLinkSentCheckSMS', [], 'controllers')
                             );
                         } elseif ($smsResponse === SMSResponse::SMS_SUCCESS_CODE->value) {
                             // Save event for code sent
@@ -307,8 +311,7 @@ class SecurityController extends AbstractController
                             );
                             $this->addFlash(
                                 'success',
-                                'We have sent a login verification code to your phone number. 
-                                Please check your SMS messages to continue.'
+                                $this->translator->trans('loginLinkSentCheckSMS', [], 'controllers')
                             );
 
                             // Soft Authenticate the user for code confirmation
@@ -326,8 +329,7 @@ class SecurityController extends AbstractController
                         } else {
                             $this->addFlash(
                                 'error',
-                                'We were unable to send the login link or verification code to your 
-                                phone number. Please try again later.'
+                                $this->translator->trans('unableSendLoginLink', [], 'controllers')
                             );
                         }
                     } else {
@@ -355,20 +357,26 @@ class SecurityController extends AbstractController
                     );
 
                     $link = $this->magicLinkService->magicToken($user);
-                    $message = "Welcome to OpenRoaming! Click the link to confirm and login with your account: $link";
+
+                    $message = $this->translator->trans(
+                        'loginLinkConfirmMessage',
+                        [
+                            '%link%' => $link
+                        ],
+                        'controllers'
+                    );
+
                     $smsResponse = $this->sendSMS->sendSmsNoValidation($user, $message);
 
                     if ($smsResponse === SMSResponse::SMS_SUCCESS_LINK->value) {
                         $this->addFlash(
                             'success',
-                            'We have sent a login link to your phone number. 
-                            Please check your SMS messages to continue.'
+                            $this->translator->trans('loginLinkSentCheckSMS', [], 'controllers')
                         );
                     } elseif ($smsResponse === SMSResponse::SMS_SUCCESS_CODE->value) {
                         $this->addFlash(
                             'success',
-                            'We have sent a login verification code to your phone number. 
-                            Please check your SMS messages to continue.'
+                            $this->translator->trans('loginVerificationCodeSent', [], 'controllers')
                         );
 
                         // Soft Authenticate the user for code confirmation
@@ -386,7 +394,7 @@ class SecurityController extends AbstractController
                     } else {
                         $this->addFlash(
                             'error',
-                            'We were unable to send the login link to your phone number. Please try again.'
+                            $this->translator->trans('unableSendLoginLink', [], 'controllers')
                         );
                     }
                 }
@@ -564,7 +572,7 @@ class SecurityController extends AbstractController
 
                 $this->addFlash(
                     'success',
-                    'Login successfully'
+                    $this->translator->trans('loginSuccessfully', [], 'controllers')
                 );
 
                 return $this->redirectToRoute('app_landing');
@@ -572,14 +580,14 @@ class SecurityController extends AbstractController
                 // Invalid link in case the try catch fails
                 $this->addFlash(
                     'error',
-                    'Your login link is invalid or has expired. Please request a new login link to continue.'
+                    $this->translator->trans('invalidLogin', [], 'controllers')
                 );
             }
         } else {
             // Invalid operation in case the link is actually expired based on the service timer
             $this->addFlash(
                 'error',
-                'Your login link is invalid or has expired. Please request a new login link to continue.'
+                $this->translator->trans('invalidLogin', [], 'controllers')
             );
         }
 
