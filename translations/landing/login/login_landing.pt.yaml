@@ -1,5 +1,6 @@
 logoAlt: 'Logotipo do Cliente'
 welcome_back: 'Bem-vindo de volta'
+magicLinkDescription: 'You have selected to login via magic link. Please enter your email or phone number to receive the login link'
 description: >
     Selecionou iniciar sessão via email e palavra-passe. Assim que iniciar sessão,
     instale o perfil no seu dispositivo.
