@@ -18,7 +18,7 @@ accountCurrentlyPendingApproval: 'Your account is currently with a request pendi
 profileNotFound: 'Profile not found'
 authenticationMethodNotEnabled: "This authentication method it's not enabled!"
 userWithSameEmail: 'User with the same email already exists, please try to Login using the link below.'
-emailSentWithPasswordAndVerificationCode: 'We have sent an email with your account password and verification code'
+emailSentWithPasswordAndVerificationCode: 'An email with your account password and verification code has been sent to you'
 userWithSamePhoneNumber: 'User with the same phone number already exists, please try to "Log in" using the link below.'
 yourAccountPasswordIs: 'Your account password is: '
 verificationCodeIs: 'Verification code is: '
