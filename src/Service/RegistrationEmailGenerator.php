@@ -50,9 +50,12 @@ readonly class RegistrationEmailGenerator
                 'uuid' => $user->getEmail(),
                 'supportTeam' => $supportTeam,
                 'contactEmail' => $contactEmail,
-                'twoFaCode' => $user->getTwoFAcode(),
+                'verificationCode' => $user->getTwoFAcode(),
+                'isNewUser' => true,
+                'magicLink' => $magicLink,
+                // This variable informs if the user it's new our if it's just a password reset request
                 'password' => $password,
-                'isLoginOnlyWithUUIDActive' => $isLoginOnlyWithUUIDActive
+                'magicURL' => $magicURL,
             ])
             ->embedFromPath($logoPath, 'logo_cid');
 
