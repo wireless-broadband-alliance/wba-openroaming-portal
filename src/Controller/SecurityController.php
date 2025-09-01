@@ -153,7 +153,7 @@ class SecurityController extends AbstractController
         UserPasswordHasherInterface $userPasswordHasher,
         SessionInterface $session,
     ): Response {
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
 
         if ($data['LOGIN_WITH_UUID_ONLY']['value'] === OperationMode::OFF->value) {
             return $this->redirectToRoute('app_login');
@@ -393,7 +393,7 @@ class SecurityController extends AbstractController
             }
         }
 
-        return $this->render('site/login_UUID_landing.html.twig', [
+        return $this->render('landing/login_UUID_landing.html.twig', [
             'data' => $data,
             'form' => $form,
             'context' => FirewallType::LANDING->value,
@@ -414,7 +414,7 @@ class SecurityController extends AbstractController
         }
 
         // Call the getSettings method of GetSettings class to retrieve the data
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
 
         // Last username entered by the user (this will be empty if the user clicked the verification link)
         $email = $request->request->get('email') ?? $request->query->get('email');
@@ -445,7 +445,7 @@ class SecurityController extends AbstractController
             $this->addFlash('error', $error->getMessage());
         }
 
-        return $this->render('admin/login_admin_landing.html.twig', [
+        return $this->render('dashboard/login/login_admin_landing.html.twig', [
             'last_username' => $lastUsername,
             'error' => $error,
             'data' => $data,
@@ -453,15 +453,6 @@ class SecurityController extends AbstractController
             'context' => FirewallType::DASHBOARD->value,
             'loginChoiceDTO' => $dto,
         ]);
-    }
-
-    #[Route(path: '/dashboard/logout', name: 'app_dashboard_logout')]
-    public function dashboardLogout(Request $request): Response
-    {
-        $session = $request->getSession();
-        $session->clear();
-
-        return $this->redirectToRoute('app_dashboard_login');
     }
 
     #[Route('/login/confirmation', name: 'app_login_confirmation')]
@@ -515,67 +506,6 @@ class SecurityController extends AbstractController
             'context' => FirewallType::LANDING->value,
             'user' => $user,
         ]);
-    }
-
-    /**
-     * @throws NonUniqueResultException
-     */
-    #[Route('/dashboard/login', name: 'app_dashboard_login')]
-    public function dashboardLogin(Request $request, AuthenticationUtils $authenticationUtils): Response
-    {
-        /** @var User $user */
-        $user = $this->getUser();
-        if ($user instanceof User) {
-            return $this->redirectToRoute('admin_page');
-        }
-
-        // Call the getSettings method of GetSettings class to retrieve the data
-        $data = $this->getSettings->getSettings();
-
-        // Last username entered by the user (this will be empty if the user clicked the verification link)
-        $lastUsername = $authenticationUtils->getLastUsername();
-        $user = $this->userRepository->findOneBy([
-            'uuid' => $lastUsername,
-        ]);
-
-        $form = $this->createForm(LoginFormType::class, $user, [
-            'firewallType' => FirewallType::DASHBOARD->value,
-        ]);
-        $form->handleRequest($request);
-
-        // Get the login error if there is one
-        $error = $authenticationUtils->getLastAuthenticationError();
-
-        // Show an error message if the login attempt fails
-        if ($error instanceof AuthenticationException) {
-            $this->addFlash('error', $error->getMessage());
-        }
-
-        return $this->render('dashboard/login/login_admin_landing.html.twig', [
-            'last_username' => $lastUsername,
-            'error' => $error,
-            'data' => $data,
-            'form' => $form,
-            'context' => FirewallType::DASHBOARD->value,
-        ]);
-    }
-
-
-    #[Route(path: '/dashboard/logout', name: 'app_dashboard_logout')]
-    public function dashboardLogout(Request $request): Response
-    {
-        $session = $request->getSession();
-        $session->clear();
-        return $this->redirectToRoute('app_dashboard_login');
-    }
-
-    #[Route(path: '/logout', name: 'app_logout')]
-    public function logout(Request $request): Response
-    {
-        $session = $request->getSession();
-        $session->clear();
-
-        return $this->redirectToRoute('app_landing');
     }
 
     #[Route('/login/magic/link', name: 'app_login_magic_link')]
@@ -654,5 +584,22 @@ class SecurityController extends AbstractController
         }
 
         return $this->redirectToRoute('app_login');
+    }
+
+    #[Route(path: '/dashboard/logout', name: 'app_dashboard_logout')]
+    public function dashboardLogout(Request $request): Response
+    {
+        $session = $request->getSession();
+        $session->clear();
+        return $this->redirectToRoute('app_dashboard_login');
+    }
+
+    #[Route(path: '/logout', name: 'app_logout')]
+    public function logout(Request $request): Response
+    {
+        $session = $request->getSession();
+        $session->clear();
+
+        return $this->redirectToRoute('app_landing');
     }
 }
