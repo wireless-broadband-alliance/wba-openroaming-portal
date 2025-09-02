@@ -31,12 +31,12 @@ readonly class RegistrationEmailGenerator
         $supportTeam = $this->settingRepository->findOneBy(['name' => 'PAGE_TITLE'])->getValue();
         $contactEmail = $this->settingRepository->findOneBy(['name' => 'CONTACT_EMAIL'])->getValue();
         $loginWithUUID = $this->settingRepository->findOneBy(['name' => 'LOGIN_WITH_UUID_ONLY'])->getValue();
-        $magicURL =  $this->magicLinkService->magicToken($user);
         $customerLogo = $this->settingRepository->findOneBy(['name' => 'CUSTOMER_LOGO'])->getValue();
         $projectDir =  $this->parameterBag->get('kernel.project_dir');
         $logoPath = $projectDir . '/public' . $customerLogo;
 
         if ($loginWithUUID === OperationMode::ON->value) {
+            $magicURL =  $this->magicLinkService->magicToken($user);
             // Send email to the user with the verification link for authentications
             $email = new TemplatedEmail()
                 ->from(new Address(
@@ -67,7 +67,7 @@ readonly class RegistrationEmailGenerator
                     'uuid' => $user->getEmail(),
                     'supportTeam' => $supportTeam,
                     'contactEmail' => $contactEmail,
-                    'verificationCode' => $user->getTwoFAcode(),
+                    'twoFaCode' => $user->getTwoFAcode(),
                     'password' => $password,
                 ])
                 ->embedFromPath($logoPath, 'logo_cid');
