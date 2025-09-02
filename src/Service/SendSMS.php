@@ -23,13 +23,6 @@ readonly class SendSMS
     ) {
     }
 
-    /**
-     * @throws TransportExceptionInterface
-     * @throws RandomException
-     * @throws ServerExceptionInterface
-     * @throws RedirectionExceptionInterface
-     * @throws ClientExceptionInterface
-     */
     public function sendSmsNoValidation(User $user, string $message): string
     {
         $recipient = "+" .

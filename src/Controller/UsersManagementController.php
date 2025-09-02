@@ -11,7 +11,6 @@ use App\Enum\AnalyticalEventType;
 use App\Enum\FirewallType;
 use App\Enum\OperationMode;
 use App\Enum\PlatformMode;
-use App\Enum\SMSResponse;
 use App\Enum\UserProvider;
 use App\Enum\UserRadiusProfileRevokeReason;
 use App\Enum\UserTwoFactorAuthenticationStatus;
@@ -540,7 +539,7 @@ class UsersManagementController extends AbstractController
                         ['%password%' => $newPassword],
                         'controllers'
                     );
-                    $this->sendSMS->sendSmsNoValidation($user, $message);
+                    $smsResponse = $this->sendSMS->sendSmsNoValidation($user, $message);
 
                     if ($smsResponse !== '' && $smsResponse !== '0') {
                         $this->addFlash(
