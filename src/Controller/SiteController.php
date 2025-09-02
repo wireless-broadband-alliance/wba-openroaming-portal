@@ -151,7 +151,6 @@ class SiteController extends AbstractController
                 return $this->redirectToRoute('app_login_confirmation');
             }
 
-
             if (
                 $currentUser &&
                 ($data["LOGIN_WITH_UUID_ONLY"]["value"] === OperationMode::OFF->value ||

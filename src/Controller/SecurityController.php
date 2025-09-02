@@ -541,9 +541,11 @@ class SecurityController extends AbstractController
                 // Dispatch the login event
                 $event = new InteractiveLoginEvent($request, $token);
                 $eventDispatcher->dispatch($event);
+                $session = $request->getSession();
 
                 if (!$user->isVerified()) {
                     $user->setIsVerified(true);
+                    $session->set('session_verified', true);
                 }
 
                 $user->setTwoFAcodeIsActive(false);
@@ -553,7 +555,6 @@ class SecurityController extends AbstractController
                     $user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::EMAIL->value ||
                     $user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::SMS->value
                 ) {
-                    $session = $request->getSession();
                     $session->set('2fa_verified_' . FirewallType::LANDING->value, true);
                 }
 
