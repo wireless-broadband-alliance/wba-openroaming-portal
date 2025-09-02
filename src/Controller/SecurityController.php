@@ -64,6 +64,7 @@ class SecurityController extends AbstractController
         private readonly RegistrationEmailGenerator $emailGenerator,
         private readonly UserCreationService $userCreationService,
         private readonly TokenStorageInterface $tokenStorage,
+        private readonly RegistrationEmailGenerator $registrationEmailGenerator,
     ) {
     }
 
@@ -192,8 +193,8 @@ class SecurityController extends AbstractController
 
                     $event = $this->magicLinkService->canSendLink($loginUser);
                     if (!($event instanceof Event)) {
-                        $this->magicLinkService->sendEmail(
-                            $loginUser,
+                        $this->registrationEmailGenerator->sendRegistrationEmail(
+                            $loginUser
                         );
 
                         $eventMetaData = [

@@ -26,7 +26,7 @@ readonly class RegistrationEmailGenerator
     /**
      * @throws TransportExceptionInterface
      */
-    public function sendRegistrationEmail(User $user, $password): void
+    public function sendRegistrationEmail(User $user, ?string $password = null): void
     {
         $supportTeam = $this->settingRepository->findOneBy(['name' => 'PAGE_TITLE'])->getValue();
         $contactEmail = $this->settingRepository->findOneBy(['name' => 'CONTACT_EMAIL'])->getValue();
