@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
-    <title>OpenRoaming Registration</title>
+    <title>OpenRoaming Authentication</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet"/>
     <style>
         body {
@@ -179,13 +179,13 @@
     </div>
 
     <main class="content" role="main">
-        <h1>{{ 'header_welcome'|trans({}, 'user_registration') }}</h1>
+        <h1>{{ 'header_welcome'|trans({}, 'user_registration_login_uuid') }}</h1>
         {% if app.request.locale starts with 'pt' %}
             <p>
                 {{ 'intro_new_user'|trans({
                     '%link_text%': 'clique no link abaixo',
                     '%download_text%': 'Descarregue e instale a rede Wi-Fi',
-                }, 'user_registration')|raw }}
+                }, 'user_registration_login_uuid')|raw }}
             </p>
         {% endif %}
         {% if app.request.locale starts with 'en' %}
@@ -193,30 +193,22 @@
                 {{ 'intro_new_user'|trans({
                     '%link_text%': 'click the link below',
                     '%download_text%': 'Download and install the wifi network',
-                }, 'user_registration')|raw }}
+                }, 'user_registration_login_uuid')|raw }}
             </p>
         {% endif %}
         <a href="{{ magicURL }}" class="btn-download">
-            {{ 'download_and_install'|trans({}, 'user_registration') }}
+            {{ 'download_and_install'|trans({}, 'user_registration_login_uuid') }}
         </a>
-        {% if isLoginOnlyWithUUIDActive == constant('App\\Enum\\OperationMode::OFF').value %}
-            <p>
-                {{ 'new_user_steps.password'|trans({'%password%': password}, 'user_registration')|raw }}
-            </p>
-            <p>
-                {{ 'new_user_steps.enter_code'|trans({'%twoFaCode%': twoFaCode}, 'user_registration')|raw }}
-            </p>
-        {% endif %}
     </main>
 
     <footer class="footer" role="contentinfo">
         <p>
-            {{ 'footer.support_team'|trans({}, 'user_registration') }}
+            {{ 'footer.support_team'|trans({}, 'user_registration_login_uuid') }}
             <a href="mailto:{{ contactEmail }}">{{ contactEmail }}</a>
         </p>
         <p>
-            <strong>{{ 'footer.thank_you'|trans({}, 'user_registration') }}</strong><br/>
-            {{ 'footer.team'|trans({'%supportTeam%': supportTeam}, 'user_registration') }}
+            <strong>{{ 'footer.thank_you'|trans({}, 'user_registration_login_uuid') }}</strong><br/>
+            {{ 'footer.team'|trans({'%supportTeam%': supportTeam}, 'user_registration_login_uuid') }}
         </p>
     </footer>
 </div>

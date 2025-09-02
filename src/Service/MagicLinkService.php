@@ -33,7 +33,7 @@ readonly class MagicLinkService
 
     public function canSendLink(User $user): ?Event
     {
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
         $emailTimer = $data["TWO_FACTOR_AUTH_RESEND_INTERVAL"]["value"];
         $limitTime = new DateTime();
         $limitTime->modify('-' . $emailTimer . ' seconds');

@@ -44,7 +44,7 @@ readonly class RegistrationEmailGenerator
                     $this->parameterBag->get('app.sender_name')
                 ))
                 ->to($user->getEmail())
-                ->subject($this->translator->trans('subject_registration_details', [], 'user_registration'))
+                ->subject($this->translator->trans('subject_registration_details', [], 'user_registration_login_uuid'))
                 ->htmlTemplate('email/user_registration_login_uuid.html.twig')
                 ->context([
                     'uuid' => $user->getEmail(),
