@@ -20,11 +20,11 @@
             {{ 'welcome_back'|trans({}, 'login_landing') }}
         </p>
         <p class="text-lg">
-            {% if data.AUTH_METHOD_REGISTER_ENABLED.value == 'true' and data.AUTH_METHOD_SMS_REGISTER_ENABLED.value == 'true'%}
+            {% if data.AUTH_METHOD_REGISTER_ENABLED.value == 'true' and data.AUTH_METHOD_SMS_REGISTER_ENABLED.value == 'true' %}
                 {{ 'description'|trans({}, 'login_landing') }}
-            {% elseif data.AUTH_METHOD_REGISTER_ENABLED.value == 'false' and data.AUTH_METHOD_SMS_REGISTER_ENABLED.value == 'true'%}
+            {% elseif data.AUTH_METHOD_REGISTER_ENABLED.value == 'false' and data.AUTH_METHOD_SMS_REGISTER_ENABLED.value == 'true' %}
                 {{ 'descriptionOnlyPhone'|trans({}, 'login_landing') }}
-            {% elseif data.AUTH_METHOD_REGISTER_ENABLED.value == 'true' and data.AUTH_METHOD_SMS_REGISTER_ENABLED.value == 'false'%}
+            {% elseif data.AUTH_METHOD_REGISTER_ENABLED.value == 'true' and data.AUTH_METHOD_SMS_REGISTER_ENABLED.value == 'false' %}
                 {{ 'descriptionOnlyEmail'|trans({}, 'login_landing') }}
             {% endif %}
         </p>
