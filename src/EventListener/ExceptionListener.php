@@ -20,7 +20,7 @@ readonly class ExceptionListener
     public function __construct(
         private Environment $twig,
         private GetSettings $getSettings,
-        private readonly TranslatorInterface $translator,
+        private TranslatorInterface $translator,
     ) {
     }
 
