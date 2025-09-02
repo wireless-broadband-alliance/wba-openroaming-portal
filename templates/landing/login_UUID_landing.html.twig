@@ -20,7 +20,15 @@
 
     <div class="{{ data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\OperationMode::ON').value ? 'pt-[28px]' : 'pt-[161px]' }} leading-7">
         <p class="font-bold text-xl">{{ 'welcome_back'|trans({}, 'login_landing') }}</p>
-        <p class="text-lg">{{ 'magicLinkDescription'|trans({}, 'login_landing') }}</p>
+        <p class="text-lg">
+        {% if data.AUTH_METHOD_REGISTER_ENABLED.value == 'true' and data.AUTH_METHOD_SMS_REGISTER_ENABLED.value == 'true'%}
+           {{ 'magicLinkDescription'|trans({}, 'login_landing') }}
+        {% elseif data.AUTH_METHOD_REGISTER_ENABLED.value == 'false' and data.AUTH_METHOD_SMS_REGISTER_ENABLED.value == 'true'%}
+            {{ 'magicLinkDescriptionOnlyPhone'|trans({}, 'login_landing') }}
+        {% elseif data.AUTH_METHOD_REGISTER_ENABLED.value == 'true' and data.AUTH_METHOD_SMS_REGISTER_ENABLED.value == 'false'%}
+            {{ 'magicLinkDescriptionOnlyEmail'|trans({}, 'login_landing') }}
+        {% endif %}
+        </p>
     </div>
 
     <twig:LoginUUIDForm :loginChoiceDTO="loginChoiceDTO" :form="form">

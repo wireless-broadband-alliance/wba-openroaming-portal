@@ -20,10 +20,12 @@
             {{ 'welcome_back'|trans({}, 'login_landing') }}
         </p>
         <p class="text-lg">
-            {% if data.LOGIN_WITH_UUID_ONLY.value == constant('App\\Enum\\OperationMode::OFF').value %}
+            {% if data.AUTH_METHOD_REGISTER_ENABLED.value == 'true' and data.AUTH_METHOD_SMS_REGISTER_ENABLED.value == 'true'%}
                 {{ 'description'|trans({}, 'login_landing') }}
-            {% else %}
-                {{ 'magic_link_description'|trans({}, 'login_landing') }}
+            {% elseif data.AUTH_METHOD_REGISTER_ENABLED.value == 'false' and data.AUTH_METHOD_SMS_REGISTER_ENABLED.value == 'true'%}
+                {{ 'descriptionOnlyPhone'|trans({}, 'login_landing') }}
+            {% elseif data.AUTH_METHOD_REGISTER_ENABLED.value == 'true' and data.AUTH_METHOD_SMS_REGISTER_ENABLED.value == 'false'%}
+                {{ 'descriptionOnlyEmail'|trans({}, 'login_landing') }}
             {% endif %}
         </p>
     </div>

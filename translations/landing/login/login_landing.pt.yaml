@@ -1,9 +1,17 @@
 logoAlt: 'Logotipo do Cliente'
 welcome_back: 'Bem-vindo de volta'
 magicLinkDescription: 'Optou por fazer login via link mágico. Introduza o seu e-mail ou número de telefone para receber o link de login.'
+magicLinkDescriptionOnlyEmail: 'Optou por fazer login via link mágico. Introduza o seu e-mail para receber o link de login.'
+magicLinkDescriptionOnlyPhone: 'Optou por fazer login via link mágico. Introduza o seu número de telefone para receber o link de login.'
 description: >
-    Selecionou iniciar sessão via email e palavra-passe. Assim que iniciar sessão,
+    Selecionou iniciar sessão via email/número de telefone e palavra-passe. Assim que iniciar sessão,
     instale o perfil no seu dispositivo.
+descriptionOnlyEmail: >
+    Selecionou iniciar sessão via email e palavra-passe. Assim que iniciar sessão,
+        instale o perfil no seu dispositivo.
+descriptionOnlyPhone: >
+    Selecionou iniciar sessão via número de telefone e palavra-passe. Assim que iniciar sessão,
+        instale o perfil no seu dispositivo.
 magic_link_description: >
     Selecionou iniciar sessão via email ou número de telefone.
     Será enviado um código para confirmação da sua identidade.
