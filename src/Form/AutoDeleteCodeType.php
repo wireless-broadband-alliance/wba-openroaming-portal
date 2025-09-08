@@ -24,7 +24,7 @@ class AutoDeleteCodeType extends AbstractType
             ->add('code', TextType::class, [
                 'constraints' => [
                     new NotBlank([
-                        'message' => $this->translator->trans('enterCode', [], 'AuthType'),
+                        'message' => $this->translator->trans('enterCode', [], 'AutoDeleteType'),
                     ]),
                 ],
                 'attr' => [
@@ -36,7 +36,7 @@ class AutoDeleteCodeType extends AbstractType
                 'mapped' => false,
                 'constraints' => [
                     new IsTrue([
-                        'message' => $this->translator->trans('confirmDeletingYourAccount', [], 'AuthType'),
+                        'message' => $this->translator->trans('confirmDeletingYourAccount', [], 'AutoDeleteType'),
                     ]),
                 ],
             ]);
