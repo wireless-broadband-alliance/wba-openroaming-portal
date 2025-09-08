@@ -4,6 +4,7 @@ namespace App\Service;
 
 use App\Enum\LanguageType;
 use App\Enum\SettingName;
+use App\Enum\TextEditorName;
 use App\Repository\SettingRepository;
 use App\Repository\SettingTranslationRepository;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -182,8 +183,8 @@ readonly class GetSettings
                 SettingName::PRIVACY_POLICY->value => 'Privacy policy format',
                 SettingName::TOS_LINK->value => 'Terms and Conditions URL',
                 SettingName::PRIVACY_POLICY_LINK->value => 'Privacy policy URL',
-                'TOS_EDITOR' => 'Terms and Conditions text editor',
-                'PRIVACY_POLICY_EDITOR' => 'Privacy policy text editor',
+                TextEditorName::TOS_EDITOR->value => 'Terms and Conditions text editor',
+                TextEditorName::PRIVACY_POLICY_EDITOR->value => 'Privacy policy text editor',
                 SettingName::VALID_DOMAINS_GOOGLE_LOGIN->value => 'When this is empty, it allows all the domains to authenticate. Please only type the domains you want to be able to authenticate. Domains must be separated by ","',
                 SettingName::VALID_DOMAINS_MICROSOFT_LOGIN->value => 'When this is empty, it allows all the domains to authenticate. Please only type the domains you want to be able to authenticate. Domains must be separated by ","',
                 SettingName::PROFILES_ENCRYPTION_TYPE_IOS_ONLY->value => 'Type of encryption defined for the creation of the profiles',
@@ -269,8 +270,8 @@ readonly class GetSettings
                 SettingName::PRIVACY_POLICY->value => 'Formato da Política de Privacidade',
                 SettingName::TOS_LINK->value => 'URL dos Termos e Condições',
                 SettingName::PRIVACY_POLICY_LINK->value => 'URL da Política de Privacidade',
-                'TOS_EDITOR' => 'Editor de texto dos Termos e Condições',
-                'PRIVACY_POLICY_EDITOR' => 'Editor de texto da Política de Privacidade',
+                TextEditorName::TOS_EDITOR->value => 'Editor de texto dos Termos e Condições',
+                TextEditorName::PRIVACY_POLICY_EDITOR->value => 'Editor de texto da Política de Privacidade',
                 SettingName::VALID_DOMAINS_GOOGLE_LOGIN->value => 'Quando vazio, permite que todos os domínios se autentiquem. Introduza apenas os domínios que pretende permitir. Os dominios devem ser separados por ","',
                 SettingName::VALID_DOMAINS_MICROSOFT_LOGIN->value => 'Quando vazio, permite que todos os domínios se autentiquem. Introduza apenas os domínios que pretende permitir. Os dominios devem ser separados por ","',
                 SettingName::PROFILES_ENCRYPTION_TYPE_IOS_ONLY->value => 'Tipo de encriptação definido para criação de perfis',

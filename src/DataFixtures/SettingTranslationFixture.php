@@ -5,6 +5,7 @@ namespace App\DataFixtures;
 use App\Entity\Setting;
 use App\Entity\SettingTranslation;
 use App\Enum\LanguageType;
+use App\Enum\SettingName;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 
@@ -16,7 +17,7 @@ class SettingTranslationFixture extends Fixture
         // phpcs:disable Generic.Files.LineLength.TooLong
         $settingsToTranslate = [
             [
-                'name' => 'WELCOME_TEXT',
+                'name' => SettingName::WELCOME_TEXT->value,
                 'value' => 'Welcome to OpenRoaming Provisioning Service',
                 'translations' => [
                     LanguageType::EN->value => 'Welcome to OpenRoaming Provisioning Service',
@@ -24,7 +25,7 @@ class SettingTranslationFixture extends Fixture
                 ],
             ],
             [
-                'name' => 'WELCOME_DESCRIPTION',
+                'name' => SettingName::WELCOME_DESCRIPTION->value,
                 'value' => 'This portal allows you to download and install an OpenRoaming profile tailored to your device, allowing you to connect automatically to OpenRoaming Wi-Fi networks across the world.',
                 'translations' => [
                     LanguageType::EN->value => 'This portal allows you to download and install an OpenRoaming profile tailored to your device, allowing you to connect automatically to OpenRoaming Wi-Fi networks across the world.',
@@ -32,7 +33,7 @@ class SettingTranslationFixture extends Fixture
                 ],
             ],
             [
-                'name' => 'ADDITIONAL_LABEL',
+                'name' => SettingName::ADDITIONAL_LABEL->value,
                 'value' => 'This label is used to add extra content if necessary',
                 'translations' => [
                     LanguageType::EN->value => 'This label is used to add extra content if necessary',
@@ -40,7 +41,7 @@ class SettingTranslationFixture extends Fixture
                 ],
             ],
             [
-                'name' => 'AUTH_METHOD_SAML_LABEL',
+                'name' => SettingName::AUTH_METHOD_SAML_LABEL->value,
                 'value' => 'Login with SAML',
                 'translations' => [
                     LanguageType::EN->value => 'Login with SAML',
@@ -48,7 +49,7 @@ class SettingTranslationFixture extends Fixture
                 ],
             ],
             [
-                'name' => 'AUTH_METHOD_SAML_DESCRIPTION',
+                'name' => SettingName::AUTH_METHOD_SAML_DESCRIPTION->value,
                 'value' => 'Authenticate with your SAML account',
                 'translations' => [
                     LanguageType::EN->value => 'Authenticate with your SAML account',
@@ -56,7 +57,7 @@ class SettingTranslationFixture extends Fixture
                 ],
             ],
             [
-                'name' => 'AUTH_METHOD_GOOGLE_LOGIN_LABEL',
+                'name' => SettingName::AUTH_METHOD_GOOGLE_LOGIN_LABEL->value,
                 'value' => 'Login with Google',
                 'translations' => [
                     LanguageType::EN->value => 'Login with Google',
@@ -64,7 +65,7 @@ class SettingTranslationFixture extends Fixture
                 ],
             ],
             [
-                'name' => 'AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION',
+                'name' => SettingName::AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION->value,
                 'value' => 'Authenticate with your Google account',
                 'translations' => [
                     LanguageType::EN->value => 'Authenticate with your Google account',
@@ -72,7 +73,7 @@ class SettingTranslationFixture extends Fixture
                 ],
             ],
             [
-                'name' => 'AUTH_METHOD_MICROSOFT_LOGIN_LABEL',
+                'name' => SettingName::AUTH_METHOD_MICROSOFT_LOGIN_LABEL->value,
                 'value' => 'Login with Microsoft',
                 'translations' => [
                     LanguageType::EN->value => 'Login with Microsoft',
@@ -80,7 +81,7 @@ class SettingTranslationFixture extends Fixture
                 ],
             ],
             [
-                'name' => 'AUTH_METHOD_MICROSOFT_LOGIN_DESCRIPTION',
+                'name' => SettingName::AUTH_METHOD_MICROSOFT_LOGIN_DESCRIPTION->value,
                 'value' => 'Authenticate with your Microsoft account',
                 'translations' => [
                     LanguageType::EN->value => 'Authenticate with your Microsoft account',
@@ -88,7 +89,7 @@ class SettingTranslationFixture extends Fixture
                 ],
             ],
             [
-                'name' => 'AUTH_METHOD_REGISTER_LABEL',
+                'name' => SettingName::AUTH_METHOD_REGISTER_LABEL->value,
                 'value' => 'Create Account with Email',
                 'translations' => [
                     LanguageType::EN->value => 'Create Account with Email',
@@ -96,7 +97,7 @@ class SettingTranslationFixture extends Fixture
                 ],
             ],
             [
-                'name' => 'AUTH_METHOD_REGISTER_DESCRIPTION',
+                'name' => SettingName::AUTH_METHOD_REGISTER_DESCRIPTION->value,
                 'value' => "Don't have an account? Create one",
                 'translations' => [
                     LanguageType::EN->value => "Don't have an account? Create one",
@@ -104,7 +105,7 @@ class SettingTranslationFixture extends Fixture
                 ],
             ],
             [
-                'name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_LABEL',
+                'name' => SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_LABEL->value,
                 'value' => 'Login Here',
                 'translations' => [
                     LanguageType::EN->value => 'Login Here',
@@ -112,7 +113,7 @@ class SettingTranslationFixture extends Fixture
                 ],
             ],
             [
-                'name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION',
+                'name' => SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION->value,
                 'value' => 'Already have an account? Login then',
                 'translations' => [
                     LanguageType::EN->value => 'Already have an account? Login then',
@@ -120,7 +121,7 @@ class SettingTranslationFixture extends Fixture
                 ],
             ],
             [
-                'name' => 'AUTH_METHOD_SMS_REGISTER_LABEL',
+                'name' => SettingName::AUTH_METHOD_SMS_REGISTER_LABEL->value,
                 'value' => 'Create Account with Phone Number',
                 'translations' => [
                     LanguageType::EN->value => 'Create Account with Phone Number',
@@ -128,7 +129,7 @@ class SettingTranslationFixture extends Fixture
                 ],
             ],
             [
-                'name' => 'AUTH_METHOD_SMS_REGISTER_DESCRIPTION',
+                'name' => SettingName::AUTH_METHOD_SMS_REGISTER_DESCRIPTION->value,
                 'value' => "Don't have an account? Create one",
                 'translations' => [
                     LanguageType::EN->value => "Don't have an account? Create one",
