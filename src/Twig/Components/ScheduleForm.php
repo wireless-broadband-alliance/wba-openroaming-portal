@@ -5,6 +5,7 @@ namespace App\Twig\Components;
 use App\DTO\ScheduleDTO;
 use App\DTO\ScheduleSettingDTO;
 use App\Enum\OperationMode;
+use App\Enum\SettingName;
 use App\Form\ScheduleType;
 use App\Repository\SettingRepository;
 use App\Service\CronExpressionHelperService;
@@ -48,7 +49,7 @@ final class ScheduleForm extends AbstractController
         private readonly CronExpressionHelperService $cronHelper,
         private readonly SchedulerService $schedulerService
     ) {
-        $cronAdvanceStatus = $this->settingRepository->findOneBy(["name" => "CRON_ADVANCED_STATUS"]);
+        $cronAdvanceStatus = $this->settingRepository->findOneBy(["name" => SettingName::CRON_ADVANCED_STATUS->value]);
         if (!is_null($cronAdvanceStatus)) {
             $this->default_use_advanced_mode = $cronAdvanceStatus->getValue() === OperationMode::ON->value;
         }
@@ -87,7 +88,7 @@ final class ScheduleForm extends AbstractController
             // Switching to simple mode → recreate DTOs from cron expression values
             $this->scheduleDTO->delete_unconfirmed_users_cron =
                 new ScheduleSettingDTO(
-                    'DELETE_UNCONFIRMED_USERS_CRON',
+                    SettingName::DELETE_UNCONFIRMED_USERS_CRON->value,
                     $this->settingRepository,
                     $this->cronHelper,
                     $this->scheduleDTO->delete_unconfirmed_users_cron->advanced
@@ -95,7 +96,7 @@ final class ScheduleForm extends AbstractController
 
             $this->scheduleDTO->users_when_profile_expires_cron =
                 new ScheduleSettingDTO(
-                    'USERS_WHEN_PROFILE_EXPIRES_CRON',
+                    SettingName::USERS_WHEN_PROFILE_EXPIRES_CRON->value,
                     $this->settingRepository,
                     $this->cronHelper,
                     $this->scheduleDTO->users_when_profile_expires_cron->advanced
@@ -103,7 +104,7 @@ final class ScheduleForm extends AbstractController
 
             $this->scheduleDTO->ldap_sync_cron =
                 new ScheduleSettingDTO(
-                    'LDAP_SYNC_CRON',
+                    SettingName::LDAP_SYNC_CRON->value,
                     $this->settingRepository,
                     $this->cronHelper,
                     $this->scheduleDTO->ldap_sync_cron->advanced
@@ -111,7 +112,7 @@ final class ScheduleForm extends AbstractController
 
             $this->scheduleDTO->freeradius_last_connection_cron =
                 new ScheduleSettingDTO(
-                    'FREERADIUS_LAST_CONNECTION_CRON',
+                    SettingName::FREERADIUS_LAST_CONNECTION_CRON->value,
                     $this->settingRepository,
                     $this->cronHelper,
                     $this->scheduleDTO->freeradius_last_connection_cron->advanced
