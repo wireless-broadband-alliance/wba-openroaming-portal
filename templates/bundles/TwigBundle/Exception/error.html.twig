@@ -13,15 +13,15 @@
     <div class="relative min-h-screen px-4 sm:px-6 lg:px-8 bg-center bg-cover"
          style="background-image: url('{{ bgUrl }}');">
         <div class="relative w-full h-full p-8 xl:pl-[130px] xl:pr-[150px] xl:pt-[210px] bg-center bg-cover z-10">
-            {% block language %}
-                {{ include('shared/_select_language.html.twig', {
-                    currentLocale: app.request.locale,
-                    routeName: 'change_language',
-                    warningMessage: false,
-                }) }}
-            {% endblock %}
-            <div class="bg-white rounded-2xl shadow-xl max-w-2xl w-full p-10 text-center mx-auto">
 
+            <div class="bg-white rounded-2xl shadow-xl max-w-2xl w-full p-10 text-center mx-auto">
+                {% block language %}
+                    {{ include('shared/_select_language.html.twig', {
+                        currentLocale: app.request.locale,
+                        routeName: 'change_language',
+                        warningMessage: false,
+                    }) }}
+                {% endblock %}
                 {# Icon on top, bigger and centered #}
                 <div class="flex justify-center mb-4">
                     <div class="flex items-center justify-center w-48 h-24 rounded-full">
