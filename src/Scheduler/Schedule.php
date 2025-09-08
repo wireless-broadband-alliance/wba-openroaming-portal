@@ -2,6 +2,7 @@
 
 namespace App\Scheduler;
 
+use App\Enum\SettingName;
 use App\Repository\SettingRepository;
 use RuntimeException;
 use Symfony\Component\Console\Messenger\RunCommandMessage;
@@ -29,7 +30,7 @@ readonly class Schedule implements ScheduleProviderInterface
             // By default, daily at 00:00
             ->add(
                 RecurringMessage::cron(
-                    $this->getRequiredSetting('DELETE_UNCONFIRMED_USERS_CRON'),
+                    $this->getRequiredSetting(SettingName::DELETE_UNCONFIRMED_USERS_CRON->value),
                     new RunCommandMessage('clear:deleteUnconfirmedUsers')
                 )
             )
@@ -37,7 +38,7 @@ readonly class Schedule implements ScheduleProviderInterface
             // By default, daily at 01:00
             ->add(
                 RecurringMessage::cron(
-                    $this->getRequiredSetting('USERS_WHEN_PROFILE_EXPIRES_CRON'),
+                    $this->getRequiredSetting(SettingName::USERS_WHEN_PROFILE_EXPIRES_CRON->value),
                     new RunCommandMessage('notify:usersWhenProfileExpires')
                 )
             )
@@ -45,14 +46,14 @@ readonly class Schedule implements ScheduleProviderInterface
             // By default, daily at 02:00
             ->add(
                 RecurringMessage::cron(
-                    $this->getRequiredSetting('LDAP_SYNC_CRON'),
+                    $this->getRequiredSetting(SettingName::LDAP_SYNC_CRON->value),
                     new RunCommandMessage('ldap:sync')
                 )
             )
 
             ->add(
                 RecurringMessage::cron(
-                    $this->getRequiredSetting('FREERADIUS_LAST_CONNECTION_CRON'),
+                    $this->getRequiredSetting(SettingName::FREERADIUS_LAST_CONNECTION_CRON->value),
                     new RunCommandMessage('backup:freeradiusLastConnection')
                 )
             );
