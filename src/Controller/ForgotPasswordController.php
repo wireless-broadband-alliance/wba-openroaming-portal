@@ -308,7 +308,7 @@ class ForgotPasswordController extends AbstractController
 
                         $message = "If you requested a password reset for your OpenRoaming account, " .
                             "use this code to proceed: {$user->getTwoFAcode()}";
-                        $this->sendSMS->sendSmsNoValidation($recipient, $message);
+                        $this->sendSMS->sendSmsNoValidation($user, $message);
 
                         $attemptsLeft = 3 - $verificationAttempts;
                         $message = "We have sent you a message to: {$user->getUuid()}. 

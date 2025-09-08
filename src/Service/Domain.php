@@ -6,7 +6,7 @@ class Domain
 {
     // Validate domain names and check if they resolve to an IP address
     // Validation comes from here: https://www.php.net/manual/en/function.dns-get-record.php
-    public function isValidDomain($domain)
+    public function isValidDomain($domain): bool
     {
         if (!filter_var($domain, FILTER_VALIDATE_DOMAIN, FILTER_FLAG_HOSTNAME)) {
             return false;

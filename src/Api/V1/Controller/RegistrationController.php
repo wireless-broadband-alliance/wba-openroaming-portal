@@ -9,6 +9,7 @@ use App\Entity\UserExternalAuth;
 use App\Enum\AnalyticalEventType;
 use App\Enum\OperationMode;
 use App\Enum\PlatformMode;
+use App\Enum\SMSResponse;
 use App\Enum\UserProvider;
 use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
@@ -521,23 +522,23 @@ class RegistrationController extends AbstractController
             $message = "Your account password is: "
                 . $data['password'] . "%0A" . "Verification code is: "
                 . $user->getTwoFAcode();
-            $result = $this->sendSMSService->sendSms($user->getPhoneNumber(), $message);
+            $result = $this->sendSMSService->sendSmsNoValidation($user, $message);
 
-            if ($result) {
-                return new BaseResponse(
-                    200,
-                    [
-                        'message' =>
-                            'SMS User Account Registered Successfully. A verification code has been sent to your phone.'
-                    ]
-                )->toResponse();
+            if ($result === SMSResponse::SMS_SUCCESS_LINK->value) {
+                $messageAPI = 'SMS User Account Registered Successfully. A link has been sent to your phone.';
+            } else {
+                $messageAPI = 'SMS User Account Registered Successfully. 
+                A verification code has been sent to your phone.';
             }
+            return new BaseResponse(
+                200,
+                [
+                    'message' => $messageAPI,
+                ]
+            )->toResponse();
         } catch (\RuntimeException) {
             return new BaseResponse(500, null, 'Failed to send SMS')->toResponse(); // Internal Server Error
         }
-
-        // Return fallback response
-        return new BaseResponse(500, null, 'User registered but SMS could not be sent.')->toResponse();
     }
 
 
@@ -728,7 +729,7 @@ class RegistrationController extends AbstractController
                         $user->getTwoFAcode()
                     );
 
-                    $result = $this->sendSMSService->sendSms($user->getPhoneNumber(), $message);
+                    $result = $this->sendSMSService->sendSmsNoValidation($user, $message);
 
                     // Defines the Event to the table
                     $eventMetadata = [
@@ -744,7 +745,7 @@ class RegistrationController extends AbstractController
                         $eventMetadata
                     );
 
-                    if ($result) {
+                    if ($result !== '' && $result !== '0') {
                         return new BaseResponse(200, [
                             'success' => sprintf(
                                 'If the phone number exists,' .

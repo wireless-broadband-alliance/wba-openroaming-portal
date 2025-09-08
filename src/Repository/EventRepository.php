@@ -98,6 +98,23 @@ class EventRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    public function findLastLinkSent(User $user, \DateTime $time): ?Event
+    {
+        return $this->createQueryBuilder('e')
+            ->andWhere('e.user = :user')
+            ->andWhere('e.event_name IN (:event_names)')
+            ->andWhere('e.event_datetime >= :datetime')
+            ->setParameter('user', $user)
+            ->setParameter('event_names', [
+                AnalyticalEventType::LOGIN_WITH_UUID_ONLY_LINK->value,
+                AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE->value
+            ])
+            ->setParameter('datetime', $time)
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
     /**
      * Find the latest '$eventLog' from AnalyticalEventType Enum for the given user.
      *

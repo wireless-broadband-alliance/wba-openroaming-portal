@@ -23,8 +23,10 @@ class ResetPasswordType extends AbstractType
                 'constraints' => [
                     new Length([
                         'min' => 7,
-                        'minMessage' => ' This field cannot be shorter than {{ limit }} characters',
-                    ])
+                        'max' => 128,
+                        'minMessage' => 'This field cannot be shorter than {{ limit }} characters',
+                        'maxMessage' => 'This field cannot be longer than {{ limit }} characters',
+                    ]),
                 ],
             ])
             ->add('confirmPassword', PasswordType::class, [

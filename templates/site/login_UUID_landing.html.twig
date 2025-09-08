@@ -20,52 +20,48 @@
 
     <div class="{{ data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\OperationMode::ON').value ? 'pt-[28px]' : 'pt-[161px]' }} leading-7">
         <p class="font-bold text-xl">Welcome back</p>
-        <p class="text-lg">You have chosen to log in with your current credentials. Once you are logged in, please
-            install the
-            profile onto
-            your device.</p>
-        <p class="text-lg">
-            Please select your login method and enter the required credentials.
-        </p>
+        <p class="text-lg">You have selected to login via magic link.
+            Please enter your email or phone number to receive the login link</p>
     </div>
 
-    <twig:LoginForm :loginChoiceDTO="loginChoiceDTO" :form="form">
+    <twig:LoginUUIDForm :loginChoiceDTO="loginChoiceDTO" :form="form">
         {{ form_start(form) }}
-
         {% if form.loginMethod is defined %}
             {# Login Method Toggle #}
             <div class="flex justify-center mt-8">
                 <div class="flex bg-gray-300 rounded-lg overflow-hidden w-full max-w-md p-1">
+
                     {# Email Option #}
                     <label
                             class="cursor-pointer flex-1 text-center px-4 py-2 transition-colors duration-200 rounded-md
-                   {{ loginChoiceDTO.loginMethod == constant('App\\Enum\\UserProvider::EMAIL').value ? 'bg-white text-black font-semibold shadow-md' : 'text-gray-700' }}"
+                {{ form.loginMethod.vars.value == constant('App\\Enum\\UserProvider::EMAIL').value ? 'bg-white text-black font-semibold shadow-md' : 'text-gray-700' }}"
                     >
                         <input type="radio"
                                name="{{ form.loginMethod.vars.full_name }}"
                                value="{{ constant('App\\Enum\\UserProvider::EMAIL').value }}"
                                class="hidden"
-                               wire:model="loginMethod"
-                               wire:click="changeLoginMethod('{{ constant('App\\Enum\\UserProvider::EMAIL').value }}')"
-                        />
+                               {% if form.loginMethod.vars.value == constant('App\\Enum\\UserProvider::EMAIL').value %}checked{% endif %} />
                         Email
                     </label>
 
                     {# Phone Number Option #}
                     <label
                             class="cursor-pointer flex-1 text-center px-4 py-2 transition-colors duration-200 rounded-md
-                   {{ loginChoiceDTO.loginMethod == constant('App\\Enum\\UserProvider::PHONE_NUMBER').value ? 'bg-white text-black font-semibold shadow-md' : 'text-gray-700' }}"
+                {{ form.loginMethod.vars.value == constant('App\\Enum\\UserProvider::PHONE_NUMBER').value ? 'bg-white text-black font-semibold shadow-md' : 'text-gray-700' }}"
                     >
                         <input type="radio"
                                name="{{ form.loginMethod.vars.full_name }}"
                                value="{{ constant('App\\Enum\\UserProvider::PHONE_NUMBER').value }}"
                                class="hidden"
-                               wire:model="loginMethod"
-                               wire:click="changeLoginMethod('{{ constant('App\\Enum\\UserProvider::EMAIL').value }}')"
-                        />
+                               {% if form.loginMethod.vars.value == constant('App\\Enum\\UserProvider::PHONE_NUMBER').value %}checked{% endif %} />
                         Phone Number
                     </label>
                 </div>
+            </div>
+
+            {# Show validation error if needed #}
+            <div class="text-red-500 mt-2 text-center">
+                {{ form_errors(form.loginMethod) }}
             </div>
         {% endif %}
 
@@ -109,16 +105,9 @@
             </div>
         {% endif %}
 
-        {# Password Field #}
-        {% if form.password is defined %}
-            <div class="relative mt-[32px]">
-                {{ form_label(form.password, 'Password', {label_attr: {class: 'form-label'}}) }}
-                {{ form_widget(form.password, {attr: {class: 'form-widget', placeholder: 'Enter your password'}}) }}
-            </div>
-            <div class="text-red-500 m-2">
-                {{ form_errors(form.password) }}
-            </div>
-        {% endif %}
+        <div class="ml-3 mt-5 hidden">
+            {{ form_row(form.formID) }}
+        </div>
 
         {# Turnstile Checker #}
         {% if form.security is defined %}
@@ -131,51 +120,12 @@
             </div>
         {% endif %}
 
-        <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
         <div class="my-[32px] flex justify-center gap-4">
-            <button type="submit" class="w-[220px] btn-primary">Log in</button>
+            <button type="submit" class="w-[220px] btn-primary">Send Link</button>
             <a href="{{ path('app_landing') }}" class="w-[220px] btn-secondary">Choose Another</a>
         </div>
 
+        {{ form_row(form._token) }}
         {{ form_end(form, {render_rest: false}) }}
-    </twig:LoginForm>
-
-    {# Divider & Links #}
-    <div class="my-[25px] divider"></div>
-    {% if data.PLATFORM_MODE.value != constant('App\\Enum\\PlatformMode::DEMO').value %}
-
-        {% if data.EMAIL_REGISTER_ENABLED.value or data.AUTH_METHOD_SMS_REGISTER_ENABLED.value %}
-            <p class="mt-2 text-sm">Did you forget your password? Get a new one for your
-
-            {% if data.EMAIL_REGISTER_ENABLED.value %}
-                <a href="{{ path('app_site_forgot_password_email') }}" class="font-semibold text-primary underline">email</a>
-            {% endif %}
-
-            {% if data.EMAIL_REGISTER_ENABLED.value and data.AUTH_METHOD_SMS_REGISTER_ENABLED.value %}or{% endif %}
-
-            {% if data.AUTH_METHOD_SMS_REGISTER_ENABLED.value %}
-                <a href="{{ path('app_site_forgot_password_sms') }}"
-                   class="font-semibold text-primary underline">phone number</a>.
-            {% endif %}
-
-            {% if data.EMAIL_REGISTER_ENABLED.value or data.AUTH_METHOD_SMS_REGISTER_ENABLED.value %}
-
-                <p class="mt-2 text-sm">You don't have an account? Register with
-
-                    {% if data.EMAIL_REGISTER_ENABLED.value %}
-                        <a href="{{ path('app_register') }}"
-                           class="font-semibold text-primary underline">email</a>
-                    {% endif %}
-
-                    {% if data.EMAIL_REGISTER_ENABLED.value and data.AUTH_METHOD_SMS_REGISTER_ENABLED.value %}or{% endif %}
-
-                    {% if data.AUTH_METHOD_SMS_REGISTER_ENABLED.value %}
-                        <a href="{{ path('app_register_sms') }}"
-                           class="font-semibold text-primary underline">phone number</a>.
-                    {% endif %}
-                </p>
-            {% endif %}
-        {% endif %}
-    {% endif %}
-
+    </twig:LoginUUIDForm>
 {% endblock %}
