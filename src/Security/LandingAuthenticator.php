@@ -6,6 +6,7 @@ use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Enum\FirewallType;
 use App\Enum\OperationMode;
+use App\Enum\SettingName;
 use App\Enum\UserProvider;
 use App\Enum\UserTwoFactorAuthenticationStatus;
 use App\Repository\SettingRepository;
@@ -105,7 +106,7 @@ class LandingAuthenticator extends AbstractLoginFormAuthenticator
 
         // Turnstile CAPTCHA check
         $turnstileResponse = $request->request->get('cf-turnstile-response');
-        $turnstileSetting = $this->settingRepository->findOneBy(['name' => 'TURNSTILE_CHECKER']);
+        $turnstileSetting = $this->settingRepository->findOneBy(['name' => SettingName::TURNSTILE_CHECKER->value]);
         $isTurnstileEnabled = $turnstileSetting && $turnstileSetting->getValue() === OperationMode::ON->value;
         if (
             $isTurnstileEnabled && (empty($turnstileResponse) || !$this->turnstileHttpClient->verifyResponse(
@@ -156,7 +157,7 @@ class LandingAuthenticator extends AbstractLoginFormAuthenticator
             return new RedirectResponse($this->urlGenerator->generate('app_landing'));
         }
 
-        $loginModeSetting = $this->settingRepository->findOneBy(['name' => 'LOGIN_WITH_UUID_ONLY']);
+        $loginModeSetting = $this->settingRepository->findOneBy(['name' => SettingName::LOGIN_WITH_UUID_ONLY->value]);
         $mode = OperationMode::from($loginModeSetting?->getValue() ?? OperationMode::OFF->value);
 
         $eventType = match ($mode) {
@@ -165,7 +166,7 @@ class LandingAuthenticator extends AbstractLoginFormAuthenticator
         };
 
         if (
-            $this->settingRepository->findOneBy(['name' => 'USER_VERIFICATION'])->getValue() ===
+            $this->settingRepository->findOneBy(['name' => SettingName::USER_VERIFICATION->value])->getValue() ===
             OperationMode::ON->value
         ) {
             if ($this->twoFAService->canValidationCode($user, $eventType->value)) {

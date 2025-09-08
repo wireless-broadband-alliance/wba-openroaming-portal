@@ -5,6 +5,7 @@ namespace App\Security;
 use App\Entity\User;
 use App\Enum\FirewallType;
 use App\Enum\OperationMode;
+use App\Enum\SettingName;
 use App\Enum\TwoFAType;
 use App\Enum\UserProvider;
 use App\Enum\UserTwoFactorAuthenticationStatus;
@@ -97,7 +98,7 @@ class DashboardAuthenticator extends AbstractLoginFormAuthenticator
 
         // CAPTCHA (Turnstile) check
         $turnstileResponse = $request->request->get('cf-turnstile-response');
-        $turnstileSetting = $this->settingRepository->findOneBy(['name' => 'TURNSTILE_CHECKER']);
+        $turnstileSetting = $this->settingRepository->findOneBy(['name' => SettingName::TURNSTILE_CHECKER->value]);
         $isTurnstileEnabled = $turnstileSetting && $turnstileSetting->getValue() === OperationMode::ON->value;
 
         if (
@@ -158,7 +159,7 @@ class DashboardAuthenticator extends AbstractLoginFormAuthenticator
             }
 
             $twoFAPlatformStatus = $this->settingRepository->findOneBy([
-                'name' => 'TWO_FACTOR_AUTH_STATUS'
+                'name' => SettingName::TWO_FACTOR_AUTH_STATUS->value
             ])->getValue();
 
             $verification = $user->isVerified();
