@@ -3,6 +3,7 @@
 namespace App\Service;
 
 use App\Entity\User;
+use App\Enum\SettingName;
 use App\Enum\SMSResponse;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
@@ -32,10 +33,10 @@ readonly class SendSMS
         $apiUrl = $this->parameterBag->get('app.budget_api_url');
 
         // Fetch SMS credentials from the database
-        $username = $this->settingRepository->findOneBy(['name' => 'SMS_USERNAME'])->getValue();
-        $userId = $this->settingRepository->findOneBy(['name' => 'SMS_USER_ID'])->getValue();
-        $handle = $this->settingRepository->findOneBy(['name' => 'SMS_HANDLE'])->getValue();
-        $from = $this->settingRepository->findOneBy(['name' => 'SMS_FROM'])->getValue();
+        $username = $this->settingRepository->findOneBy(['name' => SettingName::SMS_USERNAME->value])->getValue();
+        $userId = $this->settingRepository->findOneBy(['name' => SettingName::SMS_USER_ID->value])->getValue();
+        $handle = $this->settingRepository->findOneBy(['name' => SettingName::SMS_HANDLE->value])->getValue();
+        $from = $this->settingRepository->findOneBy(['name' => SettingName::SMS_FROM->value])->getValue();
 
         // Check if the user can regenerate the SMS code
         $client = HttpClient::create();
