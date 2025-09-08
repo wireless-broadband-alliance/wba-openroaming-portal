@@ -3,6 +3,7 @@
 namespace App\Form;
 
 use App\DTO\UserUpdateDTO;
+use App\Enum\SettingName;
 use App\Repository\SettingRepository;
 use libphonenumber\PhoneNumberFormat;
 use Misd\PhoneNumberBundle\Form\Type\PhoneNumberType;
@@ -25,7 +26,9 @@ class UserUpdateType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         // Fetch the setting from the database
-        $regionsSetting = $this->settingRepository->findOneBy(['name' => 'DEFAULT_REGION_PHONE_INPUTS']);
+        $regionsSetting = $this->settingRepository->findOneBy(
+            ['name' => SettingName::DEFAULT_REGION_PHONE_INPUTS->value]
+        );
 
         // If the setting exists, explode and trim; otherwise use a default
         $regionInputs = $regionsSetting && $regionsSetting->getValue()
