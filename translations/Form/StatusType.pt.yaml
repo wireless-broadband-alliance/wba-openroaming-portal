@@ -1,0 +1,6 @@
+selectOption: 'Por favor, seleciona uma opção'
+fieldCannotBeLongerThan: 'Este campo não pode ter mais de {{ limit }} caracteres'
+timerShouldNotBeLessThan: 'O temporizador nunca deve ser inferior a 0 para a autoeliminação de utilizadores.'
+timerValueRequired: 'O valor do temporizador é obrigatório. Por favor, insere um temporizador válido.'
+timerShouldNotBeLessThanProfileNotification: 'O temporizador nunca deve ser inferior a 0 para a notificação de perfil do utilizador.'
+PleaseSetTimer: 'Por favor, certifica-te de configurar um temporizador.'

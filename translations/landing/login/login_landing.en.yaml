@@ -1,0 +1,45 @@
+logoAlt: 'Customer Logo'
+welcome_back: 'Welcome back'
+magicLinkDescription: 'You have selected to login via magic link. Please enter your email or phone number to receive the login link'
+magicLinkDescriptionOnlyEmail: 'You have selected to login via magic link. Please enter your email to receive the login link'
+magicLinkDescriptionOnlyPhone: 'You have selected to login via magic link. Please enter your phone number to receive the login link'
+description: >
+    You have selected to login via email/phone number and password. Once you are logged in, 
+    please install the profile onto your device.
+descriptionOnlyEmail: >
+    You have selected to login via email and password. Once you are logged in, 
+    please install the profile onto your device.
+descriptionOnlyPhone: >
+    You have selected to login via phone number and password. Once you are logged in, 
+    please install the profile onto your device.
+magic_link_description: >
+    You have selected to login via email or phone number. 
+    An code has been sent to you to confirm your identity.
+magic_link_login_description: >
+    The identity confirmation code has been sent to your authentication method.
+    Enter the code to confirm your identity.
+form:
+    email_or_phone: 'Email or Phone Number'
+    email: 'Email'
+    phone_number: 'Phone Number'
+    enter_placeholder: 'Enter your %label%'
+    enter_email: 'Enter your email'
+    enter_phone: 'Enter your Phone Number'
+    enter_placeholder_both_methods: 'Enter your Email or Phone Number'
+    enter_code: 'Enter your code'
+    password: 'Password'
+    password_placeholder: 'Enter your password'
+btn:
+    sendLink: 'Send Link'
+    login: 'Log in'
+    choose_another: 'Choose Another'
+    send_code: 'Send Code'
+    resend: 'Resend code'
+    verifyCode: 'Verify code'
+forgot_password: 'Did you forget your password? Get a new one for your'
+forgot_password_email: 'email'
+forgot_password_phone: 'phone number'
+or: 'or'
+no_account_register: 'You don''t have an account? Register with'
+register_email: 'email'
+register_phone: 'phone number'

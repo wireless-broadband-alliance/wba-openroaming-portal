@@ -1,0 +1,45 @@
+logoAlt: 'Logotipo do Cliente'
+welcome_back: 'Bem-vindo de volta'
+magicLinkDescription: 'Optou por fazer login via link mágico. Introduza o seu e-mail ou número de telefone para receber o link de login.'
+magicLinkDescriptionOnlyEmail: 'Optou por fazer login via link mágico. Introduza o seu e-mail para receber o link de login.'
+magicLinkDescriptionOnlyPhone: 'Optou por fazer login via link mágico. Introduza o seu número de telefone para receber o link de login.'
+description: >
+    Selecionou iniciar sessão via email/número de telefone e palavra-passe. Assim que iniciar sessão,
+    instale o perfil no seu dispositivo.
+descriptionOnlyEmail: >
+    Selecionou iniciar sessão via email e palavra-passe. Assim que iniciar sessão,
+        instale o perfil no seu dispositivo.
+descriptionOnlyPhone: >
+    Selecionou iniciar sessão via número de telefone e palavra-passe. Assim que iniciar sessão,
+        instale o perfil no seu dispositivo.
+magic_link_description: >
+    Selecionou iniciar sessão via email ou número de telefone.
+    Será enviado um código para confirmação da sua identidade.
+magic_link_login_description: >
+    O código de confirmação de identidade foi enviado para o seu método de autenticação.
+    Insira o código para confirmar a sua identidade.
+form:
+    email_or_phone: 'Email ou Número de Telefone'
+    email: 'Email'
+    phone_number: 'Número de Telefone'
+    enter_placeholder: 'Introduza o seu %label%'
+    enter_email: 'Introduza o seu email'
+    enter_phone: 'Introduza o seu Número de Telefone'
+    enter_placeholder_both_methods: 'Introduza o seu Email ou Número de Telefone'
+    enter_code: 'Introduza o seu código'
+    password: 'Palavra-passe'
+    password_placeholder: 'Introduza a sua palavra-passe'
+btn:
+    sendLink: 'Enviar Link'
+    login: 'Iniciar sessão'
+    choose_another: 'Escolher Outra'
+    send_code: 'Enviar Código'
+    resend: 'Reenviar código'
+    verifyCode: 'Verificar código'
+forgot_password: 'Esqueceu-se da sua palavra-passe? Obtenha uma nova para o seu'
+forgot_password_email: 'email'
+forgot_password_phone: 'número de telefone'
+or: 'ou'
+no_account_register: 'Não tem uma conta? Registar-se com'
+register_email: 'email'
+register_phone: 'número de telefone'

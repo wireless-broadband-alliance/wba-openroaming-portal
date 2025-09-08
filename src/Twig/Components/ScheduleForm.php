@@ -38,6 +38,9 @@ final class ScheduleForm extends AbstractController
     public bool|null $ldapCronWarning = null;
 
     #[LiveProp]
+    public bool|null $freeradiusLastConnectionWarning = null;
+
+    #[LiveProp]
     public bool|null $default_use_advanced_mode = false;
 
     public function __construct(
@@ -104,6 +107,14 @@ final class ScheduleForm extends AbstractController
                     $this->settingRepository,
                     $this->cronHelper,
                     $this->scheduleDTO->ldap_sync_cron->advanced
+                );
+
+            $this->scheduleDTO->freeradius_last_connection_cron =
+                new ScheduleSettingDTO(
+                    'FREERADIUS_LAST_CONNECTION_CRON',
+                    $this->settingRepository,
+                    $this->cronHelper,
+                    $this->scheduleDTO->freeradius_last_connection_cron->advanced
                 );
         }
 

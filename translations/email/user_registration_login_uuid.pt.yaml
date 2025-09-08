@@ -1,0 +1,17 @@
+subject_registration_details: 'Os seus detalhes de autenticação OpenRoaming'
+title_welcome: 'Abra a porta ao OpenRoaming!'
+header_welcome: 'Bem-vindo ao Portal de Aprovisionamento OpenRoaming!'
+intro_new_user: >
+    Para utilizar a sua conta no Portal OpenRoaming, <strong style='color: #0B1A58;'>%link_text%</strong>. 
+    <strong>%download_text%</strong> para configurar o seu dispositivo.
+
+new_user_steps:
+    confirm_account: 'Clique <a href="%confirmLink%" style="font-weight: 700; color: #7BBA29; text-decoration: underline;">aqui</a> para autenticar a sua conta.'
+    download_profile: "Depois de autenticar, não se esqueça de clicar em <strong>“Transferir e Instalar Perfil”</strong> no portal para concluir a configuração do seu dispositivo."
+
+download_and_install: 'Transferir e Instalar'
+
+footer:
+    support_team: 'Equipa de suporte:'
+    thank_you: 'Obrigado'
+    team: 'A Equipa %supportTeam%'

@@ -1,0 +1,87 @@
+{# CRON WARNING #}
+<div class="my-2 mr-2 p-2 z-0 text-base font-semibold w-full">
+    <div class="flex bg-infoBgColor/50 rounded-lg p-4 text-xs md:text-sm text-infoTextColor" role="alert">
+        <twig:ux:icon name="wba:info" class="w-10 md:w-5 h-10 md:h-5 inline mr-3" fill="currentColor"/>
+        <span class="font-medium">
+                {{ 'selectMulti'|trans({}, 'schedule')|raw }}
+        </span>
+    </div>
+</div>
+
+<twig:ScheduleForm :scheduleDTO="formDTO" :form="form">
+    <div>
+        {{ form_start(form) }}
+
+        <div class="flex flex-col mx-4 space-x-3 space-y-2">
+            <div>
+                <label class="inline-flex items-center cursor-pointer gap-x-3">
+                    {{ form_label(form.use_advanced_mode, null, {label_attr: {class: 'me-3'}}) }}
+                    {{ form_widget(form.use_advanced_mode, {attr: {
+                        class: 'sr-only peer',
+                        'data-action': 'live#action',
+                        'data-live-name': 'toggleMode',
+                        'data-live-action-param': 'toggleMode',
+                    }}) }}
+                    <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-bg-lightGreen rounded-full
+                        peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white
+                        after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border
+                        after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#68D391]"></div>
+                    {{ form_errors(form.use_advanced_mode) }}
+                </label>
+            </div>
+        </div>
+
+        <div class="grid gap-4 lg:grid-cols-2 xl:grid-cols-4 p-2 z-0 mt-4">
+            {{ include('dashboard/shared/settings_actions/schedule/card.html.twig', {
+                label: 'deleteUnconfirmedAccount'|trans({}, 'schedule'),
+                description: 'deleteUnconfirmedAccountDescription'|trans({}, 'schedule'),
+                field: form.delete_unconfirmed_users_cron,
+            }) }}
+
+            {{ include('dashboard/shared/settings_actions/schedule/card.html.twig', {
+                label: 'profileExpirationNotification'|trans({}, 'schedule'),
+                description: 'profileExpirationNotificationDescription'|trans({}, 'schedule'),
+                field: form.users_when_profile_expires_cron,
+            }) }}
+
+            {{ include('dashboard/shared/settings_actions/schedule/card.html.twig', {
+                label: 'LDAPSynchronization'|trans({}, 'schedule'),
+                description: 'LDAPSynchronizationDescription'|trans({}, 'schedule'),
+                field: form.ldap_sync_cron,
+            }) }}
+
+            {{ include('dashboard/shared/settings_actions/schedule/card.html.twig', {
+                label: 'freeradiusSynchronization'|trans({}, 'schedule'),
+                description: 'freeradiusSynchronizationDescription'|trans({}, 'schedule'),
+                field: form.freeradius_last_connection_cron,
+            }) }}
+        </div>
+
+        <div class="alert-block my-4 p-2 {{ form.use_advanced_mode.vars.data != default_use_advanced_mode ? '' : 'hidden' }}">
+            <div class="flex items-center gap-2 p-4 border-l-4 border-yellow-500 bg-yellow-50 text-yellow-800 text-sm rounded-md"
+                 role="alert">
+                <twig:ux:icon name="wba:info" class="w-10 md:w-5 h-10 md:h-5 inline mr-3" fill="currentColor"/>
+                <span class="font-medium">
+                    {{ 'changeMode'|trans({}, 'schedule')|raw }}
+                </span>
+            </div>
+        </div>
+
+        <div class="mt-6 divider-solid"></div>
+
+        <div class="mt-6 flex flex-row w-full justify-end items-center gap-2">
+            <a href="{{ path('app_dashboard_regenerate_code_admin', {type: 'settingSchedule'}) }}"
+               onclick="return confirm({{ 'resetDefaultSettings'|trans({}, 'schedule')|raw }})"
+               class="text-sm hover:text-red-600 font-bold p-2 rounded-lg transition ease-in duration-300">
+                {{ 'reset'|trans({}, 'schedule')|raw }}
+            </a>
+
+            <button type="submit" class="btn-primary"
+                    onclick="return confirm({{ 'applyChanges'|trans({}, 'schedule')|raw }})">
+                {{ 'saveChanges'|trans({}, 'schedule')|raw }}
+            </button>
+        </div>
+
+        {{ form_end(form) }}
+    </div>
+</twig:ScheduleForm>

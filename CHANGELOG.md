@@ -1,5 +1,33 @@
 # Changelog
 
+# Release v1.11.0
+
+- Responsive Translations (Available: EN & PT-PT) - Administrator can just add new configurations for YAML
+  files in the translations folder, and the page auto-detects the added language.
+- New Listener to auto-detection of the user language.
+- Session token to auto-detect the new required `_locale`.
+- Optimized the `GetSettings` service to significantly reduce the loading process, improving application performance by
+  minimizing redundant data processing and database queries.
+- Renamed some enums to singular form to follow symfony guidelines for enum classes.
+
+# Release V1.10.0
+
+- New feature - Now the admin can configure the landing login authentication, instead of being the traditional (
+  email/password), it sends a verification link, for both cases (emails || phoneNumbers), to reduce the amount of steps
+  for new users account creation.
+- Rework landing/dashboard authentications because of the new feature - DTO Implementation to improve code optimization
+  and add a new login method selector emails || phoneNumber authentication.
+- Fix minor bugs & conflicts with the new DTO and authentication form.
+- Add a new eventSubscriber to avoid the admin of hard changing the DB value `USER_VERIFICATION` setting to `OFF`, when
+  the `PLATFORM_MODE` setting is `ON`.
+    - When that happens, it could brake the user account registration system for email & phoneNumbers on the landing
+      page.
+- Also for this release, it's required to run the new migrations to set up the new setting: `LOGIN_WITH_UUID_ONLY`
+  - Run the migrations with:
+    ```bash
+    php bin/console doctrine:migrations:migrate
+    ```
+
 # Release V1.9.0
 
 - **Fix bug 500** on `/dashboard/statistics/freeradius` in case the connection details are invalid and the portal can
@@ -10,7 +38,8 @@
 - Fix bug with returns with admin reset password, the problem was related with the previous firewall configuration
   implementation where no context has returned.
 - Update `/dashboard/edit/{id}` to use DTO's and live components for validation.
-- New info icon about uuid explanation when admin is editing a user. Check the following page `/dashboard/edit/{id}` for more details.
+- New info icon about uuid explanation when admin is editing a user. Check the following page `/dashboard/edit/{id}` for
+  more details.
 - New command for freeradius profile connection of each user, now the `UserRadiusProfile` entity saves the start/end
   connection of the user profiles when the freeradius server gets a new request. (For later graphics generations and
   user details)

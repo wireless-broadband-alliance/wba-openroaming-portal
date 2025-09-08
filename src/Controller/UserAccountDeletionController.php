@@ -5,10 +5,10 @@ namespace App\Controller;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Enum\FirewallType;
+use App\Enum\OperationMode;
 use App\Enum\UserProvider;
 use App\Form\AutoDeleteCodeType;
 use App\Form\AutoDeletePasswordType;
-use App\Repository\SettingRepository;
 use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
 use App\Service\GetSettings;
@@ -22,6 +22,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class UserAccountDeletionController extends AbstractController
 {
@@ -29,9 +30,9 @@ class UserAccountDeletionController extends AbstractController
         private readonly UserExternalAuthRepository $userExternalAuthRepository,
         private readonly GetSettings $getSettings,
         private readonly UserDeletionService $userDeletionService,
+        private readonly TranslatorInterface $translator,
         private readonly UserRepository $userRepository,
         private readonly TwoFAService $twoFAService,
-        private readonly SettingRepository $settingRepository,
     ) {
     }
 
@@ -42,7 +43,7 @@ class UserAccountDeletionController extends AbstractController
     #[IsGranted('ROLE_USER')]
     public function autoDeleteUserLocalRequest(Request $request): Response
     {
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
 
         /** @var User $currentUser */
         $currentUser = $this->getUser();
@@ -56,20 +57,50 @@ class UserAccountDeletionController extends AbstractController
         if ($currentUser->getUserExternalAuths()[0]->getProvider() !== UserProvider::PORTAL_ACCOUNT->value) {
             $this->addFlash(
                 'error',
-                'You can not access this page without the valid requirements!'
+                $this->translator->trans(
+                    'cannotAccessThisPageWithAInvalidProvider',
+                    [],
+                    'controllers'
+                )
             );
 
             return $this->redirectToRoute('app_landing');
         }
-
-        if (in_array('ROLE_ADMIN', $currentUser->getRoles(), true)) {
-            $this->addFlash(
-                'error',
-                'Admin user can not delete his own account'
-            );
-            return $this->redirectToRoute('app_landing');
+        if (
+            $data['LOGIN_WITH_UUID_ONLY']['value'] === OperationMode::ON->value &&
+            $currentUser->getUserExternalAuths()[0]->getProvider() === UserProvider::PORTAL_ACCOUNT->value
+        ) {
+            if (
+                $this->twoFAService->canValidationCode($currentUser, AnalyticalEventType::USER_AUTO_DELETE_CODE->value)
+            ) {
+                $this->twoFAService->generate2FACode(
+                    $currentUser,
+                    $request->getClientIp(),
+                    $request->headers->get('User-Agent'),
+                    AnalyticalEventType::USER_AUTO_DELETE_CODE->value
+                );
+                $this->addFlash(
+                    'success',
+                    $this->translator->trans('confirmationCodeSentToEmail', [], 'controllers')
+                );
+            } else {
+                $interval_minutes = $this->twoFAService->timeLeftToResendCode(
+                    $currentUser,
+                    AnalyticalEventType::USER_AUTO_DELETE_CODE->value
+                );
+                $this->addFlash(
+                    'error',
+                    $this->translator->trans(
+                        'codeAlreadySent',
+                        [
+                            '%minutes%' => $interval_minutes
+                        ],
+                        'controllers'
+                    )
+                );
+            }
+            return $this->redirectToRoute('app_user_account_deletion_local_code');
         }
-
         $form = $this->createForm(AutoDeletePasswordType::class);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
@@ -85,7 +116,7 @@ class UserAccountDeletionController extends AbstractController
                 }
                 $this->addFlash(
                     'error',
-                    'Current password Invalid. Please try again.'
+                    $this->translator->trans('invalidPassword', [], 'controllers')
                 );
             }
         }
@@ -96,7 +127,7 @@ class UserAccountDeletionController extends AbstractController
             }
         }
 
-        return $this->render('site/actions/auto_delete_account.html.twig', [
+        return $this->render('landing/autoDeleteAccount/auto_delete_account.html.twig', [
             'form' => $form->createView(),
             'data' => $data,
             'user' => $currentUser,
@@ -108,7 +139,7 @@ class UserAccountDeletionController extends AbstractController
     #[IsGranted('ROLE_USER')]
     public function userAccountDeletionLocalConfirm(Request $request): Response
     {
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
 
         /** @var User $currentUser */
         $currentUser = $this->getUser();
@@ -122,7 +153,11 @@ class UserAccountDeletionController extends AbstractController
         if ($currentUser->getUserExternalAuths()[0]->getProvider() !== UserProvider::PORTAL_ACCOUNT->value) {
             $this->addFlash(
                 'error',
-                'You can not access this page without the valid requirements!'
+                $this->translator->trans(
+                    'cannotAccessThisPageWithAInvalidProvider',
+                    [],
+                    'controllers'
+                )
             );
 
             return $this->redirectToRoute('app_landing');
@@ -140,12 +175,11 @@ class UserAccountDeletionController extends AbstractController
             // Compare the typed code with the 2fa code from the database
             if ($this->twoFAService->validate2FACode($currentUser, $typedCode)) {
                 $this->userDeletionService->deleteUser($currentUser, $userExternalAuths, $request, $currentUser);
-
                 return $this->redirectToRoute('app_landing');
             }
             $this->addFlash(
                 'error',
-                'Code Invalid. Please try again.'
+                $this->translator->trans('invalidCode', [], 'controllers')
             );
         }
 
@@ -155,7 +189,7 @@ class UserAccountDeletionController extends AbstractController
             }
         }
 
-        return $this->render('site/actions/auto_delete_account.html.twig', [
+        return $this->render('landing/autoDeleteAccount/auto_delete_account.html.twig', [
             'form' => $form->createView(),
             'data' => $data,
             'user' => $currentUser,
@@ -187,7 +221,7 @@ class UserAccountDeletionController extends AbstractController
         if ($userExternalAuths[0]->getProvider() === UserProvider::PORTAL_ACCOUNT->value) {
             $this->addFlash(
                 'error',
-                'You can not access this page without the valid requirements!'
+                $this->translator->trans('cannotAccessThisPageWithAInvalidProvider', [], 'controllers')
             );
 
             return $this->redirectToRoute('app_landing');
@@ -197,14 +231,12 @@ class UserAccountDeletionController extends AbstractController
         // GOOGLE ACCOUNT
         if ($userExternalAuths[0]->getProvider() === UserProvider::GOOGLE_ACCOUNT->value) {
             $previousLoggedID = $currentUser->getId();
-
             return $this->redirectToRoute('connect_google', ['previousLoggedID' => $previousLoggedID]);
         }
 
         // MICROSOFT ACCOUNT
         if ($userExternalAuths[0]->getProvider() === UserProvider::MICROSOFT_ACCOUNT->value) {
             $previousLoggedID = $currentUser->getId();
-
             return $this->redirectToRoute('connect_microsoft', ['previousLoggedID' => $previousLoggedID]);
         }
 
@@ -255,8 +287,7 @@ class UserAccountDeletionController extends AbstractController
         if ($previousLoggedID !== $currentLoggedUserID) {
             $this->addFlash(
                 'error',
-                'You did not select the correct account for deletion. 
-                Your currently authenticated account is not the same as the selected one.'
+                $this->translator->trans('invalidAccountSelectForUserDeletion', [], 'controllers')
             );
 
             return $this->redirectToRoute('app_landing');

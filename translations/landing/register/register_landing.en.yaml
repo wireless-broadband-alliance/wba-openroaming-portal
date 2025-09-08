@@ -1,0 +1,14 @@
+logoAlt: 'Customer Logo'
+heading: 'Create your account'
+description:
+    1: 'This will enable you to access and download a profile onto your device.'
+    2: 'Once you download your profile, you can connect automatically to OpenRoaming Wi-Fi networks across the world.'
+form:
+    email_placeholder: 'Enter your email'
+    phone_number: 'Phone Number'
+    phone_placeholder: 'Enter your phone number'
+    submit: 'Create Account'
+    choose_another: 'Choose Another'
+    already_have_account: 'You already have an account?'
+    login: 'Login'
+    here: 'here!'

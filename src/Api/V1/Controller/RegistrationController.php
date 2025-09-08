@@ -9,6 +9,7 @@ use App\Entity\UserExternalAuth;
 use App\Enum\AnalyticalEventType;
 use App\Enum\OperationMode;
 use App\Enum\PlatformMode;
+use App\Enum\SMSResponse;
 use App\Enum\UserProvider;
 use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
@@ -45,6 +46,7 @@ use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class RegistrationController extends AbstractController
 {
@@ -61,7 +63,8 @@ class RegistrationController extends AbstractController
         private readonly UserPasswordHasherInterface $userPasswordHasher,
         private readonly CaptchaValidator $captchaValidator,
         private readonly RegistrationEmailGenerator $emailGenerator,
-        private readonly ValidatorInterface $validator
+        private readonly ValidatorInterface $validator,
+        private readonly TranslatorInterface $translator,
     ) {
     }
 
@@ -145,12 +148,12 @@ class RegistrationController extends AbstractController
         $hashedPassword = $userPasswordHasher->hashPassword($user, $data['password']);
         $user->setPassword($hashedPassword);
         $user->setIsVerified(false);
+        $user->setCreatedAt(new DateTime());
         $user->setTwoFAcode(random_int(100000, 999999));
         $user->setTwoFACodeGeneratedAt(new DateTime());
         $user->setTwoFAcodeIsActive(true);
         $user->setFirstName($data['first_name'] ?? null);
         $user->setLastName($data['last_name'] ?? null);
-        $user->setCreatedAt(new DateTime());
 
         $userExternalAuth = new UserExternalAuth();
         $userExternalAuth->setUser($user);
@@ -327,7 +330,13 @@ class RegistrationController extends AbstractController
                             )
                         )
                         ->to($user->getEmail())
-                        ->subject('Reset Your OpenRoaming Password')
+                        ->subject(
+                            $this->translator->trans(
+                                'subject_forgot_password',
+                                [],
+                                'user_forgot_password_request'
+                            )
+                        )
                         ->htmlTemplate('email/user_forgot_password_request.html.twig')
                         ->context([
                             'password' => $randomPassword,
@@ -485,12 +494,12 @@ class RegistrationController extends AbstractController
         $hashedPassword = $userPasswordHasher->hashPassword($user, $data['password']);
         $user->setPassword($hashedPassword);
         $user->setIsVerified(false);
+        $user->setCreatedAt(new DateTime());
         $user->setTwoFAcode(random_int(100000, 999999));
         $user->setTwoFACodeGeneratedAt(new DateTime());
         $user->setTwoFAcodeIsActive(true);
         $user->setFirstName($data['first_name'] ?? null);
         $user->setLastName($data['last_name'] ?? null);
-        $user->setCreatedAt(new DateTime());
 
         $userExternalAuth = new UserExternalAuth();
         $userExternalAuth->setUser($user);
@@ -521,23 +530,23 @@ class RegistrationController extends AbstractController
             $message = "Your account password is: "
                 . $data['password'] . "%0A" . "Verification code is: "
                 . $user->getTwoFAcode();
-            $result = $this->sendSMSService->sendSms($user->getPhoneNumber(), $message);
+            $result = $this->sendSMSService->sendSmsNoValidation($user, $message);
 
-            if ($result) {
-                return new BaseResponse(
-                    200,
-                    [
-                        'message' =>
-                            'SMS User Account Registered Successfully. A verification code has been sent to your phone.'
-                    ]
-                )->toResponse();
+            if ($result === SMSResponse::SMS_SUCCESS_LINK->value) {
+                $messageAPI = 'SMS User Account Registered Successfully. A link has been sent to your phone.';
+            } else {
+                $messageAPI = 'SMS User Account Registered Successfully. 
+                A verification code has been sent to your phone.';
             }
+            return new BaseResponse(
+                200,
+                [
+                    'message' => $messageAPI,
+                ]
+            )->toResponse();
         } catch (\RuntimeException) {
             return new BaseResponse(500, null, 'Failed to send SMS')->toResponse(); // Internal Server Error
         }
-
-        // Return fallback response
-        return new BaseResponse(500, null, 'User registered but SMS could not be sent.')->toResponse();
     }
 
 
@@ -644,7 +653,7 @@ class RegistrationController extends AbstractController
                 }
             }
 
-            $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+            $data = $this->getSettings->getSettings();
 
             if ($hasValidPortalAccount) {
                 try {
@@ -728,7 +737,7 @@ class RegistrationController extends AbstractController
                         $user->getTwoFAcode()
                     );
 
-                    $result = $this->sendSMSService->sendSms($user->getPhoneNumber(), $message);
+                    $result = $this->sendSMSService->sendSmsNoValidation($user, $message);
 
                     // Defines the Event to the table
                     $eventMetadata = [
@@ -744,7 +753,7 @@ class RegistrationController extends AbstractController
                         $eventMetadata
                     );
 
-                    if ($result) {
+                    if ($result !== '' && $result !== '0') {
                         return new BaseResponse(200, [
                             'success' => sprintf(
                                 'If the phone number exists,' .

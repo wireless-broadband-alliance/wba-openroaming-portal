@@ -26,6 +26,9 @@ parameters:
   app.metrics_enabled: '%env(bool:METRICS_ENABLED)%'
   app.metrics_allowed_ips: '%env(string:METRICS_ALLOWED_IPS)%'
 services:
+    App\EventListener\LocaleListener:
+      tags:
+        - { name: kernel.event_listener, event: kernel.request, priority: 20 }
     PixelOpen\CloudflareTurnstileBundle\Http\CloudflareTurnstileHttpClient:
         alias: 'turnstile.http_client'
     App\Service\JWTTokenGenerator:
@@ -34,7 +37,6 @@ services:
     App\EventListener\JWTExceptionListener:
         tags:
             - { name: kernel.event_subscriber }
-    App\Form\Transformer\BooleanToDateTimeTransformer: ~
     App\Service\UserStatusChecker: ~
     #Things to make the login with Google work
     App\Controller\GoogleController:
@@ -65,7 +67,6 @@ services:
             $userRepository: '@App\Repository\UserRepository'
             $entityManager: '@doctrine.orm.entity_manager'
             $getSettings: '@App\Service\GetSettings'
-            $settingRepository: '@App\Repository\SettingRepository'
             $requestStack: '@request_stack'
         tags:
             - { name: 'nbgrp_oneloginsaml.user_factory' }

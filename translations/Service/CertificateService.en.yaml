@@ -1,0 +1,3 @@
+certificateNotFound: 'Certificate not found in path: %certificatePath%'
+errorReadingCertificate: 'Error reading certificate.'
+unableExtractExpirationDateCertificate: 'Unable to extract the expiration date of the certificate.'

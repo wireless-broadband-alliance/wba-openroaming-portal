@@ -1,34 +1,168 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="{{ app.request.locale }}">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Confirm your Password Reset</title>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>{{ 'header_settings_reset'|trans({}, 'admin_reset') }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet"/>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', sans-serif;
+            background-color: #F4F4F4;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1100px;
+            background: #fff;
+            margin: 0 auto;
+        }
+
+        /* HEADER */
+        .header {
+            background-color: #0B1A58;
+            width: 100%;
+            min-height: 180px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 3rem 1rem;
+            box-sizing: border-box;
+            margin-bottom: 2rem;
+        }
+
+        .header img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        /* CONTENT */
+        .content {
+            width: 100%;
+            background-color: #FFFFFF;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 3rem 2rem;
+            margin-bottom: 2rem;
+            box-sizing: border-box;
+        }
+
+        .content h1 {
+            color: #0B1A58;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 2.5rem;
+        }
+
+        .content p {
+            font-size: 1.25rem;
+            margin-bottom: 2rem;
+            line-height: 1.5;
+            color: #0B1A58;
+        }
+
+        .content p span {
+            font-weight: 600;
+        }
+
+        .content p span.code {
+            font-weight: 700;
+            color: #0045AD;
+        }
+
+        /* FOOTER */
+        .footer {
+            background-color: #E6E6E6;
+            width: 100%;
+            min-height: 160px;
+            padding: 1.5rem 1rem;
+            text-align: center;
+            box-sizing: border-box;
+        }
+
+        .footer p {
+            margin: 0.75rem 0;
+            font-size: 1rem;
+            color: #1A202C;
+        }
+
+        .footer a,
+        .footer strong {
+            color: #0B1A58;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .footer a:hover,
+        .footer a:focus {
+            text-decoration: underline;
+        }
+
+        /* Responsive adjustments */
+        @media only screen and (max-width: 768px) {
+            .content h1 {
+                font-size: 2rem;
+            }
+
+            .content p {
+                font-size: 1.1rem;
+            }
+
+            .header img {
+                width: 100%;
+                max-width: 300px;
+            }
+
+            .footer p {
+                font-size: 0.95rem;
+            }
+        }
+
+        @media only screen and (max-width: 480px) {
+            .content h1 {
+                font-size: 1.5rem;
+            }
+
+            .content p {
+                font-size: 1rem;
+            }
+
+            .header {
+                padding: 2rem 1rem;
+            }
+        }
+    </style>
 </head>
-<body style="background-color: #080D4A; font-family: ui-sans-serif, system-ui, sans-serif; color: #4A5568; margin: 0; padding: 0;">
-<div style="max-width: 600px; margin: 0 auto; padding: 3rem 1rem;">
-    <div style="max-width: 448px; margin: 0 auto; background-color: white; border-radius: 1rem; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1); overflow: hidden;">
-        <div style="background-color: #7BBA29; color: white; text-align: center; padding: 1.5rem;">
-            {% if resetPassword %}
-                <h1 style="font-size: 1.5rem; font-weight: bold;">Admin Password Reset</h1>
-            {% else %}
-                <h1 style="font-size: 1.5rem; font-weight: bold;">Admin Settings Reset</h1>
-            {% endif %}
-        </div>
+<body>
+<div class="container">
+    <header class="header" role="banner">
+        <img src="cid:logo_cid" alt="Customer Logo"/>
+    </header>
 
-        <div style="padding: 1.5rem;">
-            {% if resetPassword %}
-                <p style="font-size: 1.125rem; margin-bottom: 1rem;">This is a step to confirm your password reset.</p>
-            {% else %}
-                <p style="font-size: 1.125rem; margin-bottom: 1rem;">This is a step to confirm the settings reset.</p>
-            {% endif %}
+    <main class="content" role="main">
+        <h1>{{ 'header_settings_reset'|trans({}, 'admin_reset') }}</h1>
+        <p>{{ 'message_settings_reset'|trans({'%settingCategory%': settingCategory}, 'admin_reset')|raw }}</p>
+        <p>
+            {{ 'confirmation_code'|trans({}, 'admin_reset') }}
+            <span class="code">{{ verificationCode }}</span>
+        </p>
+    </main>
 
-            <p style="font-size: 1.125rem; margin-bottom: 1rem;">
-                Please use the following code to confirm the action:
-                <span style="font-weight: bold; color: #0045AD;">{{ verificationCode }}</span>
-            </p>
-        </div>
-    </div>
+    <footer class="footer" role="contentinfo">
+        <p>
+            {{ 'footer.support_team'|trans({}, 'admin_reset') }}
+            <a href="mailto:{{ contactEmail }}">{{ contactEmail }}</a>
+        </p>
+        <p>
+            {{ 'footer.thank_you'|trans({}, 'admin_reset') }}<br/>
+            <strong>{{ supportTeam }}</strong>
+        </p>
+    </footer>
 </div>
 </body>
 </html>

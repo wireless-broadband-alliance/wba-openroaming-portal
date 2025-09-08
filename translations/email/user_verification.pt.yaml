@@ -1,0 +1,12 @@
+subject_two_factor_code: 'O seu código de autenticação de dois fatores do OpenRoaming é %code%.'
+title: 'Verificação de Código'
+subject_2fa: 'Autenticação de Dois Fatores'
+subject_verify: 'Verifique Sua Conta'
+two_factor_message: 'O seu código de autenticação dois fatores é:'
+one_time_code_message: 'O seu código de autenticação é:'
+valid_for_message: 'Este <strong>código só pode ser usado uma vez</strong> e <strong>é válido nos próximos %seconds% segundos.</strong>'
+confidential_message: 'Por favor, <strong>mantenha este código confidencial</strong> e <strong>não o compartilhe com terceiros.</strong>'
+footer:
+    support_team: 'Equipa de apoio:'
+    thank_you: 'Obrigado,'
+    team: 'A Equipa %supportTeam%'
