@@ -3,6 +3,7 @@
 namespace App\DTO;
 
 use App\Enum\OperationMode;
+use App\Enum\SettingName;
 use App\Repository\SettingRepository;
 use App\Service\CronExpressionHelperService;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -54,32 +55,32 @@ class ScheduleDTO
         ?CronExpressionHelperService $cronExpressionHelperService = null
     ) {
         if (!is_null($settingRepository)) {
-            $cronAdvanceStatus = $settingRepository->findOneBy(["name" => "CRON_ADVANCED_STATUS"]);
+            $cronAdvanceStatus = $settingRepository->findOneBy(["name" => SettingName::CRON_ADVANCED_STATUS->value]);
             if (!is_null($cronAdvanceStatus)) {
                 $this->use_advanced_mode = $cronAdvanceStatus->getValue() === OperationMode::ON->value;
             }
         }
 
         $this->delete_unconfirmed_users_cron = new ScheduleSettingDTO(
-            "DELETE_UNCONFIRMED_USERS_CRON",
+            SettingName::DELETE_UNCONFIRMED_USERS_CRON->value,
             $settingRepository,
             $cronExpressionHelperService
         );
 
         $this->users_when_profile_expires_cron = new ScheduleSettingDTO(
-            "USERS_WHEN_PROFILE_EXPIRES_CRON",
+            SettingName::USERS_WHEN_PROFILE_EXPIRES_CRON->value,
             $settingRepository,
             $cronExpressionHelperService
         );
 
         $this->ldap_sync_cron = new ScheduleSettingDTO(
-            "LDAP_SYNC_CRON",
+            SettingName::LDAP_SYNC_CRON->value,
             $settingRepository,
             $cronExpressionHelperService
         );
 
         $this->freeradius_last_connection_cron = new ScheduleSettingDTO(
-            "FREERADIUS_LAST_CONNECTION_CRON",
+            SettingName::FREERADIUS_LAST_CONNECTION_CRON->value,
             $settingRepository,
             $cronExpressionHelperService
         );
@@ -88,19 +89,19 @@ class ScheduleDTO
     public function toCronExpressions(CronExpressionHelperService $cronExpressionHelperService): array
     {
         return [
-            "DELETE_UNCONFIRMED_USERS_CRON" => $this->delete_unconfirmed_users_cron->toCronExpression(
+            SettingName::DELETE_UNCONFIRMED_USERS_CRON->value => $this->delete_unconfirmed_users_cron->toCronExpression(
                 $this->use_advanced_mode,
                 $cronExpressionHelperService
             ),
-            "USERS_WHEN_PROFILE_EXPIRES_CRON" => $this->users_when_profile_expires_cron->toCronExpression(
+            SettingName::USERS_WHEN_PROFILE_EXPIRES_CRON->value => $this->users_when_profile_expires_cron->toCronExpression(
                 $this->use_advanced_mode,
                 $cronExpressionHelperService
             ),
-            "LDAP_SYNC_CRON" => $this->ldap_sync_cron->toCronExpression(
+            SettingName::LDAP_SYNC_CRON->value => $this->ldap_sync_cron->toCronExpression(
                 $this->use_advanced_mode,
                 $cronExpressionHelperService
             ),
-            "FREERADIUS_LAST_CONNECTION_CRON" => $this->freeradius_last_connection_cron->toCronExpression(
+            SettingName::FREERADIUS_LAST_CONNECTION_CRON->value => $this->freeradius_last_connection_cron->toCronExpression(
                 $this->use_advanced_mode,
                 $cronExpressionHelperService
             )
