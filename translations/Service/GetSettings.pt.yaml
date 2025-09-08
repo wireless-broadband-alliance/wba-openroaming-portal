@@ -1,1 +1,3 @@
 noRequestAvailable: 'Nenhuma solicitação disponível no momento.'
+settingsMissing: 'Algumas configurações estão em falta na base de dados: %missing%'
+notInEnum: 'Algumas configurações encontradas na base de dados não estão definidas no projeto: %notInEnum%'

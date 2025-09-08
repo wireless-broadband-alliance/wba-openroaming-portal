@@ -77,14 +77,21 @@ readonly class GetSettings
         if (!empty($missingInDb)) {
             throw new HttpException(
                 Response::HTTP_INTERNAL_SERVER_ERROR,
-                'Some settings are missing in the database: ' . implode(', ', $missingInDb)
+                $this->translator->trans(
+                    'settingsMissing',
+                    ['%missing%' => implode(', ', $missingInDb)],
+                    'GetSettings'
+                )
             );
         }
         if (!empty($notInEnum)) {
             throw new HttpException(
                 Response::HTTP_INTERNAL_SERVER_ERROR,
-                'Some settings found in the database are not defined in the project.: ' . implode(', ', $notInEnum),
-
+                $this->translator->trans(
+                    'notInEnum',
+                    ['%notInEnum%' => implode(', ', $notInEnum)],
+                    'GetSettings'
+                )
             );
         }
 
