@@ -60,6 +60,11 @@ readonly class ExceptionListener
             $template = 'bundles/TwigBundle/Exception/error.html.twig';
         }
 
+        $request = $event->getRequest();
+        $locale = $request->getSession()->get('_locale', 'en');
+        $request->setLocale($locale);
+        $this->translator->setLocale($locale);
+
         $content = $this->twig->render($template, [
             'status_code' => $statusCode,
             'status_title' => $statusTitle,
