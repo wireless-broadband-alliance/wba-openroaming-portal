@@ -11,6 +11,7 @@ use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Symfony\Contracts\Translation\LocaleAwareInterface;
 use Twig\Environment;
 use Twig\Error\LoaderError;
 use Twig\Error\RuntimeError;
@@ -23,6 +24,7 @@ readonly class ExceptionListener
         private Environment $twig,
         private TranslatorInterface $translator,
         private SettingRepository $settingRepository,
+        private LocaleAwareInterface $translatorLocale,
     ) {
     }
 
@@ -65,7 +67,7 @@ readonly class ExceptionListener
         $request = $event->getRequest();
         $locale = $request->getSession()->get('_locale', 'en');
         $request->setLocale($locale);
-        $this->translator->setLocale($locale);
+        $this->translatorLocale->setLocale($locale);
 
         $content = $this->twig->render($template, [
             'status_code' => $statusCode,
