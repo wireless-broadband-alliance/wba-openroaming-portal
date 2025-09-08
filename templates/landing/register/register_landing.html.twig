@@ -48,7 +48,7 @@
         <button type="submit" class="btn-primary">
             {{ 'form.submit'|trans({}, 'register_landing') }}
         </button>
-        {% if data.PLATFORM_MODE != constant('App\\Enum\\PlatformMode::DEMO').value %}
+        {% if data.PLATFORM_MODE.value != constant('App\\Enum\\PlatformMode::DEMO').value %}
             <a href="{{ path('app_landing') }}" class="btn-secondary">
                 {{ 'form.choose_another'|trans({}, 'register_landing') }}
             </a>

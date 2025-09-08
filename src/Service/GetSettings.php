@@ -3,11 +3,15 @@
 namespace App\Service;
 
 use App\Enum\LanguageType;
+use App\Enum\SettingName;
 use App\Repository\SettingRepository;
 use App\Repository\SettingTranslationRepository;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 readonly class GetSettings
 {
@@ -19,7 +23,7 @@ readonly class GetSettings
     ) {
     }
 
-    public function getSettings(?string $language = null): array
+    public function getSettings(?string $language = null): array|JsonResponse
     {
         // Get the current request from the RequestStack
         $request = $this->requestStack->getCurrentRequest();
@@ -33,6 +37,9 @@ readonly class GetSettings
         if (str_starts_with($request->getPathInfo(), '/api')) {
             return [];
         }
+
+        // Always fetch the latest setting names from the DB
+        $allSettings = $this->settingRepository->findAll();
 
         $locale = $language
             ?? $request->getSession()->get('_locale')
@@ -50,35 +57,36 @@ readonly class GetSettings
             ];
         }
 
-        $specialSettings = [
-            'TURNSTILE_CHECKER',
-            'PLATFORM_MODE',
-        ];
+        foreach ($allSettings as $setting) {
+            $name = $setting->getName();
 
-        foreach ($this->settingRepository->findAll() as $setting) {
-            if (in_array($setting->getName(), $specialSettings, true)) {
-                continue;
-            }
-
-            $settingName = $setting->getName();
-            $data[$settingName] = [
-                'value' => $localizedSettings[$settingName]['value'] ?? $setting->getValue(),
-                'description' => $this->getSettingDescription($settingName),
+            $data[$name] = [
+                'value' => $localizedSettings[$name]['value'] ?? $setting->getValue(),
+                'description' => $this->getSettingDescription($name),
             ];
         }
 
-        $turnstile_checker = $this->settingRepository->findOneBy(['name' => 'TURNSTILE_CHECKER']);
-        if ($turnstile_checker !== null) {
-            $data['TURNSTILE_CHECKER'] = [
-                'value' => $turnstile_checker->getValue(),
-                'description' => $this->getSettingDescription('TURNSTILE_CHECKER'),
-            ];
-        }
+        $currentSettingsName = array_keys($data);
+        $expectedSettings = array_map(static fn($e) => $e->value, SettingName::cases());
 
-        $data['PLATFORM_MODE'] = [
-            'value' => $this->settingRepository->findOneBy(['name' => 'PLATFORM_MODE'])->getValue() === 'Demo',
-            'description' => $this->getSettingDescription('PLATFORM_MODE'),
-        ];
+        // Compare both sets
+        $missingInDb = array_diff($expectedSettings, $currentSettingsName);
+        $notInEnum = array_diff($currentSettingsName, $expectedSettings);
+
+        // Check if all the settings on the DB are set and valid
+        if (!empty($missingInDb)) {
+            throw new HttpException(
+                Response::HTTP_INTERNAL_SERVER_ERROR,
+                'Some settings are missing in the database: ' . implode(', ', $missingInDb)
+            );
+        }
+        if (!empty($notInEnum)) {
+            throw new HttpException(
+                Response::HTTP_INTERNAL_SERVER_ERROR,
+                'Some settings found in the database are not defined in the project.: ' . implode(', ', $notInEnum),
+
+            );
+        }
 
         return $data;
     }

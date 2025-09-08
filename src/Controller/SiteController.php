@@ -232,7 +232,7 @@ class SiteController extends AbstractController
         $userAgent = $request->headers->get('User-Agent');
         $actionName = $request->attributes->get('_route');
 
-        if ($data['PLATFORM_MODE']['value']) {
+        if ($data['PLATFORM_MODE']['value'] === PlatformMode::DEMO->value) {
             if ($request->isMethod('POST')) {
                 $payload = $request->request->all();
                 if ($data['TURNSTILE_CHECKER']['value'] === OperationMode::ON->value) {

@@ -78,7 +78,7 @@ class RegistrationController extends AbstractController
         $data = $this->getSettings->getSettings();
 
         // Check if the user clicked on the 'sms' variable present only on the SMS authentication buttons
-        if ($data['PLATFORM_MODE']['value'] === true) {
+        if ($data['PLATFORM_MODE']['value'] === PlatformMode::DEMO->value) {
             $this->addFlash(
                 'error',
                 $this->translator->trans(
@@ -171,7 +171,6 @@ class RegistrationController extends AbstractController
      * @throws ClientExceptionInterface
      * @throws RedirectionExceptionInterface
      * @throws ServerExceptionInterface
-     * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
      * @throws Exception
      */
     #[Route('/register/sms', name: 'app_register_sms')]
@@ -184,7 +183,7 @@ class RegistrationController extends AbstractController
         $data = $this->getSettings->getSettings();
 
         // Check if the user clicked on the 'sms' variable present only on the SMS authentication buttons
-        if ($data['PLATFORM_MODE']['value'] === true) {
+        if ($data['PLATFORM_MODE']['value'] === PlatformMode::DEMO->value) {
             $this->addFlash(
                 'error',
                 $this->translator->trans(
