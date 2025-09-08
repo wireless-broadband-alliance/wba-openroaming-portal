@@ -3,6 +3,7 @@
 namespace App\Service;
 
 use App\Entity\User;
+use App\Enum\SettingName;
 use App\Enum\TwoFAType;
 use App\Enum\UserTwoFactorAuthenticationStatus;
 use App\Repository\SettingRepository;
@@ -17,7 +18,7 @@ readonly class TwoFAAPIService
 
     public function twoFAEnforcementChecker(User $user, string $endpointName): array
     {
-        $status2FA = $this->settingRepository->findOneBy(['name' => 'TWO_FACTOR_AUTH_STATUS']);
+        $status2FA = $this->settingRepository->findOneBy(['name' => SettingName::TWO_FACTOR_AUTH_STATUS->value]);
 
         // If $status2FA is null or not found, return an error message
         if (!$status2FA) {

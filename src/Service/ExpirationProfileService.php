@@ -3,6 +3,7 @@
 namespace App\Service;
 
 use App\Entity\UserRadiusProfile;
+use App\Enum\SettingName;
 use App\Enum\UserProvider;
 use App\Repository\SettingRepository;
 use Exception;
@@ -39,22 +40,22 @@ readonly class ExpirationProfileService
         // Determine expiration time based on provider and provider ID
         switch ($provider) {
             case UserProvider::GOOGLE_ACCOUNT->value:
-                $expireDays = $this->getSettingValue('PROFILE_LIMIT_DATE_GOOGLE', $defaultExpireDays);
+                $expireDays = $this->getSettingValue(SettingName::PROFILE_LIMIT_DATE_GOOGLE->value, $defaultExpireDays);
                 break;
 
             case UserProvider::MICROSOFT_ACCOUNT->value:
-                $expireDays = $this->getSettingValue('PROFILE_LIMIT_DATE_MICROSOFT', $defaultExpireDays);
+                $expireDays = $this->getSettingValue(SettingName::PROFILE_LIMIT_DATE_MICROSOFT->value, $defaultExpireDays);
                 break;
 
             case UserProvider::SAML->value:
-                $expireDays = $this->getSettingValue('PROFILE_LIMIT_DATE_SAML', $defaultExpireDays);
+                $expireDays = $this->getSettingValue(SettingName::PROFILE_LIMIT_DATE_SAML->value, $defaultExpireDays);
                 break;
 
             case UserProvider::PORTAL_ACCOUNT->value:
                 if ($providerId === UserProvider::EMAIL->value) {
-                    $expireDays = $this->getSettingValue('PROFILE_LIMIT_DATE_EMAIL', $defaultExpireDays);
+                    $expireDays = $this->getSettingValue(SettingName::PROFILE_LIMIT_DATE_EMAIL->value, $defaultExpireDays);
                 } elseif ($providerId === UserProvider::PHONE_NUMBER->value) {
-                    $expireDays = $this->getSettingValue('PROFILE_LIMIT_DATE_SMS', $defaultExpireDays);
+                    $expireDays = $this->getSettingValue(SettingName::PROFILE_LIMIT_DATE_SMS->value, $defaultExpireDays);
                 }
                 break;
         }

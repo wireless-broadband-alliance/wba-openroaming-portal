@@ -4,6 +4,7 @@ namespace App\Service;
 
 use App\Entity\Event;
 use App\Entity\User;
+use App\Enum\SettingName;
 use Random\RandomException;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use App\Repository\EventRepository;
@@ -25,7 +26,7 @@ readonly class MagicLinkService
     public function canSendLink(User $user): ?Event
     {
         $data = $this->getSettings->getSettings();
-        $emailTimer = $data["TWO_FACTOR_AUTH_RESEND_INTERVAL"]["value"];
+        $emailTimer = $data[SettingName::TWO_FACTOR_AUTH_RESEND_INTERVAL->value]["value"];
         $limitTime = new DateTime();
         $limitTime->modify('-' . $emailTimer . ' seconds');
 
@@ -49,7 +50,7 @@ readonly class MagicLinkService
 
     public function linkValidity(User $user): bool
     {
-        $linkValidity = $this->settingRepository->findOneBy(['name' => 'LINK_VALIDITY'])->getValue();
+        $linkValidity = $this->settingRepository->findOneBy(['name' => SettingName::LINK_VALIDITY->value])->getValue();
         $limitTime = new DateTime();
         $limitTime->modify('-' . $linkValidity . ' minutes');
         return $limitTime < $user->getTwoFAcodeGeneratedAt();

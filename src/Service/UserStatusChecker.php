@@ -4,6 +4,7 @@ namespace App\Service;
 
 use App\Api\V1\BaseResponse;
 use App\Entity\User;
+use App\Enum\SettingName;
 use App\Enum\UserProvider;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
@@ -75,10 +76,10 @@ readonly class UserStatusChecker
     {
         if ($providerName === UserProvider::MICROSOFT_ACCOUNT->value) {
             // Retrieve the valid domains setting from the database
-            $validDomainsSetting = $this->settingRepository->findOneBy(['name' => 'VALID_DOMAINS_MICROSOFT_LOGIN']);
+            $validDomainsSetting = $this->settingRepository->findOneBy(['name' => SettingName::VALID_DOMAINS_MICROSOFT_LOGIN->value]);
         } elseif ($providerName === UserProvider::GOOGLE_ACCOUNT->value) {
             // Retrieve the valid domains setting from the database
-            $validDomainsSetting = $this->settingRepository->findOneBy(['name' => 'VALID_DOMAINS_GOOGLE_LOGIN']);
+            $validDomainsSetting = $this->settingRepository->findOneBy(['name' => SettingName::VALID_DOMAINS_GOOGLE_LOGIN->value]);
         } else {
             // If providerName doesn't match any valid providers, throw an exception
             throw new RuntimeException($this->translator->trans('invalidProviderName', [], 'UserStatusChecker'));

@@ -3,6 +3,7 @@
 namespace App\Service;
 
 use App\Enum\OperationMode;
+use App\Enum\SettingName;
 use App\Repository\SettingRepository;
 
 readonly class SchedulerService
@@ -15,7 +16,7 @@ readonly class SchedulerService
 
     public function verifyHoursAndMinutesFrequency(string $cron): ?string
     {
-        $advancedMode = $this->settingRepository->findOneBy(['name' => 'CRON_ADVANCED_STATUS']);
+        $advancedMode = $this->settingRepository->findOneBy(['name' => SettingName::CRON_ADVANCED_STATUS->value]);
         if ($advancedMode && $advancedMode->getValue() === OperationMode::OFF->value) {
             return null;
         }
