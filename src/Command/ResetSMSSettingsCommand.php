@@ -3,6 +3,7 @@
 namespace App\Command;
 
 use App\Entity\Setting;
+use App\Enum\SettingName;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -50,12 +51,12 @@ class ResetSMSSettingsCommand extends Command
         }
 
         $settings = [
-            ['name' => 'SMS_USERNAME', 'value' => ''],
-            ['name' => 'SMS_USER_ID', 'value' => ''],
-            ['name' => 'SMS_HANDLE', 'value' => ''],
-            ['name' => 'SMS_FROM', 'value' => 'OpenRoaming'],
-            ['name' => 'SMS_TIMER_RESEND', 'value' => '5'],
-            ['name' => 'DEFAULT_REGION_PHONE_INPUTS', 'value' => 'PT, US, GB'],
+            ['name' => SettingName::SMS_USERNAME->value, 'value' => ''],
+            ['name' => SettingName::SMS_USER_ID->value, 'value' => ''],
+            ['name' => SettingName::SMS_HANDLE->value, 'value' => ''],
+            ['name' => SettingName::SMS_FROM->value, 'value' => 'OpenRoaming'],
+            ['name' => SettingName::SMS_TIMER_RESEND->value, 'value' => '5'],
+            ['name' => SettingName::DEFAULT_REGION_PHONE_INPUTS->value, 'value' => 'PT, US, GB'],
         ];
 
         // Begin a database transaction to ensure data consistency

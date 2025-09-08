@@ -5,6 +5,7 @@ namespace App\Command;
 use App\Entity\Setting;
 use App\Entity\SettingTranslation;
 use App\Enum\LanguageType;
+use App\Enum\SettingName;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -49,115 +50,115 @@ class ResetAllSettingsCommand extends Command
         }
 
         $settings = [
-            ['name' => 'RADIUS_REALM_NAME', 'value' => 'EditMe'],
-            ['name' => 'DISPLAY_NAME', 'value' => 'EditMe'],
-            ['name' => 'PAYLOAD_IDENTIFIER', 'value' => '887FAE2A-F051-4CC9-99BB-8DFD66F553A9'],
-            ['name' => 'OPERATOR_NAME', 'value' => 'EditMe'],
-            ['name' => 'DOMAIN_NAME', 'value' => 'EditMe'],
-            ['name' => 'RADIUS_TLS_NAME', 'value' => 'EditMe'],
-            ['name' => 'NAI_REALM', 'value' => 'EditMe'],
+            ['name' => SettingName::RADIUS_REALM_NAME->value, 'value' => 'EditMe'],
+            ['name' => SettingName::DISPLAY_NAME->value, 'value' => 'EditMe'],
+            ['name' => SettingName::PAYLOAD_IDENTIFIER->value, 'value' => '887FAE2A-F051-4CC9-99BB-8DFD66F553A9'],
+            ['name' => SettingName::OPERATOR_NAME->value, 'value' => 'EditMe'],
+            ['name' => SettingName::DOMAIN_NAME->value, 'value' => 'EditMe'],
+            ['name' => SettingName::RADIUS_TLS_NAME->value, 'value' => 'EditMe'],
+            ['name' => SettingName::NAI_REALM->value, 'value' => 'EditMe'],
             [
-                'name' => 'RADIUS_TRUSTED_ROOT_CA_SHA1_HASH',
+                'name' => SettingName::RADIUS_TRUSTED_ROOT_CA_SHA1_HASH->value,
                 'value' => 'ca bd 2a 79 a1 07 6a 31 f2 1d 25 36 35 cb 03 9d 43 29 a5 e8'
             ],
 
-            ['name' => 'PLATFORM_MODE', 'value' => 'Demo'],
-            ['name' => 'USER_VERIFICATION', 'value' => 'OFF'],
-            ['name' => 'TURNSTILE_CHECKER', 'value' => 'OFF'],
-            ['name' => 'API_STATUS', 'value' => 'OFF'],
+            ['name' => SettingName::PLATFORM_MODE->value, 'value' => 'Demo'],
+            ['name' => SettingName::USER_VERIFICATION->value, 'value' => 'OFF'],
+            ['name' => SettingName::TURNSTILE_CHECKER->value, 'value' => 'OFF'],
+            ['name' => SettingName::API_STATUS->value, 'value' => 'OFF'],
 
-            ['name' => 'TWO_FACTOR_AUTH_STATUS', 'value' => 'NOT_ENFORCED'],
-            ['name' => 'TWO_FACTOR_AUTH_APP_LABEL', 'value' => 'OpenRoaming'],
-            ['name' => 'TWO_FACTOR_AUTH_APP_ISSUER', 'value' => 'OpenRoaming'],
-            ['name' => 'TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME', 'value' => '60'],
-            ['name' => 'TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE', 'value' => '3'],
-            ['name' => 'TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS', 'value' => '1'],
-            ['name' => 'TWO_FACTOR_AUTH_RESEND_INTERVAL', 'value' => '30'],
+            ['name' => SettingName::TWO_FACTOR_AUTH_STATUS->value, 'value' => 'NOT_ENFORCED'],
+            ['name' => SettingName::TWO_FACTOR_AUTH_APP_LABEL->value, 'value' => 'OpenRoaming'],
+            ['name' => SettingName::TWO_FACTOR_AUTH_APP_ISSUER->value, 'value' => 'OpenRoaming'],
+            ['name' => SettingName::TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME->value, 'value' => '60'],
+            ['name' => SettingName::TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE->value, 'value' => '3'],
+            ['name' => SettingName::TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS->value, 'value' => '1'],
+            ['name' => SettingName::TWO_FACTOR_AUTH_RESEND_INTERVAL->value, 'value' => '30'],
 
-            ['name' => 'PAGE_TITLE', 'value' => 'OpenRoaming Portal'],
-            ['name' => 'CUSTOMER_LOGO_ENABLED', 'value' => 'ON'],
-            ['name' => 'CUSTOMER_LOGO', 'value' => '/resources/logos/WBA_Logo.png'],
-            ['name' => 'OPENROAMING_LOGO', 'value' => '/resources/logos/openroaming.svg'],
-            ['name' => 'WALLPAPER_IMAGE', 'value' => '/resources/images/wallpaper.png'],
-            ['name' => 'WELCOME_TEXT', 'value' => 'Welcome to OpenRoaming Provisioning Service'],
+            ['name' => SettingName::PAGE_TITLE->value, 'value' => 'OpenRoaming Portal'],
+            ['name' => SettingName::CUSTOMER_LOGO_ENABLED->value, 'value' => 'ON'],
+            ['name' => SettingName::CUSTOMER_LOGO->value, 'value' => '/resources/logos/WBA_Logo.png'],
+            ['name' => SettingName::OPENROAMING_LOGO->value, 'value' => '/resources/logos/openroaming.svg'],
+            ['name' => SettingName::WALLPAPER_IMAGE->value, 'value' => '/resources/images/wallpaper.png'],
+            ['name' => SettingName::WELCOME_TEXT->value, 'value' => 'Welcome to OpenRoaming Provisioning Service'],
             [
-                'name' => 'WELCOME_DESCRIPTION',
+                'name' => SettingName::WELCOME_DESCRIPTION->value,
                 'value' => 'This provisioning portal is for the WBA OpenRoaming Live Program'
             ],
-            ['name' => 'ADDITIONAL_LABEL', 'value' => 'This label it\'s to add extra content if necessary'],
-            ['name' => 'CONTACT_EMAIL', 'value' => 'openroaming-help@example.com'],
+            ['name' => SettingName::ADDITIONAL_LABEL->value, 'value' => 'This label it\'s to add extra content if necessary'],
+            ['name' => SettingName::CONTACT_EMAIL->value, 'value' => 'openroaming-help@example.com'],
 
-            ['name' => 'AUTH_METHOD_SAML_ENABLED', 'value' => 'false'],
-            ['name' => 'AUTH_METHOD_SAML_LABEL', 'value' => 'Login with SAML'],
-            ['name' => 'AUTH_METHOD_SAML_DESCRIPTION', 'value' => 'Authenticate with your SAML account'],
-            ['name' => 'AUTH_METHOD_GOOGLE_LOGIN_ENABLED', 'value' => 'false'],
-            ['name' => 'AUTH_METHOD_GOOGLE_LOGIN_LABEL', 'value' => 'Login with Google'],
-            ['name' => 'AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION', 'value' => 'Authenticate with your Google account'],
-            ['name' => 'AUTH_METHOD_MICROSOFT_LOGIN_ENABLED', 'value' => 'false'],
-            ['name' => 'AUTH_METHOD_MICROSOFT_LOGIN_LABEL', 'value' => 'Login with Microsoft'],
+            ['name' => SettingName::AUTH_METHOD_SAML_ENABLED->value, 'value' => 'false'],
+            ['name' => SettingName::AUTH_METHOD_SAML_LABEL->value, 'value' => 'Login with SAML'],
+            ['name' => SettingName::AUTH_METHOD_SAML_DESCRIPTION->value, 'value' => 'Authenticate with your SAML account'],
+            ['name' => SettingName::AUTH_METHOD_GOOGLE_LOGIN_ENABLED->value, 'value' => 'false'],
+            ['name' => SettingName::AUTH_METHOD_GOOGLE_LOGIN_LABEL->value, 'value' => 'Login with Google'],
+            ['name' => SettingName::AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION->value, 'value' => 'Authenticate with your Google account'],
+            ['name' => SettingName::AUTH_METHOD_MICROSOFT_LOGIN_ENABLED->value, 'value' => 'false'],
+            ['name' => SettingName::AUTH_METHOD_MICROSOFT_LOGIN_LABEL->value, 'value' => 'Login with Microsoft'],
             [
-                'name' => 'AUTH_METHOD_MICROSOFT_LOGIN_DESCRIPTION',
+                'name' => SettingName::AUTH_METHOD_MICROSOFT_LOGIN_DESCRIPTION->value,
                 'value' => 'Authenticate with your Microsoft account'
             ],
-            ['name' => 'AUTH_METHOD_REGISTER_ENABLED', 'value' => 'true'],
-            ['name' => 'AUTH_METHOD_REGISTER_LABEL', 'value' => 'Create Account with Email'],
-            ['name' => 'AUTH_METHOD_REGISTER_DESCRIPTION', 'value' => 'Don\'t have an account? Create one'],
-            ['name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED', 'value' => 'true'],
-            ['name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_LABEL', 'value' => 'Account Login'],
-            ['name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION', 'value' => 'Already have an account? Login then'],
-            ['name' => 'LOGIN_WITH_UUID_ONLY', 'value' => 'OFF'],
-            ['name' => 'AUTH_METHOD_SMS_REGISTER_ENABLED', 'value' => 'false'],
-            ['name' => 'AUTH_METHOD_SMS_REGISTER_LABEL', 'value' => 'Create Account with Phone Number'],
-            ['name' => 'AUTH_METHOD_SMS_REGISTER_DESCRIPTION', 'value' => 'Don\'t have an account? Create one'],
+            ['name' => SettingName::AUTH_METHOD_REGISTER_ENABLED->value, 'value' => 'true'],
+            ['name' => SettingName::AUTH_METHOD_REGISTER_LABEL->value, 'value' => 'Create Account with Email'],
+            ['name' => SettingName::AUTH_METHOD_REGISTER_DESCRIPTION->value, 'value' => 'Don\'t have an account? Create one'],
+            ['name' => SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED->value, 'value' => 'true'],
+            ['name' => SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_LABEL->value, 'value' => 'Account Login'],
+            ['name' => SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION->value, 'value' => 'Already have an account? Login then'],
+            ['name' => SettingName::LOGIN_WITH_UUID_ONLY->value, 'value' => 'OFF'],
+            ['name' => SettingName::AUTH_METHOD_SMS_REGISTER_ENABLED->value, 'value' => 'false'],
+            ['name' => SettingName::AUTH_METHOD_SMS_REGISTER_LABEL->value, 'value' => 'Create Account with Phone Number'],
+            ['name' => SettingName::AUTH_METHOD_SMS_REGISTER_DESCRIPTION->value, 'value' => 'Don\'t have an account? Create one'],
 
-            ['name' => 'EMAIL_TIMER_RESEND', 'value' => '2'],
-            ['name' => 'LINK_VALIDITY', 'value' => '10'],
+            ['name' => SettingName::EMAIL_TIMER_RESEND->value, 'value' => '2'],
+            ['name' => SettingName::LINK_VALIDITY->value, 'value' => '10'],
 
-            ['name' => 'TOS', 'value' => 'LINK'],
-            ['name' => 'PRIVACY_POLICY', 'value' => 'LINK'],
-            ['name' => 'TOS_LINK', 'value' => 'https://wballiance.com/openroaming/toc/'],
-            ['name' => 'PRIVACY_POLICY_LINK', 'value' => 'https://wballiance.com/openroaming/privacy-policy'],
-            ['name' => 'VALID_DOMAINS_GOOGLE_LOGIN', 'value' => ''],
-            ['name' => 'VALID_DOMAINS_MICROSOFT_LOGIN', 'value' => ''],
-            ['name' => 'PROFILES_ENCRYPTION_TYPE_IOS_ONLY', 'value' => 'WPA2'],
+            ['name' => SettingName::TOS->value, 'value' => 'LINK'],
+            ['name' => SettingName::PRIVACY_POLICY->value, 'value' => 'LINK'],
+            ['name' => SettingName::TOS_LINK->value, 'value' => 'https://wballiance.com/openroaming/toc/'],
+            ['name' => SettingName::PRIVACY_POLICY_LINK->value, 'value' => 'https://wballiance.com/openroaming/privacy-policy'],
+            ['name' => SettingName::VALID_DOMAINS_GOOGLE_LOGIN->value, 'value' => ''],
+            ['name' => SettingName::VALID_DOMAINS_MICROSOFT_LOGIN->value, 'value' => ''],
+            ['name' => SettingName::PROFILES_ENCRYPTION_TYPE_IOS_ONLY->value, 'value' => 'WPA2'],
 
-            ['name' => 'SYNC_LDAP_ENABLED', 'value' => 'false'],
-            ['name' => 'SYNC_LDAP_SERVER', 'value' => 'ldap://127.0.0.1'],
-            ['name' => 'SYNC_LDAP_BIND_USER_DN', 'value' => ''],
-            ['name' => 'SYNC_LDAP_BIND_USER_PASSWORD', 'value' => ''],
-            ['name' => 'SYNC_LDAP_SEARCH_BASE_DN', 'value' => ''],
-            ['name' => 'SYNC_LDAP_SEARCH_FILTER', 'value' => '(sAMAccountName=$identifier)'],
+            ['name' => SettingName::SYNC_LDAP_ENABLED->value, 'value' => 'false'],
+            ['name' => SettingName::SYNC_LDAP_SERVER->value, 'value' => 'ldap://127.0.0.1'],
+            ['name' => SettingName::SYNC_LDAP_BIND_USER_DN->value, 'value' => ''],
+            ['name' => SettingName::SYNC_LDAP_BIND_USER_PASSWORD->value, 'value' => ''],
+            ['name' => SettingName::SYNC_LDAP_SEARCH_BASE_DN->value, 'value' => ''],
+            ['name' => SettingName::SYNC_LDAP_SEARCH_FILTER->value, 'value' => '(sAMAccountName=$identifier)'],
 
-            ['name' => 'CAPPORT_ENABLED', 'value' => 'false'],
-            ['name' => 'CAPPORT_PORTAL_URL', 'value' => 'https://example.com/'],
-            ['name' => 'CAPPORT_VENUE_INFO_URL', 'value' => ' https://openroaming.org/'],
+            ['name' => SettingName::CAPPORT_ENABLED->value, 'value' => 'false'],
+            ['name' => SettingName::CAPPORT_PORTAL_URL->value, 'value' => 'https://example.com/'],
+            ['name' => SettingName::CAPPORT_VENUE_INFO_URL->value, 'value' => ' https://openroaming.org/'],
 
-            ['name' => 'SMS_USERNAME', 'value' => ''],
-            ['name' => 'SMS_USER_ID', 'value' => ''],
-            ['name' => 'SMS_HANDLE', 'value' => ''],
-            ['name' => 'SMS_FROM', 'value' => 'OpenRoaming'],
-            ['name' => 'SMS_TIMER_RESEND', 'value' => '5'],
-            ['name' => 'USER_DELETE_TIME', 'value' => '5'],
-            ['name' => 'TIME_INTERVAL_NOTIFICATION', 'value' => '7'],
-            ['name' => 'DEFAULT_REGION_PHONE_INPUTS', 'value' => 'PT, US, GB'],
-            ['name' => 'PROFILE_LIMIT_DATE_GOOGLE', 'value' => '5'],
-            ['name' => 'PROFILE_LIMIT_DATE_MICROSOFT', 'value' => '5'],
-            ['name' => 'PROFILE_LIMIT_DATE_SAML', 'value' => '5'],
-            ['name' => 'PROFILE_LIMIT_DATE_EMAIL', 'value' => '5'],
-            ['name' => 'PROFILE_LIMIT_DATE_SMS', 'value' => '5'],
-            ['name' => 'TIME_STAMP_FREERADIUS_CRON', 'value' => null],
+            ['name' => SettingName::SMS_USERNAME->value, 'value' => ''],
+            ['name' => SettingName::SMS_USER_ID->value, 'value' => ''],
+            ['name' => SettingName::SMS_HANDLE->value, 'value' => ''],
+            ['name' => SettingName::SMS_FROM->value, 'value' => 'OpenRoaming'],
+            ['name' => SettingName::SMS_TIMER_RESEND->value, 'value' => '5'],
+            ['name' => SettingName::USER_DELETE_TIME->value, 'value' => '5'],
+            ['name' => SettingName::TIME_INTERVAL_NOTIFICATION->value, 'value' => '7'],
+            ['name' => SettingName::DEFAULT_REGION_PHONE_INPUTS->value, 'value' => 'PT, US, GB'],
+            ['name' => SettingName::PROFILE_LIMIT_DATE_GOOGLE->value, 'value' => '5'],
+            ['name' => SettingName::PROFILE_LIMIT_DATE_MICROSOFT->value, 'value' => '5'],
+            ['name' => SettingName::PROFILE_LIMIT_DATE_SAML->value, 'value' => '5'],
+            ['name' => SettingName::PROFILE_LIMIT_DATE_EMAIL->value, 'value' => '5'],
+            ['name' => SettingName::PROFILE_LIMIT_DATE_SMS->value, 'value' => '5'],
+            ['name' => SettingName::TIME_STAMP_FREERADIUS_CRON->value, 'value' => null],
 
-            ['name' => 'DELETE_UNCONFIRMED_USERS_CRON', 'value' => '0 0 * * *'],
-            ['name' => 'USERS_WHEN_PROFILE_EXPIRES_CRON', 'value' => '0 1 * * *'],
-            ['name' => 'LDAP_SYNC_CRON', 'value' => '0 2 * * *'],
-            ['name' => 'FREERADIUS_LAST_CONNECTION_CRON', 'value' => '* * * * *'],
+            ['name' => SettingName::DELETE_UNCONFIRMED_USERS_CRON->value, 'value' => '0 0 * * *'],
+            ['name' => SettingName::USERS_WHEN_PROFILE_EXPIRES_CRON->value, 'value' => '0 1 * * *'],
+            ['name' => SettingName::LDAP_SYNC_CRON->value, 'value' => '0 2 * * *'],
+            ['name' => SettingName::FREERADIUS_LAST_CONNECTION_CRON->value, 'value' => '* * * * *'],
 
         ];
 
         // phpcs:disable Generic.Files.LineLength.TooLong
         $settingsToTranslate = [
             [
-                'name' => 'WELCOME_TEXT',
+                'name' => SettingName::WELCOME_TEXT->value,
                 'value' => 'Welcome to OpenRoaming Provisioning Service',
                 'translations' => [
                     LanguageType::EN->value => 'Welcome to OpenRoaming Provisioning Service',
@@ -165,7 +166,7 @@ class ResetAllSettingsCommand extends Command
                 ],
             ],
             [
-                'name' => 'WELCOME_DESCRIPTION',
+                'name' => SettingName::WELCOME_DESCRIPTION->value,
                 'value' => 'This portal allows you to download and install an OpenRoaming profile tailored to your device, allowing you to connect automatically to OpenRoaming Wi-Fi networks across the world.',
                 'translations' => [
                     LanguageType::EN->value => 'This portal allows you to download and install an OpenRoaming profile tailored to your device, allowing you to connect automatically to OpenRoaming Wi-Fi networks across the world.',
@@ -173,7 +174,7 @@ class ResetAllSettingsCommand extends Command
                 ],
             ],
             [
-                'name' => 'ADDITIONAL_LABEL',
+                'name' => SettingName::ADDITIONAL_LABEL->value,
                 'value' => 'This label is used to add extra content if necessary',
                 'translations' => [
                     LanguageType::EN->value => 'This label is used to add extra content if necessary',
@@ -181,7 +182,7 @@ class ResetAllSettingsCommand extends Command
                 ],
             ],
             [
-                'name' => 'AUTH_METHOD_SAML_LABEL',
+                'name' => SettingName::AUTH_METHOD_SAML_LABEL->value,
                 'value' => 'Login with SAML',
                 'translations' => [
                     LanguageType::EN->value => 'Login with SAML',
@@ -189,7 +190,7 @@ class ResetAllSettingsCommand extends Command
                 ],
             ],
             [
-                'name' => 'AUTH_METHOD_SAML_DESCRIPTION',
+                'name' => SettingName::AUTH_METHOD_SAML_DESCRIPTION->value,
                 'value' => 'Authenticate with your SAML account',
                 'translations' => [
                     LanguageType::EN->value => 'Authenticate with your SAML account',
@@ -197,7 +198,7 @@ class ResetAllSettingsCommand extends Command
                 ],
             ],
             [
-                'name' => 'AUTH_METHOD_GOOGLE_LOGIN_LABEL',
+                'name' => SettingName::AUTH_METHOD_GOOGLE_LOGIN_LABEL->value,
                 'value' => 'Login with Google',
                 'translations' => [
                     LanguageType::EN->value => 'Login with Google',
@@ -205,7 +206,7 @@ class ResetAllSettingsCommand extends Command
                 ],
             ],
             [
-                'name' => 'AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION',
+                'name' => SettingName::AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION->value,
                 'value' => 'Authenticate with your Google account',
                 'translations' => [
                     LanguageType::EN->value => 'Authenticate with your Google account',
@@ -213,7 +214,7 @@ class ResetAllSettingsCommand extends Command
                 ],
             ],
             [
-                'name' => 'AUTH_METHOD_MICROSOFT_LOGIN_LABEL',
+                'name' => SettingName::AUTH_METHOD_MICROSOFT_LOGIN_LABEL->value,
                 'value' => 'Login with Microsoft',
                 'translations' => [
                     LanguageType::EN->value => 'Login with Microsoft',
@@ -221,7 +222,7 @@ class ResetAllSettingsCommand extends Command
                 ],
             ],
             [
-                'name' => 'AUTH_METHOD_MICROSOFT_LOGIN_DESCRIPTION',
+                'name' => SettingName::AUTH_METHOD_MICROSOFT_LOGIN_DESCRIPTION->value,
                 'value' => 'Authenticate with your Microsoft account',
                 'translations' => [
                     LanguageType::EN->value => 'Authenticate with your Microsoft account',
@@ -229,7 +230,7 @@ class ResetAllSettingsCommand extends Command
                 ],
             ],
             [
-                'name' => 'AUTH_METHOD_REGISTER_LABEL',
+                'name' => SettingName::AUTH_METHOD_REGISTER_LABEL->value,
                 'value' => 'Create Account with Email',
                 'translations' => [
                     LanguageType::EN->value => 'Create Account with Email',
@@ -237,7 +238,7 @@ class ResetAllSettingsCommand extends Command
                 ],
             ],
             [
-                'name' => 'AUTH_METHOD_REGISTER_DESCRIPTION',
+                'name' => SettingName::AUTH_METHOD_REGISTER_DESCRIPTION->value,
                 'value' => "Don't have an account? Create one",
                 'translations' => [
                     LanguageType::EN->value => "Don't have an account? Create one",
@@ -245,7 +246,7 @@ class ResetAllSettingsCommand extends Command
                 ],
             ],
             [
-                'name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_LABEL',
+                'name' => SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_LABEL->value,
                 'value' => 'Login Here',
                 'translations' => [
                     LanguageType::EN->value => 'Login Here',
@@ -253,7 +254,7 @@ class ResetAllSettingsCommand extends Command
                 ],
             ],
             [
-                'name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION',
+                'name' => SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION->value,
                 'value' => 'Already have an account? Login then',
                 'translations' => [
                     LanguageType::EN->value => 'Already have an account? Login then',
@@ -261,7 +262,7 @@ class ResetAllSettingsCommand extends Command
                 ],
             ],
             [
-                'name' => 'AUTH_METHOD_SMS_REGISTER_LABEL',
+                'name' => SettingName::AUTH_METHOD_SMS_REGISTER_LABEL->value,
                 'value' => 'Create Account with Phone Number',
                 'translations' => [
                     LanguageType::EN->value => 'Create Account with Phone Number',
@@ -269,7 +270,7 @@ class ResetAllSettingsCommand extends Command
                 ],
             ],
             [
-                'name' => 'AUTH_METHOD_SMS_REGISTER_DESCRIPTION',
+                'name' => SettingName::AUTH_METHOD_SMS_REGISTER_DESCRIPTION->value,
                 'value' => "Don't have an account? Create one",
                 'translations' => [
                     LanguageType::EN->value => "Don't have an account? Create one",

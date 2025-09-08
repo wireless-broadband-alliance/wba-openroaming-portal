@@ -5,6 +5,7 @@ namespace App\Command;
 use App\Entity\Setting;
 use App\Entity\SettingTranslation;
 use App\Enum\LanguageType;
+use App\Enum\SettingName;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -49,45 +50,45 @@ class ResetAuthSettingsCommand extends Command
         }
 
         $settings = [
-            ['name' => 'AUTH_METHOD_SAML_ENABLED', 'value' => 'false'],
-            ['name' => 'AUTH_METHOD_SAML_LABEL', 'value' => 'Login with SAML'],
-            ['name' => 'AUTH_METHOD_SAML_DESCRIPTION', 'value' => 'Authenticate with your SAML account'],
-            ['name' => 'AUTH_METHOD_GOOGLE_LOGIN_ENABLED', 'value' => 'false'],
-            ['name' => 'AUTH_METHOD_GOOGLE_LOGIN_LABEL', 'value' => 'Login with Google'],
-            ['name' => 'AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION', 'value' => 'Authenticate with your Google account'],
-            ['name' => 'AUTH_METHOD_MICROSOFT_LOGIN_ENABLED', 'value' => 'false'],
-            ['name' => 'AUTH_METHOD_MICROSOFT_LOGIN_LABEL', 'value' => 'Login with Microsoft'],
+            ['name' => SettingName::AUTH_METHOD_SAML_ENABLED->value, 'value' => 'false'],
+            ['name' => SettingName::AUTH_METHOD_SAML_LABEL->value, 'value' => 'Login with SAML'],
+            ['name' => SettingName::AUTH_METHOD_SAML_DESCRIPTION->value, 'value' => 'Authenticate with your SAML account'],
+            ['name' => SettingName::AUTH_METHOD_GOOGLE_LOGIN_ENABLED->value, 'value' => 'false'],
+            ['name' => SettingName::AUTH_METHOD_GOOGLE_LOGIN_LABEL->value, 'value' => 'Login with Google'],
+            ['name' => SettingName::AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION->value, 'value' => 'Authenticate with your Google account'],
+            ['name' => SettingName::AUTH_METHOD_MICROSOFT_LOGIN_ENABLED->value, 'value' => 'false'],
+            ['name' => SettingName::AUTH_METHOD_MICROSOFT_LOGIN_LABEL->value, 'value' => 'Login with Microsoft'],
             [
-                'name' => 'AUTH_METHOD_MICROSOFT_LOGIN_DESCRIPTION',
+                'name' => SettingName::AUTH_METHOD_MICROSOFT_LOGIN_DESCRIPTION->value,
                 'value' => 'Authenticate with your Microsoft account'
             ],
-            ['name' => 'VALID_DOMAINS_GOOGLE_LOGIN', 'value' => ''],
-            ['name' => 'AUTH_METHOD_REGISTER_ENABLED', 'value' => 'true'],
-            ['name' => 'AUTH_METHOD_REGISTER_LABEL', 'value' => 'Create Account with Email'],
-            ['name' => 'AUTH_METHOD_REGISTER_DESCRIPTION', 'value' => 'Don\'t have an account? Create one'],
+            ['name' => SettingName::VALID_DOMAINS_GOOGLE_LOGIN->value, 'value' => ''],
+            ['name' => SettingName::AUTH_METHOD_REGISTER_ENABLED->value, 'value' => 'true'],
+            ['name' => SettingName::AUTH_METHOD_REGISTER_LABEL->value, 'value' => 'Create Account with Email'],
+            ['name' => SettingName::AUTH_METHOD_REGISTER_DESCRIPTION->value, 'value' => 'Don\'t have an account? Create one'],
 
-            ['name' => 'EMAIL_TIMER_RESEND', 'value' => '2'],
-            ['name' => 'LINK_VALIDITY', 'value' => '10'],
+            ['name' => SettingName::EMAIL_TIMER_RESEND->value, 'value' => '2'],
+            ['name' => SettingName::LINK_VALIDITY->value, 'value' => '10'],
 
-            ['name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED', 'value' => 'true'],
-            ['name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_LABEL', 'value' => 'Account Login'],
-            ['name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION', 'value' => 'Already have an account? Login then'],
-            ['name' => 'LOGIN_WITH_UUID_ONLY', 'value' => 'OFF'],
-            ['name' => 'AUTH_METHOD_SMS_REGISTER_ENABLED', 'value' => 'false'],
-            ['name' => 'AUTH_METHOD_SMS_REGISTER_LABEL', 'value' => 'Create Account with Phone Number'],
-            ['name' => 'AUTH_METHOD_SMS_REGISTER_DESCRIPTION', 'value' => 'Don\'t have an account? Create one'],
-            ['name' => 'VALID_DOMAINS_GOOGLE_LOGIN', 'value' => ''],
-            ['name' => 'VALID_DOMAINS_MICROSOFT_LOGIN', 'value' => ''],
-            ['name' => 'PROFILE_LIMIT_DATE_GOOGLE', 'value' => '5'],
-            ['name' => 'PROFILE_LIMIT_DATE_MICROSOFT', 'value' => '5'],
-            ['name' => 'PROFILE_LIMIT_DATE_SAML', 'value' => '5'],
-            ['name' => 'PROFILE_LIMIT_DATE_EMAIL', 'value' => '5'],
-            ['name' => 'PROFILE_LIMIT_DATE_SMS', 'value' => '5'],
+            ['name' => SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED->value, 'value' => 'true'],
+            ['name' => SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_LABEL->value, 'value' => 'Account Login'],
+            ['name' => SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION->value, 'value' => 'Already have an account? Login then'],
+            ['name' => SettingName::LOGIN_WITH_UUID_ONLY->value, 'value' => 'OFF'],
+            ['name' => SettingName::AUTH_METHOD_SMS_REGISTER_ENABLED->value, 'value' => 'false'],
+            ['name' => SettingName::AUTH_METHOD_SMS_REGISTER_LABEL->value, 'value' => 'Create Account with Phone Number'],
+            ['name' => SettingName::AUTH_METHOD_SMS_REGISTER_DESCRIPTION->value, 'value' => 'Don\'t have an account? Create one'],
+            ['name' => SettingName::VALID_DOMAINS_GOOGLE_LOGIN->value, 'value' => ''],
+            ['name' => SettingName::VALID_DOMAINS_MICROSOFT_LOGIN->value, 'value' => ''],
+            ['name' => SettingName::PROFILE_LIMIT_DATE_GOOGLE->value, 'value' => '5'],
+            ['name' => SettingName::PROFILE_LIMIT_DATE_MICROSOFT->value, 'value' => '5'],
+            ['name' => SettingName::PROFILE_LIMIT_DATE_SAML->value, 'value' => '5'],
+            ['name' => SettingName::PROFILE_LIMIT_DATE_EMAIL->value, 'value' => '5'],
+            ['name' => SettingName::PROFILE_LIMIT_DATE_SMS->value, 'value' => '5'],
         ];
 
         $settingsToTranslate = [
             [
-                'name' => 'AUTH_METHOD_SAML_LABEL',
+                'name' => SettingName::AUTH_METHOD_SAML_LABEL->value,
                 'value' => 'Login with SAML',
                 'translations' => [
                     LanguageType::EN->value => 'Login with SAML',
@@ -95,7 +96,7 @@ class ResetAuthSettingsCommand extends Command
                 ],
             ],
             [
-                'name' => 'AUTH_METHOD_SAML_DESCRIPTION',
+                'name' => SettingName::AUTH_METHOD_SAML_DESCRIPTION->value,
                 'value' => 'Authenticate with your SAML account',
                 'translations' => [
                     LanguageType::EN->value => 'Authenticate with your SAML account',
@@ -103,7 +104,7 @@ class ResetAuthSettingsCommand extends Command
                 ],
             ],
             [
-                'name' => 'AUTH_METHOD_GOOGLE_LOGIN_LABEL',
+                'name' => SettingName::AUTH_METHOD_GOOGLE_LOGIN_LABEL->value,
                 'value' => 'Login with Google',
                 'translations' => [
                     LanguageType::EN->value => 'Login with Google',
@@ -111,7 +112,7 @@ class ResetAuthSettingsCommand extends Command
                 ],
             ],
             [
-                'name' => 'AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION',
+                'name' => SettingName::AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION->value,
                 'value' => 'Authenticate with your Google account',
                 'translations' => [
                     LanguageType::EN->value => 'Authenticate with your Google account',
@@ -119,7 +120,7 @@ class ResetAuthSettingsCommand extends Command
                 ],
             ],
             [
-                'name' => 'AUTH_METHOD_MICROSOFT_LOGIN_LABEL',
+                'name' => SettingName::AUTH_METHOD_MICROSOFT_LOGIN_LABEL->value,
                 'value' => 'Login with Microsoft',
                 'translations' => [
                     LanguageType::EN->value => 'Login with Microsoft',
@@ -127,7 +128,7 @@ class ResetAuthSettingsCommand extends Command
                 ],
             ],
             [
-                'name' => 'AUTH_METHOD_MICROSOFT_LOGIN_DESCRIPTION',
+                'name' => SettingName::AUTH_METHOD_MICROSOFT_LOGIN_DESCRIPTION->value,
                 'value' => 'Authenticate with your Microsoft account',
                 'translations' => [
                     LanguageType::EN->value => 'Authenticate with your Microsoft account',
@@ -135,7 +136,7 @@ class ResetAuthSettingsCommand extends Command
                 ],
             ],
             [
-                'name' => 'AUTH_METHOD_REGISTER_LABEL',
+                'name' => SettingName::AUTH_METHOD_REGISTER_LABEL->value,
                 'value' => 'Create Account with Email',
                 'translations' => [
                     LanguageType::EN->value => 'Create Account with Email',
@@ -143,7 +144,7 @@ class ResetAuthSettingsCommand extends Command
                 ],
             ],
             [
-                'name' => 'AUTH_METHOD_REGISTER_DESCRIPTION',
+                'name' => SettingName::AUTH_METHOD_REGISTER_DESCRIPTION->value,
                 'value' => "Don't have an account? Create one",
                 'translations' => [
                     LanguageType::EN->value => "Don't have an account? Create one",
@@ -151,7 +152,7 @@ class ResetAuthSettingsCommand extends Command
                 ],
             ],
             [
-                'name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_LABEL',
+                'name' => SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_LABEL->value,
                 'value' => 'Login Here',
                 'translations' => [
                     LanguageType::EN->value => 'Login Here',
@@ -159,7 +160,7 @@ class ResetAuthSettingsCommand extends Command
                 ],
             ],
             [
-                'name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION',
+                'name' => SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION->value,
                 'value' => 'Already have an account? Login then',
                 'translations' => [
                     LanguageType::EN->value => 'Already have an account? Login then',
@@ -167,7 +168,7 @@ class ResetAuthSettingsCommand extends Command
                 ],
             ],
             [
-                'name' => 'AUTH_METHOD_SMS_REGISTER_LABEL',
+                'name' => SettingName::AUTH_METHOD_SMS_REGISTER_LABEL->value,
                 'value' => 'Create Account with Phone Number',
                 'translations' => [
                     LanguageType::EN->value => 'Create Account with Phone Number',
@@ -175,7 +176,7 @@ class ResetAuthSettingsCommand extends Command
                 ],
             ],
             [
-                'name' => 'AUTH_METHOD_SMS_REGISTER_DESCRIPTION',
+                'name' => SettingName::AUTH_METHOD_SMS_REGISTER_DESCRIPTION->value,
                 'value' => "Don't have an account? Create one",
                 'translations' => [
                     LanguageType::EN->value => "Don't have an account? Create one",

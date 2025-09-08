@@ -3,6 +3,7 @@
 namespace App\Command;
 
 use App\Entity\Setting;
+use App\Enum\SettingName;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -48,11 +49,11 @@ class ResetScheduleSettingsCommand extends Command
         }
 
         $settings = [
-            ['name' => 'FREERADIUS_LAST_CONNECTION_CRON', 'value' => '* * * * *'],
-            ['name' => 'DELETE_UNCONFIRMED_USERS_CRON', 'value' => '0 0 * * *'],
-            ['name' => 'USERS_WHEN_PROFILE_EXPIRES_CRON', 'value' => '0 1 * * *'],
-            ['name' => 'LDAP_SYNC_CRON', 'value' => '0 2 * * *'],
-            ['name' => 'CRON_ADVANCED_STATUS', 'value' => 'OFF'],
+            ['name' => SettingName::FREERADIUS_LAST_CONNECTION_CRON->value, 'value' => '* * * * *'],
+            ['name' => SettingName::DELETE_UNCONFIRMED_USERS_CRON->value, 'value' => '0 0 * * *'],
+            ['name' => SettingName::USERS_WHEN_PROFILE_EXPIRES_CRON->value, 'value' => '0 1 * * *'],
+            ['name' => SettingName::LDAP_SYNC_CRON->value, 'value' => '0 2 * * *'],
+            ['name' => SettingName::CRON_ADVANCED_STATUS->value, 'value' => 'OFF'],
         ];
 
         // Begin a database transaction to ensure data consistency

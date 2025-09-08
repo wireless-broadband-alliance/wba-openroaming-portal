@@ -3,6 +3,7 @@
 namespace App\Command;
 
 use App\Entity\Setting;
+use App\Enum\SettingName;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -49,12 +50,12 @@ class ResetPlatformStatusSettingsCommand extends Command
         }
 
         $settings = [
-            ['name' => 'PLATFORM_MODE', 'value' => 'Demo'],
-            ['name' => 'USER_VERIFICATION', 'value' => 'OFF'],
-            ['name' => 'TURNSTILE_CHECKER', 'value' => 'OFF'],
-            ['name' => 'API_STATUS', 'value' => 'OFF'],
-            ['name' => 'USER_DELETE_TIME', 'value' => '5'],
-            ['name' => 'TIME_INTERVAL_NOTIFICATION', 'value' => '7'],
+            ['name' => SettingName::PLATFORM_MODE->value, 'value' => 'Demo'],
+            ['name' => SettingName::USER_VERIFICATION->value, 'value' => 'OFF'],
+            ['name' => SettingName::TURNSTILE_CHECKER->value, 'value' => 'OFF'],
+            ['name' => SettingName::API_STATUS->value, 'value' => 'OFF'],
+            ['name' => SettingName::USER_DELETE_TIME->value, 'value' => '5'],
+            ['name' => SettingName::TIME_INTERVAL_NOTIFICATION->value, 'value' => '7'],
         ];
 
         $this->entityManager->beginTransaction();
