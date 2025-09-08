@@ -45,7 +45,7 @@
         {# Form Password Section #}
         <div {{ stimulus_controller('fields') }}>
             <form method="POST" action="{{ path('app_site_account_user') }}">
-                <h1 class="text-lg mb-8">{{ 'changePassword.title'|trans({}, '_account_widget') }}</h1>
+                <h1 class="text-lg mb-8 mt-10">{{ 'changePassword.title'|trans({}, '_account_widget') }}</h1>
 
                 {{ form_start(formPassword) }}
                 {{ form_errors(formPassword) }}
