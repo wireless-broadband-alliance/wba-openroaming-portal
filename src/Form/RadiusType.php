@@ -3,6 +3,7 @@
 namespace App\Form;
 
 use App\Enum\ProfileType;
+use App\Enum\SettingName;
 use App\Service\GetSettings;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -24,7 +25,7 @@ class RadiusType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $settingsToUpdate = [
-            'DISPLAY_NAME' => [
+            SettingName::DISPLAY_NAME->value => [
                 'type' => TextType::class,
                 'constraints' => [
                     new NotBlank([
@@ -36,7 +37,7 @@ class RadiusType extends AbstractType
                     ])
                 ],
             ],
-            'RADIUS_REALM_NAME' => [
+            SettingName::RADIUS_REALM_NAME->value => [
                 'type' => TextType::class,
                 'constraints' => [
                     new NotBlank([
@@ -48,7 +49,7 @@ class RadiusType extends AbstractType
                     ])
                 ],
             ],
-            'DOMAIN_NAME' => [
+            SettingName::DOMAIN_NAME->value => [
                 'type' => TextType::class,
                 'constraints' => [
                     new NotBlank([
@@ -60,7 +61,7 @@ class RadiusType extends AbstractType
                     ])
                 ],
             ],
-            'OPERATOR_NAME' => [
+            SettingName::OPERATOR_NAME->value => [
                 'type' => TextType::class,
                 'constraints' => [
                     new NotBlank([
@@ -72,7 +73,7 @@ class RadiusType extends AbstractType
                     ])
                 ],
             ],
-            'RADIUS_TLS_NAME' => [
+            SettingName::RADIUS_TLS_NAME->value => [
                 'type' => TextType::class,
                 'constraints' => [
                     new NotBlank([
@@ -84,7 +85,7 @@ class RadiusType extends AbstractType
                     ])
                 ],
             ],
-            'NAI_REALM' => [
+            SettingName::NAI_REALM->value => [
                 'type' => TextType::class,
                 'constraints' => [
                     new NotBlank([
@@ -96,7 +97,7 @@ class RadiusType extends AbstractType
                     ])
                 ],
             ],
-            'RADIUS_TRUSTED_ROOT_CA_SHA1_HASH' => [
+            SettingName::RADIUS_TRUSTED_ROOT_CA_SHA1_HASH->value => [
                 'type' => TextType::class,
                 'constraints' => [
                     new NotBlank([
@@ -108,7 +109,7 @@ class RadiusType extends AbstractType
                     ])
                 ],
             ],
-            'PAYLOAD_IDENTIFIER' => [
+            SettingName::PAYLOAD_IDENTIFIER->value => [
                 'type' => TextType::class,
                 'constraints' => [
                     new NotBlank([
@@ -120,7 +121,7 @@ class RadiusType extends AbstractType
                     ])
                 ],
             ],
-            'PROFILES_ENCRYPTION_TYPE_IOS_ONLY' => [
+            SettingName::PROFILES_ENCRYPTION_TYPE_IOS_ONLY->value => [
                 'type' => ChoiceType::class,
                 'constraints' => [
                     new NotBlank([
@@ -135,7 +136,7 @@ class RadiusType extends AbstractType
             foreach ($options['settings'] as $setting) {
                 if ($setting->getName() === $settingName) {
                     $formFieldOptions['data'] = $setting->getValue();
-                    if ($settingName === 'PROFILES_ENCRYPTION_TYPE_IOS_ONLY') {
+                    if ($settingName === SettingName::PROFILES_ENCRYPTION_TYPE_IOS_ONLY->value) {
                         $formFieldOptions['choices'] = [
                             'WPA 2' => ProfileType::WPA2->value,
                             'WPA 3' => ProfileType::WPA3->value,

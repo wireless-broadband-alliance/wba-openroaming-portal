@@ -3,6 +3,7 @@
 namespace App\Form;
 
 use App\Enum\OperationMode;
+use App\Enum\SettingName;
 use App\Service\GetSettings;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -23,10 +24,10 @@ class CapportType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $settingsToUpdate = [
-            'CAPPORT_ENABLED' => [
+            SettingName::CAPPORT_ENABLED->value => [
                 'type' => ChoiceType::class,
             ],
-            'CAPPORT_PORTAL_URL' => [
+            SettingName::CAPPORT_PORTAL_URL->value => [
                 'type' => TextType::class,
                 'constraints' => [
                     new Assert\Url([
@@ -36,7 +37,7 @@ class CapportType extends AbstractType
                     ]),
                 ],
             ],
-            'CAPPORT_VENUE_INFO_URL' => [
+            SettingName::CAPPORT_VENUE_INFO_URL->value => [
                 'type' => TextType::class,
                 'constraints' => [
                     new Assert\Url([
@@ -53,7 +54,7 @@ class CapportType extends AbstractType
             foreach ($options['settings'] as $setting) {
                 if ($setting->getName() === $settingName) {
                     $formFieldOptions['data'] = $setting->getValue();
-                    if ($settingName === 'CAPPORT_ENABLED') {
+                    if ($settingName === SettingName::CAPPORT_ENABLED->value) {
                         $formFieldOptions['choices'] = [
                             OperationMode::ON->value => 'true',
                             OperationMode::OFF->value => 'false',
