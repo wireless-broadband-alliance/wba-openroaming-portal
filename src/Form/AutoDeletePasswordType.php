@@ -29,7 +29,7 @@ class AutoDeletePasswordType extends AbstractType
                 'mapped' => false,
                 'constraints' => [
                     new IsTrue([
-                        'message' => $this->translator->trans('confirmDeletingYourAccount', [], 'AuthType'),
+                        'message' => $this->translator->trans('confirmDeletingYourAccount', [], 'AutoDeleteType'),
                     ]),
                 ],
             ]);
