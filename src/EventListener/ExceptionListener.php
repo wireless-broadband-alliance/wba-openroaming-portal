@@ -2,7 +2,9 @@
 
 namespace App\EventListener;
 
-use App\Service\GetSettings;
+use App\Entity\Setting;
+use App\Enum\SettingName;
+use App\Repository\SettingRepository;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
@@ -19,8 +21,8 @@ readonly class ExceptionListener
 {
     public function __construct(
         private Environment $twig,
-        private GetSettings $getSettings,
         private TranslatorInterface $translator,
+        private SettingRepository $settingRepository,
     ) {
     }
 
@@ -47,12 +49,12 @@ readonly class ExceptionListener
         }
 
         // Custom status codes to handle
-        $handleCodes = [400, 404, 422, 424, 500, 503];
+        $handleCodes = [400, 404, 422, 424, 500, 501, 503];
         if (!in_array($statusCode, $handleCodes, true)) {
             return;
         }
 
-        $data = $this->getSettings->getSettings();
+        $data = $this->getSettings();
 
         // Try specific error template first
         $template = sprintf('bundles/TwigBundle/Exception/error_%d.html.twig', $statusCode);
@@ -69,5 +71,29 @@ readonly class ExceptionListener
 
         $response = new Response($content, $statusCode);
         $event->setResponse($response);
+    }
+
+    private function getSettings(): array
+    {
+        $wanted = [
+            SettingName::PAGE_TITLE->value,
+            SettingName::CUSTOMER_LOGO_ENABLED->value,
+            SettingName::CUSTOMER_LOGO->value,
+            SettingName::WALLPAPER_IMAGE->value
+        ];
+
+        $settings = $this->settingRepository->findBy([
+            'name' => $wanted,
+        ]);
+
+        $result = [];
+        foreach ($settings as $setting) {
+            /** @var Setting $setting */
+            $result[$setting->getName()] = [
+                'value' => $setting->getValue(),
+            ];
+        }
+
+        return $result;
     }
 }

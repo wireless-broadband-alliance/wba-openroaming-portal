@@ -10,7 +10,6 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Contracts\Translation\TranslatorInterface;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
 readonly class GetSettings
@@ -76,7 +75,7 @@ readonly class GetSettings
         // Check if all the settings on the DB are set and valid
         if (!empty($missingInDb)) {
             throw new HttpException(
-                Response::HTTP_INTERNAL_SERVER_ERROR,
+                500,
                 $this->translator->trans(
                     'settingsMissing',
                     ['%missing%' => implode(', ', $missingInDb)],
@@ -86,7 +85,7 @@ readonly class GetSettings
         }
         if (!empty($notInEnum)) {
             throw new HttpException(
-                Response::HTTP_INTERNAL_SERVER_ERROR,
+                500,
                 $this->translator->trans(
                     'notInEnum',
                     ['%notInEnum%' => implode(', ', $notInEnum)],
