@@ -9,6 +9,7 @@ use App\Enum\AnalyticalEventType;
 use App\Enum\FirewallType;
 use App\Enum\OperationMode;
 use App\Enum\PlatformMode;
+use App\Enum\SettingName;
 use App\Enum\SMSResponse;
 use App\Enum\UserProvider;
 use App\Enum\UserTwoFactorAuthenticationStatus;
@@ -84,11 +85,11 @@ class SecurityController extends AbstractController
 
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings();
-        if ($data['PLATFORM_MODE']['value'] === PlatformMode::DEMO->value) {
+        if ($data[SettingName::PLATFORM_MODE->value]['value'] === PlatformMode::DEMO->value) {
             return $this->redirectToRoute('app_landing');
         }
 
-        if ($data['LOGIN_WITH_UUID_ONLY']['value'] === OperationMode::ON->value) {
+        if ($data[SettingName::LOGIN_WITH_UUID_ONLY->value]['value'] === OperationMode::ON->value) {
             return $this->redirectToRoute('app_login_magic');
         }
 
@@ -108,8 +109,8 @@ class SecurityController extends AbstractController
         // Create the DTO with injected default regions and required password for this login method
         $dto = new LoginChoiceDTO();
 
-        $emailMethod = $data['AUTH_METHOD_REGISTER_ENABLED']['value'];
-        $phoneNumberMethod = $data['AUTH_METHOD_SMS_REGISTER_ENABLED']['value'];
+        $emailMethod = $data[SettingName::AUTH_METHOD_REGISTER_ENABLED->value]['value'];
+        $phoneNumberMethod = $data[SettingName::AUTH_METHOD_SMS_REGISTER_ENABLED->value]['value'];
         if ($emailMethod === 'false' && $phoneNumberMethod) {
             $dto->loginMethod = UserProvider::PHONE_NUMBER->value;
             $dto->requireLoginMethod = false;
@@ -156,13 +157,13 @@ class SecurityController extends AbstractController
     ): Response {
         $data = $this->getSettings->getSettings();
 
-        if ($data['LOGIN_WITH_UUID_ONLY']['value'] === OperationMode::OFF->value) {
+        if ($data[SettingName::LOGIN_WITH_UUID_ONLY->value]['value'] === OperationMode::OFF->value) {
             return $this->redirectToRoute('app_login');
         }
 
         $loginChoiceDTO = new LoginChoiceDTO();
-        $emailMethod = $data['AUTH_METHOD_REGISTER_ENABLED']['value'];
-        $phoneNumberMethod = $data['AUTH_METHOD_SMS_REGISTER_ENABLED']['value'];
+        $emailMethod = $data[SettingName::AUTH_METHOD_REGISTER_ENABLED->value]['value'];
+        $phoneNumberMethod = $data[SettingName::AUTH_METHOD_SMS_REGISTER_ENABLED->value]['value'];
         if ($emailMethod === 'false' && $phoneNumberMethod) {
             $loginChoiceDTO->loginMethod = UserProvider::PHONE_NUMBER->value;
             $loginChoiceDTO->requireLoginMethod = false;
@@ -214,7 +215,7 @@ class SecurityController extends AbstractController
                             $this->translator->trans('loginSentSuccessfully', [], 'controllers')
                         );
                     } else {
-                        $timeIntervalToResendCode = $data["TWO_FACTOR_AUTH_RESEND_INTERVAL"]["value"];
+                        $timeIntervalToResendCode = $data[SettingName::TWO_FACTOR_AUTH_RESEND_INTERVAL->value]['value'];
                         $message = $this->magicLinkService->timeToResend($timeIntervalToResendCode, $event);
                         $this->addFlash(
                             'error',
@@ -334,7 +335,7 @@ class SecurityController extends AbstractController
                             );
                         }
                     } else {
-                        $timeIntervalToResendCode = $data["TWO_FACTOR_AUTH_RESEND_INTERVAL"]["value"];
+                        $timeIntervalToResendCode = $data[SettingName::TWO_FACTOR_AUTH_RESEND_INTERVAL->value]['value'];
                         $message = $this->magicLinkService->timeToResend($timeIntervalToResendCode, $event);
                         $this->addFlash(
                             'error',

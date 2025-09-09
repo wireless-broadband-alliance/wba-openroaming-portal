@@ -7,6 +7,7 @@ use App\Entity\UserExternalAuth;
 use App\Enum\AnalyticalEventType;
 use App\Enum\FirewallType;
 use App\Enum\PlatformMode;
+use App\Enum\SettingName;
 use App\Enum\UserProvider;
 use App\Repository\SettingRepository;
 use App\Repository\UserExternalAuthRepository;
@@ -69,7 +70,7 @@ class GoogleController extends AbstractController
         $data = $this->getSettings->getSettings();
 
         // Check if the user clicked on the 'sms' variable present only on the SMS authentication buttons
-        if ($data['PLATFORM_MODE']['value'] === PlatformMode::DEMO->value) {
+        if ($data[SettingName::PLATFORM_MODE->value]['value'] === PlatformMode::DEMO->value) {
             $this->addFlash(
                 'error',
                 $this->translator->trans(
@@ -310,7 +311,9 @@ class GoogleController extends AbstractController
 
             // Defines the Event to the table
             $eventMetadata = [
-                'platform' => $this->settingRepository->findOneBy(['name' => 'PLATFORM_MODE'])->getValue(),
+                'platform' => $this->settingRepository->findOneBy(
+                    ['name' => SettingName::PLATFORM_MODE->value]
+                )->getValue(),
                 'ip' => $_SERVER['REMOTE_ADDR'],
                 'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? 'Unknown',
                 'uuid' => $user->getUuid(),

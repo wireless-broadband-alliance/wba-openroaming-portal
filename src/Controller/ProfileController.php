@@ -7,6 +7,7 @@ use App\Entity\UserRadiusProfile;
 use App\Enum\AnalyticalEventType;
 use App\Enum\OperationMode;
 use App\Enum\OSType;
+use App\Enum\SettingName;
 use App\Enum\UserProvider;
 use App\Enum\UserRadiusProfileStatus;
 use App\RadiusDb\Entity\RadiusUser;
@@ -85,7 +86,7 @@ class ProfileController extends AbstractController
             $user,
             $radiusUserRepository,
             $radiusProfileRepository,
-            $this->settingRepository->findOneBy(['name' => 'RADIUS_REALM_NAME'])->getValue()
+            $this->settingRepository->findOneBy(['name' => SettingName::RADIUS_REALM_NAME->value])->getValue()
         );
 
         $expirationDate = $this->expirationProfileService->calculateExpiration(
@@ -108,9 +109,9 @@ class ProfileController extends AbstractController
         ], [
             $radiusUser->getUsername(),
             base64_encode((string)$radiusUser->getValue()),
-            $this->settingRepository->findOneBy(['name' => 'DOMAIN_NAME'])->getValue(),
-            $this->settingRepository->findOneBy(['name' => 'RADIUS_TLS_NAME'])->getValue(),
-            $this->settingRepository->findOneBy(['name' => 'DISPLAY_NAME'])->getValue(),
+            $this->settingRepository->findOneBy(['name' => SettingName::DOMAIN_NAME->value])->getValue(),
+            $this->settingRepository->findOneBy(['name' => SettingName::RADIUS_TLS_NAME->value])->getValue(),
+            $this->settingRepository->findOneBy(['name' => SettingName::DISPLAY_NAME->value])->getValue(),
             $expirationDate['limitTime']->format('Y-m-d')
         ], $profile);
         $profileTemplate = file_get_contents('../profile_templates/android/template.txt');
@@ -130,7 +131,9 @@ class ProfileController extends AbstractController
         $eventMetadata = [
             'ip' => $request->getClientIp(),
             'user_agent' => $request->headers->get('User-Agent'),
-            'platform' => $this->settingRepository->findOneBy(['name' => 'PLATFORM_MODE'])->getValue(),
+            'platform' => $this->settingRepository->findOneBy(
+                ['name' => SettingName::PLATFORM_MODE->value]
+            )->getValue(),
             'type' => OSType::ANDROID->value,
         ];
 
@@ -176,7 +179,7 @@ class ProfileController extends AbstractController
             $user,
             $radiusUserRepository,
             $radiusProfileRepository,
-            $this->settingRepository->findOneBy(['name' => 'RADIUS_REALM_NAME'])->getValue()
+            $this->settingRepository->findOneBy(['name' => SettingName::RADIUS_REALM_NAME->value])->getValue()
         );
 
         $expirationDate = $this->expirationProfileService->calculateExpiration(
@@ -203,13 +206,14 @@ class ProfileController extends AbstractController
         ], [
             $radiusUser->getUsername(),
             $radiusUser->getValue(),
-            $this->settingRepository->findOneBy(['name' => 'DOMAIN_NAME'])->getValue(),
-            $this->settingRepository->findOneBy(['name' => 'RADIUS_TLS_NAME'])->getValue(),
-            $this->settingRepository->findOneBy(['name' => 'DISPLAY_NAME'])->getValue(),
-            $this->settingRepository->findOneBy(['name' => 'PAYLOAD_IDENTIFIER'])->getValue(),
-            $this->settingRepository->findOneBy(['name' => 'OPERATOR_NAME'])->getValue(),
-            $this->settingRepository->findOneBy(['name' => 'NAI_REALM'])->getValue(),
-            $this->settingRepository->findOneBy(['name' => 'PROFILES_ENCRYPTION_TYPE_IOS_ONLY'])->getValue(),
+            $this->settingRepository->findOneBy(['name' => SettingName::DOMAIN_NAME->value])->getValue(),
+            $this->settingRepository->findOneBy(['name' => SettingName::RADIUS_TLS_NAME->value])->getValue(),
+            $this->settingRepository->findOneBy(['name' => SettingName::DISPLAY_NAME->value])->getValue(),
+            $this->settingRepository->findOneBy(['name' => SettingName::PAYLOAD_IDENTIFIER->value])->getValue(),
+            $this->settingRepository->findOneBy(['name' => SettingName::OPERATOR_NAME->value])->getValue(),
+            $this->settingRepository->findOneBy(['name' => SettingName::NAI_REALM->value])->getValue(),
+            $this->settingRepository->findOneBy(['name' => SettingName::PROFILES_ENCRYPTION_TYPE_IOS_ONLY->value]
+            )->getValue(),
             $expirationDate['limitTime']->format('Y-m-d\TH:i:s\Z'),
         ], $profile);
 
@@ -268,14 +272,18 @@ class ProfileController extends AbstractController
             $eventMetadata = [
                 'ip' => $request->getClientIp(),
                 'user_agent' => $request->headers->get('User-Agent'),
-                'platform' => $this->settingRepository->findOneBy(['name' => ['PLATFORM_MODE']])->getValue(),
+                'platform' => $this->settingRepository->findOneBy(
+                    ['name' => [SettingName::PLATFORM_MODE->value]]
+                )->getValue(),
                 'type' => OSType::IOS->value,
             ];
         } elseif (stripos((string)$userAgent, 'Mac OS') !== false) {
             $eventMetadata = [
                 'ip' => $request->getClientIp(),
                 'user_agent' => $request->headers->get('User-Agent'),
-                'platform' => $this->settingRepository->findOneBy(['name' => ['PLATFORM_MODE']])->getValue(),
+                'platform' => $this->settingRepository->findOneBy(
+                    ['name' => [SettingName::PLATFORM_MODE->value]]
+                )->getValue(),
                 'type' => OSType::MACOS->value
             ];
         }
@@ -320,7 +328,7 @@ class ProfileController extends AbstractController
             $user,
             $radiusUserRepository,
             $radiusProfileRepository,
-            $this->settingRepository->findOneBy(['name' => 'RADIUS_REALM_NAME'])->getValue()
+            $this->settingRepository->findOneBy(['name' => SettingName::RADIUS_REALM_NAME->value])->getValue()
         );
         $profile = file_get_contents('../profile_templates/windows/template.xml');
         $profile = str_replace([
@@ -335,10 +343,10 @@ class ProfileController extends AbstractController
             $radiusUser->getUsername(),
             $radiusUser->getValue(),
             $this->generateWindowsUuid(),
-            $this->settingRepository->findOneBy(['name' => 'DOMAIN_NAME'])->getValue(),
-            $this->settingRepository->findOneBy(['name' => 'RADIUS_TLS_NAME'])->getValue(),
-            $this->settingRepository->findOneBy(['name' => 'RADIUS_TRUSTED_ROOT_CA_SHA1_HASH'])->getValue(),
-            $this->settingRepository->findOneBy(['name' => 'DISPLAY_NAME'])->getValue(),
+            $this->settingRepository->findOneBy(['name' => SettingName::DOMAIN_NAME->value])->getValue(),
+            $this->settingRepository->findOneBy(['name' => SettingName::RADIUS_TLS_NAME->value])->getValue(),
+            $this->settingRepository->findOneBy(['name' => SettingName::RADIUS_TRUSTED_ROOT_CA_SHA1_HASH->value])->getValue(),
+            $this->settingRepository->findOneBy(['name' => SettingName::DISPLAY_NAME->value])->getValue(),
         ], $profile);
 
         //Windows Specific
@@ -383,7 +391,7 @@ class ProfileController extends AbstractController
         $eventMetadata = [
             'ip' => $request->getClientIp(),
             'user_agent' => $request->headers->get('User-Agent'),
-            'platform' => $this->settingRepository->findOneBy(['name' => ['PLATFORM_MODE']])->getValue(),
+            'platform' => $this->settingRepository->findOneBy(['name' => [SettingName::PLATFORM_MODE->value]])->getValue(),
             'type' => OSType::WINDOWS->value,
         ];
 
@@ -568,7 +576,7 @@ class ProfileController extends AbstractController
         if (
             !$user->isVerified() &&
             $this->settingRepository->findOneBy(
-                ['name' => 'USER_VERIFICATION']
+                ['name' => SettingName::USER_VERIFICATION->value]
             )->getValue() === OperationMode::ON->value
         ) {
             $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $user]);

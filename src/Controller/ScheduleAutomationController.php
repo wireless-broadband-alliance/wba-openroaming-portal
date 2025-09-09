@@ -6,6 +6,7 @@ use App\DTO\ScheduleDTO;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Enum\OperationMode;
+use App\Enum\SettingName;
 use App\Form\ScheduleType;
 use App\Repository\SettingRepository;
 use App\Service\CronExpressionHelperService;
@@ -96,7 +97,9 @@ class ScheduleAutomationController extends AbstractController
             $setting->setValue($value);
             $this->entityManager->persist($setting);
         }
-        $advancedModeStatus = $this->settingRepository->findOneBy(['name' => 'CRON_ADVANCED_STATUS']);
+        $advancedModeStatus = $this->settingRepository->findOneBy(
+            ['name' => SettingName::CRON_ADVANCED_STATUS->value]
+        );
         $advancedModeValue = $advancedMode ? OperationMode::ON->value : OperationMode::OFF->value;
         if ($advancedModeStatus !== null) {
             $advancedModeStatus->setValue($advancedModeValue);
