@@ -10,6 +10,7 @@
 - Optimized the `GetSettings` service to significantly reduce the loading process, improving application performance by
   minimizing redundant data processing and database queries.
 - Renamed some enums to singular form to follow symfony guidelines for enum classes.
+- Symfony version increase for maintained version (7.3.3), it bug fixes and security fixes until January 2026.
 - Also for this release, it's required to run the new migrations to set up the new entity for the translations: `SettingTranslation`
   - Run the migrations with:
     ```bash
