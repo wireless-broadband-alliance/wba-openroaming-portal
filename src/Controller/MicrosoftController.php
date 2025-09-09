@@ -77,6 +77,18 @@ class MicrosoftController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
+        if ($data['AUTH_METHOD_MICROSOFT_LOGIN_ENABLED']['value'] === "false") {
+            $this->addFlash(
+                'error',
+                $this->translator->trans(
+                    'authenticationMethodNotEnabled',
+                    [],
+                    'controllers'
+                )
+            );
+            return $this->redirectToRoute('app_landing');
+        }
+
         $previousLoggedID = $request->get('previousLoggedID');
 
         // Retrieve the "microsoft" client

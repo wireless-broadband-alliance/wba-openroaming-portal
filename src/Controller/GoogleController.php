@@ -78,6 +78,17 @@ class GoogleController extends AbstractController
             );
             return $this->redirectToRoute('app_landing');
         }
+        if ($data['AUTH_METHOD_GOOGLE_LOGIN_ENABLED']['value'] === "false") {
+            $this->addFlash(
+                'error',
+                $this->translator->trans(
+                    'authenticationMethodNotEnabled',
+                    [],
+                    'controllers'
+                )
+            );
+            return $this->redirectToRoute('app_landing');
+        }
 
         $previousLoggedID = $request->get('previousLoggedID');
 
