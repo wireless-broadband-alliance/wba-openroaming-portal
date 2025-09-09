@@ -2,6 +2,7 @@
 
 # Release v1.11.0
 
+- New UI design for email templates.
 - Responsive Translations (Available: EN & PT-PT) - Administrator can just add new configurations for YAML
   files in the translations folder, and the page auto-detects the added language.
 - New Listener to auto-detection of the user language.
