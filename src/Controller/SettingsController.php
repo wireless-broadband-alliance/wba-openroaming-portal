@@ -52,8 +52,6 @@ class SettingsController extends AbstractController
         private readonly EventActions $eventActions,
         private readonly GetSettings $getSettings,
         private readonly EntityManagerInterface $entityManager,
-        private readonly RadiusAuthsRepository $radiusAuthsRepository,
-        private readonly RadiusAccountingRepository $radiusAccountingRepository,
         private readonly TranslatorInterface $translator,
         private readonly SettingTranslationRepository $settingTranslationRepository,
         private readonly EnforcePasswordResetService $enforcePasswordResetService,

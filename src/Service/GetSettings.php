@@ -74,7 +74,7 @@ readonly class GetSettings
         $notInEnum = array_diff($currentSettingsName, $expectedSettings);
 
         // Check if all the settings on the DB are set and valid
-        if (!empty($missingInDb)) {
+        if ($missingInDb !== []) {
             throw new HttpException(
                 500,
                 $this->translator->trans(
@@ -84,7 +84,7 @@ readonly class GetSettings
                 )
             );
         }
-        if (!empty($notInEnum)) {
+        if ($notInEnum !== []) {
             throw new HttpException(
                 500,
                 $this->translator->trans(
