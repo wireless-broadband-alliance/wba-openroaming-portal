@@ -8,10 +8,10 @@ use App\Enum\AnalyticalEventType;
 use App\Enum\CodeVerificationType;
 use App\Enum\DefaultUser;
 use App\Enum\FirewallType;
+use App\Enum\SettingName;
 use App\Enum\UserTwoFactorAuthenticationStatus;
 use App\Form\TwoFACode;
 use App\Repository\EventRepository;
-use App\Repository\UserRepository;
 use App\Service\GetSettings;
 use App\Service\TOTPService;
 use App\Service\TwoFAService;
@@ -402,7 +402,7 @@ class TwoFAController extends AbstractController
             $user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::EMAIL->value
         ) {
             $data = $this->getSettings->getSettings();
-            $timeToResetAttempts = $data["TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS"]["value"];
+            $timeToResetAttempts = $data[SettingName::TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS->value]["value"];
             $limitTime = new DateTime();
             $limitTime->modify('-' . $timeToResetAttempts . ' minutes');
             if ($this->twoFAService->canValidationCode($user, AnalyticalEventType::TWO_FA_CODE_DISABLE->value)) {
@@ -747,9 +747,9 @@ class TwoFAController extends AbstractController
             return $this->redirectToRoute('app_dashboard_login');
         }
         $data = $this->getSettings->getSettings();
-        $timeToResetAttempts = $data["TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS"]["value"];
-        $nrAttempts = $data["TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE"]["value"];
-        $timeIntervalToResendCode = $data["TWO_FACTOR_AUTH_RESEND_INTERVAL"]["value"];
+        $timeToResetAttempts = $data[SettingName::TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS->value]["value"];
+        $nrAttempts = $data[SettingName::TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE->value]["value"];
+        $timeIntervalToResendCode = $data[SettingName::TWO_FACTOR_AUTH_RESEND_INTERVAL->value]["value"];
         $limitTime = new DateTime();
         $limitTime->modify('-' . $timeToResetAttempts . ' minutes');
 
@@ -1007,7 +1007,7 @@ class TwoFAController extends AbstractController
             ]);
         }
         $data = $this->getSettings->getSettings();
-        $timeToResetAttempts = $data["TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS"]["value"];
+        $timeToResetAttempts = $data[SettingName::TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS->value]["value"];
         $limitTime = new DateTime();
         $limitTime->modify('-' . $timeToResetAttempts . ' minutes');
         if ($this->twoFAService->canValidationCode($user, AnalyticalEventType::TWO_FA_CODE_ENABLE->value)) {
@@ -1098,7 +1098,7 @@ class TwoFAController extends AbstractController
         ) {
             $this->addFlash(
                 'error',
-                $this->translator->trans('invalidContactIdentifier')
+                $this->translator->trans('invalidContactIdentifier', [], 'controllers')
             );
 
             return $this->redirectToRoute('app_configure2FA', [

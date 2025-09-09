@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Enum\SettingName;
 use App\Enum\TextEditorName;
 use App\Enum\TextInputType;
 use App\Repository\SettingRepository;
@@ -26,7 +27,7 @@ class TOSController extends AbstractController
     {
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings();
-        $tosFormat = $this->settingRepository->findOneBy(['name' => 'TOS']);
+        $tosFormat = $this->settingRepository->findOneBy(['name' => SettingName::TOS->value]);
 
         if (
             $tosFormat &&
@@ -49,9 +50,13 @@ class TOSController extends AbstractController
         if (
             $tosFormat &&
             $tosFormat->getValue() === TextInputType::LINK->value &&
-            $this->settingRepository->findOneBy(['name' => 'TOS_LINK'])
+            $this->settingRepository->findOneBy(['name' => SettingName::TOS_LINK->value])
         ) {
-            return $this->redirect($this->settingRepository->findOneBy(['name' => 'TOS_LINK'])->getValue());
+            return $this->redirect(
+                $this->settingRepository->findOneBy(
+                    ['name' => SettingName::TOS_LINK->value]
+                )->getValue()
+            );
         }
 
         return $this->redirectToRoute('app_landing');
@@ -63,7 +68,9 @@ class TOSController extends AbstractController
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings();
 
-        $privacyPolicyFormat = $this->settingRepository->findOneBy(['name' => 'PRIVACY_POLICY']);
+        $privacyPolicyFormat = $this->settingRepository->findOneBy(
+            ['name' => SettingName::PRIVACY_POLICY->value]
+        );
 
         if (
             $privacyPolicyFormat &&
@@ -86,11 +93,11 @@ class TOSController extends AbstractController
         if (
             $privacyPolicyFormat &&
             $privacyPolicyFormat->getValue() === TextInputType::LINK->value &&
-            $this->settingRepository->findOneBy(['name' => 'PRIVACY_POLICY_LINK'])
+            $this->settingRepository->findOneBy(['name' => SettingName::PRIVACY_POLICY_LINK->value])
         ) {
             return $this->redirect(
                 $this->settingRepository->findOneBy(
-                    ['name' => 'PRIVACY_POLICY_LINK']
+                    ['name' => SettingName::PRIVACY_POLICY_LINK->value]
                 )->getValue()
             );
         }
