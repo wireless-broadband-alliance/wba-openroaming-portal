@@ -10,7 +10,11 @@
 - Optimized the `GetSettings` service to significantly reduce the loading process, improving application performance by
   minimizing redundant data processing and database queries.
 - Renamed some enums to singular form to follow symfony guidelines for enum classes.
-
+- Also for this release, it's required to run the new migrations to set up the new entity for the translations: `SettingTranslation`
+  - Run the migrations with:
+    ```bash
+    php bin/console doctrine:migrations:migrate
+    ```
 # Release V1.10.0
 
 - New feature - Now the admin can configure the landing login authentication, instead of being the traditional (
