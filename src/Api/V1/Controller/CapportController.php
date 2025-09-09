@@ -21,8 +21,12 @@ class CapportController extends AbstractController
         return new JsonResponse(
             [
                 'captive' => false,
-                'user-portal-url' => $settingRepository->findOneBy(['name' => SettingName::CAPPORT_PORTAL_URL->value])->getValue(),
-                'venue-info-url' => $settingRepository->findOneBy(['name' => SettingName::CAPPORT_VENUE_INFO_URL->value])->getValue()
+                'user-portal-url' => $settingRepository->findOneBy([
+                    'name' => SettingName::CAPPORT_PORTAL_URL->value
+                ])->getValue(),
+                'venue-info-url' => $settingRepository->findOneBy([
+                    'name' => SettingName::CAPPORT_VENUE_INFO_URL->value
+                ])->getValue()
             ],
             Response::HTTP_OK
         );

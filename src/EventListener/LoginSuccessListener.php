@@ -36,11 +36,15 @@ readonly class LoginSuccessListener implements EventSubscriberInterface
         $user = $event->getAuthenticationToken()->getUser();
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings();
-        $platformMode = $data[SettingName::PLATFORM_MODE->value]['value'] ? PlatformMode::DEMO->value : PlatformMode::LIVE->value;
+        $platformMode = $data[SettingName::PLATFORM_MODE->value]['value'] ?
+            PlatformMode::DEMO->value : PlatformMode::LIVE->value;
         $session = $this->requestStack->getSession();
 
         if ($user instanceof User) {
-            if ($data[SettingName::LOGIN_WITH_UUID_ONLY->value]["value"] === OperationMode::OFF->value && $user->isVerified()) {
+            if (
+                $data[SettingName::LOGIN_WITH_UUID_ONLY->value]["value"] === OperationMode::OFF->value &&
+                $user->isVerified()
+            ) {
                 $session->set('session_verified', true);
             }
 

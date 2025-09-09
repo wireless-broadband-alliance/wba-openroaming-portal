@@ -85,7 +85,9 @@ class AuthController extends AbstractController
             return new BaseResponse(400, null, 'Invalid JSON format')->toResponse(); # Bad Request Response
         }
 
-        $turnstileSetting = $this->settingRepository->findOneBy(['name' => SettingName::TURNSTILE_CHECKER->value])->getValue();
+        $turnstileSetting = $this->settingRepository->findOneBy([
+            'name' => SettingName::TURNSTILE_CHECKER->value
+        ])->getValue();
         if (!$turnstileSetting) {
             throw new RuntimeException('Missing settings: TURNSTILE_CHECKER not found');
         }
@@ -117,7 +119,9 @@ class AuthController extends AbstractController
             $errors[] = 'uuid';
         }
 
-        $isLoginWithUUIDOnly = $this->settingRepository->findOneBy(['name' => SettingName::LOGIN_WITH_UUID_ONLY->value])->getValue();
+        $isLoginWithUUIDOnly = $this->settingRepository->findOneBy([
+            'name' => SettingName::LOGIN_WITH_UUID_ONLY->value
+        ])->getValue();
         if ($isLoginWithUUIDOnly === OperationMode::OFF->value && empty($data['password'])) {
             $errors[] = 'password';
         }

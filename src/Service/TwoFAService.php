@@ -180,9 +180,13 @@ readonly class TwoFAService
         $secondsLeft = $data[SettingName::TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME->value]["value"];
         if ($messageType === UserTwoFactorAuthenticationStatus::EMAIL->value || $user->getEmail()) {
             $emailTitle = $this->settingRepository->findOneBy(['name' => SettingName::PAGE_TITLE->value])->getValue();
-            $contactEmail = $this->settingRepository->findOneBy(['name' => SettingName::CONTACT_EMAIL->value])->getValue();
+            $contactEmail = $this->settingRepository->findOneBy([
+                'name' => SettingName::CONTACT_EMAIL->value
+            ])->getValue();
             $supportTeam = $this->settingRepository->findOneBy(['name' => SettingName::PAGE_TITLE->value])->getValue();
-            $customerLogo = $this->settingRepository->findOneBy(['name' => SettingName::CUSTOMER_LOGO->value])->getValue();
+            $customerLogo = $this->settingRepository->findOneBy([
+                'name' => SettingName::CUSTOMER_LOGO->value
+            ])->getValue();
             $projectDir = $this->parameterBag->get('kernel.project_dir');
             $logoPath = $projectDir . '/public' . $customerLogo;
 

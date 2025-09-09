@@ -433,8 +433,10 @@ class SettingsController extends AbstractController
         $settings = $settingsRepository->findAll();
 
         foreach ($settings as $setting) {
-            if ($setting->getName() === TextEditorName::TOS_EDITOR->value ||
-                $setting->getName() === TextEditorName::PRIVACY_POLICY_EDITOR->value) {
+            if (
+                $setting->getName() === TextEditorName::TOS_EDITOR->value ||
+                $setting->getName() === TextEditorName::PRIVACY_POLICY_EDITOR->value
+            ) {
                 $this->entityManager->remove($setting);
                 $this->entityManager->flush();
             }
@@ -770,7 +772,9 @@ class SettingsController extends AbstractController
                 $this->entityManager->persist($emailVerificationSetting);
             }
 
-            $turnstileCheckerSetting = $settingsRepository->findOneBy(['name' => SettingName::TURNSTILE_CHECKER->value]);
+            $turnstileCheckerSetting = $settingsRepository->findOneBy([
+                'name' => SettingName::TURNSTILE_CHECKER->value
+            ]);
             if ($turnstileCheckerSetting !== null) {
                 $turnstileCheckerSetting->setValue($turnstileChecker);
                 $this->entityManager->persist($turnstileCheckerSetting);
@@ -1055,7 +1059,8 @@ class SettingsController extends AbstractController
                     );
                 }
 
-                if ($settingName === SettingName::VALID_DOMAINS_GOOGLE_LOGIN->value ||
+                if (
+                    $settingName === SettingName::VALID_DOMAINS_GOOGLE_LOGIN->value ||
                     $settingName === SettingName::VALID_DOMAINS_MICROSOFT_LOGIN->value
                 ) {
                     continue;

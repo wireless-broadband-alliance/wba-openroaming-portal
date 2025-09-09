@@ -256,11 +256,17 @@ class AdminController extends AbstractController
                         // Update the setting value
                         $setting->setValue($submittedValue);
                     }
-                } elseif (in_array($settingName, [
-                    SettingName::CUSTOMER_LOGO->value,
-                    SettingName::OPENROAMING_LOGO->value,
-                    SettingName::WALLPAPER_IMAGE->value
-                ])) {
+                } elseif (
+                    in_array(
+                        $settingName,
+                        [
+                            SettingName::CUSTOMER_LOGO->value,
+                            SettingName::OPENROAMING_LOGO->value,
+                            SettingName::WALLPAPER_IMAGE->value
+                        ],
+                        true
+                    )
+                ) {
                     // Handle file uploads for logos and wallpaper image
                     $file = $form->get($settingName)->getData();
 

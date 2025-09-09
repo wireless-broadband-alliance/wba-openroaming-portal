@@ -43,27 +43,39 @@ class ConfigController extends AbstractController
     {
         $data['platform'] = [
             SettingName::PLATFORM_MODE->value => $this->getSettingValueRaw(SettingName::PLATFORM_MODE->value),
-            SettingName::USER_VERIFICATION->value => $this->getSettingValueConverted(SettingName::USER_VERIFICATION->value),
-            SettingName::TURNSTILE_CHECKER->value => $this->getSettingValueConverted(SettingName::TURNSTILE_CHECKER->value),
+            SettingName::USER_VERIFICATION->value => $this->getSettingValueConverted(
+                SettingName::USER_VERIFICATION->value
+            ),
+            SettingName::TURNSTILE_CHECKER->value => $this->getSettingValueConverted(
+                SettingName::TURNSTILE_CHECKER->value
+            ),
             SettingName::CONTACT_EMAIL->value => $this->getSettingValueRaw(SettingName::CONTACT_EMAIL->value),
             SettingName::TOS->value => $this->resolveTosValue(),
             SettingName::PRIVACY_POLICY->value => $this->resolvePrivacyPolicyValue(),
-            SettingName::TWO_FACTOR_AUTH_STATUS->value => $this->getSettingValueRaw(SettingName::TWO_FACTOR_AUTH_STATUS->value),
+            SettingName::TWO_FACTOR_AUTH_STATUS->value => $this->getSettingValueRaw(
+                SettingName::TWO_FACTOR_AUTH_STATUS->value
+            ),
         ];
 
         $data['auth'] = [
-            SettingName::AUTH_METHOD_SAML_ENABLED->value => $this->getSettingValueConverted(SettingName::AUTH_METHOD_SAML_ENABLED->value),
+            SettingName::AUTH_METHOD_SAML_ENABLED->value => $this->getSettingValueConverted(
+                SettingName::AUTH_METHOD_SAML_ENABLED->value
+            ),
             SettingName::AUTH_METHOD_GOOGLE_LOGIN_ENABLED->value => $this->getSettingValueConverted(
                 SettingName::AUTH_METHOD_GOOGLE_LOGIN_ENABLED->value
             ),
             SettingName::AUTH_METHOD_MICROSOFT_LOGIN_ENABLED->value => $this->getSettingValueConverted(
                 SettingName::AUTH_METHOD_MICROSOFT_LOGIN_ENABLED->value
             ),
-            SettingName::AUTH_METHOD_REGISTER_ENABLED->value => $this->getSettingValueConverted(SettingName::AUTH_METHOD_REGISTER_ENABLED->value),
+            SettingName::AUTH_METHOD_REGISTER_ENABLED->value => $this->getSettingValueConverted(
+                SettingName::AUTH_METHOD_REGISTER_ENABLED->value
+            ),
             SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED->value => $this->getSettingValueConverted(
                 SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED->value
             ),
-            SettingName::AUTH_METHOD_SMS_REGISTER_ENABLED->value => $this->getSettingValueConverted(SettingName::AUTH_METHOD_SMS_REGISTER_ENABLED->value)
+            SettingName::AUTH_METHOD_SMS_REGISTER_ENABLED->value => $this->getSettingValueConverted(
+                SettingName::AUTH_METHOD_SMS_REGISTER_ENABLED->value
+            )
         ];
 
         if (

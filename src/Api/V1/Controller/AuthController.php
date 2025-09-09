@@ -72,7 +72,9 @@ class AuthController extends AbstractController
             return new BaseResponse(400, null, 'Invalid JSON format')->toResponse(); # Bad Request Response
         }
 
-        $turnstileSetting = $this->settingRepository->findOneBy(['name' => SettingName::TURNSTILE_CHECKER->value])->getValue();
+        $turnstileSetting = $this->settingRepository->findOneBy([
+            'name' => SettingName::TURNSTILE_CHECKER->value
+        ])->getValue();
         if (!$turnstileSetting) {
             throw new \RuntimeException('Missing settings: TURNSTILE_CHECKER not found');
         }

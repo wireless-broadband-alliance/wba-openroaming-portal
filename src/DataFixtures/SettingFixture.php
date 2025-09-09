@@ -48,15 +48,24 @@ class SettingFixture extends Fixture
                 'value' => 'This portal allows you to download and install an OpenRoaming profile tailored to your ' .
                     'device, allowing you to connect automatically to OpenRoaming Wi-Fi networks across the world.',
             ],
-            ['name' => SettingName::ADDITIONAL_LABEL->value, 'value' => 'This label is used to add extra content if necessary'],
+            [
+                'name' => SettingName::ADDITIONAL_LABEL->value,
+                'value' => 'This label is used to add extra content if necessary'
+            ],
             ['name' => SettingName::CONTACT_EMAIL->value, 'value' => 'openroaming@wballiance.com'],
 
             ['name' => SettingName::AUTH_METHOD_SAML_ENABLED->value, 'value' => 'false'],
             ['name' => SettingName::AUTH_METHOD_SAML_LABEL->value, 'value' => 'Login with SAML'],
-            ['name' => SettingName::AUTH_METHOD_SAML_DESCRIPTION->value, 'value' => 'Authenticate with your SAML account'],
+            [
+                'name' => SettingName::AUTH_METHOD_SAML_DESCRIPTION->value,
+                'value' => 'Authenticate with your SAML account'
+            ],
             ['name' => SettingName::AUTH_METHOD_GOOGLE_LOGIN_ENABLED->value, 'value' => 'false'],
             ['name' => SettingName::AUTH_METHOD_GOOGLE_LOGIN_LABEL->value, 'value' => 'Login with Google'],
-            ['name' => SettingName::AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION->value, 'value' => 'Authenticate with your Google account'],
+            [
+                'name' => SettingName::AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION->value,
+                'value' => 'Authenticate with your Google account'
+            ],
             ['name' => SettingName::AUTH_METHOD_MICROSOFT_LOGIN_ENABLED->value, 'value' => 'false'],
             ['name' => SettingName::AUTH_METHOD_MICROSOFT_LOGIN_LABEL->value, 'value' => 'Login with Microsoft'],
             [
@@ -65,14 +74,26 @@ class SettingFixture extends Fixture
             ],
             ['name' => SettingName::AUTH_METHOD_REGISTER_ENABLED->value, 'value' => 'true'],
             ['name' => SettingName::AUTH_METHOD_REGISTER_LABEL->value, 'value' => 'Create Account with Email'],
-            ['name' => SettingName::AUTH_METHOD_REGISTER_DESCRIPTION->value, 'value' => 'Don\'t have an account? Create one'],
+            [
+                'name' => SettingName::AUTH_METHOD_REGISTER_DESCRIPTION->value,
+                'value' => 'Don\'t have an account? Create one'
+            ],
             ['name' => SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED->value, 'value' => 'true'],
             ['name' => SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_LABEL->value, 'value' => 'Login Here'],
-            ['name' => SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION->value, 'value' => 'Already have an account? Login then'],
+            [
+                'name' => SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION->value,
+                'value' => 'Already have an account? Login then'
+            ],
             ['name' => SettingName::LOGIN_WITH_UUID_ONLY->value, 'value' => 'OFF'],
             ['name' => SettingName::AUTH_METHOD_SMS_REGISTER_ENABLED->value, 'value' => 'false'],
-            ['name' => SettingName::AUTH_METHOD_SMS_REGISTER_LABEL->value, 'value' => 'Create Account with Phone Number'],
-            ['name' => SettingName::AUTH_METHOD_SMS_REGISTER_DESCRIPTION->value, 'value' => 'Don\'t have an account? Create one'],
+            [
+                'name' => SettingName::AUTH_METHOD_SMS_REGISTER_LABEL->value,
+                'value' => 'Create Account with Phone Number'
+            ],
+            [
+                'name' => SettingName::AUTH_METHOD_SMS_REGISTER_DESCRIPTION->value,
+                'value' => 'Don\'t have an account? Create one'
+            ],
             ['name' => SettingName::LOGIN_WITH_UUID_ONLY->value, 'value' => 'OFF'],
 
             ['name' => SettingName::EMAIL_TIMER_RESEND->value, 'value' => '2'],
@@ -81,7 +102,10 @@ class SettingFixture extends Fixture
             ['name' => SettingName::TOS->value, 'value' => 'LINK'],
             ['name' => SettingName::PRIVACY_POLICY->value, 'value' => 'LINK'],
             ['name' => SettingName::TOS_LINK->value, 'value' => 'https://wballiance.com/openroaming/toc/'],
-            ['name' => SettingName::PRIVACY_POLICY_LINK->value, 'value' => 'https://wballiance.com/openroaming/privacy-policy'],
+            [
+                'name' => SettingName::PRIVACY_POLICY_LINK->value,
+                'value' => 'https://wballiance.com/openroaming/privacy-policy'
+            ],
 
             ['name' => SettingName::VALID_DOMAINS_GOOGLE_LOGIN->value, 'value' => ''],
             ['name' => SettingName::VALID_DOMAINS_MICROSOFT_LOGIN->value, 'value' => ''],

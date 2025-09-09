@@ -86,7 +86,9 @@ class RegistrationController extends AbstractController
             return new BaseResponse(400, null, 'Invalid JSON format')->toResponse(); // Invalid Json
         }
 
-        $turnstileSetting = $this->settingRepository->findOneBy(['name' => SettingName::TURNSTILE_CHECKER->value])->getValue();
+        $turnstileSetting = $this->settingRepository->findOneBy([
+            'name' => SettingName::TURNSTILE_CHECKER->value
+        ])->getValue();
         if (!$turnstileSetting) {
             throw new \RuntimeException('Missing settings: TURNSTILE_CHECKER not found');
         }
@@ -217,7 +219,9 @@ class RegistrationController extends AbstractController
             )->toResponse();
         }
 
-        $turnstileSetting = $this->settingRepository->findOneBy(['name' => SettingName::TURNSTILE_CHECKER->value])->getValue();
+        $turnstileSetting = $this->settingRepository->findOneBy([
+            'name' => SettingName::TURNSTILE_CHECKER->value
+        ])->getValue();
         if (!$turnstileSetting) {
             throw new \RuntimeException('Missing settings: TURNSTILE_CHECKER not found');
         }
@@ -336,7 +340,9 @@ class RegistrationController extends AbstractController
                             'uuid' => $user->getUuid(),
                             'currentPassword' => $randomPassword,
                             'verificationCode' => $user->getTwoFAcode(),
-                            'emailTitle' => $this->settingRepository->findOneBy(['name' => SettingName::PAGE_TITLE->value])->getValue(),
+                            'emailTitle' => $this->settingRepository->findOneBy([
+                                'name' => SettingName::PAGE_TITLE->value
+                            ])->getValue(),
                             'contactEmail' => $this->settingRepository->findOneBy(
                                 ['name' => 'CONTACT_EMAIL']
                             )->getValue()
@@ -406,7 +412,9 @@ class RegistrationController extends AbstractController
             return new BaseResponse(400, null, 'Invalid JSON format')->toResponse();
         }
 
-        $turnstileSetting = $this->settingRepository->findOneBy(['name' => SettingName::TURNSTILE_CHECKER->value])->getValue();
+        $turnstileSetting = $this->settingRepository->findOneBy([
+            'name' => SettingName::TURNSTILE_CHECKER->value
+        ])->getValue();
         if (!$turnstileSetting) {
             throw new \RuntimeException('Missing settings: TURNSTILE_CHECKER not found');
         }
@@ -557,7 +565,9 @@ class RegistrationController extends AbstractController
         } catch (\JsonException) {
             return new BaseResponse(400, null, 'Invalid JSON format')->toResponse(); // Invalid Json
         }
-        $turnstileSetting = $this->settingRepository->findOneBy(['name' => SettingName::TURNSTILE_CHECKER->value])->getValue();
+        $turnstileSetting = $this->settingRepository->findOneBy([
+            'name' => SettingName::TURNSTILE_CHECKER->value
+        ])->getValue();
         if (!$turnstileSetting) {
             throw new \RuntimeException('Missing settings: TURNSTILE_CHECKER not found');
         }

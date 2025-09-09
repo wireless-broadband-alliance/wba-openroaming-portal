@@ -52,10 +52,16 @@ class ResetAuthSettingsCommand extends Command
         $settings = [
             ['name' => SettingName::AUTH_METHOD_SAML_ENABLED->value, 'value' => 'false'],
             ['name' => SettingName::AUTH_METHOD_SAML_LABEL->value, 'value' => 'Login with SAML'],
-            ['name' => SettingName::AUTH_METHOD_SAML_DESCRIPTION->value, 'value' => 'Authenticate with your SAML account'],
+            [
+                'name' => SettingName::AUTH_METHOD_SAML_DESCRIPTION->value,
+                'value' => 'Authenticate with your SAML account'
+            ],
             ['name' => SettingName::AUTH_METHOD_GOOGLE_LOGIN_ENABLED->value, 'value' => 'false'],
             ['name' => SettingName::AUTH_METHOD_GOOGLE_LOGIN_LABEL->value, 'value' => 'Login with Google'],
-            ['name' => SettingName::AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION->value, 'value' => 'Authenticate with your Google account'],
+            [
+                'name' => SettingName::AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION->value,
+                'value' => 'Authenticate with your Google account'
+            ],
             ['name' => SettingName::AUTH_METHOD_MICROSOFT_LOGIN_ENABLED->value, 'value' => 'false'],
             ['name' => SettingName::AUTH_METHOD_MICROSOFT_LOGIN_LABEL->value, 'value' => 'Login with Microsoft'],
             [
@@ -65,18 +71,30 @@ class ResetAuthSettingsCommand extends Command
             ['name' => SettingName::VALID_DOMAINS_GOOGLE_LOGIN->value, 'value' => ''],
             ['name' => SettingName::AUTH_METHOD_REGISTER_ENABLED->value, 'value' => 'true'],
             ['name' => SettingName::AUTH_METHOD_REGISTER_LABEL->value, 'value' => 'Create Account with Email'],
-            ['name' => SettingName::AUTH_METHOD_REGISTER_DESCRIPTION->value, 'value' => 'Don\'t have an account? Create one'],
+            [
+                'name' => SettingName::AUTH_METHOD_REGISTER_DESCRIPTION->value,
+                'value' => 'Don\'t have an account? Create one'
+            ],
 
             ['name' => SettingName::EMAIL_TIMER_RESEND->value, 'value' => '2'],
             ['name' => SettingName::LINK_VALIDITY->value, 'value' => '10'],
 
             ['name' => SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED->value, 'value' => 'true'],
             ['name' => SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_LABEL->value, 'value' => 'Account Login'],
-            ['name' => SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION->value, 'value' => 'Already have an account? Login then'],
+            [
+                'name' => SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION->value,
+                'value' => 'Already have an account? Login then'
+            ],
             ['name' => SettingName::LOGIN_WITH_UUID_ONLY->value, 'value' => 'OFF'],
             ['name' => SettingName::AUTH_METHOD_SMS_REGISTER_ENABLED->value, 'value' => 'false'],
-            ['name' => SettingName::AUTH_METHOD_SMS_REGISTER_LABEL->value, 'value' => 'Create Account with Phone Number'],
-            ['name' => SettingName::AUTH_METHOD_SMS_REGISTER_DESCRIPTION->value, 'value' => 'Don\'t have an account? Create one'],
+            [
+                'name' => SettingName::AUTH_METHOD_SMS_REGISTER_LABEL->value,
+                'value' => 'Create Account with Phone Number'
+            ],
+            [
+                'name' => SettingName::AUTH_METHOD_SMS_REGISTER_DESCRIPTION->value,
+                'value' => 'Don\'t have an account? Create one'
+            ],
             ['name' => SettingName::VALID_DOMAINS_GOOGLE_LOGIN->value, 'value' => ''],
             ['name' => SettingName::VALID_DOMAINS_MICROSOFT_LOGIN->value, 'value' => ''],
             ['name' => SettingName::PROFILE_LIMIT_DATE_GOOGLE->value, 'value' => '5'],

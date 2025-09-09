@@ -60,7 +60,9 @@ class NotifyUsersWhenProfileExpiresCommand extends Command
     public function notifyUsersWhenProfileExpires(OutputInterface $output): void
     {
         $userRadiusProfiles = $this->userRadiusProfileRepository->findAll();
-        $notificationResendInterval = $this->settingRepository->findOneBy(['name' => SettingName::TIME_INTERVAL_NOTIFICATION->value]);
+        $notificationResendInterval = $this->settingRepository->findOneBy([
+            'name' => SettingName::TIME_INTERVAL_NOTIFICATION->value
+        ]);
 
         foreach ($userRadiusProfiles as $userRadiusProfile) {
             $user = $userRadiusProfile->getUser();

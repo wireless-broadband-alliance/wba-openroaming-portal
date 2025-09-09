@@ -68,7 +68,10 @@ class ResetCustomSettingsCommand extends Command
                 'value' => 'This portal allows you to download and install an OpenRoaming profile tailored to your ' .
                     'device, allowing you to connect automatically to OpenRoaming Wi-Fi networks across the world.',
             ],
-            ['name' => SettingName::ADDITIONAL_LABEL->value, 'value' => 'This label is used to add extra content if necessary'],
+            [
+                'name' => SettingName::ADDITIONAL_LABEL->value,
+                'value' => 'This label is used to add extra content if necessary'
+            ],
             ['name' => SettingName::CONTACT_EMAIL->value, 'value' => 'openroaming-help@example.com'],
         ];
 

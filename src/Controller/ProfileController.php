@@ -212,8 +212,9 @@ class ProfileController extends AbstractController
             $this->settingRepository->findOneBy(['name' => SettingName::PAYLOAD_IDENTIFIER->value])->getValue(),
             $this->settingRepository->findOneBy(['name' => SettingName::OPERATOR_NAME->value])->getValue(),
             $this->settingRepository->findOneBy(['name' => SettingName::NAI_REALM->value])->getValue(),
-            $this->settingRepository->findOneBy(['name' => SettingName::PROFILES_ENCRYPTION_TYPE_IOS_ONLY->value]
-            )->getValue(),
+            $this->settingRepository->findOneBy([
+                'name' => SettingName::PROFILES_ENCRYPTION_TYPE_IOS_ONLY->value
+            ])->getValue(),
             $expirationDate['limitTime']->format('Y-m-d\TH:i:s\Z'),
         ], $profile);
 
@@ -345,7 +346,9 @@ class ProfileController extends AbstractController
             $this->generateWindowsUuid(),
             $this->settingRepository->findOneBy(['name' => SettingName::DOMAIN_NAME->value])->getValue(),
             $this->settingRepository->findOneBy(['name' => SettingName::RADIUS_TLS_NAME->value])->getValue(),
-            $this->settingRepository->findOneBy(['name' => SettingName::RADIUS_TRUSTED_ROOT_CA_SHA1_HASH->value])->getValue(),
+            $this->settingRepository->findOneBy([
+                'name' => SettingName::RADIUS_TRUSTED_ROOT_CA_SHA1_HASH->value
+            ])->getValue(),
             $this->settingRepository->findOneBy(['name' => SettingName::DISPLAY_NAME->value])->getValue(),
         ], $profile);
 
@@ -391,7 +394,9 @@ class ProfileController extends AbstractController
         $eventMetadata = [
             'ip' => $request->getClientIp(),
             'user_agent' => $request->headers->get('User-Agent'),
-            'platform' => $this->settingRepository->findOneBy(['name' => [SettingName::PLATFORM_MODE->value]])->getValue(),
+            'platform' => $this->settingRepository->findOneBy([
+                'name' => [SettingName::PLATFORM_MODE->value
+                ]])->getValue(),
             'type' => OSType::WINDOWS->value,
         ];
 

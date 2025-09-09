@@ -31,7 +31,9 @@ readonly class RegistrationEmailGenerator
     {
         $supportTeam = $this->settingRepository->findOneBy(['name' => SettingName::PAGE_TITLE->value])->getValue();
         $contactEmail = $this->settingRepository->findOneBy(['name' => SettingName::CONTACT_EMAIL->value])->getValue();
-        $loginWithUUID = $this->settingRepository->findOneBy(['name' => SettingName::LOGIN_WITH_UUID_ONLY->value])->getValue();
+        $loginWithUUID = $this->settingRepository->findOneBy([
+            'name' => SettingName::LOGIN_WITH_UUID_ONLY->value
+        ])->getValue();
         $customerLogo = $this->settingRepository->findOneBy(['name' => SettingName::CUSTOMER_LOGO->value])->getValue();
         $projectDir =  $this->parameterBag->get('kernel.project_dir');
         $logoPath = $projectDir . '/public' . $customerLogo;

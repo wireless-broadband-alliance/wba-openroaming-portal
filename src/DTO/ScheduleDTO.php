@@ -93,18 +93,20 @@ class ScheduleDTO
                 $this->use_advanced_mode,
                 $cronExpressionHelperService
             ),
-            SettingName::USERS_WHEN_PROFILE_EXPIRES_CRON->value => $this->users_when_profile_expires_cron->toCronExpression(
-                $this->use_advanced_mode,
-                $cronExpressionHelperService
-            ),
+            SettingName::USERS_WHEN_PROFILE_EXPIRES_CRON->value =>
+                $this->users_when_profile_expires_cron->toCronExpression(
+                    $this->use_advanced_mode,
+                    $cronExpressionHelperService
+                ),
             SettingName::LDAP_SYNC_CRON->value => $this->ldap_sync_cron->toCronExpression(
                 $this->use_advanced_mode,
                 $cronExpressionHelperService
             ),
-            SettingName::FREERADIUS_LAST_CONNECTION_CRON->value => $this->freeradius_last_connection_cron->toCronExpression(
-                $this->use_advanced_mode,
-                $cronExpressionHelperService
-            )
+            SettingName::FREERADIUS_LAST_CONNECTION_CRON->value =>
+                $this->freeradius_last_connection_cron->toCronExpression(
+                    $this->use_advanced_mode,
+                    $cronExpressionHelperService
+                )
         ];
     }
 }

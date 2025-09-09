@@ -54,7 +54,9 @@ class FreeradiusLastConnectionCommand extends Command
         }
 
         // Load timestamp setting
-        $timestampFreeradiusCron = $this->settingRepository->findOneBy(['name' => SettingName::TIME_STAMP_FREERADIUS_CRON->value]);
+        $timestampFreeradiusCron = $this->settingRepository->findOneBy([
+            'name' => SettingName::TIME_STAMP_FREERADIUS_CRON->value
+        ]);
         if ($timestampFreeradiusCron && is_null($timestampFreeradiusCron->getValue())) {
             $timestampFreeradiusCron->setValue(0);
         }

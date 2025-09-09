@@ -44,7 +44,10 @@ readonly class ExpirationProfileService
                 break;
 
             case UserProvider::MICROSOFT_ACCOUNT->value:
-                $expireDays = $this->getSettingValue(SettingName::PROFILE_LIMIT_DATE_MICROSOFT->value, $defaultExpireDays);
+                $expireDays = $this->getSettingValue(
+                    SettingName::PROFILE_LIMIT_DATE_MICROSOFT->value,
+                    $defaultExpireDays
+                );
                 break;
 
             case UserProvider::SAML->value:
@@ -53,9 +56,15 @@ readonly class ExpirationProfileService
 
             case UserProvider::PORTAL_ACCOUNT->value:
                 if ($providerId === UserProvider::EMAIL->value) {
-                    $expireDays = $this->getSettingValue(SettingName::PROFILE_LIMIT_DATE_EMAIL->value, $defaultExpireDays);
+                    $expireDays = $this->getSettingValue(
+                        SettingName::PROFILE_LIMIT_DATE_EMAIL->value,
+                        $defaultExpireDays
+                    );
                 } elseif ($providerId === UserProvider::PHONE_NUMBER->value) {
-                    $expireDays = $this->getSettingValue(SettingName::PROFILE_LIMIT_DATE_SMS->value, $defaultExpireDays);
+                    $expireDays = $this->getSettingValue(
+                        SettingName::PROFILE_LIMIT_DATE_SMS->value,
+                        $defaultExpireDays
+                    );
                 }
                 break;
         }
