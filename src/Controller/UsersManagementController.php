@@ -11,6 +11,7 @@ use App\Enum\AnalyticalEventType;
 use App\Enum\FirewallType;
 use App\Enum\OperationMode;
 use App\Enum\PlatformMode;
+use App\Enum\SettingName;
 use App\Enum\UserProvider;
 use App\Enum\UserRadiusProfileRevokeReason;
 use App\Enum\UserTwoFactorAuthenticationStatus;
@@ -465,9 +466,9 @@ class UsersManagementController extends AbstractController
             $em->flush();
 
             if ($user->getEmail()) {
-                $supportTeam = $data['PAGE_TITLE']['value'];
-                $contactEmail = $data['CONTACT_EMAIL']['value'];
-                $customerLogo = $data['CUSTOMER_LOGO']['value'];
+                $supportTeam = $data[SettingName::PAGE_TITLE->value]['value'];
+                $contactEmail = $data[SettingName::CONTACT_EMAIL->value]['value'];
+                $customerLogo = $data[SettingName::CUSTOMER_LOGO->value]['value'];
                 $projectDir = $this->parameterBag->get('kernel.project_dir');
                 $logoPath = $projectDir . '/public' . $customerLogo;
 
@@ -512,7 +513,7 @@ class UsersManagementController extends AbstractController
                     AnalyticalEventType::USER_ACCOUNT_UPDATE_PASSWORD_FROM_UI
                 );
                 // Retrieve the SMS resend interval from the settings
-                $smsResendInterval = $data['SMS_TIMER_RESEND']['value'];
+                $smsResendInterval = $data[SettingName::SMS_TIMER_RESEND->value]['value'];
                 $minInterval = new DateInterval('PT' . $smsResendInterval . 'M');
                 $currentTime = new DateTime();
 
@@ -544,7 +545,7 @@ class UsersManagementController extends AbstractController
                     if ($smsResponse !== '' && $smsResponse !== '0') {
                         $this->addFlash(
                             'success',
-                            'A new account password has been sent to your phone number via SMS.'
+                            $this->translator->trans('passwordSentSMS', [], 'controllers')
                         );
 
                         $eventMetadata = [
@@ -563,7 +564,7 @@ class UsersManagementController extends AbstractController
                     } else {
                         $this->addFlash(
                             'error',
-                            'We were unable to send the new password to your phone number. Please try again.'
+                            $this->translator->trans('passwordNotSentSMS', [], 'controllers')
                         );
                     }
                 }
