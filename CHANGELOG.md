@@ -3,6 +3,7 @@
 # Release V1.12.0
 - More Project optimizations reduce the amount of number of queries made in most of the pages.
 - New checker on the `GetSettings` service to also verify if there is any missing or duplicated setting on the DB.
+- Also for this release, it doesn't have any migrations to be executed.
 
 # Release V1.11.0
 
