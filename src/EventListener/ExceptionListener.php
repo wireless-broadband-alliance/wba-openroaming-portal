@@ -2,7 +2,8 @@
 
 namespace App\EventListener;
 
-use App\Service\GetSettings;
+use App\Entity\Setting;
+use App\Repository\SettingRepository;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
@@ -20,8 +21,8 @@ readonly class ExceptionListener
 {
     public function __construct(
         private Environment $twig,
-        private GetSettings $getSettings,
         private TranslatorInterface $translator,
+        private SettingRepository $settingRepository,
         private LocaleAwareInterface $translatorLocale,
     ) {
     }
@@ -54,7 +55,7 @@ readonly class ExceptionListener
             return;
         }
 
-        $data = $this->getSettings->getSettings();
+        $data = $this->getSettings();
 
         // Try specific error template first
         $template = sprintf('bundles/TwigBundle/Exception/error_%d.html.twig', $statusCode);
@@ -76,5 +77,29 @@ readonly class ExceptionListener
 
         $response = new Response($content, $statusCode);
         $event->setResponse($response);
+    }
+
+    private function getSettings(): array
+    {
+        $wanted = [
+            'PAGE_TITLE',
+            'CUSTOMER_LOGO_ENABLED',
+            'CUSTOMER_LOGO',
+            'WALLPAPER_IMAGE'
+        ];
+
+        $settings = $this->settingRepository->findBy([
+            'name' => $wanted,
+        ]);
+
+        $result = [];
+        foreach ($settings as $setting) {
+            /** @var Setting $setting */
+            $result[$setting->getName()] = [
+                'value' => $setting->getValue(),
+            ];
+        }
+
+        return $result;
     }
 }
