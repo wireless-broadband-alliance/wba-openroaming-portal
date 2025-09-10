@@ -18,9 +18,11 @@ class InstructionsController extends AbstractController
     ) {
     }
 
-    #[Route('/landing/instructions', name: 'app_landing_instructions')]
-    public function landingInstructions(): string
+    #[Route('profile/instructions', name: 'app_profile_instructions')]
+    public function profileInstructions(): string
     {
+        // Opinion: I think its better this route be independent and be the same firewall "landing",
+        // but it's not required to be authenticated, optional
         $data = $this->getSettings->getSettings();
 
         return dd($data);
