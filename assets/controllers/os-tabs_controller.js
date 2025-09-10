@@ -4,7 +4,8 @@ export default class extends Controller {
     static targets = ["content", "tab"]
 
     connect() {
-        const defaultOs = this.element.dataset.defaultOs || (this.hasContentTarget ? this.contentTargets[0].dataset.os : null);
+        const defaultOs = this.data.get("defaultOs") || (this.hasContentTarget ? this.contentTargets[0].dataset.os : null);
+        console.log(defaultOs);
         if (defaultOs) this.showTab(defaultOs);
     }
 
