@@ -11,10 +11,10 @@
 {% block body %}
     <div class="min-h-screen bg-center bg-cover flex items-center justify-center px-4 sm:px-6 lg:px-8"
          style="background-image: url('{{ bgUrl }}');"
-         data-controller="os-tabs">
+         data-controller="os-tabs"
+         data-default-os="{{ data.os.selected }}">
 
         <div class="w-full max-w-5xl bg-white rounded-xl shadow-2xl overflow-hidden py-12 px-10">
-
             {# Language Selector in the top-right #}
             <div class="flex justify-end mb-6">
                 {{ include('shared/_select_language.html.twig', {
@@ -28,48 +28,54 @@
             <div class="flex border-b border-gray-200 mb-8">
                 <button data-os="android" data-os-tabs-target="tab"
                         data-action="click->os-tabs#activate"
-                        class="px-6 py-3 font-semibold flex items-center space-x-2 transition-all duration-200">
-                    <twig:ux:icon name="wba:android" class="w-5 h-5" />
+                        class="px-6 py-3 font-semibold flex items-center space-x-2 transition-all duration-200
+                        {% if data.os.selected == constant('App\\Enum\\OSType::ANDROID') %}border-b-2 border-blue-600 text-blue-600{% else %}text-gray-600{% endif %}">
+                    <twig:ux:icon name="wba:android" class="w-5 h-5"/>
                     <span>Android</span>
                 </button>
 
                 <button data-os="ios" data-os-tabs-target="tab"
                         data-action="click->os-tabs#activate"
-                        class="px-6 py-3 font-semibold flex items-center space-x-2 transition-all duration-200">
-                    <twig:ux:icon name="wba:ios" class="w-5 h-5" />
-                    <span>IOS</span>
+                        class="px-6 py-3 font-semibold flex items-center space-x-2 transition-all duration-200
+                        {% if data.os.selected == constant('App\\Enum\\OSType::IOS') %}border-b-2 border-blue-600 text-blue-600{% else %}text-gray-600{% endif %}">
+                    <twig:ux:icon name="wba:ios" class="w-5 h-5"/>
+                    <span>iOS</span>
                 </button>
 
                 <button data-os="windows" data-os-tabs-target="tab"
                         data-action="click->os-tabs#activate"
-                        class="px-6 py-3 font-semibold flex items-center space-x-2 transition-all duration-200">
-                    <twig:ux:icon name="wba:windows" class="w-5 h-5" />
+                        class="px-6 py-3 font-semibold flex items-center space-x-2 transition-all duration-200
+                        {% if data.os.selected == constant('App\\Enum\\OSType::WINDOWS') %}border-b-2 border-blue-600 text-blue-600{% else %}text-gray-600{% endif %}">
+                    <twig:ux:icon name="wba:windows" class="w-5 h-5"/>
                     <span>Windows</span>
                 </button>
             </div>
 
             {# Contents #}
-            {# TODO: MAKE A NEW TWIG FILE OR EACH OS SYSTEM DETAILS #}
-            <div data-os="android" data-os-tabs-target="content">
+            <div data-os="android" data-os-tabs-target="content"
+                 class="{% if data.os.selected == constant('App\\Enum\\OSType::ANDROID') %}hidden{% endif %}">
                 <div class="flex items-center space-x-8">
-                    <twig:ux:icon name="wba:android" class="w-20 h-20" />
+                    <twig:ux:icon name="wba:android" class="w-20 h-20"/>
                     <p class="text-xl">Android Mode</p>
                 </div>
             </div>
 
-            <div data-os="ios" data-os-tabs-target="content" class="hidden">
+            <div data-os="ios" data-os-tabs-target="content"
+                 class="{% if data.os.selected == constant('App\\Enum\\OSType::IOS') %}hidden{% endif %}">
                 <div class="flex items-center space-x-8">
-                    <twig:ux:icon name="wba:ios" class="w-20 h-20" />
+                    <twig:ux:icon name="wba:ios" class="w-20 h-20"/>
                     <p class="text-xl">iOS Mode</p>
                 </div>
             </div>
 
-            <div data-os="windows" data-os-tabs-target="content" class="hidden">
+            <div data-os="windows" data-os-tabs-target="content"
+                 class="{% if data.os.selected == constant('App\\Enum\\OSType::WINDOWS') %}hidden{% endif %}">
                 <div class="flex items-center space-x-8">
-                    <twig:ux:icon name="wba:windows" class="w-20 h-20" />
+                    <twig:ux:icon name="wba:windows" class="w-20 h-20"/>
                     <p class="text-xl">Windows Mode</p>
                 </div>
             </div>
+
         </div>
     </div>
 {% endblock %}

@@ -1,13 +1,11 @@
-import {Controller} from '@hotwired/stimulus';
+import { Controller } from '@hotwired/stimulus';
 
 export default class extends Controller {
     static targets = ["content", "tab"]
 
     connect() {
-        // Show the first tab by default
-        if (this.hasContentTarget) {
-            this.showTab(this.contentTargets[0].dataset.os);
-        }
+        const defaultOs = this.element.dataset.defaultOs || (this.hasContentTarget ? this.contentTargets[0].dataset.os : null);
+        if (defaultOs) this.showTab(defaultOs);
     }
 
     activate(event) {
@@ -17,29 +15,18 @@ export default class extends Controller {
     }
 
     showTab(os) {
-        // Toggle tab content
-        this.contentTargets.forEach((el) => {
-            el.classList.toggle("hidden", el.dataset.os !== os);
-        });
+        const activeClasses = ["bg-white", "text-[#8AB742]", "shadow-md", "rounded-t-lg", "border-b-2", "border-[#8AB742]", "-mb-[2px]"];
+        const inactiveClasses = ["text-gray-400", "hover:text-black", "bg-transparent", "border-b-2", "border-transparent"];
 
-        // Toggle tab button styles
-        this.tabTargets.forEach((btn) => {
-            const active = btn.dataset.os === os;
+        // Toggle content visibility
+        this.contentTargets.forEach(el => el.classList.toggle("hidden", el.dataset.os !== os));
 
-            btn.classList.toggle("bg-white", active);
-            btn.classList.toggle("text-[#8AB742]", active);
-            btn.classList.toggle("shadow-md", active);
-            btn.classList.toggle("rounded-t-lg", active);
-            btn.classList.toggle("border-b-2", active);
-            btn.classList.toggle("border-[#8AB742]", active);
-            btn.classList.toggle("-mb-[2px]", active);
+        // Toggle tab styles
+        this.tabTargets.forEach(btn => {
+            const isActive = btn.dataset.os === os;
 
-            // inactive state
-            btn.classList.toggle("text-gray-400", !active);
-            btn.classList.toggle("hover:text-black", !active);
-            btn.classList.toggle("bg-transparent", !active);
-            btn.classList.toggle("border-b-2", !active);
-            btn.classList.toggle("border-transparent", !active);
+            btn.classList.remove(...(isActive ? inactiveClasses : activeClasses));
+            btn.classList.add(...(isActive ? activeClasses : inactiveClasses));
         });
     }
 }
