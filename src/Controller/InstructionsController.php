@@ -2,7 +2,9 @@
 
 namespace App\Controller;
 
+use App\Entity\Setting;
 use App\Entity\User;
+use App\Enum\SettingName;
 use App\Service\GetSettings;
 use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -18,13 +20,37 @@ class InstructionsController extends AbstractController
     ) {
     }
 
-    #[Route('profile/instructions', name: 'app_profile_instructions')]
-    public function profileInstructions(): string
+    #[Route('/profile/instructions', name: 'app_profile_instructions')]
+    public function profileInstructions(): Response
     {
-        // Opinion: I think its better this route be independent and be the same firewall "landing",
-        // but it's not required to be authenticated, optional
         $data = $this->getSettings->getSettings();
 
-        return dd($data);
+        return $this->render('instructions/instructions.html.twig', [
+            'data' => $data,
+        ]);
+    }
+
+    private function getSettings(): array
+    {
+        $wanted = [
+            SettingName::PAGE_TITLE->value,
+            SettingName::CUSTOMER_LOGO_ENABLED->value,
+            SettingName::CUSTOMER_LOGO->value,
+            SettingName::WALLPAPER_IMAGE->value
+        ];
+
+        $settings = $this->settingRepository->findBy([
+            'name' => $wanted,
+        ]);
+
+        $result = [];
+        foreach ($settings as $setting) {
+            /** @var Setting $setting */
+            $result[$setting->getName()] = [
+                'value' => $setting->getValue(),
+            ];
+        }
+
+        return $result;
     }
 }
