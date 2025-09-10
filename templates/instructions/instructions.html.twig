@@ -29,24 +29,21 @@
             <div class="flex border-b border-gray-200 mb-8">
                 <button data-os="{{ constant('App\\Enum\\OSType::ANDROID').value }}" data-os-tabs-target="tab"
                         data-action="click->os-tabs#activate"
-                        class="px-6 py-3 font-semibold flex items-center space-x-2 transition-all duration-200
-                        {% if data.os.selected == constant('App\\Enum\\OSType::ANDROID').value %}border-b-2 border-primary{% else %}text-gray-600{% endif %}">
+                        class="px-6 py-3 font-semibold flex items-center space-x-2 transition-all duration-200">
                     <twig:ux:icon name="wba:android" class="w-5 h-5"/>
                     <span>Android</span>
                 </button>
 
                 <button data-os="{{ constant('App\\Enum\\OSType::IOS').value }}" data-os-tabs-target="tab"
                         data-action="click->os-tabs#activate"
-                        class="px-6 py-3 font-semibold flex items-center space-x-2 transition-all duration-200
-                        {% if data.os.selected == constant('App\\Enum\\OSType::IOS').value %}border-b-2 border-primary{% else %}text-gray-600{% endif %}">
+                        class="px-6 py-3 font-semibold flex items-center space-x-2 transition-all duration-200">
                     <twig:ux:icon name="wba:ios" class="w-5 h-5"/>
                     <span>iOS</span>
                 </button>
 
                 <button data-os="{{ constant('App\\Enum\\OSType::WINDOWS').value }}" data-os-tabs-target="tab"
                         data-action="click->os-tabs#activate"
-                        class="px-6 py-3 font-semibold flex items-center space-x-2 transition-all duration-200
-                        {% if data.os.selected == constant('App\\Enum\\OSType::WINDOWS').value %}border-b-2 border-primary{% else %}text-gray-600{% endif %}">
+                        class="px-6 py-3 font-semibold flex items-center space-x-2 transition-all duration-200">
                     <twig:ux:icon name="wba:windows" class="w-5 h-5"/>
                     <span>Windows</span>
                 </button>
