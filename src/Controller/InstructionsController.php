@@ -23,15 +23,6 @@ class InstructionsController extends AbstractController
     #[Route('/profile/instructions', name: 'app_profile_instructions')]
     public function profileInstructions(): Response
     {
-        $data = $this->getSettings->getSettings();
-
-        return $this->render('instructions/instructions.html.twig', [
-            'data' => $data,
-        ]);
-    }
-
-    private function getSettings(): array
-    {
         $wanted = [
             SettingName::PAGE_TITLE->value,
             SettingName::CUSTOMER_LOGO_ENABLED->value,
@@ -39,18 +30,10 @@ class InstructionsController extends AbstractController
             SettingName::WALLPAPER_IMAGE->value
         ];
 
-        $settings = $this->settingRepository->findBy([
-            'name' => $wanted,
+        $data = $this->getSettings->getSpecificSettings($wanted);
+
+        return $this->render('instructions/instructions.html.twig', [
+            'data' => $data,
         ]);
-
-        $result = [];
-        foreach ($settings as $setting) {
-            /** @var Setting $setting */
-            $result[$setting->getName()] = [
-                'value' => $setting->getValue(),
-            ];
-        }
-
-        return $result;
     }
 }
