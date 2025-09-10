@@ -3,39 +3,32 @@
 namespace App\Form;
 
 use App\Enum\OperationMode;
+use App\Enum\SettingName;
 use App\Repository\SettingRepository;
-use App\Repository\UserRepository;
-use App\Service\GetSettings;
 use libphonenumber\PhoneNumberFormat;
 use Misd\PhoneNumberBundle\Form\Type\PhoneNumberType;
 use PixelOpen\CloudflareTurnstileBundle\Type\TurnstileType;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Validator\Constraints\Length;
-use Symfony\Component\Validator\Constraints\Regex;
 
 class ForgotPasswordSMSType extends AbstractType
 {
-    /**
-     * @param UserRepository $userRepository The repository for accessing user data.
-     * @param SettingRepository $settingRepository The setting repository is used to create the getSettings function.
-     * @param GetSettings $getSettings The instance of GetSettings class.
-     */
     public function __construct(
-        private readonly UserRepository $userRepository,
-        private readonly SettingRepository $settingRepository,
-        private readonly GetSettings $getSettings
+        private readonly SettingRepository $settingRepository
     ) {
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
-        $regionInputs = explode(',', (string) $data['DEFAULT_REGION_PHONE_INPUTS']['value']);
+        $turnstileCheckerValue = $this->settingRepository->findOneBy(
+            ['name' => SettingName::TURNSTILE_CHECKER->value]
+        )->getValue();
+        $regionInputValue = $this->settingRepository->findOneBy(
+            ['name' => SettingName::DEFAULT_REGION_PHONE_INPUTS->value]
+        )->getValue();
+        $regionInputs = explode(',', (string)$regionInputValue);
         $regionInputs = array_map('trim', $regionInputs);
-        $turnstileCheckerValue = $data['TURNSTILE_CHECKER']['value'];
 
         $builder
             ->add('phoneNumber', PhoneNumberType::class, [

@@ -7,17 +7,18 @@ use Prometheus\RenderTextFormat;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class MetricsController extends AbstractController
 {
     public function __construct(
         private readonly MetricsService $metricsService,
         private readonly LoggerInterface $logger,
-        private readonly ParameterBagInterface $params
+        private readonly ParameterBagInterface $params,
+        private readonly TranslatorInterface $translator,
     ) {
     }
 
@@ -36,7 +37,11 @@ class MetricsController extends AbstractController
         );
 
         if (!$metricsEnabled) {
-            return new Response('Metrics endpoint is disabled', Response::HTTP_NOT_FOUND);
+            return new Response($this->translator->trans(
+                'metricsEndpointDisabled',
+                [],
+                'controllers'
+            ), Response::HTTP_NOT_FOUND);
         }
 
         $clientIp = $request->getClientIp();
@@ -45,7 +50,11 @@ class MetricsController extends AbstractController
         $isIpAllowed = $this->isIpAllowed($clientIp, $allowedIps);
 
         if (!$isIpAllowed) {
-            $this->logger->warning('Unauthorized metrics access attempt from IP: ' . $clientIp);
+            $this->logger->warning($this->translator->trans(
+                'unauthorizedMetrics',
+                ['%clientIp%' => $clientIp],
+                'controllers'
+            ));
             return new Response('Access denied', Response::HTTP_FORBIDDEN);
         }
 
@@ -55,18 +64,30 @@ class MetricsController extends AbstractController
             $renderer = new RenderTextFormat();
             $result = $renderer->render($registry->getMetricFamilySamples());
 
-            $this->logger->info('Metrics collected successfully for ' . $clientIp);
+            $this->logger->info($this->translator->trans(
+                'metricsCollectedSuccessfully',
+                ['%clientIp%' => $clientIp],
+                'controllers'
+            ));
 
             return new Response($result, Response::HTTP_OK, [
                 'Content-Type' => RenderTextFormat::MIME_TYPE
             ]);
         } catch (\Throwable $e) {
-            $this->logger->error('Error rendering metrics: ' . $e->getMessage(), [
+            $this->logger->error($this->translator->trans(
+                'errorRenderingMetrics',
+                ['%message%' => $e->getMessage()],
+                'controllers'
+            ), [
                 'exception' => $e,
                 'trace' => $e->getTraceAsString()
             ]);
 
-            return new Response('Internal error collecting metrics', Response::HTTP_INTERNAL_SERVER_ERROR);
+            return new Response($this->translator->trans(
+                'internalErrorCollectingMetrics',
+                [],
+                'controllers'
+            ), Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 

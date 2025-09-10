@@ -9,7 +9,7 @@ use Misd\PhoneNumberBundle\Validator\Constraints\PhoneNumber as AssertPhoneNumbe
 
 class UserUpdateDTO
 {
-    #[Assert\NotBlank(message: 'UUID cannot be blank.')]
+    #[Assert\NotBlank(message: 'UUIDNotBlank')]
     public ?string $uuid = null;
 
     #[Assert\Email]

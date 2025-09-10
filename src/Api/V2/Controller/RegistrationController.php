@@ -9,6 +9,7 @@ use App\Entity\UserExternalAuth;
 use App\Enum\AnalyticalEventType;
 use App\Enum\OperationMode;
 use App\Enum\PlatformMode;
+use App\Enum\SettingName;
 use App\Enum\UserProvider;
 use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
@@ -85,7 +86,9 @@ class RegistrationController extends AbstractController
             return new BaseResponse(400, null, 'Invalid JSON format')->toResponse(); // Invalid Json
         }
 
-        $turnstileSetting = $this->settingRepository->findOneBy(['name' => 'TURNSTILE_CHECKER'])->getValue();
+        $turnstileSetting = $this->settingRepository->findOneBy([
+            'name' => SettingName::TURNSTILE_CHECKER->value
+        ])->getValue();
         if (!$turnstileSetting) {
             throw new \RuntimeException('Missing settings: TURNSTILE_CHECKER not found');
         }
@@ -216,7 +219,9 @@ class RegistrationController extends AbstractController
             )->toResponse();
         }
 
-        $turnstileSetting = $this->settingRepository->findOneBy(['name' => 'TURNSTILE_CHECKER'])->getValue();
+        $turnstileSetting = $this->settingRepository->findOneBy([
+            'name' => SettingName::TURNSTILE_CHECKER->value
+        ])->getValue();
         if (!$turnstileSetting) {
             throw new \RuntimeException('Missing settings: TURNSTILE_CHECKER not found');
         }
@@ -335,7 +340,9 @@ class RegistrationController extends AbstractController
                             'uuid' => $user->getUuid(),
                             'currentPassword' => $randomPassword,
                             'verificationCode' => $user->getTwoFAcode(),
-                            'emailTitle' => $this->settingRepository->findOneBy(['name' => 'PAGE_TITLE'])->getValue(),
+                            'emailTitle' => $this->settingRepository->findOneBy([
+                                'name' => SettingName::PAGE_TITLE->value
+                            ])->getValue(),
                             'contactEmail' => $this->settingRepository->findOneBy(
                                 ['name' => 'CONTACT_EMAIL']
                             )->getValue()
@@ -405,7 +412,9 @@ class RegistrationController extends AbstractController
             return new BaseResponse(400, null, 'Invalid JSON format')->toResponse();
         }
 
-        $turnstileSetting = $this->settingRepository->findOneBy(['name' => 'TURNSTILE_CHECKER'])->getValue();
+        $turnstileSetting = $this->settingRepository->findOneBy([
+            'name' => SettingName::TURNSTILE_CHECKER->value
+        ])->getValue();
         if (!$turnstileSetting) {
             throw new \RuntimeException('Missing settings: TURNSTILE_CHECKER not found');
         }
@@ -556,7 +565,9 @@ class RegistrationController extends AbstractController
         } catch (\JsonException) {
             return new BaseResponse(400, null, 'Invalid JSON format')->toResponse(); // Invalid Json
         }
-        $turnstileSetting = $this->settingRepository->findOneBy(['name' => 'TURNSTILE_CHECKER'])->getValue();
+        $turnstileSetting = $this->settingRepository->findOneBy([
+            'name' => SettingName::TURNSTILE_CHECKER->value
+        ])->getValue();
         if (!$turnstileSetting) {
             throw new \RuntimeException('Missing settings: TURNSTILE_CHECKER not found');
         }
@@ -641,7 +652,7 @@ class RegistrationController extends AbstractController
                 }
             }
 
-            $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+            $data = $this->getSettings->getSettings();
 
             if ($hasValidPortalAccount) {
                 try {
@@ -650,7 +661,7 @@ class RegistrationController extends AbstractController
 
                     // Retrieve the latest SMS attempt event for the user
                     $latestEvent = $this->eventRepository->findLatestSmsAttemptEvent($user);
-                    $smsResendInterval = $data['SMS_TIMER_RESEND']['value']; // Interval in minutes
+                    $smsResendInterval = $data[SettingName::SMS_TIMER_RESEND->value]['value']; // Interval in minutes
                     $minInterval = new DateInterval('PT' . $smsResendInterval . 'M');
                     $maxAttempts = 3;
                     $currentTime = new DateTime();

@@ -1,0 +1,11 @@
+username: 'Username'
+userId: 'User Id'
+handle: 'Handle'
+from: 'From'
+timeToResend: 'Time to Resend'
+defaultRegionPhoneInputs: 'Default Region Phone Inputs'
+sms_provider_notice: 'This is for the 
+  <a class="font-semibold underline inline-block" href="https://www.budgetsms.net/" target="_blank">
+      BudgetSMS.net
+  </a>
+  provider, you should create and fund an account with them.'

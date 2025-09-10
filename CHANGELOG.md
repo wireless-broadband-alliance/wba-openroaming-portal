@@ -1,5 +1,26 @@
 # Changelog
 
+# Release V1.12.0
+- More Project optimizations reduce the amount of number of queries made in most of the pages.
+- New checker on the `GetSettings` service to also verify if there is any missing or duplicated setting on the DB.
+- Also for this release, it doesn't have any migrations to be executed.
+
+# Release V1.11.0
+
+- New UI design for email templates.
+- Responsive Translations (Available: EN & PT-PT) - Administrator can just add new configurations for YAML
+  files in the translations folder, and the page auto-detects the added language.
+- New Listener to auto-detection of the user language.
+- Session token to auto-detect the new required `_locale`.
+- Optimized the `GetSettings` service to significantly reduce the loading process, improving application performance by
+  minimizing redundant data processing and database queries.
+- Renamed some enums to singular form to follow symfony guidelines for enum classes.
+- Symfony version increase for maintained version (7.3.3), it bug fixes and security fixes until January 2026.
+- Also for this release, it's required to run the new migrations to set up the new entity for the translations: `SettingTranslation`
+  - Run the migrations with:
+    ```bash
+    php bin/console doctrine:migrations:migrate
+    ```
 # Release V1.10.0
 
 - New feature - Now the admin can configure the landing login authentication, instead of being the traditional (
@@ -42,7 +63,7 @@
 
 # Release V1.8.1
 
-- Removed duplicated field relative to the user account verification, (Account Verification & User
+- Removed duplicated field relative to the user account verification (Account Verification & User
   2FA Configuration).
 
 > **Important**: In this release, the field **verificationCode** was eliminated.

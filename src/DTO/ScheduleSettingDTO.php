@@ -189,7 +189,7 @@ class ScheduleSettingDTO
             $this->months_of_the_year_frequency !== null &&
             $this->months_of_the_year_frequency > count($this->months_of_the_year)
         ) {
-            $context->buildViolation('Frequency cannot be greater than the number of selected months.')
+            $context->buildViolation('frequencyNotGreaterSelectedMonths')
                 ->atPath('months_of_the_year_frequency')
                 ->addViolation();
         }
@@ -204,7 +204,7 @@ class ScheduleSettingDTO
             $this->day_of_month_frequency !== null &&
             $this->day_of_month_frequency > count($this->day_of_month)
         ) {
-            $context->buildViolation('Frequency cannot be greater than the number of selected days.')
+            $context->buildViolation('frequencyNotGreaterSelectedDays')
                 ->atPath('day_of_month_frequency')
                 ->addViolation();
         }
@@ -219,7 +219,7 @@ class ScheduleSettingDTO
             $this->day_of_week_frequency !== null &&
             $this->day_of_week_frequency > count($this->day_of_week)
         ) {
-            $context->buildViolation('Frequency cannot be greater than the number of selected days.')
+            $context->buildViolation('frequencyNotGreaterSelectedDays')
                 ->atPath('day_of_week_frequency')
                 ->addViolation();
         }
@@ -233,7 +233,7 @@ class ScheduleSettingDTO
             in_array('*', $this->day_of_week, true) &&
             count($this->day_of_week) > 1
         ) {
-            $context->buildViolation('"All days of the week" cannot be selected together with specific days.')
+            $context->buildViolation('allDaysWithSpecificDaysNotAllowed')
                 ->atPath('day_of_week')
                 ->addViolation();
         }
@@ -249,7 +249,7 @@ class ScheduleSettingDTO
                 $this->day_of_month
             ) > 1
         ) {
-            $context->buildViolation('"All days of the month" cannot be selected together with specific days.')
+            $context->buildViolation('allDaysWithSpecificDaysNotAllowed')
                 ->atPath('day_of_month')
                 ->addViolation();
         }
@@ -265,7 +265,7 @@ class ScheduleSettingDTO
                 $this->months_of_the_year
             ) > 1
         ) {
-            $context->buildViolation('"All months" cannot be selected together with specific months.')
+            $context->buildViolation('allMonthsWithSpecificDaysNotAllowed')
                 ->atPath('months_of_the_year')
                 ->addViolation();
         }
@@ -281,7 +281,7 @@ class ScheduleSettingDTO
         try {
             new CronExpression($this->advanced);
         } catch (InvalidArgumentException) {
-            $context->buildViolation('The cron expression is not valid.')
+            $context->buildViolation('cronExpressionNotValid')
                 ->atPath('advanced')
                 ->addViolation();
         }

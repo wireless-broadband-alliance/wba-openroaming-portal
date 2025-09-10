@@ -1,0 +1,138 @@
+{% extends '/landing/base.html.twig' %}
+
+{% block title %}
+    {{ data.PAGE_TITLE.value }}
+{% endblock %}
+
+{% block second_col %}
+    {# Form Column #}
+    {# Toasts #}
+    <div class="grid grid-cols-1 gap-[5px]">
+        {# Flash error messages #}
+        {% for message in app.session.flashbag.get('error') %}
+            {{ include('landing/shared/_toast.html.twig', {toast_type: 'toast-warning'}) }}
+        {% endfor %}
+    </div>
+
+    {% if data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\OperationMode::ON').value %}
+        <img class="w-[120px] h-[58px] object-scale-down mt-[75px]" src="{{ data.CUSTOMER_LOGO.value }}" alt={{ 'logoAlt'|trans({}, 'login_landing') }}/>
+    {% endif %}
+
+    <div class="{{ data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\OperationMode::ON').value ? 'pt-[28px]' : 'pt-[161px]' }} leading-7">
+        <p class="font-bold text-xl">{{ 'welcome_back'|trans({}, 'login_landing') }}</p>
+        <p class="text-lg">
+        {% if data.AUTH_METHOD_REGISTER_ENABLED.value == 'true' and data.AUTH_METHOD_SMS_REGISTER_ENABLED.value == 'true' %}
+           {{ 'magicLinkDescription'|trans({}, 'login_landing') }}
+        {% elseif data.AUTH_METHOD_REGISTER_ENABLED.value == 'false' and data.AUTH_METHOD_SMS_REGISTER_ENABLED.value == 'true' %}
+            {{ 'magicLinkDescriptionOnlyPhone'|trans({}, 'login_landing') }}
+        {% elseif data.AUTH_METHOD_REGISTER_ENABLED.value == 'true' and data.AUTH_METHOD_SMS_REGISTER_ENABLED.value == 'false' %}
+            {{ 'magicLinkDescriptionOnlyEmail'|trans({}, 'login_landing') }}
+        {% endif %}
+        </p>
+    </div>
+
+    <twig:LoginUUIDForm :loginChoiceDTO="loginChoiceDTO" :form="form">
+        {{ form_start(form) }}
+        {% if form.loginMethod is defined %}
+            {# Login Method Toggle #}
+            <div class="flex justify-center mt-8">
+                <div class="flex bg-gray-300 rounded-lg overflow-hidden w-full max-w-md p-1">
+
+                    {# Email Option #}
+                    <label
+                            class="cursor-pointer flex-1 text-center px-4 py-2 transition-colors duration-200 rounded-md
+                {{ form.loginMethod.vars.value == constant('App\\Enum\\UserProvider::EMAIL').value ? 'bg-white text-black font-semibold shadow-md' : 'text-gray-700' }}"
+                    >
+                        <input type="radio"
+                               name="{{ form.loginMethod.vars.full_name }}"
+                               value="{{ constant('App\\Enum\\UserProvider::EMAIL').value }}"
+                               class="hidden"
+                               {% if form.loginMethod.vars.value == constant('App\\Enum\\UserProvider::EMAIL').value %}checked{% endif %} />
+                        Email
+                    </label>
+
+                    {# Phone Number Option #}
+                    <label
+                            class="cursor-pointer flex-1 text-center px-4 py-2 transition-colors duration-200 rounded-md
+                {{ form.loginMethod.vars.value == constant('App\\Enum\\UserProvider::PHONE_NUMBER').value ? 'bg-white text-black font-semibold shadow-md' : 'text-gray-700' }}"
+                    >
+                        <input type="radio"
+                               name="{{ form.loginMethod.vars.full_name }}"
+                               value="{{ constant('App\\Enum\\UserProvider::PHONE_NUMBER').value }}"
+                               class="hidden"
+                               {% if form.loginMethod.vars.value == constant('App\\Enum\\UserProvider::PHONE_NUMBER').value %}checked{% endif %} />
+                        {{ 'form.phone_number'|trans({}, 'login_landing') }}
+                    </label>
+                </div>
+            </div>
+
+            {# Show validation error if needed #}
+            <div class="text-red-500 mt-2 text-center">
+                {{ form_errors(form.loginMethod) }}
+            </div>
+        {% endif %}
+
+        {# Email Field #}
+        {% if loginChoiceDTO.loginMethod == constant('App\\Enum\\UserProvider::EMAIL').value and form['email'] is defined %}
+            <div class="relative mt-[32px]">
+                {{ form_label(form.email, constant('App\\Enum\\UserProvider::EMAIL').value, {label_attr: {class: 'form-label'}}) }}
+                {{ form_widget(form.email, {attr: {class: 'form-widget', placeholder: 'form.enter_email'|trans({}, 'login_landing')}}) }}
+                <div class="text-red-500 m-2">
+                    {{ form_errors(form.email) }}
+                </div>
+            </div>
+        {% endif %}
+
+        {# Phone Number Field #}
+        {% if loginChoiceDTO.loginMethod == constant('App\\Enum\\UserProvider::PHONE_NUMBER').value and form['phoneNumber'] is defined %}
+            <div class="flex flex-row items-end space-x-4 mt-[32px]">
+                {# Country Code Dropdown #}
+                <div class="flex flex-col w-1/3">
+                    {{ form_widget(form.phoneNumber.children.country, {
+                        attr: {
+                            class: 'block w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary',
+                            autocomplete: 'tel-country',
+                        },
+                    }) }}
+                </div>
+
+                {# Phone Number Input #}
+                <div class="flex flex-col w-2/3">
+                    {{ form_widget(form.phoneNumber.children.number, {
+                        attr: {
+                            class: 'block w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary',
+                            placeholder: 'form.enter_phone'|trans({}, 'login_landing'),
+                            autocomplete: 'tel',
+                        },
+                    }) }}
+                </div>
+            </div>
+            <div class="text-red-500 m-2">
+                {{ form_errors(form.phoneNumber) }}
+            </div>
+        {% endif %}
+
+        <div class="ml-3 mt-5 hidden">
+            {{ form_row(form.formID) }}
+        </div>
+
+        {# Turnstile Checker #}
+        {% if form.security is defined %}
+            <div class="ml-3 mt-5">
+                {{ form_label(form.security) }}
+                {{ form_widget(form.security) }}
+                <div class="text-red-500">
+                    {{ form_errors(form.security) }}
+                </div>
+            </div>
+        {% endif %}
+
+        <div class="my-[32px] flex justify-center gap-4">
+            <button type="submit" class="w-[220px] btn-primary">{{ 'btn.sendLink'|trans({}, 'login_landing') }}</button>
+            <a href="{{ path('app_landing') }}" class="w-[220px] btn-secondary">{{ 'btn.choose_another'|trans({}, 'login_landing') }}</a>
+        </div>
+
+        {{ form_row(form._token) }}
+        {{ form_end(form, {render_rest: false}) }}
+    </twig:LoginUUIDForm>
+{% endblock %}

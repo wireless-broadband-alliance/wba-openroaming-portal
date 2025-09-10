@@ -3,8 +3,8 @@
 namespace App\Form;
 
 use App\Enum\OperationMode;
+use App\Enum\SettingName;
 use App\Service\GetSettings;
-use App\Validator\SamlEnabled;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
@@ -15,38 +15,48 @@ use Symfony\Component\Validator\Constraints\Callback;
 use Symfony\Component\Validator\Constraints\GreaterThanOrEqual;
 use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotBlank;
-use Symfony\Component\Validator\Constraints\Range;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class AuthType extends AbstractType
 {
-    public function __construct(private readonly GetSettings $getSettings)
-    {
+    public function __construct(
+        private readonly GetSettings $getSettings,
+        private readonly TranslatorInterface $translator
+    ) {
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $settingsToUpdate = [
             // SAML
-            'AUTH_METHOD_SAML_ENABLED' => [
+            SettingName::AUTH_METHOD_SAML_ENABLED->value => [
                 'type' => ChoiceType::class,
             ],
-            'AUTH_METHOD_SAML_LABEL' => [
+            SettingName::AUTH_METHOD_SAML_LABEL->value => [
                 'type' => TextType::class,
                 'options' => [
                     'constraints' => [
                         new Length([
                             'min' => 3,
                             'max' => 50,
-                            'minMessage' => 'The label must be at least {{ limit }} characters long.',
-                            'maxMessage' => 'The label cannot be longer than {{ limit }} characters.',
+                            'minMessage' => $this->translator->trans('labelMinimumCharactersMessage', [], 'AuthType'),
+                            'maxMessage' => $this->translator->trans('labelMaximumCharactersMessage', [], 'AuthType'),
                         ]),
                         new Callback([
                             'callback' => function ($value, ExecutionContextInterface $context): void {
                                 $form = $context->getRoot();
-                                $authMethodGoogleEnabled = $form->get('AUTH_METHOD_GOOGLE_LOGIN_ENABLED')->getData();
+                                $authMethodGoogleEnabled = $form->get(
+                                    SettingName::AUTH_METHOD_GOOGLE_LOGIN_ENABLED->value
+                                )->getData();
                                 if ($authMethodGoogleEnabled === "true" && empty($value)) {
-                                    $context->buildViolation('This field cannot be empty when GOOGLE is enabled.')
+                                    $context->buildViolation(
+                                        $this->translator->trans(
+                                            'fieldNotEmptyWhenSAMLEnabled',
+                                            [],
+                                            'AuthType'
+                                        )
+                                    )
                                         ->addViolation();
                                 }
                             },
@@ -54,30 +64,34 @@ class AuthType extends AbstractType
                     ],
                 ],
             ],
-            'AUTH_METHOD_SAML_DESCRIPTION' => [
+            SettingName::AUTH_METHOD_SAML_DESCRIPTION->value => [
                 'type' => TextType::class,
                 'options' => [
                     'required' => false,
                     'constraints' => [
                         new Length([
                             'max' => 100,
-                            'maxMessage' => 'The description cannot be longer than {{ limit }} characters.',
+                            'maxMessage' => $this->translator->trans(
+                                'descriptionMaximumCharactersMessage',
+                                [],
+                                'AuthType'
+                            ),
                         ]),
                     ],
                 ],
             ],
-            'PROFILE_LIMIT_DATE_SAML' => [
+            SettingName::PROFILE_LIMIT_DATE_SAML->value => [
                 'type' => IntegerType::class,
                 'constraints' => [
                     new NotBlank([
-                        'message' => 'Please select return a valid value.',
+                        'message' => $this->translator->trans('selectValidValue', [], 'AuthType'),
                     ]),
                     new Callback(function ($value, ExecutionContextInterface $context) use ($options): void {
                         // Get the root form to access other fields
                         $form = $context->getRoot();
 
                         // Check if AUTH_METHOD_SAML_ENABLED is set to 'false'
-                        $authMethodSamlEnabled = $form->get('AUTH_METHOD_SAML_ENABLED')->getData();
+                        $authMethodSamlEnabled = $form->get(SettingName::AUTH_METHOD_SAML_ENABLED->value)->getData();
                         if ($authMethodSamlEnabled === 'false') {
                             // Skip validation if SAML is disabled
                             return;
@@ -85,45 +99,59 @@ class AuthType extends AbstractType
 
                         // Perform the range validation if SAML is enabled
                         if ($value < 1 || $value > $options['profileLimitDate']) {
-                            $context->buildViolation(sprintf(
-                                'Please select a value between 1 (minimum, fixed value) and %d 
-                    (maximum, determined by the number of days left until the certificate expires on %s).',
-                                $options['profileLimitDate'],
-                                $options['humanReadableExpirationDate']
-                            ))->addViolation();
+                            $context->buildViolation(
+                                $this->translator->trans(
+                                    'profileLimitMessage',
+                                    [
+                                        '{{ limit }}' => $options['profileLimitDate'],
+                                        '{{ expiration_date }}' => $options['humanReadableExpirationDate']
+                                    ],
+                                    'AuthType'
+                                )
+                            )->addViolation();
                         }
                     }),
                     new Callback(function ($value, ExecutionContextInterface $context) use ($options): void {
                         // Additional validation if needed for expired certificates
                         if ($options['profileLimitDate'] < 1) {
-                            $context->buildViolation(sprintf(
-                                'The certificate has expired on (%s), please renew your certificate.',
-                                $options['humanReadableExpirationDate']
-                            ))->addViolation();
+                            $context->buildViolation(
+                                $this->translator->trans(
+                                    'certificateExpired',
+                                    [
+                                        '{{ expiration_date }}' => $options['humanReadableExpirationDate'],
+                                    ],
+                                    'AuthType'
+                                )
+                            )->addViolation();
                         }
                     }),
                 ],
             ],
+
             // Google Settings
-            'AUTH_METHOD_GOOGLE_LOGIN_ENABLED' => [
+            SettingName::AUTH_METHOD_GOOGLE_LOGIN_ENABLED->value => [
                 'type' => ChoiceType::class,
             ],
-            'AUTH_METHOD_GOOGLE_LOGIN_LABEL' => [
+            SettingName::AUTH_METHOD_GOOGLE_LOGIN_LABEL->value => [
                 'type' => TextType::class,
                 'options' => [
                     'constraints' => [
                         new Length([
                             'min' => 3,
                             'max' => 50,
-                            'minMessage' => 'The label must be at least {{ limit }} characters long.',
-                            'maxMessage' => 'The label cannot be longer than {{ limit }} characters.',
+                            'minMessage' => $this->translator->trans('labelMinimumCharactersMessage', [], 'AuthType'),
+                            'maxMessage' => $this->translator->trans('labelMaximumCharactersMessage', [], 'AuthType'),
                         ]),
                         new Callback([
                             'callback' => function ($value, ExecutionContextInterface $context): void {
                                 $form = $context->getRoot();
-                                $authMethodGoogleEnabled = $form->get('AUTH_METHOD_GOOGLE_LOGIN_ENABLED')->getData();
+                                $authMethodGoogleEnabled = $form->get(
+                                    SettingName::AUTH_METHOD_GOOGLE_LOGIN_ENABLED->value
+                                )->getData();
                                 if ($authMethodGoogleEnabled === 'true' && empty($value)) {
-                                    $context->buildViolation('This field cannot be empty when GOOGLE is enabled.')
+                                    $context->buildViolation(
+                                        $this->translator->trans('fieldNotEmptyWhenGOOGLEEnabled', [], 'AuthType')
+                                    )
                                         ->addViolation();
                                 }
                             },
@@ -131,70 +159,86 @@ class AuthType extends AbstractType
                     ],
                 ],
             ],
-            'AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION' => [
+            SettingName::AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION->value => [
                 'type' => TextType::class,
                 'options' => [
                     'required' => false,
                     'constraints' => [
                         new Length([
                             'max' => 100,
-                            'maxMessage' => 'The description cannot be longer than {{ limit }} characters.',
+                            'maxMessage' => $this->translator->trans(
+                                'descriptionMaximumCharactersMessage',
+                                [],
+                                'AuthType'
+                            ),
                         ]),
                     ],
                 ],
             ],
-            'VALID_DOMAINS_GOOGLE_LOGIN' => [
+            SettingName::VALID_DOMAINS_GOOGLE_LOGIN->value => [
                 'type' => TextType::class,
                 'options' => [
                     'required' => false,
                 ],
             ],
-            'PROFILE_LIMIT_DATE_GOOGLE' => [
+            SettingName::PROFILE_LIMIT_DATE_GOOGLE->value => [
                 'type' => IntegerType::class,
                 'constraints' => [
                     new NotBlank([
-                        'message' => 'Please select an option.',
+                        'message' => $this->translator->trans('selectValidValue', [], 'AuthType'),
                     ]),
                     new Callback(function ($value, ExecutionContextInterface $context) use ($options): void {
                         $form = $context->getRoot();
-                        $authMethodGoogleEnabled = $form->get('AUTH_METHOD_GOOGLE_LOGIN_ENABLED')->getData();
+                        $authMethodGoogleEnabled = $form->get(
+                            SettingName::AUTH_METHOD_GOOGLE_LOGIN_ENABLED->value
+                        )->getData();
                         if ($authMethodGoogleEnabled === 'false') {
                             return;
                         }
 
                         // Perform range validation if Google login is enabled
                         if ($value < 1 || $value > $options['profileLimitDate']) {
-                            $context->buildViolation(sprintf(
-                                'Please select a value between 1 (minimum, fixed value) and %d 
-                    (maximum, determined by the number of days left until the certificate expires on %s).',
-                                $options['profileLimitDate'],
-                                $options['humanReadableExpirationDate']
-                            ))->addViolation();
+                            $context->buildViolation(
+                                $this->translator->trans(
+                                    'profileLimitMessage',
+                                    [
+                                        '{{ limit }}' => $options['profileLimitDate'],
+                                        '{{ expiration_date }}' => $options['humanReadableExpirationDate']
+                                    ],
+                                    'AuthType'
+                                )
+                            )->addViolation();
                         }
                     }),
                     new Callback(function ($value, ExecutionContextInterface $context) use ($options): void {
                         if ($options['profileLimitDate'] < 1) {
-                            $context->buildViolation(sprintf(
-                                'The certificate has expired on (%s), please renew your certificate.',
-                                $options['humanReadableExpirationDate']
-                            ))->addViolation();
+                            $context->buildViolation(
+                                $this->translator->trans(
+                                    'certificateExpired',
+                                    [
+                                        '{{ expiration_date }}' => $options['humanReadableExpirationDate'],
+                                    ],
+                                    'AuthType'
+                                )
+                            )->addViolation();
                         }
                     }),
                 ],
             ],
+
             // Microsoft
-            'AUTH_METHOD_MICROSOFT_LOGIN_ENABLED' => [
+            SettingName::AUTH_METHOD_MICROSOFT_LOGIN_ENABLED->value => [
                 'type' => ChoiceType::class,
             ],
-            'AUTH_METHOD_MICROSOFT_LOGIN_LABEL' => [
+            SettingName::AUTH_METHOD_MICROSOFT_LOGIN_LABEL->value => [
                 'type' => TextType::class,
                 'options' => [
                     'constraints' => [
                         new Length([
                             'min' => 3,
                             'max' => 50,
-                            'minMessage' => 'The label must be at least {{ limit }} characters long.',
-                            'maxMessage' => 'The label cannot be longer than {{ limit }} characters.',
+                            'minMessage' => $this->translator->trans('labelMinimumCharactersMessage', [], 'AuthType'),
+                            'maxMessage' => $this->translator->trans('labelMaximumCharactersMessage', [], 'AuthType'),
                         ]),
                         new Callback([
                             'callback' => function ($value, ExecutionContextInterface $context): void {
@@ -203,7 +247,9 @@ class AuthType extends AbstractType
                                     'AUTH_METHOD_MICROSOFT_LOGIN_ENABLED'
                                 )->getData();
                                 if ($authMethodMicrosoftEnabled === "true" && empty($value)) {
-                                    $context->buildViolation('This field cannot be empty when Microsoft is enabled.')
+                                    $context->buildViolation(
+                                        $this->translator->trans('fieldNotEmptyWhenMicrosoftEnabled', [], 'AuthType')
+                                    )
                                         ->addViolation();
                                 }
                             },
@@ -211,79 +257,96 @@ class AuthType extends AbstractType
                     ],
                 ],
             ],
-            'AUTH_METHOD_MICROSOFT_LOGIN_DESCRIPTION' => [
+            SettingName::AUTH_METHOD_MICROSOFT_LOGIN_DESCRIPTION->value => [
                 'type' => TextType::class,
                 'options' => [
                     'required' => false,
                     'constraints' => [
                         new Length([
                             'max' => 100,
-                            'maxMessage' => 'The description cannot be longer than {{ limit }} characters.',
+                            'maxMessage' => $this->translator->trans(
+                                'descriptionMaximumCharactersMessage',
+                                [],
+                                'AuthType'
+                            ),
                         ]),
                     ],
                 ],
             ],
-            'VALID_DOMAINS_MICROSOFT_LOGIN' => [
+            SettingName::VALID_DOMAINS_MICROSOFT_LOGIN->value => [
                 'type' => TextType::class,
                 'options' => [
                     'required' => false,
                 ]
             ],
-            'PROFILE_LIMIT_DATE_MICROSOFT' => [
+            SettingName::PROFILE_LIMIT_DATE_MICROSOFT->value => [
                 'type' => IntegerType::class,
                 'constraints' => [
                     new NotBlank([
-                        'message' => 'Please select a valid value.',
+                        'message' => $this->translator->trans('selectValidValue', [], 'AuthType'),
                     ]),
                     new Callback(function ($value, ExecutionContextInterface $context) use ($options): void {
                         $form = $context->getRoot();
 
-                        $authMethodMicrosoftEnabled = $form->get('AUTH_METHOD_MICROSOFT_LOGIN_ENABLED')->getData();
+                        $authMethodMicrosoftEnabled = $form->get(
+                            SettingName::AUTH_METHOD_MICROSOFT_LOGIN_ENABLED->value
+                        )->getData();
                         if ($authMethodMicrosoftEnabled === 'false') {
                             return;
                         }
 
                         if ($value < 1 || $value > $options['profileLimitDate']) {
-                            $context->buildViolation(sprintf(
-                                'Please select a value between 1 (minimum, fixed value) and %d 
-                    (maximum, determined by the number of days left until the certificate expires on %s).',
-                                $options['profileLimitDate'],
-                                $options['humanReadableExpirationDate']
-                            ))->addViolation();
+                            $context->buildViolation(
+                                $this->translator->trans(
+                                    'profileLimitMessage',
+                                    [
+                                        '{{ limit }}' => $options['profileLimitDate'],
+                                        '{{ expiration_date }}' => $options['humanReadableExpirationDate']
+                                    ],
+                                    'AuthType'
+                                )
+                            )->addViolation();
                         }
                     }),
                     new Callback(function ($value, ExecutionContextInterface $context) use ($options): void {
                         if ($options['profileLimitDate'] < 1) {
-                            $context->buildViolation(sprintf(
-                                'The certificate has expired on (%s), please renew your certificate.',
-                                $options['humanReadableExpirationDate']
-                            ))->addViolation();
+                            $context->buildViolation(
+                                $this->translator->trans(
+                                    'certificateExpired',
+                                    [
+                                        '{{ expiration_date }}' => $options['humanReadableExpirationDate'],
+                                    ],
+                                    'AuthType'
+                                )
+                            )->addViolation();
                         }
                     }),
                 ],
             ],
 
             // Email Registration
-            'AUTH_METHOD_REGISTER_ENABLED' => [
+            SettingName::AUTH_METHOD_REGISTER_ENABLED->value => [
                 'type' => ChoiceType::class,
             ],
-            'AUTH_METHOD_REGISTER_LABEL' => [
+            SettingName::AUTH_METHOD_REGISTER_LABEL->value => [
                 'type' => TextType::class,
                 'options' => [
                     'constraints' => [
                         new Length([
                             'min' => 3,
                             'max' => 50,
-                            'minMessage' => 'The label must be at least {{ limit }} characters long.',
-                            'maxMessage' => 'The label cannot be longer than {{ limit }} characters.',
+                            'minMessage' => $this->translator->trans('labelMinimumCharactersMessage', [], 'AuthType'),
+                            'maxMessage' => $this->translator->trans('labelMaximumCharactersMessage', [], 'AuthType'),
                         ]),
                         new Callback([
                             'callback' => function ($value, ExecutionContextInterface $context): void {
                                 $form = $context->getRoot();
-                                $authMethodRegisterEnabled = $form->get('AUTH_METHOD_REGISTER_ENABLED')->getData();
+                                $authMethodRegisterEnabled = $form->get(
+                                    SettingName::AUTH_METHOD_REGISTER_ENABLED->value
+                                )->getData();
                                 if ($authMethodRegisterEnabled === "true" && empty($value)) {
                                     $context->buildViolation(
-                                        'This field cannot be empty when EMAIL REGISTER is enabled.'
+                                        $this->translator->trans('fieldNotEmptyWhenEMAILEnabled', [], 'AuthType')
                                     )->addViolation();
                                 }
                             },
@@ -291,108 +354,147 @@ class AuthType extends AbstractType
                     ],
                 ],
             ],
-            'AUTH_METHOD_REGISTER_DESCRIPTION' => [
+            SettingName::AUTH_METHOD_REGISTER_DESCRIPTION->value => [
                 'type' => TextType::class,
                 'options' => [
                     'required' => false,
                     'constraints' => [
                         new Length([
                             'max' => 100,
-                            'maxMessage' => 'The description cannot be longer than {{ limit }} characters.',
+                            'maxMessage' => $this->translator->trans(
+                                'descriptionMaximumCharactersMessage',
+                                [],
+                                'AuthType'
+                            ),
                         ]),
                     ],
                 ],
             ],
-            'PROFILE_LIMIT_DATE_EMAIL' => [
+            SettingName::PROFILE_LIMIT_DATE_EMAIL->value => [
                 'type' => IntegerType::class,
                 'constraints' => [
                     new NotBlank([
-                        'message' => 'Please select an option.',
+                        'message' => $this->translator->trans('selectValidValue', [], 'AuthType'),
                     ]),
                     new Callback(function ($value, ExecutionContextInterface $context) use ($options): void {
                         $form = $context->getRoot();
 
-                        $authMethodRegisterEnabled = $form->get('AUTH_METHOD_REGISTER_ENABLED')->getData();
+                        $authMethodRegisterEnabled = $form->get(
+                            SettingName::AUTH_METHOD_REGISTER_ENABLED->value
+                        )->getData();
                         if ($authMethodRegisterEnabled === 'false') {
                             return;
                         }
 
                         if ($value < 1 || $value > $options['profileLimitDate']) {
-                            $context->buildViolation(sprintf(
-                                'Please select a value between 1 (minimum, fixed value) and %d 
-                    (maximum, determined by the number of days left until the certificate expires on %s).',
-                                $options['profileLimitDate'],
-                                $options['humanReadableExpirationDate']
-                            ))->addViolation();
+                            $context->buildViolation(
+                                $this->translator->trans(
+                                    'profileLimitMessage',
+                                    [
+                                        '{{ limit }}' => $options['profileLimitDate'],
+                                        '{{ expiration_date }}' => $options['humanReadableExpirationDate']
+                                    ],
+                                    'AuthType'
+                                )
+                            )->addViolation();
                         }
                     }),
                     new Callback(function ($value, ExecutionContextInterface $context) use ($options): void {
                         if ($options['profileLimitDate'] < 1) {
-                            $context->buildViolation(sprintf(
-                                'The certificate has expired on (%s), please renew your certificate.',
-                                $options['humanReadableExpirationDate']
-                            ))->addViolation();
+                            $context->buildViolation(
+                                $this->translator->trans(
+                                    'certificateExpired',
+                                    [
+                                        '{{ expiration_date }}' => $options['humanReadableExpirationDate'],
+                                    ],
+                                    'AuthType'
+                                )
+                            )->addViolation();
                         }
                     }),
                 ],
             ],
-            'EMAIL_TIMER_RESEND' => [
+            SettingName::EMAIL_TIMER_RESEND->value => [
                 'type' => IntegerType::class,
                 'constraints' => [
                     new Length([
                         'max' => 3,
-                        'maxMessage' => ' This field cannot be longer than {{ limit }} characters',
+                        'maxMessage' => $this->translator->trans(
+                            'descriptionMaximumCharactersMessage',
+                            [],
+                            'AuthType'
+                        ),
                     ]),
                     new GreaterThanOrEqual([
                         'value' => 1,
-                        'message' => 'This timer should never be less than 1.',
+                        'message' => $this->translator->trans(
+                            'timerNeverLessThan1',
+                            [],
+                            'AuthType'
+                        ),
                     ]),
                     new NotBlank([
-                        'message' => 'Please make sure to set a timer',
+                        'message' => $this->translator->trans(
+                            'timerNotBlank',
+                            [],
+                            'AuthType'
+                        ),
                     ]),
 
                 ]
             ],
-            'LINK_VALIDITY' => [
+            SettingName::LINK_VALIDITY->value => [
                 'type' => IntegerType::class,
                 'constraints' => [
                     new Length([
                         'max' => 3,
-                        'maxMessage' => ' This field cannot be longer than {{ limit }} characters',
+                        'maxMessage' => $this->translator->trans(
+                            'descriptionMaximumCharactersMessage',
+                            [],
+                            'AuthType'
+                        ),
                     ]),
                     new GreaterThanOrEqual([
                         'value' => 1,
-                        'message' => 'This timer should never be less than 1.',
+                        'message' => $this->translator->trans(
+                            'timerNeverLessThan1',
+                            [],
+                            'AuthType'
+                        ),
                     ]),
                     new NotBlank([
-                        'message' => 'Please make sure to set a timer',
+                        'message' => $this->translator->trans(
+                            'timerNotBlank',
+                            [],
+                            'AuthType'
+                        ),
                     ]),
 
                 ]
             ],
             // Login
-            'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED' => [
+            SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED->value => [
                 'type' => ChoiceType::class,
             ],
-            'AUTH_METHOD_LOGIN_TRADITIONAL_LABEL' => [
+            SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_LABEL->value => [
                 'type' => TextType::class,
                 'options' => [
                     'constraints' => [
                         new Length([
                             'min' => 3,
                             'max' => 50,
-                            'minMessage' => 'The label must be at least {{ limit }} characters long.',
-                            'maxMessage' => 'The label cannot be longer than {{ limit }} characters.',
+                            'minMessage' => $this->translator->trans('labelMinimumCharactersMessage', [], 'AuthType'),
+                            'maxMessage' => $this->translator->trans('labelMaximumCharactersMessage', [], 'AuthType'),
                         ]),
                         new Callback([
                             'callback' => function ($value, ExecutionContextInterface $context): void {
                                 $form = $context->getRoot();
                                 $authMethodLoginTraditionalEnabled = $form->get(
-                                    'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED'
+                                    SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED->value
                                 )->getData();
                                 if ($authMethodLoginTraditionalEnabled === "true" && empty($value)) {
                                     $context->buildViolation(
-                                        'This field cannot be empty when Login Traditional is enabled.'
+                                        $this->translator->trans('fieldNotEmptyWhenTraditionalEnabled', [], 'AuthType')
                                     )->addViolation();
                                 }
                             },
@@ -400,44 +502,49 @@ class AuthType extends AbstractType
                     ],
                 ],
             ],
-            'AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION' => [
+            SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION->value => [
                 'type' => TextType::class,
                 'options' => [
                     'required' => false,
                     'constraints' => [
                         new Length([
                             'max' => 100,
-                            'maxMessage' => 'The description cannot be longer than {{ limit }} characters.',
+                            'maxMessage' => $this->translator->trans(
+                                'descriptionMaximumCharactersMessage',
+                                [],
+                                'AuthType'
+                            ),
                         ]),
                     ],
                 ],
             ],
             // Login with UUID only Settings
-            'LOGIN_WITH_UUID_ONLY' => [
+            SettingName::LOGIN_WITH_UUID_ONLY->value => [
                 'type' => ChoiceType::class,
             ],
             // SMS
-            'AUTH_METHOD_SMS_REGISTER_ENABLED' => [
+            SettingName::AUTH_METHOD_SMS_REGISTER_ENABLED->value => [
                 'type' => ChoiceType::class,
             ],
-            'AUTH_METHOD_SMS_REGISTER_LABEL' => [
+            SettingName::AUTH_METHOD_SMS_REGISTER_LABEL->value => [
                 'type' => TextType::class,
                 'options' => [
                     'constraints' => [
                         new Length([
                             'min' => 3,
                             'max' => 50,
-                            'minMessage' => 'The label must be at least {{ limit }} characters long.',
-                            'maxMessage' => 'The label cannot be longer than {{ limit }} characters.',
+                            'minMessage' => $this->translator->trans('labelMinimumCharactersMessage', [], 'AuthType'),
+                            'maxMessage' => $this->translator->trans('labelMaximumCharactersMessage', [], 'AuthType'),
                         ]),
                         new Callback([
                             'callback' => function ($value, ExecutionContextInterface $context): void {
                                 $form = $context->getRoot();
-                                $authMethodSMSRegisterEnabled = $form->get('AUTH_METHOD_SMS_REGISTER_ENABLED')->getData(
-                                );
+                                $authMethodSMSRegisterEnabled = $form->get(
+                                    SettingName::AUTH_METHOD_SMS_REGISTER_ENABLED->value
+                                )->getData();
                                 if ($authMethodSMSRegisterEnabled === "true" && empty($value)) {
                                     $context->buildViolation(
-                                        'This field cannot be empty when SMS Register is enabled.'
+                                        $this->translator->trans('fieldNotEmptyWhenSMSEnabled', [], 'AuthType')
                                     )->addViolation();
                                 }
                             },
@@ -445,47 +552,62 @@ class AuthType extends AbstractType
                     ],
                 ],
             ],
-            'AUTH_METHOD_SMS_REGISTER_DESCRIPTION' => [
+            SettingName::AUTH_METHOD_SMS_REGISTER_DESCRIPTION->value => [
                 'type' => TextType::class,
                 'options' => [
                     'required' => false,
                     'constraints' => [
                         new Length([
                             'max' => 100,
-                            'maxMessage' => 'The description cannot be longer than {{ limit }} characters.',
+                            'maxMessage' => $this->translator->trans(
+                                'descriptionMaximumCharactersMessage',
+                                [],
+                                'AuthType'
+                            ),
                         ]),
                     ],
                 ],
             ],
-            'PROFILE_LIMIT_DATE_SMS' => [
+            SettingName::PROFILE_LIMIT_DATE_SMS->value => [
                 'type' => IntegerType::class,
                 'constraints' => [
                     new NotBlank([
-                        'message' => 'Please select an option.',
+                        'message' => $this->translator->trans('selectValidValue', [], 'AuthType'),
                     ]),
                     new Callback(function ($value, ExecutionContextInterface $context) use ($options): void {
                         $form = $context->getRoot();
 
-                        $authMethodSmsRegisterEnabled = $form->get('AUTH_METHOD_SMS_REGISTER_ENABLED')->getData();
+                        $authMethodSmsRegisterEnabled = $form->get(
+                            SettingName::AUTH_METHOD_SMS_REGISTER_ENABLED->value
+                        )->getData();
                         if ($authMethodSmsRegisterEnabled === 'false') {
                             return;
                         }
 
                         if ($value < 1 || $value > $options['profileLimitDate']) {
-                            $context->buildViolation(sprintf(
-                                'Please select a value between 1 (minimum, fixed value) and %d 
-                    (maximum, determined by the number of days left until the certificate expires on %s).',
-                                $options['profileLimitDate'],
-                                $options['humanReadableExpirationDate']
-                            ))->addViolation();
+                            $context->buildViolation(
+                                $this->translator->trans(
+                                    'profileLimitMessage',
+                                    [
+                                        '{{ limit }}' => $options['profileLimitDate'],
+                                        '{{ expiration_date }}' => $options['humanReadableExpirationDate']
+                                    ],
+                                    'AuthType'
+                                )
+                            )->addViolation();
                         }
                     }),
                     new Callback(function ($value, ExecutionContextInterface $context) use ($options): void {
                         if ($options['profileLimitDate'] < 1) {
-                            $context->buildViolation(sprintf(
-                                'The certificate has expired on (%s). Please renew your certificate.',
-                                $options['humanReadableExpirationDate']
-                            ))->addViolation();
+                            $context->buildViolation(
+                                $this->translator->trans(
+                                    'certificateExpired',
+                                    [
+                                        '{{ expiration_date }}' => $options['humanReadableExpirationDate'],
+                                    ],
+                                    'AuthType'
+                                )
+                            )->addViolation();
                         }
                     }),
                 ],
@@ -501,26 +623,27 @@ class AuthType extends AbstractType
 
                     if (
                         in_array($settingName, [
-                            'AUTH_METHOD_SAML_ENABLED',
-                            'AUTH_METHOD_GOOGLE_LOGIN_ENABLED',
-                            'AUTH_METHOD_MICROSOFT_LOGIN_ENABLED',
-                            'AUTH_METHOD_REGISTER_ENABLED',
-                            'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED',
-                            'AUTH_METHOD_SMS_REGISTER_ENABLED',
+                            SettingName::AUTH_METHOD_SAML_ENABLED->value,
+                            SettingName::AUTH_METHOD_GOOGLE_LOGIN_ENABLED->value,
+                            SettingName::AUTH_METHOD_MICROSOFT_LOGIN_ENABLED->value,
+                            SettingName::AUTH_METHOD_REGISTER_ENABLED->value,
+                            SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED->value,
+                            SettingName::AUTH_METHOD_SMS_REGISTER_ENABLED->value,
                         ])
                     ) {
                         $formFieldOptions['choices'] = [
                             OperationMode::ON->value => 'true',
                             OperationMode::OFF->value => 'false',
                         ];
-                        $formFieldOptions['placeholder'] = 'Select an option';
-                    } elseif ($settingName === 'LOGIN_WITH_UUID_ONLY') {
+                        $formFieldOptions['placeholder'] = $this->translator->trans('selectOption', [], 'AuthType');
+                    } elseif ($settingName === SettingName::LOGIN_WITH_UUID_ONLY->value) {
                         $formFieldOptions['choices'] = [
                             OperationMode::ON->value => OperationMode::ON->value,
                             OperationMode::OFF->value => OperationMode::OFF->value,
                         ];
-                        $formFieldOptions['placeholder'] = 'Select an option';
+                        $formFieldOptions['placeholder'] = $this->translator->trans('selectOption', [], 'AuthType');
                     }
+
                     if (isset($config['constraints'])) {
                         $formFieldOptions['constraints'] = $config['constraints'];
                     }

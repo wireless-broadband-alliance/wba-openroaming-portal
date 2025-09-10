@@ -7,6 +7,7 @@ use App\Entity\OTPcode;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Enum\PlatformMode;
+use App\Enum\SettingName;
 use App\Enum\TwoFAType;
 use App\Enum\UserProvider;
 use App\Enum\UserTwoFactorAuthenticationStatus;
@@ -25,6 +26,7 @@ use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 readonly class TwoFAService
 {
@@ -38,12 +40,13 @@ readonly class TwoFAService
         private EventActions $eventActions,
         private GetSettings $getSettings,
         private EventRepository $eventRepository,
+        private TranslatorInterface $translator
     ) {
     }
 
     public function validate2FACode(User $user, string $formCode): bool
     {
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
         $codeDate = $user->getTwoFACodeGeneratedAt();
         // If the user doesn't have code in the DB return false
         if (!$codeDate instanceof DateTimeInterface) {
@@ -51,7 +54,7 @@ readonly class TwoFAService
         }
         $now = new DateTime();
         $diff = $now->getTimestamp() - $codeDate->getTimestamp();
-        $timeToExpireCode = $data["TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME"]["value"];
+        $timeToExpireCode = $data[SettingName::TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME->value]["value"];
         if ($diff >= $timeToExpireCode) {
             return false;
         }
@@ -65,10 +68,11 @@ readonly class TwoFAService
     /**
      * @throws RandomException
      */
-    public function twoFACode(User $user): string
+    public function twoFACode(User $user): ?string
     {
         // Generate a random verification code with 6 digits
-        $user->setTwoFACode(random_int(100000, 999999));
+        $verificationCode = random_int(100000, 999999);
+        $user->setTwoFACode($verificationCode);
         $user->setTwoFACodeGeneratedAt(new DateTime());
         $user->setTwoFAcodeIsActive(true);
         $this->userRepository->save($user, true);
@@ -93,7 +97,7 @@ readonly class TwoFAService
         User $user,
         ?string $ip,
         ?string $userAgent,
-        string $eventType,
+        string $eventType
     ): void {
         $code = $this->twoFACode($user);
         $this->sendCode($user, $code, $ip, $userAgent, $eventType);
@@ -172,15 +176,44 @@ readonly class TwoFAService
         string $eventType,
     ): void {
         $messageType = $user->getTwoFAtype();
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
-        $secondsLeft = $data["TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME"]["value"];
+        $data = $this->getSettings->getSettings();
+        $secondsLeft = $data[SettingName::TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME->value]["value"];
         if ($messageType === UserTwoFactorAuthenticationStatus::EMAIL->value || $user->getEmail()) {
-            $emailTitle = $this->settingRepository->findOneBy(['name' => 'PAGE_TITLE'])->getValue();
-            $contactEmail = $this->settingRepository->findOneBy(['name' => 'CONTACT_EMAIL'])->getValue();
-            $supportTeam = $this->settingRepository->findOneBy(['name' => 'PAGE_TITLE'])->getValue();
+            $emailTitle = $this->settingRepository->findOneBy(['name' => SettingName::PAGE_TITLE->value])->getValue();
+            $contactEmail = $this->settingRepository->findOneBy([
+                'name' => SettingName::CONTACT_EMAIL->value
+            ])->getValue();
+            $supportTeam = $this->settingRepository->findOneBy(['name' => SettingName::PAGE_TITLE->value])->getValue();
+            $customerLogo = $this->settingRepository->findOneBy([
+                'name' => SettingName::CUSTOMER_LOGO->value
+            ])->getValue();
+            $projectDir = $this->parameterBag->get('kernel.project_dir');
+            $logoPath = $projectDir . '/public' . $customerLogo;
 
             if (
-                $eventType === AnalyticalEventType::LOGIN_TRADITIONAL_REQUEST->value
+                $eventType === AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE->value
+            ) {
+                // LOGIN_WITH_UUID_ONLY_CODE
+                $email = new TemplatedEmail()
+                    ->from(
+                        new Address(
+                            $this->parameterBag->get('app.email_address'),
+                            $this->parameterBag->get('app.sender_name')
+                        )
+                    )
+                    ->to($user->getEmail())
+                    ->subject($this->translator->trans('subject', [], 'confirmation_code'))
+                    ->htmlTemplate('email/confirmation_code.html.twig')
+                    ->context([
+                        'uuid' => $user->getEmail(),
+                        'emailTitle' => $emailTitle,
+                        'contactEmail' => $contactEmail,
+                        'twoFaCode' => $code,
+                    ])
+                    ->embedFromPath($logoPath, 'logo_cid');
+            } elseif (
+                $eventType === AnalyticalEventType::LOGIN_TRADITIONAL_REQUEST->value ||
+                $eventType === AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE_RESEND->value
             ) {
                 // LOGIN_TRADITIONAL_REQUEST || LOGIN_CODE_RESEND
                 $email = new TemplatedEmail()
@@ -191,16 +224,45 @@ readonly class TwoFAService
                         )
                     )
                     ->to($user->getEmail())
-                    ->subject('Verify Your Account')
-                    ->htmlTemplate('email/user_code.html.twig')
+                    ->subject($this->translator->trans('subject_verify', [], 'user_verification'))
+                    ->htmlTemplate('email/user_verification.html.twig')
                     ->context([
                         'uuid' => $user->getEmail(),
-                        'emailTitle' => $emailTitle,
                         'supportTeam' => $emailTitle,
                         'contactEmail' => $contactEmail,
                         'twoFaCode' => $code,
                         'is2FATemplate' => false
-                    ]);
+                    ])
+                    ->embedFromPath($logoPath, 'logo_cid');
+            } elseif (
+                $eventType === AnalyticalEventType::USER_AUTO_DELETE_CODE->value
+            ) {
+                // AUTO DELETE CONFIRMATION CODE
+                $email = new TemplatedEmail()
+                    ->from(
+                        new Address(
+                            $this->parameterBag->get('app.email_address'),
+                            $this->parameterBag->get('app.sender_name')
+                        )
+                    )
+                    ->to($user->getEmail())
+                    ->subject(
+                        $this->translator->trans(
+                            'subject_auto_deletion_code',
+                            ['%code%' => $code],
+                            'user_auto_delete_code'
+                        )
+                    )
+                    ->htmlTemplate('email/user_auto_delete_code.html.twig')
+                    ->context([
+                        'uuid' => $user->getEmail(),
+                        'emailTitle' => $emailTitle,
+                        'contactEmail' => $contactEmail,
+                        'supportTeam' => $supportTeam,
+                        'code' => $code,
+                        'secondsLeft' => $secondsLeft,
+                    ])
+                    ->embedFromPath($logoPath, 'logo_cid');
             } else {
                 // 2FA VERIFICATION REQUESTS
                 $email = new TemplatedEmail()
@@ -211,8 +273,14 @@ readonly class TwoFAService
                         )
                     )
                     ->to($user->getEmail())
-                    ->subject('Your OpenRoaming Two Factor Authentication code is ' . $code)
-                    ->htmlTemplate('email/user_code.html.twig')
+                    ->subject(
+                        $this->translator->trans(
+                            'subject_two_factor_code',
+                            ['%code%' => $code],
+                            'user_verification'
+                        )
+                    )
+                    ->htmlTemplate('email/user_verification.html.twig')
                     ->context([
                         'uuid' => $user->getEmail(),
                         'emailTitle' => $emailTitle,
@@ -221,16 +289,28 @@ readonly class TwoFAService
                         'twoFaCode' => $code,
                         'is2FATemplate' => true,
                         'secondsLeft' => $secondsLeft,
-                    ]);
+                    ])
+                    ->embedFromPath($logoPath, 'logo_cid');
             }
             $this->mailer->send($email);
         } elseif ($messageType === UserTwoFactorAuthenticationStatus::SMS->value || $user->getPhoneNumber()) {
             if (
-                $eventType === AnalyticalEventType::LOGIN_TRADITIONAL_REQUEST->value
+                $eventType === AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE->value ||
+                $eventType === AnalyticalEventType::LOGIN_TRADITIONAL_REQUEST->value ||
+                $eventType === AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE_RESEND->value ||
+                $eventType === AnalyticalEventType::VERIFICATION_CODE_LOGIN_RESEND->value
             ) {
-                $message = "Your verification Code is " . $code;
+                $message = $this->translator->trans(
+                    'verification_code_message',
+                    ['%code%' => $code],
+                    'TwoFAService'
+                );
             } else {
-                $message = "Your Two Factor Authentication Code is " . $code;
+                $message = $this->translator->trans(
+                    'two_factor_code_message',
+                    ['%code%' => $code],
+                    'TwoFAService'
+                );
             }
             $this->sendSMS->sendSmsNoValidation($user, $message);
         }
@@ -270,9 +350,9 @@ readonly class TwoFAService
 
     public function canResendCode(User $user, string $eventType): bool
     {
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
-        $nrAttempts = $data["TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE"]["value"];
-        $timeToResetAttempts = $data["TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS"]["value"];
+        $data = $this->getSettings->getSettings();
+        $nrAttempts = $data[SettingName::TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE->value]["value"];
+        $timeToResetAttempts = $data[SettingName::TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS->value]["value"];
         $limitTime = new DateTime();
         $limitTime->modify('-' . $timeToResetAttempts . ' minutes');
         $attempts = $this->eventRepository->find2FACodeAttemptEvent(
@@ -286,8 +366,8 @@ readonly class TwoFAService
 
     public function timeIntervalToResendCode(User $user, string $eventType): bool
     {
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
-        $timeIntervalToResendCode = $data["TWO_FACTOR_AUTH_RESEND_INTERVAL"]["value"];
+        $data = $this->getSettings->getSettings();
+        $timeIntervalToResendCode = $data[SettingName::TWO_FACTOR_AUTH_RESEND_INTERVAL->value]["value"];
         $limitTime = new DateTime();
         $limitTime->modify('-' . $timeIntervalToResendCode . ' seconds');
         $attempts = $this->eventRepository->find2FACodeAttemptEvent(
@@ -301,8 +381,8 @@ readonly class TwoFAService
 
     public function timeIntervalToSendCode(User $user, string $event): bool
     {
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
-        $timeIntervalToResendCode = $data["TWO_FACTOR_AUTH_RESEND_INTERVAL"]["value"];
+        $data = $this->getSettings->getSettings();
+        $timeIntervalToResendCode = $data[SettingName::TWO_FACTOR_AUTH_RESEND_INTERVAL->value]["value"];
         $limitTime = new DateTime();
         $limitTime->modify('-' . $timeIntervalToResendCode . ' seconds');
         $attempts = $this->eventRepository->find2FACodeAttemptEvent(
@@ -353,9 +433,9 @@ readonly class TwoFAService
 
     public function canValidationCode(User $user, string $eventType): bool
     {
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
-        $timeToResetAttempts = $data["TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS"]["value"];
-        $nrAttempts = $data["TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE"]["value"];
+        $data = $this->getSettings->getSettings();
+        $timeToResetAttempts = $data[SettingName::TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS->value]["value"];
+        $nrAttempts = $data[SettingName::TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE->value]["value"];
         $limitTime = new DateTime();
         $limitTime->modify('-' . $timeToResetAttempts . ' minutes');
         $attempts = $this->eventRepository->find2FACodeAttemptEvent($user, $nrAttempts, $limitTime, $eventType);
@@ -375,8 +455,8 @@ readonly class TwoFAService
 
     public function timeLeftToResendCode(User $user, string $eventType): int
     {
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
-        $timeToResetAttempts = $data["TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS"]["value"];
+        $data = $this->getSettings->getSettings();
+        $timeToResetAttempts = $data[SettingName::TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS->value]["value"];
         $lastEvent = $this->eventRepository->findLatest2FACodeAttemptEvent(
             $user,
             $eventType
@@ -393,8 +473,8 @@ readonly class TwoFAService
 
     public function timeLeftToResendCodeTimeInterval(User $user, string $eventType): int
     {
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
-        $timeToResetAttempts = $data["TWO_FACTOR_AUTH_RESEND_INTERVAL"]["value"];
+        $data = $this->getSettings->getSettings();
+        $timeToResetAttempts = $data[SettingName::TWO_FACTOR_AUTH_RESEND_INTERVAL->value]["value"];
         $lastEvent = $this->eventRepository->findLatest2FACodeAttemptEvent(
             $user,
             $eventType
@@ -412,8 +492,8 @@ readonly class TwoFAService
 
     public function isTwoFARequired(User $user): bool
     {
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
-        if ($data["TWO_FACTOR_AUTH_STATUS"]["value"] === TwoFAType::ENFORCED_FOR_LOCAL->value) {
+        $data = $this->getSettings->getSettings();
+        if ($data[SettingName::TWO_FACTOR_AUTH_STATUS->value]["value"] === TwoFAType::ENFORCED_FOR_LOCAL->value) {
             if (
                 $user->getUserExternalAuths()[0] &&
                 $user->getUserExternalAuths()[0]->getProvider() === UserProvider::PORTAL_ACCOUNT->value
@@ -423,7 +503,7 @@ readonly class TwoFAService
             return false;
         }
 
-        if ($data["TWO_FACTOR_AUTH_STATUS"]["value"] === TwoFAType::ENFORCED_FOR_ALL->value) {
+        if ($data[SettingName::TWO_FACTOR_AUTH_STATUS->value]["value"] === TwoFAType::ENFORCED_FOR_ALL->value) {
             return $user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::DISABLED->value;
         }
 

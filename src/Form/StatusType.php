@@ -4,6 +4,7 @@ namespace App\Form;
 
 use App\Enum\OperationMode;
 use App\Enum\PlatformMode;
+use App\Enum\SettingName;
 use App\Service\GetSettings;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -13,11 +14,13 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\GreaterThanOrEqual;
 use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class StatusType extends AbstractType
 {
     public function __construct(
-        private readonly GetSettings $getSettings
+        private readonly GetSettings $getSettings,
+        private readonly TranslatorInterface $translator
     ) {
     }
 
@@ -29,8 +32,8 @@ class StatusType extends AbstractType
             $settingValue = $setting->getValue();
             $description = $this->getSettings->getSettingDescription($settingName);
 
-            if ($settingName === 'USER_VERIFICATION') {
-                $builder->add('USER_VERIFICATION', ChoiceType::class, [
+            if ($settingName === SettingName::USER_VERIFICATION->value) {
+                $builder->add(SettingName::USER_VERIFICATION->value, ChoiceType::class, [
                     'choices' => [
                         OperationMode::ON->value => OperationMode::ON->value,
                         OperationMode::OFF->value => OperationMode::OFF->value,
@@ -41,13 +44,13 @@ class StatusType extends AbstractType
                     'data' => $settingValue,
                     'constraints' => [
                         new NotBlank([
-                            'message' => 'Please select an option',
+                            'message' => $this->translator->trans('selectOption', [], 'StatusType'),
                         ]),
                     ],
-                    'invalid_message' => 'Please select an option',
+                    'invalid_message' => $this->translator->trans('selectOption', [], 'StatusType'),
                 ]);
-            } elseif ($settingName === 'PLATFORM_MODE') {
-                $builder->add('PLATFORM_MODE', ChoiceType::class, [
+            } elseif ($settingName === SettingName::PLATFORM_MODE->value) {
+                $builder->add(SettingName::PLATFORM_MODE->value, ChoiceType::class, [
                     'choices' => [
                         PlatformMode::DEMO->value => PlatformMode::DEMO->value,
                         PlatformMode::LIVE->value => PlatformMode::LIVE->value,
@@ -58,13 +61,13 @@ class StatusType extends AbstractType
                     ],
                     'constraints' => [
                         new NotBlank([
-                            'message' => 'Please select an option',
+                            'message' => $this->translator->trans('selectOption', [], 'StatusType'),
                         ]),
                     ],
-                    'invalid_message' => 'Please select an option',
+                    'invalid_message' => $this->translator->trans('selectOption', [], 'StatusType'),
                 ]);
-            } elseif ($settingName === 'TURNSTILE_CHECKER') {
-                $builder->add('TURNSTILE_CHECKER', ChoiceType::class, [
+            } elseif ($settingName === SettingName::TURNSTILE_CHECKER->value) {
+                $builder->add(SettingName::TURNSTILE_CHECKER->value, ChoiceType::class, [
                     'choices' => [
                         OperationMode::ON->value => OperationMode::ON->value,
                         OperationMode::OFF->value => OperationMode::OFF->value,
@@ -75,13 +78,13 @@ class StatusType extends AbstractType
                     'data' => $settingValue,
                     'constraints' => [
                         new NotBlank([
-                            'message' => 'Please select an option',
+                            'message' => $this->translator->trans('selectOption', [], 'StatusType'),
                         ]),
                     ],
-                    'invalid_message' => 'Please select an option',
+                    'invalid_message' => $this->translator->trans('selectOption', [], 'StatusType'),
                 ]);
-            } elseif ($settingName === 'API_STATUS') {
-                $builder->add('API_STATUS', ChoiceType::class, [
+            } elseif ($settingName === SettingName::API_STATUS->value) {
+                $builder->add(SettingName::API_STATUS->value, ChoiceType::class, [
                     'choices' => [
                         OperationMode::ON->value => OperationMode::ON->value,
                         OperationMode::OFF->value => OperationMode::OFF->value,
@@ -92,13 +95,13 @@ class StatusType extends AbstractType
                     'data' => $settingValue,
                     'constraints' => [
                         new NotBlank([
-                            'message' => 'Please select an option',
+                            'message' => $this->translator->trans('selectOption', [], 'StatusType'),
                         ]),
                     ],
-                    'invalid_message' => 'Please select an option',
+                    'invalid_message' => $this->translator->trans('selectOption', [], 'StatusType'),
                 ]);
-            } elseif ($settingName === 'USER_DELETE_TIME') {
-                $builder->add('USER_DELETE_TIME', IntegerType::class, [
+            } elseif ($settingName === SettingName::USER_DELETE_TIME->value) {
+                $builder->add(SettingName::USER_DELETE_TIME->value, IntegerType::class, [
                     'attr' => [
                         'description' => $description,
                     ],
@@ -106,19 +109,19 @@ class StatusType extends AbstractType
                     'constraints' => [
                         new Length([
                             'max' => 3,
-                            'maxMessage' => ' This field cannot be longer than {{ limit }} characters',
+                            'maxMessage' => $this->translator->trans('fieldCannotBeLongerThan', [], 'StatusType'),
                         ]),
                         new GreaterThanOrEqual([
                             'value' => 0,
-                            'message' => 'This timer should never be less than 0 for user auto-deletion.',
+                            'message' => $this->translator->trans('timerShouldNotBeLessThan', [], 'StatusType'),
                         ]),
                         new NotBlank([
-                            'message' => 'The timer value is required. Please provide a valid timer',
+                            'message' => $this->translator->trans('timerValueRequired', [], 'StatusType'),
                         ]),
                     ],
                 ]);
-            } elseif ($settingName === 'TIME_INTERVAL_NOTIFICATION') {
-                $builder->add('TIME_INTERVAL_NOTIFICATION', IntegerType::class, [
+            } elseif ($settingName === SettingName::TIME_INTERVAL_NOTIFICATION->value) {
+                $builder->add(SettingName::TIME_INTERVAL_NOTIFICATION->value, IntegerType::class, [
                     'attr' => [
                         'description' => $description,
                     ],
@@ -126,10 +129,14 @@ class StatusType extends AbstractType
                     'constraints' => [
                         new GreaterThanOrEqual([
                             'value' => 1,
-                            'message' => 'This timer should never be less than 0 for user profile notification.',
+                            'message' => $this->translator->trans(
+                                'timerShouldNotBeLessThanProfileNotification',
+                                [],
+                                'StatusType'
+                            ),
                         ]),
                         new NotBlank([
-                            'message' => 'Please make sure to set a timer',
+                            'message' => $this->translator->trans('PleaseSetTimer', [], 'StatusType'),
                         ]),
                     ],
                 ]);

@@ -11,6 +11,7 @@ use App\Entity\UserExternalAuth;
 use App\Enum\AnalyticalEventType;
 use App\Enum\OperationMode;
 use App\Enum\PlatformMode;
+use App\Enum\SettingName;
 use App\Enum\SMSResponse;
 use App\Enum\UserProvider;
 use App\Enum\UserTwoFactorAuthenticationStatus;
@@ -20,6 +21,7 @@ use App\Service\CaptchaValidator;
 use App\Service\EventActions;
 use App\Service\JWTTokenGenerator;
 use App\Service\MagicLinkService;
+use App\Service\RegistrationEmailGenerator;
 use App\Service\SamlResolverService;
 use App\Service\SendSMS;
 use App\Service\TOTPService;
@@ -62,6 +64,7 @@ class AuthController extends AbstractController
         private readonly SettingRepository $settingRepository,
         private readonly MagicLinkService $magicLinkService,
         private readonly SendSMS $sendSMS,
+        private readonly RegistrationEmailGenerator $registrationEmailGenerator,
     ) {
     }
 
@@ -82,7 +85,9 @@ class AuthController extends AbstractController
             return new BaseResponse(400, null, 'Invalid JSON format')->toResponse(); # Bad Request Response
         }
 
-        $turnstileSetting = $this->settingRepository->findOneBy(['name' => 'TURNSTILE_CHECKER'])->getValue();
+        $turnstileSetting = $this->settingRepository->findOneBy([
+            'name' => SettingName::TURNSTILE_CHECKER->value
+        ])->getValue();
         if (!$turnstileSetting) {
             throw new RuntimeException('Missing settings: TURNSTILE_CHECKER not found');
         }
@@ -114,7 +119,9 @@ class AuthController extends AbstractController
             $errors[] = 'uuid';
         }
 
-        $isLoginWithUUIDOnly = $this->settingRepository->findOneBy(['name' => 'LOGIN_WITH_UUID_ONLY'])->getValue();
+        $isLoginWithUUIDOnly = $this->settingRepository->findOneBy([
+            'name' => SettingName::LOGIN_WITH_UUID_ONLY->value
+        ])->getValue();
         if ($isLoginWithUUIDOnly === OperationMode::OFF->value && empty($data['password'])) {
             $errors[] = 'password';
         }
@@ -239,7 +246,7 @@ class AuthController extends AbstractController
         if (!($event instanceof Event)) {
             $providerId = $user->getUserExternalAuths()[0]->getProviderId();
             if ($providerId === UserProvider::EMAIL->value) {
-                $this->magicLinkService->sendEmail($user);
+                $this->registrationEmailGenerator->sendRegistrationEmail($user);
                 $this->addFlash(
                     'success',
                     'A login link has been sent to your email address.'

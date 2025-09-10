@@ -1,0 +1,4 @@
+title: 'Autenticação de Dois Fatores'
+prompt: 'Por favor, selecione uma opção para configurar sua experiência.'
+alreadyConfigured: 'Já tem a autenticação de dois fatores configurada para esta conta.'
+mandatory: 'A autenticação de dois fatores é obrigatória para a segurança da conta no portal. Não pode continuar sem a ativar. Por favor, ative-a imediatamente para continuar.'

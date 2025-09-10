@@ -1,0 +1,12 @@
+adminLoginPage: 'Admin login Page'
+loginPageMessage: "Please log in using your admin credentials. Once logged in, you'll have access to the admin dashboard."
+emailPhoneNumber: 'Email or Phone Number'
+phoneNumber: 'phone number'
+phoneNumberLabel: 'Phone Number'
+enterYour: 'Enter your '
+enterPassword: 'Enter your password'
+chooseAnother: 'Choose Another'
+forgetPassword: 'Did you forget your password? Get a new one for your'
+noAccount: "You don't have an account? Register with"
+or: 'or'
+login: 'Log in'

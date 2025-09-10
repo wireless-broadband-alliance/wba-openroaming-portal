@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Enum\ApiVersion;
+use App\Enum\SettingName;
 use App\Repository\SettingRepository;
 use App\Service\ApiResponseService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -24,17 +25,17 @@ class ApiController extends AbstractController
         $commonMessages = $this->apiResponseService->getCommonResponses();
 
         $settings = [
-            'PAGE_TITLE' => $this->settingRepository->findOneBy(
-                ['name' => 'PAGE_TITLE']
+            SettingName::PAGE_TITLE->value => $this->settingRepository->findOneBy(
+                ['name' => SettingName::PAGE_TITLE->value]
             )->getValue(),
-            'CUSTOMER_LOGO_ENABLED' => $this->settingRepository->findOneBy(
-                ['name' => 'CUSTOMER_LOGO_ENABLED']
+            SettingName::CUSTOMER_LOGO_ENABLED->value => $this->settingRepository->findOneBy(
+                ['name' => SettingName::CUSTOMER_LOGO_ENABLED->value]
             )->getValue(),
-            'CUSTOMER_LOGO' => $this->settingRepository->findOneBy(
-                ['name' => 'CUSTOMER_LOGO']
+            SettingName::CUSTOMER_LOGO->value => $this->settingRepository->findOneBy(
+                ['name' => SettingName::CUSTOMER_LOGO->value]
             )->getValue(),
-            'OPENROAMING_LOGO' => $this->settingRepository->findOneBy(
-                ['name' => 'OPENROAMING_LOGO']
+            SettingName::OPENROAMING_LOGO->value => $this->settingRepository->findOneBy(
+                ['name' => SettingName::OPENROAMING_LOGO->value]
             )->getValue(),
         ];
 
@@ -52,17 +53,17 @@ class ApiController extends AbstractController
         $commonMessages = $this->apiResponseService->getCommonResponses();
 
         $settings = [
-            'PAGE_TITLE' => $this->settingRepository->findOneBy(
-                ['name' => 'PAGE_TITLE']
+            SettingName::PAGE_TITLE->value => $this->settingRepository->findOneBy(
+                ['name' => SettingName::PAGE_TITLE->value]
             )->getValue(),
-            'CUSTOMER_LOGO_ENABLED' => $this->settingRepository->findOneBy(
-                ['name' => 'CUSTOMER_LOGO_ENABLED']
+            SettingName::CUSTOMER_LOGO_ENABLED->value => $this->settingRepository->findOneBy(
+                ['name' => SettingName::CUSTOMER_LOGO_ENABLED->value]
             )->getValue(),
-            'CUSTOMER_LOGO' => $this->settingRepository->findOneBy(
-                ['name' => 'CUSTOMER_LOGO']
+            SettingName::CUSTOMER_LOGO->value => $this->settingRepository->findOneBy(
+                ['name' => SettingName::CUSTOMER_LOGO->value]
             )->getValue(),
-            'OPENROAMING_LOGO' => $this->settingRepository->findOneBy(
-                ['name' => 'OPENROAMING_LOGO']
+            SettingName::OPENROAMING_LOGO->value => $this->settingRepository->findOneBy(
+                ['name' => SettingName::OPENROAMING_LOGO->value]
             )->getValue(),
         ];
 

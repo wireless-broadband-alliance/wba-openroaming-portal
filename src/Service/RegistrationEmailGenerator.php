@@ -4,12 +4,14 @@ namespace App\Service;
 
 use App\Entity\User;
 use App\Enum\OperationMode;
+use App\Enum\SettingName;
 use App\Repository\SettingRepository;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 readonly class RegistrationEmailGenerator
 {
@@ -18,42 +20,61 @@ readonly class RegistrationEmailGenerator
         private MailerInterface $mailer,
         private SettingRepository $settingRepository,
         private MagicLinkService $magicLinkService,
+        private TranslatorInterface $translator
     ) {
     }
 
     /**
      * @throws TransportExceptionInterface
      */
-    public function sendRegistrationEmail(User $user, $password): void
+    public function sendRegistrationEmail(User $user, ?string $password = null): void
     {
-        $supportTeam = $this->settingRepository->findOneBy(['name' => 'PAGE_TITLE'])->getValue();
-        $contactEmail = $this->settingRepository->findOneBy(['name' => 'CONTACT_EMAIL'])->getValue();
-        $loginWithUUID = $this->settingRepository->findOneBy(['name' => 'LOGIN_WITH_UUID_ONLY'])->getValue();
-        $magicLink = $loginWithUUID === OperationMode::ON->value;
-        $magicURL = $magicLink ? $this->magicLinkService->magicToken($user) : null;
+        $supportTeam = $this->settingRepository->findOneBy(['name' => SettingName::PAGE_TITLE->value])->getValue();
+        $contactEmail = $this->settingRepository->findOneBy(['name' => SettingName::CONTACT_EMAIL->value])->getValue();
+        $loginWithUUID = $this->settingRepository->findOneBy([
+            'name' => SettingName::LOGIN_WITH_UUID_ONLY->value
+        ])->getValue();
+        $customerLogo = $this->settingRepository->findOneBy(['name' => SettingName::CUSTOMER_LOGO->value])->getValue();
+        $projectDir =  $this->parameterBag->get('kernel.project_dir');
+        $logoPath = $projectDir . '/public' . $customerLogo;
 
-        // Send email to the user with the verification code
-        $email = new TemplatedEmail()
-            ->from(
-                new Address(
+        if ($loginWithUUID === OperationMode::ON->value) {
+            $magicURL =  $this->magicLinkService->magicToken($user);
+            // Send email to the user with the verification link for authentications
+            $email = new TemplatedEmail()
+                ->from(new Address(
                     $this->parameterBag->get('app.email_address'),
                     $this->parameterBag->get('app.sender_name')
-                )
-            )
-            ->to($user->getEmail())
-            ->subject('Your OpenRoaming Registration Details')
-            ->htmlTemplate('email/user_password.html.twig')
-            ->context([
-                'uuid' => $user->getEmail(),
-                'supportTeam' => $supportTeam,
-                'contactEmail' => $contactEmail,
-                'verificationCode' => $user->getTwoFAcode(),
-                'isNewUser' => true,
-                'magicLink' => $magicLink,
-                // This variable informs if the user it's new our if it's just a password reset request
-                'password' => $password,
-                'magicURL' => $magicURL,
-            ]);
+                ))
+                ->to($user->getEmail())
+                ->subject($this->translator->trans('subject_registration_details', [], 'user_registration_login_uuid'))
+                ->htmlTemplate('email/user_registration_login_uuid.html.twig')
+                ->context([
+                    'uuid' => $user->getEmail(),
+                    'supportTeam' => $supportTeam,
+                    'contactEmail' => $contactEmail,
+                    'magicURL' => $magicURL,
+                ])
+                ->embedFromPath($logoPath, 'logo_cid');
+        } else {
+            // Send email to the user with the verification code
+            $email = new TemplatedEmail()
+                ->from(new Address(
+                    $this->parameterBag->get('app.email_address'),
+                    $this->parameterBag->get('app.sender_name')
+                ))
+                ->to($user->getEmail())
+                ->subject($this->translator->trans('subject_registration_details', [], 'user_registration'))
+                ->htmlTemplate('email/user_registration.html.twig')
+                ->context([
+                    'uuid' => $user->getEmail(),
+                    'supportTeam' => $supportTeam,
+                    'contactEmail' => $contactEmail,
+                    'twoFaCode' => $user->getTwoFAcode(),
+                    'password' => $password,
+                ])
+                ->embedFromPath($logoPath, 'logo_cid');
+        }
 
         $this->mailer->send($email);
     }
@@ -63,8 +84,11 @@ readonly class RegistrationEmailGenerator
      */
     public function sendNotifyExpiresProfileEmail(User $user, int $timeLeft): void
     {
-        $supportTeam = $this->settingRepository->findOneBy(['name' => 'PAGE_TITLE'])->getValue();
-        $contactEmail = $this->settingRepository->findOneBy(['name' => 'CONTACT_EMAIL'])->getValue();
+        $emailTitle = $this->settingRepository->findOneBy(['name' => SettingName::PAGE_TITLE->value])->getValue();
+        $contactEmail = $this->settingRepository->findOneBy(['name' => SettingName::CONTACT_EMAIL->value])->getValue();
+        $customerLogo = $this->settingRepository->findOneBy(['name' => SettingName::CUSTOMER_LOGO->value])->getValue();
+        $projectDir = $this->parameterBag->get('kernel.project_dir');
+        $logoPath = $projectDir . '/public' . $customerLogo;
 
         // Send email to the user with the verification code
         $email = new TemplatedEmail()
@@ -75,21 +99,29 @@ readonly class RegistrationEmailGenerator
                 )
             )
             ->to($user->getEmail())
-            ->subject('Your OpenRoaming Profile is about to expire')
+            ->subject($this->translator->trans('subject_is_expiring', [], 'expirationProfiles'))
             ->htmlTemplate('email/expiresProfile.html.twig')
             ->context([
                 'uuid' => $user->getEmail(),
-                'supportTeam' => $supportTeam,
+                'emailTitle' => $emailTitle,
                 'contactEmail' => $contactEmail,
                 'timeLeft' => $timeLeft,
-            ]);
+            ])
+            ->embedFromPath($logoPath, 'logo_cid');
         $this->mailer->send($email);
     }
 
+    /**
+     * @throws TransportExceptionInterface
+     */
     public function sendNotifyExpiredProfile(User $user): void
     {
-        $supportTeam = $this->settingRepository->findOneBy(['name' => 'PAGE_TITLE'])->getValue();
-        $contactEmail = $this->settingRepository->findOneBy(['name' => 'CONTACT_EMAIL'])->getValue();
+        $emailTitle = $this->settingRepository->findOneBy(['name' => SettingName::PAGE_TITLE->value])->getValue();
+        $supportTeam = $this->settingRepository->findOneBy(['name' => SettingName::PAGE_TITLE->value])->getValue();
+        $contactEmail = $this->settingRepository->findOneBy(['name' => SettingName::CONTACT_EMAIL->value])->getValue();
+        $customerLogo = $this->settingRepository->findOneBy(['name' => SettingName::CUSTOMER_LOGO->value])->getValue();
+        $projectDir = $this->parameterBag->get('kernel.project_dir');
+        $logoPath = $projectDir . '/public' . $customerLogo;
 
         // Send email to the user with the verification code
         $email = new TemplatedEmail()
@@ -100,13 +132,15 @@ readonly class RegistrationEmailGenerator
                 )
             )
             ->to($user->getEmail())
-            ->subject('Your OpenRoaming Profile is about to expire')
+            ->subject($this->translator->trans('subject_is_expired', [], 'expirationProfiles'))
             ->htmlTemplate('email/expiredProfile.html.twig')
             ->context([
                 'uuid' => $user->getEmail(),
                 'contactEmail' => $contactEmail,
+                'emailTitle' => $emailTitle,
                 'supportTeam' => $supportTeam,
-            ]);
+            ])
+            ->embedFromPath($logoPath, 'logo_cid');
 
         $this->mailer->send($email);
     }

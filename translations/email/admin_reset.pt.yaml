@@ -1,0 +1,10 @@
+subject_verify: 'Detalhes da Redefinição de Configurações'
+header_password_reset: 'Restauração da Palavra-passe'
+header_settings_reset: 'Restauração de Configurações'
+message_password_reset: 'Este é um passo para confirmar a restauração da sua palavra-passe.'
+message_settings_reset: 'Este é um passo para confirmar a reposição da configuração: <strong>%settingCategory%</strong>.'
+confirmation_code: 'Por favor, use o seguinte código para confirmar a ação:'
+footer:
+    support_team: 'Equipa de apoio:'
+    thank_you: 'Obrigado,'
+    team: 'A Equipa %supportTeam%'

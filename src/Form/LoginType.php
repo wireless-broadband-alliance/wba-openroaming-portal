@@ -3,7 +3,9 @@
 namespace App\Form;
 
 use App\DTO\LoginChoiceDTO;
+use App\Entity\Setting;
 use App\Enum\OperationMode;
+use App\Enum\SettingName;
 use App\Enum\UserProvider;
 use App\Repository\SettingRepository;
 use libphonenumber\PhoneNumberFormat;
@@ -16,18 +18,22 @@ use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class LoginType extends AbstractType
 {
     public function __construct(
-        private readonly SettingRepository $settingRepository
+        private readonly SettingRepository $settingRepository,
+        private readonly TranslatorInterface $translator
     ) {
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         // Fetch the setting from the database
-        $regionsSetting = $this->settingRepository->findOneBy(['name' => 'DEFAULT_REGION_PHONE_INPUTS']);
+        $regionsSetting = $this->settingRepository->findOneBy(
+            ['name' => SettingName::DEFAULT_REGION_PHONE_INPUTS->value]
+        );
 
         // If the setting exists, explode and trim; otherwise use a default
         $regionInputs = $regionsSetting && $regionsSetting->getValue()
@@ -35,13 +41,13 @@ class LoginType extends AbstractType
             : ['PT', 'US', 'GB']; // fallback default
 
         $turnstileCheckerValue = $this->settingRepository->findOneBy(
-            ['name' => 'TURNSTILE_CHECKER']
+            ['name' => SettingName::TURNSTILE_CHECKER->value]
         )?->getValue();
         $emailMethod = $this->settingRepository->findOneBy(
-            ['name' => 'AUTH_METHOD_REGISTER_ENABLED']
+            ['name' => SettingName::AUTH_METHOD_REGISTER_ENABLED->value]
         )?->getValue();
         $phoneNumberMethod = $this->settingRepository->findOneBy(
-            ['name' => 'AUTH_METHOD_SMS_REGISTER_ENABLED']
+            ['name' => SettingName::AUTH_METHOD_SMS_REGISTER_ENABLED->value]
         )?->getValue();
 
         // Let user select if they want to log in with email
@@ -62,7 +68,7 @@ class LoginType extends AbstractType
             'required' => false,
             'label' => 'Email',
             'attr' => [
-                'placeholder' => 'Enter your email',
+                'placeholder' => $this->translator->trans('EnterEmail', [], 'LoginFormType'),
             ],
         ]);
 
@@ -83,7 +89,7 @@ class LoginType extends AbstractType
                 'label' => 'Password',
                 'required' => true,
                 'attr' => [
-                    'placeholder' => 'Enter your password',
+                    'placeholder' => $this->translator->trans('EnterPassword', [], 'LoginFormType'),
                     'data-live-ignore' => 'true',
                 ],
             ]);

@@ -1,4 +1,4 @@
-# API Endpoints
+~~# API Endpoints
 
 This document provides an overview of the key API endpoints introduced in this project. Each endpoint is designed to
 improve user authentication and management processes, with integrated CAPTCHA validation to ensure security.
@@ -93,4 +93,4 @@ account deletion.
 
 - Most of the endpoints above are integrated with CAPTCHA validation to increase security.
 - Please refer to the [API documentation](api/index.html) generated with OpenAPI via Swagger UI for detailed usage
-  instructions and examples.
+  instructions and examples.~~

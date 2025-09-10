@@ -4,6 +4,7 @@ namespace App\Command;
 
 use App\Entity\Notification;
 use App\Enum\NotificationType;
+use App\Enum\SettingName;
 use App\Enum\UserProvider;
 use App\Enum\UserRadiusProfileRevokeReason;
 use App\Repository\NotificationRepository;
@@ -59,7 +60,9 @@ class NotifyUsersWhenProfileExpiresCommand extends Command
     public function notifyUsersWhenProfileExpires(OutputInterface $output): void
     {
         $userRadiusProfiles = $this->userRadiusProfileRepository->findAll();
-        $notificationResendInterval = $this->settingRepository->findOneBy(['name' => 'TIME_INTERVAL_NOTIFICATION']);
+        $notificationResendInterval = $this->settingRepository->findOneBy([
+            'name' => SettingName::TIME_INTERVAL_NOTIFICATION->value
+        ]);
 
         foreach ($userRadiusProfiles as $userRadiusProfile) {
             $user = $userRadiusProfile->getUser();

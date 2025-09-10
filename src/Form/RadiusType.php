@@ -3,6 +3,7 @@
 namespace App\Form;
 
 use App\Enum\ProfileType;
+use App\Enum\SettingName;
 use App\Service\GetSettings;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -11,118 +12,120 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class RadiusType extends AbstractType
 {
     public function __construct(
-        private readonly GetSettings $getSettings
+        private readonly GetSettings $getSettings,
+        private readonly TranslatorInterface $translator
     ) {
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $settingsToUpdate = [
-            'DISPLAY_NAME' => [
+            SettingName::DISPLAY_NAME->value => [
                 'type' => TextType::class,
                 'constraints' => [
                     new NotBlank([
-                        'message' => 'This field cannot be empty',
+                        'message' => $this->translator->trans('fieldCannotBeEmpty', [], 'CustomType'),
                     ]),
                     new Length([
                         'max' => 253,
-                        'maxMessage' => ' This field cannot be longer than {{ limit }} characters',
+                        'maxMessage' => $this->translator->trans('fieldCannotBeLongerThan', [], 'CustomType'),
                     ])
                 ],
             ],
-            'RADIUS_REALM_NAME' => [
+            SettingName::RADIUS_REALM_NAME->value => [
                 'type' => TextType::class,
                 'constraints' => [
                     new NotBlank([
-                        'message' => 'This field cannot be empty',
+                        'message' => $this->translator->trans('fieldCannotBeEmpty', [], 'CustomType'),
                     ]),
                     new Length([
                         'max' => 253,
-                        'maxMessage' => ' This field cannot be longer than {{ limit }} characters',
+                        'maxMessage' => $this->translator->trans('fieldCannotBeLongerThan', [], 'CustomType'),
                     ])
                 ],
             ],
-            'DOMAIN_NAME' => [
+            SettingName::DOMAIN_NAME->value => [
                 'type' => TextType::class,
                 'constraints' => [
                     new NotBlank([
-                        'message' => 'This field cannot be empty',
+                        'message' => $this->translator->trans('fieldCannotBeEmpty', [], 'CustomType'),
                     ]),
                     new Length([
                         'max' => 253,
-                        'maxMessage' => ' This field cannot be longer than {{ limit }} characters',
+                        'maxMessage' => $this->translator->trans('fieldCannotBeLongerThan', [], 'CustomType'),
                     ])
                 ],
             ],
-            'OPERATOR_NAME' => [
+            SettingName::OPERATOR_NAME->value => [
                 'type' => TextType::class,
                 'constraints' => [
                     new NotBlank([
-                        'message' => 'This field cannot be empty',
+                        'message' => $this->translator->trans('fieldCannotBeEmpty', [], 'CustomType'),
                     ]),
                     new Length([
                         'max' => 253,
-                        'maxMessage' => ' This field cannot be longer than {{ limit }} characters',
+                        'maxMessage' => $this->translator->trans('fieldCannotBeLongerThan', [], 'CustomType'),
                     ])
                 ],
             ],
-            'RADIUS_TLS_NAME' => [
+            SettingName::RADIUS_TLS_NAME->value => [
                 'type' => TextType::class,
                 'constraints' => [
                     new NotBlank([
-                        'message' => 'This field cannot be empty',
+                        'message' => $this->translator->trans('fieldCannotBeEmpty', [], 'CustomType'),
                     ]),
                     new Length([
                         'max' => 253,
-                        'maxMessage' => ' This field cannot be longer than {{ limit }} characters',
+                        'maxMessage' => $this->translator->trans('fieldCannotBeLongerThan', [], 'CustomType'),
                     ])
                 ],
             ],
-            'NAI_REALM' => [
+            SettingName::NAI_REALM->value => [
                 'type' => TextType::class,
                 'constraints' => [
                     new NotBlank([
-                        'message' => 'This field cannot be empty',
+                        'message' => $this->translator->trans('fieldCannotBeEmpty', [], 'CustomType'),
                     ]),
                     new Length([
                         'max' => 253,
-                        'maxMessage' => ' This field cannot be longer than {{ limit }} characters',
+                        'maxMessage' => $this->translator->trans('fieldCannotBeLongerThan', [], 'CustomType'),
                     ])
                 ],
             ],
-            'RADIUS_TRUSTED_ROOT_CA_SHA1_HASH' => [
+            SettingName::RADIUS_TRUSTED_ROOT_CA_SHA1_HASH->value => [
                 'type' => TextType::class,
                 'constraints' => [
                     new NotBlank([
-                        'message' => 'This field cannot be empty',
+                        'message' => $this->translator->trans('fieldCannotBeEmpty', [], 'CustomType'),
                     ]),
                     new Length([
                         'max' => 253,
-                        'maxMessage' => ' This field cannot be longer than {{ limit }} characters',
+                        'maxMessage' => $this->translator->trans('fieldCannotBeLongerThan', [], 'CustomType'),
                     ])
                 ],
             ],
-            'PAYLOAD_IDENTIFIER' => [
+            SettingName::PAYLOAD_IDENTIFIER->value => [
                 'type' => TextType::class,
                 'constraints' => [
                     new NotBlank([
-                        'message' => 'This field cannot be empty',
+                        'message' => $this->translator->trans('fieldCannotBeEmpty', [], 'CustomType'),
                     ]),
                     new Length([
                         'max' => 253,
-                        'maxMessage' => ' This field cannot be longer than {{ limit }} characters',
+                        'maxMessage' => $this->translator->trans('fieldCannotBeLongerThan', [], 'CustomType'),
                     ])
                 ],
             ],
-            'PROFILES_ENCRYPTION_TYPE_IOS_ONLY' => [
+            SettingName::PROFILES_ENCRYPTION_TYPE_IOS_ONLY->value => [
                 'type' => ChoiceType::class,
                 'constraints' => [
                     new NotBlank([
-                        'message' => 'Please select an option',
+                        'message' => $this->translator->trans('selectOption', [], 'CustomType'),
                     ]),
                 ],
             ],
@@ -133,12 +136,12 @@ class RadiusType extends AbstractType
             foreach ($options['settings'] as $setting) {
                 if ($setting->getName() === $settingName) {
                     $formFieldOptions['data'] = $setting->getValue();
-                    if ($settingName === 'PROFILES_ENCRYPTION_TYPE_IOS_ONLY') {
+                    if ($settingName === SettingName::PROFILES_ENCRYPTION_TYPE_IOS_ONLY->value) {
                         $formFieldOptions['choices'] = [
                             'WPA 2' => ProfileType::WPA2->value,
                             'WPA 3' => ProfileType::WPA3->value,
                         ];
-                        $formFieldOptions['placeholder'] = 'Select an option';
+                        $formFieldOptions['placeholder'] = $this->translator->trans('selectOption', [], 'CustomType');
                         $formFieldOptions['required'] = true;
                     }
                     $formFieldOptions['attr']['description'] = $this->getSettings->getSettingDescription($settingName);
