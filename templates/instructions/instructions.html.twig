@@ -27,50 +27,50 @@
 
             {# Tabs #}
             <div class="flex border-b border-gray-200 mb-8">
-                <button data-os="android" data-os-tabs-target="tab"
+                <button data-os="{{ constant('App\\Enum\\OSType::ANDROID').value }}" data-os-tabs-target="tab"
                         data-action="click->os-tabs#activate"
                         class="px-6 py-3 font-semibold flex items-center space-x-2 transition-all duration-200
-                        {% if data.os.selected == constant('App\\Enum\\OSType::ANDROID') %}border-b-2 border-blue-600 text-blue-600{% else %}text-gray-600{% endif %}">
+                        {% if data.os.selected == constant('App\\Enum\\OSType::ANDROID').value %}border-b-2 border-primary{% else %}text-gray-600{% endif %}">
                     <twig:ux:icon name="wba:android" class="w-5 h-5"/>
                     <span>Android</span>
                 </button>
 
-                <button data-os="ios" data-os-tabs-target="tab"
+                <button data-os="{{ constant('App\\Enum\\OSType::IOS').value }}" data-os-tabs-target="tab"
                         data-action="click->os-tabs#activate"
                         class="px-6 py-3 font-semibold flex items-center space-x-2 transition-all duration-200
-                        {% if data.os.selected == constant('App\\Enum\\OSType::IOS') %}border-b-2 border-blue-600 text-blue-600{% else %}text-gray-600{% endif %}">
+                        {% if data.os.selected == constant('App\\Enum\\OSType::IOS').value %}border-b-2 border-primary{% else %}text-gray-600{% endif %}">
                     <twig:ux:icon name="wba:ios" class="w-5 h-5"/>
                     <span>iOS</span>
                 </button>
 
-                <button data-os="windows" data-os-tabs-target="tab"
+                <button data-os="{{ constant('App\\Enum\\OSType::WINDOWS').value }}" data-os-tabs-target="tab"
                         data-action="click->os-tabs#activate"
                         class="px-6 py-3 font-semibold flex items-center space-x-2 transition-all duration-200
-                        {% if data.os.selected == constant('App\\Enum\\OSType::WINDOWS') %}border-b-2 border-blue-600 text-blue-600{% else %}text-gray-600{% endif %}">
+                        {% if data.os.selected == constant('App\\Enum\\OSType::WINDOWS').value %}border-b-2 border-primary{% else %}text-gray-600{% endif %}">
                     <twig:ux:icon name="wba:windows" class="w-5 h-5"/>
                     <span>Windows</span>
                 </button>
             </div>
 
             {# Contents #}
-            <div data-os="android" data-os-tabs-target="content"
-                 class="{% if data.os.selected == constant('App\\Enum\\OSType::ANDROID') %}hidden{% endif %}">
+            <div data-os="{{ constant('App\\Enum\\OSType::ANDROID').value }}" data-os-tabs-target="content"
+                 class="{% if data.os.selected == constant('App\\Enum\\OSType::ANDROID').value %}hidden{% endif %}">
                 <div class="flex items-center space-x-8">
                     <twig:ux:icon name="wba:android" class="w-20 h-20"/>
                     <p class="text-xl">Android Mode</p>
                 </div>
             </div>
 
-            <div data-os="ios" data-os-tabs-target="content"
-                 class="{% if data.os.selected == constant('App\\Enum\\OSType::IOS') %}hidden{% endif %}">
+            <div data-os="{{ constant('App\\Enum\\OSType::IOS').value }}" data-os-tabs-target="content"
+                 class="{% if data.os.selected == constant('App\\Enum\\OSType::IOS').value %}hidden{% endif %}">
                 <div class="flex items-center space-x-8">
                     <twig:ux:icon name="wba:ios" class="w-20 h-20"/>
                     <p class="text-xl">iOS Mode</p>
                 </div>
             </div>
 
-            <div data-os="windows" data-os-tabs-target="content"
-                 class="{% if data.os.selected == constant('App\\Enum\\OSType::WINDOWS') %}hidden{% endif %}">
+            <div data-os="{{ constant('App\\Enum\\OSType::WINDOWS').value }}" data-os-tabs-target="content"
+                 class="{% if data.os.selected == constant('App\\Enum\\OSType::WINDOWS').value %}hidden{% endif %}">
                 <div class="flex items-center space-x-8">
                     <twig:ux:icon name="wba:windows" class="w-20 h-20"/>
                     <p class="text-xl">Windows Mode</p>
