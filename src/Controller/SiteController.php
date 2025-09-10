@@ -409,7 +409,7 @@ class SiteController extends AbstractController
      * @return RedirectResponse
      * @throws Exception
      */
-    #[Route('/account/user', name: 'app_site_account_user', methods: ['POST'])]
+    #[Route('/account/user', name: 'app_landing_account_user', methods: ['POST'])]
     public function accountUser(
         Request $request,
         UserPasswordHasherInterface $passwordHasher,
