@@ -16,12 +16,11 @@ class InstructionsController extends AbstractController
     public function __construct(
         private readonly GetSettings $getSettings,
         private readonly OSDetectionService $OSDetectionService,
-        private readonly Request $request
     ) {
     }
 
     #[Route('/profile/instructions', name: 'app_profile_instructions')]
-    public function profileInstructions(): Response
+    public function profileInstructions(Request $request): Response
     {
         $data = $this->getSettings->getSpecificSettings([
             SettingName::PAGE_TITLE->value,
@@ -31,7 +30,7 @@ class InstructionsController extends AbstractController
         ]);
 
         $data['os'] = [
-            'selected' => $this->OSDetectionService->detectDevice($this->request->headers->get('User-Agent')),
+            'selected' => $this->OSDetectionService->detectDevice($request->headers->get('User-Agent')),
             'items' => [
                 OSType::WINDOWS->value => ['alt' => 'Windows Logo'],
                 OSType::IOS->value => ['alt' => 'Apple Logo'],
@@ -40,7 +39,7 @@ class InstructionsController extends AbstractController
         ];
 
         if ($data['os']['selected'] === OSType::NONE->value) {
-            // return default and be android
+            $data['os']['selected'] = OSType::ANDROID->value;
         }
 
         return $this->render('instructions/instructions.html.twig', [
