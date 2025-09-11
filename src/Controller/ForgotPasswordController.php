@@ -389,10 +389,12 @@ class ForgotPasswordController extends AbstractController
         }
 
         if ($user->getUuid() === $uuid && $user->getTwoFAcode() === $twoFaCode) {
-            if ($this->magicLinkService->linkCanBeUsed(
-                $user,
-                AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST->value
-            )) {
+            if (
+                $this->magicLinkService->linkCanBeUsed(
+                    $user,
+                    AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST->value
+                )
+            ) {
                 $this->addFlash(
                     'error',
                     $this->translator->trans(
