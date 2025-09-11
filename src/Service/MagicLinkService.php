@@ -24,7 +24,9 @@ readonly class MagicLinkService
 
     public function canSendLink(User $user): ?Event
     {
-        $emailTimer = $this->settingRepository->findOneBy(['name' => 'TWO_FACTOR_AUTH_RESEND_INTERVAL'])->getValue();
+        $emailTimer = $this->settingRepository->findOneBy(
+            ['name' => SettingName::TWO_FACTOR_AUTH_RESEND_INTERVAL->value]
+        )->getValue();
         $limitTime = new DateTime();
         $limitTime->modify('-' . $emailTimer . ' seconds');
 
