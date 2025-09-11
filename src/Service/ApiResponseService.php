@@ -120,11 +120,9 @@ readonly class ApiResponseService
             ],
             'api_v1_auth_saml' => [
                 'requestBody' => [
-                    'Type' => 'multipart/form-data',
-                    'Fields' => [
-                        'SAMLResponse' => 'required',
-                        'twoFACode' => '02YZR88R',
-                    ]
+                    'SAML Account' => [
+                        'SAMLResponse' => 'samlResponseExample'
+                    ],
                 ],
                 'description' => 'This endpoint authenticates a user using their SAML response in the header of the 
                 endpoint. If the user is not found in the database, a new user will be created based on the SAML 
@@ -894,11 +892,9 @@ readonly class ApiResponseService
             ],
             'api_v2_auth_saml' => [
                 'requestBody' => [
-                    'Type' => 'multipart/form-data',
-                    'Fields' => [
-                        'SAMLResponse' => 'required',
-                        'twoFACode' => '02YZR88R',
-                    ]
+                    'SAML Account' => [
+                        'SAMLResponse' => 'samlResponseExample'
+                    ],
                 ],
                 'description' => 'This endpoint authenticates a user using their SAML response. 
                 If the user is not found in the database, a new user will be created based on the SAML assertion. 
@@ -1525,7 +1521,19 @@ configuration for the Android App.</p></body></html>'
             ],
             'api_v2_user_account_deletion' => [
                 'requestBody' => [
-                    'password' => 'user-password-example'
+                    'Portal Account' => [
+                        'password' => 'user-password-example'
+                    ],
+                    'SAML Account' => [
+                        'SAMLResponse' => 'samlResponseExample'
+                    ],
+                    'Google Account' => [
+                        'code' => 'googleCodeExample'
+                    ],
+                    'Microsoft Account' => [
+                        'code' => 'microsoftCodeExample'
+                    ],
+
                 ],
                 'description' => 'This endpoint deletes the currently authenticated user account. 
                 Depending on the authentication method, the request body may require a password (Portal Account), 
