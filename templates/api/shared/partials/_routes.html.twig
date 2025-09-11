@@ -61,7 +61,8 @@
                             {% if route.name in [
                                 'api_v1_user_account_deletion',
                                 'api_v2_user_account_deletion',
-                                'api_v1_auth_saml', 'api_v2_auth_saml'
+                                'api_v1_auth_saml',
+                                'api_v2_auth_saml',
                             ] %}
                                 {% set samlTitle = constant('App\\Enum\\UserProvider::SAML').value %}
                                 {% set samlRequest = route.requestBody[samlTitle] ?? null %}
