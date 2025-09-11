@@ -4,6 +4,7 @@ namespace App\Service;
 
 use App\Entity\Event;
 use App\Entity\User;
+use App\Enum\AnalyticalEventType;
 use Random\RandomException;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use App\Repository\EventRepository;
@@ -68,5 +69,23 @@ readonly class MagicLinkService
         $interval_seconds += $interval->s;
 
         return 'Too many requests. Please wait ' . $interval_seconds . ' seconds before requesting a new login link.';
+    }
+
+    public function linkCanBeUsed(User $user, string $eventType): bool
+    {
+        $lastEvent = $this->eventRepository->findLatest2FACodeAttemptEvent(
+            $user,
+            $eventType
+        );
+        $linkTimeInterval = $this->settingRepository->findOneBy(['name' => 'LINK_VALIDITY'])->getValue();
+        $lastAttemptTime = $lastEvent instanceof Event ?
+            $lastEvent->getEventDatetime() : $linkTimeInterval;
+        $now = new DateTime();
+        $interval = date_diff($now, $lastAttemptTime);
+        $interval_minutes = $interval->days * 1440;
+        $interval_minutes += $interval->h * 60;
+        $interval_minutes += $interval->i;
+
+        return $interval_minutes > ((int)$linkTimeInterval);
     }
 }

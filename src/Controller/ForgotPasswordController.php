@@ -18,6 +18,7 @@ use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
 use App\Service\EventActions;
 use App\Service\GetSettings;
+use App\Service\MagicLinkService;
 use App\Service\PasswordResetRequestHandler;
 use App\Service\EmailGenerator;
 use App\Service\SendSMS;
@@ -57,7 +58,8 @@ class ForgotPasswordController extends AbstractController
         private readonly PasswordResetRequestHandler $passwordResetRequestHandler,
         private readonly TranslatorInterface $translator,
         private readonly EmailGenerator $emailGenerator,
-        private readonly EntityManagerInterface $entityManager
+        private readonly EntityManagerInterface $entityManager,
+        private readonly MagicLinkService $magicLinkService
     ) {
     }
 
@@ -387,19 +389,7 @@ class ForgotPasswordController extends AbstractController
         }
 
         if ($user->getUuid() === $uuid && $user->getTwoFAcode() === $twoFaCode) {
-            $lastEvent = $this->eventRepository->findLatest2FACodeAttemptEvent(
-                $user,
-                AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST->value
-            );
-            $linkTimeInterval = $this->settingRepository->findOneBy(['name' => 'LINK_VALIDITY'])->getValue();
-            $lastAttemptTime = $lastEvent instanceof Event ?
-                $lastEvent->getEventDatetime() : $linkTimeInterval;
-            $now = new DateTime();
-            $interval = date_diff($now, $lastAttemptTime);
-            $interval_minutes = $interval->days * 1440;
-            $interval_minutes += $interval->h * 60;
-            $interval_minutes += $interval->i;
-            if ($interval_minutes > ((int)$linkTimeInterval)) {
+            if ($this->magicLinkService->linkCanBeUsed($user, AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST->value)) {
                 $this->addFlash(
                     'error',
                     $this->translator->trans(
