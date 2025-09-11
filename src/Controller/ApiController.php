@@ -18,6 +18,12 @@ class ApiController extends AbstractController
     ) {
     }
 
+    #[Route('/api', name: 'api_docs')]
+    public function redirectToLatestAPIVersion(): Response
+    {
+        return $this->redirectToRoute('api_v2_docs');
+    }
+
     #[Route('/api/v1', name: 'api_v1_docs')]
     public function versionOne(): Response
     {
