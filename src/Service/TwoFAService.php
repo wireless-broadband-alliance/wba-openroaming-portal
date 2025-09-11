@@ -176,8 +176,9 @@ readonly class TwoFAService
         string $eventType,
     ): void {
         $messageType = $user->getTwoFAtype();
-        $data = $this->getSettings->getSettings();
-        $secondsLeft = $data["TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME"]["value"];
+        $secondsLeft = $this->settingRepository->findOneBy(
+            ['name' => 'TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME']
+        )->getValue();
         if ($messageType === UserTwoFactorAuthenticationStatus::EMAIL->value || $user->getEmail()) {
             $emailTitle = $this->settingRepository->findOneBy(['name' => 'PAGE_TITLE'])->getValue();
             $contactEmail = $this->settingRepository->findOneBy(['name' => 'CONTACT_EMAIL'])->getValue();
@@ -434,7 +435,6 @@ readonly class TwoFAService
 
     public function canValidationCode(User $user, string $eventType): bool
     {
-        $data = $this->getSettings->getSettings();
         $timeToResetAttempts = $this->settingRepository->findOneBy(
             ['name' => 'TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS']
         )->getValue();
