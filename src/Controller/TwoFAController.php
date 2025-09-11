@@ -12,6 +12,8 @@ use App\Enum\SettingName;
 use App\Enum\UserTwoFactorAuthenticationStatus;
 use App\Form\TwoFACode;
 use App\Repository\EventRepository;
+use App\Repository\SettingRepository;
+use App\Repository\UserRepository;
 use App\Service\GetSettings;
 use App\Service\TOTPService;
 use App\Service\TwoFAService;
@@ -39,6 +41,7 @@ class TwoFAController extends AbstractController
         private readonly TwoFAService $twoFAService,
         private readonly EventRepository $eventRepository,
         private readonly TranslatorInterface $translator,
+        private readonly SettingRepository $settingRepository,
     ) {
     }
 
@@ -1006,8 +1009,9 @@ class TwoFAController extends AbstractController
                 'context' => $context
             ]);
         }
-        $data = $this->getSettings->getSettings();
-        $timeToResetAttempts = $data[SettingName::TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS->value]["value"];
+        $timeToResetAttempts = $this->settingRepository->findOneBy(
+            ['name' => 'TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS']
+        )->getValue();
         $limitTime = new DateTime();
         $limitTime->modify('-' . $timeToResetAttempts . ' minutes');
         if ($this->twoFAService->canValidationCode($user, AnalyticalEventType::TWO_FA_CODE_ENABLE->value)) {

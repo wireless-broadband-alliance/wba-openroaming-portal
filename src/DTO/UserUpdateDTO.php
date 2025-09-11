@@ -56,5 +56,6 @@ class UserUpdateDTO
         $user->setFirstName($this->firstName);
         $user->setLastName($this->lastName);
         $user->setPhoneNumber($this->phoneNumber);
+        $user->setIsVerified($this->isVerified);
     }
 }
