@@ -1010,7 +1010,7 @@ class TwoFAController extends AbstractController
             ]);
         }
         $timeToResetAttempts = $this->settingRepository->findOneBy(
-            ['name' => 'TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS']
+            ['name' => SettingName::TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS->value]
         )->getValue();
         $limitTime = new DateTime();
         $limitTime->modify('-' . $timeToResetAttempts . ' minutes');
