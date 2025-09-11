@@ -38,7 +38,6 @@ readonly class TwoFAService
         private ParameterBagInterface $parameterBag,
         private SettingRepository $settingRepository,
         private EventActions $eventActions,
-        private GetSettings $getSettings,
         private EventRepository $eventRepository,
         private TranslatorInterface $translator
     ) {
@@ -46,7 +45,6 @@ readonly class TwoFAService
 
     public function validate2FACode(User $user, string $formCode): bool
     {
-        $data = $this->getSettings->getSettings();
         $codeDate = $user->getTwoFACodeGeneratedAt();
         // If the user doesn't have code in the DB return false
         if (!$codeDate instanceof DateTimeInterface) {
@@ -54,7 +52,9 @@ readonly class TwoFAService
         }
         $now = new DateTime();
         $diff = $now->getTimestamp() - $codeDate->getTimestamp();
-        $timeToExpireCode = $data[SettingName::TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME->value]["value"];
+        $timeToExpireCode = $this->settingRepository->findOneBy(
+            ['name' => SettingName::TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME->value]
+        )->getValue();
         if ($diff >= $timeToExpireCode) {
             return false;
         }
@@ -176,8 +176,9 @@ readonly class TwoFAService
         string $eventType,
     ): void {
         $messageType = $user->getTwoFAtype();
-        $data = $this->getSettings->getSettings();
-        $secondsLeft = $data[SettingName::TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME->value]["value"];
+        $secondsLeft = $this->settingRepository->findOneBy(
+            ['name' => SettingName::TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME->value]
+        )->getValue();
         if ($messageType === UserTwoFactorAuthenticationStatus::EMAIL->value || $user->getEmail()) {
             $emailTitle = $this->settingRepository->findOneBy(['name' => SettingName::PAGE_TITLE->value])->getValue();
             $contactEmail = $this->settingRepository->findOneBy([
@@ -350,9 +351,12 @@ readonly class TwoFAService
 
     public function canResendCode(User $user, string $eventType): bool
     {
-        $data = $this->getSettings->getSettings();
-        $nrAttempts = $data[SettingName::TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE->value]["value"];
-        $timeToResetAttempts = $data[SettingName::TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS->value]["value"];
+        $nrAttempts = $this->settingRepository->findOneBy(
+            ['name' => SettingName::TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE->value]
+        )->getValue();
+        $timeToResetAttempts = $this->settingRepository->findOneBy(
+            ['name' => SettingName::TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS->value]
+        )->getValue();
         $limitTime = new DateTime();
         $limitTime->modify('-' . $timeToResetAttempts . ' minutes');
         $attempts = $this->eventRepository->find2FACodeAttemptEvent(
@@ -366,8 +370,9 @@ readonly class TwoFAService
 
     public function timeIntervalToResendCode(User $user, string $eventType): bool
     {
-        $data = $this->getSettings->getSettings();
-        $timeIntervalToResendCode = $data[SettingName::TWO_FACTOR_AUTH_RESEND_INTERVAL->value]["value"];
+        $timeIntervalToResendCode = $this->settingRepository->findOneBy(
+            ['name' => SettingName::TWO_FACTOR_AUTH_RESEND_INTERVAL->value]
+        )->getValue();
         $limitTime = new DateTime();
         $limitTime->modify('-' . $timeIntervalToResendCode . ' seconds');
         $attempts = $this->eventRepository->find2FACodeAttemptEvent(
@@ -381,8 +386,9 @@ readonly class TwoFAService
 
     public function timeIntervalToSendCode(User $user, string $event): bool
     {
-        $data = $this->getSettings->getSettings();
-        $timeIntervalToResendCode = $data[SettingName::TWO_FACTOR_AUTH_RESEND_INTERVAL->value]["value"];
+        $timeIntervalToResendCode = $this->settingRepository->findOneBy(
+            ['name' => SettingName::TWO_FACTOR_AUTH_RESEND_INTERVAL->value]
+        )->getValue();
         $limitTime = new DateTime();
         $limitTime->modify('-' . $timeIntervalToResendCode . ' seconds');
         $attempts = $this->eventRepository->find2FACodeAttemptEvent(
@@ -433,9 +439,12 @@ readonly class TwoFAService
 
     public function canValidationCode(User $user, string $eventType): bool
     {
-        $data = $this->getSettings->getSettings();
-        $timeToResetAttempts = $data[SettingName::TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS->value]["value"];
-        $nrAttempts = $data[SettingName::TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE->value]["value"];
+        $timeToResetAttempts = $this->settingRepository->findOneBy(
+            ['name' => SettingName::TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS->value]
+        )->getValue();
+        $nrAttempts = $this->settingRepository->findOneBy(
+            ['name' => SettingName::TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE->value]
+        )->getValue();
         $limitTime = new DateTime();
         $limitTime->modify('-' . $timeToResetAttempts . ' minutes');
         $attempts = $this->eventRepository->find2FACodeAttemptEvent($user, $nrAttempts, $limitTime, $eventType);
@@ -455,8 +464,9 @@ readonly class TwoFAService
 
     public function timeLeftToResendCode(User $user, string $eventType): int
     {
-        $data = $this->getSettings->getSettings();
-        $timeToResetAttempts = $data[SettingName::TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS->value]["value"];
+        $timeToResetAttempts = $this->settingRepository->findOneBy(
+            ['name' => SettingName::TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS->value]
+        )->getValue();
         $lastEvent = $this->eventRepository->findLatest2FACodeAttemptEvent(
             $user,
             $eventType
@@ -464,6 +474,7 @@ readonly class TwoFAService
         $lastAttemptTime = $lastEvent instanceof Event ?
             $lastEvent->getEventDatetime() : $timeToResetAttempts;
         $now = new DateTime();
+        /** @var DateTime $lastAttemptTime */
         $lastAttemptTime->modify('+' . $timeToResetAttempts . ' minutes');
         $interval = date_diff($now, $lastAttemptTime);
         $interval_minutes = $interval->days * 1440;
@@ -473,8 +484,9 @@ readonly class TwoFAService
 
     public function timeLeftToResendCodeTimeInterval(User $user, string $eventType): int
     {
-        $data = $this->getSettings->getSettings();
-        $timeToResetAttempts = $data[SettingName::TWO_FACTOR_AUTH_RESEND_INTERVAL->value]["value"];
+        $timeToResetAttempts = $this->settingRepository->findOneBy(
+            ['name' => SettingName::TWO_FACTOR_AUTH_RESEND_INTERVAL->value]
+        )->getValue();
         $lastEvent = $this->eventRepository->findLatest2FACodeAttemptEvent(
             $user,
             $eventType
@@ -482,6 +494,7 @@ readonly class TwoFAService
         $lastAttemptTime = $lastEvent instanceof Event ?
             $lastEvent->getEventDatetime() : $timeToResetAttempts;
         $now = new DateTime();
+        /** @var DateTime $lastAttemptTime */
         $lastAttemptTime->modify('+' . $timeToResetAttempts . ' seconds');
         $interval = date_diff($now, $lastAttemptTime);
         $interval_seconds = $interval->days * 1440;
@@ -492,8 +505,10 @@ readonly class TwoFAService
 
     public function isTwoFARequired(User $user): bool
     {
-        $data = $this->getSettings->getSettings();
-        if ($data[SettingName::TWO_FACTOR_AUTH_STATUS->value]["value"] === TwoFAType::ENFORCED_FOR_LOCAL->value) {
+        $twoFAStatus = $this->settingRepository->findOneBy(
+            ['name' => SettingName::TWO_FACTOR_AUTH_STATUS->value]
+        )->getValue();
+        if ($twoFAStatus === TwoFAType::ENFORCED_FOR_LOCAL->value) {
             if (
                 $user->getUserExternalAuths()[0] &&
                 $user->getUserExternalAuths()[0]->getProvider() === UserProvider::PORTAL_ACCOUNT->value
@@ -503,7 +518,7 @@ readonly class TwoFAService
             return false;
         }
 
-        if ($data[SettingName::TWO_FACTOR_AUTH_STATUS->value]["value"] === TwoFAType::ENFORCED_FOR_ALL->value) {
+        if ($twoFAStatus === TwoFAType::ENFORCED_FOR_ALL->value) {
             return $user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::DISABLED->value;
         }
 

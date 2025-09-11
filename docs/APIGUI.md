@@ -1,4 +1,4 @@
-~~# API Endpoints
+# API Endpoints
 
 This document provides an overview of the key API endpoints introduced in this project. Each endpoint is designed to
 improve user authentication and management processes, with integrated CAPTCHA validation to ensure security.
