@@ -119,7 +119,13 @@ readonly class ApiResponseService
 
             ],
             'api_v1_auth_saml' => [
-                'requestBody' => [],
+                'requestBody' => [
+                    'Type' => 'multipart/form-data',
+                    'Fields' => [
+                        'SAMLResponse' => 'required',
+                        'twoFACode' => '02YZR88R',
+                    ]
+                ],
                 'description' => 'This endpoint authenticates a user using their SAML response in the header of the 
                 endpoint. If the user is not found in the database, a new user will be created based on the SAML 
                 assertion. The response includes user details along with a JWT token if authentication is successful. 
@@ -887,7 +893,13 @@ readonly class ApiResponseService
                 ],
             ],
             'api_v2_auth_saml' => [
-                'requestBody' => [],
+                'requestBody' => [
+                    'Type' => 'multipart/form-data',
+                    'Fields' => [
+                        'SAMLResponse' => 'required',
+                        'twoFACode' => '02YZR88R',
+                    ]
+                ],
                 'description' => 'This endpoint authenticates a user using their SAML response. 
                 If the user is not found in the database, a new user will be created based on the SAML assertion. 
                 The response includes user details along with a JWT token if authentication is successful. 
