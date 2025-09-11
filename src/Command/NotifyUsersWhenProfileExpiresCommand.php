@@ -13,7 +13,7 @@ use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRadiusProfileRepository;
 use App\Service\ExpirationProfileService;
 use App\Service\ProfileManager;
-use App\Service\RegistrationEmailGenerator;
+use App\Service\EmailGenerator;
 use App\Service\SendSMS;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
@@ -40,7 +40,7 @@ class NotifyUsersWhenProfileExpiresCommand extends Command
         private readonly ProfileManager $profileManager,
         private readonly UserExternalAuthRepository $userExternalAuthRepository,
         private readonly UserRadiusProfileRepository $userRadiusProfileRepository,
-        private readonly RegistrationEmailGenerator $registrationEmailGenerator,
+        private readonly EmailGenerator $emailGenerator,
         private readonly ExpirationProfileService $expirationProfileService,
         private readonly SettingRepository $settingRepository,
         private readonly NotificationRepository $notificationRepository,
@@ -121,7 +121,7 @@ class NotifyUsersWhenProfileExpiresCommand extends Command
                 try {
                     // Priority: Send Email Notification
                     if ($user->getEmail()) { // For Google/Portal/Microsoft future accounts - any account with an email
-                        $this->registrationEmailGenerator->sendNotifyExpiresProfileEmail(
+                        $this->emailGenerator->sendNotifyExpiresProfileEmail(
                             $user,
                             $timeLeftDays + 1
                         );
@@ -175,7 +175,7 @@ class NotifyUsersWhenProfileExpiresCommand extends Command
                     UserRadiusProfileRevokeReason::PROFILE_EXPIRED->value,
                     true
                 );
-                $this->registrationEmailGenerator->sendNotifyExpiredProfile($user);
+                $this->emailGenerator->sendNotifyExpiredProfile($user);
                 $this->entityManager->persist($userRadiusProfile);
                 $this->entityManager->flush();
             }

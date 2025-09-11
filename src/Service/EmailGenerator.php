@@ -3,6 +3,7 @@
 namespace App\Service;
 
 use App\Entity\User;
+use App\Enum\FirewallType;
 use App\Enum\OperationMode;
 use App\Enum\SettingName;
 use App\Repository\SettingRepository;
@@ -13,7 +14,7 @@ use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-readonly class RegistrationEmailGenerator
+readonly class EmailGenerator
 {
     public function __construct(
         private ParameterBagInterface $parameterBag,
@@ -116,10 +117,9 @@ readonly class RegistrationEmailGenerator
      */
     public function sendNotifyExpiredProfile(User $user): void
     {
-        $emailTitle = $this->settingRepository->findOneBy(['name' => SettingName::PAGE_TITLE->value])->getValue();
-        $supportTeam = $this->settingRepository->findOneBy(['name' => SettingName::PAGE_TITLE->value])->getValue();
-        $contactEmail = $this->settingRepository->findOneBy(['name' => SettingName::CONTACT_EMAIL->value])->getValue();
-        $customerLogo = $this->settingRepository->findOneBy(['name' => SettingName::CUSTOMER_LOGO->value])->getValue();
+        $supportTeam = $this->settingRepository->findOneBy(['name' => 'PAGE_TITLE'])->getValue();
+        $contactEmail = $this->settingRepository->findOneBy(['name' => 'CONTACT_EMAIL'])->getValue();
+        $customerLogo = $this->settingRepository->findOneBy(['name' => 'CUSTOMER_LOGO'])->getValue();
         $projectDir = $this->parameterBag->get('kernel.project_dir');
         $logoPath = $projectDir . '/public' . $customerLogo;
 
@@ -137,8 +137,48 @@ readonly class RegistrationEmailGenerator
             ->context([
                 'uuid' => $user->getEmail(),
                 'contactEmail' => $contactEmail,
-                'emailTitle' => $emailTitle,
+                'emailTitle' => $supportTeam,
                 'supportTeam' => $supportTeam,
+            ])
+            ->embedFromPath($logoPath, 'logo_cid');
+
+        $this->mailer->send($email);
+    }
+
+    /**
+     * @throws TransportExceptionInterface
+     */
+    public function sendForgotPasswordEmail(User $user): void
+    {
+        $emailTitle = $this->settingRepository->findOneBy(['name' => 'PAGE_TITLE'])->getValue();
+        $contactEmail = $this->settingRepository->findOneBy(['name' => 'CONTACT_EMAIL'])->getValue();
+        $customerLogo = $this->settingRepository->findOneBy(['name' => 'CUSTOMER_LOGO'])->getValue();
+        $projectDir = $this->parameterBag->get('kernel.project_dir');
+        $logoPath = $projectDir . '/public' . $customerLogo;
+
+        $email = new TemplatedEmail()
+            ->from(
+                new Address(
+                    $this->parameterBag->get('app.email_address'),
+                    $this->parameterBag->get('app.sender_name')
+                )
+            )
+            ->to($user->getEmail())
+            ->subject(
+                $this->translator->trans(
+                    'subject_forgot_password',
+                    [],
+                    'user_forgot_password_request'
+                )
+            )
+            ->htmlTemplate('email/user_forgot_password_request.html.twig')
+            ->context([
+                'forgotPasswordUser' => true,
+                'uuid' => $user->getUuid(),
+                'emailTitle' => $emailTitle,
+                'contactEmail' => $contactEmail,
+                'verificationCode' => $user->getTwoFAcode(),
+                'context' => FirewallType::LANDING->value,
             ])
             ->embedFromPath($logoPath, 'logo_cid');
 

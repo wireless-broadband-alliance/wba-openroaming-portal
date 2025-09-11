@@ -21,7 +21,7 @@ use App\Service\CaptchaValidator;
 use App\Service\EventActions;
 use App\Service\JWTTokenGenerator;
 use App\Service\MagicLinkService;
-use App\Service\RegistrationEmailGenerator;
+use App\Service\EmailGenerator;
 use App\Service\SamlResolverService;
 use App\Service\SendSMS;
 use App\Service\TOTPService;
@@ -64,7 +64,7 @@ class AuthController extends AbstractController
         private readonly SettingRepository $settingRepository,
         private readonly MagicLinkService $magicLinkService,
         private readonly SendSMS $sendSMS,
-        private readonly RegistrationEmailGenerator $registrationEmailGenerator,
+        private readonly EmailGenerator $emailGenerator,
     ) {
     }
 
@@ -246,7 +246,8 @@ class AuthController extends AbstractController
         if (!($event instanceof Event)) {
             $providerId = $user->getUserExternalAuths()[0]->getProviderId();
             if ($providerId === UserProvider::EMAIL->value) {
-                $this->registrationEmailGenerator->sendRegistrationEmail($user);
+                // Send registration email
+                $this->emailGenerator->sendRegistrationEmail($user);
                 $this->addFlash(
                     'success',
                     'A login link has been sent to your email address.'
