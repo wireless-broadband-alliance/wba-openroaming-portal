@@ -145,7 +145,8 @@ readonly class EmailGenerator
     /**
      * @throws TransportExceptionInterface
      */
-    public function sendForgotPasswordEmail(User $user): void {
+    public function sendForgotPasswordEmail(User $user): void
+    {
         $emailTitle = $this->settingRepository->findOneBy(['name' => 'PAGE_TITLE'])->getValue();
         $contactEmail = $this->settingRepository->findOneBy(['name' => 'CONTACT_EMAIL'])->getValue();
         $customerLogo = $this->settingRepository->findOneBy(['name' => 'CUSTOMER_LOGO'])->getValue();
