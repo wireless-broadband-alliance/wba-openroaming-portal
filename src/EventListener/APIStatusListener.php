@@ -16,6 +16,7 @@ final class APIStatusListener
 
     private array $ignoredPaths = [
         '/api/v1/capport/json',
+        '/api/v2/capport/json'
     ];
 
     public function __construct(
