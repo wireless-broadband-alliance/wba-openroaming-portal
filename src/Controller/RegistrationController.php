@@ -13,7 +13,7 @@ use App\Form\RegistrationFormType;
 use App\Repository\UserRepository;
 use App\Service\EventActions;
 use App\Service\GetSettings;
-use App\Service\RegistrationEmailGenerator;
+use App\Service\EmailGenerator;
 use App\Service\SendSMS;
 use App\Service\UserCreationService;
 use DateTime;
@@ -47,7 +47,7 @@ class RegistrationController extends AbstractController
      * @param SendSMS $sendSMS Calls the sendSMS service
      * @param TokenStorageInterface $tokenStorage Used to authenticate users after register with SMS
      * @param EventActions $eventActions Used to generate event related to the User creation
-     * @param RegistrationEmailGenerator $emailGenerator Used to generate and send emails for the user
+     * @param EmailGenerator $emailGenerator Used to generate and send emails for the user
      */
     public function __construct(
         private readonly UserRepository $userRepository,
@@ -55,7 +55,7 @@ class RegistrationController extends AbstractController
         private readonly SendSMS $sendSMS,
         private readonly TokenStorageInterface $tokenStorage,
         private readonly EventActions $eventActions,
-        private readonly RegistrationEmailGenerator $emailGenerator,
+        private readonly EmailGenerator $emailGenerator,
         private readonly UserCreationService $userCreationService,
         private readonly TranslatorInterface $translator
     ) {

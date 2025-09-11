@@ -18,7 +18,7 @@ use App\Repository\UserRepository;
 use App\Service\CaptchaValidator;
 use App\Service\EventActions;
 use App\Service\GetSettings;
-use App\Service\RegistrationEmailGenerator;
+use App\Service\EmailGenerator;
 use App\Service\SendSMS;
 use DateInterval;
 use DateTime;
@@ -56,15 +56,13 @@ class RegistrationController extends AbstractController
         private readonly EventRepository $eventRepository,
         private readonly EntityManagerInterface $entityManager,
         private readonly EventActions $eventActions,
-        private readonly ParameterBagInterface $parameterBag,
         private readonly SendSMS $sendSMSService,
         private readonly GetSettings $getSettings,
         private readonly SettingRepository $settingRepository,
         private readonly UserPasswordHasherInterface $userPasswordHasher,
         private readonly CaptchaValidator $captchaValidator,
-        private readonly RegistrationEmailGenerator $emailGenerator,
+        private readonly EmailGenerator $emailGenerator,
         private readonly ValidatorInterface $validator,
-        private readonly TranslatorInterface $translator,
     ) {
     }
 
@@ -198,7 +196,6 @@ class RegistrationController extends AbstractController
     #[Route('/auth/local/reset', name: 'api_v1_auth_local_reset', methods: ['POST'])]
     public function localReset(
         UserPasswordHasherInterface $userPasswordHasher,
-        MailerInterface $mailer,
         Request $request,
     ): JsonResponse {
         try {
@@ -322,35 +319,8 @@ class RegistrationController extends AbstractController
                     $this->entityManager->persist($user);
                     $this->entityManager->flush();
 
-                    $email = new TemplatedEmail()
-                        ->from(
-                            new Address(
-                                $this->parameterBag->get('app.email_address'),
-                                $this->parameterBag->get('app.sender_name')
-                            )
-                        )
-                        ->to($user->getEmail())
-                        ->subject(
-                            $this->translator->trans(
-                                'subject_forgot_password',
-                                [],
-                                'user_forgot_password_request'
-                            )
-                        )
-                        ->htmlTemplate('email/user_forgot_password_request.html.twig')
-                        ->context([
-                            'password' => $randomPassword,
-                            'forgotPasswordUser' => true,
-                            'uuid' => $user->getUuid(),
-                            'currentPassword' => $randomPassword,
-                            'verificationCode' => $user->getTwoFAcode(),
-                            'emailTitle' => $this->settingRepository->findOneBy(['name' => 'PAGE_TITLE'])->getValue(),
-                            'contactEmail' => $this->settingRepository->findOneBy(
-                                ['name' => 'CONTACT_EMAIL']
-                            )->getValue()
-                        ]);
-
-                    $mailer->send($email);
+                    // Send email for the user
+                    $this->emailGenerator->sendForgotPasswordEmail($user);
 
                     // Defines the Event to the table
                     $eventMetadata = [

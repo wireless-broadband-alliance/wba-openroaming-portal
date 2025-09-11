@@ -19,6 +19,7 @@ use App\Repository\UserRepository;
 use App\Service\EventActions;
 use App\Service\GetSettings;
 use App\Service\PasswordResetRequestHandler;
+use App\Service\EmailGenerator;
 use App\Service\SendSMS;
 use DateInterval;
 use DateTime;
@@ -48,7 +49,6 @@ class ForgotPasswordController extends AbstractController
     public function __construct(
         private readonly UserRepository $userRepository,
         private readonly UserExternalAuthRepository $userExternalAuthRepository,
-        private readonly ParameterBagInterface $parameterBag,
         private readonly GetSettings $getSettings,
         private readonly EventRepository $eventRepository,
         private readonly EventActions $eventActions,
@@ -56,6 +56,8 @@ class ForgotPasswordController extends AbstractController
         private readonly SettingRepository $settingRepository,
         private readonly PasswordResetRequestHandler $passwordResetRequestHandler,
         private readonly TranslatorInterface $translator,
+        private readonly EmailGenerator $emailGenerator,
+        private readonly EntityManagerInterface $entityManager
     ) {
     }
 
@@ -66,8 +68,6 @@ class ForgotPasswordController extends AbstractController
     #[Route('/forgot-password/email', name: 'app_site_forgot_password_email')]
     public function forgotPasswordUserEmail(
         Request $request,
-        EntityManagerInterface $entityManager,
-        MailerInterface $mailer
     ): Response {
         if ($this->getUser() instanceof UserInterface) {
             $this->addFlash(
@@ -151,41 +151,12 @@ class ForgotPasswordController extends AbstractController
                         $user->setTwoFACodeGeneratedAt(new DateTime());
                         $user->setTwoFAcodeIsActive(true);
 
-                        $entityManager->persist($latestEvent);
-                        $entityManager->persist($user);
-                        $entityManager->flush();
+                        $this->entityManager->persist($latestEvent);
+                        $this->entityManager->persist($user);
+                        $this->entityManager->flush();
 
-
-                        $customerLogo = $data['CUSTOMER_LOGO']['value'];
-                        $projectDir =  $this->parameterBag->get('kernel.project_dir');
-                        $logoPath = $projectDir . '/public' . $customerLogo;
-                        $email = new TemplatedEmail()
-                            ->from(
-                                new Address(
-                                    $this->parameterBag->get('app.email_address'),
-                                    $this->parameterBag->get('app.sender_name')
-                                )
-                            )
-                            ->to($user->getEmail())
-                            ->subject(
-                                $this->translator->trans(
-                                    'subject_forgot_password',
-                                    [],
-                                    'user_forgot_password_request'
-                                )
-                            )
-                            ->htmlTemplate('email/user_forgot_password_request.html.twig')
-                            ->context([
-                                'forgotPasswordUser' => true,
-                                'uuid' => $user->getUuid(),
-                                'emailTitle' => $data['PAGE_TITLE']['value'],
-                                'contactEmail' => $data['CONTACT_EMAIL']['value'],
-                                'verificationCode' => $user->getTwoFAcode(),
-                                'context' => FirewallType::LANDING->value,
-                            ])
-                            ->embedFromPath($logoPath, 'logo_cid');
-
-                        $mailer->send($email);
+                        // Send email for the user
+                        $this->emailGenerator->sendForgotPasswordEmail($user);
 
                         $message = $this->translator->trans(
                             'emailSentMessage',
@@ -235,7 +206,6 @@ class ForgotPasswordController extends AbstractController
     )]
     public function forgotPasswordUserSMS(
         Request $request,
-        EntityManagerInterface $entityManager,
     ): Response {
         $data = $this->getSettings->getSettings();
 
@@ -310,8 +280,8 @@ class ForgotPasswordController extends AbstractController
                         $user->setTwoFAcodeIsActive(true);
                         $this->eventRepository->save($latestEvent, true);
 
-                        $entityManager->persist($user);
-                        $entityManager->flush();
+                        $this->entityManager->persist($user);
+                        $this->entityManager->flush();
 
                         $message = $this->translator->trans(
                             'password_reset_code',
@@ -563,7 +533,6 @@ class ForgotPasswordController extends AbstractController
     #[IsGranted('ROLE_USER')]
     public function forgotPasswordUserChecker(
         Request $request,
-        EntityManagerInterface $entityManager,
         UserPasswordHasherInterface $userPasswordHasher,
         string $context
     ): Response {
@@ -649,8 +618,9 @@ class ForgotPasswordController extends AbstractController
             $currentUser->setTwoFAcodeIsActive(true);
             $session = $request->getSession();
             $session->set('session_verified', true);
-            $entityManager->persist($currentUser);
-            $entityManager->flush();
+
+            $this->entityManager->persist($currentUser);
+            $this->entityManager->flush();
 
             $eventMetadata = [
                 'ip' => $request->getClientIp(),

@@ -19,7 +19,7 @@ use App\Repository\UserRepository;
 use App\Service\EventActions;
 use App\Service\GetSettings;
 use App\Service\MagicLinkService;
-use App\Service\RegistrationEmailGenerator;
+use App\Service\EmailGenerator;
 use App\Service\SendSMS;
 use App\Service\TwoFAService;
 use App\Service\UserCreationService;
@@ -61,10 +61,9 @@ class SecurityController extends AbstractController
         private readonly SendSMS $sendSMS,
         private readonly MagicLinkService $magicLinkService,
         private readonly EventActions $eventActions,
-        private readonly RegistrationEmailGenerator $emailGenerator,
+        private readonly EmailGenerator $emailGenerator,
         private readonly UserCreationService $userCreationService,
         private readonly TokenStorageInterface $tokenStorage,
-        private readonly RegistrationEmailGenerator $registrationEmailGenerator,
     ) {
     }
 
@@ -193,7 +192,7 @@ class SecurityController extends AbstractController
 
                     $event = $this->magicLinkService->canSendLink($loginUser);
                     if (!($event instanceof Event)) {
-                        $this->registrationEmailGenerator->sendRegistrationEmail(
+                        $this->emailGenerator->sendRegistrationEmail(
                             $loginUser
                         );
 
