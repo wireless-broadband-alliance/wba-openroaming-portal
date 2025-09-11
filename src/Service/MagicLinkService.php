@@ -15,7 +15,6 @@ use DateTime;
 readonly class MagicLinkService
 {
     public function __construct(
-        private GetSettings $getSettings,
         private UserRepository $userRepository,
         private SettingRepository $settingRepository,
         private EventRepository $eventRepository,
@@ -25,8 +24,9 @@ readonly class MagicLinkService
 
     public function canSendLink(User $user): ?Event
     {
-        $data = $this->getSettings->getSettings();
-        $emailTimer = $data[SettingName::TWO_FACTOR_AUTH_RESEND_INTERVAL->value]["value"];
+        $emailTimer = $this->settingRepository->findOneBy(
+            ['name' => SettingName::TWO_FACTOR_AUTH_RESEND_INTERVAL->value]
+        )->getValue();
         $limitTime = new DateTime();
         $limitTime->modify('-' . $emailTimer . ' seconds');
 
