@@ -53,6 +53,18 @@ class UserAccountDeletionController extends AbstractController
             $this->redirectToRoute('app_landing');
         }
 
+        if (in_array('ROLE_ADMIN', $currentUser->getRoles(), true)) {
+            $this->addFlash(
+                'error',
+                $this->translator->trans(
+                    'administratorsCannotDeleteThemselves',
+                    [],
+                    'controllers'
+                )
+            );
+            return $this->redirectToRoute('app_landing');
+        }
+
         $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $currentUser->getId()]);
         if ($currentUser->getUserExternalAuths()[0]->getProvider() !== UserProvider::PORTAL_ACCOUNT->value) {
             $this->addFlash(
