@@ -360,7 +360,7 @@ class ForgotPasswordController extends AbstractController
 
 
         // Get the user with the matching email, excluding admin users
-        $user = $this->userRepository->findOneBy([ 'uuid' => $uuid]);
+        $user = $this->userRepository->findOneBy(['uuid' => $uuid]);
         if (!$user instanceof User) {
             $this->addFlash(
                 'error',
@@ -389,7 +389,10 @@ class ForgotPasswordController extends AbstractController
         }
 
         if ($user->getUuid() === $uuid && $user->getTwoFAcode() === $twoFaCode) {
-            if ($this->magicLinkService->linkCanBeUsed($user, AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST->value)) {
+            if ($this->magicLinkService->linkCanBeUsed(
+                $user,
+                AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST->value
+            )) {
                 $this->addFlash(
                     'error',
                     $this->translator->trans(
