@@ -212,17 +212,17 @@ class AuthController extends AbstractController
             }
 
             // Defines the Event to the table
-            $eventMetadata = [
-                'ip' => $request->getClientIp(),
+            $eventMetaData = [
                 'user_agent' => $request->headers->get('User-Agent'),
                 'uuid' => $user->getUuid(),
+                'ip' => $request->getClientIp(),
             ];
 
             $this->eventActions->saveEvent(
                 $user,
                 AnalyticalEventType::AUTH_LOCAL_API->value,
                 new DateTime(),
-                $eventMetadata
+                $eventMetaData
             );
 
             // Prepare response data
