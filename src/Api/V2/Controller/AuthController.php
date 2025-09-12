@@ -18,10 +18,10 @@ use App\Enum\UserTwoFactorAuthenticationStatus;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use App\Service\CaptchaValidator;
+use App\Service\EmailGenerator;
 use App\Service\EventActions;
 use App\Service\JWTTokenGenerator;
 use App\Service\MagicLinkService;
-use App\Service\EmailGenerator;
 use App\Service\SamlResolverService;
 use App\Service\SendSMS;
 use App\Service\TOTPService;
@@ -219,17 +219,17 @@ class AuthController extends AbstractController
             }
 
             // Defines the Event to the table
-            $eventMetadata = [
-                'ip' => $request->getClientIp(),
+            $eventMetaData = [
                 'user_agent' => $request->headers->get('User-Agent'),
                 'uuid' => $user->getUuid(),
+                'ip' => $request->getClientIp(),
             ];
 
             $this->eventActions->saveEvent(
                 $user,
                 AnalyticalEventType::AUTH_LOCAL_API->value,
                 new DateTime(),
-                $eventMetadata
+                $eventMetaData
             );
 
             // Prepare response data
@@ -246,7 +246,6 @@ class AuthController extends AbstractController
         if (!($event instanceof Event)) {
             $providerId = $user->getUserExternalAuths()[0]->getProviderId();
             if ($providerId === UserProvider::EMAIL->value) {
-                // Send registration email
                 $this->emailGenerator->sendRegistrationEmail($user);
                 $this->addFlash(
                     'success',
@@ -289,7 +288,6 @@ class AuthController extends AbstractController
         }
 
         $eventMetaData = [
-            'platform' => PlatformMode::LIVE->value,
             'user_agent' => $request->headers->get('User-Agent'),
             'uuid' => $user->getUuid(),
             'ip' => $request->getClientIp(),
