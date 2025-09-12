@@ -284,7 +284,9 @@ class RegistrationController extends AbstractController
                     $user,
                     AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST->value
                 );
-                $emailTimerResend = $this->settingRepository->findOneBy(['name' => 'EMAIL_TIMER_RESEND'])->getValue();
+                $emailTimerResend = $this->settingRepository->findOneBy(
+                    ['name' => SettingName::EMAIL_TIMER_RESEND->value]
+                )->getValue();
                 $minInterval = new DateInterval('PT' . $emailTimerResend . 'M');
                 $currentTime = new DateTime();
                 $latestEventMetadata = $latestEvent instanceof Event ? $latestEvent->getEventMetadata() : [];
@@ -368,7 +370,7 @@ class RegistrationController extends AbstractController
                     return new BaseResponse(200, [
                         // Correct success response
                         'message' => sprintf(
-                            // Actually success
+                        // Actually success
                             'If the email address exists in our system, we’ve sent a new one to: %s.',
                             $user->getEmail()
                         )
