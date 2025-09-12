@@ -62,6 +62,7 @@ class ConfigController extends AbstractController
             'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED' => $this->getSettingValueConverted(
                 'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED'
             ),
+            'LOGIN_WITH_UUID_ONLY' => $this->getSettingValueConverted('LOGIN_WITH_UUID_ONLY'),
             'AUTH_METHOD_SMS_REGISTER_ENABLED' => $this->getSettingValueConverted('AUTH_METHOD_SMS_REGISTER_ENABLED')
         ];
 
