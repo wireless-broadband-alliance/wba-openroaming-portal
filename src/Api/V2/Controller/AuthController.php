@@ -20,7 +20,6 @@ use App\Service\CaptchaValidator;
 use App\Service\EventActions;
 use App\Service\JWTTokenGenerator;
 use App\Service\MagicLinkService;
-use App\Service\EmailGenerator;
 use App\Service\SamlResolverService;
 use App\Service\SendSMS;
 use App\Service\TOTPService;
@@ -63,7 +62,6 @@ class AuthController extends AbstractController
         private readonly SettingRepository $settingRepository,
         private readonly MagicLinkService $magicLinkService,
         private readonly SendSMS $sendSMS,
-        private readonly EmailGenerator $emailGenerator,
     ) {
     }
 
@@ -116,6 +114,10 @@ class AuthController extends AbstractController
             $errors[] = 'uuid';
         }
 
+        $isLoginWithUUIDOnly = $this->settingRepository->findOneBy(['name' => 'LOGIN_WITH_UUID_ONLY'])->getValue();
+        if ($isLoginWithUUIDOnly === OperationMode::OFF->value && empty($data['password'])) {
+            $errors[] = 'password';
+        }
 
         if ($errors !== []) {
             return new BaseResponse(
@@ -186,7 +188,9 @@ class AuthController extends AbstractController
             }
 
             // --- Email/SMS / OTP validation ---
-            if (
+            if ($isLoginWithUUIDOnly === OperationMode::ON->value) {
+                // If LOGIN_WITH_UUID_ONLY is ON, skip this entire 2FA validation for email/SMS accounts
+            } elseif (
                 !$this->twoFAService->validate2FACode($user, $data['twoFACode']) &&
                 !$this->twoFAService->validateOTPCodes($user, $data['twoFACode'])
             ) {
@@ -198,115 +202,36 @@ class AuthController extends AbstractController
             }
         }
 
-        // If the login with uuid is disabled generate JWT Token
-        $token = $this->tokenGenerator->generateToken($user);
-        if (is_array($token) && isset($token['success']) && $token['success'] === false) {
-            $statusCode = $token['error'] === 'Invalid user provided. Please verify the user data.' ? 400 : 500;
-
-            return new BaseResponse($statusCode, null, $token['error'])->toResponse();
-        }
-
-        // Defines the Event to the table
-        $eventMetaData = [
-            'user_agent' => $request->headers->get('User-Agent'),
-            'uuid' => $user->getUuid(),
-            'ip' => $request->getClientIp(),
-        ];
-
-        $this->eventActions->saveEvent(
-            $user,
-            AnalyticalEventType::AUTH_LOCAL_API->value,
-            new DateTime(),
-            $eventMetaData
-        );
-
-        // Prepare response data
-        $responseData = $user->toApiResponse([
-            'token' => $token,
-        ]);
-
-        // Return success response using BaseResponse
-        return new BaseResponse(200, $responseData)->toResponse(); # Success Response
-    }
-
-
-    /**
-     * @throws ClientExceptionInterface
-     * @throws RedirectionExceptionInterface
-     * @throws ServerExceptionInterface
-     * @throws Exception
-     * @throws TransportExceptionInterface
-     * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
-     */
-    #[Route('/auth/local/magic', name: 'api_v2_auth_local_magic', methods: ['POST'])]
-    public function authLocalMagic(Request $request): JsonResponse
-    {
-        $isLoginWithUUIDOnly = $this->settingRepository->findOneBy(['name' => 'LOGIN_WITH_UUID_ONLY'])->getValue();
         if ($isLoginWithUUIDOnly === OperationMode::OFF->value) {
-            return new BaseResponse(
-                403, // Access Forbidden
-                null,
-                'This authentication method is currently disabled.'
-            )->toResponse();
-        }
+            // If the login with uuid is disabled generate JWT Token
+            $token = $this->tokenGenerator->generateToken($user);
+            if (is_array($token) && isset($token['success']) && $token['success'] === false) {
+                $statusCode = $token['error'] === 'Invalid user provided. Please verify the user data.' ? 400 : 500;
 
-        try {
-            $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
-        } catch (JsonException) {
-            return new BaseResponse(400, null, 'Invalid JSON format')->toResponse(); # Bad Request Response
-        }
-
-        $turnstileSetting = $this->settingRepository->findOneBy(['name' => 'TURNSTILE_CHECKER'])->getValue();
-        if (!$turnstileSetting) {
-            throw new RuntimeException('Missing settings: TURNSTILE_CHECKER not found');
-        }
-
-        if ($turnstileSetting === OperationMode::ON->value) {
-            if (!isset($data['turnstile_token'])) {
-                return new BaseResponse(
-                    400,
-                    null,
-                    'CAPTCHA validation failed'
-                )->toResponse(); # Bad Request Response
+                return new BaseResponse($statusCode, null, $token['error'])->toResponse();
             }
 
-            $turnstileValidation = $this->captchaValidator->validate(
-                $data['turnstile_token'],
-                $request->getClientIp()
+            // Defines the Event to the table
+            $eventMetadata = [
+                'ip' => $request->getClientIp(),
+                'user_agent' => $request->headers->get('User-Agent'),
+                'uuid' => $user->getUuid(),
+            ];
+
+            $this->eventActions->saveEvent(
+                $user,
+                AnalyticalEventType::AUTH_LOCAL_API->value,
+                new DateTime(),
+                $eventMetadata
             );
 
-            if (!$turnstileValidation['success']) {
-                $errorMessage = $turnstileValidation['error'] ?? 'CAPTCHA validation failed';
+            // Prepare response data
+            $responseData = $user->toApiResponse([
+                'token' => $token,
+            ]);
 
-                return new BaseResponse(400, null, $errorMessage)->toResponse();
-            }
-        }
-
-        $errors = [];
-        // Check for missing fields and add them to the array errors
-        if (empty($data['uuid'])) {
-            $errors[] = 'uuid';
-        }
-
-        if ($errors !== []) {
-            return new BaseResponse(
-                400,
-                ['missing_fields' => $errors],
-                'Invalid data: Missing required fields.'
-            )->toResponse();
-        }
-
-        // Check if user exists
-        $user = $this->userRepository->findOneBy(['uuid' => $data['uuid']]);
-
-        if (!$user instanceof User) {
-            return new BaseResponse(401, null, 'Invalid credentials')->toResponse();
-            // Bad Request Response
-        }
-
-        $statusCheckerResponse = $this->userStatusChecker->checkUserStatus($user);
-        if ($statusCheckerResponse instanceof BaseResponse) {
-            return $statusCheckerResponse->toResponse();
+            // Return success response using BaseResponse
+            return new BaseResponse(200, $responseData)->toResponse(); # Success Response
         }
 
         // If login with UUID is enabled, generate the SMS or email with the login link
@@ -314,8 +239,7 @@ class AuthController extends AbstractController
         if (!($event instanceof Event)) {
             $providerId = $user->getUserExternalAuths()[0]->getProviderId();
             if ($providerId === UserProvider::EMAIL->value) {
-                // Send registration email
-                $this->emailGenerator->sendRegistrationEmail($user);
+                $this->magicLinkService->sendEmail($user);
                 $this->addFlash(
                     'success',
                     'A login link has been sent to your email address.'
@@ -357,6 +281,7 @@ class AuthController extends AbstractController
         }
 
         $eventMetaData = [
+            'platform' => PlatformMode::LIVE->value,
             'user_agent' => $request->headers->get('User-Agent'),
             'uuid' => $user->getUuid(),
             'ip' => $request->getClientIp(),
@@ -534,17 +459,16 @@ class AuthController extends AbstractController
             ]);
 
             // Defines the Event to the table
-            $eventMetaData = [
-                'user_agent' => $request->headers->get('User-Agent'),
-                'uuid' => $user->getUuid(),
+            $eventMetadata = [
                 'ip' => $request->getClientIp(),
+                'uuid' => $user->getUuid(),
             ];
 
             $this->eventActions->saveEvent(
                 $user,
                 AnalyticalEventType::AUTH_SAML_API->value,
                 new DateTime(),
-                $eventMetaData
+                $eventMetadata
             );
 
             return new BaseResponse(200, $responseData)->toResponse(); // Success
@@ -663,17 +587,17 @@ class AuthController extends AbstractController
             $formattedUserData = $user->toApiResponse(['token' => $token]);
 
             // Defines the Event to the table
-            $eventMetaData = [
+            $eventMetadata = [
+                'ip' => $request->getClientIp(),
                 'user_agent' => $request->headers->get('User-Agent'),
                 'uuid' => $user->getUuid(),
-                'ip' => $request->getClientIp(),
             ];
 
             $this->eventActions->saveEvent(
                 $user,
                 AnalyticalEventType::AUTH_GOOGLE_API->value,
                 new DateTime(),
-                $eventMetaData
+                $eventMetadata
             );
 
             return new BaseResponse(200, $formattedUserData, null)->toResponse();
@@ -792,17 +716,17 @@ class AuthController extends AbstractController
             $formattedUserData = $user->toApiResponse(['token' => $token]);
 
             // Defines the Event to the table
-            $eventMetaData = [
+            $eventMetadata = [
+                'ip' => $request->getClientIp(),
                 'user_agent' => $request->headers->get('User-Agent'),
                 'uuid' => $user->getUuid(),
-                'ip' => $request->getClientIp(),
             ];
 
             $this->eventActions->saveEvent(
                 $user,
                 AnalyticalEventType::AUTH_MICROSOFT_API->value,
                 new DateTime(),
-                $eventMetaData
+                $eventMetadata
             );
 
             return new BaseResponse(200, $formattedUserData, null)->toResponse();
