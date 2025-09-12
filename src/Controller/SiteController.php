@@ -114,7 +114,8 @@ class SiteController extends AbstractController
             // Check if the user is verified
             if (
                 $userExternalAuths[0]->getProvider() === UserProvider::PORTAL_ACCOUNT->value &&
-                !$session->has('session_verified')
+                !$session->has('session_verified') &&
+                $data['LOGIN_WITH_UUID_ONLY']['value'] === OperationMode::OFF->value
             ) {
                 if (
                     $this->twoFAService->canValidationCode(
