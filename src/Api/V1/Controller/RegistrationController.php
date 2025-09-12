@@ -284,7 +284,10 @@ class RegistrationController extends AbstractController
                     $user,
                     AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST->value
                 );
-                $minInterval = new DateInterval('PT2M');
+                $emailTimerResend = $this->settingRepository->findOneBy(
+                    ['name' => SettingName::EMAIL_TIMER_RESEND->value]
+                )->getValue();
+                $minInterval = new DateInterval('PT' . $emailTimerResend . 'M');
                 $currentTime = new DateTime();
                 $latestEventMetadata = $latestEvent instanceof Event ? $latestEvent->getEventMetadata() : [];
                 $lastVerificationCodeTime = isset($latestEventMetadata['lastVerificationCodeTime'])
