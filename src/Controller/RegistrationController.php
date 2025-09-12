@@ -314,8 +314,10 @@ class RegistrationController extends AbstractController
             return $this->redirectToRoute('app_login', ['uuid' => $uuid]);
         }
 
-        if ($user->getUuid() === $uuid && $user->getTwoFAcode() === $verificationCode &&
-            $this->magicLinkService->linkCanBeUsed($user, AnalyticalEventType::USER_CREATION->value)) {
+        if (
+            $user->getUuid() === $uuid && $user->getTwoFAcode() === $verificationCode &&
+            $this->magicLinkService->linkCanBeUsed($user, AnalyticalEventType::USER_CREATION->value)
+        ) {
                 $this->addFlash(
                     'error',
                     $this->translator->trans(
