@@ -37,7 +37,6 @@ readonly class TwoFAService
         private ParameterBagInterface $parameterBag,
         private SettingRepository $settingRepository,
         private EventActions $eventActions,
-        private GetSettings $getSettings,
         private EventRepository $eventRepository,
         private TranslatorInterface $translator
     ) {
