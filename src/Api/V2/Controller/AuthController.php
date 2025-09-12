@@ -116,10 +116,6 @@ class AuthController extends AbstractController
             $errors[] = 'uuid';
         }
 
-        $isLoginWithUUIDOnly = $this->settingRepository->findOneBy(['name' => 'LOGIN_WITH_UUID_ONLY'])->getValue();
-        if ($isLoginWithUUIDOnly === OperationMode::OFF->value && empty($data['password'])) {
-            $errors[] = 'password';
-        }
 
         if ($errors !== []) {
             return new BaseResponse(
@@ -190,9 +186,7 @@ class AuthController extends AbstractController
             }
 
             // --- Email/SMS / OTP validation ---
-            if ($isLoginWithUUIDOnly === OperationMode::ON->value) {
-                // If LOGIN_WITH_UUID_ONLY is ON, skip this entire 2FA validation for email/SMS accounts
-            } elseif (
+            if (
                 !$this->twoFAService->validate2FACode($user, $data['twoFACode']) &&
                 !$this->twoFAService->validateOTPCodes($user, $data['twoFACode'])
             ) {
@@ -204,101 +198,35 @@ class AuthController extends AbstractController
             }
         }
 
-        if ($isLoginWithUUIDOnly === OperationMode::OFF->value) {
-            // If the login with uuid is disabled generate JWT Token
-            $token = $this->tokenGenerator->generateToken($user);
-            if (is_array($token) && isset($token['success']) && $token['success'] === false) {
-                $statusCode = $token['error'] === 'Invalid user provided. Please verify the user data.' ? 400 : 500;
+        // If the login with uuid is disabled generate JWT Token
+        $token = $this->tokenGenerator->generateToken($user);
+        if (is_array($token) && isset($token['success']) && $token['success'] === false) {
+            $statusCode = $token['error'] === 'Invalid user provided. Please verify the user data.' ? 400 : 500;
 
-                return new BaseResponse($statusCode, null, $token['error'])->toResponse();
-            }
-
-            // Defines the Event to the table
-            $eventMetaData = [
-                'user_agent' => $request->headers->get('User-Agent'),
-                'uuid' => $user->getUuid(),
-                'ip' => $request->getClientIp(),
-            ];
-
-            $this->eventActions->saveEvent(
-                $user,
-                AnalyticalEventType::AUTH_LOCAL_API->value,
-                new DateTime(),
-                $eventMetaData
-            );
-
-            // Prepare response data
-            $responseData = $user->toApiResponse([
-                'token' => $token,
-            ]);
-
-            // Return success response using BaseResponse
-            return new BaseResponse(200, $responseData)->toResponse(); # Success Response
+            return new BaseResponse($statusCode, null, $token['error'])->toResponse();
         }
 
-        // If login with UUID is enabled, generate the SMS or email with the login link
-        $event = $this->magicLinkService->canSendLink($user);
-        if (!($event instanceof Event)) {
-            $providerId = $user->getUserExternalAuths()[0]->getProviderId();
-            if ($providerId === UserProvider::EMAIL->value) {
-                // Send registration email
-                $this->emailGenerator->sendRegistrationEmail($user);
-                $this->addFlash(
-                    'success',
-                    'A login link has been sent to your email address.'
-                );
-            } else {
-                $link = $this->magicLinkService->magicToken($user);
-                $message = "Welcome to OpenRoaming! Click the link to confirm and login with your account: $link";
-
-                $smsResponse = $this->sendSMS->sendSmsNoValidation($user, $message);
-
-                if ($smsResponse === SMSResponse::SMS_SUCCESS_LINK->value) {
-                    $this->addFlash(
-                        'success',
-                        'We have sent a login link to your phone number. Please check your SMS messages to continue.'
-                    );
-                } elseif ($smsResponse === SMSResponse::SMS_SUCCESS_CODE->value) {
-                    $this->addFlash(
-                        'success',
-                        'We have sent a login verification code to your phone number. 
-                        Please check your SMS messages to continue.'
-                    );
-                } else {
-                    $this->addFlash(
-                        'error',
-                        'We were unable to send the login link to your phone number. Please try again.'
-                    );
-                }
-            }
-        } else {
-            $timeIntervalToResendCode = $this->settingRepository->findOneBy(
-                ['name' => 'TWO_FACTOR_AUTH_RESEND_INTERVAL']
-            )->getValue();
-            $message = $this->magicLinkService->timeToResend($timeIntervalToResendCode, $event);
-
-            return new BaseResponse(
-                429,
-                ['message' => $message]
-            )->toResponse();
-        }
-
+        // Defines the Event to the table
         $eventMetaData = [
             'user_agent' => $request->headers->get('User-Agent'),
             'uuid' => $user->getUuid(),
             'ip' => $request->getClientIp(),
         ];
+
         $this->eventActions->saveEvent(
             $user,
-            AnalyticalEventType::LOGIN_WITH_UUID_ONLY_LINK->value,
+            AnalyticalEventType::AUTH_LOCAL_API->value,
             new DateTime(),
             $eventMetaData
         );
 
-        return new BaseResponse(
-            200,
-            ['message' => 'Authentication request sent. Please check your email or phone for the login link.']
-        )->toResponse();
+        // Prepare response data
+        $responseData = $user->toApiResponse([
+            'token' => $token,
+        ]);
+
+        // Return success response using BaseResponse
+        return new BaseResponse(200, $responseData)->toResponse(); # Success Response
     }
 
 
