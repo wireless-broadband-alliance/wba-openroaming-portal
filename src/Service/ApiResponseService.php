@@ -818,7 +818,10 @@ readonly class ApiResponseService
                 ],
                 'description' => 'This endpoint authenticates a user using their UUID, password, 
         and a CAPTCHA token. Platform can require the authentication with Two-Factor, 
-        the twoFACode parameter will be asked based on the TWO_FACTOR_AUTH_STATUS setting.',
+        the twoFACode parameter will be asked based on the TWO_FACTOR_AUTH_STATUS setting.
+        When the setting LOGIN_WITH_UUID_ONLY is enabled:
+        The authentication process does not require a password. Instead, a success message is returned
+        and the platform will send a login link via email or phone number.',
                 'responses' => [
                     200 => [
                         'default' => json_decode(
@@ -843,49 +846,8 @@ readonly class ApiResponseService
                             512,
                             JSON_THROW_ON_ERROR
                         ),
-                    ],
-                    400 => [
-                        'CAPTCHA validation failed',
-                        'Missing required fields: uuid, password or turnstile_token',
-                        'Missing required configuration setting: TWO_FACTOR_AUTH_STATUS',
-                        'Invalid json format',
-                        'Invalid user provided. Please verify the user data'
-                    ],
-                    401 => [
                         // phpcs:disable Generic.Files.LineLength.TooLong
-                        'Two-Factor Authentication is active for this account. Please ensure you provide the correct authentication code.',
-                        // phpcs:enable
-                        'Two-Factor Authentication is ENFORCED FOR PORTAL accounts.',
-                        // phpcs:disable Generic.Files.LineLength.TooLong
-                        'Two-Factor Authentication it\'s required for authentication on the portal. Please visit DOMAIN to set up 2FA and secure your account.',
-                        // phpcs:enable
-                        'Invalid credentials'
-                    ],
-                    403 => [
-                        'User account is not verified!',
-                        'User account is banned from the system!',
-                        // phpcs:disable Generic.Files.LineLength.TooLong
-                        'Your request cannot be processed at this time due to a pending action. If your account is active, re-login to complete the action',
-                        // phpcs:enable
-                    ],
-                    500 => [
-                        'An error occurred: Generic server-side error.',
-                        'JWT key files are missing. Please ensure both private and public keys exist.',
-                    ]
-                ],
-            ],
-            'api_v2_auth_local_magic' => [
-                'requestBody' => [
-                    'uuid' => 'user-uuid-example',
-                    'turnstile_token' => 'valid_test_token',
-                ],
-                'description' => 'This endpoint authenticates a user using their UUID and a CAPTCHA token. 
-        Only when the setting LOGIN_WITH_UUID_ONLY is enabled this endpoint will work as pretended.
-        The authentication will send a success message and returns a login link via email or phone number of the user.',
-                'responses' => [
-                    200 => [
-                        // phpcs:disable Generic.Files.LineLength.TooLong
-                        'default' => json_decode(
+                        'uuid_only_mode' => json_decode(
                             '{
                                 "success": true,
                                 "data": {
@@ -904,6 +866,16 @@ readonly class ApiResponseService
                         'Missing required configuration setting: TWO_FACTOR_AUTH_STATUS',
                         'Invalid json format',
                         'Invalid user provided. Please verify the user data'
+                    ],
+                    401 => [
+                        // phpcs:disable Generic.Files.LineLength.TooLong
+                        'Two-Factor Authentication is active for this account. Please ensure you provide the correct authentication code.',
+                        // phpcs:enable
+                        'Two-Factor Authentication is ENFORCED FOR PORTAL accounts.',
+                        // phpcs:disable Generic.Files.LineLength.TooLong
+                        'Two-Factor Authentication it\'s required for authentication on the portal. Please visit DOMAIN to set up 2FA and secure your account.',
+                        // phpcs:enable
+                        'Invalid credentials'
                     ],
                     403 => [
                         'User account is not verified!',
