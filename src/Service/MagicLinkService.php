@@ -4,7 +4,7 @@ namespace App\Service;
 
 use App\Entity\Event;
 use App\Entity\User;
-use App\Enum\AnalyticalEventType;
+use App\Enum\SettingName;
 use Random\RandomException;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use App\Repository\EventRepository;
@@ -58,8 +58,7 @@ readonly class MagicLinkService
 
     public function timeToResend(string $timeInterval, Event $event): string
     {
-        $lastAttemptTime = $event instanceof Event ?
-            $event->getEventDatetime() : $timeInterval;
+        $lastAttemptTime = $event->getEventDatetime();
         $limitTime = $lastAttemptTime;
         /** @var DateTime $limitTime */
         $limitTime->modify('+' . $timeInterval . ' seconds');
