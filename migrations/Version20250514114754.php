@@ -25,7 +25,7 @@ final class Version20250514114754 extends AbstractMigration
                 'setting_name' => 'WELCOME_TEXT',
                 'translations' => [
                     'en' => 'Welcome to OpenRoaming Provisioning Service',
-                    'pt' => 'Bem-vindo ao Serviço de OpenRoaming Provisioning',
+                    'pt' => 'Bem-vindo ao OpenRoaming Provisioning Service',
                 ],
             ],
             [
@@ -39,14 +39,14 @@ final class Version20250514114754 extends AbstractMigration
                 'setting_name' => 'ADDITIONAL_LABEL',
                 'translations' => [
                     'en' => 'This label is used to add extra content if necessary',
-                    'pt' => 'Este rótulo é usado para adicionar conteúdo extra, se necessário',
+                    'pt' => 'Este etiqueta é utilizado para adicionar conteúdo extra caso necessário',
                 ],
             ],
             [
                 'setting_name' => 'AUTH_METHOD_SAML_LABEL',
                 'translations' => [
                     'en' => 'Login with SAML',
-                    'pt' => 'Entrar com SAML',
+                    'pt' => 'Login com SAML',
                 ],
             ],
             [
@@ -60,7 +60,7 @@ final class Version20250514114754 extends AbstractMigration
                 'setting_name' => 'AUTH_METHOD_GOOGLE_LOGIN_LABEL',
                 'translations' => [
                     'en' => 'Login with Google',
-                    'pt' => 'Entrar com Google',
+                    'pt' => 'Login com Google',
                 ],
             ],
             [
@@ -74,7 +74,7 @@ final class Version20250514114754 extends AbstractMigration
                 'setting_name' => 'AUTH_METHOD_MICROSOFT_LOGIN_LABEL',
                 'translations' => [
                     'en' => 'Login with Microsoft',
-                    'pt' => 'Entrar com Microsoft',
+                    'pt' => 'Login com Microsoft',
                 ],
             ],
             [
