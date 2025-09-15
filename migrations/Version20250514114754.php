@@ -32,8 +32,7 @@ final class Version20250514114754 extends AbstractMigration
                 'setting_name' => 'WELCOME_DESCRIPTION',
                 'translations' => [
                     'en' => 'This portal allows you to download and install an OpenRoaming profile tailored to your device, allowing you to connect automatically to OpenRoaming Wi-Fi networks across the world.',
-                    'pt' => 'Este portal permite-lhe descarregar e instalar um perfil OpenRoaming adaptado ao seu dispositivo, 
-                    permitindo-lhe ligar-se automaticamente às redes OpenRoaming Wi-Fi em todo o mundo.',
+                    'pt' => 'Este portal permite-lhe descarregar e instalar um perfil OpenRoaming adaptado ao seu dispositivo, permitindo-lhe ligar-se automaticamente às redes OpenRoaming Wi-Fi em todo o mundo.',
                 ],
             ],
             [
@@ -110,7 +109,7 @@ final class Version20250514114754 extends AbstractMigration
                 'setting_name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION',
                 'translations' => [
                     'en' => 'Already have an account? Login then',
-                    'pt' => 'Já tem uma conta? Faça login então',
+                    'pt' => 'Já tem uma conta? Então inicie sessão.',
                 ],
             ],
             [
