@@ -93,4 +93,4 @@ account deletion.
 
 - Most of the endpoints above are integrated with CAPTCHA validation to increase security.
 - Please refer to the [API documentation](api/index.html) generated with OpenAPI via Swagger UI for detailed usage
-  instructions and examples.~~
+  instructions and examples.

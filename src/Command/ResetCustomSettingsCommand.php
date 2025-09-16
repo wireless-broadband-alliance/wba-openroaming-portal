@@ -90,7 +90,8 @@ class ResetCustomSettingsCommand extends Command
                 'value' => 'This portal allows you to download and install an OpenRoaming profile tailored to your device, allowing you to connect automatically to OpenRoaming Wi-Fi networks across the world.',
                 'translations' => [
                     LanguageType::EN->value => 'This portal allows you to download and install an OpenRoaming profile tailored to your device, allowing you to connect automatically to OpenRoaming Wi-Fi networks across the world.',
-                    LanguageType::PT->value => 'Este portal permite que você faça o download e instale um perfil OpenRoaming adaptado ao seu dispositivo, permitindo-lhe conectar-se automaticamente às redes OpenRoaming Wi-Fi em todo o mundo.',
+                    LanguageType::PT->value => 'Este portal permite-lhe descarregar e instalar um perfil OpenRoaming adaptado ao seu dispositivo, 
+                    permitindo-lhe ligar-se automaticamente às redes OpenRoaming Wi-Fi em todo o mundo.',
                 ],
             ],
             [
