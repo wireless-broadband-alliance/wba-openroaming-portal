@@ -25,28 +25,28 @@ final class Version20250514114754 extends AbstractMigration
                 'setting_name' => 'WELCOME_TEXT',
                 'translations' => [
                     'en' => 'Welcome to OpenRoaming Provisioning Service',
-                    'pt' => 'Bem-vindo ao Serviço de OpenRoaming Provisioning',
+                    'pt' => 'Bem-vindo ao OpenRoaming Provisioning Service',
                 ],
             ],
             [
                 'setting_name' => 'WELCOME_DESCRIPTION',
                 'translations' => [
                     'en' => 'This portal allows you to download and install an OpenRoaming profile tailored to your device, allowing you to connect automatically to OpenRoaming Wi-Fi networks across the world.',
-                    'pt' => 'Este portal permite que você faça o download e instale um perfil OpenRoaming adaptado ao seu dispositivo, permitindo-lhe conectar-se automaticamente às redes OpenRoaming Wi-Fi em todo o mundo.',
+                    'pt' => 'Este portal permite-lhe descarregar e instalar um perfil OpenRoaming adaptado ao seu dispositivo, permitindo-lhe ligar-se automaticamente às redes OpenRoaming Wi-Fi em todo o mundo.',
                 ],
             ],
             [
                 'setting_name' => 'ADDITIONAL_LABEL',
                 'translations' => [
                     'en' => 'This label is used to add extra content if necessary',
-                    'pt' => 'Este rótulo é usado para adicionar conteúdo extra, se necessário',
+                    'pt' => 'Este etiqueta é utilizado para adicionar conteúdo extra caso necessário',
                 ],
             ],
             [
                 'setting_name' => 'AUTH_METHOD_SAML_LABEL',
                 'translations' => [
                     'en' => 'Login with SAML',
-                    'pt' => 'Entrar com SAML',
+                    'pt' => 'Login com SAML',
                 ],
             ],
             [
@@ -60,7 +60,7 @@ final class Version20250514114754 extends AbstractMigration
                 'setting_name' => 'AUTH_METHOD_GOOGLE_LOGIN_LABEL',
                 'translations' => [
                     'en' => 'Login with Google',
-                    'pt' => 'Entrar com Google',
+                    'pt' => 'Login com Google',
                 ],
             ],
             [
@@ -74,7 +74,7 @@ final class Version20250514114754 extends AbstractMigration
                 'setting_name' => 'AUTH_METHOD_MICROSOFT_LOGIN_LABEL',
                 'translations' => [
                     'en' => 'Login with Microsoft',
-                    'pt' => 'Entrar com Microsoft',
+                    'pt' => 'Login com Microsoft',
                 ],
             ],
             [
@@ -109,7 +109,7 @@ final class Version20250514114754 extends AbstractMigration
                 'setting_name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION',
                 'translations' => [
                     'en' => 'Already have an account? Login then',
-                    'pt' => 'Já tem uma conta? Faça login então',
+                    'pt' => 'Já tem uma conta? Então inicie sessão.',
                 ],
             ],
             [

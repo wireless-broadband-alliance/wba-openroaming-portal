@@ -182,7 +182,7 @@ class ResetAuthSettingsCommand extends Command
                 'value' => 'Already have an account? Login then',
                 'translations' => [
                     LanguageType::EN->value => 'Already have an account? Login then',
-                    LanguageType::PT->value => 'Já tem uma conta? Faça login então',
+                    LanguageType::PT->value => 'Já tem uma conta? Então inicie sessão.',
                 ],
             ],
             [
