@@ -87,6 +87,9 @@ class LoginType extends AbstractType
         if ($builder->getData()?->requirePassword ?? true) {
             $builder->add('password', PasswordType::class, [
                 'label' => 'Password',
+                'toggle' => true,
+                'hidden_label' => null,
+                'visible_label' => null,
                 'required' => true,
                 'attr' => [
                     'placeholder' => $this->translator->trans('EnterPassword', [], 'LoginFormType'),
