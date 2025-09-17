@@ -2,6 +2,8 @@
 
 namespace App\Controller;
 
+use App\DTO\AdminConfigDTO;
+use App\DTO\DatabaseConfigDTO;
 use App\Entity\InstallationWidget;
 use App\Enum\InstallationWidgetStepsEnum;
 use App\Form\DatabaseConfigType;
@@ -45,9 +47,13 @@ class InstallationWidgetController extends AbstractController
     {
         $installation = $this->installationWidgetRepository->findOneBy([]);
 
+        $databaseConfigDTO = new DatabaseConfigDTO();
+
+        //TODO: Match each field of the dto with the data in the installation widget
+
         $form = $this->createForm(
             DatabaseConfigType::class,
-            $installation->getStepData(InstallationWidgetStepsEnum::DATABASE) ?? []
+            $databaseConfigDTO
         );
         $form->handleRequest($request);
 
@@ -74,9 +80,13 @@ class InstallationWidgetController extends AbstractController
     {
         $installation = $this->installationWidgetRepository->findOneBy([]);
 
+        $adminConfigDTO = new AdminConfigDTO();
+
+        //TODO: Match each field of the dto with the data in the installation widget
+
         $form = $this->createForm(
             AdminConfigType::class,
-            $installation->getStepData(InstallationWidgetStepsEnum::ADMIN_CONFIGURATION) ?? []
+            $adminConfigDTO
         );
         $form->handleRequest($request);
 
