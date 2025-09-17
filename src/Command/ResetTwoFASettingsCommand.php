@@ -3,6 +3,7 @@
 namespace App\Command;
 
 use App\Entity\Setting;
+use App\Enum\SettingName;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -49,13 +50,13 @@ class ResetTwoFASettingsCommand extends Command
         }
 
         $settings = [
-            ['name' => 'TWO_FACTOR_AUTH_STATUS', 'value' => 'NOT_ENFORCED'],
-            ['name' => 'TWO_FACTOR_AUTH_APP_LABEL', 'value' => 'OpenRoaming'],
-            ['name' => 'TWO_FACTOR_AUTH_APP_ISSUER', 'value' => 'OpenRoaming'],
-            ['name' => 'TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME', 'value' => '60'],
-            ['name' => 'TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE', 'value' => '3'],
-            ['name' => 'TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS', 'value' => '60'],
-            ['name' => 'TWO_FACTOR_AUTH_RESEND_INTERVAL', 'value' => '30'],
+            ['name' => SettingName::TWO_FACTOR_AUTH_STATUS->value, 'value' => 'NOT_ENFORCED'],
+            ['name' => SettingName::TWO_FACTOR_AUTH_APP_LABEL->value, 'value' => 'OpenRoaming'],
+            ['name' => SettingName::TWO_FACTOR_AUTH_APP_ISSUER->value, 'value' => 'OpenRoaming'],
+            ['name' => SettingName::TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME->value, 'value' => '60'],
+            ['name' => SettingName::TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE->value, 'value' => '3'],
+            ['name' => SettingName::TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS->value, 'value' => '60'],
+            ['name' => SettingName::TWO_FACTOR_AUTH_RESEND_INTERVAL->value, 'value' => '30'],
         ];
 
         $this->entityManager->beginTransaction();

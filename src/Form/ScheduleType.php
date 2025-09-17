@@ -3,22 +3,29 @@
 namespace App\Form;
 
 use App\DTO\ScheduleDTO;
+use App\Entity\Setting;
+use App\Enum\SettingName;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfonycasts\DynamicForms\DependentField;
 use Symfonycasts\DynamicForms\DynamicFormBuilder;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class ScheduleType extends AbstractType
 {
+    public function __construct(
+        private readonly TranslatorInterface $translator
+    ) {
+    }
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder = new DynamicFormBuilder($builder);
 
         $builder
             ->add('use_advanced_mode', CheckboxType::class, [
-                'label' => 'Use Advanced Mode (Manual CRON Expression)',
+                'label' => $this->translator->trans('useAdvancedMode', [], 'ScheduleType'),
                 'required' => false,
             ])
             ->addDependent(
@@ -29,7 +36,7 @@ class ScheduleType extends AbstractType
                         'label' => false,
                         'required' => false,
                         'use_advanced_mode' => $use_advanced_mode,
-                        'settingName' => 'DELETE_UNCONFIRMED_USERS_CRON',
+                        'settingName' => SettingName::DELETE_UNCONFIRMED_USERS_CRON->value,
                     ]);
                 }
             )
@@ -41,7 +48,7 @@ class ScheduleType extends AbstractType
                         'label' => false,
                         'required' => false,
                         'use_advanced_mode' => $use_advanced_mode,
-                        'settingName' => 'USERS_WHEN_PROFILE_EXPIRES_CRON',
+                        'settingName' => SettingName::USERS_WHEN_PROFILE_EXPIRES_CRON->value,
                     ]);
                 }
             )
@@ -53,7 +60,7 @@ class ScheduleType extends AbstractType
                         'label' => false,
                         'required' => false,
                         'use_advanced_mode' => $use_advanced_mode,
-                        'settingName' => 'LDAP_SYNC_CRON',
+                        'settingName' => SettingName::LDAP_SYNC_CRON->value,
                     ]);
                 }
             )
@@ -65,7 +72,7 @@ class ScheduleType extends AbstractType
                         'label' => false,
                         'required' => false,
                         'use_advanced_mode' => $use_advanced_mode,
-                        'settingName' => 'FREERADIUS_LAST_CONNECTION_CRON',
+                        'settingName' => SettingName::FREERADIUS_LAST_CONNECTION_CRON->value,
                     ]);
                 }
             );

@@ -3,6 +3,7 @@
 namespace App\Command;
 
 use App\Entity\Setting;
+use App\Enum\SettingName;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -47,12 +48,12 @@ class ResetLDAPSettingsCommand extends Command
         }
 
         $settings = [
-            ['name' => 'SYNC_LDAP_ENABLED', 'value' => 'false'],
-            ['name' => 'SYNC_LDAP_SERVER', 'value' => 'ldap://127.0.0.1'],
-            ['name' => 'SYNC_LDAP_BIND_USER_DN', 'value' => ''],
-            ['name' => 'SYNC_LDAP_BIND_USER_PASSWORD', 'value' => ''],
-            ['name' => 'SYNC_LDAP_SEARCH_BASE_DN', 'value' => ''],
-            ['name' => 'SYNC_LDAP_SEARCH_FILTER', 'value' => '(sAMAccountName=$identifier)'],
+            ['name' => SettingName::SYNC_LDAP_ENABLED->value, 'value' => 'false'],
+            ['name' => SettingName::SYNC_LDAP_SERVER->value, 'value' => 'ldap://127.0.0.1'],
+            ['name' => SettingName::SYNC_LDAP_BIND_USER_DN->value, 'value' => ''],
+            ['name' => SettingName::SYNC_LDAP_BIND_USER_PASSWORD->value, 'value' => ''],
+            ['name' => SettingName::SYNC_LDAP_SEARCH_BASE_DN->value, 'value' => ''],
+            ['name' => SettingName::SYNC_LDAP_SEARCH_FILTER->value, 'value' => '(sAMAccountName=$identifier)'],
         ];
 
         // Begin a database transaction to ensure data consistency

@@ -1,0 +1,53 @@
+{% extends 'landing/base.html.twig' %}
+
+{% set resendType = data.LOGIN_WITH_UUID_ONLY.value == constant('App\\Enum\\OperationMode::ON').value
+    ? constant('App\\Enum\\CodeVerificationType::LOGIN_WITH_UUID_ONLY_CODE_RESEND').value
+    : constant('App\\Enum\\CodeVerificationType::VERIFICATION_CODE_LOGIN_RESEND').value %}
+
+{% block title %}
+    {{ data.PAGE_TITLE.value }}
+{% endblock %}
+
+{% block second_col %}
+
+    {# Toasts #}
+    {{ block('toast_messages') }}
+
+    {% if data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\OperationMode::ON').value %}
+        <img class="w-[120px] h-[58px] object-scale-down mt-[75px]" src="{{ data.CUSTOMER_LOGO.value }}"
+             alt="{{ 'logoAlt'|trans({}, 'login_landing') }}"/>
+    {% endif %}
+
+    <div class="{{ data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\OperationMode::ON').value ? 'pt-[28px]' : 'pt-[161px]' }} leading-7">
+        <p class="font-bold text-xl">{{ 'welcome_back'|trans({}, 'login_landing') }}</p>
+        <p class="text-lg">{{ 'magic_link_login_description'|trans({}, 'login_landing') }}</p>
+    </div>
+
+    {# Form Column #}
+    {{ form_start(form) }}
+    <div class="relative mt-10 mb-6">
+        {{ form_label(form.code, null, {label_attr: {class: 'form-label'}}) }}
+        {{ form_widget(form.code, {
+            attr: {
+                class: 'form-widget',
+                placeholder: 'form.enter_code'|trans({}, 'login_landing'),
+            }}) }}
+    </div>
+
+    {# Action Buttons #}
+    <div class="grid mt-4 grid-cols-1 sm:gap-4 lg:gap-6 sm:[grid-template-columns:repeat(auto-fit,minmax(150px,1fr))] md:my-2 my-3 space-y-4 sm:space-y-0">
+        <button class="btn-primary"
+                type="submit">{{ 'btn.login'|trans({}, 'login_landing') }}</button>
+        <a href="{{ path('app_local_resend_code', {
+            context: context,
+            type: resendType,
+        }) }}"
+           class="w-[220px] btn-secondary">
+            {{ 'btn.resend'|trans({}, 'login_landing') }}
+        </a>
+    </div>
+    {{ form_end(form) }}
+
+    {{ include('landing/shared/returnActions/_logout.html.twig') }}
+
+{% endblock %}

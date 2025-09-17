@@ -1,0 +1,4 @@
+failedDecodeSAMLResponse: 'Falha ao descodificar SAMLResponse.'
+issuerNotFoundSAMLResponse: 'Emissor (idp_entity_id) não encontrado na SAMLResponse.'
+certificateNotFoundSAMLResponse: 'Certificado não encontrado na SAMLResponse.'
+errorOccurredWhileProcessingSAMLResponse: 'Ocorreu um erro ao processar o SAMLResponse: %message%'

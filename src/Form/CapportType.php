@@ -3,6 +3,7 @@
 namespace App\Form;
 
 use App\Enum\OperationMode;
+use App\Enum\SettingName;
 use App\Service\GetSettings;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -10,35 +11,37 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class CapportType extends AbstractType
 {
     public function __construct(
-        private readonly GetSettings $getSettings
+        private readonly GetSettings $getSettings,
+        private readonly TranslatorInterface $translator
     ) {
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $settingsToUpdate = [
-            'CAPPORT_ENABLED' => [
+            SettingName::CAPPORT_ENABLED->value => [
                 'type' => ChoiceType::class,
             ],
-            'CAPPORT_PORTAL_URL' => [
+            SettingName::CAPPORT_PORTAL_URL->value => [
                 'type' => TextType::class,
                 'constraints' => [
                     new Assert\Url([
-                        'message' => 'The value {{ value }} is not a valid URL.',
+                        'message' => $this->translator->trans('valueNotValid', [], 'CapportType'),
                         'protocols' => ['http', 'https'],
                         'requireTld' => true,
                     ]),
                 ],
             ],
-            'CAPPORT_VENUE_INFO_URL' => [
+            SettingName::CAPPORT_VENUE_INFO_URL->value => [
                 'type' => TextType::class,
                 'constraints' => [
                     new Assert\Url([
-                        'message' => 'The value {{ value }} is not a valid URL.',
+                        'message' => $this->translator->trans('valueNotValid', [], 'CapportType'),
                         'protocols' => ['http', 'https'],
                         'requireTld' => true,
                     ]),
@@ -51,12 +54,12 @@ class CapportType extends AbstractType
             foreach ($options['settings'] as $setting) {
                 if ($setting->getName() === $settingName) {
                     $formFieldOptions['data'] = $setting->getValue();
-                    if ($settingName === 'CAPPORT_ENABLED') {
+                    if ($settingName === SettingName::CAPPORT_ENABLED->value) {
                         $formFieldOptions['choices'] = [
                             OperationMode::ON->value => 'true',
                             OperationMode::OFF->value => 'false',
                         ];
-                        $formFieldOptions['placeholder'] = 'Select an option';
+                        $formFieldOptions['placeholder'] = $this->translator->trans('selectOption', [], 'CapportType');
                         $formFieldOptions['required'] = true;
                     }
                     $formFieldOptions['attr']['description'] = $this->getSettings->getSettingDescription($settingName);

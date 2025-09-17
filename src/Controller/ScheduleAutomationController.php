@@ -6,9 +6,9 @@ use App\DTO\ScheduleDTO;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Enum\OperationMode;
+use App\Enum\SettingName;
 use App\Form\ScheduleType;
 use App\Repository\SettingRepository;
-use App\Repository\UserRepository;
 use App\Service\CronExpressionHelperService;
 use App\Service\EventActions;
 use App\Service\GetSettings;
@@ -19,15 +19,16 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class ScheduleAutomationController extends AbstractController
 {
     public function __construct(
         private readonly GetSettings $getSettings,
-        private readonly UserRepository $userRepository,
         private readonly SettingRepository $settingRepository,
         private readonly EntityManagerInterface $entityManager,
         private readonly EventActions $eventActions,
+        private readonly TranslatorInterface $translator,
         private readonly CronExpressionHelperService $cronExpressionHelperService
     ) {
     }
@@ -39,7 +40,7 @@ class ScheduleAutomationController extends AbstractController
         /** @var User $currentUser */
         $currentUser = $this->getUser();
 
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
 
         $scheduleDTO = new ScheduleDTO($this->settingRepository, $this->cronExpressionHelperService);
 
@@ -72,12 +73,12 @@ class ScheduleAutomationController extends AbstractController
 
             $this->addFlash(
                 'success_admin',
-                'New Schedule configuration has been applied successfully.'
+                $this->translator->trans('scheduleConfigSuccess', [], 'controllers')
             );
             return $this->redirectToRoute('admin_dashboard_settings_schedule');
         }
 
-        return $this->render('admin/settings_actions.html.twig', [
+        return $this->render('dashboard/shared/settings_actions.html.twig', [
             'user' => $currentUser,
             'data' => $data,
             'settings' => $this->settingRepository->findAll(),
@@ -96,7 +97,9 @@ class ScheduleAutomationController extends AbstractController
             $setting->setValue($value);
             $this->entityManager->persist($setting);
         }
-        $advancedModeStatus = $this->settingRepository->findOneBy(['name' => 'CRON_ADVANCED_STATUS']);
+        $advancedModeStatus = $this->settingRepository->findOneBy(
+            ['name' => SettingName::CRON_ADVANCED_STATUS->value]
+        );
         $advancedModeValue = $advancedMode ? OperationMode::ON->value : OperationMode::OFF->value;
         if ($advancedModeStatus !== null) {
             $advancedModeStatus->setValue($advancedModeValue);

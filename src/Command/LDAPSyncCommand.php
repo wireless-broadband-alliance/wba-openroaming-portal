@@ -2,6 +2,7 @@
 
 namespace App\Command;
 
+use App\Enum\SettingName;
 use App\Enum\UserProvider;
 use App\Enum\UserRadiusProfileRevokeReason;
 use App\Repository\SettingRepository;
@@ -36,7 +37,11 @@ class LDAPSyncCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
-        if ($this->settingRepository->findOneBy(['name' => 'SYNC_LDAP_ENABLED'])->getValue() === 'false') {
+        if (
+            $this->settingRepository->findOneBy([
+                'name' => SettingName::SYNC_LDAP_ENABLED->value
+            ])->getValue() === 'false'
+        ) {
             $io->writeln('LDAP sync is disabled');
             return Command::SUCCESS;
         }
@@ -89,9 +94,13 @@ class LDAPSyncCommand extends Command
 
     private function fetchUserFromLDAP(string $identifier)
     {
-        $ldapServer = $this->settingRepository->findOneBy(['name' => 'SYNC_LDAP_SERVER'])->getValue();
-        $ldapUsername = $this->settingRepository->findOneBy(['name' => 'SYNC_LDAP_BIND_USER_DN'])->getValue();
-        $ldapPassword = $this->settingRepository->findOneBy(['name' => 'SYNC_LDAP_BIND_USER_PASSWORD'])->getValue();
+        $ldapServer = $this->settingRepository->findOneBy(['name' => SettingName::SYNC_LDAP_SERVER->value])->getValue();
+        $ldapUsername = $this->settingRepository->findOneBy([
+            'name' => SettingName::SYNC_LDAP_BIND_USER_DN->value
+        ])->getValue();
+        $ldapPassword = $this->settingRepository->findOneBy([
+            'name' => SettingName::SYNC_LDAP_BIND_USER_PASSWORD->value
+        ])->getValue();
         $ldapConnection = ldap_connect($ldapServer) or die("Could not connect to LDAP server.");
         ldap_set_option($ldapConnection, LDAP_OPT_DEREF, LDAP_DEREF_ALWAYS);
         ldap_set_option($ldapConnection, LDAP_OPT_PROTOCOL_VERSION, 3);
@@ -102,9 +111,11 @@ class LDAPSyncCommand extends Command
         $searchFilter = str_replace(
             "@ID",
             $identifier,
-            $this->settingRepository->findOneBy(['name' => 'SYNC_LDAP_SEARCH_FILTER'])->getValue()
+            $this->settingRepository->findOneBy(['name' => SettingName::SYNC_LDAP_SEARCH_FILTER->value])->getValue()
         );
-        $searchBaseDN = $this->settingRepository->findOneBy(['name' => 'SYNC_LDAP_SEARCH_BASE_DN'])->getValue();
+        $searchBaseDN = $this->settingRepository->findOneBy([
+            'name' => SettingName::SYNC_LDAP_SEARCH_BASE_DN->value
+        ])->getValue();
         $searchResult = ldap_search(
             $ldapConnection,
             $searchBaseDN,

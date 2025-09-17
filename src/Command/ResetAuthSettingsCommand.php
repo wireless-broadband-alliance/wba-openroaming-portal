@@ -3,6 +3,9 @@
 namespace App\Command;
 
 use App\Entity\Setting;
+use App\Entity\SettingTranslation;
+use App\Enum\LanguageType;
+use App\Enum\SettingName;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -47,40 +50,157 @@ class ResetAuthSettingsCommand extends Command
         }
 
         $settings = [
-            ['name' => 'AUTH_METHOD_SAML_ENABLED', 'value' => 'false'],
-            ['name' => 'AUTH_METHOD_SAML_LABEL', 'value' => 'Login with SAML'],
-            ['name' => 'AUTH_METHOD_SAML_DESCRIPTION', 'value' => 'Authenticate with your SAML account'],
-            ['name' => 'AUTH_METHOD_GOOGLE_LOGIN_ENABLED', 'value' => 'false'],
-            ['name' => 'AUTH_METHOD_GOOGLE_LOGIN_LABEL', 'value' => 'Login with Google'],
-            ['name' => 'AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION', 'value' => 'Authenticate with your Google account'],
-            ['name' => 'AUTH_METHOD_MICROSOFT_LOGIN_ENABLED', 'value' => 'false'],
-            ['name' => 'AUTH_METHOD_MICROSOFT_LOGIN_LABEL', 'value' => 'Login with Microsoft'],
+            ['name' => SettingName::AUTH_METHOD_SAML_ENABLED->value, 'value' => 'false'],
+            ['name' => SettingName::AUTH_METHOD_SAML_LABEL->value, 'value' => 'Login with SAML'],
             [
-                'name' => 'AUTH_METHOD_MICROSOFT_LOGIN_DESCRIPTION',
+                'name' => SettingName::AUTH_METHOD_SAML_DESCRIPTION->value,
+                'value' => 'Authenticate with your SAML account'
+            ],
+            ['name' => SettingName::AUTH_METHOD_GOOGLE_LOGIN_ENABLED->value, 'value' => 'false'],
+            ['name' => SettingName::AUTH_METHOD_GOOGLE_LOGIN_LABEL->value, 'value' => 'Login with Google'],
+            [
+                'name' => SettingName::AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION->value,
+                'value' => 'Authenticate with your Google account'
+            ],
+            ['name' => SettingName::AUTH_METHOD_MICROSOFT_LOGIN_ENABLED->value, 'value' => 'false'],
+            ['name' => SettingName::AUTH_METHOD_MICROSOFT_LOGIN_LABEL->value, 'value' => 'Login with Microsoft'],
+            [
+                'name' => SettingName::AUTH_METHOD_MICROSOFT_LOGIN_DESCRIPTION->value,
                 'value' => 'Authenticate with your Microsoft account'
             ],
-            ['name' => 'VALID_DOMAINS_GOOGLE_LOGIN', 'value' => ''],
-            ['name' => 'AUTH_METHOD_REGISTER_ENABLED', 'value' => 'true'],
-            ['name' => 'AUTH_METHOD_REGISTER_LABEL', 'value' => 'Create Account with Email'],
-            ['name' => 'AUTH_METHOD_REGISTER_DESCRIPTION', 'value' => 'Don\'t have an account? Create one'],
+            ['name' => SettingName::VALID_DOMAINS_GOOGLE_LOGIN->value, 'value' => ''],
+            ['name' => SettingName::AUTH_METHOD_REGISTER_ENABLED->value, 'value' => 'true'],
+            ['name' => SettingName::AUTH_METHOD_REGISTER_LABEL->value, 'value' => 'Create Account with Email'],
+            [
+                'name' => SettingName::AUTH_METHOD_REGISTER_DESCRIPTION->value,
+                'value' => 'Don\'t have an account? Create one'
+            ],
 
-            ['name' => 'EMAIL_TIMER_RESEND', 'value' => '2'],
-            ['name' => 'LINK_VALIDITY', 'value' => '10'],
+            ['name' => SettingName::EMAIL_TIMER_RESEND->value, 'value' => '2'],
+            ['name' => SettingName::LINK_VALIDITY->value, 'value' => '10'],
 
-            ['name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED', 'value' => 'true'],
-            ['name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_LABEL', 'value' => 'Account Login'],
-            ['name' => 'AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION', 'value' => 'Already have an account? Login then'],
-            ['name' => 'LOGIN_WITH_UUID_ONLY', 'value' => 'OFF'],
-            ['name' => 'AUTH_METHOD_SMS_REGISTER_ENABLED', 'value' => 'false'],
-            ['name' => 'AUTH_METHOD_SMS_REGISTER_LABEL', 'value' => 'Create Account with Phone Number'],
-            ['name' => 'AUTH_METHOD_SMS_REGISTER_DESCRIPTION', 'value' => 'Don\'t have an account? Create one'],
-            ['name' => 'VALID_DOMAINS_GOOGLE_LOGIN', 'value' => ''],
-            ['name' => 'VALID_DOMAINS_MICROSOFT_LOGIN', 'value' => ''],
-            ['name' => 'PROFILE_LIMIT_DATE_GOOGLE', 'value' => '5'],
-            ['name' => 'PROFILE_LIMIT_DATE_MICROSOFT', 'value' => '5'],
-            ['name' => 'PROFILE_LIMIT_DATE_SAML', 'value' => '5'],
-            ['name' => 'PROFILE_LIMIT_DATE_EMAIL', 'value' => '5'],
-            ['name' => 'PROFILE_LIMIT_DATE_SMS', 'value' => '5'],
+            ['name' => SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED->value, 'value' => 'true'],
+            ['name' => SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_LABEL->value, 'value' => 'Account Login'],
+            [
+                'name' => SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION->value,
+                'value' => 'Already have an account? Login then'
+            ],
+            ['name' => SettingName::LOGIN_WITH_UUID_ONLY->value, 'value' => 'OFF'],
+            ['name' => SettingName::AUTH_METHOD_SMS_REGISTER_ENABLED->value, 'value' => 'false'],
+            [
+                'name' => SettingName::AUTH_METHOD_SMS_REGISTER_LABEL->value,
+                'value' => 'Create Account with Phone Number'
+            ],
+            [
+                'name' => SettingName::AUTH_METHOD_SMS_REGISTER_DESCRIPTION->value,
+                'value' => 'Don\'t have an account? Create one'
+            ],
+            ['name' => SettingName::VALID_DOMAINS_GOOGLE_LOGIN->value, 'value' => ''],
+            ['name' => SettingName::VALID_DOMAINS_MICROSOFT_LOGIN->value, 'value' => ''],
+            ['name' => SettingName::PROFILE_LIMIT_DATE_GOOGLE->value, 'value' => '5'],
+            ['name' => SettingName::PROFILE_LIMIT_DATE_MICROSOFT->value, 'value' => '5'],
+            ['name' => SettingName::PROFILE_LIMIT_DATE_SAML->value, 'value' => '5'],
+            ['name' => SettingName::PROFILE_LIMIT_DATE_EMAIL->value, 'value' => '5'],
+            ['name' => SettingName::PROFILE_LIMIT_DATE_SMS->value, 'value' => '5'],
+        ];
+
+        $settingsToTranslate = [
+            [
+                'name' => SettingName::AUTH_METHOD_SAML_LABEL->value,
+                'value' => 'Login with SAML',
+                'translations' => [
+                    LanguageType::EN->value => 'Login with SAML',
+                    LanguageType::PT->value => 'Entrar com SAML',
+                ],
+            ],
+            [
+                'name' => SettingName::AUTH_METHOD_SAML_DESCRIPTION->value,
+                'value' => 'Authenticate with your SAML account',
+                'translations' => [
+                    LanguageType::EN->value => 'Authenticate with your SAML account',
+                    LanguageType::PT->value => 'Autentique-se com sua conta SAML',
+                ],
+            ],
+            [
+                'name' => SettingName::AUTH_METHOD_GOOGLE_LOGIN_LABEL->value,
+                'value' => 'Login with Google',
+                'translations' => [
+                    LanguageType::EN->value => 'Login with Google',
+                    LanguageType::PT->value => 'Entrar com Google',
+                ],
+            ],
+            [
+                'name' => SettingName::AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION->value,
+                'value' => 'Authenticate with your Google account',
+                'translations' => [
+                    LanguageType::EN->value => 'Authenticate with your Google account',
+                    LanguageType::PT->value => 'Autentique-se com sua conta Google',
+                ],
+            ],
+            [
+                'name' => SettingName::AUTH_METHOD_MICROSOFT_LOGIN_LABEL->value,
+                'value' => 'Login with Microsoft',
+                'translations' => [
+                    LanguageType::EN->value => 'Login with Microsoft',
+                    LanguageType::PT->value => 'Entrar com Microsoft',
+                ],
+            ],
+            [
+                'name' => SettingName::AUTH_METHOD_MICROSOFT_LOGIN_DESCRIPTION->value,
+                'value' => 'Authenticate with your Microsoft account',
+                'translations' => [
+                    LanguageType::EN->value => 'Authenticate with your Microsoft account',
+                    LanguageType::PT->value => 'Autentique-se com sua conta Microsoft',
+                ],
+            ],
+            [
+                'name' => SettingName::AUTH_METHOD_REGISTER_LABEL->value,
+                'value' => 'Create Account with Email',
+                'translations' => [
+                    LanguageType::EN->value => 'Create Account with Email',
+                    LanguageType::PT->value => 'Criar Conta com Email',
+                ],
+            ],
+            [
+                'name' => SettingName::AUTH_METHOD_REGISTER_DESCRIPTION->value,
+                'value' => "Don't have an account? Create one",
+                'translations' => [
+                    LanguageType::EN->value => "Don't have an account? Create one",
+                    LanguageType::PT->value => 'Não tem uma conta? Crie uma',
+                ],
+            ],
+            [
+                'name' => SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_LABEL->value,
+                'value' => 'Login Here',
+                'translations' => [
+                    LanguageType::EN->value => 'Login Here',
+                    LanguageType::PT->value => 'Entre Aqui',
+                ],
+            ],
+            [
+                'name' => SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION->value,
+                'value' => 'Already have an account? Login then',
+                'translations' => [
+                    LanguageType::EN->value => 'Already have an account? Login then',
+                    LanguageType::PT->value => 'Já tem uma conta? Então inicie sessão.',
+                ],
+            ],
+            [
+                'name' => SettingName::AUTH_METHOD_SMS_REGISTER_LABEL->value,
+                'value' => 'Create Account with Phone Number',
+                'translations' => [
+                    LanguageType::EN->value => 'Create Account with Phone Number',
+                    LanguageType::PT->value => 'Criar Conta com Número de Telefone',
+                ],
+            ],
+            [
+                'name' => SettingName::AUTH_METHOD_SMS_REGISTER_DESCRIPTION->value,
+                'value' => "Don't have an account? Create one",
+                'translations' => [
+                    LanguageType::EN->value => "Don't have an account? Create one",
+                    LanguageType::PT->value => 'Não tem uma conta? Crie uma',
+                ],
+            ],
         ];
 
         // Begin a database transaction to ensure data consistency
@@ -88,23 +208,34 @@ class ResetAuthSettingsCommand extends Command
 
         try {
             $settingsRepository = $this->entityManager->getRepository(Setting::class);
+            $translationsRepository = $this->entityManager->getRepository(SettingTranslation::class);
 
+            // Insert or update settings
             foreach ($settings as $settingData) {
-                $name = $settingData['name'];
-                $value = $settingData['value'];
+                $setting = $settingsRepository->findOneBy(['name' => $settingData['name']]) ?? new Setting();
+                $setting->setName($settingData['name']);
+                $setting->setValue($settingData['value']);
+                $this->entityManager->persist($setting);
+            }
 
-                // Look for all the settings using the name
-                $setting = $settingsRepository->findOneBy(['name' => $name]);
+            // Insert or update settings with translations
+            foreach ($settingsToTranslate as $settingData) {
+                $setting = $settingsRepository->findOneBy(['name' => $settingData['name']]) ?? new Setting();
+                $setting->setName($settingData['name']);
+                $setting->setValue($settingData['value']);
+                $this->entityManager->persist($setting);
 
-                if ($setting !== null) {
-                    // Update the already existing value
-                    $setting->setValue($value);
-                } else {
-                    // If it doesn't exist, create a new setting from the $setting
-                    $setting = new Setting();
-                    $setting->setName($name);
-                    $setting->setValue($value);
-                    $this->entityManager->persist($setting);
+                // Handle translations
+                foreach ($settingData['translations'] as $locale => $translationText) {
+                    $translation = $translationsRepository->findOneBy([
+                        'setting' => $setting,
+                        'locale' => $locale,
+                    ]) ?? new SettingTranslation();
+
+                    $translation->setSetting($setting);
+                    $translation->setLocale($locale);
+                    $translation->setTranslation($translationText);
+                    $this->entityManager->persist($translation);
                 }
             }
 

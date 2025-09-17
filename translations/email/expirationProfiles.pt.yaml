@@ -1,0 +1,15 @@
+subject_is_expired: 'O seu Perfil OpenRoaming Expirou'
+subject_is_expiring: 'O seu Perfil OpenRoaming está prestes a expirar'
+header: 'O seu Perfil OpenRoaming Expirou'
+profile_expiration_warning: 'O seu Perfil vai expirar em <span style="font-weight: 700; color: #0045AD;">%timeLeft%</span> dias.'
+expired_message: 'Para criar um novo perfil, <strong>clique no link abaixo e faça login</strong> com suas credenciais. Dentro do portal, <strong>faça download um novo perfil</strong>'
+new_profile: 'Novo perfil'
+renew_instructions: 'Para obter um novo perfil, siga estes simples passos:'
+steps:
+    access_portal: 'Clique <a href="%link%">aqui</a> para aceder ao portal OpenRoaming.'
+    login: 'Inicie sessão com as suas credenciais.'
+    download: 'No portal, transfira um novo perfil.'
+footer:
+    support_team: 'Equipa de apoio:'
+    thank_you: 'Obrigado,'
+    team: 'A Equipa %emailTitle%'

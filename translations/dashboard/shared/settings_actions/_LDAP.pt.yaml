@@ -1,0 +1,6 @@
+synchronizationLDAP: 'Sincronização com LDAP'
+synchronizationLDAPServer: 'Servidor de Sincronização LDAP'
+bindDistinguishedName: 'Nome Distinto de Ligação'
+bindDistinguishedPassword: 'Palavra-Passe Distinta de Ligação'
+searchBaseDistinguishedName: 'Nome Base Distinto de Pesquisa'
+LDAPSearchFilter: 'Filtro de Pesquisa LDAP'

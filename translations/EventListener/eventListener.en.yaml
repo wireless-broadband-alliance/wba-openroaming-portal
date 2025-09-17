@@ -1,0 +1,4 @@
+internalServerError: 'Internal Server Error'
+JWTTokenNotFound: 'JWT Token not found!'
+JWTTokenIsInvalid: 'JWT Token is invalid!'
+JWTTokenIsExpired: 'JWT Token is expired!'

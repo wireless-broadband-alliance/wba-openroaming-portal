@@ -1,0 +1,26 @@
+title: 'Two-Factor Authentication Setup'
+logoAlt: 'Customer Logo'
+heading: 'Two-Factor Authentication Setup'
+instructions: 'Before proceeding, please install one of the following Two-Factor Authentication apps on your device:'
+googleAuth:
+    name: 'Google Authenticator'
+    availableOn: 'Available on'
+    googlePlay: 'Google Play'
+    appStore: 'App Store'
+microsoftAuth:
+    name: 'Microsoft Authenticator'
+    availableOn: 'Available on'
+    googlePlay: 'Google Play'
+    appStore: 'App Store'
+and: 'and'
+steps:
+    heading: 'To enable Two-Factor Authentication, follow these steps:'
+    install: 'Install one of the applications listed above on your mobile device.'
+    addAccount: 'Open the application and choose the option to add a new account.'
+    scanCode: 'Scan the QR code below using the app or manually enter the key provided in the app if needed.'
+    useCode: 'Once the app is configured, use the app-generated code whenever prompted while logging in.'
+qrCodeAlt: 'QR Code for 2FA configuration'
+manualCode: 'Or manually enter the code into the application:'
+form:
+    placeholder: 'Enter 2FA Code'
+    submit: 'Submit'

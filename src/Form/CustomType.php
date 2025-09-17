@@ -3,6 +3,7 @@
 namespace App\Form;
 
 use App\Enum\OperationMode;
+use App\Enum\SettingName;
 use App\Service\GetSettings;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -16,63 +17,65 @@ use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Constraints\Email as EmailConstraint;
 use Symfony\Component\Validator\Constraints\File;
 use Symfony\Component\Validator\Constraints\Length;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class CustomType extends AbstractType
 {
     public function __construct(
-        private readonly GetSettings $getSettings
+        private readonly GetSettings $getSettings,
+        private readonly TranslatorInterface $translator
     ) {
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $allowedSettings = [
-            'CUSTOMER_LOGO_ENABLED' => ChoiceType::class,
-            'CUSTOMER_LOGO' => FileType::class,
-            'OPENROAMING_LOGO' => FileType::class,
-            'WALLPAPER_IMAGE' => FileType::class,
-            'WELCOME_TEXT' => [
+            SettingName::CUSTOMER_LOGO_ENABLED->value => ChoiceType::class,
+            SettingName::CUSTOMER_LOGO->value => FileType::class,
+            SettingName::OPENROAMING_LOGO->value => FileType::class,
+            SettingName::WALLPAPER_IMAGE->value => FileType::class,
+            SettingName::WELCOME_TEXT->value => [
                 'type' => TextareaType::class,
                 'constraints' => [
                     new Assert\NotBlank([
-                        'message' => 'This field cannot be empty'
+                        'message' => $this->translator->trans('fieldCannotBeEmpty', [], 'CustomType')
                     ]),
                 ]
             ],
-            'WELCOME_DESCRIPTION' => TextareaType::class,
-            'PAGE_TITLE' => [
+            SettingName::WELCOME_DESCRIPTION->value => TextareaType::class,
+            SettingName::PAGE_TITLE->value => [
                 'type' => TextType::class,
                 'constraints' => [
                     new Assert\NotBlank([
-                        'message' => 'This field cannot be empty'
+                        'message' => $this->translator->trans('fieldCannotBeEmpty', [], 'CustomType')
                     ]),
                     new Length([
                         'max' => 255,
-                        'maxMessage' => ' This field cannot be longer than {{ limit }} characters',
+                        'maxMessage' => $this->translator->trans('fieldCannotBeLongerThan', [], 'CustomType'),
                     ])
                 ],
             ],
-            'ADDITIONAL_LABEL' => [
+            SettingName::ADDITIONAL_LABEL->value => [
                 'type' => TextType::class,
                 'constraints' => [
                     new Length([
                         'max' => 255,
-                        'maxMessage' => ' This field cannot be longer than {{ limit }} characters',
+                        'maxMessage' => $this->translator->trans('fieldCannotBeLongerThan', [], 'CustomType'),
                     ])
                 ],
             ],
-            'CONTACT_EMAIL' => [
+            SettingName::CONTACT_EMAIL->value => [
                 'type' => EmailType::class,
                 'constraints' => [
                     new EmailConstraint([
-                        'message' => 'The value "{{ value }}" is not a valid email address.'
+                        'message' => $this->translator->trans('invalidValueEmailAddress', [], 'CustomType')
                     ]),
                     new Assert\NotBlank([
-                        'message' => 'This field cannot be empty'
+                        'message' => $this->translator->trans('fieldCannotBeEmpty', [], 'CustomType')
                     ]),
                     new Length([
                         'max' => 320,
-                        'maxMessage' => ' This field cannot be longer than {{ limit }} characters',
+                        'maxMessage' => $this->translator->trans('fieldCannotBeLongerThan', [], 'CustomType'),
                     ])
                 ]
             ],
@@ -97,10 +100,10 @@ class CustomType extends AbstractType
                         'mimeTypes' => [
                             'image/jpeg',
                             'image/png',
-                            'image/svg',
+                            'image/svg+xml',
                             'image/webp',
                         ],
-                        'mimeTypesMessage' => 'Please upload a valid format (JPEG,PNG,SVG,WEBP) image',
+                        'mimeTypesMessage' => $this->translator->trans('uploadValidFormat', [], 'CustomType'),
                     ]),
                 ];
                 $formFieldType = $config;
@@ -131,12 +134,12 @@ class CustomType extends AbstractType
             $formFieldOptions['attr']['description'] = $this->getSettings->getSettingDescription($settingName);
 
             // Specific logic for CUSTOMER_LOGO_ENABLED
-            if ($settingName === 'CUSTOMER_LOGO_ENABLED') {
+            if ($settingName === SettingName::CUSTOMER_LOGO_ENABLED->value) {
                 $formFieldOptions['choices'] = [
                     OperationMode::ON->value => OperationMode::ON->value,
                     OperationMode::OFF->value => OperationMode::OFF->value,
                 ];
-                $formFieldOptions['placeholder'] = 'Select an option';
+                $formFieldOptions['placeholder'] = $this->translator->trans('selectOption', [], 'CustomType');
                 $formFieldOptions['required'] = true;
             }
 

@@ -4,8 +4,8 @@ namespace App\Form;
 
 use App\Entity\User;
 use App\Enum\OperationMode;
+use App\Enum\SettingName;
 use App\Repository\SettingRepository;
-use App\Repository\UserRepository;
 use App\Service\GetSettings;
 use PixelOpen\CloudflareTurnstileBundle\Type\TurnstileType;
 use Symfony\Component\Form\AbstractType;
@@ -15,23 +15,16 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class RegistrationFormType extends AbstractType
 {
-    /**
-     *
-     * @param UserRepository $userRepository The repository for accessing user data.
-     * @param SettingRepository $settingRepository The setting repository is used to create the getSettings function.
-     * @param GetSettings $getSettings The instance of GetSettings class.
-     */
     public function __construct(
-        private readonly UserRepository $userRepository,
-        private readonly SettingRepository $settingRepository,
-        private readonly GetSettings $getSettings
+        private readonly SettingRepository $settingRepository
     ) {
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
-        $turnstileCheckerValue = $data['TURNSTILE_CHECKER']['value'];
+        $turnstileCheckerValue = $this->settingRepository->findOneBy(
+            ['name' => SettingName::TURNSTILE_CHECKER->value]
+        )->getValue();
 
         $builder
             ->add('email', EmailType::class);
