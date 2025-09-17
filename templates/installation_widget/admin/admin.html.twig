@@ -1,9 +1,11 @@
 {% extends '/installation_widget/base.html.twig' %}
 
 {% block body %}
+
+
 <twig:AdminConfigForm :adminConfigDTO="adminConfigDTO" :form="form">
 
-    {{ dump(dto) }}
+    {{ dump(adminConfigDTO) }}
 
 </twig:AdminConfigForm>
 

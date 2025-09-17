@@ -9,13 +9,8 @@ use Symfony\Component\Validator\Constraints as Assert;
 class AdminConfigDTO
 {
 
-    #[Assert\When(
-        expression: "this.loginMethod === constant('App\\\\Enum\\\\UserProvider::EMAIL').value",
-        constraints: [
-            new Assert\NotBlank(message: 'Email cannot be empty.'),
-            new Assert\Email(message: 'Please enter a valid email address.')
-        ]
-    )]
+    #[Assert\Email(message: 'Email not valid')]
+    #[Assert\Length(max: 180, maxMessage: 'Email cannot be longer than 180 characters')]
     public ?string $email = null;
 
 }
