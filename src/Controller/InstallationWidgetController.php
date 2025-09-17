@@ -60,10 +60,13 @@ class InstallationWidgetController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $data = $form->getData();
 
-            $installation
-                ->setStepData(InstallationWidgetStepsEnum::DATABASE, $data)
-                ->setStepTimestamp(InstallationWidgetStepsEnum::DATABASE)
-                ->setCurrentStep(InstallationWidgetStepsEnum::ADMIN_CONFIGURATION);
+            if ($installation) {
+                $installation
+                    ->setStepData(InstallationWidgetStepsEnum::DATABASE, $data)
+                    ->setStepTimestamp(InstallationWidgetStepsEnum::DATABASE)
+                    ->setCurrentStep(InstallationWidgetStepsEnum::ADMIN_CONFIGURATION);
+            }
+
 
             $this->entityManager->flush();
 
@@ -72,6 +75,7 @@ class InstallationWidgetController extends AbstractController
 
         return $this->render('installation_widget/database/database.html.twig', [
             'form' => $form->createView(),
+            'databaseConfigDTO' => $databaseConfigDTO
         ]);
     }
 
@@ -93,10 +97,12 @@ class InstallationWidgetController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $data = $form->getData();
 
-            $installation
-                ->setStepData(InstallationWidgetStepsEnum::ADMIN_CONFIGURATION, $data)
-                ->setStepTimestamp(InstallationWidgetStepsEnum::ADMIN_CONFIGURATION)
-                ->setCurrentStep(InstallationWidgetStepsEnum::RECAP);
+            if ($installation) {
+                $installation
+                    ->setStepData(InstallationWidgetStepsEnum::ADMIN_CONFIGURATION, $data)
+                    ->setStepTimestamp(InstallationWidgetStepsEnum::ADMIN_CONFIGURATION)
+                    ->setCurrentStep(InstallationWidgetStepsEnum::RECAP);
+            }
 
             $this->entityManager->flush();
 
@@ -105,6 +111,7 @@ class InstallationWidgetController extends AbstractController
 
         return $this->render('installation_widget/admin/admin.html.twig', [
             'form' => $form->createView(),
+            'adminConfigDTO' => $adminConfigDTO
         ]);
     }
 

@@ -1,6 +1,11 @@
 {% extends '/installation_widget/base.html.twig' %}
 
 {% block body %}
+<twig:DatabaseConfigForm :databaseConfigDTO="databaseConfigDTO" :form="form">
+
+    {{ dump(dto) }}
+
+</twig:DatabaseConfigForm>
 
 {% endblock %}
 
