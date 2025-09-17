@@ -39,11 +39,17 @@ class NewPasswordAccountType extends AbstractType
         $builder
             ->add('newPassword', PasswordType::class, [
                 'label' => $this->translator->trans('newPassword', [], 'NewPasswordAccountType'),
+                'toggle' => true,
+                'hidden_label' => null,
+                'visible_label' => null,
                 'required' => true,
                 'mapped' => false,
             ])
             ->add('confirmPassword', PasswordType::class, [
                 'label' => $this->translator->trans('confirmNewPassword', [], 'NewPasswordAccountType'),
+                'toggle' => true,
+                'hidden_label' => null,
+                'visible_label' => null,
                 'required' => true,
                 'mapped' => false,
             ]);

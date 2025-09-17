@@ -2,6 +2,7 @@
 
 namespace App\Command;
 
+use App\Enum\SettingName;
 use App\Repository\SettingRepository;
 use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
