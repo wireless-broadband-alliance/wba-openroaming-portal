@@ -4,5 +4,4 @@ namespace App\DTO;
 
 class DatabaseConfigDTO
 {
-
 }

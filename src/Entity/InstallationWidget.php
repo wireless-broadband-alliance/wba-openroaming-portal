@@ -56,4 +56,3 @@ class InstallationWidget
         return $this;
     }
 }
-
