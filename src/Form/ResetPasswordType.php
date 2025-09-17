@@ -21,6 +21,9 @@ class ResetPasswordType extends AbstractType
         $builder
             ->add('password', PasswordType::class, [
                 'label' => $this->translator->trans('newPassword', [], 'ResetPasswordType'),
+                'toggle' => true,
+                'hidden_label' => null,
+                'visible_label' => null,
                 'attr' => [
                     'mapped' => false,
                     'placeholder' => $this->translator->trans('enterNewPassword', [], 'ResetPasswordType'),
@@ -36,6 +39,9 @@ class ResetPasswordType extends AbstractType
             ])
             ->add('confirmPassword', PasswordType::class, [
                 'label' => $this->translator->trans('confirmNewPassword', [], 'ResetPasswordType'),
+                'toggle' => true,
+                'hidden_label' => null,
+                'visible_label' => null,
                 'mapped' => false,
                 'attr' => [
                     'placeholder' => $this->translator->trans('enterTheConfirmation', [], 'ResetPasswordType'),
