@@ -1,4 +1,4 @@
-import { Controller } from '@hotwired/stimulus';
+import { Controller } from "@hotwired/stimulus";
 
 export default class extends Controller {
     static values = {
@@ -55,10 +55,7 @@ export default class extends Controller {
         toggleButtonElement.innerHTML = this.isDisplayed
             ? `${this.hiddenIcon} ${this.hiddenLabelValue}`
             : `${this.visibleIcon} ${this.visibleLabelValue}`;
-        this.element.setAttribute(
-            "type",
-            this.isDisplayed ? "text" : "password",
-        );
+        this.element.setAttribute("type", this.isDisplayed ? "text" : "password");
         this.dispatchEvent(this.isDisplayed ? "show" : "hide", {
             element: this.element,
             button: toggleButtonElement,
