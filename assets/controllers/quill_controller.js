@@ -9,12 +9,11 @@ export default class extends Controller {
     connect() {
         this.quill = new Quill(this.editorTarget, {
             theme: "snow",
-            placeholder: "Type potatoes here pls :3...",
             modules: {
                 toolbar: [
                     [{ header: [1, 2, false] }],
                     ["bold", "italic", "underline"],
-                    ["link", "blockquote", "code-block", "image"],
+                    ["link", "blockquote", "code-block"],
                     [{ list: "ordered" }, { list: "bullet" }]
                 ]
             }

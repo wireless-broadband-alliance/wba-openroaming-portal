@@ -17,7 +17,7 @@ class QuillType extends AbstractType
     {
         $resolver->setDefaults([
             'attr' => [
-                'class' => 'quill-editor hidden', // hidden textarea (Stimulus will sync)
+                'class' => 'ql-editor hidden', // hidden textarea (Stimulus will sync)
             ],
         ]);
     }
