@@ -48,6 +48,11 @@
         <div class="mt-5 mb-1">
             {{ form_widget(setting, {attr: {class: 'p-2 bg-transparent border outline-none text-left text-base block w-full rounded-md  focus:shadow-sm'}}) }}
         </div>
+    {% elseif settingType == 'quill' %}
+        <div class="mt-5" data-controller="quill">
+            <div data-quill-target="editor" class="border rounded-lg p-2"></div>
+            {{ form_widget(setting, { attr: { 'class': 'hidden', 'data-quill-target': 'input' } }) }}
+        </div>
     {% endif %}
 
     {{ include('/dashboard/shared/settings_actions/_description.html.twig', {description: setting.vars.attr.description}) }}

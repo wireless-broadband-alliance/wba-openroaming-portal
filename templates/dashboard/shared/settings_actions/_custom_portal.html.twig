@@ -24,10 +24,13 @@
 
 {% set textSettings = [
     {name: 'PAGE_TITLE', displayName: 'pageTitle'|trans({}, '_custom_portal')},
+    {name: 'CONTACT_EMAIL', displayName: 'contactEmail'|trans({}, '_custom_portal')},
+] %}
+
+{% set QuillSettings = [
     {name: 'WELCOME_TEXT', displayName: 'welcomeText'|trans({}, '_custom_portal')},
     {name: 'WELCOME_DESCRIPTION', displayName: 'welcomeDescription'|trans({}, '_custom_portal')},
     {name: 'ADDITIONAL_LABEL', displayName: 'additionalLabel'|trans({}, '_custom_portal')},
-    {name: 'CONTACT_EMAIL', displayName: 'contactEmail'|trans({}, '_custom_portal')},
 ] %}
 
 {% set choiceSettings = [
@@ -124,6 +127,12 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {% for textSetting in textSettings %}
                 {{ include('/dashboard/shared/settings_actions/_card.html.twig', {...textSetting, settingType: 'text'}) }}
+            {% endfor %}
+        </div>
+        {# Quill Settings #}
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {% for QuillSetting in QuillSettings %}
+                {{ include('/dashboard/shared/settings_actions/_card.html.twig', {...QuillSetting, settingType: 'quill'}) }}
             {% endfor %}
         </div>
     </div>
