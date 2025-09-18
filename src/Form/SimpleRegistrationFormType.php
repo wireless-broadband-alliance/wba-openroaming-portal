@@ -9,9 +9,15 @@ use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\IsTrue;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class SimpleRegistrationFormType extends AbstractType
 {
+    public function __construct(
+        private readonly TranslatorInterface $translator
+    ) {
+    }
+
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
@@ -20,7 +26,7 @@ class SimpleRegistrationFormType extends AbstractType
                 'mapped' => false,
                 'constraints' => [
                     new IsTrue([
-                        'message' => 'You should agree to our terms.',
+                        'message' => $this->translator->trans('agreeTerms', [], 'LoginFormType'),
                     ]),
                 ],
             ]);

@@ -1,0 +1,149 @@
+{# Table Content #}
+<tr>
+    {# UUID #}
+    <td class="p-4 pl-8 font-medium">
+        {{ user.uuid is defined ? user.uuid : 'noInformation'|trans({}, '_user') }}
+    </td>
+
+    {# Email #}
+    <td class="p-4 -ml-4">
+        {% if user.email is not null %}
+            {{ user.email }}
+        {% else %}
+            <span class="font-semibold p-1 pill-error">{{ 'noInformation'|trans({}, '_user') }}
+</span>
+        {% endif %}
+    </td>
+
+    {# User Provider #}
+    <td class="p-4">
+        <p class="text-left ml-1 p-1">
+            {% if user.userExternalAuths is not empty %}
+                {% for auth in user.userExternalAuths %}
+                    {{ auth.provider }}
+                    {% if not loop.last %}, {% endif %}
+                {% endfor %}
+            {% else %}
+                <span>{{ 'noProvidersFound'|trans({}, '_user') }}</span>
+            {% endif %}
+        </p>
+    </td>
+
+    {# User Verification #}
+    <td class="p-4 ">
+        <p class="font-semibold p-1">
+            {% if user.isVerified is defined and user.isVerified == 0 %}
+                <span class="pill-error">
+                    {{ 'notVerified'|trans({}, '_user') }}
+                </span>
+            {% else %}
+                <span class="pill-success">
+                    {{ 'verified'|trans({}, '_user') }}
+                </span>
+            {% endif %}
+        </p>
+    </td>
+
+    {# 2FA status #}
+    <td class="px-6 py-4 font-medium">
+        {% if user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value %}
+            <span class="pill-error">
+                {{ 'disabled'|trans({}, '_user') }}
+            </span>
+        {% endif %}
+        {% if user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::EMAIL').value %}
+            <span class="pill-success">
+                Email
+            </span>
+        {% endif %}
+        {% if user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::SMS').value %}
+            <span class="pill-success">
+                SMS
+            </span>
+        {% endif %}
+        {% if user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::TOTP').value %}
+            <span class="pill-success">
+                TOTP
+            </span>
+        {% endif %}
+    </td>
+
+    {# Banned At #}
+    <td class="p-4 text-left">
+        <p class="font-semibold p-1">
+            {% if user.getBannedAt %}
+                <span class="pill-error">
+                    {{ user.bannedat|date('d/m/Y H:i') }}
+                </span>
+            {% else %}
+                <span class="pill-success">
+                    {{ 'notBanned'|trans({}, '_user') }}
+                </span>
+            {% endif %}
+        </p>
+    </td>
+
+    {# Created At #}
+    <td class="px-6 py-4 font-medium">
+        {{ user.createdat|date('d/m/Y H:i') }}
+    </td>
+
+    {# Actions Buttons #}
+    <td class="px-10 py-4 text-right" {{ stimulus_controller('nav-submenu') }}>
+        {# Items Button Dropdown #}
+        <button type="button" class="cursor-pointer p-2 rounded-lg hover:shadow duration-300"
+                {{ stimulus_action('nav-submenu', 'toggle')|stimulus_action('nav-submenu', 'lost_focus', 'focusout') }}
+                {{ stimulus_target('nav-submenu', 'button') }}>
+            <twig:ux:icon name="wba:menu-dots" class="w-5 h-5"/>
+        </button>
+
+        {# Items List Dropdown #}
+        <div class="hidden bg-white divide-y divide-gray-100 rounded-lg shadow min-w-max absolute right-16 mt-2 z-16"
+                {{ stimulus_target('nav-submenu', 'container') }}>
+            <ul class="p-2 text-gray-700 gap-y-2">
+                <li>
+                    <a href="{{ path('admin_user_edit', {id: user.id}) }}"
+                       class="flex flex-row items-center px-2 py-2 duration-100 p-2 cursor-pointer hover:text-lightGreen">
+                        <twig:ux:icon name="wba:pencil-edit" class="w-5 mr-3" fill="none"/>
+                        {{ 'edit'|trans({}, '_user') }}
+                    </a>
+                </li>
+                {% if delete_users == constant('App\\Enum\\OperationMode::ON').value %}
+                    <li {{ stimulus_controller('alert') }}>
+                        <form action="{{ path('admin_user_delete', {id: user.id}) }}"
+                              method="post" {{ stimulus_target('alert', 'form') }}>
+                            <input type="hidden" name="_method" value="DELETE">
+
+                            <a href="javascript:void(0)" data-user-id="{{ user.id }}" data-user-uuid="{{ user.uuid }}"
+                                    {{ stimulus_action('alert', 'delete_user') }} {{ stimulus_target('alert', 'button') }}
+                               class="flex flex-row items-center px-2 py-2 duration-100 p-2 cursor-pointer hover:text-red-400">
+                                <twig:ux:icon name="wba:trash" class="w-5 mr-3" fill="none"/>
+                                {{ 'delete'|trans({}, '_user') }}
+                            </a>
+                        </form>
+                    </li>
+                {% endif %}
+                <li {{ stimulus_controller('alert') }}>
+                    <form method="POST"
+                          action="{{ path('admin_user_revoke_profiles', {id: user.id}) }}"
+                            {{ stimulus_target('alert', 'form') }}>
+                        {{ form_start(formRevokeProfiles) }}
+                        {{ form_errors(formRevokeProfiles) }}
+                        <input type="hidden" name="_method" value="REVOKE">
+                        <a href="javascript:void(0)"
+                           class="flex flex-row items-center px-2 py-2 duration-100 p-2 cursor-pointer hover:text-lightGreen"
+                                {{ stimulus_action('alert', 'revoke_profiles') }}
+                                {{ stimulus_target('alert', 'button') }}
+                           data-user-uuid="{% if userExternalAuths[user.id] is defined %}{% for auth in userExternalAuths[user.id] %}{% if auth.provider == constant('App\\Enum\\UserProvider::SAML').value %}{{ auth.providerId }}{% else %}{{ user.uuid }}{% endif %}{% endfor %}{% endif %}"
+                        >
+                            <twig:ux:icon name="wba:return-2-solid" class="w-6 mr-3" fill="none"/>
+                            {{ 'revoke'|trans({}, '_user') }}
+                        </a>
+                        {{ form_rest(formRevokeProfiles) }}
+                        {{ form_end(formRevokeProfiles) }}
+                    </form>
+                </li>
+            </ul>
+        </div>
+    </td>
+</tr>

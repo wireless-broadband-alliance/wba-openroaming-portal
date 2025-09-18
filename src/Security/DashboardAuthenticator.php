@@ -5,6 +5,7 @@ namespace App\Security;
 use App\Entity\User;
 use App\Enum\FirewallType;
 use App\Enum\OperationMode;
+use App\Enum\SettingName;
 use App\Enum\TwoFAType;
 use App\Enum\UserProvider;
 use App\Enum\UserTwoFactorAuthenticationStatus;
@@ -31,6 +32,7 @@ use Symfony\Component\Security\Http\Authenticator\Passport\Credentials\PasswordC
 use Symfony\Component\Security\Http\Authenticator\Passport\Passport;
 use Symfony\Component\Security\Http\SecurityRequestAttributes;
 use Symfony\Component\Security\Http\Util\TargetPathTrait;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class DashboardAuthenticator extends AbstractLoginFormAuthenticator
 {
@@ -43,6 +45,7 @@ class DashboardAuthenticator extends AbstractLoginFormAuthenticator
         private readonly CloudflareTurnstileHttpClient $turnstileHttpClient,
         private readonly UserRepository $userRepository,
         private readonly RequestStack $requestStack,
+        private readonly TranslatorInterface $translator
     ) {
     }
 
@@ -95,14 +98,16 @@ class DashboardAuthenticator extends AbstractLoginFormAuthenticator
 
         // CAPTCHA (Turnstile) check
         $turnstileResponse = $request->request->get('cf-turnstile-response');
-        $turnstileSetting = $this->settingRepository->findOneBy(['name' => 'TURNSTILE_CHECKER']);
+        $turnstileSetting = $this->settingRepository->findOneBy(['name' => SettingName::TURNSTILE_CHECKER->value]);
         $isTurnstileEnabled = $turnstileSetting && $turnstileSetting->getValue() === OperationMode::ON->value;
 
         if (
             $isTurnstileEnabled && (empty($turnstileResponse) ||
                 !$this->turnstileHttpClient->verifyResponse($turnstileResponse))
         ) {
-            throw new CustomUserMessageAuthenticationException('Invalid CAPTCHA validation.');
+            throw new CustomUserMessageAuthenticationException(
+                $this->translator->trans('invalidCAPTCHAValidation', [], 'Security')
+            );
         }
 
         // Store last username/identifier in session
@@ -141,7 +146,7 @@ class DashboardAuthenticator extends AbstractLoginFormAuthenticator
                 if ($session instanceof Session) {
                     $session->getFlashBag()->add(
                         'error',
-                        'You need to confirm the new password before download a profile!'
+                        $this->translator->trans('confirmNewPasswordBeforeDownloadProfile', [], 'Security')
                     );
                 }
 
@@ -154,7 +159,7 @@ class DashboardAuthenticator extends AbstractLoginFormAuthenticator
             }
 
             $twoFAPlatformStatus = $this->settingRepository->findOneBy([
-                'name' => 'TWO_FACTOR_AUTH_STATUS'
+                'name' => SettingName::TWO_FACTOR_AUTH_STATUS->value
             ])->getValue();
 
             $verification = $user->isVerified();

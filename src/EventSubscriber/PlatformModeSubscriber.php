@@ -4,6 +4,7 @@ namespace App\EventSubscriber;
 
 use App\Enum\OperationMode;
 use App\Enum\PlatformMode;
+use App\Enum\SettingName;
 use App\Repository\SettingRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -40,10 +41,10 @@ readonly class PlatformModeSubscriber implements EventSubscriberInterface
         }
 
         // Fetch PLATFORM_MODE
-        $platformMode = $this->settingRepository->findOneBy(['name' => 'PLATFORM_MODE']);
+        $platformMode = $this->settingRepository->findOneBy(['name' => SettingName::PLATFORM_MODE->value]);
         if ($platformMode && $platformMode->getValue() === PlatformMode::LIVE->value) {
             // Fetch USER_VERIFICATION setting
-            $userVerification = $this->settingRepository->findOneBy(['name' => 'USER_VERIFICATION']);
+            $userVerification = $this->settingRepository->findOneBy(['name' => SettingName::USER_VERIFICATION->value]);
             if ($userVerification && $userVerification->getValue() !== OperationMode::ON->value) {
                 $userVerification->setValue(OperationMode::ON->value);
                 $this->entityManager->persist($userVerification);

@@ -1,0 +1,9 @@
+loginToAccessThisPage: 'You have to login in order to access this page.'
+impossibleUseThisAuthenticationMethodInDemoMode: "Get Away. It's impossible to use this authentication method in demo mode"
+accountDisabled: 'This account is disabled. Please contact support.'
+attributeNotFoundSAMLData: 'Attribute %attribute% not found in SAML data.'
+invalidCredentials: 'Invalid Credentials.'
+invalidCAPTCHAValidation: 'Invalid CAPTCHA validation.'
+confirmNewPasswordBeforeDownloadProfile: 'You need to confirm the new password before download a profile!'
+accountCurrentlyDisabled: 'This account is currently disabled.'
+accountCurrentlyBanned: 'This account is currently banned.'

@@ -3,6 +3,7 @@
 namespace App\EventListener;
 
 use App\Enum\OperationMode;
+use App\Enum\SettingName;
 use App\Repository\SettingRepository;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -16,6 +17,7 @@ final class APIStatusListener
 
     private array $ignoredPaths = [
         '/api/v1/capport/json',
+        '/api/v2/capport/json'
     ];
 
     public function __construct(
@@ -52,7 +54,7 @@ final class APIStatusListener
 
     private function getApiStatus(): string
     {
-        $setting = $this->settingRepository->findOneBy(['name' => 'API_STATUS']);
+        $setting = $this->settingRepository->findOneBy(['name' => SettingName::API_STATUS->value]);
         return $setting ? trim((string)$setting->getValue()) : OperationMode::OFF->value;
     }
 }

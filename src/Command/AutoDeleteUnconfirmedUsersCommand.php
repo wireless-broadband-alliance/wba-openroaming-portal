@@ -2,6 +2,7 @@
 
 namespace App\Command;
 
+use App\Enum\SettingName;
 use App\Repository\SettingRepository;
 use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
@@ -33,7 +34,7 @@ class AutoDeleteUnconfirmedUsersCommand extends Command
     public function deleteUnconfirmedUsers(): array
     {
         $users = $this->userRepository->findAll();
-        $settingTime = $this->settingRepository->findBy(['name' => 'USER_DELETE_TIME']);
+        $settingTime = $this->settingRepository->findBy(['name' => SettingName::USER_DELETE_TIME->value]);
 
         if (empty($settingTime)) {
             return [];

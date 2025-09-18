@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Command;
 
 use App\Entity\Setting;
+use App\Enum\SettingName;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -51,7 +52,7 @@ class ResetTimestampFreeradiusCommand extends Command
         }
 
         $settings = [
-            ['name' => 'TIME_STAMP_FREERADIUS_CRON', 'value' => null],
+            ['name' => SettingName::TIME_STAMP_FREERADIUS_CRON->value, 'value' => null],
         ];
 
         // Begin a database transaction to ensure data consistency

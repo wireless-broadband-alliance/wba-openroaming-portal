@@ -6,6 +6,7 @@ use App\Api\V2\BaseResponse;
 use App\Entity\User;
 use App\Entity\UserRadiusProfile;
 use App\Enum\AnalyticalEventType;
+use App\Enum\SettingName;
 use App\Enum\UserRadiusProfileStatus;
 use App\RadiusDb\Entity\RadiusUser;
 use App\RadiusDb\Repository\RadiusUserRepository;
@@ -96,9 +97,9 @@ class ProfileController extends AbstractController
             $radiusProfile = new UserRadiusProfile();
 
             $androidLimit = 32;
-            $realmSize = strlen($this->getSettingValueRaw('RADIUS_REALM_NAME')) + 1;
+            $realmSize = strlen($this->getSettingValueRaw(SettingName::RADIUS_REALM_NAME->value)) + 1;
             $username = $this->generateToken($androidLimit - $realmSize) . "@" . $this->getSettingValueRaw(
-                'RADIUS_REALM_NAME'
+                SettingName::RADIUS_REALM_NAME->value
             );
             $token = $this->generateToken($androidLimit - $realmSize);
             $radiusProfile->setUser($currentUser);
@@ -143,12 +144,12 @@ class ProfileController extends AbstractController
         $data = [
             'radiusUsername' => $radiusProfile->getRadiusUser(),
             'radiusPassword' => $encryptedPassword,
-            'friendlyName' => $this->getSettingValueRaw('DISPLAY_NAME'),
-            'fqdn' => $this->getSettingValueRaw('RADIUS_TLS_NAME'),
+            'friendlyName' => $this->getSettingValueRaw(SettingName::DISPLAY_NAME->value),
+            'fqdn' => $this->getSettingValueRaw(SettingName::RADIUS_TLS_NAME->value),
             'roamingConsortiumOis' => ['5a03ba0000', '004096'],
             'eapType' => 21,
             'nonEapInnerMethod' => 'MS-CHAP-V2',
-            'realm' => $this->getSettingValueRaw('RADIUS_REALM_NAME'),
+            'realm' => $this->getSettingValueRaw(SettingName::RADIUS_REALM_NAME->value),
         ];
 
         $eventMetadata = [
@@ -221,9 +222,9 @@ class ProfileController extends AbstractController
             $radiusProfile = new UserRadiusProfile();
 
             $androidLimit = 32;
-            $realmSize = strlen($this->getSettingValueRaw('RADIUS_REALM_NAME')) + 1;
+            $realmSize = strlen($this->getSettingValueRaw(SettingName::RADIUS_REALM_NAME->value)) + 1;
             $username = $this->generateToken($androidLimit - $realmSize) . "@" . $this->getSettingValueRaw(
-                'RADIUS_REALM_NAME'
+                SettingName::RADIUS_REALM_NAME->value
             );
             $token = $this->generateToken($androidLimit - $realmSize);
             $radiusProfile->setUser($currentUser);
@@ -266,20 +267,22 @@ class ProfileController extends AbstractController
         $encryptedPassword = $encryptionResult['data'];
 
         $data = [
-            'payloadIdentifier' => 'com.apple.wifi.managed.' . $this->getSettingValueRaw('PAYLOAD_IDENTIFIER') . '-2',
+            'payloadIdentifier' => 'com.apple.wifi.managed.' . $this->getSettingValueRaw(
+                SettingName::PAYLOAD_IDENTIFIER->value
+            ) . '-2',
             'payloadType' => 'com.apple.wifi.managed',
-            'payloadUUID' => $this->getSettingValueRaw('PAYLOAD_IDENTIFIER') . '-1',
-            'domainName' => $this->getSettingValueRaw('DOMAIN_NAME'),
+            'payloadUUID' => $this->getSettingValueRaw(SettingName::PAYLOAD_IDENTIFIER->value) . '-1',
+            'domainName' => $this->getSettingValueRaw(SettingName::DOMAIN_NAME->value),
             'EAPClientConfiguration' => [
                 'acceptEAPTypes' => 21,
                 'radiusUsername' => $radiusProfile->getRadiusUser(),
                 'radiusPassword' => $encryptedPassword,
-                'outerIdentity' => 'anonymous@' . $this->getSettingValueRaw('RADIUS_TLS_NAME'),
+                'outerIdentity' => 'anonymous@' . $this->getSettingValueRaw(SettingName::RADIUS_TLS_NAME->value),
                 'TTLSInnerAuthentication' => 'MSCHAPv2',
             ],
             'encryptionType' => 'WPA2',
             'roamingConsortiumOis' => ['5A03BA0000', '004096'],
-            'NAIRealmNames' => $this->getSettingValueRaw('NAI_REALM')
+            'NAIRealmNames' => $this->getSettingValueRaw(SettingName::NAI_REALM->value)
         ];
 
         $eventMetadata = [

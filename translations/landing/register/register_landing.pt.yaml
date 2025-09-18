@@ -1,0 +1,14 @@
+logoAlt: 'Logotipo do Cliente'
+heading: 'Crie a sua conta'
+description:
+    1: 'Isto permitirá que aceda e faça o download de um perfil para o seu dispositivo.'
+    2: 'Após descarregar o seu perfil, poderá conectar-se automaticamente às redes Wi-Fi OpenRoaming em todo o mundo.'
+form:
+    email_placeholder: 'Introduza o seu email'
+    phone_number: 'Número de Telefone'
+    phone_placeholder: 'Introduza o seu número de telefone'
+    submit: 'Criar Conta'
+    choose_another: 'Escolher Outra'
+    already_have_account: 'Já tem uma conta?'
+    login: 'Iniciar Sessão'
+    here: 'aqui!'

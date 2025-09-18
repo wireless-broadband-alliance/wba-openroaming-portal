@@ -9,6 +9,7 @@ use App\Entity\User;
 use App\Entity\UserExternalAuth;
 use App\Enum\AnalyticalEventType;
 use App\Enum\OperationMode;
+use App\Enum\SettingName;
 use App\Enum\UserProvider;
 use App\Enum\UserTwoFactorAuthenticationStatus;
 use App\Repository\SettingRepository;
@@ -71,7 +72,9 @@ class AuthController extends AbstractController
             return new BaseResponse(400, null, 'Invalid JSON format')->toResponse(); # Bad Request Response
         }
 
-        $turnstileSetting = $this->settingRepository->findOneBy(['name' => 'TURNSTILE_CHECKER'])->getValue();
+        $turnstileSetting = $this->settingRepository->findOneBy([
+            'name' => SettingName::TURNSTILE_CHECKER->value
+        ])->getValue();
         if (!$turnstileSetting) {
             throw new \RuntimeException('Missing settings: TURNSTILE_CHECKER not found');
         }
@@ -196,17 +199,17 @@ class AuthController extends AbstractController
         ]);
 
         // Defines the Event to the table
-        $eventMetadata = [
-            'ip' => $request->getClientIp(),
+        $eventMetaData = [
             'user_agent' => $request->headers->get('User-Agent'),
             'uuid' => $user->getUuid(),
+            'ip' => $request->getClientIp(),
         ];
 
         $this->eventActions->saveEvent(
             $user,
             AnalyticalEventType::AUTH_LOCAL_API->value,
             new DateTime(),
-            $eventMetadata
+            $eventMetaData
         );
 
         // Return success response using BaseResponse
@@ -372,16 +375,17 @@ class AuthController extends AbstractController
             ]);
 
             // Defines the Event to the table
-            $eventMetadata = [
-                'ip' => $request->getClientIp(),
+            $eventMetaData = [
+                'user_agent' => $request->headers->get('User-Agent'),
                 'uuid' => $user->getUuid(),
+                'ip' => $request->getClientIp(),
             ];
 
             $this->eventActions->saveEvent(
                 $user,
                 AnalyticalEventType::AUTH_SAML_API->value,
                 new DateTime(),
-                $eventMetadata
+                $eventMetaData
             );
 
             return new BaseResponse(200, $responseData)->toResponse(); // Success
@@ -499,17 +503,17 @@ class AuthController extends AbstractController
             $formattedUserData = $user->toApiResponse(['token' => $token]);
 
             // Defines the Event to the table
-            $eventMetadata = [
-                'ip' => $request->getClientIp(),
+            $eventMetaData = [
                 'user_agent' => $request->headers->get('User-Agent'),
                 'uuid' => $user->getUuid(),
+                'ip' => $request->getClientIp(),
             ];
 
             $this->eventActions->saveEvent(
                 $user,
                 AnalyticalEventType::AUTH_GOOGLE_API->value,
                 new DateTime(),
-                $eventMetadata
+                $eventMetaData
             );
 
             return new BaseResponse(200, $formattedUserData, null)->toResponse();
@@ -627,17 +631,17 @@ class AuthController extends AbstractController
             $formattedUserData = $user->toApiResponse(['token' => $token]);
 
             // Defines the Event to the table
-            $eventMetadata = [
-                'ip' => $request->getClientIp(),
+            $eventMetaData = [
                 'user_agent' => $request->headers->get('User-Agent'),
                 'uuid' => $user->getUuid(),
+                'ip' => $request->getClientIp(),
             ];
 
             $this->eventActions->saveEvent(
                 $user,
                 AnalyticalEventType::AUTH_MICROSOFT_API->value,
                 new DateTime(),
-                $eventMetadata
+                $eventMetaData
             );
 
             return new BaseResponse(200, $formattedUserData, null)->toResponse();

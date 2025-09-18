@@ -9,6 +9,7 @@ use App\Entity\UserExternalAuth;
 use App\Enum\AnalyticalEventType;
 use App\Enum\OperationMode;
 use App\Enum\PlatformMode;
+use App\Enum\SettingName;
 use App\Enum\SMSResponse;
 use App\Enum\UserProvider;
 use App\Repository\EventRepository;
@@ -18,7 +19,7 @@ use App\Repository\UserRepository;
 use App\Service\CaptchaValidator;
 use App\Service\EventActions;
 use App\Service\GetSettings;
-use App\Service\RegistrationEmailGenerator;
+use App\Service\EmailGenerator;
 use App\Service\SendSMS;
 use DateInterval;
 use DateTime;
@@ -46,6 +47,7 @@ use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class RegistrationController extends AbstractController
 {
@@ -55,14 +57,13 @@ class RegistrationController extends AbstractController
         private readonly EventRepository $eventRepository,
         private readonly EntityManagerInterface $entityManager,
         private readonly EventActions $eventActions,
-        private readonly ParameterBagInterface $parameterBag,
         private readonly SendSMS $sendSMSService,
         private readonly GetSettings $getSettings,
         private readonly SettingRepository $settingRepository,
         private readonly UserPasswordHasherInterface $userPasswordHasher,
         private readonly CaptchaValidator $captchaValidator,
-        private readonly RegistrationEmailGenerator $emailGenerator,
-        private readonly ValidatorInterface $validator
+        private readonly EmailGenerator $emailGenerator,
+        private readonly ValidatorInterface $validator,
     ) {
     }
 
@@ -86,7 +87,9 @@ class RegistrationController extends AbstractController
             return new BaseResponse(400, null, 'Invalid JSON format')->toResponse(); // Invalid Json
         }
 
-        $turnstileSetting = $this->settingRepository->findOneBy(['name' => 'TURNSTILE_CHECKER'])->getValue();
+        $turnstileSetting = $this->settingRepository->findOneBy([
+            'name' => SettingName::TURNSTILE_CHECKER->value
+        ])->getValue();
         if (!$turnstileSetting) {
             throw new \RuntimeException('Missing settings: TURNSTILE_CHECKER not found');
         }
@@ -146,12 +149,12 @@ class RegistrationController extends AbstractController
         $hashedPassword = $userPasswordHasher->hashPassword($user, $data['password']);
         $user->setPassword($hashedPassword);
         $user->setIsVerified(false);
+        $user->setCreatedAt(new DateTime());
         $user->setTwoFAcode(random_int(100000, 999999));
         $user->setTwoFACodeGeneratedAt(new DateTime());
         $user->setTwoFAcodeIsActive(true);
         $user->setFirstName($data['first_name'] ?? null);
         $user->setLastName($data['last_name'] ?? null);
-        $user->setCreatedAt(new DateTime());
 
         $userExternalAuth = new UserExternalAuth();
         $userExternalAuth->setUser($user);
@@ -196,7 +199,6 @@ class RegistrationController extends AbstractController
     #[Route('/auth/local/reset', name: 'api_v1_auth_local_reset', methods: ['POST'])]
     public function localReset(
         UserPasswordHasherInterface $userPasswordHasher,
-        MailerInterface $mailer,
         Request $request,
     ): JsonResponse {
         try {
@@ -217,7 +219,9 @@ class RegistrationController extends AbstractController
             )->toResponse();
         }
 
-        $turnstileSetting = $this->settingRepository->findOneBy(['name' => 'TURNSTILE_CHECKER'])->getValue();
+        $turnstileSetting = $this->settingRepository->findOneBy([
+            'name' => SettingName::TURNSTILE_CHECKER->value
+        ])->getValue();
         if (!$turnstileSetting) {
             throw new \RuntimeException('Missing settings: TURNSTILE_CHECKER not found');
         }
@@ -280,7 +284,10 @@ class RegistrationController extends AbstractController
                     $user,
                     AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST->value
                 );
-                $minInterval = new DateInterval('PT2M');
+                $emailTimerResend = $this->settingRepository->findOneBy(
+                    ['name' => SettingName::EMAIL_TIMER_RESEND->value]
+                )->getValue();
+                $minInterval = new DateInterval('PT' . $emailTimerResend . 'M');
                 $currentTime = new DateTime();
                 $latestEventMetadata = $latestEvent instanceof Event ? $latestEvent->getEventMetadata() : [];
                 $lastVerificationCodeTime = isset($latestEventMetadata['lastVerificationCodeTime'])
@@ -320,29 +327,8 @@ class RegistrationController extends AbstractController
                     $this->entityManager->persist($user);
                     $this->entityManager->flush();
 
-                    $email = new TemplatedEmail()
-                        ->from(
-                            new Address(
-                                $this->parameterBag->get('app.email_address'),
-                                $this->parameterBag->get('app.sender_name')
-                            )
-                        )
-                        ->to($user->getEmail())
-                        ->subject('Reset Your OpenRoaming Password')
-                        ->htmlTemplate('email/user_forgot_password_request.html.twig')
-                        ->context([
-                            'password' => $randomPassword,
-                            'forgotPasswordUser' => true,
-                            'uuid' => $user->getUuid(),
-                            'currentPassword' => $randomPassword,
-                            'verificationCode' => $user->getTwoFAcode(),
-                            'emailTitle' => $this->settingRepository->findOneBy(['name' => 'PAGE_TITLE'])->getValue(),
-                            'contactEmail' => $this->settingRepository->findOneBy(
-                                ['name' => 'CONTACT_EMAIL']
-                            )->getValue()
-                        ]);
-
-                    $mailer->send($email);
+                    // Send email for the user
+                    $this->emailGenerator->sendForgotPasswordEmail($user);
 
                     // Defines the Event to the table
                     $eventMetadata = [
@@ -409,7 +395,9 @@ class RegistrationController extends AbstractController
             return new BaseResponse(400, null, 'Invalid JSON format')->toResponse();
         }
 
-        $turnstileSetting = $this->settingRepository->findOneBy(['name' => 'TURNSTILE_CHECKER'])->getValue();
+        $turnstileSetting = $this->settingRepository->findOneBy([
+            'name' => SettingName::TURNSTILE_CHECKER->value
+        ])->getValue();
         if (!$turnstileSetting) {
             throw new \RuntimeException('Missing settings: TURNSTILE_CHECKER not found');
         }
@@ -486,12 +474,12 @@ class RegistrationController extends AbstractController
         $hashedPassword = $userPasswordHasher->hashPassword($user, $data['password']);
         $user->setPassword($hashedPassword);
         $user->setIsVerified(false);
+        $user->setCreatedAt(new DateTime());
         $user->setTwoFAcode(random_int(100000, 999999));
         $user->setTwoFACodeGeneratedAt(new DateTime());
         $user->setTwoFAcodeIsActive(true);
         $user->setFirstName($data['first_name'] ?? null);
         $user->setLastName($data['last_name'] ?? null);
-        $user->setCreatedAt(new DateTime());
 
         $userExternalAuth = new UserExternalAuth();
         $userExternalAuth->setUser($user);
@@ -560,7 +548,9 @@ class RegistrationController extends AbstractController
         } catch (\JsonException) {
             return new BaseResponse(400, null, 'Invalid JSON format')->toResponse(); // Invalid Json
         }
-        $turnstileSetting = $this->settingRepository->findOneBy(['name' => 'TURNSTILE_CHECKER'])->getValue();
+        $turnstileSetting = $this->settingRepository->findOneBy([
+            'name' => SettingName::TURNSTILE_CHECKER->value
+        ])->getValue();
         if (!$turnstileSetting) {
             throw new \RuntimeException('Missing settings: TURNSTILE_CHECKER not found');
         }
@@ -645,7 +635,7 @@ class RegistrationController extends AbstractController
                 }
             }
 
-            $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+            $data = $this->getSettings->getSettings();
 
             if ($hasValidPortalAccount) {
                 try {
@@ -654,7 +644,7 @@ class RegistrationController extends AbstractController
 
                     // Retrieve the latest SMS attempt event for the user
                     $latestEvent = $this->eventRepository->findLatestSmsAttemptEvent($user);
-                    $smsResendInterval = $data['SMS_TIMER_RESEND']['value']; // Interval in minutes
+                    $smsResendInterval = $data[SettingName::SMS_TIMER_RESEND->value]['value']; // Interval in minutes
                     $minInterval = new DateInterval('PT' . $smsResendInterval . 'M');
                     $maxAttempts = 3;
                     $currentTime = new DateTime();

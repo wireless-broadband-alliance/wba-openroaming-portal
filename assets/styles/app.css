@@ -100,3 +100,20 @@
 .urls-table {
     @apply whitespace-nowrap truncate block;
 }
+
+.country-dropdown {
+    @apply block w-full cursor-pointer appearance-none rounded-lg bg-white py-2 pl-3 pr-10 text-sm shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-primary;
+}
+
+/* password reveal toggle */
+.toggle-password-container {
+    @apply relative
+}
+
+.toggle-password-icon {
+    @apply h-[1rem] w-[1rem]
+}
+
+.toggle-password-button {
+    @apply items-center bg-transparent border-none gap-[0.25rem] flex flex-row text-[0.875rem]/[1.25rem] justify-center h-[1rem] absolute right-[0.875rem] top-[0.875rem]
+}

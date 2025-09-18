@@ -7,7 +7,7 @@ use Symfony\Component\Validator\Constraint;
 #[\Attribute]
 class CronNotEmpty extends Constraint
 {
-    public string $message = "Please provide a valid CRON expression.";
+    public string $message = 'provideValidCRON';
 
     #[\Override]
     public function getTargets(): string

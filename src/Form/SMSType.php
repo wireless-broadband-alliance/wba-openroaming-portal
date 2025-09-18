@@ -2,6 +2,7 @@
 
 namespace App\Form;
 
+use App\Enum\SettingName;
 use App\Service\GetSettings;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
@@ -11,86 +12,89 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\GreaterThanOrEqual;
 use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class SMSType extends AbstractType
 {
-    public function __construct(private readonly GetSettings $getSettings)
-    {
+    public function __construct(
+        private readonly GetSettings $getSettings,
+        private readonly TranslatorInterface $translator
+    ) {
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $settingsToUpdate = [
-            'SMS_USERNAME' => [
+            SettingName::SMS_USERNAME->value => [
                 'type' => TextType::class,
                 'constraints' => [
                     new Length([
                         'max' => 32,
-                        'maxMessage' => ' This field cannot be longer than {{ limit }} characters',
+                        'maxMessage' => $this->translator->trans('fieldCannotBeLongerThan', [], 'CustomType'),
                     ]),
                     new NotBlank([
-                        'message' => 'This field cannot be empty',
+                        'message' => $this->translator->trans('fieldCannotBeEmpty', [], 'CustomType'),
                     ]),
                 ],
             ],
-            'SMS_USER_ID' => [
+            SettingName::SMS_USER_ID->value => [
                 'type' => TextType::class,
                 'constraints' => [
                     new Length([
                         'max' => 32,
-                        'maxMessage' => ' This field cannot be longer than {{ limit }} characters',
+                        'maxMessage' => $this->translator->trans('fieldCannotBeLongerThan', [], 'CustomType'),
                     ]),
                     new NotBlank([
-                        'message' => 'This field cannot be empty',
+                        'message' => $this->translator->trans('fieldCannotBeEmpty', [], 'CustomType'),
                     ]),
                 ],
             ],
-            'SMS_HANDLE' => [
+            SettingName::SMS_HANDLE->value => [
                 'type' => TextType::class,
                 'constraints' => [
                     new Length([
                         'max' => 32,
-                        'maxMessage' => ' This field cannot be longer than {{ limit }} characters',
+                        'maxMessage' => $this->translator->trans('fieldCannotBeLongerThan', [], 'CustomType'),
                     ]),
                     new NotBlank([
-                        'message' => 'This field cannot be empty',
+                        'message' => $this->translator->trans('fieldCannotBeEmpty', [], 'CustomType'),
                     ]),
                 ],
             ],
-            'SMS_FROM' => [
+            SettingName::SMS_FROM->value => [
                 'type' => TextType::class,
                 'attr' => ['maxlength' => 11],
                 'constraints' => [
                     new Length([
                         'max' => 11,
-                        'maxMessage' => ' This field cannot be longer than {{ limit }} characters',
+                        'maxMessage' => $this->translator->trans('fieldCannotBeLongerThan', [], 'CustomType'),
                     ]),
                     new NotBlank([
-                        'message' => 'This field cannot be empty',
+                        'message' => $this->translator->trans('fieldCannotBeEmpty', [], 'CustomType'),
                     ]),
                 ],
             ],
-            'SMS_TIMER_RESEND' => [
+            SettingName::SMS_TIMER_RESEND->value => [
                 'type' => IntegerType::class,
                 'constraints' => [
                     new Length([
                         'max' => 3,
-                        'maxMessage' => ' This field cannot be longer than {{ limit }} characters',
+                        'maxMessage' => $this->translator->trans('fieldCannotBeLongerThan', [], 'CustomType'),
                     ]),
                     new GreaterThanOrEqual([
                         'value' => 1,
-                        'message' => 'This timer should never be less than 1.',
+                        'message' => $this->translator->trans('timerShouldNeverBeLessThan', [], 'CustomType'),
                     ]),
                     new NotBlank([
-                        'message' => 'Please make sure to set a timer',
+                        'message' => $this->translator->trans('pleaseSetTimer', [], 'CustomType'),
                     ]),
                 ],
             ],
-            'DEFAULT_REGION_PHONE_INPUTS' => [
+            SettingName::DEFAULT_REGION_PHONE_INPUTS->value => [
                 'type' => TextType::class,
                 'constraints' => [
                     new NotBlank([
-                        'message' => 'This field cannot be empty',
+                        'message' => $this->translator->trans('fieldCannotBeEmpty', [], 'CustomType'),
                     ]),
                 ],
             ],
