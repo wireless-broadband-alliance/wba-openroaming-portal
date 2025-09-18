@@ -1,6 +1,15 @@
 # Changelog
 
+# Release V1.13.0
+
+- Remove TinyMice text editor bundle from the project because it's not valid for commercial use.
+- Installation new text editor open-source alternative for free commercial use.
+- Fix and rework customization page to also have this custom editor for (page_tile, page_description &
+  additional_label).
+- Also for this release, it doesn't have any migrations to be executed.
+
 # Release V1.12.0
+
 - More Project optimizations reduce the amount of number of queries made in most of the pages.
 - New checker on the `GetSettings` service to also verify if there is any missing or duplicated setting on the DB.
 - Password toggle reveal implementation for inputs.
@@ -17,11 +26,13 @@
   minimizing redundant data processing and database queries.
 - Renamed some enums to singular form to follow symfony guidelines for enum classes.
 - Symfony version increase for maintained version (7.3.3), it bug fixes and security fixes until January 2026.
-- Also for this release, it's required to run the new migrations to set up the new entity for the translations: `SettingTranslation`
-  - Run the migrations with:
-    ```bash
-    php bin/console doctrine:migrations:migrate
-    ```
+- Also for this release, it's required to run the new migrations to set up the new entity for the translations:
+  `SettingTranslation`
+    - Run the migrations with:
+      ```bash
+      php bin/console doctrine:migrations:migrate
+      ```
+
 # Release V1.10.0
 
 - New feature - Now the admin can configure the landing login authentication, instead of being the traditional (
@@ -35,10 +46,10 @@
     - When that happens, it could brake the user account registration system for email & phoneNumbers on the landing
       page.
 - Also for this release, it's required to run the new migrations to set up the new setting: `LOGIN_WITH_UUID_ONLY`
-  - Run the migrations with:
-    ```bash
-    php bin/console doctrine:migrations:migrate
-    ```
+    - Run the migrations with:
+      ```bash
+      php bin/console doctrine:migrations:migrate
+      ```
 
 # Release V1.9.0
 
