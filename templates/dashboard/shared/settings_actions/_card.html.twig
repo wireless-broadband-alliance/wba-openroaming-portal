@@ -49,10 +49,9 @@
             {{ form_widget(setting, {attr: {class: 'p-2 bg-transparent border outline-none text-left text-base block w-full rounded-md  focus:shadow-sm'}}) }}
         </div>
     {% elseif settingType == 'quill' %}
-        <div class="my-14 max-w-full sm:max-w-lg md:max-w-2xl mx-auto" data-controller="quill">
+        <div class="mt-5 w-full max-w-full sm:max-w-lg md:max-w-2xl mx-auto" data-controller="quill">
             <div data-quill-target="editor"
-                 class="border rounded-lg p-2 w-full box-border overflow-y-auto
-                min-h-[120px] sm:min-h-[150px] md:min-h-[200px] lg:min-h-[250px]">
+                 class="border rounded-lg p-2 w-full box-border overflow-y-auto">
             </div>
             {{ form_widget(setting, { attr: { 'class': 'hidden', 'data-quill-target': 'input' } }) }}
         </div>
