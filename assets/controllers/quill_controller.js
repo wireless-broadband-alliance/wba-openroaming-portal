@@ -1,21 +1,21 @@
-import { Controller } from "@hotwired/stimulus"
-import Quill from "quill"
+import { Controller } from "@hotwired/stimulus";
+import Quill from "quill";
 
-import "quill/dist/quill.snow.css"
+import "quill/dist/quill.snow.css";
 
 export default class extends Controller {
-    static targets = ["editor", "input"]
+    static targets = ["editor", "input"];
 
     resizeEditor() {
-        const windowHeight = window.innerHeight
-        const newHeight = Math.max(windowHeight * 0, 120) // 40% of viewport, min 120px
-        this.editorTarget.style.height = `${newHeight}px`
+        const windowHeight = window.innerHeight;
+        const newHeight = Math.max(windowHeight * 0, 120); // 40% of viewport, min 120px
+        this.editorTarget.style.height = `${newHeight}px`;
 
         // Also make the inner editor fill the container
-        const editorContent = this.editorTarget.querySelector(".ql-editor")
+        const editorContent = this.editorTarget.querySelector(".ql-editor");
         if (editorContent) {
-            editorContent.style.minHeight = "0"
-            editorContent.style.height = "100%"
+            editorContent.style.minHeight = "0";
+            editorContent.style.height = "100%";
         }
     }
 
@@ -27,25 +27,25 @@ export default class extends Controller {
                     [{ header: [1, 2, false] }],
                     ["bold", "italic", "underline"],
                     ["link", "blockquote", "code-block"],
-                    [{ list: "ordered" }, { list: "bullet" }]
-                ]
-            }
-        })
+                    [{ list: "ordered" }, { list: "bullet" }],
+                ],
+            },
+        });
 
         // Load initial value from hidden input
         if (this.inputTarget.value) {
-            this.quill.root.innerHTML = this.inputTarget.value
+            this.quill.root.innerHTML = this.inputTarget.value;
         }
 
         // Sync changes back to hidden input
         this.quill.on("text-change", () => {
-            this.inputTarget.value = this.quill.root.innerHTML
-        })
+            this.inputTarget.value = this.quill.root.innerHTML;
+        });
 
         // Initial resize
-        this.resizeEditor()
+        this.resizeEditor();
 
         // Resize on window resize
-        window.addEventListener("resize", () => this.resizeEditor())
+        window.addEventListener("resize", () => this.resizeEditor());
     }
 }
