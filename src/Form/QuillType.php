@@ -8,6 +8,7 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class QuillType extends AbstractType
 {
+    #[\Override]
     public function getParent(): string
     {
         return TextareaType::class;
