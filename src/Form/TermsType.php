@@ -29,8 +29,8 @@ class TermsType extends AbstractType
             SettingName::PRIVACY_POLICY->value => ChoiceType::class,
             SettingName::TOS_LINK->value => TextType::class,
             SettingName::PRIVACY_POLICY_LINK->value => TextType::class,
-            TextEditorName::TOS_EDITOR->value => TinymceType::class,
-            TextEditorName::PRIVACY_POLICY_EDITOR->value => TinymceType::class,
+            TextEditorName::TOS_EDITOR->value => QuillType::class,
+            TextEditorName::PRIVACY_POLICY_EDITOR->value => QuillType::class,
         ];
 
         foreach ($allowedSettings as $settingName => $formFieldType) {
