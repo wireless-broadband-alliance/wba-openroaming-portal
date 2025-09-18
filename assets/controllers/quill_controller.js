@@ -8,8 +8,15 @@ export default class extends Controller {
 
     resizeEditor() {
         const windowHeight = window.innerHeight
-        // Set editor height to 40% of viewport height, minimum 120px
-        this.editorTarget.style.height = `${Math.max(windowHeight * 0.4, 120)}px`
+        const newHeight = Math.max(windowHeight * 0, 120) // 40% of viewport, min 120px
+        this.editorTarget.style.height = `${newHeight}px`
+
+        // Also make the inner editor fill the container
+        const editorContent = this.editorTarget.querySelector(".ql-editor")
+        if (editorContent) {
+            editorContent.style.minHeight = "0"
+            editorContent.style.height = "100%"
+        }
     }
 
     connect() {
@@ -25,18 +32,20 @@ export default class extends Controller {
             }
         })
 
-        // Load initial value from textarea into Quill
+        // Load initial value from hidden input
         if (this.inputTarget.value) {
             this.quill.root.innerHTML = this.inputTarget.value
         }
 
-        // Sync changes back to hidden textarea
+        // Sync changes back to hidden input
         this.quill.on("text-change", () => {
             this.inputTarget.value = this.quill.root.innerHTML
         })
 
         // Initial resize
         this.resizeEditor()
+
+        // Resize on window resize
         window.addEventListener("resize", () => this.resizeEditor())
     }
 }
