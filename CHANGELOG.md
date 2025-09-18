@@ -3,7 +3,7 @@
 # Release V1.13.0
 
 - Remove TinyMice text editor bundle from the project because it's not valid for commercial use.
-- Installation new text editor open-source alternative for free commercial use.
+- Installation of a new text editor open-source alternative for free commercial use.
 - Fix and rework customization page to also have this custom editor for (page_tile, page_description &
   additional_label).
 - Also for this release, it doesn't have any migrations to be executed.
