@@ -23,7 +23,6 @@
     "doctrine/orm": "^3",
     "dragonmantank/cron-expression": "^3.4",
     "easycorp/easyadmin-bundle": "^4.24",
-    "emileperron/tinymce-bundle": "^3.1.1",
     "endroid/qr-code": "^6.0",
     "ezyang/htmlpurifier": "^4.18",
     "geoip2/geoip2": "^3.1",

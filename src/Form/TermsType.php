@@ -5,7 +5,6 @@ namespace App\Form;
 use App\Enum\SettingName;
 use App\Enum\TextEditorName;
 use App\Service\GetSettings;
-use EmilePerron\TinymceBundle\Form\Type\TinymceType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
