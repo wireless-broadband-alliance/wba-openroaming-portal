@@ -398,28 +398,34 @@ class SettingsController extends AbstractController
         return $this->redirectToRoute('admin_confirm_reset', ['type' => $type]);
     }
 
-    #[Route('/dashboard/settings/terms', name: 'admin_dashboard_settings_terms')]
+    #[Route('/dashboard/settings/terms/{language}',
+        name: 'admin_dashboard_settings_terms',
+        defaults: ['language' => LanguageType::EN->value]
+    )]
     #[IsGranted('ROLE_ADMIN')]
     public function settingsTerms(
         Request $request,
+        string $language
     ): Response {
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
         $currentUser = $this->getUser();
 
         $textEditorRepository = $this->entityManager->getRepository(TextEditor::class);
-        $tosTextEditor = $textEditorRepository->findOneBy(['name' => TextEditorName::TOS->value]);
+        $tosTextEditor = $textEditorRepository->findTextEditor(TextEditorName::TOS->value, $language);
         if ($tosTextEditor === null) {
             $tosTextEditor = new TextEditor();
             $tosTextEditor->setName(TextEditorName::TOS->value);
             $tosTextEditor->setContent('');
+            $tosTextEditor->setLocale($language);
             $this->entityManager->persist($tosTextEditor);
         }
-        $privacyPolicyTextEditor = $textEditorRepository->findoneBy(['name' => TextEditorName::PRIVACY_POLICY->value]);
+        $privacyPolicyTextEditor = $textEditorRepository->findTextEditor(TextEditorName::PRIVACY_POLICY->value, $language);
         if ($privacyPolicyTextEditor === null) {
             $privacyPolicyTextEditor = new TextEditor();
             $privacyPolicyTextEditor->setName(TextEditorName::PRIVACY_POLICY->value);
             $privacyPolicyTextEditor->setContent('');
+            $privacyPolicyTextEditor->setLocale($language);
             $this->entityManager->persist($privacyPolicyTextEditor);
         }
         $this->entityManager->flush();
@@ -489,7 +495,7 @@ class SettingsController extends AbstractController
             }
             $sanitizeHtml = new SanitizeHTML();
             if ($tosTextEditor) {
-                $tosEditorSetting = $textEditorRepository->findOneBy(['name' => TextEditorName::TOS->value]);
+                $tosEditorSetting = $textEditorRepository->findTextEditor(TextEditorName::TOS->value, $language);
                 if ($tosEditorSetting !== null) {
                     $cleanHTML = $sanitizeHtml->sanitizeHtml($tosTextEditor);
                     $tosEditorSetting->setContent($cleanHTML);
@@ -498,9 +504,7 @@ class SettingsController extends AbstractController
             }
 
             if ($privacyPolicyTextEditor) {
-                $privacyPolicyEditorSetting = $textEditorRepository->findOneBy([
-                    'name' => TextEditorName::PRIVACY_POLICY->value
-                ]);
+                $privacyPolicyEditorSetting = $textEditorRepository->findTextEditor(TextEditorName::PRIVACY_POLICY->value, $language);
                 if ($privacyPolicyEditorSetting !== null) {
                     $cleanHTML = $sanitizeHtml->sanitizeHtml($privacyPolicyTextEditor);
                     $privacyPolicyEditorSetting->setContent($cleanHTML);
@@ -525,7 +529,7 @@ class SettingsController extends AbstractController
                 'success_admin',
                 $this->translator->trans('termsPoliciesLinksChangesAppliedSuccessfully', [], 'controllers')
             );
-            return $this->redirectToRoute('admin_dashboard_settings_terms');
+            return $this->redirectToRoute('admin_dashboard_settings_terms', ['language' => $language]);
         }
 
 
@@ -535,6 +539,7 @@ class SettingsController extends AbstractController
             'settings' => $settings,
             'current_user' => $currentUser,
             'form' => $form->createView(),
+            'language' => $language,
         ]);
     }
 
