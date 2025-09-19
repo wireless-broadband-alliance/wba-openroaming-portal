@@ -415,7 +415,7 @@ class SettingsController extends AbstractController
         $currentUser = $this->getUser();
 
         $tosTextEditor = $this->textEditorRepository->findTextEditor(TextEditorName::TOS->value, $language);
-        if ($tosTextEditor === null) {
+        if (!$tosTextEditor instanceof TextEditor) {
             $tosTextEditor = new TextEditor();
             $tosTextEditor->setName(TextEditorName::TOS->value);
             $tosTextEditor->setContent('');
@@ -426,7 +426,7 @@ class SettingsController extends AbstractController
             TextEditorName::PRIVACY_POLICY->value,
             $language
         );
-        if ($privacyPolicyTextEditor === null) {
+        if (!$privacyPolicyTextEditor instanceof \App\Entity\TextEditor) {
             $privacyPolicyTextEditor = new TextEditor();
             $privacyPolicyTextEditor->setName(TextEditorName::PRIVACY_POLICY->value);
             $privacyPolicyTextEditor->setContent('');
@@ -501,7 +501,7 @@ class SettingsController extends AbstractController
             $sanitizeHtml = new SanitizeHTML();
             if ($tosTextEditor) {
                 $tosEditorSetting = $this->textEditorRepository->findTextEditor(TextEditorName::TOS->value, $language);
-                if ($tosEditorSetting !== null) {
+                if ($tosEditorSetting instanceof TextEditor) {
                     $cleanHTML = $sanitizeHtml->sanitizeHtml($tosTextEditor);
                     $tosEditorSetting->setContent($cleanHTML);
                 }
@@ -513,7 +513,7 @@ class SettingsController extends AbstractController
                     TextEditorName::PRIVACY_POLICY->value,
                     $language
                 );
-                if ($privacyPolicyEditorSetting !== null) {
+                if ($privacyPolicyEditorSetting instanceof TextEditor) {
                     $cleanHTML = $sanitizeHtml->sanitizeHtml($privacyPolicyTextEditor);
                     $privacyPolicyEditorSetting->setContent($cleanHTML);
                 }
