@@ -23,9 +23,10 @@ class TOSController extends AbstractController
     ) {
     }
 
-    #[Route('/terms-conditions',
+    #[Route(
+        '/terms-conditions',
         name: 'app_terms_conditions',
-)]
+    )]
     public function termsConditions(Request $request): RedirectResponse|Response
     {
         // Call the getSettings method of GetSettings class to retrieve the data
@@ -63,14 +64,13 @@ class TOSController extends AbstractController
         return $this->redirectToRoute('app_landing');
     }
 
-    #[Route('/privacy-policy',
+    #[Route(
+        '/privacy-policy',
         name: 'app_privacy_policy',
-
     )]
     public function privacyPolicy(
         Request $request,
-    ): RedirectResponse|Response
-    {
+    ): RedirectResponse|Response {
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings();
 

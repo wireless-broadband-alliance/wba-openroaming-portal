@@ -398,7 +398,8 @@ class SettingsController extends AbstractController
         return $this->redirectToRoute('admin_confirm_reset', ['type' => $type]);
     }
 
-    #[Route('/dashboard/settings/terms/{language}',
+    #[Route(
+        '/dashboard/settings/terms/{language}',
         name: 'admin_dashboard_settings_terms',
         defaults: ['language' => LanguageType::EN->value]
     )]
@@ -420,7 +421,10 @@ class SettingsController extends AbstractController
             $tosTextEditor->setLocale($language);
             $this->entityManager->persist($tosTextEditor);
         }
-        $privacyPolicyTextEditor = $textEditorRepository->findTextEditor(TextEditorName::PRIVACY_POLICY->value, $language);
+        $privacyPolicyTextEditor = $textEditorRepository->findTextEditor(
+            TextEditorName::PRIVACY_POLICY->value,
+            $language
+        );
         if ($privacyPolicyTextEditor === null) {
             $privacyPolicyTextEditor = new TextEditor();
             $privacyPolicyTextEditor->setName(TextEditorName::PRIVACY_POLICY->value);
@@ -504,7 +508,10 @@ class SettingsController extends AbstractController
             }
 
             if ($privacyPolicyTextEditor) {
-                $privacyPolicyEditorSetting = $textEditorRepository->findTextEditor(TextEditorName::PRIVACY_POLICY->value, $language);
+                $privacyPolicyEditorSetting = $textEditorRepository->findTextEditor(
+                    TextEditorName::PRIVACY_POLICY->value,
+                    $language
+                );
                 if ($privacyPolicyEditorSetting !== null) {
                     $cleanHTML = $sanitizeHtml->sanitizeHtml($privacyPolicyTextEditor);
                     $privacyPolicyEditorSetting->setContent($cleanHTML);
