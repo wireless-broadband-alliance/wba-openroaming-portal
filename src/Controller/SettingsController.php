@@ -21,6 +21,7 @@ use App\Form\TwoFASettingsType;
 use App\RadiusDb\Repository\RadiusAccountingRepository;
 use App\RadiusDb\Repository\RadiusAuthsRepository;
 use App\Repository\SettingTranslationRepository;
+use App\Repository\TextEditorRepository;
 use App\Service\CertificateService;
 use App\Service\Domain;
 use App\Service\EnforcePasswordResetService;
@@ -55,6 +56,7 @@ class SettingsController extends AbstractController
         private readonly SettingTranslationRepository $settingTranslationRepository,
         private readonly EnforcePasswordResetService $enforcePasswordResetService,
         private readonly CertificateService $certificateService,
+        private readonly TextEditorRepository $textEditorRepository
     ) {
     }
 
@@ -412,8 +414,7 @@ class SettingsController extends AbstractController
         /** @var User $currentUser */
         $currentUser = $this->getUser();
 
-        $textEditorRepository = $this->entityManager->getRepository(TextEditor::class);
-        $tosTextEditor = $textEditorRepository->findTextEditor(TextEditorName::TOS->value, $language);
+        $tosTextEditor = $this->textEditorRepository->findTextEditor(TextEditorName::TOS->value, $language);
         if ($tosTextEditor === null) {
             $tosTextEditor = new TextEditor();
             $tosTextEditor->setName(TextEditorName::TOS->value);
@@ -421,7 +422,7 @@ class SettingsController extends AbstractController
             $tosTextEditor->setLocale($language);
             $this->entityManager->persist($tosTextEditor);
         }
-        $privacyPolicyTextEditor = $textEditorRepository->findTextEditor(
+        $privacyPolicyTextEditor = $this->textEditorRepository->findTextEditor(
             TextEditorName::PRIVACY_POLICY->value,
             $language
         );
@@ -499,7 +500,7 @@ class SettingsController extends AbstractController
             }
             $sanitizeHtml = new SanitizeHTML();
             if ($tosTextEditor) {
-                $tosEditorSetting = $textEditorRepository->findTextEditor(TextEditorName::TOS->value, $language);
+                $tosEditorSetting = $this->textEditorRepository->findTextEditor(TextEditorName::TOS->value, $language);
                 if ($tosEditorSetting !== null) {
                     $cleanHTML = $sanitizeHtml->sanitizeHtml($tosTextEditor);
                     $tosEditorSetting->setContent($cleanHTML);
@@ -508,7 +509,7 @@ class SettingsController extends AbstractController
             }
 
             if ($privacyPolicyTextEditor) {
-                $privacyPolicyEditorSetting = $textEditorRepository->findTextEditor(
+                $privacyPolicyEditorSetting = $this->textEditorRepository->findTextEditor(
                     TextEditorName::PRIVACY_POLICY->value,
                     $language
                 );

@@ -41,11 +41,7 @@ class TOSController extends AbstractController
             $tosFormat->getValue() === TextInputType::TEXT_EDITOR->value
         ) {
             $textEditor = $this->textEditorRepository->findTextEditor(TextEditorName::TOS->value, $language);
-            if ($textEditor !== null) {
-                $content = $textEditor->getContent();
-            } else {
-                $content = '';
-            }
+            $content = $textEditor instanceof \App\Entity\TextEditor ? $textEditor->getContent() : '';
 
             return $this->render('landing/shared/tos/_tos.html.twig', [
                 'content' => $content,
@@ -84,11 +80,7 @@ class TOSController extends AbstractController
             $privacyPolicyFormat->getValue() === TextInputType::TEXT_EDITOR->value
         ) {
             $textEditor = $this->textEditorRepository->findTextEditor(TextEditorName::PRIVACY_POLICY->value, $language);
-            if ($textEditor !== null) {
-                $content = $textEditor->getContent();
-            } else {
-                $content = '';
-            }
+            $content = $textEditor instanceof \App\Entity\TextEditor ? $textEditor->getContent() : '';
 
             return $this->render('landing/shared/tos/_privacy_policy.html.twig', [
                 'content' => $content,
