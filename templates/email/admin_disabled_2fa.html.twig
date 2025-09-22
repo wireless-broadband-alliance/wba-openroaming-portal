@@ -1,209 +1,58 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="{{ app.request.locale }}">
 <head>
-    <meta charset="UTF-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>OpenRoaming Registration</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet"/>
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: 'Poppins', sans-serif;
-            background-color: #F4F4F4;
-        }
-
-        .container {
-            width: 100%;
-            max-width: 1100px;
-            background: #fff;
-            margin: 0 auto;
-        }
-
-        /* HEADER */
-        .header {
-            background-color: #0B1A58;
-            width: 100%;
-            min-height: 180px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 3rem 1rem;
-            box-sizing: border-box;
-            margin-bottom: 2rem;
-        }
-
-        .header img {
-            max-width: 100%;
-            height: auto;
-        }
-
-        /* CONTENT */
-        .content {
-            width: 100%;
-            background-color: #FFFFFF;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            padding: 3rem 2rem;
-            margin-bottom: 2rem;
-            box-sizing: border-box;
-        }
-
-        .content h1 {
-            color: #0B1A58;
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin-bottom: 2.5rem;
-        }
-
-        .content p {
-            font-size: 1.25rem;
-            margin-bottom: 2rem;
-            line-height: 1.5;
-            color: #0B1A58;
-        }
-
-        .content p span {
-            font-weight: 600;
-        }
-
-        .content p span.strong {
-            font-weight: 700;
-        }
-
-        .btn-download {
-            display: inline-block;
-            width: 90%;
-            max-width: 800px;
-            padding: 1.25rem;
-            background-color: #7BBA29;
-            color: #0B1A58;
-            font-size: 1.25rem;
-            font-weight: 700;
-            text-align: center;
-            text-decoration: none;
-            border-radius: 10px;
-            transition: background-color 0.3s ease;
-            margin-top: 1.25rem;
-        }
-
-        /* FOOTER */
-        .footer {
-            background-color: #E6E6E6;
-            width: 100%;
-            min-height: 160px;
-            padding: 1.5rem 1rem;
-            text-align: center;
-            box-sizing: border-box;
-        }
-
-        .footer p {
-            margin: 0.75rem 0;
-            font-size: 1rem;
-            color: #1A202C;
-        }
-
-        .footer a,
-        .footer strong {
-            color: #0B1A58;
-            font-weight: 600;
-            text-decoration: none;
-        }
-
-        /* Hover states */
-        .footer a:hover,
-        .footer a:focus {
-            text-decoration: underline;
-        }
-
-        .btn-download:hover,
-        .btn-download:focus {
-            background-color: #669922;
-            outline: none;
-        }
-
-        /* Responsive adjustments */
-        @media only screen and (max-width: 768px) {
-            .content h1 {
-                font-size: 2rem;
-            }
-
-            .content p {
-                font-size: 1.1rem;
-            }
-
-            .btn-download {
-                font-size: 1.25rem;
-                padding: 1.5rem;
-            }
-
-            .header img {
-                width: 100%;
-                max-width: 300px;
-            }
-
-            .footer p {
-                font-size: 0.95rem;
-            }
-        }
-
-        @media only screen and (max-width: 480px) {
-            .content h1 {
-                font-size: 1.5rem;
-            }
-
-            .content p {
-                font-size: 1rem;
-            }
-
-            .btn-download {
-                font-size: 1rem;
-                padding: 1rem;
-            }
-
-            .header {
-                padding: 2rem 1rem;
-            }
-        }
-    </style>
 </head>
-<body>
-<div class="container">
-    <div class="container">
-        <header class="header" role="banner">
-            <img src="cid:logo_cid" alt="Customer Logo"/>
-        </header>
-    </div>
+<body style="margin:0; padding:0; background-color:#F4F4F4; font-family: Arial, sans-serif;">
+<table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" bgcolor="#F4F4F4">
+    <tr>
+        <td align="center">
+            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="600" style="background:#ffffff;">
+                <!-- HEADER -->
+                <tr>
+                    <td align="center" bgcolor="#0B1A58" style="padding:30px;">
+                        <img src="cid:logo_cid" alt="Customer Logo" style="max-width:200px; height:auto;" />
+                    </td>
+                </tr>
 
-    <main class="content" role="main">
-        <h1>{{ 'subject_2fa_disabled'|trans({}, 'admin_disabled2fa') }}</h1>
-        <div style="text-align: left">
-            <p>
-                {{ 'greeting'|trans({'%uuid%': uuid}, 'admin_disabled2fa') }}
-            </p>
-            <p>
-                {{ 'info_2fa_disabled'|trans({}, 'admin_disabled2fa')|raw }}
-                <br>
-                {{ 'warning_contact_support'|trans({}, 'admin_disabled2fa')|raw }}
-                <br>
-                {{ 'recommend_re_enable_2fa'|trans({}, 'admin_disabled2fa')|raw }}
-            </p>
-        </div>
-    </main>
+                <!-- CONTENT -->
+                <tr>
+                    <td align="left" style="padding:40px; text-align:left; color:#0B1A58;">
+                        <h1 style="font-size:24px; font-weight:bold; margin:0 0 20px 0; color:#0B1A58;">
+                            {{ 'subject_2fa_disabled'|trans({}, 'admin_disabled2fa') }}
+                        </h1>
+                        <p style="font-size:16px; line-height:1.5; margin:0 0 20px 0;">
+                            {{ 'greeting'|trans({'%uuid%': uuid}, 'admin_disabled2fa') }}
+                        </p>
+                        <p style="font-size:16px; line-height:1.5; margin:0 0 20px 0;">
+                            {{ 'info_2fa_disabled'|trans({}, 'admin_disabled2fa')|raw }}<br/>
+                            {{ 'warning_contact_support'|trans({}, 'admin_disabled2fa')|raw }}<br/>
+                            {{ 'recommend_re_enable_2fa'|trans({}, 'admin_disabled2fa')|raw }}
+                        </p>
+                    </td>
+                </tr>
 
-    <footer class="footer" role="contentinfo">
-        <p>
-            {{ 'footer.support_team'|trans({}, 'user_registration') }}
-            <a href="mailto:{{ contactEmail }}">{{ contactEmail }}</a>
-        </p>
-        <p>
-            <strong>{{ 'footer.thank_you'|trans({}, 'user_registration') }}</strong><br/>
-            {{ 'footer.team'|trans({'%supportTeam%': supportTeam}, 'user_registration') }}
-        </p>
-    </footer>
-</div>
+                <!-- FOOTER -->
+                <tr>
+                    <td bgcolor="#E6E6E6" align="center" style="padding:20px; font-size:14px; color:#1A202C;">
+                        <p style="margin:0 0 10px 0;">
+                            {{ 'footer.support_team'|trans({}, 'user_registration') }}
+                            <a href="mailto:{{ contactEmail }}" style="color:#0B1A58; font-weight:bold; text-decoration:none;">
+                                {{ contactEmail }}
+                            </a>
+                        </p>
+                        <p style="margin:0;">
+                            <strong style="color:#0B1A58;">{{ 'footer.thank_you'|trans({}, 'user_registration') }}</strong><br/>
+                            {{ 'footer.team'|trans({'%supportTeam%': supportTeam}, 'user_registration') }}
+                        </p>
+                    </td>
+                </tr>
+
+            </table>
+        </td>
+    </tr>
+</table>
 </body>
 </html>
