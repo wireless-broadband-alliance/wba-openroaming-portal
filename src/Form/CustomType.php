@@ -35,14 +35,14 @@ class CustomType extends AbstractType
             SettingName::OPENROAMING_LOGO->value => FileType::class,
             SettingName::WALLPAPER_IMAGE->value => FileType::class,
             SettingName::WELCOME_TEXT->value => [
-                'type' => TextareaType::class,
+                'type' => QuillType::class,
                 'constraints' => [
                     new Assert\NotBlank([
                         'message' => $this->translator->trans('fieldCannotBeEmpty', [], 'CustomType')
                     ]),
                 ]
             ],
-            SettingName::WELCOME_DESCRIPTION->value => TextareaType::class,
+            SettingName::WELCOME_DESCRIPTION->value => QuillType::class,
             SettingName::PAGE_TITLE->value => [
                 'type' => TextType::class,
                 'constraints' => [
@@ -56,7 +56,7 @@ class CustomType extends AbstractType
                 ],
             ],
             SettingName::ADDITIONAL_LABEL->value => [
-                'type' => TextType::class,
+                'type' => QuillType::class,
                 'constraints' => [
                     new Length([
                         'max' => 255,
