@@ -31,10 +31,18 @@ readonly class EmailGenerator
      */
     public function sendRegistrationEmail(User $user, ?string $password = null): void
     {
-        $supportTeam = $this->settingRepository->findOneBy(['name' => SettingName::PAGE_TITLE->value])->getValue();
-        $contactEmail = $this->settingRepository->findOneBy(['name' => SettingName::CONTACT_EMAIL->value])->getValue();
-        $loginWithUUID = $this->settingRepository->findOneBy(['name' => SettingName::LOGIN_WITH_UUID_ONLY->value])->getValue();
-        $customerLogo = $this->settingRepository->findOneBy(['name' => SettingName::CUSTOMER_LOGO->value])->getValue();
+        $supportTeam = $this->settingRepository->findOneBy(
+            ['name' => SettingName::PAGE_TITLE->value]
+        )->getValue();
+        $contactEmail = $this->settingRepository->findOneBy(
+            ['name' => SettingName::CONTACT_EMAIL->value]
+        )->getValue();
+        $loginWithUUID = $this->settingRepository->findOneBy(
+            ['name' => SettingName::LOGIN_WITH_UUID_ONLY->value]
+        )->getValue();
+        $customerLogo = $this->settingRepository->findOneBy(
+            ['name' => SettingName::CUSTOMER_LOGO->value]
+        )->getValue();
         $projectDir = $this->parameterBag->get('kernel.project_dir');
         $logoPath = $projectDir . '/public' . $customerLogo;
 
@@ -200,10 +208,12 @@ readonly class EmailGenerator
         $logoPath = $projectDir . '/public' . $customerLogo;
 
         $email = new TemplatedEmail()
-            ->from(new Address(
-                $this->parameterBag->get('app.email_address'),
-                $this->parameterBag->get('app.sender_name')
-            ))
+            ->from(
+                new Address(
+                    $this->parameterBag->get('app.email_address'),
+                    $this->parameterBag->get('app.sender_name')
+                )
+            )
             ->to($user->getEmail())
             ->subject($this->translator->trans('subject_password_reset_details', [], 'user_password_reset'))
             ->htmlTemplate('email/user_password_reset.html.twig')
