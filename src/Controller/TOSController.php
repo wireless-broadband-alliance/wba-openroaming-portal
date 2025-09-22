@@ -2,7 +2,9 @@
 
 namespace App\Controller;
 
+use App\Entity\TextEditor;
 use App\Enum\LanguageType;
+use App\Enum\SettingName;
 use App\Enum\TextEditorName;
 use App\Enum\TextInputType;
 use App\Repository\SettingRepository;
@@ -77,14 +79,14 @@ class TOSController extends AbstractController
         $session = $request->getSession();
         $language = $session->get('_locale');
 
-        $privacyPolicyFormat = $this->settingRepository->findOneBy(['name' => 'PRIVACY_POLICY']);
+        $privacyPolicyFormat = $this->settingRepository->findOneBy(['name' => SettingName::PRIVACY_POLICY->value]);
 
         if (
             $privacyPolicyFormat &&
             $privacyPolicyFormat->getValue() === TextInputType::TEXT_EDITOR->value
         ) {
             $textEditor = $this->textEditorRepository->findTextEditor(TextEditorName::PRIVACY_POLICY->value, $language);
-            $content = $textEditor instanceof \App\Entity\TextEditor ? $textEditor->getContent() : '';
+            $content = $textEditor instanceof TextEditor ? $textEditor->getContent() : '';
 
             return $this->render('landing/shared/tos/_privacy_policy.html.twig', [
                 'content' => $content,
