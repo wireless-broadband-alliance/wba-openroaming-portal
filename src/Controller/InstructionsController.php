@@ -20,7 +20,7 @@ class InstructionsController extends AbstractController
     }
 
     #[Route('/instructions', name: 'app_instructions')]
-    public function profileInstructions(Request $request): Response
+    public function instructions(Request $request): Response
     {
         $data = $this->getSettings->getSpecificSettings([
             SettingName::PAGE_TITLE->value,
