@@ -11,6 +11,7 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
+use Symfony\Component\Mime\Email;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 readonly class EmailGenerator
@@ -33,17 +34,19 @@ readonly class EmailGenerator
         $contactEmail = $this->settingRepository->findOneBy(['name' => 'CONTACT_EMAIL'])->getValue();
         $loginWithUUID = $this->settingRepository->findOneBy(['name' => 'LOGIN_WITH_UUID_ONLY'])->getValue();
         $customerLogo = $this->settingRepository->findOneBy(['name' => 'CUSTOMER_LOGO'])->getValue();
-        $projectDir =  $this->parameterBag->get('kernel.project_dir');
+        $projectDir = $this->parameterBag->get('kernel.project_dir');
         $logoPath = $projectDir . '/public' . $customerLogo;
 
         if ($loginWithUUID === OperationMode::ON->value) {
-            $magicURL =  $this->magicLinkService->magicToken($user);
+            $magicURL = $this->magicLinkService->magicToken($user);
             // Send email to the user with the verification link for authentications
             $email = new TemplatedEmail()
-                ->from(new Address(
-                    $this->parameterBag->get('app.email_address'),
-                    $this->parameterBag->get('app.sender_name')
-                ))
+                ->from(
+                    new Address(
+                        $this->parameterBag->get('app.email_address'),
+                        $this->parameterBag->get('app.sender_name')
+                    )
+                )
                 ->to($user->getEmail())
                 ->subject($this->translator->trans('subject_registration_details', [], 'user_registration_login_uuid'))
                 ->htmlTemplate('email/user_registration_login_uuid.html.twig')
@@ -57,10 +60,12 @@ readonly class EmailGenerator
         } else {
             // Send email to the user with the verification code
             $email = new TemplatedEmail()
-                ->from(new Address(
-                    $this->parameterBag->get('app.email_address'),
-                    $this->parameterBag->get('app.sender_name')
-                ))
+                ->from(
+                    new Address(
+                        $this->parameterBag->get('app.email_address'),
+                        $this->parameterBag->get('app.sender_name')
+                    )
+                )
                 ->to($user->getEmail())
                 ->subject($this->translator->trans('subject_registration_details', [], 'user_registration'))
                 ->htmlTemplate('email/user_registration.html.twig')
@@ -176,6 +181,35 @@ readonly class EmailGenerator
                 'contactEmail' => $contactEmail,
                 'verificationCode' => $user->getTwoFAcode(),
                 'context' => FirewallType::LANDING->value,
+            ])
+            ->embedFromPath($logoPath, 'logo_cid');
+
+        $this->mailer->send($email);
+    }
+
+    /**
+     * @throws TransportExceptionInterface
+     */
+    public function sendResetPasswordEmailByAdmin(User $user, string $newPassword): void
+    {
+        $supportTeam = $this->settingRepository->findOneBy(['name' => 'PAGE_TITLE'])->getValue();
+        $contactEmail = $this->settingRepository->findOneBy(['name' => 'CONTACT_EMAIL'])->getValue();
+        $customerLogo = $this->settingRepository->findOneBy(['name' => 'CUSTOMER_LOGO'])->getValue();
+        $projectDir = $this->parameterBag->get('kernel.project_dir');
+        $logoPath = $projectDir . '/public' . $customerLogo;
+
+        $email = new TemplatedEmail()
+            ->from(new Address(
+                $this->parameterBag->get('app.email_address'),
+                $this->parameterBag->get('app.sender_name')
+            ))
+            ->to($user->getEmail())
+            ->subject($this->translator->trans('subject_password_reset_details', [], 'user_password_reset'))
+            ->htmlTemplate('email/user_password_reset.html.twig')
+            ->context([
+                'password' => $newPassword,
+                'supportTeam' => $supportTeam,
+                'contactEmail' => $contactEmail,
             ])
             ->embedFromPath($logoPath, 'logo_cid');
 
