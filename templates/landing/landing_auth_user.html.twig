@@ -1,0 +1,86 @@
+{% set bgUrl = data.WALLPAPER_IMAGE.value != '/resources/images/wallpaper.png'
+    ? data.WALLPAPER_IMAGE.value
+    : '/resources/images/background.png' %}
+
+{% extends 'landing/base.html.twig' %}
+
+{% block title %}
+    {{ data.PAGE_TITLE.value }}
+{% endblock %}
+
+{% block body %}
+
+    <div class="relative min-h-screen w-screen bg-center bg-cover"
+         style="background-image: url('{{ bgUrl }}');">
+        <div class="relative w-full h-full p-8 xl:pl-[130px] xl:pr-[150px] xl:pt-[100px] bg-center bg-cover z-10">
+
+            <div class="bg-white rounded-2xl shadow-xl max-w-2xl w-full p-10 text-left mx-auto">
+                <div class="text-left">
+                    {% block language %}
+                        {{ include('shared/_select_language.html.twig', {
+                            currentLocale: app.request.locale,
+                            routeName: 'change_language',
+                            warningMessage: false,
+                        }) }}
+                    {% endblock %}
+                </div>
+                {# Toasts #}
+                {{ block('toast_messages') }}
+
+
+                <div class="flex justify-between items-center w-full">
+                    {% if data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\OperationMode::ON').value %}
+                        <img class="w-[120px] h-[58px] object-scale-down" src="{{ data.CUSTOMER_LOGO.value }}" alt="Customer Logo"/>
+                    {% endif %}
+
+                    <img class="w-[120px] h-[58px] object-scale-down" src="{{ data.OPENROAMING_LOGO.value }}" alt="OR Logo"/>
+                </div>
+
+                <div class="{{ data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\OperationMode::ON').value ? 'pt-[28px]' : 'pt-[16px]' }} leading-7">
+                    <p class="font-bold text-lg">{{ 'downloadInstallProfiles'|trans({}, 'landing') }}</p>
+                    <p class="mt-3">{{ 'profilesExplanation'|trans({}, 'landing') }}</p>
+                </div>
+
+
+                <form method="post" novalidate>
+                    {{ include('landing/shared/_os_selection.html.twig') }}
+                </form>
+
+                    {# Divider #}
+                    <div class="my-[25px] divider"></div>
+
+                <div {{ stimulus_controller('widget') }}>
+                    <div class="flex justify-between items-center w-full">
+                        {# Bloco usuário à esquerda #}
+                        <div>
+                            <p class="text-[#212529] text-opacity-40 text-sm">
+                                {{ 'authenticatedAs'|trans({}, 'landing') }}
+                                {% for auth in user.userExternalAuths %}
+                                    {% if auth.provider == constant('App\\Enum\\UserProvider::SAML').value %}
+                                        {{ auth.providerId }}
+                                    {% else %}
+                                        {{ app.user.uuid }}
+                                    {% endif %}
+                                {% endfor %}
+                            </p>
+
+                            <div class="flex items-center gap-2 mt-1">
+                                <p class="text-sm text-[#707070]">{{ 'title'|trans({}, '_account_widget') }}</p>
+                                <button id="widgetUserButton" type="button" {{ stimulus_action('widget', 'open') }}
+                                        class="duration-300 cursor-pointer rounded-full text-[#707070] focus:animate-spin-slow focus:bg-[#7DB928] focus:text-white hover:shadow-lg p-2.5 relative z-0">
+                                    <twig:ux:icon name="wba:cog" class="w-6" fill="none"/>
+                                </button>
+                            </div>
+                        </div>
+
+                        {# Botão logout à direita #}
+                        <a href="{{ path('app_logout') }}" class="w-[160px] btn-logout">
+                            {{ 'logout'|trans({}, 'landing') }}
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

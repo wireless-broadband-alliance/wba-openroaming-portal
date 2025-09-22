@@ -392,6 +392,17 @@ class SiteController extends AbstractController
         $formRevokeProfiles = $this->createForm(RevokeProfilesType::class, $this->getUser());
         $formTOS = $this->createForm(TOSType::class);
 
+        if ($currentUser) {
+            return $this->render('landing/landing_auth_user.html.twig', [
+                'form' => $form->createView(),
+                'formPassword' => $formPassword->createView(),
+                'formRevokeProfiles' => $formRevokeProfiles->createView(),
+                'data' => $data,
+                'user' => $currentUser,
+                'context' => FirewallType::LANDING->value,
+            ]);
+        }
+
         return $this->render('landing/landing.html.twig', [
             'form' => $form->createView(),
             'formPassword' => $formPassword->createView(),
