@@ -12,7 +12,8 @@
     <div class="min-h-screen bg-center bg-cover flex items-center justify-center px-4 sm:px-6 lg:px-8"
          style="background-image: url('{{ bgUrl }}');">
 
-        <div class="w-full max-w-5xl bg-white rounded-xl shadow-2xl overflow-hidden py-12 px-10"
+        <div class="w-full max-w-5xl bg-white rounded-xl shadow-2xl overflow-hidden py-12 px-10
+                max-h-[80vh] overflow-y-auto"
              data-controller="os-tabs"
              data-os-tabs-default-os="{{ data.os.selected }}">
 
@@ -26,24 +27,24 @@
             </div>
 
             {# Tabs #}
-            <div class="flex border-b border-gray-200 mb-8">
+            <div class="flex border-b border-gray-200 mb-8 w-full">
                 <button data-os="{{ constant('App\\Enum\\OSType::ANDROID').value }}" data-os-tabs-target="tab"
                         data-action="click->os-tabs#activate"
-                        class="px-6 py-3 font-semibold flex items-center space-x-2 transition-all duration-200">
+                        class="flex-1 text-center px-6 py-3 font-semibold flex items-center justify-center space-x-2 transition-all duration-200">
                     <twig:ux:icon name="wba:android" class="w-5 h-5"/>
                     <span>Android</span>
                 </button>
 
                 <button data-os="{{ constant('App\\Enum\\OSType::IOS').value }}" data-os-tabs-target="tab"
                         data-action="click->os-tabs#activate"
-                        class="px-6 py-3 font-semibold flex items-center space-x-2 transition-all duration-200">
+                        class="flex-1 text-center px-6 py-3 font-semibold flex items-center justify-center space-x-2 transition-all duration-200">
                     <twig:ux:icon name="wba:ios" class="w-5 h-5"/>
                     <span>iOS</span>
                 </button>
 
                 <button data-os="{{ constant('App\\Enum\\OSType::WINDOWS').value }}" data-os-tabs-target="tab"
                         data-action="click->os-tabs#activate"
-                        class="px-6 py-3 font-semibold flex items-center space-x-2 transition-all duration-200">
+                        class="flex-1 text-center px-6 py-3 font-semibold flex items-center justify-center space-x-2 transition-all duration-200">
                     <twig:ux:icon name="wba:windows" class="w-5 h-5"/>
                     <span>Windows</span>
                 </button>
