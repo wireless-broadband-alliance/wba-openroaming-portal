@@ -19,7 +19,7 @@ class InstructionsController extends AbstractController
     ) {
     }
 
-    #[Route('/profile/instructions', name: 'app_profile_instructions')]
+    #[Route('/instructions', name: 'app_instructions')]
     public function profileInstructions(Request $request): Response
     {
         $data = $this->getSettings->getSpecificSettings([
