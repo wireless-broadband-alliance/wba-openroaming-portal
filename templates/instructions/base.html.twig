@@ -49,29 +49,19 @@
                 </button>
             </div>
 
-            {# Contents TODO make new files for each OS and steps #}
             <div data-os="{{ constant('App\\Enum\\OSType::ANDROID').value }}" data-os-tabs-target="content"
                  class="{% if data.os.selected == constant('App\\Enum\\OSType::ANDROID').value %}hidden{% endif %}">
-                <div class="flex items-center space-x-8">
-                    <twig:ux:icon name="wba:android" class="w-20 h-20"/>
-                    <p class="text-xl">Android Mode</p>
-                </div>
+                {{ include('instructions/os/_android.html.twig') }}
             </div>
 
             <div data-os="{{ constant('App\\Enum\\OSType::IOS').value }}" data-os-tabs-target="content"
                  class="{% if data.os.selected == constant('App\\Enum\\OSType::IOS').value %}hidden{% endif %}">
-                <div class="flex items-center space-x-8">
-                    <twig:ux:icon name="wba:ios" class="w-20 h-20"/>
-                    <p class="text-xl">iOS Mode</p>
-                </div>
+                {{ include('instructions/os/_ios.html.twig') }}
             </div>
 
             <div data-os="{{ constant('App\\Enum\\OSType::WINDOWS').value }}" data-os-tabs-target="content"
                  class="{% if data.os.selected == constant('App\\Enum\\OSType::WINDOWS').value %}hidden{% endif %}">
-                <div class="flex items-center space-x-8">
-                    <twig:ux:icon name="wba:windows" class="w-20 h-20"/>
-                    <p class="text-xl">Windows Mode</p>
-                </div>
+                {{ include('instructions/os/_windows.html.twig') }}
             </div>
         </div>
     </div>
