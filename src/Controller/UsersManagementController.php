@@ -21,6 +21,7 @@ use App\Repository\EventRepository;
 use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRadiusProfileRepository;
 use App\Repository\UserRepository;
+use App\Service\EmailGenerator;
 use App\Service\EscapeSpreadSheet;
 use App\Service\EventActions;
 use App\Service\GetSettings;
@@ -66,6 +67,7 @@ class UsersManagementController extends AbstractController
         private readonly VerificationCodeEmailGenerator $verificationCodeEmailGenerator,
         private readonly TranslatorInterface $translator,
         private readonly UserRadiusProfileRepository $radiusProfileRepository,
+        private readonly EmailGenerator $emailGenerator,
     ) {
     }
 
@@ -437,9 +439,6 @@ class UsersManagementController extends AbstractController
             return $this->redirect($lastPage);
         }
 
-        $emailSender = $this->parameterBag->get('app.email_address');
-        $nameSender = $this->parameterBag->get('app.sender_name');
-
         $formReset = $this->createForm(ResetPasswordType::class, $user);
         $formReset->handleRequest($request);
 
@@ -466,29 +465,8 @@ class UsersManagementController extends AbstractController
             $em->flush();
 
             if ($user->getEmail()) {
-                $supportTeam = $data[SettingName::PAGE_TITLE->value]['value'];
-                $contactEmail = $data[SettingName::CONTACT_EMAIL->value]['value'];
-                $customerLogo = $data[SettingName::CUSTOMER_LOGO->value]['value'];
-                $projectDir = $this->parameterBag->get('kernel.project_dir');
-                $logoPath = $projectDir . '/public' . $customerLogo;
-
-                // Send email
-                $email = new Email()
-                    ->from(new Address($emailSender, $nameSender))
-                    ->to($user->getEmail())
-                    ->subject($this->translator->trans('subject_password_reset_details', [], 'user_password_reset'))
-                    ->html(
-                        $this->renderView(
-                            'email/user_password_reset.html.twig',
-                            [
-                                'password' => $newPassword,
-                                'supportTeam' => $supportTeam,
-                                'contactEmail' => $contactEmail
-                            ]
-                        )
-                    )
-                    ->embedFromPath($logoPath, 'logo_cid');
-                $mailer->send($email);
+                // Send email for the user
+                $this->emailGenerator->sendResetPasswordEmailByAdmin($user, $newPassword);
 
                 $eventMetadata = [
                     'ip' => $request->getClientIp(),

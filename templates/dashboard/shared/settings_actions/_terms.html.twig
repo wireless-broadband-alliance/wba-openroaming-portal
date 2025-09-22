@@ -1,4 +1,10 @@
-<form action="{{ path('admin_dashboard_settings_terms') }}" method="post" enctype="multipart/form-data">
+{{ include('shared/_select_language.html.twig', {
+    currentLocale: language,
+    routeName: 'admin_dashboard_settings_terms',
+    warningMessage: true,
+}) }}
+
+<form action="{{ path('admin_dashboard_settings_terms', {language: language}) }}" method="post" enctype="multipart/form-data">
     {{ form_row(form._token) }}
 
     <div class="grid gap-4 lg:grid-cols-2 p-2">
