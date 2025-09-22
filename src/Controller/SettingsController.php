@@ -427,7 +427,7 @@ class SettingsController extends AbstractController
             TextEditorName::PRIVACY_POLICY->value,
             $language
         );
-        if (!$privacyPolicyTextEditor instanceof \App\Entity\TextEditor) {
+        if (!$privacyPolicyTextEditor instanceof TextEditor) {
             $privacyPolicyTextEditor = new TextEditor();
             $privacyPolicyTextEditor->setName(TextEditorName::PRIVACY_POLICY->value);
             $privacyPolicyTextEditor->setContent('');
