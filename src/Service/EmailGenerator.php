@@ -31,10 +31,10 @@ readonly class EmailGenerator
      */
     public function sendRegistrationEmail(User $user, ?string $password = null): void
     {
-        $supportTeam = $this->settingRepository->findOneBy(['name' => 'PAGE_TITLE'])->getValue();
-        $contactEmail = $this->settingRepository->findOneBy(['name' => 'CONTACT_EMAIL'])->getValue();
-        $loginWithUUID = $this->settingRepository->findOneBy(['name' => 'LOGIN_WITH_UUID_ONLY'])->getValue();
-        $customerLogo = $this->settingRepository->findOneBy(['name' => 'CUSTOMER_LOGO'])->getValue();
+        $supportTeam = $this->settingRepository->findOneBy(['name' => SettingName::PAGE_TITLE->value])->getValue();
+        $contactEmail = $this->settingRepository->findOneBy(['name' => SettingName::CONTACT_EMAIL->value])->getValue();
+        $loginWithUUID = $this->settingRepository->findOneBy(['name' => SettingName::LOGIN_WITH_UUID_ONLY->value])->getValue();
+        $customerLogo = $this->settingRepository->findOneBy(['name' => SettingName::CUSTOMER_LOGO->value])->getValue();
         $projectDir = $this->parameterBag->get('kernel.project_dir');
         $logoPath = $projectDir . '/public' . $customerLogo;
 
@@ -193,9 +193,9 @@ readonly class EmailGenerator
      */
     public function sendResetPasswordEmailByAdmin(User $user, string $newPassword): void
     {
-        $supportTeam = $this->settingRepository->findOneBy(['name' => 'PAGE_TITLE'])->getValue();
-        $contactEmail = $this->settingRepository->findOneBy(['name' => 'CONTACT_EMAIL'])->getValue();
-        $customerLogo = $this->settingRepository->findOneBy(['name' => 'CUSTOMER_LOGO'])->getValue();
+        $supportTeam = $this->settingRepository->findOneBy(['name' => SettingName::PAGE_TITLE->value])->getValue();
+        $contactEmail = $this->settingRepository->findOneBy(['name' => SettingName::CONTACT_EMAIL->value])->getValue();
+        $customerLogo = $this->settingRepository->findOneBy(['name' => SettingName::CUSTOMER_LOGO->value])->getValue();
         $projectDir = $this->parameterBag->get('kernel.project_dir');
         $logoPath = $projectDir . '/public' . $customerLogo;
 
