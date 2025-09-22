@@ -12,18 +12,17 @@
     <div class="min-h-screen bg-center bg-cover flex items-center justify-center px-4 sm:px-6 lg:px-8"
          style="background-image: url('{{ bgUrl }}');">
 
-        <div class="w-full sm:w-[95%] lg:w-[90%] max-w-[1400px] bg-white rounded-xl shadow-2xl
-                py-12 sm:py-16 lg:py-20 px-6 sm:px-10"
+        <div class="instructions-container"
              data-controller="os-tabs"
              data-os-tabs-default-os="{{ data.os.selected }}">
 
             {# Header #}
-            <div class="flex flex-col-reverse sm:flex-row sm:items-center justify-between mb-4 gap-2">
-                <h1 class="text-xl sm:text-2xl md:text-3xl font-bold">
+            <div class="instructions-header">
+                <h1 class="instructions-title">
                     Device Setup Instructions
                 </h1>
 
-                <div class="self-end sm:self-auto">
+                <div class="instructions-language">
                     {{ include('shared/_select_language.html.twig', {
                         currentLocale: app.request.locale,
                         routeName: 'change_language',
@@ -33,31 +32,31 @@
             </div>
 
             {# Tabs #}
-            <div class="flex border-b border-gray-200 mb-6 w-full">
+            <div class="instructions-tabs">
                 <button data-os="{{ constant('App\\Enum\\OSType::ANDROID').value }}" data-os-tabs-target="tab"
                         data-action="click->os-tabs#activate"
-                        class="flex-1 px-3 py-2 text-sm sm:text-base font-semibold flex items-center justify-center space-x-2 transition-all duration-200">
+                        class="instructions-tab">
                     <twig:ux:icon name="wba:android" class="w-5 h-5"/>
                     <span>Android</span>
                 </button>
 
                 <button data-os="{{ constant('App\\Enum\\OSType::IOS').value }}" data-os-tabs-target="tab"
                         data-action="click->os-tabs#activate"
-                        class="flex-1 px-3 py-2 text-sm sm:text-base font-semibold flex items-center justify-center space-x-2 transition-all duration-200">
+                        class="instructions-tab">
                     <twig:ux:icon name="wba:ios" class="w-5 h-5"/>
                     <span>iOS</span>
                 </button>
 
                 <button data-os="{{ constant('App\\Enum\\OSType::WINDOWS').value }}" data-os-tabs-target="tab"
                         data-action="click->os-tabs#activate"
-                        class="flex-1 px-3 py-2 text-sm sm:text-base font-semibold flex items-center justify-center space-x-2 transition-all duration-200">
+                        class="instructions-tab">
                     <twig:ux:icon name="wba:windows" class="w-5 h-5"/>
                     <span>Windows</span>
                 </button>
             </div>
 
-            {# Scrollable Content Area #}
-            <div class="h-[60vh] overflow-y-auto">
+            {# Content Area #}
+            <div class="instructions-content">
                 <div data-os="{{ constant('App\\Enum\\OSType::ANDROID').value }}" data-os-tabs-target="content"
                      class="{% if data.os.selected == constant('App\\Enum\\OSType::ANDROID').value %}hidden{% endif %}">
                     {{ include('instructions/os/_android.html.twig') }}

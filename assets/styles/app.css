@@ -140,3 +140,32 @@
         @apply text-xl font-semibold mt-4;
     }
 }
+
+.instructions-container {
+    @apply w-full sm:w-[95%] lg:w-[90%] max-w-[1400px] bg-white rounded-xl shadow-2xl
+    py-12 sm:py-16 lg:py-20 px-6 sm:px-10;
+}
+
+.instructions-header {
+    @apply flex flex-col-reverse sm:flex-row sm:items-center justify-between mb-4 gap-2;
+}
+
+.instructions-title {
+    @apply text-xl sm:text-2xl md:text-3xl font-bold;
+}
+
+.instructions-language {
+    @apply self-end sm:self-auto;
+}
+
+.instructions-tabs {
+    @apply flex border-b border-gray-200 mb-6 w-full;
+}
+
+.instructions-tab {
+    @apply flex-1 px-3 py-2 text-sm sm:text-base font-semibold flex items-center justify-center space-x-2 transition-all duration-200;
+}
+
+.instructions-content {
+    @apply h-[60vh] overflow-y-auto;
+}
