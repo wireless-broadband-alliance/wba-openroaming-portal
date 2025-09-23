@@ -120,6 +120,10 @@
 
 /* instructions page  */
 @layer components {
+    .instructions .introduction {
+        @apply text-base sm:text-lg md:text-xl font-medium mb-6;
+    }
+
     .instructions .card-container {
         @apply min-h-screen rounded-lg flex justify-center px-4 sm:px-6 lg:px-10 py-12;
     }

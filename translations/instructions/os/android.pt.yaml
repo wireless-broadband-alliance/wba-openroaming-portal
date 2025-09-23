@@ -1,10 +1,11 @@
+introduction: 'De modo a aceder de forma segura às redes OpenRoaming, deve seguir os próximos passos'
 item1:
-    description: "This is a short description about Item 1."
+    description: "Abra o link em anexo no seu e-mail"
 item2:
-    description: "This is a short description about Item 2."
+    description: "Insira o seu e-mail, aceite os termos e condições e prossiga tocando em “Download and Install Profile"
 item3:
-    description: "This is a short description about Item 3."
+    description: "Toque em “Instalar”"
 item4:
-    description: "This is a short description about Item 4."
+    description: "Toque em “OK”"
 item5:
-    description: "This is a short description about Item 5."
+    description: "Após finalizado o processo ficará ligado à rede OpenRoaming e poderá confirmar nas definições de Wi-Fi"

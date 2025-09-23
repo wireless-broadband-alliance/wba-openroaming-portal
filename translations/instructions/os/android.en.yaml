@@ -1,10 +1,11 @@
+introduction: "To securely access OpenRoaming networks, please follow the next steps"
 item1:
-    description: "This is a short description about Item 1."
+    description: "Open the link attached in your email"
 item2:
-    description: "This is a short description about Item 2."
+    description: "Enter your email, accept the terms and conditions, and proceed by tapping “Download and Install Profile”"
 item3:
-    description: "This is a short description about Item 3."
+    description: "Tap “Install”"
 item4:
-    description: "This is a short description about Item 4."
+    description: "Tap “OK”"
 item5:
-    description: "This is a short description about Item 5."
+    description: "Once the process is complete, you will be connected to the OpenRoaming network and can confirm in the Wi-Fi settings"
