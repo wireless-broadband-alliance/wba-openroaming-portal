@@ -9,10 +9,10 @@
 {% endblock %}
 
 {% block body %}
-    <div class="relative min-h-screen w-screen bg-center bg-cover flex items-start justify-center p-10"
-         style="background-image: url('{{ bgUrl }}');" {{ stimulus_controller('visibility') }}>
+    <div class="relative min-h-screen w-screen bg-center bg-cover flex flex-col justify-center items-center py-10 px-10"
+         style="background-image: url('{{ bgUrl }}');">
 
-        <div class="bg-white rounded-2xl shadow-xl w-[90%] max-w-6xl max-h-[80vh] h-auto flex flex-col">
+        <div class="bg-white rounded-2xl shadow-xl w-[90%] max-w-6xl max-h-[80vh] h-auto flex flex-col p-6">
             <div class="flex justify-between items-center w-full px-6 py-0">
                 {% if data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\OperationMode::ON').value %}
                     <img class="w-[120px] h-[58px] object-scale-down" src="{{ data.CUSTOMER_LOGO.value }}" alt="Customer Logo"/>
