@@ -12,32 +12,33 @@
 
     <div class="relative min-h-screen w-screen bg-center bg-cover flex items-start justify-center p-10"
          style="background-image: url('{{ bgUrl }}');">
-        <div class="bg-white rounded-2xl shadow-xl w-[90%] max-w-6xl max-h-[80vh] h-auto p-10 text-left overflow-y-auto flex flex-col">
-            <div class="flex-1">
-                <div class="text-left">
-                    {% block language %}
-                        {{ include('shared/_select_language.html.twig', {
-                            currentLocale: app.request.locale,
-                            routeName: 'change_language',
-                            warningMessage: false,
-                        }) }}
-                    {% endblock %}
-                </div>
 
-                {{ block('toast_messages') }}
+        <!-- Quadrado branco principal -->
+        <div class="bg-white rounded-2xl shadow-xl w-[90%] max-w-6xl max-h-[80vh] h-auto flex flex-col">
 
-                <div class="flex justify-between items-center w-full mt-6">
-                    {% if data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\OperationMode::ON').value %}
-                        <img class="w-[120px] h-[58px] object-scale-down" src="{{ data.CUSTOMER_LOGO.value }}" alt="Customer Logo"/>
-                    {% endif %}
-                    <img class="w-[120px] h-[58px] object-scale-down" src="{{ data.OPENROAMING_LOGO.value }}" alt="OR Logo"/>
-                </div>
+            <div class="mt-2 mr-4">
+                {% block language %}
+                    {{ include('shared/_select_language.html.twig', {
+                        currentLocale: app.request.locale,
+                        routeName: 'change_language',
+                        warningMessage: false,
+                    }) }}
+                {% endblock %}
+            </div>
 
-                <div class="mt-4">
+            <div class="flex justify-between items-center w-full px-10 py-6">
+                {% if data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\OperationMode::ON').value %}
+                    <img class="w-[120px] h-[58px] object-scale-down" src="{{ data.CUSTOMER_LOGO.value }}" alt="Customer Logo"/>
+                {% endif %}
+                <div>
                     {% if isEEAUser() != constant('App\\Enum\\GeoLocation\\IsEEAHandler::NOT_IN_EEA').value %}
                         {{ include('landing/shared/_cookie_banner.html.twig') }}
                     {% endif %}
                 </div>
+            </div>
+
+            <div class="flex-1 overflow-y-auto px-10 pb-10">
+                {{ block('toast_messages') }}
 
                 <div class="mt-6 leading-7">
                     <p class="font-bold text-lg">{{ 'downloadInstallProfiles'|trans({}, 'landing') }}</p>
@@ -87,11 +88,11 @@
                         </a>
                     </div>
                 </div>
+
             </div>
 
-
-
         </div>
+
     </div>
 
 {% endblock %}
