@@ -12,13 +12,13 @@ termsCheckboxText: 'I agree to the %terms% and the %privacy%.'
 contactText: 'Should you have any questions or require assistance, please contact us at'
 
 demoMode:
-  header: 'DEMO MODE – {status}'
-  enterYourEmail: 'Enter your email'
-  systemMessage: 'This portal is for testing purposes only and should not be used in production environments. Users created on this portal might be revoked at any time without notice.'
-  createAccount: 'Create Demo Account'
-  status:
-    confirmed: 'CONFIRMED EMAIL SYSTEM'
-    unconfirmed: 'UNCONFIRMED EMAIL SYSTEM'
+    header: 'DEMO MODE – {status}'
+    enterYourEmail: 'Enter your email'
+    systemMessage: 'This portal is for testing purposes only and should not be used in production environments. Users created on this portal might be revoked at any time without notice.'
+    createAccount: 'Create Demo Account'
+    status:
+        confirmed: 'CONFIRMED EMAIL SYSTEM'
+        unconfirmed: 'UNCONFIRMED EMAIL SYSTEM'
 
 authenticatedAs: 'You are currently authenticated as'
 authenticatedUserAsProvider: 'You are currently authenticated as {providerId}.'
@@ -26,19 +26,20 @@ obtainProfile: 'Obtain Your Profile'
 authenticationMethods: 'To get started, select one of the following authentication methods:'
 
 confirmationModal:
-  title: 'You need to confirm the terms before proceeding.'
-  closeButton: 'Close'
+    title: 'You need to confirm the terms before proceeding.'
+    closeButton: 'Close'
 
 accountSettings: 'Account Settings'
 authenticatedUser: 'You are currently authenticated as {uuid}'
 
 os_selection:
-  choose_os: 'Choose your operating system, so you can download and install the profile:'
-  macos_or_ios: 'macOS/iOS'
-  download_install: 'Download and Install Profile'
-  device_identified: 'Device identified as running: %os%'
-  is_wrong: 'Is this Wrong?'
-  click_to_select: 'Click here to select your OS.'
+    choose_os: 'Choose your operating system, so you can download and install the profile:'
+    macos_or_ios: 'macOS/iOS'
+    download_install: 'Download and Install Profile'
+    download_hint: "If you have any doubts, follow the %link%."
+    device_identified: 'Device identified as running: %os%'
+    is_wrong: 'Is this Wrong?'
+    click_to_select: 'Click here to select your OS.'
 
 invalidCaptcha: 'Invalid CAPTCHA validation!'
 logout: 'Logout'
@@ -46,6 +47,6 @@ accessLoggedInOnly: 'You can only access this page logged in.'
 confirmNewPasswordBeforeDownload: 'You need to confirm the new password before downloading a profile!'
 
 emailVerification:
-  newCodeSentEmail: 'We have sent you a new code to: %email%.'
-  waitBeforeTryingAgain: 'Please wait %time% minutes before trying again.'
-  accountSuccessfullyVerified: 'Your account is now successfully verified.'
+    newCodeSentEmail: 'We have sent you a new code to: %email%.'
+    waitBeforeTryingAgain: 'Please wait %time% minutes before trying again.'
+    accountSuccessfullyVerified: 'Your account is now successfully verified.'
