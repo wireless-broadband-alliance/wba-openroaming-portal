@@ -1,0 +1,9 @@
+introduction: "To securely access OpenRoaming networks, please follow the next steps"
+item1:
+    description: "Insira o seu email, aceite os termos e condições e prossiga clicando em “Create Account”"
+item2:
+    description: "Depois de ser redirecionado do email, clique em “Download and install Profile”."
+item3:
+    description: "Clique em “Open Settings”"
+item4:
+    description: "Clique em “Add” e ligue-se automaticamente à rede."

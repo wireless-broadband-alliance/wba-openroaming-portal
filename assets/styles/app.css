@@ -132,6 +132,10 @@
         @apply w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 gap-10;
     }
 
+    .instructions .card-grid-windows {
+        @apply w-full max-w-6xl grid grid-cols-1 gap-10;
+    }
+
     .instructions .card {
         @apply relative p-6 rounded-xl shadow-lg transition transform duration-200 hover:-translate-y-1 hover:shadow-2xl block h-full;
     }
@@ -150,6 +154,10 @@
 
     .instructions .card-image {
         @apply max-w-sm w-full object-contain rounded-lg cursor-zoom-in m-2;
+    }
+
+    .instructions .card-image-windows {
+        @apply w-full max-w-full h-auto object-contain rounded-lg cursor-zoom-in m-2;
     }
 }
 
