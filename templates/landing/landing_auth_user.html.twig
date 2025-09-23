@@ -12,7 +12,7 @@
 
     <div class="relative min-h-screen w-screen bg-center bg-cover flex items-start justify-center p-10"
          style="background-image: url('{{ bgUrl }}');">
-        <div class="bg-white rounded-2xl shadow-xl w-[90%] max-w-4xl max-h-[80vh] h-auto p-10 text-left overflow-y-auto flex flex-col">
+        <div class="bg-white rounded-2xl shadow-xl w-[90%] max-w-6xl max-h-[80vh] h-auto p-10 text-left overflow-y-auto flex flex-col">
             <div class="flex-1">
                 <div class="text-left">
                     {% block language %}
@@ -31,6 +31,12 @@
                         <img class="w-[120px] h-[58px] object-scale-down" src="{{ data.CUSTOMER_LOGO.value }}" alt="Customer Logo"/>
                     {% endif %}
                     <img class="w-[120px] h-[58px] object-scale-down" src="{{ data.OPENROAMING_LOGO.value }}" alt="OR Logo"/>
+                </div>
+
+                <div class="mt-4">
+                    {% if isEEAUser() != constant('App\\Enum\\GeoLocation\\IsEEAHandler::NOT_IN_EEA').value %}
+                        {{ include('landing/shared/_cookie_banner.html.twig') }}
+                    {% endif %}
                 </div>
 
                 <div class="mt-6 leading-7">
@@ -83,11 +89,7 @@
                 </div>
             </div>
 
-            <div class="mt-4">
-                {% if isEEAUser() != constant('App\\Enum\\GeoLocation\\IsEEAHandler::NOT_IN_EEA').value %}
-                    {{ include('landing/shared/_cookie_banner.html.twig') }}
-                {% endif %}
-            </div>
+
 
         </div>
     </div>
