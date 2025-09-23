@@ -23,9 +23,18 @@
     </div>
 
     {# Download profile button #}
-    <button type="submit" class="my-6 w-[250px] btn-primary py-2">
-        {{ 'os_selection.download_install'|trans({}, 'landing') }}
-    </button>
+    <div class="flex flex-col items-center gap-2">
+        <div>
+            <button type="submit" class="ml-auto w-[250px] btn-primary py-2">
+                {{ 'os_selection.download_install'|trans({}, 'landing') }}
+            </button>
+        </div>
+        <div>
+            <p class="text-sm text-gray-600">
+                {{ 'os_selection.download_hint'|trans({'%link%': '<a href="' ~ path('app_instructions') ~ '" class="font-bold underline">instructions</a>'}, 'landing')|raw }}
+            </p>
+        </div>
+    </div>
 </div>
 
 <input type="hidden" id="detected-os" name="detected-os" value="{{ data.os.selected }}"/>
@@ -45,9 +54,18 @@
             </div>
 
             {# Download profile button #}
-            <button type="submit" class="ml-auto w-[250px] btn-primary py-2">
-                {{ 'os_selection.download_install'|trans({}, 'landing') }}
-            </button>
+            <div class="flex flex-col items-center gap-2">
+                <div>
+                    <button type="submit" class="ml-auto w-[250px] btn-primary py-2">
+                        {{ 'os_selection.download_install'|trans({}, 'landing') }}
+                    </button>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-600">
+                        {{ 'os_selection.download_hint'|trans({'%link%': '<a href="' ~ path('app_instructions') ~ '" class="font-bold underline">instructions</a>'}, 'landing')|raw }}
+                    </p>
+                </div>
+            </div>
         </div>
 
         <p class="text-sm mt-[15px] mb-[40px]">
