@@ -40,7 +40,6 @@
                     <p class="mt-3">{{ 'profilesExplanation'|trans({}, 'landing') }}</p>
                 </div>
 
-
             <form method="post" novalidate>
                     {{ include('landing/shared/_os_selection.html.twig') }}
                 </form>
@@ -48,52 +47,53 @@
             {# Divider #}
             <div class="my-[25px] divider"></div>
 
-                {# testes #}
             <div {{ stimulus_controller('widget') }}>
-                    <div class="flex justify-between items-center w-full">
-                            <div>
-                                <p class="text-[#212529] text-opacity-40 text-sm">
-                                    {{ 'authenticatedAs'|trans({}, 'landing') }}
-                                    {% for auth in user.userExternalAuths %}
-                                        {% if auth.provider == constant('App\\Enum\\UserProvider::SAML').value %}
-                                            {{ auth.providerId }}
-                                        {% else %}
-                                            {{ app.user.uuid }}
-                                        {% endif %}
-                                    {% endfor %}
-                                </p>
-
-                                {% if app.user.isVerified %}
-                                    <div class="flex flex-row items-center gap-2">
-                                        <p class="text-sm text-[#707070]">{{ 'title'|trans({}, '_account_widget') }}</p>
-                                        <button id="widgetUserButton" type="button" {{ stimulus_action('widget', 'open') }}
-                                                class="duration-300 cursor-pointer rounded-full text-[#707070] focus:animate-spin-slow focus:bg-[#7DB928] focus:text-white hover:shadow-lg p-2.5 relative z-0">
-
-                                            <twig:ux:icon name="wba:cog" class="w-6" fill="none"/>
-                                        </button>
-                                    </div>
+                <div class="flex justify-between items-center w-full">
+                    <div>
+                        <p class="text-[#212529] text-opacity-40 text-sm">
+                            {{ 'authenticatedAs'|trans({}, 'landing') }}
+                            {% for auth in user.userExternalAuths %}
+                                {% if auth.provider == constant('App\\Enum\\UserProvider::SAML').value %}
+                                    {{ auth.providerId }}
+                                {% else %}
+                                    {{ app.user.uuid }}
                                 {% endif %}
-                                    {% if app.user.isVerified %}
+                            {% endfor %}
+                        </p>
 
-                                        {# Widget User Settings #}
-                                        <div {{ stimulus_target('widget', 'modal') }}
-                                                class="hidden fixed top-0 left-0 w-full h-full bg-[#090B2F] bg-opacity-70 z-20 ">
-                                            <div class="flex flex-row justify-center items-center h-full w-full">
-                                                {{ include('landing/shared/_account_widget.html.twig') }}
-                                            </div>
-                                        </div>
-                                    {% endif %}
+                        {% if app.user.isVerified %}
+                            <div class="flex flex-row items-center gap-2">
+                                <p class="text-sm text-[#707070]">{{ 'title'|trans({}, '_account_widget') }}</p>
+                                <button id="widgetUserButton" type="button" {{ stimulus_action('widget', 'open') }}
+                                        class="duration-300 cursor-pointer rounded-full text-[#707070] focus:animate-spin-slow focus:bg-[#7DB928] focus:text-white hover:shadow-lg p-2.5 relative z-0">
 
+                                    <twig:ux:icon name="wba:cog" class="w-6" fill="none"/>
+                                </button>
                             </div>
-                            <a href="{{ path('app_logout') }}" class="w-[160px] btn-logout">
-                                {{ 'logout'|trans({}, 'landing') }}
-                            </a>
+                        {% endif %}
+                            {% if app.user.isVerified %}
 
+                                {# Widget User Settings #}
+                                <div {{ stimulus_target('widget', 'modal') }}
+                                        class="hidden fixed top-0 left-0 w-full h-full bg-[#090B2F] bg-opacity-70 z-20 ">
+                                    <div class="flex flex-row justify-center items-center h-full w-full">
+                                        {{ include('landing/shared/_account_widget.html.twig') }}
+                                    </div>
+                                </div>
+                            {% endif %}
 
                     </div>
+                    <a href="{{ path('app_logout') }}" class="w-[160px] btn-logout">
+                        {{ 'logout'|trans({}, 'landing') }}
+                    </a>
                 </div>
+            </div>
 
-                {# test #}
+            <div class="grid grid-cols-1 gap-[5px] break-words">
+                {% if isEEAUser() != constant('App\\Enum\\GeoLocation\\IsEEAHandler::NOT_IN_EEA').value %}
+                    {{ include('landing/shared/_cookie_banner.html.twig') }}
+                {% endif %}
+            </div>
         </div>
     </div>
 
