@@ -27,7 +27,7 @@
                     {% endblock %}
                 </div>
             </div>
-            <div class="mr-4">
+            <div class="m-4">
                 {% if isEEAUser() != constant('App\\Enum\\GeoLocation\\IsEEAHandler::NOT_IN_EEA').value %}
                     {{ include('landing/shared/_cookie_banner.html.twig') }}
                 {% endif %}
