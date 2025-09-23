@@ -1,0 +1,18 @@
+introduction: "To securely access OpenRoaming networks, please follow the next steps"
+item1:
+    description: "Após abrir o link em anexo, insira o seu email, aceite os termos e condições e prossiga tocando em “Download and Install Profile”"
+item2:
+    description: "Feche a caixa de aviso"
+item3:
+    description: "Nas definições, toque em “Perfil descarregado”"
+item4:
+    description: "Toque em “Instalar”, no campo
+superior direito"
+item5:
+    description: "Insira o seu código"
+item6:
+    description: "Toque em “Instalar”"
+item7:
+    description: "Depois de finalizar, toque em “OK” e saia das definições"
+item8:
+    description: "Se estiver conectado a alguma rede no momento, desligue o Wi-Fi e volte a ligar. A rede estará com o nome de “OpenRoaming”"
