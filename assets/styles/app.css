@@ -125,11 +125,11 @@
     }
 
     .instructions .card-grid {
-        @apply w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 gap-8;
+        @apply w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 gap-10;
     }
 
     .instructions .card {
-        @apply relative p-6 rounded-xl shadow-lg transition transform duration-200 hover:-translate-y-1 hover:shadow-2xl;
+        @apply relative p-6 rounded-xl shadow-lg transition transform duration-200 hover:-translate-y-1 hover:shadow-2xl block h-full;
     }
 
     .instructions .card-number {
@@ -138,6 +138,14 @@
 
     .instructions .card-title {
         @apply text-xl font-semibold mt-4;
+    }
+
+    .instructions .card-description {
+        @apply text-sm text-gray-600 mt-4;
+    }
+
+    .instructions .card-image {
+        @apply max-w-sm w-full object-contain rounded-lg cursor-zoom-in m-2;
     }
 }
 
