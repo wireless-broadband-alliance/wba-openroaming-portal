@@ -1,0 +1,72 @@
+{% extends 'landing/base.html.twig' %}
+
+{% block title %}
+    {{ data.PAGE_TITLE.value }}
+{% endblock %}
+
+{% block second_col %}
+    {# Toasts #}
+    {{ block('toast_messages') }}
+
+    {% if data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\OperationMode::ON').value %}
+        <img class="w-[120px] h-[58px] object-scale-down mt-[75px]" src="{{ data.CUSTOMER_LOGO.value }}" alt="{{ 'logoAlt'|trans({}, 'verify2FA') }}"/>
+    {% endif %}
+
+    <div class="{{ data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\OperationMode::ON').value ? 'pt-[28px]' : 'pt-[161px]' }} leading-7">
+        <p class="font-bold text-xl">{{ 'heading'|trans({}, 'verify2FA') }}</p>
+
+        {% if data.TWO_FACTOR_AUTH_STATUS.value == constant('App\\Enum\\TwoFAType::NOT_ENFORCED').value %}
+            {% if user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value %}
+                <p class="text-lg">
+                    {{ 'notEnforced.disabled'|trans({}, 'verify2FA') }}
+                </p>
+            {% else %}
+                <p class="text-lg">
+                    {{ 'notEnforced.enabled'|trans({}, 'verify2FA') }}
+                </p>
+            {% endif %}
+            <p class="text-md">
+                {{ 'notEnforced.prompt'|trans({}, 'verify2FA') }}
+            </p>
+        {% elseif data.TWO_FACTOR_AUTH_STATUS.value == constant('App\\Enum\\TwoFAType::ENFORCED_FOR_LOCAL').value %}
+            <p class="text-lg">
+                {{ 'enforced.local'|trans({}, 'verify2FA') }}
+            </p>
+        {% elseif data.TWO_FACTOR_AUTH_STATUS.value == constant('App\\Enum\\TwoFAType::ENFORCED_FOR_ALL').value %}
+            <p class="text-lg">
+                {{ 'enforced.all'|trans({}, 'verify2FA') }}
+            </p>
+        {% else %}
+            <p class="text-lg">
+                {{ 'default'|trans({}, 'verify2FA') }}
+            </p>
+        {% endif %}
+    </div>
+
+    {# Form Column #}
+    {{ form_start(form) }}
+    <div class="relative mt-10">
+        {{ form_widget(form.code, {
+            attr: {
+                class: 'form-widget',
+                placeholder: 'placeholder'|trans({}, 'verify2FA'),
+            }}) }}
+    </div>
+
+    <div class="grid mt-4 grid-cols-1 sm:gap-4 lg:gap-6 sm:[grid-template-columns:repeat(auto-fit,minmax(150px,1fr))] md:my-2 my-3">
+        <button class="btn-primary"
+                type="submit">{{ 'submit'|trans({}, 'verify2FA') }}</button>
+
+        {% if not (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::TOTP').value) %}
+            <a href="{{ path('app_local_resend_code', {
+                context: context,
+                type: constant('App\\Enum\\CodeVerificationType::TWO_FA_VERIFY_RESEND').value},
+            ) }}"
+               class="btn-secondary">{{ 'resend'|trans({}, 'verify2FA') }}</a>
+        {% endif %}
+    </div>
+
+    {{ form_end(form) }}
+
+    {{ include('landing/shared/returnActions/_logout.html.twig') }}
+{% endblock %}

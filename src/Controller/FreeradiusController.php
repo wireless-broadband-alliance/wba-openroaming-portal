@@ -27,18 +27,18 @@ use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class FreeradiusController extends AbstractController
 {
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
         private readonly GetSettings $getSettings,
-        private readonly UserRepository $userRepository,
-        private readonly SettingRepository $settingRepository,
         private readonly ParameterBagInterface $parameterBag,
         private readonly EventActions $eventActions,
         private readonly RadiusAuthsRepository $radiusAuthsRepository,
         private readonly RadiusAccountingRepository $radiusAccountingRepository,
+        private readonly TranslatorInterface $translator,
         private readonly FreeradiusConnectionService $freeradiusConnectionService
     ) {
     }
@@ -66,7 +66,7 @@ class FreeradiusController extends AbstractController
             );
         }
 
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
 
         $user = $this->getUser();
         $export_freeradius_statistics = $this->parameterBag->get('app.export_freeradius_statistics');
@@ -86,7 +86,11 @@ class FreeradiusController extends AbstractController
         if ($interval->days > 365) {
             $this->addFlash(
                 'error_admin',
-                'Maximum date range is 1 year'
+                $this->translator->trans(
+                    'maximumDateRange1Year',
+                    [],
+                    'controllers'
+                )
             );
 
             return $this->redirectToRoute('admin_dashboard_statistics_freeradius');
@@ -117,7 +121,11 @@ class FreeradiusController extends AbstractController
         if ($memory_diff > 134217728) {
             $this->addFlash(
                 'error_admin',
-                'Maximum date range is 1 year'
+                $this->translator->trans(
+                    'maximumDateRange1Year',
+                    [],
+                    'controllers'
+                )
             );
 
             return $this->redirectToRoute('admin_dashboard_statistics_freeradius');
@@ -188,7 +196,7 @@ class FreeradiusController extends AbstractController
         $offset = ($page - 1) * $count;
         $fetchChartApUsage = array_slice($fetchChartApUsage, $offset, $count);
 
-        return $this->render('admin/freeradius_statistics.html.twig', [
+        return $this->render('dashboard/statistics/freeradius_statistics.html.twig', [
             'user' => $user,
             'data' => $data,
             'current_user' => $user,

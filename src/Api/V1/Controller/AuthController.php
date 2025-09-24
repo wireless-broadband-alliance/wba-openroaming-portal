@@ -196,17 +196,17 @@ class AuthController extends AbstractController
         ]);
 
         // Defines the Event to the table
-        $eventMetadata = [
-            'ip' => $request->getClientIp(),
+        $eventMetaData = [
             'user_agent' => $request->headers->get('User-Agent'),
             'uuid' => $user->getUuid(),
+            'ip' => $request->getClientIp(),
         ];
 
         $this->eventActions->saveEvent(
             $user,
             AnalyticalEventType::AUTH_LOCAL_API->value,
             new DateTime(),
-            $eventMetadata
+            $eventMetaData
         );
 
         // Return success response using BaseResponse
@@ -372,16 +372,17 @@ class AuthController extends AbstractController
             ]);
 
             // Defines the Event to the table
-            $eventMetadata = [
-                'ip' => $request->getClientIp(),
+            $eventMetaData = [
+                'user_agent' => $request->headers->get('User-Agent'),
                 'uuid' => $user->getUuid(),
+                'ip' => $request->getClientIp(),
             ];
 
             $this->eventActions->saveEvent(
                 $user,
                 AnalyticalEventType::AUTH_SAML_API->value,
                 new DateTime(),
-                $eventMetadata
+                $eventMetaData
             );
 
             return new BaseResponse(200, $responseData)->toResponse(); // Success
@@ -499,17 +500,17 @@ class AuthController extends AbstractController
             $formattedUserData = $user->toApiResponse(['token' => $token]);
 
             // Defines the Event to the table
-            $eventMetadata = [
-                'ip' => $request->getClientIp(),
+            $eventMetaData = [
                 'user_agent' => $request->headers->get('User-Agent'),
                 'uuid' => $user->getUuid(),
+                'ip' => $request->getClientIp(),
             ];
 
             $this->eventActions->saveEvent(
                 $user,
                 AnalyticalEventType::AUTH_GOOGLE_API->value,
                 new DateTime(),
-                $eventMetadata
+                $eventMetaData
             );
 
             return new BaseResponse(200, $formattedUserData, null)->toResponse();
@@ -627,17 +628,17 @@ class AuthController extends AbstractController
             $formattedUserData = $user->toApiResponse(['token' => $token]);
 
             // Defines the Event to the table
-            $eventMetadata = [
-                'ip' => $request->getClientIp(),
+            $eventMetaData = [
                 'user_agent' => $request->headers->get('User-Agent'),
                 'uuid' => $user->getUuid(),
+                'ip' => $request->getClientIp(),
             ];
 
             $this->eventActions->saveEvent(
                 $user,
                 AnalyticalEventType::AUTH_MICROSOFT_API->value,
                 new DateTime(),
-                $eventMetadata
+                $eventMetaData
             );
 
             return new BaseResponse(200, $formattedUserData, null)->toResponse();

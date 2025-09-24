@@ -6,17 +6,24 @@ use Doctrine\DBAL\Connection;
 use Doctrine\Persistence\ManagerRegistry;
 use RuntimeException;
 use Throwable;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 readonly class FreeradiusConnectionService
 {
     private Connection $freeradiusConnection;
 
-    public function __construct(ManagerRegistry $doctrine)
-    {
+    public function __construct(
+        ManagerRegistry $doctrine,
+        private TranslatorInterface $translator
+    ) {
         $connection = $doctrine->getConnection('freeradius');
 
         if (!$connection instanceof Connection) {
-            throw new RuntimeException('Invalid connection type.');
+            throw new RuntimeException($this->translator->trans(
+                'invalidConnectionType',
+                [],
+                'FreeradiusConnectionService'
+            ));
         }
 
         $this->freeradiusConnection = $connection;
@@ -28,13 +35,16 @@ readonly class FreeradiusConnectionService
             $this->freeradiusConnection->executeQuery('SELECT 1');
             return [
                 'success' => true,
-                'message' => 'FreeRADIUS DB connection - Successfully connected.',
+                'message' => $this->translator->trans(
+                    'freeRADIUSConnectionSuccessfully',
+                    [],
+                    'FreeradiusConnectionService'
+                ),
             ];
         } catch (Throwable) {
             return [
                 'success' => false,
-                'message' => 'FreeRADIUS DB connection failed: Failed to connect to the database. ' .
-                    'Please check your connection details on the .env configuration.',
+                'message' => $this->translator->trans('FreeRADIUSConnectionFailed', [], 'FreeradiusConnectionService'),
             ];
         }
     }

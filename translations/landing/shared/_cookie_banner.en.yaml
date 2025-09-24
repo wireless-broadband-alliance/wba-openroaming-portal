@@ -1,0 +1,35 @@
+title: 'Cookies Settings'
+subTitle: 'Necessary Cookies'
+text: 'By accepting cookies, you consent to downloading and installing an OpenRoaming profile for your device as part of the WBA OpenRoaming program.'
+accept: 'Accept Cookies'
+reject: 'Reject Cookies'
+apply: 'Apply Cookies'
+settings: 'Cookie Settings'
+manage: 'Manage Cookies'
+close: 'Close'
+cookiesDescription: 'This platform uses cookies to provide a seamless experience when connecting to the OpenRoaming network. These cookies are essential for provisioning your device securely, enabling automatic authentication, and ensuring compliance with our policies. By using our platform, you consent to the use of these cookies.'
+essentialCookiesText: 'These cookies are essential for the platform to function properly and cannot be disabled.'
+dataSafetyText: 'Your data is safe with us. Learn more in our'
+
+controlledBy: 'Controlled by'
+privacyPolicy: 'Privacy Policy'
+manageableCookiesTitle: 'Manageable Cookies'
+manageableCookiesDescription: 'These cookies help us understand how you like to use our platform.'
+sessionCookie:
+    title: 'Session Cookie (PHPSESSID)'
+    description: 'This cookie is essential for maintaining the user session state during its duration. It allows the platform to function properly and ensures a seamless user experience.'
+csrfToken:
+    title: 'CSRF Token'
+    description: 'Protects against cross-site request forgery (CSRF) attacks by ensuring that forms and requests are submitted from trusted sources.'
+samlSessionCookie:
+    title: 'SAML Session Cookie'
+    description: 'Used to manage authentication and session state during Single Sign-On (SSO) interactions with a SAML identity provider. Ensures secure and seamless login across connected services.'
+jwtAuthenticationCookie:
+    title: 'JWT Authentication Cookie'
+    description: 'Stores a JSON Web Token (JWT) for user authentication, enabling secure access to protected resources during a user''s session. Ensures that the user''s identity is verified throughout the session.'
+turnstileCookie:
+    title: 'Turnstile Security Cookie'
+    description: 'Ensures platform security by preventing spam and bot interactions.'
+rememberMeCookie:
+    title: 'Remember Me'
+    description: 'Saves user session if the account was previously active.'

@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\DTO\UserUpdateDTO;
+use App\Entity\Event;
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
 use App\Entity\UserRadiusProfile;
@@ -10,17 +11,16 @@ use App\Enum\AnalyticalEventType;
 use App\Enum\FirewallType;
 use App\Enum\OperationMode;
 use App\Enum\PlatformMode;
-use App\Enum\SMSResponse;
 use App\Enum\UserProvider;
 use App\Enum\UserRadiusProfileRevokeReason;
 use App\Enum\UserTwoFactorAuthenticationStatus;
 use App\Form\ResetPasswordType;
 use App\Form\UserUpdateType;
 use App\Repository\EventRepository;
-use App\Repository\SettingRepository;
 use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRadiusProfileRepository;
 use App\Repository\UserRepository;
+use App\Service\EmailGenerator;
 use App\Service\EscapeSpreadSheet;
 use App\Service\EventActions;
 use App\Service\GetSettings;
@@ -47,6 +47,7 @@ use Symfony\Component\Mime\Email;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class UsersManagementController extends AbstractController
 {
@@ -58,13 +59,14 @@ class UsersManagementController extends AbstractController
         private readonly EntityManagerInterface $entityManager,
         private readonly UserExternalAuthRepository $userExternalAuthRepository,
         private readonly GetSettings $getSettings,
-        private readonly SettingRepository $settingRepository,
         private readonly EventRepository $eventRepository,
         private readonly SendSMS $sendSMS,
         private readonly UserDeletionService $userDeletionService,
         private readonly TwoFAService $twoFAService,
         private readonly VerificationCodeEmailGenerator $verificationCodeEmailGenerator,
+        private readonly TranslatorInterface $translator,
         private readonly UserRadiusProfileRepository $radiusProfileRepository,
+        private readonly EmailGenerator $emailGenerator,
     ) {
     }
 
@@ -79,7 +81,10 @@ class UsersManagementController extends AbstractController
         $currentUser = $this->getUser();
         $user = $userRepository->find($id);
         if (!$user) {
-            $this->addFlash('error', 'User not found.');
+            $this->addFlash(
+                'error',
+                $this->translator->trans('userNotFound', [], 'controllers')
+            );
             return $this->redirectToRoute('app_landing');
         }
         $revokeProfiles = $this->profileManager->disableProfiles(
@@ -88,7 +93,10 @@ class UsersManagementController extends AbstractController
             true
         );
         if (!$revokeProfiles) {
-            $this->addFlash('error_admin', 'This account doesn\'t have profiles associated!');
+            $this->addFlash(
+                'error_admin',
+                $this->translator->trans('accountWithoutProfilesAssociated', [], 'controllers')
+            );
             return $this->redirectToRoute('admin_page');
         }
 
@@ -108,9 +116,12 @@ class UsersManagementController extends AbstractController
 
         $this->addFlash(
             'success_admin',
-            sprintf(
-                'Profile associated "%s" have been revoked.',
-                $user->getUuid()
+            $this->translator->trans(
+                'profileRevoked',
+                [
+                    '%uuid%' => $user->getUuid()
+                ],
+                'controllers'
             )
         );
 
@@ -135,7 +146,10 @@ class UsersManagementController extends AbstractController
         // Check if the export users operation is enabled
         $exportUsers = $this->parameterBag->get('app.export_users');
         if ($exportUsers === OperationMode::OFF->value) {
-            $this->addFlash('error_admin', 'This operation is disabled for security reasons');
+            $this->addFlash(
+                'error_admin',
+                $this->translator->trans('operationDisabledForSecurityReasons', [], 'controllers')
+            );
             return $this->redirectToRoute('admin_page');
         }
 
@@ -278,12 +292,17 @@ class UsersManagementController extends AbstractController
         $user = $this->userRepository->find($id);
         $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $id]);
         if (!$user) {
-            throw $this->createNotFoundException('User not found.');
+            throw $this->createNotFoundException(
+                $this->translator->trans('userNotFound', [], 'controllers')
+            );
         }
         $getUserUuid = $user->getUuid();
 
         if ($user->getDeletedAt() !== null) {
-            $this->addFlash('error_admin', 'This user has already been deleted.');
+            $this->addFlash(
+                'error_admin',
+                $this->translator->trans('userAlreadyDeleted', [], 'controllers')
+            );
             return $this->redirectToRoute('admin_page');
         }
 
@@ -294,8 +313,20 @@ class UsersManagementController extends AbstractController
             return $this->redirectToRoute('admin_page');
         }
 
-        $this->addFlash('success_admin', sprintf('User with the UUID "%s" deleted successfully.', $getUserUuid));
-        return $this->redirectToRoute('admin_page');
+        $this->addFlash(
+            'success_admin',
+            $this->translator->trans(
+                'userDeleted',
+                [
+                    '%uuid%' => $getUserUuid
+                ],
+                'controllers'
+            )
+        );
+
+        // Return to the last page where the user has (with searching filters)
+        $lastPage = $request->headers->get('referer', '/dashboard');
+        return $this->redirect($lastPage);
     }
 
     /**
@@ -314,20 +345,28 @@ class UsersManagementController extends AbstractController
         $id
     ): Response {
         // Call the getSettings method of GetSettings class to retrieve the data
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
 
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
         $currentUser = $this->getUser();
 
+
+
         if (!$user = $this->userRepository->find($id)) {
             // Get the 'id' parameter from the route URL
-            $this->addFlash('error_admin', 'The user does not exist.');
+            $this->addFlash(
+                'error_admin',
+                $this->translator->trans('userNotFound', [], 'controllers')
+            );
             return $this->redirectToRoute('admin_page');
         }
 
         if ($user->getDeletedAt() !== null) {
-            $this->addFlash('error_admin', 'This user has already been deleted.');
+            $this->addFlash(
+                'error_admin',
+                $this->translator->trans('userAlreadyDeleted', [], 'controllers')
+            );
             return $this->redirectToRoute('admin_page');
         }
 
@@ -382,16 +421,22 @@ class UsersManagementController extends AbstractController
                 ]
             );
 
+            $uuid = $user->getUuid();
             $this->addFlash(
                 'success_admin',
-                sprintf('"%s" has been updated successfully.', $user->getUuid())
+                $this->translator->trans(
+                    'userUpdated',
+                    [
+                        '%uuid%' => $uuid
+                    ],
+                    'controllers'
+                )
             );
 
-            return $this->redirectToRoute('admin_user_edit', ['id' => $user->getId()]);
+            // Return to the last page where the user has (with searching filters)
+            $lastPage = $request->headers->get('referer', '/dashboard');
+            return $this->redirect($lastPage);
         }
-
-        $emailSender = $this->parameterBag->get('app.email_address');
-        $nameSender = $this->parameterBag->get('app.sender_name');
 
         $formReset = $this->createForm(ResetPasswordType::class, $user);
         $formReset->handleRequest($request);
@@ -402,7 +447,10 @@ class UsersManagementController extends AbstractController
             $confirmPassword = $formReset->get('confirmPassword')->getData();
 
             if ($newPassword !== $confirmPassword) {
-                $this->addFlash('error_admin', 'Both the password and password confirmation fields must match.');
+                $this->addFlash(
+                    'error_admin',
+                    $this->translator->trans('PasswordPasswordConfirmationMustMatch', [], 'controllers')
+                );
                 return $this->redirectToRoute('admin_user_edit', ['id' => $user->getId()]);
             }
 
@@ -416,25 +464,8 @@ class UsersManagementController extends AbstractController
             $em->flush();
 
             if ($user->getEmail()) {
-                $supportTeam = $data['title']['value'];
-                $contactEmail = $data['contactEmail']['value'];
-                // Send email
-                $email = new Email()
-                    ->from(new Address($emailSender, $nameSender))
-                    ->to($user->getEmail())
-                    ->subject('Your Password Reset Details')
-                    ->html(
-                        $this->renderView(
-                            'email/user_password.html.twig',
-                            [
-                                'password' => $newPassword,
-                                'isNewUser' => false,
-                                'supportTeam' => $supportTeam,
-                                'contactEmail' => $contactEmail
-                            ]
-                        )
-                    );
-                $mailer->send($email);
+                // Send email for the user
+                $this->emailGenerator->sendResetPasswordEmailByAdmin($user, $newPassword);
 
                 $eventMetadata = [
                     'ip' => $request->getClientIp(),
@@ -464,7 +495,7 @@ class UsersManagementController extends AbstractController
                 $currentTime = new DateTime();
 
                 // Retrieve the metadata from the latest event
-                $latestEventMetadata = $latestEvent instanceof \App\Entity\Event ? $latestEvent->getEventMetadata(
+                $latestEventMetadata = $latestEvent instanceof Event ? $latestEvent->getEventMetadata(
                 ) : [];
                 $lastResetAccountPasswordTime = isset($latestEventMetadata['lastResetAccountPasswordTime'])
                     ? new DateTime($latestEventMetadata['lastResetAccountPasswordTime'])
@@ -481,7 +512,11 @@ class UsersManagementController extends AbstractController
                 ) {
                     $attempts = $resetAttempts + 1;
 
-                    $message = "Your new account password is: " . $newPassword . "%0A";
+                    $message = $this->translator->trans(
+                        'newPasswordMessage',
+                        ['%password%' => $newPassword],
+                        'controllers'
+                    );
                     $smsResponse = $this->sendSMS->sendSmsNoValidation($user, $message);
 
                     if ($smsResponse !== '' && $smsResponse !== '0') {
@@ -511,9 +546,20 @@ class UsersManagementController extends AbstractController
                     }
                 }
             }
+            $this->addFlash(
+                'success_admin',
+                $this->translator->trans(
+                    'passwordUpdated',
+                    [
+                        '%uuid%' => $user->getUuid()
+                    ],
+                    'controllers'
+                )
+            );
 
-            $this->addFlash('success_admin', sprintf('"%s" is password was updated.', $user->getUuid()));
-            return $this->redirectToRoute('admin_page');
+            // Return to the last page where the user has (with searching filters)
+            $lastPage = $request->headers->get('referer', '/dashboard');
+            return $this->redirect($lastPage);
         }
 
         $lastConnectedProfile = $this->radiusProfileRepository->findUserLastConnection($user);
@@ -527,7 +573,7 @@ class UsersManagementController extends AbstractController
         }
 
         return $this->render(
-            'admin/edit.html.twig',
+            'dashboard/actions/edit.html.twig',
             [
                 'form' => $form->createView(),
                 'formReset' => $formReset->createView(),
@@ -553,9 +599,9 @@ class UsersManagementController extends AbstractController
     public function confirmReset(string $type): Response
     {
         // Call the getSettings method of GetSettings class to retrieve the data
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
 
-        return $this->render('admin/confirm.html.twig', [
+        return $this->render('dashboard/actions/confirm.html.twig', [
             'data' => $data,
             'type' => $type
         ]);
@@ -573,13 +619,17 @@ class UsersManagementController extends AbstractController
         MailerInterface $mailer
     ): RedirectResponse {
         if (!$user = $this->userRepository->find($id)) {
-            $this->addFlash('error_admin', 'The user does not exist.');
+            // Get the 'id' parameter from the route URL
+            $this->addFlash(
+                'error_admin',
+                $this->translator->trans('userNotFound', [], 'controllers')
+            );
             return $this->redirectToRoute('admin_page');
         }
 
         $userExternalAuths = $this->userExternalAuthRepository->findOneBy(['user' => $user]);
 
-        // Disable current associated Profile
+        // Disable the current associated Profile
         $this->profileManager->disableProfiles(
             $user,
             UserRadiusProfileRevokeReason::TWO_FA_DISABLED_BY->value,
@@ -601,22 +651,26 @@ class UsersManagementController extends AbstractController
             $user->getPhoneNumber() &&
             $userExternalAuths->getProviderId() === UserProvider::PHONE_NUMBER->value
         ) {
-            $message = "Your OpenRoaming 2FA has been disabled. Please re-enable it as soon as possible.";
+            $message = $this->translator->trans('2faDisabledMessage', [], 'controllers');
+            $this->sendSMS->sendSmsNoValidation($user, $message);
             $smsResponse = $this->sendSMS->sendSmsNoValidation($user, $message);
 
             if ($smsResponse !== '' && $smsResponse !== '0') {
                 $this->addFlash(
                     'success_admin',
-                    'Two-factor authentication successfully disabled and SMS notification sent.'
+                    $this->translator->trans('2faDisabledSMSSent', [], 'controllers')
                 );
             } else {
                 $this->addFlash(
-                    'error_admin',
-                    '2FA disabled, but the SMS notification failed to send. Please notify the user manually.'
+                    'success_admin',
+                    $this->translator->trans('2faDisabledSMSFailed', [], 'controllers')
                 );
             }
         } else {
-            $this->addFlash('success_admin', 'Two-factor authentication successfully disabled.');
+            $this->addFlash(
+                'success_admin',
+                $this->translator->trans('twoFASuccessfullyDisabled', [], 'controllers')
+            );
         }
 
         return $this->redirectToRoute('admin_user_edit', [

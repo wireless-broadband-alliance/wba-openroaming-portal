@@ -10,11 +10,14 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class TermsType extends AbstractType
 {
-    public function __construct(private readonly GetSettings $getSettings)
-    {
+    public function __construct(
+        private readonly GetSettings $getSettings,
+        private readonly TranslatorInterface $translator
+    ) {
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
@@ -40,7 +43,7 @@ class TermsType extends AbstractType
                     ],
                     'constraints' => [
                         new Assert\Url([
-                            'message' => 'The value {{ value }} is not a valid URL.',
+                            'message' => $this->translator->trans('valueNotValid', [], 'CapportType'),
                             'protocols' => ['http', 'https'],
                             'requireTld' => true,
                         ]),
@@ -52,7 +55,7 @@ class TermsType extends AbstractType
                     'LINK' => 'LINK',
                     'TEXT_EDITOR' => 'TEXT_EDITOR',
                 ];
-                $formFieldOptions['placeholder'] = 'Select an option';
+                $formFieldOptions['placeholder'] = $this->translator->trans('selectOption', [], 'CapportType');
             }
             // Get the corresponding Setting entity and set its value
             foreach ($options['settings'] as $setting) {

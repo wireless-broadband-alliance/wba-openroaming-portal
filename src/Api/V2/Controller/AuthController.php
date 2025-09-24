@@ -17,6 +17,7 @@ use App\Enum\UserTwoFactorAuthenticationStatus;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use App\Service\CaptchaValidator;
+use App\Service\EmailGenerator;
 use App\Service\EventActions;
 use App\Service\JWTTokenGenerator;
 use App\Service\MagicLinkService;
@@ -62,6 +63,7 @@ class AuthController extends AbstractController
         private readonly SettingRepository $settingRepository,
         private readonly MagicLinkService $magicLinkService,
         private readonly SendSMS $sendSMS,
+        private readonly EmailGenerator $emailGenerator,
     ) {
     }
 
@@ -212,17 +214,17 @@ class AuthController extends AbstractController
             }
 
             // Defines the Event to the table
-            $eventMetadata = [
-                'ip' => $request->getClientIp(),
+            $eventMetaData = [
                 'user_agent' => $request->headers->get('User-Agent'),
                 'uuid' => $user->getUuid(),
+                'ip' => $request->getClientIp(),
             ];
 
             $this->eventActions->saveEvent(
                 $user,
                 AnalyticalEventType::AUTH_LOCAL_API->value,
                 new DateTime(),
-                $eventMetadata
+                $eventMetaData
             );
 
             // Prepare response data
@@ -239,7 +241,7 @@ class AuthController extends AbstractController
         if (!($event instanceof Event)) {
             $providerId = $user->getUserExternalAuths()[0]->getProviderId();
             if ($providerId === UserProvider::EMAIL->value) {
-                $this->magicLinkService->sendEmail($user);
+                $this->emailGenerator->sendRegistrationEmail($user);
                 $this->addFlash(
                     'success',
                     'A login link has been sent to your email address.'
@@ -281,7 +283,6 @@ class AuthController extends AbstractController
         }
 
         $eventMetaData = [
-            'platform' => PlatformMode::LIVE->value,
             'user_agent' => $request->headers->get('User-Agent'),
             'uuid' => $user->getUuid(),
             'ip' => $request->getClientIp(),

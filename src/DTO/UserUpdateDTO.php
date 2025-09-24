@@ -9,7 +9,7 @@ use Misd\PhoneNumberBundle\Validator\Constraints\PhoneNumber as AssertPhoneNumbe
 
 class UserUpdateDTO
 {
-    #[Assert\NotBlank(message: 'UUID cannot be blank.')]
+    #[Assert\NotBlank(message: 'UUIDNotBlank')]
     public ?string $uuid = null;
 
     #[Assert\Email]
@@ -56,5 +56,6 @@ class UserUpdateDTO
         $user->setFirstName($this->firstName);
         $user->setLastName($this->lastName);
         $user->setPhoneNumber($this->phoneNumber);
+        $user->setIsVerified($this->isVerified);
     }
 }

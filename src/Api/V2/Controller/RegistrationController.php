@@ -17,7 +17,7 @@ use App\Repository\UserRepository;
 use App\Service\CaptchaValidator;
 use App\Service\EventActions;
 use App\Service\GetSettings;
-use App\Service\RegistrationEmailGenerator;
+use App\Service\EmailGenerator;
 use App\Service\SendSMS;
 use DateInterval;
 use DateTime;
@@ -60,7 +60,7 @@ class RegistrationController extends AbstractController
         private readonly SettingRepository $settingRepository,
         private readonly UserPasswordHasherInterface $userPasswordHasher,
         private readonly CaptchaValidator $captchaValidator,
-        private readonly RegistrationEmailGenerator $emailGenerator,
+        private readonly EmailGenerator $emailGenerator,
         private readonly ValidatorInterface $validator
     ) {
     }
@@ -279,7 +279,8 @@ class RegistrationController extends AbstractController
                     $user,
                     AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST->value
                 );
-                $minInterval = new DateInterval('PT2M');
+                $emailTimerResend = $this->settingRepository->findOneBy(['name' => 'EMAIL_TIMER_RESEND'])->getValue();
+                $minInterval = new DateInterval('PT' . $emailTimerResend . 'M');
                 $currentTime = new DateTime();
                 $latestEventMetadata = $latestEvent instanceof Event ? $latestEvent->getEventMetadata() : [];
                 $lastVerificationCodeTime = isset($latestEventMetadata['lastVerificationCodeTime'])
@@ -641,7 +642,7 @@ class RegistrationController extends AbstractController
                 }
             }
 
-            $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+            $data = $this->getSettings->getSettings();
 
             if ($hasValidPortalAccount) {
                 try {

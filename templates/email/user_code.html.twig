@@ -1,56 +1,56 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ emailTitle }} - Code Verification</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>{{ emailTitle }} - {{ 'codeVerification'|trans({}, 'user_code') }}</title>
 </head>
-<body style="background-color: #080D4A; font-family: ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji'; color: #4A5568; margin: 0; padding: 0;">
-<div style="width: 100%; max-width: 600px; margin: 0 auto; padding: 3rem 1rem;">
-    <div style="max-width: 448px; margin: 0 auto; background-color: #fff; border-radius: 16px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1); overflow: hidden;">
-        <div style="background-color: #7BBA29; color: #fff; padding: 1.5rem; text-align: center;">
-            <h1 style="font-size: 1.5rem; font-weight: 700;">
-                {% if is2FATemplate %}
-                    Two-Factor Authentication
-                {% else %}
-                    Verify Your Account
-                {% endif %}
-            </h1>
-        </div>
-        <div style="padding: 1.5rem;">
-            {% if is2FATemplate %}
-                <p style="font-size: 1.125rem; margin-bottom: 1rem;">
-                    Your two-factor authentication code is:
-                </p>
-                <p style="text-align: center; font-size: 1.5rem; font-weight: 700; color: #0045AD; margin: 1.5rem 0;">
-                    {{ twoFaCode }}
-                </p>
-                <p style="font-size: 1.125rem; margin-bottom: 1rem;">
-                    This code can only be used once and is valid for the next
-                    <span style="font-weight: 700;">{{ secondsLeft }}</span> seconds.
-                </p>
-                <p style="font-size: 1.125rem; margin-bottom: 1rem;">
-                    Please keep this code confidential and do not share it with others.
-                </p>
-            {% else %}
-                <p style="font-size: 1.125rem; margin-bottom: 1rem;">
-                    Your authentication code is:
-                </p>
-                <p style="text-align: center; font-size: 1.5rem; font-weight: 700; color: #0045AD; margin: 1.5rem 0;">
-                    {{ twoFaCode }}
-                </p>
-                <p style="font-size: 1.125rem; margin-bottom: 1rem;">
-                    Please keep this code confidential and do not share it with others.
-                </p>
-            {% endif %}
-        </div>
-        <div style="background-color: #f4f4f4; text-align: center; padding: 1.5rem;">
-            <p style="font-size: 0.875rem; color: #718096;">
-                Thank you,<br>
-                <strong>{{ emailTitle }} Team</strong>
-            </p>
-        </div>
-    </div>
-</div>
+<body style="margin:0; padding:0; background-color:#080D4A; font-family:Arial, sans-serif; color:#4A5568;">
+<table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" bgcolor="#080D4A">
+    <tr>
+        <td align="center" style="padding:3rem 1rem;">
+            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="600" style="background-color:#fff; border-radius:16px; overflow:hidden;">
+
+                <!-- HEADER -->
+                <tr>
+                    <td bgcolor="#7BBA29" align="center" style="padding:24px; color:#ffffff; font-weight:bold; font-size:20px;">
+                        {% if is2FATemplate %}
+                            {{ 'twoFactorAuthentication'|trans({}, 'user_code') }}
+                        {% else %}
+                            {{ 'verifyAccount'|trans({}, 'user_code') }}
+                        {% endif %}
+                    </td>
+                </tr>
+
+                <!-- BODY -->
+                <tr>
+                    <td align="left" style="padding:24px; font-size:16px; line-height:1.5; color:#333333;">
+                        {% if is2FATemplate %}
+                            <p style="margin:0 0 16px 0;">{{ 'twoFactorAuthenticationCode'|trans({}, 'user_code') }}</p>
+                            <p style="text-align:center; font-size:24px; font-weight:bold; color:#0045AD; margin:24px 0;">{{ twoFaCode }}</p>
+                            <p style="margin:0 0 16px 0;">{{ 'validForSeconds'|trans({'%seconds%': secondsLeft}, 'user_code')|raw }}</p>
+                            <p style="margin:0 0 16px 0;">{{ 'KeepConfidential'|trans({}, 'user_code') }}</p>
+                        {% else %}
+                            <p style="margin:0 0 16px 0;">{{ 'authCode'|trans({}, 'user_code') }}</p>
+                            <p style="text-align:center; font-size:24px; font-weight:bold; color:#0045AD; margin:24px 0;">{{ twoFaCode }}</p>
+                            <p style="margin:0 0 16px 0;">{{ 'KeepConfidential'|trans({}, 'user_code') }}</p>
+                        {% endif %}
+                    </td>
+                </tr>
+
+                <!-- FOOTER -->
+                <tr>
+                    <td bgcolor="#f4f4f4" align="center" style="padding:24px; font-size:14px; color:#718096;">
+                        <p style="margin:0;">
+                            {{ 'thankYou'|trans({}, 'user_code') }}<br />
+                            <strong style="color:#333333;">{{ 'team'|trans({'%supportTeam%': emailTitle}, 'user_code') }}</strong>
+                        </p>
+                    </td>
+                </tr>
+
+            </table>
+        </td>
+    </tr>
+</table>
 </body>
 </html>

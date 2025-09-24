@@ -16,11 +16,13 @@ use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class LoginType extends AbstractType
 {
     public function __construct(
-        private readonly SettingRepository $settingRepository
+        private readonly SettingRepository $settingRepository,
+        private readonly TranslatorInterface $translator
     ) {
     }
 
@@ -62,7 +64,7 @@ class LoginType extends AbstractType
             'required' => false,
             'label' => 'Email',
             'attr' => [
-                'placeholder' => 'Enter your email',
+                'placeholder' => $this->translator->trans('EnterEmail', [], 'LoginFormType'),
             ],
         ]);
 
@@ -83,7 +85,7 @@ class LoginType extends AbstractType
                 'label' => 'Password',
                 'required' => true,
                 'attr' => [
-                    'placeholder' => 'Enter your password',
+                    'placeholder' => $this->translator->trans('EnterPassword', [], 'LoginFormType'),
                     'data-live-ignore' => 'true',
                 ],
             ]);

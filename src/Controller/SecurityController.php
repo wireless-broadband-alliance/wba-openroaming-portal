@@ -14,13 +14,12 @@ use App\Enum\UserProvider;
 use App\Enum\UserTwoFactorAuthenticationStatus;
 use App\Form\LoginType;
 use App\Form\TwoFACode;
-use App\Repository\SettingRepository;
 use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
 use App\Service\EventActions;
 use App\Service\GetSettings;
 use App\Service\MagicLinkService;
-use App\Service\RegistrationEmailGenerator;
+use App\Service\EmailGenerator;
 use App\Service\SendSMS;
 use App\Service\TwoFAService;
 use App\Service\UserCreationService;
@@ -42,27 +41,27 @@ use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class SecurityController extends AbstractController
 {
     /**
      * SiteController constructor.
      * @param UserRepository $userRepository The repository for accessing user data.
-     * @param SettingRepository $settingRepository The setting repository is used to create the getSettings function.
      * @param GetSettings $getSettings The instance of GetSettings class.
      *  of the user account
      */
     public function __construct(
         private readonly UserRepository $userRepository,
-        private readonly SettingRepository $settingRepository,
-        private readonly GetSettings $getSettings,
         private readonly UserExternalAuthRepository $userExternalAuthRepository,
+        private readonly GetSettings $getSettings,
         private readonly TwoFAService $twoFAService,
+        private readonly TranslatorInterface $translator,
         private readonly EntityManagerInterface $entityManager,
         private readonly SendSMS $sendSMS,
         private readonly MagicLinkService $magicLinkService,
         private readonly EventActions $eventActions,
-        private readonly RegistrationEmailGenerator $emailGenerator,
+        private readonly EmailGenerator $emailGenerator,
         private readonly UserCreationService $userCreationService,
         private readonly TokenStorageInterface $tokenStorage,
     ) {
@@ -83,7 +82,7 @@ class SecurityController extends AbstractController
         }
 
         // Call the getSettings method of GetSettings class to retrieve the data
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
         if ($data['PLATFORM_MODE']['value'] === true) {
             return $this->redirectToRoute('app_landing');
         }
@@ -134,7 +133,7 @@ class SecurityController extends AbstractController
             $this->addFlash('error', $error->getMessage());
         }
 
-        return $this->render('site/login_landing.html.twig', [
+        return $this->render('landing/login/login_landing.html.twig', [
             'last_username' => $lastUsername,
             'error' => $error,
             'data' => $data,
@@ -154,7 +153,7 @@ class SecurityController extends AbstractController
         UserPasswordHasherInterface $userPasswordHasher,
         SessionInterface $session,
     ): Response {
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
 
         if ($data['LOGIN_WITH_UUID_ONLY']['value'] === OperationMode::OFF->value) {
             return $this->redirectToRoute('app_login');
@@ -186,16 +185,15 @@ class SecurityController extends AbstractController
                     if ($loginUser->getUserExternalAuths()[0]->getProvider() !== UserProvider::PORTAL_ACCOUNT->value) {
                         $this->addFlash(
                             'error',
-                            'Email is already in use but is associated with a different provider!
-                            Please use the original one.'
+                            $this->translator->trans('emailInUse', [], 'controllers')
                         );
                         return $this->redirectToRoute('app_login_magic');
                     }
 
                     $event = $this->magicLinkService->canSendLink($loginUser);
                     if (!($event instanceof Event)) {
-                        $this->magicLinkService->sendEmail(
-                            $loginUser,
+                        $this->emailGenerator->sendRegistrationEmail(
+                            $loginUser
                         );
 
                         $eventMetaData = [
@@ -212,7 +210,7 @@ class SecurityController extends AbstractController
                         );
                         $this->addFlash(
                             'success',
-                            'Login link sent to you successfully'
+                            $this->translator->trans('loginSentSuccessfully', [], 'controllers')
                         );
                     } else {
                         $timeIntervalToResendCode = $data["TWO_FACTOR_AUTH_RESEND_INTERVAL"]["value"];
@@ -244,12 +242,12 @@ class SecurityController extends AbstractController
 
                     $this->addFlash(
                         'success',
-                        'A login link has been sent to your email',
+                        $this->translator->trans('loginLinkSent', [], 'controllers'),
                     );
                 } else {
                     $this->addFlash(
                         'error',
-                        'Invalid email Format'
+                        $this->translator->trans('invalidEmailFormat', [], 'controllers')
                     );
                 }
             } else {
@@ -260,16 +258,22 @@ class SecurityController extends AbstractController
                     if ($loginUser->getUserExternalAuths()[0]->getProvider() !== UserProvider::PORTAL_ACCOUNT->value) {
                         $this->addFlash(
                             'error',
-                            'PhoneNumber is already in use but is associated with a different provider!
-                            Please use the original one.'
+                            $this->translator->trans('phoneInUse', [], 'controllers')
                         );
                         return $this->redirectToRoute('app_login_magic');
                     }
                     $event = $this->magicLinkService->canSendLink($loginUser);
                     if (!($event instanceof Event)) {
                         $link = $this->magicLinkService->magicToken($loginUser);
-                        $message = "Welcome to OpenRoaming! Click the link to" .
-                            " login with your account: $link";
+
+                        $message = $this->translator->trans(
+                            'loginLinkMessage',
+                            [
+                                '%link%' => $link
+                            ],
+                            'controllers'
+                        );
+
                         $smsResponse = $this->sendSMS->sendSmsNoValidation($loginUser, $message);
 
                         if ($smsResponse === SMSResponse::SMS_SUCCESS_LINK->value) {
@@ -289,8 +293,7 @@ class SecurityController extends AbstractController
 
                             $this->addFlash(
                                 'success',
-                                'We have sent a login link to your phone number. 
-                                Please check your SMS messages to continue.'
+                                $this->translator->trans('loginLinkSentCheckSMS', [], 'controllers')
                             );
                         } elseif ($smsResponse === SMSResponse::SMS_SUCCESS_CODE->value) {
                             // Save event for code sent
@@ -308,8 +311,7 @@ class SecurityController extends AbstractController
                             );
                             $this->addFlash(
                                 'success',
-                                'We have sent a login verification code to your phone number. 
-                                Please check your SMS messages to continue.'
+                                $this->translator->trans('loginLinkSentCheckSMS', [], 'controllers')
                             );
 
                             // Soft Authenticate the user for code confirmation
@@ -327,8 +329,7 @@ class SecurityController extends AbstractController
                         } else {
                             $this->addFlash(
                                 'error',
-                                'We were unable to send the login link or verification code to your 
-                                phone number. Please try again later.'
+                                $this->translator->trans('unableSendLoginLink', [], 'controllers')
                             );
                         }
                     } else {
@@ -356,20 +357,26 @@ class SecurityController extends AbstractController
                     );
 
                     $link = $this->magicLinkService->magicToken($user);
-                    $message = "Welcome to OpenRoaming! Click the link to confirm and login with your account: $link";
+
+                    $message = $this->translator->trans(
+                        'loginLinkConfirmMessage',
+                        [
+                            '%link%' => $link
+                        ],
+                        'controllers'
+                    );
+
                     $smsResponse = $this->sendSMS->sendSmsNoValidation($user, $message);
 
                     if ($smsResponse === SMSResponse::SMS_SUCCESS_LINK->value) {
                         $this->addFlash(
                             'success',
-                            'We have sent a login link to your phone number. 
-                            Please check your SMS messages to continue.'
+                            $this->translator->trans('loginLinkSentCheckSMS', [], 'controllers')
                         );
                     } elseif ($smsResponse === SMSResponse::SMS_SUCCESS_CODE->value) {
                         $this->addFlash(
                             'success',
-                            'We have sent a login verification code to your phone number. 
-                            Please check your SMS messages to continue.'
+                            $this->translator->trans('loginVerificationCodeSent', [], 'controllers')
                         );
 
                         // Soft Authenticate the user for code confirmation
@@ -387,14 +394,14 @@ class SecurityController extends AbstractController
                     } else {
                         $this->addFlash(
                             'error',
-                            'We were unable to send the login link to your phone number. Please try again.'
+                            $this->translator->trans('unableSendLoginLink', [], 'controllers')
                         );
                     }
                 }
             }
         }
 
-        return $this->render('site/login_UUID_landing.html.twig', [
+        return $this->render('landing/login_UUID_landing.html.twig', [
             'data' => $data,
             'form' => $form,
             'context' => FirewallType::LANDING->value,
@@ -415,7 +422,7 @@ class SecurityController extends AbstractController
         }
 
         // Call the getSettings method of GetSettings class to retrieve the data
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
 
         // Last username entered by the user (this will be empty if the user clicked the verification link)
         $email = $request->request->get('email') ?? $request->query->get('email');
@@ -446,7 +453,7 @@ class SecurityController extends AbstractController
             $this->addFlash('error', $error->getMessage());
         }
 
-        return $this->render('admin/login_admin_landing.html.twig', [
+        return $this->render('dashboard/login/login_admin_landing.html.twig', [
             'last_username' => $lastUsername,
             'error' => $error,
             'data' => $data,
@@ -454,15 +461,6 @@ class SecurityController extends AbstractController
             'context' => FirewallType::DASHBOARD->value,
             'loginChoiceDTO' => $dto,
         ]);
-    }
-
-    #[Route(path: '/dashboard/logout', name: 'app_dashboard_logout')]
-    public function dashboardLogout(Request $request): Response
-    {
-        $session = $request->getSession();
-        $session->clear();
-
-        return $this->redirectToRoute('app_dashboard_login');
     }
 
     #[Route('/login/confirmation', name: 'app_login_confirmation')]
@@ -487,7 +485,7 @@ class SecurityController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $data = $this->getSettings->getSettings();
 
         $form = $this->createForm(TwoFACode::class);
         $form->handleRequest($request);
@@ -506,25 +504,16 @@ class SecurityController extends AbstractController
 
             $this->addFlash(
                 'error',
-                'Code Invalid. Please try again.'
+                $this->translator->trans('invalidCode', [], 'controllers')
             );
         }
 
-        return $this->render('site/login_landing_code_confirmation.html.twig', [
+        return $this->render('landing/login/login_landing_code_confirmation.html.twig', [
             'data' => $data,
             'form' => $form,
             'context' => FirewallType::LANDING->value,
             'user' => $user,
         ]);
-    }
-
-    #[Route(path: '/logout', name: 'app_logout')]
-    public function logout(Request $request): Response
-    {
-        $session = $request->getSession();
-        $session->clear();
-
-        return $this->redirectToRoute('app_landing');
     }
 
     #[Route('/login/magic/link', name: 'app_login_magic_link')]
@@ -551,9 +540,11 @@ class SecurityController extends AbstractController
                 // Dispatch the login event
                 $event = new InteractiveLoginEvent($request, $token);
                 $eventDispatcher->dispatch($event);
+                $session = $request->getSession();
 
                 if (!$user->isVerified()) {
                     $user->setIsVerified(true);
+                    $session->set('session_verified', true);
                 }
 
                 $user->setTwoFAcodeIsActive(false);
@@ -563,7 +554,6 @@ class SecurityController extends AbstractController
                     $user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::EMAIL->value ||
                     $user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::SMS->value
                 ) {
-                    $session = $request->getSession();
                     $session->set('2fa_verified_' . FirewallType::LANDING->value, true);
                 }
 
@@ -583,7 +573,7 @@ class SecurityController extends AbstractController
 
                 $this->addFlash(
                     'success',
-                    'Login successfully'
+                    $this->translator->trans('loginSuccessfully', [], 'controllers')
                 );
 
                 return $this->redirectToRoute('app_landing');
@@ -591,17 +581,34 @@ class SecurityController extends AbstractController
                 // Invalid link in case the try catch fails
                 $this->addFlash(
                     'error',
-                    'Your login link is invalid or has expired. Please request a new login link to continue.'
+                    $this->translator->trans('invalidLogin', [], 'controllers')
                 );
             }
         } else {
             // Invalid operation in case the link is actually expired based on the service timer
             $this->addFlash(
                 'error',
-                'Your login link is invalid or has expired. Please request a new login link to continue.'
+                $this->translator->trans('invalidLogin', [], 'controllers')
             );
         }
 
         return $this->redirectToRoute('app_login');
+    }
+
+    #[Route(path: '/dashboard/logout', name: 'app_dashboard_logout')]
+    public function dashboardLogout(Request $request): Response
+    {
+        $session = $request->getSession();
+        $session->clear();
+        return $this->redirectToRoute('app_dashboard_login');
+    }
+
+    #[Route(path: '/logout', name: 'app_logout')]
+    public function logout(Request $request): Response
+    {
+        $session = $request->getSession();
+        $session->clear();
+
+        return $this->redirectToRoute('app_landing');
     }
 }

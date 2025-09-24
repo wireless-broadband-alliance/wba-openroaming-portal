@@ -1,0 +1,3 @@
+CAPTCHATokenEmpty: 'O token de validação CAPTCHA está vazio.'
+CAPTCHAValidationFailed: 'Falha na validação do CAPTCHA.'
+exceptionDuringCAPTCHAValidation: 'Ocorreu uma exceção durante a validação do CAPTCHA.'
