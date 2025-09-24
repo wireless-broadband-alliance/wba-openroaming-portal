@@ -13,7 +13,7 @@ new_user_steps:
 
 buttons:
     download_and_install: 'Download and Install'
-    link_text: "click the link below"
+    link_text: "Click the link below"
     download_text: "Download and install the wifi network"
 
 footer:

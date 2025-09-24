@@ -5,11 +5,11 @@ heading:
     swap: 'Desativar Autenticação de Dois Fatores - Trocar Método'
     default: 'Desativar Autenticação de Dois Fatores'
 description:
-    swap: 'Para alterar seu método de autenticação, você deve primeiro desativar seu método atual.'
-    default: 'Por favor, insira seu código para desativar a Autenticação de Dois Fatores.'
-instructions: 'Por favor, insira seu código para desativar a Autenticação de Dois Fatores.'
-logoAlt: 'Logotipo do Cliente'
+    swap: 'Para alterar o seu método de autenticação, deve primeiro desativar o seu método atual.'
+    default: 'Por favor, insira o seu código para desativar a Autenticação de Dois Fatores.'
+instructions: 'Por favor, insira o seu código para desativar a Autenticação de Dois Fatores.'
+logoAlt: 'Logótipo do Cliente'
 form:
-    placeholder: 'Insira seu Código'
+    placeholder: 'Insira o seu Código'
     submit: 'Enviar'
     resend: 'Reenviar código'

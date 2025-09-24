@@ -1,7 +1,7 @@
-logoAlt: 'Logotipo do Cliente'
+logoAlt: 'Logótipo do Cliente'
 welcome_back: 'Bem-vindo de volta'
-magicLinkDescription: 'Optou por fazer login via link mágico. Introduza o seu e-mail ou número de telefone para receber o link de login.'
-magicLinkDescriptionOnlyEmail: 'Optou por fazer login via link mágico. Introduza o seu e-mail para receber o link de login.'
+magicLinkDescription: 'Optou por fazer login via link mágico. Introduza o seu email ou número de telefone para receber o link de login.'
+magicLinkDescriptionOnlyEmail: 'Optou por fazer login via link mágico. Introduza o seu email para receber o link de login.'
 magicLinkDescriptionOnlyPhone: 'Optou por fazer login via link mágico. Introduza o seu número de telefone para receber o link de login.'
 description: >
     Selecionou iniciar sessão via email/número de telefone e palavra-passe. Assim que iniciar sessão,
@@ -40,6 +40,6 @@ forgot_password: 'Esqueceu-se da sua palavra-passe? Obtenha uma nova para o seu'
 forgot_password_email: 'email'
 forgot_password_phone: 'número de telefone'
 or: 'ou'
-no_account_register: 'Não tem uma conta? Registar-se com'
+no_account_register: 'Não tem uma conta? Registe-se com'
 register_email: 'email'
 register_phone: 'número de telefone'
