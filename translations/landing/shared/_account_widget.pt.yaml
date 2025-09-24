@@ -9,7 +9,7 @@ changePassword:
     title: 'Alterar Palavra-Passe'
     current: 'Palavra-Passe Atual'
     new: 'Palavra-Passe Nova'
-    confirm: 'Palavra-Passe Confirmação'
+    confirm: 'Confirmar Palavra-Passe'
     changeBtn: 'Alterar Palavra-Passe'
 twoFactorAuth:
     title: 'Autenticação de Dois Fatores'

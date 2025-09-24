@@ -12,4 +12,4 @@ profileLimitMessage: 'Por favor, selecione um valor entre 1 (mínimo, valor fixo
 certificateExpired: 'O certificado expirou em {{ expiration_date }}, por favor, renove o seu certificado.'
 selectOption: 'Selecione uma opção'
 timerNeverLessThan1: 'Este temporizador nunca deve ser inferior a 1.'
-timerNotBlank: 'Por favor, certifique-se de que define um valor'
+timerNotBlank: 'Por favor, certifique-se de que define um temporizador'
