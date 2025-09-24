@@ -1,4 +1,4 @@
 internalServerError: 'Erro interno do servidor'
 JWTTokenNotFound: 'Token JWT não encontrado!'
-JWTTokenIsInvalid: 'Token JWT invalido!'
+JWTTokenIsInvalid: 'Token JWT inválido!'
 JWTTokenIsExpired: 'Token JWT expirado!'
