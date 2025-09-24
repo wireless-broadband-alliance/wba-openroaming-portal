@@ -13,10 +13,10 @@ new_user_steps:
 
 buttons:
     download_and_install: 'Descarregar e Instalar'
-    link_text: "clique no link abaixo"
-    download_text: "Descarregue e instale a rede Wi-Fi"
+    link_text: 'clique no link abaixo'
+    download_text: 'Descarregue e instale a rede Wi-Fi'
 
 footer:
-    support_team: 'Equipa de apoio:'
+    support_team: 'Equipa de suporte:'
     thank_you: 'Obrigado'
     team: 'A equipa %supportTeam%'

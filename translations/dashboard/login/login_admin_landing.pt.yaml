@@ -3,7 +3,7 @@ loginPageMessage: "Por favor, efetue login usando as suas credenciais de adminis
 emailPhoneNumber: 'Email ou Número de Telefone'
 phoneNumber: 'número de telefone'
 phoneNumberLabel: 'Número de Telefone'
-enterYour: 'Introduza o seu '
+enterYour: 'Introduza o(a) seu(sua) '
 enterPassword: 'Introduza a sua palavra-passe'
 chooseAnother: 'Escolher Outro'
 forgetPassword: 'Esqueceu-se da sua palavra-passe? Obtenha uma nova para o seu'
