@@ -1,4 +1,4 @@
-successResendAdmin: 'We have send to you a new code to: %email%'
+successResendAdmin: 'We have sent you a new code to: %email%'
 errorAdminWait: "You must wait %time% seconds before requesting a new code. Please try again later."
 settingsUpdatedSuccessfully: 'Customization settings have been updated successfully.'
 maximumDateRange1Year: 'Maximum date range is 1 year'
