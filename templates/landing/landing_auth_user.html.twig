@@ -10,8 +10,12 @@
 
 {% block content %}
     <div class="mt-6 leading-7">
-        <p class="font-bold text-lg">{{ 'downloadInstallProfiles'|trans({}, 'landing') }}</p>
-        <p class="mt-3">{{ 'profilesExplanation'|trans({}, 'landing') }}</p>
+        <p class="font-bold text-base sm:text-lg md:text-xl lg:text-2xl">
+            {{ 'downloadInstallProfiles'|trans({}, 'landing') }}
+        </p>
+        <p class="mt-3 text-sm sm:text-base md:text-lg lg:text-xl">
+            {{ 'profilesExplanation'|trans({}, 'landing') }}
+        </p>
     </div>
     <form method="post" novalidate>
         {{ include('landing/shared/_os_selection.html.twig') }}
