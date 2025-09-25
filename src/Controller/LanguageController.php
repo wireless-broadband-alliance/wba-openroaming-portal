@@ -18,7 +18,9 @@ class LanguageController extends AbstractController
 
         $session->set('_locale', $locale);
 
-        $referer = $request->headers->get('referer', '/');
+        // Safe fallback if the referer is broken
+        $referer = $request->headers->get('referer') ?? $this->generateUrl('app_landing');
+
         return $this->redirect($referer);
     }
 }
