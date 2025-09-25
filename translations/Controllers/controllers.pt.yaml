@@ -74,6 +74,7 @@ confirmationCodeSentToEmail: 'Um código de confirmação foi enviado para o seu
 codeAlreadySent: 'O seu código já foi enviado anteriormente. Aguarde %minutes% minuto(s) para solicitar um código novamente.'
 invalidPassword: 'A palavra-passe atual é inválida. Por favor, tente novamente.'
 invalidCode: 'O código é inválido. Por favor, tente novamente ou reenvie o código.'
+invalidCodeTOTP: 'O código é inválido. Por favor tente novamente.'
 verificationCodeIncorrect: 'O código de verificação está incorreto. Por favor, tente novamente.'
 verificationMethodNotEnabled: 'Este método de verificação não está ativado!'
 onlyAdminCanAccessThisPage: 'Apenas administradores podem aceder a esta página.'
