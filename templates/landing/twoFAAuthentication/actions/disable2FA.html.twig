@@ -8,8 +8,6 @@
 
     {# Toasts #}
     {{ block('toast_messages') }}
-
-
     <div class="{{ data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\OperationMode::ON').value ? 'pt-[28px]' : 'pt-[161px]' }} leading-7">
         {% if swap %}
             <p class="font-bold text-xl">{{ 'heading.swap'|trans({}, 'disable2FA') }}</p>
