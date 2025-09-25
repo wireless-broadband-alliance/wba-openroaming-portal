@@ -45,20 +45,18 @@
     <div class="mt-10" {{ stimulus_target('visibility', 'second') }}>
 
         {# Profile selector #}
-        <div class="w-[100%] rounded-[1px] shadow-lg bg-[#F9F9F9] px-[25px] py-[30px] flex flex-row items-center justify-end text-[#3F474D] space-x-6">
+        <div class="w-full rounded shadow-lg bg-[#F9F9F9] px-6 py-8 flex flex-col md:flex-row items-center md:justify-between text-[#3F474D] space-y-6 md:space-y-0 md:space-x-6">
 
-            <div class="mr-auto flex flex-row items-center justify-start space-x-6">
+            <div class="flex flex-row items-center justify-start space-x-6">
                 <twig:ux:icon name="wba:{{ data.os.selected|lower }}" class="w-8" fill="none"/>
-
-                <span class="font-medium">
-                    {{ 'os_selection.device_identified'|trans({'%os%': data.os.selected}, 'landing') }}
-                </span>
+                <span class="font-medium text-sm sm:text-base md:text-lg">
+            {{ 'os_selection.device_identified'|trans({'%os%': data.os.selected}, 'landing') }}
+        </span>
             </div>
 
-            {# Download profile button #}
             <div class="flex flex-col items-center gap-2">
                 <div>
-                    <button type="submit" class="ml-auto w-[250px] btn-primary py-2">
+                    <button type="submit" class="w-full md:w-[250px] btn-primary py-2 text-sm sm:text-base md:text-lg">
                         {{ 'os_selection.download_install'|trans({}, 'landing') }}
                     </button>
                 </div>
@@ -72,10 +70,9 @@
             </div>
         </div>
 
-        <p class="text-sm mt-[15px] mb-[40px]">
+        <p class="mt-4 mb-10 text-xs sm:text-sm md:text-base">
             {{ 'os_selection.is_wrong'|trans({}, 'landing') }}
-            <button type="button"
-                    class="text-primary font-semibold underline" {{ stimulus_action('visibility', 'toggle') }}>
+            <button type="button" class="text-primary font-semibold underline text-xs sm:text-sm md:text-base" {{ stimulus_action('visibility', 'toggle') }}>
                 {{ 'os_selection.click_to_select'|trans({}, 'landing') }}
             </button>
         </p>

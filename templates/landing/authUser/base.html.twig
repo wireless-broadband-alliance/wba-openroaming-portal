@@ -13,11 +13,15 @@
          style="background-image: url('{{ bgUrl }}');">
 
         <div class="bg-white rounded-2xl shadow-xl w-[90%] max-w-6xl max-h-[80vh] h-auto flex flex-col p-6">
-            <div class="flex justify-between items-center w-full px-6 py-0">
+            <div class="flex flex-col md:flex-row justify-between items-center w-full px-6 py-2 gap-4">
+
                 {% if data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\OperationMode::ON').value %}
-                    <img class="w-[120px] h-[58px] object-scale-down" src="{{ data.CUSTOMER_LOGO.value }}" alt="Customer Logo"/>
+                    <img class="w-[120px] h-[58px] object-scale-down"
+                         src="{{ data.CUSTOMER_LOGO.value }}"
+                         alt="Customer Logo"/>
                 {% endif %}
-                <div class="mt-4">
+
+                <div class="mt-0 md:mt-0">
                     {% block language %}
                         {{ include('shared/_select_language.html.twig', {
                             currentLocale: app.request.locale,
@@ -33,46 +37,8 @@
                 {% endif %}
             </div>
             <div class="flex-1 overflow-y-auto px-10 pb-10">
-                {{ block('toast_messages') }}
                     {% block content %}
                     {% endblock %}
-                <div class="my-[25px] divider"></div>
-                <div {{ stimulus_controller('widget') }}>
-                    <div class="flex justify-between items-center w-full">
-                        <div>
-                            <p class="text-[#212529] text-opacity-40 text-sm">
-                                {{ 'authenticatedAs'|trans({}, 'landing') }}
-                                {% for auth in user.userExternalAuths %}
-                                    {% if auth.provider == constant('App\\Enum\\UserProvider::SAML').value %}
-                                        {{ auth.providerId }}
-                                    {% else %}
-                                        {{ app.user.uuid }}
-                                    {% endif %}
-                                {% endfor %}
-                            </p>
-
-                            {% if app.user.isVerified %}
-                                <div class="flex flex-row items-center gap-2 mt-2">
-                                    <p class="text-sm text-[#707070]">{{ 'title'|trans({}, '_account_widget') }}</p>
-                                    <button id="widgetUserButton" type="button" {{ stimulus_action('widget', 'open') }}
-                                            class="duration-300 cursor-pointer rounded-full text-[#707070] focus:animate-spin-slow focus:bg-[#7DB928] focus:text-white hover:shadow-lg p-2.5 relative z-0">
-                                        <twig:ux:icon name="wba:cog" class="w-6" fill="none"/>
-                                    </button>
-                                </div>
-
-                                <div {{ stimulus_target('widget', 'modal') }}
-                                        class="hidden fixed top-0 left-0 w-full h-full bg-[#090B2F] bg-opacity-70 z-20 ">
-                                    <div class="flex flex-row justify-center items-center h-full w-full">
-                                        {{ include('landing/shared/_account_widget.html.twig') }}
-                                    </div>
-                                </div>
-                            {% endif %}
-                        </div>
-                        <a href="{{ path('app_logout') }}" class="w-[160px] btn-logout">
-                            {{ 'logout'|trans({}, 'landing') }}
-                        </a>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
