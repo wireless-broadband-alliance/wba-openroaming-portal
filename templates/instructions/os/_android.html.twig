@@ -5,7 +5,10 @@
     </p>
 
     {# Get the correct image folder based on locale, fallback to en #}
-    {% set locale = app.request.locale in ['pt', 'en'] ? app.request.locale : 'en' %}
+    {% set locale = app.request.locale in [
+        constant('App\\Enum\\LanguageType::EN').value,
+        constant('App\\Enum\\LanguageType::PT').value]
+        ? app.request.locale : LanguageType.EN.value %}
     {% set imgPath = 'resources/instructions/android/' ~ locale %}
 
     <div class="card-container">

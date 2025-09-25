@@ -4,8 +4,11 @@
         {{ 'introduction'|trans({}, 'ios') }}
     </p>
 
-    {# Determine correct image folder based on locale, fallback to en #}
-    {% set locale = app.request.locale in ['pt', 'en'] ? app.request.locale : 'en' %}
+    {# Get the correct image folder based on locale, fallback to en #}
+    {% set locale = app.request.locale in [
+        constant('App\\Enum\\LanguageType::EN').value,
+        constant('App\\Enum\\LanguageType::PT').value]
+        ? app.request.locale : LanguageType.EN.value %}
     {% set imgPath = 'resources/instructions/ios/' ~ locale %}
 
     <div class="card-container">
