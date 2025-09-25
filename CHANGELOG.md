@@ -1,5 +1,11 @@
 # Changelog
 
+# Release V1.14.0
+
+- Landing page UI rework for authenticated users.
+- Improve landing page by centralizing the display content for better notice and for mobile user focused.
+- Also for this release, it doesn't have any migrations to be executed.
+
 # Release V1.13.0
 
 - Remove TinyMice text editor bundle from the project because it's not valid for commercial use.
