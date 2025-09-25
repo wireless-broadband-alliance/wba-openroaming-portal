@@ -1,5 +1,12 @@
 # Changelog
 
+# Release V1.15.0
+
+- Profile download instructions page.
+- New page dedicated for profile download steps and prepared for both translations implemented on the project.
+- Added new screenshots for each case (PT/EN) and for each operating system.
+- Also for this release, it doesn't have any migrations to be executed.
+
 # Release V1.14.0
 
 - Landing page UI rework for authenticated users.
