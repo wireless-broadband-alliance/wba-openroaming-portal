@@ -34,6 +34,11 @@ readonly class SessionValidatorListener
         $session = $request->getSession();
         $path = $request->getPathInfo();
 
+        // Allow the user to still be able to change the language
+        if ($request->attributes->get('_route') === 'change_language') {
+            return;
+        }
+
         // Check if the user is authenticated
         $token = $this->tokenStorage->getToken();
         if (!$token || !$token->getUser()) {
