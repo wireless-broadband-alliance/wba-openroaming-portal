@@ -393,7 +393,7 @@ class SiteController extends AbstractController
         $formTOS = $this->createForm(TOSType::class);
 
         if ($currentUser) {
-            return $this->render('landing/landing_auth_user.html.twig', [
+            return $this->render('landing/authUser/landing_auth_user.html.twig', [
                 'form' => $form->createView(),
                 'formPassword' => $formPassword->createView(),
                 'formRevokeProfiles' => $formRevokeProfiles->createView(),
