@@ -12,17 +12,17 @@
     <div class="min-h-screen bg-center bg-cover flex items-center justify-center px-4 sm:px-6 lg:px-8"
          style="background-image: url('{{ bgUrl }}');">
 
-        <div class="instructions-container"
+        <div class="landing-container"
              data-controller="os-tabs"
              data-os-tabs-default-os="{{ data.os.selected }}">
 
             {# Header #}
-            <div class="instructions-header">
+            <div class="landing-header">
                 <h1 class="instructions-title">
                     {{ 'title'|trans({}, 'base') }}
                 </h1>
 
-                <div class="instructions-language">
+                <div class="landing-language-selector">
                     {{ include('shared/_select_language.html.twig', {
                         currentLocale: app.request.locale,
                         routeName: 'change_language',

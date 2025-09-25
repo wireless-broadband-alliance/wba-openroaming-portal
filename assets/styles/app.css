@@ -174,7 +174,6 @@
     @apply h-[60vh] overflow-y-auto p-2;
 }
 
-
 .landing-language-selector {
     @apply self-end sm:self-auto;
 }
