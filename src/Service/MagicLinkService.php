@@ -4,7 +4,7 @@ namespace App\Service;
 
 use App\Entity\Event;
 use App\Entity\User;
-use App\Enum\AnalyticalEventType;
+use App\Enum\SettingName;
 use Random\RandomException;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use App\Repository\EventRepository;
@@ -24,7 +24,9 @@ readonly class MagicLinkService
 
     public function canSendLink(User $user): ?Event
     {
-        $emailTimer = $this->settingRepository->findOneBy(['name' => 'TWO_FACTOR_AUTH_RESEND_INTERVAL'])->getValue();
+        $emailTimer = $this->settingRepository->findOneBy(
+            ['name' => SettingName::TWO_FACTOR_AUTH_RESEND_INTERVAL->value]
+        )->getValue();
         $limitTime = new DateTime();
         $limitTime->modify('-' . $emailTimer . ' seconds');
 
@@ -48,7 +50,7 @@ readonly class MagicLinkService
 
     public function linkValidity(User $user): bool
     {
-        $linkValidity = $this->settingRepository->findOneBy(['name' => 'LINK_VALIDITY'])->getValue();
+        $linkValidity = $this->settingRepository->findOneBy(['name' => SettingName::LINK_VALIDITY->value])->getValue();
         $limitTime = new DateTime();
         $limitTime->modify('-' . $linkValidity . ' minutes');
         return $limitTime < $user->getTwoFAcodeGeneratedAt();
@@ -56,8 +58,7 @@ readonly class MagicLinkService
 
     public function timeToResend(string $timeInterval, Event $event): string
     {
-        $lastAttemptTime = $event instanceof Event ?
-            $event->getEventDatetime() : $timeInterval;
+        $lastAttemptTime = $event->getEventDatetime();
         $limitTime = $lastAttemptTime;
         /** @var DateTime $limitTime */
         $limitTime->modify('+' . $timeInterval . ' seconds');

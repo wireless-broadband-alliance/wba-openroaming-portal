@@ -9,6 +9,7 @@ namespace App\Security;
 use ApiPlatform\Metadata\UrlGeneratorInterface;
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
+use App\Enum\SettingName;
 use App\Enum\UserProvider;
 use App\Repository\UserRepository;
 use App\Service\GetSettings;
@@ -63,7 +64,7 @@ class CustomSamlUserFactory implements SamlUserFactoryInterface
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings();
 
-        if ($data['PLATFORM_MODE']['value'] === true) {
+        if ($data[SettingName::PLATFORM_MODE->value]['value'] === true) {
             throw new RuntimeException(
                 $this->translator->trans('impossibleUseThisAuthenticationMethodInDemoMode', [], 'Security')
             );

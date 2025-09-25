@@ -1,1 +1,3 @@
 noRequestAvailable: 'No current request available.'
+settingsMissing: 'Some settings are missing in the database: %missing%'
+notInEnum: 'Some settings found in the database are not defined in the project: %notInEnum%'

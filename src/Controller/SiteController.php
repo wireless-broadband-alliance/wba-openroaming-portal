@@ -233,7 +233,7 @@ class SiteController extends AbstractController
         $userAgent = $request->headers->get('User-Agent');
         $actionName = $request->attributes->get('_route');
 
-        if ($data['PLATFORM_MODE']['value']) {
+        if ($data['PLATFORM_MODE']['value'] === PlatformMode::DEMO->value) {
             if ($request->isMethod('POST')) {
                 $payload = $request->request->all();
                 if ($data['TURNSTILE_CHECKER']['value'] === OperationMode::ON->value) {
@@ -410,7 +410,7 @@ class SiteController extends AbstractController
      * @return RedirectResponse
      * @throws Exception
      */
-    #[Route('/account/user', name: 'app_site_account_user', methods: ['POST'])]
+    #[Route('/account/user', name: 'app_landing_account_user', methods: ['POST'])]
     public function accountUser(
         Request $request,
         UserPasswordHasherInterface $passwordHasher,

@@ -5,6 +5,7 @@ namespace App\Command;
 use App\Entity\Setting;
 use App\Entity\SettingTranslation;
 use App\Enum\LanguageType;
+use App\Enum\SettingName;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -56,25 +57,28 @@ class ResetCustomSettingsCommand extends Command
         }
 
         $settings = [
-            ['name' => 'PAGE_TITLE', 'value' => 'OpenRoaming Portal'],
-            ['name' => 'CUSTOMER_LOGO_ENABLED', 'value' => 'ON'],
-            ['name' => 'CUSTOMER_LOGO', 'value' => '/resources/logos/WBA_Logo.png'],
-            ['name' => 'OPENROAMING_LOGO', 'value' => '/resources/logos/openroaming.svg'],
-            ['name' => 'WALLPAPER_IMAGE', 'value' => '/resources/images/wallpaper.png'],
-            ['name' => 'WELCOME_TEXT', 'value' => 'Welcome to OpenRoaming Provisioning Service'],
+            ['name' => SettingName::PAGE_TITLE->value, 'value' => 'OpenRoaming Portal'],
+            ['name' => SettingName::CUSTOMER_LOGO_ENABLED->value, 'value' => 'ON'],
+            ['name' => SettingName::CUSTOMER_LOGO->value, 'value' => '/resources/logos/WBA_Logo.png'],
+            ['name' => SettingName::OPENROAMING_LOGO->value, 'value' => '/resources/logos/openroaming.svg'],
+            ['name' => SettingName::WALLPAPER_IMAGE->value, 'value' => '/resources/images/wallpaper.png'],
+            ['name' => SettingName::WELCOME_TEXT->value, 'value' => 'Welcome to OpenRoaming Provisioning Service'],
             [
-                'name' => 'WELCOME_DESCRIPTION',
+                'name' => SettingName::WELCOME_DESCRIPTION->value,
                 'value' => 'This portal allows you to download and install an OpenRoaming profile tailored to your ' .
                     'device, allowing you to connect automatically to OpenRoaming Wi-Fi networks across the world.',
             ],
-            ['name' => 'ADDITIONAL_LABEL', 'value' => 'This label is used to add extra content if necessary'],
-            ['name' => 'CONTACT_EMAIL', 'value' => 'openroaming-help@example.com'],
+            [
+                'name' => SettingName::ADDITIONAL_LABEL->value,
+                'value' => 'This label is used to add extra content if necessary'
+            ],
+            ['name' => SettingName::CONTACT_EMAIL->value, 'value' => 'openroaming-help@example.com'],
         ];
 
         // phpcs:disable Generic.Files.LineLength.TooLong
         $settingsToTranslate = [
             [
-                'name' => 'WELCOME_TEXT',
+                'name' => SettingName::WELCOME_TEXT->value,
                 'value' => 'Welcome to OpenRoaming Provisioning Service',
                 'translations' => [
                     LanguageType::EN->value => 'Welcome to OpenRoaming Provisioning Service',
@@ -82,7 +86,7 @@ class ResetCustomSettingsCommand extends Command
                 ],
             ],
             [
-                'name' => 'WELCOME_DESCRIPTION',
+                'name' => SettingName::WELCOME_DESCRIPTION->value,
                 'value' => 'This portal allows you to download and install an OpenRoaming profile tailored to your device, allowing you to connect automatically to OpenRoaming Wi-Fi networks across the world.',
                 'translations' => [
                     LanguageType::EN->value => 'This portal allows you to download and install an OpenRoaming profile tailored to your device, allowing you to connect automatically to OpenRoaming Wi-Fi networks across the world.',
@@ -91,7 +95,7 @@ class ResetCustomSettingsCommand extends Command
                 ],
             ],
             [
-                'name' => 'ADDITIONAL_LABEL',
+                'name' => SettingName::ADDITIONAL_LABEL->value,
                 'value' => 'This label is used to add extra content if necessary',
                 'translations' => [
                     LanguageType::EN->value => 'This label is used to add extra content if necessary',

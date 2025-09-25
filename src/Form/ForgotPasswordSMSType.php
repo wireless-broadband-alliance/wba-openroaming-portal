@@ -3,7 +3,8 @@
 namespace App\Form;
 
 use App\Enum\OperationMode;
-use App\Service\GetSettings;
+use App\Enum\SettingName;
+use App\Repository\SettingRepository;
 use libphonenumber\PhoneNumberFormat;
 use Misd\PhoneNumberBundle\Form\Type\PhoneNumberType;
 use PixelOpen\CloudflareTurnstileBundle\Type\TurnstileType;
@@ -13,20 +14,21 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class ForgotPasswordSMSType extends AbstractType
 {
-    /**
-     * @param GetSettings $getSettings The instance of the GetSettings class.
-     */
     public function __construct(
-        private readonly GetSettings $getSettings
+        private readonly SettingRepository $settingRepository
     ) {
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
-        $data = $this->getSettings->getSettings();
-        $regionInputs = explode(',', (string)$data['DEFAULT_REGION_PHONE_INPUTS']['value']);
+        $turnstileCheckerValue = $this->settingRepository->findOneBy(
+            ['name' => SettingName::TURNSTILE_CHECKER->value]
+        )->getValue();
+        $regionInputValue = $this->settingRepository->findOneBy(
+            ['name' => SettingName::DEFAULT_REGION_PHONE_INPUTS->value]
+        )->getValue();
+        $regionInputs = explode(',', (string)$regionInputValue);
         $regionInputs = array_map('trim', $regionInputs);
-        $turnstileCheckerValue = $data['TURNSTILE_CHECKER']['value'];
 
         $builder
             ->add('phoneNumber', PhoneNumberType::class, [

@@ -3,6 +3,7 @@
 namespace App\EventListener;
 
 use App\Entity\Setting;
+use App\Enum\SettingName;
 use App\Repository\SettingRepository;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpFoundation\Response;
@@ -50,7 +51,7 @@ readonly class ExceptionListener
         }
 
         // Custom status codes to handle
-        $handleCodes = [400, 404, 422, 424, 500, 503];
+        $handleCodes = [400, 404, 422, 424, 500, 501, 503];
         if (!in_array($statusCode, $handleCodes, true)) {
             return;
         }
@@ -82,10 +83,10 @@ readonly class ExceptionListener
     private function getSettings(): array
     {
         $wanted = [
-            'PAGE_TITLE',
-            'CUSTOMER_LOGO_ENABLED',
-            'CUSTOMER_LOGO',
-            'WALLPAPER_IMAGE'
+            SettingName::PAGE_TITLE->value,
+            SettingName::CUSTOMER_LOGO_ENABLED->value,
+            SettingName::CUSTOMER_LOGO->value,
+            SettingName::WALLPAPER_IMAGE->value
         ];
 
         $settings = $this->settingRepository->findBy([

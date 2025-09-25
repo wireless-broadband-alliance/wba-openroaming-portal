@@ -8,6 +8,7 @@ use App\Enum\AnalyticalEventType;
 use App\Enum\FirewallType;
 use App\Enum\OperationMode;
 use App\Enum\PlatformMode;
+use App\Enum\SettingName;
 use App\Enum\UserProvider;
 use App\Form\RegistrationFormSMSType;
 use App\Form\RegistrationFormType;
@@ -83,7 +84,7 @@ class RegistrationController extends AbstractController
         $data = $this->getSettings->getSettings();
 
         // Check if the user clicked on the 'sms' variable present only on the SMS authentication buttons
-        if ($data['PLATFORM_MODE']['value'] === true) {
+        if ($data[SettingName::PLATFORM_MODE->value]['value'] === PlatformMode::DEMO->value) {
             $this->addFlash(
                 'error',
                 $this->translator->trans(
@@ -95,7 +96,7 @@ class RegistrationController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
-        if ($data['AUTH_METHOD_REGISTER_ENABLED']['value'] !== 'true') {
+        if ($data[SettingName::AUTH_METHOD_REGISTER_ENABLED->value]['value'] !== 'true') {
             $this->addFlash(
                 'error',
                 $this->translator->trans(
@@ -107,7 +108,7 @@ class RegistrationController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
-        if ($data['LOGIN_WITH_UUID_ONLY']['value'] === OperationMode::ON->value) {
+        if ($data[SettingName::LOGIN_WITH_UUID_ONLY->value]['value'] === OperationMode::ON->value) {
             $this->addFlash(
                 'error',
                 $this->translator->trans(
@@ -133,7 +134,7 @@ class RegistrationController extends AbstractController
                         'controllers'
                     )
                 );
-            } elseif ($data['USER_VERIFICATION']['value'] === OperationMode::ON->value) {
+            } elseif ($data[SettingName::USER_VERIFICATION->value]['value'] === OperationMode::ON->value) {
                 // Generate a random password
                 $randomPassword = bin2hex(random_bytes(4));
 
@@ -176,7 +177,6 @@ class RegistrationController extends AbstractController
      * @throws ClientExceptionInterface
      * @throws RedirectionExceptionInterface
      * @throws ServerExceptionInterface
-     * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
      * @throws Exception
      */
     #[Route('/register/sms', name: 'app_register_sms')]
@@ -189,7 +189,7 @@ class RegistrationController extends AbstractController
         $data = $this->getSettings->getSettings();
 
         // Check if the user clicked on the 'sms' variable present only on the SMS authentication buttons
-        if ($data['PLATFORM_MODE']['value'] === true) {
+        if ($data[SettingName::PLATFORM_MODE->value]['value'] === PlatformMode::DEMO->value) {
             $this->addFlash(
                 'error',
                 $this->translator->trans(
@@ -201,7 +201,7 @@ class RegistrationController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
-        if ($data['AUTH_METHOD_SMS_REGISTER_ENABLED']['value'] !== 'true') {
+        if ($data[SettingName::AUTH_METHOD_SMS_REGISTER_ENABLED->value]['value'] !== 'true') {
             $this->addFlash(
                 'error',
                 $this->translator->trans(
@@ -213,7 +213,7 @@ class RegistrationController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
-        if ($data['LOGIN_WITH_UUID_ONLY']['value'] === OperationMode::ON->value) {
+        if ($data[SettingName::LOGIN_WITH_UUID_ONLY->value]['value'] === OperationMode::ON->value) {
             $this->addFlash(
                 'error',
                 $this->translator->trans(

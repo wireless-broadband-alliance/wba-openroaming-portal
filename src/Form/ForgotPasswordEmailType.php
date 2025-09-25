@@ -3,6 +3,8 @@
 namespace App\Form;
 
 use App\Enum\OperationMode;
+use App\Enum\SettingName;
+use App\Repository\SettingRepository;
 use App\Service\GetSettings;
 use PixelOpen\CloudflareTurnstileBundle\Type\TurnstileType;
 use Symfony\Component\Form\AbstractType;
@@ -12,18 +14,16 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class ForgotPasswordEmailType extends AbstractType
 {
-    /**
-     * @param GetSettings $getSettings The instance of the GetSettings class.
-     */
     public function __construct(
-        private readonly GetSettings $getSettings
+        private readonly SettingRepository $settingRepository
     ) {
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
-        $data = $this->getSettings->getSettings();
-        $turnstileCheckerValue = $data['TURNSTILE_CHECKER']['value'];
+        $turnstileCheckerValue = $this->settingRepository->findOneBy(
+            ['name' => SettingName::TURNSTILE_CHECKER->value]
+        )->getValue();
 
         $builder->add('email', EmailType::class);
 

@@ -3,6 +3,7 @@
 namespace App\Command;
 
 use App\Entity\Setting;
+use App\Enum\SettingName;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -49,10 +50,13 @@ class ResetTermsSettingsCommand extends Command
         }
 
         $settings = [
-            ['name' => 'TOS', 'value' => 'LINK'],
-            ['name' => 'PRIVACY_POLICY', 'value' => 'LINK'],
-            ['name' => 'TOS_LINK', 'value' => 'https://wballiance.com/openroaming/toc/'],
-            ['name' => 'PRIVACY_POLICY_LINK', 'value' => 'https://wballiance.com/openroaming/privacy-policy'],
+            ['name' => SettingName::TOS->value, 'value' => 'LINK'],
+            ['name' => SettingName::PRIVACY_POLICY->value, 'value' => 'LINK'],
+            ['name' => SettingName::TOS_LINK->value, 'value' => 'https://wballiance.com/openroaming/toc/'],
+            [
+                'name' => SettingName::PRIVACY_POLICY_LINK->value,
+                'value' => 'https://wballiance.com/openroaming/privacy-policy'
+            ],
         ];
 
         $this->entityManager->beginTransaction();

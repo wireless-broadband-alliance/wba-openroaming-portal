@@ -2,6 +2,7 @@
 
 namespace App\Form;
 
+use App\Enum\SettingName;
 use App\Service\GetSettings;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
@@ -24,7 +25,7 @@ class SMSType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $settingsToUpdate = [
-            'SMS_USERNAME' => [
+            SettingName::SMS_USERNAME->value => [
                 'type' => TextType::class,
                 'constraints' => [
                     new Length([
@@ -36,7 +37,7 @@ class SMSType extends AbstractType
                     ]),
                 ],
             ],
-            'SMS_USER_ID' => [
+            SettingName::SMS_USER_ID->value => [
                 'type' => TextType::class,
                 'constraints' => [
                     new Length([
@@ -48,7 +49,7 @@ class SMSType extends AbstractType
                     ]),
                 ],
             ],
-            'SMS_HANDLE' => [
+            SettingName::SMS_HANDLE->value => [
                 'type' => TextType::class,
                 'constraints' => [
                     new Length([
@@ -60,7 +61,7 @@ class SMSType extends AbstractType
                     ]),
                 ],
             ],
-            'SMS_FROM' => [
+            SettingName::SMS_FROM->value => [
                 'type' => TextType::class,
                 'attr' => ['maxlength' => 11],
                 'constraints' => [
@@ -73,7 +74,7 @@ class SMSType extends AbstractType
                     ]),
                 ],
             ],
-            'SMS_TIMER_RESEND' => [
+            SettingName::SMS_TIMER_RESEND->value => [
                 'type' => IntegerType::class,
                 'constraints' => [
                     new Length([
@@ -89,7 +90,7 @@ class SMSType extends AbstractType
                     ]),
                 ],
             ],
-            'DEFAULT_REGION_PHONE_INPUTS' => [
+            SettingName::DEFAULT_REGION_PHONE_INPUTS->value => [
                 'type' => TextType::class,
                 'constraints' => [
                     new NotBlank([

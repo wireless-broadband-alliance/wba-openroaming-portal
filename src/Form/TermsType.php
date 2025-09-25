@@ -2,6 +2,8 @@
 
 namespace App\Form;
 
+use App\Enum\SettingName;
+use App\Enum\TextEditorName;
 use App\Service\GetSettings;
 use EmilePerron\TinymceBundle\Form\Type\TinymceType;
 use Symfony\Component\Form\AbstractType;
@@ -23,12 +25,12 @@ class TermsType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $allowedSettings = [
-            'TOS' => ChoiceType::class,
-            'PRIVACY_POLICY' => ChoiceType::class,
-            'TOS_LINK' => TextType::class,
-            'PRIVACY_POLICY_LINK' => TextType::class,
-            'TOS_EDITOR' => TinymceType::class,
-            'PRIVACY_POLICY_EDITOR' => TinymceType::class,
+            SettingName::TOS->value => ChoiceType::class,
+            SettingName::PRIVACY_POLICY->value => ChoiceType::class,
+            SettingName::TOS_LINK->value => TextType::class,
+            SettingName::PRIVACY_POLICY_LINK->value => TextType::class,
+            TextEditorName::TOS_EDITOR->value => TinymceType::class,
+            TextEditorName::PRIVACY_POLICY_EDITOR->value => TinymceType::class,
         ];
 
         foreach ($allowedSettings as $settingName => $formFieldType) {

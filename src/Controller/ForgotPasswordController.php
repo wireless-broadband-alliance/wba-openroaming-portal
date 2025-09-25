@@ -7,6 +7,7 @@ use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Enum\FirewallType;
 use App\Enum\PlatformMode;
+use App\Enum\SettingName;
 use App\Enum\UserProvider;
 use App\Form\ForgotPasswordEmailType;
 use App\Form\ForgotPasswordSMSType;
@@ -82,7 +83,7 @@ class ForgotPasswordController extends AbstractController
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings();
 
-        if ($data['PLATFORM_MODE']['value'] === true) {
+        if ($data[SettingName::PLATFORM_MODE->value]['value'] === PlatformMode::DEMO->value) {
             $this->addFlash(
                 'error',
                 $this->translator->trans('portalInDemoMode', [], 'controllers')
@@ -90,7 +91,7 @@ class ForgotPasswordController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
-        if ($data['AUTH_METHOD_REGISTER_ENABLED']['value'] !== 'true') {
+        if ($data[SettingName::AUTH_METHOD_REGISTER_ENABLED->value]['value'] !== 'true') {
             $this->addFlash(
                 'error',
                 $this->translator->trans('verificationMethodNotEnabled', [], 'controllers')
@@ -123,7 +124,7 @@ class ForgotPasswordController extends AbstractController
                         $user,
                         AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST->value
                     );
-                    $resetPasswordTimer = $data['EMAIL_TIMER_RESEND']['value'];
+                    $resetPasswordTimer = $data[SettingName::EMAIL_TIMER_RESEND->value]['value'];
                     $minInterval = new DateInterval('PT' . $resetPasswordTimer . 'M');
                     $currentTime = new DateTime();
                     // Check if enough time has passed since the last attempt
@@ -168,7 +169,7 @@ class ForgotPasswordController extends AbstractController
                         $this->addFlash('success', $message);
                     } else {
                         // Inform the user to wait before trying again
-                        $emailTimeIntervalSetting = $data['EMAIL_TIMER_RESEND']['value'];
+                        $emailTimeIntervalSetting = $data[SettingName::EMAIL_TIMER_RESEND->value]['value'];
                         $this->addFlash(
                             'error',
                             $this->translator->trans(
@@ -220,7 +221,7 @@ class ForgotPasswordController extends AbstractController
         }
 
         // Check if the user clicked on the 'sms' variable present only on the SMS authentication buttons
-        if ($data['PLATFORM_MODE']['value']) {
+        if ($data[SettingName::PLATFORM_MODE->value]['value'] === PlatformMode::DEMO->value) {
             $this->addFlash(
                 'error',
                 $this->translator->trans('portalInDemoMode', [], 'controllers')
@@ -240,7 +241,7 @@ class ForgotPasswordController extends AbstractController
                     AnalyticalEventType::FORGOT_PASSWORD_SMS_REQUEST->value
                 );
                 // Retrieve the SMS resend interval from the settings
-                $smsResendInterval = $data['SMS_TIMER_RESEND']['value'];
+                $smsResendInterval = $data[SettingName::SMS_TIMER_RESEND->value]['value'];
                 $minInterval = new DateInterval('PT' . $smsResendInterval . 'M');
                 $currentTime = new DateTime();
                 // Check if the user has not exceeded the attempt limit
@@ -313,7 +314,7 @@ class ForgotPasswordController extends AbstractController
                         $this->translator->trans(
                             'waitBeforeRetry',
                             [
-                                '%minutes%' => $data['SMS_TIMER_RESEND']['value']
+                                '%minutes%' => $data[SettingName::SMS_TIMER_RESEND->value]['value']
                             ],
                             'controllers'
                         )
@@ -375,7 +376,9 @@ class ForgotPasswordController extends AbstractController
         }
 
         if (
-            $this->settingRepository->findOneBy(['name' => 'PLATFORM_MODE'])->getValue() !== PlatformMode::LIVE->value
+            $this->settingRepository->findOneBy(
+                ['name' => SettingName::PLATFORM_MODE->value]
+            )->getValue() !== PlatformMode::LIVE->value
         ) {
             $this->addFlash(
                 'error',
@@ -465,7 +468,9 @@ class ForgotPasswordController extends AbstractController
         }
 
         if (
-            $this->settingRepository->findOneBy(['name' => 'PLATFORM_MODE'])->getValue() !== PlatformMode::LIVE->value
+            $this->settingRepository->findOneBy(
+                ['name' => SettingName::PLATFORM_MODE->value]
+            )->getValue() !== PlatformMode::LIVE->value
         ) {
             $this->addFlash(
                 'error',
@@ -544,7 +549,7 @@ class ForgotPasswordController extends AbstractController
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings();
 
-        if ($data['PLATFORM_MODE']['value']) {
+        if ($data[SettingName::PLATFORM_MODE->value]['value'] === PlatformMode::DEMO->value) {
             $this->addFlash(
                 'error',
                 $this->translator->trans('portalInDemoMode', [], 'controllers')

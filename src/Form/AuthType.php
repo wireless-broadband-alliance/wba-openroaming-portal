@@ -3,8 +3,8 @@
 namespace App\Form;
 
 use App\Enum\OperationMode;
+use App\Enum\SettingName;
 use App\Service\GetSettings;
-use App\Validator\SamlEnabled;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
@@ -30,10 +30,10 @@ class AuthType extends AbstractType
     {
         $settingsToUpdate = [
             // SAML
-            'AUTH_METHOD_SAML_ENABLED' => [
+            SettingName::AUTH_METHOD_SAML_ENABLED->value => [
                 'type' => ChoiceType::class,
             ],
-            'AUTH_METHOD_SAML_LABEL' => [
+            SettingName::AUTH_METHOD_SAML_LABEL->value => [
                 'type' => TextType::class,
                 'options' => [
                     'constraints' => [
@@ -46,7 +46,9 @@ class AuthType extends AbstractType
                         new Callback([
                             'callback' => function ($value, ExecutionContextInterface $context): void {
                                 $form = $context->getRoot();
-                                $authMethodGoogleEnabled = $form->get('AUTH_METHOD_GOOGLE_LOGIN_ENABLED')->getData();
+                                $authMethodGoogleEnabled = $form->get(
+                                    SettingName::AUTH_METHOD_GOOGLE_LOGIN_ENABLED->value
+                                )->getData();
                                 if ($authMethodGoogleEnabled === "true" && empty($value)) {
                                     $context->buildViolation(
                                         $this->translator->trans(
@@ -62,7 +64,7 @@ class AuthType extends AbstractType
                     ],
                 ],
             ],
-            'AUTH_METHOD_SAML_DESCRIPTION' => [
+            SettingName::AUTH_METHOD_SAML_DESCRIPTION->value => [
                 'type' => TextType::class,
                 'options' => [
                     'required' => false,
@@ -78,7 +80,7 @@ class AuthType extends AbstractType
                     ],
                 ],
             ],
-            'PROFILE_LIMIT_DATE_SAML' => [
+            SettingName::PROFILE_LIMIT_DATE_SAML->value => [
                 'type' => IntegerType::class,
                 'constraints' => [
                     new NotBlank([
@@ -89,7 +91,7 @@ class AuthType extends AbstractType
                         $form = $context->getRoot();
 
                         // Check if AUTH_METHOD_SAML_ENABLED is set to 'false'
-                        $authMethodSamlEnabled = $form->get('AUTH_METHOD_SAML_ENABLED')->getData();
+                        $authMethodSamlEnabled = $form->get(SettingName::AUTH_METHOD_SAML_ENABLED->value)->getData();
                         if ($authMethodSamlEnabled === 'false') {
                             // Skip validation if SAML is disabled
                             return;
@@ -127,10 +129,10 @@ class AuthType extends AbstractType
             ],
 
             // Google Settings
-            'AUTH_METHOD_GOOGLE_LOGIN_ENABLED' => [
+            SettingName::AUTH_METHOD_GOOGLE_LOGIN_ENABLED->value => [
                 'type' => ChoiceType::class,
             ],
-            'AUTH_METHOD_GOOGLE_LOGIN_LABEL' => [
+            SettingName::AUTH_METHOD_GOOGLE_LOGIN_LABEL->value => [
                 'type' => TextType::class,
                 'options' => [
                     'constraints' => [
@@ -143,7 +145,9 @@ class AuthType extends AbstractType
                         new Callback([
                             'callback' => function ($value, ExecutionContextInterface $context): void {
                                 $form = $context->getRoot();
-                                $authMethodGoogleEnabled = $form->get('AUTH_METHOD_GOOGLE_LOGIN_ENABLED')->getData();
+                                $authMethodGoogleEnabled = $form->get(
+                                    SettingName::AUTH_METHOD_GOOGLE_LOGIN_ENABLED->value
+                                )->getData();
                                 if ($authMethodGoogleEnabled === 'true' && empty($value)) {
                                     $context->buildViolation(
                                         $this->translator->trans('fieldNotEmptyWhenGOOGLEEnabled', [], 'AuthType')
@@ -155,7 +159,7 @@ class AuthType extends AbstractType
                     ],
                 ],
             ],
-            'AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION' => [
+            SettingName::AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION->value => [
                 'type' => TextType::class,
                 'options' => [
                     'required' => false,
@@ -171,13 +175,13 @@ class AuthType extends AbstractType
                     ],
                 ],
             ],
-            'VALID_DOMAINS_GOOGLE_LOGIN' => [
+            SettingName::VALID_DOMAINS_GOOGLE_LOGIN->value => [
                 'type' => TextType::class,
                 'options' => [
                     'required' => false,
                 ],
             ],
-            'PROFILE_LIMIT_DATE_GOOGLE' => [
+            SettingName::PROFILE_LIMIT_DATE_GOOGLE->value => [
                 'type' => IntegerType::class,
                 'constraints' => [
                     new NotBlank([
@@ -185,7 +189,9 @@ class AuthType extends AbstractType
                     ]),
                     new Callback(function ($value, ExecutionContextInterface $context) use ($options): void {
                         $form = $context->getRoot();
-                        $authMethodGoogleEnabled = $form->get('AUTH_METHOD_GOOGLE_LOGIN_ENABLED')->getData();
+                        $authMethodGoogleEnabled = $form->get(
+                            SettingName::AUTH_METHOD_GOOGLE_LOGIN_ENABLED->value
+                        )->getData();
                         if ($authMethodGoogleEnabled === 'false') {
                             return;
                         }
@@ -221,10 +227,10 @@ class AuthType extends AbstractType
             ],
 
             // Microsoft
-            'AUTH_METHOD_MICROSOFT_LOGIN_ENABLED' => [
+            SettingName::AUTH_METHOD_MICROSOFT_LOGIN_ENABLED->value => [
                 'type' => ChoiceType::class,
             ],
-            'AUTH_METHOD_MICROSOFT_LOGIN_LABEL' => [
+            SettingName::AUTH_METHOD_MICROSOFT_LOGIN_LABEL->value => [
                 'type' => TextType::class,
                 'options' => [
                     'constraints' => [
@@ -251,7 +257,7 @@ class AuthType extends AbstractType
                     ],
                 ],
             ],
-            'AUTH_METHOD_MICROSOFT_LOGIN_DESCRIPTION' => [
+            SettingName::AUTH_METHOD_MICROSOFT_LOGIN_DESCRIPTION->value => [
                 'type' => TextType::class,
                 'options' => [
                     'required' => false,
@@ -267,13 +273,13 @@ class AuthType extends AbstractType
                     ],
                 ],
             ],
-            'VALID_DOMAINS_MICROSOFT_LOGIN' => [
+            SettingName::VALID_DOMAINS_MICROSOFT_LOGIN->value => [
                 'type' => TextType::class,
                 'options' => [
                     'required' => false,
                 ]
             ],
-            'PROFILE_LIMIT_DATE_MICROSOFT' => [
+            SettingName::PROFILE_LIMIT_DATE_MICROSOFT->value => [
                 'type' => IntegerType::class,
                 'constraints' => [
                     new NotBlank([
@@ -282,7 +288,9 @@ class AuthType extends AbstractType
                     new Callback(function ($value, ExecutionContextInterface $context) use ($options): void {
                         $form = $context->getRoot();
 
-                        $authMethodMicrosoftEnabled = $form->get('AUTH_METHOD_MICROSOFT_LOGIN_ENABLED')->getData();
+                        $authMethodMicrosoftEnabled = $form->get(
+                            SettingName::AUTH_METHOD_MICROSOFT_LOGIN_ENABLED->value
+                        )->getData();
                         if ($authMethodMicrosoftEnabled === 'false') {
                             return;
                         }
@@ -317,10 +325,10 @@ class AuthType extends AbstractType
             ],
 
             // Email Registration
-            'AUTH_METHOD_REGISTER_ENABLED' => [
+            SettingName::AUTH_METHOD_REGISTER_ENABLED->value => [
                 'type' => ChoiceType::class,
             ],
-            'AUTH_METHOD_REGISTER_LABEL' => [
+            SettingName::AUTH_METHOD_REGISTER_LABEL->value => [
                 'type' => TextType::class,
                 'options' => [
                     'constraints' => [
@@ -333,7 +341,9 @@ class AuthType extends AbstractType
                         new Callback([
                             'callback' => function ($value, ExecutionContextInterface $context): void {
                                 $form = $context->getRoot();
-                                $authMethodRegisterEnabled = $form->get('AUTH_METHOD_REGISTER_ENABLED')->getData();
+                                $authMethodRegisterEnabled = $form->get(
+                                    SettingName::AUTH_METHOD_REGISTER_ENABLED->value
+                                )->getData();
                                 if ($authMethodRegisterEnabled === "true" && empty($value)) {
                                     $context->buildViolation(
                                         $this->translator->trans('fieldNotEmptyWhenEMAILEnabled', [], 'AuthType')
@@ -344,7 +354,7 @@ class AuthType extends AbstractType
                     ],
                 ],
             ],
-            'AUTH_METHOD_REGISTER_DESCRIPTION' => [
+            SettingName::AUTH_METHOD_REGISTER_DESCRIPTION->value => [
                 'type' => TextType::class,
                 'options' => [
                     'required' => false,
@@ -360,7 +370,7 @@ class AuthType extends AbstractType
                     ],
                 ],
             ],
-            'PROFILE_LIMIT_DATE_EMAIL' => [
+            SettingName::PROFILE_LIMIT_DATE_EMAIL->value => [
                 'type' => IntegerType::class,
                 'constraints' => [
                     new NotBlank([
@@ -369,7 +379,9 @@ class AuthType extends AbstractType
                     new Callback(function ($value, ExecutionContextInterface $context) use ($options): void {
                         $form = $context->getRoot();
 
-                        $authMethodRegisterEnabled = $form->get('AUTH_METHOD_REGISTER_ENABLED')->getData();
+                        $authMethodRegisterEnabled = $form->get(
+                            SettingName::AUTH_METHOD_REGISTER_ENABLED->value
+                        )->getData();
                         if ($authMethodRegisterEnabled === 'false') {
                             return;
                         }
@@ -402,7 +414,7 @@ class AuthType extends AbstractType
                     }),
                 ],
             ],
-            'EMAIL_TIMER_RESEND' => [
+            SettingName::EMAIL_TIMER_RESEND->value => [
                 'type' => IntegerType::class,
                 'constraints' => [
                     new Length([
@@ -415,7 +427,7 @@ class AuthType extends AbstractType
                     ]),
                     new GreaterThanOrEqual([
                         'value' => 1,
-                        'message' =>  $this->translator->trans(
+                        'message' => $this->translator->trans(
                             'timerNeverLessThan1',
                             [],
                             'AuthType'
@@ -431,7 +443,7 @@ class AuthType extends AbstractType
 
                 ]
             ],
-            'LINK_VALIDITY' => [
+            SettingName::LINK_VALIDITY->value => [
                 'type' => IntegerType::class,
                 'constraints' => [
                     new Length([
@@ -444,7 +456,7 @@ class AuthType extends AbstractType
                     ]),
                     new GreaterThanOrEqual([
                         'value' => 1,
-                        'message' =>  $this->translator->trans(
+                        'message' => $this->translator->trans(
                             'timerNeverLessThan1',
                             [],
                             'AuthType'
@@ -461,10 +473,10 @@ class AuthType extends AbstractType
                 ]
             ],
             // Login
-            'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED' => [
+            SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED->value => [
                 'type' => ChoiceType::class,
             ],
-            'AUTH_METHOD_LOGIN_TRADITIONAL_LABEL' => [
+            SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_LABEL->value => [
                 'type' => TextType::class,
                 'options' => [
                     'constraints' => [
@@ -478,7 +490,7 @@ class AuthType extends AbstractType
                             'callback' => function ($value, ExecutionContextInterface $context): void {
                                 $form = $context->getRoot();
                                 $authMethodLoginTraditionalEnabled = $form->get(
-                                    'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED'
+                                    SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED->value
                                 )->getData();
                                 if ($authMethodLoginTraditionalEnabled === "true" && empty($value)) {
                                     $context->buildViolation(
@@ -490,7 +502,7 @@ class AuthType extends AbstractType
                     ],
                 ],
             ],
-            'AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION' => [
+            SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION->value => [
                 'type' => TextType::class,
                 'options' => [
                     'required' => false,
@@ -507,14 +519,14 @@ class AuthType extends AbstractType
                 ],
             ],
             // Login with UUID only Settings
-            'LOGIN_WITH_UUID_ONLY' => [
+            SettingName::LOGIN_WITH_UUID_ONLY->value => [
                 'type' => ChoiceType::class,
             ],
             // SMS
-            'AUTH_METHOD_SMS_REGISTER_ENABLED' => [
+            SettingName::AUTH_METHOD_SMS_REGISTER_ENABLED->value => [
                 'type' => ChoiceType::class,
             ],
-            'AUTH_METHOD_SMS_REGISTER_LABEL' => [
+            SettingName::AUTH_METHOD_SMS_REGISTER_LABEL->value => [
                 'type' => TextType::class,
                 'options' => [
                     'constraints' => [
@@ -527,8 +539,9 @@ class AuthType extends AbstractType
                         new Callback([
                             'callback' => function ($value, ExecutionContextInterface $context): void {
                                 $form = $context->getRoot();
-                                $authMethodSMSRegisterEnabled = $form->get('AUTH_METHOD_SMS_REGISTER_ENABLED')->getData(
-                                );
+                                $authMethodSMSRegisterEnabled = $form->get(
+                                    SettingName::AUTH_METHOD_SMS_REGISTER_ENABLED->value
+                                )->getData();
                                 if ($authMethodSMSRegisterEnabled === "true" && empty($value)) {
                                     $context->buildViolation(
                                         $this->translator->trans('fieldNotEmptyWhenSMSEnabled', [], 'AuthType')
@@ -539,7 +552,7 @@ class AuthType extends AbstractType
                     ],
                 ],
             ],
-            'AUTH_METHOD_SMS_REGISTER_DESCRIPTION' => [
+            SettingName::AUTH_METHOD_SMS_REGISTER_DESCRIPTION->value => [
                 'type' => TextType::class,
                 'options' => [
                     'required' => false,
@@ -555,7 +568,7 @@ class AuthType extends AbstractType
                     ],
                 ],
             ],
-            'PROFILE_LIMIT_DATE_SMS' => [
+            SettingName::PROFILE_LIMIT_DATE_SMS->value => [
                 'type' => IntegerType::class,
                 'constraints' => [
                     new NotBlank([
@@ -564,7 +577,9 @@ class AuthType extends AbstractType
                     new Callback(function ($value, ExecutionContextInterface $context) use ($options): void {
                         $form = $context->getRoot();
 
-                        $authMethodSmsRegisterEnabled = $form->get('AUTH_METHOD_SMS_REGISTER_ENABLED')->getData();
+                        $authMethodSmsRegisterEnabled = $form->get(
+                            SettingName::AUTH_METHOD_SMS_REGISTER_ENABLED->value
+                        )->getData();
                         if ($authMethodSmsRegisterEnabled === 'false') {
                             return;
                         }
@@ -608,12 +623,12 @@ class AuthType extends AbstractType
 
                     if (
                         in_array($settingName, [
-                            'AUTH_METHOD_SAML_ENABLED',
-                            'AUTH_METHOD_GOOGLE_LOGIN_ENABLED',
-                            'AUTH_METHOD_MICROSOFT_LOGIN_ENABLED',
-                            'AUTH_METHOD_REGISTER_ENABLED',
-                            'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED',
-                            'AUTH_METHOD_SMS_REGISTER_ENABLED',
+                            SettingName::AUTH_METHOD_SAML_ENABLED->value,
+                            SettingName::AUTH_METHOD_GOOGLE_LOGIN_ENABLED->value,
+                            SettingName::AUTH_METHOD_MICROSOFT_LOGIN_ENABLED->value,
+                            SettingName::AUTH_METHOD_REGISTER_ENABLED->value,
+                            SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED->value,
+                            SettingName::AUTH_METHOD_SMS_REGISTER_ENABLED->value,
                         ])
                     ) {
                         $formFieldOptions['choices'] = [
@@ -621,7 +636,7 @@ class AuthType extends AbstractType
                             OperationMode::OFF->value => 'false',
                         ];
                         $formFieldOptions['placeholder'] = $this->translator->trans('selectOption', [], 'AuthType');
-                    } elseif ($settingName === 'LOGIN_WITH_UUID_ONLY') {
+                    } elseif ($settingName === SettingName::LOGIN_WITH_UUID_ONLY->value) {
                         $formFieldOptions['choices'] = [
                             OperationMode::ON->value => OperationMode::ON->value,
                             OperationMode::OFF->value => OperationMode::OFF->value,

@@ -3,7 +3,9 @@
 namespace App\Form;
 
 use App\DTO\LoginChoiceDTO;
+use App\Entity\Setting;
 use App\Enum\OperationMode;
+use App\Enum\SettingName;
 use App\Enum\UserProvider;
 use App\Repository\SettingRepository;
 use libphonenumber\PhoneNumberFormat;
@@ -29,7 +31,9 @@ class LoginType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         // Fetch the setting from the database
-        $regionsSetting = $this->settingRepository->findOneBy(['name' => 'DEFAULT_REGION_PHONE_INPUTS']);
+        $regionsSetting = $this->settingRepository->findOneBy(
+            ['name' => SettingName::DEFAULT_REGION_PHONE_INPUTS->value]
+        );
 
         // If the setting exists, explode and trim; otherwise use a default
         $regionInputs = $regionsSetting && $regionsSetting->getValue()
@@ -37,13 +41,13 @@ class LoginType extends AbstractType
             : ['PT', 'US', 'GB']; // fallback default
 
         $turnstileCheckerValue = $this->settingRepository->findOneBy(
-            ['name' => 'TURNSTILE_CHECKER']
+            ['name' => SettingName::TURNSTILE_CHECKER->value]
         )?->getValue();
         $emailMethod = $this->settingRepository->findOneBy(
-            ['name' => 'AUTH_METHOD_REGISTER_ENABLED']
+            ['name' => SettingName::AUTH_METHOD_REGISTER_ENABLED->value]
         )?->getValue();
         $phoneNumberMethod = $this->settingRepository->findOneBy(
-            ['name' => 'AUTH_METHOD_SMS_REGISTER_ENABLED']
+            ['name' => SettingName::AUTH_METHOD_SMS_REGISTER_ENABLED->value]
         )?->getValue();
 
         // Let user select if they want to log in with email
@@ -83,6 +87,9 @@ class LoginType extends AbstractType
         if ($builder->getData()?->requirePassword ?? true) {
             $builder->add('password', PasswordType::class, [
                 'label' => 'Password',
+                'toggle' => true,
+                'hidden_label' => null,
+                'visible_label' => null,
                 'required' => true,
                 'attr' => [
                     'placeholder' => $this->translator->trans('EnterPassword', [], 'LoginFormType'),

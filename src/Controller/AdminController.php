@@ -6,6 +6,7 @@ use App\Entity\Setting;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Enum\LanguageType;
+use App\Enum\SettingName;
 use App\Enum\SettingType;
 use App\Form\CustomType;
 use App\Form\RevokeProfilesType;
@@ -191,7 +192,6 @@ class AdminController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function customize(Request $request, EntityManagerInterface $em, string $language): Response
     {
-
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings($language);
         // Get the current logged-in user (admin)
@@ -224,12 +224,12 @@ class AdminController extends AbstractController
                     in_array(
                         $settingName,
                         [
-                            'WELCOME_TEXT',
-                            'PAGE_TITLE',
-                            'WELCOME_DESCRIPTION',
-                            'ADDITIONAL_LABEL',
-                            'CONTACT_EMAIL',
-                            'CUSTOMER_LOGO_ENABLED'
+                            SettingName::WELCOME_TEXT->value,
+                            SettingName::PAGE_TITLE->value,
+                            SettingName::WELCOME_DESCRIPTION->value,
+                            SettingName::ADDITIONAL_LABEL->value,
+                            SettingName::CONTACT_EMAIL->value,
+                            SettingName::CUSTOMER_LOGO_ENABLED->value
                         ]
                     )
                 ) {
@@ -244,7 +244,7 @@ class AdminController extends AbstractController
                         $settingTranslation = $this->settingTranslationRepository->findOneBy(
                             ['setting' => $setting, 'locale' => $locale]
                         );
-                        if ($settingName === 'ADDITIONAL_LABEL' && $submittedValue === null) {
+                        if ($settingName === SettingName::ADDITIONAL_LABEL->value && $submittedValue === null) {
                             $settingTranslation?->setTranslation('');
                         } else {
                             $settingTranslation?->setTranslation($submittedValue);
@@ -256,7 +256,17 @@ class AdminController extends AbstractController
                         // Update the setting value
                         $setting->setValue($submittedValue);
                     }
-                } elseif (in_array($settingName, ['CUSTOMER_LOGO', 'OPENROAMING_LOGO', 'WALLPAPER_IMAGE'])) {
+                } elseif (
+                    in_array(
+                        $settingName,
+                        [
+                            SettingName::CUSTOMER_LOGO->value,
+                            SettingName::OPENROAMING_LOGO->value,
+                            SettingName::WALLPAPER_IMAGE->value
+                        ],
+                        true
+                    )
+                ) {
                     // Handle file uploads for logos and wallpaper image
                     $file = $form->get($settingName)->getData();
 

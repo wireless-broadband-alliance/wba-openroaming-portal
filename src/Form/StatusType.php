@@ -4,6 +4,7 @@ namespace App\Form;
 
 use App\Enum\OperationMode;
 use App\Enum\PlatformMode;
+use App\Enum\SettingName;
 use App\Service\GetSettings;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -31,8 +32,8 @@ class StatusType extends AbstractType
             $settingValue = $setting->getValue();
             $description = $this->getSettings->getSettingDescription($settingName);
 
-            if ($settingName === 'USER_VERIFICATION') {
-                $builder->add('USER_VERIFICATION', ChoiceType::class, [
+            if ($settingName === SettingName::USER_VERIFICATION->value) {
+                $builder->add(SettingName::USER_VERIFICATION->value, ChoiceType::class, [
                     'choices' => [
                         OperationMode::ON->value => OperationMode::ON->value,
                         OperationMode::OFF->value => OperationMode::OFF->value,
@@ -48,8 +49,8 @@ class StatusType extends AbstractType
                     ],
                     'invalid_message' => $this->translator->trans('selectOption', [], 'StatusType'),
                 ]);
-            } elseif ($settingName === 'PLATFORM_MODE') {
-                $builder->add('PLATFORM_MODE', ChoiceType::class, [
+            } elseif ($settingName === SettingName::PLATFORM_MODE->value) {
+                $builder->add(SettingName::PLATFORM_MODE->value, ChoiceType::class, [
                     'choices' => [
                         PlatformMode::DEMO->value => PlatformMode::DEMO->value,
                         PlatformMode::LIVE->value => PlatformMode::LIVE->value,
@@ -65,8 +66,8 @@ class StatusType extends AbstractType
                     ],
                     'invalid_message' => $this->translator->trans('selectOption', [], 'StatusType'),
                 ]);
-            } elseif ($settingName === 'TURNSTILE_CHECKER') {
-                $builder->add('TURNSTILE_CHECKER', ChoiceType::class, [
+            } elseif ($settingName === SettingName::TURNSTILE_CHECKER->value) {
+                $builder->add(SettingName::TURNSTILE_CHECKER->value, ChoiceType::class, [
                     'choices' => [
                         OperationMode::ON->value => OperationMode::ON->value,
                         OperationMode::OFF->value => OperationMode::OFF->value,
@@ -82,8 +83,8 @@ class StatusType extends AbstractType
                     ],
                     'invalid_message' => $this->translator->trans('selectOption', [], 'StatusType'),
                 ]);
-            } elseif ($settingName === 'API_STATUS') {
-                $builder->add('API_STATUS', ChoiceType::class, [
+            } elseif ($settingName === SettingName::API_STATUS->value) {
+                $builder->add(SettingName::API_STATUS->value, ChoiceType::class, [
                     'choices' => [
                         OperationMode::ON->value => OperationMode::ON->value,
                         OperationMode::OFF->value => OperationMode::OFF->value,
@@ -99,8 +100,8 @@ class StatusType extends AbstractType
                     ],
                     'invalid_message' => $this->translator->trans('selectOption', [], 'StatusType'),
                 ]);
-            } elseif ($settingName === 'USER_DELETE_TIME') {
-                $builder->add('USER_DELETE_TIME', IntegerType::class, [
+            } elseif ($settingName === SettingName::USER_DELETE_TIME->value) {
+                $builder->add(SettingName::USER_DELETE_TIME->value, IntegerType::class, [
                     'attr' => [
                         'description' => $description,
                     ],
@@ -119,8 +120,8 @@ class StatusType extends AbstractType
                         ]),
                     ],
                 ]);
-            } elseif ($settingName === 'TIME_INTERVAL_NOTIFICATION') {
-                $builder->add('TIME_INTERVAL_NOTIFICATION', IntegerType::class, [
+            } elseif ($settingName === SettingName::TIME_INTERVAL_NOTIFICATION->value) {
+                $builder->add(SettingName::TIME_INTERVAL_NOTIFICATION->value, IntegerType::class, [
                     'attr' => [
                         'description' => $description,
                     ],

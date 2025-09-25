@@ -3,6 +3,7 @@
 namespace App\Command;
 
 use App\Entity\Setting;
+use App\Enum\SettingName;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -49,9 +50,9 @@ class ResetCapportSettingsCommand extends Command
         }
 
         $settings = [
-            ['name' => 'CAPPORT_ENABLED', 'value' => 'false'],
-            ['name' => 'CAPPORT_PORTAL_URL', 'value' => 'https://example.com/'],
-            ['name' => 'CAPPORT_VENUE_INFO_URL', 'value' => ' https://openroaming.org/'],
+            ['name' => SettingName::CAPPORT_ENABLED->value, 'value' => 'false'],
+            ['name' => SettingName::CAPPORT_PORTAL_URL->value, 'value' => 'https://example.com/'],
+            ['name' => SettingName::CAPPORT_VENUE_INFO_URL->value, 'value' => ' https://openroaming.org/'],
         ];
 
         $this->entityManager->beginTransaction();

@@ -1,6 +1,12 @@
 # Changelog
 
-# Release v1.11.0
+# Release V1.12.0
+- More Project optimizations reduce the amount of number of queries made in most of the pages.
+- New checker on the `GetSettings` service to also verify if there is any missing or duplicated setting on the DB.
+- Password toggle reveal implementation for inputs.
+- Also for this release, it doesn't have any migrations to be executed.
+
+# Release V1.11.0
 
 - New UI design for email templates.
 - Responsive Translations (Available: EN & PT-PT) - Administrator can just add new configurations for YAML
@@ -58,7 +64,7 @@
 
 # Release V1.8.1
 
-- Removed duplicated field relative to the user account verification, (Account Verification & User
+- Removed duplicated field relative to the user account verification (Account Verification & User
   2FA Configuration).
 
 > **Important**: In this release, the field **verificationCode** was eliminated.

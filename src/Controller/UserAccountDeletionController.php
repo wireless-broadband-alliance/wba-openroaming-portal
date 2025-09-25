@@ -6,6 +6,7 @@ use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Enum\FirewallType;
 use App\Enum\OperationMode;
+use App\Enum\SettingName;
 use App\Enum\UserProvider;
 use App\Form\AutoDeleteCodeType;
 use App\Form\AutoDeletePasswordType;
@@ -79,7 +80,7 @@ class UserAccountDeletionController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
         if (
-            $data['LOGIN_WITH_UUID_ONLY']['value'] === OperationMode::ON->value &&
+            $data[SettingName::LOGIN_WITH_UUID_ONLY->value]['value'] === OperationMode::ON->value &&
             $currentUser->getUserExternalAuths()[0]->getProvider() === UserProvider::PORTAL_ACCOUNT->value
         ) {
             if (

@@ -7,6 +7,7 @@ use App\Entity\OTPcode;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Enum\PlatformMode;
+use App\Enum\SettingName;
 use App\Enum\TwoFAType;
 use App\Enum\UserProvider;
 use App\Enum\UserTwoFactorAuthenticationStatus;
@@ -52,7 +53,7 @@ readonly class TwoFAService
         $now = new DateTime();
         $diff = $now->getTimestamp() - $codeDate->getTimestamp();
         $timeToExpireCode = $this->settingRepository->findOneBy(
-            ['name' => 'TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME']
+            ['name' => SettingName::TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME->value]
         )->getValue();
         if ($diff >= $timeToExpireCode) {
             return false;
@@ -176,13 +177,17 @@ readonly class TwoFAService
     ): void {
         $messageType = $user->getTwoFAtype();
         $secondsLeft = $this->settingRepository->findOneBy(
-            ['name' => 'TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME']
+            ['name' => SettingName::TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME->value]
         )->getValue();
         if ($messageType === UserTwoFactorAuthenticationStatus::EMAIL->value || $user->getEmail()) {
-            $emailTitle = $this->settingRepository->findOneBy(['name' => 'PAGE_TITLE'])->getValue();
-            $contactEmail = $this->settingRepository->findOneBy(['name' => 'CONTACT_EMAIL'])->getValue();
-            $supportTeam = $this->settingRepository->findOneBy(['name' => 'PAGE_TITLE'])->getValue();
-            $customerLogo = $this->settingRepository->findOneBy(['name' => 'CUSTOMER_LOGO'])->getValue();
+            $emailTitle = $this->settingRepository->findOneBy(['name' => SettingName::PAGE_TITLE->value])->getValue();
+            $contactEmail = $this->settingRepository->findOneBy([
+                'name' => SettingName::CONTACT_EMAIL->value
+            ])->getValue();
+            $supportTeam = $this->settingRepository->findOneBy(['name' => SettingName::PAGE_TITLE->value])->getValue();
+            $customerLogo = $this->settingRepository->findOneBy([
+                'name' => SettingName::CUSTOMER_LOGO->value
+            ])->getValue();
             $projectDir = $this->parameterBag->get('kernel.project_dir');
             $logoPath = $projectDir . '/public' . $customerLogo;
 
@@ -347,10 +352,10 @@ readonly class TwoFAService
     public function canResendCode(User $user, string $eventType): bool
     {
         $nrAttempts = $this->settingRepository->findOneBy(
-            ['name' => 'TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE']
+            ['name' => SettingName::TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE->value]
         )->getValue();
         $timeToResetAttempts = $this->settingRepository->findOneBy(
-            ['name' => 'TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS']
+            ['name' => SettingName::TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS->value]
         )->getValue();
         $limitTime = new DateTime();
         $limitTime->modify('-' . $timeToResetAttempts . ' minutes');
@@ -366,7 +371,7 @@ readonly class TwoFAService
     public function timeIntervalToResendCode(User $user, string $eventType): bool
     {
         $timeIntervalToResendCode = $this->settingRepository->findOneBy(
-            ['name' => 'TWO_FACTOR_AUTH_RESEND_INTERVAL']
+            ['name' => SettingName::TWO_FACTOR_AUTH_RESEND_INTERVAL->value]
         )->getValue();
         $limitTime = new DateTime();
         $limitTime->modify('-' . $timeIntervalToResendCode . ' seconds');
@@ -382,7 +387,7 @@ readonly class TwoFAService
     public function timeIntervalToSendCode(User $user, string $event): bool
     {
         $timeIntervalToResendCode = $this->settingRepository->findOneBy(
-            ['name' => 'TWO_FACTOR_AUTH_RESEND_INTERVAL']
+            ['name' => SettingName::TWO_FACTOR_AUTH_RESEND_INTERVAL->value]
         )->getValue();
         $limitTime = new DateTime();
         $limitTime->modify('-' . $timeIntervalToResendCode . ' seconds');
@@ -435,10 +440,10 @@ readonly class TwoFAService
     public function canValidationCode(User $user, string $eventType): bool
     {
         $timeToResetAttempts = $this->settingRepository->findOneBy(
-            ['name' => 'TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS']
+            ['name' => SettingName::TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS->value]
         )->getValue();
         $nrAttempts = $this->settingRepository->findOneBy(
-            ['name' => 'TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE']
+            ['name' => SettingName::TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE->value]
         )->getValue();
         $limitTime = new DateTime();
         $limitTime->modify('-' . $timeToResetAttempts . ' minutes');
@@ -460,7 +465,7 @@ readonly class TwoFAService
     public function timeLeftToResendCode(User $user, string $eventType): int
     {
         $timeToResetAttempts = $this->settingRepository->findOneBy(
-            ['name' => 'TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS']
+            ['name' => SettingName::TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS->value]
         )->getValue();
         $lastEvent = $this->eventRepository->findLatest2FACodeAttemptEvent(
             $user,
@@ -480,7 +485,7 @@ readonly class TwoFAService
     public function timeLeftToResendCodeTimeInterval(User $user, string $eventType): int
     {
         $timeToResetAttempts = $this->settingRepository->findOneBy(
-            ['name' => 'TWO_FACTOR_AUTH_RESEND_INTERVAL']
+            ['name' => SettingName::TWO_FACTOR_AUTH_RESEND_INTERVAL->value]
         )->getValue();
         $lastEvent = $this->eventRepository->findLatest2FACodeAttemptEvent(
             $user,
@@ -500,7 +505,9 @@ readonly class TwoFAService
 
     public function isTwoFARequired(User $user): bool
     {
-        $twoFAStatus = $this->settingRepository->findOneBy(['name' => 'TWO_FACTOR_AUTH_STATUS'])->getValue();
+        $twoFAStatus = $this->settingRepository->findOneBy(
+            ['name' => SettingName::TWO_FACTOR_AUTH_STATUS->value]
+        )->getValue();
         if ($twoFAStatus === TwoFAType::ENFORCED_FOR_LOCAL->value) {
             if (
                 $user->getUserExternalAuths()[0] &&

@@ -3,6 +3,7 @@
 namespace App\Form;
 
 use App\Enum\OperationMode;
+use App\Enum\SettingName;
 use App\Service\GetSettings;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -23,22 +24,22 @@ class LDAPType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $settingsToUpdate = [
-            'SYNC_LDAP_ENABLED' => [
+            SettingName::SYNC_LDAP_ENABLED->value => [
                 'type' => ChoiceType::class,
             ],
-            'SYNC_LDAP_BIND_USER_DN' => [
+            SettingName::SYNC_LDAP_BIND_USER_DN->value => [
                 'type' => TextType::class,
             ],
-            'SYNC_LDAP_BIND_USER_PASSWORD' => [
+            SettingName::SYNC_LDAP_BIND_USER_PASSWORD->value => [
                 'type' => PasswordType::class,
             ],
-            'SYNC_LDAP_SERVER' => [
+            SettingName::SYNC_LDAP_SERVER->value => [
                 'type' => TextType::class,
             ],
-            'SYNC_LDAP_SEARCH_BASE_DN' => [
+            SettingName::SYNC_LDAP_SEARCH_BASE_DN->value => [
                 'type' => TextType::class,
             ],
-            'SYNC_LDAP_SEARCH_FILTER' => [
+            SettingName::SYNC_LDAP_SEARCH_FILTER->value => [
                 'type' => TextType::class,
             ],
         ];
@@ -48,7 +49,7 @@ class LDAPType extends AbstractType
             foreach ($options['settings'] as $setting) {
                 if ($setting->getName() === $settingName) {
                     $formFieldOptions['data'] = $setting->getValue();
-                    if ($settingName === 'SYNC_LDAP_ENABLED') {
+                    if ($settingName === SettingName::SYNC_LDAP_ENABLED->value) {
                         $formFieldOptions['choices'] = [
                             OperationMode::ON->value => 'true',
                             OperationMode::OFF->value => 'false',

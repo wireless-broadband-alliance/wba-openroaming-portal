@@ -3,7 +3,8 @@
 namespace App\Form;
 
 use App\Entity\User;
-use App\Service\GetSettings;
+use App\Enum\SettingName;
+use App\Repository\SettingRepository;
 use libphonenumber\PhoneNumberFormat;
 use Misd\PhoneNumberBundle\Form\Type\PhoneNumberType;
 use Symfony\Component\Form\AbstractType;
@@ -15,16 +16,19 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 class TwoFactorPhoneNumber extends AbstractType
 {
     public function __construct(
-        private readonly GetSettings $getSettings,
-        private readonly TranslatorInterface $translator
+        private readonly TranslatorInterface $translator,
+        private readonly SettingRepository $settingRepository,
     ) {
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
-        $data = $this->getSettings->getSettings();
-        $regionInputs = explode(',', (string)$data['DEFAULT_REGION_PHONE_INPUTS']['value']);
+        $regionInputValue = $this->settingRepository->findOneBy(
+            ['name' => SettingName::DEFAULT_REGION_PHONE_INPUTS->value]
+        )->getValue();
+        $regionInputs = explode(',', (string)$regionInputValue);
         $regionInputs = array_map('trim', $regionInputs);
+
         $builder
             ->add('phoneNumber', PhoneNumberType::class, [
                 'label' => $this->translator->trans('phoneNumber', [], 'TwoFA'),
