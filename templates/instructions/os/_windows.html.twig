@@ -4,59 +4,28 @@
         {{ 'introduction'|trans({}, 'windows') }}
     </p>
 
+    {# Determine correct image folder based on locale, fallback to en #}
+    {% set locale = app.request.locale in ['pt', 'en'] ? app.request.locale : 'en' %}
+    {% set imgPath = 'resources/instructions/windows/' ~ locale %}
+
     <div class="card-container">
         <div class="card-grid-windows">
-            {# Item 1 #}
-            <a href="{{ asset('resources/instructions/windows/item1.jpeg') }}" target="_blank" class="card">
-                <div class="card-number">1</div>
-                <div class="flex justify-center">
-                    <img src="{{ asset('resources/instructions/windows/item1.jpeg') }}"
-                         alt="Item 1"
-                         class="card-image-windows">
-                </div>
-                <p class="card-description">
-                    {{ 'item1.description'|trans({}, 'windows') }}
-                </p>
-            </a>
 
-            {# Item 2 #}
-            <a href="{{ asset('resources/instructions/windows/item2.jpeg') }}" target="_blank" class="card">
-                <div class="card-number">2</div>
-                <div class="flex justify-center">
-                    <img src="{{ asset('resources/instructions/windows/item2.jpeg') }}"
-                         alt="Item 2"
-                         class="card-image-windows">
-                </div>
-                <p class="card-description">
-                    {{ 'item2.description'|trans({}, 'windows') }}
-                </p>
-            </a>
+            {# Loop items 1 to 4 dynamically #}
+            {% for i in 1..4 %}
+                <a href="{{ asset(imgPath ~ '/item' ~ i ~ '.jpeg') }}" target="_blank" class="card">
+                    <div class="card-number">{{ i }}</div>
+                    <div class="flex justify-center">
+                        <img src="{{ asset(imgPath ~ '/item' ~ i ~ '.jpeg') }}"
+                             alt="Item {{ i }}"
+                             class="card-image-windows">
+                    </div>
+                    <p class="card-description">
+                        {{ ('item' ~ i ~ '.description')|trans({}, 'windows') }}
+                    </p>
+                </a>
+            {% endfor %}
 
-            {# Item 3 #}
-            <a href="{{ asset('resources/instructions/windows/item3.jpeg') }}" target="_blank" class="card">
-                <div class="card-number">3</div>
-                <div class="flex justify-center">
-                    <img src="{{ asset('resources/instructions/windows/item3.jpeg') }}"
-                         alt="Item 3"
-                         class="card-image-windows">
-                </div>
-                <p class="card-description">
-                    {{ 'item3.description'|trans({}, 'windows') }}
-                </p>
-            </a>
-
-            {# Item 4 #}
-            <a href="{{ asset('resources/instructions/windows/item4.jpeg') }}" target="_blank" class="card">
-                <div class="card-number">4</div>
-                <div class="flex justify-center">
-                    <img src="{{ asset('resources/instructions/windows/item4.jpeg') }}"
-                         alt="Item 4"
-                         class="card-image-windows">
-                </div>
-                <p class="card-description">
-                    {{ 'item4.description'|trans({}, 'windows') }}
-                </p>
-            </a>
         </div>
     </div>
 </div>
