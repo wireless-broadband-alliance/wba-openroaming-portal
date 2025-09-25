@@ -121,7 +121,7 @@
 /* instructions page  */
 @layer components {
     .instructions .introduction {
-        @apply text-base sm:text-lg md:text-xl font-medium mb-6;
+        @apply text-base sm:text-lg md:text-xl font-medium mt-6;
     }
 
     .instructions .card-container {
