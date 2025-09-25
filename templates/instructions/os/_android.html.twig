@@ -4,67 +4,34 @@
         {{ 'introduction'|trans({}, 'android') }}
     </p>
 
+    {# Get the correct image folder based on locale, fallback to en #}
+    {% set locale = app.request.locale in ['pt', 'en'] ? app.request.locale : 'en' %}
+    {% set imgPath = 'resources/instructions/android/' ~ locale %}
+
     <div class="card-container">
         <div class="card-grid">
 
-            {# Item 1 #}
-            <a href="{{ asset('resources/instructions/android/item1.jpeg') }}" target="_blank" class="card">
-                <div class="card-number">1</div>
-                <div class="flex justify-center">
-                    <img src="{{ asset('resources/instructions/android/item1.jpeg') }}"
-                         alt="Item 1"
-                         class="card-image">
-                </div>
-                <p class="card-description">
-                    {{ 'item1.description'|trans({}, 'android') }}
-                </p>
-            </a>
-
-            {# Item 2 #}
-            <a href="{{ asset('resources/instructions/android/item2.jpeg') }}" target="_blank" class="card">
-                <div class="card-number">2</div>
-                <div class="flex justify-center">
-                    <img src="{{ asset('resources/instructions/android/item2.jpeg') }}"
-                         alt="Item 2"
-                         class="card-image">
-                </div>
-                <p class="card-description">
-                    {{ 'item2.description'|trans({}, 'android') }}
-                </p>
-            </a>
-
-            {# Item 3 #}
-            <a href="{{ asset('resources/instructions/android/item3.jpeg') }}" target="_blank" class="card">
-                <div class="card-number">3</div>
-                <div class="flex justify-center">
-                    <img src="{{ asset('resources/instructions/android/item3.jpeg') }}"
-                         alt="Item 3"
-                         class="card-image">
-                </div>
-                <p class="card-description">
-                    {{ 'item3.description'|trans({}, 'android') }}
-                </p>
-            </a>
-
-            {# Item 4 #}
-            <a href="{{ asset('resources/instructions/android/item4.jpeg') }}" target="_blank" class="card">
-                <div class="card-number">4</div>
-                <div class="flex justify-center">
-                    <img src="{{ asset('resources/instructions/android/item4.jpeg') }}"
-                         alt="Item 4"
-                         class="card-image">
-                </div>
-                <p class="card-description">
-                    {{ 'item4.description'|trans({}, 'android') }}
-                </p>
-            </a>
+            {# Items 1 to 4 #}
+            {% for i in 1..4 %}
+                <a href="{{ asset(imgPath ~ '/item' ~ i ~ '.jpeg') }}" target="_blank" class="card">
+                    <div class="card-number">{{ i }}</div>
+                    <div class="flex justify-center">
+                        <img src="{{ asset(imgPath ~ '/item' ~ i ~ '.jpeg') }}"
+                             alt="Item {{ i }}"
+                             class="card-image">
+                    </div>
+                    <p class="card-description">
+                        {{ ('item' ~ i ~ '.description')|trans({}, 'android') }}
+                    </p>
+                </a>
+            {% endfor %}
 
             {# Item 5 full width #}
-            <a href="{{ asset('resources/instructions/android/item5.jpeg') }}" target="_blank"
+            <a href="{{ asset(imgPath ~ '/item5.jpeg') }}" target="_blank"
                class="card md:col-span-2">
                 <div class="card-number">5</div>
                 <div class="flex justify-center">
-                    <img src="{{ asset('resources/instructions/android/item5.jpeg') }}"
+                    <img src="{{ asset(imgPath ~ '/item5.jpeg') }}"
                          alt="Item 5"
                          class="card-image">
                 </div>
