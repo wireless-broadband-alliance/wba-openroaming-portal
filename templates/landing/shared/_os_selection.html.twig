@@ -43,28 +43,21 @@
     <div class="mt-10" {{ stimulus_target('visibility', 'second') }}>
 
         {# Profile selector #}
-        <div class="w-[100%] rounded-[1px] shadow-lg bg-[#F9F9F9] px-[25px] py-[30px] flex flex-row items-center justify-end text-[#3F474D] space-x-6">
+        <div class="w-full rounded shadow-lg bg-[#F9F9F9] px-6 py-8 flex flex-col md:flex-row items-center md:items-center md:justify-between text-[#3F474D] space-y-6 md:space-y-0 md:space-x-6">
 
-            <div class="mr-auto flex flex-row items-center justify-start space-x-6">
+            <div class="flex flex-row items-center justify-start space-x-6">
                 <twig:ux:icon name="wba:{{ data.os.selected|lower }}" class="w-8" fill="none"/>
-
                 <span class="font-medium">
-                    {{ 'os_selection.device_identified'|trans({'%os%': data.os.selected}, 'landing') }}
-                </span>
+            {{ 'os_selection.device_identified'|trans({'%os%': data.os.selected}, 'landing') }}
+        </span>
             </div>
 
-            {# Download profile button #}
             <div class="flex flex-col items-center gap-2">
                 <div>
-                    <button type="submit" class="ml-auto w-[250px] btn-primary py-2">
+                    <button type="submit" class="w-full md:w-[250px] btn-primary py-2">
                         {{ 'os_selection.download_install'|trans({}, 'landing') }}
                     </button>
                 </div>
-                {#                <div> #}
-                {#                    <p class="text-sm text-gray-600"> #}
-                {#                        {{ 'os_selection.download_hint'|trans({'%link%': '<a href="' ~ path('app_instructions') ~ '" class="font-bold underline">instructions</a>'}, 'landing')|raw }} #}
-                {#                    </p> #}
-                {#                </div> #}
             </div>
         </div>
 
