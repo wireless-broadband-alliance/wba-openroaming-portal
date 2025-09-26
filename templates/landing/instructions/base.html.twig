@@ -1,4 +1,4 @@
-{% extends 'base.html.twig' %}
+{% extends 'landing/instructions/base.html.twig' %}
 
 {% block title %}
     {{ data.PAGE_TITLE.value }}
@@ -68,17 +68,17 @@
 
                 <div data-os="{{ constant('App\\Enum\\OSType::ANDROID').value }}" data-os-tabs-target="content"
                      class="{% if data.os.selected == constant('App\\Enum\\OSType::ANDROID').value %}hidden{% endif %}">
-                    {{ include('instructions/os/_android.html.twig') }}
+                    {{ include('/landing/instructions/os/_android.html.twig') }}
                 </div>
 
                 <div data-os="{{ constant('App\\Enum\\OSType::IOS').value }}" data-os-tabs-target="content"
                      class="{% if data.os.selected == constant('App\\Enum\\OSType::IOS').value %}hidden{% endif %}">
-                    {{ include('instructions/os/_ios.html.twig') }}
+                    {{ include('/landing/instructions/os/_ios.html.twig') }}
                 </div>
 
                 <div data-os="{{ constant('App\\Enum\\OSType::WINDOWS').value }}" data-os-tabs-target="content"
                      class="{% if data.os.selected == constant('App\\Enum\\OSType::WINDOWS').value %}hidden{% endif %}">
-                    {{ include('instructions/os/_windows.html.twig') }}
+                    {{ include('/landing/instructions/os/_windows.html.twig') }}
                 </div>
             </div>
         </div>

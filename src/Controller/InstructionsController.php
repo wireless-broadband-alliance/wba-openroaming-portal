@@ -42,7 +42,7 @@ class InstructionsController extends AbstractController
             $data['os']['selected'] = OSType::ANDROID->value;
         }
 
-        return $this->render('instructions/base.html.twig', [
+        return $this->render('landing/instructions/base.html.twig', [
             'data' => $data,
         ]);
     }
