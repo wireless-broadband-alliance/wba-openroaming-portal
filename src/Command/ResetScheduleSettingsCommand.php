@@ -53,6 +53,7 @@ class ResetScheduleSettingsCommand extends Command
             ['name' => SettingName::DELETE_UNCONFIRMED_USERS_CRON->value, 'value' => '0 0 * * *'],
             ['name' => SettingName::USERS_WHEN_PROFILE_EXPIRES_CRON->value, 'value' => '0 1 * * *'],
             ['name' => SettingName::LDAP_SYNC_CRON->value, 'value' => '0 2 * * *'],
+            ['name' => SettingName::FREERADIUS_LAST_CONNECTION_CRON->value, 'value' => '0 3 * * *'],
             ['name' => SettingName::CRON_ADVANCED_STATUS->value, 'value' => 'OFF'],
         ];
 
