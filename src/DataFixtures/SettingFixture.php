@@ -136,7 +136,7 @@ class SettingFixture extends Fixture
             ['name' => SettingName::PROFILE_LIMIT_DATE_EMAIL->value, 'value' => '5'],
             ['name' => SettingName::PROFILE_LIMIT_DATE_SMS->value, 'value' => '5'],
             ['name' => SettingName::TIME_STAMP_FREERADIUS_CRON->value, 'value' => '0'],
-            ['name' => SettingName::FREERADIUS_LAST_CONNECTION_CRON->value, 'value' => '* * * * *'],
+            ['name' => SettingName::FREERADIUS_LAST_CONNECTION_CRON->value, 'value' => '0 3 * * *'],
             ['name' => SettingName::DELETE_UNCONFIRMED_USERS_CRON->value, 'value' => '0 0 * * *'],
             ['name' => SettingName::USERS_WHEN_PROFILE_EXPIRES_CRON->value, 'value' => '0 1 * * *'],
             ['name' => SettingName::LDAP_SYNC_CRON->value, 'value' => '0 2 * * *'],
