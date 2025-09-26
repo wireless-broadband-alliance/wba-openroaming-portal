@@ -13,7 +13,7 @@
     <div {{ stimulus_controller('fields') }}>
             <h1 class="text-lg mb-8 mt-10">{{ 'personalData.title'|trans({}, '_account_widget') }}</h1>
 
-        {{ form_start(form, { action: path('app_landing_account_user') }) }}
+        {{ form_start(form, {action: path('app_landing_account_user')}) }}
         {{ form_errors(form) }}
 
             <div class="flex flex-col lg:flex-row gap-x-6 gap-y-8">
@@ -44,7 +44,7 @@
         <div {{ stimulus_controller('fields') }}>
                 <h1 class="text-lg mb-8 mt-10">{{ 'changePassword.title'|trans({}, '_account_widget') }}</h1>
 
-            {{ form_start(formPassword, { action: path('app_landing_account_user') }) }}
+            {{ form_start(formPassword, {action: path('app_landing_account_user')}) }}
                 {{ form_errors(formPassword) }}
 
                 <div class="flex flex-col gap-x-6 gap-y-8">
@@ -128,8 +128,8 @@
                 action: path('app_landing_account_user'),
                 attr: {
                     'data-controller': 'alert',
-                    'data-alert-target': 'form'
-                }
+                    'data-alert-target': 'form',
+                },
             }) }}
             {{ form_errors(formRevokeProfiles) }}
             {% set userUUID = app.user.uuid %}
