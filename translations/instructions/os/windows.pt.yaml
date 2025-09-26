@@ -1,9 +1,9 @@
 introduction: 'De modo a aceder de forma segura às redes OpenRoaming, deve seguir os próximos passos'
 item1:
-    description: "Insira o seu email, aceite os termos e condições e prossiga clicando em “Create Account”"
+    description: "Selecione o métode de autenticação que pretende utilizar e aceite os termos e condições"
 item2:
-    description: "Depois de ser redirecionado do email, clique em “Download and install Profile”."
+    description: "Insira o seus detalhes"
 item3:
-    description: "Clique em “Open Settings”"
+    description: "Toque em “Transferir e Instalar”"
 item4:
     description: "Clique em “Add” e ligue-se automaticamente à rede."

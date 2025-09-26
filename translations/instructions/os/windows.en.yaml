@@ -1,9 +1,9 @@
 introduction: "To securely access OpenRoaming networks, please follow the next steps"
 item1:
-    description: "Enter your email, accept the terms and conditions, and proceed by clicking “Create Account”"
+    description: "Select the authentication method you want to use and accept the terms and conditions"
 item2:
-    description: "After being redirected from the email, click “Download and Install Profile”"
+    description: "Enter your details"
 item3:
-    description: "Click “Open Settings”"
+    description: "Tap “Download and Install”"
 item4:
     description: "Click “Add” and connect automatically to the network"
