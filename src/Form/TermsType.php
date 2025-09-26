@@ -42,6 +42,7 @@ class TermsType extends AbstractType
                     'attr' => [
                         'autocomplete' => 'off',
                     ],
+                    'required' => false,
                     'constraints' => [
                         new Assert\Url([
                             'message' => $this->translator->trans('valueNotValid', [], 'CapportType'),
