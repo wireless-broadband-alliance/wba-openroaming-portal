@@ -19,7 +19,6 @@ export default class extends Controller {
     showTab(os) {
         const activeClasses = [
             "bg-white",
-            "text-[#8AB742]",
             "shadow-md",
             "rounded-t-lg",
             "border-b-2",
