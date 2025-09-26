@@ -35,8 +35,7 @@ class TOSController extends AbstractController
         $data = $this->getSettings->getSettings();
         $tosFormat = $this->settingRepository->findOneBy(['name' => SettingName::TOS->value]);
 
-        $session = $request->getSession();
-        $language = $session->get('_locale');
+        $language = $request->getLocale();
 
         if (
             $tosFormat &&
@@ -76,8 +75,7 @@ class TOSController extends AbstractController
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings();
 
-        $session = $request->getSession();
-        $language = $session->get('_locale');
+        $language = $request->getLocale();
 
         $privacyPolicyFormat = $this->settingRepository->findOneBy(['name' => SettingName::PRIVACY_POLICY->value]);
 
