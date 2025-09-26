@@ -11,11 +11,10 @@
     </div>
 
     <div {{ stimulus_controller('fields') }}>
-        <form method="POST" action="{{ path('app_landing_account_user') }}">
             <h1 class="text-lg mb-8 mt-10">{{ 'personalData.title'|trans({}, '_account_widget') }}</h1>
 
-            {{ form_start(form) }}
-            {{ form_errors(form) }}
+        {{ form_start(form, {action: path('app_landing_account_user')}) }}
+        {{ form_errors(form) }}
 
             <div class="flex flex-col lg:flex-row gap-x-6 gap-y-8">
                 <div class="relative w-full">
@@ -38,16 +37,14 @@
 
             {{ form_rest(form) }}
             {{ form_end(form) }}
-        </form>
     </div>
 
     {% if data.LOGIN_WITH_UUID_ONLY.value == constant('App\\Enum\\OperationMode::OFF').value %}
         {# Form Password Section #}
         <div {{ stimulus_controller('fields') }}>
-            <form method="POST" action="{{ path('app_landing_account_user') }}">
                 <h1 class="text-lg mb-8 mt-10">{{ 'changePassword.title'|trans({}, '_account_widget') }}</h1>
 
-                {{ form_start(formPassword) }}
+            {{ form_start(formPassword, {action: path('app_landing_account_user')}) }}
                 {{ form_errors(formPassword) }}
 
                 <div class="flex flex-col gap-x-6 gap-y-8">
@@ -91,7 +88,6 @@
 
                 {{ form_rest(formPassword) }}
                 {{ form_end(formPassword) }}
-            </form>
         </div>
     {% endif %}
 
@@ -123,30 +119,40 @@
 
     {# Revoke Account Profile Section #}
     <div {{ stimulus_controller('alert') }}>
-        <form method="POST"
-              action="{{ path('app_landing_account_user') }}"
-              data-controller="alert"
-              data-alert-target="form">
-            <h1 class="text-lg mb-8 mt-10">
-                {{ 'profileData.title'|trans({}, '_account_widget') }}
-            </h1>
+        <h1 class="text-lg mb-8 mt-10">
+            {{ 'profileData.title'|trans({}, '_account_widget') }}
+        </h1>
 
-            <div class="grid grid-cols-1 space-y-4">
-                {{ form_start(formRevokeProfiles) }}
-                {{ form_errors(formRevokeProfiles) }}
+        <div class="grid grid-cols-1 space-y-4">
+            {{ form_start(formRevokeProfiles, {
+                action: path('app_landing_account_user'),
+                attr: {
+                    'data-controller': 'alert',
+                    'data-alert-target': 'form',
+                },
+            }) }}
+            {{ form_errors(formRevokeProfiles) }}
+            {% set userUUID = app.user.uuid %}
 
-                <button class="btn-logout"
-                        type="button"
-                        data-action="alert#revoke_profiles"
-                        data-alert-target="button"
-                        data-user-uuid="{% if userExternalAuths[user.id] is defined %}{% for auth in userExternalAuths[user.id] %}{% if auth.provider == constant('App\\Enum\\UserProvider::SAML').value %}{{ auth.providerId }}{% else %}{{ app.user.uuid }}{% endif %}{% endfor %}{% endif %}">
-                    {{ 'profileData.revokeProfiles'|trans({}, '_account_widget') }}
-                </button>
+            {% if user.userExternalAuths|length > 0 %}
+                {% for auth in user.userExternalAuths %}
+                    {% if auth.provider == constant('App\\Enum\\UserProvider::SAML').value %}
+                        {% set userUUID = auth.providerId %}
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
 
-                {{ form_rest(formRevokeProfiles) }}
-                {{ form_end(formRevokeProfiles) }}
-            </div>
-        </form>
+            <button class="btn-logout w-full"
+                    type="submit"
+                    data-action="alert#revoke_profiles"
+                    data-alert-target="button"
+                    data-user-uuid="{{ userUUID }}">
+                {{ 'profileData.revokeProfiles'|trans({}, '_account_widget') }}
+            </button>
+
+            {{ form_rest(formRevokeProfiles) }}
+            {{ form_end(formRevokeProfiles) }}
+        </div>
     </div>
 
     {# Additional Option: Danger Zone for Account Deletion #}
