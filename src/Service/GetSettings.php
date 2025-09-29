@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use App\Entity\Setting;
 use App\Enum\LanguageType;
 use App\Enum\SettingName;
 use App\Enum\TextEditorName;
@@ -31,6 +32,11 @@ readonly class GetSettings
             throw new \RuntimeException(
                 $this->translator->trans('noRequestAvailable', [], 'GetSettings')
             );
+        }
+
+        // Allow the user to still be able to change the language
+        if ($request->attributes->get('_route') === 'change_language') {
+            return [];
         }
 
         // Ignore locale logic for API requests
@@ -326,5 +332,23 @@ readonly class GetSettings
             SettingName::AUTH_METHOD_SMS_REGISTER_LABEL->value,
             SettingName::AUTH_METHOD_SMS_REGISTER_DESCRIPTION->value,
         ];
+    }
+
+    public function getSpecificSettings(array $settingsWanted): array
+    {
+
+        $settings = $this->settingRepository->findBy([
+            'name' => $settingsWanted,
+        ]);
+
+        $result = [];
+        foreach ($settings as $setting) {
+            /** @var Setting $setting */
+            $result[$setting->getName()] = [
+                'value' => $setting->getValue(),
+            ];
+        }
+
+        return $result;
     }
 }

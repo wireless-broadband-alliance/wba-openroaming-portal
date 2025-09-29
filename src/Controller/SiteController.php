@@ -22,6 +22,7 @@ use App\Repository\UserExternalAuthRepository;
 use App\Security\LandingAuthenticator;
 use App\Service\EventActions;
 use App\Service\GetSettings;
+use App\Service\OSDetectionService;
 use App\Service\ProfileManager;
 use App\Service\TwoFAService;
 use App\Service\UserDeletionService;
@@ -61,6 +62,7 @@ class SiteController extends AbstractController
         private readonly TranslatorInterface $translator,
         private readonly UserDeletionService $userDeletionService,
         private readonly EntityManagerInterface $entityManager,
+        private readonly OSDetectionService $OSDetectionService,
     ) {
     }
 
@@ -369,7 +371,7 @@ class SiteController extends AbstractController
         }
 
         $data['os'] = [
-            'selected' => $payload['radio-os'] ?? $this->detectDevice($userAgent),
+            'selected' => $payload['radio-os'] ?? $this->OSDetectionService->detectDevice($userAgent),
             'items' => [
                 OSType::WINDOWS->value => ['alt' => 'Windows Logo'],
                 OSType::IOS->value => ['alt' => 'Apple Logo'],
@@ -548,37 +550,5 @@ class SiteController extends AbstractController
         }
 
         return $this->redirectToRoute('app_landing');
-    }
-
-    private function detectDevice($userAgent): string
-    {
-        $os = OSType::NONE->value;
-
-        // Windows
-        if (preg_match('/windows|win32/i', (string)$userAgent)) {
-            $os = OSType::WINDOWS->value;
-        }
-
-        // macOS
-        if (preg_match('/macintosh|mac os x/i', (string)$userAgent)) {
-            $os = OSType::MACOS->value;
-        }
-
-        // iOS
-        if (preg_match('/iphone|ipod|ipad/i', (string)$userAgent)) {
-            $os = OSType::IOS->value;
-        }
-
-        // Android
-        if (preg_match('/android/i', (string)$userAgent)) {
-            $os = OSType::ANDROID->value;
-        }
-
-        // Linux
-//        if (preg_match('/linux/i', $userAgent)) {
-//            $os = OSType::LINUX;
-//        }
-
-        return $os;
     }
 }

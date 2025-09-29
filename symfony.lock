@@ -73,9 +73,6 @@
             "config/routes/easyadmin.yaml"
         ]
     },
-    "emileperron/tinymce-bundle": {
-        "version": "v2.1.0"
-    },
     "knpuniversity/oauth2-client-bundle": {
         "version": "2.15",
         "recipe": {

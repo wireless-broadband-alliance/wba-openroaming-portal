@@ -35,6 +35,13 @@ readonly class ExceptionListener
      */
     public function __invoke(ExceptionEvent $event): void
     {
+        $request = $event->getRequest();
+        // Allow the user to still be able to change the language
+        if ($request->attributes->get('_route') === 'change_language') {
+            $event->allowCustomResponseCode();
+            return;
+        }
+
         $exception = $event->getThrowable();
 
         // Default values
@@ -64,7 +71,6 @@ readonly class ExceptionListener
             $template = 'bundles/TwigBundle/Exception/error.html.twig';
         }
 
-        $request = $event->getRequest();
         $locale = $request->getSession()->get('_locale', 'en');
         $request->setLocale($locale);
         $this->translatorLocale->setLocale($locale);
