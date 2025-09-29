@@ -11,11 +11,13 @@ use PixelOpen\CloudflareTurnstileBundle\Type\TurnstileType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class ForgotPasswordSMSType extends AbstractType
 {
     public function __construct(
-        private readonly SettingRepository $settingRepository
+        private readonly SettingRepository $settingRepository,
+        private readonly TranslatorInterface $translator
     ) {
     }
 
@@ -47,7 +49,8 @@ class ForgotPasswordSMSType extends AbstractType
             $builder->add('security', TurnstileType::class, [
                 'attr' => [
                     'data-action' => 'contact',
-                    'data-theme' => 'light'
+                    'data-theme' => 'light',
+                    'data-language' => $this->translator->getLocale()
                 ],
                 'label' => false
             ]);
