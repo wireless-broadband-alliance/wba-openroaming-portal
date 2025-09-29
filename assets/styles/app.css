@@ -176,7 +176,7 @@
 
 
 .landing-language-selector {
-    @apply self-end sm:self-auto;
+    @apply self-end sm:self-auto z-30;
 }
 
 .instructions-header {
