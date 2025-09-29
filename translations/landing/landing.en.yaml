@@ -39,7 +39,7 @@ os_selection:
     download_hint: 'If you need help, follow the %link%.'
     instructions_link_text: 'instructions'
     device_identified: 'Device identified as running: %os%'
-    is_wrong: 'Is this Wrong?'
+    is_wrong: 'Is this wrong?'
     click_to_select: 'Click here to select your OS.'
 
 invalidCaptcha: 'Invalid CAPTCHA validation!'
