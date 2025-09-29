@@ -146,7 +146,8 @@
                     type="submit"
                     data-action="alert#revoke_profiles"
                     data-alert-target="button"
-                    data-user-uuid="{{ userUUID }}">
+                    data-user-uuid="{{ userUUID }}"
+                    data-user-actions-confirm-revoke="{{ 'profileData.confirm_revoke'|trans({'%uuid%': userUUID}, '_account_widget') }}">
                 {{ 'profileData.revokeProfiles'|trans({}, '_account_widget') }}
             </button>
 
