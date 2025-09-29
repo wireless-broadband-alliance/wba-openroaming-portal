@@ -21,7 +21,7 @@ readonly class TermsAcceptanceSubscriber implements EventSubscriberInterface
 
         // Pages that are always allowed
         $allowedPaths = [
-            '/',                   // landing page
+            '/',
             '/dashboard/login',
             '/dashboard/register',
             '/api',
@@ -29,9 +29,7 @@ readonly class TermsAcceptanceSubscriber implements EventSubscriberInterface
             '/api/v2',
         ];
 
-        // Get session
         $session = $request->getSession();
-
         $termsAccepted = $session->get('termsAccepted', false);
 
         // Only redirect if terms are NOT accepted AND page is not allowed
@@ -42,6 +40,8 @@ readonly class TermsAcceptanceSubscriber implements EventSubscriberInterface
                 [],
                 'controllers'
             );
+
+            // Load the flash msg
             $session->getFlashBag()->add('error', $message);
 
             // Redirect to landing page
