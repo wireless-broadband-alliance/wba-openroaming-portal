@@ -1,35 +1,23 @@
 # Changelog
 
-# Release V1.15.0
+# Release V1.9.0
 
 - Profile download instructions page.
 - New page dedicated for profile download steps and prepared for both translations implemented on the project.
 - Added new screenshots for each case (PT/EN) and for each operating system.
 - Also for this release, it doesn't have any migrations to be executed.
-
-# Release V1.14.0
-
 - Landing page UI rework for authenticated users.
 - Improve landing page by centralizing the display content for better notice and for mobile user focused.
 - Also for this release, it doesn't have any migrations to be executed.
-
-# Release V1.13.0
-
 - Remove TinyMice text editor bundle from the project because it's not valid for commercial use.
 - Installation of a new text editor open-source alternative for free commercial use.
 - Fix and rework customization page to also have this custom editor for (page_tile, page_description &
   additional_label).
 - Also for this release, it doesn't have any migrations to be executed.
-
-# Release V1.12.0
-
 - More Project optimizations reduce the amount of number of queries made in most of the pages.
 - New checker on the `GetSettings` service to also verify if there is any missing or duplicated setting on the DB.
 - Password toggle reveal implementation for inputs.
 - Also for this release, it doesn't have any migrations to be executed.
-
-# Release V1.11.0
-
 - New UI design for email templates.
 - Responsive Translations (Available: EN & PT-PT) - Administrator can just add new configurations for YAML
   files in the translations folder, and the page auto-detects the added language.
@@ -39,15 +27,6 @@
   minimizing redundant data processing and database queries.
 - Renamed some enums to singular form to follow symfony guidelines for enum classes.
 - Symfony version increase for maintained version (7.3.3), it bug fixes and security fixes until January 2026.
-- Also for this release, it's required to run the new migrations to set up the new entity for the translations:
-  `SettingTranslation`
-    - Run the migrations with:
-      ```bash
-      php bin/console doctrine:migrations:migrate
-      ```
-
-# Release V1.10.0
-
 - New feature - Now the admin can configure the landing login authentication, instead of being the traditional (
   email/password), it sends a verification link, for both cases (emails || phoneNumbers), to reduce the amount of steps
   for new users account creation.
@@ -58,14 +37,6 @@
   the `PLATFORM_MODE` setting is `ON`.
     - When that happens, it could brake the user account registration system for email & phoneNumbers on the landing
       page.
-- Also for this release, it's required to run the new migrations to set up the new setting: `LOGIN_WITH_UUID_ONLY`
-    - Run the migrations with:
-      ```bash
-      php bin/console doctrine:migrations:migrate
-      ```
-
-# Release V1.9.0
-
 - **Fix bug 500** on `/dashboard/statistics/freeradius` in case the connection details are invalid and the portal can
   reach
   the server, added a new JSON error message for details.
@@ -85,6 +56,12 @@
 - NPM webpack-cli deprecations fixed to the latest stabled release (
     - (https://www.npmjs.com/package/webpack-cli/v/5.1.4)) compatible with "@symfony/webpack-encore": "^5.1.0".
 - New validation on the Admin Authentication Methods page to check whether the project has all required certificates.
+- Also for this release, it's required to run the new migrations to set up the new entity for the translations (
+  `SettingTranslation`). And the new setting for the login with uuid (`LOGIN_WITH_UUID_ONLY`):
+    - Run the migrations with:
+      ```bash
+      php bin/console doctrine:migrations:migrate
+      ```
 
 # Release V1.8.1
 

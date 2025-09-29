@@ -95,13 +95,7 @@ Upgrading your system requires caution and preparation. Follow these general gui
 | 1.6             | N/A                  | 1.7.0           | Proceed directly to the release (1.7.0) after reviewing the changelog.                                                 |
 | 1.7.x           | N/A                  | 1.7.0           | Run `php bin/console doctrine:schema:update --force` to apply required schema changes.                                 |
 | 1.8.0 or lower  | N/A                  | 1.8.1           | Run `php bin/console doctrine:migrations:migrate` to apply optimizations & remove deprecated `verificationCode` field. |
-| 1.8.1           | N/A                  | 1.9.0           | Proceed directly to latest release after reviewing the changelog.                                                      |
-| 1.9.0           | N/A                  | 1.10.0          | Proceed directly to latest release after reviewing the changelog.                                                      |
-| 1.10.0          | N/A                  | 1.11.0          | Proceed directly to latest release after reviewing the changelog.                                                      |
-| 1.11.0          | N/A                  | 1.12.0          | Proceed directly to latest release after reviewing the changelog.                                                      |
-| 1.12.0          | N/A                  | 1.13.0          | Proceed directly to latest release after reviewing the changelog.                                                      |
-| 1.13.0          | N/A                  | 1.14.0          | Proceed directly to latest release after reviewing the changelog.                                                      |
-| 1.14.0          | N/A                  | 1.15.0 (Latest) | Proceed directly to latest release after reviewing the changelog.                                                      |
+| 1.8.1           | N/A                  | 1.9.0           | Run `php bin/console doctrine:migrations:migrate` to apply optimizations.                                              |
 
 Use this table to determine the exact upgrade steps based on your current version.
 
