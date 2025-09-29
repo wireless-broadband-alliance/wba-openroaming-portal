@@ -65,7 +65,6 @@ export default class extends Controller {
         this.clearAllCookies();
         this.closeModal();
         this.hideBanner();
-        location.reload();
     }
 
     savePreferences() {
