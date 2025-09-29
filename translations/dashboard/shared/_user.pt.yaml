@@ -7,3 +7,5 @@ notBanned: 'Não Banido'
 edit: 'Editar'
 delete: 'Eliminar'
 revoke: 'Revogar'
+confirm_delete: "Tem a certeza de que desejas remover o utilizador com o UUID %uuid%?"
+confirm_revoke: "Tem a certeza de que desejas revogar todos os perfis associados a esta conta: %uuid%?"
