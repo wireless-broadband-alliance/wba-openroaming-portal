@@ -38,7 +38,7 @@ os_selection:
     download_install: 'Download and Install Profile'
     download_hint: "If you have any doubts, follow the %link%."
     device_identified: 'Device identified as running: %os%'
-    is_wrong: 'Is this Wrong?'
+    is_wrong: 'Is this wrong?'
     click_to_select: 'Click here to select your OS.'
 
 invalidCaptcha: 'Invalid CAPTCHA validation!'
