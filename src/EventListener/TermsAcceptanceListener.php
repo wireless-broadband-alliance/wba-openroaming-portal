@@ -8,6 +8,7 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Symfony\Component\HttpFoundation\Session\Session;
 
 readonly class TermsAcceptanceListener
 {
@@ -43,6 +44,7 @@ readonly class TermsAcceptanceListener
             '/reject-terms'
         ];
 
+        /** @var Session $session */
         $session = $request->getSession();
         $termsAccepted = $session->get('termsAccepted', false);
 
