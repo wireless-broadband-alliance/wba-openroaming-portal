@@ -38,7 +38,7 @@
 }
 
 .form-widget {
-    @apply w-full border px-5 py-2.5 text-[#656565] placeholder-opacity-40 bg-transparent rounded-[5px] border-[#CECECE] appearance-none focus:outline-none focus:ring-0 focus:border-primary;
+    @apply w-full border px-5 py-2.5 text-[#656565] placeholder-opacity-40 bg-transparent rounded-[5px] border-[#CECECE] appearance-none focus:outline-none focus:ring-0 focus:border-primary pr-10;
 }
 
 .form-widget-text-area {
@@ -107,15 +107,19 @@
 
 /* password reveal toggle */
 .toggle-password-container {
-    @apply relative
+    @apply relative;
 }
 
 .toggle-password-icon {
-    @apply h-[1rem] w-[1rem]
+    @apply h-[1rem] w-[1rem];
 }
 
+/* password reveal toggle */
 .toggle-password-button {
-    @apply items-center bg-transparent border-none gap-[0.25rem] flex flex-row text-[0.875rem]/[1.25rem] justify-center h-[1rem] absolute right-[0.875rem] top-[0.875rem]
+    @apply items-center bg-transparent border-none flex justify-center absolute top-1/2 -translate-y-1/2;
+    right: 0.75rem;   /* keep it tucked inside the input, not too far */
+    height: 1.25rem;
+    width: 1.25rem;
 }
 
 /* landing-instructions page  */
@@ -175,7 +179,7 @@
 }
 
 .landing-language-selector {
-    @apply self-end sm:self-auto;
+    @apply self-end sm:self-auto z-30;
 }
 
 .instructions-header {

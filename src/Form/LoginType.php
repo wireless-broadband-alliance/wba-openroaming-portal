@@ -108,7 +108,8 @@ class LoginType extends AbstractType
             $builder->add('security', TurnstileType::class, [
                 'attr' => [
                     'data-action' => 'contact',
-                    'data-theme' => 'light'
+                    'data-theme' => 'light',
+                    'data-language' => $this->translator->getLocale(),
                 ],
                 'label' => false
             ]);

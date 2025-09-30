@@ -6,7 +6,6 @@ use App\Entity\User;
 use App\Enum\OperationMode;
 use App\Enum\SettingName;
 use App\Repository\SettingRepository;
-use App\Service\GetSettings;
 use PixelOpen\CloudflareTurnstileBundle\Type\TurnstileType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
@@ -59,7 +58,8 @@ class NewPasswordAccountType extends AbstractType
             $builder->add('security', TurnstileType::class, [
                 'attr' => [
                     'data-action' => 'contact',
-                    'data-theme' => 'light'
+                    'data-theme' => 'light',
+                    'data-language' => $this->translator->getLocale()
                 ],
                 'label' => false
             ]);

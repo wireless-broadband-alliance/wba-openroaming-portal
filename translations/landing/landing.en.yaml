@@ -26,7 +26,7 @@ obtainProfile: 'Obtain Your Profile'
 authenticationMethods: 'To get started, select one of the following authentication methods:'
 
 confirmationModal:
-    title: 'You need to confirm the terms before proceeding.'
+    title: 'You need to agree to the terms before proceeding.'
     closeButton: 'Close'
 
 accountSettings: 'Account Settings'
