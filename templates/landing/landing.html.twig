@@ -161,7 +161,7 @@
                 </div>
 
                 {# Terms and Conditions Check Box #}
-                {{ form_start(formTOS) }}
+                {{ form_start(formTOS, { attr: { id: 'tosForm' } }) }}
                 <div class="mt-[28px] flex items-center justify-start gap-2">
                     {{ form_widget(formTOS.agreeTerms, {
                         attr: {
@@ -169,6 +169,14 @@
                             id: 'agreeTermsCheckbox',
                             'data-action': 'terms-widget#handleCheckboxChange',
                             'data-terms-widget-target': 'agreeTerms',
+                            onchange: "
+                                        if(this.checked){
+                                            this.form.action='" ~ path('accept_terms') ~ "';
+                                        } else {
+                                            this.form.action='" ~ path('reject_terms') ~ "';
+                                        }
+                                        this.form.submit();
+                                    ",
                         },
                     }) }}
 
