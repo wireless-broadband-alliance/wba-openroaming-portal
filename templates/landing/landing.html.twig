@@ -170,12 +170,15 @@
                             'data-action': 'terms-widget#handleCheckboxChange',
                             'data-terms-widget-target': 'agreeTerms',
                             onchange: "
-                                        if(this.checked){
-                                            this.form.action='" ~ path('accept_terms') ~ "';
-                                        } else {
-                                            this.form.action='" ~ path('reject_terms') ~ "';
-                                        }
-                                        this.form.submit();
+                                        const url = this.checked ? '" ~ path('accept_terms') ~ "' : '" ~ path('reject_terms') ~ "';
+                                        fetch(url, {
+                                            method: 'POST',
+                                            headers: { 'X-Requested-With': 'XMLHttpRequest', 'Content-Type': 'application/json' },
+                                        })
+                                        .then(res => res.json())
+                                        .then(data => {
+                                            console.log(data.message);
+                                        });
                                     ",
                         },
                     }) }}

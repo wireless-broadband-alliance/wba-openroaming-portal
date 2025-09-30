@@ -114,7 +114,7 @@ class TOSController extends AbstractController
         $request->getSession()->set('termsAccepted', true);
 
 
-        return $this->redirectToRoute('app_landing');
+        return new JsonResponse(['status' => 'ok', 'message' => 'Terms accepted']);
     }
 
     #[Route('/reject-terms', name: 'reject_terms', methods: ['POST'])]
@@ -122,6 +122,6 @@ class TOSController extends AbstractController
     {
         $request->getSession()->set('termsAccepted', false);
 
-        return $this->redirectToRoute('app_landing');
+        return new JsonResponse(['status' => 'ok', 'message' => 'Rejected terms']);
     }
 }
