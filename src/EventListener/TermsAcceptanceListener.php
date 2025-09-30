@@ -37,8 +37,9 @@ readonly class TermsAcceptanceListener
             '/dashboard/register',
             '/instructions',
             '/change-language',
-            '/accept-terms',
-            '/reject-terms',
+            '/api',
+            '/api/v1',
+            '/api/v2',
         ];
 
         $session = $request->getSession();
