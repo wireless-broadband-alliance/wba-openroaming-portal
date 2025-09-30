@@ -1,4 +1,4 @@
-import {Controller} from "@hotwired/stimulus";
+import { Controller } from "@hotwired/stimulus";
 
 export default class extends Controller {
     static targets = ["button", "form"];
@@ -15,7 +15,6 @@ export default class extends Controller {
             this.formTarget.submit();
         }
     }
-
 
     revoke_profiles() {
         const message = this.buttonTarget.getAttribute("data-user-actions-confirm-revoke");
