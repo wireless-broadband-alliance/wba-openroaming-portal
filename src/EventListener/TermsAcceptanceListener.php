@@ -14,7 +14,8 @@ readonly class TermsAcceptanceListener
     public function __construct(
         private RouterInterface $router,
         private TranslatorInterface $translator
-    ) {}
+    ) {
+    }
 
     #[AsEventListener(event: KernelEvents::REQUEST)]
     public function onKernelRequest(RequestEvent $event): void
@@ -43,7 +44,11 @@ readonly class TermsAcceptanceListener
         $session = $request->getSession();
         $termsAccepted = $session->get('termsAccepted', false);
 
-        if (!$termsAccepted && !in_array($path, $allowedPaths, true) && $path !== $this->router->generate('app_landing')) {
+        if (
+            !$termsAccepted &&
+            !in_array($path, $allowedPaths, true) &&
+            $path !== $this->router->generate('app_landing')
+        ) {
             $message = $this->translator->trans(
                 'cannotAccessThisPageWithAInvalidProvider',
                 [],
