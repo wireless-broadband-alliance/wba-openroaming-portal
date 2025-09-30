@@ -24,9 +24,13 @@ readonly class TermsAcceptanceSubscriber implements EventSubscriberInterface
             '/',
             '/dashboard/login',
             '/dashboard/register',
+            '/instructions',
+            '/change-language',
             '/api',
             '/api/v1',
             '/api/v2',
+            '/accept-terms',
+            '/reject-terms'
         ];
 
         $session = $request->getSession();
