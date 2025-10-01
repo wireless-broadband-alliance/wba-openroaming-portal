@@ -35,7 +35,7 @@ class LanguageController extends AbstractController
 
         // Rebuild URL with preserved query
         $refererUrl = ($urlParts['path'] ?? '');
-        if (!empty($query)) {
+        if ($query !== []) {
             $refererUrl .= '?' . http_build_query($query);
         }
 
