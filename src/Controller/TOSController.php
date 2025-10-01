@@ -111,11 +111,17 @@ class TOSController extends AbstractController
     #[Route('/accept-terms', name: 'accept_terms', methods: ['POST'])]
     public function acceptTerms(Request $request): Response
     {
-        $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
-        if (!empty($data['accepted'])) {
-            $request->getSession()->set('termsAccepted', true);
-        }
+        $request->getSession()->set('termsAccepted', true);
 
-        return new JsonResponse(['success' => true]);
+
+        return new JsonResponse(['status' => 'ok', 'message' => 'Terms accepted']);
+    }
+
+    #[Route('/reject-terms', name: 'reject_terms', methods: ['POST'])]
+    public function rejectTerms(Request $request): Response
+    {
+        $request->getSession()->set('termsAccepted', false);
+
+        return new JsonResponse(['status' => 'ok', 'message' => 'Rejected terms']);
     }
 }
