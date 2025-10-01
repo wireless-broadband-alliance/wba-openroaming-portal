@@ -1,0 +1,44 @@
+{% set bgUrl = data.WALLPAPER_IMAGE.value != '/resources/images/wallpaper.png'
+    ? data.WALLPAPER_IMAGE.value
+    : '/resources/images/background.png' %}
+
+{% extends 'landing/base.html.twig' %}
+
+{% block title %}
+    {{ data.PAGE_TITLE.value }}
+{% endblock %}
+
+{% block body %}
+    <div class="min-h-screen bg-center bg-cover flex items-center justify-center px-4 sm:px-6 lg:px-8"
+         style="background-image: url('{{ bgUrl }}');" {{ stimulus_controller('visibility') }}>
+
+        <div class="landing-container">
+            {# Header: logo + language selector #}
+            <div class="landing-header">
+                {% if data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\OperationMode::ON').value %}
+                    <img class="max-w-[120px] h-auto object-contain"
+                         src="{{ data.CUSTOMER_LOGO.value }}"
+                         alt="Customer Logo"/>
+                {% endif %}
+
+                <div class="landing-language-selector">
+                    {{ include('shared/_select_language.html.twig', {
+                        currentLocale: app.request.locale,
+                        routeName: 'change_language',
+                        warningMessage: false,
+                    }) }}
+                </div>
+            </div>
+
+            {# Content Area #}
+            <div class="landing-content">
+                {% if isEEAUser() != constant('App\\Enum\\GeoLocation\\IsEEAHandler::NOT_IN_EEA').value %}
+                    {{ include('landing/shared/_cookie_banner.html.twig') }}
+                {% endif %}
+
+                {% block content %}
+                {% endblock %}
+            </div>
+        </div>
+    </div>
+{% endblock %}

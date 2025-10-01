@@ -342,23 +342,14 @@
         </div>
     </div>
     {# Cookie Open Modal Cookie Setting #}
-    <div class="flex flex-row justify-end items-center gap-4 my-2">
-        {# Manage cookies btn #}
+    <div class="flex flex-row justify-end items-center gap-4 my-2"
+         data-cookie-target="manageButton">
         <div class="flex items-center gap-2">
             <span class="text-sm text-[#707070]">{{ 'manage'|trans({}, '_cookie_banner') }}</span>
             <button id="modalManageCookies" type="button" data-action="cookie#showModal"
                     class="flex items-center duration-300 cursor-pointer rounded-full text-[#707070] focus:animate-spin-slow focus:bg-[#7DB928] focus:text-white hover:shadow-lg p-2.5 relative z-0">
                 <twig:ux:icon name="wba:cookie"/>
             </button>
-        </div>
-
-        {# Instructions btn #}
-        <div class="flex items-center gap-2">
-            <span class="text-sm text-[#707070]">{{ 'instructions'|trans({}, '_cookie_banner') }}</span>
-            <a href="{{ path('app_profile_instructions') }}"
-               class="flex items-center duration-300 cursor-pointer rounded-full text-[#707070] focus:animate-spin-slow focus:bg-[#7DB928] focus:text-white hover:shadow-lg p-2.5 relative z-0">
-                <twig:ux:icon class="w-5 h-5" name="wba:info" />
-            </a>
         </div>
     </div>
 </div>

@@ -1,0 +1,47 @@
+<div class="instructions">
+    {# Introduction #}
+    <p class="introduction">
+        {{ 'introduction'|trans({}, 'android') }}
+    </p>
+
+    {# Get the correct image folder based on locale, fallback to en #}
+    {% set locale = app.request.locale in [
+        constant('App\\Enum\\LanguageType::EN').value,
+        constant('App\\Enum\\LanguageType::PT').value]
+        ? app.request.locale : LanguageType.EN.value %}
+    {% set imgPath = 'resources/instructions/android/' ~ locale %}
+
+    <div class="card-container">
+        <div class="card-grid">
+
+            {# Items 1 to 6 #}
+            {% for i in 1..6 %}
+                <a href="{{ asset(imgPath ~ '/item' ~ i ~ '.jpeg') }}" target="_blank" class="card">
+                    <div class="card-number">{{ i }}</div>
+                    <div class="flex justify-center">
+                        <img src="{{ asset(imgPath ~ '/item' ~ i ~ '.jpeg') }}"
+                             alt="Item {{ i }}"
+                             class="card-image">
+                    </div>
+                    <p class="card-description">
+                        {{ ('item' ~ i ~ '.description')|trans({}, 'android') }}
+                    </p>
+                </a>
+            {% endfor %}
+
+            {# Item 7 full width #}
+            <a href="{{ asset(imgPath ~ '/item7.jpeg') }}" target="_blank"
+               class="card md:col-span-2">
+                <div class="card-number">7</div>
+                <div class="flex justify-center">
+                    <img src="{{ asset(imgPath ~ '/item7.jpeg') }}"
+                         alt="Item 7"
+                         class="card-image">
+                </div>
+                <p class="card-description">
+                    {{ 'item7.description'|trans({}, 'android') }}
+                </p>
+            </a>
+        </div>
+    </div>
+</div>

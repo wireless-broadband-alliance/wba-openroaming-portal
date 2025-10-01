@@ -19,8 +19,8 @@ class InstructionsController extends AbstractController
     ) {
     }
 
-    #[Route('/profile/instructions', name: 'app_profile_instructions')]
-    public function profileInstructions(Request $request): Response
+    #[Route('/instructions', name: 'app_instructions')]
+    public function instructions(Request $request): Response
     {
         $data = $this->getSettings->getSpecificSettings([
             SettingName::PAGE_TITLE->value,
@@ -29,8 +29,18 @@ class InstructionsController extends AbstractController
             SettingName::WALLPAPER_IMAGE->value
         ]);
 
+        // Check URL query first
+        $selectedOs = $request->query->get('os');
+        if (!$selectedOs) {
+            $selectedOs = $this->OSDetectionService->detectDevice($request->headers->get('User-Agent'));
+        }
+
+        if ($selectedOs === OSType::NONE->value) {
+            $selectedOs = OSType::ANDROID->value;
+        }
+
         $data['os'] = [
-            'selected' => $this->OSDetectionService->detectDevice($request->headers->get('User-Agent')),
+            'selected' => $selectedOs,
             'items' => [
                 OSType::WINDOWS->value => ['alt' => 'Windows Logo'],
                 OSType::IOS->value => ['alt' => 'Apple Logo'],
@@ -38,12 +48,9 @@ class InstructionsController extends AbstractController
             ]
         ];
 
-        if ($data['os']['selected'] === OSType::NONE->value) {
-            $data['os']['selected'] = OSType::ANDROID->value;
-        }
-
-        return $this->render('instructions/instructions.html.twig', [
+        return $this->render('landing/instructions/base.html.twig', [
             'data' => $data,
+            'currentOS' => $selectedOs,
         ]);
     }
 }

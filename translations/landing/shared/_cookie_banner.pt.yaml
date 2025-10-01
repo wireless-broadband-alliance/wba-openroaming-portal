@@ -6,10 +6,9 @@ reject: 'Rejeitar Cookies'
 apply: 'Aplicar Cookies'
 settings: 'Configurações de Cookies'
 manage: 'Gerir Cookies'
-instructions: 'Instruções de Instalação'
 close: 'Fechar'
-cookiesDescription: 'Esta plataforma usa cookies para fornecer uma experiência perfeita ao conectar-se à rede OpenRoaming. Esses cookies são essenciais para conectar seu dispositivo com segurança, possibilitando uma autenticação automática e garantir conformidade com nossas políticas. Ao usar nossa plataforma, você concorda com o uso desses cookies.'
-essentialCookiesText: 'Esses cookies são essenciais para o funcionamento adequado da plataforma e não podem ser desativados.'
+cookiesDescription: 'Esta plataforma usa cookies para fornecer uma experiência estável ao conectar-se à rede OpenRoaming. Estes cookies são essenciais para conectar o seu dispositivo com segurança, possibilitando uma autenticação automática e garantir conformidade com as nossas políticas. Ao usar a nossa plataforma, concorda com o uso desses cookies.'
+essentialCookiesText: 'Estes cookies são essenciais para o funcionamento adequado da plataforma e não podem ser desativados.'
 dataSafetyText: 'Os seus dados estão seguros connosco. Saiba mais na nossa'
 
 controlledBy: 'Controlado por'
@@ -18,7 +17,7 @@ manageableCookiesTitle: 'Cookies Gerenciáveis'
 manageableCookiesDescription: 'Estes cookies ajudam-nos a compreender como prefere usar a nossa plataforma.'
 sessionCookie:
     title: 'Cookie de Sessão (PHPSESSID)'
-    description: 'Este cookie é essencial para manter o estado da sessão do utilizador durante a duração da mesma. Ele permite que a plataforma funcione corretamente e garante uma experiência de utilizador perfeita.'
+    description: 'Este cookie é essencial para manter o estado da sessão do utilizador durante a duração da mesma. Permite que a plataforma funcione corretamente e garante uma experiência de utilizador estável.'
 csrfToken:
     title: 'Token CSRF'
     description: 'Protege contra ataques de falsificação de pedidos entre sites (CSRF), garantindo que formulários e pedidos sejam enviados a partir de fontes confiáveis.'
@@ -32,5 +31,5 @@ turnstileCookie:
     title: 'Cookie de Segurança Turnstile'
     description: 'Garante a segurança da plataforma ao prevenir interações de spam e bots.'
 rememberMeCookie:
-    title: 'Lembre-te de mim'
+    title: 'Lembra-te de mim'
     description: 'Guarda a sessão do utilizador se a conta estiver previamente ativa.'

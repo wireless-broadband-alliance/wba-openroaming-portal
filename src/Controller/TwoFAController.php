@@ -153,7 +153,7 @@ class TwoFAController extends AbstractController
                 }
                 $this->addFlash(
                     'error',
-                    $this->translator->trans('invalidCode', [], 'controllers')
+                    $this->translator->trans('invalidCodeTOTP', [], 'controllers')
                 );
             }
         }
@@ -276,7 +276,7 @@ class TwoFAController extends AbstractController
                 }
                 $this->addFlash(
                     'error',
-                    $this->translator->trans('invalidCode', [], 'controllers')
+                    $this->translator->trans('invalidCodeTOTP', [], 'controllers')
                 );
             }
         }

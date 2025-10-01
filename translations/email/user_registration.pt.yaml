@@ -11,9 +11,12 @@ new_user_steps:
     password: "A sua palavra-passe é: <strong style='color: #0045AD;'>%password%</strong>"
     enter_code: "Se tiver problemas com o link de confirmação, inicie sessão com as suas credenciais (email e palavra-passe) e introduza este código: <strong style='color: #0045AD;'>%twoFaCode%</strong>"
 
-download_and_install: 'Descarregar e Instalar'
+buttons:
+    download_and_install: 'Descarregar e Instalar'
+    link_text: 'clique no link abaixo'
+    download_text: 'Descarregue e instale a rede Wi-Fi'
 
 footer:
-    support_team: 'Equipa de apoio:'
+    support_team: 'Equipa de suporte:'
     thank_you: 'Obrigado'
     team: 'A equipa %supportTeam%'

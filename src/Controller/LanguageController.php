@@ -15,10 +15,30 @@ class LanguageController extends AbstractController
     public function changeLanguage(Request $request, SessionInterface $session): RedirectResponse
     {
         $locale = $request->query->get('locale', LanguageType::EN->value);
-
         $session->set('_locale', $locale);
 
-        $referer = $request->headers->get('referer', '/');
-        return $this->redirect($referer);
+        // Safe fallback if the referer is broken
+        $referer = $request->headers->get('referer') ?? $this->generateUrl('app_landing');
+
+        // Parse the referer URL to preserve the OS
+        $urlParts = parse_url($referer);
+
+        $query = [];
+        if (isset($urlParts['query'])) {
+            parse_str($urlParts['query'], $query);
+        }
+
+        // If 'os' exists in referer, preserve it
+        if ($request->query->has('os')) {
+            $query['os'] = $request->query->get('os');
+        }
+
+        // Rebuild URL with preserved query
+        $refererUrl = ($urlParts['path'] ?? '');
+        if ($query !== []) {
+            $refererUrl .= '?' . http_build_query($query);
+        }
+
+        return $this->redirect($refererUrl);
     }
 }

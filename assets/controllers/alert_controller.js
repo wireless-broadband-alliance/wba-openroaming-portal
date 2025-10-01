@@ -8,18 +8,18 @@ export default class extends Controller {
     }
 
     delete_user() {
-        const user_uuid = this.buttonTarget.getAttribute("data-user-uuid");
+        const message = this.buttonTarget.getAttribute("data-user-actions-confirm-delete");
         // Show warning message
-        if (confirm(`Are you sure you want to delete the user with UUID ${user_uuid}?`)) {
+        if (confirm(message)) {
             // If confirmed, submit the form
             this.formTarget.submit();
         }
     }
 
     revoke_profiles() {
-        const user_uuid = this.buttonTarget.getAttribute("data-user-uuid");
+        const message = this.buttonTarget.getAttribute("data-user-actions-confirm-revoke");
         // Show warning message
-        if (confirm(`Are you sure you want to revoke all the profiles associated with this account: ${user_uuid}?`)) {
+        if (confirm(message)) {
             // If confirmed, submit the form
             this.formTarget.submit();
         }

@@ -3,7 +3,7 @@ userId: 'ID do Utilizador'
 handle: 'Identificador'
 from: 'De'
 timeToResend: 'Tempo para Reenviar'
-defaultRegionPhoneInputs: 'Região Padrão de Números'
+defaultRegionPhoneInputs: 'Entradas telefónicas da região predefinida'
 sms_provider_notice: 'Isto é para o fornecedor 
   <a class="font-semibold underline inline-block" href="https://www.budgetsms.net/" target="_blank">
       BudgetSMS.net

@@ -40,4 +40,16 @@ class TextEditorRepository extends ServiceEntityRepository
     //            ->getOneOrNullResult()
     //        ;
     //    }
+
+    public function findTextEditor(string $name, string $language): ?TextEditor
+    {
+        return $this->createQueryBuilder('t')
+            ->Where('t.name = :name')
+            ->andWhere('t.locale = :locale')
+            ->setParameter('name', $name)
+            ->setParameter('locale', $language)
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
 }

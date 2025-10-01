@@ -1,4 +1,4 @@
-successResendAdmin: 'We have send to you a new code to: %email%'
+successResendAdmin: 'We have sent you a new code to: %email%'
 errorAdminWait: "You must wait %time% seconds before requesting a new code. Please try again later."
 settingsUpdatedSuccessfully: 'Customization settings have been updated successfully.'
 maximumDateRange1Year: 'Maximum date range is 1 year'
@@ -74,6 +74,7 @@ confirmationCodeSentToEmail: 'A confirmation code was sent to your email.'
 codeAlreadySent: 'Your code has already been sent to you previously. Wait %minutes% minute(s) to request a code again.'
 invalidPassword: 'Current password Invalid. Please try again.'
 invalidCode: 'Code Invalid. Please try again or resend the code.'
+invalidCodeTOTP: 'Code Invalid. Please try again.'
 verificationCodeIncorrect: 'The verification code is incorrect. Please try again.'
 verificationMethodNotEnabled: "This verification method it's not enabled!"
 onlyAdminCanAccessThisPage: 'Only admin users can access this page.'
