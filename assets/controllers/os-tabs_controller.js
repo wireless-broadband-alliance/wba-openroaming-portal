@@ -22,7 +22,6 @@ export default class extends Controller {
         window.history.replaceState({}, "", url);
     }
 
-
     showTab(os) {
         const activeClasses = ["bg-white", "shadow-md", "rounded-t-lg", "border-b-2", "border-[#8AB742]", "-mb-[2px]"];
         const inactiveClasses = [
