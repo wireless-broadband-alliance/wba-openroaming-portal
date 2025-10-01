@@ -1,4 +1,5 @@
 <?php
+
 namespace App\EventSubscriber;
 
 use Symfony\Component\HttpKernel\Event\RequestEvent;
@@ -12,7 +13,8 @@ readonly class TermsAcceptanceSubscriber implements EventSubscriberInterface
     public function __construct(
         private RouterInterface $router,
         private TranslatorInterface $translator
-    ) {}
+    ) {
+    }
 
     public function onKernelRequest(RequestEvent $event): void
     {
