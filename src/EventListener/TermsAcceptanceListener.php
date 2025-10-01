@@ -41,7 +41,10 @@ readonly class TermsAcceptanceListener
             '/api/v1',
             '/api/v2',
             '/accept-terms',
-            '/reject-terms'
+            '/reject-terms',
+            '/terms-conditions',
+            '/privacy-policy',
+            '/metrics'
         ];
 
         /** @var Session $session */
