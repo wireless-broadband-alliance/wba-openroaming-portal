@@ -66,6 +66,7 @@ PhoneNumberDoesntExist: 'Este número de telefone não existe. Por favor, insira
 onlyAccessThisPageLoggedIn: 'Só pode aceder a esta página com sessão iniciada.'
 cannotAccessThisPageWithoutValidRequest: 'Não podes aceder a esta página sem um pedido válido!'
 cannotAccessThisPageWithAInvalidProvider: 'Não podes aceder a esta página sem os requisitos válidos!'
+cannotAccessThisPageWithoutAcceptTerms: 'Não podes aceder a esta página sem aceitar os termos e codições!'
 cantAccessThisPageWithoutRequest: 'Não pode aceder a esta página sem ter um pedido!'
 codeSentWithAttemptsLeft: 'Enviámos-lhe um novo código para: %phone%. Tem %attempts% tentativa(s) restante(s).'
 smsRegenerationError: 'Falha ao regenerar o código SMS. Por favor, aguarde %minutes% minuto(s) antes de gerar um novo código.'
