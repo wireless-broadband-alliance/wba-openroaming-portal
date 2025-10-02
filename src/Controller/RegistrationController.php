@@ -266,7 +266,6 @@ class RegistrationController extends AbstractController
                     'success',
                     $this->translator->trans('messageSentWithPasswordAndVerificationCode', [], 'controllers')
                 );
-                $this->addFlash('success', $randomPassword);
 
                 // Authenticate the user
                 $token = new UsernamePasswordToken($user, FirewallType::LANDING->value, $user->getRoles());
