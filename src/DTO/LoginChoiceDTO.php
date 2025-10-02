@@ -39,12 +39,6 @@ class LoginChoiceDTO
     )]
     public ?PhoneNumber $phoneNumber = null;
 
-    #[Assert\When(
-        expression: "this.requirePassword === true",
-        constraints: [
-            new Assert\NotBlank(message: 'Password cannot be empty.')
-        ]
-    )]
     public ?string $password = null;
 
     // Controls whether password is required
