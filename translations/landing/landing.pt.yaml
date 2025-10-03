@@ -30,6 +30,7 @@ confirmationModal:
     closeButton: 'Fechar'
 
 accountSettings: 'Definições de Conta'
+authenticatedUser: 'Atualmente está autenticado como {uuid}'
 
 os_selection:
     choose_os: 'Escolha o seu sistema operativo para que possa transferir e instalar o perfil:'

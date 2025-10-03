@@ -123,6 +123,13 @@ class SecurityController extends AbstractController
 
         $dto->requirePassword = true;
 
+        $session = $request->getSession();
+        $lastMethod = $session->get('last_login_method');
+
+        if ($lastMethod) {
+            $dto->loginMethod = $lastMethod;
+        }
+
         // Create the form bound to the DTO
         $form = $this->createForm(LoginType::class, $dto);
 
