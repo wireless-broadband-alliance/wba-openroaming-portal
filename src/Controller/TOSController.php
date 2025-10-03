@@ -11,6 +11,7 @@ use App\Repository\SettingRepository;
 use App\Repository\TextEditorRepository;
 use App\Service\GetSettings;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -105,5 +106,29 @@ class TOSController extends AbstractController
         }
 
         return $this->redirectToRoute('app_landing');
+    }
+
+    #[Route('/accept-terms', name: 'accept_terms', methods: ['POST'])]
+    public function acceptTerms(Request $request): Response
+    {
+        $request->getSession()->set('termsAccepted', true);
+
+
+        return new JsonResponse(['status' => 'ok', 'message' => 'Terms accepted']);
+    }
+
+    #[Route('/reject-terms', name: 'reject_terms', methods: ['POST'])]
+    public function rejectTerms(Request $request): Response
+    {
+        $request->getSession()->set('termsAccepted', false);
+
+        return new JsonResponse(['status' => 'ok', 'message' => 'Rejected terms']);
+    }
+
+    #[Route('/get-terms-status', name: 'get_terms_status', methods: ['GET'])]
+    public function getTermsStatus(Request $request): JsonResponse
+    {
+        $termsAccepted = $request->getSession()->get('termsAccepted', false);
+        return new JsonResponse(['termsAccepted' => $termsAccepted]);
     }
 }

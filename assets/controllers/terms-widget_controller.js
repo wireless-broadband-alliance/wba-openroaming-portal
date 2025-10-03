@@ -4,19 +4,12 @@ export default class extends Controller {
     static targets = ["agreeTerms", "confirmationModal", "button"];
 
     connect() {
-        const isEEAUser = parseInt(this.element.dataset.isEeaUser, 10);
-
-        // Load the saved state of the terms checkbox from localStorage, if allowed by cookies
-        const hasCookies = this.getCookie("cookies_accepted") || this.getCookie("cookie_preferences");
-        if (hasCookies || isEEAUser !== 1) {
-            const savedTermsState = localStorage.getItem("termsAccepted");
-            if (savedTermsState !== null) {
-                this.updateTermsCheckbox(JSON.parse(savedTermsState));
-            }
-        }
-
-        // Enable/Disable submit buttons based on the checkbox state
-        this.toggleSubmitButtons();
+        fetch("/get-terms-status")
+            .then((res) => res.json())
+            .then((data) => {
+                this.updateTermsCheckbox(data.termsAccepted);
+                this.toggleSubmitButtons();
+            });
     }
 
     showModal(event) {
@@ -33,25 +26,19 @@ export default class extends Controller {
     handleCheckboxChange() {
         const isChecked = this.agreeTermsTarget.checked;
 
-        if (isChecked) {
-            this.confirmationModalTarget.classList.add("hidden");
-            // Save the terms state only if cookies are allowed
-            const hasCookies = this.getCookie("cookies_accepted") || this.getCookie("cookie_preferences");
-            const isEEAUser = parseInt(this.element.dataset.isEeaUser, 10);
-            if (hasCookies || isEEAUser !== 1) {
-                this.saveTermsState(isChecked);
-            }
-        } else {
-            // Remove the saved terms state from the localStorage if the user unchecks
-            localStorage.removeItem("termsAccepted");
-        }
+        fetch(isChecked ? "/accept-terms" : "/reject-terms", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+        })
+            .then((res) => res.json())
+            .then((data) => {
+                console.log(data.message);
+            });
 
-        // Enable/Disable submit buttons based on the checkbox state
+        // Show/Hide warning widget based on the checkbox state if the user clicks any of the authentication methods
+        if (isChecked) this.closeConfirmationModal();
+
         this.toggleSubmitButtons();
-    }
-
-    saveTermsState(accepted) {
-        localStorage.setItem("termsAccepted", accepted);
     }
 
     updateTermsCheckbox(accepted) {
@@ -65,9 +52,8 @@ export default class extends Controller {
         for (let button of this.buttonTargets) {
             // btn-disabled (for general buttons)
             button.classList.toggle("btn-disabled", !isChecked);
-
-            // btn-secondary-disabled (for the specific login button)
             if (button.classList.contains("btn-secondary")) {
+                // btn-secondary-disabled (for the specific login button)
                 button.classList.toggle("btn-secondary-disabled", !isChecked);
             }
         }
@@ -75,11 +61,5 @@ export default class extends Controller {
 
     closeConfirmationModal() {
         this.confirmationModalTarget.classList.add("hidden");
-    }
-
-    getCookie(name) {
-        const value = `; ${document.cookie}`;
-        const parts = value.split(`; ${name}=`);
-        return parts.length === 2 ? parts.pop().split(";").shift() : null;
     }
 }

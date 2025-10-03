@@ -38,7 +38,7 @@
 }
 
 .form-widget {
-    @apply w-full border px-5 py-2.5 text-[#656565] placeholder-opacity-40 bg-transparent rounded-[5px] border-[#CECECE] appearance-none focus:outline-none focus:ring-0 focus:border-primary;
+    @apply w-full border px-5 py-2.5 text-[#656565] placeholder-opacity-40 bg-transparent rounded-[5px] border-[#CECECE] appearance-none focus:outline-none focus:ring-0 focus:border-primary pr-10;
 }
 
 .form-widget-text-area {
@@ -107,13 +107,97 @@
 
 /* password reveal toggle */
 .toggle-password-container {
-    @apply relative
+    @apply relative;
 }
 
 .toggle-password-icon {
-    @apply h-[1rem] w-[1rem]
+    @apply h-[1rem] w-[1rem];
 }
 
+/* password reveal toggle */
 .toggle-password-button {
-    @apply items-center bg-transparent border-none gap-[0.25rem] flex flex-row text-[0.875rem]/[1.25rem] justify-center h-[1rem] absolute right-[0.875rem] top-[0.875rem]
+    @apply items-center bg-transparent border-none flex justify-center absolute top-1/2 -translate-y-1/2;
+    right: 0.75rem;   /* keep it tucked inside the input, not too far */
+    height: 1.25rem;
+    width: 1.25rem;
+}
+
+/* landing-instructions page  */
+@layer components {
+    .instructions .introduction {
+        @apply text-base sm:text-lg md:text-xl font-medium mt-6;
+    }
+
+    .instructions .card-container {
+        @apply min-h-screen rounded-lg flex justify-center px-4 sm:px-6 lg:px-10 py-12;
+    }
+
+    .instructions .card-grid {
+        @apply w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 gap-10;
+    }
+
+    .instructions .card-grid-windows {
+        @apply w-full max-w-6xl grid grid-cols-1 gap-10;
+    }
+
+    .instructions .card {
+        @apply relative p-6 rounded-xl shadow-lg transition transform duration-200 hover:-translate-y-1 hover:shadow-2xl block h-full;
+    }
+
+    .instructions .card-number {
+        @apply absolute -top-3 -left-3 w-10 h-10 flex items-center justify-center rounded-full bg-primary text-white font-bold;
+    }
+
+    .instructions .card-title {
+        @apply text-xl font-semibold mt-4;
+    }
+
+    .instructions .card-description {
+        @apply text-sm text-gray-600 mt-4;
+    }
+
+    .instructions .card-image {
+        @apply max-w-sm w-full object-contain rounded-lg cursor-zoom-in m-2;
+    }
+
+    .instructions .card-image-windows {
+        @apply w-full max-w-full h-auto object-contain rounded-lg cursor-zoom-in m-2;
+    }
+}
+
+.landing-container {
+    @apply w-[95%] sm:w-[90%] lg:w-[85%] xl:w-[80%] 2xl:w-[75%] max-w-[1800px] bg-white rounded-xl shadow-2xl py-12 sm:py-16 lg:py-20 px-6 sm:px-10;
+}
+
+.landing-header {
+    @apply flex flex-col-reverse sm:flex-row sm:items-center justify-between mb-4 gap-2;
+}
+
+.landing-content {
+    @apply h-[60vh] overflow-y-auto p-2;
+}
+
+
+.landing-language-selector {
+    @apply self-end sm:self-auto z-30;
+}
+
+.instructions-header {
+    @apply flex flex-col-reverse sm:flex-row sm:items-center justify-between mb-4 gap-2;
+}
+
+.instructions-title {
+    @apply text-xl sm:text-2xl md:text-3xl font-bold;
+}
+
+.instructions-tabs {
+    @apply flex border-b border-gray-200 mb-6 w-full;
+}
+
+.instructions-tab {
+    @apply flex-1 px-3 py-2 text-sm sm:text-base font-semibold flex items-center justify-center space-x-2 transition-all duration-200;
+}
+
+.instructions-content {
+    @apply h-[60vh] overflow-y-auto p-2;
 }

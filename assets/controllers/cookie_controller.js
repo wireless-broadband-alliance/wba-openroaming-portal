@@ -1,7 +1,7 @@
 import { Controller } from "@hotwired/stimulus";
 
 export default class extends Controller {
-    static targets = ["banner", "modalCookie", "consentForm"];
+    static targets = ["banner", "modalCookie", "consentForm", "manageButton"];
 
     connect() {
         // Initialize preferences without setting any cookies on the first page load
@@ -11,6 +11,7 @@ export default class extends Controller {
 
         this.updateCheckboxes();
         this.checkCookies();
+        this.toggleManageButton();
     }
 
     checkCookies() {
@@ -25,14 +26,28 @@ export default class extends Controller {
 
     showBanner() {
         this.bannerTarget.classList.remove("hidden");
+        this.toggleManageButton();
     }
 
     hideBanner() {
         this.bannerTarget.classList.add("hidden");
+        this.toggleManageButton();
+    }
+
+    toggleManageButton() {
+        if (this.bannerTarget.classList.contains("hidden")) {
+            this.manageButtonTarget.classList.remove("hidden");
+        } else {
+            this.manageButtonTarget.classList.add("hidden");
+        }
     }
 
     showModal() {
         this.modalCookieTarget.classList.remove("hidden");
+    }
+
+    closeModal() {
+        this.modalCookieTarget.classList.add("hidden");
     }
 
     acceptCookies() {
@@ -113,9 +128,5 @@ export default class extends Controller {
         });
 
         localStorage.clear();
-    }
-
-    closeModal() {
-        this.modalCookieTarget.classList.add("hidden");
     }
 }

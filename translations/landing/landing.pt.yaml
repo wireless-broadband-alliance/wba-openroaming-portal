@@ -30,11 +30,13 @@ confirmationModal:
   closeButton: 'Fechar'
 
 accountSettings: 'Definições de Conta'
+authenticatedUser: 'Atualmente está autenticado como {uuid}'
 
 os_selection:
   choose_os: 'Escolha o seu sistema operativo para que possa transferir e instalar o perfil:'
   macos_or_ios: 'macOS/iOS'
   download_install: 'Transferir e Instalar Perfil'
+  download_hint: 'Em caso de dúvidas, siga as %link%.'
   device_identified: 'Dispositivo identificado como executando: %os%'
   is_wrong: 'Está incorreto?'
   click_to_select: 'Clique aqui para selecionar o seu sistema operativo.'
