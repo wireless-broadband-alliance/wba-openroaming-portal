@@ -23,6 +23,7 @@
             'admin_dashboard_settings_terms',
             'admin_dashboard_settings_capport',
             'admin_dashboard_settings_schedule',
+            'admin_dashboard_settings_certs',
         ] %}
         {% set userAuthenticationRoutes = [
             'admin_dashboard_settings_auth',
@@ -98,6 +99,13 @@
                            href="{{ path('admin_dashboard_settings_schedule') }}">
                             <twig:ux:icon name="wba:schedule" class="w-5 mr-4" fill="none"/>
                             {{ 'scheduleAutomation'|trans({}, '_header_admin') }}
+                        </a>
+                    </li>
+                    <li>
+                        <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300 {% if app.request.attributes.get('_route') == 'admin_dashboard_settings_certs' %}selected{% endif %}"
+                           href="{{ path('admin_dashboard_settings_certs') }}">
+                            <twig:ux:icon name="wba:download" class="w-5 mr-4" fill="none"/>
+                            {{ 'certsInstallation'|trans({}, '_header_admin') }}
                         </a>
                     </li>
                 </ul>
