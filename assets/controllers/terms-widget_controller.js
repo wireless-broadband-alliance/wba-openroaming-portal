@@ -14,9 +14,11 @@ export default class extends Controller {
 
     showModal(event) {
         event.preventDefault();
+        // Show the modal if the terms checkbox is not checked
         if (!this.agreeTermsTarget.checked) {
             this.confirmationModalTarget.classList.remove("hidden");
         } else {
+            // Get href of clicked link
             window.location.href = event.currentTarget.getAttribute("href");
         }
     }
@@ -33,6 +35,7 @@ export default class extends Controller {
                 console.log(data.message);
             });
 
+        // Show/Hide warning widget based on the checkbox state if the user clicks any of the authentication methods
         if (isChecked) this.closeConfirmationModal();
 
         this.toggleSubmitButtons();
@@ -47,8 +50,10 @@ export default class extends Controller {
     toggleSubmitButtons() {
         const isChecked = this.agreeTermsTarget?.checked || false;
         for (let button of this.buttonTargets) {
+            // btn-disabled (for general buttons)
             button.classList.toggle("btn-disabled", !isChecked);
             if (button.classList.contains("btn-secondary")) {
+                // btn-secondary-disabled (for the specific login button)
                 button.classList.toggle("btn-secondary-disabled", !isChecked);
             }
         }
