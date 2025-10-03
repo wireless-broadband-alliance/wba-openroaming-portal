@@ -166,8 +166,7 @@
 }
 
 .landing-container {
-    @apply w-full sm:w-[95%] lg:w-[90%] max-w-[1400px] bg-white rounded-xl shadow-2xl
-    py-12 sm:py-16 lg:py-20 px-6 sm:px-10;
+    @apply w-[95%] sm:w-[90%] lg:w-[85%] xl:w-[80%] 2xl:w-[75%] max-w-[1800px] bg-white rounded-xl shadow-2xl py-12 sm:py-16 lg:py-20 px-6 sm:px-10;
 }
 
 .landing-header {
