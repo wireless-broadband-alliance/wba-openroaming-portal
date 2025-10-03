@@ -20,7 +20,7 @@ twoFactorAuth:
 profileData:
     title: 'Dados do Perfil'
     revokeProfiles: 'Revogar Perfis de Conta'
-    confirm_delete: 'Tem a certeza de que desejas remover o utilizador com o UUID %uuid%?'
+    confirm_revoke: "Tem a certeza de que pretende revogar todos os perfis associados à conta %uuid%?"
 dangerZone:
     title: 'Zona de Perigo'
     deleteAccount: 'Eliminar Conta'
