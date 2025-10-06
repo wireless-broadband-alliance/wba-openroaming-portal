@@ -2,13 +2,15 @@
 
 namespace App\DTO;
 
+use App\Enum\CertificateFileName;
+use App\Enum\CertificateMachineType;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Validator\Constraints as Assert;
 
-class CertificateUploadDto
+class CertificateUploadDTO
 {
-    #[Assert\NotBlank]
-    public string $name;
+    public ?CertificateFileName $name = null;
+    public ?CertificateMachineType $type = null;
 
     #[Assert\NotNull]
     #[Assert\File(

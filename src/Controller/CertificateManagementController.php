@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\DTO\CertificateUploadDTO;
 use App\DTO\DbSetupDTO;
+use App\Enum\FirewallType;
+use App\Form\CertificateUploadType;
 use App\Form\DbSetupType;
 use App\Service\GetSettings;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -46,8 +49,22 @@ class CertificateManagementController extends AbstractController
             3 - GET THE DATA CONTENT OF EACH FILE
         */
 
+        // Prepare DTO
+        $certificateUploadDTO = new CertificateUploadDTO();
+
+        // Create & handle form
+        $form = $this->createForm(CertificateUploadType::class, $certificateUploadDTO);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            dd('NICE UPLOAD');
+        }
+
         return $this->render('dashboard/shared/settings_actions.html.twig', [
             'data' => $data,
+            'certificateUploadDTO' => $certificateUploadDTO,
+            'form' => $form->createView(),
+            'context' => FirewallType::DASHBOARD->value,
         ]);
     }
 

@@ -352,8 +352,6 @@ class UsersManagementController extends AbstractController
         /** @var User $currentUser */
         $currentUser = $this->getUser();
 
-
-
         if (!$user = $this->userRepository->find($id)) {
             // Get the 'id' parameter from the route URL
             $this->addFlash(

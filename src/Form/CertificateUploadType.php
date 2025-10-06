@@ -2,7 +2,7 @@
 
 namespace App\Form;
 
-use App\DTO\CertificateUploadDto;
+use App\DTO\CertificateUploadDTO;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -26,7 +26,7 @@ class CertificateUploadType extends AbstractType
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'data_class' => CertificateUploadDto::class,
+            'data_class' => CertificateUploadDTO::class,
         ]);
     }
 }
