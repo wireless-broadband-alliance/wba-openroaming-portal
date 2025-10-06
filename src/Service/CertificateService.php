@@ -6,12 +6,13 @@ use Exception;
 use RuntimeException;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-class CertificateService
+readonly class CertificateService
 {
     public function __construct(
-        private readonly TranslatorInterface $translator
+        private TranslatorInterface $translator
     ) {
     }
+
     /**
      * @throws Exception
      */
@@ -39,6 +40,21 @@ class CertificateService
             );
         }
         return date('Y-m-d H:i:s', $certInfo['validTo_time_t']);
+    }
+
+    public function isCertificateValidFromString(string $content): bool
+    {
+        // Parse the certificate
+        $certInfo = openssl_x509_parse($content);
+
+        // If parsing failed or no validity info, consider invalid
+        if ($certInfo === false || !isset($certInfo['validTo_time_t'])) {
+            return false;
+        }
+
+        // Check current time against certificate expiration
+        $now = time();
+        return $certInfo['validTo_time_t'] > $now;
     }
 
     public function verifyCertificates(): array
