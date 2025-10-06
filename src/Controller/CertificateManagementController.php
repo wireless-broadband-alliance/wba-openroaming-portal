@@ -13,7 +13,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
-class CertificateInstalationController extends AbstractController
+class CertificateManagementController extends AbstractController
 {
 
     public function __construct(
@@ -21,9 +21,9 @@ class CertificateInstalationController extends AbstractController
     ) {
     }
 
-    #[Route('/dashboard/settings/certificatesInstallation', name: 'admin_dashboard_settings_certs')]
+    #[Route('/dashboard/settings/certificatesManagement', name: 'admin_dashboard_settings_certs_management')]
     #[IsGranted('ROLE_ADMIN')]
-    public function settingsCertificatesInstallation(
+    public function settingsCertificatesManagement(
         Request $request
     ): Response {
         $data = $this->getSettings->getSettings();
@@ -33,9 +33,9 @@ class CertificateInstalationController extends AbstractController
         ]);
     }
 
-    #[Route('/dashboard/settings/certificatesInstallation/certificates', name: 'admin_dashboard_settings_certs')]
+    #[Route('/dashboard/settings/certificatesManagement/certificates', name: 'admin_dashboard_settings_certs')]
     #[IsGranted('ROLE_ADMIN')]
-    public function settingsCertificates(
+    public function settingsCertificatesManagementCertificates(
         Request $request
     ): Response {
         $data = $this->getSettings->getSettings();
@@ -45,9 +45,9 @@ class CertificateInstalationController extends AbstractController
         ]);
     }
 
-    #[Route('/dashboard/settings/certificatesInstallation/installation/db', name: 'admin_dashboard_settings_installation_db')]
+    #[Route('/dashboard/settings/certificatesManagement/installation', name: 'admin_dashboard_settings_certs_installation')]
     #[IsGranted('ROLE_ADMIN')]
-    public function settingsInstallation(
+    public function settingsCertificatesManagementInstallation(
         Request $request
     ): Response {
         $data = $this->getSettings->getSettings();
@@ -56,9 +56,12 @@ class CertificateInstalationController extends AbstractController
 
         $form = $this->createForm(DbSetupType::class, $dbDTO);
 
-        return $this->render('dashboard/shared/settings_actions/certificatesInstallation/installation/dataBase.html.twig', [
-            'data' => $data,
-            'form' => $form->createView(),
-        ]);
+        return $this->render(
+            'dashboard/shared/settings_actions/certificatesManagement/installation/dataBase.html.twig',
+            [
+                'data' => $data,
+                'form' => $form->createView(),
+            ]
+        );
     }
 }

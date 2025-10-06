@@ -48,9 +48,9 @@
     {% elseif app.request.attributes.get('_route') == 'admin_dashboard_settings_sms' %}
         <twig:ux:icon name="wba:sms" class="w-10 mt-0.5" fill="none"/>
         <h1 class="text-2xl font-semibold p-5">{{ 'SMSConfiguration'|trans({}, '_header_admin') }}</h1>
-    {% elseif app.request.attributes.get('_route') == 'admin_dashboard_settings_certs' %}
+    {% elseif app.request.attributes.get('_route') == 'admin_dashboard_settings_certs_management' %}
         <twig:ux:icon name="wba:download" class="w-10 mt-0.5" fill="none"/>
-        <h1 class="text-2xl font-semibold p-5">{{ 'certsInstallation'|trans({}, '_header_admin') }}</h1>
+        <h1 class="text-2xl font-semibold p-5">{{ 'certsManagement'|trans({}, '_header_admin') }}</h1>
     {% endif %}
 </div>
 

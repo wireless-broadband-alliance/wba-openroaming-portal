@@ -23,7 +23,7 @@
         {{ include('dashboard/shared/settings_actions/_schedule.html.twig') }}
     {% elseif app.request.attributes.get('_route') == 'admin_dashboard_settings_sms' %}
         {{ include('dashboard/shared/settings_actions/_sms.html.twig') }}
-    {% elseif app.request.attributes.get('_route') == 'admin_dashboard_settings_certs' %}
+    {% elseif app.request.attributes.get('_route') == 'admin_dashboard_settings_certs_management' %}
         {{ include('dashboard/shared/settings_actions/_certificateInstallation.html.twig') }}
     {% endif %}
 {% endblock %}
