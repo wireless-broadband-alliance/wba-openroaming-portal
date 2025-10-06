@@ -201,3 +201,36 @@
 .instructions-content {
     @apply h-[60vh] overflow-y-auto p-2;
 }
+
+
+/* Certificate Upload */
+
+/* Certificate Upload Form Card */
+.cert-upload-card {
+    @apply bg-white rounded-lg shadow-lg p-6 sm:p-8 lg:p-10 max-w-2xl mx-auto border border-gray-200;
+}
+
+/* Certificate Upload Form Header */
+.cert-upload-header {
+    @apply text-xl sm:text-2xl font-semibold mb-6 text-gray-700;
+}
+
+/* Certificate Upload Form Group */
+.cert-upload-group {
+    @apply space-y-2;
+}
+
+/* File name pill for uploaded files */
+.cert-upload-filename {
+    @apply inline-block px-3 py-1 text-sm font-medium text-white bg-primary rounded-lg mt-1;
+}
+
+/* Submit button for certificate upload */
+.cert-upload-btn {
+    @apply btn-primary w-full sm:w-auto mt-4;
+}
+
+/* Flash messages container inside certificate upload form */
+.cert-upload-flash {
+    @apply mt-6 space-y-3;
+}

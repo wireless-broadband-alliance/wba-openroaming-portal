@@ -1,1 +1,29 @@
-atum
+<div class="cert-upload-card">
+    <h3 class="cert-upload-header">Upload your PEM files</h3>
+
+    <twig:CertificateUploadForm :certificateUploadDTO="certificateUploadDTO" :form="form">
+        {{ form_start(form) }}
+
+        <div class="cert-upload-group">
+            {{ form_label(form.client, 'Client Certificate (.pem)', {'label_attr': {'class': 'form-label'}}) }}
+            {{ form_widget(form.client, {'attr': {'class': 'form-widget'}}) }}
+            {{ form_errors(form.client) }}
+            {% if form.client.vars.value %}
+                <span class="cert-upload-filename">{{ form.client.vars.value.filename }}</span>
+            {% endif %}
+        </div>
+
+        <div class="cert-upload-group">
+            {{ form_label(form.key, 'Private Key (.pem)', {'label_attr': {'class': 'form-label'}}) }}
+            {{ form_widget(form.key, {'attr': {'class': 'form-widget'}}) }}
+            {{ form_errors(form.key) }}
+            {% if form.key.vars.value %}
+                <span class="cert-upload-filename">{{ form.key.vars.value.filename }}</span>
+            {% endif %}
+        </div>
+
+        <button type="submit" class="cert-upload-btn">Upload Certificates</button>
+
+        {{ form_end(form) }}
+    </twig:CertificateUploadForm>
+</div>
