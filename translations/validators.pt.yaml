@@ -16,3 +16,6 @@ frequencyLessThanSelectedValues: 'A frequência deve ser menor que o número de 
 failedGenerateValidCRONExpression: 'Falha ao gerar uma expressão CRON válida a partir da entrada.'
 allValueWithSpecificDaysNotAllowed: 'O valor "Todos" não pode ser selecionado juntamente com valores específicos.'
 selectNonContiguousValuesWithFrequencyGreaterThan1NotAllowed: "Não selecione valores não contíguos com frequência maior que 1."
+fieldNotBlank: 'Este campo não pode ficar em branco.'
+maxCharacters: 'Este campo não pode ter mais de {{ limit }} caracteres'
+minCharacters: 'Este campo não pode ter menos de {{ limit }} caracteres'

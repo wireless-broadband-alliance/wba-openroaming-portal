@@ -16,3 +16,6 @@ frequencyLessThanSelectedValues: 'Frequency must be less than the number of sele
 failedGenerateValidCRONExpression: 'Failed to generate a valid CRON expression from input.'
 allValueWithSpecificDaysNotAllowed: '"All" value cannot be selected together with specific values.'
 selectNonContiguousValuesWithFrequencyGreaterThan1NotAllowed: "Please don't select Non-contiguous values with frequency greater than 1."
+fieldNotBlank: 'This field cannot be blank'
+maxCharacters: 'This field cannot be greater than {{ limit }} characters!'
+minCharacters: 'This field cannot be less than {{ limit }} characters!'
