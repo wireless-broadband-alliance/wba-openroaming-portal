@@ -2,13 +2,11 @@
 
 namespace App\Twig\Components;
 
-use App\DTO\CertificateUploadDTO;
+use App\DTO\certificateUploadDTO;
 use App\Enum\CertificateFileName;
 use App\Enum\CertificateMachineType;
 use App\Form\CertificateUploadType;
-use App\Service\CertificateService;
 use Symfony\Component\Form\FormError;
-use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
@@ -26,62 +24,55 @@ final class CertificateUploadForm
     use LiveCollectionTrait;
 
     #[LiveProp]
-    public ?CertificateUploadDTO $certificateUploadDto = null;
-
-    public function __construct(
-        private readonly CertificateService $certificateService,
-        private readonly FormFactoryInterface $formFactory
-    ) {
-        $this->certificateUploadDto = new CertificateUploadDTO();
-    }
+    public ?CertificateUploadDTO $certificateUploadDTO = null;
 
     /**
      * Instantiate the form using FormFactory
      */
     protected function instantiateForm(): FormInterface
     {
-        return $this->formFactory->create(CertificateUploadType::class, $this->certificateUploadDto);
+        return $this->formFactory->create(CertificateUploadType::class, $this->certificateUploadDTO);
     }
 
     #[LiveAction]
     public function validate(): void
     {
-        $form = $this->formFactory->create(CertificateUploadType::class, $this->certificateUploadDto);
+        $form = $this->formFactory->create(CertificateUploadType::class, $this->certificateUploadDTO);
 
-        if ($this->certificateUploadDto->client instanceof UploadedFile) {
-            $this->certificateUploadDto->name = CertificateFileName::CLIENT_PEM;
-            $this->certificateUploadDto->type = CertificateMachineType::RADSECPROXY;
+        if ($this->certificateUploadDTO->client instanceof UploadedFile) {
+            $this->certificateUploadDTO->name = CertificateFileName::CLIENT_PEM;
+            $this->certificateUploadDTO->type = CertificateMachineType::RADSECPROXY;
         }
 
-        if ($this->certificateUploadDto->key instanceof UploadedFile) {
-            $this->certificateUploadDto->name = CertificateFileName::KEY_PEM;
-            $this->certificateUploadDto->type = CertificateMachineType::RADSECPROXY;
+        if ($this->certificateUploadDTO->key instanceof UploadedFile) {
+            $this->certificateUploadDTO->name = CertificateFileName::KEY_PEM;
+            $this->certificateUploadDTO->type = CertificateMachineType::RADSECPROXY;
         }
 
         $form->submit([
-            'client' => $this->certificateUploadDto->client,
-            'key' => $this->certificateUploadDto->key,
+            'client' => $this->certificateUploadDTO->client,
+            'key' => $this->certificateUploadDTO->key,
         ], false);
 
         // Validate client certificate
-        if ($this->certificateUploadDto->client instanceof UploadedFile) {
-            $content = file_get_contents($this->certificateUploadDto->client->getPathname());
+        if ($this->certificateUploadDTO->client instanceof UploadedFile) {
+            $content = file_get_contents($this->certificateUploadDTO->client->getPathname());
             if (!$this->certificateService->isCertificateValidFromString($content)) {
                 $form->addError(new FormError('Client certificate is expired or invalid.'));
             }
         }
 
         // Validate private key
-        if ($this->certificateUploadDto->key instanceof UploadedFile) {
-            $keyContent = file_get_contents($this->certificateUploadDto->key->getPathname());
+        if ($this->certificateUploadDTO->key instanceof UploadedFile) {
+            $keyContent = file_get_contents($this->certificateUploadDTO->key->getPathname());
             $privateKey = openssl_pkey_get_private($keyContent);
 
             if ($privateKey === false) {
                 $form->addError(new FormError('Private key is invalid.'));
             }
 
-            if ($this->certificateUploadDto->client instanceof UploadedFile && $privateKey !== false) {
-                $certContent = file_get_contents($this->certificateUploadDto->client->getPathname());
+            if ($this->certificateUploadDTO->client instanceof UploadedFile && $privateKey !== false) {
+                $certContent = file_get_contents($this->certificateUploadDTO->client->getPathname());
                 $certResource = openssl_x509_read($certContent);
                 $pubKey = openssl_pkey_get_details(openssl_pkey_get_public($certResource))['key'];
                 $privateKeyPub = openssl_pkey_get_details($privateKey)['key'];
