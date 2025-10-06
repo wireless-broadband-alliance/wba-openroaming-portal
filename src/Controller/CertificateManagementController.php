@@ -40,6 +40,11 @@ class CertificateManagementController extends AbstractController
     ): Response {
         $data = $this->getSettings->getSettings();
 
+        /* TODO
+            1 - FIND A WAY TO SUBMIT THIS 2 FILES WITH FILE SYSTEM (client.pem and key.pem) about this -> wba certs fpr /root/wba-openroaming-connector/hybrid/radsecproxy/certs (CONFIRM path) -> https://github.com/wireless-broadband-alliance/wba-openroaming-connector
+            2 - GET THE DATA CONTENT OF EACH FILE
+        */
+
         return $this->render('dashboard/shared/settings_actions.html.twig', [
             'data' => $data,
         ]);
