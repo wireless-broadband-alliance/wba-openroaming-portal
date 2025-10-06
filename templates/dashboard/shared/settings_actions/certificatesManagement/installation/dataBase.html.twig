@@ -1,17 +1,8 @@
-{% set bgUrl = data.WALLPAPER_IMAGE.value != '/resources/images/wallpaper.png'
-    ? data.WALLPAPER_IMAGE.value
-    : '/resources/images/background.png' %}
+{% extends '/dashboard/base.html.twig' %}
 
-{% extends 'landing/authUser/base.html.twig' %}
+{% block title %}{{ 'adminPageWBA'|trans({}, '_header_admin') }}{% endblock %}
 
-{% block title %}
-    {{ data.PAGE_TITLE.value }}
-{% endblock %}
-
-{% block content %}
-
-    {{ block('toast_messages') }}
-
+{% block container %}
     <div class="mt-6 leading-7">
         <p class="font-bold text-base sm:text-lg md:text-xl lg:text-2xl">
             {{ 'databaseTitle'|trans({}, 'dataBase') }}
@@ -22,47 +13,87 @@
     </div>
 
     <div class="my-[25px] divider"></div>
+    <twig:DataBaseForm :dbSetupDTO="formDTO" :form="form">
 
-    {# OpenRoaming & Freeradius Section #}
-    <div class="w-full">
-        {{ form_start(form, { action: path('app_landing_account_user') }) }}
-        {{ form_errors(form) }}
+    <form action="{{ path('admin_dashboard_settings_certs_installation') }}" method="post" enctype="multipart/form-data" autocomplete="off">
+        {{ form_row(form._token) }}
 
-        <div class="flex flex-col gap-y-8">
-            <div class="relative w-full">
-                {{ form_label(form.dbOpenRoaming, 'dbOpenRoamingLabel'|trans({}, 'dataBase'), {
-                    label_attr: { class: 'form-label' }
+        <div class="grid gap-4 lg:grid-cols-2 xl:grid-cols-3 p-2 z-0">
+            {# --- OpenRoaming Card --- #}
+            <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full">
+                <div class="flex flex-row justify-between">
+                    <div class="text-base font-medium text-center break-normal md:break-all">
+                        <h1 class="text-base md:text-lg whitespace-nowrap">
+                            {{ 'dbOpenRoamingLabel'|trans({}, 'dataBase') }}
+                        </h1>
+                    </div>
+                    <label class="flex items-center bg-opacity-40">
+                        <img class="w-6 cursor-pointer"
+                             src="{{ asset('resources/logos/info_icon.svg') }}"
+                             alt="info_icon"/>
+                    </label>
+                </div>
+
+                {{ include('/dashboard/shared/settings_actions/_description.html.twig', {
+                    description: 'dbOpenRoamingDescription'|trans({}, 'dataBase')
                 }) }}
-                {{ form_widget(form.dbOpenRoaming, {
-                    attr: {
-                        class: 'form-widget w-full',
-                        minlength: 7
-                    }
-                }) }}
-                {{ form_errors(form.dbOpenRoaming) }}
+
+                <div class="flex items-center space-x-2 mt-5">
+                    {{ form_widget(form.dbOpenRoaming, {
+                        attr: {
+                            class: 'form-widget w-full border border-gray-300 rounded-lg p-2 focus:border-indigo-500 focus:ring-indigo-500'
+                        }
+                    }) }}
+                </div>
+
+                <div class="mt-2 text-center text-red-500 text-base">
+                    {{ form_errors(form.dbOpenRoaming) }}
+                </div>
             </div>
 
-            <div class="relative w-full">
-                {{ form_label(form.dbFreeradius, 'dbFreeradiusLabel'|trans({}, 'dataBase'), {
-                    label_attr: { class: 'form-label' }
+            {# --- Freeradius Card --- #}
+            <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full">
+                <div class="flex flex-row justify-between">
+                    <div class="text-base font-medium text-center break-normal md:break-all">
+                        <h1 class="text-base md:text-lg whitespace-nowrap">
+                            {{ 'dbFreeradiusLabel'|trans({}, 'dataBase') }}
+                        </h1>
+                    </div>
+                    <label class="flex items-center bg-opacity-40">
+                        <img class="w-6 cursor-pointer"
+                             src="{{ asset('resources/logos/info_icon.svg') }}"
+                             alt="info_icon"/>
+                    </label>
+                </div>
+
+                {{ include('/dashboard/shared/settings_actions/_description.html.twig', {
+                    description: 'dbFreeradiusDescription'|trans({}, 'dataBase')
                 }) }}
-                {{ form_widget(form.dbFreeradius, {
-                    attr: {
-                        class: 'form-widget w-full',
-                        minlength: 7
-                    }
-                }) }}
-                {{ form_errors(form.dbFreeradius) }}
+
+                <div class="flex items-center space-x-2 mt-5">
+                    {{ form_widget(form.dbFreeradius, {
+                        attr: {
+                            class: 'form-widget w-full border border-gray-300 rounded-lg p-2 focus:border-indigo-500 focus:ring-indigo-500'
+                        }
+                    }) }}
+                </div>
+
+                <div class="mt-2 text-center text-red-500 text-base">
+                    {{ form_errors(form.dbFreeradius) }}
+                </div>
             </div>
         </div>
 
-        <button class="mt-6 w-full md:w-[180px] btn-primary"
-                type="submit">
-            {{ 'databaseApplyBtn'|trans({}, 'dataBase') }}
-        </button>
+        <div class="mt-8 divider-solid"></div>
 
-        {{ form_rest(form) }}
-        {{ form_end(form) }}
-    </div>
+        <div class="mt-6 flex flex-row w-full justify-end items-center gap-2">
 
+            <button type="submit"
+                    class="btn-primary"
+                    onclick="return confirm('{{ 'saveChangesMessage'|trans({}, 'dataBase') }}')">
+                {{ 'databaseApplyBtn'|trans({}, 'dataBase') }}
+            </button>
+        </div>
+    </form>
+    </twig:DataBaseForm>
 {% endblock %}

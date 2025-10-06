@@ -61,12 +61,18 @@ class CertificateManagementController extends AbstractController
         $dbDTO = new DbSetupDTO();
 
         $form = $this->createForm(DbSetupType::class, $dbDTO);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            dd('estou a chegar aqui');
+        }
 
         return $this->render(
             'dashboard/shared/settings_actions/certificatesManagement/installation/dataBase.html.twig',
             [
                 'data' => $data,
                 'form' => $form->createView(),
+                'formDTO' => $dbDTO
             ]
         );
     }
