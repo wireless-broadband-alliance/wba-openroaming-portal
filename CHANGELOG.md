@@ -1,5 +1,16 @@
 # Changelog
 
+# Release V1.10.0
+
+- Installation Widget implementation (For first time project setup / for later use on the admin page configuration).
+- Certificate Management for the admin page (for radsecproxy/freeradius certificates)
+- Also for this release, it's required to run the new migrations to set up the new entity for the installation widget
+  details & the certificates (`InstalationWidget` & `Certificate`):
+    - Run the migrations with:
+      ```bash
+      php bin/console doctrine:migrations:migrate
+      ```
+
 # Release V1.9.0
 
 - Profile download instructions page.
@@ -8,11 +19,11 @@
 - Landing page UI rework for authenticated users.
 - Improve landing page by centralizing the display content for better notice and for mobile user focused.
 - Installation of a new text editor open-source alternative for free commercial use.
-  - Remove TinyMice text editor bundle from the project because it's not valid for commercial use.
-  - Fix and rework customization page to also have this custom editor for (page_tile, page_description &
-    additional_label).
+    - Remove TinyMice text editor bundle from the project because it's not valid for commercial use.
+    - Fix and rework customization page to also have this custom editor for (page_tile, page_description &
+      additional_label).
 - New checker on the `GetSettings` service to also verify if there is any missing or duplicated setting on the DB.
-  - More Project optimizations reduce the amount of number of queries made in most of the pages.
+    - More Project optimizations reduce the amount of number of queries made in most of the pages.
 - Password toggle reveal implementation for inputs.
 - New UI design for email templates.
 - Responsive Translations (Available: EN & PT-PT) - Administrator can just add new configurations for YAML
@@ -27,7 +38,7 @@
   for new users account creation.
 - Rework landing/dashboard authentications because of the new feature - DTO Implementation to improve code optimization
   and add a new login method selector emails || phoneNumber authentication.
-  - Fix minor bugs & conflicts with the new DTO and authentication form.
+    - Fix minor bugs & conflicts with the new DTO and authentication form.
 - Add a new eventSubscriber to avoid the admin of hard changing the DB value `USER_VERIFICATION` setting to `OFF`, when
   the `PLATFORM_MODE` setting is `ON`.
     - When that happens, it could brake the user account registration system for email & phoneNumbers on the landing
@@ -45,7 +56,7 @@
 - New command for freeradius profile connection of each user, now the `UserRadiusProfile` entity saves the start/end
   connection of the user profiles when the freeradius server gets a new request. (For later graphics generations and
   user details)
-  - This new command is configurable on the page `dashboard/settings/schedule` because he is also cron based.
+    - This new command is configurable on the page `dashboard/settings/schedule` because he is also cron based.
 - New bundle installed `composer require symfony/lock` required for the command next execution only start when the
   current active ends.
 - Symfony version increase for maintained version (7.3.3), it bug fixes and security fixes until January 2026.
@@ -58,7 +69,7 @@
       ```bash
       php bin/console doctrine:migrations:migrate
       ```
-      
+
 # Release V1.8.1
 
 - Removed duplicated field relative to the user account verification (Account Verification & User
