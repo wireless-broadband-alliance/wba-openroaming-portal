@@ -83,6 +83,7 @@ final class CertificateUploadForm extends AbstractController
         // Continue only if files exist
         if ($this->certificateUploadDTO->client && $this->certificateUploadDTO->key) {
             // Validate extensions
+            // TODO RECAP THIS TO CHECK IF THE FILE IS THE CORRECT TYPE
             if (strtolower($this->certificateUploadDTO->client->getClientOriginalExtension()) !== 'pem') {
                 $form->addError(new FormError('Client certificate must be a .pem file.'));
             }
@@ -91,12 +92,14 @@ final class CertificateUploadForm extends AbstractController
             }
 
             // Validate certificate content
+            // TODO RECAP THIS LOGIC TO CHECK IF THE CERTIFICATE IS STILL VALID
             $certContent = file_get_contents($this->certificateUploadDTO->client->getPathname());
             if (!$this->certificateService->isCertificateValidFromString($certContent)) {
                 $form->addError(new FormError('Client certificate is expired or invalid.'));
             }
 
             // Validate key content
+            // TODO RECAP THIS LOGIC ABOUT THE CERTIFICATE/PRIVATE KEY CHECK CONTENT IF THEY BELONG TO EACH OTHER
             $keyContent = file_get_contents($this->certificateUploadDTO->key->getPathname());
             $privateKey = openssl_pkey_get_private($keyContent);
             if ($privateKey === false) {
