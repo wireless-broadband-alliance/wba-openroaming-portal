@@ -1,34 +1,36 @@
 <div class="cert-upload-card">
     <h3 class="cert-upload-header">Upload your PEM files</h3>
+    <twig:CertificateUploadForm :certificateUploadDTO="certificateUploadDTO" :form="form">
 
-    {{ form_start(form, {
-        'attr': {
-            'data-action': 'live#action',
-            'data-live-action-param': 'files|validate'
-        }
-    }) }}
-
-    <div class="cert-upload-group">
-        <p class="text-2xl">client.pem</p>
-        {{ form_label(form.client, 'Client Certificate (.pem)', {'label_attr': {'class': 'form-label'}}) }}
-        {{ form_widget(form.client, {
-            attr: {'data-live-upload-target': 'client'}
+        {{ form_start(form, {
+            'attr': {
+                'data-action': 'live#action',
+                'data-live-action-param': 'validate'
+            }
         }) }}
-        {{ form_errors(form.client) }}
-    </div>
 
-    <div class="cert-upload-group">
-        <p class="text-2xl">key.pem</p>
-        {{ form_label(form.key, 'Private Key (.pem)', {'label_attr': {'class': 'form-label'}}) }}
-        {{ form_widget(form.key, {
-            attr: {'data-live-upload-target': 'key'}
-        }) }}
-        {{ form_errors(form.key) }}
-    </div>
+        <div class="cert-upload-group">
+            <p class="text-2xl">client.pem</p>
+            {{ form_label(form.client, 'Client Certificate (.pem)', {'label_attr': {'class': 'form-label'}}) }}
+            {{ form_widget(form.client, {
+                attr: {'data-live-upload-target': 'client'}
+            }) }}
+            {{ form_errors(form.client) }}
+        </div>
 
-    <button class="cert-upload-btn" type="submit">
-        Upload Certificates
-    </button>
+        <div class="cert-upload-group">
+            <p class="text-2xl">key.pem</p>
+            {{ form_label(form.key, 'Private Key (.pem)', {'label_attr': {'class': 'form-label'}}) }}
+            {{ form_widget(form.key, {
+                attr: {'data-live-upload-target': 'key'}
+            }) }}
+            {{ form_errors(form.key) }}
+        </div>
 
-    {{ form_end(form) }}
+        <button class="cert-upload-btn" type="submit">
+            Upload Certificates
+        </button>
+
+        {{ form_end(form) }}
+    </twig:CertificateUploadForm>
 </div>
