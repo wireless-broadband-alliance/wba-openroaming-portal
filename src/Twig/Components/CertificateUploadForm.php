@@ -3,6 +3,8 @@
 namespace App\Twig\Components;
 
 use App\DTO\CertificateUploadDTO;
+use App\Enum\CertificateFileName;
+use App\Enum\CertificateMachineType;
 use App\Form\CertificateUploadType;
 use App\Service\CertificateService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -52,13 +54,23 @@ final class CertificateUploadForm extends AbstractController
     {
         $form = $this->getForm();
 
-        // Retrieve uploaded files from Request
+        // Return the uploaded files from request
         $clientFile = $request->files->get('client');
         $keyFile = $request->files->get('key');
 
         $this->certificateUploadDTO ??= new CertificateUploadDTO();
         $this->certificateUploadDTO->client = $clientFile instanceof UploadedFile ? $clientFile : null;
         $this->certificateUploadDTO->key = $keyFile instanceof UploadedFile ? $keyFile : null;
+
+        // Assign enums for each certificate scenario
+        if ($this->certificateUploadDTO->client instanceof UploadedFile) {
+            $this->certificateUploadDTO->name = CertificateFileName::CLIENT_PEM;
+            $this->certificateUploadDTO->type = CertificateMachineType::RADSECPROXY;
+        }
+        if ($this->certificateUploadDTO->key instanceof UploadedFile) {
+            $this->certificateUploadDTO->name = CertificateFileName::KEY_PEM;
+            $this->certificateUploadDTO->type = CertificateMachineType::RADSECPROXY;
+        }
 
         // Validate existence
         if (!$this->certificateUploadDTO->client) {
