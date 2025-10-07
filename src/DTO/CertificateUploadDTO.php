@@ -12,19 +12,28 @@ class CertificateUploadDTO
     public ?CertificateFileName $name = null;
     public ?CertificateMachineType $type = null;
 
-    #[Assert\NotNull]
+    #[Assert\NotNull(message: 'Please upload a client certificate file.')]
     #[Assert\File(
         maxSize: '5M',
-        mimeTypes: ['application/x-x509-ca-cert', 'application/x-pem-file', 'text/plain'],
-        mimeTypesMessage: 'Please upload a valid PEM certificate file.'
+        mimeTypes: [
+            'application/x-x509-ca-cert',
+            'application/x-pem-file',
+            'application/octet-stream', // some .pem files are detected like this because of the browser differences
+            'text/plain'
+        ],
+        mimeTypesMessage: 'Invalid client certificate file type. Please upload a valid .pem certificate.'
     )]
     public ?UploadedFile $client = null;
 
-    #[Assert\NotNull]
+    #[Assert\NotNull(message: 'Please upload a private key file.')]
     #[Assert\File(
         maxSize: '5M',
-        mimeTypes: ['application/x-pem-file', 'text/plain'],
-        mimeTypesMessage: 'Please upload a valid PEM key file.'
+        mimeTypes: [
+            'application/x-pem-file',
+            'application/octet-stream',
+            'text/plain'
+        ],
+        mimeTypesMessage: 'Invalid private key file type. Please upload a valid .pem key.'
     )]
     public ?UploadedFile $key = null;
 }

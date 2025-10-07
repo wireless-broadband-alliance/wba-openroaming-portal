@@ -2,10 +2,12 @@
 
 namespace App\Twig\Components;
 
-use App\DTO\certificateUploadDTO;
+use App\DTO\CertificateUploadDTO;
 use App\Enum\CertificateFileName;
 use App\Enum\CertificateMachineType;
 use App\Form\CertificateUploadType;
+use App\Service\CertificateService;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -17,27 +19,32 @@ use Symfony\UX\LiveComponent\DefaultActionTrait;
 use Symfony\UX\LiveComponent\LiveCollectionTrait;
 
 #[AsLiveComponent]
-final class CertificateUploadForm
+final class CertificateUploadForm extends AbstractController
 {
     use ComponentWithFormTrait;
     use DefaultActionTrait;
     use LiveCollectionTrait;
 
     #[LiveProp]
-    public ?CertificateUploadDTO $certificateUploadDTO = null;
+    public CertificateUploadDTO|null $certificateUploadDTO = null;
 
     /**
      * Instantiate the form using FormFactory
      */
     protected function instantiateForm(): FormInterface
     {
-        return $this->formFactory->create(CertificateUploadType::class, $this->certificateUploadDTO);
+        return $this->createForm(CertificateUploadType::class, $this->certificateUploadDTO);
+    }
+
+    public function __construct(
+        private readonly CertificateService $certificateService
+    ) {
     }
 
     #[LiveAction]
     public function validate(): void
     {
-        $form = $this->formFactory->create(CertificateUploadType::class, $this->certificateUploadDTO);
+        $form = $this->createForm(CertificateUploadType::class, $this->certificateUploadDTO);
 
         if ($this->certificateUploadDTO->client instanceof UploadedFile) {
             $this->certificateUploadDTO->name = CertificateFileName::CLIENT_PEM;

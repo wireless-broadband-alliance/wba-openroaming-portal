@@ -5,6 +5,7 @@
         {{ form_start(form) }}
 
         <div class="cert-upload-group">
+            <p class="text-2xl">client.pem</p>
             {{ form_label(form.client, 'Client Certificate (.pem)', {'label_attr': {'class': 'form-label'}}) }}
             {{ form_widget(form.client, {'attr': {'class': 'form-widget'}}) }}
             {{ form_errors(form.client) }}
@@ -14,6 +15,7 @@
         </div>
 
         <div class="cert-upload-group">
+            <p class="text-2xl">key.pem</p>
             {{ form_label(form.key, 'Private Key (.pem)', {'label_attr': {'class': 'form-label'}}) }}
             {{ form_widget(form.key, {'attr': {'class': 'form-widget'}}) }}
             {{ form_errors(form.key) }}
