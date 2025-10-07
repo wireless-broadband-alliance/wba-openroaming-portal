@@ -6,9 +6,11 @@ namespace App\Controller;
 
 use App\DTO\CertificateUploadDTO;
 use App\DTO\DbSetupDTO;
+use App\Enum\DataBaseSetupType;
 use App\Enum\FirewallType;
 use App\Form\CertificateUploadType;
 use App\Form\DbSetupType;
+use App\Service\DatabaseConnectionService;
 use App\Service\GetSettings;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -21,6 +23,7 @@ class CertificateManagementController extends AbstractController
 
     public function __construct(
         private readonly GetSettings $getSettings,
+        private readonly DatabaseConnectionService $databaseConnectionService
     ) {
     }
 
@@ -81,7 +84,14 @@ class CertificateManagementController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            dd('estou a chegar aqui');
+
+            $openRoamingDb = $dbDTO->dbOpenRoaming;
+            $freeradiusDb = $dbDTO->dbFreeradius;
+
+            $orConnection = $this->databaseConnectionService->testDatabaseConnection($openRoamingDb);
+            $frConnection = $this->databaseConnectionService->testDatabaseConnection($freeradiusDb);
+
+            dd($orConnection, $frConnection);
         }
 
         return $this->render(
