@@ -18,12 +18,17 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
+use Symfony\Contracts\Translation\TranslatorInterface;
+
+use function PHPUnit\Framework\isEmpty;
+
 class CertificateManagementController extends AbstractController
 {
 
     public function __construct(
         private readonly GetSettings $getSettings,
-        private readonly DatabaseConnectionService $databaseConnectionService
+        private readonly DatabaseConnectionService $databaseConnectionService,
+        private readonly TranslatorInterface $translator,
     ) {
     }
 
@@ -91,8 +96,55 @@ class CertificateManagementController extends AbstractController
             $orConnection = $this->databaseConnectionService->testDatabaseConnection($openRoamingDb);
             $frConnection = $this->databaseConnectionService->testDatabaseConnection($freeradiusDb);
 
-            dd($orConnection, $frConnection);
+            $connectionsFailed = array();
+
+            if (!$orConnection) {
+                $connectionsFailed[] = 'OpenRoaming';
+            }
+            if (!$frConnection) {
+                $connectionsFailed[] = 'Freeradius';
+            }
+
+            if (!empty($connectionsFailed)) {
+                $this->addFlash(
+                    'error_admin',
+                    $this->translator->trans(
+                        'connectionFailed',
+                        ['%dbConnections%' => implode(', ', $connectionsFailed)],
+                        'controllers'
+                    )
+                );
+                return $this->redirectToRoute('admin_dashboard_settings_certs_installation');
+            }
+
+            $this->databaseConnectionService->writeDatabaseUrlToEnv($openRoamingDb, DataBaseSetupType::DATABASE_URL->value);
+            $this->databaseConnectionService->writeDatabaseUrlToEnv($freeradiusDb, DataBaseSetupType::DATABASE_FREERADIUS_URL->value);
+
+            return $this->redirectToRoute('admin_dashboard_settings_certs_installation_settings');
         }
+
+        return $this->render(
+            'dashboard/shared/settings_actions/certificatesManagement/installation/dataBase.html.twig',
+            [
+                'data' => $data,
+                'form' => $form->createView(),
+                'formDTO' => $dbDTO
+            ]
+        );
+    }
+
+    #[Route('/dashboard/settings/certificatesManagement/installation/settings', name: 'admin_dashboard_settings_certs_installation_settings')]
+    #[IsGranted('ROLE_ADMIN')]
+    public function settingsCertificatesManagementInstallationSettings(
+        Request $request
+    ): Response {
+
+        $data = $this->getSettings->getSettings();
+
+        $dbDTO = new DbSetupDTO();
+
+        $form = $this->createForm(DbSetupType::class, $dbDTO);
+        $form->handleRequest($request);
 
         return $this->render(
             'dashboard/shared/settings_actions/certificatesManagement/installation/dataBase.html.twig',

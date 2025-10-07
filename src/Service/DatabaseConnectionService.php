@@ -4,7 +4,6 @@ namespace App\Service;
 
 use App\Enum\DataBaseSetupType;
 use Doctrine\DBAL\DriverManager;
-use Doctrine\DBAL\Exception;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 class DatabaseConnectionService
@@ -15,54 +14,33 @@ class DatabaseConnectionService
     {
         $this->params = $params;
     }
-    public function testDatabaseConnection(string $url): array
+    public function testDatabaseConnection(string $dbUrl): bool
     {
         try {
-            $parts = parse_url($url);
-            if (!$parts || !isset($parts['scheme'])) {
-                return [
-                    'success' => false,
-                    'error' => 'Formato de URL inválido.',
-                ];
+            $parts = parse_url($dbUrl);
+
+            if (!$parts || !isset($parts['scheme'], $parts['host'], $parts['user'], $parts['path'])) {
+                throw new \InvalidArgumentException('Invalid database URL.');
             }
 
-            $driverMap = [
-                'mysql' => 'pdo_mysql',
-                'pgsql' => 'pdo_pgsql',
-                'postgres' => 'pdo_pgsql',
-                'sqlite' => 'pdo_sqlite',
+            $dbname = ltrim($parts['path'], '/');
+
+            $connectionParams = [
+                'dbname'   => $dbname,
+                'user'     => $parts['user'],
+                'password' => $parts['pass'] ?? null,
+                'host'     => $parts['host'],
+                'port'     => $parts['port'] ?? null,
+                'driver'   => $this->getDriverFromScheme($parts['scheme']),
             ];
-            $driver = $driverMap[$parts['scheme']] ?? null;
 
-            if (!$driver) {
-                return [
-                    'success' => false,
-                    'error' => sprintf('Driver não suportado: %s', $parts['scheme']),
-                ];
-            }
+            $connection = DriverManager::getConnection($connectionParams);
+            $connection->executeQuery('SELECT 1');
 
-            if (($parts['host'] ?? '') === 'localhost') {
-                $parts['host'] = '127.0.0.1';
-                $url = $this->rebuildUrl($parts);
-            }
+            return true;
 
-            $connection = DriverManager::getConnection([
-                'url' => $url,
-                'driver' => $driver,
-            ]);
-
-            $connection->getNativeConnection();
-
-            return [
-                'success' => true,
-                'error' => null,
-            ];
-        } catch (Exception $e) {
-            return [
-                'success' => false,
-                'error' => $e->getMessage(),
-                'url' => $url,
-            ];
+        } catch (\Exception $e) {
+            return false;
         }
     }
 
@@ -80,5 +58,15 @@ class DatabaseConnectionService
         }
 
         file_put_contents($envPath, trim($envContent) . "\n" . $newLine);
+    }
+
+    private function getDriverFromScheme(string $scheme): string
+    {
+        return match($scheme) {
+            'mysql' => 'pdo_mysql',
+            'pgsql' => 'pdo_pgsql',
+            'sqlite' => 'pdo_sqlite',
+            default => throw new \InvalidArgumentException("Unsupported database scheme: $scheme"),
+        };
     }
 }

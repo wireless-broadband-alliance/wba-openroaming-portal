@@ -128,3 +128,4 @@ unableSendLoginLink: 'Não foi possível enviar o link de login ou o código de 
 loginVerificationCodeSent: 'Enviámos um código de verificação de início de sessão para o seu número de telefone. Verifique as suas mensagens SMS para continuar.'
 loginSuccessfully: 'Login efetuado com sucesso'
 invalidLogin: 'O seu link de login é inválido ou expirou. Solicite um novo link de login para continuar.'
+connectionFailed: 'Falha na ligação à base de dados: %dbConnections%'
