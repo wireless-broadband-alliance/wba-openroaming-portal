@@ -65,7 +65,12 @@ class CertificateManagementController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            dd('NICE UPLOAD');
+            dump($form->isValid());                   // true / false
+            dump($form->getErrors(true, false));      // list validation errors
+            dump($certificateUploadDTO);              // the actual DTO object
+            dump($certificateUploadDTO->client);      // UploadedFile object
+            dump($certificateUploadDTO->key);         // UploadedFile object
+            dd('potato testing');
         }
 
         return $this->render('dashboard/shared/settings_actions.html.twig', [
@@ -89,7 +94,6 @@ class CertificateManagementController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-
             $openRoamingDb = $dbDTO->dbOpenRoaming;
             $freeradiusDb = $dbDTO->dbFreeradius;
 
@@ -117,8 +121,14 @@ class CertificateManagementController extends AbstractController
                 return $this->redirectToRoute('admin_dashboard_settings_certs_installation');
             }
 
-            $this->databaseConnectionService->writeDatabaseUrlToEnv($openRoamingDb, DataBaseSetupType::DATABASE_URL->value);
-            $this->databaseConnectionService->writeDatabaseUrlToEnv($freeradiusDb, DataBaseSetupType::DATABASE_FREERADIUS_URL->value);
+            $this->databaseConnectionService->writeDatabaseUrlToEnv(
+                $openRoamingDb,
+                DataBaseSetupType::DATABASE_URL->value
+            );
+            $this->databaseConnectionService->writeDatabaseUrlToEnv(
+                $freeradiusDb,
+                DataBaseSetupType::DATABASE_FREERADIUS_URL->value
+            );
 
             return $this->redirectToRoute('admin_dashboard_settings_certs_installation_settings');
         }
@@ -138,7 +148,6 @@ class CertificateManagementController extends AbstractController
     public function settingsCertificatesManagementInstallationSettings(
         Request $request
     ): Response {
-
         $data = $this->getSettings->getSettings();
 
         $dbDTO = new DbSetupDTO();
