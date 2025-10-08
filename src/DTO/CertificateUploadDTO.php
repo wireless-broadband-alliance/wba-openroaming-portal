@@ -4,6 +4,7 @@ namespace App\DTO;
 
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 class CertificateUploadDTO
 {
@@ -32,6 +33,21 @@ class CertificateUploadDTO
     )]
     public ?UploadedFile $key = null;
 
+//    #[Assert\Callback] this also works, and it gives the violation on the profiler
+//    public function validatePemFiles(ExecutionContextInterface $context): void
+//    {
+//        if ($this->client && strtolower($this->client->getClientOriginalExtension()) !== 'pem') {
+//            $context->buildViolation('Client certificate must be a .pem file.')
+//                ->atPath('client')
+//                ->addViolation();
+//        }
+//
+//        if ($this->key && strtolower($this->key->getClientOriginalExtension()) !== 'pem') {
+//            $context->buildViolation('Private key must be a .pem file.')
+//                ->atPath('key')
+//                ->addViolation();
+//        }
+//    }
 
     public function __construct()
     {
@@ -40,7 +56,7 @@ class CertificateUploadDTO
     }
 
     /**
-     * Return an array ready to be passed to your service for DB insertion or storage
+     * Return an array ready to be passed to the service for later DB insertion or storage
      */
     public function toArray(): array
     {
