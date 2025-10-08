@@ -1,5 +1,6 @@
 <div class="cert-upload-card">
     <h3 class="cert-upload-header">Upload your PEM files</h3>
+
     <twig:CertificateUploadForm :certificateUploadDTO="certificateUploadDTO" :form="form">
 
         {{ form_start(form, {
@@ -16,6 +17,13 @@
                 attr: {'data-live-upload-target': 'client'}
             }) }}
             {{ form_errors(form.client) }}
+
+            {# Safely display uploaded file name if exists #}
+            {% if form.client.vars.data is not null %}
+                <p class="text-sm text-gray-500">
+                    Uploaded: {{ form.client.vars.data.getClientOriginalName() }}
+                </p>
+            {% endif %}
         </div>
 
         <div class="cert-upload-group">
@@ -25,6 +33,12 @@
                 attr: {'data-live-upload-target': 'key'}
             }) }}
             {{ form_errors(form.key) }}
+
+            {% if form.key.vars.data is not null %}
+                <p class="text-sm text-gray-500">
+                    Uploaded: {{ form.key.vars.data.getClientOriginalName() }}
+                </p>
+            {% endif %}
         </div>
 
         <button class="cert-upload-btn" type="submit">
