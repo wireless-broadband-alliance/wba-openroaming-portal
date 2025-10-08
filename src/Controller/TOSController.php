@@ -124,4 +124,11 @@ class TOSController extends AbstractController
 
         return new JsonResponse(['status' => 'ok', 'message' => 'Rejected terms']);
     }
+
+    #[Route('/get-terms-status', name: 'get_terms_status', methods: ['GET'])]
+    public function getTermsStatus(Request $request): JsonResponse
+    {
+        $termsAccepted = $request->getSession()->get('termsAccepted', false);
+        return new JsonResponse(['termsAccepted' => $termsAccepted]);
+    }
 }

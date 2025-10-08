@@ -57,7 +57,7 @@ readonly class TermsAcceptanceListener
             $path !== $this->router->generate('app_landing')
         ) {
             $message = $this->translator->trans(
-                'cannotAccessThisPageWithAInvalidProvider',
+                'cannotAccessThisPageWithoutAcceptTerms',
                 [],
                 'controllers'
             );
