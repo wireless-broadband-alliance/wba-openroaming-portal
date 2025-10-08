@@ -23,5 +23,4 @@ class DbSetupDTO
         maxMessage: 'maxCharacters'
     )]
     public ?string $dbFreeradius = null;
-
 }

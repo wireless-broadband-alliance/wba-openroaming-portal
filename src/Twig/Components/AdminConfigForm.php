@@ -39,6 +39,16 @@ final class AdminConfigForm extends AbstractController
             $this->adminConfigDTO = new AdminConfigDTO();
         }
 
-        // TODO: Validations
+        // Rebuild form with DTO data
+        $form = $this->createForm(AdminConfigType::class, $this->adminConfigDTO);
+
+        // Submit the form data to trigger validation
+        $form->submit([
+            'email' => $this->adminConfigDTO->email,
+            'password' => $this->adminConfigDTO->password,
+            'confirmPassword' => $this->adminConfigDTO->confirmPassword,
+        ], false);
+
+        $this->form = $form;
     }
 }

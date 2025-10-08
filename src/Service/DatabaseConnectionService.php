@@ -59,19 +59,19 @@ class DatabaseConnectionService
         } elseif ($type === SettingsConfigType::TRUSTED_PROXIES->value) {
             $envContent = preg_replace('/^TRUSTED_PROXIES=.*$/m', '', $envContent);
             $newLine = sprintf("TRUSTED_PROXIES=\"%s\"\n", $url);
-        } elseif ($type === SettingsConfigType::TRUSTED_PROXIES->value) {
+        } elseif ($type === SettingsConfigType::TURNSTILE_KEY->value) {
             $envContent = preg_replace('/^TURNSTILE_KEY=.*$/m', '', $envContent);
             $newLine = sprintf("TURNSTILE_KEY=\"%s\"\n", $url);
-        } elseif ($type === SettingsConfigType::TRUSTED_PROXIES->value) {
+        } elseif ($type === SettingsConfigType::TURNSTILE_SECRET->value) {
             $envContent = preg_replace('/^TURNSTILE_SECRET=.*$/m', '', $envContent);
             $newLine = sprintf("TURNSTILE_SECRET=\"%s\"\n", $url);
-        } elseif ($type === SettingsConfigType::TRUSTED_PROXIES->value) {
+        } elseif ($type === SettingsConfigType::JWT_SECRET_KEY->value) {
             $envContent = preg_replace('/^JWT_SECRET_KEY=.*$/m', '', $envContent);
             $newLine = sprintf("JWT_SECRET_KEY=\"%s\"\n", $url);
-        } elseif ($type === SettingsConfigType::TRUSTED_PROXIES->value) {
+        } elseif ($type === SettingsConfigType::JWT_PUBLIC_KEY->value) {
             $envContent = preg_replace('/^JWT_PUBLIC_KEY=.*$/m', '', $envContent);
             $newLine = sprintf("JWT_PUBLIC_KEY=\"%s\"\n", $url);
-        } elseif ($type === SettingsConfigType::TRUSTED_PROXIES->value) {
+        } elseif ($type === SettingsConfigType::JWT_PASSPHRASE->value) {
             $envContent = preg_replace('/^JWT_PASSPHRASE=.*$/m', '', $envContent);
             $newLine = sprintf("JWT_PASSPHRASE=\"%s\"\n", $url);
         }

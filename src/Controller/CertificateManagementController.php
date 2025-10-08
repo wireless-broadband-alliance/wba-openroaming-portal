@@ -195,10 +195,38 @@ class CertificateManagementController extends AbstractController
                 $jwtPassphrase,
                 SettingsConfigType::JWT_PASSPHRASE->value
             );
+
+            return $this->redirectToRoute('admin_dashboard_settings_certs_installation_admin');
         }
 
         return $this->render(
             'dashboard/shared/settings_actions/certificatesManagement/installation/settings.html.twig',
+            [
+                'data' => $data,
+                'form' => $form->createView(),
+                'formDTO' => $settingsDTO
+            ]
+        );
+    }
+
+    #[Route('/dashboard/settings/certificatesManagement/installation/settings', name: 'admin_dashboard_settings_certs_installation_admin')]
+    #[IsGranted('ROLE_ADMIN')]
+    public function settingsCertificatesManagementInstallationAdmin(
+        Request $request
+    ): Response {
+        $data = $this->getSettings->getSettings();
+
+        $settingsDTO = new SettingsDTO();
+
+        $form = $this->createForm(SettingsType::class, $settingsDTO);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            return $this->redirectToRoute('');
+        }
+
+        return $this->render(
+            'dashboard/shared/settings_actions/certificatesManagement/installation/admin.html.twig',
             [
                 'data' => $data,
                 'form' => $form->createView(),
