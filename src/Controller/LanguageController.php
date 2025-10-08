@@ -11,7 +11,7 @@ use Symfony\Component\Routing\Attribute\Route;
 
 class LanguageController extends AbstractController
 {
-    #[Route('/change-language', name: 'change_language')]
+    #[Route('/change-language', name: 'app_change_language')]
     public function changeLanguage(Request $request, SessionInterface $session): RedirectResponse
     {
         $locale = $request->query->get('locale', LanguageType::EN->value);
