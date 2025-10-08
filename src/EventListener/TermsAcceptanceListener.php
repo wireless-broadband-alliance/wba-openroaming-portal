@@ -28,6 +28,10 @@ readonly class TermsAcceptanceListener
         $request = $event->getRequest();
         $path = $request->getPathInfo();
 
+        if (str_starts_with($path, '/dashboard') || str_starts_with($path, '/_components')) {
+            return;
+        }
+
         if (str_starts_with($path, '/_profiler') || str_starts_with($path, '/_wdt')) {
             return;
         }
