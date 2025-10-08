@@ -37,7 +37,7 @@ readonly class ExceptionListener
     {
         $request = $event->getRequest();
         // Allow the user to still be able to change the language
-        if ($request->attributes->get('_route') === 'change_language') {
+        if ($request->attributes->get('_route') === 'app_change_language') {
             $event->allowCustomResponseCode();
             return;
         }
