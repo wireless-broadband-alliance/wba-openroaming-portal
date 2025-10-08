@@ -2,9 +2,7 @@
 
 namespace App\Twig\Components;
 
-use App\DTO\DbSetupDTO;
 use App\DTO\SettingsDTO;
-use App\Form\DbSetupType;
 use App\Form\SettingsType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormInterface;

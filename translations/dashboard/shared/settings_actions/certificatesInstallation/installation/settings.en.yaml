@@ -1,0 +1,8 @@
+databaseApplyBtn: 'Apply Changes'
+settingsTitle: 'Settings configuration'
+trustedProxiesLabel: 'Trusted Proxies'
+trustedKeyLabel: 'Trusted Key'
+turnstileSecretLabel: 'Turnstile Secret'
+jwtSecretKeyLabel: 'JWT Secret Key'
+jwtPublicKeyLabel: 'JWT Public Key'
+jwtPassphraseLabel: 'JWT Passphrase'

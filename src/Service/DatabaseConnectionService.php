@@ -3,6 +3,7 @@
 namespace App\Service;
 
 use App\Enum\DataBaseSetupType;
+use App\Enum\SettingsConfigType;
 use Doctrine\DBAL\DriverManager;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
@@ -55,6 +56,24 @@ class DatabaseConnectionService
         } elseif ($type === DataBaseSetupType::DATABASE_FREERADIUS_URL->value) {
             $envContent = preg_replace('/^DATABASE_FREERADIUS_URL=.*$/m', '', $envContent);
             $newLine = sprintf("DATABASE_FREERADIUS_URL=\"%s\"\n", $url);
+        } elseif ($type === SettingsConfigType::TRUSTED_PROXIES->value) {
+            $envContent = preg_replace('/^TRUSTED_PROXIES=.*$/m', '', $envContent);
+            $newLine = sprintf("TRUSTED_PROXIES=\"%s\"\n", $url);
+        } elseif ($type === SettingsConfigType::TRUSTED_PROXIES->value) {
+            $envContent = preg_replace('/^TURNSTILE_KEY=.*$/m', '', $envContent);
+            $newLine = sprintf("TURNSTILE_KEY=\"%s\"\n", $url);
+        } elseif ($type === SettingsConfigType::TRUSTED_PROXIES->value) {
+            $envContent = preg_replace('/^TURNSTILE_SECRET=.*$/m', '', $envContent);
+            $newLine = sprintf("TURNSTILE_SECRET=\"%s\"\n", $url);
+        } elseif ($type === SettingsConfigType::TRUSTED_PROXIES->value) {
+            $envContent = preg_replace('/^JWT_SECRET_KEY=.*$/m', '', $envContent);
+            $newLine = sprintf("JWT_SECRET_KEY=\"%s\"\n", $url);
+        } elseif ($type === SettingsConfigType::TRUSTED_PROXIES->value) {
+            $envContent = preg_replace('/^JWT_PUBLIC_KEY=.*$/m', '', $envContent);
+            $newLine = sprintf("JWT_PUBLIC_KEY=\"%s\"\n", $url);
+        } elseif ($type === SettingsConfigType::TRUSTED_PROXIES->value) {
+            $envContent = preg_replace('/^JWT_PASSPHRASE=.*$/m', '', $envContent);
+            $newLine = sprintf("JWT_PASSPHRASE=\"%s\"\n", $url);
         }
 
         file_put_contents($envPath, trim($envContent) . "\n" . $newLine);

@@ -6,10 +6,13 @@ namespace App\Controller;
 
 use App\DTO\CertificateUploadDTO;
 use App\DTO\DbSetupDTO;
+use App\DTO\SettingsDTO;
 use App\Enum\DataBaseSetupType;
 use App\Enum\FirewallType;
+use App\Enum\SettingsConfigType;
 use App\Form\CertificateUploadType;
 use App\Form\DbSetupType;
+use App\Form\SettingsType;
 use App\Service\DatabaseConnectionService;
 use App\Service\GetSettings;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -150,17 +153,56 @@ class CertificateManagementController extends AbstractController
     ): Response {
         $data = $this->getSettings->getSettings();
 
-        $dbDTO = new DbSetupDTO();
+        $settingsDTO = new SettingsDTO();
 
-        $form = $this->createForm(DbSetupType::class, $dbDTO);
+        $form = $this->createForm(SettingsType::class, $settingsDTO);
         $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $trustedProxies = $settingsDTO->trustedProxies;
+            $turnstileKey = $settingsDTO->turnstileKey;
+            $turnstileSecret = $settingsDTO->turnstileSecret;
+            $jwtSecretKey = $settingsDTO->jwtSecretKey;
+            $jwtPublicKey = $settingsDTO->jwtPublicKey;
+            $jwtPassphrase = $settingsDTO->jwtPassphrase;
+
+            $this->databaseConnectionService->writeDatabaseUrlToEnv(
+                $trustedProxies,
+                SettingsConfigType::TRUSTED_PROXIES->value
+            );
+
+            $this->databaseConnectionService->writeDatabaseUrlToEnv(
+                $turnstileKey,
+                SettingsConfigType::TURNSTILE_KEY->value
+            );
+
+            $this->databaseConnectionService->writeDatabaseUrlToEnv(
+                $turnstileSecret,
+                SettingsConfigType::TURNSTILE_SECRET->value
+            );
+
+            $this->databaseConnectionService->writeDatabaseUrlToEnv(
+                $jwtSecretKey,
+                SettingsConfigType::JWT_SECRET_KEY->value
+            );
+
+            $this->databaseConnectionService->writeDatabaseUrlToEnv(
+                $jwtPublicKey,
+                SettingsConfigType::JWT_PUBLIC_KEY->value
+            );
+
+            $this->databaseConnectionService->writeDatabaseUrlToEnv(
+                $jwtPassphrase,
+                SettingsConfigType::JWT_PASSPHRASE->value
+            );
+        }
 
         return $this->render(
             'dashboard/shared/settings_actions/certificatesManagement/installation/settings.html.twig',
             [
                 'data' => $data,
                 'form' => $form->createView(),
-                'formDTO' => $dbDTO
+                'formDTO' => $settingsDTO
             ]
         );
     }
