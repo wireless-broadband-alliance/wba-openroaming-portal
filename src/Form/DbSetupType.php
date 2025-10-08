@@ -16,11 +16,9 @@ class DbSetupType extends AbstractType
     {
         $builder
             ->add('dbOpenRoaming', TextType::class, [
-                'label' => 'UUID',
                 'required' => false,
             ])
             ->add('dbFreeradius', TextType::class, [
-                'label' => 'Email',
                 'required' => false,
             ]);
     }

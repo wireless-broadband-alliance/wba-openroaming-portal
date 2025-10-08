@@ -156,7 +156,7 @@ class CertificateManagementController extends AbstractController
         $form->handleRequest($request);
 
         return $this->render(
-            'dashboard/shared/settings_actions/certificatesManagement/installation/dataBase.html.twig',
+            'dashboard/shared/settings_actions/certificatesManagement/installation/settings.html.twig',
             [
                 'data' => $data,
                 'form' => $form->createView(),

@@ -1,0 +1,107 @@
+{% extends '/dashboard/base.html.twig' %}
+
+{% block title %}
+    {{ 'adminPageWBA'|trans({}, '_header_admin') }}
+{% endblock %}
+
+{% block container %}
+
+
+    <div class="mt-6 leading-7">
+        <p class="font-bold text-base sm:text-lg md:text-xl lg:text-2xl">
+            {{ 'databaseTitle'|trans({}, 'dataBase') }}
+        </p>
+        <p class="mt-3 text-sm sm:text-base md:text-lg lg:text-xl text-gray-600">
+            {{ 'databaseDescription'|trans({}, 'dataBase') }}
+        </p>
+    </div>
+
+    <div class="my-[25px] divider"></div>
+
+    {# Live Component do formulário #}
+    <twig:DataBaseForm :dbSetupDTO="formDTO">
+        <div {{ attributes }}>
+            {{ form_start(form, {'attr': {'autocomplete': 'off'}}) }}
+
+            <div class="grid gap-4 lg:grid-cols-2 xl:grid-cols-3 p-2 z-0">
+
+                {# --- OpenRoaming Card --- #}
+                <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full">
+                    <div class="flex flex-row justify-between">
+                        <div class="text-base font-medium text-center break-normal md:break-all">
+                            <h1 class="text-base md:text-lg whitespace-nowrap">
+                                {{ 'dbOpenRoamingLabel'|trans({}, 'dataBase') }}
+                            </h1>
+                        </div>
+                        <label class="flex items-center bg-opacity-40">
+                            <img class="w-6 cursor-pointer"
+                                 src="{{ asset('resources/logos/info_icon.svg') }}"
+                                 alt="info_icon"/>
+                        </label>
+                    </div>
+
+                    {{ include('/dashboard/shared/settings_actions/_description.html.twig', {
+                        description: 'dbOpenRoamingDescription'|trans({}, 'dataBase')
+                    }) }}
+
+                    <div class="flex items-center space-x-2 mt-5">
+                        {{ form_widget(form.dbOpenRoaming, {
+                            attr: {
+                                class: 'form-widget w-full border border-gray-300 rounded-lg p-2 focus:border-indigo-500 focus:ring-indigo-500',
+                                'wire:model.debounce.500ms': 'dbSetupDTO.dbOpenRoaming'
+                            }
+                        }) }}
+                    </div>
+
+                    <div class="mt-2 text-center text-red-500 text-base">
+                        {{ form_errors(form.dbOpenRoaming) }}
+                    </div>
+                </div>
+
+                {# --- Freeradius Card --- #}
+                <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full">
+                    <div class="flex flex-row justify-between">
+                        <div class="text-base font-medium text-center break-normal md:break-all">
+                            <h1 class="text-base md:text-lg whitespace-nowrap">
+                                {{ 'dbFreeradiusLabel'|trans({}, 'dataBase') }}
+                            </h1>
+                        </div>
+                        <label class="flex items-center bg-opacity-40">
+                            <img class="w-6 cursor-pointer"
+                                 src="{{ asset('resources/logos/info_icon.svg') }}"
+                                 alt="info_icon"/>
+                        </label>
+                    </div>
+
+                    {{ include('/dashboard/shared/settings_actions/_description.html.twig', {
+                        description: 'dbFreeradiusDescription'|trans({}, 'dataBase')
+                    }) }}
+
+                    <div class="flex items-center space-x-2 mt-5">
+                        {{ form_widget(form.dbFreeradius, {
+                            attr: {
+                                class: 'form-widget w-full border border-gray-300 rounded-lg p-2 focus:border-indigo-500 focus:ring-indigo-500',
+                                'wire:model.debounce.500ms': 'dbSetupDTO.dbFreeradius'
+                            }
+                        }) }}
+                    </div>
+
+                    <div class="mt-2 text-center text-red-500 text-base">
+                        {{ form_errors(form.dbFreeradius) }}
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="mt-8 divider-solid"></div>
+
+            <div class="mt-6 flex flex-row w-full justify-end items-center gap-2">
+                <button type="submit" class="btn-primary" onclick="return confirm('{{ 'saveChangesMessage'|trans({}, 'dataBase') }}')">
+                    {{ 'databaseApplyBtn'|trans({}, 'dataBase') }}
+                </button>
+            </div>
+
+            {{ form_end(form) }}
+        </div>
+    </twig:DataBaseForm>
+{% endblock %}
