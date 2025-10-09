@@ -71,9 +71,10 @@ pgp_public_key/*
 
 ###> script for pipelines before commits ###
 .git/hooks/pre-commit
-###> script for pipelines before commits ###
+###< script for pipelines before commits ###
 
 geoLiteDB/GeoLite2-City.mmdb
 
-###> Command for DB reset for local testing
+###> Command for DB reset for local testing ###
 src/Command/ResetRadiusMarcelinaSettingsCommand.php
+###< Command for DB reset for local testing ###
