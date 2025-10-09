@@ -1449,8 +1449,7 @@ configuration for the Android App.</p></body></html>'
                         json_decode(
                             '{
                                       "success": true,
-                                      "data": "<html><body><h1>Turnstile Configuration</h1><p>This is the required HTML
-                                       configuration for the Android App.</p></body></html>"
+                                      "data": "<html><body><h1>Turnstile Configuration</h1><p>This is the required HTML configuration for the Android App.</p></body></html>"
                                     }',
                             false,
                             512,
@@ -1477,8 +1476,7 @@ configuration for the IOS App.</p></body></html>'
                         json_decode(
                             '{
                                       "success": true,
-                                      "data": "<html><body><h1>Turnstile Configuration</h1><p>This is the required HTML
-                                       configuration for the IOS App.</p></body></html>"
+                                      "data": "<html><body><h1>Turnstile Configuration</h1><p>This is the required HTML configuration for the IOS App.</p></body></html>"
                                     }',
                             false,
                             512,
