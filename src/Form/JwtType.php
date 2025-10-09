@@ -2,33 +2,37 @@
 
 namespace App\Form;
 
-use App\DTO\DbSetupDTO;
-use App\DTO\SettingsDTO;
+use App\DTO\JwtDTO;
+use App\Enum\OperationMode;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class SettingsType extends AbstractType
+class JwtType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            ->add('trustedProxies', TextType::class, [
+            ->add('jwtSecretKey', TextType::class, [
                 'required' => false,
+                ])
+            ->add('jwtPublicKey', TextType::class, [
+                'required' => false,
+                ])
+            ->add('jwtPassphraseEnable', CheckboxType::class, [
             ])
-            ->add('turnstileKey', TextType::class, [
+            ->add('jwtPassphrase', TextType::class, [
                 'required' => false,
-            ])
-            ->add('turnstileSecret', TextType::class, [
-                'required' => false,
-            ]);
+                ]);
     }
 
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
-            'data_class' => SettingsDTO::class,
+            'data_class' => JwtDTO::class,
         ]);
     }
 

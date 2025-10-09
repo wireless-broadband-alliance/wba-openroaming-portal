@@ -6,6 +6,7 @@ namespace App\Controller;
 
 use App\DTO\CertificateUploadDTO;
 use App\DTO\DbSetupDTO;
+use App\DTO\JwtDTO;
 use App\DTO\SettingsDTO;
 use App\Enum\CertificateFileName;
 use App\Enum\DataBaseSetupType;
@@ -13,6 +14,7 @@ use App\Enum\FirewallType;
 use App\Enum\SettingsConfigType;
 use App\Form\CertificateUploadType;
 use App\Form\DbSetupType;
+use App\Form\JwtType;
 use App\Form\SettingsType;
 use App\Service\CertificateStorageService;
 use App\Service\DatabaseConnectionService;
@@ -179,9 +181,6 @@ class CertificateManagementController extends AbstractController
             $trustedProxies = $settingsDTO->trustedProxies;
             $turnstileKey = $settingsDTO->turnstileKey;
             $turnstileSecret = $settingsDTO->turnstileSecret;
-            $jwtSecretKey = $settingsDTO->jwtSecretKey;
-            $jwtPublicKey = $settingsDTO->jwtPublicKey;
-            $jwtPassphrase = $settingsDTO->jwtPassphrase;
 
             $this->databaseConnectionService->writeDatabaseUrlToEnv(
                 $trustedProxies,
@@ -198,22 +197,7 @@ class CertificateManagementController extends AbstractController
                 SettingsConfigType::TURNSTILE_SECRET->value
             );
 
-            $this->databaseConnectionService->writeDatabaseUrlToEnv(
-                $jwtSecretKey,
-                SettingsConfigType::JWT_SECRET_KEY->value
-            );
-
-            $this->databaseConnectionService->writeDatabaseUrlToEnv(
-                $jwtPublicKey,
-                SettingsConfigType::JWT_PUBLIC_KEY->value
-            );
-
-            $this->databaseConnectionService->writeDatabaseUrlToEnv(
-                $jwtPassphrase,
-                SettingsConfigType::JWT_PASSPHRASE->value
-            );
-
-            return $this->redirectToRoute('admin_dashboard_settings_certs_installation_admin');
+            return $this->redirectToRoute('admin_dashboard_settings_certs_installation_jwt');
         }
 
         return $this->render(
@@ -226,7 +210,34 @@ class CertificateManagementController extends AbstractController
         );
     }
 
-    #[Route('/dashboard/settings/certificatesManagement/installation/settings', name: 'admin_dashboard_settings_certs_installation_admin')]
+
+    #[Route('/dashboard/settings/certificatesManagement/installation/jwt', name: 'admin_dashboard_settings_certs_installation_jwt')]
+    #[IsGranted('ROLE_ADMIN')]
+    public function settingsCertificatesManagementInstallationJwt(
+        Request $request
+    ): Response {
+        $data = $this->getSettings->getSettings();
+
+        $jwtDTO = new JwtDTO();
+
+        $form = $this->createForm(JwtType::class, $jwtDTO);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            return $this->redirectToRoute('');
+        }
+
+        return $this->render(
+            'dashboard/shared/settings_actions/certificatesManagement/installation/jwt.html.twig',
+            [
+                'data' => $data,
+                'form' => $form->createView(),
+                'formDTO' => $jwtDTO
+            ]
+        );
+    }
+
+    #[Route('/dashboard/settings/certificatesManagement/installation/admin', name: 'admin_dashboard_settings_certs_installation_admin')]
     #[IsGranted('ROLE_ADMIN')]
     public function settingsCertificatesManagementInstallationAdmin(
         Request $request
