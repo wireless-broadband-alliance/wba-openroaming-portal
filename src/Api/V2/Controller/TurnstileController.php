@@ -20,4 +20,17 @@ class TurnstileController extends AbstractController
         // Return the file content as an HTML response
         return new Response($html, Response::HTTP_OK, ['Content-Type' => 'text/html']);
     }
+
+    #[Route('/turnstile/ios', name: 'api_v2_turnstile_html_ios', methods: ['GET'])]
+    public function getHtmlFromFileIos(): Response
+    {
+        $filePath = $this->getParameter('kernel.project_dir') . '/public/resources/turnstile_android_html/index.html';
+        if (!file_exists($filePath)) {
+            return new Response('HTML file not found.', Response::HTTP_NOT_FOUND);
+        }
+        $html = file_get_contents($filePath);
+
+        // Return the file content as an HTML response
+        return new Response($html, Response::HTTP_OK, ['Content-Type' => 'text/html']);
+    }
 }
