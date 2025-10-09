@@ -18,7 +18,7 @@ readonly class TermsAcceptanceListener
     ) {
     }
 
-    #[AsEventListener(event: KernelEvents::REQUEST)]
+    #[AsEventListener(event: KernelEvents::REQUEST, priority: -255)]
     public function onKernelRequest(RequestEvent $event): void
     {
         if (!$event->isMainRequest()) {
