@@ -7,12 +7,14 @@ namespace App\Controller;
 use App\DTO\CertificateUploadDTO;
 use App\DTO\DbSetupDTO;
 use App\DTO\SettingsDTO;
+use App\Enum\CertificateFileName;
 use App\Enum\DataBaseSetupType;
 use App\Enum\FirewallType;
 use App\Enum\SettingsConfigType;
 use App\Form\CertificateUploadType;
 use App\Form\DbSetupType;
 use App\Form\SettingsType;
+use App\Service\CertificateStorageService;
 use App\Service\DatabaseConnectionService;
 use App\Service\GetSettings;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -32,6 +34,7 @@ class CertificateManagementController extends AbstractController
         private readonly GetSettings $getSettings,
         private readonly DatabaseConnectionService $databaseConnectionService,
         private readonly TranslatorInterface $translator,
+        private readonly CertificateStorageService $certificateStorageService,
     ) {
     }
 
@@ -68,12 +71,26 @@ class CertificateManagementController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            dump($form->isValid());                   // true / false
-            dump($form->getErrors(true, false));      // list validation errors
-            dump($certificateUploadDTO);              // the actual DTO object
-            dump($certificateUploadDTO->client);      // UploadedFile object
-            dump($certificateUploadDTO->key);         // UploadedFile object
-            dd('potato testing');
+            $client = $certificateUploadDTO->client;
+            $key = $certificateUploadDTO->key;
+
+            if ($client) {
+                // Save on the tmp folder the uploaded certificates after the validation
+                $this->certificateStorageService->storeUploadedFile(
+                    $client,
+                    CertificateFileName::CLIENT_PEM->value
+                );
+            }
+
+            if ($key) {
+                // Save on the tmp folder the uploaded certificates after the validation
+                $this->certificateStorageService->storeUploadedFile(
+                    $key,
+                    CertificateFileName::KEY_PEM->value
+                );
+            }
+
+            $this->addFlash('success_admin', 'Certificates uploaded and saved successfully!');
         }
 
         return $this->render('dashboard/shared/settings_actions.html.twig', [

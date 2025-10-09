@@ -1,47 +1,29 @@
 <div class="cert-upload-card">
     <h3 class="cert-upload-header">Upload your PEM files</h3>
 
-    <twig:CertificateUploadForm :certificateUploadDTO="certificateUploadDTO" :form="form">
+    {{ form_start(form, { 'attr': {'enctype': 'multipart/form-data'} }) }}
 
-        {{ form_start(form, {
-            'attr': {
-                'data-action': 'live#action',
-                'data-live-action-param': 'validate'
-            }
-        }) }}
-
-        {# CLIENT PEM #}
-        <div class="cert-upload-group">
-            <p class="text-2xl">client.pem</p>
-            {{ form_label(form.client, 'Client Certificate (.pem)', {'label_attr': {'class': 'form-label'}}) }}
-            {{ form_widget(form.client, {'attr': {'data-live-upload-target': 'client'}}) }}
+    <div class="cert-upload-group">
+        <p class="text-lg">Upload a valid "client.pem"</p>
+        {{ form_label(form.client, 'Client Certificate (.pem)') }}
+        {{ form_widget(form.client) }}
+        <div class="text-red-500 ml-2">
             {{ form_errors(form.client) }}
-
-            {% if form.vars.value.client is not null and form.vars.value.client.getClientOriginalName is defined %}
-                <p class="text-sm text-gray-500">
-                    Uploaded: {{ form.vars.value.client.getClientOriginalName() }}
-                </p>
-            {% endif %}
         </div>
+    </div>
 
-        {# KEY PEM #}
-        <div class="cert-upload-group">
-            <p class="text-2xl">key.pem</p>
-            {{ form_label(form.key, 'Private Key (.pem)', {'label_attr': {'class': 'form-label'}}) }}
-            {{ form_widget(form.key, {'attr': {'data-live-upload-target': 'key'}}) }}
+    <div class="cert-upload-group">
+        <p class="text-lg">Upload a valid "key.pem"</p>
+        {{ form_label(form.key, 'Private Key (.pem)') }}
+        {{ form_widget(form.key) }}
+        <div class="text-red-500 ml-2">
             {{ form_errors(form.key) }}
-
-            {% if form.vars.value.key is not null and form.vars.value.key.getClientOriginalName is defined %}
-                <p class="text-sm text-gray-500">
-                    Uploaded: {{ form.vars.value.key.getClientOriginalName() }}
-                </p>
-            {% endif %}
         </div>
+    </div>
 
-        <button class="cert-upload-btn" type="submit">
-            Upload Certificates
-        </button>
+    <button class="cert-upload-btn" type="submit">
+        Upload Certificates
+    </button>
 
-        {{ form_end(form) }}
-    </twig:CertificateUploadForm>
+    {{ form_end(form) }}
 </div>

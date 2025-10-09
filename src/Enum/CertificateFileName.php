@@ -4,6 +4,6 @@ namespace App\Enum;
 
 enum CertificateFileName: string
 {
-    case CLIENT_PEM = 'client.pem';
-    case KEY_PEM = 'key.pem';
+    case CLIENT_PEM = 'client';
+    case KEY_PEM = 'key';
 }

@@ -2,6 +2,7 @@
 
 namespace App\DTO;
 
+use App\Enum\CertificateFileName;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
@@ -33,36 +34,58 @@ class CertificateUploadDTO
     )]
     public ?UploadedFile $key = null;
 
-//    #[Assert\Callback] this also works, and it gives the violation on the profiler
-//    public function validatePemFiles(ExecutionContextInterface $context): void
-//    {
-//        if ($this->client && strtolower($this->client->getClientOriginalExtension()) !== 'pem') {
-//            $context->buildViolation('Client certificate must be a .pem file.')
-//                ->atPath('client')
-//                ->addViolation();
-//        }
-//
-//        if ($this->key && strtolower($this->key->getClientOriginalExtension()) !== 'pem') {
-//            $context->buildViolation('Private key must be a .pem file.')
-//                ->atPath('key')
-//                ->addViolation();
-//        }
-//    }
-
-    public function __construct()
+    // TODO MAKE A NEW CALLBACK TO CHECK IF THE CLIENT.PEM IS NOT EXPIRED
+    #[Assert\Callback]
+    public function validatePemFiles(ExecutionContextInterface $context): void
     {
-        $this->client = null;
-        $this->key = null;
+        // Validate client PEM
+        if ($this->client instanceof UploadedFile) {
+            $contents = @file_get_contents($this->client->getPathname());
+            if (!$this->isValidPemCertificate($contents)) {
+                $context->buildViolation('Client certificate must be a valid PEM-encoded X.509 certificate.')
+                    ->atPath(CertificateFileName::CLIENT_PEM->value)
+                    ->addViolation();
+            }
+        }
+
+        // Validate private key PEM
+        if ($this->key instanceof UploadedFile) {
+            $contents = @file_get_contents($this->key->getPathname());
+            if (!$this->isValidPemPrivateKey($contents)) {
+                $context->buildViolation('Private key must be a valid PEM-encoded private key.')
+                    ->atPath(CertificateFileName::KEY_PEM->value)
+                    ->addViolation();
+            }
+        }
     }
 
-    /**
-     * Return an array ready to be passed to the service for later DB insertion or storage
-     */
-    public function toArray(): array
+    private function isValidPemCertificate(?string $contents): bool
     {
-        return [
-            'client' => $this->client,
-            'key' => $this->key,
-        ];
+        if (!$contents) {
+            return false;
+        }
+
+        // Parse the certificate
+        $cert = @openssl_x509_read($contents);
+        if ($cert === false) {
+            return false;
+        }
+
+        return true;
+    }
+
+    private function isValidPemPrivateKey(?string $contents): bool
+    {
+        if (!$contents) {
+            return false;
+        }
+
+        // Parse the private key
+        $key = @openssl_pkey_get_private($contents);
+        if ($key === false) {
+            return false;
+        }
+
+        return true;
     }
 }
