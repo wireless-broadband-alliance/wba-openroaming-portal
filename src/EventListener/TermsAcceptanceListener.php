@@ -28,9 +28,11 @@ readonly class TermsAcceptanceListener
         $request = $event->getRequest();
         $path = $request->getPathInfo();
 
-        if (str_starts_with($path, '/dashboard') ||
+        if (
+            str_starts_with($path, '/dashboard') ||
             str_starts_with($path, '/_components') ||
-            str_starts_with($path, '/api')) {
+            str_starts_with($path, '/api')
+        ) {
             return;
         }
 
