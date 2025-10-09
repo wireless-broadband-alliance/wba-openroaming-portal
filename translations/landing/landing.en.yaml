@@ -34,9 +34,10 @@ authenticatedUser: 'You are currently authenticated as {uuid}'
 
 os_selection:
     choose_os: 'Choose your operating system, so you can download and install the profile:'
-    macos_or_ios: 'macOS/iOS'
     download_install: 'Download and Install Profile'
-    download_hint: "If you have any doubts, follow the %link%."
+    macos_or_ios: 'macOS/iOS'
+    download_hint: 'If you need help, follow the %link%.'
+    instructions_link_text: 'instructions'
     device_identified: 'Device identified as running: %os%'
     is_wrong: 'Is this wrong?'
     click_to_select: 'Click here to select your OS.'

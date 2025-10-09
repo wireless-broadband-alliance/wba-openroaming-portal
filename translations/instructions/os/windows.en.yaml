@@ -1,0 +1,9 @@
+introduction: "To securely access OpenRoaming networks, please follow the next steps"
+item1:
+    description: "Select the authentication method you want to use and accept the terms and conditions"
+item2:
+    description: "Enter your details"
+item3:
+    description: "Tap “Download and Install”"
+item4:
+    description: "Click “Add” and connect automatically to the network"

@@ -13,19 +13,17 @@ export default class extends Controller {
     activate(event) {
         event.preventDefault();
         const os = event.currentTarget.dataset.os;
+
         this.showTab(os);
+
+        // Update the URL with the new OS, without reloading
+        const url = new URL(window.location.href);
+        url.searchParams.set("os", os);
+        window.history.replaceState({}, "", url);
     }
 
     showTab(os) {
-        const activeClasses = [
-            "bg-white",
-            "text-[#8AB742]",
-            "shadow-md",
-            "rounded-t-lg",
-            "border-b-2",
-            "border-[#8AB742]",
-            "-mb-[2px]",
-        ];
+        const activeClasses = ["bg-white", "shadow-md", "rounded-t-lg", "border-b-2", "border-[#8AB742]", "-mb-[2px]"];
         const inactiveClasses = [
             "text-gray-400",
             "hover:text-black",

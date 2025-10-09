@@ -1,0 +1,9 @@
+introduction: 'De modo a aceder de forma segura às redes OpenRoaming, deve seguir os próximos passos'
+item1:
+    description: "Selecione o métode de autenticação que pretende utilizar e aceite os termos e condições"
+item2:
+    description: "Insira o seus detalhes"
+item3:
+    description: "Toque em “Transferir e Instalar”"
+item4:
+    description: "Clique em “Add” e ligue-se automaticamente à rede."

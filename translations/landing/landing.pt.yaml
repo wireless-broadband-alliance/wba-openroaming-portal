@@ -12,13 +12,13 @@ termsCheckboxText: 'Concordo com os %terms% e a %privacy%.'
 contactText: 'Caso tenha alguma dúvida ou precise de assistência, por favor contacte-nos através de'
 
 demoMode:
-  header: 'MODO DEMO – {status}'
-  enterYourEmail: 'Introduza o seu email'
-  systemMessage: 'Este portal é apenas para fins de teste e não deve ser utilizado em ambientes de produção. Os utilizadores criados neste portal podem ser revogados a qualquer momento sem aviso prévio.'
-  createAccount: 'Criar Conta Demo'
-  status:
-    confirmed: 'SISTEMA DE EMAIL CONFIRMADO'
-    unconfirmed: 'SISTEMA DE EMAIL NÃO CONFIRMADO'
+    header: 'MODO DEMO – {status}'
+    enterYourEmail: 'Introduza o seu e-mail'
+    systemMessage: 'Este portal é apenas para fins de teste e não deve ser utilizado em ambientes de produção. Os utilizadores criados neste portal podem ser revogados a qualquer momento sem aviso prévio.'
+    createAccount: 'Criar Conta Demo'
+    status:
+        confirmed: 'SISTEMA DE EMAIL CONFIRMADO'
+        unconfirmed: 'SISTEMA DE EMAIL NÃO CONFIRMADO'
 
 authenticatedAs: 'Atualmente está autenticado como'
 authenticatedUserAsProvider: 'Atualmente está autenticado como {providerId}'
@@ -26,20 +26,21 @@ obtainProfile: 'Obtenha o Seu Perfil'
 authenticationMethods: 'Para começar, selecione um dos seguintes métodos de autenticação:'
 
 confirmationModal:
-  title: 'Por favor, confirme os termos de uso antes de continuar.'
-  closeButton: 'Fechar'
+    title: 'Por favor confirme os termos de uso antes de continuar.'
+    closeButton: 'Fechar'
 
 accountSettings: 'Definições de Conta'
 authenticatedUser: 'Atualmente está autenticado como {uuid}'
 
 os_selection:
-  choose_os: 'Escolha o seu sistema operativo para que possa transferir e instalar o perfil:'
-  macos_or_ios: 'macOS/iOS'
-  download_install: 'Transferir e Instalar Perfil'
-  download_hint: 'Em caso de dúvidas, siga as %link%.'
-  device_identified: 'Dispositivo identificado como executando: %os%'
-  is_wrong: 'Está incorreto?'
-  click_to_select: 'Clique aqui para selecionar o seu sistema operativo.'
+    choose_os: 'Escolha o seu sistema operativo para que possa transferir e instalar o perfil:'
+    macos_or_ios: 'macOS/iOS'
+    download_install: 'Transferir e Instalar Perfil'
+    download_hint: 'Se precisas de ajuda, segue as %link%.'
+    instructions_link_text: 'instruções'
+    device_identified: 'Dispositivo identificado como executando: %os%'
+    is_wrong: 'Está incorreto?'
+    click_to_select: 'Clique aqui para selecionar o seu sistema operativo.'
 
 invalidCaptcha: 'Validação de CAPTCHA inválida!'
 logout: 'Terminar sessão'
@@ -47,6 +48,6 @@ accessLoggedInOnly: 'Só pode aceder a esta página estando autenticado.'
 confirmNewPasswordBeforeDownload: 'É necessário confirmar a nova palavra-passe antes de transferir um perfil!'
 
 emailVerification:
-  newCodeSentEmail: 'Enviámos um novo código para: %email%.'
-  waitBeforeTryingAgain: 'Por favor, aguarde %time% minutos antes de tentar novamente.'
-  accountSuccessfullyVerified: 'A sua conta foi verificada com sucesso.'
+    newCodeSentEmail: 'Enviamos um novo código para: %email%.'
+    waitBeforeTryingAgain: 'Por favor, aguarde %time% minutos antes de tentar novamente.'
+    accountSuccessfullyVerified: 'Sua conta foi verificada com sucesso.'

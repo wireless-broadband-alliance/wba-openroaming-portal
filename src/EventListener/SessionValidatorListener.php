@@ -35,7 +35,7 @@ readonly class SessionValidatorListener
         $path = $request->getPathInfo();
 
         // Allow the user to still be able to change the language
-        if ($request->attributes->get('_route') === 'change_language') {
+        if ($request->attributes->get('_route') === 'app_change_language') {
             return;
         }
 
