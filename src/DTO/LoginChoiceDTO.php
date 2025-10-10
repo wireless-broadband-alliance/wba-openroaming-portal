@@ -13,15 +13,15 @@ class LoginChoiceDTO
 {
     #[Assert\Choice(
         choices: [UserProvider::EMAIL->value, UserProvider::PHONE_NUMBER->value],
-        message: 'Select a valid login method'
+        message: 'validLoginMethod'
     )]
     public ?string $loginMethod = null;
 
     #[Assert\When(
         expression: "this.loginMethod === constant('App\\\\Enum\\\\UserProvider::EMAIL').value",
         constraints: [
-            new Assert\NotBlank(message: 'Email cannot be empty.'),
-            new Assert\Email(message: 'Please enter a valid email address.')
+            new Assert\NotBlank(message: 'emailNotEmpty'),
+            new Assert\Email(message: 'validEmailAddress')
         ]
     )]
     public ?string $email = null;
@@ -29,11 +29,11 @@ class LoginChoiceDTO
     #[Assert\When(
         expression: "this.loginMethod === constant('App\\\\Enum\\\\UserProvider::PHONE_NUMBER').value",
         constraints: [
-            new Assert\NotNull(message: 'Phone number cannot be empty.'),
+            new Assert\NotNull(message: 'phoneNumberNotEmpty'),
             new AssertPhoneNumber\PhoneNumber(
                 type: AssertPhoneNumber\PhoneNumber::MOBILE,
                 defaultRegion: 'US',
-                message: 'Please enter a valid phone number.'
+                message: 'validPhoneNumberAddress'
             )
         ]
     )]
@@ -55,7 +55,7 @@ class LoginChoiceDTO
             $this->requireLoginMethod &&
             ($this->loginMethod === null || $this->loginMethod === '' || $this->loginMethod === '0')
         ) {
-            $context->buildViolation('Login method is required.')
+            $context->buildViolation('loginMethodRequired')
                 ->atPath('loginMethod')
                 ->addViolation();
         }
