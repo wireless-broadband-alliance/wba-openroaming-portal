@@ -1,2 +1,6 @@
 databaseApplyBtn: 'Aplicar Alterações'
-settingsTitle: 'Configurações das definições'
+settingsTitle: 'Definições do Sistema'
+settingsDescription: 'Gerir as definições e configurações do sistema.'
+trustedProxiesLabel: 'Proxies Fidedignos'
+trustedKeyLabel: 'Chave Fidedigna'
+turnstileSecretLabel: 'Segredo do Turnstile'

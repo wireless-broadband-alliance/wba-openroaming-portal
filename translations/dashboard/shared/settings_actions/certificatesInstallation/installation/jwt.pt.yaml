@@ -1,0 +1,8 @@
+jwtTitle: 'Configuração JWT'
+jwtDescription: 'Configuração para autenticação segura com JWT.'
+jwtSecretKeyLabel: 'Chave Secreta JWT'
+jwtPublicKeyLabel: 'Chave Pública JWT'
+jwtPassphraseEnableLabel: 'Ativar Frase-Passe JWT'
+jwtPassphraseLabel: 'Frase-Passe JWT'
+saveChangesMessage: 'Deseja guardar estas alterações?'
+databaseApplyBtn: 'Aplicar Alterações'
