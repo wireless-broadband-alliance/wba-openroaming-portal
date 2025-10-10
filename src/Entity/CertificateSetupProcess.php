@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Enum\CertificateProcessStatus;
 use App\Repository\CertificateSetupProcessRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -16,8 +17,8 @@ class CertificateSetupProcess
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 50)]
-    private ?string $status = null;
+    #[ORM\Column(enumType: CertificateProcessStatus::class)]
+    private ?CertificateProcessStatus $status = null;
 
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $radsecproxyFormCompletedAt = null;
@@ -59,12 +60,12 @@ class CertificateSetupProcess
         return $this->id;
     }
 
-    public function getStatus(): ?string
+    public function getStatus(): ?CertificateProcessStatus
     {
         return $this->status;
     }
 
-    public function setStatus(string $status): static
+    public function setStatus(CertificateProcessStatus $status): static
     {
         $this->status = $status;
 

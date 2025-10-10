@@ -3,6 +3,8 @@
 namespace App\Service;
 
 use App\Entity\Certificate;
+use App\Entity\CertificateSetupProcess;
+use App\Enum\CertificateProcessStatus;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use RuntimeException;
@@ -17,12 +19,26 @@ readonly class CertificateStorageService
     ) {
     }
 
+    public function createCertificateProcess(): CertificateSetupProcess
+    {
+        $process = new CertificateSetupProcess();
+        $process->setStatus(CertificateProcessStatus::IN_PROGRESS);
+        $process->setCreatedAt(new DateTimeImmutable());
+        $process->setUpdatedAt(new DateTimeImmutable());
+
+        $this->entityManager->persist($process);
+        $this->entityManager->flush();
+
+        return $process;
+    }
+
     /**
      * Store an uploaded certificate/key using VichUploaderBundle.
      *
      * @param UploadedFile $file
      * @param string $type Logical type (e.g., 'client' or 'key')
      * @param string $name Display name
+     * @param CertificateSetupProcess $process Return and associates the process with the new cert
      * @param bool|null $isAKey Optional Checks if the file being uploaded is a privateKey
      * @return Certificate
      */
@@ -30,13 +46,15 @@ readonly class CertificateStorageService
         UploadedFile $file,
         string $type,
         string $name,
-        ?bool $isAKey = false
+        CertificateSetupProcess $process,
+        ?bool $isAKey = false,
     ): Certificate {
         $certificate = new Certificate();
         $certificate->setName($name . $type . ' Certificate');
         $certificate->setType($type);
         $certificate->setCreatedAt(new DateTimeImmutable());
         $certificate->setFile($file);
+        $certificate->setSetupProcess($process);
 
         // Capture metadata
         $certificate->setMetadata([

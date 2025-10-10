@@ -20,6 +20,8 @@ use App\Form\SettingsType;
 use App\Service\CertificateStorageService;
 use App\Service\DatabaseConnectionService;
 use App\Service\GetSettings;
+use DateTimeImmutable;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
@@ -39,6 +41,7 @@ class CertificateManagementController extends AbstractController
         private readonly DatabaseConnectionService $databaseConnectionService,
         private readonly TranslatorInterface $translator,
         private readonly CertificateStorageService $certificateStorageService,
+        private readonly EntityManagerInterface $entityManager,
     ) {
     }
 
@@ -70,12 +73,16 @@ class CertificateManagementController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // Create a certificate process before upload and making any actually changes on the DB and files
+            $process = $this->certificateStorageService->createCertificateProcess();
+
             if ($certificateUploadDTO->client instanceof UploadedFile) {
                 // Save on the tmp folder the uploaded certificates after the validation
                 $this->certificateStorageService->storeUploadedFile(
                     $certificateUploadDTO->client,
                     CertificateMachineType::RADSECPROXY->value,
                     CertificateFileName::CLIENT_PEM->value,
+                    $process,
                     false
                 );
             }
@@ -86,13 +93,21 @@ class CertificateManagementController extends AbstractController
                     $certificateUploadDTO->key,
                     CertificateMachineType::RADSECPROXY->value,
                     CertificateFileName::KEY_PEM->value,
+                    $process,
                     true
                 );
             }
 
+            // After the files are validated and the processed, update them once again to add the radsecProxyFormCompletionAt
+            $process->setRadsecproxyFormCompletedAt(new DateTimeImmutable());
+            $process->setUpdatedAt(new DateTimeImmutable());
+
+            $this->entityManager->persist($process);
+            $this->entityManager->flush();
 
             /* TODO'S
-                1 - Make the new entity to be related with the "Certificate" one
+                1 - Make the new entity to be related with the "Certificate" one -> done
+                   1.1 - Rework the services for the connection -> done
                 2 - return the command to execute on the radsecproxy container
                 3 - make the logic to check this project has been finished
             */

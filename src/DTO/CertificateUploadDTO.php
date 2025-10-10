@@ -57,7 +57,7 @@ class CertificateUploadDTO
                 if ($certInfo && isset($certInfo['validTo_time_t'])) {
                     $validTo = new DateTimeImmutable()->setTimestamp((int)$certInfo['validTo_time_t']);
                     if ($validTo < new DateTimeImmutable()) {
-                        $context->buildViolation('')
+                        $context->buildViolation('certPEMX509Expired')
                             ->atPath(CertificateFileName::CLIENT_PEM->value)
                             ->addViolation();
                     }
