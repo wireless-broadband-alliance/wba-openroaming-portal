@@ -28,6 +28,14 @@ readonly class TermsAcceptanceListener
         $request = $event->getRequest();
         $path = $request->getPathInfo();
 
+        if (
+            str_starts_with($path, '/dashboard') ||
+            str_starts_with($path, '/_components') ||
+            str_starts_with($path, '/api')
+        ) {
+            return;
+        }
+
         if (str_starts_with($path, '/_profiler') || str_starts_with($path, '/_wdt')) {
             return;
         }
@@ -37,14 +45,11 @@ readonly class TermsAcceptanceListener
             '/dashboard/login',
             '/instructions',
             '/change-language',
-            '/api',
-            '/api/v1',
-            '/api/v2',
             '/accept-terms',
             '/reject-terms',
             '/terms-conditions',
             '/privacy-policy',
-            '/metrics'
+            '/metrics',
         ];
 
         /** @var Session $session */
