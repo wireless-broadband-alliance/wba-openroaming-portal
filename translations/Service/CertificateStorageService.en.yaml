@@ -1,0 +1,2 @@
+invalidPEMCertificate: 'Invalid PEM certificate.'
+unableParse: 'Unable to parse PEM certificate.'

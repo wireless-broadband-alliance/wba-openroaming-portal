@@ -46,10 +46,10 @@ class Certificate
     private ?string $fingerprint = null;
 
     #[ORM\Column(nullable: true)]
-    private ?\DateTime $validFrom = null;
+    private ?\DateTimeImmutable $validFrom = null;
 
     #[ORM\Column(nullable: true)]
-    private ?\DateTime $validTo = null;
+    private ?\DateTimeImmutable $validTo = null;
 
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
@@ -134,23 +134,23 @@ class Certificate
         return $this;
     }
 
-    public function getValidFrom(): ?\DateTime
+    public function getValidFrom(): ?\DateTimeImmutable
     {
         return $this->validFrom;
     }
 
-    public function setValidFrom(?\DateTime $validFrom): static
+    public function setValidFrom(?\DateTimeImmutable $validFrom): static
     {
         $this->validFrom = $validFrom;
         return $this;
     }
 
-    public function getValidTo(): ?\DateTime
+    public function getValidTo(): ?\DateTimeImmutable
     {
         return $this->validTo;
     }
 
-    public function setValidTo(?\DateTime $validTo): static
+    public function setValidTo(?\DateTimeImmutable $validTo): static
     {
         $this->validTo = $validTo;
         return $this;

@@ -76,6 +76,7 @@ class CertificateManagementController extends AbstractController
                     $certificateUploadDTO->client,
                     CertificateMachineType::RADSECPROXY->value,
                     CertificateFileName::CLIENT_PEM->value,
+                    false
                 );
             }
 
@@ -85,10 +86,15 @@ class CertificateManagementController extends AbstractController
                     $certificateUploadDTO->key,
                     CertificateMachineType::RADSECPROXY->value,
                     CertificateFileName::KEY_PEM->value,
+                    true
                 );
             }
 
-            $this->addFlash('success_admin', 'RadSecProxy certificates uploaded successfully!');
+            $this->addFlash('success_admin', $this->translator->trans(
+                'radsecProxyCertUploadedSuccessfully',
+                [],
+                'controllers'
+            ));
             return $this->redirectToRoute('admin_dashboard_settings_certs_freeradius');
         }
 
