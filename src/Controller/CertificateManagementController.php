@@ -52,18 +52,13 @@ class CertificateManagementController extends AbstractController
         ]);
     }
 
-    #[Route('/dashboard/settings/certificatesManagement/certificates', name: 'admin_dashboard_settings_certs')]
+    #[Route('/dashboard/settings/certificatesManagement/certificates/radsecproxy',
+        name: 'admin_dashboard_settings_certs_radsecproxy')]
     #[IsGranted('ROLE_ADMIN')]
-    public function settingsCertificatesManagementCertificates(
+    public function settingsCertificatesManagementRadsecproxy(
         Request $request
     ): Response {
         $data = $this->getSettings->getSettings();
-
-        /* TODO
-            1 - MAKE THE NEW ENTITY RESPONSIBLE TO THIS progress saving
-            2 - FIND A WAY TO SUBMIT THIS 2 FILES WITH FILE SYSTEM (client.pem and key.pem) about this -> wba certs fpr /root/wba-openroaming-connector/hybrid/radsecproxy/certs (CONFIRM path) -> https://github.com/wireless-broadband-alliance/wba-openroaming-connector
-            3 - GET THE DATA CONTENT OF EACH FILE
-        */
 
         // Prepare DTO
         $certificateUploadDTO = new CertificateUploadDTO();
@@ -92,7 +87,8 @@ class CertificateManagementController extends AbstractController
                 );
             }
 
-            $this->addFlash('success_admin', 'Certificates uploaded and saved successfully!');
+            $this->addFlash('success_admin', 'Radsecproxy Certificates uploaded and ready to be applied!');
+            return $this->redirectToRoute('admin_dashboard_settings_certs_freeradius');
         }
 
         return $this->render('dashboard/shared/settings_actions.html.twig', [
@@ -100,6 +96,18 @@ class CertificateManagementController extends AbstractController
             'certificateUploadDTO' => $certificateUploadDTO,
             'form' => $form->createView(),
             'context' => FirewallType::DASHBOARD->value,
+        ]);
+    }
+
+    #[Route('/dashboard/settings/certificatesManagement/freeradius', name: 'admin_dashboard_settings_certs_freeradius')]
+    #[IsGranted('ROLE_ADMIN')]
+    public function settingsCertificatesManagementFreeradius(
+    ): Response {
+        $data = $this->getSettings->getSettings();
+
+        return $this->render('dashboard/shared/settings_actions.html.twig', [
+            'data' => $data,
+            'potato' => 'potato'
         ]);
     }
 

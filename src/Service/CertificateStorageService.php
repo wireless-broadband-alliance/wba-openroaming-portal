@@ -39,6 +39,14 @@ readonly class CertificateStorageService
         $uniqueName = sprintf('%s_%s.%s', $type, $uuid, $extension);
         $targetPath = $this->certDir . '/' . $uniqueName;
 
+        // Capture metadata BEFORE moving
+        $metadata = [
+            'uuid' => (string) $uuid,
+            'originalName' => $file->getClientOriginalName(),
+            'mimeType' => $file->getClientMimeType(),
+            'size' => $file->getSize(),
+        ];
+
         // Move the file to the target directory (var/tmp/certs)
         $file->move($this->certDir, $uniqueName);
 
@@ -47,12 +55,7 @@ readonly class CertificateStorageService
         $certificate->setName($name ?? ucfirst($type) . ' Certificate');
         $certificate->setType($type);
         $certificate->setFilePath($targetPath);
-        $certificate->setMetadata([
-            'uuid' => (string) $uuid,
-            'originalName' => $file->getClientOriginalName(),
-            'mimeType' => $file->getClientMimeType(),
-            'size' => $file->getSize(),
-        ]);
+        $certificate->setMetadata($metadata);
         $certificate->setCreatedAt(new DateTimeImmutable());
 
         // Persist in database
