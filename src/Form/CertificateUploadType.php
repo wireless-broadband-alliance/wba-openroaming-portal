@@ -3,24 +3,27 @@
 namespace App\Form;
 
 use App\DTO\CertificateUploadDTO;
-use App\Enum\CertificateFileName;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Vich\UploaderBundle\Form\Type\VichFileType;
 
 class CertificateUploadType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add(CertificateFileName::CLIENT_PEM->value, FileType::class, [
+            ->add('client', VichFileType::class, [
                 'label' => 'Client Certificate (.pem)',
                 'required' => true,
+                'allow_delete' => false,
+                'download_uri' => false,
             ])
-            ->add(CertificateFileName::KEY_PEM->value, FileType::class, [
+            ->add('key', VichFileType::class, [
                 'label' => 'Private Key (.pem)',
                 'required' => true,
+                'allow_delete' => false,
+                'download_uri' => false,
             ]);
     }
 

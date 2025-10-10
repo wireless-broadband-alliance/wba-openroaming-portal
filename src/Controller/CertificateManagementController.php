@@ -9,6 +9,7 @@ use App\DTO\DbSetupDTO;
 use App\DTO\JwtDTO;
 use App\DTO\SettingsDTO;
 use App\Enum\CertificateFileName;
+use App\Enum\CertificateMachineType;
 use App\Enum\DataBaseSetupType;
 use App\Enum\FirewallType;
 use App\Enum\SettingsConfigType;
@@ -20,6 +21,7 @@ use App\Service\CertificateStorageService;
 use App\Service\DatabaseConnectionService;
 use App\Service\GetSettings;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -68,28 +70,28 @@ class CertificateManagementController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $client = $certificateUploadDTO->client;
-            $key = $certificateUploadDTO->key;
-
-            if ($client) {
+            if ($certificateUploadDTO->client instanceof UploadedFile) {
                 // Save on the tmp folder the uploaded certificates after the validation
                 $this->certificateStorageService->storeUploadedFile(
-                    $client,
-                    CertificateFileName::CLIENT_PEM->value
+                    $certificateUploadDTO->client,
+                    CertificateMachineType::RADSECPROXY->value,
+                    CertificateFileName::CLIENT_PEM->value,
                 );
             }
 
-            if ($key) {
+            if ($certificateUploadDTO->key instanceof UploadedFile) {
                 // Save on the tmp folder the uploaded certificates after the validation
                 $this->certificateStorageService->storeUploadedFile(
-                    $key,
-                    CertificateFileName::KEY_PEM->value
+                    $certificateUploadDTO->key,
+                    CertificateMachineType::RADSECPROXY->value,
+                    CertificateFileName::KEY_PEM->value,
                 );
             }
 
-            $this->addFlash('success_admin', 'Radsecproxy Certificates uploaded and ready to be applied!');
+            $this->addFlash('success_admin', 'RadSecProxy certificates uploaded successfully!');
             return $this->redirectToRoute('admin_dashboard_settings_certs_freeradius');
         }
+
 
         return $this->render('dashboard/shared/settings_actions.html.twig', [
             'data' => $data,

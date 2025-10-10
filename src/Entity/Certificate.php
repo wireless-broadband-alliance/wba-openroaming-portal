@@ -5,8 +5,12 @@ namespace App\Entity;
 use App\Repository\CertificateRepository;
 use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\HttpFoundation\File\File;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Vich\UploaderBundle\Mapping\Annotation as Vich;
 
 #[ORM\Entity(repositoryClass: CertificateRepository::class)]
+#[Vich\Uploadable]
 class Certificate
 {
     public function __construct()
@@ -25,8 +29,15 @@ class Certificate
     #[ORM\Column(length: 50)]
     private ?string $type = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $filePath = null;
+
+    /**
+     * This property is not persisted in the database.
+     * It is used by VichUploaderBundle to handle the uploaded file.
+     */
+    #[Vich\UploadableField(mapping: 'certificate_files', fileNameProperty: 'filePath')]
+    private ?File $file = null;
 
     #[ORM\Column(nullable: true)]
     private ?array $metadata = null;
@@ -59,7 +70,6 @@ class Certificate
     public function setName(string $name): static
     {
         $this->name = $name;
-
         return $this;
     }
 
@@ -71,6 +81,22 @@ class Certificate
     public function setType(string $type): static
     {
         $this->type = $type;
+        return $this;
+    }
+
+    public function getFile(): ?File
+    {
+        return $this->file;
+    }
+
+    public function setFile(?File $file): static
+    {
+        $this->file = $file;
+
+        // Automatically update timestamp when a file changes
+        if ($file instanceof UploadedFile) {
+            $this->updatedAt = new DateTimeImmutable();
+        }
 
         return $this;
     }
@@ -80,10 +106,9 @@ class Certificate
         return $this->filePath;
     }
 
-    public function setFilePath(string $filePath): static
+    public function setFilePath(?string $filePath): static
     {
         $this->filePath = $filePath;
-
         return $this;
     }
 
@@ -95,7 +120,6 @@ class Certificate
     public function setMetadata(?array $metadata): static
     {
         $this->metadata = $metadata;
-
         return $this;
     }
 
@@ -107,7 +131,6 @@ class Certificate
     public function setFingerprint(?string $fingerprint): static
     {
         $this->fingerprint = $fingerprint;
-
         return $this;
     }
 
@@ -119,7 +142,6 @@ class Certificate
     public function setValidFrom(?\DateTime $validFrom): static
     {
         $this->validFrom = $validFrom;
-
         return $this;
     }
 
@@ -131,7 +153,6 @@ class Certificate
     public function setValidTo(?\DateTime $validTo): static
     {
         $this->validTo = $validTo;
-
         return $this;
     }
 
@@ -143,7 +164,6 @@ class Certificate
     public function setCreatedAt(\DateTimeImmutable $createdAt): static
     {
         $this->createdAt = $createdAt;
-
         return $this;
     }
 
@@ -155,7 +175,6 @@ class Certificate
     public function setUpdatedAt(?\DateTimeImmutable $updatedAt): static
     {
         $this->updatedAt = $updatedAt;
-
         return $this;
     }
 }

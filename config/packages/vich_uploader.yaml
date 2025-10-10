@@ -1,0 +1,10 @@
+vich_uploader:
+    db_driver: orm
+    storage: file_system
+
+    mappings:
+        certificate_files:
+            upload_destination: '%kernel.project_dir%/var/tmp/certs'
+            namer: Vich\UploaderBundle\Naming\SmartUniqueNamer
+            delete_on_update: true
+            delete_on_remove: true
