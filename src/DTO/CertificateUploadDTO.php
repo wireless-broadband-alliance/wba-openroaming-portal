@@ -18,8 +18,8 @@ class CertificateUploadDTO
             'application/octet-stream',
             'text/plain',
         ],
-        notFoundMessage: 'Please upload a client certificate file.',
-        mimeTypesMessage: 'Invalid client certificate file type. Please upload a valid .pem certificate.'
+        notFoundMessage: 'nullCertificate',
+        mimeTypesMessage: 'invalidFileTypeCert'
     )]
     public ?UploadedFile $client = null;
 
@@ -30,8 +30,8 @@ class CertificateUploadDTO
             'application/octet-stream',
             'text/plain',
         ],
-        notFoundMessage: 'Please upload a private key file.',
-        mimeTypesMessage: 'Invalid private key file type. Please upload a valid .pem key.'
+        notFoundMessage: 'nullKey',
+        mimeTypesMessage: 'invalidFileTypeKey'
     )]
     public ?UploadedFile $key = null;
 
@@ -46,7 +46,7 @@ class CertificateUploadDTO
             $certContents = @file_get_contents($this->client->getPathname());
 
             if (!$this->isValidPemCertificate($certContents)) {
-                $context->buildViolation('Client certificate must be a valid PEM-encoded X.509 certificate.')
+                $context->buildViolation('mustBeValidCertPEMX509')
                     ->atPath(CertificateFileName::CLIENT_PEM->value)
                     ->addViolation();
             } else {
@@ -57,7 +57,7 @@ class CertificateUploadDTO
                 if ($certInfo && isset($certInfo['validTo_time_t'])) {
                     $validTo = new DateTimeImmutable()->setTimestamp((int)$certInfo['validTo_time_t']);
                     if ($validTo < new DateTimeImmutable()) {
-                        $context->buildViolation('Client certificate has expired.')
+                        $context->buildViolation('')
                             ->atPath(CertificateFileName::CLIENT_PEM->value)
                             ->addViolation();
                     }
@@ -69,7 +69,7 @@ class CertificateUploadDTO
         if ($this->key instanceof UploadedFile) {
             $keyContents = @file_get_contents($this->key->getPathname());
             if (!$this->isValidPemPrivateKey($keyContents)) {
-                $context->buildViolation('Private key must be a valid PEM-encoded private key.')
+                $context->buildViolation('mustBeValidKeyPEMX509')
                     ->atPath(CertificateFileName::KEY_PEM->value)
                     ->addViolation();
             } else {
@@ -84,7 +84,7 @@ class CertificateUploadDTO
                 $certDetails = openssl_pkey_get_details($publicKey);
                 $keyDetails = openssl_pkey_get_details($privateKeyResource);
                 if (!$certDetails || !$keyDetails || $certDetails['key'] !== $keyDetails['key']) {
-                    $context->buildViolation('The private key does not match the client certificate.')
+                    $context->buildViolation('privateKeyDoesntMatchCertificate')
                         ->atPath(CertificateFileName::KEY_PEM->value)
                         ->addViolation();
                 }
