@@ -1,0 +1,8 @@
+jwtTitle: ''
+jwtDescription: ''
+jwtSecretKeyLabel: 'JWT Secret Key'
+jwtPublicKeyLabel: 'JWT Public Key'
+jwtPassphraseEnableLabel: ''
+jwtPassphraseLabel: 'JWT Passphrase'
+saveChangesMessage: ''
+databaseApplyBtn: ''

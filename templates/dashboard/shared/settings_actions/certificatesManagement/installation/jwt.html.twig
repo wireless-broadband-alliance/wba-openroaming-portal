@@ -9,10 +9,10 @@
 
     <div class="mt-6 leading-7">
         <p class="font-bold text-base sm:text-lg md:text-xl lg:text-2xl">
-            {{ 'settingsTitle'|trans({}, 'settings') }}
+            {{ 'jwtTitle'|trans({}, 'jwt') }}
         </p>
         <p class="mt-3 text-sm sm:text-base md:text-lg lg:text-xl text-gray-600">
-            {{ 'settingsDescription'|trans({}, 'settings') }}
+            {{ 'jwtDescription'|trans({}, 'jwt') }}
         </p>
     </div>
 
@@ -30,7 +30,7 @@
                     <div class="flex flex-row justify-between">
                         <div class="text-base font-medium text-center break-normal md:break-all">
                             <h1 class="text-base md:text-lg whitespace-nowrap">
-                                {{ 'jwtSecretKeyLabel'|trans({}, 'settings') }}
+                                {{ 'jwtSecretKeyLabel'|trans({}, 'jwt') }}
                             </h1>
                         </div>
                         <label class="flex items-center bg-opacity-40">
@@ -41,7 +41,7 @@
                     </div>
 
                     {{  include('/dashboard/shared/settings_actions/_description.html.twig', {
-                        description: ''|trans({}, 'dataBase')
+                        description: ''|trans({}, 'jwt')
                     }) }}
 
                     <div class="flex items-center space-x-2 mt-5">
@@ -63,7 +63,7 @@
                     <div class="flex flex-row justify-between">
                         <div class="text-base font-medium text-center break-normal md:break-all">
                             <h1 class="text-base md:text-lg whitespace-nowrap">
-                                {{ 'jwtPublicKeyLabel'|trans({}, 'settings') }}
+                                {{ 'jwtPublicKeyLabel'|trans({}, 'jwt') }}
                             </h1>
                         </div>
                         <label class="flex items-center bg-opacity-40">
@@ -74,7 +74,7 @@
                     </div>
 
                     {{  include('/dashboard/shared/settings_actions/_description.html.twig', {
-                        description: ''|trans({}, 'dataBase')
+                        description: ''|trans({}, 'jwt')
                     }) }}
 
                     <div class="flex items-center space-x-2 mt-5">
@@ -96,7 +96,7 @@
                     <div class="flex flex-row justify-between">
                         <div class="text-base font-medium text-center break-normal md:break-all">
                             <h1 class="text-base md:text-lg whitespace-nowrap">
-                                {{ 'jwtPassphraseEnableLabel'|trans({}, 'settings') }}
+                                {{ 'jwtPassphraseEnableLabel'|trans({}, 'jwt') }}
                             </h1>
                         </div>
                     </div>
@@ -126,13 +126,13 @@
                         <div class="flex flex-row justify-between">
                             <div class="text-base font-medium text-center break-normal md:break-all">
                                 <h1 class="text-base md:text-lg whitespace-nowrap">
-                                    {{ 'jwtPassphraseLabel'|trans({}, 'settings') }}
+                                    {{ 'jwtPassphraseLabel'|trans({}, 'jwt') }}
                                 </h1>
                             </div>
                         </div>
 
                         {{ include('/dashboard/shared/settings_actions/_description.html.twig', {
-                            description: ''|trans({}, 'dataBase')
+                            description: ''|trans({}, 'jwt')
                         }) }}
 
                         <div class="flex items-center space-x-2 mt-5">
@@ -156,8 +156,8 @@
             <div class="mt-8 divider-solid"></div>
 
             <div class="mt-6 flex flex-row w-full justify-end items-center gap-2">
-                <button type="submit" class="btn-primary" onclick="return confirm('{{ 'saveChangesMessage'|trans({}, 'dataBase') }}')">
-                    {{ 'databaseApplyBtn'|trans({}, 'settings') }}
+                <button type="submit" class="btn-primary" onclick="return confirm('{{ 'saveChangesMessage'|trans({}, 'jwt') }}')">
+                    {{ 'databaseApplyBtn'|trans({}, 'jwt') }}
                 </button>
             </div>
 
