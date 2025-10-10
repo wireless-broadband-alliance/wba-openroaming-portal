@@ -1462,6 +1462,33 @@ configuration for the Android App.</p></body></html>'
                     ]
                 ]
             ],
+            'api_v2_turnstile_html_ios' => [
+                'requestBody' => [
+                    'success' => true,
+                    'data' => '<html><body><h1>Turnstile Configuration</h1><p>This is the required HTML 
+configuration for the IOS App.</p></body></html>'
+                ],
+                'description' => 'This endpoint serves the public HTML configuration required for the IOS 
+                App to integrate with the Turnstile feature.',
+                'responses' => [
+                    200 => [
+                        // phpcs:disable Generic.Files.LineLength.TooLong
+                        json_decode(
+                            '{
+                                      "success": true,
+                                      "data": "<html><body><h1>Turnstile Configuration</h1><p>This is the required HTML configuration for the IOS App.</p></body></html>"
+                                    }',
+                            false,
+                            512,
+                            JSON_THROW_ON_ERROR
+                        )
+                        // phpcs:enable
+                    ],
+                    404 => [
+                        'HTML file not found.',
+                    ]
+                ]
+            ],
             'api_v2_twoFA_request' => [
                 'requestBody' => [
                     'uuid' => 'user-uuid-example',
