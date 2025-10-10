@@ -264,7 +264,35 @@ class CertificateManagementController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            return $this->redirectToRoute('');
+
+            $jwtSecretKey = $jwtDTO->jwtSecretKey;
+            $jwtPublicKey = $jwtDTO->jwtPublicKey;
+            $jwtPassphraseEnable = $jwtDTO->jwtPassphraseEnable;
+            $jwtPassphrase = $jwtDTO->jwtPassphrase;
+
+            $this->databaseConnectionService->writeDatabaseUrlToEnv(
+                $jwtSecretKey,
+                SettingsConfigType::JWT_SECRET_KEY->value
+            );
+
+            $this->databaseConnectionService->writeDatabaseUrlToEnv(
+                $jwtPublicKey,
+                SettingsConfigType::JWT_PUBLIC_KEY->value
+            );
+
+            if ($jwtPassphraseEnable) {
+                $this->databaseConnectionService->writeDatabaseUrlToEnv(
+                    $jwtPassphrase,
+                    SettingsConfigType::JWT_PASSPHRASE->value
+                );
+            }
+
+            if ($jwtPassphraseEnable) {
+                // TODO run jwt command with passphrase
+            } else {
+                // TODO run jwt command without passphrase
+            }
+
         }
 
         return $this->render(

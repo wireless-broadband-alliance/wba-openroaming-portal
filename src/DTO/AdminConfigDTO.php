@@ -6,14 +6,16 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 class AdminConfigDTO
 {
-    #[Assert\Email(message: 'Email not valid')]
-    #[Assert\Length(max: 180, maxMessage: 'Email cannot be longer than 180 characters')]
+    #[Assert\Email(message: 'emailNotValid')]
+    #[Assert\Length(max: 100, maxMessage: 'maxCharacters')]
     public ?string $email = null;
 
-    #[Assert\Length(max: 100)]
+    #[Assert\NotBlank(message: 'fieldNotBlank')]
+    #[Assert\Length(max: 100, maxMessage: 'maxCharacters')]
     public ?string $password = null;
 
-    #[Assert\Length(max: 100)]
+    #[Assert\NotBlank(message: 'fieldNotBlank')]
+    #[Assert\Length(max: 100, maxMessage: 'maxCharacters')]
     public ?string $confirmPassword = null;
 
 
