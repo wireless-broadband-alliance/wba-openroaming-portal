@@ -38,19 +38,22 @@ class CertificateUploadDTO
     #[Assert\Callback]
     public function validatePemFiles(ExecutionContextInterface $context): void
     {
+        $certResource = null;
+        $privateKeyResource = null;
+
         // Validate client PEM
         if ($this->client instanceof UploadedFile) {
-            $contents = @file_get_contents($this->client->getPathname());
+            $certContents = @file_get_contents($this->client->getPathname());
 
-            if (!$this->isValidPemCertificate($contents)) {
+            if (!$this->isValidPemCertificate($certContents)) {
                 $context->buildViolation('Client certificate must be a valid PEM-encoded X.509 certificate.')
                     ->atPath(CertificateFileName::CLIENT_PEM->value)
                     ->addViolation();
             } else {
-                // Check if the certificate is expired
-                $certResource = @openssl_x509_read($contents);
-                $certInfo = openssl_x509_parse($certResource);
+                $certResource = @openssl_x509_read($certContents);
 
+                // Check expiration
+                $certInfo = openssl_x509_parse($certResource);
                 if ($certInfo && isset($certInfo['validTo_time_t'])) {
                     $validTo = new DateTimeImmutable()->setTimestamp((int)$certInfo['validTo_time_t']);
                     if ($validTo < new DateTimeImmutable()) {
@@ -64,11 +67,27 @@ class CertificateUploadDTO
 
         // Validate private key PEM
         if ($this->key instanceof UploadedFile) {
-            $contents = @file_get_contents($this->key->getPathname());
-            if (!$this->isValidPemPrivateKey($contents)) {
+            $keyContents = @file_get_contents($this->key->getPathname());
+            if (!$this->isValidPemPrivateKey($keyContents)) {
                 $context->buildViolation('Private key must be a valid PEM-encoded private key.')
                     ->atPath(CertificateFileName::KEY_PEM->value)
                     ->addViolation();
+            } else {
+                $privateKeyResource = @openssl_pkey_get_private($keyContents);
+            }
+        }
+
+        // Validate that key matches certificate
+        if ($certResource && $privateKeyResource) {
+            $publicKey = openssl_pkey_get_public($certResource);
+            if ($publicKey) {
+                $certDetails = openssl_pkey_get_details($publicKey);
+                $keyDetails = openssl_pkey_get_details($privateKeyResource);
+                if (!$certDetails || !$keyDetails || $certDetails['key'] !== $keyDetails['key']) {
+                    $context->buildViolation('The private key does not match the client certificate.')
+                        ->atPath(CertificateFileName::KEY_PEM->value)
+                        ->addViolation();
+                }
             }
         }
     }
