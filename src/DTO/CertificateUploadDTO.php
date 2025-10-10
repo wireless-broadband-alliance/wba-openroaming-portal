@@ -3,6 +3,7 @@
 namespace App\DTO;
 
 use App\Enum\CertificateFileName;
+use DateTimeImmutable;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
@@ -34,17 +35,30 @@ class CertificateUploadDTO
     )]
     public ?UploadedFile $key = null;
 
-    // TODO MAKE A NEW CALLBACK TO CHECK IF THE CLIENT.PEM IS NOT EXPIRED
     #[Assert\Callback]
     public function validatePemFiles(ExecutionContextInterface $context): void
     {
         // Validate client PEM
         if ($this->client instanceof UploadedFile) {
             $contents = @file_get_contents($this->client->getPathname());
+
             if (!$this->isValidPemCertificate($contents)) {
                 $context->buildViolation('Client certificate must be a valid PEM-encoded X.509 certificate.')
                     ->atPath(CertificateFileName::CLIENT_PEM->value)
                     ->addViolation();
+            } else {
+                // Check if the certificate is expired
+                $certResource = @openssl_x509_read($contents);
+                $certInfo = openssl_x509_parse($certResource);
+
+                if ($certInfo && isset($certInfo['validTo_time_t'])) {
+                    $validTo = new DateTimeImmutable()->setTimestamp((int)$certInfo['validTo_time_t']);
+                    if ($validTo < new DateTimeImmutable()) {
+                        $context->buildViolation('Client certificate has expired.')
+                            ->atPath(CertificateFileName::CLIENT_PEM->value)
+                            ->addViolation();
+                    }
+                }
             }
         }
 
