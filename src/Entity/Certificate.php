@@ -8,6 +8,8 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Vich\UploaderBundle\Mapping\Annotation as Vich;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 
 #[ORM\Entity(repositoryClass: CertificateRepository::class)]
 #[Vich\Uploadable]
@@ -16,6 +18,7 @@ class Certificate
     public function __construct()
     {
         $this->createdAt = new DateTimeImmutable();
+        $this->certificates = new ArrayCollection();
     }
 
     #[ORM\Id]
@@ -56,6 +59,10 @@ class Certificate
 
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $updatedAt = null;
+
+    #[ORM\ManyToOne(inversedBy: 'certificates')]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
+    private ?CertificateSetupProcess $setupProcess = null;
 
     public function getId(): ?int
     {
@@ -175,6 +182,42 @@ class Certificate
     public function setUpdatedAt(?\DateTimeImmutable $updatedAt): static
     {
         $this->updatedAt = $updatedAt;
+        return $this;
+    }
+
+    public function getCertificates(): Collection
+    {
+        return $this->certificates;
+    }
+
+    public function addCertificate(Certificate $certificate): static
+    {
+        if (!$this->certificates->contains($certificate)) {
+            $this->certificates->add($certificate);
+            $certificate->setSetupProcess($this);
+        }
+        return $this;
+    }
+
+    public function removeCertificate(Certificate $certificate): static
+    {
+        if ($this->certificates->removeElement($certificate)) {
+            if ($certificate->getSetupProcess() === $this) {
+                $certificate->setSetupProcess(null);
+            }
+        }
+        return $this;
+    }
+
+    public function getSetupProcess(): ?CertificateSetupProcess
+    {
+        return $this->setupProcess;
+    }
+
+    public function setSetupProcess(?CertificateSetupProcess $setupProcess): static
+    {
+        $this->setupProcess = $setupProcess;
+
         return $this;
     }
 }

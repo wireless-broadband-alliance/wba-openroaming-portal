@@ -90,11 +90,20 @@ class CertificateManagementController extends AbstractController
                 );
             }
 
-            $this->addFlash('success_admin', $this->translator->trans(
-                'radsecProxyCertUploadedSuccessfully',
-                [],
-                'controllers'
-            ));
+
+            /* TODO'S
+                1 - Make the new entity to be related with the "Certificate" one
+                2 - return the command to execute on the radsecproxy container
+                3 - make the logic to check this project has been finished
+            */
+            $this->addFlash(
+                'success_admin',
+                $this->translator->trans(
+                    'radsecProxyCertUploadedSuccessfully',
+                    [],
+                    'controllers'
+                )
+            );
             return $this->redirectToRoute('admin_dashboard_settings_certs_freeradius');
         }
 
@@ -109,8 +118,8 @@ class CertificateManagementController extends AbstractController
 
     #[Route('/dashboard/settings/certificatesManagement/freeradius', name: 'admin_dashboard_settings_certs_freeradius')]
     #[IsGranted('ROLE_ADMIN')]
-    public function settingsCertificatesManagementFreeradius(
-    ): Response {
+    public function settingsCertificatesManagementFreeradius(): Response
+    {
         $data = $this->getSettings->getSettings();
 
         return $this->render('dashboard/shared/settings_actions.html.twig', [
