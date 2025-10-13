@@ -44,7 +44,7 @@ readonly class SamlResolverService
             // Get all Issuer nodes (Response + Assertion)
             $issuers = $this->getIssuers($dom);
 
-            if (empty($issuers)) {
+            if ($issuers === []) {
                 throw new AuthenticationException(
                     $this->translator->trans('issuerNotFoundSAMLResponse', [], 'SamlResolverService')
                 );
@@ -53,7 +53,7 @@ readonly class SamlResolverService
             // Validate each issuer (like OneLogin)
             foreach ($issuers as $issuer) {
                 $trimmedIssuer = trim($issuer);
-                if (empty($trimmedIssuer) || $trimmedIssuer !== $expectedIdpEntityId) {
+                if ($trimmedIssuer === '' || $trimmedIssuer === '0' || $trimmedIssuer !== $expectedIdpEntityId) {
                     throw new AuthenticationException(
                         $this->translator->trans(
                             'invalidIssuerSAMLResponse',

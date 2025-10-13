@@ -53,7 +53,7 @@ class LoginChoiceDTO
     {
         if (
             $this->requireLoginMethod &&
-            ($this->loginMethod === null || $this->loginMethod === '' || $this->loginMethod === '0')
+            (in_array($this->loginMethod, [null, '', '0'], true))
         ) {
             $context->buildViolation('loginMethodRequired')
                 ->atPath('loginMethod')
