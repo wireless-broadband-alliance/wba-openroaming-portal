@@ -9,18 +9,19 @@ use Lexik\Bundle\JWTAuthenticationBundle\Event\JWTNotFoundEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-class JWTExceptionListener implements EventSubscriberInterface
+readonly class JWTExceptionListener implements EventSubscriberInterface
 {
     public function __construct(
-        private readonly TranslatorInterface $translator,
+        private TranslatorInterface $translator,
     ) {
     }
     public static function getSubscribedEvents(): array
     {
         return [
-            'lexik_jwt_authentication.on_jwt_not_found' => 'onJWTNotFound',
-            'lexik_jwt_authentication.on_jwt_invalid' => 'onJWTInvalid',
-            'lexik_jwt_authentication.on_jwt_expired' => 'onJWTExpired',
+            // Higher number = higher priority, executed first
+            'lexik_jwt_authentication.on_jwt_not_found' => ['onJWTNotFound', 0],
+            'lexik_jwt_authentication.on_jwt_invalid'   => ['onJWTInvalid', 0],
+            'lexik_jwt_authentication.on_jwt_expired'   => ['onJWTExpired', 0],
         ];
     }
 
