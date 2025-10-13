@@ -1,5 +1,5 @@
 failedDecodeSAMLResponse: 'Failed to decode SAMLResponse.'
-issuerNotFoundSAMLResponse: 'Issuer (idp_entity_id) not found in the SAMLResponse.'
+audienceNotFoundSAMLResponse: 'Audience identifier (Audience) not found in the SAMLResponse.'
 certificateNotFoundSAMLResponse: 'Certificate not found in the SAMLResponse.'
 errorOccurredWhileProcessingSAMLResponse: 'An error occurred while processing the SAMLResponse: %message%'
 multipleIssuerSAMLResponse: "Multiple Issuer elements found in the SAML Response."

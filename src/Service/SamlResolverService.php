@@ -17,8 +17,6 @@ readonly class SamlResolverService
     public function decodeSamlResponse(string $samlResponse, string $expectedIdpEntityId): array
     {
         // Decode the SamlResponse for data validation with the DB
-
-        // Decode the Base64-encoded SAMLResponse
         $decodedSamlResponse = base64_decode($samlResponse, true);
 
         if ($decodedSamlResponse === false) {
@@ -32,34 +30,39 @@ readonly class SamlResolverService
         $dom->preserveWhiteSpace = false;
         $dom->loadXML($decodedSamlResponse);
 
-        // Extract the "Issuer" field (idp_entity_id)
-        $issuerNode = $dom->getElementsByTagName('Issuer')->item(0);
-        if (!$issuerNode) {
+        // Create XPath and register namespaces
+        $xpath = new DOMXPath($dom);
+        $xpath->registerNamespace('samlp', 'urn:oasis:names:tc:SAML:2.0:protocol');
+        $xpath->registerNamespace('saml', 'urn:oasis:names:tc:SAML:2.0:assertion');
+
+        // Extract the Audience field
+        $audienceNodes = $xpath->query('//saml:Conditions/saml:AudienceRestriction/saml:Audience');
+        if ($audienceNodes && $audienceNodes->length > 0) {
+            $idpEntityId = trim($audienceNodes->item(0)->textContent);
+        } else {
+            throw new AuthenticationException(
+                $this->translator->trans('audienceNotFoundSAMLResponse', [], 'SamlResolverService')
+            );
+        }
+
+        // Validate the Audience (Response + Assertion)
+        $audiences = $this->getAudiences($dom);
+
+        if ($audiences === []) {
             throw new AuthenticationException(
                 $this->translator->trans('issuerNotFoundSAMLResponse', [], 'SamlResolverService')
             );
         }
-        $idpEntityId = $issuerNode->textContent;
 
-        // Get all Issuer nodes (Response + Assertion)
-        $issuers = $this->getIssuers($dom);
-
-        if ($issuers === []) {
-            throw new AuthenticationException(
-                $this->translator->trans('issuerNotFoundSAMLResponse', [], 'SamlResolverService')
-            );
-        }
-
-        // Validate each issuer (like OneLogin)
-        foreach ($issuers as $issuer) {
-            $trimmedIssuer = trim($issuer);
-            if (empty($trimmedIssuer) || $trimmedIssuer !== $expectedIdpEntityId) {
+        foreach ($audiences as $audience) {
+            $trimmedAudience = trim($audience);
+            if (empty($trimmedAudience) || $trimmedAudience !== $expectedIdpEntityId) {
                 throw new AuthenticationException(
                     $this->translator->trans(
                         'invalidIssuerSAMLResponse',
                         [
                             '%expected%' => $expectedIdpEntityId,
-                            '%got%' => $trimmedIssuer ?: 'empty',
+                            '%got%' => $trimmedAudience ?: 'empty',
                         ],
                         'SamlResolverService'
                     )
@@ -67,55 +70,46 @@ readonly class SamlResolverService
             }
         }
 
-        // Extract the certificate
         $certificateNode = $dom->getElementsByTagName('X509Certificate')->item(0);
         if (!$certificateNode) {
             throw new AuthenticationException(
                 $this->translator->trans('certificateNotFoundSAMLResponse', [], 'SamlResolverService')
             );
         }
-        $certificate = $certificateNode->textContent;
 
-        // Return both the IdP Entity ID and the Certificate
+        $certificate = trim($certificateNode->textContent);
+
+        // Return both the Audience (idp_entity_id) and the Certificate
         return [
             'idp_entity_id' => $idpEntityId,
-            'certificate' => $certificate,
+            'certificate'   => $certificate,
         ];
     }
 
     /**
-     * Extract issuers from both the SAML Response and the Assertion.
-     *
-     * @return string[]
+     * Extract Audience values from both the SAML Response and the Assertion.
      */
-    private function getIssuers(DOMDocument $dom): array
+    private function getAudiences(DOMDocument $dom): array
     {
         $xpath = new DOMXPath($dom);
         $xpath->registerNamespace('samlp', 'urn:oasis:names:tc:SAML:2.0:protocol');
         $xpath->registerNamespace('saml', 'urn:oasis:names:tc:SAML:2.0:assertion');
 
-        $issuers = [];
+        $audiences = [];
 
-        // Response-level issuer
-        $responseIssuerNodes = $xpath->query('/samlp:Response/saml:Issuer');
-        if ($responseIssuerNodes && $responseIssuerNodes->length === 1) {
-            $issuers[] = $responseIssuerNodes->item(0)->textContent;
-        } elseif ($responseIssuerNodes && $responseIssuerNodes->length > 1) {
+        // Audience(s) defined in the Assertion's Conditions
+        $audienceNodes = $xpath->query('//saml:Conditions/saml:AudienceRestriction/saml:Audience');
+
+        if ($audienceNodes && $audienceNodes->length > 0) {
+            foreach ($audienceNodes as $node) {
+                $audiences[] = trim($node->textContent);
+            }
+        } else {
             throw new AuthenticationException(
-                $this->translator->trans('multipleIssuerSAMLResponse', [], 'SamlResolverService')
+                $this->translator->trans('audienceNotFoundSAMLResponse', [], 'SamlResolverService')
             );
         }
 
-        // Assertion-level issuer
-        $assertionIssuerNodes = $xpath->query('//saml:Assertion/saml:Issuer');
-        if ($assertionIssuerNodes && $assertionIssuerNodes->length === 1) {
-            $issuers[] = $assertionIssuerNodes->item(0)->textContent;
-        } elseif ($assertionIssuerNodes && $assertionIssuerNodes->length > 1) {
-            throw new AuthenticationException(
-                $this->translator->trans('multipleAssertionIssuerSAMLResponse', [], 'SamlResolverService')
-            );
-        }
-
-        return $issuers;
+        return $audiences;
     }
 }
