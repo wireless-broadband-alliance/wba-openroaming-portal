@@ -12,7 +12,12 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 class JWTExceptionListener implements EventSubscriberInterface
 {
     private array $excludeRoutes = [
-        'api_v2_auth_saml'
+        'api_v1_auth_saml',
+        'api_v2_auth_saml',
+        'api_v1_auth_google',
+        'api_v2_auth_google',
+        'api_v1_auth_microsoft',
+        'api_v2_auth_microsoft',
     ];
 
     public function __construct(
