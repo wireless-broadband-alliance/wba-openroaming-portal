@@ -9,10 +9,14 @@ use Lexik\Bundle\JWTAuthenticationBundle\Event\JWTNotFoundEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-readonly class JWTExceptionListener implements EventSubscriberInterface
+class JWTExceptionListener implements EventSubscriberInterface
 {
+    private array $excludeRoutes = [
+        'api_v2_auth_saml'
+    ];
+
     public function __construct(
-        private TranslatorInterface $translator,
+        private readonly TranslatorInterface $translator,
     ) {
     }
     public static function getSubscribedEvents(): array
@@ -27,6 +31,13 @@ readonly class JWTExceptionListener implements EventSubscriberInterface
 
     public function onJWTNotFound(JWTNotFoundEvent $event): void
     {
+        $request = $event->getRequest();
+        $route = $request->attributes->get('_route');
+
+        if (in_array($route, $this->excludeRoutes, true)) {
+            return;
+        }
+
         $response =
             new BaseResponse(
                 401,
