@@ -55,8 +55,8 @@ readonly class SamlResolverService
         }
 
         foreach ($audiences as $audience) {
-            $trimmedAudience = trim($audience);
-            if (empty($trimmedAudience) || $trimmedAudience !== $expectedIdpEntityId) {
+            $trimmedAudience = trim((string) $audience);
+            if ($trimmedAudience === '' || $trimmedAudience === '0' || $trimmedAudience !== $expectedIdpEntityId) {
                 throw new AuthenticationException(
                     $this->translator->trans(
                         'invalidIssuerSAMLResponse',
