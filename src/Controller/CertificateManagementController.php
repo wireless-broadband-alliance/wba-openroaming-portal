@@ -17,6 +17,7 @@ use App\Form\CertificateUploadType;
 use App\Form\DbSetupType;
 use App\Form\JwtType;
 use App\Form\SettingsType;
+use App\Service\CertificateProcessCheckerService;
 use App\Service\CertificateStorageService;
 use App\Service\DatabaseConnectionService;
 use App\Service\GetSettings;
@@ -41,6 +42,7 @@ class CertificateManagementController extends AbstractController
         private readonly DatabaseConnectionService $databaseConnectionService,
         private readonly TranslatorInterface $translator,
         private readonly CertificateStorageService $certificateStorageService,
+        private readonly CertificateProcessCheckerService $certificateProcessCheckerService,
         private readonly EntityManagerInterface $entityManager,
     ) {
     }
@@ -64,6 +66,14 @@ class CertificateManagementController extends AbstractController
         Request $request
     ): Response {
         $data = $this->getSettings->getSettings();
+
+        // Check current certificateProcess status
+        $processState = $this->certificateProcessCheckerService->getProcessState();
+
+        // Return the user to the correct step
+        if ($processState['active'] && $processState['nextRoute'] !== 'admin_dashboard_settings_certs_radsecproxy') {
+            return $this->redirectToRoute($processState['nextRoute']);
+        }
 
         // Prepare DTO
         $certificateUploadDTO = new CertificateUploadDTO();
@@ -119,7 +129,7 @@ class CertificateManagementController extends AbstractController
                     'controllers'
                 )
             );
-            return $this->redirectToRoute('admin_dashboard_settings_certs_freeradius');
+            return $this->redirectToRoute('admin_dashboard_settings_certs_radsecproxy_config');
         }
 
 
@@ -128,6 +138,27 @@ class CertificateManagementController extends AbstractController
             'certificateUploadDTO' => $certificateUploadDTO,
             'form' => $form->createView(),
             'context' => FirewallType::DASHBOARD->value,
+        ]);
+    }
+
+    #[Route('/dashboard/settings/certificatesManagement/certificates/radsecproxy/config',
+        name: 'admin_dashboard_settings_certs_radsecproxy_config')]
+    #[IsGranted('ROLE_ADMIN')]
+    public function settingsCertificatesManagementRadsecproxyConfig(): Response
+    {
+        $data = $this->getSettings->getSettings();
+
+        // Check current process
+        $processState = $this->certificateProcessCheckerService->getProcessState();
+
+        // If no active process or it's the wrong step, send user back
+        if (!$processState['active'] || $processState['stage'] !== 'radsecproxy_config_commands') {
+            return $this->redirectToRoute('admin_dashboard_settings_certs_management');
+        }
+
+        return $this->render('dashboard/shared/settings_actions.html.twig', [
+            'data' => $data,
+            'commands' => 'potato123'
         ]);
     }
 
