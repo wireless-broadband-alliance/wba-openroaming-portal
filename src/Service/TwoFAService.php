@@ -296,7 +296,8 @@ readonly class TwoFAService
             $this->mailer->send($email);
         } elseif ($messageType === UserTwoFactorAuthenticationStatus::SMS->value || $user->getPhoneNumber()) {
             if (
-                in_array($eventType,
+                in_array(
+                    $eventType,
                     [
                         AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE->value,
                         AnalyticalEventType::LOGIN_TRADITIONAL_REQUEST->value,
