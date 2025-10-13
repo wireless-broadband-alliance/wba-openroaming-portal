@@ -2,16 +2,19 @@
 
 namespace App\Service;
 
+use DOMDocument;
+use DOMXPath;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-class SamlResolverService
+readonly class SamlResolverService
 {
     public function __construct(
-        private readonly TranslatorInterface $translator
+        private TranslatorInterface $translator
     ) {
     }
-    public function decodeSamlResponse(string $samlResponse): array
+
+    public function decodeSamlResponse(string $samlResponse, string $expectedIdpEntityId): array
     {
         // Decode the SamlResponse for data validation with the DB
         try {
@@ -25,7 +28,7 @@ class SamlResolverService
             }
 
             // Load the response as an XML document
-            $dom = new \DOMDocument();
+            $dom = new DOMDocument();
             $dom->preserveWhiteSpace = false;
             $dom->loadXML($decodedSamlResponse);
 
@@ -37,6 +40,32 @@ class SamlResolverService
                 );
             }
             $idpEntityId = $issuerNode->textContent;
+
+            // Get all Issuer nodes (Response + Assertion)
+            $issuers = $this->getIssuers($dom);
+
+            if (empty($issuers)) {
+                throw new AuthenticationException(
+                    $this->translator->trans('issuerNotFoundSAMLResponse', [], 'SamlResolverService')
+                );
+            }
+
+            // Validate each issuer (like OneLogin)
+            foreach ($issuers as $issuer) {
+                $trimmedIssuer = trim($issuer);
+                if (empty($trimmedIssuer) || $trimmedIssuer !== $expectedIdpEntityId) {
+                    throw new AuthenticationException(
+                        $this->translator->trans(
+                            'invalidIssuerSAMLResponse',
+                            [
+                                '%expected%' => $expectedIdpEntityId,
+                                '%got%' => $trimmedIssuer ?: 'empty',
+                            ],
+                            'SamlResolverService'
+                        )
+                    );
+                }
+            }
 
             // Extract the certificate
             $certificateNode = $dom->getElementsByTagName('X509Certificate')->item(0);
@@ -61,5 +90,41 @@ class SamlResolverService
                 )
             );
         }
+    }
+
+    /**
+     * Extract issuers from both the SAML Response and the Assertion.
+     *
+     * @return string[]
+     */
+    private function getIssuers(DOMDocument $dom): array
+    {
+        $xpath = new DOMXPath($dom);
+        $xpath->registerNamespace('samlp', 'urn:oasis:names:tc:SAML:2.0:protocol');
+        $xpath->registerNamespace('saml', 'urn:oasis:names:tc:SAML:2.0:assertion');
+
+        $issuers = [];
+
+        // Response-level issuer
+        $responseIssuerNodes = $xpath->query('/samlp:Response/saml:Issuer');
+        if ($responseIssuerNodes && $responseIssuerNodes->length === 1) {
+            $issuers[] = $responseIssuerNodes->item(0)->textContent;
+        } elseif ($responseIssuerNodes && $responseIssuerNodes->length > 1) {
+            throw new AuthenticationException(
+                $this->translator->trans('multipleIssuerSAMLResponse', [], 'SamlResolverService')
+            );
+        }
+
+        // Assertion-level issuer
+        $assertionIssuerNodes = $xpath->query('//saml:Assertion/saml:Issuer');
+        if ($assertionIssuerNodes && $assertionIssuerNodes->length === 1) {
+            $issuers[] = $assertionIssuerNodes->item(0)->textContent;
+        } elseif ($assertionIssuerNodes && $assertionIssuerNodes->length > 1) {
+            throw new AuthenticationException(
+                $this->translator->trans('multipleAssertionIssuerSAMLResponse', [], 'SamlResolverService')
+            );
+        }
+
+        return $issuers;
     }
 }
