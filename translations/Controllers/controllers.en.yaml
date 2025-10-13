@@ -133,3 +133,5 @@ passwordSentSMS: 'A new account password has been sent to your phone number via 
 passwordNotSentSMS: 'We were unable to send the new password to your phone number. Please try again.'
 connectionFailed: 'Database connection failed: %dbConnections%'
 radsecProxyCertUploadedSuccessfully: 'RadSecProxy certificates uploaded successfully!'
+jwtSuccessfully: 'JWT key pair generated successfully'
+jwtFailed: 'Failed to generate JWT key pair'

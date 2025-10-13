@@ -24,9 +24,15 @@ use App\Service\GetSettings;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Bundle\FrameworkBundle\Console\Application;
+use Symfony\Component\Console\Input\ArrayInput;
+use Symfony\Component\Console\Output\BufferedOutput;
+use Symfony\Component\Form\Exception\LogicException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
@@ -236,6 +242,10 @@ class CertificateManagementController extends AbstractController
         );
     }
 
+    /**
+     * @throws HttpException
+     * @throws LogicException
+     */
     #[Route('/dashboard/settings/certificatesManagement/installation/settings', name: 'admin_dashboard_settings_certs_installation_settings')]
     #[IsGranted('ROLE_ADMIN')]
     public function settingsCertificatesManagementInstallationSettings(
@@ -285,7 +295,8 @@ class CertificateManagementController extends AbstractController
     #[Route('/dashboard/settings/certificatesManagement/installation/jwt', name: 'admin_dashboard_settings_certs_installation_jwt')]
     #[IsGranted('ROLE_ADMIN')]
     public function settingsCertificatesManagementInstallationJwt(
-        Request $request
+        Request $request,
+        KernelInterface $kernel
     ): Response {
         $data = $this->getSettings->getSettings();
 
@@ -317,10 +328,67 @@ class CertificateManagementController extends AbstractController
                 );
             }
 
-            if ($jwtPassphraseEnable) {
-                // TODO run jwt command with passphrase
-            } else {
-                // TODO run jwt command without passphrase
+            try {
+                $application = new Application($kernel);
+                $application->setAutoExit(false);
+
+                if ($jwtPassphraseEnable) {
+                    $input = new ArrayInput([
+                        'command' => 'lexik:jwt:generate-keypair',
+                        '--overwrite' => true,
+                        '--passphrase' => $jwtPassphrase,
+                    ]);
+                } else {
+                    $input = new ArrayInput([
+                        'command' => 'lexik:jwt:generate-keypair',
+                        '--overwrite' => true,
+                    ]);
+                }
+
+                $output = new BufferedOutput();
+                if (!defined('STDIN')) {
+                    define('STDIN', fopen('php://stdin', 'r'));
+                }
+                $application->run($input, $output);
+
+                $result = $output->fetch();
+
+                $privateKeyPath = $this->getParameter('kernel.project_dir') . '/config/jwt/private.pem';
+                $publicKeyPath  = $this->getParameter('kernel.project_dir') . '/config/jwt/public.pem';
+
+                $success = false;
+
+                if (file_exists($privateKeyPath) && file_exists($publicKeyPath)) {
+                    $privateKeyContent = file_get_contents($privateKeyPath);
+                    $publicKeyContent  = file_get_contents($publicKeyPath);
+
+
+                    if (
+                        str_starts_with(trim($privateKeyContent), '-----BEGIN ENCRYPTED PRIVATE KEY-----') &&
+                        str_starts_with(trim($publicKeyContent), '-----BEGIN PUBLIC KEY-----')
+                    ) {
+                        $success = true;
+                    }
+                }
+
+                if ($success) {
+                    $this->addFlash(
+                        'success_admin',
+                        $this->translator->trans('jwtSuccessfully', [], 'controllers')
+                    );
+                } else {
+                    $this->addFlash(
+                        'error_admin',
+                        $this->translator->trans('jwtFailed', [], 'controllers')
+                    );
+                }
+
+            } catch (\Exception $exception) {
+
+                $this->addFlash(
+                    'error_admin',
+                    $this->translator->trans('jwtFailed', [], 'controllers')
+                );
             }
         }
 

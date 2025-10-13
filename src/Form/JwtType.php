@@ -23,6 +23,7 @@ class JwtType extends AbstractType
                 'required' => false,
                 ])
             ->add('jwtPassphraseEnable', CheckboxType::class, [
+                'required' => false,
             ])
             ->add('jwtPassphrase', TextType::class, [
                 'required' => false,
