@@ -17,79 +17,70 @@ readonly class SamlResolverService
     public function decodeSamlResponse(string $samlResponse, string $expectedIdpEntityId): array
     {
         // Decode the SamlResponse for data validation with the DB
-        try {
-            // Decode the Base64-encoded SAMLResponse
-            $decodedSamlResponse = base64_decode($samlResponse, true);
 
-            if ($decodedSamlResponse === false) {
-                throw new AuthenticationException(
-                    $this->translator->trans('failedDecodeSAMLResponse', [], 'SamlResolverService')
-                );
-            }
+        // Decode the Base64-encoded SAMLResponse
+        $decodedSamlResponse = base64_decode($samlResponse, true);
 
-            // Load the response as an XML document
-            $dom = new DOMDocument();
-            $dom->preserveWhiteSpace = false;
-            $dom->loadXML($decodedSamlResponse);
-
-            // Extract the "Issuer" field (idp_entity_id)
-            $issuerNode = $dom->getElementsByTagName('Issuer')->item(0);
-            if (!$issuerNode) {
-                throw new AuthenticationException(
-                    $this->translator->trans('issuerNotFoundSAMLResponse', [], 'SamlResolverService')
-                );
-            }
-            $idpEntityId = $issuerNode->textContent;
-
-            // Get all Issuer nodes (Response + Assertion)
-            $issuers = $this->getIssuers($dom);
-
-            if ($issuers === []) {
-                throw new AuthenticationException(
-                    $this->translator->trans('issuerNotFoundSAMLResponse', [], 'SamlResolverService')
-                );
-            }
-
-            // Validate each issuer (like OneLogin)
-            foreach ($issuers as $issuer) {
-                $trimmedIssuer = trim($issuer);
-                if ($trimmedIssuer === '' || $trimmedIssuer === '0' || $trimmedIssuer !== $expectedIdpEntityId) {
-                    throw new AuthenticationException(
-                        $this->translator->trans(
-                            'invalidIssuerSAMLResponse',
-                            [
-                                '%expected%' => $expectedIdpEntityId,
-                                '%got%' => $trimmedIssuer ?: 'empty',
-                            ],
-                            'SamlResolverService'
-                        )
-                    );
-                }
-            }
-
-            // Extract the certificate
-            $certificateNode = $dom->getElementsByTagName('X509Certificate')->item(0);
-            if (!$certificateNode) {
-                throw new AuthenticationException(
-                    $this->translator->trans('certificateNotFoundSAMLResponse', [], 'SamlResolverService')
-                );
-            }
-            $certificate = $certificateNode->textContent;
-
-            // Return both the IdP Entity ID and the Certificate
-            return [
-                'idp_entity_id' => $idpEntityId,
-                'certificate' => $certificate,
-            ];
-        } catch (\Exception $e) {
+        if ($decodedSamlResponse === false) {
             throw new AuthenticationException(
-                $this->translator->trans(
-                    'certificateNotFoundSAMLResponse',
-                    ['%message%' => $e->getMessage()],
-                    'SamlResolverService'
-                )
+                $this->translator->trans('failedDecodeSAMLResponse', [], 'SamlResolverService')
             );
         }
+
+        // Load the response as an XML document
+        $dom = new DOMDocument();
+        $dom->preserveWhiteSpace = false;
+        $dom->loadXML($decodedSamlResponse);
+
+        // Extract the "Issuer" field (idp_entity_id)
+        $issuerNode = $dom->getElementsByTagName('Issuer')->item(0);
+        if (!$issuerNode) {
+            throw new AuthenticationException(
+                $this->translator->trans('issuerNotFoundSAMLResponse', [], 'SamlResolverService')
+            );
+        }
+        $idpEntityId = $issuerNode->textContent;
+
+        // Get all Issuer nodes (Response + Assertion)
+        $issuers = $this->getIssuers($dom);
+
+        if ($issuers === []) {
+            throw new AuthenticationException(
+                $this->translator->trans('issuerNotFoundSAMLResponse', [], 'SamlResolverService')
+            );
+        }
+
+        // Validate each issuer (like OneLogin)
+        foreach ($issuers as $issuer) {
+            $trimmedIssuer = trim($issuer);
+            if (empty($trimmedIssuer) || $trimmedIssuer !== $expectedIdpEntityId) {
+                throw new AuthenticationException(
+                    $this->translator->trans(
+                        'invalidIssuerSAMLResponse',
+                        [
+                            '%expected%' => $expectedIdpEntityId,
+                            '%got%' => $trimmedIssuer ?: 'empty',
+                        ],
+                        'SamlResolverService'
+                    )
+                );
+            }
+        }
+
+        // Extract the certificate
+        $certificateNode = $dom->getElementsByTagName('X509Certificate')->item(0);
+        if (!$certificateNode) {
+            throw new AuthenticationException(
+                $this->translator->trans('certificateNotFoundSAMLResponse', [], 'SamlResolverService')
+            );
+        }
+        $certificate = $certificateNode->textContent;
+
+        // Return both the IdP Entity ID and the Certificate
+        return [
+            'idp_entity_id' => $idpEntityId,
+            'certificate' => $certificate,
+        ];
     }
 
     /**
