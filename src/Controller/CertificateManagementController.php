@@ -119,7 +119,7 @@ class CertificateManagementController extends AbstractController
                 1 - Make the new entity to be related with the "Certificate" one -> done
                    1.1 - Rework the services for the connection -> done
                 2 - return the command to execute on the radsecproxy container
-                3 - make the logic to check this project has been finished
+                3 - make the logic to check this process has been finished -> done check this certificateProcessCheckerService
             */
             $this->addFlash(
                 'success_admin',
@@ -295,7 +295,6 @@ class CertificateManagementController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-
             $jwtSecretKey = $jwtDTO->jwtSecretKey;
             $jwtPublicKey = $jwtDTO->jwtPublicKey;
             $jwtPassphraseEnable = $jwtDTO->jwtPassphraseEnable;
@@ -323,7 +322,6 @@ class CertificateManagementController extends AbstractController
             } else {
                 // TODO run jwt command without passphrase
             }
-
         }
 
         return $this->render(
