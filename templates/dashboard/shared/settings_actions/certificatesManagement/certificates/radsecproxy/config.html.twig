@@ -13,7 +13,7 @@
                     {% for cmd in commands %}
                         <div class="space-y-2 relative">
                             <p class="text-sm font-medium text-gray-700">Step {{ loop.index }}</p>
-                            <pre data-clipboard-target="code" class="copyable-code rounded bg-gray-800 text-white p-4 font-mono overflow-x-auto relative">{{ cmd }}</pre>
+                            <pre data-clipboard-target="code-{{ loop.index }}" class="copyable-code rounded bg-gray-800 text-white p-4 font-mono overflow-x-auto relative">{{ cmd }}</pre>
                             <div class="absolute top-6 right-2">
                                 <button type="button" title="Copy" aria-label="Copy code to clipboard"
                                         class="code-block-copy"
