@@ -26,17 +26,11 @@ class CertificateSetupProcess
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $radsecproxyConfigAppliedAt = null;
 
-    #[ORM\Column(type: Types::TEXT, nullable: true)]
-    private ?string $radsecproxyOutput = null;
-
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $freeradiusCompletedAt = null;
 
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $freeradiusConfigAppliedAt = null;
-
-    #[ORM\Column(type: Types::TEXT, nullable: true)]
-    private ?string $freeradiusOutput = null;
 
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
@@ -96,18 +90,6 @@ class CertificateSetupProcess
         return $this;
     }
 
-    public function getRadsecproxyOutput(): ?string
-    {
-        return $this->radsecproxyOutput;
-    }
-
-    public function setRadsecproxyOutput(?string $radsecproxyOutput): static
-    {
-        $this->radsecproxyOutput = $radsecproxyOutput;
-
-        return $this;
-    }
-
     public function getFreeradiusCompletedAt(): ?\DateTimeImmutable
     {
         return $this->freeradiusCompletedAt;
@@ -128,18 +110,6 @@ class CertificateSetupProcess
     public function setFreeradiusConfigAppliedAt(?\DateTimeImmutable $freeradiusConfigAppliedAt): static
     {
         $this->freeradiusConfigAppliedAt = $freeradiusConfigAppliedAt;
-
-        return $this;
-    }
-
-    public function getFreeradiusOutput(): ?string
-    {
-        return $this->freeradiusOutput;
-    }
-
-    public function setFreeradiusOutput(?string $freeradiusOutput): static
-    {
-        $this->freeradiusOutput = $freeradiusOutput;
 
         return $this;
     }
