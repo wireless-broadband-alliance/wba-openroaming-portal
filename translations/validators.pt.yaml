@@ -34,3 +34,4 @@ invalidFileTypeKey: 'Tipo de ficheiro de chave privada inválido. Carregue uma c
 mustBeValidKeyPEMX509: 'A chave privada deve ser uma chave privada válida codificada em PEM.'
 privateKeyDoesntMatchCertificate: 'A chave privada não corresponde ao certificado de cliente.'
 emailNotValid: 'Email inválido'
+passwordNotMatch: "As palavras-passe não coincidem."
