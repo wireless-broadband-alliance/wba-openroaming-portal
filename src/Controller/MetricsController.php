@@ -100,7 +100,7 @@ class MetricsController extends AbstractController
      */
     private function isIpAllowed(string $ip, string $allowedIps): bool
     {
-        if ($allowedIps === '' || $allowedIps === '0' || $allowedIps === '0.0.0.0/0') {
+        if (in_array($allowedIps, ['', '0', '0.0.0.0/0'], true)) {
             return true;
         }
 

@@ -23,7 +23,7 @@ class PgpEncryptionService
             ];
         }
 
-        if ($publicKeyContent === '' || $publicKeyContent === '0' || $publicKeyContent === false) {
+        if (in_array($publicKeyContent, ['', '0', false], true)) {
             return [
                 UserVerificationStatus::EMPTY_PUBLIC_KEY_CONTENT->value,
                 'The file does not exist or is not located in the correct path!

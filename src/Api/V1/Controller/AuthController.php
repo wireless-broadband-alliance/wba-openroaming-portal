@@ -225,18 +225,11 @@ class AuthController extends AbstractController
             return new BaseResponse(400, null, 'SAML Response not found')->toResponse();
         }
 
-        $samlResponseData = $this->samlResolverService->decodeSamlResponse($samlResponseBase64);
-        $idpEntityId = $samlResponseData['idp_entity_id'];
+        $samlResponseData = $this->samlResolverService->decodeSamlResponse(
+            $samlResponseBase64,
+            $this->getParameter('app.saml_idp_entity_id')
+        );
         $idpCertificate = $samlResponseData['certificate'];
-
-        // Compare entity IDs
-        if ($this->getParameter('app.saml_idp_entity_id') !== $idpEntityId) {
-            return new BaseResponse(
-                403,
-                null,
-                'The configured IDP Entity ID does not match the expected value. Access denied.'
-            )->toResponse();
-        }
 
         // Compare certificates
         if ($this->getParameter('app.saml_idp_x509_cert') !== $idpCertificate) {

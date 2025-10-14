@@ -11,6 +11,15 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
 class JWTExceptionListener implements EventSubscriberInterface
 {
+    private array $excludeRoutes = [
+        'api_v1_auth_saml',
+        'api_v2_auth_saml',
+        'api_v1_auth_google',
+        'api_v2_auth_google',
+        'api_v1_auth_microsoft',
+        'api_v2_auth_microsoft',
+    ];
+
     public function __construct(
         private readonly TranslatorInterface $translator,
     ) {
@@ -18,14 +27,22 @@ class JWTExceptionListener implements EventSubscriberInterface
     public static function getSubscribedEvents(): array
     {
         return [
-            'lexik_jwt_authentication.on_jwt_not_found' => 'onJWTNotFound',
-            'lexik_jwt_authentication.on_jwt_invalid' => 'onJWTInvalid',
-            'lexik_jwt_authentication.on_jwt_expired' => 'onJWTExpired',
+            // Higher number = higher priority, executed first
+            'lexik_jwt_authentication.on_jwt_not_found' => ['onJWTNotFound', 0],
+            'lexik_jwt_authentication.on_jwt_invalid'   => ['onJWTInvalid', 0],
+            'lexik_jwt_authentication.on_jwt_expired'   => ['onJWTExpired', 0],
         ];
     }
 
     public function onJWTNotFound(JWTNotFoundEvent $event): void
     {
+        $request = $event->getRequest();
+        $route = $request->attributes->get('_route');
+
+        if (in_array($route, $this->excludeRoutes, true)) {
+            return;
+        }
+
         $response =
             new BaseResponse(
                 401,
