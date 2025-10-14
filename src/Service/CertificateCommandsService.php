@@ -6,26 +6,31 @@ use App\Entity\CertificateSetupProcess;
 use App\Enum\CertificateMachineType;
 use App\Enum\CertificateProcessStatus;
 use App\Repository\CertificateSetupProcessRepository;
+use Symfony\Component\HttpKernel\KernelInterface;
 
 readonly class CertificateCommandsService
 {
     public function __construct(
         private CertificateSetupProcessRepository $certificateSetupProcessRepository,
+        private KernelInterface $kernel,
     ) {}
 
     /**
-     * Return only the raw shell commands needed to renew RADSecProxy certificates.
+     * Return shell commands to update local RADSecProxy certificates.
      */
     public function getRadsecproxyRenewCommands(): array
     {
-        $process = $this->certificateSetupProcessRepository->findOneBy([
-            'status' => CertificateProcessStatus::IN_PROGRESS->value,
-        ], ['createdAt' => 'DESC']);
+        // Get the latest in-progress certificate process
+        $process = $this->certificateSetupProcessRepository->findOneBy(
+            ['status' => CertificateProcessStatus::IN_PROGRESS->value],
+            ['createdAt' => 'DESC']
+        );
 
         if (!$process instanceof CertificateSetupProcess) {
-            return [];
+            return ['# No active certificate process found.'];
         }
 
+        // Filter RADSecProxy certificates
         $certificates = $process->getCertificates()->filter(
             fn($cert) => $cert->getType() === CertificateMachineType::RADSECPROXY->value
         );
@@ -34,33 +39,56 @@ readonly class CertificateCommandsService
     }
 
     /**
-     * Generate the docker and system commands to renew RADSecProxy certs.
+     * Generate shell commands to overwrite cert files in the local target directory.
      */
     private function generateRadsecproxyCertCommands(iterable $certificates): array
     {
-        $containerName = 'hybrid-radsecproxy-1';
-        $basePath = '/var/www/project/var/uploads/certificates/';
-        $targetPath = '/app/configs/radsecproxy/certs/';
+        $targetPath = '~/openroaming-oss/hybrid/configs/radsecproxy/certs/';
+        $localBasePath = $this->kernel->getProjectDir() . '/var/certs/';
 
         $commands = [];
 
-        // Copy client and key files
+        // Remove old files
+        $commands[] = sprintf('rm -f %sclient.pem %skey.pem', $targetPath, $targetPath);
+
+        // Write each certificate
         foreach ($certificates as $cert) {
-            $filename = $cert->getFilePath();
-            if (!$filename) continue;
-
-            $sourcePath = $basePath . $filename;
-
-            if (str_contains($filename, 'client')) {
-                $commands[] = "docker cp {$sourcePath} {$containerName}:{$targetPath}client.pem";
-            } elseif (str_contains($filename, 'key')) {
-                $commands[] = "docker cp {$sourcePath} {$containerName}:{$targetPath}key.pem";
+            $originalFile = $cert->getFilePath();
+            if (!$originalFile) {
+                continue;
             }
+
+            $localFile = $localBasePath . $originalFile;
+            if (!file_exists($localFile)) {
+                continue;
+            }
+
+            $content = file_get_contents($localFile);
+            if ($content === false) {
+                continue;
+            }
+
+            // Escape single quotes for heredoc
+            $content = str_replace("'", "'\"'\"'", $content);
+
+            // Determine target file
+            $targetFile = str_contains(strtolower($originalFile), 'client') ? 'client.pem' : 'key.pem';
+
+            // Create echo (heredoc-style) command
+            $commands[] = sprintf(
+                "cat > %s%s << 'EOF'\n%s\nEOF",
+                $targetPath,
+                $targetFile,
+                $content
+            );
         }
 
-        // Add service restart and verification steps
-        $commands[] = "docker restart {$containerName}";
-        $commands[] = "docker logs {$containerName} --tail 50";
+        // Add rebuild/restart instructions
+        $commands[] = 'cd ~/openroaming-oss/hybrid';
+        $commands[] = 'docker compose build --no-cache radsecproxy';
+        $commands[] = 'docker compose up -d radsecproxy';
+        $commands[] = 'docker ps | grep radsecproxy';
+        $commands[] = 'docker logs hybrid-radsecproxy-1 --tail 50';
 
         return $commands;
     }
