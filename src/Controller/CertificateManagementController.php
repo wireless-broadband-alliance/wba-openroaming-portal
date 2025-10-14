@@ -17,6 +17,7 @@ use App\Form\CertificateUploadType;
 use App\Form\DbSetupType;
 use App\Form\JwtType;
 use App\Form\SettingsType;
+use App\Service\CertificateCommandsService;
 use App\Service\CertificateProcessCheckerService;
 use App\Service\CertificateStorageService;
 use App\Service\DatabaseConnectionService;
@@ -50,6 +51,7 @@ class CertificateManagementController extends AbstractController
         private readonly CertificateStorageService $certificateStorageService,
         private readonly CertificateProcessCheckerService $certificateProcessCheckerService,
         private readonly EntityManagerInterface $entityManager,
+        private readonly CertificateCommandsService $certificateCommandsService,
     ) {
     }
 
@@ -139,12 +141,16 @@ class CertificateManagementController extends AbstractController
         }
 
 
-        return $this->render('dashboard/shared/settings_actions.html.twig', [
-            'data' => $data,
-            'certificateUploadDTO' => $certificateUploadDTO,
-            'form' => $form->createView(),
-            'context' => FirewallType::DASHBOARD->value,
-        ]);
+        return $this->render(
+            'dashboard/shared/settings_actions/certificatesManagement/certificates/radsecproxy/upload.html.twig',
+            [
+                'data' => $data,
+                'certificateUploadDTO' => $certificateUploadDTO,
+                'form' => $form->createView(),
+                'context' => FirewallType::DASHBOARD->value,
+                'processState' => $processState,
+            ]
+        );
     }
 
     #[Route('/dashboard/settings/certificatesManagement/certificates/radsecproxy/config',
@@ -157,18 +163,26 @@ class CertificateManagementController extends AbstractController
         // Check current process
         $processState = $this->certificateProcessCheckerService->getProcessState();
 
-        // If no active process or it's the wrong step, send user back
         if (!$processState['active'] || $processState['stage'] !== 'radsecproxy_config_commands') {
             return $this->redirectToRoute('admin_dashboard_settings_certs_management');
         }
 
-        return $this->render('dashboard/shared/settings_actions.html.twig', [
-            'data' => $data,
-            'commands' => 'potato123'
-        ]);
+        // Get the ready-to-execute commands
+        $commands = $this->certificateCommandsService->getRadsecproxyRenewCommands();
+
+        return $this->render(
+            'dashboard/shared/settings_actions/certificatesManagement/certificates/radsecproxy/config.html.twig',
+            [
+                'data' => $data,
+                'commands' => $commands,
+                'processState' => $processState,
+            ]
+        );
     }
 
-    #[Route('/dashboard/settings/certificatesManagement/freeradius', name: 'admin_dashboard_settings_certs_freeradius')]
+    #[Route('/dashboard/settings/certificatesManagement/freeradius',
+        name: 'admin_dashboard_settings_certs_freeradius'
+    )]
     #[IsGranted('ROLE_ADMIN')]
     public function settingsCertificatesManagementFreeradius(): Response
     {
@@ -354,13 +368,13 @@ class CertificateManagementController extends AbstractController
                 $result = $output->fetch();
 
                 $privateKeyPath = $this->getParameter('kernel.project_dir') . '/config/jwt/private.pem';
-                $publicKeyPath  = $this->getParameter('kernel.project_dir') . '/config/jwt/public.pem';
+                $publicKeyPath = $this->getParameter('kernel.project_dir') . '/config/jwt/public.pem';
 
                 $success = false;
 
                 if (file_exists($privateKeyPath) && file_exists($publicKeyPath)) {
                     $privateKeyContent = file_get_contents($privateKeyPath);
-                    $publicKeyContent  = file_get_contents($publicKeyPath);
+                    $publicKeyContent = file_get_contents($publicKeyPath);
 
 
                     if (
@@ -385,7 +399,6 @@ class CertificateManagementController extends AbstractController
 
                 return $this->redirectToRoute('admin_dashboard_settings_certs_installation_jwt');
             } catch (\Exception $exception) {
-
                 $this->addFlash(
                     'error_admin',
                     $this->translator->trans('jwtFailed', [], 'controllers')

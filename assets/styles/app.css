@@ -201,20 +201,24 @@
     @apply h-[60vh] overflow-y-auto p-2;
 }
 
+/* Code Block Copy */
+.code-block-copy {
+    @apply absolute top-2 right-2 bg-indigo-600/90 hover:bg-indigo-700/95 text-white p-2.5 rounded-lg shadow-md transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 flex items-center justify-center w-9 h-9 z-10;
+}
 
 /* Certificate Upload */
 
-/* Certificate Upload Form Card */
+/* Form Card */
 .cert-upload-card {
-    @apply bg-white rounded-lg shadow-lg p-6 sm:p-8 lg:p-10 max-w-2xl mx-auto border border-gray-200;
+    @apply bg-white rounded-lg shadow-lg p-6 sm:p-8 lg:p-10 border border-gray-200;
 }
 
-/* Certificate Upload Form Header */
+/* Form Header */
 .cert-upload-header {
     @apply text-xl sm:text-2xl font-semibold mb-6 text-gray-700;
 }
 
-/* Certificate Upload Form Group */
+/* Form Group */
 .cert-upload-group {
     @apply space-y-2 my-2;
 }

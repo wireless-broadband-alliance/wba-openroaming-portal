@@ -49,7 +49,7 @@ readonly class CertificateProcessCheckerService
             ];
         }
 
-        // 2 - User just uploaded the certs and config its not finished
+        // 2 - User just uploaded the certs and config it's not finished
         if ($process->getRadsecproxyFormCompletedAt() !== null &&
             $process->getRadsecproxyConfigAppliedAt() === null &&
             $process->getFreeradiusCompletedAt() === null) {

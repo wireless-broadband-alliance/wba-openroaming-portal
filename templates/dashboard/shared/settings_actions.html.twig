@@ -25,11 +25,5 @@
         {{ include('dashboard/shared/settings_actions/_sms.html.twig') }}
     {% elseif app.request.attributes.get('_route') == 'admin_dashboard_settings_certs_management' %}
         {{ include('dashboard/shared/settings_actions/_certificateManagement.html.twig') }}
-    {% elseif app.request.attributes.get('_route') == 'admin_dashboard_settings_certs_radsecproxy' %}
-        {{ include('dashboard/shared/settings_actions/certificatesManagement/certificates/radsecproxy_certs.html.twig') }}
-    {% elseif app.request.attributes.get('_route') == 'admin_dashboard_settings_certs_radsecproxy_config' %}
-        {{ include('dashboard/shared/settings_actions/certificatesManagement/certificates/radsecproxy_certs_config.html.twig') }}
-    {% elseif app.request.attributes.get('_route') == 'admin_dashboard_settings_certs_freeradius' %}
-        {{ include('dashboard/shared/settings_actions/certificatesManagement/certificates/freeradius_certs.html.twig') }}
     {% endif %}
 {% endblock %}

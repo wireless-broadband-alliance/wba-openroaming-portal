@@ -1,0 +1,11 @@
+{% extends 'dashboard/base.html.twig' %}
+
+{% block container %}
+    <div class="max-w-full mx-auto px-6 lg:px-10 py-6">
+        {% include 'dashboard/shared/settings_actions/certificatesManagement/partials/_certificate_stepper.htm.twig' %}
+
+        <div class="mt-12">
+            {% block certificates_content %}{% endblock %}
+        </div>
+    </div>
+{% endblock %}

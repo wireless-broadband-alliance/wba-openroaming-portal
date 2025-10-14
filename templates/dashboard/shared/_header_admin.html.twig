@@ -1,57 +1,36 @@
 {# Header - Title - left conner #}
-<div class="flex flex-row items-center -pl-2">
-    {% if app.request.attributes.get('_route') == 'admin_page' or app.request.attributes.get('_route') == 'admin_user_edit' %}
-        <twig:ux:icon name="wba:user" class="w-10 mt-0.5" fill="none"/>
-        <h1 class="text-2xl font-semibold p-5">{{ 'usersManagement'|trans({}, '_header_admin') }}</h1>
-    {% elseif app.request.attributes.get('_route') == 'admin_dashboard_customize' %}
-        <twig:ux:icon name="wba:pencil-edit" class="w-10 mt-0.5" fill="none"/>
-        <h1 class="text-2xl font-semibold p-5">{{ 'landingPageConfiguration'|trans({}, '_header_admin') }}</h1>
-    {% elseif app.request.attributes.get('_route') == 'admin_reset_password' %}
-        <twig:ux:icon name="wba:cog" class="w-10 mt-0.5" fill="none"/>
-        <h1 class="text-2xl font-semibold p-5">{{ 'resetPassword'|trans({}, '_header_admin') }}</h1>
-    {% elseif app.request.attributes.get('_route') == 'admin_user_update' %}
-        <twig:ux:icon name="wba:user-circle" class="w-10 mt-0.5" fill="none"/>
-        <h1 class="text-2xl font-semibold p-5">{{ 'accountSettings'|trans({}, '_header_admin') }}</h1>
-    {% elseif app.request.attributes.get('_route') == 'admin_dashboard_settings_terms' %}
-        <twig:ux:icon name="wba:file-check" class="w-10 mt-0.5" fill="none"/>
-        <h1 class="text-2xl font-semibold p-5">{{ 'termsAndPolicies'|trans({}, '_header_admin') }}</h1>
-    {% elseif app.request.attributes.get('_route') == 'admin_dashboard_settings_radius' %}
-        <twig:ux:icon name="wba:file-space" class="w-10 mt-0.5" fill="none"/>
-        <h1 class="text-2xl font-semibold p-5">{{ 'radiusProfileConfiguration'|trans({}, '_header_admin') }}</h1>
-    {% elseif app.request.attributes.get('_route') == 'admin_dashboard_settings_status' %}
-        <twig:ux:icon name="wba:barchart" class="w-10 mt-0.5" fill="none"/>
-        <h1 class="text-2xl font-semibold p-5">{{ 'platformStatus'|trans({}, '_header_admin') }}</h1>
-    {% elseif app.request.attributes.get('_route') == 'admin_dashboard_settings_LDAP' %}
-        <twig:ux:icon name="wba:sync" class="w-10 mt-0.5" fill="none"/>
-        <h1 class="text-2xl font-semibold p-5">{{ 'LDAPSynchronization'|trans({}, '_header_admin') }}</h1>
-    {% elseif app.request.attributes.get('_route') == 'admin_dashboard_settings_two_fa' %}
-        <twig:ux:icon name="wba:2fa" class="w-10 mt-0.5" fill="none"/>
-        <h1 class="text-2xl font-semibold p-5">{{ 'twoFactorAuthenticator'|trans({}, '_header_admin') }}</h1>
-    {% elseif app.request.attributes.get('_route') == 'admin_dashboard_settings_LDAP' %}
-        <twig:ux:icon name="wba:sync" class="w-10 mt-0.5" fill="none"/>
-        <h1 class="text-2xl font-semibold p-5">{{ 'LDAPSynchronization'|trans({}, '_header_admin') }}</h1>
-    {% elseif app.request.attributes.get('_route') == 'admin_dashboard_settings_auth' %}
-        <twig:ux:icon name="wba:at" class="w-10 mt-0.5" fill="none"/>
-        <h1 class="text-2xl font-semibold p-5">{{ 'authenticationMethods'|trans({}, '_header_admin') }}</h1>
-    {% elseif app.request.attributes.get('_route') == 'admin_dashboard_settings_capport' %}
-        <twig:ux:icon name="wba:wifi" class="w-10 mt-0.5" fill="none"/>
-        <h1 class="text-2xl font-semibold p-5">{{ 'userEngagement'|trans({}, '_header_admin') }}</h1>
-    {% elseif app.request.attributes.get('_route') == 'admin_dashboard_settings_schedule' %}
-        <twig:ux:icon name="wba:schedule" class="w-10 mt-0.5" fill="none"/>
-        <h1 class="text-2xl font-semibold p-5">{{ 'scheduleAutomation'|trans({}, '_header_admin') }}</h1>
-    {% elseif app.request.attributes.get('_route') == 'admin_dashboard_statistics' %}
-        <twig:ux:icon name="wba:piechart" class="w-10 mt-0.5" fill="none"/>
-        <h1 class="text-2xl font-semibold p-5">{{ 'portalStatistics'|trans({}, '_header_admin') }}</h1>
-    {% elseif app.request.attributes.get('_route') == 'admin_dashboard_statistics_freeradius' %}
-        <twig:ux:icon name="wba:hdd" class="w-10 mt-0.5" fill="none"/>
-        <h1 class="text-2xl font-semibold p-5">{{ 'connectivityStatistics'|trans({}, '_header_admin') }}</h1>
-    {% elseif app.request.attributes.get('_route') == 'admin_dashboard_settings_sms' %}
-        <twig:ux:icon name="wba:sms" class="w-10 mt-0.5" fill="none"/>
-        <h1 class="text-2xl font-semibold p-5">{{ 'SMSConfiguration'|trans({}, '_header_admin') }}</h1>
-    {% elseif app.request.attributes.get('_route') == 'admin_dashboard_settings_certs_management' %}
-        <twig:ux:icon name="wba:download" class="w-10 mt-0.5" fill="none"/>
-        <h1 class="text-2xl font-semibold p-5">{{ 'certsManagement'|trans({}, '_header_admin') }}</h1>
-    {% endif %}
+{# templates/dashboard/shared/_header.html.twig #}
+
+{# Define route-to-header mapping #}
+{% set routeHeaders = {
+    'admin_page': { icon: 'wba:user', title: 'usersManagement' },
+    'admin_user_edit': { icon: 'wba:user', title: 'usersManagement' },
+    'admin_dashboard_customize': { icon: 'wba:pencil-edit', title: 'landingPageConfiguration' },
+    'admin_reset_password': { icon: 'wba:cog', title: 'resetPassword' },
+    'admin_user_update': { icon: 'wba:user-circle', title: 'accountSettings' },
+    'admin_dashboard_settings_terms': { icon: 'wba:file-check', title: 'termsAndPolicies' },
+    'admin_dashboard_settings_radius': { icon: 'wba:file-space', title: 'radiusProfileConfiguration' },
+    'admin_dashboard_settings_status': { icon: 'wba:barchart', title: 'platformStatus' },
+    'admin_dashboard_settings_LDAP': { icon: 'wba:sync', title: 'LDAPSynchronization' },
+    'admin_dashboard_settings_two_fa': { icon: 'wba:2fa', title: 'twoFactorAuthenticator' },
+    'admin_dashboard_settings_auth': { icon: 'wba:at', title: 'authenticationMethods' },
+    'admin_dashboard_settings_capport': { icon: 'wba:wifi', title: 'userEngagement' },
+    'admin_dashboard_settings_schedule': { icon: 'wba:schedule', title: 'scheduleAutomation' },
+    'admin_dashboard_statistics': { icon: 'wba:piechart', title: 'portalStatistics' },
+    'admin_dashboard_statistics_freeradius': { icon: 'wba:hdd', title: 'connectivityStatistics' },
+    'admin_dashboard_settings_sms': { icon: 'wba:sms', title: 'SMSConfiguration' },
+    'admin_dashboard_settings_certs_management': { icon: 'wba:download', title: 'certsManagement' },
+    'admin_dashboard_settings_certs_radsecproxy': { icon: 'wba:download', title: 'certsManagement' },
+    'admin_dashboard_settings_certs_radsecproxy_config': { icon: 'wba:download', title: 'certsManagement' },
+    'admin_dashboard_settings_certs_freeradius': { icon: 'wba:download', title: 'certsManagement' }
+} %}
+
+{% set currentRoute = app.request.attributes.get('_route') %}
+{% set header = routeHeaders[currentRoute] ?? { icon: 'wba:document', title: 'Dashboard' } %}
+
+<div class="flex flex-row items-center pl-4">
+    <twig:ux:icon name="{{ header.icon }}" class="w-10 mt-0.5" fill="none" />
+    <h1 class="text-2xl font-semibold p-5">{{ header.title|trans({}, '_header_admin') }}</h1>
 </div>
 
 {# Error Message Container #}
