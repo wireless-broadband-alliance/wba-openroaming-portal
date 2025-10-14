@@ -8,7 +8,7 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
-class CertificateUploadDTO
+class CertificateRadSecUploadDTO
 {
     #[Assert\File(
         maxSize: '5M',

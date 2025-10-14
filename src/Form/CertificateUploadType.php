@@ -2,7 +2,7 @@
 
 namespace App\Form;
 
-use App\DTO\CertificateUploadDTO;
+use App\DTO\CertificateRadSecUploadDTO;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -30,7 +30,7 @@ class CertificateUploadType extends AbstractType
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'data_class' => CertificateUploadDTO::class,
+            'data_class' => CertificateRadSecUploadDTO::class,
         ]);
     }
 }
