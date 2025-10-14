@@ -1,7 +1,6 @@
 {% extends 'dashboard/shared/settings_actions/certificatesManagement/certificates/radsecproxy/base.html.twig' %}
 
 {% block radsecproxy_content %}
-    <div data-controller="clipboard">
         {% if commands is defined and commands is not empty %}
             <div class="border border-gray-200 rounded-xl shadow-sm overflow-hidden mt-6">
                 <div class="bg-gray-50 px-6 py-4 border-b border-gray-200 flex items-center gap-2">
@@ -11,9 +10,9 @@
 
                 <div class="px-6 py-5 space-y-5 bg-white">
                     {% for cmd in commands %}
-                        <div class="space-y-2 relative">
+                        <div class="space-y-2 relative" data-controller="clipboard">
                             <p class="text-sm font-medium text-gray-700">Step {{ loop.index }}</p>
-                            <pre data-clipboard-target="code-{{ loop.index }}" class="copyable-code rounded bg-gray-800 text-white p-4 font-mono overflow-x-auto relative">{{ cmd }}</pre>
+                            <pre data-clipboard-target="code" class="copyable-code rounded bg-gray-800 text-white p-4 font-mono overflow-x-auto relative">{{ cmd }}</pre>
                             <div class="absolute top-6 right-2">
                                 <button type="button" title="Copy" aria-label="Copy code to clipboard"
                                         class="code-block-copy"
@@ -28,6 +27,5 @@
         {% else %}
             <div class="text-gray-500 text-sm italic mt-4">No renewal commands available.</div>
         {% endif %}
-    </div>
 {% endblock %}
 
