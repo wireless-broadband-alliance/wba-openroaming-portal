@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\DTO\AdminConfigDTO;
-use App\DTO\CertificateUploadDTO;
+use App\DTO\CertificateRadSecUploadDTO;
 use App\DTO\DbSetupDTO;
 use App\DTO\JwtDTO;
 use App\DTO\SettingsDTO;
@@ -86,7 +86,7 @@ class CertificateManagementController extends AbstractController
         }
 
         // Prepare DTO
-        $certificateUploadDTO = new CertificateUploadDTO();
+        $certificateUploadDTO = new CertificateRadSecUploadDTO();
 
         // Create & handle form
         $form = $this->createForm(CertificateUploadType::class, $certificateUploadDTO);
