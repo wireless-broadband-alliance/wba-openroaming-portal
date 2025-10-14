@@ -376,19 +376,21 @@ class CertificateManagementController extends AbstractController
                         'success_admin',
                         $this->translator->trans('jwtSuccessfully', [], 'controllers')
                     );
-                } else {
-                    $this->addFlash(
-                        'error_admin',
-                        $this->translator->trans('jwtFailed', [], 'controllers')
-                    );
+                    return $this->redirectToRoute('admin_dashboard_settings_certs_installation_admin');
                 }
+                $this->addFlash(
+                    'error_admin',
+                    $this->translator->trans('jwtFailed', [], 'controllers')
+                );
 
+                return $this->redirectToRoute('admin_dashboard_settings_certs_installation_jwt');
             } catch (\Exception $exception) {
 
                 $this->addFlash(
                     'error_admin',
                     $this->translator->trans('jwtFailed', [], 'controllers')
                 );
+                return $this->redirectToRoute('admin_dashboard_settings_certs_installation_jwt');
             }
         }
 

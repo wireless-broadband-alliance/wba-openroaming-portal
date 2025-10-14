@@ -23,7 +23,7 @@ use App\RadiusDb\Repository\RadiusAccountingRepository;
 use App\RadiusDb\Repository\RadiusAuthsRepository;
 use App\Repository\SettingTranslationRepository;
 use App\Repository\TextEditorRepository;
-use App\Service\CertificateService;
+use App\Service\CertificateCheckerService;
 use App\Service\Domain;
 use App\Service\EnforcePasswordResetService;
 use App\Service\EventActions;
@@ -56,7 +56,7 @@ class SettingsController extends AbstractController
         private readonly TranslatorInterface $translator,
         private readonly SettingTranslationRepository $settingTranslationRepository,
         private readonly EnforcePasswordResetService $enforcePasswordResetService,
-        private readonly CertificateService $certificateService,
+        private readonly CertificateCheckerService $certificateService,
         private readonly TextEditorRepository $textEditorRepository
     ) {
     }
@@ -922,7 +922,7 @@ class SettingsController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function settingsAuths(
         Request $request,
-        CertificateService $certificateService,
+        CertificateCheckerService $certificateService,
         string $language
     ): Response {
         $missingFiles = $this->certificateService->verifyCertificates();

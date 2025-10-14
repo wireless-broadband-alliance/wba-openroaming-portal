@@ -6,7 +6,7 @@ use Exception;
 use RuntimeException;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-readonly class CertificateService
+readonly class CertificateCheckerService
 {
     public function __construct(
         private TranslatorInterface $translator
