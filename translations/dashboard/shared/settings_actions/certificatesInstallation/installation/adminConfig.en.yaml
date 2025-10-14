@@ -1,0 +1,7 @@
+adminConfigTitle: 'Admin user configuration'
+adminConfigDescription: 'Set de admin email and password'
+emailLabel: 'Email'
+passwordLabel: 'Password'
+passwordConfirmLabel: 'Confirm password'
+saveChangesMessage: 'Do you want to save these changes?'
+databaseApplyBtn: 'Apply Changes'

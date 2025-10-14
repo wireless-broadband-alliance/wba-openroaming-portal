@@ -1,0 +1,7 @@
+adminConfigTitle: 'Configuração do administrador'
+adminConfigDescription: 'Defina o email e a palavra-passe do administrador'
+emailLabel: 'Email'
+passwordLabel: 'Palavra-passe'
+passwordConfirmLabel: 'Confirme a palavra-passe'
+saveChangesMessage: 'Deseja guardar estas alterações?'
+databaseApplyBtn: 'Aplicar Alterações'

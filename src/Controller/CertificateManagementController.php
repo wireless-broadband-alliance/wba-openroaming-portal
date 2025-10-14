@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\DTO\AdminConfigDTO;
 use App\DTO\CertificateUploadDTO;
 use App\DTO\DbSetupDTO;
 use App\DTO\JwtDTO;
@@ -13,6 +14,7 @@ use App\Enum\CertificateMachineType;
 use App\Enum\DataBaseSetupType;
 use App\Enum\FirewallType;
 use App\Enum\SettingsConfigType;
+use App\Form\AdminConfigType;
 use App\Form\CertificateUploadType;
 use App\Form\DbSetupType;
 use App\Form\JwtType;
@@ -424,9 +426,9 @@ class CertificateManagementController extends AbstractController
     ): Response {
         $data = $this->getSettings->getSettings();
 
-        $settingsDTO = new SettingsDTO();
+        $adminConfigDTO = new AdminConfigDTO();
 
-        $form = $this->createForm(SettingsType::class, $settingsDTO);
+        $form = $this->createForm(AdminConfigType::class, $adminConfigDTO);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -438,7 +440,7 @@ class CertificateManagementController extends AbstractController
             [
                 'data' => $data,
                 'form' => $form->createView(),
-                'formDTO' => $settingsDTO
+                'formDTO' => $adminConfigDTO
             ]
         );
     }

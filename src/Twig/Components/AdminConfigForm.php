@@ -42,6 +42,8 @@ final class AdminConfigForm extends AbstractController
         // Rebuild form with DTO data
         $form = $this->createForm(AdminConfigType::class, $this->adminConfigDTO);
 
+        dd($this->adminConfigDTO);
+
         // Submit the form data to trigger validation
         $form->submit([
             'email' => $this->adminConfigDTO->email,
