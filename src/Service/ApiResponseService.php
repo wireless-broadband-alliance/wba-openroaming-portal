@@ -12,6 +12,9 @@ readonly class ApiResponseService
     ) {
     }
 
+    /**
+     * @throws \JsonException
+     */
     public function getRoutesByPrefix(string $version): array
     {
         $routes = $this->router->getRouteCollection();

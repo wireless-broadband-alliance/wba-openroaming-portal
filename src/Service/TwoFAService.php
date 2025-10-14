@@ -296,10 +296,16 @@ readonly class TwoFAService
             $this->mailer->send($email);
         } elseif ($messageType === UserTwoFactorAuthenticationStatus::SMS->value || $user->getPhoneNumber()) {
             if (
-                $eventType === AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE->value ||
-                $eventType === AnalyticalEventType::LOGIN_TRADITIONAL_REQUEST->value ||
-                $eventType === AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE_RESEND->value ||
-                $eventType === AnalyticalEventType::VERIFICATION_CODE_LOGIN_RESEND->value
+                in_array(
+                    $eventType,
+                    [
+                        AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE->value,
+                        AnalyticalEventType::LOGIN_TRADITIONAL_REQUEST->value,
+                        AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE_RESEND->value,
+                        AnalyticalEventType::VERIFICATION_CODE_LOGIN_RESEND->value
+                    ],
+                    true
+                )
             ) {
                 $message = $this->translator->trans(
                     'verification_code_message',

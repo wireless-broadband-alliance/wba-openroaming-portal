@@ -66,8 +66,8 @@ class LDAPSyncCommand extends Command
                     }
 
                     $userAccountControl = $ldapUser['userAccountControl'][0];
-                    $passwordExpired = ($userAccountControl & 0x800000) == 0x800000;
-                    $userLocked = ($userAccountControl & 0x000002) == 0x000002;
+                    $passwordExpired = ($userAccountControl & 0x800000) === 0x800000;
+                    $userLocked = ($userAccountControl & 0x000002) === 0x000002;
 
                     if ($userLocked) {
                         $io->writeln('User ' . $providerId . ' is locked in LDAP, disabling');
