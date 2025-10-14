@@ -18,12 +18,7 @@
 
     <div class="my-[25px] divider"></div>
 
-    {# Live Component do formulário #}
-    <twig:AdminConfigForm :adminConfigDTO="formDTO">
-        <div {{ attributes }}>
             {{ form_start(form, {'attr': {'autocomplete': 'off'}}) }}
-
-            {{ dump(adminConfigDTO) }}
 
             <div class="grid gap-4 lg:grid-cols-2 xl:grid-cols-3 p-2 z-0">
 
@@ -50,7 +45,6 @@
                         {{ form_widget(form.email, {
                             attr: {
                                 class: 'form-widget w-full border border-gray-300 rounded-lg p-2 focus:border-indigo-500 focus:ring-indigo-500',
-                                'wire:model.debounce.500ms': 'adminConfigDTO.email'
                             }
                         }) }}
                     </div>
@@ -82,8 +76,7 @@
                     <div class="flex items-center space-x-2 mt-5">
                         {{ form_widget(form.password, {
                             attr: {
-                                class: 'form-widget w-full border border-gray-300 rounded-lg p-2 focus:border-indigo-500 focus:ring-indigo-500',
-                                'wire:model.debounce.500ms': 'adminConfigDTO.password'
+                                class: 'form-widget w-full border border-gray-300 rounded-lg p-2 focus:border-indigo-500 focus:ring-indigo-500'
                             }
                         }) }}
                     </div>
@@ -115,8 +108,7 @@
                     <div class="flex items-center space-x-2 mt-5">
                         {{ form_widget(form.confirmPassword, {
                             attr: {
-                                class: 'form-widget w-full border border-gray-300 rounded-lg p-2 focus:border-indigo-500 focus:ring-indigo-500',
-                                'wire:model.debounce.500ms': 'adminConfigDTO.confirmPassword'
+                                class: 'form-widget w-full border border-gray-300 rounded-lg p-2 focus:border-indigo-500 focus:ring-indigo-500'
                             }
                         }) }}
                     </div>
@@ -140,6 +132,4 @@
             {{ form_row(form._token) }}
 
             {{ form_end(form) }}
-        </div>
-    </twig:AdminConfigForm>
 {% endblock %}

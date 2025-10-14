@@ -3,6 +3,7 @@
 namespace App\DTO;
 
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 class AdminConfigDTO
 {
@@ -18,5 +19,17 @@ class AdminConfigDTO
     #[Assert\Length(min: 8, max: 100, minMessage: 'minCharacters', maxMessage: 'maxCharacters')]
     public ?string $confirmPassword = null;
 
+    #[Assert\Callback]
+    public function validatePassword(ExecutionContextInterface $context): void
+    {
+        if ($this->password !== $this->confirmPassword) {
+            $context->buildViolation('passwordNotMatch')
+                ->atPath('password')
+                ->addViolation();
 
+            $context->buildViolation('passwordNotMatch')
+                ->atPath('confirmPassword')
+                ->addViolation();
+        }
+    }
 }
