@@ -85,8 +85,11 @@ readonly class CertificateCommandsService
 
         // Add rebuild/restart instructions
         $commands[] = 'cd ~/openroaming-oss/hybrid';
-        $commands[] = 'docker compose build --no-cache radsecproxy';
-        $commands[] = 'docker compose up -d radsecproxy';
+        $commands[] = 'docker compose down';
+        $commands[] = 'docker images hybrid-radsecproxy -q | xargs -r docker rmi -f';
+        // Rebuild all the resolver soo the container can still be logged and checker after the execution
+        $commands[] = 'docker compose build --no-cache';
+        $commands[] = 'docker compose up -d';
         $commands[] = 'docker ps | grep radsecproxy';
         $commands[] = 'docker logs hybrid-radsecproxy-1 --tail 50';
 
