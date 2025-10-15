@@ -23,7 +23,7 @@
             'admin_dashboard_settings_terms',
             'admin_dashboard_settings_capport',
             'admin_dashboard_settings_schedule',
-            'admin_dashboard_settings_certs',
+            'admin_dashboard_settings_certs_management',
         ] %}
         {% set userAuthenticationRoutes = [
             'admin_dashboard_settings_auth',
@@ -102,7 +102,7 @@
                         </a>
                     </li>
                     <li>
-                        <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300 {% if app.request.attributes.get('_route') == 'admin_dashboard_settings_certs' %}selected{% endif %}"
+                        <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300 {% if app.request.attributes.get('_route') == 'admin_dashboard_settings_certs_management' %}selected{% endif %}"
                            href="{{ path('admin_dashboard_settings_certs_management') }}">
                             <twig:ux:icon name="wba:download" class="w-5 mr-4" fill="none"/>
                             {{ 'certsManagement'|trans({}, '_header_admin') }}
