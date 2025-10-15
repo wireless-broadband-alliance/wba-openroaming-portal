@@ -19,6 +19,7 @@ use App\Form\CertificateUploadType;
 use App\Form\DbSetupType;
 use App\Form\JwtType;
 use App\Form\SettingsType;
+use App\Form\SimpleSubmitFormType;
 use App\Service\CertificateCommandsService;
 use App\Service\CertificateProcessCheckerService;
 use App\Service\CertificateStorageService;
@@ -48,7 +49,6 @@ class CertificateManagementController extends AbstractController
 
     public function __construct(
         private readonly GetSettings $getSettings,
-        private readonly DatabaseConnectionService $databaseConnectionService,
         private readonly TranslatorInterface $translator,
         private readonly CertificateStorageService $certificateStorageService,
         private readonly CertificateProcessCheckerService $certificateProcessCheckerService,
@@ -59,9 +59,8 @@ class CertificateManagementController extends AbstractController
 
     #[Route('/dashboard/settings/certificatesManagement', name: 'admin_dashboard_settings_certs_management')]
     #[IsGranted('ROLE_ADMIN')]
-    public function settingsCertificatesManagement(
-        Request $request
-    ): Response {
+    public function settingsCertificatesManagement(): Response
+    {
         $data = $this->getSettings->getSettings();
 
         return $this->render('dashboard/shared/settings_actions.html.twig', [
@@ -118,19 +117,13 @@ class CertificateManagementController extends AbstractController
                 );
             }
 
-            // After the files are validated and the processed, update them once again to add the radsecProxyFormCompletionAt
+            // After the files are validated and the processed, update them once again to add
             $process->setRadsecproxyFormCompletedAt(new DateTimeImmutable());
             $process->setUpdatedAt(new DateTimeImmutable());
 
             $this->entityManager->persist($process);
             $this->entityManager->flush();
 
-            /* TODO'S
-                1 - Make the new entity to be related with the "Certificate" one -> done
-                   1.1 - Rework the services for the connection -> done
-                2 - return the command to execute on the radsecproxy container
-                3 - make the logic to check this process has been finished -> done check this certificateProcessCheckerService
-            */
             $this->addFlash(
                 'success_admin',
                 $this->translator->trans(
@@ -141,7 +134,6 @@ class CertificateManagementController extends AbstractController
             );
             return $this->redirectToRoute('admin_dashboard_settings_certs_radsecproxy_config');
         }
-
 
         return $this->render(
             'dashboard/shared/settings_actions/certificatesManagement/certificates/radsecproxy/upload.html.twig',
@@ -158,7 +150,7 @@ class CertificateManagementController extends AbstractController
     #[Route('/dashboard/settings/certificatesManagement/certificates/radsecproxy/config',
         name: 'admin_dashboard_settings_certs_radsecproxy_config')]
     #[IsGranted('ROLE_ADMIN')]
-    public function settingsCertificatesManagementRadsecproxyConfig(): Response
+    public function settingsCertificatesManagementRadsecproxyConfig(Request $request): Response
     {
         $data = $this->getSettings->getSettings();
 
@@ -169,30 +161,71 @@ class CertificateManagementController extends AbstractController
             return $this->redirectToRoute('admin_dashboard_settings_certs_management');
         }
 
-        // Get the ready-to-execute commands
+        // Return the commands to be executed on the resolver
         $commands = $this->certificateCommandsService->getRadsecproxyRenewCommands();
+
+        $form = $this->createForm(SimpleSubmitFormType::class);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $process = $this->certificateProcessCheckerService->getCurrentProcess();
+
+            // After the command and the user confirms he did run all the commands, update the process once again to add
+            $process->setRadsecproxyConfigAppliedAt(new DateTimeImmutable());
+            $process->setUpdatedAt(new DateTimeImmutable());
+
+            $this->entityManager->persist($process);
+            $this->entityManager->flush();
+
+            $this->addFlash(
+                'success_admin',
+                $this->translator->trans(
+                    'radsecProxyConfigAppliedSuccessfully',
+                    [],
+                    'controllers'
+                )
+            );
+            return $this->redirectToRoute('admin_dashboard_settings_certs_radsecproxy_completed');
+        }
 
         return $this->render(
             'dashboard/shared/settings_actions/certificatesManagement/certificates/radsecproxy/config.html.twig',
             [
                 'data' => $data,
+                'form' => $form->createView(),
                 'commands' => $commands,
                 'processState' => $processState,
             ]
         );
     }
 
-    #[Route('/dashboard/settings/certificatesManagement/freeradius',
-        name: 'admin_dashboard_settings_certs_freeradius'
+    #[Route('/dashboard/settings/certificatesManagement/certificates/radsecproxy/completed',
+        name: 'admin_dashboard_settings_certs_radsecproxy_completed'
     )]
     #[IsGranted('ROLE_ADMIN')]
-    public function settingsCertificatesManagementFreeradius(): Response
+    public function settingsCertificatesManagementRadsecproxyCompleted(): Response
     {
         $data = $this->getSettings->getSettings();
 
-        return $this->render('dashboard/shared/settings_actions.html.twig', [
-            'data' => $data,
-            'potato' => 'potato'
-        ]);
+        return $this->render(
+            'dashboard/shared/settings_actions/certificatesManagement/certificates/radsecproxy/completed.html.twig',
+            [
+                'data' => $data,
+            ]
+        );
     }
+
+//    #[Route('/dashboard/settings/certificatesManagement/certificates/freeradius',
+//        name: 'admin_dashboard_settings_certs_freeradius'
+//    )]
+//    #[IsGranted('ROLE_ADMIN')]
+//    public function settingsCertificatesManagementFreeradius(): Response
+//    {
+//        $data = $this->getSettings->getSettings();
+//
+//        return $this->render('dashboard/shared/settings_actions.html.twig', [
+//            'data' => $data,
+//            'potato' => 'potato'
+//        ]);
+//    }
 }
