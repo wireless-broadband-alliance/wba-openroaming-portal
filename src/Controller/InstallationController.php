@@ -12,6 +12,7 @@ use App\Form\AdminConfigType;
 use App\Form\DbSetupType;
 use App\Form\JwtType;
 use App\Form\SettingsType;
+use App\Repository\UserRepository;
 use App\Service\DatabaseConnectionService;
 use App\Service\GetSettings;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
@@ -34,6 +35,7 @@ class InstallationController extends AbstractController
         private readonly GetSettings $getSettings,
         private readonly DatabaseConnectionService $databaseConnectionService,
         private readonly TranslatorInterface $translator,
+        private readonly UserRepository $userRepository,
     ) {
     }
 
@@ -273,7 +275,8 @@ class InstallationController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-
+            // TODO: change this function when super admin features is added!!
+            $adminUser = $this->userRepository->findAdmin();
             return $this->redirectToRoute('');
         }
 
