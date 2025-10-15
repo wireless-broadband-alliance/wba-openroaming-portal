@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\InstallationProgressRepository;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: InstallationProgressRepository::class)]
@@ -49,6 +50,12 @@ class InstallationProgress
     #[ORM\Column]
     #[ORM\JoinColumn(nullable: false)]
     private ?bool $adminConfirmation = false;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $updatedAt = null;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    private ?\DateTimeInterface $createdAt = null;
 
     public function getId(): ?int
     {
@@ -193,6 +200,26 @@ class InstallationProgress
     public function setAdminConfirmation(?bool $adminConfirmation): void
     {
         $this->adminConfirmation = $adminConfirmation;
+    }
+
+    public function getUpdatedAt(): ?\DateTimeInterface
+    {
+        return $this->updatedAt;
+    }
+
+    public function setUpdatedAt(?\DateTimeInterface $updatedAt): void
+    {
+        $this->updatedAt = $updatedAt;
+    }
+
+    public function getCreatedAt(): ?\DateTimeInterface
+    {
+        return $this->createdAt;
+    }
+
+    public function setCreatedAt(?\DateTimeInterface $createdAt): void
+    {
+        $this->createdAt = $createdAt;
     }
 
 }
