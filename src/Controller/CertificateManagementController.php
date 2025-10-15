@@ -63,6 +63,21 @@ class CertificateManagementController extends AbstractController
     {
         $data = $this->getSettings->getSettings();
 
+        // Check current certificateProcess status
+        $processState = $this->certificateProcessCheckerService->getProcessState();
+
+        // Return the user to the correct step
+        if ($processState['active'] && $processState['nextRoute'] !== 'admin_dashboard_settings_certs_management') {
+            $this->addFlash('error_certs', $processState['message']);
+            return $this->redirectToRoute($processState['nextRoute']);
+        }
+
+        // In case there's not active process
+        if (!$processState['active']) {
+            $this->addFlash('error_certs', $processState['message']);
+            return $this->redirectToRoute($processState['nextRoute']);
+        }
+
         return $this->render('dashboard/shared/settings_actions.html.twig', [
             'data' => $data,
         ]);
@@ -71,7 +86,7 @@ class CertificateManagementController extends AbstractController
     #[Route('/dashboard/settings/certificatesManagement/radsecproxy/upload',
         name: 'admin_dashboard_settings_certs_radsecproxy_upload')]
     #[IsGranted('ROLE_ADMIN')]
-    public function settingsCertificatesManagementRadsecproxy(
+    public function settingsCertificatesManagementRadsecproxyUpload(
         Request $request
     ): Response {
         $data = $this->getSettings->getSettings();
@@ -81,6 +96,7 @@ class CertificateManagementController extends AbstractController
 
         // Return the user to the correct step
         if ($processState['active'] && $processState['nextRoute'] !== 'admin_dashboard_settings_certs_radsecproxy_upload') {
+            $this->addFlash('error_certs', $processState['message']);
             return $this->redirectToRoute($processState['nextRoute']);
         }
 
@@ -159,6 +175,13 @@ class CertificateManagementController extends AbstractController
 
         // Return the user to the correct step
         if ($processState['active'] && $processState['nextRoute'] !== 'admin_dashboard_settings_certs_radsecproxy_config') {
+            $this->addFlash('error_certs', $processState['message']);
+            return $this->redirectToRoute($processState['nextRoute']);
+        }
+
+        // In case there's not active process
+        if (!$processState['active']) {
+            $this->addFlash('error_certs', $processState['message']);
             return $this->redirectToRoute($processState['nextRoute']);
         }
 
@@ -213,6 +236,13 @@ class CertificateManagementController extends AbstractController
 
         // Return the user to the correct step
         if ($processState['active'] && $processState['nextRoute'] !== 'admin_dashboard_settings_certs_radsecproxy_completed') {
+            $this->addFlash('error_certs', $processState['message']);
+            return $this->redirectToRoute($processState['nextRoute']);
+        }
+
+        // In case there's not active process
+        if (!$processState['active']) {
+            $this->addFlash('error_certs', $processState['message']);
             return $this->redirectToRoute($processState['nextRoute']);
         }
 

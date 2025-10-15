@@ -1,0 +1,5 @@
+radsecproxy:
+    upload_pending: "Awaiting RadSecProxy certificate upload."
+    config_pending: "RadSecProxy upload process still active. Please follow the setups to configure your resolver."
+    completed_pending: "RadSecProxy configuration is done. Proceed to follow the next page for more details."
+    no_active_process: "No current process active."

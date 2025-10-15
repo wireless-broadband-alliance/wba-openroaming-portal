@@ -5,11 +5,13 @@ namespace App\Service;
 use App\Entity\CertificateSetupProcess;
 use App\Enum\CertificateProcessStatus;
 use App\Repository\CertificateSetupProcessRepository;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 readonly class CertificateProcessCheckerService
 {
     public function __construct(
         private CertificateSetupProcessRepository $certificateSetupProcessRepository,
+        private TranslatorInterface $translator,
     ) {
     }
 
@@ -43,7 +45,7 @@ readonly class CertificateProcessCheckerService
             return [
                 'active' => true,
                 'stage' => 'radsecproxy_upload',
-                'message' => 'Awaiting RadSecProxy certificate upload.',
+                'message' => $this->translator->trans('radsecproxy.upload_pending', [], 'certificateProcessCheckerService'),
                 'nextRoute' => 'admin_dashboard_settings_certs_radsecproxy_upload',
                 'process' => $process,
             ];
@@ -55,7 +57,7 @@ readonly class CertificateProcessCheckerService
             return [
                 'active' => true,
                 'stage' => 'radsecproxy_config',
-                'message' => 'RadSecProxy upload done. Proceed to follow the setups to configure your resolver.',
+                'message' => 'RadSecProxy upload process still active. Please follow the setups to configure your resolver.',
                 'nextRoute' => 'admin_dashboard_settings_certs_radsecproxy_config',
                 'process' => $process,
             ];
