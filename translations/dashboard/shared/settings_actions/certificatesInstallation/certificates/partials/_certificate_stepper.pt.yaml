@@ -2,9 +2,9 @@ step:
     radsecproxy_upload:
         title: "Carregar certificados RadSecProxy"
         description: "Carregue os seus certificados RadSecProxy para iniciar o processo."
-    radsecproxy_config_commands:
+    radsecproxy_config:
         title: "Aplicar configuração RadSecProxy"
         description: "Execute os comandos gerados para configurar o seu resolver."
-    completed:
+    radsecproxy_completed:
         title: "Processo concluído"
         description: "A configuração dos certificados foi concluída com sucesso."

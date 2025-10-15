@@ -2,9 +2,9 @@ step:
     radsecproxy_upload:
         title: "Upload RadSecProxy Certs"
         description: "Upload your RadSecProxy certificates to start the process."
-    radsecproxy_config_commands:
+    radsecproxy_config:
         title: "Apply RadSecProxy Config"
         description: "Run the generated commands to configure your resolver."
-    completed:
+    radsecproxy_completed:
         title: "Process Completed"
         description: "Certificate setup finished successfully."
