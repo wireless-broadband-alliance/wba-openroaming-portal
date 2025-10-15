@@ -60,4 +60,12 @@
             </div>
         {% endfor %}
     </div>
+
+    {# Abort button #}
+    <div class="mt-6 text-right">
+        <a href="{{ path('admin_dashboard_settings_certs_management_abort') }}"
+           class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition duration-300">
+            {{ 'abort'|trans({}, '_certificate_stepper') }}
+        </a>
+    </div>
 </div>

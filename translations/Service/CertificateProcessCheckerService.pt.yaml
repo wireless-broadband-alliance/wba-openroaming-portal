@@ -1,5 +1,6 @@
 radsecproxy:
-    upload_pending: "Aguardando o carregamento do certificado RadSecProxy."
-    config_pending: "O processo de carregamento do RadSecProxy ainda está ativo. Por favor, siga as instruções para configurar o seu resolver."
-    completed_pending: "A configuração do RadSecProxy está concluída. Prossiga para a próxima página para mais detalhes."
-    no_active_process: "Não existe nenhum processo ativo no momento."
+    upload: 'Aguardando o carregamento do certificado RadSecProxy.'
+    config: 'O processo de carregamento do RadSecProxy ainda está ativo. Por favor, siga as instruções para configurar o seu resolver.'
+    completed: 'A configuração do RadSecProxy está concluída. Prossiga para a próxima página para mais detalhes.'
+
+noActiveProcess: 'Nenhum processo ativo no momento.'

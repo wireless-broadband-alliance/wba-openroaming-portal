@@ -11,6 +11,7 @@ use App\DTO\JwtDTO;
 use App\DTO\SettingsDTO;
 use App\Enum\CertificateFileName;
 use App\Enum\CertificateMachineType;
+use App\Enum\CertificateProcessStatus;
 use App\Enum\DataBaseSetupType;
 use App\Enum\FirewallType;
 use App\Enum\SettingsConfigType;
@@ -73,14 +74,42 @@ class CertificateManagementController extends AbstractController
         }
 
         // In case there's not active process
-        if (!$processState['active']) {
-            $this->addFlash('error_certs', $processState['message']);
-            return $this->redirectToRoute($processState['nextRoute']);
+        if (!$processState['active'] && !$processState['nextRoute'] == 'admin_dashboard_settings_certs_management') {
+            return $this->render('dashboard/shared/settings_actions.html.twig', [
+                'data' => $data,
+                'message' => $processState['message'],
+            ]);
         }
 
         return $this->render('dashboard/shared/settings_actions.html.twig', [
             'data' => $data,
         ]);
+    }
+
+    #[Route('/dashboard/settings/certificatesManagement/abort', name: 'admin_dashboard_settings_certs_management_abort')]
+    #[IsGranted('ROLE_ADMIN')]
+    public function settingsCertificatesManagementAbort(): Response
+    {
+        $process = $this->certificateProcessCheckerService->getCurrentProcess();
+
+        // Cancel the process and add a tag IN_COMPLETED
+        // When a process is incompleted the page should ALERT the user always about this miss configured action
+        $process->setStatus(CertificateProcessStatus::ABORTED);
+        $process->setUpdatedAt(new DateTimeImmutable());
+
+        $this->entityManager->persist($process);
+        $this->entityManager->flush();
+
+        $this->addFlash(
+            'success_admin',
+            $this->translator->trans(
+                'radsecProxyCertUploadedSuccessfully',
+                [],
+                'controllers'
+            )
+        );
+
+        return $this->redirectToRoute('admin_dashboard_settings_certs_management');
     }
 
     #[Route('/dashboard/settings/certificatesManagement/radsecproxy/upload',

@@ -20,9 +20,7 @@ readonly class CertificateProcessCheckerService
      */
     public function getCurrentProcess(): ?CertificateSetupProcess
     {
-        return $this->certificateSetupProcessRepository->findOneBy([
-            'status' => CertificateProcessStatus::IN_PROGRESS
-        ]);
+        return $this->certificateSetupProcessRepository->getLatestProcess();
     }
 
     /**
@@ -32,9 +30,11 @@ readonly class CertificateProcessCheckerService
     {
         $process = $this->getCurrentProcess();
 
+        // Check if the process active
         if (!$process) {
             return [
                 'active' => false,
+                'message' => $this->translator->trans('noActiveProcess', [], 'CertificateProcessCheckerService'),
                 'nextRoute' => 'admin_dashboard_settings_certs_management',
             ];
         }
@@ -45,7 +45,7 @@ readonly class CertificateProcessCheckerService
             return [
                 'active' => true,
                 'stage' => 'radsecproxy_upload',
-                'message' => $this->translator->trans('radsecproxy.upload_pending', [], 'certificateProcessCheckerService'),
+                'message' => $this->translator->trans('radsecproxy.upload', [], 'CertificateProcessCheckerService'),
                 'nextRoute' => 'admin_dashboard_settings_certs_radsecproxy_upload',
                 'process' => $process,
             ];
@@ -57,7 +57,7 @@ readonly class CertificateProcessCheckerService
             return [
                 'active' => true,
                 'stage' => 'radsecproxy_config',
-                'message' => 'RadSecProxy upload process still active. Please follow the setups to configure your resolver.',
+                'message' => $this->translator->trans('radsecproxy.config', [], 'CertificateProcessCheckerService'),
                 'nextRoute' => 'admin_dashboard_settings_certs_radsecproxy_config',
                 'process' => $process,
             ];
@@ -70,7 +70,7 @@ readonly class CertificateProcessCheckerService
             return [
                 'active' => true,
                 'stage' => 'radsecproxy_completed',
-                'message' => 'RadSecProxy configuration is done. Proceed to follow the next page for more details.',
+                'message' => $this->translator->trans('radsecproxy.completed', [], 'CertificateProcessCheckerService'),
                 'nextRoute' => 'admin_dashboard_settings_certs_radsecproxy_completed',
                 'process' => $process,
             ];
@@ -80,7 +80,7 @@ readonly class CertificateProcessCheckerService
         return [
             'active' => false,
             'stage' => 'completed',
-            'message' => 'No current process active.',
+            'message' => $this->translator->trans('noActiveProcess', [], 'CertificateProcessCheckerService'),
             'nextRoute' => 'admin_dashboard_settings_certs_management',
             'process' => $process,
         ];

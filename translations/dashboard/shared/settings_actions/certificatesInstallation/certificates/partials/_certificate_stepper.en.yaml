@@ -1,10 +1,12 @@
 step:
     radsecproxy_upload:
-        title: "Upload RadSecProxy Certs"
-        description: "Upload your RadSecProxy certificates to start the process."
+        title: 'Upload RadSecProxy Certs'
+        description: 'Upload your RadSecProxy certificates to start the process.'
     radsecproxy_config:
-        title: "Apply RadSecProxy Config"
-        description: "Run the generated commands to configure your resolver."
+        title: 'Apply RadSecProxy Config'
+        description: 'Run the generated commands to configure your resolver.'
     radsecproxy_completed:
-        title: "Process Completed"
-        description: "Certificate setup finished successfully."
+        title: 'Process Completed'
+        description: 'Certificate setup finished successfully.'
+
+abort: 'Abort Process'

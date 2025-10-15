@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\CertificateSetupProcess;
+use App\Enum\CertificateProcessStatus;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -14,6 +15,23 @@ class CertificateSetupProcessRepository extends ServiceEntityRepository
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, CertificateSetupProcess::class);
+    }
+
+    /**
+     * Get the latest process that is either in progress or aborted.
+     */
+    public function getLatestProcess(): ?CertificateSetupProcess
+    {
+        return $this->createQueryBuilder('p')
+            ->where('p.status IN (:statuses)')
+            ->setParameter('statuses', [
+                CertificateProcessStatus::IN_PROGRESS,
+                CertificateProcessStatus::ABORTED,
+            ])
+            ->orderBy('p.updatedAt', 'DESC')
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
     }
 
     //    /**
