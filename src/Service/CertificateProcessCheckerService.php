@@ -52,7 +52,7 @@ readonly class CertificateProcessCheckerService
         // 2 - User just uploaded the certs and config it's not finished
         if ($process->getRadsecproxyFormCompletedAt() !== null &&
             $process->getRadsecproxyConfigAppliedAt() === null &&
-            $process->getFreeradiusCompletedAt() === null) {
+            $process->getFreeradiusFormCompletedAt() === null) {
             return [
                 'active' => true,
                 'stage' => 'radsecproxy_config_commands',
@@ -62,7 +62,20 @@ readonly class CertificateProcessCheckerService
             ];
         }
 
-        // 3 - There's no current active process on the server to validate at this point
+        // 3 - User applied the new configuration on the resolver
+        if ($process->getRadsecproxyFormCompletedAt() !== null &&
+            $process->getRadsecproxyConfigAppliedAt() !== null &&
+            $process->getFreeradiusFormCompletedAt() === null) {
+            return [
+                'active' => true,
+                'stage' => 'radsecproxy_complted',
+                'message' => 'RadSecProxy configuration is done. Proceed to follow the next page for more details.',
+                'nextRoute' => 'admin_dashboard_settings_certs_radsecproxy_completed',
+                'process' => $process,
+            ];
+        }
+
+        // 4 - There's no current active process on the server to validate at this point
         return [
             'active' => false,
             'stage' => 'completed',

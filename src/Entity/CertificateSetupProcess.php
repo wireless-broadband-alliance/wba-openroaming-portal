@@ -27,7 +27,7 @@ class CertificateSetupProcess
     private ?\DateTimeImmutable $radsecproxyConfigAppliedAt = null;
 
     #[ORM\Column(nullable: true)]
-    private ?\DateTimeImmutable $freeradiusCompletedAt = null;
+    private ?\DateTimeImmutable $freeradiusFormCompletedAt = null;
 
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $freeradiusConfigAppliedAt = null;
@@ -90,14 +90,14 @@ class CertificateSetupProcess
         return $this;
     }
 
-    public function getFreeradiusCompletedAt(): ?\DateTimeImmutable
+    public function getFreeradiusFormCompletedAt(): ?\DateTimeImmutable
     {
-        return $this->freeradiusCompletedAt;
+        return $this->freeradiusFormCompletedAt;
     }
 
-    public function setFreeradiusCompletedAt(?\DateTimeImmutable $freeradiusCompletedAt): static
+    public function setFreeradiusFormCompletedAt(?\DateTimeImmutable $freeradiusFormCompletedAt): static
     {
-        $this->freeradiusCompletedAt = $freeradiusCompletedAt;
+        $this->freeradiusFormCompletedAt = $freeradiusFormCompletedAt;
 
         return $this;
     }

@@ -1,2 +1,4 @@
 configTitle: 'Renewal Steps'
 step: 'Step'
+submit: 'Confirm configuration'
+confirm_follow_steps: 'Are you sure you followed all the required steps?'
