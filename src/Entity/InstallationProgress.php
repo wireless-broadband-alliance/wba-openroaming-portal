@@ -47,6 +47,9 @@ class InstallationProgress
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $passwordAdmin = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $confirmCodeAdmin = null;
+
     #[ORM\Column]
     #[ORM\JoinColumn(nullable: false)]
     private ?bool $adminConfirmation = false;
@@ -190,6 +193,16 @@ class InstallationProgress
         $this->passwordAdmin = $passwordAdmin;
 
         return $this;
+    }
+
+    public function getConfirmCodeAdmin(): ?string
+    {
+        return $this->confirmCodeAdmin;
+    }
+
+    public function setConfirmCodeAdmin(?string $confirmCodeAdmin): void
+    {
+        $this->confirmCodeAdmin = $confirmCodeAdmin;
     }
 
     public function getAdminConfirmation(): ?bool

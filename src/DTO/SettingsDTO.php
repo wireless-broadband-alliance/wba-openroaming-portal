@@ -16,5 +16,8 @@ class SettingsDTO
     #[Assert\NotBlank(message: 'fieldNotBlank')]
     public ?string $turnstileSecret = null;
 
+    public ?bool $jwtPassphraseEnable = false;
+
+    public ?string $jwtPassphrase = null;
 
 }

@@ -124,6 +124,65 @@
                     </div>
                 </div>
 
+                {# --- JWT Passphrase Enable Card (Toggle Switch) --- #}
+                <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full">
+                    <div class="flex flex-row justify-between">
+                        <div class="text-base font-medium text-center break-normal md:break-all">
+                            <h1 class="text-base md:text-lg whitespace-nowrap">
+                                {{ 'jwtPassphraseEnableLabel'|trans({}, 'jwt') }}
+                            </h1>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center space-x-2 mt-5">
+                        <label class="inline-flex items-center cursor-pointer">
+                            {{ form_widget(form.jwtPassphraseEnable, {
+                                attr: {
+                                    class: 'sr-only peer',
+                                    'wire:model.debounce.500ms': 'settingsDTO.jwtPassphraseEnable'
+                                }
+                            }) }}
+                            <div class="w-11 h-6 bg-gray-200 rounded-full peer-checked:bg-green-500 peer-focus:ring-4 peer-focus:ring-green-300 transition-colors relative">
+                                <span class="absolute top-[2px] left-[2px] h-5 w-5 bg-white rounded-full border border-gray-300 transition-transform peer-checked:translate-x-5"></span>
+                            </div>
+                        </label>
+                    </div>
+
+                    <div class="mt-2 text-center text-red-500 text-base">
+                        {{ form_errors(form.jwtPassphraseEnable) }}
+                    </div>
+                </div>
+
+                {# --- JWT Passphrase Card (aparece só se Enable estiver marcado) --- #}
+                {% if form.jwtPassphraseEnable.vars.data %}
+                    <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full">
+                        <div class="flex flex-row justify-between">
+                            <div class="text-base font-medium text-center break-normal md:break-all">
+                                <h1 class="text-base md:text-lg whitespace-nowrap">
+                                    {{ 'jwtPassphraseLabel'|trans({}, 'jwt') }}
+                                </h1>
+                            </div>
+                        </div>
+
+                        {{ include('/dashboard/shared/settings_actions/_description.html.twig', {
+                            description: ''|trans({}, 'jwt')
+                        }) }}
+
+                        <div class="flex items-center space-x-2 mt-5">
+                            {{ form_widget(form.jwtPassphrase, {
+                                attr: {
+                                    class: 'form-widget w-full border border-gray-300 rounded-lg p-2 focus:border-indigo-500 focus:ring-indigo-500',
+                                    'wire:model.debounce.500ms': 'settingsDTO.jwtPassphrase'
+                                }
+                            }) }}
+                        </div>
+
+                        <div class="mt-2 text-center text-red-500 text-base">
+                            {{ form_errors(form.jwtPassphrase) }}
+                        </div>
+                    </div>
+                {% endif %}
+
 
             </div>
 
@@ -135,7 +194,8 @@
                 </button>
             </div>
 
-            {{ form_end(form) }}
+            {{ form_row(form._token) }}
+            {{ form_end(form, {'render_rest': false}) }}
         </div>
     </twig:SettingsForm>
 {% endblock %}

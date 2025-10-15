@@ -48,6 +48,8 @@ class SettingsForm extends AbstractController
             'trustedProxies' => $this->settingsDTO->trustedProxies,
             'turnstileKey' => $this->settingsDTO->turnstileKey,
             'turnstileSecret' => $this->settingsDTO->turnstileSecret,
+            'jwtPassphraseEnable' => $this->settingsDTO->jwtPassphraseEnable,
+            'jwtPassphrase' => $this->settingsDTO->jwtPassphrase,
         ], false);
 
         $this->form = $form;
