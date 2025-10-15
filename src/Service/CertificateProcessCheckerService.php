@@ -31,7 +31,7 @@ readonly class CertificateProcessCheckerService
         $process = $this->getCurrentProcess();
 
         // Check if the process active
-        if (!$process) {
+        if (!$process || $process->getStatus() === CertificateProcessStatus::ABORTED) {
             return [
                 'active' => false,
                 'message' => $this->translator->trans('noActiveProcess', [], 'CertificateProcessCheckerService'),

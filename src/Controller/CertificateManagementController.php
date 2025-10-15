@@ -92,6 +92,15 @@ class CertificateManagementController extends AbstractController
     {
         $process = $this->certificateProcessCheckerService->getCurrentProcess();
 
+        // In case there's not active process
+        if (!$process) {
+            $this->addFlash(
+                'error_certs',
+                $this->translator->trans('noActiveProcess', [], 'CertificateProcessCheckerService')
+            );
+            return $this->redirectToRoute('admin_dashboard_settings_certs_management');
+        }
+
         // Cancel the process and add a tag IN_COMPLETED
         // When a process is incompleted the page should ALERT the user always about this miss configured action
         $process->setStatus(CertificateProcessStatus::ABORTED);
@@ -101,9 +110,9 @@ class CertificateManagementController extends AbstractController
         $this->entityManager->flush();
 
         $this->addFlash(
-            'success_admin',
+            'error_certs',
             $this->translator->trans(
-                'radsecProxyCertUploadedSuccessfully',
+                'certificateProcessAborted',
                 [],
                 'controllers'
             )
