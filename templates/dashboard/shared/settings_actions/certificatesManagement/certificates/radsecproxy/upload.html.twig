@@ -2,13 +2,17 @@
 
 {% block radsecproxy_content %}
     <div class="cert-upload-card">
-        <h3 class="cert-upload-header">Upload your PEM files</h3>
+        <h3 class="cert-upload-header">
+            {{ 'title'|trans({}, 'upload') }}
+        </h3>
 
         {{ form_start(form, { 'attr': {'enctype': 'multipart/form-data'} }) }}
 
         <div class="cert-upload-group space-y-2 mb-4">
-            <p class="text-lg font-medium text-gray-700">Upload a valid "client.pem"</p>
-            {{ form_label(form.client, 'Client Certificate (.pem)') }}
+            <p class="text-lg font-medium text-gray-700">
+                {{ 'client.description'|trans({}, 'upload') }}
+            </p>
+            {{ form_label(form.client, 'client.label'|trans({}, 'upload')) }}
             {{ form_widget(form.client, {'attr': {'class': 'border rounded-lg p-2 w-full'}}) }}
             <div class="text-red-500 text-sm ml-1">
                 {{ form_errors(form.client) }}
@@ -16,17 +20,21 @@
         </div>
 
         <div class="cert-upload-group space-y-2 mb-4">
-            <p class="text-lg font-medium text-gray-700">Upload a valid "key.pem"</p>
-            {{ form_label(form.key, 'Private Key (.pem)') }}
+            <p class="text-lg font-medium text-gray-700">
+                {{ 'key.description'|trans({}, 'upload') }}
+            </p>
+            {{ form_label(form.key, 'key.label'|trans({}, 'upload')) }}
             {{ form_widget(form.key, {'attr': {'class': 'border rounded-lg p-2 w-full'}}) }}
             <div class="text-red-500 text-sm ml-1">
                 {{ form_errors(form.key) }}
             </div>
         </div>
 
-        <button class="cert-upload-btn text-white px-6 py-2 rounded-lg shadow-sm transition">
-            Upload Certificates
-        </button>
+        <div class="flex justify-end mt-4">
+            <button class="cert-upload-btn text-white px-6 py-2 rounded-lg shadow-sm transition">
+                {{ 'submit'|trans({}, 'upload') }}
+            </button>
+        </div>
 
         {{ form_end(form) }}
     </div>

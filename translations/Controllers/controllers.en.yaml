@@ -134,6 +134,6 @@ passwordNotSentSMS: 'We were unable to send the new password to your phone numbe
 connectionFailed: 'Database connection failed: %dbConnections%'
 radsecProxyCertUploadedSuccessfully: 'RadSecProxy certificates uploaded successfully!'
 radsecProxyConfigAppliedSuccessfully: 'RadSecProxy configuration completed!'
-certificateProcessAborted: 'This process was aborted successfully. Please dont forget to re-configure the certificate again correctly!'
+certificateProcessAborted: "This process was aborted successfully. Please don't forget to re-configure all the process once again correctly!"
 jwtSuccessfully: 'JWT key pair generated successfully'
 jwtFailed: 'Failed to generate JWT key pair'

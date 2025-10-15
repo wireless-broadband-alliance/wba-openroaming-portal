@@ -10,3 +10,4 @@ step:
         description: 'Certificate setup finished successfully.'
 
 abort: 'Abort Process'
+confirm_abort: 'Are you sure you want to abort the current certificate setup process?'

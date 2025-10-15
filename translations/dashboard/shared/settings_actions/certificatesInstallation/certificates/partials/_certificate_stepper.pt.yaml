@@ -10,3 +10,4 @@ step:
         description: 'A configuração dos certificados foi concluída com sucesso.'
 
 abort: 'Abortar Processo'
+confirm_abort: 'Tem a certeza que deseja cancelar o processo de configuração de certificados?'
