@@ -6,15 +6,21 @@ use App\DTO\AdminConfigDTO;
 use App\DTO\DbSetupDTO;
 use App\DTO\JwtDTO;
 use App\DTO\SettingsDTO;
+use App\Entity\InstallationProgress;
 use App\Enum\DataBaseSetupType;
+use App\Enum\InstallationProgressType;
+use App\Enum\InstallationStep;
 use App\Enum\SettingsConfigType;
 use App\Form\AdminConfigType;
 use App\Form\DbSetupType;
 use App\Form\JwtType;
 use App\Form\SettingsType;
+use App\Repository\InstallationProgressRepository;
 use App\Repository\UserRepository;
 use App\Service\DatabaseConnectionService;
 use App\Service\GetSettings;
+use App\Service\InstallationService;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Console\Input\ArrayInput;
@@ -36,6 +42,9 @@ class InstallationController extends AbstractController
         private readonly DatabaseConnectionService $databaseConnectionService,
         private readonly TranslatorInterface $translator,
         private readonly UserRepository $userRepository,
+        private readonly InstallationProgressRepository $installationProgressRepository,
+        private readonly InstallationService $installationService,
+        private readonly EntityManagerInterface $entityManager,
     ) {
     }
 
@@ -44,6 +53,21 @@ class InstallationController extends AbstractController
     public function settingsCertificatesManagementInstallation(
         Request $request
     ): Response {
+
+        $lastInstallation = $this->installationService->lastInstallation();
+        if ($lastInstallation instanceof InstallationProgress) {
+            $step = $this->installationService->getStep($lastInstallation);
+            if ($step === InstallationStep::SETTINGS->value) {
+                return $this->redirectToRoute('admin_dashboard_settings_certs_installation_settings');
+            }
+            if ($step === InstallationStep::JWT->value) {
+                return $this->redirectToRoute('admin_dashboard_settings_certs_installation_jwt');
+            }
+            if ($step === InstallationStep::ADMIN->value) {
+                return $this->redirectToRoute('admin_dashboard_settings_certs_installation_admin');
+            }
+        }
+
         $data = $this->getSettings->getSettings();
 
         $dbDTO = new DbSetupDTO();
@@ -79,6 +103,26 @@ class InstallationController extends AbstractController
                 return $this->redirectToRoute('admin_dashboard_settings_certs_installation');
             }
 
+            if ($lastInstallation instanceof InstallationProgress) {
+                $lastInstallation->setUpdatedAt(new \DateTime());
+                $lastInstallation->setDbOpenRoaming($openRoamingDb);
+                $lastInstallation->setDbFreeradius($freeradiusDb);
+                $lastInstallation->setInstallationState(InstallationProgressType::IN_PROGRESS->value);
+                $this->entityManager->persist($lastInstallation);
+                $this->entityManager->flush();
+            } else {
+                $installation = new InstallationProgress();
+                $installation->setCreatedAt(new \DateTime());
+                $installation->setUpdatedAt(new \DateTime());
+                $installation->setDbOpenRoaming($openRoamingDb);
+                $installation->setDbFreeradius($freeradiusDb);
+                $installation->setInstallationState(InstallationProgressType::IN_PROGRESS->value);
+                $this->entityManager->persist($installation);
+                $this->entityManager->flush();
+            }
+
+            /*
+
             $this->databaseConnectionService->writeDatabaseUrlToEnv(
                 $openRoamingDb,
                 DataBaseSetupType::DATABASE_URL->value
@@ -86,7 +130,7 @@ class InstallationController extends AbstractController
             $this->databaseConnectionService->writeDatabaseUrlToEnv(
                 $freeradiusDb,
                 DataBaseSetupType::DATABASE_FREERADIUS_URL->value
-            );
+            );*/
 
             return $this->redirectToRoute('admin_dashboard_settings_certs_installation_settings');
         }
