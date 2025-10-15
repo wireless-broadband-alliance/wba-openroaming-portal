@@ -1,31 +1,31 @@
 {% extends 'dashboard/shared/settings_actions/certificatesManagement/certificates/radsecproxy/base.html.twig' %}
 
 {% block radsecproxy_content %}
-        {% if commands is defined and commands is not empty %}
-            <div class="border border-gray-200 rounded-xl shadow-sm overflow-hidden mt-6">
-                <div class="bg-gray-50 px-6 py-4 border-b border-gray-200 flex items-center gap-2">
-                    <twig:ux:icon class="w-5 h-5 text-primary" name="wba:terminal"/>
-                    <h5 class="text-lg font-semibold text-gray-800">Manual Renewal Steps</h5>
-                </div>
-
-                <div class="px-6 py-5 space-y-5 bg-white">
-                    {% for cmd in commands %}
-                        <div class="space-y-2 relative" data-controller="clipboard">
-                            <p class="text-sm font-medium text-gray-700">Step {{ loop.index }}</p>
-                            <pre data-clipboard-target="code" class="copyable-code rounded bg-gray-800 text-white p-4 font-mono overflow-x-auto relative">{{ cmd }}</pre>
-                            <div class="absolute top-6 right-2">
-                                <button type="button" title="Copy" aria-label="Copy code to clipboard"
-                                        class="code-block-copy"
-                                        data-action="click->clipboard#copyToClipboard">
-                                    <twig:ux:icon class="w-5 h-5" name="wba:copy"/>
-                                </button>
-                            </div>
-                        </div>
-                    {% endfor %}
-                </div>
+    {% if commands is defined and commands is not empty %}
+        <div class="border border-gray-200 rounded-xl shadow-sm overflow-hidden mt-6">
+            <div class="bg-gray-50 px-6 py-4 border-b border-gray-200 flex items-center gap-2">
+                <twig:ux:icon class="w-5 h-5 text-primary" name="wba:terminal"/>
+                <h5 class="text-lg font-semibold text-gray-800">{{ 'configTitle'|trans({}, 'config') }}</h5>
             </div>
-        {% else %}
-            <div class="text-gray-500 text-sm italic mt-4">No renewal commands available.</div>
-        {% endif %}
+            <div class="px-6 py-5 space-y-5 bg-white">
+                {% for step in commands %}
+                    <div class="space-y-2 relative" data-controller="clipboard">
+                        <p class="text-sm font-medium text-gray-700">
+                            {{ 'step'|trans({}, 'config') }} {{ loop.index }} – {{ step.description }}
+                        </p>
+                        <div class="absolute top-5 right-2">
+                            <button type="button" title="Copy" aria-label="Copy code to clipboard"
+                                    class="code-block-copy"
+                                    data-action="click->clipboard#copyToClipboard">
+                                <twig:ux:icon class="w-5 h-5" name="wba:copy"/>
+                            </button>
+                        </div>
+                        <pre data-clipboard-target="code"
+                             class="copyable-code rounded bg-gray-800 text-white p-4 font-mono overflow-x-auto relative">{{ step.command }}</pre>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
 {% endblock %}
 

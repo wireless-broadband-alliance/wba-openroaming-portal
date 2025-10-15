@@ -7,30 +7,39 @@ use App\Enum\CertificateMachineType;
 use App\Enum\CertificateProcessStatus;
 use App\Repository\CertificateSetupProcessRepository;
 use Symfony\Component\HttpKernel\KernelInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 readonly class CertificateCommandsService
 {
     public function __construct(
         private CertificateSetupProcessRepository $certificateSetupProcessRepository,
         private KernelInterface $kernel,
-    ) {}
+        private TranslatorInterface $translator,
+    ) {
+    }
 
     /**
      * Return shell commands to update local RADSecProxy certificates.
      */
     public function getRadsecproxyRenewCommands(): array
     {
-        // Get the latest in-progress certificate process
         $process = $this->certificateSetupProcessRepository->findOneBy(
             ['status' => CertificateProcessStatus::IN_PROGRESS->value],
             ['createdAt' => 'DESC']
         );
 
         if (!$process instanceof CertificateSetupProcess) {
-            return ['# No active certificate process found.'];
+            return [
+                [
+                    'description' => $this->translator->trans(
+                        'no_active_process',
+                        domain: 'CertificateCommandsService'
+                    ),
+                    'command' => '# No action required.',
+                ]
+            ];
         }
 
-        // Filter RADSecProxy certificates
         $certificates = $process->getCertificates()->filter(
             fn($cert) => $cert->getType() === CertificateMachineType::RADSECPROXY->value
         );
@@ -38,20 +47,19 @@ readonly class CertificateCommandsService
         return $this->generateRadsecproxyCertCommands($certificates);
     }
 
-    /**
-     * Generate shell commands to overwrite cert files in the local target directory.
-     */
     private function generateRadsecproxyCertCommands(iterable $certificates): array
     {
         $targetPath = '~/openroaming-oss/hybrid/configs/radsecproxy/certs/';
         $localBasePath = $this->kernel->getProjectDir() . '/var/certs/';
-
         $commands = [];
 
         // Remove old files
-        $commands[] = sprintf('rm -f %sclient.pem %skey.pem', $targetPath, $targetPath);
+        $commands[] = [
+            'description' => $this->translator->trans('remove_old_files', domain: 'CertificateCommandsService'),
+            'command' => sprintf('rm -f %sclient.pem %skey.pem', $targetPath, $targetPath),
+        ];
 
-        // Write each certificate
+        // Write certificates
         foreach ($certificates as $cert) {
             $originalFile = $cert->getFilePath();
             if (!$originalFile) {
@@ -68,30 +76,50 @@ readonly class CertificateCommandsService
                 continue;
             }
 
-            // Escape single quotes for heredoc
             $content = str_replace("'", "'\"'\"'", $content);
-
-            // Determine target file
             $targetFile = str_contains(strtolower($originalFile), 'client') ? 'client.pem' : 'key.pem';
 
-            // Create echo (heredoc-style) command
-            $commands[] = sprintf(
-                "cat > %s%s << 'EOF'\n%s\nEOF",
-                $targetPath,
-                $targetFile,
-                $content
-            );
+            $commands[] = [
+                'description' => $this->translator->trans(
+                    'write_cert_file',
+                    ['%filename%' => $targetFile],
+                    'CertificateCommandsService'
+                ),
+                'command' => sprintf("cat > %s%s << 'EOF'\n%s\nEOF", $targetPath, $targetFile, $content),
+            ];
         }
 
-        // Add rebuild/restart instructions
-        $commands[] = 'cd ~/openroaming-oss/hybrid';
-        $commands[] = 'docker compose down';
-        $commands[] = 'docker images hybrid-radsecproxy -q | xargs -r docker rmi -f';
-        // Rebuild all the resolver soo the container can still be logged and checker after the execution
-        $commands[] = 'docker compose build --no-cache';
-        $commands[] = 'docker compose up -d';
-        $commands[] = 'docker ps | grep radsecproxy';
-        $commands[] = 'docker logs hybrid-radsecproxy-1 --tail 50';
+        // Docker rebuild/restart
+        $commands = array_merge($commands, [
+            [
+                'description' => $this->translator->trans('navigate_to_dir', domain: 'CertificateCommandsService'),
+                'command' => 'cd ~/openroaming-oss/hybrid',
+            ],
+            [
+                'description' => $this->translator->trans('stop_containers', domain: 'CertificateCommandsService'),
+                'command' => 'docker compose down',
+            ],
+            [
+                'description' => $this->translator->trans('remove_old_images', domain: 'CertificateCommandsService'),
+                'command' => 'docker images hybrid-radsecproxy -q | xargs -r docker rmi -f',
+            ],
+            [
+                'description' => $this->translator->trans('rebuild_image', domain: 'CertificateCommandsService'),
+                'command' => 'docker compose build --no-cache radsecproxy',
+            ],
+            [
+                'description' => $this->translator->trans('start_container', domain: 'CertificateCommandsService'),
+                'command' => 'docker compose up -d radsecproxy',
+            ],
+            [
+                'description' => $this->translator->trans('verify_container', domain: 'CertificateCommandsService'),
+                'command' => 'docker ps | grep radsecproxy',
+            ],
+            [
+                'description' => $this->translator->trans('check_logs', domain: 'CertificateCommandsService'),
+                'command' => 'docker logs hybrid-radsecproxy-1 --tail 50',
+            ],
+        ]);
 
         return $commands;
     }
