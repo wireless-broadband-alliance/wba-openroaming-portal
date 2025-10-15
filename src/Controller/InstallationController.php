@@ -4,19 +4,15 @@ namespace App\Controller;
 
 use App\DTO\AdminConfigDTO;
 use App\DTO\DbSetupDTO;
-use App\DTO\JwtDTO;
 use App\DTO\SettingsDTO;
 use App\Entity\InstallationProgress;
 use App\Entity\User;
-use App\Enum\DataBaseSetupType;
 use App\Enum\InstallationProgressType;
 use App\Enum\InstallationStep;
 use App\Enum\SettingsConfigType;
 use App\Form\AdminConfigType;
 use App\Form\DbSetupType;
-use App\Form\JwtType;
 use App\Form\SettingsType;
-use App\Repository\InstallationProgressRepository;
 use App\Repository\UserRepository;
 use App\Service\DatabaseConnectionService;
 use App\Service\GetSettings;
@@ -44,7 +40,6 @@ class InstallationController extends AbstractController
         private readonly DatabaseConnectionService $databaseConnectionService,
         private readonly TranslatorInterface $translator,
         private readonly UserRepository $userRepository,
-        private readonly InstallationProgressRepository $installationProgressRepository,
         private readonly InstallationService $installationService,
         private readonly EntityManagerInterface $entityManager,
     ) {
@@ -78,6 +73,8 @@ class InstallationController extends AbstractController
             $openRoamingDb = $dbDTO->dbOpenRoaming;
             $freeradiusDb = $dbDTO->dbFreeradius;
 
+            /*
+
             $orConnection = $this->databaseConnectionService->testDatabaseConnection($openRoamingDb);
             $frConnection = $this->databaseConnectionService->testDatabaseConnection($freeradiusDb);
 
@@ -101,8 +98,12 @@ class InstallationController extends AbstractController
                 );
                 return $this->redirectToRoute('admin_dashboard_settings_certs_installation');
             }
-
-            if (!($lastInstallation instanceof InstallationProgress)) {
+            */
+            if (
+                !($lastInstallation instanceof InstallationProgress) ||
+                $lastInstallation->getInstallationState() === InstallationProgressType::COMPLETED->value ||
+                $lastInstallation->getInstallationState() === InstallationProgressType::ABORTED->value
+            ) {
                 $lastInstallation = new InstallationProgress();
                 $lastInstallation->setCreatedAt(new \DateTime());
             }
@@ -376,13 +377,14 @@ class InstallationController extends AbstractController
                     $lastInstallation->setCreatedAt(new \DateTime());
                 }
                 $lastInstallation->setUpdatedAt(new \DateTime());
-                $lastInstallation->setAdminEmail($adminEmail);
-                $lastInstallation->setAdminPassword($hashedPassword);
+                $lastInstallation->setEmailAdmin($adminEmail);
+                $lastInstallation->setPasswordAdmin($hashedPassword);
                 $lastInstallation->setInstallationState(InstallationProgressType::IN_PROGRESS->value);
                 $this->entityManager->persist($lastInstallation);
                 $this->entityManager->flush();
             }
 
+            dd($lastInstallation);
             // TODO: add a new route to send and confirm admin email
             return $this->redirectToRoute('');
         }

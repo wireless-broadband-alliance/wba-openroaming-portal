@@ -33,12 +33,6 @@ class InstallationProgress
     private ?string $turnstileSecret = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    private ?string $jwtSecretKey = null;
-
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $jwtPublicKey = null;
-
-    #[ORM\Column(length: 255, nullable: true)]
     private ?string $jwtPassphrase = null;
 
     #[ORM\Column(length: 255, nullable: true)]
@@ -131,30 +125,6 @@ class InstallationProgress
     public function setTurnstileSecret(?string $turnstileSecret): static
     {
         $this->turnstileSecret = $turnstileSecret;
-
-        return $this;
-    }
-
-    public function getJwtSecretKey(): ?string
-    {
-        return $this->jwtSecretKey;
-    }
-
-    public function setJwtSecretKey(?string $jwtSecretKey): static
-    {
-        $this->jwtSecretKey = $jwtSecretKey;
-
-        return $this;
-    }
-
-    public function getJwtPublicKey(): ?string
-    {
-        return $this->jwtPublicKey;
-    }
-
-    public function setJwtPublicKey(?string $jwtPublicKey): static
-    {
-        $this->jwtPublicKey = $jwtPublicKey;
 
         return $this;
     }

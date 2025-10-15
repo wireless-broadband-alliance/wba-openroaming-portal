@@ -33,28 +33,21 @@ class InstallationService
     public function getStep(InstallationProgress $installationProgress): string
     {
         if (
-            $installationProgress->getDbOpenRoaming() ||
+            $installationProgress->getDbOpenRoaming() &&
             $installationProgress->getDbFreeradius()
         ) {
             if (
-                $installationProgress->getTurnstileKey() ||
-                $installationProgress->getTurnstileSecret() ||
+                $installationProgress->getTurnstileKey() &&
+                $installationProgress->getTurnstileSecret() &&
                 $installationProgress->getTrustedProxies()
             ) {
-                if (
-                    $installationProgress->getJwtSecretKey() ||
-                    $installationProgress->getJwtPublicKey() ||
-                    $installationProgress->getJwtPassphrase()
+                if ($installationProgress->getEmailAdmin() &&
+                    $installationProgress->getPasswordAdmin() &&
+                    $installationProgress->getAdminConfirmation()
                 ) {
-                    if ($installationProgress->getEmailAdmin() ||
-                        $installationProgress->getPasswordAdmin() ||
-                        $installationProgress->getAdminConfirmation()
-                    ) {
-                        return InstallationStep::COMPLETED->value;
-                    }
-                    return InstallationStep::ADMIN->value;
+                    return InstallationStep::COMPLETED->value;
                 }
-                return InstallationStep::JWT->value;
+                return InstallationStep::ADMIN->value;
             }
             return InstallationStep::SETTINGS->value;
         }
