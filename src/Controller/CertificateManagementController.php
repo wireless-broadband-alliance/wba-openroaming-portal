@@ -68,8 +68,8 @@ class CertificateManagementController extends AbstractController
         ]);
     }
 
-    #[Route('/dashboard/settings/certificatesManagement/certificates/radsecproxy',
-        name: 'admin_dashboard_settings_certs_radsecproxy')]
+    #[Route('/dashboard/settings/certificatesManagement/radsecproxy/upload',
+        name: 'admin_dashboard_settings_certs_radsecproxy_upload')]
     #[IsGranted('ROLE_ADMIN')]
     public function settingsCertificatesManagementRadsecproxy(
         Request $request
@@ -80,7 +80,7 @@ class CertificateManagementController extends AbstractController
         $processState = $this->certificateProcessCheckerService->getProcessState();
 
         // Return the user to the correct step
-        if ($processState['active'] && $processState['nextRoute'] !== 'admin_dashboard_settings_certs_radsecproxy') {
+        if ($processState['active'] && $processState['nextRoute'] !== 'admin_dashboard_settings_certs_radsecproxy_upload') {
             return $this->redirectToRoute($processState['nextRoute']);
         }
 
@@ -147,18 +147,19 @@ class CertificateManagementController extends AbstractController
         );
     }
 
-    #[Route('/dashboard/settings/certificatesManagement/certificates/radsecproxy/config',
+    #[Route('/dashboard/settings/certificatesManagement/radsecproxy/config',
         name: 'admin_dashboard_settings_certs_radsecproxy_config')]
     #[IsGranted('ROLE_ADMIN')]
     public function settingsCertificatesManagementRadsecproxyConfig(Request $request): Response
     {
         $data = $this->getSettings->getSettings();
 
-        // Check current process
+        // Check current certificateProcess status
         $processState = $this->certificateProcessCheckerService->getProcessState();
 
-        if (!$processState['active'] || $processState['stage'] !== 'radsecproxy_config_commands') {
-            return $this->redirectToRoute('admin_dashboard_settings_certs_management');
+        // Return the user to the correct step
+        if ($processState['active'] && $processState['nextRoute'] !== 'admin_dashboard_settings_certs_radsecproxy_config') {
+            return $this->redirectToRoute($processState['nextRoute']);
         }
 
         // Return the commands to be executed on the resolver
@@ -199,7 +200,7 @@ class CertificateManagementController extends AbstractController
         );
     }
 
-    #[Route('/dashboard/settings/certificatesManagement/certificates/radsecproxy/completed',
+    #[Route('/dashboard/settings/certificatesManagement/radsecproxy/completed',
         name: 'admin_dashboard_settings_certs_radsecproxy_completed'
     )]
     #[IsGranted('ROLE_ADMIN')]
@@ -207,15 +208,24 @@ class CertificateManagementController extends AbstractController
     {
         $data = $this->getSettings->getSettings();
 
+        // Check current certificateProcess status
+        $processState = $this->certificateProcessCheckerService->getProcessState();
+
+        // Return the user to the correct step
+        if ($processState['active'] && $processState['nextRoute'] !== 'admin_dashboard_settings_certs_radsecproxy_completed') {
+            return $this->redirectToRoute($processState['nextRoute']);
+        }
+
         return $this->render(
             'dashboard/shared/settings_actions/certificatesManagement/certificates/radsecproxy/completed.html.twig',
             [
                 'data' => $data,
+                'processState' => $processState,
             ]
         );
     }
 
-//    #[Route('/dashboard/settings/certificatesManagement/certificates/freeradius',
+//    #[Route('/dashboard/settings/certificatesManagement/freeradius',
 //        name: 'admin_dashboard_settings_certs_freeradius'
 //    )]
 //    #[IsGranted('ROLE_ADMIN')]

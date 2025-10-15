@@ -1,7 +1,7 @@
 {% set steps = [
     { id: 'radsecproxy_upload' },
-    { id: 'radsecproxy_config_commands' },
-    { id: 'completed' }
+    { id: 'radsecproxy_config' },
+    { id: 'radsecproxy_completed' }
 ] %}
 
 {% set currentStage = processState.stage ?? 'radsecproxy_upload' %}

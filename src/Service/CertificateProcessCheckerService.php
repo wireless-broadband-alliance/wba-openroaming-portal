@@ -44,18 +44,17 @@ readonly class CertificateProcessCheckerService
                 'active' => true,
                 'stage' => 'radsecproxy_upload',
                 'message' => 'Awaiting RadSecProxy certificate upload.',
-                'nextRoute' => 'admin_dashboard_settings_certs_radsecproxy',
+                'nextRoute' => 'admin_dashboard_settings_certs_radsecproxy_upload',
                 'process' => $process,
             ];
         }
 
         // 2 - User just uploaded the certs and config it's not finished
         if ($process->getRadsecproxyFormCompletedAt() !== null &&
-            $process->getRadsecproxyConfigAppliedAt() === null &&
-            $process->getFreeradiusFormCompletedAt() === null) {
+            $process->getRadsecproxyConfigAppliedAt() === null) {
             return [
                 'active' => true,
-                'stage' => 'radsecproxy_config_commands',
+                'stage' => 'radsecproxy_config',
                 'message' => 'RadSecProxy upload done. Proceed to follow the setups to configure your resolver.',
                 'nextRoute' => 'admin_dashboard_settings_certs_radsecproxy_config',
                 'process' => $process,
@@ -68,7 +67,7 @@ readonly class CertificateProcessCheckerService
             $process->getFreeradiusFormCompletedAt() === null) {
             return [
                 'active' => true,
-                'stage' => 'radsecproxy_complted',
+                'stage' => 'radsecproxy_completed',
                 'message' => 'RadSecProxy configuration is done. Proceed to follow the next page for more details.',
                 'nextRoute' => 'admin_dashboard_settings_certs_radsecproxy_completed',
                 'process' => $process,
