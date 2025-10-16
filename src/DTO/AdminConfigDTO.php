@@ -18,7 +18,7 @@ class AdminConfigDTO
     #[Assert\NotBlank(message: 'fieldNotBlank')]
     #[Assert\Length(min: 8, max: 100, minMessage: 'minCharacters', maxMessage: 'maxCharacters')]
     #[Assert\Expression(
-        expression: "this.password != this.confirmPassword",
+        expression: "this.password == this.confirmPassword",
         message: 'passwordNotMatch',
         negate: true,
     )]

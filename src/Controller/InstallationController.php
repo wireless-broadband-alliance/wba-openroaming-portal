@@ -13,6 +13,7 @@ use App\Enum\SettingsConfigType;
 use App\Form\AdminConfigType;
 use App\Form\DbSetupType;
 use App\Form\SettingsType;
+use App\Form\TwoFACode;
 use App\Repository\UserRepository;
 use App\Service\DatabaseConnectionService;
 use App\Service\GetSettings;
@@ -402,7 +403,37 @@ class InstallationController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function settingsCertificatesManagementInstallationAdminConfirmation()
     {
+        $data = $this->getSettings->getSettings();
+        //TODO make validations for resend codes (the user can not spam with emails)
+
         $lastInstallation = $this->installationService->lastInstallation();
+        if ($lastInstallation instanceof InstallationProgress) {
+            $this->installationService->sendAdminConfirmationCode($lastInstallation);
+        }
+
+        $form = $this->createForm(TwoFACode::class);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $data = $form->getData();
+            $code = $data["code"];
+
+            if ($code === $lastInstallation->getConfirmCodeAdmin()) {
+                $this->addFlash(
+                    'success',
+                    $this->translator->trans()
+                );
+            }
+            $this->addFlash(
+                'error_admin',
+                $this->translator->trans()
+            );
+        }
+
+        return $this->render('dashboard/shared/settings_actions/certificatesManagement/installation/ConfirmAdmin.html.twig',
+        [
+            'data' => $data,
+            'form' => $form->createView(),
+        ]);
 
     }
 }
