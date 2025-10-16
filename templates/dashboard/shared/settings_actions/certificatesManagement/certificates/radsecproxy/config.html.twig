@@ -1,6 +1,15 @@
 {% extends 'dashboard/shared/settings_actions/certificatesManagement/certificates/radsecproxy/base.html.twig' %}
 
 {% block radsecproxy_content %}
+    {# Warning message box #}
+    <div class="toast-light-warning mb-6">
+        <twig:ux:icon name="wba:info" class="w-10 md:w-5 h-10 md:h-5 inline mr-3" fill="currentColor"/>
+
+        <span>
+            {{ 'warning.root_command'|trans({}, 'upload') }}
+        </span>
+    </div>
+
     {% if commands is defined and commands is not empty %}
         <div class="border border-gray-200 rounded-xl shadow-sm overflow-hidden mt-6">
             <div class="bg-gray-50 px-6 py-4 border-b border-gray-200 flex items-center gap-2">

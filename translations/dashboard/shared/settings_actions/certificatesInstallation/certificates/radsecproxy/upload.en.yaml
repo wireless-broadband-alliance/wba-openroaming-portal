@@ -1,4 +1,6 @@
 title: 'Upload your PEM files'
+warning:
+    root_command: 'Run the following command as the root user in your terminal before starting!'
 client:
     label: 'Client Certificate (.pem)'
     description: "Upload a valid 'client.pem'"

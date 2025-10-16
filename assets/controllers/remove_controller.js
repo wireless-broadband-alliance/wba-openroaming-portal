@@ -12,10 +12,4 @@ export default class extends Controller {
             element.remove();
         }, 5000);
     }
-
-    targetCertsTargetConnected(element) {
-        setTimeout(function () {
-            element.remove();
-        }, 10000);
-    }
 }

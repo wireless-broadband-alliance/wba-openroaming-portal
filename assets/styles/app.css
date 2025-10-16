@@ -24,6 +24,10 @@
     @apply text-white text-sm font-medium bg-[#F82600CE] border border-[#A83622] rounded-[5px] px-[25px] py-[15px] flex flex-row justify-start items-center;
 }
 
+.toast-light-warning {
+    @apply flex bg-infoBgColor/50 rounded-lg p-4 text-xs md:text-sm text-infoTextColor;
+}
+
 .pill-success {
     @apply px-2 py-1 text-green-400 bg-green-100/50 rounded-lg;
 }
@@ -117,7 +121,7 @@
 /* password reveal toggle */
 .toggle-password-button {
     @apply items-center bg-transparent border-none flex justify-center absolute top-1/2 -translate-y-1/2;
-    right: 0.75rem;   /* keep it tucked inside the input, not too far */
+    right: 0.75rem; /* keep it tucked inside the input, not too far */
     height: 1.25rem;
     width: 1.25rem;
 }

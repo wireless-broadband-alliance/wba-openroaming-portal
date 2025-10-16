@@ -1,4 +1,6 @@
 title: 'Carregar os seus ficheiros PEM'
+warning:
+    root_command: "Execute o seguinte comando como 'root' no terminal antes de começar!"
 client:
     label: 'Certificado do Cliente (.pem)'
     description: "Carregue um ficheiro 'client.pem' válido"
