@@ -225,7 +225,7 @@ class InstallationController extends AbstractController
         );
     }
 
-
+/*
     #[Route('', name: '')]
     #[IsGranted('ROLE_ADMIN')]
     public function settingsCertificatesManagementInstallationJwt(
@@ -337,6 +337,7 @@ class InstallationController extends AbstractController
             ]
         );
     }
+*/
 
     #[Route('/dashboard/settings/certificatesManagement/installation/admin', name: 'admin_dashboard_settings_certs_installation_admin')]
     #[IsGranted('ROLE_ADMIN')]
@@ -384,9 +385,7 @@ class InstallationController extends AbstractController
                 $this->entityManager->flush();
             }
 
-            dd($lastInstallation);
-            // TODO: add a new route to send and confirm admin email
-            return $this->redirectToRoute('');
+            return $this->redirectToRoute('admin_dashboard_settings_certs_installation_admin_confirmation');
         }
 
         return $this->render(
@@ -397,5 +396,13 @@ class InstallationController extends AbstractController
                 'formDTO' => $adminConfigDTO
             ]
         );
+    }
+
+    #[Route('/dashboard/settings/certificatesManagement/installation/admin/confirmation', name: 'admin_dashboard_settings_certs_installation_admin_confirmation')]
+    #[IsGranted('ROLE_ADMIN')]
+    public function settingsCertificatesManagementInstallationAdminConfirmation()
+    {
+        $lastInstallation = $this->installationService->lastInstallation();
+
     }
 }

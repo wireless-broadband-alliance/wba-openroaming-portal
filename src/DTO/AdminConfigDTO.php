@@ -17,19 +17,10 @@ class AdminConfigDTO
 
     #[Assert\NotBlank(message: 'fieldNotBlank')]
     #[Assert\Length(min: 8, max: 100, minMessage: 'minCharacters', maxMessage: 'maxCharacters')]
+    #[Assert\Expression(
+        expression: "this.password != this.confirmPassword",
+        message: 'passwordNotMatch',
+        negate: true,
+    )]
     public ?string $confirmPassword = null;
-
-    #[Assert\Callback]
-    public function validatePassword(ExecutionContextInterface $context): void
-    {
-        if ($this->password !== $this->confirmPassword) {
-            $context->buildViolation('passwordNotMatch')
-                ->atPath('password')
-                ->addViolation();
-
-            $context->buildViolation('passwordNotMatch')
-                ->atPath('confirmPassword')
-                ->addViolation();
-        }
-    }
 }
