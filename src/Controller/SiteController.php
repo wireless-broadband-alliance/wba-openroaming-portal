@@ -9,6 +9,7 @@ use App\Enum\FirewallType;
 use App\Enum\OperationMode;
 use App\Enum\OSType;
 use App\Enum\PlatformMode;
+use App\Enum\SettingName;
 use App\Enum\TwoFAType;
 use App\Enum\UserProvider;
 use App\Enum\UserRadiusProfileRevokeReason;
@@ -83,8 +84,8 @@ class SiteController extends AbstractController
 
         // Check if the user_verification setting is active
         if (
-            isset($data["USER_VERIFICATION"]["value"]) &&
-            $data["USER_VERIFICATION"]["value"] === OperationMode::ON->value &&
+            isset($data[SettingName::USER_VERIFICATION->value]["value"]) &&
+            $data[SettingName::USER_VERIFICATION->value]["value"] === OperationMode::ON->value &&
             $currentUser
         ) {
             // Retrieve the cookie about SAML_ACCOUNT Deletion from the request
