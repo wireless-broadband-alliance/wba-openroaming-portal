@@ -9,16 +9,23 @@
         {% set eeaStatus = isEEAUser() %}
         {% set message = '' %}
         {% if eeaStatus == constant('App\\Enum\\GeoLocation\\IsEEAHandler::LOCATION_ERROR').value %}
-            {% set message = 'location_error'|trans({}, 'dashboard') %}
+            {% set message = 'locationError'|trans({}, 'dashboard') %}
         {% elseif eeaStatus == constant('App\\Enum\\GeoLocation\\IsEEAHandler::MISSING_FILE').value %}
-            {% set message = 'missing_file'|trans({}, 'dashboard') %}
+            {% set message = 'missingFile'|trans({}, 'dashboard') %}
         {% elseif eeaStatus == constant('App\\Enum\\GeoLocation\\IsEEAHandler::INVALID_DB').value %}
-            {% set message = 'invalid_db'|trans({}, 'dashboard') %}
+            {% set message = 'invalidDb'|trans({}, 'dashboard') %}
         {% endif %}
 
         {% if message != '' %}
             {{ include('landing/shared/_toast.html.twig', {
                 message: message,
+                toast_type: 'toast-warning'
+            }) }}
+        {% endif %}
+
+        {% if isCertificateAborted() %}
+            {{ include('landing/shared/_toast.html.twig', {
+                message: 'abortedCertificatesWarning'|trans({}, 'dashboard'),
                 toast_type: 'toast-warning'
             }) }}
         {% endif %}
