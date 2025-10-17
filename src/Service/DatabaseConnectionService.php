@@ -9,11 +9,8 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 class DatabaseConnectionService
 {
-    private ParameterBagInterface $params;
-
-    public function __construct(ParameterBagInterface $params)
+    public function __construct(private readonly ParameterBagInterface $params)
     {
-        $this->params = $params;
     }
     public function testDatabaseConnection(string $dbUrl): bool
     {
@@ -39,7 +36,7 @@ class DatabaseConnectionService
             $connection->executeQuery('SELECT 1');
 
             return true;
-        } catch (\Exception $e) {
+        } catch (\Exception) {
             return false;
         }
     }
@@ -73,6 +70,8 @@ class DatabaseConnectionService
         } elseif ($type === SettingsConfigType::JWT_PASSPHRASE->value) {
             $envContent = preg_replace('/^JWT_PASSPHRASE=.*$/m', '', $envContent);
             $newLine = sprintf("JWT_PASSPHRASE=%s\n", $url);
+        } else {
+            $newLine = '';
         }
 
         file_put_contents($envPath, trim($envContent) . "\n" . $newLine);

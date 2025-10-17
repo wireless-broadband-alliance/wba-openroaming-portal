@@ -90,7 +90,7 @@ class InstallationController extends AbstractController
             $orConnection = $this->databaseConnectionService->testDatabaseConnection($openRoamingDb);
             $frConnection = $this->databaseConnectionService->testDatabaseConnection($freeradiusDb);
 
-            $connectionsFailed = array();
+            $connectionsFailed = [];
 
             if (!$orConnection) {
                 $connectionsFailed[] = 'OpenRoaming';
@@ -99,7 +99,7 @@ class InstallationController extends AbstractController
                 $connectionsFailed[] = 'Freeradius';
             }
 
-            if (!empty($connectionsFailed)) {
+            if ($connectionsFailed !== []) {
                 $this->addFlash(
                     'error_admin',
                     $this->translator->trans(
@@ -282,7 +282,7 @@ class InstallationController extends AbstractController
                 );
 
                 return $this->redirectToRoute('admin_dashboard_settings_certs_installation_admin');
-            } catch (\Exception $exception) {
+            } catch (\Exception) {
                 $this->addFlash(
                     'error_admin',
                     $this->translator->trans('jwtFailed', [], 'controllers')

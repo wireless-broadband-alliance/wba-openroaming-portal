@@ -7,7 +7,6 @@ use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Enum\InstallationProgressType;
 use App\Enum\InstallationStep;
-use App\Enum\PlatformMode;
 use App\Enum\SettingName;
 use App\Repository\EventRepository;
 use App\Repository\InstallationProgressRepository;
@@ -28,7 +27,7 @@ readonly class InstallationService
         private SettingRepository $settingRepository,
         private ParameterBagInterface $parameterBag,
         private MailerInterface $mailer,
-        private readonly EntityManagerInterface $entityManager,
+        private EntityManagerInterface $entityManager,
         private EventRepository $eventRepository,
     ) {
     }
