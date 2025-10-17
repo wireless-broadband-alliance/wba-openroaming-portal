@@ -77,7 +77,7 @@ readonly class CertificateCommandsService
             }
 
             $content = str_replace("'", "'\"'\"'", $content);
-            $targetFile = str_contains(strtolower($originalFile), 'client') ? 'client.pem' : 'key.pem';
+            $targetFile = str_contains(strtolower((string) $originalFile), 'client') ? 'client.pem' : 'key.pem';
 
             $commands[] = [
                 'description' => $this->translator->trans(

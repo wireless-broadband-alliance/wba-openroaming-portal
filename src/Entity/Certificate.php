@@ -15,6 +15,8 @@ use Doctrine\Common\Collections\Collection;
 #[Vich\Uploadable]
 class Certificate
 {
+    public $certificates;
+
     public function __construct()
     {
         $this->createdAt = new DateTimeImmutable();
@@ -201,10 +203,8 @@ class Certificate
 
     public function removeCertificate(Certificate $certificate): static
     {
-        if ($this->certificates->removeElement($certificate)) {
-            if ($certificate->getSetupProcess() === $this) {
-                $certificate->setSetupProcess(null);
-            }
+        if ($this->certificates->removeElement($certificate) && $certificate->getSetupProcess() === $this) {
+            $certificate->setSetupProcess(null);
         }
         return $this;
     }

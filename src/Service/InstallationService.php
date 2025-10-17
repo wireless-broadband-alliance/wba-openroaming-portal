@@ -14,15 +14,17 @@ use App\Repository\InstallationProgressRepository;
 use App\Repository\SettingRepository;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
+use Random\RandomException;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
 
-class InstallationService
+readonly class InstallationService
 {
     public function __construct(
-        private readonly InstallationProgressRepository $installationProgressRepository,
+        private InstallationProgressRepository $installationProgressRepository,
         private SettingRepository $settingRepository,
         private ParameterBagInterface $parameterBag,
         private MailerInterface $mailer,
@@ -72,6 +74,10 @@ class InstallationService
         return InstallationStep::DATABASE->value;
     }
 
+    /**
+     * @throws RandomException
+     * @throws TransportExceptionInterface
+     */
     public function sendAdminConfirmationCode(InstallationProgress $installationProgress): void
     {
         $verificationCode = random_int(100000, 999999);
@@ -84,7 +90,6 @@ class InstallationService
         $contactEmail = $this->settingRepository->findOneBy([
             'name' => SettingName::CONTACT_EMAIL->value
         ])->getValue();
-        $supportTeam = $this->settingRepository->findOneBy(['name' => SettingName::PAGE_TITLE->value])->getValue();
         $customerLogo = $this->settingRepository->findOneBy([
             'name' => SettingName::CUSTOMER_LOGO->value
         ])->getValue();

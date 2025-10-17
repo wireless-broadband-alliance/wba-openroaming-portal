@@ -35,12 +35,10 @@ readonly class CertificateStorageService
     /**
      * Store an uploaded certificate/key using VichUploaderBundle.
      *
-     * @param UploadedFile $file
      * @param string $type Logical type (e.g., 'client' or 'key')
      * @param string $name Display name
      * @param CertificateSetupProcess $process Return and associates the process with the new cert
      * @param bool|null $isAKey Optional Checks if the file being uploaded is a privateKey
-     * @return Certificate
      */
     public function storeUploadedFile(
         UploadedFile $file,

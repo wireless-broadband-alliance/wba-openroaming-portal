@@ -160,7 +160,7 @@ class CertificateSetupProcess
     {
         if ($this->certificates->removeElement($certificate)) {
             // set the owning side to null (unless already changed)
-            if ($certificate->getSetupProcess() === $this) {
+            if ($this->certificates->removeElement($certificate) && $certificate->getSetupProcess() === $this) {
                 $certificate->setSetupProcess(null);
             }
         }

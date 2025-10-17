@@ -5,6 +5,7 @@ namespace App\Service;
 use App\Entity\CertificateSetupProcess;
 use App\Enum\CertificateProcessStatus;
 use App\Repository\CertificateSetupProcessRepository;
+use DateTimeImmutable;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 readonly class CertificateProcessCheckerService
@@ -41,7 +42,7 @@ readonly class CertificateProcessCheckerService
 
         // Determine which step we’re at
         // 1 - User just started the process and any didn't upload any certs
-        if ($process->getRadsecproxyFormCompletedAt() === null) {
+        if (!$process->getRadsecproxyFormCompletedAt() instanceof DateTimeImmutable) {
             return [
                 'active' => true,
                 'stage' => 'radsecproxy_upload',
@@ -53,8 +54,7 @@ readonly class CertificateProcessCheckerService
 
         // 2 - User just uploaded the certs and config it's not finished
         if (
-            $process->getRadsecproxyFormCompletedAt() !== null &&
-            $process->getRadsecproxyConfigAppliedAt() === null
+            !$process->getRadsecproxyConfigAppliedAt() instanceof DateTimeImmutable
         ) {
             return [
                 'active' => true,
@@ -67,9 +67,7 @@ readonly class CertificateProcessCheckerService
 
         // 3 - User applied the new configuration on the resolver
         if (
-            $process->getRadsecproxyFormCompletedAt() !== null &&
-            $process->getRadsecproxyConfigAppliedAt() !== null &&
-            $process->getFreeradiusFormCompletedAt() === null
+            !$process->getFreeradiusFormCompletedAt() instanceof DateTimeImmutable
         ) {
             return [
                 'active' => true,

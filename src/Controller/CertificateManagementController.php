@@ -9,6 +9,7 @@ use App\DTO\CertificateRadSecUploadDTO;
 use App\DTO\DbSetupDTO;
 use App\DTO\JwtDTO;
 use App\DTO\SettingsDTO;
+use App\Entity\CertificateSetupProcess;
 use App\Enum\CertificateFileName;
 use App\Enum\CertificateMachineType;
 use App\Enum\CertificateProcessStatus;
@@ -94,7 +95,7 @@ class CertificateManagementController extends AbstractController
         $process = $this->certificateProcessCheckerService->getCurrentProcess();
 
         // In case there's not active process
-        if (!$process) {
+        if (!$process instanceof CertificateSetupProcess) {
             $this->addFlash(
                 'error',
                 $this->translator->trans('noActiveProcess', [], 'CertificateProcessCheckerService')
