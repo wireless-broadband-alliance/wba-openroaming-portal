@@ -73,10 +73,14 @@ class InstallationController extends AbstractController
             }
         }
 
+        // TODO add a verification when the last installation process is done, we need to create a new one!!!
+
         $data = $this->getSettings->getSettings();
 
         $dbDTO = new DbSetupDTO();
 
+        // TODO this form needs to have more fields, the user gives some information and we need to put this together and create a DB URL
+        // TODO ask Facha for more information!!!
         $form = $this->createForm(DbSetupType::class, $dbDTO);
         $form->handleRequest($request);
 
@@ -141,7 +145,7 @@ class InstallationController extends AbstractController
             [
                 'data' => $data,
                 'form' => $form->createView(),
-                'formDTO' => $dbDTO
+                'formDTO' => $dbDTO,
             ]
         );
     }
@@ -220,6 +224,9 @@ class InstallationController extends AbstractController
                 );
             }
 
+            // TODO we need verification for trusted proxies too
+            // TODO ask Facha about turnstile verification
+            // JWT Verification
             try {
                 $application = new Application($kernel);
                 $application->setAutoExit(false);
@@ -290,7 +297,7 @@ class InstallationController extends AbstractController
             [
                 'data' => $data,
                 'form' => $form->createView(),
-                'formDTO' => $settingsDTO
+                'formDTO' => $settingsDTO,
             ]
         );
     }
@@ -351,7 +358,7 @@ class InstallationController extends AbstractController
             [
                 'data' => $data,
                 'form' => $form->createView(),
-                'formDTO' => $adminConfigDTO
+                'formDTO' => $adminConfigDTO,
             ]
         );
     }
@@ -365,9 +372,21 @@ class InstallationController extends AbstractController
         Request $request,
     )
     {
-        $data = $this->getSettings->getSettings();
-
         $lastInstallation = $this->installationService->lastInstallation();
+        if ($lastInstallation instanceof InstallationProgress) {
+            $step = $this->installationService->getStep($lastInstallation);
+            if ($step === InstallationStep::DATABASE->value) {
+                return $this->redirectToRoute('admin_dashboard_settings_certs_installation_settings');
+            }
+            if ($step === InstallationStep::SETTINGS->value) {
+                return $this->redirectToRoute('admin_dashboard_settings_certs_installation_settings');
+            }
+            if ($step === InstallationStep::ADMIN->value && !($lastInstallation->getEmailAdmin())) {
+                return $this->redirectToRoute('admin_dashboard_settings_certs_installation_admin');
+            }
+        }
+
+        $data = $this->getSettings->getSettings();
 
         $form = $this->createForm(TwoFACode::class);
         $form->handleRequest($request);
@@ -377,7 +396,14 @@ class InstallationController extends AbstractController
             $code = $data["code"];
 
             if ($lastInstallation && $code === $lastInstallation->getConfirmCodeAdmin()  ) {
+                $adminUser = $this->userRepository->findAdmin();
                 $lastInstallation->setAdminConfirmation(true);
+                if ($adminUser instanceof User) {
+                    $adminUser->setEmail($lastInstallation->getEmailAdmin());
+                    $adminUser->setPassword($lastInstallation->getPasswordAdmin());
+                }
+
+                $this->entityManager->persist($adminUser);
                 $this->entityManager->persist($lastInstallation);
                 $this->entityManager->flush();
 
@@ -386,7 +412,7 @@ class InstallationController extends AbstractController
                     $this->translator->trans('adminConfirmedSuccessfully', [], 'controllers')
                 );
 
-                return $this->redirectToRoute('');
+                return $this->redirectToRoute('admin_dashboard_settings_certs_installation_summary');
             }
             $this->addFlash(
                 'error_admin',
@@ -428,7 +454,7 @@ class InstallationController extends AbstractController
                         $this->translator->trans(
                             'codeAlreadySent',
                             [
-                                '%minutes%' => $interval_minutes
+                                '%minutes%' => $interval_minutes,
                             ],
                             'controllers'
                         )
@@ -444,5 +470,34 @@ class InstallationController extends AbstractController
                 'form' => $form->createView(),
             ]
         );
+    }
+
+    #[Route(
+        '/dashboard/settings/certificatesManagement/installation/summary',
+        name: 'admin_dashboard_settings_certs_installation_summary'
+    )]
+    #[IsGranted('ROLE_ADMIN')]
+    public function InstallationSummary()
+    {
+        $lastInstallation = $this->installationService->lastInstallation();
+        if ($lastInstallation instanceof InstallationProgress) {
+            $step = $this->installationService->getStep($lastInstallation);
+            if ($step === InstallationStep::DATABASE->value) {
+                return $this->redirectToRoute('admin_dashboard_settings_certs_installation_settings');
+            }
+            if ($step === InstallationStep::SETTINGS->value) {
+                return $this->redirectToRoute('admin_dashboard_settings_certs_installation_settings');
+            }
+            if ($step === InstallationStep::ADMIN->value) {
+                return $this->redirectToRoute('admin_dashboard_settings_certs_installation_admin');
+            }
+        }
+
+        $data = $this->getSettings->getSettings();
+
+        return $this->render('dashboard/shared/settings_actions/certificatesManagement/installation/summary.html.twig', [
+            'data' => $data,
+            'Installation' => $lastInstallation,
+        ]);
     }
 }

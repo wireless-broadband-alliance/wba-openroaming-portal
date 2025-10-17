@@ -65,6 +65,7 @@ readonly class InstallationService
                     $installationProgress->getPasswordAdmin() &&
                     $installationProgress->getAdminConfirmation()
                 ) {
+                    $installationProgress->setInstallationState(InstallationProgressType::COMPLETED->value);
                     return InstallationStep::COMPLETED->value;
                 }
                 return InstallationStep::ADMIN->value;

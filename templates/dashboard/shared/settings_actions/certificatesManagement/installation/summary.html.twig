@@ -1,0 +1,22 @@
+{% extends '/dashboard/base.html.twig' %}
+
+{% block title %}
+    {{ 'adminPageWBA'|trans({}, '_header_admin') }}
+{% endblock %}
+
+{% block container %}
+
+    <div class="mt-6 leading-7">
+        <p class="font-bold text-base sm:text-lg md:text-xl lg:text-2xl">
+            {{ 'adminConfigTitle'|trans({}, 'adminConfig') }}
+        </p>
+        <p class="mt-3 text-sm sm:text-base md:text-lg lg:text-xl text-gray-600">
+            {{ 'adminConfirmDescription'|trans({}, 'adminConfig') }}
+        </p>
+    </div>
+
+    <div class="my-[25px] divider"></div>
+
+
+
+{% endblock %}
