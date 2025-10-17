@@ -8,5 +8,5 @@ sensitive_hidden_text: 'Sensitive content'
 copy_command:
     title: "Copy"
     aria_label: "Copy"
-    success: "Command copied!"
-    error: "It was not possible to copy the command."
+    success: "Copied!"
+    error: "It was not possible to copy the content."

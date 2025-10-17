@@ -23,7 +23,7 @@
                     <div class="relative" data-controller="clipboard">
                         {% set codeId = 'code-' ~ status ~ '-' ~ loop.parent.loop.index0 ~ '-' ~ loop.index0 %}
 
-                        {{ include('api/shared/partials/_copy.html.twig', {
+                        {{ include('shared/_copy_button.html.twig', {
                             clipboard_target: '#' ~ codeId,
                         }) }}
 
