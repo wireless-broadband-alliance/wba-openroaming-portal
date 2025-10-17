@@ -1,6 +1,5 @@
 <?php
 
-
 namespace App\Twig;
 
 use App\Service\CertificateProcessCheckerService;

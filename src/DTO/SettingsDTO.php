@@ -6,7 +6,6 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 class SettingsDTO
 {
-
     #[Assert\NotBlank(message: 'fieldNotBlank')]
     public ?string $trustedProxies = null;
 
@@ -19,5 +18,4 @@ class SettingsDTO
     public ?bool $jwtPassphraseEnable = false;
 
     public ?string $jwtPassphrase = null;
-
 }

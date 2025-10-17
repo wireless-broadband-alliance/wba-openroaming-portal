@@ -40,14 +40,12 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
-
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 use function PHPUnit\Framework\isEmpty;
 
 class CertificateManagementController extends AbstractController
 {
-
     public function __construct(
         private readonly GetSettings $getSettings,
         private readonly TranslatorInterface $translator,
@@ -86,7 +84,10 @@ class CertificateManagementController extends AbstractController
         ]);
     }
 
-    #[Route('/dashboard/settings/certificatesManagement/abort', name: 'admin_dashboard_settings_certs_management_abort')]
+    #[Route(
+        '/dashboard/settings/certificatesManagement/abort',
+        name: 'admin_dashboard_settings_certs_management_abort'
+    )]
     #[IsGranted('ROLE_ADMIN')]
     public function settingsCertificatesManagementAbort(): Response
     {
@@ -121,8 +122,10 @@ class CertificateManagementController extends AbstractController
         return $this->redirectToRoute('admin_dashboard_settings_certs_management');
     }
 
-    #[Route('/dashboard/settings/certificatesManagement/radsecproxy/upload',
-        name: 'admin_dashboard_settings_certs_radsecproxy_upload')]
+    #[Route(
+        '/dashboard/settings/certificatesManagement/radsecproxy/upload',
+        name: 'admin_dashboard_settings_certs_radsecproxy_upload'
+    )]
     #[IsGranted('ROLE_ADMIN')]
     public function settingsCertificatesManagementRadsecproxyUpload(
         Request $request
@@ -133,7 +136,10 @@ class CertificateManagementController extends AbstractController
         $processState = $this->certificateProcessCheckerService->getProcessState();
 
         // Return the user to the correct step
-        if ($processState['active'] && $processState['nextRoute'] !== 'admin_dashboard_settings_certs_radsecproxy_upload') {
+        if (
+            $processState['active']
+            && $processState['nextRoute'] !== 'admin_dashboard_settings_certs_radsecproxy_upload'
+        ) {
             $this->addFlash('error', $processState['message']);
             return $this->redirectToRoute($processState['nextRoute']);
         }
@@ -201,8 +207,10 @@ class CertificateManagementController extends AbstractController
         );
     }
 
-    #[Route('/dashboard/settings/certificatesManagement/radsecproxy/config',
-        name: 'admin_dashboard_settings_certs_radsecproxy_config')]
+    #[Route(
+        '/dashboard/settings/certificatesManagement/radsecproxy/config',
+        name: 'admin_dashboard_settings_certs_radsecproxy_config'
+    )]
     #[IsGranted('ROLE_ADMIN')]
     public function settingsCertificatesManagementRadsecproxyConfig(Request $request): Response
     {
@@ -212,7 +220,10 @@ class CertificateManagementController extends AbstractController
         $processState = $this->certificateProcessCheckerService->getProcessState();
 
         // Return the user to the correct step
-        if ($processState['active'] && $processState['nextRoute'] !== 'admin_dashboard_settings_certs_radsecproxy_config') {
+        if (
+            $processState['active'] &&
+            $processState['nextRoute'] !== 'admin_dashboard_settings_certs_radsecproxy_config'
+        ) {
             $this->addFlash('error', $processState['message']);
             return $this->redirectToRoute($processState['nextRoute']);
         }
@@ -261,7 +272,8 @@ class CertificateManagementController extends AbstractController
         );
     }
 
-    #[Route('/dashboard/settings/certificatesManagement/radsecproxy/completed',
+    #[Route(
+        '/dashboard/settings/certificatesManagement/radsecproxy/completed',
         name: 'admin_dashboard_settings_certs_radsecproxy_completed'
     )]
     #[IsGranted('ROLE_ADMIN')]
@@ -273,7 +285,10 @@ class CertificateManagementController extends AbstractController
         $processState = $this->certificateProcessCheckerService->getProcessState();
 
         // Return the user to the correct step
-        if ($processState['active'] && $processState['nextRoute'] !== 'admin_dashboard_settings_certs_radsecproxy_completed') {
+        if (
+            $processState['active'] &&
+            $processState['nextRoute'] !== 'admin_dashboard_settings_certs_radsecproxy_completed'
+        ) {
             $this->addFlash('error', $processState['message']);
             return $this->redirectToRoute($processState['nextRoute']);
         }

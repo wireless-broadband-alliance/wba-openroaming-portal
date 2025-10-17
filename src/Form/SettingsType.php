@@ -29,7 +29,8 @@ class SettingsType extends AbstractType
             ])
             ->add('jwtPassphrase', TextType::class, [
                 'required' => false,
-            ]);;
+            ]);
+        ;
     }
 
     public function configureOptions(OptionsResolver $resolver)
@@ -38,5 +39,4 @@ class SettingsType extends AbstractType
             'data_class' => SettingsDTO::class,
         ]);
     }
-
 }

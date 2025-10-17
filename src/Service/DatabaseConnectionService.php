@@ -39,7 +39,6 @@ class DatabaseConnectionService
             $connection->executeQuery('SELECT 1');
 
             return true;
-
         } catch (\Exception $e) {
             return false;
         }
@@ -47,7 +46,7 @@ class DatabaseConnectionService
 
     public function writeDatabaseUrlToEnv(string $url, string $type): void
     {
-        $envPath = $this->params->get('kernel.project_dir').'/.env';
+        $envPath = $this->params->get('kernel.project_dir') . '/.env';
         $envContent = file_get_contents($envPath);
 
         if ($type === DataBaseSetupType::DATABASE_URL->value) {
@@ -81,7 +80,7 @@ class DatabaseConnectionService
 
     private function getDriverFromScheme(string $scheme): string
     {
-        return match($scheme) {
+        return match ($scheme) {
             'mysql' => 'pdo_mysql',
             'pgsql' => 'pdo_pgsql',
             'sqlite' => 'pdo_sqlite',

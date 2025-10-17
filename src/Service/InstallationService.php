@@ -13,7 +13,6 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
 
-
 class InstallationService
 {
     public function __construct(
@@ -29,7 +28,8 @@ class InstallationService
         $lastInstallation = $this->installationProgressRepository->getLast();
 
         if ($lastInstallation instanceof InstallationProgress) {
-            if ($lastInstallation->getInstallationState() === InstallationProgressType::COMPLETED->value ||
+            if (
+                $lastInstallation->getInstallationState() === InstallationProgressType::COMPLETED->value ||
                 $lastInstallation->getInstallationState() === InstallationProgressType::ABORTED->value
             ) {
                 return null;
@@ -50,7 +50,8 @@ class InstallationService
                 $installationProgress->getTurnstileSecret() &&
                 $installationProgress->getTrustedProxies()
             ) {
-                if ($installationProgress->getEmailAdmin() &&
+                if (
+                    $installationProgress->getEmailAdmin() &&
                     $installationProgress->getPasswordAdmin() &&
                     $installationProgress->getAdminConfirmation()
                 ) {
@@ -99,7 +100,5 @@ class InstallationService
             ->embedFromPath($logoPath, 'logo_cid');
 
         $this->mailer->send($email);
-
     }
-
 }

@@ -16,7 +16,6 @@ use Symfony\UX\LiveComponent\LiveCollectionTrait;
 #[AsLiveComponent]
 class SettingsForm extends AbstractController
 {
-
     use ComponentWithFormTrait;
     use DefaultActionTrait;
     use LiveCollectionTrait;
@@ -54,5 +53,4 @@ class SettingsForm extends AbstractController
 
         $this->form = $form;
     }
-
 }

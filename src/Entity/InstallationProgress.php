@@ -204,5 +204,4 @@ class InstallationProgress
     {
         $this->createdAt = $createdAt;
     }
-
 }

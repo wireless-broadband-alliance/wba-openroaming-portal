@@ -35,7 +35,6 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
 class InstallationController extends AbstractController
 {
-
     public function __construct(
         private readonly GetSettings $getSettings,
         private readonly DatabaseConnectionService $databaseConnectionService,
@@ -46,12 +45,14 @@ class InstallationController extends AbstractController
     ) {
     }
 
-    #[Route('/dashboard/settings/certificatesManagement/installation', name: 'admin_dashboard_settings_certs_installation')]
+    #[Route(
+        '/dashboard/settings/certificatesManagement/installation',
+        name: 'admin_dashboard_settings_certs_installation'
+    )]
     #[IsGranted('ROLE_ADMIN')]
     public function settingsCertificatesManagementInstallation(
         Request $request
     ): Response {
-
         $lastInstallation = $this->installationService->lastInstallation();
         if ($lastInstallation instanceof InstallationProgress) {
             $step = $this->installationService->getStep($lastInstallation);
@@ -145,7 +146,10 @@ class InstallationController extends AbstractController
      * @throws HttpException
      * @throws LogicException
      */
-    #[Route('/dashboard/settings/certificatesManagement/installation/settings', name: 'admin_dashboard_settings_certs_installation_settings')]
+    #[Route(
+        '/dashboard/settings/certificatesManagement/installation/settings',
+        name: 'admin_dashboard_settings_certs_installation_settings'
+    )]
     #[IsGranted('ROLE_ADMIN')]
     public function settingsCertificatesManagementInstallationSettings(
         Request $request
@@ -226,127 +230,129 @@ class InstallationController extends AbstractController
         );
     }
 
-/*
-    #[Route('', name: '')]
-    #[IsGranted('ROLE_ADMIN')]
-    public function settingsCertificatesManagementInstallationJwt(
-        Request $request,
-        KernelInterface $kernel
-    ): Response {
-        // TODO   warning!!!! unused function  REMOVE THIS AT THE END
-        $data = $this->getSettings->getSettings();
+    /*
+        #[Route('', name: '')]
+        #[IsGranted('ROLE_ADMIN')]
+        public function settingsCertificatesManagementInstallationJwt(
+            Request $request,
+            KernelInterface $kernel
+        ): Response {
+            // TODO   warning!!!! unused function  REMOVE THIS AT THE END
+            $data = $this->getSettings->getSettings();
 
-        $jwtDTO = new JwtDTO();
+            $jwtDTO = new JwtDTO();
 
-        $form = $this->createForm(JwtType::class, $jwtDTO);
-        $form->handleRequest($request);
+            $form = $this->createForm(JwtType::class, $jwtDTO);
+            $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $jwtSecretKey = $jwtDTO->jwtSecretKey;
-            $jwtPublicKey = $jwtDTO->jwtPublicKey;
-            $jwtPassphraseEnable = $jwtDTO->jwtPassphraseEnable;
-            $jwtPassphrase = $jwtDTO->jwtPassphrase;
+            if ($form->isSubmitted() && $form->isValid()) {
+                $jwtSecretKey = $jwtDTO->jwtSecretKey;
+                $jwtPublicKey = $jwtDTO->jwtPublicKey;
+                $jwtPassphraseEnable = $jwtDTO->jwtPassphraseEnable;
+                $jwtPassphrase = $jwtDTO->jwtPassphrase;
 
-            $this->databaseConnectionService->writeDatabaseUrlToEnv(
-                $jwtSecretKey,
-                SettingsConfigType::JWT_SECRET_KEY->value
-            );
-
-            $this->databaseConnectionService->writeDatabaseUrlToEnv(
-                $jwtPublicKey,
-                SettingsConfigType::JWT_PUBLIC_KEY->value
-            );
-
-            if ($jwtPassphraseEnable) {
                 $this->databaseConnectionService->writeDatabaseUrlToEnv(
-                    $jwtPassphrase,
-                    SettingsConfigType::JWT_PASSPHRASE->value
+                    $jwtSecretKey,
+                    SettingsConfigType::JWT_SECRET_KEY->value
                 );
-            }
 
-            try {
-                $application = new Application($kernel);
-                $application->setAutoExit(false);
+                $this->databaseConnectionService->writeDatabaseUrlToEnv(
+                    $jwtPublicKey,
+                    SettingsConfigType::JWT_PUBLIC_KEY->value
+                );
 
                 if ($jwtPassphraseEnable) {
-                    $input = new ArrayInput([
-                        'command' => 'lexik:jwt:generate-keypair',
-                        '--overwrite' => true,
-                        '--passphrase' => $jwtPassphrase,
-                    ]);
-                } else {
-                    $input = new ArrayInput([
-                        'command' => 'lexik:jwt:generate-keypair',
-                        '--overwrite' => true,
-                    ]);
-                }
-
-                $output = new BufferedOutput();
-                if (!defined('STDIN')) {
-                    define('STDIN', fopen('php://stdin', 'r'));
-                }
-                $application->run($input, $output);
-
-                $result = $output->fetch();
-
-                $privateKeyPath = $this->getParameter('kernel.project_dir') . '/config/jwt/private.pem';
-                $publicKeyPath = $this->getParameter('kernel.project_dir') . '/config/jwt/public.pem';
-
-                $success = false;
-
-                if (file_exists($privateKeyPath) && file_exists($publicKeyPath)) {
-                    $privateKeyContent = file_get_contents($privateKeyPath);
-                    $publicKeyContent = file_get_contents($publicKeyPath);
-
-
-                    if (
-                        str_starts_with(trim($privateKeyContent), '-----BEGIN ENCRYPTED PRIVATE KEY-----') &&
-                        str_starts_with(trim($publicKeyContent), '-----BEGIN PUBLIC KEY-----')
-                    ) {
-                        $success = true;
-                    }
-                }
-
-                if ($success) {
-                    $this->addFlash(
-                        'success_admin',
-                        $this->translator->trans('jwtSuccessfully', [], 'controllers')
+                    $this->databaseConnectionService->writeDatabaseUrlToEnv(
+                        $jwtPassphrase,
+                        SettingsConfigType::JWT_PASSPHRASE->value
                     );
-                    return $this->redirectToRoute('admin_dashboard_settings_certs_installation_admin');
                 }
-                $this->addFlash(
-                    'error_admin',
-                    $this->translator->trans('jwtFailed', [], 'controllers')
-                );
 
-                return $this->redirectToRoute('admin_dashboard_settings_certs_installation_jwt');
-            } catch (\Exception $exception) {
-                $this->addFlash(
-                    'error_admin',
-                    $this->translator->trans('jwtFailed', [], 'controllers')
-                );
-                return $this->redirectToRoute('admin_dashboard_settings_certs_installation_jwt');
+                try {
+                    $application = new Application($kernel);
+                    $application->setAutoExit(false);
+
+                    if ($jwtPassphraseEnable) {
+                        $input = new ArrayInput([
+                            'command' => 'lexik:jwt:generate-keypair',
+                            '--overwrite' => true,
+                            '--passphrase' => $jwtPassphrase,
+                        ]);
+                    } else {
+                        $input = new ArrayInput([
+                            'command' => 'lexik:jwt:generate-keypair',
+                            '--overwrite' => true,
+                        ]);
+                    }
+
+                    $output = new BufferedOutput();
+                    if (!defined('STDIN')) {
+                        define('STDIN', fopen('php://stdin', 'r'));
+                    }
+                    $application->run($input, $output);
+
+                    $result = $output->fetch();
+
+                    $privateKeyPath = $this->getParameter('kernel.project_dir') . '/config/jwt/private.pem';
+                    $publicKeyPath = $this->getParameter('kernel.project_dir') . '/config/jwt/public.pem';
+
+                    $success = false;
+
+                    if (file_exists($privateKeyPath) && file_exists($publicKeyPath)) {
+                        $privateKeyContent = file_get_contents($privateKeyPath);
+                        $publicKeyContent = file_get_contents($publicKeyPath);
+
+
+                        if (
+                            str_starts_with(trim($privateKeyContent), '-----BEGIN ENCRYPTED PRIVATE KEY-----') &&
+                            str_starts_with(trim($publicKeyContent), '-----BEGIN PUBLIC KEY-----')
+                        ) {
+                            $success = true;
+                        }
+                    }
+
+                    if ($success) {
+                        $this->addFlash(
+                            'success_admin',
+                            $this->translator->trans('jwtSuccessfully', [], 'controllers')
+                        );
+                        return $this->redirectToRoute('admin_dashboard_settings_certs_installation_admin');
+                    }
+                    $this->addFlash(
+                        'error_admin',
+                        $this->translator->trans('jwtFailed', [], 'controllers')
+                    );
+
+                    return $this->redirectToRoute('admin_dashboard_settings_certs_installation_jwt');
+                } catch (\Exception $exception) {
+                    $this->addFlash(
+                        'error_admin',
+                        $this->translator->trans('jwtFailed', [], 'controllers')
+                    );
+                    return $this->redirectToRoute('admin_dashboard_settings_certs_installation_jwt');
+                }
             }
+
+            return $this->render(
+                'dashboard/shared/settings_actions/certificatesManagement/installation/jwt.html.twig',
+                [
+                    'data' => $data,
+                    'form' => $form->createView(),
+                    'formDTO' => $jwtDTO
+                ]
+            );
         }
+    */
 
-        return $this->render(
-            'dashboard/shared/settings_actions/certificatesManagement/installation/jwt.html.twig',
-            [
-                'data' => $data,
-                'form' => $form->createView(),
-                'formDTO' => $jwtDTO
-            ]
-        );
-    }
-*/
-
-    #[Route('/dashboard/settings/certificatesManagement/installation/admin', name: 'admin_dashboard_settings_certs_installation_admin')]
+    #[Route(
+        '/dashboard/settings/certificatesManagement/installation/admin',
+        name: 'admin_dashboard_settings_certs_installation_admin'
+    )]
     #[IsGranted('ROLE_ADMIN')]
     public function settingsCertificatesManagementInstallationAdmin(
         Request $request,
         UserPasswordHasherInterface $userPasswordHasher,
     ): Response {
-
         $lastInstallation = $this->installationService->lastInstallation();
         if ($lastInstallation instanceof InstallationProgress) {
             $step = $this->installationService->getStep($lastInstallation);
@@ -399,7 +405,10 @@ class InstallationController extends AbstractController
         );
     }
 
-    #[Route('/dashboard/settings/certificatesManagement/installation/admin/confirmation', name: 'admin_dashboard_settings_certs_installation_admin_confirmation')]
+    #[Route(
+        '/dashboard/settings/certificatesManagement/installation/admin/confirmation',
+        name: 'admin_dashboard_settings_certs_installation_admin_confirmation'
+    )]
     #[IsGranted('ROLE_ADMIN')]
     public function settingsCertificatesManagementInstallationAdminConfirmation()
     {
@@ -429,11 +438,12 @@ class InstallationController extends AbstractController
             );
         }
 
-        return $this->render('dashboard/shared/settings_actions/certificatesManagement/installation/ConfirmAdmin.html.twig',
-        [
-            'data' => $data,
-            'form' => $form->createView(),
-        ]);
-
+        return $this->render(
+            'dashboard/shared/settings_actions/certificatesManagement/installation/ConfirmAdmin.html.twig',
+            [
+                'data' => $data,
+                'form' => $form->createView(),
+            ]
+        );
     }
 }

@@ -97,7 +97,7 @@ readonly class CertificateStorageService
 
         $certInfo = openssl_x509_parse($certResource);
         if (!$certInfo) {
-            throw new RuntimeException( $this->translator->trans(
+            throw new RuntimeException($this->translator->trans(
                 'unableParse',
                 [],
                 'CertificateStorageService'

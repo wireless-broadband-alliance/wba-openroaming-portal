@@ -50,5 +50,4 @@ class DataBaseForm extends AbstractController
 
         $this->form = $form;
     }
-
 }
