@@ -136,5 +136,4 @@ readonly class InstallationService
         );
         return count($attempts) < $nrAttempts;
     }
-
 }

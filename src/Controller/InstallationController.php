@@ -40,7 +40,6 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-
 class InstallationController extends AbstractController
 {
     public function __construct(
@@ -78,7 +77,8 @@ class InstallationController extends AbstractController
 
         $dbDTO = new DbSetupDTO();
 
-        // TODO this form needs to have more fields, the user gives some information and we need to put this together and create a DB URL
+        // TODO this form needs to have more fields,
+        // TODO the user gives some information and we need to put this together and create a DB URL
         // TODO ask Facha for more information!!!
         $form = $this->createForm(DbSetupType::class, $dbDTO);
         $form->handleRequest($request);
@@ -369,8 +369,7 @@ class InstallationController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function settingsCertificatesManagementInstallationAdminConfirmation(
         Request $request,
-    )
-    {
+    ) {
         $lastInstallation = $this->installationService->lastInstallation();
         if ($lastInstallation instanceof InstallationProgress) {
             $step = $this->installationService->getStep($lastInstallation);
@@ -394,7 +393,7 @@ class InstallationController extends AbstractController
             $data = $form->getData();
             $code = $data["code"];
 
-            if ($lastInstallation && $code === $lastInstallation->getConfirmCodeAdmin()  ) {
+            if ($lastInstallation && $code === $lastInstallation->getConfirmCodeAdmin()) {
                 $adminUser = $this->userRepository->findAdmin();
                 $lastInstallation->setAdminConfirmation(true);
                 if ($adminUser instanceof User) {
@@ -421,10 +420,8 @@ class InstallationController extends AbstractController
         if ($lastInstallation instanceof InstallationProgress) {
             $admin = $this->userRepository->findAdmin();
             if ($admin instanceof User) {
-                if ($this->installationService->canSendCode($lastInstallation, $admin))
-                {
+                if ($this->installationService->canSendCode($lastInstallation, $admin)) {
                     $this->installationService->sendAdminConfirmationCode($lastInstallation);
-
                     $eventMetaData = [
                         'platform' => PlatformMode::LIVE->value,
                         'user_agent' => $request->headers->get('User-Agent'),
@@ -476,7 +473,7 @@ class InstallationController extends AbstractController
         name: 'admin_dashboard_settings_certs_installation_summary'
     )]
     #[IsGranted('ROLE_ADMIN')]
-    public function InstallationSummary()
+    public function installationSummary()
     {
         $lastInstallation = $this->installationProgressRepository->getLastCompleted();
         if ($lastInstallation instanceof InstallationProgress) {
@@ -494,9 +491,12 @@ class InstallationController extends AbstractController
 
         $data = $this->getSettings->getSettings();
 
-        return $this->render('dashboard/shared/settings_actions/certificatesManagement/installation/summary.html.twig', [
+        return $this->render(
+            'dashboard/shared/settings_actions/certificatesManagement/installation/summary.html.twig',
+            [
             'data' => $data,
             'Installation' => $lastInstallation,
-        ]);
+                ]
+        );
     }
 }
