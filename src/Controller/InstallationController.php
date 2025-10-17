@@ -7,8 +7,11 @@ use App\DTO\DbSetupDTO;
 use App\DTO\SettingsDTO;
 use App\Entity\InstallationProgress;
 use App\Entity\User;
+use App\Enum\AnalyticalEventType;
+use App\Enum\DataBaseSetupType;
 use App\Enum\InstallationProgressType;
 use App\Enum\InstallationStep;
+use App\Enum\PlatformMode;
 use App\Enum\SettingsConfigType;
 use App\Form\AdminConfigType;
 use App\Form\DbSetupType;
@@ -16,11 +19,14 @@ use App\Form\SettingsType;
 use App\Form\TwoFACode;
 use App\Repository\UserRepository;
 use App\Service\DatabaseConnectionService;
+use App\Service\EventActions;
 use App\Service\GetSettings;
 use App\Service\InstallationService;
+use App\Service\TwoFAService;
+use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\Form\Exception\LogicException;
@@ -33,15 +39,18 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
+
 class InstallationController extends AbstractController
 {
     public function __construct(
         private readonly GetSettings $getSettings,
         private readonly DatabaseConnectionService $databaseConnectionService,
+        private readonly EventActions $eventActions,
         private readonly TranslatorInterface $translator,
         private readonly UserRepository $userRepository,
         private readonly InstallationService $installationService,
         private readonly EntityManagerInterface $entityManager,
+        private readonly TwoFAService $twoFAService,
     ) {
     }
 
@@ -75,8 +84,6 @@ class InstallationController extends AbstractController
             $openRoamingDb = $dbDTO->dbOpenRoaming;
             $freeradiusDb = $dbDTO->dbFreeradius;
 
-            /*
-
             $orConnection = $this->databaseConnectionService->testDatabaseConnection($openRoamingDb);
             $frConnection = $this->databaseConnectionService->testDatabaseConnection($freeradiusDb);
 
@@ -100,7 +107,7 @@ class InstallationController extends AbstractController
                 );
                 return $this->redirectToRoute('admin_dashboard_settings_certs_installation');
             }
-            */
+
             if (
                 !($lastInstallation instanceof InstallationProgress) ||
                 $lastInstallation->getInstallationState() === InstallationProgressType::COMPLETED->value ||
@@ -117,9 +124,6 @@ class InstallationController extends AbstractController
             $this->entityManager->persist($lastInstallation);
             $this->entityManager->flush();
 
-
-            // TODO: write this variables only at the end
-            /*
             $this->databaseConnectionService->writeDatabaseUrlToEnv(
                 $openRoamingDb,
                 DataBaseSetupType::DATABASE_URL->value
@@ -127,7 +131,7 @@ class InstallationController extends AbstractController
             $this->databaseConnectionService->writeDatabaseUrlToEnv(
                 $freeradiusDb,
                 DataBaseSetupType::DATABASE_FREERADIUS_URL->value
-            );*/
+            );
 
             return $this->redirectToRoute('admin_dashboard_settings_certs_installation_settings');
         }
@@ -152,7 +156,8 @@ class InstallationController extends AbstractController
     )]
     #[IsGranted('ROLE_ADMIN')]
     public function settingsCertificatesManagementInstallationSettings(
-        Request $request
+        Request $request,
+        KernelInterface $kernel
     ): Response {
         $lastInstallation = $this->installationService->lastInstallation();
         if ($lastInstallation instanceof InstallationProgress) {
@@ -193,8 +198,6 @@ class InstallationController extends AbstractController
             $this->entityManager->persist($lastInstallation);
             $this->entityManager->flush();
 
-            // TODO: write this variables only at the end
-            /*
             $this->databaseConnectionService->writeDatabaseUrlToEnv(
                 $trustedProxies,
                 SettingsConfigType::TRUSTED_PROXIES->value
@@ -215,9 +218,71 @@ class InstallationController extends AbstractController
                     $jwtPassphrase,
                     SettingsConfigType::JWT_PASSPHRASE->value
                 );
-            }*/
+            }
 
-            return $this->redirectToRoute('admin_dashboard_settings_certs_installation_admin');
+            try {
+                $application = new Application($kernel);
+                $application->setAutoExit(false);
+
+                if ($jwtPassphraseEnable) {
+                    $input = new ArrayInput([
+                        'command' => 'lexik:jwt:generate-keypair',
+                        '--overwrite' => true,
+                        '--passphrase' => $jwtPassphrase,
+                    ]);
+                } else {
+                    $input = new ArrayInput([
+                        'command' => 'lexik:jwt:generate-keypair',
+                        '--overwrite' => true,
+                    ]);
+                }
+
+                $output = new BufferedOutput();
+                if (!defined('STDIN')) {
+                    define('STDIN', fopen('php://stdin', 'r'));
+                }
+                $application->run($input, $output);
+
+                $result = $output->fetch();
+
+                $privateKeyPath = $this->getParameter('kernel.project_dir') . '/config/jwt/private.pem';
+                $publicKeyPath = $this->getParameter('kernel.project_dir') . '/config/jwt/public.pem';
+
+                $success = false;
+
+                if (file_exists($privateKeyPath) && file_exists($publicKeyPath)) {
+                    $privateKeyContent = file_get_contents($privateKeyPath);
+                    $publicKeyContent = file_get_contents($publicKeyPath);
+
+
+                    if (
+                        str_starts_with(trim($privateKeyContent), '-----BEGIN ENCRYPTED PRIVATE KEY-----') &&
+                        str_starts_with(trim($publicKeyContent), '-----BEGIN PUBLIC KEY-----')
+                    ) {
+                        $success = true;
+                    }
+                }
+
+                if ($success) {
+                    $this->addFlash(
+                        'success_admin',
+                        $this->translator->trans('jwtSuccessfully', [], 'controllers')
+                    );
+                    return $this->redirectToRoute('admin_dashboard_settings_certs_installation_admin');
+                }
+                $this->addFlash(
+                    'error_admin',
+                    $this->translator->trans('jwtFailed', [], 'controllers')
+                );
+
+                return $this->redirectToRoute('admin_dashboard_settings_certs_installation_admin');
+            } catch (\Exception $exception) {
+                $this->addFlash(
+                    'error_admin',
+                    $this->translator->trans('jwtFailed', [], 'controllers')
+                );
+                return $this->redirectToRoute('admin_dashboard_settings_certs_installation_settings');
+            }
         }
 
         return $this->render(
@@ -229,120 +294,6 @@ class InstallationController extends AbstractController
             ]
         );
     }
-
-    /*
-        #[Route('', name: '')]
-        #[IsGranted('ROLE_ADMIN')]
-        public function settingsCertificatesManagementInstallationJwt(
-            Request $request,
-            KernelInterface $kernel
-        ): Response {
-            // TODO   warning!!!! unused function  REMOVE THIS AT THE END
-            $data = $this->getSettings->getSettings();
-
-            $jwtDTO = new JwtDTO();
-
-            $form = $this->createForm(JwtType::class, $jwtDTO);
-            $form->handleRequest($request);
-
-            if ($form->isSubmitted() && $form->isValid()) {
-                $jwtSecretKey = $jwtDTO->jwtSecretKey;
-                $jwtPublicKey = $jwtDTO->jwtPublicKey;
-                $jwtPassphraseEnable = $jwtDTO->jwtPassphraseEnable;
-                $jwtPassphrase = $jwtDTO->jwtPassphrase;
-
-                $this->databaseConnectionService->writeDatabaseUrlToEnv(
-                    $jwtSecretKey,
-                    SettingsConfigType::JWT_SECRET_KEY->value
-                );
-
-                $this->databaseConnectionService->writeDatabaseUrlToEnv(
-                    $jwtPublicKey,
-                    SettingsConfigType::JWT_PUBLIC_KEY->value
-                );
-
-                if ($jwtPassphraseEnable) {
-                    $this->databaseConnectionService->writeDatabaseUrlToEnv(
-                        $jwtPassphrase,
-                        SettingsConfigType::JWT_PASSPHRASE->value
-                    );
-                }
-
-                try {
-                    $application = new Application($kernel);
-                    $application->setAutoExit(false);
-
-                    if ($jwtPassphraseEnable) {
-                        $input = new ArrayInput([
-                            'command' => 'lexik:jwt:generate-keypair',
-                            '--overwrite' => true,
-                            '--passphrase' => $jwtPassphrase,
-                        ]);
-                    } else {
-                        $input = new ArrayInput([
-                            'command' => 'lexik:jwt:generate-keypair',
-                            '--overwrite' => true,
-                        ]);
-                    }
-
-                    $output = new BufferedOutput();
-                    if (!defined('STDIN')) {
-                        define('STDIN', fopen('php://stdin', 'r'));
-                    }
-                    $application->run($input, $output);
-
-                    $result = $output->fetch();
-
-                    $privateKeyPath = $this->getParameter('kernel.project_dir') . '/config/jwt/private.pem';
-                    $publicKeyPath = $this->getParameter('kernel.project_dir') . '/config/jwt/public.pem';
-
-                    $success = false;
-
-                    if (file_exists($privateKeyPath) && file_exists($publicKeyPath)) {
-                        $privateKeyContent = file_get_contents($privateKeyPath);
-                        $publicKeyContent = file_get_contents($publicKeyPath);
-
-
-                        if (
-                            str_starts_with(trim($privateKeyContent), '-----BEGIN ENCRYPTED PRIVATE KEY-----') &&
-                            str_starts_with(trim($publicKeyContent), '-----BEGIN PUBLIC KEY-----')
-                        ) {
-                            $success = true;
-                        }
-                    }
-
-                    if ($success) {
-                        $this->addFlash(
-                            'success_admin',
-                            $this->translator->trans('jwtSuccessfully', [], 'controllers')
-                        );
-                        return $this->redirectToRoute('admin_dashboard_settings_certs_installation_admin');
-                    }
-                    $this->addFlash(
-                        'error_admin',
-                        $this->translator->trans('jwtFailed', [], 'controllers')
-                    );
-
-                    return $this->redirectToRoute('admin_dashboard_settings_certs_installation_jwt');
-                } catch (\Exception $exception) {
-                    $this->addFlash(
-                        'error_admin',
-                        $this->translator->trans('jwtFailed', [], 'controllers')
-                    );
-                    return $this->redirectToRoute('admin_dashboard_settings_certs_installation_jwt');
-                }
-            }
-
-            return $this->render(
-                'dashboard/shared/settings_actions/certificatesManagement/installation/jwt.html.twig',
-                [
-                    'data' => $data,
-                    'form' => $form->createView(),
-                    'formDTO' => $jwtDTO
-                ]
-            );
-        }
-    */
 
     #[Route(
         '/dashboard/settings/certificatesManagement/installation/admin',
@@ -410,32 +361,80 @@ class InstallationController extends AbstractController
         name: 'admin_dashboard_settings_certs_installation_admin_confirmation'
     )]
     #[IsGranted('ROLE_ADMIN')]
-    public function settingsCertificatesManagementInstallationAdminConfirmation()
+    public function settingsCertificatesManagementInstallationAdminConfirmation(
+        Request $request,
+    )
     {
         $data = $this->getSettings->getSettings();
-        //TODO make validations for resend codes (the user can not spam with emails)
 
         $lastInstallation = $this->installationService->lastInstallation();
-        if ($lastInstallation instanceof InstallationProgress) {
-            $this->installationService->sendAdminConfirmationCode($lastInstallation);
-        }
 
         $form = $this->createForm(TwoFACode::class);
+        $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             $data = $form->getData();
             $code = $data["code"];
 
-            if ($code === $lastInstallation->getConfirmCodeAdmin()) {
+            if ($lastInstallation && $code === $lastInstallation->getConfirmCodeAdmin()  ) {
+                $lastInstallation->setAdminConfirmation(true);
+                $this->entityManager->persist($lastInstallation);
+                $this->entityManager->flush();
+
                 $this->addFlash(
                     'success',
-                    $this->translator->trans()
+                    $this->translator->trans('adminConfirmedSuccessfully', [], 'controllers')
                 );
+
+                return $this->redirectToRoute('');
             }
             $this->addFlash(
                 'error_admin',
-                $this->translator->trans()
+                $this->translator->trans('invalidCodeMessage', [], 'controllers')
             );
+        }
+        if ($lastInstallation instanceof InstallationProgress) {
+            $admin = $this->userRepository->findAdmin();
+            if ($admin instanceof User) {
+                if ($this->installationService->canSendCode($lastInstallation, $admin))
+                {
+                    $this->installationService->sendAdminConfirmationCode($lastInstallation);
+
+                    $eventMetaData = [
+                        'platform' => PlatformMode::LIVE->value,
+                        'user_agent' => $request->headers->get('User-Agent'),
+                        'uuid' => $admin->getUuid(),
+                        'ip' => $request->getClientIp(),
+                    ];
+                    $this->eventActions->saveEvent(
+                        $admin,
+                        AnalyticalEventType::INSTALLATION_ADMIN_CONFIRM_CODE_SENT->value,
+                        new DateTime(),
+                        $eventMetaData
+                    );
+
+                    $this->addFlash(
+                        'success_admin',
+                        $this->translator->trans('codeSentSuccessfully', [], 'controllers')
+                    );
+                } else {
+                    $interval_minutes = $this->twoFAService->timeLeftToResendCode(
+                        $admin,
+                        AnalyticalEventType::INSTALLATION_ADMIN_CONFIRM_CODE_SENT->value
+                    );
+
+                    $this->addFlash(
+                        'error_admin',
+                        $this->translator->trans(
+                            'codeAlreadySent',
+                            [
+                                '%minutes%' => $interval_minutes
+                            ],
+                            'controllers'
+                        )
+                    );
+                }
+            }
         }
 
         return $this->render(

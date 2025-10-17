@@ -3,11 +3,17 @@
 namespace App\Service;
 
 use App\Entity\InstallationProgress;
+use App\Entity\User;
+use App\Enum\AnalyticalEventType;
 use App\Enum\InstallationProgressType;
 use App\Enum\InstallationStep;
+use App\Enum\PlatformMode;
 use App\Enum\SettingName;
+use App\Repository\EventRepository;
 use App\Repository\InstallationProgressRepository;
 use App\Repository\SettingRepository;
+use DateTime;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Mailer\MailerInterface;
@@ -20,6 +26,8 @@ class InstallationService
         private SettingRepository $settingRepository,
         private ParameterBagInterface $parameterBag,
         private MailerInterface $mailer,
+        private readonly EntityManagerInterface $entityManager,
+        private EventRepository $eventRepository,
     ) {
     }
 
@@ -69,6 +77,8 @@ class InstallationService
         $verificationCode = random_int(100000, 999999);
         $installationProgress->setConfirmCodeAdmin($verificationCode);
         $installationProgress->setUpdatedAt(new \DateTime());
+        $this->entityManager->persist($installationProgress);
+        $this->entityManager->flush();
 
         $emailTitle = $this->settingRepository->findOneBy(['name' => SettingName::PAGE_TITLE->value])->getValue();
         $contactEmail = $this->settingRepository->findOneBy([
@@ -101,4 +111,24 @@ class InstallationService
 
         $this->mailer->send($email);
     }
+
+    public function canSendCode(InstallationProgress $installationProgress, User $user): bool
+    {
+        $nrAttempts = $this->settingRepository->findOneBy(
+            ['name' => SettingName::TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE->value]
+        )->getValue();
+        $timeToResetAttempts = $this->settingRepository->findOneBy(
+            ['name' => SettingName::TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS->value]
+        )->getValue();
+        $limitTime = new DateTime();
+        $limitTime->modify('-' . $timeToResetAttempts . ' minutes');
+        $attempts = $this->eventRepository->find2FACodeAttemptEvent(
+            $user,
+            $nrAttempts,
+            $limitTime,
+            AnalyticalEventType::INSTALLATION_ADMIN_CONFIRM_CODE_SENT->value
+        );
+        return count($attempts) < $nrAttempts;
+    }
+
 }

@@ -137,3 +137,4 @@ radsecProxyConfigAppliedSuccessfully: 'RadSecProxy configuration completed!'
 certificateProcessAborted: "This process was aborted successfully. Please don't forget to re-configure all the process once again correctly!"
 jwtSuccessfully: 'JWT key pair generated successfully'
 jwtFailed: 'Failed to generate JWT key pair'
+adminConfirmedSuccessfully: 'Admin email confirmed successfully'
