@@ -3,30 +3,30 @@
 
 {# Define route-to-header mapping #}
 {% set routeHeaders = {
-    'admin_page': { icon: 'wba:user', title: 'usersManagement' },
-    'admin_user_edit': { icon: 'wba:user', title: 'usersManagement' },
-    'admin_dashboard_customize': { icon: 'wba:pencil-edit', title: 'landingPageConfiguration' },
-    'admin_reset_password': { icon: 'wba:cog', title: 'resetPassword' },
-    'admin_user_update': { icon: 'wba:user-circle', title: 'accountSettings' },
-    'admin_dashboard_settings_terms': { icon: 'wba:file-check', title: 'termsAndPolicies' },
-    'admin_dashboard_settings_radius': { icon: 'wba:file-space', title: 'radiusProfileConfiguration' },
-    'admin_dashboard_settings_status': { icon: 'wba:barchart', title: 'platformStatus' },
-    'admin_dashboard_settings_LDAP': { icon: 'wba:sync', title: 'LDAPSynchronization' },
-    'admin_dashboard_settings_two_fa': { icon: 'wba:2fa', title: 'twoFactorAuthenticator' },
-    'admin_dashboard_settings_auth': { icon: 'wba:at', title: 'authenticationMethods' },
-    'admin_dashboard_settings_capport': { icon: 'wba:wifi', title: 'userEngagement' },
-    'admin_dashboard_settings_schedule': { icon: 'wba:schedule', title: 'scheduleAutomation' },
-    'admin_dashboard_statistics': { icon: 'wba:piechart', title: 'portalStatistics' },
-    'admin_dashboard_statistics_freeradius': { icon: 'wba:hdd', title: 'connectivityStatistics' },
-    'admin_dashboard_settings_sms': { icon: 'wba:sms', title: 'SMSConfiguration' },
-    'admin_dashboard_settings_certs_management': { icon: 'wba:download', title: 'certsManagement' },
-    'admin_dashboard_settings_certs_radsecproxy': { icon: 'wba:download', title: 'certsManagement' },
-    'admin_dashboard_settings_certs_radsecproxy_config': { icon: 'wba:download', title: 'certsManagement' },
-    'admin_dashboard_settings_certs_freeradius': { icon: 'wba:download', title: 'certsManagement' }
+    admin_page: {icon: 'wba:user', title: 'usersManagement'},
+    admin_user_edit: {icon: 'wba:user', title: 'usersManagement'},
+    admin_dashboard_customize: {icon: 'wba:pencil-edit', title: 'landingPageConfiguration'},
+    admin_reset_password: {icon: 'wba:cog', title: 'resetPassword'},
+    admin_user_update: {icon: 'wba:user-circle', title: 'accountSettings'},
+    admin_dashboard_settings_terms: {icon: 'wba:file-check', title: 'termsAndPolicies'},
+    admin_dashboard_settings_radius: {icon: 'wba:file-space', title: 'radiusProfileConfiguration'},
+    admin_dashboard_settings_status: {icon: 'wba:barchart', title: 'platformStatus'},
+    admin_dashboard_settings_LDAP: {icon: 'wba:sync', title: 'LDAPSynchronization'},
+    admin_dashboard_settings_two_fa: {icon: 'wba:2fa', title: 'twoFactorAuthenticator'},
+    admin_dashboard_settings_auth: {icon: 'wba:at', title: 'authenticationMethods'},
+    admin_dashboard_settings_capport: {icon: 'wba:wifi', title: 'userEngagement'},
+    admin_dashboard_settings_schedule: {icon: 'wba:schedule', title: 'scheduleAutomation'},
+    admin_dashboard_statistics: {icon: 'wba:piechart', title: 'portalStatistics'},
+    admin_dashboard_statistics_freeradius: {icon: 'wba:hdd', title: 'connectivityStatistics'},
+    admin_dashboard_settings_sms: {icon: 'wba:sms', title: 'SMSConfiguration'},
+    admin_dashboard_settings_certs_management: {icon: 'wba:download', title: 'certsManagement'},
+    admin_dashboard_settings_certs_radsecproxy: {icon: 'wba:download', title: 'certsManagement'},
+    admin_dashboard_settings_certs_radsecproxy_config: {icon: 'wba:download', title: 'certsManagement'},
+    admin_dashboard_settings_certs_freeradius: {icon: 'wba:download', title: 'certsManagement'},
 } %}
 
 {% set currentRoute = app.request.attributes.get('_route') %}
-{% set header = routeHeaders[currentRoute] ?? { icon: 'wba:wifi', title: 'Dashboard' } %}
+{% set header = routeHeaders[currentRoute] ?? {icon: 'wba:wifi', title: 'Dashboard'} %}
 
 <div class="flex flex-row items-center pl-4">
     <twig:ux:icon name="{{ header.icon }}" class="w-10 mt-0.5" fill="none" />

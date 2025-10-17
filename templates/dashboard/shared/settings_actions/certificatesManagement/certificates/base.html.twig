@@ -3,7 +3,7 @@
 {% block container %}
     <div class="max-w-full mx-auto px-6 lg:px-10 py-6">
         {{ include('landing/shared/_render_toasts.html.twig') }}
-        {% include 'dashboard/shared/settings_actions/certificatesManagement/partials/_certificate_radsecproxy_stepper.htm.twig' %}
+        {{ include('dashboard/shared/settings_actions/certificatesManagement/partials/_certificate_radsecproxy_stepper.htm.twig') }}
 
         <div class="mt-12">
             {% block certificates_content %}{% endblock %}

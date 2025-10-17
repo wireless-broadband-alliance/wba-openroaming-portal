@@ -100,11 +100,7 @@ class CertificateRadSecUploadDTO
 
         // Parse the certificate
         $cert = @openssl_x509_read($contents);
-        if ($cert === false) {
-            return false;
-        }
-
-        return true;
+        return $cert !== false;
     }
 
     private function isValidPemPrivateKey(?string $contents): bool
@@ -115,10 +111,6 @@ class CertificateRadSecUploadDTO
 
         // Parse the private key
         $key = @openssl_pkey_get_private($contents);
-        if ($key === false) {
-            return false;
-        }
-
-        return true;
+        return $key !== false;
     }
 }

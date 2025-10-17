@@ -1,7 +1,7 @@
 {% set steps = [
-    { id: 'radsecproxy_upload' },
-    { id: 'radsecproxy_config' },
-    { id: 'radsecproxy_completed' }
+    {id: 'radsecproxy_upload'},
+    {id: 'radsecproxy_config'},
+    {id: 'radsecproxy_completed'},
 ] %}
 
 {% set currentStage = processState.stage ?? 'radsecproxy_upload' %}
@@ -25,8 +25,8 @@
 
         {# Step circles and labels #}
         {% for step in steps %}
-            {% set title = ('step.' ~ step.id ~ '.title')|trans(domain='_certificate_stepper') %}
-            {% set description = ('step.' ~ step.id ~ '.description')|trans(domain='_certificate_stepper') %}
+            {% set title = ('step.' ~ step.id ~ '.title')|trans(domain: '_certificate_stepper') %}
+            {% set description = ('step.' ~ step.id ~ '.description')|trans(domain: '_certificate_stepper') %}
             {% set index = loop.index0 %}
             {% set active = step.id == currentStage %}
             {% set completed = index < currentIndex %}

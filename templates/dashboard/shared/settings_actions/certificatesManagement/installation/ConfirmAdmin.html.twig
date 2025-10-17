@@ -6,7 +6,6 @@
 
 {% block container %}
 
-
     <div class="mt-6 leading-7">
         <p class="font-bold text-base sm:text-lg md:text-xl lg:text-2xl">
             {{ 'adminConfigTitle'|trans({}, 'adminConfig') }}
@@ -18,7 +17,7 @@
 
     <div class="my-[25px] divider"></div>
 
-    {{ form_start(form, {'attr': {'autocomplete': 'off'}}) }}
+    {{ form_start(form, {attr: {autocomplete: 'off'}}) }}
 
     <div class="grid gap-4 lg:grid-cols-2 xl:grid-cols-3 p-2 z-0">
 
@@ -37,15 +36,15 @@
                 </label>
             </div>
 
-            {{  include('/dashboard/shared/settings_actions/_description.html.twig', {
-                description: ''|trans({}, 'adminConfig')
+            {{ include('/dashboard/shared/settings_actions/_description.html.twig', {
+                description: ''|trans({}, 'adminConfig'),
             }) }}
 
             <div class="flex items-center space-x-2 mt-5">
                 {{ form_widget(form.code, {
                     attr: {
                         class: 'form-widget w-full border border-gray-300 rounded-lg p-2 focus:border-indigo-500 focus:ring-indigo-500',
-                    }
+                    },
                 }) }}
             </div>
 
@@ -53,8 +52,6 @@
                 {{ form_errors(form.code) }}
             </div>
         </div>
-
-
 
     </div>
 

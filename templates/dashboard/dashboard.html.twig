@@ -19,14 +19,14 @@
         {% if message != '' %}
             {{ include('landing/shared/_toast.html.twig', {
                 message: message,
-                toast_type: 'toast-warning'
+                toast_type: 'toast-warning',
             }) }}
         {% endif %}
 
         {% if isCertificateAborted() %}
             {{ include('landing/shared/_toast.html.twig', {
                 message: 'abortedCertificatesWarning'|trans({}, 'dashboard'),
-                toast_type: 'toast-warning'
+                toast_type: 'toast-warning',
             }) }}
         {% endif %}
     </div>

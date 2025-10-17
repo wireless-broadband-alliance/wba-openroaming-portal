@@ -6,14 +6,14 @@
             {{ 'title'|trans({}, 'upload') }}
         </h3>
 
-        {{ form_start(form, { 'attr': {'enctype': 'multipart/form-data'} }) }}
+        {{ form_start(form, {attr: {enctype: 'multipart/form-data'}}) }}
 
         <div class="cert-upload-group space-y-2 mb-4">
             <p class="text-lg font-medium text-gray-700">
                 {{ 'client.description'|trans({}, 'upload') }}
             </p>
             {{ form_label(form.client, 'client.label'|trans({}, 'upload')) }}
-            {{ form_widget(form.client, {'attr': {'class': 'border rounded-lg p-2 w-full'}}) }}
+            {{ form_widget(form.client, {attr: {class: 'border rounded-lg p-2 w-full'}}) }}
             <div class="text-red-500 text-sm ml-1">
                 {{ form_errors(form.client) }}
             </div>
@@ -24,7 +24,7 @@
                 {{ 'key.description'|trans({}, 'upload') }}
             </p>
             {{ form_label(form.key, 'key.label'|trans({}, 'upload')) }}
-            {{ form_widget(form.key, {'attr': {'class': 'border rounded-lg p-2 w-full'}}) }}
+            {{ form_widget(form.key, {attr: {class: 'border rounded-lg p-2 w-full'}}) }}
             <div class="text-red-500 text-sm ml-1">
                 {{ form_errors(form.key) }}
             </div>
