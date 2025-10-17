@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\InstallationProgress;
+use App\Enum\InstallationProgressType;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -43,6 +44,17 @@ class InstallationProgressRepository extends ServiceEntityRepository
     public function getLast(): ?InstallationProgress
     {
         return $this->createQueryBuilder('i')
+            ->orderBy('i.createdAt', 'DESC')
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
+    public function getLastCompleted()
+    {
+        return $this->createQueryBuilder('i')
+            ->where('i.installationState = :installationState')
+            ->setParameter('installationState', InstallationProgressType::COMPLETED->value)
             ->orderBy('i.createdAt', 'DESC')
             ->setMaxResults(1)
             ->getQuery()

@@ -17,6 +17,7 @@ use App\Form\AdminConfigType;
 use App\Form\DbSetupType;
 use App\Form\SettingsType;
 use App\Form\TwoFACode;
+use App\Repository\InstallationProgressRepository;
 use App\Repository\UserRepository;
 use App\Service\DatabaseConnectionService;
 use App\Service\EventActions;
@@ -51,6 +52,7 @@ class InstallationController extends AbstractController
         private readonly InstallationService $installationService,
         private readonly EntityManagerInterface $entityManager,
         private readonly TwoFAService $twoFAService,
+        private readonly InstallationProgressRepository $installationProgressRepository,
     ) {
     }
 
@@ -72,9 +74,6 @@ class InstallationController extends AbstractController
                 return $this->redirectToRoute('admin_dashboard_settings_certs_installation_settings');
             }
         }
-
-        // TODO add a verification when the last installation process is done, we need to create a new one!!!
-
         $data = $this->getSettings->getSettings();
 
         $dbDTO = new DbSetupDTO();
@@ -479,7 +478,7 @@ class InstallationController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function InstallationSummary()
     {
-        $lastInstallation = $this->installationService->lastInstallation();
+        $lastInstallation = $this->installationProgressRepository->getLastCompleted();
         if ($lastInstallation instanceof InstallationProgress) {
             $step = $this->installationService->getStep($lastInstallation);
             if ($step === InstallationStep::DATABASE->value) {
