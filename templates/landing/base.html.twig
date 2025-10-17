@@ -45,6 +45,14 @@
                 {{ include('landing/shared/_render_toasts.html.twig') }}
             {% endblock %}
 
+            {# Certificate Process Status - Checks if the certificates are applied correcly #}
+            {% if isCertificateAborted() %}
+                {{ include('landing/shared/_toast.html.twig', {
+                    message: 'abortedCertificatesWarning'|trans({}, 'dashboard'),
+                    toast_type: 'toast-warning'
+                }) }}
+            {% endif %}
+
             {% block second_col %}
             {% endblock %}
 

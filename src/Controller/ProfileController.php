@@ -18,6 +18,7 @@ use App\Repository\UserRadiusProfileRepository;
 use App\Service\EventActions;
 use App\Service\ExpirationProfileService;
 use App\Service\TwoFAService;
+use App\Twig\CertificateProcessExtension;
 use App\Utils\CacheUtils;
 use DateTime;
 use DateTimeInterface;
@@ -43,7 +44,8 @@ class ProfileController extends AbstractController
         private readonly UserExternalAuthRepository $userExternalAuthRepository,
         private readonly ExpirationProfileService $expirationProfileService,
         private readonly TwoFAService $twoFAService,
-        private readonly TranslatorInterface $translator
+        private readonly TranslatorInterface $translator,
+        private readonly CertificateProcessExtension $certificateProcessExtension,
     ) {
     }
 
@@ -56,10 +58,6 @@ class ProfileController extends AbstractController
         UserRadiusProfileRepository $radiusProfileRepository,
         Request $request
     ): Response {
-        if (!file_exists('/var/www/openroaming/signing-keys/ca.pem')) {
-            throw new RuntimeException("CA.pem is missing");
-        }
-
         /** @var User $user */
         $user = $this->getUser();
         if (!$user) {
@@ -71,6 +69,10 @@ class ProfileController extends AbstractController
         }
 
         if ($this->twoFAService->isTwoFARequired($user)) {
+            return $this->redirectToRoute('app_landing');
+        }
+
+        if ($this->certificateProcessExtension->isCertificateAborted()) {
             return $this->redirectToRoute('app_landing');
         }
 
@@ -165,6 +167,10 @@ class ProfileController extends AbstractController
         }
 
         if ($this->twoFAService->isTwoFARequired($user)) {
+            return $this->redirectToRoute('app_landing');
+        }
+
+        if ($this->certificateProcessExtension->isCertificateAborted()) {
             return $this->redirectToRoute('app_landing');
         }
 
@@ -317,6 +323,10 @@ class ProfileController extends AbstractController
         }
 
         if ($this->twoFAService->isTwoFARequired($user)) {
+            return $this->redirectToRoute('app_landing');
+        }
+
+        if ($this->certificateProcessExtension->isCertificateAborted()) {
             return $this->redirectToRoute('app_landing');
         }
 

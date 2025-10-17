@@ -50,6 +50,9 @@ readonly class TermsAcceptanceListener
             '/terms-conditions',
             '/privacy-policy',
             '/metrics',
+            '/profile/android',
+            '/profile/ios',
+            '/profile/windows',
         ];
 
         /** @var Session $session */

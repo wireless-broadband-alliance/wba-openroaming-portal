@@ -36,6 +36,17 @@
                     {{ include('landing/shared/_cookie_banner.html.twig') }}
                 {% endif %}
 
+                {# Toast Messages #}
+                {{ block('toast_messages') }}
+
+                {# Certificate Process Status - Checks if the certificates are applied correcly #}
+                {% if isCertificateAborted() %}
+                    {{ include('landing/shared/_toast.html.twig', {
+                        message: 'abortedCertificatesWarning'|trans({}, 'dashboard'),
+                        toast_type: 'toast-warning'
+                    }) }}
+                {% endif %}
+
                 {% block content %}
                 {% endblock %}
             </div>

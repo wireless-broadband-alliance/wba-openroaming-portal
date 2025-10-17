@@ -25,7 +25,9 @@
     {# Download profile button #}
     <div class="flex flex-col items-center gap-2">
         <div>
-            <button type="submit" class="ml-auto w-[250px] btn-primary py-2">
+            <button type="submit"
+                    class="ml-auto w-[250px] btn-primary py-2 {{ isCertificateAborted() ? 'btn-disabled' : '' }}"
+                    {% if isCertificateAborted() %}disabled{% endif %}>
                 {{ 'os_selection.download_install'|trans({}, 'landing') }}
             </button>
         </div>
@@ -55,11 +57,11 @@
             </div>
 
             <div class="flex flex-col items-center gap-2">
-                <div>
-                    <button type="submit" class="w-full md:w-[250px] btn-primary py-2 text-sm sm:text-base md:text-lg">
-                        {{ 'os_selection.download_install'|trans({}, 'landing') }}
-                    </button>
-                </div>
+                <button type="submit"
+                        class="w-full md:w-[250px] btn-primary py-2 text-sm sm:text-base md:text-lg {{ isCertificateAborted() ? 'btn-disabled' : '' }}"
+                        {% if isCertificateAborted() %}disabled{% endif %}>
+                    {{ 'os_selection.download_install'|trans({}, 'landing') }}
+                </button>
                 <div>
                     <p class="text-sm text-gray-600">
                         {{ 'os_selection.download_hint'|trans({
