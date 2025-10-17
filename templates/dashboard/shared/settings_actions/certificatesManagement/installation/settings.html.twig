@@ -6,7 +6,6 @@
 
 {% block container %}
 
-
     <div class="mt-6 leading-7">
         <p class="font-bold text-base sm:text-lg md:text-xl lg:text-2xl">
             {{ 'settingsTitle'|trans({}, 'settings') }}
@@ -21,7 +20,7 @@
     {# Live Component do formulário #}
     <twig:SettingsForm :settingsDTO="formDTO">
         <div {{ attributes }}>
-            {{ form_start(form, {'attr': {'autocomplete': 'off'}}) }}
+            {{ form_start(form, {attr: {autocomplete: 'off'}}) }}
 
             <div class="grid gap-4 lg:grid-cols-2 xl:grid-cols-3 p-2 z-0">
 
@@ -40,16 +39,16 @@
                         </label>
                     </div>
 
-                    {{  include('/dashboard/shared/settings_actions/_description.html.twig', {
-                        description: ''|trans({}, 'dataBase')
+                    {{ include('/dashboard/shared/settings_actions/_description.html.twig', {
+                        description: ''|trans({}, 'dataBase'),
                     }) }}
 
                     <div class="flex items-center space-x-2 mt-5">
                         {{ form_widget(form.trustedProxies, {
                             attr: {
                                 class: 'form-widget w-full border border-gray-300 rounded-lg p-2 focus:border-indigo-500 focus:ring-indigo-500',
-                                'wire:model.debounce.500ms': 'settingsDTO.trustedProxies'
-                            }
+                                'wire:model.debounce.500ms': 'settingsDTO.trustedProxies',
+                            },
                         }) }}
                     </div>
 
@@ -73,16 +72,16 @@
                         </label>
                     </div>
 
-                    {{  include('/dashboard/shared/settings_actions/_description.html.twig', {
-                        description: ''|trans({}, 'dataBase')
+                    {{ include('/dashboard/shared/settings_actions/_description.html.twig', {
+                        description: ''|trans({}, 'dataBase'),
                     }) }}
 
                     <div class="flex items-center space-x-2 mt-5">
                         {{ form_widget(form.turnstileKey, {
                             attr: {
                                 class: 'form-widget w-full border border-gray-300 rounded-lg p-2 focus:border-indigo-500 focus:ring-indigo-500',
-                                'wire:model.debounce.500ms': 'settingsDTO.turnstileKey'
-                            }
+                                'wire:model.debounce.500ms': 'settingsDTO.turnstileKey',
+                            },
                         }) }}
                     </div>
 
@@ -106,16 +105,16 @@
                         </label>
                     </div>
 
-                    {{  include('/dashboard/shared/settings_actions/_description.html.twig', {
-                        description: ''|trans({}, 'dataBase')
+                    {{ include('/dashboard/shared/settings_actions/_description.html.twig', {
+                        description: ''|trans({}, 'dataBase'),
                     }) }}
 
                     <div class="flex items-center space-x-2 mt-5">
                         {{ form_widget(form.turnstileSecret, {
                             attr: {
                                 class: 'form-widget w-full border border-gray-300 rounded-lg p-2 focus:border-indigo-500 focus:ring-indigo-500',
-                                'wire:model.debounce.500ms': 'settingsDTO.turnstileSecret'
-                            }
+                                'wire:model.debounce.500ms': 'settingsDTO.turnstileSecret',
+                            },
                         }) }}
                     </div>
 
@@ -139,8 +138,8 @@
                             {{ form_widget(form.jwtPassphraseEnable, {
                                 attr: {
                                     class: 'sr-only peer',
-                                    'wire:model.debounce.500ms': 'settingsDTO.jwtPassphraseEnable'
-                                }
+                                    'wire:model.debounce.500ms': 'settingsDTO.jwtPassphraseEnable',
+                                },
                             }) }}
                             <div class="w-11 h-6 bg-gray-200 rounded-full peer-checked:bg-green-500 peer-focus:ring-4 peer-focus:ring-green-300 transition-colors relative">
                                 <span class="absolute top-[2px] left-[2px] h-5 w-5 bg-white rounded-full border border-gray-300 transition-transform peer-checked:translate-x-5"></span>
@@ -165,15 +164,15 @@
                         </div>
 
                         {{ include('/dashboard/shared/settings_actions/_description.html.twig', {
-                            description: ''|trans({}, 'jwt')
+                            description: ''|trans({}, 'jwt'),
                         }) }}
 
                         <div class="flex items-center space-x-2 mt-5">
                             {{ form_widget(form.jwtPassphrase, {
                                 attr: {
                                     class: 'form-widget w-full border border-gray-300 rounded-lg p-2 focus:border-indigo-500 focus:ring-indigo-500',
-                                    'wire:model.debounce.500ms': 'settingsDTO.jwtPassphrase'
-                                }
+                                    'wire:model.debounce.500ms': 'settingsDTO.jwtPassphrase',
+                                },
                             }) }}
                         </div>
 
@@ -182,7 +181,6 @@
                         </div>
                     </div>
                 {% endif %}
-
 
             </div>
 
@@ -195,7 +193,7 @@
             </div>
 
             {{ form_row(form._token) }}
-            {{ form_end(form, {'render_rest': false}) }}
+            {{ form_end(form, {render_rest: false}) }}
         </div>
     </twig:SettingsForm>
 {% endblock %}

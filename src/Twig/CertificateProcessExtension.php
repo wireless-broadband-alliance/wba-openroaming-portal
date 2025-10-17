@@ -2,6 +2,7 @@
 
 namespace App\Twig;
 
+use App\Entity\CertificateSetupProcess;
 use App\Service\CertificateProcessCheckerService;
 use App\Enum\CertificateProcessStatus;
 use Twig\Extension\AbstractExtension;
@@ -14,10 +15,11 @@ class CertificateProcessExtension extends AbstractExtension
     ) {
     }
 
+    #[\Override]
     public function getFunctions(): array
     {
         return [
-            new TwigFunction('isCertificateAborted', [$this, 'isCertificateAborted']),
+            new TwigFunction('isCertificateAborted', $this->isCertificateAborted(...)),
         ];
     }
 
@@ -28,7 +30,7 @@ class CertificateProcessExtension extends AbstractExtension
     {
         $currentProcess = $this->certificateProcessCheckerService->getCurrentProcess();
 
-        if ($currentProcess === null) {
+        if (!$currentProcess instanceof CertificateSetupProcess) {
             return false;
         }
 
