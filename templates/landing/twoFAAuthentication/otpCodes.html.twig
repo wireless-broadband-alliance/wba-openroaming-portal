@@ -20,7 +20,7 @@
                     <div class="flex justify-start space-x-4 mb-4">
                         <button title="{{ 'copy'|trans({}, 'otp_codes') }}"
                                 data-action="clipboard#copyToClipboard">
-                            <twig:ux:icon class="w-4" name="wba:copy" />
+                            <twig:ux:icon class="w-4 fill-none" name="wba:copy" />
                         </button>
                         <a title="{{ 'download'|trans({}, 'otp_codes') }}"
                            href="{{ path('app_download_codes', {context: context}) }}">

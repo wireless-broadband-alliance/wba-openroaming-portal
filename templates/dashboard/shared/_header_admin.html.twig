@@ -1,52 +1,49 @@
 {# Header - Title - left conner #}
 <div class="flex flex-row items-center -pl-2">
     {% if app.request.attributes.get('_route') == 'admin_page' or app.request.attributes.get('_route') == 'admin_user_edit' %}
-        <twig:ux:icon name="wba:user" class="w-10 mt-0.5" fill="none"/>
+        <twig:ux:icon name="wba:user" class="w-10 mt-0.5 fill-none"/>
         <h1 class="text-2xl font-semibold p-5">{{ 'usersManagement'|trans({}, '_header_admin') }}</h1>
     {% elseif app.request.attributes.get('_route') == 'admin_dashboard_customize' %}
-        <twig:ux:icon name="wba:pencil-edit" class="w-10 mt-0.5" fill="none"/>
+        <twig:ux:icon name="wba:pencil-edit" class="w-10 mt-0.5 fill-none"/>
         <h1 class="text-2xl font-semibold p-5">{{ 'landingPageConfiguration'|trans({}, '_header_admin') }}</h1>
-    {% elseif app.request.attributes.get('_route') == 'admin_reset_password' %}
-        <twig:ux:icon name="wba:cog" class="w-10 mt-0.5" fill="none"/>
-        <h1 class="text-2xl font-semibold p-5">{{ 'resetPassword'|trans({}, '_header_admin') }}</h1>
     {% elseif app.request.attributes.get('_route') == 'admin_user_update' %}
-        <twig:ux:icon name="wba:user-circle" class="w-10 mt-0.5" fill="none"/>
+        <twig:ux:icon name="wba:user-circle" class="w-10 mt-0.5 fill-none"/>
         <h1 class="text-2xl font-semibold p-5">{{ 'accountSettings'|trans({}, '_header_admin') }}</h1>
     {% elseif app.request.attributes.get('_route') == 'admin_dashboard_settings_terms' %}
-        <twig:ux:icon name="wba:file-check" class="w-10 mt-0.5" fill="none"/>
+        <twig:ux:icon name="wba:file-check" class="w-10 mt-0.5 fill-none"/>
         <h1 class="text-2xl font-semibold p-5">{{ 'termsAndPolicies'|trans({}, '_header_admin') }}</h1>
     {% elseif app.request.attributes.get('_route') == 'admin_dashboard_settings_radius' %}
-        <twig:ux:icon name="wba:file-space" class="w-10 mt-0.5" fill="none"/>
+        <twig:ux:icon name="wba:file-space" class="w-10 mt-0.5 fill-none"/>
         <h1 class="text-2xl font-semibold p-5">{{ 'radiusProfileConfiguration'|trans({}, '_header_admin') }}</h1>
     {% elseif app.request.attributes.get('_route') == 'admin_dashboard_settings_status' %}
-        <twig:ux:icon name="wba:barchart" class="w-10 mt-0.5" fill="none"/>
+        <twig:ux:icon name="wba:barchart" class="w-10 mt-0.5 stroke-current fill-none"/>
         <h1 class="text-2xl font-semibold p-5">{{ 'platformStatus'|trans({}, '_header_admin') }}</h1>
     {% elseif app.request.attributes.get('_route') == 'admin_dashboard_settings_LDAP' %}
-        <twig:ux:icon name="wba:sync" class="w-10 mt-0.5" fill="none"/>
+        <twig:ux:icon name="wba:sync" class="w-10 mt-0.5 fill-none"/>
         <h1 class="text-2xl font-semibold p-5">{{ 'LDAPSynchronization'|trans({}, '_header_admin') }}</h1>
     {% elseif app.request.attributes.get('_route') == 'admin_dashboard_settings_two_fa' %}
-        <twig:ux:icon name="wba:2fa" class="w-10 mt-0.5" fill="none"/>
+        <twig:ux:icon name="wba:2fa" class="w-10 mt-0.5 stroke-current fill-none"/>
         <h1 class="text-2xl font-semibold p-5">{{ 'twoFactorAuthenticator'|trans({}, '_header_admin') }}</h1>
     {% elseif app.request.attributes.get('_route') == 'admin_dashboard_settings_LDAP' %}
-        <twig:ux:icon name="wba:sync" class="w-10 mt-0.5" fill="none"/>
+        <twig:ux:icon name="wba:sync" class="w-10 mt-0.5 fill-none"/>
         <h1 class="text-2xl font-semibold p-5">{{ 'LDAPSynchronization'|trans({}, '_header_admin') }}</h1>
     {% elseif app.request.attributes.get('_route') == 'admin_dashboard_settings_auth' %}
-        <twig:ux:icon name="wba:at" class="w-10 mt-0.5" fill="none"/>
+        <twig:ux:icon name="wba:at" class="w-10 mt-0.5 stroke-current fill-none"/>
         <h1 class="text-2xl font-semibold p-5">{{ 'authenticationMethods'|trans({}, '_header_admin') }}</h1>
     {% elseif app.request.attributes.get('_route') == 'admin_dashboard_settings_capport' %}
-        <twig:ux:icon name="wba:wifi" class="w-10 mt-0.5" fill="none"/>
+        <twig:ux:icon name="wba:wifi" class="w-10 mt-0.5 fill-none"/>
         <h1 class="text-2xl font-semibold p-5">{{ 'userEngagement'|trans({}, '_header_admin') }}</h1>
     {% elseif app.request.attributes.get('_route') == 'admin_dashboard_settings_schedule' %}
-        <twig:ux:icon name="wba:schedule" class="w-10 mt-0.5" fill="none"/>
+        <twig:ux:icon name="wba:schedule" class="w-10 mt-0.5 fill-none"/>
         <h1 class="text-2xl font-semibold p-5">{{ 'scheduleAutomation'|trans({}, '_header_admin') }}</h1>
     {% elseif app.request.attributes.get('_route') == 'admin_dashboard_statistics' %}
-        <twig:ux:icon name="wba:piechart" class="w-10 mt-0.5" fill="none"/>
+        <twig:ux:icon name="wba:piechart" class="w-10 mt-0.5 fill-none"/>
         <h1 class="text-2xl font-semibold p-5">{{ 'portalStatistics'|trans({}, '_header_admin') }}</h1>
     {% elseif app.request.attributes.get('_route') == 'admin_dashboard_statistics_freeradius' %}
-        <twig:ux:icon name="wba:hdd" class="w-10 mt-0.5" fill="none"/>
+        <twig:ux:icon name="wba:hdd" class="w-10 mt-0.5 fill-none"/>
         <h1 class="text-2xl font-semibold p-5">{{ 'connectivityStatistics'|trans({}, '_header_admin') }}</h1>
     {% elseif app.request.attributes.get('_route') == 'admin_dashboard_settings_sms' %}
-        <twig:ux:icon name="wba:sms" class="w-10 mt-0.5" fill="none"/>
+        <twig:ux:icon name="wba:sms" class="w-10 mt-0.5 fill-none"/>
         <h1 class="text-2xl font-semibold p-5">{{ 'SMSConfiguration'|trans({}, '_header_admin') }}</h1>
     {% endif %}
 </div>
@@ -88,7 +85,7 @@
                     {# Account Option #}
                     <a href="{{ path('admin_user_edit', {id: app.user.id}) }}"
                        class="flex items-center space-x-2">
-                        <twig:ux:icon name="wba:user-circle" class="w-7 pr-2 mr-2" fill="none"/>
+                        <twig:ux:icon name="wba:user-circle" class="w-7 pr-2 mr-2 fill-none"/>
                         {{ 'account'|trans({}, '_header_admin') }}
                     </a>
                 </li>
@@ -101,7 +98,7 @@
                                 {{ stimulus_action('nav-dropdown', 'toggleHeader')|stimulus_action('nav-dropdown', 'lost_focusHeader', 'focusout') }}>
 
                             <div class="flex flex-row items-center space-x-2">
-                                <twig:ux:icon name="wba:globe" class="w-6 pr-1 mr-2" fill="none"/>
+                                <twig:ux:icon name="wba:globe" class="w-6 pr-1 mr-2 fill-none"/>
                                 <span class="truncate">{{ 'language'|trans({}, 'landing') }}</span>
                             </div>
                         </button>
@@ -110,13 +107,13 @@
                     <ul {{ stimulus_target('nav-dropdown', 'container') }}
                             class="px-6 hidden mt-2 divide-y divide-gray-100 text-sm rounded-lg bg-white">
                         <li class="flex items-center space-x-2 px-4 py-2 rounded cursor-pointer hover:text-lightGreen {{ app.request.locale == constant('App\\Enum\\LanguageType::EN').value ? 'selected' : '' }}">
-                            <twig:ux:icon class="w-4 h-4 rounded-full" name="wba:gb-flag" />
+                            <twig:ux:icon class="w-4 h-4 rounded-full" name="wba:gb-flag"/>
                             <a href="{{ path('app_change_language', {locale: constant('App\\Enum\\LanguageType::EN').value}) }}">
                                 English
                             </a>
                         </li>
                         <li class="flex items-center space-x-2 px-4 py-2 rounded cursor-pointer hover:text-lightGreen {{ app.request.locale == constant('App\\Enum\\LanguageType::PT').value ? 'selected' : '' }}">
-                            <twig:ux:icon class="w-4 h-4 rounded-full" name="wba:portugal-flag" />
+                            <twig:ux:icon class="w-4 h-4 rounded-full" name="wba:portugal-flag"/>
                             <a href="{{ path('app_change_language', {locale: constant('App\\Enum\\LanguageType::PT').value}) }}">
                                 Portuguese
                             </a>
@@ -128,7 +125,7 @@
                     <a href="{{ path('app_dashboard_logout') }}"
                        class="flex items-center space-x-2"
                        onclick="return confirm('{{ 'logoutMessage'|trans({}, '_header_admin') }}')">
-                        <twig:ux:icon name="wba:logout" class="w-7 pr-2 mr-2" fill="none"/>
+                        <twig:ux:icon name="wba:logout" class="w-7 pr-2 mr-2 fill-none"/>
                         {{ 'logout'|trans({}, '_header_admin') }}
                     </a>
                 </li>
