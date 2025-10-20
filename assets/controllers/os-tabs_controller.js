@@ -41,19 +41,11 @@ export default class extends Controller {
         // Toggle content visibility
         this.contentTargets.forEach((el) => el.classList.toggle("hidden", el.dataset.os !== os));
 
-        // Toggle tab + icon styles
+        // Toggle tab styles
         this.tabTargets.forEach((btn) => {
             const isActive = btn.dataset.os === os;
-            const icon = btn.querySelector("svg"); // find the icon inside the tab
-
             btn.classList.remove(...(isActive ? inactiveClasses : activeClasses));
             btn.classList.add(...(isActive ? activeClasses : inactiveClasses));
-
-            // update icon color
-            if (icon) {
-                icon.classList.remove(isActive ? "text-gray-400" : "text-black");
-                icon.classList.add(isActive ? "text-black" : "text-gray-400");
-            }
         });
     }
 }
