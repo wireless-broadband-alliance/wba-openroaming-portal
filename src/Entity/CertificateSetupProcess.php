@@ -158,11 +158,14 @@ class CertificateSetupProcess
 
     public function removeCertificate(Certificate $certificate): static
     {
-        if ($this->certificates->removeElement($certificate)) {
-            // set the owning side to null (unless already changed)
-            if ($this->certificates->removeElement($certificate) && $certificate->getSetupProcess() === $this) {
-                $certificate->setSetupProcess(null);
-            }
+        // set the owning side to null (unless already changed)
+        if (
+            $this->certificates->removeElement($certificate) &&
+            ($this->certificates->removeElement(
+                $certificate
+            ) && $certificate->getSetupProcess() === $this)
+        ) {
+            $certificate->setSetupProcess(null);
         }
 
         return $this;
