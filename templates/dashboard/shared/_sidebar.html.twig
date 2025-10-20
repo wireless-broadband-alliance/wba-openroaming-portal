@@ -41,11 +41,11 @@
             <div class="duration-300 rounded p-2 flex flex-row justify-between items-center cursor-pointer hover:shadow hover:text-lightGreen
                 {% if app.request.attributes.get('_route') in ['admin_page', 'admin_user_edit'] %}selected{% endif %}">
                 <div class="flex items-center space-x-2">
-                    <twig:ux:icon name="wba:user" class="w-5 mr-2 stroke-current fill-none" />
+                    <twig:ux:icon name="wba:user" class="w-5 mr-2 fill-none stroke-current" />
                     {{ 'usersManagement'|trans({}, '_header_admin') }}
                 </div>
 
-                <twig:ux:icon name="wba:right" class="w-4 stroke-current fill-none" />
+                <twig:ux:icon name="wba:right" class="w-4 fill-none stroke-current" />
             </div>
         </a>
 
@@ -59,7 +59,7 @@
                     {{ 'portalSettings'|trans({}, '_header_admin') }}
                 </div>
                 <twig:ux:icon name="wba:right"
-                              class="w-4 fill-none transition ease-in {{ (app.request.attributes.get('_route') in portalSettingsRoutes) ? 'rotate-90' : '' }}" data-nav-submenu-target="icon"/>
+                              class="w-4 fill-none stroke-current transition ease-in {{ (app.request.attributes.get('_route') in portalSettingsRoutes) ? 'rotate-90' : '' }}" data-nav-submenu-target="icon"/>
             </button>
 
             <div class="py-2 mt-1 bg-lightGray rounded-md duration-300 shadow {{ (app.request.attributes.get('_route') in portalSettingsRoutes) ? '' : 'hidden' }}" {{ stimulus_target('nav-submenu', 'container') }}>
@@ -74,14 +74,14 @@
                     <li>
                         <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300 {% if app.request.attributes.get('_route') == 'admin_dashboard_customize' %}selected{% endif %}"
                            href="{{ path('admin_dashboard_customize') }}">
-                            <twig:ux:icon name="wba:pencil-edit" class="w-5 mr-4 fill-none"/>
+                            <twig:ux:icon name="wba:pencil-edit" class="w-5 mr-4 fill-none stroke-current"/>
                             {{ 'landingPageConfiguration'|trans({}, '_header_admin') }}
                         </a>
                     </li>
                     <li>
                         <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300 {% if app.request.attributes.get('_route') == 'admin_dashboard_settings_capport' %}selected{% endif %}"
                            href="{{ path('admin_dashboard_settings_capport') }}">
-                            <twig:ux:icon name="wba:wifi" class="w-5 mr-4 fill-none"/>
+                            <twig:ux:icon name="wba:wifi" class="w-5 mr-4 fill-none stroke-current"/>
                             {{ 'userEngagement'|trans({}, '_header_admin') }}
                         </a>
                     </li>
@@ -95,7 +95,7 @@
                     <li>
                         <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300 {% if app.request.attributes.get('_route') == 'admin_dashboard_settings_schedule' %}selected{% endif %}"
                            href="{{ path('admin_dashboard_settings_schedule') }}">
-                            <twig:ux:icon name="wba:schedule" class="w-5 mr-4 fill-none"/>
+                            <twig:ux:icon name="wba:schedule" class="w-5 mr-4 fill-none stroke-current"/>
                             {{ 'scheduleAutomation'|trans({}, '_header_admin') }}
                         </a>
                     </li>
@@ -113,7 +113,7 @@
                 </div>
 
                 <twig:ux:icon name="wba:right"
-                              class="w-4 fill-none transition ease-in {{ (app.request.attributes.get('_route') in userAuthenticationRoutes) ? 'rotate-90' : '' }}"
+                              class="w-4 fill-none stroke-current transition ease-in {{ (app.request.attributes.get('_route') in userAuthenticationRoutes) ? 'rotate-90' : '' }}"
                               data-nav-submenu-target="icon"/>
             </button>
 
@@ -136,7 +136,7 @@
                     <li>
                         <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300 {% if app.request.attributes.get('_route') == 'admin_dashboard_settings_LDAP' %}selected{% endif %}"
                            href="{{ path('admin_dashboard_settings_LDAP') }}">
-                            <twig:ux:icon name="wba:sync" class="w-5 mr-4 fill-none"/>
+                            <twig:ux:icon name="wba:sync" class="w-5 mr-4 fill-none stroke-current"/>
                             {{ 'LDAPSynchronization'|trans({}, '_header_admin') }}
                         </a>
                     </li>
@@ -150,7 +150,7 @@
                     <li>
                         <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300 {% if app.request.attributes.get('_route') == 'admin_dashboard_settings_sms' %}selected{% endif %}"
                            href="{{ path('admin_dashboard_settings_sms') }}">
-                            <twig:ux:icon name="wba:sms" class="w-5 mr-4 fill-none" />
+                            <twig:ux:icon name="wba:sms" class="w-5 mr-4 fill-none stroke-current" />
                             {{ 'SMSConfiguration'|trans({}, '_header_admin') }}
                         </a>
                     </li>
@@ -168,7 +168,7 @@
                 </div>
 
                 <twig:ux:icon name="wba:right"
-                              class="w-4 fill-none transition ease-in {{ (app.request.attributes.get('_route') in portalStatisticsRoutes) ? 'rotate-90' : '' }}"
+                              class="w-4 fill-none stroke-current transition ease-in {{ (app.request.attributes.get('_route') in portalStatisticsRoutes) ? 'rotate-90' : '' }}"
                               data-nav-submenu-target="icon"/>
             </button>
             <div {{ stimulus_target('nav-submenu', 'container') }}
@@ -178,7 +178,7 @@
                         {# SideBar Button - Portal Statistics - Button #}
                         <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300 {% if app.request.attributes.get('_route') == 'admin_dashboard_statistics' %}selected{% endif %}"
                            href="{{ path('admin_dashboard_statistics') }}">
-                            <twig:ux:icon name="wba:piechart" class="w-5 mr-4 fill-none" />
+                            <twig:ux:icon name="wba:piechart" class="w-5 mr-4 fill-none stroke-current" />
 
                             {{ 'portalStatistics'|trans({}, '_header_admin') }}
                         </a>
@@ -204,7 +204,7 @@
                     <twig:ux:icon name="wba:cog" class="w-5 mr-2 fill-none stroke-current"/>
                     {{ 'settings'|trans({}, '_header_admin') }}
                 </div>
-                <twig:ux:icon name="wba:right" class="w-4 transition ease-in fill-none"
+                <twig:ux:icon name="wba:right" class="w-4 transition ease-in fill-none stroke-current"
                               data-nav-submenu-target="icon"/>
             </button>
             {# Submenu Dropdown #}
@@ -216,7 +216,7 @@
                     <li>
                         <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300"
                            href="{{ path('admin_user_edit', {id: app.user.id}) }}">
-                            <twig:ux:icon name="wba:user-circle" class="w-5 mr-4 fill-none"/>
+                            <twig:ux:icon name="wba:user-circle" class="w-5 mr-4 fill-none stroke-current"/>
                             {{ 'account'|trans({}, '_header_admin') }}
                         </a>
                     </li>
