@@ -29,7 +29,7 @@
                 <a {% if currentPage > 1 %} href="{{ path(route, {u: searchTerm ?? '', page: 1, filter: activeFilter ?? '', count: count}) }}" {% endif %}
                         class="hover:shadow-md p-1 rounded-lg {{ currentPage > 1 ? 'cursor-pointer' : 'text-gray-400 cursor-not-allowed' }}"
                         title={{ 'firstPage'|trans({}, '_pagination') }}>
-                    <twig:ux:icon name="wba:d-right" class="w-4 rotate-180" fill="none"/>
+                    <twig:ux:icon name="wba:d-right" class="w-4 rotate-180 fill-none" />
                     <span class="sr-only">{{ 'firstPage'|trans({}, '_pagination') }}</span>
                 </a>
 
@@ -53,7 +53,7 @@
                 <a {% if currentPage < totalPages %} href="{{ path(route, {u: searchTerm ?? '', page: totalPages, filter: activeFilter ?? '', count: count}) }}" {% endif %}
                         class="hover:shadow-md p-1 rounded-lg {{ currentPage < totalPages ? 'cursor-pointer' : 'text-gray-400 cursor-not-allowed' }}"
                         title={{ 'lastPage'|trans({}, '_pagination') }}>
-                    <twig:ux:icon name="wba:d-right" class="w-4" fill="none"/>
+                    <twig:ux:icon name="wba:d-right" class="w-4 fill-none" />
                     <span class="sr-only">{{ 'lastPage'|trans({}, '_pagination') }}</span>
                 </a>
             </div>

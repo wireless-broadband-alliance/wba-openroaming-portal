@@ -88,7 +88,7 @@
                     <li>
                         <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300 {% if app.request.attributes.get('_route') == 'admin_dashboard_settings_terms' %}selected{% endif %}"
                            href="{{ path('admin_dashboard_settings_terms') }}">
-                            <twig:ux:icon name="wba:file-check" class="w-5 mr-4 fill-none"/>
+                            <twig:ux:icon name="wba:file-check" class="w-5 mr-4 fill-none stroke-current"/>
                             {{ 'termsAndPolicies'|trans({}, '_header_admin') }}
                         </a>
                     </li>
@@ -143,7 +143,7 @@
                     <li>
                         <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300 {% if app.request.attributes.get('_route') == 'admin_dashboard_settings_radius' %}selected{% endif %}"
                            href="{{ path('admin_dashboard_settings_radius') }}">
-                            <twig:ux:icon name="wba:file-space" class="w-5 mr-4 fill-none" />
+                            <twig:ux:icon name="wba:file-space" class="w-5 mr-4 fill-none stroke-current" />
                             {{ 'radiusProfileConfiguration'|trans({}, '_header_admin') }}
                         </a>
                     </li>
@@ -163,7 +163,7 @@
             <button type="button" class="w-full duration-300 rounded p-2 flex flex-row justify-between items-center cursor-pointer hover:shadow hover:text-lightGreen
                 {% if app.request.attributes.get('_route') in portalStatisticsRoutes %}selected{% endif %}" {{ stimulus_action('nav-submenu', 'toggle') }}>
                 <div class="flex items-center space-x-2">
-                    <twig:ux:icon name="wba:database" class="w-5 mr-2 fill-none"/>
+                    <twig:ux:icon name="wba:database" class="w-5 mr-2 fill-none stroke-current"/>
                     {{ 'statistics'|trans({}, '_header_admin') }}
                 </div>
 
@@ -187,7 +187,7 @@
                         {# SideBar Button - Freeradius Statistics - Button #}
                         <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300 {% if app.request.attributes.get('_route') == 'admin_dashboard_statistics_freeradius' %}selected{% endif %}"
                            href="{{ path('admin_dashboard_statistics_freeradius') }}">
-                            <twig:ux:icon name="wba:hdd" class="w-5 mr-4 fill-none" />
+                            <twig:ux:icon name="wba:hdd" class="w-5 mr-4 fill-none stroke-current" />
                             {{ 'connectivityStatistics'|trans({}, '_header_admin') }}
                         </a>
                     </li>
@@ -201,7 +201,7 @@
                     class="w-full duration-300 rounded p-2 mb-4 flex flex-row justify-between items-center cursor-pointer hover:shadow hover:text-lightGreen"
                     {{ stimulus_action('nav-submenu', 'toggle') }}>
                 <div class="flex items-center space-x-2">
-                    <twig:ux:icon name="wba:cog" class="w-5 mr-2 fill-none"/>
+                    <twig:ux:icon name="wba:cog" class="w-5 mr-2 fill-none stroke-current"/>
                     {{ 'settings'|trans({}, '_header_admin') }}
                 </div>
                 <twig:ux:icon name="wba:right" class="w-4 transition ease-in fill-none"
@@ -230,7 +230,7 @@
                                 class="w-full flex justify-between items-center">
 
                             <div class="flex items-center space-x-2">
-                                <twig:ux:icon name="wba:globe" class="w-6 pr-1 mr-2 fill-none"/>
+                                <twig:ux:icon name="wba:globe" class="w-6 pr-1 mr-2 fill-none stroke-current"/>
                                 <span class="truncate">{{ 'language'|trans({}, 'landing') }}</span>
                             </div>
                         </button>
@@ -259,7 +259,7 @@
                                 class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300"
                                 href="{{ path('app_dashboard_logout') }}"
                                 onclick="return confirm('Are you sure you want to leave?')">
-                            <twig:ux:icon name="wba:logout" class="w-5 mr-4 fill-none"/>
+                            <twig:ux:icon name="wba:logout" class="w-5 mr-4 fill-none stroke-current"/>
                             {{ 'logout'|trans({}, '_header_admin') }}
                         </a>
                     </li>
