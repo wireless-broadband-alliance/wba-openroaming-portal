@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Enum\CertificateProcessStatus;
+use App\Enum\CertificateTestResult;
 use App\Repository\CertificateSetupProcessRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -25,12 +26,15 @@ class CertificateSetupProcess
 
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $radsecproxyConfigAppliedAt = null;
-
+    #[ORM\Column(enumType: CertificateTestResult::class, nullable: true)]
+    private ?CertificateTestResult $radsecproxyTestResult = null;
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $freeradiusFormCompletedAt = null;
 
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $freeradiusConfigAppliedAt = null;
+    #[ORM\Column(enumType: CertificateTestResult::class, nullable: true)]
+    private ?CertificateTestResult $freeradiusTestResult = null;
 
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
@@ -90,6 +94,17 @@ class CertificateSetupProcess
         return $this;
     }
 
+    public function getRadsecproxyTestResult(): ?CertificateTestResult
+    {
+        return $this->radsecproxyTestResult;
+    }
+
+    public function setRadsecproxyTestResult(?CertificateTestResult $radsecproxyTestResult): static
+    {
+        $this->radsecproxyTestResult = $radsecproxyTestResult;
+        return $this;
+    }
+
     public function getFreeradiusFormCompletedAt(): ?\DateTimeImmutable
     {
         return $this->freeradiusFormCompletedAt;
@@ -111,6 +126,17 @@ class CertificateSetupProcess
     {
         $this->freeradiusConfigAppliedAt = $freeradiusConfigAppliedAt;
 
+        return $this;
+    }
+
+    public function getFreeradiusTestResult(): ?CertificateTestResult
+    {
+        return $this->freeradiusTestResult;
+    }
+
+    public function setFreeradiusTestResult(?CertificateTestResult $freeradiusTestResult): static
+    {
+        $this->freeradiusTestResult = $freeradiusTestResult;
         return $this;
     }
 

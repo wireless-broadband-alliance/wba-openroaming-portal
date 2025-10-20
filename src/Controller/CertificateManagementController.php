@@ -309,17 +309,17 @@ class CertificateManagementController extends AbstractController
         );
     }
 
-//    #[Route('/dashboard/settings/certificatesManagement/freeradius',
-//        name: 'admin_dashboard_settings_certs_freeradius'
-//    )]
-//    #[IsGranted('ROLE_ADMIN')]
-//    public function settingsCertificatesManagementFreeradius(): Response
-//    {
-//        $data = $this->getSettings->getSettings();
-//
-//        return $this->render('dashboard/shared/settings_actions.html.twig', [
-//            'data' => $data,
-//            'potato' => 'potato'
-//        ]);
-//    }
+    #[Route('/dashboard/settings/certificatesManagement/freeradius',
+        name: 'admin_dashboard_settings_certs_freeradius'
+    )]
+    #[IsGranted('ROLE_ADMIN')]
+    public function settingsCertificatesManagementFreeradius(): Response
+    {
+        $data = $this->getSettings->getSettings();
+
+        return $this->render('dashboard/shared/settings_actions.html.twig', [
+            'data' => $data,
+            'potato' => 'potato'
+        ]);
+    }
 }

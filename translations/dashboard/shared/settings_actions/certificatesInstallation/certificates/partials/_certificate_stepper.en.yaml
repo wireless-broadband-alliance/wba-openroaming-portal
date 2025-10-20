@@ -6,8 +6,8 @@ step:
         title: 'Apply RadSecProxy Config'
         description: 'Run the generated commands to configure your resolver.'
     radsecproxy_completed:
-        title: 'Process Completed'
-        description: 'Certificate setup finished successfully.'
+        title: 'Test Implementation'
+        description: 'Certificate setup almost finished.'
 
 abort: 'Abort Process'
 confirm_abort: 'Are you sure you want to abort the current certificate setup process?'

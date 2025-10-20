@@ -1,6 +1,69 @@
 {% extends 'dashboard/shared/settings_actions/certificatesManagement/certificates/radsecproxy/base.html.twig' %}
 
 {% block radsecproxy_content %}
-    Radsecproxy completed pog :D
-    Add more stuff about starting the new required process for freeradius
+    {# Info Banner #}
+    <div class="toast-light-warning mb-6 flex items-start gap-3">
+        <twig:ux:icon name="wba:info" class="w-10 md:w-5 h-10 md:h-5 flex-shrink-0 text-primary" fill="currentColor"/>
+        <div>
+            <p class="text-gray-800 font-medium">
+                The RadSecProxy certificate configuration has been completed but has not yet been tested.
+            </p>
+            <p class="text-gray-600 text-sm">
+                You can test this configuration on the server to verify that it works correctly, or continue with the FreeRADIUS certificate setup.
+            </p>
+        </div>
+    </div>
+
+    {# Action Card #}
+    <div class="border border-gray-200 rounded-xl shadow-sm overflow-hidden bg-white">
+        <div class="bg-gray-50 px-6 py-4 border-b border-gray-200 flex items-center gap-2">
+            <twig:ux:icon class="w-5 h-5 text-primary" name="wba:terminal"/>
+            <h5 class="text-lg font-semibold text-gray-800">
+                Test or Proceed
+            </h5>
+        </div>
+
+        <div class="p-6 space-y-6 text-gray-700" data-controller="test-certificates">
+            <div class="text-center space-y-3">
+                <twig:ux:icon name="wba:shield-check" class="w-14 h-14 mx-auto text-primary"/>
+                <h3 class="text-xl font-semibold text-gray-900">Configuration Complete (Not Yet Tested)</h3>
+                <p class="text-gray-600">
+                    Run the server test to confirm that the RadSecProxy certificates are installed correctly.<br>
+                    Once testing is done, proceed to configure the FreeRADIUS certificates.
+                </p>
+            </div>
+
+            {# Buttons #}
+            <div class="flex flex-col md:flex-row justify-center items-center gap-4 pt-4">
+                <button
+                        type="button"
+                        class="px-6 py-3 bg-primary text-white font-medium rounded-lg shadow hover:bg-primary-dark focus:ring-2 focus:ring-primary/50 transition flex items-center gap-2"
+                        data-action="click->test-certificates#runTest"
+                        data-test-certificates-target="testButton"
+                >
+                    <twig:ux:icon name="wba:shield-check" class="w-5 h-5"/>
+                    Test RadSecProxy Certificates
+                </button>
+
+                <a
+                        href="{{ path('admin_dashboard_settings_certs_freeradius') }}"
+                        class="px-6 py-3 bg-white border border-gray-300 text-gray-800 font-medium rounded-lg shadow-sm hover:bg-gray-50 focus:ring-2 focus:ring-primary/30 transition flex items-center gap-2"
+                >
+                    <twig:ux:icon name="wba:right" class="w-5 h-5"/>
+                    Proceed to FreeRADIUS Certificates
+                </a>
+            </div>
+
+            {# Test Result Section #}
+            <div class="mt-6" data-test-certificates-target="resultArea" style="display:none;">
+                <div class="alert alert-info flex items-start gap-2 bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm text-blue-800">
+                    <twig:ux:icon name="wba:hourglass-outline" class="w-5 h-5 flex-shrink-0 text-blue-500"/>
+                    <div>
+                        <strong>Testing in progress...</strong><br>
+                        Verifying the RadSecProxy certificate setup on the server. Please wait.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}
