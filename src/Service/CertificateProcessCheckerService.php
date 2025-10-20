@@ -4,6 +4,7 @@ namespace App\Service;
 
 use App\Entity\CertificateSetupProcess;
 use App\Enum\CertificateProcessStatus;
+use App\Enum\CertificateTestResult;
 use App\Repository\CertificateSetupProcessRepository;
 use DateTimeImmutable;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -67,13 +68,14 @@ readonly class CertificateProcessCheckerService
 
         // 3 - User applied the new configuration on the resolver
         if (
-            !$process->getFreeradiusFormCompletedAt() instanceof DateTimeImmutable
+            !$process->getRadsecproxyTestResult() instanceof CertificateTestResult ||
+            $process->getRadsecproxyTestResult() === CertificateTestResult::FAILED->value
         ) {
             return [
                 'active' => true,
-                'stage' => 'radsecproxy_completed',
-                'message' => $this->translator->trans('radsecproxy.completed', [], 'CertificateProcessCheckerService'),
-                'nextRoute' => 'admin_dashboard_settings_certs_radsecproxy_completed',
+                'stage' => 'radsecproxy_test',
+                'message' => $this->translator->trans('radsecproxy.test', [], 'CertificateProcessCheckerService'),
+                'nextRoute' => 'admin_dashboard_settings_certs_radsecproxy_test',
                 'process' => $process,
             ];
         }

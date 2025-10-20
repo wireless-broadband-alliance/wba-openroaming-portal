@@ -1,7 +1,7 @@
 {% set steps = [
     {id: 'radsecproxy_upload'},
     {id: 'radsecproxy_config'},
-    {id: 'radsecproxy_completed'},
+    {id: 'radsecproxy_test'},
 ] %}
 
 {% set currentStage = processState.stage ?? 'radsecproxy_upload' %}
@@ -13,17 +13,17 @@
 {% endfor %}
 
 <div class="w-full max-w-5xl mx-auto mt-8 mb-10 px-4">
-    <div class="relative flex items-center justify-between">
+    <div class="relative flex flex-col md:flex-row items-start md:items-center md:justify-between">
         {# Background line #}
-        <div class="absolute top-1/2 left-0 w-full h-1 bg-gray-200 rounded-full transform -translate-y-1/2"></div>
+        <div class="hidden md:block absolute top-1/2 left-0 w-full h-1 bg-gray-200 rounded-full transform -translate-y-1/2"></div>
 
-        {# Progress bar fill — use primary color #}
+        {# Progress bar #}
         <div
-                class="absolute top-1/2 left-0 h-1 bg-primary rounded-full transform -translate-y-1/2 transition-all duration-500 ease-in-out"
+                class="hidden md:block absolute top-1/2 left-0 h-1 bg-primary rounded-full transform -translate-y-1/2 transition-all duration-500 ease-in-out"
                 style="width: calc({{ ((currentIndex + 1) / steps|length) * 100 }}%)"
         ></div>
 
-        {# Step circles and labels #}
+        {# Steps #}
         {% for step in steps %}
             {% set title = ('step.' ~ step.id ~ '.title')|trans(domain: '_certificate_stepper') %}
             {% set description = ('step.' ~ step.id ~ '.description')|trans(domain: '_certificate_stepper') %}
@@ -31,31 +31,20 @@
             {% set active = step.id == currentStage %}
             {% set completed = index < currentIndex %}
 
-            <div class="relative flex flex-col items-center text-center w-1/3">
-                <div
-                        class="flex items-center justify-center w-10 h-10 rounded-full border-2 z-10 font-semibold transition-all duration-300
-                        {% if completed %}
-                            bg-primary border-primary text-white
-                        {% elseif active %}
-                            bg-white border-primary text-primary
-                        {% else %}
-                            bg-white border-gray-300 text-gray-400
-                        {% endif %}
-                    ">
+            <div class="w-full md:flex-1 flex flex-col md:items-center text-center md:text-center mb-8 p-2">
+                <div class="flex items-center justify-center w-10 h-10 sm:w-9 sm:h-9 rounded-full border-2 z-10 font-semibold transition-all duration-300
+                    {% if completed %} bg-primary border-primary text-white
+                    {% elseif active %} bg-white border-primary text-primary step-active
+                    {% else %} bg-white border-gray-300 text-gray-400 {% endif %}">
                     {{ loop.index }}
                 </div>
 
-                <div class="mt-3">
-                    <h4 class="text-sm font-semibold
-                        {% if completed or active %}
-                            text-primary
-                        {% else %}
-                            text-gray-500
-                        {% endif %}
-                    ">
+                <div class="mt-2 sm:mt-1 md:mt-2">
+                    <h4 class="text-sm sm:text-xs font-semibold
+                        {% if completed or active %} text-primary {% else %} text-gray-500 {% endif %}">
                         {{ title }}
                     </h4>
-                    <p class="text-xs text-gray-400 mt-1">{{ description }}</p>
+                    <p class="text-xs sm:text-[9px] text-gray-400 mt-1 break-words">{{ description }}</p>
                 </div>
             </div>
         {% endfor %}

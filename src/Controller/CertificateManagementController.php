@@ -259,7 +259,7 @@ class CertificateManagementController extends AbstractController
                     'controllers'
                 )
             );
-            return $this->redirectToRoute('admin_dashboard_settings_certs_radsecproxy_completed');
+            return $this->redirectToRoute('admin_dashboard_settings_certs_radsecproxy_test');
         }
 
         return $this->render(
@@ -274,11 +274,11 @@ class CertificateManagementController extends AbstractController
     }
 
     #[Route(
-        '/dashboard/settings/certificatesManagement/radsecproxy/completed',
-        name: 'admin_dashboard_settings_certs_radsecproxy_completed'
+        '/dashboard/settings/certificatesManagement/radsecproxy/test',
+        name: 'admin_dashboard_settings_certs_radsecproxy_test'
     )]
     #[IsGranted('ROLE_ADMIN')]
-    public function settingsCertificatesManagementRadsecproxyCompleted(): Response
+    public function settingsCertificatesManagementRadsecproxyTest(): Response
     {
         $data = $this->getSettings->getSettings();
 
@@ -288,7 +288,7 @@ class CertificateManagementController extends AbstractController
         // Return the user to the correct step
         if (
             $processState['active'] &&
-            $processState['nextRoute'] !== 'admin_dashboard_settings_certs_radsecproxy_completed'
+            $processState['nextRoute'] !== 'admin_dashboard_settings_certs_radsecproxy_test'
         ) {
             $this->addFlash('error', $processState['message']);
             return $this->redirectToRoute($processState['nextRoute']);
@@ -301,7 +301,7 @@ class CertificateManagementController extends AbstractController
         }
 
         return $this->render(
-            'dashboard/shared/settings_actions/certificatesManagement/certificates/radsecproxy/completed.html.twig',
+            'dashboard/shared/settings_actions/certificatesManagement/certificates/radsecproxy/test.html.twig',
             [
                 'data' => $data,
                 'processState' => $processState,
@@ -319,7 +319,6 @@ class CertificateManagementController extends AbstractController
 
         return $this->render('dashboard/shared/settings_actions.html.twig', [
             'data' => $data,
-            'potato' => 'potato'
         ]);
     }
 }

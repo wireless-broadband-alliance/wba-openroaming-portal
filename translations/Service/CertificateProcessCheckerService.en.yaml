@@ -1,6 +1,6 @@
 radsecproxy:
     upload: 'Awaiting RadSecProxy certificate upload.'
     config: 'RadSecProxy upload process still active. Please follow the setups to configure your resolver.'
-    completed: 'RadSecProxy configuration is done. Proceed to follow the next page for more details.'
+    test: 'RadSecProxy configuration is done. Proceed to follow the next page for more details.'
 
 noActiveProcess: 'No current process active.'

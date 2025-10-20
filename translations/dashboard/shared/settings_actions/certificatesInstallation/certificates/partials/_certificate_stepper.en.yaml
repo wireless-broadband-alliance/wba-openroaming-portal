@@ -5,7 +5,7 @@ step:
     radsecproxy_config:
         title: 'Apply RadSecProxy Config'
         description: 'Run the generated commands to configure your resolver.'
-    radsecproxy_completed:
+    radsecproxy_test:
         title: 'Test Implementation'
         description: 'Certificate setup almost finished.'
 
