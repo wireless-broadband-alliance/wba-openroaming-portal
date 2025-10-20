@@ -6,24 +6,30 @@ export default class extends Controller {
     connect() {
         const defaultOs =
             this.data.get("defaultOs") || (this.hasContentTarget ? this.contentTargets[0].dataset.os : null);
-        console.log(defaultOs);
         if (defaultOs) this.showTab(defaultOs);
     }
 
     activate(event) {
         event.preventDefault();
         const os = event.currentTarget.dataset.os;
-
         this.showTab(os);
 
-        // Update the URL with the new OS, without reloading
+        // Update URL param (no reload)
         const url = new URL(window.location.href);
         url.searchParams.set("os", os);
         window.history.replaceState({}, "", url);
     }
 
     showTab(os) {
-        const activeClasses = ["bg-white", "shadow-md", "rounded-t-lg", "border-b-2", "border-[#8AB742]", "-mb-[2px]"];
+        const activeClasses = [
+            "bg-white",
+            "shadow-md",
+            "rounded-t-lg",
+            "border-b-2",
+            "border-[#8AB742]",
+            "-mb-[2px]",
+            "text-black",
+        ];
         const inactiveClasses = [
             "text-gray-400",
             "hover:text-black",
@@ -35,12 +41,19 @@ export default class extends Controller {
         // Toggle content visibility
         this.contentTargets.forEach((el) => el.classList.toggle("hidden", el.dataset.os !== os));
 
-        // Toggle tab styles
+        // Toggle tab + icon styles
         this.tabTargets.forEach((btn) => {
             const isActive = btn.dataset.os === os;
+            const icon = btn.querySelector("svg"); // find the icon inside the tab
 
             btn.classList.remove(...(isActive ? inactiveClasses : activeClasses));
             btn.classList.add(...(isActive ? activeClasses : inactiveClasses));
+
+            // update icon color
+            if (icon) {
+                icon.classList.remove(isActive ? "text-gray-400" : "text-black");
+                icon.classList.add(isActive ? "text-black" : "text-gray-400");
+            }
         });
     }
 }
