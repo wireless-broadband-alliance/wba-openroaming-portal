@@ -19,6 +19,6 @@ class ValidPemCertificate extends Constraint
     // Optional for later if its need it can create a custom validator class here
     public function validatedBy(): string
     {
-        return static::class.'Validator';
+        return static::class . 'Validator';
     }
 }

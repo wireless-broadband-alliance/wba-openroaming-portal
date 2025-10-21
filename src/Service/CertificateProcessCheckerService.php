@@ -12,7 +12,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
 readonly class CertificateProcessCheckerService
 {
-    private const array STAGE_ORDER = [
+    private const STAGE_ORDER = [
         'radsecproxy_upload',
         'radsecproxy_config',
         'radsecproxy_test',
@@ -21,7 +21,8 @@ readonly class CertificateProcessCheckerService
     public function __construct(
         private CertificateSetupProcessRepository $certificateSetupProcessRepository,
         private TranslatorInterface $translator
-    ) {}
+    ) {
+    }
 
     /**
      * Get the currently in-progress certificate process (if any)

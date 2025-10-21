@@ -26,7 +26,6 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-
 class CertificateManagementController extends AbstractController
 {
     public function __construct(
@@ -279,7 +278,8 @@ class CertificateManagementController extends AbstractController
         );
     }
 
-    #[Route('/dashboard/settings/certificatesManagement/freeradius',
+    #[Route(
+        '/dashboard/settings/certificatesManagement/freeradius',
         name: 'admin_dashboard_settings_certs_freeradius'
     )]
     #[IsGranted('ROLE_ADMIN')]
