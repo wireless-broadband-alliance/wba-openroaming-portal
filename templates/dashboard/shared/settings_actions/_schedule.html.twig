@@ -1,7 +1,7 @@
 {# CRON WARNING #}
 <div class="my-2 mr-2 p-2 z-0 text-base font-semibold w-full">
     <div class="toast-light-warning" role="alert">
-        <twig:ux:icon name="wba:info" class="w-10 md:w-5 h-10 md:h-5 inline mr-3" fill="currentColor"/>
+        <twig:ux:icon name="wba:info" class="w-10 md:w-5 h-10 md:h-5 inline mr-3 fill-current"/>
         <span class="font-medium">
                 {{ 'selectMulti'|trans({}, 'schedule')|raw }}
         </span>
@@ -60,7 +60,7 @@
         <div class="alert-block my-4 p-2 {{ form.use_advanced_mode.vars.data != default_use_advanced_mode ? '' : 'hidden' }}">
             <div class="flex items-center gap-2 p-4 border-l-4 border-yellow-500 bg-yellow-50 text-yellow-800 text-sm rounded-md"
                  role="alert">
-                <twig:ux:icon name="wba:info" class="w-10 md:w-5 h-10 md:h-5 inline mr-3" fill="currentColor"/>
+                <twig:ux:icon name="wba:info" class="w-10 md:w-5 h-10 md:h-5 inline mr-3 fill-current"/>
                 <span class="font-medium">
                     {{ 'changeMode'|trans({}, 'schedule')|raw }}
                 </span>

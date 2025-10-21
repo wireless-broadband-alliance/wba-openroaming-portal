@@ -29,7 +29,7 @@
 {% set header = routeHeaders[currentRoute] ?? {icon: 'wba:wifi', title: 'Dashboard'} %}
 
 <div class="flex flex-row items-center pl-4">
-    <twig:ux:icon name="{{ header.icon }}" class="w-10 mt-0.5" fill="none" />
+    <twig:ux:icon name="{{ header.icon }}" class="w-10 mt-0.5 fill-none stroke-current" />
     <h1 class="text-2xl font-semibold p-5">{{ header.title|trans({}, '_header_admin') }}</h1>
 </div>
 
@@ -37,7 +37,7 @@
 {% for message in app.session.flashbag.get('error_admin') %}
     <div class="transition duration-500 animate-pulse mt-2 mr-2 text-red-500 text-base font-semibold" {{ stimulus_controller('remove') }} {{ stimulus_target('remove', 'target') }}>
         <div class="flex bg-red-100/50 rounded-lg p-4 mb-4 text-sm text-red-700" role="alert">
-            <twig:ux:icon name="wba:info" class="w-5 h-5 inline mr-3"/>
+            <twig:ux:icon name="wba:info" class="w-5 h-5 inline mr-3 fill-current"/>
 
             <span class="font-medium">{{ message }}</span>
         </div>
@@ -48,7 +48,7 @@
 {% for message in app.session.flashbag.get('success_admin') %}
     <div class="transition duration-500 animate-pulse mt-2 mr-2 text-infoTextColor text-base font-semibold" {{ stimulus_controller('remove') }} {{ stimulus_target('remove', 'target') }}>
         <div class="flex bg-infoBgColor rounded-lg p-4 mb-4 text-sm" role="alert">
-            <twig:ux:icon name="wba:info" class="w-5 h-5 inline mr-3"/>
+            <twig:ux:icon name="wba:info" class="w-5 h-5 inline mr-3 fill-current"/>
 
             <span class="font-medium">{{ message }}</span>
         </div>
@@ -59,7 +59,7 @@
 <div class="relative" {{ stimulus_controller('nav-dropdown') }} >
     <button type="button" {{ stimulus_target('nav-dropdown', 'button') }} {{ stimulus_action('nav-dropdown', 'toggle')|stimulus_action('nav-dropdown', 'lost_focus', 'focusout') }}
             class="cursor-pointer shadow-md w-12 h-12 p-2 rounded-full duration-300 hidden xl:relative xl:block hover:bg-white hover:text-lightGreen">
-        <twig:ux:icon name="wba:menu"/>
+        <twig:ux:icon name="wba:menu" class="stroke-current"/>
     </button>
 
     <div class="hidden xl:block">
@@ -70,7 +70,7 @@
                     {# Account Option #}
                     <a href="{{ path('admin_user_edit', {id: app.user.id}) }}"
                        class="flex items-center space-x-2">
-                        <twig:ux:icon name="wba:user-circle" class="w-7 pr-2 mr-2" fill="none"/>
+                        <twig:ux:icon name="wba:user-circle" class="w-7 pr-2 mr-2 fill-none stroke-current"/>
                         {{ 'account'|trans({}, '_header_admin') }}
                     </a>
                 </li>
@@ -83,7 +83,7 @@
                                 {{ stimulus_action('nav-dropdown', 'toggleHeader')|stimulus_action('nav-dropdown', 'lost_focusHeader', 'focusout') }}>
 
                             <div class="flex flex-row items-center space-x-2">
-                                <twig:ux:icon name="wba:globe" class="w-6 pr-1 mr-2" fill="none"/>
+                                <twig:ux:icon name="wba:globe" class="w-6 pr-1 mr-2 fill-none stroke-current"/>
                                 <span class="truncate">{{ 'language'|trans({}, 'landing') }}</span>
                             </div>
                         </button>
@@ -92,13 +92,13 @@
                     <ul {{ stimulus_target('nav-dropdown', 'container') }}
                             class="px-6 hidden mt-2 divide-y divide-gray-100 text-sm rounded-lg bg-white">
                         <li class="flex items-center space-x-2 px-4 py-2 rounded cursor-pointer hover:text-lightGreen {{ app.request.locale == constant('App\\Enum\\LanguageType::EN').value ? 'selected' : '' }}">
-                            <twig:ux:icon class="w-4 h-4 rounded-full" name="wba:gb-flag" />
+                            <twig:ux:icon class="w-4 h-4 rounded-full" name="wba:gb-flag"/>
                             <a href="{{ path('app_change_language', {locale: constant('App\\Enum\\LanguageType::EN').value}) }}">
                                 English
                             </a>
                         </li>
                         <li class="flex items-center space-x-2 px-4 py-2 rounded cursor-pointer hover:text-lightGreen {{ app.request.locale == constant('App\\Enum\\LanguageType::PT').value ? 'selected' : '' }}">
-                            <twig:ux:icon class="w-4 h-4 rounded-full" name="wba:portugal-flag" />
+                            <twig:ux:icon class="w-4 h-4 rounded-full" name="wba:portugal-flag"/>
                             <a href="{{ path('app_change_language', {locale: constant('App\\Enum\\LanguageType::PT').value}) }}">
                                 Portuguese
                             </a>
@@ -110,7 +110,7 @@
                     <a href="{{ path('app_dashboard_logout') }}"
                        class="flex items-center space-x-2"
                        onclick="return confirm('{{ 'logoutMessage'|trans({}, '_header_admin') }}')">
-                        <twig:ux:icon name="wba:logout" class="w-7 pr-2 mr-2" fill="none"/>
+                        <twig:ux:icon name="wba:logout" class="w-7 pr-2 mr-2 fill-none stroke-current"/>
                         {{ 'logout'|trans({}, '_header_admin') }}
                     </a>
                 </li>

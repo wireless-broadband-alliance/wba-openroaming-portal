@@ -137,7 +137,7 @@
     }
 
     .instructions .card-grid {
-        @apply w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 gap-10;
+        @apply w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 gap-14 p-2;
     }
 
     .instructions .card-grid-windows {
@@ -186,11 +186,11 @@
 }
 
 .instructions-header {
-    @apply flex flex-col-reverse sm:flex-row sm:items-center justify-between mb-4 gap-2;
+    @apply flex flex-col-reverse sm:flex-row sm:items-center justify-between gap-2;
 }
 
 .instructions-title {
-    @apply text-xl sm:text-2xl md:text-3xl font-bold;
+    @apply text-xl sm:text-2xl md:text-3xl font-bold pb-8;
 }
 
 .instructions-tabs {
@@ -198,7 +198,7 @@
 }
 
 .instructions-tab {
-    @apply flex-1 px-3 py-2 text-sm sm:text-base font-semibold flex items-center justify-center space-x-2 transition-all duration-200;
+    @apply flex-1 px-3 py-2 text-lg sm:text-xl font-semibold flex items-center justify-center space-x-2 transition-all duration-200;
 }
 
 .instructions-content {

@@ -10,7 +10,7 @@
                 <label for="radio-os-{{ key }}"
                        class="hover:bg-gray-300 inline-flex items-center justify-center w-full px-6 py-4 rounded-lg bg-[#B4B4B4] bg-opacity-40 cursor-pointer peer-checked:bg-[#7DB928]">
 
-                    <twig:ux:icon name="wba:{{ key|lower }}" class="w-8" fill="none"/>
+                    <twig:ux:icon name="wba:{{ key|lower }}" class="w-8 fill-current"/>
                 </label>
 
                 <p class="text-center mt-2 text-[#656565] text-xs sm:text-sm md:text-base font-light">
@@ -50,7 +50,7 @@
         <div class="w-full rounded shadow-lg bg-[#F9F9F9] px-6 py-8 flex flex-col md:flex-row items-center md:justify-between text-[#3F474D] space-y-6 md:space-y-0 md:space-x-6">
 
             <div class="flex flex-row items-center justify-start space-x-6">
-                <twig:ux:icon name="wba:{{ data.os.selected|lower }}" class="w-8" fill="none"/>
+                <twig:ux:icon name="wba:{{ data.os.selected|lower }}" class="w-8 fill-current"/>
                 <span class="font-medium text-sm sm:text-base md:text-lg">
             {{ 'os_selection.device_identified'|trans({'%os%': data.os.selected}, 'landing') }}
         </span>
