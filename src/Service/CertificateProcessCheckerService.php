@@ -12,7 +12,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
 readonly class CertificateProcessCheckerService
 {
-    private const STAGE_ORDER = [
+    private const array STAGE_ORDER = [
         'radsecproxy_upload',
         'radsecproxy_config',
         'radsecproxy_test',

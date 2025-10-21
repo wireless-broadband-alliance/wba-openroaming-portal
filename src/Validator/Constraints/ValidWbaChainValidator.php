@@ -15,7 +15,7 @@ class ValidWbaChainValidator extends ConstraintValidator
     /**
      * WBA root SHA-256 fingerprints (from https://wballiance.com/openroaming/pki-repository/)
      */
-    private const WBA_ROOTS_SHA256 = [
+    private const array WBA_ROOTS_SHA256 = [
         // signed by wba-policy0
         'C62494336C88718F99CBBC7A7670489656B827DBB67A4FB4320757043A2C3918',
         // signed by wba-policy0a
@@ -30,7 +30,7 @@ class ValidWbaChainValidator extends ConstraintValidator
      * WBA-related identifiers used to recognize organization names, CNs, and OUs
      * if fingerprint verification does not match.
      */
-    private const POSSIBLE_INDICATORS = [
+    private const array POSSIBLE_INDICATORS = [
         'WIRELESS BROADBAND ALLIANCE',
         'WBA',
         'OPENROAMING',
@@ -87,14 +87,18 @@ class ValidWbaChainValidator extends ConstraintValidator
 
         $issuer = strtoupper(json_encode($certInfo['issuer'] ?? []));
         $subject = strtoupper(json_encode($certInfo['subject'] ?? []));
-        $isValid = false;
 
-        foreach (self::POSSIBLE_INDICATORS as $indicator) {
-            if (str_contains($issuer, $indicator) || str_contains($subject, $indicator)) {
-                $isValid = true;
-                break;
-            }
-        }
+        $isValid = array_any(
+            self::POSSIBLE_INDICATORS,
+            fn($indicator) => str_contains(
+                    $issuer,
+                    (string)$indicator
+                ) ||
+                str_contains(
+                    $subject,
+                    (string)$indicator
+                )
+        );
 
         if (!$isValid) {
             $this->context->buildViolation(

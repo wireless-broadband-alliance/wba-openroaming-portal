@@ -1,12 +1,12 @@
-import { Controller } from '@hotwired/stimulus'
+import { Controller } from "@hotwired/stimulus";
 
 export default class extends Controller {
-    static targets = ['resultArea', 'testButton']
+    static targets = ["resultArea", "testButton"];
 
     runTest() {
-        this.testButton.disabled = true
-        this.testButton.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span> Running Tests...`
-        this.resultAreaTarget.style.display = 'block'
+        this.testButton.disabled = true;
+        this.testButton.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span> Running Tests...`;
+        this.resultAreaTarget.style.display = "block";
         this.resultAreaTarget.innerHTML = `
             <div class="alert alert-info d-flex align-items-center">
                 <i class="bi bi-hourglass-split me-2"></i>
@@ -15,7 +15,7 @@ export default class extends Controller {
                     Verifying the RadSecProxy certificate setup on the server.
                 </div>
             </div>
-        `
+        `;
 
         setTimeout(() => {
             this.resultAreaTarget.innerHTML = `
@@ -26,9 +26,9 @@ export default class extends Controller {
                         The RadSecProxy certificates are valid and working correctly.
                     </div>
                 </div>
-            `
-            this.testButton.disabled = false
-            this.testButton.innerHTML = `<i class="bi bi-shield-check"></i> Test RadSecProxy Certificates`
-        }, 2500)
+            `;
+            this.testButton.disabled = false;
+            this.testButton.innerHTML = `<i class="bi bi-shield-check"></i> Test RadSecProxy Certificates`;
+        }, 2500);
     }
 }
