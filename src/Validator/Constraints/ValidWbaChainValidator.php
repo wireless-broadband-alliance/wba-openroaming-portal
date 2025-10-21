@@ -91,9 +91,9 @@ class ValidWbaChainValidator extends ConstraintValidator
         $isValid = array_any(
             self::POSSIBLE_INDICATORS,
             fn($indicator) => str_contains(
-                    $issuer,
-                    (string)$indicator
-                ) ||
+                $issuer,
+                (string)$indicator
+            ) ||
                 str_contains(
                     $subject,
                     (string)$indicator
