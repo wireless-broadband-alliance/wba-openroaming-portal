@@ -34,23 +34,36 @@
 
             <div class="w-full md:flex-1 flex flex-col md:items-center text-center md:text-center mb-8 p-2">
                 <div class="flex items-center justify-center w-10 h-10 sm:w-9 sm:h-9 rounded-full border-2 z-10 font-semibold transition-all duration-300
-                    {% if completed %} bg-primary border-primary text-white
-                    {% elseif active %} bg-white border-primary text-primary step-active
-                    {% else %} bg-white border-gray-300 text-gray-400 {% endif %}">
+            {% if completed %} bg-primary border-primary text-white
+            {% elseif active %} bg-white border-primary text-primary step-active
+            {% else %} bg-white border-gray-300 text-gray-400 {% endif %}">
 
-                    {# Make number clickable only if completed or active #}
-                    {% if completed or active %}
-                        <a href="{{ path(step.route) }}" class="w-full h-full flex items-center justify-center text-inherit no-underline">
-                            {{ loop.index }}
-                        </a>
+                    {% if loop.first %}
+                        {# Wrap first step in a form for abort #}
+                        <form action="{{ path('admin_dashboard_settings_certs_management_abort') }}" method="POST"
+                              class="w-full h-full">
+                            <button type="submit"
+                                    class="w-full h-full flex items-center justify-center text-inherit bg-transparent border-none p-0 m-0 cursor-pointer"
+                                    onclick="return confirm('{{ 'confirm_abort'|trans({}, '_certificate_stepper') }}');">
+                                {{ loop.index }}
+                            </button>
+                        </form>
                     {% else %}
-                        {{ loop.index }}
+                        {# Other steps: clickable links only if completed or active #}
+                        {% if completed or active %}
+                            <a href="{{ path(step.route) }}"
+                               class="w-full h-full flex items-center justify-center text-inherit no-underline">
+                                {{ loop.index }}
+                            </a>
+                        {% else %}
+                            {{ loop.index }}
+                        {% endif %}
                     {% endif %}
                 </div>
 
                 <div class="mt-2 sm:mt-1 md:mt-2">
                     <h4 class="text-sm sm:text-xs font-semibold
-                        {% if completed or active %} text-primary {% else %} text-gray-500 {% endif %}">
+                {% if completed or active %} text-primary {% else %} text-gray-500 {% endif %}">
                         {{ title }}
                     </h4>
                     <p class="text-xs sm:text-[9px] text-gray-400 mt-1 break-words">{{ description }}</p>

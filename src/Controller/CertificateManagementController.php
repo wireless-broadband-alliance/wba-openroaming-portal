@@ -44,17 +44,6 @@ class CertificateManagementController extends AbstractController
     {
         $data = $this->getSettings->getSettings();
 
-        // Check current certificateProcess status
-        $processState = $this->certificateProcessCheckerService->getProcessState();
-
-        // In case there's not active process
-        if (!$processState['active'] && !$processState['nextRoute'] == 'admin_dashboard_settings_certs_management') {
-            return $this->render('dashboard/shared/settings_actions.html.twig', [
-                'data' => $data,
-                'message' => $processState['message'],
-            ]);
-        }
-
         return $this->render('dashboard/shared/settings_actions.html.twig', [
             'data' => $data,
         ]);
@@ -76,7 +65,7 @@ class CertificateManagementController extends AbstractController
                 'error',
                 $this->translator->trans('noActiveProcess', [], 'CertificateProcessCheckerService')
             );
-            return $this->redirectToRoute('admin_dashboard_settings_certs_management');
+            return $this->redirectToRoute('admin_dashboard_settings_certs_radsecproxy_upload');
         }
 
         // Cancel the process and add a tag IN_COMPLETED
@@ -96,7 +85,7 @@ class CertificateManagementController extends AbstractController
             )
         );
 
-        return $this->redirectToRoute('admin_dashboard_settings_certs_management');
+        return $this->redirectToRoute('admin_dashboard_settings_certs_radsecproxy_upload');
     }
 
     #[Route(
