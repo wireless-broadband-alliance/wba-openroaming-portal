@@ -22,7 +22,7 @@
                     {{ 'title'|trans({}, 'base') }}
                 </h1>
 
-                <div class="landing-language-selector">
+                <div class="landing-language-selector md:mb-10 mb-4">
                     {{ include('shared/_select_language.html.twig', {
                         currentLocale: app.request.locale,
                         routeName: 'app_change_language',
