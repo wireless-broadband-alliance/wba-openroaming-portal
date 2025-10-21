@@ -190,7 +190,7 @@
 }
 
 .instructions-tabs {
-    @apply flex border-b border-gray-200 mb-6 w-full;
+    @apply flex border-b border-gray-200 mb-6 w-full pb-8;
 }
 
 .instructions-tab {
