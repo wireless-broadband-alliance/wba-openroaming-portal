@@ -21,6 +21,7 @@ class CertificateRadSecUploadDTO
         mimeTypesMessage: 'invalidFileTypeCert'
     )]
     #[CustomAssert\ValidPemCertificate]
+    #[CustomAssert\ValidWbaChain]
     public ?UploadedFile $client = null;
 
     #[Assert\File(
