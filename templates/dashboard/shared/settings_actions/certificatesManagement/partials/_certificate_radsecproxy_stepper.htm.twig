@@ -53,11 +53,12 @@
     {# Abort button (only visible if there’s an active process) #}
     {% if processState is defined and processState.active %}
         <div class="mt-8 flex justify-end">
-            <a href="{{ path('admin_dashboard_settings_certs_management_abort') }}"
-               class="btn-logout flex items-center gap-2"
-               onclick="return confirm('{{ 'confirm_abort'|trans({}, '_certificate_stepper') }}');">
-                {{ 'abort'|trans({}, '_certificate_stepper') }}
-            </a>
+            <form action="{{ path('admin_dashboard_settings_certs_management_abort') }}" method="POST"
+                  onsubmit="return confirm('{{ 'confirm_abort'|trans({}, '_certificate_stepper') }}');">
+                <button type="submit" class="btn-logout flex items-center gap-2">
+                    {{ 'abort'|trans({}, '_certificate_stepper') }}
+                </button>
+            </form>
         </div>
     {% endif %}
 </div>
