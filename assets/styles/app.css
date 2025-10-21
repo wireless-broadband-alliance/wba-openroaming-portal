@@ -182,7 +182,7 @@
 }
 
 .instructions-header {
-    @apply flex flex-col-reverse sm:flex-row sm:items-center justify-between mb-4 gap-2;
+    @apply flex flex-col-reverse sm:flex-row sm:items-center justify-between gap-2;
 }
 
 .instructions-title {
