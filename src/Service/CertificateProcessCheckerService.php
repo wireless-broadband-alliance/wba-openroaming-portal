@@ -7,18 +7,24 @@ use App\Enum\CertificateProcessStatus;
 use App\Enum\CertificateTestResult;
 use App\Repository\CertificateSetupProcessRepository;
 use DateTimeImmutable;
+use InvalidArgumentException;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 readonly class CertificateProcessCheckerService
 {
+    private const array STAGE_ORDER = [
+        'radsecproxy_upload',
+        'radsecproxy_config',
+        'radsecproxy_test',
+    ];
+
     public function __construct(
         private CertificateSetupProcessRepository $certificateSetupProcessRepository,
-        private TranslatorInterface $translator,
-    ) {
-    }
+        private TranslatorInterface $translator
+    ) {}
 
     /**
-     * Get the currently in-progress certificate process (if any).
+     * Get the currently in-progress certificate process (if any)
      */
     public function getCurrentProcess(): ?CertificateSetupProcess
     {
@@ -26,67 +32,54 @@ readonly class CertificateProcessCheckerService
     }
 
     /**
-     * Checks if a process is active and returns what step is next or completed.
+     * Returns the stages and their completion status
      */
     public function getProcessState(): array
     {
         $process = $this->getCurrentProcess();
 
-        // Check if the process active
         if (!$process || $process->getStatus() === CertificateProcessStatus::ABORTED) {
             return [
                 'active' => false,
                 'message' => $this->translator->trans('noActiveProcess', [], 'CertificateProcessCheckerService'),
-                'nextRoute' => 'admin_dashboard_settings_certs_management',
+                'stages' => [],
             ];
         }
 
-        // Determine which step we’re at
-        // 1 - User just started the process and any didn't upload any certs
-        if (!$process->getRadsecproxyFormCompletedAt() instanceof DateTimeImmutable) {
-            return [
-                'active' => true,
-                'stage' => 'radsecproxy_upload',
-                'message' => $this->translator->trans('radsecproxy.upload', [], 'CertificateProcessCheckerService'),
-                'nextRoute' => 'admin_dashboard_settings_certs_radsecproxy_upload',
-                'process' => $process,
-            ];
-        }
+        // Determine stages completion
+        $stages = [
+            'radsecproxy_upload' => $process->getRadsecproxyFormCompletedAt() instanceof DateTimeImmutable,
+            'radsecproxy_config' => $process->getRadsecproxyConfigAppliedAt() instanceof DateTimeImmutable,
+            'radsecproxy_test'   => $process->getRadsecproxyTestResult() instanceof CertificateTestResult,
+        ];
 
-        // 2 - User just uploaded the certs and config it's not finished
-        if (
-            !$process->getRadsecproxyConfigAppliedAt() instanceof DateTimeImmutable
-        ) {
-            return [
-                'active' => true,
-                'stage' => 'radsecproxy_config',
-                'message' => $this->translator->trans('radsecproxy.config', [], 'CertificateProcessCheckerService'),
-                'nextRoute' => 'admin_dashboard_settings_certs_radsecproxy_config',
-                'process' => $process,
-            ];
-        }
-
-        // 3 - User applied the new configuration on the resolver
-        if (
-            !$process->getRadsecproxyTestResult() instanceof CertificateTestResult ||
-            $process->getRadsecproxyTestResult() === CertificateTestResult::FAILED->value
-        ) {
-            return [
-                'active' => true,
-                'stage' => 'radsecproxy_test',
-                'message' => $this->translator->trans('radsecproxy.test', [], 'CertificateProcessCheckerService'),
-                'nextRoute' => 'admin_dashboard_settings_certs_radsecproxy_test',
-                'process' => $process,
-            ];
-        }
-
-        // 4 - There's no current active process on the server to validate at this point
         return [
-            'active' => false,
-            'stage' => 'completed',
-            'message' => $this->translator->trans('noActiveProcess', [], 'CertificateProcessCheckerService'),
-            'nextRoute' => 'admin_dashboard_settings_certs_management',
+            'active' => true,
+            'stages' => $stages,
             'process' => $process,
         ];
+    }
+
+    /**
+     * Ensures the user can only access a stage if all previous stages are complete.
+     * Returns the route name of the first incomplete stage if access is denied, or null if allowed.
+     */
+    public function ensureStageAccess(string $requestedStage, array $stages): ?string
+    {
+        $requestedIndex = array_search($requestedStage, self::STAGE_ORDER, true);
+
+        if ($requestedIndex === false) {
+            throw new InvalidArgumentException("Invalid stage: $requestedStage");
+        }
+
+        for ($i = 0; $i < $requestedIndex; $i++) {
+            $prevStage = self::STAGE_ORDER[$i];
+            if (!($stages[$prevStage] ?? false)) {
+                // Return the route name as string
+                return 'admin_dashboard_settings_certs_' . $prevStage;
+            }
+        }
+
+        return null; // Access allowed
     }
 }

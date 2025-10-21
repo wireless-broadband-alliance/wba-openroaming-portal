@@ -81,17 +81,24 @@
 
     <div class="mt-8 flex justify-end">
         {{ form_start(form) }}
-
-        {# Button Submit #}
         {{ form_row(form._token) }}
+
+        {% set configApplied = processState.process.radsecproxyConfigAppliedAt is not null %}
+
         <button
                 type="submit"
-                class="px-6 py-2.5 bg-primary text-white font-medium rounded-lg shadow hover:bg-primary-dark focus:ring-2 focus:ring-offset-2 focus:ring-primary transition"
-                onclick="return confirm('{{ 'confirm_follow_steps'|trans({}, 'config') }}');"
+                class="px-6 py-2.5 rounded-lg shadow font-medium transition
+                {% if configApplied %}
+                    bg-gray-300 text-gray-700 cursor-not-allowed
+                {% else %}
+                    bg-primary text-white hover:bg-primary-dark focus:ring-2 focus:ring-offset-2 focus:ring-primary
+                {% endif %}"
+                {% if configApplied %} disabled title="{{ 'config_already_applied'|trans({}, 'config') }}" {% else %}
+                    onclick="return confirm('{{ 'confirm_follow_steps'|trans({}, 'config') }}');"
+                {% endif %}
         >
             {{ 'submit'|trans({}, 'config') }}
         </button>
-
         {{ form_end(form, {render_rest: false}) }}
     </div>
 {% endblock %}

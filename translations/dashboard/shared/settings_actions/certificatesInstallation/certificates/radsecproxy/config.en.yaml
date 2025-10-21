@@ -10,3 +10,4 @@ copy_command:
     aria_label: "Copy"
     success: "Copied!"
     error: "It was not possible to copy the content."
+config_already_applied: 'Config already applied!'

@@ -6,7 +6,8 @@ show_sensitive: 'Mostrar'
 hide_sensitive: 'Ocultar'
 sensitive_hidden_text: 'Contéudo sensivel'
 copy_command:
-    title: "Copiar"
-    aria_label: "Copiar"
-    success: "Copiado!"
-    error: "Não foi possível copiar o contéudo."
+    title: 'Copiar'
+    aria_label: 'Copiar'
+    success: 'Copiado!'
+    error: 'Não foi possível copiar o contéudo.'
+config_already_applied: 'Configuração ja foi aplicada!'

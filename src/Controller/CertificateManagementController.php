@@ -4,46 +4,28 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
-use App\DTO\AdminConfigDTO;
 use App\DTO\CertificateRadSecUploadDTO;
-use App\DTO\DbSetupDTO;
-use App\DTO\JwtDTO;
-use App\DTO\SettingsDTO;
 use App\Entity\CertificateSetupProcess;
 use App\Enum\CertificateFileName;
 use App\Enum\CertificateMachineType;
 use App\Enum\CertificateProcessStatus;
-use App\Enum\DataBaseSetupType;
 use App\Enum\FirewallType;
-use App\Enum\SettingsConfigType;
-use App\Form\AdminConfigType;
 use App\Form\CertificateUploadType;
-use App\Form\DbSetupType;
-use App\Form\JwtType;
-use App\Form\SettingsType;
 use App\Form\SimpleSubmitFormType;
 use App\Service\CertificateCommandsService;
 use App\Service\CertificateProcessCheckerService;
 use App\Service\CertificateStorageService;
-use App\Service\DatabaseConnectionService;
 use App\Service\GetSettings;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Bundle\FrameworkBundle\Console\Application;
-use Symfony\Component\Console\Input\ArrayInput;
-use Symfony\Component\Console\Output\BufferedOutput;
-use Symfony\Component\Form\Exception\LogicException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Exception\HttpException;
-use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-use function PHPUnit\Framework\isEmpty;
 
 class CertificateManagementController extends AbstractController
 {
@@ -65,12 +47,6 @@ class CertificateManagementController extends AbstractController
 
         // Check current certificateProcess status
         $processState = $this->certificateProcessCheckerService->getProcessState();
-
-        // Return the user to the correct step
-        if ($processState['active'] && $processState['nextRoute'] !== 'admin_dashboard_settings_certs_management') {
-            $this->addFlash('error', $processState['message']);
-            return $this->redirectToRoute($processState['nextRoute']);
-        }
 
         // In case there's not active process
         if (!$processState['active'] && !$processState['nextRoute'] == 'admin_dashboard_settings_certs_management') {
@@ -136,15 +112,6 @@ class CertificateManagementController extends AbstractController
 
         // Check current certificateProcess status
         $processState = $this->certificateProcessCheckerService->getProcessState();
-
-        // Return the user to the correct step
-        if (
-            $processState['active']
-            && $processState['nextRoute'] !== 'admin_dashboard_settings_certs_radsecproxy_upload'
-        ) {
-            $this->addFlash('error', $processState['message']);
-            return $this->redirectToRoute($processState['nextRoute']);
-        }
 
         // Prepare DTO
         $certificateUploadDTO = new CertificateRadSecUploadDTO();
@@ -220,20 +187,21 @@ class CertificateManagementController extends AbstractController
 
         // Check current certificateProcess status
         $processState = $this->certificateProcessCheckerService->getProcessState();
-
-        // Return the user to the correct step
-        if (
-            $processState['active'] &&
-            $processState['nextRoute'] !== 'admin_dashboard_settings_certs_radsecproxy_config'
-        ) {
-            $this->addFlash('error', $processState['message']);
-            return $this->redirectToRoute($processState['nextRoute']);
-        }
+        $process = $processState['process'] ?? [];
 
         // In case there's not active process
         if (!$processState['active']) {
             $this->addFlash('error', $processState['message']);
             return $this->redirectToRoute($processState['nextRoute']);
+        }
+
+        // Ensure stage access
+        $redirectRoute = $this->certificateProcessCheckerService->ensureStageAccess(
+            'radsecproxy_config',
+            $processState['stages']
+        );
+        if ($redirectRoute) {
+            return $this->redirectToRoute($redirectRoute);
         }
 
         // Return the commands to be executed on the resolver
@@ -242,25 +210,27 @@ class CertificateManagementController extends AbstractController
         $form = $this->createForm(SimpleSubmitFormType::class);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $process = $this->certificateProcessCheckerService->getCurrentProcess();
+        if ($form->isSubmitted()) {
+            if ($process?->getRadsecproxyConfigAppliedAt() instanceof DateTimeImmutable) {
+                // Just ignore the submission and warning
+                $this->addFlash(
+                    'error',
+                    $this->translator->trans('radsecProxyConfigAlreadyApplied', [], 'controllers')
+                );
+            } elseif ($form->isValid()) {
+                $process->setRadsecproxyConfigAppliedAt(new DateTimeImmutable());
+                $process->setUpdatedAt(new DateTimeImmutable());
 
-            // After the command and the user confirms he did run all the commands, update the process once again to add
-            $process->setRadsecproxyConfigAppliedAt(new DateTimeImmutable());
-            $process->setUpdatedAt(new DateTimeImmutable());
+                $this->entityManager->persist($process);
+                $this->entityManager->flush();
 
-            $this->entityManager->persist($process);
-            $this->entityManager->flush();
+                $this->addFlash(
+                    'success_admin',
+                    $this->translator->trans('radsecProxyConfigAppliedSuccessfully', [], 'controllers')
+                );
 
-            $this->addFlash(
-                'success_admin',
-                $this->translator->trans(
-                    'radsecProxyConfigAppliedSuccessfully',
-                    [],
-                    'controllers'
-                )
-            );
-            return $this->redirectToRoute('admin_dashboard_settings_certs_radsecproxy_test');
+                return $this->redirectToRoute('admin_dashboard_settings_certs_radsecproxy_test');
+            }
         }
 
         return $this->render(
@@ -286,19 +256,18 @@ class CertificateManagementController extends AbstractController
         // Check current certificateProcess status
         $processState = $this->certificateProcessCheckerService->getProcessState();
 
-        // Return the user to the correct step
-        if (
-            $processState['active'] &&
-            $processState['nextRoute'] !== 'admin_dashboard_settings_certs_radsecproxy_test'
-        ) {
-            $this->addFlash('error', $processState['message']);
-            return $this->redirectToRoute($processState['nextRoute']);
-        }
-
         // In case there's not active process
         if (!$processState['active']) {
             $this->addFlash('error', $processState['message']);
             return $this->redirectToRoute($processState['nextRoute']);
+        }
+
+        $redirectRoute = $this->certificateProcessCheckerService->ensureStageAccess(
+            'radsecproxy_test',
+            $processState['stages']
+        );
+        if ($redirectRoute) {
+            return $this->redirectToRoute($redirectRoute);
         }
 
         return $this->render(
