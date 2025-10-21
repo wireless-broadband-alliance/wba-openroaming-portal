@@ -37,7 +37,15 @@
                     {% if completed %} bg-primary border-primary text-white
                     {% elseif active %} bg-white border-primary text-primary step-active
                     {% else %} bg-white border-gray-300 text-gray-400 {% endif %}">
-                    {{ loop.index }}
+
+                    {# Make number clickable only if completed or active #}
+                    {% if completed or active %}
+                        <a href="{{ path(step.route) }}" class="w-full h-full flex items-center justify-center text-inherit no-underline">
+                            {{ loop.index }}
+                        </a>
+                    {% else %}
+                        {{ loop.index }}
+                    {% endif %}
                 </div>
 
                 <div class="mt-2 sm:mt-1 md:mt-2">
