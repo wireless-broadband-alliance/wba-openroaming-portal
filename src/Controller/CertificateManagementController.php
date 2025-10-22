@@ -44,8 +44,12 @@ class CertificateManagementController extends AbstractController
     {
         $data = $this->getSettings->getSettings();
 
+        // Check current certificateProcess status
+        $processState = $this->certificateProcessCheckerService->getProcessState();
+
         return $this->render('dashboard/shared/settings_actions.html.twig', [
             'data' => $data,
+            'processState' => $processState,
         ]);
     }
 
