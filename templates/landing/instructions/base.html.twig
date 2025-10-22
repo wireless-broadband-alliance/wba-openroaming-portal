@@ -18,11 +18,11 @@
 
             {# Header #}
             <div class="landing-header">
-                <h1 class="instructions-title">
+                <h1 class="instructions-title md:mb-10 mb-4">
                     {{ 'title'|trans({}, 'base') }}
                 </h1>
 
-                <div class="landing-language-selector">
+                <div class="landing-language-selector md:mb-10 mb-4">
                     {{ include('shared/_select_language.html.twig', {
                         currentLocale: app.request.locale,
                         routeName: 'app_change_language',
@@ -36,28 +36,28 @@
                 <button data-os="{{ constant('App\\Enum\\OSType::ANDROID').value }}" data-os-tabs-target="tab"
                         data-action="click->os-tabs#activate"
                         class="instructions-tab">
-                    <twig:ux:icon name="wba:android" class="w-5 h-5"/>
+                    <twig:ux:icon name="wba:android" class="w-4 md:w-6 h-4 md:h-6 fill-current" />
                     <span>Android</span>
                 </button>
 
                 <button data-os="{{ constant('App\\Enum\\OSType::IOS').value }}" data-os-tabs-target="tab"
                         data-action="click->os-tabs#activate"
                         class="instructions-tab">
-                    <twig:ux:icon name="wba:ios" class="w-5 h-5"/>
+                    <twig:ux:icon name="wba:ios" class="w-4 md:w-6 h-4 md:h-6 fill-current" />
                     <span>iOS</span>
                 </button>
 
                 <button data-os="{{ constant('App\\Enum\\OSType::MACOS').value }}" data-os-tabs-target="tab"
                         data-action="click->os-tabs#activate"
                         class="instructions-tab">
-                    <twig:ux:icon name="wba:ios" class="w-5 h-5"/>
+                    <twig:ux:icon name="wba:ios" class="w-4 md:w-6 h-4 md:h-6 fill-current" />
                     <span>macOS</span>
                 </button>
 
                 <button data-os="{{ constant('App\\Enum\\OSType::WINDOWS').value }}" data-os-tabs-target="tab"
                         data-action="click->os-tabs#activate"
                         class="instructions-tab">
-                    <twig:ux:icon name="wba:windows" class="w-5 h-5"/>
+                    <twig:ux:icon name="wba:windows" class="w-4 md:w-6 h-4 md:h-6 fill-current" />
                     <span>Windows</span>
                 </button>
             </div>
