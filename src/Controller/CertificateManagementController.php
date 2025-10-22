@@ -44,9 +44,26 @@ class CertificateManagementController extends AbstractController
     {
         $data = $this->getSettings->getSettings();
 
+        // TODO - Make the same verifications of the process steps for the installation here
         // Check current certificateProcess status
         $processState = $this->certificateProcessCheckerService->getProcessState();
 
+        // If there's an active process, redirect depending on its current stage
+        if ($processState['active']) {
+            $stages = $processState['stages'];
+
+            // If upload completed but config not yet applied
+            if (($stages['radsecproxy_upload'] ?? false) && !($stages['radsecproxy_config'] ?? false)) {
+                return $this->redirectToRoute('admin_dashboard_settings_certs_radsecproxy_config');
+            }
+
+            // If config applied but test not completed
+            if (($stages['radsecproxy_config'] ?? false) && !($stages['radsecproxy_test'] ?? false)) {
+                return $this->redirectToRoute('admin_dashboard_settings_certs_radsecproxy_test');
+            }
+        }
+
+        // Default render
         return $this->render('dashboard/shared/settings_actions.html.twig', [
             'data' => $data,
             'processState' => $processState,
@@ -104,6 +121,11 @@ class CertificateManagementController extends AbstractController
 
         // Check current certificateProcess status
         $processState = $this->certificateProcessCheckerService->getProcessState();
+
+        // In case there's not active process
+        if (!$processState['active']) {
+            return $this->redirectToRoute('admin_dashboard_settings_certs_management');
+        }
 
         // Prepare DTO
         $certificateUploadDTO = new CertificateRadSecUploadDTO();
