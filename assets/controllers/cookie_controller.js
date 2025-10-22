@@ -85,7 +85,6 @@ export default class extends Controller {
 
         this.closeModal();
         this.hideBanner();
-        location.reload();
     }
 
     updateCheckbox(scope, checked) {
