@@ -1,0 +1,129 @@
+<div class="instructions">
+    {# Introduction #}
+    <p class="introduction">
+        {{ 'introduction'|trans({}, 'macOS') }}
+    </p>
+
+    {# Get the correct image folder based on locale, fallback to en #}
+    {% set locale = app.request.locale in [
+        constant('App\\Enum\\LanguageType::EN').value,
+        constant('App\\Enum\\LanguageType::PT').value]
+        ? app.request.locale : LanguageType.EN.value %}
+    {% set imgPath = 'resources/instructions/macOS/' ~ locale %}
+
+    <div class="card-container">
+        <div class="card-grid">
+
+            <a href="{{ asset(imgPath ~ '/item1.jpeg') }}" target="_blank" class="card">
+                <div class="card-number">1</div>
+                <div class="flex justify-center">
+                    <img src="{{ asset(imgPath ~ '/item1.jpeg') }}" alt="Item 1" class="card-image">
+                </div>
+                <p class="card-description">
+                    {{ 'item1.description'|trans({}, 'macOS') }}
+                </p>
+            </a>
+
+            <a href="{{ asset(imgPath ~ '/item2.jpeg') }}" target="_blank" class="card">
+                <div class="card-number">2</div>
+                <div class="flex justify-center">
+                    <img src="{{ asset(imgPath ~ '/item2.jpeg') }}" alt="Item 2" class="card-image">
+                </div>
+                <p class="card-description">
+                    {{ 'item2.description'|trans({}, 'macOS') }}
+                </p>
+            </a>
+
+            <a href="{{ asset(imgPath ~ '/item3.jpeg') }}" target="_blank" class="card">
+                <div class="card-number">3</div>
+                <div class="flex justify-center">
+                    <img src="{{ asset(imgPath ~ '/item3.jpeg') }}" alt="Item 3" class="card-image">
+                </div>
+                <p class="card-description">
+                    {{ 'item3.description'|trans({}, 'macOS') }}
+                </p>
+            </a>
+
+            <a href="{{ asset(imgPath ~ '/item4.jpeg') }}" target="_blank" class="card">
+                <div class="card-number">4</div>
+                <div class="flex justify-center">
+                    <img src="{{ asset(imgPath ~ '/item4.jpeg') }}" alt="Item 4" class="card-image">
+                </div>
+                <p class="card-description">
+                    {{ 'item4.description'|trans({}, 'macOS') }}
+                </p>
+            </a>
+
+            <a href="{{ asset(imgPath ~ '/item5.jpeg') }}" target="_blank" class="card">
+                <div class="card-number">5</div>
+                <div class="flex justify-center">
+                    <img src="{{ asset(imgPath ~ '/item5.jpeg') }}" alt="Item 5" class="card-image">
+                </div>
+                <p class="card-description">
+                    {{ 'item5.description'|trans({}, 'macOS') }}
+                </p>
+            </a>
+
+            <a href="{{ asset(imgPath ~ '/item6.jpeg') }}" target="_blank" class="card">
+                <div class="card-number">6</div>
+                <div class="flex justify-center">
+                    <img src="{{ asset(imgPath ~ '/item6.jpeg') }}" alt="Item 6" class="card-image">
+                </div>
+                <p class="card-description">
+                    {{ 'item6.description'|trans({}, 'macOS') }}
+                </p>
+            </a>
+
+            <a href="{{ asset(imgPath ~ '/item7.jpeg') }}" target="_blank" class="card">
+                <div class="card-number">7</div>
+                <div class="flex justify-center">
+                    <img src="{{ asset(imgPath ~ '/item7.jpeg') }}" alt="Item 7" class="card-image">
+                </div>
+                <p class="card-description">
+                    {{ 'item7.description'|trans({}, 'macOS') }}
+                </p>
+            </a>
+
+            <a href="{{ asset(imgPath ~ '/item8.jpeg') }}" target="_blank" class="card">
+                <div class="card-number">8</div>
+                <div class="flex justify-center">
+                    <img src="{{ asset(imgPath ~ '/item8.jpeg') }}" alt="Item 8" class="card-image">
+                </div>
+                <p class="card-description">
+                    {{ 'item8.description'|trans({}, 'macOS') }}
+                </p>
+            </a>
+
+            <a href="{{ asset(imgPath ~ '/item9.jpeg') }}" target="_blank" class="card">
+                <div class="card-number">9</div>
+                <div class="flex justify-center">
+                    <img src="{{ asset(imgPath ~ '/item9.jpeg') }}" alt="Item 9" class="card-image">
+                </div>
+                <p class="card-description">
+                    {{ 'item9.description'|trans({}, 'macOS') }}
+                </p>
+            </a>
+
+            <a href="{{ asset(imgPath ~ '/item10.jpeg') }}" target="_blank" class="card">
+                <div class="card-number">10</div>
+                <div class="flex justify-center">
+                    <img src="{{ asset(imgPath ~ '/item10.jpeg') }}" alt="Item 10" class="card-image">
+                </div>
+                <p class="card-description">
+                    {{ 'item10.description'|trans({}, 'macOS') }}
+                </p>
+            </a>
+
+            {# Item 11 full width #}
+            <a href="{{ asset(imgPath ~ '/item11.jpeg') }}" target="_blank" class="card mt-4 md:col-span-2">
+                <div class="card-number">11</div>
+                <div class="flex justify-center">
+                    <img src="{{ asset(imgPath ~ '/item11.jpeg') }}" alt="Item 11" class="card-image">
+                </div>
+                <p class="card-description">
+                    {{ 'item11.description'|trans({}, 'macOS') }}1
+                </p>
+            </a>
+        </div>
+    </div>
+</div>
