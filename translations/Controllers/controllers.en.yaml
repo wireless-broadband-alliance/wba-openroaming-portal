@@ -79,7 +79,7 @@ invalidCodeTOTP: 'Code Invalid. Please try again.'
 verificationCodeIncorrect: 'The verification code is incorrect. Please try again.'
 verificationMethodNotEnabled: "This verification method it's not enabled!"
 onlyAdminCanAccessThisPage: 'Only admin users can access this page.'
-twoFAAlreadyDisabled: 'Two-Factor authentication is already disabled'
+twoFADisabledSuccessfully: 'Two-Factor authentication was disabled successfully.'
 userNotFound: 'User not found'
 codeResentSuccessfully: 'The code was resent successfully. You have %attempts% attempt(s).'
 attemptsExceeded: 'You have exceeded the number of attempts, wait %minutes% minute(s) to request a code again.'
