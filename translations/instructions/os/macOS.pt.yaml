@@ -1,0 +1,17 @@
+introduction: "Para aceder de forma segura às redes OpenRoaming, siga os passos abaixo"
+item1:
+    description: "Abra a ligação incluída no seu e-mail"
+item2:
+    description: "Introduza os seus dados"
+item3:
+    description: "Toque em “Transferir e Instalar”"
+item4:
+    description: "Abra as definições e toque em “Perfil Descarregado”"
+item5:
+    description: "Verifique os detalhes do perfil e instale-o"
+item6:
+    description: "Introduza a sua palavra-passe para permitir a instalação"
+item7:
+    description: "Depois disso, o perfil será instalado e deverá conseguir ligar-se através dele"
+item8:
+    description: "Agora aceda às definições de Wi-Fi para se ligar através do perfil"

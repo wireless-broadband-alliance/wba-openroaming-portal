@@ -47,6 +47,13 @@
                     <span>iOS</span>
                 </button>
 
+                <button data-os="{{ constant('App\\Enum\\OSType::MACOS').value }}" data-os-tabs-target="tab"
+                        data-action="click->os-tabs#activate"
+                        class="instructions-tab">
+                    <twig:ux:icon name="wba:ios" class="w-4 md:w-6 h-4 md:h-6 fill-current" />
+                    <span>macOS</span>
+                </button>
+
                 <button data-os="{{ constant('App\\Enum\\OSType::WINDOWS').value }}" data-os-tabs-target="tab"
                         data-action="click->os-tabs#activate"
                         class="instructions-tab">
@@ -74,6 +81,11 @@
                 <div data-os="{{ constant('App\\Enum\\OSType::IOS').value }}" data-os-tabs-target="content"
                      class="{% if data.os.selected == constant('App\\Enum\\OSType::IOS').value %}hidden{% endif %}">
                     {{ include('/landing/instructions/os/_ios.html.twig') }}
+                </div>
+
+                <div data-os="{{ constant('App\\Enum\\OSType::MACOS').value }}" data-os-tabs-target="content"
+                     class="{% if data.os.selected == constant('App\\Enum\\OSType::MACOS').value %}hidden{% endif %}">
+                    {{ include('/landing/instructions/os/_macOS.html.twig') }}
                 </div>
 
                 <div data-os="{{ constant('App\\Enum\\OSType::WINDOWS').value }}" data-os-tabs-target="content"
