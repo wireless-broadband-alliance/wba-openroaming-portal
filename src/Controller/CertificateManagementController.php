@@ -267,12 +267,17 @@ class CertificateManagementController extends AbstractController
             return $this->redirectToRoute($processState['nextRoute']);
         }
 
-        $redirectRoute = $this->certificateProcessCheckerService->ensureStageAccess(
-            'radsecproxy_test',
-            $processState['stages']
-        );
-        if ($redirectRoute) {
-            return $this->redirectToRoute($redirectRoute);
+        $stages = $processState['stages'];
+
+        // Only enforce stage access if config has NOT been applied
+        if (!($stages['radsecproxy_config'] ?? false)) {
+            $redirectRoute = $this->certificateProcessCheckerService->ensureStageAccess(
+                'radsecproxy_test',
+                $stages
+            );
+            if ($redirectRoute) {
+                return $this->redirectToRoute($redirectRoute);
+            }
         }
 
         return $this->render(
