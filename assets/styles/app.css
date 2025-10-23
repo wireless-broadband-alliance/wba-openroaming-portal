@@ -15,7 +15,6 @@
 
 
 /* toasts and pills */
-
 .toast-success {
     @apply text-[#0A115C] text-sm font-medium bg-[#0A115C0A] border border-[#9B9EBD] rounded-[5px] px-[25px] py-[15px] flex flex-row justify-start items-center;
 }
@@ -26,6 +25,14 @@
 
 .toast-light-warning {
     @apply flex bg-infoBgColor/50 rounded-lg p-4 text-xs md:text-sm text-infoTextColor;
+}
+
+.toast-warning-dashboard {
+    @apply bg-red-100/50 text-red-700 border border-red-300;
+}
+
+.toast-success-dashboard {
+    @apply bg-infoBgColor text-infoTextColor border border-infoTextColor/20;
 }
 
 .pill-success {

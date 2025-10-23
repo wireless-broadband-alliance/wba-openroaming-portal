@@ -1,4 +1,4 @@
-{# Header - Title - left conner #}
+{# Dashboard Header #}
 {# templates/dashboard/shared/_header.html.twig #}
 
 {# Define route-to-header mapping #}
@@ -32,28 +32,6 @@
     <twig:ux:icon name="{{ header.icon }}" class="w-10 mt-0.5 fill-none stroke-current" />
     <h1 class="text-2xl font-semibold p-5">{{ header.title|trans({}, '_header_admin') }}</h1>
 </div>
-
-{# Error Message Container #}
-{% for message in app.session.flashbag.get('error_admin') %}
-    <div class="transition duration-500 animate-pulse mt-2 mr-2 text-red-500 text-base font-semibold" {{ stimulus_controller('remove') }} {{ stimulus_target('remove', 'target') }}>
-        <div class="flex bg-red-100/50 rounded-lg p-4 mb-4 text-sm text-red-700" role="alert">
-            <twig:ux:icon name="wba:info" class="w-5 h-5 inline mr-3 fill-current"/>
-
-            <span class="font-medium">{{ message }}</span>
-        </div>
-    </div>
-{% endfor %}
-
-{# Sucess Message Container #}
-{% for message in app.session.flashbag.get('success_admin') %}
-    <div class="transition duration-500 animate-pulse mt-2 mr-2 text-infoTextColor text-base font-semibold" {{ stimulus_controller('remove') }} {{ stimulus_target('remove', 'target') }}>
-        <div class="flex bg-infoBgColor rounded-lg p-4 mb-4 text-sm" role="alert">
-            <twig:ux:icon name="wba:info" class="w-5 h-5 inline mr-3 fill-current"/>
-
-            <span class="font-medium">{{ message }}</span>
-        </div>
-    </div>
-{% endfor %}
 
 {# Main Button #}
 <div class="relative" {{ stimulus_controller('nav-dropdown') }} >
