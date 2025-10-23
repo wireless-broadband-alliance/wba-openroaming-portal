@@ -160,7 +160,7 @@
         @apply max-w-sm w-full object-contain rounded-lg cursor-zoom-in m-2;
     }
 
-    .instructions .card-image-windows {
+    .instructions .card-image-wide {
         @apply w-full max-w-full h-auto object-contain rounded-lg cursor-zoom-in m-2;
     }
 }
