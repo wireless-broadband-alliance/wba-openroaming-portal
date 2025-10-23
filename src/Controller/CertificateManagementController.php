@@ -119,14 +119,6 @@ class CertificateManagementController extends AbstractController
     ): Response {
         $data = $this->getSettings->getSettings();
 
-        // Check current certificateProcess status
-        $processState = $this->certificateProcessCheckerService->getProcessState();
-
-        // In case there's not active process
-        if (!$processState['active']) {
-            return $this->redirectToRoute('admin_dashboard_settings_certs_management');
-        }
-
         // Prepare DTO
         $certificateUploadDTO = new CertificateRadSecUploadDTO();
 
@@ -185,7 +177,6 @@ class CertificateManagementController extends AbstractController
                 'certificateUploadDTO' => $certificateUploadDTO,
                 'form' => $form->createView(),
                 'context' => FirewallType::DASHBOARD->value,
-                'processState' => $processState,
             ]
         );
     }
