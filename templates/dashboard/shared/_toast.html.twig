@@ -1,5 +1,5 @@
 <div {{ stimulus_controller('remove') }} {{ stimulus_target('remove', 'target') }}>
-    <div class="flex items-center rounded-lg p-4 mb-4 text-sm shadow-sm transition duration-500 animate-fadeIn {{ toast_type }}">
+    <div class="flex items-center rounded-lg p-4 mb-4 text-sm shadow-sm {{ toast_type }}">
         <twig:ux:icon name="wba:info" class="w-5 h-5 inline mr-3 fill-current"/>
         <span class="font-medium flex-1">{{ message }}</span>
     </div>

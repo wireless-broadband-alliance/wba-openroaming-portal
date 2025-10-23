@@ -2,7 +2,7 @@
     {# Error Toasts Dashboard #}
     {% for message in app.session.flashbag.get('error_admin') %}
         {{ include('dashboard/shared/_toast.html.twig', {
-            toast_type: 'toast-error',
+            toast_type: 'toast-warning-dashboard',
             message: message
         }) }}
     {% endfor %}
@@ -10,7 +10,7 @@
     {# Success Toasts Dashboard #}
     {% for message in app.session.flashbag.get('success_admin') %}
         {{ include('dashboard/shared/_toast.html.twig', {
-            toast_type: 'toast-success',
+            toast_type: 'toast-success-dashboard',
             message: message
         }) }}
     {% endfor %}
