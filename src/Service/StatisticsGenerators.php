@@ -184,7 +184,7 @@ class StatisticsGenerators
      *     datasets: array{
      *         label: string,
      *         data: int[],
-     *         backgroundColor: string,
+     *         backgroundColor: string[],
      *         borderRadius: string
      *     }[]
      * }
@@ -199,13 +199,13 @@ class StatisticsGenerators
             [
                 'label' => 'Accepted',
                 'data' => $acceptedCounts,
-                'backgroundColor' => '#7DB928',
+                'backgroundColor' => $this->generateColorsWithOpacity($acceptedCounts),
                 'borderRadius' => "15",
             ],
             [
                 'label' => 'Rejected',
                 'data' => $rejectedCounts,
-                'backgroundColor' => '#FE4068',
+                'backgroundColor' => $this->generateColorsWithOpacity($rejectedCounts),
                 'borderRadius' => "15",
             ]
         ];
