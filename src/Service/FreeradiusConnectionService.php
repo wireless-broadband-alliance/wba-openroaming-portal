@@ -29,6 +29,11 @@ readonly class FreeradiusConnectionService
         $this->freeradiusConnection = $connection;
     }
 
+    /**
+     * Check the FreeRADIUS database connection
+     *
+     * @return array{success: bool, message: string}
+     */
     public function checkConnection(): array
     {
         try {
@@ -44,7 +49,11 @@ readonly class FreeradiusConnectionService
         } catch (Throwable) {
             return [
                 'success' => false,
-                'message' => $this->translator->trans('FreeRADIUSConnectionFailed', [], 'FreeradiusConnectionService'),
+                'message' => $this->translator->trans(
+                    'FreeRADIUSConnectionFailed',
+                    [],
+                    'FreeradiusConnectionService'
+                ),
             ];
         }
     }
