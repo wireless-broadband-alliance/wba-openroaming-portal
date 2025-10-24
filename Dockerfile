@@ -35,9 +35,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
  && rm -rf /var/lib/apt/lists/*
 
 # Install PHP dependencies
+COPY ./.env.sample /app/.env
 RUN echo "memory_limit=512M" > /usr/local/etc/php/conf.d/memory.ini \
  && composer install --optimize-autoloader --no-interaction
-COPY ./.env.sample ./.env
+
 # Warm Symfony cache
 RUN php bin/console cache:warmup --env=prod
 
