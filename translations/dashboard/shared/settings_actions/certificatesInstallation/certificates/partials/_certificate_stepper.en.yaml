@@ -1,3 +1,4 @@
+info_text_stepper_details: 'Please note that you can use the numbered circles to navigate between completed steps. You can only access steps that have already been completed.'
 step:
     radsecproxy_upload:
         title: 'Upload RadSecProxy Certs'

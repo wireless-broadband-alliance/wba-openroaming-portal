@@ -1,0 +1,19 @@
+{# templates/components/_hover_info_circle.html.twig #}
+<div {{ stimulus_controller('card') }} class="relative inline-block mb-8">
+    {# Hover circle button #}
+    <div
+            class="info-circle group"
+            {{ stimulus_target('card', 'button') }}
+            {{ stimulus_action('card', 'show_info', 'mouseover')|stimulus_action('card', 'hide_info', 'mouseout') }}
+    >
+        <twig:ux:icon name="wba:info" class="info-circle__icon" />
+    </div>
+
+    {# Info message - positioned absolutely now #}
+    <div
+            class="info-circle__message absolute left-full top-1/2 ml-3 -translate-y-1/2 hidden opacity-0"
+            {{ stimulus_target('card', 'info') }}
+    >
+        <span>{{ info_text|raw }}</span>
+    </div>
+</div>

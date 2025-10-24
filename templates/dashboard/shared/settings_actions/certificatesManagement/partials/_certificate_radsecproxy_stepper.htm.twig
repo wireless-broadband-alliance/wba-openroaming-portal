@@ -14,23 +14,9 @@
 {% endfor %}
 
 <div class="w-full max-w-5xl mx-auto mt-8 mb-10 px-4">
-    <div {{ stimulus_controller('card') }}>
-        <div class="btn-primary"
-                {{ stimulus_target('card', 'button') }}
-                {{ stimulus_action('card', 'show_info', 'mouseover')|stimulus_action('card', 'hide_info', 'mouseout') }}
-        >
-            Hover me
-        </div>
-
-        <div class="toast-light-warning mb-6 hidden opacity-0 transition-opacity duration-300 mt-3"
-                {{ stimulus_target('card', 'info') }}>
-            <twig:ux:icon name="wba:info" class="w-10 md:w-5 h-10 md:h-5 inline mr-3 fill-current"/>
-            <span>
-            Please note that you can use the numbered circles to navigate between completed steps.
-            You can only access steps that have already been completed.
-        </span>
-        </div>
-    </div>
+    {{ include('dashboard/shared/_hover_info_details.html.twig', {
+        info_text: 'info_text_stepper_details'|trans({}, '_certificate_stepper')
+    }) }}
 
     <div class="relative flex flex-col md:flex-row items-start md:items-center md:justify-between">
         {# Progress bar #}

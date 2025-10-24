@@ -1,3 +1,4 @@
+info_text_stepper_details: 'Tenha em atenção que pode usar os círculos numerados para navegar entre os passos concluídos. Só pode aceder aos passos que já foram completados.'
 step:
     radsecproxy_upload:
         title: 'Carregar certificados RadSecProxy'

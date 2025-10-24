@@ -1,4 +1,5 @@
 @import 'custom.css';
+@import 'info_hover_details.css';
 
 @tailwind base;
 @tailwind components;
