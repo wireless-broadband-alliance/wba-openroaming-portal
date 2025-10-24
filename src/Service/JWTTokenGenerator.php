@@ -66,15 +66,21 @@ readonly class JWTTokenGenerator
     {
         try {
             $decodedPayload = $this->JWTEncoder->decode($token);
-            if (!$decodedPayload) return false;
+            if (!$decodedPayload) {
+                return false;
+            }
 
             $uuid = $decodedPayload['uuid'] ?? null;
             $tokenPasswordHash = $decodedPayload['password_hash'] ?? null;
 
-            if (!$uuid || !$tokenPasswordHash) return false;
+            if (!$uuid || !$tokenPasswordHash) {
+                return false;
+            }
 
             $user = $this->userRepository->findOneBy(['uuid' => $uuid]);
-            if (!$user) return false;
+            if (!$user) {
+                return false;
+            }
 
             return $user->getPassword() === $tokenPasswordHash;
         } catch (JWTDecodeFailureException) {

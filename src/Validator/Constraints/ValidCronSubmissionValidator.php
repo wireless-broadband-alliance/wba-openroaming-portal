@@ -120,7 +120,9 @@ class ValidCronSubmissionValidator extends ConstraintValidator
         ];
 
         foreach ($fieldsToCheck as $fieldSuffix => [$selectedValues, $frequency]) {
-            if ($frequency <= 1) continue;
+            if ($frequency <= 1) {
+                continue;
+            }
 
             $count = count($selectedValues);
             if ($frequency >= $count && !in_array('*', $selectedValues, true)) {
@@ -203,7 +205,9 @@ class ValidCronSubmissionValidator extends ConstraintValidator
      */
     private function buildCronPartWithFrequency(array $values, int $frequency, string $settingName): string
     {
-        if ($values === []) return '*';
+        if ($values === []) {
+            return '*';
+        }
 
         sort($values);
 

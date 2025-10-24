@@ -240,10 +240,13 @@ readonly class Statistics
 
         foreach ($events as $event) {
             $eventDateTime = $event->getEventDatetime();
-            if (!$eventDateTime) continue;
-            if ((!$startDate || $eventDateTime >= $startDate) &&
-                (!$endDate || $eventDateTime <= $endDate)) {
-
+            if (!$eventDateTime) {
+                continue;
+            }
+            if (
+                (!$startDate || $eventDateTime >= $startDate) &&
+                (!$endDate || $eventDateTime <= $endDate)
+            ) {
                 $eventMetadata = $event->getEventMetadata();
 
                 if (isset($eventMetadata['platform'])) {
@@ -290,9 +293,10 @@ readonly class Statistics
         foreach ($users as $user) {
             $createdAt = $user->getCreatedAt();
 
-            if ((!$startDate || $createdAt >= $startDate) &&
-                (!$endDate || $createdAt <= $endDate)) {
-
+            if (
+                (!$startDate || $createdAt >= $startDate) &&
+                (!$endDate || $createdAt <= $endDate)
+            ) {
                 $verification = $user->isVerified();
                 $ban = $user->getBannedAt();
 
