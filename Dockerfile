@@ -1,4 +1,4 @@
-FROM ubuntu:22.04
+FROM ubuntu:24.04
 ENV DEBIAN_FRONTEND=noninteractive
 ENV COMPOSER_ALLOW_SUPERUSER=1
 
@@ -44,6 +44,6 @@ COPY service-config/nginx/mime.types /etc/nginx/mime.types
 COPY service-config/nginx/fastcgi_params /etc/nginx/fastcgi_params
 COPY service-config/nginx/sites /etc/nginx/conf.d
 COPY --chown=www-data:www-data . /var/www/openroaming
-RUN mkdir /run/php
+#RUN mkdir /run/php
 CMD ["/usr/bin/supervisord"]
 
