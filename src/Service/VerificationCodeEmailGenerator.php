@@ -52,7 +52,7 @@ readonly class VerificationCodeEmailGenerator
         $projectDir = $this->parameterBag->get('kernel.project_dir');
         $logoPath = $projectDir . '/public' . $customerLogo;
 
-        $user->setTwoFACode(random_int(100000, 999999));
+        $user->setTwoFACode((string) random_int(100000, 999999));
         $user->setTwoFACodeGeneratedAt(new DateTime());
         $user->setTwoFAcodeIsActive(true);
         $this->userRepository->save($user, true);
