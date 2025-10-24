@@ -449,7 +449,7 @@ class TwoFAController extends AbstractController
         if ($user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::DISABLED->value) {
             $this->addFlash(
                 'error',
-                $this->translator->trans('twoFAAlreadyDisabled', [], 'controllers')
+                $this->translator->trans('twoFADisabledSuccessfully', [], 'controllers')
             );
             if ($context === FirewallType::DASHBOARD->value) {
                 return $this->redirectToRoute('admin_page');
@@ -511,7 +511,7 @@ class TwoFAController extends AbstractController
                 );
                 $this->addFlash(
                     'success',
-                    $this->translator->trans('twoFAAlreadyDisabled', [], 'controllers')
+                    $this->translator->trans('twoFADisabledSuccessfully', [], 'controllers')
                 );
                 if ($context === FirewallType::DASHBOARD->value) {
                     return $this->redirectToRoute('admin_page');
@@ -585,7 +585,7 @@ class TwoFAController extends AbstractController
                 );
                 $this->addFlash(
                     'success',
-                    $this->translator->trans('twoFAAlreadyDisabled', [], 'controllers')
+                    $this->translator->trans('twoFADisabledSuccessfully', [], 'controllers')
                 );
                 if ($context === FirewallType::DASHBOARD->value) {
                     return $this->redirectToRoute('admin_page');
@@ -1255,7 +1255,7 @@ class TwoFAController extends AbstractController
                 );
                 $this->addFlash(
                     'success',
-                    $this->translator->trans('twoFAAlreadyDisabled', [], 'controllers')
+                    $this->translator->trans('twoFADisabledSuccessfully', [], 'controllers')
                 );
                 return $this->redirectToRoute('app_enable2FA_TOTP', [
                     'context' => $context

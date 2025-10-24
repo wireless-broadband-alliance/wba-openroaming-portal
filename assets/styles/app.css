@@ -133,7 +133,7 @@
     }
 
     .instructions .card-grid {
-        @apply w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 gap-10;
+        @apply w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 gap-14 p-2;
     }
 
     .instructions .card-grid-windows {
@@ -166,7 +166,7 @@
 }
 
 .landing-container {
-    @apply w-[95%] sm:w-[90%] lg:w-[85%] xl:w-[80%] 2xl:w-[75%] max-w-[1800px] bg-white rounded-xl shadow-2xl py-12 sm:py-16 lg:py-20 px-6 sm:px-10;
+    @apply m-4 w-[95%] sm:w-[90%] lg:w-[85%] xl:w-[80%] 2xl:w-[75%] max-w-[1800px] bg-white rounded-xl shadow-2xl py-12 sm:py-16 lg:py-20 px-6 sm:px-10;
 }
 
 .landing-header {
@@ -182,19 +182,19 @@
 }
 
 .instructions-header {
-    @apply flex flex-col-reverse sm:flex-row sm:items-center justify-between mb-4 gap-2;
+    @apply flex flex-col-reverse sm:flex-row sm:items-center justify-between gap-2;
 }
 
 .instructions-title {
-    @apply text-xl sm:text-2xl md:text-3xl font-bold;
+    @apply text-xl sm:text-2xl md:text-3xl font-bold pb-8;
 }
 
 .instructions-tabs {
-    @apply flex border-b border-gray-200 mb-6 w-full;
+    @apply flex border-b border-gray-200 mb-6 w-full pb-8;
 }
 
 .instructions-tab {
-    @apply flex-1 px-3 py-2 text-sm sm:text-base font-semibold flex items-center justify-center space-x-2 transition-all duration-200;
+    @apply flex-1 px-3 py-2 text-lg sm:text-xl font-semibold flex items-center justify-center space-x-2 transition-all duration-200;
 }
 
 .instructions-content {
