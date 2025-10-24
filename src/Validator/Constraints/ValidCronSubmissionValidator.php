@@ -12,29 +12,36 @@ use UnexpectedValueException;
 
 class ValidCronSubmissionValidator extends ConstraintValidator
 {
-    public function validate($value, Constraint $constraint): void
+    /**
+     * @param mixed $value
+     * @param Constraint $constraint
+     */
+    public function validate(mixed $value, Constraint $constraint): void
     {
         if (!$constraint instanceof ValidCronSettings) {
             throw new UnexpectedTypeException($constraint, ValidCronSettings::class);
         }
 
         if (!is_array($value)) {
-            throw new UnexpectedValueException($value, 'array');
+            throw new UnexpectedValueException('Expected array, got ' . gettype($value));
         }
 
-        // Get cronSettings from the constraint options instead of constructor injection
+        /** @var array<string, mixed> $value */
         $cronSettings = $constraint->cronSettings;
 
         foreach ($cronSettings as $settingName) {
-            if ($value['use_advanced_mode'] === true) {
+            if (($value['use_advanced_mode'] ?? false) === true) {
                 $this->validateAdvanced($value, $settingName);
-            }
-            if ($value['use_advanced_mode'] === false) {
+            } else {
                 $this->validateSimple($value, $settingName);
             }
         }
     }
 
+    /**
+     * @param array<string, mixed> $value
+     * @param string $settingName
+     */
     private function validateAdvanced(array $value, string $settingName): void
     {
         $cronField = "{$settingName}_advanced";
@@ -48,7 +55,7 @@ class ValidCronSubmissionValidator extends ConstraintValidator
         }
 
         try {
-            new CronExpression($expr);
+            new CronExpression((string) $expr);
         } catch (Exception) {
             $this->context->buildViolation('cronExpressionNotValid')
                 ->atPath($cronField)
@@ -56,6 +63,10 @@ class ValidCronSubmissionValidator extends ConstraintValidator
         }
     }
 
+    /**
+     * @param array<string, mixed> $value
+     * @param string $settingName
+     */
     private function validateSimple(array $value, string $settingName): void
     {
         $time = $value["{$settingName}_time"] ?? null;
@@ -78,45 +89,24 @@ class ValidCronSubmissionValidator extends ConstraintValidator
 
         if (!$time) {
             $this->addError("{$settingName}_time", 'chooseTime');
-
             return;
         }
 
-        $daysOfWeek = $this->expandAllSelection(
-            $daysOfWeek,
-            0,
-            6
-        );
-        $daysOfMonth = $this->expandAllSelection(
-            $daysOfMonth,
-            1,
-            31
-        );
-        $monthsOfYear = $this->expandAllSelection(
-            $monthsOfYear,
-            1,
-            12
-        );
+        /** @var int[]|string[] $daysOfWeek */
+        $daysOfWeek = $this->expandAllSelection($daysOfWeek, 0, 6);
+        /** @var int[]|string[] $daysOfMonth */
+        $daysOfMonth = $this->expandAllSelection($daysOfMonth, 1, 31);
+        /** @var int[]|string[] $monthsOfYear */
+        $monthsOfYear = $this->expandAllSelection($monthsOfYear, 1, 12);
 
         if ($daysOfWeek === []) {
-            $this->addError(
-                "{$settingName}_day_of_week",
-                'chooseDayWeek'
-            );
+            $this->addError("{$settingName}_day_of_week", 'chooseDayWeek');
         }
-
         if ($daysOfMonth === []) {
-            $this->addError(
-                "{$settingName}_day_of_month",
-                'chooseDayMonth'
-            );
+            $this->addError("{$settingName}_day_of_month", 'chooseDayMonth');
         }
-
         if ($monthsOfYear === []) {
-            $this->addError(
-                "{$settingName}_months_of_the_year",
-                'chooseMonth'
-            );
+            $this->addError("{$settingName}_months_of_the_year", 'chooseMonth');
         }
 
         $this->checkAllWithExtras($settingName, $daysOfWeek, 'day_of_week');
@@ -130,9 +120,7 @@ class ValidCronSubmissionValidator extends ConstraintValidator
         ];
 
         foreach ($fieldsToCheck as $fieldSuffix => [$selectedValues, $frequency]) {
-            if ($frequency <= 1) {
-                continue;
-            }
+            if ($frequency <= 1) continue;
 
             $count = count($selectedValues);
             if ($frequency >= $count && !in_array('*', $selectedValues, true)) {
@@ -146,24 +134,9 @@ class ValidCronSubmissionValidator extends ConstraintValidator
         $minute = (int)$time->format('i');
         $hour = (int)$time->format('H');
 
-        $dayOfMonthPart = $this->buildPart(
-            $daysOfMonth,
-            $dayOfMonthFreq,
-            $monthsFreq,
-            'day_of_month'
-        );
-        $monthPart = $this->buildPart(
-            $monthsOfYear,
-            $monthsFreq,
-            $monthsFreq,
-            'months_of_the_year'
-        );
-        $dayOfWeekPart = $this->buildPart(
-            $daysOfWeek,
-            $dayOfWeekFreq,
-            $dayOfWeekFreq,
-            'day_of_week'
-        );
+        $dayOfMonthPart = $this->buildPart($daysOfMonth, $dayOfMonthFreq, $monthsFreq, 'day_of_month');
+        $monthPart = $this->buildPart($monthsOfYear, $monthsFreq, $monthsFreq, 'months_of_the_year');
+        $dayOfWeekPart = $this->buildPart($daysOfWeek, $dayOfWeekFreq, $dayOfWeekFreq, 'day_of_week');
 
         $cronString = sprintf('%s %d %s %s %s', $minute, $hour, $dayOfMonthPart, $monthPart, $dayOfWeekPart);
 
@@ -181,16 +154,23 @@ class ValidCronSubmissionValidator extends ConstraintValidator
             ->addViolation();
     }
 
+    /**
+     * @param string[]|int[] $values
+     */
     private function checkAllWithExtras(string $settingName, array $values, string $suffix): void
     {
         if (count($values) > 1 && in_array('*', $values, true)) {
-            $this->addError(
-                "{$settingName}_{$suffix}",
-                'allValueWithSpecificDaysNotAllowed'
-            );
+            $this->addError("{$settingName}_{$suffix}", 'allValueWithSpecificDaysNotAllowed');
         }
     }
 
+    /**
+     * @param string[]|int[] $values
+     * @param int $freq
+     * @param int $defaultFreq
+     * @param string $suffix
+     * @return string
+     */
     private function buildPart(array $values, int $freq, int $defaultFreq, string $suffix): string
     {
         if (in_array('*', $values, true)) {
@@ -200,6 +180,12 @@ class ValidCronSubmissionValidator extends ConstraintValidator
         return $this->buildCronPartWithFrequency($values, $freq, $suffix);
     }
 
+    /**
+     * @param int[]|string[] $values
+     * @param int $min
+     * @param int $max
+     * @return int[]
+     */
     private function expandAllSelection(array $values, int $min, int $max): array
     {
         if (in_array('all', $values, true)) {
@@ -209,20 +195,17 @@ class ValidCronSubmissionValidator extends ConstraintValidator
         return $values;
     }
 
-    private function buildCronPartWithFrequency(
-        array $values,
-        int $frequency,
-        string $settingName
-    ): string {
-        if ($values === []) {
-            return '*';
-        }
+    /**
+     * @param int[]|string[] $values
+     * @param int $frequency
+     * @param string $settingName
+     * @return string
+     */
+    private function buildCronPartWithFrequency(array $values, int $frequency, string $settingName): string
+    {
+        if ($values === []) return '*';
 
         sort($values);
-
-        if ($frequency <= 1) {
-            return implode(',', $values);
-        }
 
         $min = $values[0];
         $max = $values[count($values) - 1];
@@ -232,9 +215,7 @@ class ValidCronSubmissionValidator extends ConstraintValidator
             return "{$min}-{$max}/{$frequency}";
         }
 
-        $this->context->buildViolation(
-            'selectNonContiguousValuesWithFrequencyGreaterThan1NotAllowed'
-        )
+        $this->context->buildViolation('selectNonContiguousValuesWithFrequencyGreaterThan1NotAllowed')
             ->atPath("{$settingName}_time")
             ->addViolation();
 
