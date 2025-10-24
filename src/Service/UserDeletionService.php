@@ -24,6 +24,13 @@ readonly class UserDeletionService
     ) {
     }
 
+    /**
+     * @param User $user
+     * @param object[] $userExternalAuths Array of external auth objects
+     * @param Request $request
+     * @param User $currentUser
+     * @return array<string, mixed>
+     */
     public function deleteUser(User $user, array $userExternalAuths, Request $request, User $currentUser): array
     {
         $deletedUserUuid = $user->getUuid();
@@ -82,10 +89,10 @@ readonly class UserDeletionService
         $deletedUserDataEntity->setPgpEncryptedJsonFile($pgpEncryptedData);
         $deletedUserDataEntity->setUser($user);
 
-        $user->setUuid($user->getId());
+        $user->setUuid((string) $user->getId());
         $user->setEmail(null);
         $user->setPhoneNumber(null);
-        $user->setPassword($user->getId());
+        $user->setPassword((string) $user->getId());
         $user->setFirstName(null);
         $user->setLastName(null);
         $user->setDeletedAt(new DateTime());
