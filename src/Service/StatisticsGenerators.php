@@ -5,7 +5,18 @@ namespace App\Service;
 class StatisticsGenerators
 {
     /**
-     * Generated Datasets for charts graphics
+     * Generate datasets for charts graphics
+     *
+     * @param array<string, int|float> $counts
+     * @return array{
+     *     labels: string[],
+     *     datasets: array{
+     *         data: int[]|float[],
+     *         backgroundColor: string[],
+     *         borderColor: string,
+     *         borderRadius: string
+     *     }[]
+     * }
      */
     public function generateDatasets(array $counts): array
     {
@@ -37,13 +48,23 @@ class StatisticsGenerators
 
     /**
      * Generate datasets for session average time
+     *
+     * @param array<int, array{group: string, averageSessionTime: int|float}> $sessionTime
+     * @return array{
+     *     labels: string[],
+     *     datasets: array{
+     *         label: string,
+     *         data: int[]|float[],
+     *         backgroundColor: string[],
+     *         borderRadius: string,
+     *         tooltips: string[]
+     *     }[]
+     * }
      */
     public function generateDatasetsSessionAverage(array $sessionTime): array
     {
         $labels = array_column($sessionTime, 'group');
-        $averageTimes = array_map(static function ($item) {
-            return $item['averageSessionTime']; // Keep numerical values for plotting
-        }, $sessionTime);
+        $averageTimes = array_map(static fn($item) => $item['averageSessionTime'], $sessionTime);
 
         $averageTimesReadable = array_map(static function ($seconds) {
             $hours = floor($seconds / 3600);
@@ -72,6 +93,18 @@ class StatisticsGenerators
 
     /**
      * Generate datasets for session total time
+     *
+     * @param array<int, array{group: string, totalSessionTime: int|float}> $sessionTime
+     * @return array{
+     *     labels: string[],
+     *     datasets: array{
+     *         label: string,
+     *         data: int[]|float[],
+     *         backgroundColor: string[],
+     *         borderRadius: string,
+     *         tooltips: string[]
+     *     }[]
+     * }
      */
     public function generateDatasetsSessionTotal(array $sessionTime): array
     {
@@ -105,6 +138,18 @@ class StatisticsGenerators
 
     /**
      * Generate datasets for Wi-Fi tags
+     *
+     * @param array<int, array{standard: string, count: int}> $wifiUsage
+     * @return array{
+     *     labels: string[],
+     *     datasets: array{
+     *         label: string,
+     *         data: int[],
+     *         backgroundColor: string[],
+     *         borderRadius: string
+     *     }[],
+     *     rawData: int[]
+     * }
      */
     public function generateDatasetsWifiTags(array $wifiUsage): array
     {
@@ -132,6 +177,17 @@ class StatisticsGenerators
 
     /**
      * Generate datasets for authentication attempts
+     *
+     * @param array{Accepted: array<string, int>, Rejected: array<string, int>} $authsCounts
+     * @return array{
+     *     labels: string[],
+     *     datasets: array{
+     *         label: string,
+     *         data: int[],
+     *         backgroundColor: string,
+     *         borderRadius: string
+     *     }[]
+     * }
      */
     public function generateDatasetsAuths(array $authsCounts): array
     {
@@ -160,6 +216,19 @@ class StatisticsGenerators
         ];
     }
 
+    /**
+     * Generate datasets for realm counting
+     *
+     * @param array<string, int> $counts Realm names mapped to counts.
+     * @return array{
+     *     labels: string[],
+     *     datasets: array{
+     *         data: int[],
+     *         backgroundColor: string[],
+     *         borderRadius: string
+     *     }[]
+     * }
+     */
     public function generateDatasetsRealmsCounting(array $counts): array
     {
         $datasets = [];
@@ -192,6 +261,21 @@ class StatisticsGenerators
         ];
     }
 
+    /**
+     * Generate datasets for realm traffic
+     *
+     * @param array<string, array{total_input: int, total_output: int}> $trafficData
+     * @return array{
+     *     labels: string[],
+     *     datasets: array{
+     *         data: int[],
+     *         label: string,
+     *         backgroundColor: string[],
+     *         borderWidth?: int,
+     *         borderRadius: string
+     *     }[]
+     * }
+     */
     public function generateDatasetsRealmsTraffic(array $trafficData): array
     {
         $datasets = [];
@@ -247,6 +331,9 @@ class StatisticsGenerators
 
     /**
      * Generate colors with varying opacities based on data values
+     *
+     * @param array<int|float> $values
+     * @return string[]
      */
     public function generateColorsWithOpacity(array $values): array
     {
