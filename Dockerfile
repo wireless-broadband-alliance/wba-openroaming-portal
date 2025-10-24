@@ -6,7 +6,8 @@ WORKDIR /app
 
 # Install Node dependencies & build assets
 COPY package*.json yarn.lock* ./
-RUN npm ci --no-audit --progress=false
+#RUN npm ci --no-audit --progress=false
+RUN npm install --no-audit --progress=false
 
 COPY . .
 RUN npm run build
