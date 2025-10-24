@@ -1,18 +1,4 @@
 # =========================
-# Frontend build stage
-# =========================
-FROM node:22-bullseye-slim AS frontend
-WORKDIR /app
-
-# Install Node dependencies & build assets
-COPY package*.json yarn.lock* ./
-#RUN npm ci --no-audit --progress=false
-RUN npm install --no-audit --progress=false
-
-COPY . .
-RUN npm run build
-
-# =========================
 # PHP / Composer build stage
 # =========================
 FROM php:8.4-fpm-bullseye AS vendor
@@ -50,10 +36,25 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # Install PHP dependencies
 RUN echo "memory_limit=512M" > /usr/local/etc/php/conf.d/memory.ini \
- && composer install
+ && composer install --optimize-autoloader --no-interaction
 
 # Warm Symfony cache
 RUN php bin/console cache:warmup --env=prod
+
+# =========================
+# Frontend build stage
+# =========================
+FROM node:22-bullseye-slim AS frontend
+WORKDIR /app
+
+# Install Node dependencies & build assets
+COPY package*.json yarn.lock* ./
+COPY --from=vendor /app/vendor /var/www/openroaming/vendor
+#RUN npm ci --no-audit --progress=false
+RUN npm install --no-audit --progress=false
+
+COPY . .
+RUN npm run build
 
 # =========================
 # Final runtime image
