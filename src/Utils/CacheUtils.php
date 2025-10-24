@@ -3,14 +3,17 @@
 namespace App\Utils;
 
 use Memcached;
+use Psr\Cache\InvalidArgumentException;
 use Symfony\Component\Cache\Adapter\MemcachedAdapter;
 use Symfony\Component\Cache\CacheItem;
 use Symfony\Component\Cache\Exception\CacheException;
 
 class CacheUtils
 {
-    private $cache;
-
+    /**
+     * @var MemcachedAdapter
+     */
+    private MemcachedAdapter $cache;
 
     /**
      * @throws CacheException
@@ -25,24 +28,39 @@ class CacheUtils
         $this->cache = new MemcachedAdapter($client);
     }
 
-    public function read(string $key)
+    /**
+     * @param string $key
+     * @return mixed|null
+     * @throws InvalidArgumentException
+     */
+    public function read(string $key): mixed
     {
         $item = $this->getCacheItem($key);
         return $item->isHit() ? $item->get() : null;
     }
 
+    /**
+     * @throws InvalidArgumentException
+     */
     private function getCacheItem(string $key): CacheItem
     {
         return $this->cache->getItem($key);
     }
 
-    public function write(string $key, $value, int $ttl = 0)
+    /**
+     * @param string $key
+     * @param mixed $value
+     * @param int $ttl
+     * @return bool True if the item was successfully saved
+     * @throws InvalidArgumentException
+     */
+    public function write(string $key, mixed $value, int $ttl = 0): bool
     {
         $item = $this->getCacheItem($key);
         $item->set($value);
         if ($ttl > 0) {
             $item->expiresAfter($ttl);
         }
-        $this->cache->save($item);
+        return $this->cache->save($item);
     }
 }
