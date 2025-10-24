@@ -14,6 +14,9 @@ readonly class SamlResolverService
     ) {
     }
 
+    /**
+     * @return array{idp_entity_id: string, certificate: string}
+     */
     public function decodeSamlResponse(string $samlResponse, string $expectedIdpEntityId): array
     {
         // Decode the SamlResponse for data validation with the DB
@@ -50,7 +53,7 @@ readonly class SamlResolverService
 
         if ($audiences === []) {
             throw new AuthenticationException(
-                $this->translator->trans('issuerNotFoundSAMLResponse', [], 'SamlResolverService')
+                $this->translator->trans('audienceNotFoundSAMLResponse', [], 'SamlResolverService')
             );
         }
 
@@ -88,6 +91,7 @@ readonly class SamlResolverService
 
     /**
      * Extract Audience values from both the SAML Response and the Assertion.
+     * @return string[]
      */
     private function getAudiences(DOMDocument $dom): array
     {
