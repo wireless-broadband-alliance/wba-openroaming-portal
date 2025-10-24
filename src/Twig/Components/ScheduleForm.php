@@ -47,7 +47,6 @@ final class ScheduleForm extends AbstractController
     public function __construct(
         private readonly SettingRepository $settingRepository,
         private readonly CronExpressionHelperService $cronHelper,
-        private readonly SchedulerService $schedulerService
     ) {
         $cronAdvanceStatus = $this->settingRepository->findOneBy(["name" => SettingName::CRON_ADVANCED_STATUS->value]);
         if (!is_null($cronAdvanceStatus)) {
