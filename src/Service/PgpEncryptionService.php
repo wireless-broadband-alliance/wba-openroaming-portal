@@ -9,6 +9,9 @@ use RuntimeException;
 
 class PgpEncryptionService
 {
+    /**
+     * @return bool|string|array{0: string, 1: string}
+     */
     public function encrypt(string $data): bool|array|string
     {
         $publicKeyPath = "/var/www/openroaming/pgp_public_key/public_key.asc";
