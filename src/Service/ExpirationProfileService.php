@@ -6,6 +6,7 @@ use App\Entity\UserRadiusProfile;
 use App\Enum\SettingName;
 use App\Enum\UserProvider;
 use App\Repository\SettingRepository;
+use DateTimeInterface;
 use Exception;
 
 readonly class ExpirationProfileService
@@ -18,9 +19,13 @@ readonly class ExpirationProfileService
 
     /**
      * Calculate the expiration and notification times for a user profile.
-     */
-    /**
-     * @return array Contains 'limitTime' and 'notifyTime' as DateTime instances.
+     *
+     * @param string $provider
+     * @param string|null $providerId
+     * @param UserRadiusProfile $userRadiusProfile
+     * @param string $certificatePath
+     *
+     * @return array{limitTime: DateTimeInterface, notifyTime: DateTimeInterface}
      * @throws Exception
      */
     public function calculateExpiration(
