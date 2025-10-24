@@ -26,6 +26,12 @@ final class LoginUUIDForm extends AbstractController
     public LoginChoiceDTO|null $loginChoiceDTO = null;
 
     /**
+     * Store the raw phone number string input separately
+     */
+    #[LiveProp]
+    public string|null $rawPhoneNumber = null;
+
+    /**
      * @return FormInterface<mixed>
      */
     #[\Override]
@@ -41,12 +47,12 @@ final class LoginUUIDForm extends AbstractController
             $this->loginChoiceDTO = new LoginChoiceDTO();
         }
 
-        // Transform phone number string into PhoneNumber object
-        if (is_string($this->loginChoiceDTO->phoneNumber) && !empty($this->loginChoiceDTO->phoneNumber)) {
+        // Parse the raw phone number string if provided
+        if (!empty($this->rawPhoneNumber)) {
             try {
                 $phoneUtil = PhoneNumberUtil::getInstance();
                 $this->loginChoiceDTO->phoneNumber = $phoneUtil->parse(
-                    $this->loginChoiceDTO->phoneNumber,
+                    $this->rawPhoneNumber,
                     'US'
                 );
             } catch (NumberParseException) {
