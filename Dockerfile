@@ -1,7 +1,7 @@
 # =========================
 # Frontend build stage
 # =========================
-FROM node:20-bullseye-slim AS frontend
+FROM node:22-bullseye-slim AS frontend
 WORKDIR /app
 
 # Install Node dependencies & build assets
