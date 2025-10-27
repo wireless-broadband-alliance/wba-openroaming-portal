@@ -86,6 +86,9 @@ readonly class ExceptionListener
         $event->setResponse($response);
     }
 
+    /**
+     * @return array<string, array{value: mixed}>
+     */
     private function getSettings(): array
     {
         $wanted = [
