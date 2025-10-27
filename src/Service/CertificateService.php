@@ -41,6 +41,11 @@ class CertificateService
         return date('Y-m-d H:i:s', $certInfo['validTo_time_t']);
     }
 
+    /**
+     * Verify presence of required certificate files.
+     *
+     * @return string[] List of missing filenames
+     */
     public function verifyCertificates(): array
     {
         $missingFiles = [];
