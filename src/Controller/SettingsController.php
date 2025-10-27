@@ -29,6 +29,7 @@ use App\Service\EnforcePasswordResetService;
 use App\Service\EventActions;
 use App\Service\GetSettings;
 use App\Service\SanitizeHTML;
+use App\Service\SettingsService;
 use App\Service\Statistics;
 use DateTime;
 use DateTimeZone;
@@ -57,6 +58,7 @@ class SettingsController extends AbstractController
         private readonly SettingTranslationRepository $settingTranslationRepository,
         private readonly EnforcePasswordResetService $enforcePasswordResetService,
         private readonly CertificateService $certificateService,
+        private readonly SettingsService $settingsService,
         private readonly TextEditorRepository $textEditorRepository
     ) {
     }
@@ -409,12 +411,12 @@ class SettingsController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function settingsTerms(
         Request $request,
-        string $language
+        string $language,
     ): Response {
-        // Get the current logged-in user (admin)
         /** @var User $currentUser */
         $currentUser = $this->getUser();
 
+        // TOS TextEditor
         $tosTextEditor = $this->textEditorRepository->findTextEditor(TextEditorName::TOS->value, $language);
         if (!$tosTextEditor instanceof TextEditor) {
             $tosTextEditor = new TextEditor();
@@ -423,10 +425,9 @@ class SettingsController extends AbstractController
             $tosTextEditor->setLocale($language);
             $this->entityManager->persist($tosTextEditor);
         }
-        $privacyPolicyTextEditor = $this->textEditorRepository->findTextEditor(
-            TextEditorName::PRIVACY_POLICY->value,
-            $language
-        );
+
+        // Privacy Policy TextEditor
+        $privacyPolicyTextEditor = $this->textEditorRepository->findTextEditor(TextEditorName::PRIVACY_POLICY->value, $language);
         if (!$privacyPolicyTextEditor instanceof TextEditor) {
             $privacyPolicyTextEditor = new TextEditor();
             $privacyPolicyTextEditor->setName(TextEditorName::PRIVACY_POLICY->value);
@@ -434,122 +435,87 @@ class SettingsController extends AbstractController
             $privacyPolicyTextEditor->setLocale($language);
             $this->entityManager->persist($privacyPolicyTextEditor);
         }
+
+        $this->entityManager->persist($tosTextEditor);
+        $this->entityManager->persist($privacyPolicyTextEditor);
         $this->entityManager->flush();
 
         $data = $this->getSettings->getSettings();
-
         $settingsRepository = $this->entityManager->getRepository(Setting::class);
         $settings = $settingsRepository->findAll();
 
+        // Remove old editor settings
         foreach ($settings as $setting) {
-            if (
-                $setting->getName() === TextEditorName::TOS_EDITOR->value ||
-                $setting->getName() === TextEditorName::PRIVACY_POLICY_EDITOR->value
-            ) {
+            if (in_array(
+                $setting->getName(),
+                [TextEditorName::TOS_EDITOR->value, TextEditorName::PRIVACY_POLICY_EDITOR->value],
+                true
+            )) {
                 $this->entityManager->remove($setting);
-                $this->entityManager->flush();
             }
         }
 
-        $tosTextEditorSetting = new Setting();
-        $tosTextEditorSetting->setName(TextEditorName::TOS_EDITOR->value);
-        $tosTextEditorSetting->setValue($tosTextEditor->getContent());
-        $privacyPolicyTextEditorSetting = new Setting();
-        $privacyPolicyTextEditorSetting->setName(TextEditorName::PRIVACY_POLICY_EDITOR->value);
-        $privacyPolicyTextEditorSetting->setValue($privacyPolicyTextEditor->getContent());
+        $this->entityManager->flush();
 
-        $settings = array_merge($settings, [$tosTextEditorSetting, $privacyPolicyTextEditorSetting]);
-
-        $form = $this->createForm(TermsType::class, null, [
-            'settings' => $settings,
+        // Add current TextEditor content to settings array
+        $settings = array_merge($settings, [
+            new Setting()->setName(TextEditorName::TOS_EDITOR->value)->setValue($tosTextEditor->getContent()),
+            new Setting()->setName(TextEditorName::PRIVACY_POLICY_EDITOR->value)->setValue(
+                $privacyPolicyTextEditor->getContent()
+            ),
         ]);
 
+        $form = $this->createForm(TermsType::class, null, ['settings' => $settings]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // Get the submitted data
-            $submittedData = $form->getData();
-
-            // Update settings
-            $tos = $submittedData[SettingName::TOS->value];
-            $privacyPolicy = $submittedData[SettingName::PRIVACY_POLICY->value];
-            $tosLink = $submittedData[SettingName::TOS_LINK->value] ?? null;
-            $privacyPolicyLink = $submittedData[SettingName::PRIVACY_POLICY_LINK->value] ?? null;
-            $tosTextEditor = $submittedData[TextEditorName::TOS_EDITOR->value] ?? '';
-            $privacyPolicyTextEditor = $submittedData[TextEditorName::PRIVACY_POLICY_EDITOR->value] ?? '';
-
-
-            $tosSetting = $settingsRepository->findOneBy(['name' => SettingName::TOS->value]);
-            if ($tosSetting !== null) {
-                $tosSetting->setValue($tos);
-                $this->entityManager->persist($tosSetting);
-            }
-
-            $privacyPolicySetting = $settingsRepository->findOneBy(
-                ['name' => SettingName::PRIVACY_POLICY->value]
-            );
-            if ($privacyPolicySetting !== null) {
-                $privacyPolicySetting->setValue($privacyPolicy);
-                $this->entityManager->persist($privacyPolicySetting);
-            }
-
-            $tosLinkSetting = $settingsRepository->findOneBy(
-                ['name' => SettingName::TOS_LINK->value]
-            );
-            if ($tosLinkSetting !== null) {
-                $tosLinkSetting->setValue($tosLink);
-                $this->entityManager->persist($tosLinkSetting);
-            }
-
-            $privacyPolicyLinkSetting = $settingsRepository->findOneBy(
-                ['name' => SettingName::PRIVACY_POLICY_LINK->value]
-            );
-            if ($privacyPolicyLinkSetting !== null) {
-                $privacyPolicyLinkSetting->setValue($privacyPolicyLink);
-                $this->entityManager->persist($privacyPolicyLinkSetting);
-            }
             $sanitizeHtml = new SanitizeHTML();
-            if ($tosTextEditor) {
-                $tosEditorSetting = $this->textEditorRepository->findTextEditor(TextEditorName::TOS->value, $language);
-                if ($tosEditorSetting instanceof TextEditor) {
-                    $cleanHTML = $sanitizeHtml->sanitizeHtml($tosTextEditor);
-                    $tosEditorSetting->setContent($cleanHTML);
-                }
-                $this->entityManager->persist($tosEditorSetting);
-            }
 
-            if ($privacyPolicyTextEditor) {
-                $privacyPolicyEditorSetting = $this->textEditorRepository->findTextEditor(
-                    TextEditorName::PRIVACY_POLICY->value,
-                    $language
-                );
-                if ($privacyPolicyEditorSetting instanceof TextEditor) {
-                    $cleanHTML = $sanitizeHtml->sanitizeHtml($privacyPolicyTextEditor);
-                    $privacyPolicyEditorSetting->setContent($cleanHTML);
-                }
-                $this->entityManager->persist($privacyPolicyEditorSetting);
+            // Update settings using the service
+            foreach (
+                [
+                    SettingName::TOS->value => $form->get(SettingName::TOS->value)->getData(),
+                    SettingName::PRIVACY_POLICY->value => $form->get(SettingName::PRIVACY_POLICY->value)->getData(),
+                    SettingName::TOS_LINK->value => $form->get(SettingName::TOS_LINK->value)->getData(),
+                    SettingName::PRIVACY_POLICY_LINK->value => $form->get(
+                        SettingName::PRIVACY_POLICY_LINK->value
+                    )->getData(),
+                ] as $name => $value
+            ) {
+                $this->settingsService->update($name, $value);
             }
-            $eventMetadata = [
-                'ip' => $request->getClientIp(),
-                'user_agent' => $request->headers->get('User-Agent'),
-                'uuid' => $currentUser->getUuid(),
-            ];
+            $this->settingsService->flush();
+
+            // Update TextEditors
+            $tosTextEditor->setContent(
+                $sanitizeHtml->sanitizeHtml($form->get(TextEditorName::TOS_EDITOR->value)->getData())
+            );
+            $privacyPolicyTextEditor->setContent(
+                $sanitizeHtml->sanitizeHtml($form->get(TextEditorName::PRIVACY_POLICY_EDITOR->value)->getData())
+            );
+            $this->entityManager->persist($tosTextEditor);
+            $this->entityManager->persist($privacyPolicyTextEditor);
+            $this->entityManager->flush();
+
+            // Track event
             $this->eventActions->saveEvent(
                 $currentUser,
                 AnalyticalEventType::SETTING_TERMS_REQUEST->value,
                 new DateTime(),
-                $eventMetadata
+                [
+                    'ip' => $request->getClientIp(),
+                    'user_agent' => $request->headers->get('User-Agent'),
+                    'uuid' => $currentUser->getUuid(),
+                ]
             );
 
-
-            $this->entityManager->flush();
             $this->addFlash(
                 'success_admin',
                 $this->translator->trans('termsPoliciesLinksChangesAppliedSuccessfully', [], 'controllers')
             );
+
             return $this->redirectToRoute('admin_dashboard_settings_terms', ['language' => $language]);
         }
-
 
         return $this->render('dashboard/shared/settings_actions.html.twig', [
             'user' => $currentUser,
