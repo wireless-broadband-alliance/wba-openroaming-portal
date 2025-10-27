@@ -62,7 +62,7 @@ class ProfileController extends AbstractController
 
         /** @var User $user */
         $user = $this->getUser();
-        if (!$user) {
+        if (!$this->isGranted('IS_AUTHENTICATED_FULLY')) {
             return $this->redirectToRoute('app_login');
         }
 
@@ -156,7 +156,7 @@ class ProfileController extends AbstractController
     ): Response {
         /** @var User $user */
         $user = $this->getUser();
-        if (!$user) {
+        if (!$this->isGranted('IS_AUTHENTICATED_FULLY')) {
             return $this->redirectToRoute('app_login');
         }
 
@@ -308,7 +308,7 @@ class ProfileController extends AbstractController
     ): Response {
         /** @var User $user */
         $user = $this->getUser();
-        if (!$user) {
+        if (!$this->isGranted('IS_AUTHENTICATED_FULLY')) {
             return $this->redirectToRoute('app_login');
         }
 
@@ -438,6 +438,11 @@ class ProfileController extends AbstractController
         return $response;
     }
 
+    /**
+     *
+     * @param int $length
+     * @return string
+     */
     private function generateToken($length = 16)
     {
         $stringSpace = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -449,6 +454,10 @@ class ProfileController extends AbstractController
         return implode('', $pieces);
     }
 
+    /**
+     *
+     * @return string
+     */
     private function generateWindowsUuid()
     {
         $format = '%04x%04x-%04x-%04x-%04x-%04x%04x%04x';
@@ -584,26 +593,15 @@ class ProfileController extends AbstractController
                 ['name' => SettingName::USER_VERIFICATION->value]
             )->getValue() === OperationMode::ON->value
         ) {
-            $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $user]);
-            if ($userExternalAuths === UserProvider::EMAIL->value) {
-                $this->addFlash(
-                    'error',
-                    $this->translator->trans(
-                        'accountNotVerifiedToDownloadProfile',
-                        [],
-                        'controllers'
-                    )
-                );
-            } elseif ($userExternalAuths === UserProvider::PHONE_NUMBER->value) {
-                $this->addFlash(
-                    'error',
-                    $this->translator->trans(
-                        'accountNotVerifiedToDownloadProfileSMS',
-                        [],
-                        'controllers'
-                    )
-                );
-            }
+
+            $this->addFlash(
+                'error',
+                $this->translator->trans(
+                    'accountNotVerifiedToDownloadProfile',
+                    [],
+                    'controllers'
+                )
+            );
             $this->redirectToRoute('app_landing');
             return true;
         }
