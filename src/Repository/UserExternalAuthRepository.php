@@ -12,9 +12,9 @@ use Doctrine\Persistence\ManagerRegistry;
  * @extends ServiceEntityRepository<UserExternalAuth>
  *
  * @method UserExternalAuth|null find($id, $lockMode = null, $lockVersion = null)
- * @method UserExternalAuth|null findOneBy(array $criteria, array $orderBy = null)
+ * @method UserExternalAuth|null findOneBy(array<string, mixed> $criteria, array<string, string>|null $orderBy = null)
  * @method UserExternalAuth[]    findAll()
- * @method UserExternalAuth[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @method UserExternalAuth[]    findBy(array<string, mixed> $criteria, array<string, string>|null $orderBy = null, ?int $limit = null, ?int $offset = null)
  */
 class UserExternalAuthRepository extends ServiceEntityRepository
 {
@@ -41,10 +41,14 @@ class UserExternalAuthRepository extends ServiceEntityRepository
         }
     }
 
+
     /**
      * Fetch portal users counts based on the providerId within a date range.
      *
-     * @method array getPortalUserCounts(string $provider, ?DateTime $startDate, ?DateTime $endDate)
+     * @param string $provider
+     * @param DateTime|null $startDate
+     * @param DateTime|null $endDate
+     * @return array<string, int> Returns counts for 'email' and 'phone_number'
      */
     public function getPortalUserCounts(string $provider, ?DateTime $startDate, ?DateTime $endDate): array
     {
