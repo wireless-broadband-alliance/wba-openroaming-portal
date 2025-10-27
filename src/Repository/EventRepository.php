@@ -16,6 +16,7 @@ use Doctrine\Persistence\ManagerRegistry;
  * @method Event|null find($id, $lockMode = null, $lockVersion = null)
  * @method Event|null findOneBy(array<string, mixed> $criteria, array<string, string>|null $orderBy = null)
  * @method Event[]    findAll()
+ * phpcs:ignore Generic.Files.LineLength.TooLong
  * @method Event[]    findBy(array<string, mixed> $criteria, array<string, string>|null $orderBy = null, ?int $limit = null, ?int $offset = null)
  */
 class EventRepository extends ServiceEntityRepository

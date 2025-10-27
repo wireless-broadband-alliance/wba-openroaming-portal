@@ -12,6 +12,7 @@ use Doctrine\Persistence\ManagerRegistry;
  * @extends ServiceEntityRepository<UserRadiusProfile>
  *
  * @method UserRadiusProfile|null find($id, $lockMode = null, $lockVersion = null)
+ * phpcs:ignore Generic.Files.LineLength.TooLong
  * @method UserRadiusProfile[]    findBy(array<string, mixed> $criteria, array<string, string>|null $orderBy = null, ?int $limit = null, ?int $offset = null)
  * @method UserRadiusProfile[]    findAll()
  * @method UserRadiusProfile|null findOneBy(array<string, mixed> $criteria, array<string, string>|null $orderBy = null)

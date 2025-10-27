@@ -14,6 +14,7 @@ use Doctrine\Persistence\ManagerRegistry;
  * @method UserExternalAuth|null find($id, $lockMode = null, $lockVersion = null)
  * @method UserExternalAuth|null findOneBy(array<string, mixed> $criteria, array<string, string>|null $orderBy = null)
  * @method UserExternalAuth[]    findAll()
+ * phpcs:ignore Generic.Files.LineLength.TooLong
  * @method UserExternalAuth[]    findBy(array<string, mixed> $criteria, array<string, string>|null $orderBy = null, ?int $limit = null, ?int $offset = null)
  */
 class UserExternalAuthRepository extends ServiceEntityRepository
