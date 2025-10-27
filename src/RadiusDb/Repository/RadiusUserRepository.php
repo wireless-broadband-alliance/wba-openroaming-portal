@@ -12,6 +12,7 @@ use Doctrine\Persistence\ManagerRegistry;
  * @method RadiusUser|null find($id, $lockMode = null, $lockVersion = null)
  * @method RadiusUser|null findOneBy(array <string, mixed> $criteria, array<string, string>|null $orderBy = null)
  * @method RadiusUser[]    findAll()
+ * phpcs:ignore Generic.Files.LineLength.TooLong
  * @method RadiusUser[]    findBy(array <string, mixed> $criteria, array<string, string>|null $orderBy = null, $limit = null, $offset = null)
  */
 class RadiusUserRepository extends ServiceEntityRepository

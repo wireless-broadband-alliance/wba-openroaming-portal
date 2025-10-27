@@ -69,7 +69,12 @@ class UserRadiusProfileRepository extends ServiceEntityRepository
 
     /**
      * Returns array of arrays with only radius_user, lastConnectionStartAt, lastConnectionStopAt
-     * @return array<int, array{radius_user: string, lastConnectionStartAt: \DateTimeInterface|null, lastConnectionStopAt: \DateTimeInterface|null}>
+     *
+     * @return array<int, array{
+     *     radius_user: string,
+     *     lastConnectionStartAt: \DateTimeInterface|null,
+     *     lastConnectionStopAt: \DateTimeInterface|null
+     * }>
      */
     public function findRadiusUserAndConnectionTimes(): array
     {
