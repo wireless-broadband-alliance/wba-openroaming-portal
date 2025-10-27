@@ -14,6 +14,9 @@ use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
+/**
+ * @extends AbstractType<null>
+ */
 class SMSType extends AbstractType
 {
     public function __construct(
@@ -104,22 +107,25 @@ class SMSType extends AbstractType
             // Get the corresponding Setting entity and set its value
             foreach ($options['settings'] as $setting) {
                 if ($setting->getName() === $settingName) {
-                    $formFieldOptions['data'] = $setting->getValue();
-                    $formFieldOptions['attr']['description'] = $this->getSettings->getSettingDescription($settingName);
-                    if (array_key_exists('attr', $config) && array_key_exists('maxlength', $config['attr'])) {
+                    $formFieldOptions = [
+                        'data' => $setting->getValue(),
+                        'attr' => [
+                            'description' => $this->getSettings->getSettingDescription($settingName),
+                            'autocomplete' => 'off',
+                        ],
+                        'constraints' => $config['constraints'],
+                        'required' => true,
+                    ];
+
+                    // Copy maxlength if present in config['attr']
+                    if (isset($config['attr']['maxlength'])) {
                         $formFieldOptions['attr']['maxlength'] = $config['attr']['maxlength'];
                     }
-                    $formFieldOptions['constraints'] = $config['constraints'] ?? [];
+
                     $builder->add($settingName, $config['type'], $formFieldOptions);
                     break;
                 }
             }
-            $formFieldOptions = [
-                'attr' => [
-                    'autocomplete' => 'off',
-                ],
-                'required' => true,
-            ];
         }
     }
 
