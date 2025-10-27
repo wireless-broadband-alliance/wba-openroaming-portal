@@ -13,9 +13,10 @@ use Doctrine\Persistence\ManagerRegistry;
  * @extends ServiceEntityRepository<RadiusAccounting>
  *
  * @method RadiusAccounting|null find($id, $lockMode = null, $lockVersion = null)
- * @method RadiusAccounting|null findOneBy(array $criteria, array $orderBy = null)
+ * @method RadiusAccounting|null findOneBy(array <string, mixed> $criteria, array<string, string>|null $orderBy = null)
  * @method RadiusAccounting[]    findAll()
- * @method RadiusAccounting[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * phpcs:ignore Generic.Files.LineLength.TooLong
+ * @method RadiusAccounting[]    findBy(array <string, mixed> $criteria, array<string, string>|null $orderBy = null, $limit = null, $offset = null)
  */
 class RadiusAccountingRepository extends ServiceEntityRepository
 {
@@ -87,6 +88,9 @@ class RadiusAccountingRepository extends ServiceEntityRepository
         return $queryBuilder->getQuery();
     }
 
+    /**
+     * @return RadiusAccounting[]
+     */
     public function findDistinctRealms(?DateTime $startDate, ?DateTime $endDate): array
     {
         $queryBuilder = $this->createQueryBuilder('ra')
@@ -116,6 +120,9 @@ class RadiusAccountingRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    /**
+     * @return RadiusAccounting[]
+     */
     public function findSessionTimeRealms(?DateTime $startDate, ?DateTime $endDate): array
     {
         $queryBuilder = $this->createQueryBuilder('ra')
@@ -145,6 +152,9 @@ class RadiusAccountingRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    /**
+     * @return RadiusAccounting[]
+     */
     public function findWifiVersion(?DateTime $startDate, ?DateTime $endDate): array
     {
         $queryBuilder = $this->createQueryBuilder('ra')
@@ -174,6 +184,9 @@ class RadiusAccountingRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    /**
+     * @return RadiusAccounting[]
+     */
     public function findApUsage(?DateTime $startDate, ?DateTime $endDate): array
     {
         $queryBuilder = $this->createQueryBuilder('ra')
@@ -203,6 +216,9 @@ class RadiusAccountingRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    /**
+     * @return RadiusAccounting[]
+     */
     public function findLatestConnectionTime(?int $sinceTimestamp = null): ?array
     {
         $qb = $this->createQueryBuilder('ra')
@@ -223,6 +239,7 @@ class RadiusAccountingRepository extends ServiceEntityRepository
 
     /**
      * @throws \DateMalformedStringException
+     * @return RadiusAccounting[]
      */
     public function findConnectionTime(int $sinceTimestamp): array
     {
