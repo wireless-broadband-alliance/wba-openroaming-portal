@@ -33,8 +33,7 @@ readonly class TermsAcceptanceListener
             str_starts_with($path, '/_components') ||
             str_starts_with($path, '/api') ||
             str_starts_with($path, '/landing') ||
-            str_starts_with($path, '/profile') ||
-            str_starts_with($path, '/_profiler')
+            str_starts_with($path, '/profile')
         ) {
             return;
         }
