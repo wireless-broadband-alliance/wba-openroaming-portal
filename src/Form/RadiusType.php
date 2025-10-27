@@ -14,6 +14,9 @@ use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
+/**
+ * @extends AbstractType<null>
+ */
 class RadiusType extends AbstractType
 {
     public function __construct(
@@ -135,29 +138,28 @@ class RadiusType extends AbstractType
             // Get the corresponding Setting entity and set its value
             foreach ($options['settings'] as $setting) {
                 if ($setting->getName() === $settingName) {
-                    $formFieldOptions['data'] = $setting->getValue();
+                    $formFieldOptions = [
+                        'data' => $setting->getValue(),
+                        'attr' => [
+                            'description' => $this->getSettings->getSettingDescription($settingName),
+                            'autocomplete' => 'off',
+                        ],
+                        'constraints' => $config['constraints'], // always exists
+                        'required' => true,
+                    ];
+
                     if ($settingName === SettingName::PROFILES_ENCRYPTION_TYPE_IOS_ONLY->value) {
                         $formFieldOptions['choices'] = [
                             'WPA 2' => ProfileType::WPA2->value,
                             'WPA 3' => ProfileType::WPA3->value,
                         ];
                         $formFieldOptions['placeholder'] = $this->translator->trans('selectOption', [], 'CustomType');
-                        $formFieldOptions['required'] = true;
                     }
-                    $formFieldOptions['attr']['description'] = $this->getSettings->getSettingDescription($settingName);
-                    if (isset($config['constraints'])) {
-                        $formFieldOptions['constraints'] = $config['constraints'];
-                    }
+
                     $builder->add($settingName, $config['type'], $formFieldOptions);
                     break;
                 }
             }
-            $formFieldOptions = [
-                'attr' => [
-                    'autocomplete' => 'off',
-                    'required' => true,
-                ],
-            ];
         }
     }
 
