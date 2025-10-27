@@ -84,8 +84,7 @@ class SiteController extends AbstractController
         // Check if the user_verification setting is active
         if (
             isset($data["USER_VERIFICATION"]["value"]) &&
-            $data["USER_VERIFICATION"]["value"] === OperationMode::ON->value &&
-            $currentUser
+            $data["USER_VERIFICATION"]["value"] === OperationMode::ON->value
         ) {
             // Retrieve the cookie about SAML_ACCOUNT Deletion from the request
             $previousLoggedID = $request->cookies->get('previousLoggedID');
@@ -155,34 +154,29 @@ class SiteController extends AbstractController
             }
 
             if (
-                $currentUser &&
                 ($data["LOGIN_WITH_UUID_ONLY"]["value"] === OperationMode::OFF->value ||
                     $currentUser->getUserExternalAuths()[0]->getProvider() !== UserProvider::PORTAL_ACCOUNT->value)
             ) {
                 // Checks the 2FA status of the platform if mandatory and force the user to configure it
                 if (
-                    $currentUser->getUserExternalAuths() &&
                     ($data['TWO_FACTOR_AUTH_STATUS']['value'] ===
                         TwoFAType::ENFORCED_FOR_LOCAL->value &&
                         $currentUser->getUserExternalAuths()->get(0)->getProvider() ===
-                        UserProvider::PORTAL_ACCOUNT->value && ($currentUser->getTwoFAType() === null ||
-                            $currentUser->getTwoFAType() ===
+                        UserProvider::PORTAL_ACCOUNT->value && ($currentUser->getTwoFAType() ===
                             UserTwoFactorAuthenticationStatus::DISABLED->value))
                 ) {
                     return $this->redirectToRoute('app_configure2FA');
                 }
                 if (
                     $data['TWO_FACTOR_AUTH_STATUS']['value'] === TwoFAType::ENFORCED_FOR_ALL->value &&
-                    ($currentUser->getTwoFAType() === null ||
-                        $currentUser->getTwoFAType() ===
-                        UserTwoFactorAuthenticationStatus::DISABLED->value)
+                    $currentUser->getTwoFAType() ===
+                        UserTwoFactorAuthenticationStatus::DISABLED->value
                 ) {
                     return $this->redirectToRoute('app_configure2FA');
                 }
             }
         }
         if (
-            $currentUser &&
             ($data["LOGIN_WITH_UUID_ONLY"]["value"] === OperationMode::OFF->value ||
                 $currentUser->getUserExternalAuths()[0]->getProvider() !== UserProvider::PORTAL_ACCOUNT->value)
         ) {
@@ -379,7 +373,7 @@ class SiteController extends AbstractController
             ]
         ];
 
-        if ($data['os']['selected'] === OSType::NONE->value && $currentUser && $currentUser->isVerified()) {
+        if ($data['os']['selected'] === OSType::NONE->value && $currentUser->isVerified()) {
             $this->addFlash(
                 'error',
                 $this->translator->trans('selectOperatingSystem', [], 'controllers')
@@ -392,25 +386,11 @@ class SiteController extends AbstractController
         $formRevokeProfiles = $this->createForm(RevokeProfilesType::class, $this->getUser());
         $formTOS = $this->createForm(TOSType::class);
 
-        if ($currentUser) {
-            return $this->render('landing/authUser/landing_auth_user.html.twig', [
-                'form' => $form->createView(),
-                'formPassword' => $formPassword->createView(),
-                'formRevokeProfiles' => $formRevokeProfiles->createView(),
-                'data' => $data,
-                'user' => $currentUser,
-                'context' => FirewallType::LANDING->value,
-            ]);
-        }
-
-        return $this->render('landing/landing.html.twig', [
+        return $this->render('landing/authUser/landing_auth_user.html.twig', [
             'form' => $form->createView(),
             'formPassword' => $formPassword->createView(),
-            'formTOS' => $formTOS,
             'formRevokeProfiles' => $formRevokeProfiles->createView(),
-            'registrationFormDemo' => $formRegistrationDemo->createView(),
             'data' => $data,
-            'userExternalAuths' => $externalAuthsData,
             'user' => $currentUser,
             'context' => FirewallType::LANDING->value,
         ]);
