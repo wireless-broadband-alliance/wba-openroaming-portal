@@ -11,9 +11,9 @@ use Doctrine\Persistence\ManagerRegistry;
  * @extends ServiceEntityRepository<RadiusAuths>
  *
  * @method RadiusAuths|null find($id, $lockMode = null, $lockVersion = null)
- * @method RadiusAuths|null findOneBy(array $criteria, array $orderBy = null)
+ * @method RadiusAuths|null findOneBy(array <string, mixed> $criteria, array<string, string>|null $orderBy = null)
  * @method RadiusAuths[]    findAll()
- * @method RadiusAuths[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @method RadiusAuths[]    findBy(array <string, mixed> $criteria, array<string, string>|null $orderBy = null, $limit = null, $offset = null)
  */
 class RadiusAuthsRepository extends ServiceEntityRepository
 {
@@ -40,7 +40,10 @@ class RadiusAuthsRepository extends ServiceEntityRepository
         }
     }
 
-    public function findAuthRequests(DateTime $startDate, DateTime $endDate)
+    /**
+     * @return RadiusAuths[]
+     */
+    public function findAuthRequests(DateTime $startDate, DateTime $endDate): array
     {
         // Fetch all data with date filtering
         return $this->createQueryBuilder('u')
