@@ -593,7 +593,6 @@ class ProfileController extends AbstractController
                 ['name' => SettingName::USER_VERIFICATION->value]
             )->getValue() === OperationMode::ON->value
         ) {
-
             $this->addFlash(
                 'error',
                 $this->translator->trans(

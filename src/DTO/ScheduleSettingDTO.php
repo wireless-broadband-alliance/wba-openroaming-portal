@@ -196,7 +196,7 @@ class ScheduleSettingDTO
     public function validateMonthsFrequency(ExecutionContextInterface $context): void
     {
         if (
-            $this->months_of_the_year !==['*'] &&
+            $this->months_of_the_year !== ['*'] &&
             $this->months_of_the_year &&
             $this->months_of_the_year_frequency !== null &&
             $this->months_of_the_year_frequency > count($this->months_of_the_year)

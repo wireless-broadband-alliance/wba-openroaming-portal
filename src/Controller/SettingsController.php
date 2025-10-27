@@ -417,7 +417,10 @@ class SettingsController extends AbstractController
         $currentUser = $this->getUser();
 
         // TOS TextEditor
-        $tosTextEditor = $this->textEditorRepository->findTextEditor(TextEditorName::TOS->value, $language);
+        $tosTextEditor = $this->textEditorRepository->findTextEditor(
+            TextEditorName::TOS->value,
+            $language
+        );
         if (!$tosTextEditor instanceof TextEditor) {
             $tosTextEditor = new TextEditor();
             $tosTextEditor->setName(TextEditorName::TOS->value);
@@ -427,7 +430,10 @@ class SettingsController extends AbstractController
         }
 
         // Privacy Policy TextEditor
-        $privacyPolicyTextEditor = $this->textEditorRepository->findTextEditor(TextEditorName::PRIVACY_POLICY->value, $language);
+        $privacyPolicyTextEditor = $this->textEditorRepository->findTextEditor(
+            TextEditorName::PRIVACY_POLICY->value,
+            $language
+        );
         if (!$privacyPolicyTextEditor instanceof TextEditor) {
             $privacyPolicyTextEditor = new TextEditor();
             $privacyPolicyTextEditor->setName(TextEditorName::PRIVACY_POLICY->value);
@@ -446,11 +452,13 @@ class SettingsController extends AbstractController
 
         // Remove old editor settings
         foreach ($settings as $setting) {
-            if (in_array(
-                $setting->getName(),
-                [TextEditorName::TOS_EDITOR->value, TextEditorName::PRIVACY_POLICY_EDITOR->value],
-                true
-            )) {
+            if (
+                in_array(
+                    $setting->getName(),
+                    [TextEditorName::TOS_EDITOR->value, TextEditorName::PRIVACY_POLICY_EDITOR->value],
+                    true
+                )
+            ) {
                 $this->entityManager->remove($setting);
             }
         }
