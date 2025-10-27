@@ -90,12 +90,12 @@ trivy-scan:
     - |
       IMAGE="$CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME"
       echo "Scanning Docker image: $IMAGE"
-      ./trivy image --exit-code 0 --severity HIGH,CRITICAL,MEDIUM --ignore-status will_not_fix,fix_defered,fixed --format template --template "@contrib/gitlab.tpl" -o trivy-image-report.json "$IMAGE"
-      ./trivy image --exit-code 0 --severity HIGH,CRITICAL,MEDIUM --ignore-status will_not_fix,fix_defered,fixed --format table "$IMAGE"
+      ./trivy image --exit-code 0 --severity HIGH,CRITICAL,MEDIUM --ignore-status will_not_fix,fix_deferred,fixed --format template --template "@contrib/gitlab.tpl" -o trivy-image-report.json "$IMAGE"
+      ./trivy image --exit-code 0 --severity HIGH,CRITICAL,MEDIUM --ignore-status will_not_fix,fix_deferred,fixed --format table "$IMAGE"
     # Scan do Dockerfile
     - echo "Scanning Dockerfile"
-    - ./trivy config --exit-code 0 --severity HIGH,CRITICAL,MEDIUM --ignore-status will_not_fix,fix_defered,fixed --format template --template "@contrib/gitlab.tpl" -o trivy-dockerfile-report.json ./Dockerfile
-    - ./trivy config --exit-code 0 --severity HIGH,CRITICAL,MEDIUM --ignore-status will_not_fix,fix_defered,fixed --format table ./Dockerfile
+    - ./trivy config --exit-code 0 --severity HIGH,CRITICAL,MEDIUM --ignore-status will_not_fix,fix_deferred,fixed --format template --template "@contrib/gitlab.tpl" -o trivy-dockerfile-report.json ./Dockerfile
+    - ./trivy config --exit-code 0 --severity HIGH,CRITICAL,MEDIUM --ignore-status will_not_fix,fix_deferred,fixed --format table ./Dockerfile
   artifacts:
     paths:
       - trivy-image-report.json
