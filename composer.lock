@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "9b5ec15a0a47f029c2a11a34fa976385",
+    "content-hash": "d975ca842a8a632db0d1e0d68623cd09",
     "packages": [
         {
             "name": "api-platform/core",
@@ -10835,16 +10835,16 @@
         },
         {
             "name": "symfony/ux-chartjs",
-            "version": "v2.30.0",
+            "version": "v2.31.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/ux-chartjs.git",
-                "reference": "b35da28b549347b4b18552f1880ee1144ed88d3d"
+                "reference": "17f3e24bca0444a2316e408c4d4d13d89598a187"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/ux-chartjs/zipball/b35da28b549347b4b18552f1880ee1144ed88d3d",
-                "reference": "b35da28b549347b4b18552f1880ee1144ed88d3d",
+                "url": "https://api.github.com/repos/symfony/ux-chartjs/zipball/17f3e24bca0444a2316e408c4d4d13d89598a187",
+                "reference": "17f3e24bca0444a2316e408c4d4d13d89598a187",
                 "shasum": ""
             },
             "require": {
@@ -10895,7 +10895,7 @@
                 "symfony-ux"
             ],
             "support": {
-                "source": "https://github.com/symfony/ux-chartjs/tree/v2.30.0"
+                "source": "https://github.com/symfony/ux-chartjs/tree/v2.31.0"
             },
             "funding": [
                 {
@@ -10915,7 +10915,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2025-08-27T15:25:48+00:00"
+            "time": "2025-10-16T07:24:06+00:00"
         },
         {
             "name": "symfony/ux-icons",
