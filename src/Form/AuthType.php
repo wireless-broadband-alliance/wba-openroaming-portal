@@ -18,6 +18,9 @@ use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
+/**
+ * @extends AbstractType<null>
+ */
 class AuthType extends AbstractType
 {
     public function __construct(
@@ -43,24 +46,22 @@ class AuthType extends AbstractType
                             'minMessage' => $this->translator->trans('labelMinimumCharactersMessage', [], 'AuthType'),
                             'maxMessage' => $this->translator->trans('labelMaximumCharactersMessage', [], 'AuthType'),
                         ]),
-                        new Callback([
-                            'callback' => function ($value, ExecutionContextInterface $context): void {
-                                $form = $context->getRoot();
-                                $authMethodGoogleEnabled = $form->get(
-                                    SettingName::AUTH_METHOD_GOOGLE_LOGIN_ENABLED->value
-                                )->getData();
-                                if ($authMethodGoogleEnabled === "true" && empty($value)) {
-                                    $context->buildViolation(
-                                        $this->translator->trans(
-                                            'fieldNotEmptyWhenSAMLEnabled',
-                                            [],
-                                            'AuthType'
-                                        )
+                        new Callback(function ($value, ExecutionContextInterface $context): void {
+                            $form = $context->getRoot();
+                            $authMethodGoogleEnabled = $form->get(
+                                SettingName::AUTH_METHOD_GOOGLE_LOGIN_ENABLED->value
+                            )->getData();
+                            if ($authMethodGoogleEnabled === "true" && empty($value)) {
+                                $context->buildViolation(
+                                    $this->translator->trans(
+                                        'fieldNotEmptyWhenSAMLEnabled',
+                                        [],
+                                        'AuthType'
                                     )
-                                        ->addViolation();
-                                }
-                            },
-                        ]),
+                                )
+                                    ->addViolation();
+                            }
+                        }),
                     ],
                 ],
             ],
@@ -142,20 +143,18 @@ class AuthType extends AbstractType
                             'minMessage' => $this->translator->trans('labelMinimumCharactersMessage', [], 'AuthType'),
                             'maxMessage' => $this->translator->trans('labelMaximumCharactersMessage', [], 'AuthType'),
                         ]),
-                        new Callback([
-                            'callback' => function ($value, ExecutionContextInterface $context): void {
-                                $form = $context->getRoot();
-                                $authMethodGoogleEnabled = $form->get(
-                                    SettingName::AUTH_METHOD_GOOGLE_LOGIN_ENABLED->value
-                                )->getData();
-                                if ($authMethodGoogleEnabled === 'true' && empty($value)) {
-                                    $context->buildViolation(
-                                        $this->translator->trans('fieldNotEmptyWhenGOOGLEEnabled', [], 'AuthType')
-                                    )
-                                        ->addViolation();
-                                }
-                            },
-                        ]),
+                        new Callback(function ($value, ExecutionContextInterface $context): void {
+                            $form = $context->getRoot();
+                            $authMethodGoogleEnabled = $form->get(
+                                SettingName::AUTH_METHOD_GOOGLE_LOGIN_ENABLED->value
+                            )->getData();
+                            if ($authMethodGoogleEnabled === 'true' && empty($value)) {
+                                $context->buildViolation(
+                                    $this->translator->trans('fieldNotEmptyWhenGOOGLEEnabled', [], 'AuthType')
+                                )
+                                    ->addViolation();
+                            }
+                        }),
                     ],
                 ],
             ],
@@ -240,20 +239,17 @@ class AuthType extends AbstractType
                             'minMessage' => $this->translator->trans('labelMinimumCharactersMessage', [], 'AuthType'),
                             'maxMessage' => $this->translator->trans('labelMaximumCharactersMessage', [], 'AuthType'),
                         ]),
-                        new Callback([
-                            'callback' => function ($value, ExecutionContextInterface $context): void {
-                                $form = $context->getRoot();
-                                $authMethodMicrosoftEnabled = $form->get(
-                                    'AUTH_METHOD_MICROSOFT_LOGIN_ENABLED'
-                                )->getData();
-                                if ($authMethodMicrosoftEnabled === "true" && empty($value)) {
-                                    $context->buildViolation(
-                                        $this->translator->trans('fieldNotEmptyWhenMicrosoftEnabled', [], 'AuthType')
-                                    )
-                                        ->addViolation();
-                                }
-                            },
-                        ]),
+                        new Callback(function ($value, ExecutionContextInterface $context): void {
+                            $form = $context->getRoot();
+                            $authMethodMicrosoftEnabled = $form->get(
+                                SettingName::AUTH_METHOD_MICROSOFT_LOGIN_ENABLED->value
+                            )->getData();
+                            if ($authMethodMicrosoftEnabled === "true" && empty($value)) {
+                                $context->buildViolation(
+                                    $this->translator->trans('fieldNotEmptyWhenMicrosoftEnabled', [], 'AuthType')
+                                )->addViolation();
+                            }
+                        }),
                     ],
                 ],
             ],
@@ -338,19 +334,17 @@ class AuthType extends AbstractType
                             'minMessage' => $this->translator->trans('labelMinimumCharactersMessage', [], 'AuthType'),
                             'maxMessage' => $this->translator->trans('labelMaximumCharactersMessage', [], 'AuthType'),
                         ]),
-                        new Callback([
-                            'callback' => function ($value, ExecutionContextInterface $context): void {
-                                $form = $context->getRoot();
-                                $authMethodRegisterEnabled = $form->get(
-                                    SettingName::AUTH_METHOD_REGISTER_ENABLED->value
-                                )->getData();
-                                if ($authMethodRegisterEnabled === "true" && empty($value)) {
-                                    $context->buildViolation(
-                                        $this->translator->trans('fieldNotEmptyWhenEMAILEnabled', [], 'AuthType')
-                                    )->addViolation();
-                                }
-                            },
-                        ]),
+                        new Callback(function ($value, ExecutionContextInterface $context): void {
+                            $form = $context->getRoot();
+                            $authMethodRegisterEnabled = $form->get(
+                                SettingName::AUTH_METHOD_REGISTER_ENABLED->value
+                            )->getData();
+                            if ($authMethodRegisterEnabled === "true" && empty($value)) {
+                                $context->buildViolation(
+                                    $this->translator->trans('fieldNotEmptyWhenEMAILEnabled', [], 'AuthType')
+                                )->addViolation();
+                            }
+                        }),
                     ],
                 ],
             ],
@@ -486,19 +480,17 @@ class AuthType extends AbstractType
                             'minMessage' => $this->translator->trans('labelMinimumCharactersMessage', [], 'AuthType'),
                             'maxMessage' => $this->translator->trans('labelMaximumCharactersMessage', [], 'AuthType'),
                         ]),
-                        new Callback([
-                            'callback' => function ($value, ExecutionContextInterface $context): void {
-                                $form = $context->getRoot();
-                                $authMethodLoginTraditionalEnabled = $form->get(
-                                    SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED->value
-                                )->getData();
-                                if ($authMethodLoginTraditionalEnabled === "true" && empty($value)) {
-                                    $context->buildViolation(
-                                        $this->translator->trans('fieldNotEmptyWhenTraditionalEnabled', [], 'AuthType')
-                                    )->addViolation();
-                                }
-                            },
-                        ]),
+                        new Callback(function ($value, ExecutionContextInterface $context): void {
+                            $form = $context->getRoot();
+                            $authMethodLoginTraditionalEnabled = $form->get(
+                                SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED->value
+                            )->getData();
+                            if ($authMethodLoginTraditionalEnabled === "true" && empty($value)) {
+                                $context->buildViolation(
+                                    $this->translator->trans('fieldNotEmptyWhenTraditionalEnabled', [], 'AuthType')
+                                )->addViolation();
+                            }
+                        }),
                     ],
                 ],
             ],
@@ -536,19 +528,17 @@ class AuthType extends AbstractType
                             'minMessage' => $this->translator->trans('labelMinimumCharactersMessage', [], 'AuthType'),
                             'maxMessage' => $this->translator->trans('labelMaximumCharactersMessage', [], 'AuthType'),
                         ]),
-                        new Callback([
-                            'callback' => function ($value, ExecutionContextInterface $context): void {
-                                $form = $context->getRoot();
-                                $authMethodSMSRegisterEnabled = $form->get(
-                                    SettingName::AUTH_METHOD_SMS_REGISTER_ENABLED->value
-                                )->getData();
-                                if ($authMethodSMSRegisterEnabled === "true" && empty($value)) {
-                                    $context->buildViolation(
-                                        $this->translator->trans('fieldNotEmptyWhenSMSEnabled', [], 'AuthType')
-                                    )->addViolation();
-                                }
-                            },
-                        ]),
+                        new Callback(function ($value, ExecutionContextInterface $context): void {
+                            $form = $context->getRoot();
+                            $authMethodSMSRegisterEnabled = $form->get(
+                                SettingName::AUTH_METHOD_SMS_REGISTER_ENABLED->value
+                            )->getData();
+                            if ($authMethodSMSRegisterEnabled === "true" && empty($value)) {
+                                $context->buildViolation(
+                                    $this->translator->trans('fieldNotEmptyWhenSMSEnabled', [], 'AuthType')
+                                )->addViolation();
+                            }
+                        }),
                     ],
                 ],
             ],
