@@ -12,24 +12,30 @@ class RadiusAuths
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    /** @phpstan-ignore-next-line */
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    /** @phpstan-ignore-next-line */
     private ?string $username = null;
 
     /**
      * @var string The hashed password
      */
     #[ORM\Column(length: 255)]
+    /** @phpstan-ignore-next-line */
     private string $pass;
 
     #[ORM\Column(length: 255)]
+    /** @phpstan-ignore-next-line */
     private ?string $reply = null;
 
     #[ORM\Column(length: 255)]
+    /** @phpstan-ignore-next-line */
     private ?string $authdate = null;
 
     #[ORM\Column(length: 255)]
+    /** @phpstan-ignore-next-line */
     private ?string $class = null;
 
     public function getId(): ?int
