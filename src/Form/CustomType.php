@@ -19,6 +19,9 @@ use Symfony\Component\Validator\Constraints\File;
 use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
+/**
+ * @extends AbstractType<null>
+ */
 class CustomType extends AbstractType
 {
     public function __construct(
