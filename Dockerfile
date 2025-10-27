@@ -52,7 +52,7 @@ WORKDIR /app
 COPY package*.json yarn.lock* ./
 COPY --from=vendor /app/vendor /var/www/openroaming/vendor
 #RUN npm ci --no-audit --progress=false
-RUN npm install --no-audit --progress=false
+RUN npm install --force
 
 COPY . .
 RUN npm run build
