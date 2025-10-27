@@ -5,12 +5,20 @@ namespace App\Service;
 use Cron\CronExpression;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-class CronExpressionHelperService
+readonly class CronExpressionHelperService
 {
     public function __construct(
-        private readonly TranslatorInterface $translator
+        private TranslatorInterface $translator
     ) {
     }
+
+    /**
+     * @return array{
+     *     type: string,
+     *     frequency: int,
+     *     values: list<int>
+     * }
+     */
     private function parseField(string $field): array
     {
         $field = trim($field);
@@ -106,15 +114,21 @@ class CronExpressionHelperService
         return ['type' => 'custom', 'frequency' => 1, 'values' => []];
     }
 
+    /**
+     * Convert an array of cron field values and frequency into a cron expression part.
+     *
+     * @param list<int|string> $values List of cron field values (e.g. ['*'] or ['1','2','3'])
+     */
     public function selectAllWithFreqConverter(array $values, int $freq): string
     {
         if (in_array('*', $values, true)) {
-            if ($freq === 1) {
-                return '*';
-            }
-            return "*/$freq";
+            return $freq === 1 ? '*' : "*/$freq";
         }
-        return $this->buildCronPartWithFrequency($values, $freq);
+
+        /** @var list<int> $intValues */
+        $intValues = array_map('intval', $values);
+
+        return $this->buildCronPartWithFrequency($intValues, $freq);
     }
 
     /**
@@ -124,6 +138,8 @@ class CronExpressionHelperService
      *   values = [1,2,3,5,6,7,10]
      *   freq = 2
      *   => "1-3/2,5-7/2,10/2"
+     *
+     * @param list<int> $values
      */
     private function buildCronPartWithFrequency(array $values, int $frequency): string
     {
@@ -154,7 +170,22 @@ class CronExpressionHelperService
     }
 
     /**
-     * Recognize and parse the cron expression into parts with frequency and values.
+     * Recognize and parse a cron expression into detailed frequency parts.
+     *
+     * @return array{
+     *     error: string,
+     *     raw: string
+     * }|array{
+     *     raw: string,
+     *     parts: array{
+     *         minute: array{raw: string, type: string, frequency: int, values: list<int>},
+     *         hour: array{raw: string, type: string, frequency: int, values: list<int>},
+     *         day_of_month: array{raw: string, type: string, frequency: int, values: list<int>},
+     *         month: array{raw: string, type: string, frequency: int, values: list<int>},
+     *         day_of_week: array{raw: string, type: string, frequency: int, values: list<int>}
+     *     },
+     *     time: string
+     * }
      */
     public function recognizeCronFrequency(string $cronExpression): array
     {
