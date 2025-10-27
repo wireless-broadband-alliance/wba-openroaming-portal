@@ -28,40 +28,35 @@ readonly class TermsAcceptanceListener
         $request = $event->getRequest();
         $path = $request->getPathInfo();
 
-        if (
-            str_starts_with($path, '/dashboard') ||
-            str_starts_with($path, '/_components') ||
-            str_starts_with($path, '/api') ||
-            str_starts_with($path, '/landing') ||
-            str_starts_with($path, '/profile')
-        ) {
-            return;
-        }
+        /** @var Session $session */
+        $session = $request->getSession();
+        $termsAccepted = $session->get('termsAccepted', false);
 
-        if (str_starts_with($path, '/_profiler') || str_starts_with($path, '/_wdt')) {
-            return;
-        }
-
-        $allowedPaths = [
-            '/',
+        // Paths that DO NOT require terms acceptance
+        $excludedPrefixes = [
+            '/_profiler',
+            '/_wdt',
+            '/api',
+            '/_components',
+            '/assets',
+            '/', // Actual landing page
+            '/landing', // For different routes with two-factor
+            '/dashboard',
             '/instructions',
             '/change-language',
             '/accept-terms',
             '/reject-terms',
             '/terms-conditions',
             '/privacy-policy',
-            '/metrics',
+            '/metrics'
         ];
 
-        /** @var Session $session */
-        $session = $request->getSession();
-        $termsAccepted = $session->get('termsAccepted', false);
+        if (array_any($excludedPrefixes, fn($prefix) => str_starts_with($path, $prefix))) {
+            return;
+        }
 
-        if (
-            !$termsAccepted &&
-            !in_array($path, $allowedPaths, true) &&
-            $path !== $this->router->generate('app_landing')
-        ) {
+        // If terms not accepted, redirect
+        if (!$termsAccepted) {
             $message = $this->translator->trans(
                 'cannotAccessThisPageWithoutAcceptTerms',
                 [],
