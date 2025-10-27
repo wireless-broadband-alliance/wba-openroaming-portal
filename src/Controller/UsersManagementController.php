@@ -76,7 +76,7 @@ class UsersManagementController extends AbstractController
     public function revokeUsers(
         Request $request,
         UserRepository $userRepository,
-        $id
+        int $id
     ): Response {
         /** @var User $currentUser */
         $currentUser = $this->getUser();
@@ -342,8 +342,7 @@ class UsersManagementController extends AbstractController
         Request $request,
         UserPasswordHasherInterface $passwordHasher,
         EntityManagerInterface $em,
-        MailerInterface $mailer,
-        $id
+        int $id
     ): Response {
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings();
@@ -488,7 +487,7 @@ class UsersManagementController extends AbstractController
             ) {
                 $latestEvent = $this->eventRepository->findLatestRequestAttemptEvent(
                     $user,
-                    AnalyticalEventType::USER_ACCOUNT_UPDATE_PASSWORD_FROM_UI
+                    AnalyticalEventType::USER_ACCOUNT_UPDATE_PASSWORD_FROM_UI->value
                 );
                 // Retrieve the SMS resend interval from the settings
                 $smsResendInterval = $data[SettingName::SMS_TIMER_RESEND->value]['value'];
@@ -616,8 +615,8 @@ class UsersManagementController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function disabledBy2FA(
         Request $request,
-        $id,
-        MailerInterface $mailer
+        MailerInterface $mailer,
+        int $id,
     ): RedirectResponse {
         if (!$user = $this->userRepository->find($id)) {
             // Get the 'id' parameter from the route URL
