@@ -30,9 +30,13 @@ use Doctrine\ORM\NonUniqueResultException;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Random\RandomException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Form\Exception\LogicException;
+use Symfony\Component\Form\Exception\RuntimeException;
+use Symfony\Component\HttpFoundation\Exception\SessionNotFoundException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
@@ -78,7 +82,7 @@ class SecurityController extends AbstractController
     ): Response {
         /** @var User $user */
         $user = $this->getUser();
-        if ($user instanceof User) {
+        if ($this->isGranted('IS_AUTHENTICATED_FULLY')) {
             return $this->redirectToRoute('app_landing');
         }
 
@@ -425,7 +429,7 @@ class SecurityController extends AbstractController
     {
         /** @var User $user */
         $user = $this->getUser();
-        if ($user instanceof User) {
+        if ($this->isGranted('IS_AUTHENTICATED_FULLY')) {
             return $this->redirectToRoute('admin_page');
         }
 
@@ -471,6 +475,12 @@ class SecurityController extends AbstractController
         ]);
     }
 
+    /**
+     * @throws HttpException
+     * @throws SessionNotFoundException
+     * @throws RuntimeException
+     * @throws LogicException
+     */
     #[Route('/login/confirmation', name: 'app_login_confirmation')]
     public function loginConfirmation(
         Request $request,
@@ -478,7 +488,7 @@ class SecurityController extends AbstractController
         /** @var User $user */
         $user = $this->getUser();
 
-        if (!$user instanceof User) {
+        if (!$this->isGranted('IS_AUTHENTICATED_FULLY')) {
             return $this->redirectToRoute('app_login');
         }
 
@@ -499,7 +509,9 @@ class SecurityController extends AbstractController
         $form->handleRequest($request);
         $session = $request->getSession();
         if ($form->isSubmitted() && $form->isValid()) {
-            $code = $form->getData()['code'];
+            /** @var array<string, mixed> $formData */
+            $formData = $form->getData();
+            $code = $formData['code'] ?? null;
             if ($this->twoFAService->validate2FACode($user, $code)) {
                 $user->setIsVerified(true);
                 $user->setForgotPasswordRequest(false);
