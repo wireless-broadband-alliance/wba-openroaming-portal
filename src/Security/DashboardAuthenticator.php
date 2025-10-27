@@ -40,7 +40,6 @@ class DashboardAuthenticator extends AbstractLoginFormAuthenticator
 
     public function __construct(
         private readonly UrlGeneratorInterface $urlGenerator,
-        private readonly FormFactoryInterface $formFactory,
         private readonly SettingRepository $settingRepository,
         private readonly CloudflareTurnstileHttpClient $turnstileHttpClient,
         private readonly UserRepository $userRepository,
