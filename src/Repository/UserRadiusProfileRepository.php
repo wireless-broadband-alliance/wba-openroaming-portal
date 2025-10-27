@@ -12,9 +12,9 @@ use Doctrine\Persistence\ManagerRegistry;
  * @extends ServiceEntityRepository<UserRadiusProfile>
  *
  * @method UserRadiusProfile|null find($id, $lockMode = null, $lockVersion = null)
- * @method UserRadiusProfile|null findOneBy(array $criteria, array $orderBy = null)
+ * @method UserRadiusProfile[]    findBy(array<string, mixed> $criteria, array<string, string>|null $orderBy = null, ?int $limit = null, ?int $offset = null)
  * @method UserRadiusProfile[]    findAll()
- * @method UserRadiusProfile[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @method UserRadiusProfile|null findOneBy(array<string, mixed> $criteria, array<string, string>|null $orderBy = null)
  */
 class UserRadiusProfileRepository extends ServiceEntityRepository
 {
@@ -39,14 +39,6 @@ class UserRadiusProfileRepository extends ServiceEntityRepository
         if ($flush) {
             $this->getEntityManager()->flush();
         }
-    }
-
-    public function getLastConnectionData(): array
-    {
-        return $this->createQueryBuilder('ur')
-            ->select('ur.lastConnectionAt', 'ur.radius_user')
-            ->getQuery()
-            ->getResult();
     }
 
 //    /**
@@ -76,6 +68,7 @@ class UserRadiusProfileRepository extends ServiceEntityRepository
 
     /**
      * Returns array of arrays with only radius_user, lastConnectionStartAt, lastConnectionStopAt
+     * @return array<int, array{radius_user: string, lastConnectionStartAt: \DateTimeInterface|null, lastConnectionStopAt: \DateTimeInterface|null}>
      */
     public function findRadiusUserAndConnectionTimes(): array
     {
