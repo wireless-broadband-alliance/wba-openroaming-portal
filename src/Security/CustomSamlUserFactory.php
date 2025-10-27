@@ -31,8 +31,10 @@ class CustomSamlUserFactory implements SamlUserFactoryInterface
 {
     /**
      * Default attribute mapping.
+     * @var array<string, int|string|list<string>>
      */
     private readonly array $attribute_mapping;
+
     private readonly SessionInterface $session;
 
     public function __construct(
@@ -56,6 +58,7 @@ class CustomSamlUserFactory implements SamlUserFactoryInterface
     }
 
     /**
+     * @param array<string, array<int, string>> $attributes
      * @throws ReflectionException
      * @throws \Exception
      */
@@ -145,6 +148,9 @@ class CustomSamlUserFactory implements SamlUserFactoryInterface
         return $user;
     }
 
+    /**
+     * @param array<string, list<string>> $attributes
+     */
     private function getAttributeValue(array $attributes, string $attribute): mixed
     {
         $isArrayValue = str_ends_with($attribute, '[]');
