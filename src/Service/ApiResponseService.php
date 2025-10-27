@@ -13,6 +13,16 @@ readonly class ApiResponseService
     }
 
     /**
+     * @param string $version
+     * @return array<string, array<int, array{
+     *     name: string,
+     *     path: string,
+     *     methods: string[],
+     *     responses: array<string, mixed>,
+     *     isProtected: bool,
+     *     description: string|null,
+     *     requestBody: array<string, mixed>|null
+     * }>>
      * @throws \JsonException
      */
     public function getRoutesByPrefix(string $version): array
@@ -30,7 +40,7 @@ readonly class ApiResponseService
                 // Extract the first segment after the version
                 $relativePath = trim(str_replace($prefix, '', $path), '/');
                 $segments = explode('/', $relativePath);
-                $groupKey = $segments[0] ?? 'general';
+                $groupKey = $segments[0] ?: 'general';
 
                 $grouped[$groupKey][] = [
                     'name' => $name,
@@ -39,7 +49,7 @@ readonly class ApiResponseService
                     'responses' => $responses[$name]['responses'] ?? [],
                     'isProtected' => $responses[$name]['isProtected'] ?? false,
                     'description' => $responses[$name]['description'] ?? null,
-                    'requestBody' => $responses[$name]['requestBody'],
+                    'requestBody' => $responses[$name]['requestBody'] ?? null,
                 ];
             }
         }
@@ -50,6 +60,13 @@ readonly class ApiResponseService
     }
 
     /**
+     * @param string $version
+     * @return array<string, array{
+     *     responses: array<int|string, mixed>,
+     *     isProtected?: bool,
+     *     description?: string,
+     *     requestBody?: array<string, mixed>
+     * }>
      * @throws \JsonException
      */
     private function getResponseMetadata(string $version): array
@@ -1623,6 +1640,11 @@ configuration for the IOS App.</p></body></html>'
         return $apiResponseV2;
     }
 
+    /**
+     * Return common API responses grouped by HTTP status code.
+     *
+     * @return array<int, string[]> Array keyed by HTTP status code, each value is a list of messages
+     */
     public function getCommonResponses(): array
     {
         return [
