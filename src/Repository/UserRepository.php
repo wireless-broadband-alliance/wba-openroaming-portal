@@ -17,9 +17,9 @@ use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;
  * @extends ServiceEntityRepository<User>
  *
  * @method User|null find($id, $lockMode = null, $lockVersion = null)
- * @method User|null findOneBy(array $criteria, array $orderBy = null)
+ * @method User|null findOneBy(array <string, mixed> $criteria, array<string, string>|null $orderBy = null)
  * @method User[]    findAll()
- * @method User[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @method User[]    findBy(array <string, mixed> $criteria, array<string, string>|null $orderBy = null, $limit = null, $offset = null)
  */
 class UserRepository extends ServiceEntityRepository implements PasswordUpgraderInterface
 {
@@ -84,6 +84,9 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
 //            ->getOneOrNullResult()
 //        ;
 //    }
+    /**
+     * @return User[]
+     */
     public function findLDAPEnabledUsers()
     {
         return $this->createQueryBuilder('u')
@@ -96,6 +99,9 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
     }
 
     /* This data is to call and be used on the admin Users Page */
+    /**
+     * @return User[]
+     */
     public function findExcludingAdmin(?string $filter = null): array
     {
         $qb = $this->createQueryBuilder('u');
@@ -128,7 +134,7 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
      * @param string $filter The filter criterion (e.g., verified, banned).
      * @param string|null $searchTerm An optional partial search term to match user attributes or SAML provider name.
      *
-     * @return array A list of matched users, ordered by creation date in descending order.
+     * @return User[] A list of matched users, ordered by creation date in descending order.
      */
     public function searchWithFilter(string $filter, ?string $sort, ?string $order, ?string $searchTerm = null): array
     {
@@ -303,7 +309,10 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         return $qb->getQuery()->getOneOrNullResult();
     }
 
-    public function findAllPortalAccountsExcludingAdmin()
+    /**
+     * @return User[]
+     */
+    public function findAllPortalAccountsExcludingAdmin(): array
     {
         return $this->createQueryBuilder('u')
             ->join('u.userExternalAuths', 'a')
