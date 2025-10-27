@@ -10,9 +10,9 @@ use Doctrine\Persistence\ManagerRegistry;
  * @extends ServiceEntityRepository<Setting>
  *
  * @method Setting|null find($id, $lockMode = null, $lockVersion = null)
- * @method Setting|null findOneBy(array $criteria, array $orderBy = null)
+ * @method Setting|null findOneBy(array <string, mixed> $criteria, array<string, string>|null $orderBy = null)
  * @method Setting[]    findAll()
- * @method Setting[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @method Setting[]    findBy(array <string, mixed> $criteria, array<string, string>|null $orderBy = null, $limit = null, $offset = null)
  */
 class SettingRepository extends ServiceEntityRepository
 {
@@ -62,6 +62,9 @@ class SettingRepository extends ServiceEntityRepository
     //        ;
     //    }
 
+    /**
+     * @return Setting[]
+     */
     public function findAllNames(): array
     {
         return $this->createQueryBuilder('s')
