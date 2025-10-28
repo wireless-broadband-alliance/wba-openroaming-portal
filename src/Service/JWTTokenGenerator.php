@@ -35,7 +35,7 @@ readonly class JWTTokenGenerator
     }
 
     /**
-     * @return string|array{success: false, error: string}
+     * @return array{success: bool, error?: string, token?: string}
      */
     public function generateToken(UserInterface $user): string|array
     {
