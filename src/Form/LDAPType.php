@@ -36,29 +36,29 @@ class LDAPType extends AbstractType
             ])
             ->add('syncLdapServer', TextType::class, [
                 'required' => false,
-                'constraints' => [$this->notBlankIfEnabled('syncLdapServer')],
+                'constraints' => [$this->notBlankIfEnabled()],
             ])
             ->add('syncLdapBindUserDn', TextType::class, [
                 'required' => false,
-                'constraints' => [$this->notBlankIfEnabled('syncLdapBindUserDn')],
+                'constraints' => [$this->notBlankIfEnabled()],
             ])
             ->add('syncLdapBindUserPassword', PasswordType::class, [
                 'required' => false,
-                'constraints' => [$this->notBlankIfEnabled('syncLdapBindUserPassword')],
+                'constraints' => [$this->notBlankIfEnabled()],
             ])
             ->add('syncLdapSearchBaseDn', TextType::class, [
                 'required' => false,
-                'constraints' => [$this->notBlankIfEnabled('syncLdapSearchBaseDn')],
+                'constraints' => [$this->notBlankIfEnabled()],
             ])
             ->add('syncLdapSearchFilter', TextType::class, [
                 'required' => false,
-                'constraints' => [$this->notBlankIfEnabled('syncLdapSearchFilter')],
+                'constraints' => [$this->notBlankIfEnabled()],
             ]);
     }
 
-    private function notBlankIfEnabled(string $fieldName): Callback
+    private function notBlankIfEnabled(): Callback
     {
-        return new Callback(function ($value, ExecutionContextInterface $context) use ($fieldName) {
+        return new Callback(function ($value, ExecutionContextInterface $context) {
             $formData = $context->getRoot()->getData();
 
             if ($formData instanceof LDAPSettingsDTO && $formData->syncLdapEnabled === 'true') {
