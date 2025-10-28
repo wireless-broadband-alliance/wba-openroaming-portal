@@ -150,7 +150,7 @@ class ForgotPasswordController extends AbstractController
                         $latestEventMetadata['lastVerificationCodeTime'] =
                             $currentTime->format(DateTimeInterface::ATOM);
                         $latestEvent->setEventMetadata($latestEventMetadata);
-                        $user->setTwoFAcode(random_int(100000, 999999));
+                        $user->setTwoFAcode((string)random_int(100000, 999999));
                         $user->setTwoFACodeGeneratedAt(new DateTime());
                         $user->setTwoFAcodeIsActive(true);
 
@@ -278,7 +278,7 @@ class ForgotPasswordController extends AbstractController
                         $latestEventMetadata['verificationAttempts'] = $attempts;
                         $latestEvent->setEventMetadata($latestEventMetadata);
 
-                        $user->setTwoFAcode(random_int(100000, 999999));
+                        $user->setTwoFAcode((string)random_int(100000, 999999));
                         $user->setTwoFACodeGeneratedAt(new DateTime());
                         $user->setTwoFAcodeIsActive(true);
                         $this->eventRepository->save($latestEvent, true);
@@ -536,7 +536,7 @@ class ForgotPasswordController extends AbstractController
         UserPasswordHasherInterface $userPasswordHasher,
         string $context
     ): Response {
-        /** @var User $currentUser */
+        /** @var User|null $currentUser */
         $currentUser = $this->getUser();
         if (!$currentUser) {
             $this->addFlash(
@@ -613,7 +613,7 @@ class ForgotPasswordController extends AbstractController
             );
             $currentUser->setForgotPasswordRequest(false);
             $currentUser->setIsVerified(true);
-            $currentUser->setTwoFAcode(random_int(100000, 999999));
+            $currentUser->setTwoFAcode((string)random_int(100000, 999999));
             $currentUser->setTwoFACodeGeneratedAt(new DateTime());
             $currentUser->setTwoFAcodeIsActive(true);
             $session = $request->getSession();
