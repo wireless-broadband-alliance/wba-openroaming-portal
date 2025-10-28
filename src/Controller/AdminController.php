@@ -320,7 +320,8 @@ class AdminController extends AbstractController
             'settings' => $settingsTranslated,
             'form' => $form->createView(),
             'data' => $data,
-            'language' => $language
+            'language' => $language,
+            'customTypeDTO' => $customTypeDTO,
         ]);
     }
 }
