@@ -340,8 +340,8 @@ class FreeradiusController extends AbstractController
         // Prepare the AP Usage data for Excel
         $apUsageData = [];
         foreach (array_keys($fetchChartApUsage) as $index) {
-            $apName = $fetchChartApUsage[$index]['ap'] ?? 0;
-            $apUsage = $fetchChartApUsage[$index]['count'] ?? 0;
+            $apName = $fetchChartApUsage[$index]['ap'];
+            $apUsage = $fetchChartApUsage[$index]['count'];
             $apUsageData[] = [
                 'ap_Name' => $apName,
                 'ap_Usage' => $apUsage,
