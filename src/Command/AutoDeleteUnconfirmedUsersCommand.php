@@ -31,6 +31,9 @@ class AutoDeleteUnconfirmedUsersCommand extends Command
         parent::__construct();
     }
 
+    /**
+     * @return string[]
+     */
     public function deleteUnconfirmedUsers(): array
     {
         $users = $this->userRepository->findAll();
