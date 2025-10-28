@@ -24,6 +24,4 @@ class CustomTypeDTO
     public ?string $ADDITIONAL_LABEL = null;
 
     public ?string $CONTACT_EMAIL = null;
-
-
 }

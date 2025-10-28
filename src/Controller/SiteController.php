@@ -154,11 +154,13 @@ class SiteController extends AbstractController
                     return $this->redirectToRoute('app_login_confirmation');
                 }
 
-                if ($data["LOGIN_WITH_UUID_ONLY"]["value"] === OperationMode::OFF->value ||
+                if (
+                    $data["LOGIN_WITH_UUID_ONLY"]["value"] === OperationMode::OFF->value ||
                     $currentUser->getUserExternalAuths()[0]->getProvider() !== UserProvider::PORTAL_ACCOUNT->value
                 ) {
                     // Checks the 2FA status of the platform if mandatory and force the user to configure it
-                    if ($data['TWO_FACTOR_AUTH_STATUS']['value'] ===
+                    if (
+                        $data['TWO_FACTOR_AUTH_STATUS']['value'] ===
                             TwoFAType::ENFORCED_FOR_LOCAL->value &&
                             $currentUser->getUserExternalAuths()->get(0)->getProvider() ===
                             UserProvider::PORTAL_ACCOUNT->value &&
@@ -176,7 +178,8 @@ class SiteController extends AbstractController
                 }
             }
 
-            if ($data["LOGIN_WITH_UUID_ONLY"]["value"] === OperationMode::OFF->value ||
+            if (
+                $data["LOGIN_WITH_UUID_ONLY"]["value"] === OperationMode::OFF->value ||
                 $currentUser->getUserExternalAuths()[0]->getProvider() !== UserProvider::PORTAL_ACCOUNT->value
             ) {
                 if (
