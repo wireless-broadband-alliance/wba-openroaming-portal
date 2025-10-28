@@ -1,166 +1,164 @@
-<twig:LDAPSettingsForm :ldapSettingsDTO="ldapSettingsDTO" :form="form">
-    {{ form_start(form) }}
+{{ form_start(form) }}
     {{ form_widget(form._token) }}
 
-    <div class="grid gap-4 lg:grid-cols-2 xl:grid-cols-3 p-2 z-0">
+<div class="grid gap-4 lg:grid-cols-2 xl:grid-cols-3 p-2 z-0">
 
-        {# SYNC_LDAP_ENABLED #}
-        <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full" {{ stimulus_controller('radio card') }}>
-            <div class="flex flex-row justify-between">
-                <div class="text-base font-medium text-center break-normal md:break-all">
-                    <h1 class="text-base md:text-lg whitespace-nowrap">{{ 'synchronizationLDAP'|trans({}, '_LDAP') }}</h1>
-                </div>
-                <label class="flex items-center bg-opacity-40">
-                    <img class="w-6 cursor-pointer" {{ stimulus_target('card', 'button') }}
-                            {{ stimulus_action('card', 'show_info', 'mouseover')|stimulus_action('card', 'hide_info', 'mouseout') }}
-                         src="{{ asset('resources/logos/info_icon.svg') }}" alt="info_icon"/>
-                </label>
+    {# SYNC_LDAP_ENABLED #}
+    <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full" {{ stimulus_controller('radio card') }}>
+        <div class="flex flex-row justify-between">
+            <div class="text-base font-medium text-center break-normal md:break-all">
+                <h1 class="text-base md:text-lg whitespace-nowrap">{{ 'synchronizationLDAP'|trans({}, '_LDAP') }}</h1>
             </div>
-
-            {{ include('/dashboard/shared/settings_actions/_description.html.twig', { description: data.SYNC_LDAP_ENABLED.description }) }}
-
-            <div class="flex flex-col items-center space-y-2 mt-5">
-                {{ form_widget(form.syncLdapEnabled, {attr: {'wire:model': 'dto.syncLdapEnabled'}}) }}
-            </div>
-
-            <div class="mt-2 -mb-2 text-center text-red-500 text-base">
-                {{ form_errors(form.syncLdapEnabled) }}
-            </div>
+            <label class="flex items-center bg-opacity-40">
+                <img class="w-6 cursor-pointer" {{ stimulus_target('card', 'button') }}
+                        {{ stimulus_action('card', 'show_info', 'mouseover')|stimulus_action('card', 'hide_info', 'mouseout') }}
+                     src="{{ asset('resources/logos/info_icon.svg') }}" alt="info_icon"/>
+            </label>
         </div>
 
-        {# SYNC_LDAP_SERVER #}
-        <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full" {{ stimulus_target('radio-card', 'card') }} {{ stimulus_controller('card') }}>
-            <div class="flex flex-row justify-between">
-                <div class="text-base font-medium text-center break-normal md:break-all">
-                    <h1 class="text-base md:text-lg whitespace-nowrap">{{ 'synchronizationLDAPServer'|trans({}, '_LDAP') }}</h1>
-                </div>
-                <label class="flex items-center bg-opacity-40">
-                    <img class="w-6 cursor-pointer" {{ stimulus_target('card', 'button') }}
-                            {{ stimulus_action('card', 'show_info', 'mouseover')|stimulus_action('card', 'hide_info', 'mouseout') }}
-                         src="{{ asset('resources/logos/info_icon.svg') }}" alt="info_icon"/>
-                </label>
-            </div>
+        {{ include('/dashboard/shared/settings_actions/_description.html.twig', { description: data.SYNC_LDAP_ENABLED.description }) }}
 
-            {{ include('/dashboard/shared/settings_actions/_description.html.twig', { description: data.SYNC_LDAP_SERVER.description }) }}
-
-            <div class="flex items-center space-x-2 mt-5">
-                {{ form_widget(form.syncLdapServer, {attr: {'wire:model': 'dto.syncLdapServer', class: 'form-widget', 'data-radio-card-target': 'input'}}) }}
-            </div>
-
-            <div class="mt-2 -mb-2 text-center text-red-500 text-base">
-                {{ form_errors(form.syncLdapServer) }}
-            </div>
+        <div class="flex flex-col items-center space-y-2 mt-5">
+            {{ form_widget(form.syncLdapEnabled, {attr: {'wire:model': 'dto.syncLdapEnabled'}}) }}
         </div>
 
-        {# SYNC_LDAP_BIND_USER_DN #}
-        <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full" {{ stimulus_target('radio-card', 'card') }} {{ stimulus_controller('card') }}>
-            <div class="flex flex-row justify-between">
-                <div class="text-base font-medium text-center break-normal md:break-all">
-                    <h1 class="text-base md:text-lg whitespace-nowrap">{{ 'bindDistinguishedName'|trans({}, '_LDAP') }}</h1>
-                </div>
-                <label class="flex items-center bg-opacity-40">
-                    <img class="w-6 cursor-pointer" {{ stimulus_target('card', 'button') }}
-                            {{ stimulus_action('card', 'show_info', 'mouseover')|stimulus_action('card', 'hide_info', 'mouseout') }}
-                         src="{{ asset('resources/logos/info_icon.svg') }}" alt="info_icon"/>
-                </label>
-            </div>
-
-            {{ include('/dashboard/shared/settings_actions/_description.html.twig', { description: data.SYNC_LDAP_BIND_USER_DN.description }) }}
-
-            <div class="flex items-center space-x-2 mt-5">
-                {{ form_widget(form.syncLdapBindUserDn, {attr: {'wire:model': 'dto.syncLdapBindUserDn', class: 'form-widget', 'data-radio-card-target': 'input'}}) }}
-            </div>
-
-            <div class="mt-2 -mb-2 text-center text-red-500 text-base">
-                {{ form_errors(form.syncLdapBindUserDn) }}
-            </div>
-        </div>
-
-        {# SYNC_LDAP_BIND_USER_PASSWORD #}
-        <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full" {{ stimulus_target('radio-card', 'card') }} {{ stimulus_controller('card') }}>
-            <div class="flex flex-row justify-between">
-                <div class="text-base font-medium text-center break-normal md:break-all">
-                    <h1 class="text-base md:text-lg whitespace-nowrap">{{ 'bindDistinguishedPassword'|trans({}, '_LDAP') }}</h1>
-                </div>
-                <label class="flex items-center bg-opacity-40">
-                    <img class="w-6 cursor-pointer" {{ stimulus_target('card', 'button') }}
-                            {{ stimulus_action('card', 'show_info', 'mouseover')|stimulus_action('card', 'hide_info', 'mouseout') }}
-                         src="{{ asset('resources/logos/info_icon.svg') }}" alt="info_icon"/>
-                </label>
-            </div>
-
-            {{ include('/dashboard/shared/settings_actions/_description.html.twig', { description: data.SYNC_LDAP_BIND_USER_PASSWORD.description }) }}
-
-            <div class="flex items-center space-x-2 mt-5">
-                {{ form_widget(form.syncLdapBindUserPassword, {attr: {'wire:model': 'dto.syncLdapBindUserPassword', class: 'form-widget'}}) }}
-            </div>
-
-            <div class="mt-2 -mb-2 text-center text-red-500 text-base">
-                {{ form_errors(form.syncLdapBindUserPassword) }}
-            </div>
-        </div>
-
-        {# SYNC_LDAP_SEARCH_BASE_DN #}
-        <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full" {{ stimulus_target('radio-card', 'card') }} {{ stimulus_controller('card') }}>
-            <div class="flex flex-row justify-between">
-                <div class="text-base font-medium text-center break-normal md:break-all">
-                    <h1 class="text-base md:text-lg whitespace-nowrap">{{ 'searchBaseDistinguishedName'|trans({}, '_LDAP') }}</h1>
-                </div>
-                <label class="flex items-center bg-opacity-40">
-                    <img class="w-6 cursor-pointer" {{ stimulus_target('card', 'button') }}
-                            {{ stimulus_action('card', 'show_info', 'mouseover')|stimulus_action('card', 'hide_info', 'mouseout') }}
-                         src="{{ asset('resources/logos/info_icon.svg') }}" alt="info_icon"/>
-                </label>
-            </div>
-
-            {{ include('/dashboard/shared/settings_actions/_description.html.twig', { description: data.SYNC_LDAP_SEARCH_BASE_DN.description }) }}
-
-            <div class="flex items-center space-x-2 mt-5">
-                {{ form_widget(form.syncLdapSearchBaseDn, {attr: {'wire:model': 'dto.syncLdapSearchBaseDn', class: 'form-widget', 'data-radio-card-target': 'input'}}) }}
-            </div>
-
-            <div class="mt-2 -mb-2 text-center text-red-500 text-base">
-                {{ form_errors(form.syncLdapSearchBaseDn) }}
-            </div>
-        </div>
-
-        {# SYNC_LDAP_SEARCH_FILTER #}
-        <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full" {{ stimulus_target('radio-card', 'card') }} {{ stimulus_controller('card') }}>
-            <div class="flex flex-row justify-between">
-                <div class="text-base font-medium text-center break-normal md:break-all">
-                    <h1 class="text-base md:text-lg whitespace-nowrap">{{ 'LDAPSearchFilter'|trans({}, '_LDAP') }}</h1>
-                </div>
-                <label class="flex items-center bg-opacity-40">
-                    <img class="w-6 cursor-pointer" {{ stimulus_target('card', 'button') }}
-                            {{ stimulus_action('card', 'show_info', 'mouseover')|stimulus_action('card', 'hide_info', 'mouseout') }}
-                         src="{{ asset('resources/logos/info_icon.svg') }}" alt="info_icon"/>
-                </label>
-            </div>
-
-            {{ include('/dashboard/shared/settings_actions/_description.html.twig', { description: data.SYNC_LDAP_SEARCH_FILTER.description }) }}
-
-            <div class="flex items-center space-x-2 mt-5">
-                {{ form_widget(form.syncLdapSearchFilter, {attr: {'wire:model': 'dto.syncLdapSearchFilter', class: 'form-widget', 'data-radio-card-target': 'input'}}) }}
-            </div>
-
-            <div class="mt-2 -mb-2 text-center text-red-500 text-base">
-                {{ form_errors(form.syncLdapSearchFilter) }}
-            </div>
+        <div class="mt-2 -mb-2 text-center text-red-500 text-base">
+            {{ form_errors(form.syncLdapEnabled) }}
         </div>
     </div>
 
-    <div class="mt-8 divider-solid"></div>
-    <div class="mt-6 flex flex-row w-full justify-end items-center gap-2">
-        <a href="{{ path('app_dashboard_regenerate_code_admin', {type: 'settingLDAP'}) }}"
-           onclick="return confirm('{{ 'resetMessage'|trans({}, 'settings_actions_general') }}')"
-           class="text-sm hover:text-red-600 font-bold p-2 rounded-lg transition ease-in duration-300">
-            {{ 'reset'|trans({}, 'settings_actions_general') }}
-        </a>
+    {# SYNC_LDAP_SERVER #}
+    <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full" {{ stimulus_target('radio-card', 'card') }} {{ stimulus_controller('card') }}>
+        <div class="flex flex-row justify-between">
+            <div class="text-base font-medium text-center break-normal md:break-all">
+                <h1 class="text-base md:text-lg whitespace-nowrap">{{ 'synchronizationLDAPServer'|trans({}, '_LDAP') }}</h1>
+            </div>
+            <label class="flex items-center bg-opacity-40">
+                <img class="w-6 cursor-pointer" {{ stimulus_target('card', 'button') }}
+                        {{ stimulus_action('card', 'show_info', 'mouseover')|stimulus_action('card', 'hide_info', 'mouseout') }}
+                     src="{{ asset('resources/logos/info_icon.svg') }}" alt="info_icon"/>
+            </label>
+        </div>
 
-        <button type="submit" class="btn-primary">
-            {{ 'saveChanges'|trans({}, 'settings_actions_general') }}
-        </button>
+        {{ include('/dashboard/shared/settings_actions/_description.html.twig', { description: data.SYNC_LDAP_SERVER.description }) }}
+
+        <div class="flex items-center space-x-2 mt-5">
+            {{ form_widget(form.syncLdapServer, {attr: {'wire:model': 'dto.syncLdapServer', class: 'form-widget', 'data-radio-card-target': 'input'}}) }}
+        </div>
+
+        <div class="mt-2 -mb-2 text-center text-red-500 text-base">
+            {{ form_errors(form.syncLdapServer) }}
+        </div>
     </div>
 
-    {{ form_end(form) }}
-</twig:LDAPSettingsForm>
+    {# SYNC_LDAP_BIND_USER_DN #}
+    <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full" {{ stimulus_target('radio-card', 'card') }} {{ stimulus_controller('card') }}>
+        <div class="flex flex-row justify-between">
+            <div class="text-base font-medium text-center break-normal md:break-all">
+                <h1 class="text-base md:text-lg whitespace-nowrap">{{ 'bindDistinguishedName'|trans({}, '_LDAP') }}</h1>
+            </div>
+            <label class="flex items-center bg-opacity-40">
+                <img class="w-6 cursor-pointer" {{ stimulus_target('card', 'button') }}
+                        {{ stimulus_action('card', 'show_info', 'mouseover')|stimulus_action('card', 'hide_info', 'mouseout') }}
+                     src="{{ asset('resources/logos/info_icon.svg') }}" alt="info_icon"/>
+            </label>
+        </div>
+
+        {{ include('/dashboard/shared/settings_actions/_description.html.twig', { description: data.SYNC_LDAP_BIND_USER_DN.description }) }}
+
+        <div class="flex items-center space-x-2 mt-5">
+            {{ form_widget(form.syncLdapBindUserDn, {attr: {'wire:model': 'dto.syncLdapBindUserDn', class: 'form-widget', 'data-radio-card-target': 'input'}}) }}
+        </div>
+
+        <div class="mt-2 -mb-2 text-center text-red-500 text-base">
+            {{ form_errors(form.syncLdapBindUserDn) }}
+        </div>
+    </div>
+
+    {# SYNC_LDAP_BIND_USER_PASSWORD #}
+    <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full" {{ stimulus_target('radio-card', 'card') }} {{ stimulus_controller('card') }}>
+        <div class="flex flex-row justify-between">
+            <div class="text-base font-medium text-center break-normal md:break-all">
+                <h1 class="text-base md:text-lg whitespace-nowrap">{{ 'bindDistinguishedPassword'|trans({}, '_LDAP') }}</h1>
+            </div>
+            <label class="flex items-center bg-opacity-40">
+                <img class="w-6 cursor-pointer" {{ stimulus_target('card', 'button') }}
+                        {{ stimulus_action('card', 'show_info', 'mouseover')|stimulus_action('card', 'hide_info', 'mouseout') }}
+                     src="{{ asset('resources/logos/info_icon.svg') }}" alt="info_icon"/>
+            </label>
+        </div>
+
+        {{ include('/dashboard/shared/settings_actions/_description.html.twig', { description: data.SYNC_LDAP_BIND_USER_PASSWORD.description }) }}
+
+        <div class="flex items-center space-x-2 mt-5">
+            {{ form_widget(form.syncLdapBindUserPassword, {attr: {'wire:model': 'dto.syncLdapBindUserPassword', class: 'form-widget'}}) }}
+        </div>
+
+        <div class="mt-2 -mb-2 text-center text-red-500 text-base">
+            {{ form_errors(form.syncLdapBindUserPassword) }}
+        </div>
+    </div>
+
+    {# SYNC_LDAP_SEARCH_BASE_DN #}
+    <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full" {{ stimulus_target('radio-card', 'card') }} {{ stimulus_controller('card') }}>
+        <div class="flex flex-row justify-between">
+            <div class="text-base font-medium text-center break-normal md:break-all">
+                <h1 class="text-base md:text-lg whitespace-nowrap">{{ 'searchBaseDistinguishedName'|trans({}, '_LDAP') }}</h1>
+            </div>
+            <label class="flex items-center bg-opacity-40">
+                <img class="w-6 cursor-pointer" {{ stimulus_target('card', 'button') }}
+                        {{ stimulus_action('card', 'show_info', 'mouseover')|stimulus_action('card', 'hide_info', 'mouseout') }}
+                     src="{{ asset('resources/logos/info_icon.svg') }}" alt="info_icon"/>
+            </label>
+        </div>
+
+        {{ include('/dashboard/shared/settings_actions/_description.html.twig', { description: data.SYNC_LDAP_SEARCH_BASE_DN.description }) }}
+
+        <div class="flex items-center space-x-2 mt-5">
+            {{ form_widget(form.syncLdapSearchBaseDn, {attr: {'wire:model': 'dto.syncLdapSearchBaseDn', class: 'form-widget', 'data-radio-card-target': 'input'}}) }}
+        </div>
+
+        <div class="mt-2 -mb-2 text-center text-red-500 text-base">
+            {{ form_errors(form.syncLdapSearchBaseDn) }}
+        </div>
+    </div>
+
+    {# SYNC_LDAP_SEARCH_FILTER #}
+    <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full" {{ stimulus_target('radio-card', 'card') }} {{ stimulus_controller('card') }}>
+        <div class="flex flex-row justify-between">
+            <div class="text-base font-medium text-center break-normal md:break-all">
+                <h1 class="text-base md:text-lg whitespace-nowrap">{{ 'LDAPSearchFilter'|trans({}, '_LDAP') }}</h1>
+            </div>
+            <label class="flex items-center bg-opacity-40">
+                <img class="w-6 cursor-pointer" {{ stimulus_target('card', 'button') }}
+                        {{ stimulus_action('card', 'show_info', 'mouseover')|stimulus_action('card', 'hide_info', 'mouseout') }}
+                     src="{{ asset('resources/logos/info_icon.svg') }}" alt="info_icon"/>
+            </label>
+        </div>
+
+        {{ include('/dashboard/shared/settings_actions/_description.html.twig', { description: data.SYNC_LDAP_SEARCH_FILTER.description }) }}
+
+        <div class="flex items-center space-x-2 mt-5">
+            {{ form_widget(form.syncLdapSearchFilter, {attr: {'wire:model': 'dto.syncLdapSearchFilter', class: 'form-widget', 'data-radio-card-target': 'input'}}) }}
+        </div>
+
+        <div class="mt-2 -mb-2 text-center text-red-500 text-base">
+            {{ form_errors(form.syncLdapSearchFilter) }}
+        </div>
+    </div>
+</div>
+
+<div class="mt-8 divider-solid"></div>
+<div class="mt-6 flex flex-row w-full justify-end items-center gap-2">
+    <a href="{{ path('app_dashboard_regenerate_code_admin', {type: 'settingLDAP'}) }}"
+       onclick="return confirm('{{ 'resetMessage'|trans({}, 'settings_actions_general') }}')"
+       class="text-sm hover:text-red-600 font-bold p-2 rounded-lg transition ease-in duration-300">
+        {{ 'reset'|trans({}, 'settings_actions_general') }}
+    </a>
+
+    <button type="submit" class="btn-primary">
+        {{ 'saveChanges'|trans({}, 'settings_actions_general') }}
+    </button>
+</div>
+
+{{ form_end(form) }}

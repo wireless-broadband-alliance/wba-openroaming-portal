@@ -541,16 +541,15 @@ class SettingsController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function settingsLDAP(Request $request): Response
     {
-        // Fetch all settings with descriptions (from GetSettings service)
         $data = $this->getSettings->getSettings();
 
         /** @var User $currentUser */
         $currentUser = $this->getUser();
 
-        // Initialize DTO using the values from $data
+        // Initialize DTO from settings
         $dto = new LDAPSettingsDTO($data);
 
-        // Create the form bound to the DTO
+        // Create form bound to DTO
         $form = $this->createForm(LDAPType::class, $dto);
         $form->handleRequest($request);
 
@@ -558,24 +557,20 @@ class SettingsController extends AbstractController
             /** @var LDAPSettingsDTO $dto */
             $dto = $form->getData();
 
-            // Update all Setting entities from DTO
+            // Save updated settings
             $this->settingsService->updateSettingsFromArray($dto->toArray());
-
-            // Flush changes
             $this->settingsService->flush();
 
             // Log the event
-            $eventMetadata = [
-                'ip' => $request->getClientIp(),
-                'user_agent' => $request->headers->get('User-Agent'),
-                'uuid' => $currentUser->getUuid(),
-            ];
-
             $this->eventActions->saveEvent(
                 $currentUser,
                 AnalyticalEventType::SETTING_LDAP_CONF_REQUEST->value,
                 new DateTime(),
-                $eventMetadata
+                [
+                    'ip' => $request->getClientIp(),
+                    'user_agent' => $request->headers->get('User-Agent'),
+                    'uuid' => $currentUser->getUuid(),
+                ]
             );
 
             $this->addFlash(
@@ -589,7 +584,7 @@ class SettingsController extends AbstractController
         return $this->render('dashboard/shared/settings_actions.html.twig', [
             'form' => $form->createView(),
             'ldapSettingsDTO' => $dto,
-            'data' => $data,
+            'data' => $data, // optional, for descriptions in your Twig
         ]);
     }
 

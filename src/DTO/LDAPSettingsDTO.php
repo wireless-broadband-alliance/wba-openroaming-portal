@@ -15,14 +15,13 @@ class LDAPSettingsDTO
     public ?string $syncLdapSearchFilter = null;
 
     /**
-     * Initialize the DTO from a settings array (from GetSettings service)
+     * Initialize DTO from a settings array.
      *
      * @param array<string, array{value: string|null, description?: string}> $data
      */
     public function __construct(array $data = [])
     {
         $this->syncLdapEnabled = $data[SettingName::SYNC_LDAP_ENABLED->value]['value'] ?? OperationMode::OFF->value;
-
         $this->syncLdapServer = $data[SettingName::SYNC_LDAP_SERVER->value]['value'] ?? null;
         $this->syncLdapBindUserDn = $data[SettingName::SYNC_LDAP_BIND_USER_DN->value]['value'] ?? null;
         $this->syncLdapBindUserPassword = $data[SettingName::SYNC_LDAP_BIND_USER_PASSWORD->value]['value'] ?? null;
