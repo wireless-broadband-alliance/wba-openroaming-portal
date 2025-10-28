@@ -1,62 +1,204 @@
-<form action="{{ path('admin_dashboard_settings_radius') }}" method="post" enctype="multipart/form-data">
-    {{ form_row(form._token) }}
-    <div class="grid gap-4 lg:grid-cols-2 xl:grid-cols-3 p-2 z-0">
-        {% for setting in form %}
-            {# Display only the Radius settings #}
-            {% if setting.vars.name in ['RADIUS_REALM_NAME', 'DISPLAY_NAME', 'OPERATOR_NAME', 'DOMAIN_NAME', 'RADIUS_TLS_NAME', 'NAI_REALM', 'RADIUS_TRUSTED_ROOT_CA_SHA1_HASH', 'PAYLOAD_IDENTIFIER', 'PROFILES_ENCRYPTION_TYPE_IOS_ONLY'] %}
-                <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full" {{ stimulus_controller('card') }}>
+{{ form_start(form) }}
+{{ form_widget(form._token) }}
 
-                    {# Title and Icon #}
-                    <div class="flex flex-row justify-between">
-                        <div class="text-base font-medium text-center break-normal md:break-all">
-                            {% set displayName = {
-                                RADIUS_REALM_NAME: 'radiusRealmName'|trans({}, '_radius'),
-                                DISPLAY_NAME: 'displayName'|trans({}, '_radius'),
-                                PAYLOAD_IDENTIFIER: 'payloadIdentifier'|trans({}, '_radius'),
-                                OPERATOR_NAME: 'operatorName'|trans({}, '_radius'),
-                                DOMAIN_NAME: 'domainName'|trans({}, '_radius'),
-                                RADIUS_TLS_NAME: 'radiusTLSNAME'|trans({}, '_radius'),
-                                NAI_REALM: 'NAIRealm'|trans({}, '_radius'),
-                                RADIUS_TRUSTED_ROOT_CA_SHA1_HASH: 'trustedRootCASHA1Hash'|trans({}, '_radius'),
-                                PROFILES_ENCRYPTION_TYPE_IOS_ONLY: 'profileEncrytionType'|trans({}, '_radius'),
-                            }[setting.vars.name] ?? setting.vars.name %}
-                            <h1 class="text-base md:text-lg whitespace-nowrap">{{ displayName }}</h1>
-                        </div>
-                        <label class="flex items-center bg-opacity-40">
-                            <img class="w-6 cursor-pointer" {{ stimulus_target('card', 'button') }} {{ stimulus_action('card', 'show_info', 'mouseover')|stimulus_action('card', 'hide_info', 'mouseout') }}
-                                 src="{{ asset('resources/logos/info_icon.svg') }}" alt="info_icon"/>
-                        </label>
-                    </div>
+<div class="grid gap-4 lg:grid-cols-2 xl:grid-cols-3 p-2 z-0">
 
-                    {# Card Description #}
-                    {{ include('/dashboard/shared/settings_actions/_description.html.twig', {description: setting.vars.attr.description}) }}
-
-                    <div class="flex items-center space-x-2 mt-5">
-                        {{ form_widget(setting, {attr: {class: 'form-widget', autocomplete: 'off'}}) }}
-                    </div>
-
-                    {{ include('/dashboard/shared/settings_actions/_description.html.twig', {description: setting.vars.attr.description}) }}
-
-                    <div class="mt-2 -mb-2 text-center text-red-500 text-base">
-                        {{ form_errors(setting) }}
-                    </div>
-                </div>
-            {% endif %}
-        {% endfor %}
+    {# DISPLAY_NAME #}
+    <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full" {{ stimulus_controller('card') }}>
+        <div class="flex flex-row justify-between">
+            <div class="text-base font-medium text-center break-normal md:break-all">
+                <h1 class="text-base md:text-lg whitespace-nowrap">{{ 'displayName'|trans({}, '_radius') }}</h1>
+            </div>
+            <label class="flex items-center bg-opacity-40">
+                <img class="w-6 cursor-pointer" {{ stimulus_target('card', 'button') }} {{ stimulus_action('card', 'show_info', 'mouseover')|stimulus_action('card', 'hide_info', 'mouseout') }}
+                     src="{{ asset('resources/logos/info_icon.svg') }}" alt="info_icon"/>
+            </label>
+        </div>
+        {{ include('/dashboard/shared/settings_actions/_description.html.twig', { description: data.DISPLAY_NAME.description }) }}
+        <div class="flex items-center space-x-2 mt-5">
+            {{ form_widget(form.displayName, {attr: {class: 'form-widget', autocomplete: 'off'}}) }}
+        </div>
+        <div class="mt-2 -mb-2 text-center text-red-500 text-base">
+            {{ form_errors(form.displayName) }}
+        </div>
     </div>
 
-    <div class="mt-8 divider-solid"></div>
-
-    <div class="mt-6 flex flex-row w-full justify-end items-center gap-2">
-        <a href="{{ path('app_dashboard_regenerate_code_admin', {type: 'settingRadius'}) }}"
-           onclick="return confirm('{{ 'resetMessage'|trans({}, 'settings_actions_general') }}')"
-           class="text-sm hover:text-red-600 font-bold p-2 rounded-lg transition ease-in duration-300">
-            {{ 'reset'|trans({}, 'settings_actions_general') }}
-        </a>
-
-        <button type="submit" class="btn-primary"
-                onclick="return confirm('{{ 'saveChangesMessage'|trans({}, 'settings_actions_general') }}')">
-            {{ 'saveChanges'|trans({}, 'settings_actions_general') }}
-        </button>
+    {# RADIUS_REALM_NAME #}
+    <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full" {{ stimulus_controller('card') }}>
+        <div class="flex flex-row justify-between">
+            <div class="text-base font-medium text-center break-normal md:break-all">
+                <h1 class="text-base md:text-lg whitespace-nowrap">{{ 'radiusRealmName'|trans({}, '_radius') }}</h1>
+            </div>
+            <label class="flex items-center bg-opacity-40">
+                <img class="w-6 cursor-pointer" {{ stimulus_target('card', 'button') }} {{ stimulus_action('card', 'show_info', 'mouseover')|stimulus_action('card', 'hide_info', 'mouseout') }}
+                     src="{{ asset('resources/logos/info_icon.svg') }}" alt="info_icon"/>
+            </label>
+        </div>
+        {{ include('/dashboard/shared/settings_actions/_description.html.twig', { description: data.RADIUS_REALM_NAME.description }) }}
+        <div class="flex items-center space-x-2 mt-5">
+            {{ form_widget(form.radiusRealmName, {attr: {class: 'form-widget', autocomplete: 'off'}}) }}
+        </div>
+        <div class="mt-2 -mb-2 text-center text-red-500 text-base">
+            {{ form_errors(form.radiusRealmName) }}
+        </div>
     </div>
-</form>
+
+    {# DOMAIN_NAME #}
+    <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full" {{ stimulus_controller('card') }}>
+        <div class="flex flex-row justify-between">
+            <div class="text-base font-medium text-center break-normal md:break-all">
+                <h1 class="text-base md:text-lg whitespace-nowrap">{{ 'domainName'|trans({}, '_radius') }}</h1>
+            </div>
+            <label class="flex items-center bg-opacity-40">
+                <img class="w-6 cursor-pointer" {{ stimulus_target('card', 'button') }} {{ stimulus_action('card', 'show_info', 'mouseover')|stimulus_action('card', 'hide_info', 'mouseout') }}
+                     src="{{ asset('resources/logos/info_icon.svg') }}" alt="info_icon"/>
+            </label>
+        </div>
+        {{ include('/dashboard/shared/settings_actions/_description.html.twig', { description: data.DOMAIN_NAME.description }) }}
+        <div class="flex items-center space-x-2 mt-5">
+            {{ form_widget(form.domainName, {attr: {class: 'form-widget', autocomplete: 'off'}}) }}
+        </div>
+        <div class="mt-2 -mb-2 text-center text-red-500 text-base">
+            {{ form_errors(form.domainName) }}
+        </div>
+    </div>
+
+    {# OPERATOR_NAME #}
+    <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full" {{ stimulus_controller('card') }}>
+        <div class="flex flex-row justify-between">
+            <div class="text-base font-medium text-center break-normal md:break-all">
+                <h1 class="text-base md:text-lg whitespace-nowrap">{{ 'operatorName'|trans({}, '_radius') }}</h1>
+            </div>
+            <label class="flex items-center bg-opacity-40">
+                <img class="w-6 cursor-pointer" {{ stimulus_target('card', 'button') }} {{ stimulus_action('card', 'show_info', 'mouseover')|stimulus_action('card', 'hide_info', 'mouseout') }}
+                     src="{{ asset('resources/logos/info_icon.svg') }}" alt="info_icon"/>
+            </label>
+        </div>
+        {{ include('/dashboard/shared/settings_actions/_description.html.twig', { description: data.OPERATOR_NAME.description }) }}
+        <div class="flex items-center space-x-2 mt-5">
+            {{ form_widget(form.operatorName, {attr: {class: 'form-widget', autocomplete: 'off'}}) }}
+        </div>
+        <div class="mt-2 -mb-2 text-center text-red-500 text-base">
+            {{ form_errors(form.operatorName) }}
+        </div>
+    </div>
+
+    {# RADIUS_TLS_NAME #}
+    <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full" {{ stimulus_controller('card') }}>
+        <div class="flex flex-row justify-between">
+            <div class="text-base font-medium text-center break-normal md:break-all">
+                <h1 class="text-base md:text-lg whitespace-nowrap">{{ 'radiusTLSNAME'|trans({}, '_radius') }}</h1>
+            </div>
+            <label class="flex items-center bg-opacity-40">
+                <img class="w-6 cursor-pointer" {{ stimulus_target('card', 'button') }} {{ stimulus_action('card', 'show_info', 'mouseover')|stimulus_action('card', 'hide_info', 'mouseout') }}
+                     src="{{ asset('resources/logos/info_icon.svg') }}" alt="info_icon"/>
+            </label>
+        </div>
+        {{ include('/dashboard/shared/settings_actions/_description.html.twig', { description: data.RADIUS_TLS_NAME.description }) }}
+        <div class="flex items-center space-x-2 mt-5">
+            {{ form_widget(form.radiusTlsName, {attr: {class: 'form-widget', autocomplete: 'off'}}) }}
+        </div>
+        <div class="mt-2 -mb-2 text-center text-red-500 text-base">
+            {{ form_errors(form.radiusTlsName) }}
+        </div>
+    </div>
+
+    {# NAI_REALM #}
+    <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full" {{ stimulus_controller('card') }}>
+        <div class="flex flex-row justify-between">
+            <div class="text-base font-medium text-center break-normal md:break-all">
+                <h1 class="text-base md:text-lg whitespace-nowrap">{{ 'NAIRealm'|trans({}, '_radius') }}</h1>
+            </div>
+            <label class="flex items-center bg-opacity-40">
+                <img class="w-6 cursor-pointer" {{ stimulus_target('card', 'button') }} {{ stimulus_action('card', 'show_info', 'mouseover')|stimulus_action('card', 'hide_info', 'mouseout') }}
+                     src="{{ asset('resources/logos/info_icon.svg') }}" alt="info_icon"/>
+            </label>
+        </div>
+        {{ include('/dashboard/shared/settings_actions/_description.html.twig', { description: data.NAI_REALM.description }) }}
+        <div class="flex items-center space-x-2 mt-5">
+            {{ form_widget(form.naiRealm, {attr: {class: 'form-widget', autocomplete: 'off'}}) }}
+        </div>
+        <div class="mt-2 -mb-2 text-center text-red-500 text-base">
+            {{ form_errors(form.naiRealm) }}
+        </div>
+    </div>
+
+    {# RADIUS_TRUSTED_ROOT_CA_SHA1_HASH #}
+    <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full" {{ stimulus_controller('card') }}>
+        <div class="flex flex-row justify-between">
+            <div class="text-base font-medium text-center break-normal md:break-all">
+                <h1 class="text-base md:text-lg whitespace-nowrap">{{ 'trustedRootCASHA1Hash'|trans({}, '_radius') }}</h1>
+            </div>
+            <label class="flex items-center bg-opacity-40">
+                <img class="w-6 cursor-pointer" {{ stimulus_target('card', 'button') }} {{ stimulus_action('card', 'show_info', 'mouseover')|stimulus_action('card', 'hide_info', 'mouseout') }}
+                     src="{{ asset('resources/logos/info_icon.svg') }}" alt="info_icon"/>
+            </label>
+        </div>
+        {{ include('/dashboard/shared/settings_actions/_description.html.twig', { description: data.RADIUS_TRUSTED_ROOT_CA_SHA1_HASH.description }) }}
+        <div class="flex items-center space-x-2 mt-5">
+            {{ form_widget(form.radiusTrustedRootCaSha1Hash, {attr: {class: 'form-widget', autocomplete: 'off'}}) }}
+        </div>
+        <div class="mt-2 -mb-2 text-center text-red-500 text-base">
+            {{ form_errors(form.radiusTrustedRootCaSha1Hash) }}
+        </div>
+    </div>
+
+    {# PAYLOAD_IDENTIFIER #}
+    <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full" {{ stimulus_controller('card') }}>
+        <div class="flex flex-row justify-between">
+            <div class="text-base font-medium text-center break-normal md:break-all">
+                <h1 class="text-base md:text-lg whitespace-nowrap">{{ 'payloadIdentifier'|trans({}, '_radius') }}</h1>
+            </div>
+            <label class="flex items-center bg-opacity-40">
+                <img class="w-6 cursor-pointer" {{ stimulus_target('card', 'button') }} {{ stimulus_action('card', 'show_info', 'mouseover')|stimulus_action('card', 'hide_info', 'mouseout') }}
+                     src="{{ asset('resources/logos/info_icon.svg') }}" alt="info_icon"/>
+            </label>
+        </div>
+        {{ include('/dashboard/shared/settings_actions/_description.html.twig', { description: data.PAYLOAD_IDENTIFIER.description }) }}
+        <div class="flex items-center space-x-2 mt-5">
+            {{ form_widget(form.payloadIdentifier, {attr: {class: 'form-widget', autocomplete: 'off'}}) }}
+        </div>
+        <div class="mt-2 -mb-2 text-center text-red-500 text-base">
+            {{ form_errors(form.payloadIdentifier) }}
+        </div>
+    </div>
+
+    {# PROFILES_ENCRYPTION_TYPE_IOS_ONLY #}
+    <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full" {{ stimulus_controller('card') }}>
+        <div class="flex flex-row justify-between">
+            <div class="text-base font-medium text-center break-normal md:break-all">
+                <h1 class="text-base md:text-lg whitespace-nowrap">{{ 'profileEncrytionType'|trans({}, '_radius') }}</h1>
+            </div>
+            <label class="flex items-center bg-opacity-40">
+                <img class="w-6 cursor-pointer" {{ stimulus_target('card', 'button') }} {{ stimulus_action('card', 'show_info', 'mouseover')|stimulus_action('card', 'hide_info', 'mouseout') }}
+                     src="{{ asset('resources/logos/info_icon.svg') }}" alt="info_icon"/>
+            </label>
+        </div>
+        {{ include('/dashboard/shared/settings_actions/_description.html.twig', { description: data.PROFILES_ENCRYPTION_TYPE_IOS_ONLY.description }) }}
+        <div class="flex items-center space-x-2 mt-5">
+            {{ form_widget(form.profilesEncryptionTypeIosOnly, {attr: {class: 'form-widget', autocomplete: 'off'}}) }}
+        </div>
+        <div class="mt-2 -mb-2 text-center text-red-500 text-base">
+            {{ form_errors(form.profilesEncryptionTypeIosOnly) }}
+        </div>
+    </div>
+
+</div>
+
+<div class="mt-8 divider-solid"></div>
+
+<div class="mt-6 flex flex-row w-full justify-end items-center gap-2">
+    <a href="{{ path('app_dashboard_regenerate_code_admin', {type: 'settingRadius'}) }}"
+       onclick="return confirm('{{ 'resetMessage'|trans({}, 'settings_actions_general') }}')"
+       class="text-sm hover:text-red-600 font-bold p-2 rounded-lg transition ease-in duration-300">
+        {{ 'reset'|trans({}, 'settings_actions_general') }}
+    </a>
+
+    <button type="submit" class="btn-primary"
+            onclick="return confirm('{{ 'saveChangesMessage'|trans({}, 'settings_actions_general') }}')">
+        {{ 'saveChanges'|trans({}, 'settings_actions_general') }}
+    </button>
+</div>
+
+{{ form_rest(form) }}
+{{ form_end(form, {'render_rest': false}) }}

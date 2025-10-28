@@ -2,7 +2,7 @@
 
 namespace App\Service;
 
-class Domain
+class DomainService
 {
     // Validate domain names and check if they resolve to an IP address
     // Validation comes from here: https://www.php.net/manual/en/function.dns-get-record.php

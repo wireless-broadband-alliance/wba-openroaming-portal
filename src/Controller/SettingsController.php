@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\DTO\LDAPSettingsDTO;
+use App\DTO\RadiusSettingsDTO;
 use App\Entity\Setting;
 use App\Entity\TextEditor;
 use App\Entity\User;
@@ -21,26 +22,19 @@ use App\Form\SMSType;
 use App\Form\StatusType;
 use App\Form\TermsType;
 use App\Form\TwoFASettingsType;
-use App\RadiusDb\Repository\RadiusAccountingRepository;
-use App\RadiusDb\Repository\RadiusAuthsRepository;
 use App\Repository\SettingTranslationRepository;
 use App\Repository\TextEditorRepository;
 use App\Service\CertificateService;
-use App\Service\Domain;
+use App\Service\DomainService;
 use App\Service\EnforcePasswordResetService;
 use App\Service\EventActions;
 use App\Service\GetSettings;
 use App\Service\SanitizeHTML;
 use App\Service\SettingsService;
-use App\Service\Statistics;
 use DateTime;
 use DateTimeZone;
 use Doctrine\ORM\EntityManagerInterface;
-use Exception;
-use PHP_CodeSniffer\Generators\Text;
-use Rector\Set\ValueObject\Set;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpClient\Exception\JsonException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
@@ -61,7 +55,8 @@ class SettingsController extends AbstractController
         private readonly EnforcePasswordResetService $enforcePasswordResetService,
         private readonly CertificateService $certificateService,
         private readonly SettingsService $settingsService,
-        private readonly TextEditorRepository $textEditorRepository
+        private readonly TextEditorRepository $textEditorRepository,
+        private readonly DomainService $domainService,
     ) {
     }
 
@@ -584,7 +579,7 @@ class SettingsController extends AbstractController
         return $this->render('dashboard/shared/settings_actions.html.twig', [
             'form' => $form->createView(),
             'ldapSettingsDTO' => $dto,
-            'data' => $data, // optional, for descriptions in your Twig
+            'data' => $data,
         ]);
     }
 
@@ -594,99 +589,49 @@ class SettingsController extends AbstractController
         Request $request,
     ): Response {
         $data = $this->getSettings->getSettings();
-        // Get the current logged-in user (admin)
+
         /** @var User $currentUser */
         $currentUser = $this->getUser();
-        $domainService = new Domain();
-        $settingsRepository = $this->entityManager->getRepository(Setting::class);
-        $settings = $settingsRepository->findAll();
 
-        $form = $this->createForm(RadiusType::class, null, [
-            'settings' => $settings,
-        ]);
+        // Initialize DTO from settings
+        $dto = new RadiusSettingsDTO($data);
 
+        // Create form bound to DTO
+        $form = $this->createForm(RadiusType::class, $dto);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $submittedData = $form->getData();
+            /** @var RadiusSettingsDTO $dto */
+            $dto = $form->getData();
 
-            $staticValue = '887FAE2A-F051-4CC9-99BB-8DFD66F553A9';
-            if ($submittedData[SettingName::PAYLOAD_IDENTIFIER->value] === $staticValue) {
-                $this->addFlash(
-                    'error_admin',
-                    $this->translator->trans('notUseDefaultPayloadIdentifierCard', [], 'controllers')
-                );
-            } else {
-                $settingsToUpdate = [
-                    SettingName::RADIUS_REALM_NAME->value,
-                    SettingName::DISPLAY_NAME->value,
-                    SettingName::PAYLOAD_IDENTIFIER->value,
-                    SettingName::OPERATOR_NAME->value,
-                    SettingName::DOMAIN_NAME->value,
-                    SettingName::RADIUS_TLS_NAME->value,
-                    SettingName::NAI_REALM->value,
-                    SettingName::RADIUS_TRUSTED_ROOT_CA_SHA1_HASH->value,
-                    SettingName::PROFILES_ENCRYPTION_TYPE_IOS_ONLY->value,
-                ];
+            // Save updated settings
+            $this->settingsService->updateSettingsFromArray($dto->toArray());
+            $this->settingsService->flush();
 
-                foreach ($settingsToUpdate as $settingName) {
-                    $value = $submittedData[$settingName] ?? null;
-
-                    // Check for specific settings that need domain validation
-                    if (
-                        in_array(
-                            $settingName,
-                            [
-                                SettingName::RADIUS_REALM_NAME->value,
-                                SettingName::DOMAIN_NAME->value,
-                                SettingName::RADIUS_TLS_NAME->value,
-                                SettingName::NAI_REALM->value
-                            ]
-                        ) && !$domainService->isValidDomain($value)
-                    ) {
-                        $this->addFlash(
-                            'error_admin',
-                            $this->translator->trans(
-                                'invalidDomainOrIP',
-                                ['%settingName%' => $settingName],
-                                'controllers'
-                            )
-                        );
-                        return $this->redirectToRoute('admin_dashboard_settings_radius');
-                    }
-
-                    $setting = $settingsRepository->findOneBy(['name' => $settingName]);
-                    if ($setting !== null) {
-                        $setting->setValue($value);
-                        $this->entityManager->persist($setting);
-                    }
-                }
-
-                $eventMetadata = [
+            // Log the event
+            $this->eventActions->saveEvent(
+                $currentUser,
+                AnalyticalEventType::SETTING_RADIUS_CONF_REQUEST->value,
+                new DateTime(),
+                [
                     'ip' => $request->getClientIp(),
                     'user_agent' => $request->headers->get('User-Agent'),
                     'uuid' => $currentUser->getUuid(),
-                ];
-                $this->eventActions->saveEvent(
-                    $currentUser,
-                    AnalyticalEventType::SETTING_RADIUS_CONF_REQUEST->value,
-                    new DateTime(),
-                    $eventMetadata
-                );
+                ]
+            );
 
-                $this->addFlash(
-                    'success_admin',
-                    $this->translator->trans('radiusConfigurationAppliedSuccessfully', [], 'controllers')
-                );
-                return $this->redirectToRoute('admin_dashboard_settings_radius');
-            }
+            $this->addFlash(
+                'success_admin',
+                $this->translator->trans('radiusConfigurationAppliedSuccessfully', [], 'controllers')
+            );
+
+            return $this->redirectToRoute('admin_dashboard_settings_radius');
         }
 
         return $this->render('dashboard/shared/settings_actions.html.twig', [
-            'user' => $currentUser,
+            'form' => $form->createView(),
+            'radiusSettingsDTO' => $dto,
             'data' => $data,
-            'settings' => $settings,
-            'form' => $form->createView()
         ]);
     }
 

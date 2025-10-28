@@ -38,7 +38,7 @@ SMSSettingsClearSuccessfully: 'The configuration SMS settings has been clear suc
 termsPoliciesLinksChangesAppliedSuccessfully: 'Terms and Policies links changes have been applied successfully.'
 LDAPConfigurationAppliedSuccessfully: 'New LDAP configuration have been applied successfully.'
 notUseDefaultPayloadIdentifierCard: 'Please do not use the default value from the Payload Identifier card.'
-invalidDomainOrIP: "The value for %settingName% is not a valid domain or does not resolve to an IP address."
+invalidDomainOrIP: 'The value is not a valid domain or does not resolve to an IP address.'
 radiusConfigurationAppliedSuccessfully: 'Radius configuration have been applied successfully.'
 newChangesAppliedSuccessfully: 'The new changes have been applied successfully.'
 authenticationConfigurationAppliedSuccessfully: 'New authentication configuration have been applied successfully.'
