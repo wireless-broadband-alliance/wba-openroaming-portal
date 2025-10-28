@@ -2,6 +2,7 @@
 
 namespace App\Command;
 
+use App\Entity\User;
 use App\Enum\SettingName;
 use App\Enum\UserProvider;
 use App\Enum\UserRadiusProfileRevokeReason;
@@ -92,7 +93,11 @@ class LDAPSyncCommand extends Command
         return Command::SUCCESS;
     }
 
-    private function fetchUserFromLDAP(string $identifier)
+    /**
+     * @param string $identifier
+     * @return array<string, mixed>|null
+     */
+    private function fetchUserFromLDAP(string $identifier): ?array
     {
         $ldapServer = $this->settingRepository->findOneBy(['name' => SettingName::SYNC_LDAP_SERVER->value])->getValue();
         $ldapUsername = $this->settingRepository->findOneBy([
@@ -132,7 +137,7 @@ class LDAPSyncCommand extends Command
         return $attrs;
     }
 
-    private function enableProfiles($user): void
+    private function enableProfiles(User $user): void
     {
         $this->profileManager->enableProfiles($user);
     }
