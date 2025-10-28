@@ -10,8 +10,6 @@ use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Validator\Constraints\Callback;
-use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
@@ -34,41 +32,11 @@ class LDAPType extends AbstractType
                 'placeholder' => $this->translator->trans('selectOption', [], 'CustomType'),
                 'required' => true,
             ])
-            ->add('syncLdapServer', TextType::class, [
-                'required' => false,
-                'constraints' => [$this->notBlankIfEnabled()],
-            ])
-            ->add('syncLdapBindUserDn', TextType::class, [
-                'required' => false,
-                'constraints' => [$this->notBlankIfEnabled()],
-            ])
-            ->add('syncLdapBindUserPassword', PasswordType::class, [
-                'required' => false,
-                'constraints' => [$this->notBlankIfEnabled()],
-            ])
-            ->add('syncLdapSearchBaseDn', TextType::class, [
-                'required' => false,
-                'constraints' => [$this->notBlankIfEnabled()],
-            ])
-            ->add('syncLdapSearchFilter', TextType::class, [
-                'required' => false,
-                'constraints' => [$this->notBlankIfEnabled()],
-            ]);
-    }
-
-    private function notBlankIfEnabled(): Callback
-    {
-        return new Callback(function ($value, ExecutionContextInterface $context) {
-            $formData = $context->getRoot()->getData();
-
-            if ($formData instanceof LDAPSettingsDTO && $formData->syncLdapEnabled === 'true') {
-                if (empty($value)) {
-                    $context->buildViolation(
-                        $this->translator->trans('fieldCannotBeBlank', [], 'validators')
-                    )->addViolation();
-                }
-            }
-        });
+            ->add('syncLdapServer', TextType::class, ['required' => false])
+            ->add('syncLdapBindUserDn', TextType::class, ['required' => false])
+            ->add('syncLdapBindUserPassword', PasswordType::class, ['required' => false])
+            ->add('syncLdapSearchBaseDn', TextType::class, ['required' => false])
+            ->add('syncLdapSearchFilter', TextType::class, ['required' => false]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void

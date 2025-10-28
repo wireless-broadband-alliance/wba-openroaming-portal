@@ -4,18 +4,45 @@ namespace App\DTO;
 
 use App\Enum\OperationMode;
 use App\Enum\SettingName;
+use Symfony\Component\Validator\Constraints as Assert;
 
 class LDAPSettingsDTO
 {
+    #[Assert\Choice(choices: ['true', 'false'], message: 'Invalid LDAP mode.')]
     public string $syncLdapEnabled = OperationMode::OFF->value;
+
+    #[Assert\Expression(
+        expression: "this.syncLdapEnabled != 'true' or (this.syncLdapEnabled == 'true' and value != '')",
+        message: "fieldCannotBeBlank"
+    )]
     public ?string $syncLdapServer = null;
+
+    #[Assert\Expression(
+        expression: "this.syncLdapEnabled != 'true' or (this.syncLdapEnabled == 'true' and value != '')",
+        message: "fieldCannotBeBlank"
+    )]
     public ?string $syncLdapBindUserDn = null;
+
+    #[Assert\Expression(
+        expression: "this.syncLdapEnabled != 'true' or (this.syncLdapEnabled == 'true' and value != '')",
+        message: "fieldCannotBeBlank"
+    )]
     public ?string $syncLdapBindUserPassword = null;
+
+    #[Assert\Expression(
+        expression: "this.syncLdapEnabled != 'true' or (this.syncLdapEnabled == 'true' and value != '')",
+        message: "fieldCannotBeBlank"
+    )]
     public ?string $syncLdapSearchBaseDn = null;
+
+    #[Assert\Expression(
+        expression: "this.syncLdapEnabled != 'true' or (this.syncLdapEnabled == 'true' and value != '')",
+        message: "fieldCannotBeBlank"
+    )]
     public ?string $syncLdapSearchFilter = null;
 
     /**
-     * Initialize DTO from a settings array.
+     * Initialize DTO from settings array.
      *
      * @param array<string, array{value: string|null, description?: string}> $data
      */
@@ -30,7 +57,7 @@ class LDAPSettingsDTO
     }
 
     /**
-     * Map the DTO back to an array suitable for SettingsService.
+     * Map the DTO back to an array for SettingsService.
      *
      * @return array<string, array{value: string|null}>
      */
