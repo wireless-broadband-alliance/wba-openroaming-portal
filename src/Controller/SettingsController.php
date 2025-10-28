@@ -10,6 +10,7 @@ use App\Enum\LanguageType;
 use App\Enum\OperationMode;
 use App\Enum\PlatformMode;
 use App\Enum\SettingName;
+use App\Enum\SettingType;
 use App\Enum\TextEditorName;
 use App\Form\AuthType;
 use App\Form\CapportType;
@@ -82,7 +83,7 @@ class SettingsController extends AbstractController
         $currentUser = $this->getUser();
 
         if ($enteredCode === $currentUser->getTwoFAcode()) {
-            if ($type === 'settingCustom') {
+            if ($type === SettingType::SettingCustom->value) {
                 $command = 'php bin/console reset:customSettings --yes';
                 $projectRootDir = $this->getParameter('kernel.project_dir');
                 $process = new Process(explode(' ', $command), $projectRootDir);
@@ -116,7 +117,7 @@ class SettingsController extends AbstractController
                 return $this->redirectToRoute('admin_dashboard_customize');
             }
 
-            if ($type === 'settingTerms') {
+            if ($type === SettingType::SettingTerms->value) {
                 $command = 'php bin/console reset:termsSettings --yes';
                 $projectRootDir = $this->getParameter('kernel.project_dir');
                 $process = new Process(explode(' ', $command), $projectRootDir);
@@ -147,7 +148,7 @@ class SettingsController extends AbstractController
                 return $this->redirectToRoute('admin_dashboard_settings_terms');
             }
 
-            if ($type === 'settingRadius') {
+            if ($type === SettingType::SettingRadius->value) {
                 $command = 'php bin/console reset:radiusSettings --yes';
                 $projectRootDir = $this->getParameter('kernel.project_dir');
                 $process = new Process(explode(' ', $command), $projectRootDir);
@@ -178,7 +179,7 @@ class SettingsController extends AbstractController
                 return $this->redirectToRoute('admin_dashboard_settings_radius');
             }
 
-            if ($type === 'settingLDAP') {
+            if ($type === SettingType::SettingLDAP->value) {
                 $command = 'php bin/console reset:ldapSettings --yes';
                 $projectRootDir = $this->getParameter('kernel.project_dir');
                 $process = new Process(explode(' ', $command), $projectRootDir);
@@ -209,7 +210,7 @@ class SettingsController extends AbstractController
                 return $this->redirectToRoute('admin_dashboard_settings_LDAP');
             }
 
-            if ($type === 'settingStatus') {
+            if ($type === SettingType::SettingStatus->value) {
                 $command = 'php bin/console reset:statusSettings --yes';
                 $projectRootDir = $this->getParameter('kernel.project_dir');
                 $process = new Process(explode(' ', $command), $projectRootDir);
@@ -240,7 +241,7 @@ class SettingsController extends AbstractController
                 return $this->redirectToRoute('admin_dashboard_settings_status');
             }
 
-            if ($type === 'settingCAPPORT') {
+            if ($type === SettingType::SettingCAPPORT->value) {
                 $command = 'php bin/console reset:capportSettings --yes';
                 $projectRootDir = $this->getParameter('kernel.project_dir');
                 $process = new Process(explode(' ', $command), $projectRootDir);
@@ -271,7 +272,7 @@ class SettingsController extends AbstractController
                 return $this->redirectToRoute('admin_dashboard_settings_capport');
             }
 
-            if ($type === 'settingAUTH') {
+            if ($type === SettingType::SettingAUTH->value) {
                 $command = 'php bin/console reset:authSettings --yes';
                 $projectRootDir = $this->getParameter('kernel.project_dir');
                 $process = new Process(explode(' ', $command), $projectRootDir);
@@ -302,7 +303,7 @@ class SettingsController extends AbstractController
                 return $this->redirectToRoute('admin_dashboard_settings_auth');
             }
 
-            if ($type === 'settingTwoFA') {
+            if ($type === SettingType::SettingTwoFA->value) {
                 $command = 'php bin/console reset:twoFASettings --yes';
                 $projectRootDir = $this->getParameter('kernel.project_dir');
                 $process = new Process(explode(' ', $command), $projectRootDir);
@@ -333,7 +334,7 @@ class SettingsController extends AbstractController
                 return $this->redirectToRoute('admin_dashboard_settings_two_fa');
             }
 
-            if ($type === 'settingSMS') {
+            if ($type === SettingType::SettingSMS->value) {
                 $command = 'php bin/console reset:smsSettings --yes';
                 $projectRootDir = $this->getParameter('kernel.project_dir');
                 $process = new Process(explode(' ', $command), $projectRootDir);
@@ -364,7 +365,7 @@ class SettingsController extends AbstractController
                 return $this->redirectToRoute('admin_dashboard_settings_sms');
             }
 
-            if ($type === 'settingSchedule') {
+            if ($type === SettingType::SettingSchedule->value) {
                 $command = 'php bin/console reset:ScheduleSettings --yes';
                 $projectRootDir = $this->getParameter('kernel.project_dir');
                 $process = new Process(explode(' ', $command), $projectRootDir);
