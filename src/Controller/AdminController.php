@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\DTO\CustomTypeDTO;
 use App\Entity\Setting;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
@@ -204,16 +205,17 @@ class AdminController extends AbstractController
         // Get the settings value according to the language
         $settingsTranslated = $this->getSettings->getSettingsByLocale($settings, $data);
 
+        $customTypeDTO = new CustomTypeDTO();
+
         // Create the form with the CustomType and pass the relevant settings
-        $form = $this->createForm(CustomType::class, null, [
+        $form = $this->createForm(CustomType::class, $customTypeDTO, [
             'settings' => $settingsTranslated,
         ]);
 
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // Handle submitted data and update the settings accordingly
-            $submittedData = $form->getData();
+
 
             // Update the settings based on the form submission
             foreach ($settings as $setting) {
@@ -235,7 +237,7 @@ class AdminController extends AbstractController
                 ) {
                     if (in_array($settingName, $this->getSettings->arraySettingsToTranslate(), true)) {
                         $locale = $language;
-                        $submittedValue = $submittedData[$settingName];
+                        $submittedValue = $customTypeDTO->{$settingName} ?? null;
                         if ($locale === LanguageType::EN->value) {
                             // Update the setting value
                             $setting->setValue($submittedValue);
@@ -251,7 +253,7 @@ class AdminController extends AbstractController
                         }
                     } else {
                         // Get the value from the submitted form data
-                        $submittedValue = $submittedData[$settingName];
+                        $submittedValue = $customTypeDTO->{$settingName} ?? null;
 
                         // Update the setting value
                         $setting->setValue($submittedValue);
