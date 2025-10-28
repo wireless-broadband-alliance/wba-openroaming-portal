@@ -1,7 +1,7 @@
 {{ form_start(form) }}
     {{ form_widget(form._token) }}
 
-<div class="grid gap-4 lg:grid-cols-2 xl:grid-cols-3 p-2 z-0">
+<div class="grid gap-4 lg:grid-cols-2 xl:grid-cols-3 p-2 z-0" {{ stimulus_controller('radio-card') }}>
 
     {# SYNC_LDAP_ENABLED #}
     <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full" {{ stimulus_controller('radio card') }}>
@@ -19,12 +19,51 @@
         {{ include('/dashboard/shared/settings_actions/_description.html.twig', { description: data.SYNC_LDAP_ENABLED.description }) }}
 
         <div class="flex flex-col items-center space-y-2 mt-5">
-            {{ form_widget(form.syncLdapEnabled, {attr: {'wire:model': 'dto.syncLdapEnabled'}}) }}
+            {# ON Radio #}
+            <label class="flex flex-row justify-between border hover:border-gray-900 duration-200 rounded-lg w-full p-2 pl-4">
+                On
+                <input type="radio"
+                       name="{{ form.syncLdapEnabled.vars.full_name }}"
+                       value="true"
+                       class="radio-input hidden"
+                        {{ form.syncLdapEnabled.vars.value == 'true' ? 'checked' : '' }}
+                        {{ stimulus_action('radio', 'toggle')|stimulus_action('radio-card', 'unblock') }}
+                        {{ stimulus_target('radio-card', 'on') }}>
+                <div class="custom-radio pr-3 pt-1.5 {{ form.syncLdapEnabled.vars.value == 'true' ? '' : 'hidden' }}" {{ stimulus_target('radio', 'on') }}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10" viewBox="0 0 14 10" fill="none">
+                        <path fill-rule="evenodd" clip-rule="evenodd"
+                              d="M13.0303 0.96967C13.3232 1.26256 13.3232 1.73744 13.0303 2.03033L6.03033 9.03033C5.73744 9.32322 5.26256 9.32322 4.96967 9.03033L0.96967 5.03033C0.676777 4.73744 0.676777 4.26256 0.96967 3.96967C1.26256 3.67678 1.73744 3.67678 2.03033 3.96967L5.5 7.43934L11.9697 0.96967C12.2626 0.676777 12.7374 0.676777 13.0303 0.96967Z"
+                              fill="#210124"/>
+                    </svg>
+                </div>
+            </label>
+
+            {# OFF Radio #}
+            <label class="flex flex-row justify-between border hover:border-gray-900 duration-200 rounded-lg w-full p-2 pl-4">
+                Off
+                <input type="radio"
+                       name="{{ form.syncLdapEnabled.vars.full_name }}"
+                       value="false"
+                       class="radio-input hidden"
+                        {{ form.syncLdapEnabled.vars.value == 'false' ? 'checked' : '' }}
+                        {{ stimulus_action('radio', 'toggle')|stimulus_action('radio-card', 'block') }}
+                        {{ stimulus_target('radio-card', 'off') }}>
+                <div class="custom-radio pr-3 pt-1.5 {{ form.syncLdapEnabled.vars.value == 'false' ? '' : 'hidden' }}" {{ stimulus_target('radio', 'off') }}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10" viewBox="0 0 14 10" fill="none">
+                        <path fill-rule="evenodd" clip-rule="evenodd"
+                              d="M13.0303 0.96967C13.3232 1.26256 13.3232 1.73744 13.0303 2.03033L6.03033 9.03033C5.73744 9.32322 5.26256 9.32322 4.96967 9.03033L0.96967 5.03033C0.676777 4.73744 0.676777 4.26256 0.96967 3.96967C1.26256 3.67678 1.73744 3.67678 2.03033 3.96967L5.5 7.43934L11.9697 0.96967C12.2626 0.676777 12.7374 0.676777 13.0303 0.96967Z"
+                              fill="#210124"/>
+                    </svg>
+                </div>
+            </label>
         </div>
 
         <div class="mt-2 -mb-2 text-center text-red-500 text-base">
             {{ form_errors(form.syncLdapEnabled) }}
         </div>
+
+        {# Mark the field as rendered so Symfony won't duplicate it #}
+        {% do form.syncLdapEnabled.setRendered() %}
     </div>
 
     {# SYNC_LDAP_SERVER #}
@@ -161,4 +200,5 @@
     </button>
 </div>
 
-{{ form_end(form) }}
+{{ form_rest(form) }}
+{{ form_end(form, {'render_rest': false}) }}
