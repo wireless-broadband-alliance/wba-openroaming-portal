@@ -154,7 +154,7 @@ class MicrosoftController extends AbstractController
         $accessToken = $client->getOAuth2Provider()->getAccessToken('authorization_code', [
             'code' => $code,
         ]);
-
+        /** @phpstan-ignore-next-line */
         $resourceOwner = $client->fetchUserFromToken($accessToken);
         /** @phpstan-ignore-next-line */
         $data = $resourceOwner->toArray();
@@ -363,6 +363,7 @@ class MicrosoftController extends AbstractController
         ]);
 
         // Fetch user info from Microsoft
+        /** @phpstan-ignore-next-line */
         $resourceOwner = $client->fetchUserFromToken($accessToken);
         /** @phpstan-ignore-next-line */
         $data = $resourceOwner->toArray();
