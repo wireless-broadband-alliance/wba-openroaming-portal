@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\DTO\LDAPSettingsDTO;
 use App\Entity\Setting;
 use App\Entity\TextEditor;
 use App\Entity\User;
@@ -536,59 +537,40 @@ class SettingsController extends AbstractController
         ]);
     }
 
-
     #[Route('/dashboard/settings/LDAP', name: 'admin_dashboard_settings_LDAP')]
     #[IsGranted('ROLE_ADMIN')]
-    public function settingsLDAP(
-        Request $request,
-        EntityManagerInterface $em,
-    ): Response {
+    public function settingsLDAP(Request $request): Response
+    {
+        // Fetch all settings with descriptions (from GetSettings service)
         $data = $this->getSettings->getSettings();
-        // Get the current logged-in user (admin)
+
         /** @var User $currentUser */
         $currentUser = $this->getUser();
 
-        $settingsRepository = $em->getRepository(Setting::class);
-        $settings = $settingsRepository->findAll();
+        // Initialize DTO using the values from $data
+        $dto = new LDAPSettingsDTO($data);
 
-        $form = $this->createForm(LDAPType::class, null, [
-            'settings' => $settings,
-        ]);
-
+        // Create the form bound to the DTO
+        $form = $this->createForm(LDAPType::class, $dto);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $submittedData = $form->getData();
+            /** @var LDAPSettingsDTO $dto */
+            $dto = $form->getData();
 
-            $settingsToUpdate = [
-                SettingName::SYNC_LDAP_ENABLED->value,
-                SettingName::SYNC_LDAP_SERVER->value,
-                SettingName::SYNC_LDAP_BIND_USER_DN->value,
-                SettingName::SYNC_LDAP_BIND_USER_PASSWORD->value,
-                SettingName::SYNC_LDAP_SEARCH_BASE_DN->value,
-                SettingName::SYNC_LDAP_SEARCH_FILTER->value,
-            ];
+            // Update all Setting entities from DTO
+            $this->settingsService->updateSettingsFromArray($dto->toArray());
 
-            foreach ($settingsToUpdate as $settingName) {
-                $value = $submittedData[$settingName] ?? null;
+            // Flush changes
+            $this->settingsService->flush();
 
-                // Check if any submitted data is empty
-                if ($value === null) {
-                    $value = "";
-                }
-
-                $setting = $settingsRepository->findOneBy(['name' => $settingName]);
-                if ($setting !== null) {
-                    $setting->setValue($value);
-                    $em->persist($setting);
-                }
-            }
-
+            // Log the event
             $eventMetadata = [
                 'ip' => $request->getClientIp(),
                 'user_agent' => $request->headers->get('User-Agent'),
                 'uuid' => $currentUser->getUuid(),
             ];
+
             $this->eventActions->saveEvent(
                 $currentUser,
                 AnalyticalEventType::SETTING_LDAP_CONF_REQUEST->value,
@@ -596,18 +578,18 @@ class SettingsController extends AbstractController
                 $eventMetadata
             );
 
-
             $this->addFlash(
                 'success_admin',
                 $this->translator->trans('LDAPConfigurationAppliedSuccessfully', [], 'controllers')
             );
+
             return $this->redirectToRoute('admin_dashboard_settings_LDAP');
         }
 
         return $this->render('dashboard/shared/settings_actions.html.twig', [
+            'form' => $form->createView(),
+            'ldapSettingsDTO' => $dto,
             'data' => $data,
-            'settings' => $settings,
-            'form' => $form->createView()
         ]);
     }
 
