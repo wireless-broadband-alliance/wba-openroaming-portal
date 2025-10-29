@@ -5,13 +5,13 @@ namespace App\Controller;
 use App\DTO\LDAPSettingsDTO;
 use App\DTO\RadiusSettingsDTO;
 use App\DTO\StatusSettingsDTO;
+use App\DTO\TwoFASettingsDTO;
 use App\Entity\Setting;
 use App\Entity\TextEditor;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Enum\LanguageType;
 use App\Enum\OperationMode;
-use App\Enum\PlatformMode;
 use App\Enum\SettingName;
 use App\Enum\SettingType;
 use App\Enum\TextEditorName;
@@ -26,7 +26,6 @@ use App\Form\TwoFASettingsType;
 use App\Repository\SettingTranslationRepository;
 use App\Repository\TextEditorRepository;
 use App\Service\CertificateService;
-use App\Service\DomainService;
 use App\Service\EnforcePasswordResetService;
 use App\Service\EventActions;
 use App\Service\GetSettings;
@@ -686,60 +685,41 @@ class SettingsController extends AbstractController
         ]);
     }
 
-
     #[Route('/dashboard/settings/twoFA', name: 'admin_dashboard_settings_two_fa')]
     #[IsGranted('ROLE_ADMIN')]
     public function settingsTwoFA(
         Request $request,
     ): Response {
-        // Get the current logged-in user (admin)
-        /** @var User $currentUser */
-        $currentUser = $this->getUser();
         $data = $this->getSettings->getSettings();
 
-        $settingsRepository = $this->entityManager->getRepository(Setting::class);
-        $settings = $settingsRepository->findAll();
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
 
-        $formTwoFA = $this->createForm(TwoFASettingsType::class, null, [
-            'settings' => $settings,
-        ]);
-        $formTwoFA->handleRequest($request);
-        if ($formTwoFA->isSubmitted() && $formTwoFA->isValid()) {
-            $submittedData = $formTwoFA->getData();
+        // Initialize DTO from settings
+        $dto = new TwoFASettingsDTO($data);
 
-            // List of 2FA settings to handle
-            $settingsToHandle = [
-                SettingName::TWO_FACTOR_AUTH_STATUS->value,
-                SettingName::TWO_FACTOR_AUTH_APP_LABEL->value,
-                SettingName::TWO_FACTOR_AUTH_APP_ISSUER->value,
-                SettingName::TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME->value,
-                SettingName::TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE->value,
-                SettingName::TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS->value,
-                SettingName::TWO_FACTOR_AUTH_RESEND_INTERVAL->value
-            ];
+        // Create form bound to DTO
+        $form = $this->createForm(TwoFASettingsType::class, $dto);
+        $form->handleRequest($request);
 
-            foreach ($settingsToHandle as $settingName) {
-                $settingValue = $submittedData[$settingName] ?? '';
-                $setting = $settingsRepository->findOneBy(['name' => $settingName]);
-                if ($setting !== null) {
-                    // Update existing setting
-                    $setting->setValue($settingValue);
-                }
+        if ($form->isSubmitted() && $form->isValid()) {
+            /** @var TwoFASettingsDTO $dto */
+            $dto = $form->getData();
 
-                $this->entityManager->persist($setting);
-            }
-            $this->entityManager->flush();
+            // Save updated settings
+            $this->settingsService->updateSettingsFromArray($dto->toArray());
+            $this->settingsService->flush();
 
-            $eventMetadata = [
-                'ip' => $request->getClientIp(),
-                'user_agent' => $request->headers->get('User-Agent'),
-                'uuid' => $currentUser->getUuid()
-            ];
+            // Log the event
             $this->eventActions->saveEvent(
                 $currentUser,
                 AnalyticalEventType::SETTING_PLATFORM_2FA_REQUEST->value,
                 new DateTime(),
-                $eventMetadata
+                [
+                    'ip' => $request->getClientIp(),
+                    'user_agent' => $request->headers->get('User-Agent'),
+                    'uuid' => $currentUser->getUuid(),
+                ]
             );
 
             $this->addFlash(
@@ -750,11 +730,9 @@ class SettingsController extends AbstractController
         }
 
         return $this->render('dashboard/shared/settings_actions.html.twig', [
-            'user' => $currentUser,
+            'form' => $form->createView(),
+            'twoFASettingsDTO' => $dto,
             'data' => $data,
-            'settings' => $settings,
-            'current_user' => $currentUser,
-            'formTwoFA' => $formTwoFA->createView(),
         ]);
     }
 
