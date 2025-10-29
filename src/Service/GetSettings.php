@@ -129,10 +129,6 @@ readonly class GetSettings
 
     /**
      * Get the description for a given setting name in the current locale.
-     *
-     * @param string $settingName
-     *
-     * @return string|null
      */
     public function getSettingDescription(string $settingName): ?string
     {

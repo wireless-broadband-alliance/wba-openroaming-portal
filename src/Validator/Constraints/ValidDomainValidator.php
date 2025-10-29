@@ -13,10 +13,6 @@ class ValidDomainValidator extends ConstraintValidator
     ) {
     }
 
-    /**
-     * @param mixed $value
-     * @param Constraint $constraint
-     */
     public function validate(mixed $value, Constraint $constraint): void
     {
         if (!$constraint instanceof ValidDomain) {

@@ -142,10 +142,10 @@ class ConfigController extends AbstractController
     {
         $trueValues = ['ON', 'TRUE', '1', 1, true];
         $falseValues = ['OFF', 'FALSE', '0', 0, false];
-        if (in_array(strtoupper((string)$value), $trueValues, true)) {
+        if (in_array(strtoupper($value), $trueValues, true)) {
             return true;
         }
-        if (in_array(strtoupper((string)$value), $falseValues, true)) {
+        if (in_array(strtoupper($value), $falseValues, true)) {
             return false;
         }
         return (bool)$value;

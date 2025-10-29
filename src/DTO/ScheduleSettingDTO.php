@@ -54,8 +54,8 @@ class ScheduleSettingDTO
             /** @var int[] $minuteValues */
             $minuteValues = $parts['minute']['values'] ?? [];
 
-            $hour = !empty($hourValues) ? (int)min($hourValues) : 0;
-            $minute = !empty($minuteValues) ? (int)min($minuteValues) : 0;
+            $hour = empty($hourValues) ? 0 : min($hourValues);
+            $minute = empty($minuteValues) ? 0 : min($minuteValues);
 
             try {
                 $this->time = new DateTimeImmutable()->setTime($hour, $minute);

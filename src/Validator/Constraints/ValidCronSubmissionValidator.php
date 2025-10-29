@@ -12,10 +12,6 @@ use UnexpectedValueException;
 
 class ValidCronSubmissionValidator extends ConstraintValidator
 {
-    /**
-     * @param mixed $value
-     * @param Constraint $constraint
-     */
     public function validate(mixed $value, Constraint $constraint): void
     {
         if (!$constraint instanceof ValidCronSettings) {
@@ -40,7 +36,6 @@ class ValidCronSubmissionValidator extends ConstraintValidator
 
     /**
      * @param array<string, mixed> $value
-     * @param string $settingName
      */
     private function validateAdvanced(array $value, string $settingName): void
     {
@@ -65,7 +60,6 @@ class ValidCronSubmissionValidator extends ConstraintValidator
 
     /**
      * @param array<string, mixed> $value
-     * @param string $settingName
      */
     private function validateSimple(array $value, string $settingName): void
     {
@@ -168,10 +162,6 @@ class ValidCronSubmissionValidator extends ConstraintValidator
 
     /**
      * @param string[]|int[] $values
-     * @param int $freq
-     * @param int $defaultFreq
-     * @param string $suffix
-     * @return string
      */
     private function buildPart(array $values, int $freq, int $defaultFreq, string $suffix): string
     {
@@ -184,8 +174,6 @@ class ValidCronSubmissionValidator extends ConstraintValidator
 
     /**
      * @param int[]|string[] $values
-     * @param int $min
-     * @param int $max
      * @return int[]
      */
     private function expandAllSelection(array $values, int $min, int $max): array
@@ -199,9 +187,6 @@ class ValidCronSubmissionValidator extends ConstraintValidator
 
     /**
      * @param int[]|string[] $values
-     * @param int $frequency
-     * @param string $settingName
-     * @return string
      */
     private function buildCronPartWithFrequency(array $values, int $frequency, string $settingName): string
     {

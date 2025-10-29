@@ -13,7 +13,6 @@ readonly class ApiResponseService
     }
 
     /**
-     * @param string $version
      * @return array<string, array<int, array{
      *     name: string,
      *     path: string,
@@ -60,7 +59,6 @@ readonly class ApiResponseService
     }
 
     /**
-     * @param string $version
      * @return array<string, array{
      *     responses: array<int|string, mixed>,
      *     isProtected?: bool,

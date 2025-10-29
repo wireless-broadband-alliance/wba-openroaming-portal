@@ -51,9 +51,9 @@ final class SMSSettingsForm extends AbstractController
         $regions = $this->SMSSettingsDTO->defaultRegionPhoneInputs;
 
         if (!is_array($regions)) {
-            $regions = !empty($regions)
-                ? array_map('trim', explode(',', (string)$regions))
-                : [];
+            $regions = empty($regions)
+                ? []
+                : array_map('trim', explode(',', (string)$regions));
         }
 
         // Submit current DTO data (manual mapping)

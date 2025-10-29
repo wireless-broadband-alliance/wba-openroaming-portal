@@ -46,9 +46,6 @@ class UserExternalAuthRepository extends ServiceEntityRepository
     /**
      * Fetch portal users counts based on the providerId within a date range.
      *
-     * @param string $provider
-     * @param DateTime|null $startDate
-     * @param DateTime|null $endDate
      * @return array<string, int> Returns counts for 'email' and 'phone_number'
      */
     public function getPortalUserCounts(string $provider, ?DateTime $startDate, ?DateTime $endDate): array

@@ -23,7 +23,7 @@ class CronNotEmptyValidator extends ConstraintValidator
             return;
         }
 
-        if (empty($value->advanced)) {
+        if (in_array($value->advanced, [null, '', '0'], true)) {
             $this->context->buildViolation($constraint->message)
                 ->atPath("advanced")
                 ->addViolation();

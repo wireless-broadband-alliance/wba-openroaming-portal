@@ -25,11 +25,9 @@ readonly class UserDeletionService
     }
 
     /**
-     * @param User $user
      * @param object[] $userExternalAuths Array of external auth objects
-     * @param Request $request
-     * @param User $currentUser
      * @return array<string, mixed>
+     * @throws \JsonException
      */
     public function deleteUser(User $user, array $userExternalAuths, Request $request, User $currentUser): array
     {

@@ -10,10 +10,6 @@ use Symfony\Component\Validator\Exception\UnexpectedValueException;
 
 class NotDefaultPayloadIdentifierValidator extends ConstraintValidator
 {
-    /**
-     * @param mixed $value
-     * @param Constraint $constraint
-     */
     public function validate(mixed $value, Constraint $constraint): void
     {
         if (!$constraint instanceof NotDefaultPayloadIdentifier) {

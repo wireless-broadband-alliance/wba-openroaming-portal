@@ -94,7 +94,6 @@ class LDAPSyncCommand extends Command
     }
 
     /**
-     * @param string $identifier
      * @return array<string, mixed>|null
      */
     private function fetchUserFromLDAP(string $identifier): ?array

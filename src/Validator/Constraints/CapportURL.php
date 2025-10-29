@@ -9,14 +9,13 @@ class CapportURL extends Constraint
 {
     public string $messageNotBlank = 'fieldCannotBeBlank';
     public string $messageInvalidUrl = 'valueNotValidURL';
-    public string $enabledProperty;
 
-    public function __construct(string $enabledProperty, ?array $groups = null)
+    public function __construct(public string $enabledProperty, ?array $groups = null)
     {
         parent::__construct(groups: $groups);
-        $this->enabledProperty = $enabledProperty;
     }
 
+    #[\Override]
     public function validatedBy(): string
     {
         return static::class . 'Validator';

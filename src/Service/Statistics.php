@@ -30,8 +30,6 @@ readonly class Statistics
     /**
      * Fetch data related to downloaded profiles devices.
      *
-     * @param DateTime|null $startDate
-     * @param DateTime|null $endDate
      * @return array{
      *     labels: string[],
      *     datasets: array{
@@ -87,8 +85,6 @@ readonly class Statistics
     /**
      * Fetch data related to 2FA configuration on the portal
      *
-     * @param DateTime|null $startDate
-     * @param DateTime|null $endDate
      * @return array{
      *     labels: string[],
      *     datasets: array{
@@ -156,8 +152,6 @@ readonly class Statistics
     /**
      * Fetch data related to types of authentication.
      *
-     * @param DateTime|null $startDate
-     * @param DateTime|null $endDate
      * @return array{
      *     labels: string[],
      *     datasets: array{
@@ -214,8 +208,6 @@ readonly class Statistics
     /**
      * Fetch data related to users created in platform mode - Live/Demo
      *
-     * @param DateTime|null $startDate
-     * @param DateTime|null $endDate
      * @return array{
      *     labels: string[],
      *     datasets: array{
@@ -264,8 +256,6 @@ readonly class Statistics
     /**
      * Fetch data related to verified users
      *
-     * @param DateTime|null $startDate
-     * @param DateTime|null $endDate
      * @return array{
      *     labels: string[],
      *     datasets: array{
@@ -318,8 +308,6 @@ readonly class Statistics
     /**
      * Fetch data related to users with portal accounts, categorized by email or phone number
      *
-     * @param DateTime|null $startDate
-     * @param DateTime|null $endDate
      * @return array{
      *     labels: string[],
      *     datasets: array{
@@ -348,8 +336,6 @@ readonly class Statistics
     /**
      * Fetch data related to authentication attempts on the freeradius database
      *
-     * @param DateTime $startDate
-     * @param DateTime $endDate
      * @return array{
      *     labels: string[],
      *     datasets: array{
@@ -436,8 +422,6 @@ readonly class Statistics
     /**
      * Fetch data related to realms usage on the freeradius database
      *
-     * @param DateTime $startDate
-     * @param DateTime $endDate
      * @return array<int, array{group: string, realm: string, count: int}>
      * @throws Exception
      */
@@ -525,8 +509,6 @@ readonly class Statistics
     /**
      * Fetch data related to traffic passed on the freeradius database
      *
-     * @param DateTime $startDate
-     * @param DateTime $endDate
      * @return array<int, array{
      *     realm: string,
      *     group: string,
@@ -588,8 +570,6 @@ readonly class Statistics
     /**
      * Fetch data related to session time (average) on the freeradius database
      *
-     * @param DateTime $startDate
-     * @param DateTime $endDate
      * @return array{
      *     labels: string[],
      *     datasets: array{
@@ -645,8 +625,6 @@ readonly class Statistics
     /**
      * Fetch data related to session time (total) on the freeradius database
      *
-     * @param DateTime $startDate
-     * @param DateTime $endDate
      * @return array{
      *     labels: string[],
      *     datasets: array{
@@ -698,8 +676,6 @@ readonly class Statistics
     /**
      * Fetch data related to Wi-Fi tag usage on the freeradius database
      *
-     * @param DateTime $startDate
-     * @param DateTime $endDate
      * @return array{
      *     labels: string[],
      *     datasets: array{
@@ -746,8 +722,6 @@ readonly class Statistics
     /**
      * Fetch data related to AP usage on the freeradius database
      *
-     * @param DateTime $startDate
-     * @param DateTime $endDate
      * @return array<int, array{ap: string, count: int}>
      * @throws Exception
      */
@@ -800,8 +774,6 @@ readonly class Statistics
     /**
      * Determine date range and granularity
      *
-     * @param DateTime $startDate
-     * @param DateTime $endDate
      * @return array{DateTime, DateTime, 'year'|'month'|'week'|'day'}
      */
     protected function determineDateRangeAndGranularity(DateTime $startDate, DateTime $endDate): array

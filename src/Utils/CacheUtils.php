@@ -8,11 +8,8 @@ use Symfony\Component\Cache\Adapter\MemcachedAdapter;
 use Symfony\Component\Cache\CacheItem;
 use Symfony\Component\Cache\Exception\CacheException;
 
-class CacheUtils
+readonly class CacheUtils
 {
-    /**
-     * @var MemcachedAdapter
-     */
     private MemcachedAdapter $cache;
 
     /**
@@ -29,7 +26,6 @@ class CacheUtils
     }
 
     /**
-     * @param string $key
      * @return mixed|null
      * @throws InvalidArgumentException
      */
@@ -48,9 +44,6 @@ class CacheUtils
     }
 
     /**
-     * @param string $key
-     * @param mixed $value
-     * @param int $ttl
      * @return bool True if the item was successfully saved
      * @throws InvalidArgumentException
      */

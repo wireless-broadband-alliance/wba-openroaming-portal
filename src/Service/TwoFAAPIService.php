@@ -21,8 +21,6 @@ readonly class TwoFAAPIService
     /**
      * Checks the enforcement status of 2FA for a given user and endpoint.
      *
-     * @param User $user
-     * @param string $endpointName
      * @return array{
      *     canSkip2FA: bool,
      *     missing_2fa_setting: bool,
@@ -179,7 +177,6 @@ readonly class TwoFAAPIService
     /**
      * Returns the 2FA configuration of the user.
      *
-     * @param User $user
      * @return array{
      *     type?: int,
      *     isActive: bool,

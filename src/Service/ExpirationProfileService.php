@@ -20,11 +20,6 @@ readonly class ExpirationProfileService
     /**
      * Calculate the expiration and notification times for a user profile.
      *
-     * @param string $provider
-     * @param string|null $providerId
-     * @param UserRadiusProfile $userRadiusProfile
-     * @param string $certificatePath
-     *
      * @return array{limitTime: DateTimeInterface, notifyTime: DateTimeInterface}
      * @throws Exception
      */

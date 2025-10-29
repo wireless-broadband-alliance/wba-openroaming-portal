@@ -80,8 +80,6 @@ class SecurityController extends AbstractController
         Request $request,
         AuthenticationUtils $authenticationUtils
     ): Response {
-        /** @var User $user */
-        $user = $this->getUser();
         if ($this->isGranted('IS_AUTHENTICATED_FULLY')) {
             return $this->redirectToRoute('app_landing');
         }
@@ -427,8 +425,6 @@ class SecurityController extends AbstractController
     #[Route('/dashboard/login', name: 'app_dashboard_login')]
     public function dashboardLogin(Request $request, AuthenticationUtils $authenticationUtils): Response
     {
-        /** @var User $user */
-        $user = $this->getUser();
         if ($this->isGranted('IS_AUTHENTICATED_FULLY')) {
             return $this->redirectToRoute('admin_page');
         }
