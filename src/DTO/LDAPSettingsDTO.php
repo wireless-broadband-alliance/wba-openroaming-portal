@@ -9,7 +9,8 @@ use Symfony\Component\Validator\Constraints as Assert;
 class LDAPSettingsDTO
 {
     #[Assert\Choice(choices: ['true', 'false'], message: 'Invalid LDAP mode.')]
-    public string $syncLdapEnabled = OperationMode::OFF->value;
+    #[Assert\NotBlank(message: 'selectOption')]
+    public ?string $syncLdapEnabled = OperationMode::OFF->value;
 
     #[Assert\Expression(
         expression: "this.syncLdapEnabled != 'true' or (this.syncLdapEnabled == 'true' and value != '')",
