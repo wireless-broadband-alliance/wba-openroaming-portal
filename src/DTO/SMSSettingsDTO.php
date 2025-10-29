@@ -52,7 +52,7 @@ class SMSSettingsDTO
 
         $regionValue = $data[SettingName::DEFAULT_REGION_PHONE_INPUTS->value]['value'] ?? null;
         $this->defaultRegionPhoneInputs = $regionValue
-            ? array_map('trim', explode(',', $regionValue))
+            ? array_map(trim(...), explode(',', $regionValue))
             : [];
     }
 

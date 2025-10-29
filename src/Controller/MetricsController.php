@@ -104,7 +104,7 @@ class MetricsController extends AbstractController
             return true;
         }
 
-        $allowedIpList = array_map('trim', explode(',', $allowedIps));
+        $allowedIpList = array_map(trim(...), explode(',', $allowedIps));
 
         if (in_array($ip, $allowedIpList, true)) {
             return true;

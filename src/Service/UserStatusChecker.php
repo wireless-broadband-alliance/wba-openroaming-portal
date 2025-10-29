@@ -137,7 +137,7 @@ readonly class UserStatusChecker
 
         // Split the valid domains into an array and trim whitespace
         $validDomains = explode(',', $validDomains);
-        $validDomains = array_map('trim', $validDomains);
+        $validDomains = array_map(trim(...), $validDomains);
 
         // Extract the domain from the email
         $emailParts = explode('@', $email);

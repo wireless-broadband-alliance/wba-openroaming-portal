@@ -20,7 +20,7 @@ class ValidCronSettings extends Constraint
         parent::__construct($options);
 
         if (isset($options['cronSettings']) && is_array($options['cronSettings'])) {
-            $this->cronSettings = array_map('strval', $options['cronSettings']);
+            $this->cronSettings = array_map(strval(...), $options['cronSettings']);
         }
     }
 

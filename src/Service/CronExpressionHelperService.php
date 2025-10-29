@@ -126,7 +126,7 @@ readonly class CronExpressionHelperService
         }
 
         /** @var list<int> $intValues */
-        $intValues = array_map('intval', $values);
+        $intValues = array_map(intval(...), $values);
 
         return $this->buildCronPartWithFrequency($intValues, $freq);
     }

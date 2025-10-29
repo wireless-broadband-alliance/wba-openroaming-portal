@@ -34,7 +34,7 @@ class RegistrationFormSMSType extends AbstractType
             ['name' => SettingName::DEFAULT_REGION_PHONE_INPUTS->value]
         )->getValue();
         $regionInputs = explode(',', (string)$regionInputValue);
-        $regionInputs = array_map('trim', $regionInputs);
+        $regionInputs = array_map(trim(...), $regionInputs);
 
         $builder
             ->add('phoneNumber', PhoneNumberType::class, [

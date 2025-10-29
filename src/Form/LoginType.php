@@ -40,7 +40,7 @@ class LoginType extends AbstractType
 
         // If the setting exists, explode and trim; otherwise use a default
         $regionInputs = $regionsSetting && $regionsSetting->getValue()
-            ? array_map('trim', explode(',', $regionsSetting->getValue()))
+            ? array_map(trim(...), explode(',', $regionsSetting->getValue()))
             : ['PT', 'US', 'GB']; // fallback default
 
         $turnstileCheckerValue = $this->settingRepository->findOneBy(

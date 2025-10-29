@@ -164,7 +164,7 @@ class CustomSamlUserFactory implements SamlUserFactoryInterface
             ));
         }
 
-        $attributeValue = (array)$attributes[$attribute];
+        $attributeValue = $attributes[$attribute];
         if (!$isArrayValue) {
             /** @psalm-suppress MixedAssignment */
             $attributeValue = reset($attributeValue);

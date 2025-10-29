@@ -48,7 +48,7 @@ final class LoginForm extends AbstractController
         }
 
         // Parse the raw phone number string into a PhoneNumber object
-        if ($this->rawPhoneNumber !== null && $this->rawPhoneNumber !== '' && $this->rawPhoneNumber !== '0') {
+        if (!in_array($this->rawPhoneNumber, [null, '', '0'], true)) {
             try {
                 $phoneUtil = PhoneNumberUtil::getInstance();
                 $this->loginChoiceDTO->phoneNumber = $phoneUtil->parse(

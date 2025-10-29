@@ -48,7 +48,7 @@ final class LoginUUIDForm extends AbstractController
         }
 
         // Parse the raw phone number string if provided
-        if ($this->rawPhoneNumber !== null && $this->rawPhoneNumber !== '' && $this->rawPhoneNumber !== '0') {
+        if (!in_array($this->rawPhoneNumber, [null, '', '0'], true)) {
             try {
                 $phoneUtil = PhoneNumberUtil::getInstance();
                 $this->loginChoiceDTO->phoneNumber = $phoneUtil->parse(
