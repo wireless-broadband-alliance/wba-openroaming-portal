@@ -63,7 +63,9 @@ final class AuthSettingsTypeForm extends AbstractController
                 $this->authSettingsTypeDTO?->AUTH_METHOD_MICROSOFT_LOGIN_ENABLED,
             'AUTH_METHOD_MICROSOFT_LOGIN_LABEL' =>
                 $this->authSettingsTypeDTO?->AUTH_METHOD_MICROSOFT_LOGIN_LABEL,
-            'AUTH_METHOD_MICROSOFT_LOGIN_DESCRIPTION' => $this->authSettingsTypeDTO?->AUTH_METHOD_MICROSOFT_LOGIN_DESCRIPTION,
+            'AUTH_METHOD_MICROSOFT_LOGIN_DESCRIPTION' => $this->
+            authSettingsTypeDTO?->
+            AUTH_METHOD_MICROSOFT_LOGIN_DESCRIPTION,
             'VALID_DOMAINS_MICROSOFT_LOGIN' => $this->authSettingsTypeDTO?->VALID_DOMAINS_MICROSOFT_LOGIN,
             'PROFILE_LIMIT_DATE_MICROSOFT' => $this->authSettingsTypeDTO?->PROFILE_LIMIT_DATE_MICROSOFT,
 
@@ -94,5 +96,4 @@ final class AuthSettingsTypeForm extends AbstractController
 
         $this->form = $form;
     }
-
 }
