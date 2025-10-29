@@ -933,6 +933,7 @@ class SettingsController extends AbstractController
             'profileLimitDate' => $profileLimitDate,
             'humanReadableExpirationDate' => $humanReadableExpirationDate,
             'language' => $language,
+            'authSettingsTypeDTO' => $authSettingsTypeDTO
         ]);
     }
 

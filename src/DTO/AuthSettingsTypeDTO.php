@@ -2,9 +2,12 @@
 
 namespace App\DTO;
 
+use Symfony\Component\Validator\Constraints as Assert;
+
 class AuthSettingsTypeDTO
 {
     public ?string $AUTH_METHOD_SAML_ENABLED = null;
+    #[Assert\NotBlank(message: 'fieldCannotBeBlank')]
     public ?string $AUTH_METHOD_SAML_LABEL = null;
     public ?string $AUTH_METHOD_SAML_DESCRIPTION = null;
     public ?string $PROFILE_LIMIT_DATE_SAML = null;
