@@ -101,8 +101,8 @@ trivy-scan:
       - trivy-image-report.json
       - trivy-dockerfile-report.json
     expire_in: 1 hour
-    # reports:
-    #   container_scanning: trivy-image-report.json
+    reports:
+      container_scanning: trivy-image-report.json
 
 
 include :

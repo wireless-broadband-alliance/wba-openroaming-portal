@@ -10,9 +10,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     git zip unzip curl gnupg tzdata wget \
  && rm -rf /var/lib/apt/lists/*
 
-RUN wget -O PaloAlto_SSLInspection_ForwardTrust.crt https://tetrapi.pt/gp/PaloAlto_SSLInspection_ForwardTrust.crt
-RUN cp PaloAlto_SSLInspection_ForwardTrust.crt /usr/local/share/ca-certificates/
-RUN update-ca-certificates
 
 # Install Composer
 RUN curl -sS https://getcomposer.org/installer | php -- \
