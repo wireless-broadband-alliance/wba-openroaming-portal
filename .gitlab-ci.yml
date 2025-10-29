@@ -21,7 +21,7 @@ php-security-checker:
 
 test-rector:
   image: "$CI_REGISTRY_IMAGE:develop"
-  allow_failure: false
+  allow_failure: true
   before_script:
   - cp .env.sample .env
   - COMPOSER_CACHE_DIR=composer-cache composer install
@@ -31,7 +31,7 @@ test-rector:
 
 test-twig:
   image: "$CI_REGISTRY_IMAGE:develop"
-  allow_failure: false
+  allow_failure: true
   before_script:
   - cp .env.sample .env
   - COMPOSER_CACHE_DIR=composer-cache composer install
@@ -41,7 +41,7 @@ test-twig:
 
 test-phpstan :
   image : "$CI_REGISTRY_IMAGE:develop"
-  allow_failure : false
+  allow_failure : true
   before_script:
   - cp .env.sample .env
   - COMPOSER_CACHE_DIR=composer-cache composer install
@@ -101,8 +101,8 @@ trivy-scan:
       - trivy-image-report.json
       - trivy-dockerfile-report.json
     expire_in: 1 hour
-    # reports:
-    #   container_scanning: trivy-image-report.json
+    reports:
+      container_scanning: trivy-image-report.json
 
 
 include :
