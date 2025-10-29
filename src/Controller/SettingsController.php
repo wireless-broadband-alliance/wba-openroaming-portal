@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\DTO\AuthSettingsTypeDTO;
 use App\DTO\CapportSettingsDTO;
 use App\DTO\LDAPSettingsDTO;
 use App\DTO\PlatformStatusSettingsDTO;
@@ -17,12 +18,12 @@ use App\Enum\OperationMode;
 use App\Enum\SettingName;
 use App\Enum\SettingType;
 use App\Enum\TextEditorName;
-use App\Form\AuthType;
 use App\Form\CapportSettingsType;
 use App\Form\LDAPSettingsType;
 use App\Form\PlatformStatusSettingsType;
 use App\Form\RadiusSettingsType;
 use App\Form\SMSSettingsType;
+use App\Form\AuthSettingsType;
 use App\Form\TermsType;
 use App\Form\TwoFASettingsType;
 use App\Repository\SettingTranslationRepository;
@@ -786,7 +787,9 @@ class SettingsController extends AbstractController
         // Get the settings value according to the language
         $settingsTranslated = $this->getSettings->getSettingsByLocale($settings, $data);
 
-        $form = $this->createForm(AuthType::class, null, [
+        $authSettingsTypeDTO = new AuthSettingsTypeDTO();
+
+        $form = $this->createForm(AuthSettingsType::class, $authSettingsTypeDTO, [
             'settings' => $settingsTranslated,
             'profileLimitDate' => $profileLimitDate,
             'humanReadableExpirationDate' => $humanReadableExpirationDate
@@ -852,11 +855,11 @@ class SettingsController extends AbstractController
             ];
 
             foreach ($settingsToUpdate as $settingName) {
-                $value = $submittedData[$settingName] ?? null;
+                $value = $authSettingsTypeDTO->{$settingName} ?? null;
 
                 if (in_array($settingName, $this->getSettings->arraySettingsToTranslate())) {
                     $locale = $language;
-                    $submittedValue = $submittedData[$settingName];
+                    $submittedValue = $authSettingsTypeDTO->{$settingName};
                     // Get the translated setting
                     $setting = $settingsRepository->findOneBy(['name' => $settingName]);
                     $settingTranslation = $this->settingTranslationRepository->findOneBy(
