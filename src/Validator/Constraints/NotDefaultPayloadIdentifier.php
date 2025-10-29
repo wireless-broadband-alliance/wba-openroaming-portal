@@ -15,4 +15,3 @@ class NotDefaultPayloadIdentifier extends Constraint
         return self::PROPERTY_CONSTRAINT;
     }
 }
-
