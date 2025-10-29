@@ -12,7 +12,7 @@ class TwoFASettingsDTO
 
     #[Assert\NotBlank(message: 'fieldCannotBeBlank')]
     #[Assert\Regex(
-        pattern: '/^[<>\(\)_;%ç]*$/u',
+        pattern: '/^[a-zA-z0-9_-]*$/u',
         message: 'noSpecialCharacters'
     )]
     #[Assert\Length(min: 3, max: 64, minMessage: 'fieldCannotBeShorterThan', maxMessage: 'fieldCannotBeLongerThan')]
@@ -20,7 +20,7 @@ class TwoFASettingsDTO
 
     #[Assert\NotBlank(message: 'fieldCannotBeBlank')]
     #[Assert\Regex(
-        pattern: '/^[<>\(\)_;%ç]*$/u',
+        pattern: '/^[a-zA-z0-9_-]*$/u',
         message: 'noSpecialCharacters'
     )]
     #[Assert\Length(min: 3, max: 32, minMessage: 'fieldCannotBeShorterThan', maxMessage: 'fieldCannotBeLongerThan')]
