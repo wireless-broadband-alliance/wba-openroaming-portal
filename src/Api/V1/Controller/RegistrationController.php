@@ -150,7 +150,7 @@ class RegistrationController extends AbstractController
         $user->setPassword($hashedPassword);
         $user->setIsVerified(false);
         $user->setCreatedAt(new DateTime());
-        $user->setTwoFAcode(random_int(100000, 999999));
+        $user->setTwoFAcode((string)random_int(100000, 999999));
         $user->setTwoFACodeGeneratedAt(new DateTime());
         $user->setTwoFAcodeIsActive(true);
         $user->setFirstName($data['first_name'] ?? null);
@@ -443,7 +443,7 @@ class RegistrationController extends AbstractController
                 $data['phone_number'],
                 strtoupper((string)$data['country_code'])
             );
-            if ($parsedPhoneNumber && !$phoneNumberUtil->isValidNumber($parsedPhoneNumber)) {
+            if (!$phoneNumberUtil->isValidNumber($parsedPhoneNumber)) {
                 return new BaseResponse(
                     400,
                     null,
@@ -475,7 +475,7 @@ class RegistrationController extends AbstractController
         $user->setPassword($hashedPassword);
         $user->setIsVerified(false);
         $user->setCreatedAt(new DateTime());
-        $user->setTwoFAcode(random_int(100000, 999999));
+        $user->setTwoFAcode((string)random_int(100000, 999999));
         $user->setTwoFACodeGeneratedAt(new DateTime());
         $user->setTwoFAcodeIsActive(true);
         $user->setFirstName($data['first_name'] ?? null);
@@ -593,7 +593,7 @@ class RegistrationController extends AbstractController
                 $dataRequest['phone_number'],
                 strtoupper((string)$dataRequest['country_code'])
             );
-            if ($parsedPhoneNumber && !$phoneNumberUtil->isValidNumber($parsedPhoneNumber)) {
+            if (!$phoneNumberUtil->isValidNumber($parsedPhoneNumber)) {
                 return new BaseResponse(
                     400,
                     null,
