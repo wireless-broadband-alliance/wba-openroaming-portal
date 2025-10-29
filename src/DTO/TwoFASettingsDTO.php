@@ -64,16 +64,24 @@ class TwoFASettingsDTO
         $this->twoFaStatus = $data[SettingName::TWO_FACTOR_AUTH_STATUS->value]['value'] ?? null;
         $this->twoFaAppLabel = $data[SettingName::TWO_FACTOR_AUTH_APP_LABEL->value]['value'] ?? null;
         $this->twoFaAppIssuer = $data[SettingName::TWO_FACTOR_AUTH_APP_ISSUER->value]['value'] ?? null;
-        $this->twoFaCodeExpirationTime = isset($data[SettingName::TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME->value]['value'])
+        $this->twoFaCodeExpirationTime = isset(
+            $data[SettingName::TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME->value]['value']
+        )
             ? (int)$data[SettingName::TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME->value]['value']
             : null;
-        $this->twoFaAttemptsNumberResendCode = isset($data[SettingName::TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE->value]['value'])
+        $this->twoFaAttemptsNumberResendCode = isset(
+            $data[SettingName::TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE->value]['value']
+        )
             ? (int)$data[SettingName::TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE->value]['value']
             : null;
-        $this->twoFaTimeResetAttempts = isset($data[SettingName::TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS->value]['value'])
+        $this->twoFaTimeResetAttempts = isset(
+            $data[SettingName::TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS->value]['value']
+        )
             ? (int)$data[SettingName::TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS->value]['value']
             : null;
-        $this->twoFaResendInterval = isset($data[SettingName::TWO_FACTOR_AUTH_RESEND_INTERVAL->value]['value'])
+        $this->twoFaResendInterval = isset(
+            $data[SettingName::TWO_FACTOR_AUTH_RESEND_INTERVAL->value]['value']
+        )
             ? (int)$data[SettingName::TWO_FACTOR_AUTH_RESEND_INTERVAL->value]['value']
             : null;
     }
@@ -86,13 +94,20 @@ class TwoFASettingsDTO
     public function toArray(): array
     {
         return [
-            SettingName::TWO_FACTOR_AUTH_STATUS->value => ['value' => $this->twoFaStatus],
-            SettingName::TWO_FACTOR_AUTH_APP_LABEL->value => ['value' => $this->twoFaAppLabel],
-            SettingName::TWO_FACTOR_AUTH_APP_ISSUER->value => ['value' => $this->twoFaAppIssuer],
-            SettingName::TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME->value => ['value' => $this->twoFaCodeExpirationTime],
-            SettingName::TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE->value => ['value' => $this->twoFaAttemptsNumberResendCode],
-            SettingName::TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS->value => ['value' => $this->twoFaTimeResetAttempts],
-            SettingName::TWO_FACTOR_AUTH_RESEND_INTERVAL->value => ['value' => $this->twoFaResendInterval],
+            SettingName::TWO_FACTOR_AUTH_STATUS->value =>
+                ['value' => $this->twoFaStatus],
+            SettingName::TWO_FACTOR_AUTH_APP_LABEL->value =>
+                ['value' => $this->twoFaAppLabel],
+            SettingName::TWO_FACTOR_AUTH_APP_ISSUER->value =>
+                ['value' => $this->twoFaAppIssuer],
+            SettingName::TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME->value =>
+                ['value' => $this->twoFaCodeExpirationTime],
+            SettingName::TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE->value =>
+                ['value' => $this->twoFaAttemptsNumberResendCode],
+            SettingName::TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS->value =>
+                ['value' => $this->twoFaTimeResetAttempts],
+            SettingName::TWO_FACTOR_AUTH_RESEND_INTERVAL->value =>
+                ['value' => $this->twoFaResendInterval],
         ];
     }
 }
