@@ -39,6 +39,9 @@ class ConfigController extends AbstractController
         return new BaseResponse(200, $settings)->toResponse();
     }
 
+    /**
+     * @return array<string, array<string, mixed>>
+     */
     private function getSettings(): array
     {
         $data['platform'] = [
@@ -135,7 +138,7 @@ class ConfigController extends AbstractController
         return $setting && $this->convertToBoolean($setting->getValue());
     }
 
-    protected function convertToBoolean($value): bool
+    protected function convertToBoolean(string $value): bool
     {
         $trueValues = ['ON', 'TRUE', '1', 1, true];
         $falseValues = ['OFF', 'FALSE', '0', 0, false];
@@ -148,6 +151,9 @@ class ConfigController extends AbstractController
         return (bool)$value;
     }
 
+    /**
+     * @param array<string> $keys
+     */
     protected function areEnvKeysAvailable(array $keys): bool
     {
         return array_all($keys, static fn($key) => array_key_exists($key, $_ENV));
