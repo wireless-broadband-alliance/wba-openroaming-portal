@@ -212,7 +212,7 @@ class AuthController extends AbstractController
         if ($isLoginWithUUIDOnly === OperationMode::OFF->value) {
             // If the login with uuid is disabled generate JWT Token
             $token = $this->tokenGenerator->generateToken($user);
-            if (is_array($token) && isset($token['success']) && $token['success'] === false) {
+            if (is_array($token) && $token['success'] === false) {
                 $statusCode = $token['error'] === 'Invalid user provided. Please verify the user data.' ? 400 : 500;
 
                 return new BaseResponse($statusCode, null, $token['error'])->toResponse();
@@ -446,7 +446,7 @@ class AuthController extends AbstractController
 
             // Generate JWT Token
             $token = $this->tokenGenerator->generateToken($user);
-            if (is_array($token) && isset($token['success']) && $token['success'] === false) {
+            if (is_array($token) && $token['success'] === false) {
                 $statusCode = $token['error'] === 'Invalid user provided. Please verify the user data.' ? 400 : 500;
 
                 return new BaseResponse($statusCode, null, $token['error'])->toResponse();
@@ -577,7 +577,7 @@ class AuthController extends AbstractController
 
             // Generate JWT Token
             $token = $this->tokenGenerator->generateToken($user);
-            if (is_array($token) && isset($token['success']) && $token['success'] === false) {
+            if (is_array($token) && $token['success'] === false) {
                 $statusCode = $token['error'] === 'Invalid user provided. Please verify the user data.' ? 400 : 500;
 
                 return new BaseResponse($statusCode, null, $token['error'])->toResponse();
@@ -706,7 +706,7 @@ class AuthController extends AbstractController
 
             // Generate JWT Token
             $token = $this->tokenGenerator->generateToken($user);
-            if (is_array($token) && isset($token['success']) && $token['success'] === false) {
+            if (is_array($token) && $token['success'] === false) {
                 $statusCode = $token['error'] === 'Invalid user provided. Please verify the user data.' ? 400 : 500;
 
                 return new BaseResponse($statusCode, null, $token['error'])->toResponse();
