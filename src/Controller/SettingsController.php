@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\DTO\CapportSettingsDTO;
 use App\DTO\LDAPSettingsDTO;
 use App\DTO\RadiusSettingsDTO;
 use App\DTO\StatusSettingsDTO;
@@ -937,53 +938,35 @@ class SettingsController extends AbstractController
         Request $request,
     ): Response {
         $data = $this->getSettings->getSettings();
-        // Get the current logged-in user (admin)
+
         /** @var User $currentUser */
         $currentUser = $this->getUser();
 
-        $settingsRepository = $this->entityManager->getRepository(Setting::class);
-        $settings = $settingsRepository->findAll();
+        // Initialize DTO from settings
+        $dto = new CapportSettingsDTO($data);
 
-        $form = $this->createForm(CapportType::class, null, [
-            'settings' => $settings,
-        ]);
-
+        // Create form bound to DTO
+        $form = $this->createForm(CapportType::class, $dto);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $submittedData = $form->getData();
+            /** @var LDAPSettingsDTO $dto */
+            $dto = $form->getData();
 
-            $settingsToUpdate = [
-                SettingName::CAPPORT_ENABLED->value,
-                SettingName::CAPPORT_PORTAL_URL->value,
-                SettingName::CAPPORT_VENUE_INFO_URL->value,
-            ];
+            // Save updated settings
+            $this->settingsService->updateSettingsFromArray($dto->toArray());
+            $this->settingsService->flush();
 
-            foreach ($settingsToUpdate as $settingName) {
-                $value = $submittedData[$settingName] ?? null;
-
-                // Check if any submitted data is empty
-                if ($value === null) {
-                    $value = "";
-                }
-
-                $setting = $settingsRepository->findOneBy(['name' => $settingName]);
-                if ($setting !== null) {
-                    $setting->setValue($value);
-                    $this->entityManager->persist($setting);
-                }
-            }
-
-            $eventMetadata = [
-                'ip' => $request->getClientIp(),
-                'user_agent' => $request->headers->get('User-Agent'),
-                'uuid' => $currentUser->getUuid(),
-            ];
+            // Log the event
             $this->eventActions->saveEvent(
                 $currentUser,
                 AnalyticalEventType::SETTING_CAPPORT_CONF_REQUEST->value,
                 new DateTime(),
-                $eventMetadata
+                [
+                    'ip' => $request->getClientIp(),
+                    'user_agent' => $request->headers->get('User-Agent'),
+                    'uuid' => $currentUser->getUuid(),
+                ]
             );
 
             $this->addFlash(
@@ -994,10 +977,9 @@ class SettingsController extends AbstractController
         }
 
         return $this->render('dashboard/shared/settings_actions.html.twig', [
-            'user' => $currentUser,
+            'form' => $form->createView(),
+            'capportSettingsDTO' => $dto,
             'data' => $data,
-            'settings' => $settings,
-            'form' => $form->createView()
         ]);
     }
 

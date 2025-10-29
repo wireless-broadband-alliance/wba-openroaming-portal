@@ -2,88 +2,42 @@
 
 namespace App\Form;
 
+use App\DTO\CapportSettingsDTO;
 use App\Enum\OperationMode;
-use App\Enum\SettingName;
-use App\Service\GetSettings;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Validator\Constraints as Assert;
-use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
- * @extends AbstractType<null>
+ * @extends AbstractType<CapportSettingsDTO>
  */
 class CapportType extends AbstractType
 {
-    public function __construct(
-        private readonly GetSettings $getSettings,
-        private readonly TranslatorInterface $translator
-    ) {
-    }
-
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
-        $settingsToUpdate = [
-            SettingName::CAPPORT_ENABLED->value => [
-                'type' => ChoiceType::class,
+        $builder->add('capportEnabled', ChoiceType::class, [
+            'choices' => [
+                OperationMode::ON->value => 'true',
+                OperationMode::OFF->value => 'false',
             ],
-            SettingName::CAPPORT_PORTAL_URL->value => [
-                'type' => TextType::class,
-                'constraints' => [
-                    new Assert\Url([
-                        'message' => $this->translator->trans('valueNotValid', [], 'CapportType'),
-                        'protocols' => ['http', 'https'],
-                        'requireTld' => true,
-                    ]),
-                ],
-            ],
-            SettingName::CAPPORT_VENUE_INFO_URL->value => [
-                'type' => TextType::class,
-                'constraints' => [
-                    new Assert\Url([
-                        'message' => $this->translator->trans('valueNotValid', [], 'CapportType'),
-                        'protocols' => ['http', 'https'],
-                        'requireTld' => true,
-                    ]),
-                ],
-            ],
-        ];
+            'required' => false,
+        ]);
 
-        foreach ($settingsToUpdate as $settingName => $config) {
-            // Get the corresponding Setting entity and set its value
-            foreach ($options['settings'] as $setting) {
-                if ($setting->getName() === $settingName) {
-                    $formFieldOptions['data'] = $setting->getValue();
-                    if ($settingName === SettingName::CAPPORT_ENABLED->value) {
-                        $formFieldOptions['choices'] = [
-                            OperationMode::ON->value => 'true',
-                            OperationMode::OFF->value => 'false',
-                        ];
-                        $formFieldOptions['placeholder'] = $this->translator->trans('selectOption', [], 'CapportType');
-                        $formFieldOptions['required'] = true;
-                    }
-                    $formFieldOptions['attr']['description'] = $this->getSettings->getSettingDescription($settingName);
-                    $formFieldOptions['constraints'] = $config['constraints'] ?? [];
-                    $builder->add($settingName, $config['type'], $formFieldOptions);
-                    break;
-                }
-            }
-            $formFieldOptions = [
-                'attr' => [
-                    'autocomplete' => 'off',
-                ],
-                'required' => false,
-            ];
-        }
+        $builder->add('capportPortalUrl', TextType::class, [
+            'required' => false,
+        ]);
+
+        $builder->add('capportVenueInfoUrl', TextType::class, [
+            'required' => false,
+        ]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'settings' => [], // No need to set settings here
+            'data_class' => CapportSettingsDTO::class,
         ]);
     }
 }
