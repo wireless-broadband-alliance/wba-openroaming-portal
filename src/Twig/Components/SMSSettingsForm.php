@@ -2,9 +2,8 @@
 
 namespace App\Twig\Components;
 
-use App\DTO\CapportSettingsDTO;
-use App\Enum\SettingName;
-use App\Form\CapportSettingsType;
+use App\DTO\SMSSettingsDTO;
+use App\Form\SMSSettingsType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormInterface;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
@@ -15,14 +14,14 @@ use Symfony\UX\LiveComponent\DefaultActionTrait;
 use Symfony\UX\LiveComponent\LiveCollectionTrait;
 
 #[AsLiveComponent]
-final class CapportSettingsForm extends AbstractController
+final class SMSSettingsForm extends AbstractController
 {
     use ComponentWithFormTrait;
     use DefaultActionTrait;
     use LiveCollectionTrait;
 
     #[LiveProp]
-    public CapportSettingsDTO|null $capportSettingsDTO = null;
+    public SMSSettingsDTO|null $SMSSettingsDTO = null;
 
     /** @var array<string, array{value: ?string, description?: ?string}>|null */
     #[LiveProp]
@@ -34,19 +33,19 @@ final class CapportSettingsForm extends AbstractController
     #[\Override]
     protected function instantiateForm(): FormInterface
     {
-        return $this->createForm(CapportSettingsType::class, $this->capportSettingsDTO);
+        return $this->createForm(SMSSettingsType::class, $this->SMSSettingsDTO);
     }
 
     #[LiveAction]
     public function validate(): void
     {
-        $form = $this->createForm(CapportSettingsType::class, $this->capportSettingsDTO);
+        $form = $this->createForm(SMSSettingsType::class, $this->SMSSettingsDTO);
 
         // Submit the current DTO values
         $form->submit([
-            SettingName::CAPPORT_ENABLED->value => $this->capportSettingsDTO->capportEnabled,
-            SettingName::CAPPORT_PORTAL_URL->value => $this->capportSettingsDTO->capportPortalUrl,
-            SettingName::CAPPORT_VENUE_INFO_URL->value => $this->capportSettingsDTO->capportVenueInfoUrl,
+            'capportEnabled' => $this->capportSettingsDTO?->capportEnabled,
+            'capportPortalUrl' => $this->capportSettingsDTO?->capportPortalUrl,
+            'capportVenueInfoUrl' => $this->capportSettingsDTO?->capportVenueInfoUrl,
         ], false);
 
         $this->form = $form;

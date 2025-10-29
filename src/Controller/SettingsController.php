@@ -4,8 +4,9 @@ namespace App\Controller;
 
 use App\DTO\CapportSettingsDTO;
 use App\DTO\LDAPSettingsDTO;
+use App\DTO\PlatformStatusSettingsDTO;
 use App\DTO\RadiusSettingsDTO;
-use App\DTO\StatusSettingsDTO;
+use App\DTO\SMSSettingsDTO;
 use App\DTO\TwoFASettingsDTO;
 use App\Entity\Setting;
 use App\Entity\TextEditor;
@@ -17,11 +18,11 @@ use App\Enum\SettingName;
 use App\Enum\SettingType;
 use App\Enum\TextEditorName;
 use App\Form\AuthType;
-use App\Form\CapportType;
-use App\Form\LDAPType;
-use App\Form\RadiusType;
-use App\Form\SMSType;
-use App\Form\StatusType;
+use App\Form\CapportSettingsType;
+use App\Form\LDAPSettingsType;
+use App\Form\PlatformStatusSettingsType;
+use App\Form\RadiusSettingsType;
+use App\Form\SMSSettingsType;
 use App\Form\TermsType;
 use App\Form\TwoFASettingsType;
 use App\Repository\SettingTranslationRepository;
@@ -545,7 +546,7 @@ class SettingsController extends AbstractController
         $dto = new LDAPSettingsDTO($data);
 
         // Create form bound to DTO
-        $form = $this->createForm(LDAPType::class, $dto);
+        $form = $this->createForm(LDAPSettingsType::class, $dto);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -597,7 +598,7 @@ class SettingsController extends AbstractController
         $dto = new RadiusSettingsDTO($data);
 
         // Create form bound to DTO
-        $form = $this->createForm(RadiusType::class, $dto);
+        $form = $this->createForm(RadiusSettingsType::class, $dto);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -646,14 +647,14 @@ class SettingsController extends AbstractController
         $currentUser = $this->getUser();
 
         // Initialize DTO from settings
-        $dto = new StatusSettingsDTO($data);
+        $dto = new PlatformStatusSettingsDTO($data);
 
         // Create form bound to DTO
-        $form = $this->createForm(StatusType::class, $dto);
+        $form = $this->createForm(PlatformStatusSettingsType::class, $dto);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            /** @var StatusSettingsDTO $dto */
+            /** @var PlatformStatusSettingsDTO $dto */
             $dto = $form->getData();
 
             // Save updated settings
@@ -681,7 +682,7 @@ class SettingsController extends AbstractController
 
         return $this->render('dashboard/shared/settings_actions.html.twig', [
             'form' => $form->createView(),
-            'statusSettingsDTO' => $dto,
+            'platformStatusSettingsDTO' => $dto,
             'data' => $data,
         ]);
     }
@@ -946,11 +947,11 @@ class SettingsController extends AbstractController
         $dto = new CapportSettingsDTO($data);
 
         // Create form bound to DTO
-        $form = $this->createForm(CapportType::class, $dto);
+        $form = $this->createForm(CapportSettingsType::class, $dto);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            /** @var LDAPSettingsDTO $dto */
+            /** @var CapportSettingsDTO $dto */
             $dto = $form->getData();
 
             // Save updated settings
@@ -988,57 +989,36 @@ class SettingsController extends AbstractController
     public function settingsSMS(
         Request $request
     ): Response {
-        // Get the current logged-in user (admin)
-        /** @var User $currentUser */
-        $currentUser = $this->getUser();
         $data = $this->getSettings->getSettings();
 
-        $settingsRepository = $this->entityManager->getRepository(Setting::class);
-        $settings = $settingsRepository->findAll();
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
 
-        $form = $this->createForm(SMSType::class, null, [
-            'settings' => $settings,
-        ]);
+        // Initialize DTO from settings
+        $dto = new SMSSettingsDTO($data);
 
+        // Create form bound to DTO
+        $form = $this->createForm(SMSSettingsType::class, $dto);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $submittedData = $form->getData();
+            /** @var SMSSettingsDTO $dto */
+            $dto = $form->getData();
 
-            $settingsToUpdate = [
-                SettingName::SMS_USERNAME->value,
-                SettingName::SMS_USER_ID->value,
-                SettingName::SMS_HANDLE->value,
-                SettingName::SMS_FROM->value,
-                SettingName::SMS_TIMER_RESEND->value,
-                SettingName::DEFAULT_REGION_PHONE_INPUTS->value
-            ];
+            // Save updated settings
+            $this->settingsService->updateSettingsFromArray($dto->toArray());
+            $this->settingsService->flush();
 
-            foreach ($settingsToUpdate as $settingName) {
-                $value = $submittedData[$settingName] ?? null;
-
-                // Check if any submitted data is empty
-                if ($value === null) {
-                    $value = "";
-                }
-
-                $setting = $settingsRepository->findOneBy(['name' => $settingName]);
-                if ($setting !== null) {
-                    $setting->setValue($value);
-                    $this->entityManager->persist($setting);
-                }
-            }
-
-            $eventMetadata = [
-                'ip' => $request->getClientIp(),
-                'user_agent' => $request->headers->get('User-Agent'),
-                'uuid' => $currentUser->getUuid(),
-            ];
+            // Log the event
             $this->eventActions->saveEvent(
                 $currentUser,
                 AnalyticalEventType::SETTING_SMS_CONF_REQUEST->value,
                 new DateTime(),
-                $eventMetadata
+                [
+                    'ip' => $request->getClientIp(),
+                    'user_agent' => $request->headers->get('User-Agent'),
+                    'uuid' => $currentUser->getUuid(),
+                ]
             );
 
             $this->addFlash(
@@ -1049,11 +1029,9 @@ class SettingsController extends AbstractController
         }
 
         return $this->render('dashboard/shared/settings_actions.html.twig', [
-            'user' => $currentUser,
-            'data' => $data,
-            'settings' => $settings,
-            'current_user' => $currentUser,
             'form' => $form->createView(),
+            'smsSettingsDTO' => $dto,
+            'data' => $data,
         ]);
     }
 }

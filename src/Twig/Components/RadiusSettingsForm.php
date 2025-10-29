@@ -4,8 +4,7 @@ namespace App\Twig\Components;
 
 use App\DTO\RadiusSettingsDTO;
 use App\Enum\SettingName;
-use App\Form\RadiusType;
-use App\Service\SettingsService;
+use App\Form\RadiusSettingsType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormInterface;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
@@ -35,13 +34,13 @@ final class RadiusSettingsForm extends AbstractController
     #[\Override]
     protected function instantiateForm(): FormInterface
     {
-        return $this->createForm(RadiusType::class, $this->radiusSettingsDTO);
+        return $this->createForm(RadiusSettingsType::class, $this->radiusSettingsDTO);
     }
 
     #[LiveAction]
     public function validate(): void
     {
-        $form = $this->createForm(RadiusType::class, $this->radiusSettingsDTO);
+        $form = $this->createForm(RadiusSettingsType::class, $this->radiusSettingsDTO);
 
         $form->submit([
             SettingName::DISPLAY_NAME->value =>

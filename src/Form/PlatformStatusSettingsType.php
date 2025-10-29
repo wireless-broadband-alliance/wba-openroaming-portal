@@ -2,7 +2,7 @@
 
 namespace App\Form;
 
-use App\DTO\StatusSettingsDTO;
+use App\DTO\PlatformStatusSettingsDTO;
 use App\Enum\OperationMode;
 use App\Enum\PlatformMode;
 use Symfony\Component\Form\AbstractType;
@@ -12,9 +12,9 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 /**
- * @extends AbstractType<StatusSettingsDTO>
+ * @extends AbstractType<PlatformStatusSettingsDTO>
  */
-class StatusType extends AbstractType
+class PlatformStatusSettingsType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
@@ -58,7 +58,7 @@ class StatusType extends AbstractType
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'data_class' => StatusSettingsDTO::class,
+            'data_class' => PlatformStatusSettingsDTO::class,
         ]);
     }
 }

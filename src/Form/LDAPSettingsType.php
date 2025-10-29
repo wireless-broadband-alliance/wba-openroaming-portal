@@ -15,7 +15,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 /**
  * @extends AbstractType<LDAPSettingsDTO>
  */
-class LDAPType extends AbstractType
+class LDAPSettingsType extends AbstractType
 {
     public function __construct(private readonly TranslatorInterface $translator)
     {

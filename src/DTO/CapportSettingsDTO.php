@@ -4,6 +4,7 @@ namespace App\DTO;
 
 use Symfony\Component\Validator\Constraints as Assert;
 use App\Enum\SettingName;
+use App\Validator\Constraints as CustomAssert;
 
 class CapportSettingsDTO
 {
@@ -14,26 +15,10 @@ class CapportSettingsDTO
     )]
     public ?string $capportEnabled = null;
 
-    #[Assert\Url(
-        message: 'valueNotValid',
-        protocols: ['http', 'https'],
-        requireTld: true
-    )]
-    #[Assert\Expression(
-        expression: "this.capportEnabled != 'true' or (this.capportEnabled == 'true' and value != '')",
-        message: 'fieldCannotBeBlank'
-    )]
+    #[CustomAssert\CapportURL('capportEnabled')]
     public ?string $capportPortalUrl = null;
 
-    #[Assert\Url(
-        message: 'valueNotValid',
-        protocols: ['http', 'https'],
-        requireTld: true
-    )]
-    #[Assert\Expression(
-        expression: "this.capportEnabled != 'true' or (this.capportEnabled == 'true' and value != '')",
-        message: 'fieldCannotBeBlank'
-    )]
+    #[CustomAssert\CapportURL('capportEnabled')]
     public ?string $capportVenueInfoUrl = null;
 
     /**

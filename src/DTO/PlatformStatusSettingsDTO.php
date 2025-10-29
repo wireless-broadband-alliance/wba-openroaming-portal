@@ -9,7 +9,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Constraints\GreaterThanOrEqual;
 use Symfony\Component\Validator\Constraints\Length;
 
-class StatusSettingsDTO
+class PlatformStatusSettingsDTO
 {
     #[Assert\NotBlank(message: 'selectOption')]
     #[Assert\Expression(
