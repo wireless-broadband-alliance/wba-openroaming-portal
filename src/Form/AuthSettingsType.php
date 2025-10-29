@@ -2,6 +2,7 @@
 
 namespace App\Form;
 
+use App\DTO\AuthSettingsTypeDTO;
 use App\Enum\OperationMode;
 use App\Enum\SettingName;
 use App\Service\GetSettings;
@@ -21,7 +22,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 /**
  * @extends AbstractType<null>
  */
-class AuthType extends AbstractType
+class AuthSettingsType extends AbstractType
 {
     public function __construct(
         private readonly GetSettings $getSettings,
@@ -650,10 +651,11 @@ class AuthType extends AbstractType
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
+            'data_class' => AuthSettingsTypeDTO::class,
             'settings' => [], // No need to set settings here
             'profileLimitDate' => null,
             'profileMinDate' => null,
-            'humanReadableExpirationDate' => null
+            'humanReadableExpirationDate' => null,
         ]);
     }
 }
