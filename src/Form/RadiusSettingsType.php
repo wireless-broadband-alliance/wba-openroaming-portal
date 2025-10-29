@@ -16,11 +16,6 @@ use Symfony\Contracts\Translation\TranslatorInterface;
  */
 class RadiusSettingsType extends AbstractType
 {
-    public function __construct(
-        private readonly TranslatorInterface $translator
-    ) {
-    }
-
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
@@ -53,7 +48,6 @@ class RadiusSettingsType extends AbstractType
                     'WPA 2' => ProfileType::WPA2->value,
                     'WPA 3' => ProfileType::WPA3->value,
                 ],
-                'placeholder' => $this->translator->trans('selectOption', [], 'CustomType'),
                 'required' => false,
             ]);
     }

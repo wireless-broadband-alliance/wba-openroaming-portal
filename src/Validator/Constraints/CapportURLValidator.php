@@ -8,7 +8,11 @@ use Symfony\Component\Validator\Exception\UnexpectedTypeException;
 
 class CapportURLValidator extends ConstraintValidator
 {
-    public function validate($value, Constraint $constraint): void
+    /**
+     * @param mixed $value
+     * @param Constraint $constraint
+     */
+    public function validate(mixed $value, Constraint $constraint): void
     {
         if (!$constraint instanceof CapportURL) {
             throw new UnexpectedTypeException($constraint, CapportURL::class);

@@ -1033,7 +1033,7 @@ class SettingsController extends AbstractController
 
         return $this->render('dashboard/shared/settings_actions.html.twig', [
             'form' => $form->createView(),
-            'smsSettingsDTO' => $dto,
+            'SMSSettingsDTO' => $dto,
             'data' => $data,
         ]);
     }

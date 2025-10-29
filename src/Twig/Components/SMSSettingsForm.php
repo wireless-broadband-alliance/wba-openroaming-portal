@@ -3,6 +3,7 @@
 namespace App\Twig\Components;
 
 use App\DTO\SMSSettingsDTO;
+use App\Enum\SettingName;
 use App\Form\SMSSettingsType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormInterface;
@@ -21,9 +22,12 @@ final class SMSSettingsForm extends AbstractController
     use LiveCollectionTrait;
 
     #[LiveProp]
-    public SMSSettingsDTO|null $SMSSettingsDTO = null;
+    public ?SMSSettingsDTO $SMSSettingsDTO = null;
 
-    /** @var array<string, array{value: ?string, description?: ?string}>|null */
+    /**
+     * Raw settings data fetched from database or service.
+     * @var array<string, array{value: ?string, description?: ?string}>|null
+     */
     #[LiveProp]
     public ?array $data = null;
 
@@ -39,15 +43,30 @@ final class SMSSettingsForm extends AbstractController
     #[LiveAction]
     public function validate(): void
     {
+        // Create form manually to trigger validation
         $form = $this->createForm(SMSSettingsType::class, $this->SMSSettingsDTO);
 
-        // Submit the current DTO values
+        // Normalize array inputs (convert non-array to array safely)
+        /** @var string[]|string $regions */
+        $regions = $this->SMSSettingsDTO->defaultRegionPhoneInputs;
+
+        if (!is_array($regions)) {
+            $regions = !empty($regions)
+                ? array_map('trim', explode(',', (string)$regions))
+                : [];
+        }
+
+        // Submit current DTO data (manual mapping)
         $form->submit([
-            'capportEnabled' => $this->capportSettingsDTO?->capportEnabled,
-            'capportPortalUrl' => $this->capportSettingsDTO?->capportPortalUrl,
-            'capportVenueInfoUrl' => $this->capportSettingsDTO?->capportVenueInfoUrl,
+            SettingName::SMS_USERNAME->value => $this->SMSSettingsDTO?->smsUsername,
+            SettingName::SMS_USER_ID->value => $this->SMSSettingsDTO?->smsUserId,
+            SettingName::SMS_HANDLE->value => $this->SMSSettingsDTO?->smsHandle,
+            SettingName::SMS_FROM->value => $this->SMSSettingsDTO?->smsFrom,
+            SettingName::SMS_TIMER_RESEND->value => $this->SMSSettingsDTO?->smsTimerResend,
+            SettingName::DEFAULT_REGION_PHONE_INPUTS->value => $regions,
         ], false);
 
+        // Store validated form
         $this->form = $form;
     }
 }
