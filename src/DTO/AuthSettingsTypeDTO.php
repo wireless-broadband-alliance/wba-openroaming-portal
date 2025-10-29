@@ -38,5 +38,4 @@ class AuthSettingsTypeDTO
     public ?string $AUTH_METHOD_SMS_REGISTER_LABEL = null;
     public ?string $AUTH_METHOD_SMS_REGISTER_DESCRIPTION = null;
     public ?string $PROFILE_LIMIT_DATE_SMS = null;
-
 }
