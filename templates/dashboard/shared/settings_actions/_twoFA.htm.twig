@@ -27,19 +27,19 @@
                 </label>
             </div>
 
-            {{ include('/dashboard/shared/settings_actions/_description.html.twig', { description: data.TWO_FACTOR_AUTH_STATUS.description }) }}
+            {{ include('/dashboard/shared/settings_actions/_description.html.twig', {description: data.TWO_FACTOR_AUTH_STATUS.description}) }}
 
             <div class="flex items-center space-x-2 mt-5">
                 {{ form_widget(form.twoFaStatus, {
-                    attr: {class: 'hidden p-2 bg-transparent border text-center outline-none text-left text-base block w-full rounded-md focus:shadow-sm'}
+                    attr: {class: 'hidden p-2 bg-transparent border text-center outline-none text-left text-base block w-full rounded-md focus:shadow-sm'},
                 }) }}
             </div>
 
             <div class="flex flex-col md:flex-row md:space-x-4 space-y-2 md:space-y-0 items-stretch mt-5">
                 {% set options = {
-                    'NOT_ENFORCED': 'notEnforced',
-                    'ENFORCED_FOR_LOCAL': 'enforcedForLocalAccounts',
-                    'ENFORCED_FOR_ALL': 'enforcedForAllAccounts'
+                    NOT_ENFORCED: 'notEnforced',
+                    ENFORCED_FOR_LOCAL: 'enforcedForLocalAccounts',
+                    ENFORCED_FOR_ALL: 'enforcedForAllAccounts',
                 } %}
 
                 {% for value, label in options %}
@@ -85,7 +85,7 @@
                 </label>
             </div>
 
-            {{ include('/dashboard/shared/settings_actions/_description.html.twig', { description: data.TWO_FACTOR_AUTH_APP_LABEL.description }) }}
+            {{ include('/dashboard/shared/settings_actions/_description.html.twig', {description: data.TWO_FACTOR_AUTH_APP_LABEL.description}) }}
 
             <div class="flex items-center space-x-2 mt-5">
                 {{ form_widget(form.twoFaAppLabel, {attr: {class: 'form-widget', autocomplete: 'off'}}) }}
@@ -107,7 +107,7 @@
                 </label>
             </div>
 
-            {{ include('/dashboard/shared/settings_actions/_description.html.twig', { description: data.TWO_FACTOR_AUTH_APP_ISSUER.description }) }}
+            {{ include('/dashboard/shared/settings_actions/_description.html.twig', {description: data.TWO_FACTOR_AUTH_APP_ISSUER.description}) }}
 
             <div class="flex items-center space-x-2 mt-5">
                 {{ form_widget(form.twoFaAppIssuer, {attr: {class: 'form-widget', autocomplete: 'off'}}) }}
@@ -129,7 +129,7 @@
                 </label>
             </div>
 
-            {{ include('/dashboard/shared/settings_actions/_description.html.twig', { description: data.TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME.description }) }}
+            {{ include('/dashboard/shared/settings_actions/_description.html.twig', {description: data.TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME.description}) }}
 
             <div class="flex items-center space-x-2 mt-5">
                 {{ form_widget(form.twoFaCodeExpirationTime, {attr: {class: 'form-widget', autocomplete: 'off'}}) }}
@@ -151,7 +151,7 @@
                 </label>
             </div>
 
-            {{ include('/dashboard/shared/settings_actions/_description.html.twig', { description: data.TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE.description }) }}
+            {{ include('/dashboard/shared/settings_actions/_description.html.twig', {description: data.TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE.description}) }}
 
             <div class="flex items-center space-x-2 mt-5">
                 {{ form_widget(form.twoFaAttemptsNumberResendCode, {attr: {class: 'form-widget', autocomplete: 'off'}}) }}
@@ -173,7 +173,7 @@
                 </label>
             </div>
 
-            {{ include('/dashboard/shared/settings_actions/_description.html.twig', { description: data.TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS.description }) }}
+            {{ include('/dashboard/shared/settings_actions/_description.html.twig', {description: data.TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS.description}) }}
 
             <div class="flex items-center space-x-2 mt-5">
                 {{ form_widget(form.twoFaTimeResetAttempts, {attr: {class: 'form-widget', autocomplete: 'off'}}) }}
@@ -195,7 +195,7 @@
                 </label>
             </div>
 
-            {{ include('/dashboard/shared/settings_actions/_description.html.twig', { description: data.TWO_FACTOR_AUTH_RESEND_INTERVAL.description }) }}
+            {{ include('/dashboard/shared/settings_actions/_description.html.twig', {description: data.TWO_FACTOR_AUTH_RESEND_INTERVAL.description}) }}
 
             <div class="flex items-center space-x-2 mt-5">
                 {{ form_widget(form.twoFaResendInterval, {attr: {class: 'form-widget', autocomplete: 'off'}}) }}
@@ -223,5 +223,5 @@
     </div>
 
     {{ form_rest(form) }}
-    {{ form_end(form, {'render_rest': false}) }}
+    {{ form_end(form, {render_rest: false}) }}
 </twig:TwoFASettingsForm>

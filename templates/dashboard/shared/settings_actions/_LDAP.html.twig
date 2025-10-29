@@ -16,7 +16,7 @@
             </label>
         </div>
 
-        {{ include('/dashboard/shared/settings_actions/_description.html.twig', { description: data.SYNC_LDAP_ENABLED.description }) }}
+        {{ include('/dashboard/shared/settings_actions/_description.html.twig', {description: data.SYNC_LDAP_ENABLED.description}) }}
 
         <div class="flex flex-col items-center space-y-2 mt-5">
             {# ON Radio #}
@@ -79,7 +79,7 @@
             </label>
         </div>
 
-        {{ include('/dashboard/shared/settings_actions/_description.html.twig', { description: data.SYNC_LDAP_SERVER.description }) }}
+        {{ include('/dashboard/shared/settings_actions/_description.html.twig', {description: data.SYNC_LDAP_SERVER.description}) }}
 
         <div class="flex items-center space-x-2 mt-5">
             {{ form_widget(form.syncLdapServer, {attr: {'wire:model': 'dto.syncLdapServer', class: 'form-widget', 'data-radio-card-target': 'input'}}) }}
@@ -103,7 +103,7 @@
             </label>
         </div>
 
-        {{ include('/dashboard/shared/settings_actions/_description.html.twig', { description: data.SYNC_LDAP_BIND_USER_DN.description }) }}
+        {{ include('/dashboard/shared/settings_actions/_description.html.twig', {description: data.SYNC_LDAP_BIND_USER_DN.description}) }}
 
         <div class="flex items-center space-x-2 mt-5">
             {{ form_widget(form.syncLdapBindUserDn, {attr: {'wire:model': 'dto.syncLdapBindUserDn', class: 'form-widget', 'data-radio-card-target': 'input'}}) }}
@@ -127,7 +127,7 @@
             </label>
         </div>
 
-        {{ include('/dashboard/shared/settings_actions/_description.html.twig', { description: data.SYNC_LDAP_BIND_USER_PASSWORD.description }) }}
+        {{ include('/dashboard/shared/settings_actions/_description.html.twig', {description: data.SYNC_LDAP_BIND_USER_PASSWORD.description}) }}
 
         <div class="flex items-center space-x-2 mt-5">
             {{ form_widget(form.syncLdapBindUserPassword, {attr: {'wire:model': 'dto.syncLdapBindUserPassword', class: 'form-widget'}}) }}
@@ -151,7 +151,7 @@
             </label>
         </div>
 
-        {{ include('/dashboard/shared/settings_actions/_description.html.twig', { description: data.SYNC_LDAP_SEARCH_BASE_DN.description }) }}
+        {{ include('/dashboard/shared/settings_actions/_description.html.twig', {description: data.SYNC_LDAP_SEARCH_BASE_DN.description}) }}
 
         <div class="flex items-center space-x-2 mt-5">
             {{ form_widget(form.syncLdapSearchBaseDn, {attr: {'wire:model': 'dto.syncLdapSearchBaseDn', class: 'form-widget', 'data-radio-card-target': 'input'}}) }}
@@ -175,7 +175,7 @@
             </label>
         </div>
 
-        {{ include('/dashboard/shared/settings_actions/_description.html.twig', { description: data.SYNC_LDAP_SEARCH_FILTER.description }) }}
+        {{ include('/dashboard/shared/settings_actions/_description.html.twig', {description: data.SYNC_LDAP_SEARCH_FILTER.description}) }}
 
         <div class="flex items-center space-x-2 mt-5">
             {{ form_widget(form.syncLdapSearchFilter, {attr: {'wire:model': 'dto.syncLdapSearchFilter', class: 'form-widget', 'data-radio-card-target': 'input'}}) }}
@@ -201,4 +201,4 @@
 </div>
 
 {{ form_rest(form) }}
-{{ form_end(form, {'render_rest': false}) }}
+{{ form_end(form, {render_rest: false}) }}

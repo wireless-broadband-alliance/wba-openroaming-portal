@@ -19,7 +19,7 @@
                          src="{{ asset('resources/logos/info_icon.svg') }}" alt="info_icon"/>
                 </label>
             </div>
-            {{ include('/dashboard/shared/settings_actions/_description.html.twig', { description: data.DISPLAY_NAME.description }) }}
+            {{ include('/dashboard/shared/settings_actions/_description.html.twig', {description: data.DISPLAY_NAME.description}) }}
             <div class="flex items-center space-x-2 mt-5">
                 {{ form_widget(form.displayName, {attr: {class: 'form-widget', autocomplete: 'off'}}) }}
             </div>
@@ -39,7 +39,7 @@
                          src="{{ asset('resources/logos/info_icon.svg') }}" alt="info_icon"/>
                 </label>
             </div>
-            {{ include('/dashboard/shared/settings_actions/_description.html.twig', { description: data.RADIUS_REALM_NAME.description }) }}
+            {{ include('/dashboard/shared/settings_actions/_description.html.twig', {description: data.RADIUS_REALM_NAME.description}) }}
             <div class="flex items-center space-x-2 mt-5">
                 {{ form_widget(form.radiusRealmName, {attr: {class: 'form-widget', autocomplete: 'off'}}) }}
             </div>
@@ -59,7 +59,7 @@
                          src="{{ asset('resources/logos/info_icon.svg') }}" alt="info_icon"/>
                 </label>
             </div>
-            {{ include('/dashboard/shared/settings_actions/_description.html.twig', { description: data.DOMAIN_NAME.description }) }}
+            {{ include('/dashboard/shared/settings_actions/_description.html.twig', {description: data.DOMAIN_NAME.description}) }}
             <div class="flex items-center space-x-2 mt-5">
                 {{ form_widget(form.domainName, {attr: {class: 'form-widget', autocomplete: 'off'}}) }}
             </div>
@@ -79,7 +79,7 @@
                          src="{{ asset('resources/logos/info_icon.svg') }}" alt="info_icon"/>
                 </label>
             </div>
-            {{ include('/dashboard/shared/settings_actions/_description.html.twig', { description: data.OPERATOR_NAME.description }) }}
+            {{ include('/dashboard/shared/settings_actions/_description.html.twig', {description: data.OPERATOR_NAME.description}) }}
             <div class="flex items-center space-x-2 mt-5">
                 {{ form_widget(form.operatorName, {attr: {class: 'form-widget', autocomplete: 'off'}}) }}
             </div>
@@ -99,7 +99,7 @@
                          src="{{ asset('resources/logos/info_icon.svg') }}" alt="info_icon"/>
                 </label>
             </div>
-            {{ include('/dashboard/shared/settings_actions/_description.html.twig', { description: data.RADIUS_TLS_NAME.description }) }}
+            {{ include('/dashboard/shared/settings_actions/_description.html.twig', {description: data.RADIUS_TLS_NAME.description}) }}
             <div class="flex items-center space-x-2 mt-5">
                 {{ form_widget(form.radiusTlsName, {attr: {class: 'form-widget', autocomplete: 'off'}}) }}
             </div>
@@ -119,7 +119,7 @@
                          src="{{ asset('resources/logos/info_icon.svg') }}" alt="info_icon"/>
                 </label>
             </div>
-            {{ include('/dashboard/shared/settings_actions/_description.html.twig', { description: data.NAI_REALM.description }) }}
+            {{ include('/dashboard/shared/settings_actions/_description.html.twig', {description: data.NAI_REALM.description}) }}
             <div class="flex items-center space-x-2 mt-5">
                 {{ form_widget(form.naiRealm, {attr: {class: 'form-widget', autocomplete: 'off'}}) }}
             </div>
@@ -139,7 +139,7 @@
                          src="{{ asset('resources/logos/info_icon.svg') }}" alt="info_icon"/>
                 </label>
             </div>
-            {{ include('/dashboard/shared/settings_actions/_description.html.twig', { description: data.RADIUS_TRUSTED_ROOT_CA_SHA1_HASH.description }) }}
+            {{ include('/dashboard/shared/settings_actions/_description.html.twig', {description: data.RADIUS_TRUSTED_ROOT_CA_SHA1_HASH.description}) }}
             <div class="flex items-center space-x-2 mt-5">
                 {{ form_widget(form.radiusTrustedRootCaSha1Hash, {attr: {class: 'form-widget', autocomplete: 'off'}}) }}
             </div>
@@ -159,7 +159,7 @@
                          src="{{ asset('resources/logos/info_icon.svg') }}" alt="info_icon"/>
                 </label>
             </div>
-            {{ include('/dashboard/shared/settings_actions/_description.html.twig', { description: data.PAYLOAD_IDENTIFIER.description }) }}
+            {{ include('/dashboard/shared/settings_actions/_description.html.twig', {description: data.PAYLOAD_IDENTIFIER.description}) }}
             <div class="flex items-center space-x-2 mt-5">
                 {{ form_widget(form.payloadIdentifier, {attr: {class: 'form-widget', autocomplete: 'off'}}) }}
             </div>
@@ -179,7 +179,7 @@
                          src="{{ asset('resources/logos/info_icon.svg') }}" alt="info_icon"/>
                 </label>
             </div>
-            {{ include('/dashboard/shared/settings_actions/_description.html.twig', { description: data.PROFILES_ENCRYPTION_TYPE_IOS_ONLY.description }) }}
+            {{ include('/dashboard/shared/settings_actions/_description.html.twig', {description: data.PROFILES_ENCRYPTION_TYPE_IOS_ONLY.description}) }}
             <div class="flex items-center space-x-2 mt-5">
                 {{ form_widget(form.profilesEncryptionTypeIosOnly, {attr: {class: 'form-widget', autocomplete: 'off'}}) }}
             </div>
@@ -206,5 +206,5 @@
     </div>
 
     {{ form_rest(form) }}
-    {{ form_end(form, {'render_rest': false}) }}
+    {{ form_end(form, {render_rest: false}) }}
 </twig:RadiusSettingsForm>

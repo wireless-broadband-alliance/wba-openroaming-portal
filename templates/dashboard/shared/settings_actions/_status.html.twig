@@ -19,7 +19,7 @@
                 </label>
             </div>
 
-            {{ include('/dashboard/shared/settings_actions/_description.html.twig', { description: data.PLATFORM_MODE.description }) }}
+            {{ include('/dashboard/shared/settings_actions/_description.html.twig', {description: data.PLATFORM_MODE.description}) }}
 
             <div class="flex flex-col items-center space-y-2 mt-5">
                 <label class="flex flex-row justify-between border hover:border-gray-900 duration-200 rounded-lg w-full p-2 pl-4">
@@ -74,7 +74,7 @@
                 </label>
             </div>
 
-            {{ include('/dashboard/shared/settings_actions/_description.html.twig', { description: data.USER_VERIFICATION.description }) }}
+            {{ include('/dashboard/shared/settings_actions/_description.html.twig', {description: data.USER_VERIFICATION.description}) }}
 
             <div class="flex flex-col items-center space-y-2 mt-5">
                 <label class="flex flex-row justify-between border hover:border-gray-900 duration-200 rounded-lg w-full p-2 pl-4">
@@ -128,7 +128,7 @@
                 </label>
             </div>
 
-            {{ include('/dashboard/shared/settings_actions/_description.html.twig', { description: data.TURNSTILE_CHECKER.description }) }}
+            {{ include('/dashboard/shared/settings_actions/_description.html.twig', {description: data.TURNSTILE_CHECKER.description}) }}
 
             <div class="flex flex-col items-center space-y-2 mt-5">
                 <label class="flex flex-row justify-between border hover:border-gray-900 duration-200 rounded-lg w-full p-2 pl-4">
@@ -166,7 +166,6 @@
                 {{ form_errors(form.turnstileChecker) }}
             </div>
 
-
             {# Mark the field as rendered so Symfony won't duplicate it #}
             {% do form.turnstileChecker.setRendered() %}
         </div>
@@ -183,7 +182,7 @@
                 </label>
             </div>
 
-            {{ include('/dashboard/shared/settings_actions/_description.html.twig', { description: data.API_STATUS.description }) }}
+            {{ include('/dashboard/shared/settings_actions/_description.html.twig', {description: data.API_STATUS.description}) }}
 
             <div class="flex flex-col items-center space-y-2 mt-5">
                 <label class="flex flex-row justify-between border hover:border-gray-900 duration-200 rounded-lg w-full p-2 pl-4">
@@ -224,7 +223,6 @@
             {% do form.apiStatus.setRendered() %}
         </div>
 
-
         {# USER_DELETE_TIME #}
         <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full" {{ stimulus_controller('card') }}>
             <div class="flex flex-row justify-between">
@@ -237,7 +235,7 @@
                 </label>
             </div>
 
-            {{ include('/dashboard/shared/settings_actions/_description.html.twig', { description: data.USER_DELETE_TIME.description }) }}
+            {{ include('/dashboard/shared/settings_actions/_description.html.twig', {description: data.USER_DELETE_TIME.description}) }}
 
             <div class="flex items-center space-x-2 mt-5">
                 {{ form_widget(form.userDeleteTime, {attr: {class: 'form-widget', autocomplete: 'off'}}) }}
@@ -260,7 +258,7 @@
                 </label>
             </div>
 
-            {{ include('/dashboard/shared/settings_actions/_description.html.twig', { description: data.TIME_INTERVAL_NOTIFICATION.description }) }}
+            {{ include('/dashboard/shared/settings_actions/_description.html.twig', {description: data.TIME_INTERVAL_NOTIFICATION.description}) }}
 
             <div class="flex items-center space-x-2 mt-5">
                 {{ form_widget(form.timeIntervalNotification, {attr: {class: 'form-widget', autocomplete: 'off'}}) }}
@@ -293,5 +291,5 @@
     </div>
 
     {{ form_rest(form) }}
-    {{ form_end(form, {'render_rest': false}) }}
+    {{ form_end(form, {render_rest: false}) }}
 </twig:StatusSettingsForm>
