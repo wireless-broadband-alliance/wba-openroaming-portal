@@ -53,9 +53,11 @@ class RadiusSettingsDTO
         $this->operatorName = $data[SettingName::OPERATOR_NAME->value]['value'] ?? null;
         $this->radiusTlsName = $data[SettingName::RADIUS_TLS_NAME->value]['value'] ?? null;
         $this->naiRealm = $data[SettingName::NAI_REALM->value]['value'] ?? null;
-        $this->radiusTrustedRootCaSha1Hash = $data[SettingName::RADIUS_TRUSTED_ROOT_CA_SHA1_HASH->value]['value'] ?? null;
+        $this->radiusTrustedRootCaSha1Hash =
+            $data[SettingName::RADIUS_TRUSTED_ROOT_CA_SHA1_HASH->value]['value'] ?? null;
         $this->payloadIdentifier = $data[SettingName::PAYLOAD_IDENTIFIER->value]['value'] ?? null;
-        $this->profilesEncryptionTypeIosOnly = $data[SettingName::PROFILES_ENCRYPTION_TYPE_IOS_ONLY->value]['value'] ?? null;
+        $this->profilesEncryptionTypeIosOnly =
+            $data[SettingName::PROFILES_ENCRYPTION_TYPE_IOS_ONLY->value]['value'] ?? null;
     }
 
     /**

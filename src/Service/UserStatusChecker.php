@@ -23,8 +23,10 @@ readonly class UserStatusChecker
     ) {
     }
 
-    public function checkUserStatus(User $user, string $APIVersion = ApiVersion::API_V1->value): BaseResponse|BaseResponseV2|null
-    {
+    public function checkUserStatus(
+        User $user,
+        string $APIVersion = ApiVersion::API_V1->value
+    ): BaseResponse|BaseResponseV2|null {
         if ($APIVersion === ApiVersion::API_V1->value) {
             if (!$user->isVerified()) {
                 return new BaseResponse(

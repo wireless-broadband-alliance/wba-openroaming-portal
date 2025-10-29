@@ -13,7 +13,10 @@ class StatusSettingsDTO
 {
     #[Assert\NotBlank(message: 'selectOption')]
     #[Assert\Expression(
-        "this.platformMode != '" . PlatformMode::LIVE->value . "' or this.userVerification == '" . OperationMode::ON->value . "'",
+        "this.platformMode != '" .
+        PlatformMode::LIVE->value .
+        "' or this.userVerification == '" .
+        OperationMode::ON->value . "'",
         message: "enforceUserVerificationEnabled"
     )]
     public ?string $userVerification = null;
