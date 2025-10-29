@@ -310,7 +310,7 @@ class ProfileController extends AbstractController
     /**
      * @throws RandomException
      */
-    private function generateToken($length = 16): string
+    private function generateToken(int $length = 16): string
     {
         $stringSpace = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
         $pieces = [];
