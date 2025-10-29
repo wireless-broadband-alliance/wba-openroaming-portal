@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\DTO\LDAPSettingsDTO;
 use App\DTO\RadiusSettingsDTO;
+use App\DTO\StatusSettingsDTO;
 use App\Entity\Setting;
 use App\Entity\TextEditor;
 use App\Entity\User;
@@ -639,86 +640,36 @@ class SettingsController extends AbstractController
     public function settingsStatus(
         Request $request
     ): Response {
-        // Get the current logged-in user (admin)
-        /** @var User $currentUser */
-        $currentUser = $this->getUser();
         $data = $this->getSettings->getSettings();
 
-        $settingsRepository = $this->entityManager->getRepository(Setting::class);
-        $settings = $settingsRepository->findAll();
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
 
-        $form = $this->createForm(StatusType::class, null, [
-            'settings' => $settings,
-        ]);
+        // Initialize DTO from settings
+        $dto = new StatusSettingsDTO($data);
+
+        // Create form bound to DTO
+        $form = $this->createForm(StatusType::class, $dto);
         $form->handleRequest($request);
+
         if ($form->isSubmitted() && $form->isValid()) {
-            // Get the submitted data
-            $submittedData = $form->getData();
+            /** @var StatusSettingsDTO $dto */
+            $dto = $form->getData();
 
-            // Update the 'PLATFORM_MODE', 'USER_VERIFICATION' and 'TURNSTILE_CHECKER' settings
-            $platformMode = $submittedData[SettingName::PLATFORM_MODE->value] ?? null;
-            $turnstileChecker = $submittedData[SettingName::TURNSTILE_CHECKER->value] ?? null;
-            $apiStatus = $submittedData[SettingName::API_STATUS->value] ?? null;
-            $userDeleteTime = $submittedData[SettingName::USER_DELETE_TIME->value] ?? 5;
-            // Update the 'USER_VERIFICATION', and, if the platform mode is Live, set email verification to ON always
-            $emailVerification = ($platformMode === PlatformMode::LIVE->value) ?
-                OperationMode::ON->value : $submittedData[SettingName::USER_VERIFICATION->value] ?? null;
-            $timeIntervalNotifications = $submittedData[SettingName::TIME_INTERVAL_NOTIFICATION->value] ?? 7;
+            // Save updated settings
+            $this->settingsService->updateSettingsFromArray($dto->toArray());
+            $this->settingsService->flush();
 
-            $platformModeSetting = $settingsRepository->findOneBy(['name' => SettingName::PLATFORM_MODE->value]);
-            if ($platformModeSetting !== null) {
-                $platformModeSetting->setValue($platformMode);
-                $this->entityManager->persist($platformModeSetting);
-            }
-
-            $emailVerificationSetting = $settingsRepository->findOneBy(
-                ['name' => SettingName::USER_VERIFICATION->value]
-            );
-            if ($emailVerificationSetting !== null) {
-                $emailVerificationSetting->setValue($emailVerification);
-                $this->entityManager->persist($emailVerificationSetting);
-            }
-
-            $turnstileCheckerSetting = $settingsRepository->findOneBy([
-                'name' => SettingName::TURNSTILE_CHECKER->value
-            ]);
-            if ($turnstileCheckerSetting !== null) {
-                $turnstileCheckerSetting->setValue($turnstileChecker);
-                $this->entityManager->persist($turnstileCheckerSetting);
-            }
-
-            $apiStatusSetting = $settingsRepository->findOneBy(['name' => SettingName::API_STATUS->value]);
-            if ($apiStatusSetting !== null) {
-                $apiStatusSetting->setValue($apiStatus);
-                $this->entityManager->persist($apiStatusSetting);
-            }
-
-            $userDeleteTimeSetting = $settingsRepository->findOneBy(['name' => SettingName::USER_DELETE_TIME->value]);
-            if ($userDeleteTimeSetting !== null) {
-                $userDeleteTimeSetting->setValue($userDeleteTime);
-                $this->entityManager->persist($userDeleteTimeSetting);
-            }
-
-            $timeIntervalNotificationsSetting = $settingsRepository->findOneBy([
-                'name' => SettingName::TIME_INTERVAL_NOTIFICATION->value
-            ]);
-            if ($timeIntervalNotificationsSetting !== null) {
-                $timeIntervalNotificationsSetting->setValue($timeIntervalNotifications);
-                $this->entityManager->persist($timeIntervalNotificationsSetting);
-            }
-            // Flush the changes to the database
-            $this->entityManager->flush();
-
-            $eventMetadata = [
-                'ip' => $request->getClientIp(),
-                'user_agent' => $request->headers->get('User-Agent'),
-                'uuid' => $currentUser->getUuid()
-            ];
+            // Log the event
             $this->eventActions->saveEvent(
                 $currentUser,
                 AnalyticalEventType::SETTING_PLATFORM_STATUS_REQUEST->value,
                 new DateTime(),
-                $eventMetadata
+                [
+                    'ip' => $request->getClientIp(),
+                    'user_agent' => $request->headers->get('User-Agent'),
+                    'uuid' => $currentUser->getUuid(),
+                ]
             );
 
             $this->addFlash(
@@ -728,13 +679,10 @@ class SettingsController extends AbstractController
             return $this->redirectToRoute('admin_dashboard_settings_status');
         }
 
-
         return $this->render('dashboard/shared/settings_actions.html.twig', [
-            'user' => $currentUser,
-            'data' => $data,
-            'settings' => $settings,
-            'current_user' => $currentUser,
             'form' => $form->createView(),
+            'statusSettingsDTO' => $dto,
+            'data' => $data,
         ]);
     }
 

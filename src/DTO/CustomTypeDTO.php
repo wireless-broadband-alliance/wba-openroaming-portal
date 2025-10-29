@@ -27,12 +27,12 @@ class CustomTypeDTO
     )]
     public ?UploadedFile $WALLPAPER_IMAGE = null;
 
-    #[Assert\NotBlank(message: 'fieldNotBlank')]
+    #[Assert\NotBlank(message: 'fieldCannotBeBlank')]
     public ?string $WELCOME_TEXT = null;
 
     public ?string $WELCOME_DESCRIPTION = null;
 
-    #[Assert\NotBlank(message: 'fieldNotBlank')]
+    #[Assert\NotBlank(message: 'fieldCannotBeBlank')]
     #[Assert\Length(max: 255, maxMessage: 'maxCharacters')]
     public ?string $PAGE_TITLE = null;
 
