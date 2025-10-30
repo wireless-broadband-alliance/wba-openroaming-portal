@@ -10,7 +10,7 @@ class LDAPSettingsDTO
 {
     #[Assert\Choice(choices: ['true', 'false'], message: 'Invalid LDAP mode.')]
     #[Assert\NotBlank(message: 'selectOption')]
-    public ?string $syncLdapEnabled = OperationMode::OFF->value;
+    public ?string $syncLdapEnabled = 'false';
 
     #[Assert\Expression(
         expression: "this.syncLdapEnabled != 'true' or (this.syncLdapEnabled == 'true' and value != '')",
