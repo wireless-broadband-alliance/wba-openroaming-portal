@@ -337,20 +337,27 @@ class StatisticsGenerators
      */
     public function generateColorsWithOpacity(array $values): array
     {
-        if (array_filter($values, static fn($value) => $value !== 0) !== []) {
-            $maxValue = max($values);
+        if (empty($values)) {
+            return []; // or array_fill(0, 0, "rgba(125, 185, 40, 1)");
+        }
+
+        // Filter out zero values
+        $nonZeroValues = array_filter($values, static fn($value) => $value !== 0);
+
+        if ($nonZeroValues !== []) {
+            $maxValue = max($nonZeroValues); // safe: nonZeroValues is non-empty
             $colors = [];
 
             foreach ($values as $value) {
-                // Calculate the opacity relative to the max value, scaled to the opacity range
                 $opacity = 0.4 + ($value / $maxValue) * (1 - 0.4);
-                $opacity = round($opacity, 2); // Round to 2 decimal places for better control
+                $opacity = round($opacity, 2);
                 $colors[] = "rgba(125, 185, 40, {$opacity})";
             }
 
             return $colors;
         }
 
-        return array_fill(0, count($values), "rgba(125, 185, 40, 1)"); // Default color if no non-zero values
+        // If all values are zero, return default colors
+        return array_fill(0, count($values), "rgba(125, 185, 40, 1)");
     }
 }
