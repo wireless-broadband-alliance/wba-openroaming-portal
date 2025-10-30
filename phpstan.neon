@@ -4,7 +4,7 @@ parameters:
     symfony:
         containerXmlPath: var/cache/dev/App_KernelDevDebugContainer.xml
         constantHassers: false
-    level: 6
+    level: 7
     reportUnmatchedIgnoredErrors: false
     excludePaths:
         - vendor/*
