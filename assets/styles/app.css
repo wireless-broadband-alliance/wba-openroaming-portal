@@ -49,6 +49,56 @@
     @apply bg-white border rounded-lg px-3 py-1 text-[#656565] border-[#CECECE] focus:border-primary;
 }
 
+/* Tom selector customization */
+.form-widget-selector {
+    @apply w-full
+    bg-white
+    text-[#656565]
+    placeholder-opacity-40
+    rounded-[5px]
+    border border-[#CECECE]
+    px-3 py-2.5
+    focus:outline-none focus:ring-0 focus:border-primary
+    transition duration-150 ease-in-out;
+}
+
+/* Remove Tom Select’s own border & padding */
+.form-widget-selector .ts-control {
+    @apply border-0 bg-transparent shadow-none px-0 py-0;
+}
+
+/* Input text inside Tom Select */
+.form-widget-selector .ts-control > input {
+    @apply text-[#656565] placeholder-opacity-40;
+}
+
+/* Focus + hover feedback */
+.form-widget-selector .ts-control:focus-within {
+    @apply border-none ring-0 outline-none;
+}
+
+.form-widget-selector .ts-control:hover {
+    @apply border-none;
+}
+
+/* Selected item (pill) styling */
+.form-widget-selector .ts-control .item {
+    @apply bg-primary/10 text-primary font-medium
+    rounded-md px-2.5 py-1 mr-1 mb-1
+    inline-flex items-center
+    transition duration-150 ease-in-out;
+}
+
+/* When the item is active (focused or hovered) */
+.form-widget-selector .ts-control .item.active {
+    @apply bg-primary text-white;
+}
+
+/* Remove button visible and styled */
+.form-widget-selector .ts-control .remove {
+    @apply ml-2 cursor-pointer text-primary/70 hover:text-primary/100;
+}
+
 .form-widget-range {
     @apply w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer;
 }

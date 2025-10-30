@@ -125,7 +125,7 @@
             {{ include('/dashboard/shared/settings_actions/_description.html.twig', {description: data.DEFAULT_REGION_PHONE_INPUTS.description}) }}
 
             <div class="flex items-center space-x-2 mt-5">
-                {{ form_widget(form.defaultRegionPhoneInputs, {attr: {class: 'form-widget', autocomplete: 'off'}}) }}
+                {{ form_widget(form.defaultRegionPhoneInputs, {attr: {class: 'form-widget-selector'}}) }}
             </div>
             <div class="mt-2 -mb-2 text-center text-red-500 text-base">
                 {{ form_errors(form.defaultRegionPhoneInputs) }}

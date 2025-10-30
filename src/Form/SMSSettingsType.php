@@ -50,6 +50,7 @@ class SMSSettingsType extends AbstractType
                 'multiple' => true,
                 'expanded' => false,
                 'required' => false,
+                'autocomplete' => true
             ]);
     }
 
