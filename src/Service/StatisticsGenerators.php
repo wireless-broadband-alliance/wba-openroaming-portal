@@ -11,7 +11,7 @@ class StatisticsGenerators
      * @return array{
      *     labels: string[],
      *     datasets: array{
-     *         data: int[]|float[],
+     *         data: int[],
      *         backgroundColor: string[],
      *         borderColor: string,
      *         borderRadius: string
@@ -20,29 +20,23 @@ class StatisticsGenerators
      */
     public function generateDatasets(array $counts): array
     {
-        $datasets = [];
         $labels = array_keys($counts);
-        $dataValues = array_values($counts);
 
-        $data = [];
+        // Convert all values to int to satisfy PHPStan
+        $data = array_map(fn($value) => (int) round($value), array_values($counts));
 
-        // Calculate the colors with varying opacities
-        $colors = $this->generateColorsWithOpacity($dataValues);
-
-        foreach (array_keys($labels) as $index) {
-            $data[] = $dataValues[$index];
-        }
-
-        $datasets[] = [
-            'data' => $data,
-            'backgroundColor' => $colors,
-            'borderColor' => "rgb(125, 185, 40)",
-            'borderRadius' => "15",
-        ];
+        $backgroundColors = $this->generateColorsWithOpacity($data);
 
         return [
             'labels' => $labels,
-            'datasets' => $datasets,
+            'datasets' => [
+                [
+                    'data' => $data,
+                    'backgroundColor' => $backgroundColors,
+                    'borderColor' => "rgb(125, 185, 40)",
+                    'borderRadius' => "15",
+                ],
+            ],
         ];
     }
 
@@ -178,7 +172,11 @@ class StatisticsGenerators
     /**
      * Generate datasets for authentication attempts
      *
-     * @param array{Accepted: array<string, int>, Rejected: array<string, int>} $authsCounts
+     * @param array{
+     *     Accepted: array<int|string, int>,
+     *     Rejected: array<int|string, int>
+     * } $authsCounts
+     *
      * @return array{
      *     labels: string[],
      *     datasets: array{
@@ -191,7 +189,8 @@ class StatisticsGenerators
      */
     public function generateDatasetsAuths(array $authsCounts): array
     {
-        $labels = array_keys($authsCounts['Accepted']);
+        // Ensure keys are strings
+        $labels = array_map('strval', array_keys($authsCounts['Accepted']));
         $acceptedCounts = array_values($authsCounts['Accepted']);
         $rejectedCounts = array_values($authsCounts['Rejected']);
 
@@ -199,13 +198,13 @@ class StatisticsGenerators
             [
                 'label' => 'Accepted',
                 'data' => $acceptedCounts,
-                'backgroundColor' => $this->generateColorsWithOpacity($acceptedCounts),
+                'backgroundColor' => $this->generateColorsWithOpacity($acceptedCounts), // keep green
                 'borderRadius' => "15",
             ],
             [
                 'label' => 'Rejected',
                 'data' => $rejectedCounts,
-                'backgroundColor' => $this->generateColorsWithOpacity($rejectedCounts),
+                'backgroundColor' => array_map(fn($v) => "rgba(254, 64, 104, 0.8)", $rejectedCounts),
                 'borderRadius' => "15",
             ]
         ];

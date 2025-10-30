@@ -10,6 +10,7 @@ use App\Enum\PlatformMode;
 use App\Enum\UserProvider;
 use App\Enum\UserTwoFactorAuthenticationStatus;
 use App\Enum\UserVerificationStatus;
+use App\RadiusDb\Entity\RadiusAccounting;
 use App\RadiusDb\Repository\RadiusAccountingRepository;
 use App\RadiusDb\Repository\RadiusAuthsRepository;
 use App\Repository\UserExternalAuthRepository;
@@ -349,78 +350,53 @@ readonly class Statistics
      */
     public function fetchChartAuthenticationsFreeradius(DateTime $startDate, DateTime $endDate): JsonResponse|array
     {
-        // Fetch all data with date filtering
         $events = $this->radiusAuthsRepository->findAuthRequests($startDate, $endDate);
 
-        // Calculate the time difference between start and end dates
         $interval = $startDate->diff($endDate);
 
-        // Determine the appropriate time granularity
-        if ($interval->days > 365.2) {
-            $granularity = 'year';
-        } elseif ($interval->days > 90) {
-            $granularity = 'month';
-        } elseif ($interval->days > 30) {
-            $granularity = 'week';
-        } else {
-            $granularity = 'day';
-        }
+        $granularity = match (true) {
+            $interval->days > 365.2 => 'year',
+            $interval->days > 90 => 'month',
+            $interval->days > 30 => 'week',
+            default => 'day',
+        };
 
         $authsCounts = [
             'Accepted' => [],
             'Rejected' => [],
         ];
 
-        // Group the events based on the determined granularity
         foreach ($events as $event) {
-            // Convert event date string to DateTime object
             $eventDateTime = new DateTime($event->getAuthdate());
 
-            // Determine the time period based on granularity
             $period = match ($granularity) {
-                'year' => $eventDateTime->format('Y'),
+                'year'  => $eventDateTime->format('Y'),
                 'month' => $eventDateTime->format('Y-m'),
-                'week' => $eventDateTime->format('o-W'),
-                default => $eventDateTime->format('Y-m-d'),
+                'week'  => $eventDateTime->format('o-W'),
+                default  => $eventDateTime->format('Y-m-d'),
             };
 
-            // Initialize the period if not already set
             if (!isset($authsCounts['Accepted'][$period])) {
-                $authsCounts['Accepted'][$period] = [];
-                $authsCounts['Rejected'][$period] = [];
+                $authsCounts['Accepted'][$period] = 0;
+                $authsCounts['Rejected'][$period] = 0;
             }
 
-            // Use the timestamp down to the second for deduplication
-            $timestamp = $eventDateTime->format('Y-m-d H:i:s');
-
-            // Track unique timestamps within the period
-            if (
-                !isset($authsCounts['Accepted'][$period][$timestamp]) &&
-                !isset($authsCounts['Rejected'][$period][$timestamp])
-            ) {
-                $reply = $event->getReply();
-                if ($reply === 'Access-Accept') {
-                    $authsCounts['Accepted'][$period][$timestamp] = true;
-                } elseif ($reply === 'Access-Reject') {
-                    $authsCounts['Rejected'][$period][$timestamp] = true;
-                }
+            $reply = $event->getReply();
+            if ($reply === 'Access-Accept') {
+                $authsCounts['Accepted'][$period]++;
+            } elseif ($reply === 'Access-Reject') {
+                $authsCounts['Rejected'][$period]++;
             }
         }
 
-        // Convert the tracked timestamps into counts
-        foreach ($authsCounts['Accepted'] as $period => $timestamps) {
-            $authsCounts['Accepted'][$period] = count($timestamps);
-        }
-        foreach ($authsCounts['Rejected'] as $period => $timestamps) {
-            $authsCounts['Rejected'][$period] = count($timestamps);
-        }
-
-        // Return an array containing both the generated datasets and the counts
         return new StatisticsGenerators()->generateDatasetsAuths($authsCounts);
     }
 
     /**
      * Fetch data related to realms usage on the freeradius database
+     *
+     * @param DateTime $startDate
+     * @param DateTime $endDate
      *
      * @return array<int, array{group: string, realm: string, count: int}>
      * @throws Exception
@@ -432,43 +408,37 @@ readonly class Statistics
             $endDate,
         );
 
-        $events = $this->radiusAccountingRepository->findDistinctRealms($startDate, $endDate);
+        $events = $this->radiusAccountingRepository->fetchByDateRange($startDate, $endDate);
 
+        /** @var array<string, array<string, int>> $realmCounts */
         $realmCounts = [];
 
-        // Group the realm usage data based on the determined granularity
         foreach ($events as $event) {
-            $realm = $event['realm'];
-            $date = $event['acctStartTime'];
+            $realm = (string) $event->getRealm();
+            $date = $event->getAcctStartTime();
+
             $groupKey = match ($granularity) {
-                'year' => $date->format('Y'),
+                'year'  => $date->format('Y'),
                 'month' => $date->format('Y-m'),
-                'week' => $date->format('o-W'),
+                'week'  => $date->format('o-W'),
                 default => $date->format('Y-m-d'),
             };
 
-            if (!$realm) {
+            if ($realm === '') {
                 continue;
             }
 
-            if (!isset($realmCounts[$groupKey])) {
-                $realmCounts[$groupKey] = [];
-            }
-
-            if (!isset($realmCounts[$groupKey][$realm])) {
-                $realmCounts[$groupKey][$realm] = 0;
-            }
-
-            $realmCounts[$groupKey][$realm]++;
+            $realmCounts[$groupKey][$realm] = ($realmCounts[$groupKey][$realm] ?? 0) + 1;
         }
 
+        /** @var array<non-empty-string, array<string, int>> $realmCounts */
         $result = [];
         foreach ($realmCounts as $groupKey => $realms) {
             foreach ($realms as $realm => $count) {
                 $result[] = [
                     'group' => $groupKey,
                     'realm' => $realm,
-                    'count' => $count
+                    'count' => (int) $count,
                 ];
             }
         }
@@ -589,12 +559,12 @@ readonly class Statistics
             $endDate,
         );
 
-        $events = $this->radiusAccountingRepository->findSessionTimeRealms($startDate, $endDate);
+        $events = $this->radiusAccountingRepository->fetchByDateRange($startDate, $endDate);
         $sessionAverageTimes = [];
 
         foreach ($events as $event) {
-            $sessionTime = $event['acctSessionTime'];
-            $date = $event['acctStartTime'];
+            $sessionTime = $event->getAcctSessionTime();
+            $date = $event->getAcctStartTime();
             $groupKey = match ($granularity) {
                 'year' => $date->format('Y'),
                 'month' => $date->format('Y-m'),
@@ -614,8 +584,8 @@ readonly class Statistics
         foreach ($sessionAverageTimes as $groupKey => $data) {
             $averageSessionTime = $data['totalTime'] / $data['count'];
             $result[] = [
-                'group' => $groupKey,
-                'averageSessionTime' => $averageSessionTime
+                'group' => (string) $groupKey,
+                'averageSessionTime' => (float) $averageSessionTime,
             ];
         }
 
@@ -625,11 +595,14 @@ readonly class Statistics
     /**
      * Fetch data related to session time (total) on the freeradius database
      *
+     * @param DateTime $startDate
+     * @param DateTime $endDate
+     *
      * @return array{
      *     labels: string[],
      *     datasets: array{
      *         label: string,
-     *         data: int[],
+     *         data: float[],
      *         backgroundColor: string[],
      *         borderRadius: string,
      *         tooltips: string[]
@@ -644,28 +617,29 @@ readonly class Statistics
             $endDate,
         );
 
-        $events = $this->radiusAccountingRepository->findSessionTimeRealms($startDate, $endDate);
+        $events = $this->radiusAccountingRepository->fetchByDateRange($startDate, $endDate);
 
+        /** @var array<string, float> $sessionTotalTimes */
         $sessionTotalTimes = [];
 
         foreach ($events as $event) {
-            $sessionTime = $event['acctSessionTime'];
-            $date = $event['acctStartTime'];
-            $groupKey = match ($granularity) {
-                'year' => $date->format('Y'),
+            $sessionTime = $event->getAcctSessionTime() ?? 0;
+            $date = $event->getAcctStartTime();
+            $groupKey = (string) match ($granularity) {
+                'year'  => $date->format('Y'),
                 'month' => $date->format('Y-m'),
-                'week' => $date->format('o-W'),
+                'week'  => $date->format('o-W'),
                 default => $date->format('Y-m-d'),
             };
 
-            $sessionTotalTimes[$groupKey] = ($sessionTotalTimes[$groupKey] ?? 0) + $sessionTime;
+            $sessionTotalTimes[$groupKey] = ($sessionTotalTimes[$groupKey] ?? 0) + (float) $sessionTime;
         }
 
         $result = [];
         foreach ($sessionTotalTimes as $groupKey => $totalSessionTime) {
             $result[] = [
-                'group' => $groupKey,
-                'totalSessionTime' => $totalSessionTime
+                'group' => (string) $groupKey,
+                'totalSessionTime' => (float) $totalSessionTime,
             ];
         }
 
@@ -694,12 +668,12 @@ readonly class Statistics
             $endDate,
         );
 
-        $events = $this->radiusAccountingRepository->findWifiVersion($startDate, $endDate);
+        $events = $this->radiusAccountingRepository->fetchByDateRange($startDate, $endDate);
         $wifiUsage = [];
 
         // Group the events based on the Wi-Fi Standard
         foreach ($events as $event) {
-            $connectInfo = $event['connectInfo_start'];
+            $connectInfo = $event->getConnectInfoStart();
             $wifiStandard = $this->mapConnectInfoToWifiStandard($connectInfo);
 
             $wifiUsage[$wifiStandard] = ($wifiUsage[$wifiStandard] ?? 0) + 1;
@@ -731,12 +705,12 @@ readonly class Statistics
             $startDate,
             $endDate,
         );
-        $events = $this->radiusAccountingRepository->findApUsage($startDate, $endDate);
+        $events = $this->radiusAccountingRepository->fetchByDateRange($startDate, $endDate);
 
         $apCounts = [];
 
         foreach ($events as $event) {
-            $ap = $event['calledStationId'];
+            $ap = $event->getCalledStationId();
             if (!$ap) {
                 continue;
             }

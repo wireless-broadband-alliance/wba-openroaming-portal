@@ -89,108 +89,13 @@ class RadiusAccountingRepository extends ServiceEntityRepository
     }
 
     /**
+     * Fetch RadiusAccounting records filtered by range
+     *
      * @return RadiusAccounting[]
      */
-    public function findDistinctRealms(?DateTime $startDate, ?DateTime $endDate): array
+    public function fetchByDateRange(?DateTime $startDate, ?DateTime $endDate): array
     {
-        $queryBuilder = $this->createQueryBuilder('ra')
-            ->select('DISTINCT ra.realm, ra.acctStartTime');
-
-        // Apply date filters if provided
-        if ($startDate && $endDate) {
-            $queryBuilder
-                ->andWhere('ra.acctStartTime >= :startDate')
-                ->andWhere('ra.acctStopTime <= :endDate')
-                ->setParameter('startDate', $startDate)
-                ->setParameter('endDate', $endDate);
-        } elseif ($startDate instanceof DateTime) {
-            // If only start date is provided, search from start date to now
-            $queryBuilder
-                ->andWhere('ra.acctStartTime >= :startDate')
-                ->setParameter('startDate', $startDate);
-        } elseif ($endDate instanceof DateTime) {
-            // If only end date is provided, search from end date to the past
-            $queryBuilder
-                ->andWhere('ra.acctStopTime <= :endDate')
-                ->setParameter('endDate', $endDate);
-        }
-
-        return $queryBuilder
-            ->getQuery()
-            ->getResult();
-    }
-
-    /**
-     * @return RadiusAccounting[]
-     */
-    public function findSessionTimeRealms(?DateTime $startDate, ?DateTime $endDate): array
-    {
-        $queryBuilder = $this->createQueryBuilder('ra')
-            ->select('DISTINCT ra.realm, ra.acctSessionTime, ra.acctStartTime, ra.acctStopTime');
-
-        // Apply date filters if provided
-        if ($startDate && $endDate) {
-            $queryBuilder
-                ->andWhere('ra.acctStartTime >= :startDate')
-                ->andWhere('ra.acctStopTime <= :endDate')
-                ->setParameter('startDate', $startDate)
-                ->setParameter('endDate', $endDate);
-        } elseif ($startDate instanceof DateTime) {
-            // If only start date is provided, search from start date to now
-            $queryBuilder
-                ->andWhere('ra.acctStartTime >= :startDate')
-                ->setParameter('startDate', $startDate);
-        } elseif ($endDate instanceof DateTime) {
-            // If only end date is provided, search from end date to the past
-            $queryBuilder
-                ->andWhere('ra.acctStopTime <= :endDate')
-                ->setParameter('endDate', $endDate);
-        }
-
-        return $queryBuilder
-            ->getQuery()
-            ->getResult();
-    }
-
-    /**
-     * @return RadiusAccounting[]
-     */
-    public function findWifiVersion(?DateTime $startDate, ?DateTime $endDate): array
-    {
-        $queryBuilder = $this->createQueryBuilder('ra')
-            ->select('DISTINCT ra.realm, ra.connectInfo_start, ra.acctStartTime, ra.acctStopTime');
-
-        // Apply date filters if provided
-        if ($startDate && $endDate) {
-            $queryBuilder
-                ->andWhere('ra.acctStartTime >= :startDate')
-                ->andWhere('ra.acctStopTime <= :endDate')
-                ->setParameter('startDate', $startDate)
-                ->setParameter('endDate', $endDate);
-        } elseif ($startDate instanceof DateTime) {
-            // If only start date is provided, search from start date to now
-            $queryBuilder
-                ->andWhere('ra.acctStartTime >= :startDate')
-                ->setParameter('startDate', $startDate);
-        } elseif ($endDate instanceof DateTime) {
-            // If only end date is provided, search from end date to the past
-            $queryBuilder
-                ->andWhere('ra.acctStopTime <= :endDate')
-                ->setParameter('endDate', $endDate);
-        }
-
-        return $queryBuilder
-            ->getQuery()
-            ->getResult();
-    }
-
-    /**
-     * @return RadiusAccounting[]
-     */
-    public function findApUsage(?DateTime $startDate, ?DateTime $endDate): array
-    {
-        $queryBuilder = $this->createQueryBuilder('ra')
-            ->select('ra.calledStationId');
+        $queryBuilder = $this->createQueryBuilder('ra');
 
         // Apply date filters if provided
         if ($startDate && $endDate) {
