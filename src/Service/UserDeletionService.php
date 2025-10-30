@@ -4,6 +4,7 @@ namespace App\Service;
 
 use App\Entity\DeletedUserData;
 use App\Entity\User;
+use App\Entity\UserExternalAuth;
 use App\Enum\AnalyticalEventType;
 use App\Enum\UserRadiusProfileRevokeReason;
 use App\Enum\UserVerificationStatus;
@@ -25,7 +26,7 @@ readonly class UserDeletionService
     }
 
     /**
-     * @param object[] $userExternalAuths Array of external auth objects
+     * @param UserExternalAuth[] $userExternalAuths Array of external auth objects
      * @return array<string, mixed>
      * @throws \JsonException
      */
@@ -69,17 +70,26 @@ readonly class UserDeletionService
 
         $pgpEncryptedData = $this->encryptionService->encrypt($jsonDataCombined);
 
-        if ($pgpEncryptedData[0] === UserVerificationStatus::MISSING_PUBLIC_KEY_CONTENT->value) {
+        // Make sure encryption returned a string
+        if (!is_string($pgpEncryptedData) || empty($pgpEncryptedData)) {
             return [
                 'success' => false,
-                'message' => $this->translator->trans('publicKeyMissing', [], 'UserDeletionService')
+                'message' => $this->translator->trans('encryptionFailed', [], 'UserDeletionService'),
             ];
         }
 
-        if ($pgpEncryptedData[0] === UserVerificationStatus::EMPTY_PUBLIC_KEY_CONTENT->value) {
+        // Check for special error signals returned by the service
+        if ($pgpEncryptedData === UserVerificationStatus::MISSING_PUBLIC_KEY_CONTENT->value) {
             return [
                 'success' => false,
-                'message' => $this->translator->trans('publicKeyEmpty', [], 'UserDeletionService')
+                'message' => $this->translator->trans('publicKeyMissing', [], 'UserDeletionService'),
+            ];
+        }
+
+        if ($pgpEncryptedData === UserVerificationStatus::EMPTY_PUBLIC_KEY_CONTENT->value) {
+            return [
+                'success' => false,
+                'message' => $this->translator->trans('publicKeyEmpty', [], 'UserDeletionService'),
             ];
         }
 
