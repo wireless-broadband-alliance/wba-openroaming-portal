@@ -3,6 +3,7 @@
 namespace App\Service;
 
 use DOMDocument;
+use DOMNode;
 use DOMXPath;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -41,7 +42,16 @@ readonly class SamlResolverService
         // Extract the Audience field
         $audienceNodes = $xpath->query('//saml:Conditions/saml:AudienceRestriction/saml:Audience');
         if ($audienceNodes && $audienceNodes->length > 0) {
-            $idpEntityId = trim($audienceNodes->item(0)->textContent);
+            $firstNode = $audienceNodes->item(0);
+
+            // Ensure the node is a DOMNode
+            if (!$firstNode instanceof DOMNode) {
+                throw new AuthenticationException(
+                    $this->translator->trans('audienceNotFoundSAMLResponse', [], 'SamlResolverService')
+                );
+            }
+
+            $idpEntityId = trim($firstNode->textContent);
         } else {
             throw new AuthenticationException(
                 $this->translator->trans('audienceNotFoundSAMLResponse', [], 'SamlResolverService')
@@ -106,7 +116,9 @@ readonly class SamlResolverService
 
         if ($audienceNodes && $audienceNodes->length > 0) {
             foreach ($audienceNodes as $node) {
-                $audiences[] = trim($node->textContent);
+                if ($node instanceof DOMNode) {
+                    $audiences[] = trim((string) $node->textContent);
+                }
             }
         } else {
             throw new AuthenticationException(
