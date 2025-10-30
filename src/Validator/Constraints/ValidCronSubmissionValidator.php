@@ -182,7 +182,8 @@ class ValidCronSubmissionValidator extends ConstraintValidator
             return range($min, $max);
         }
 
-        return $values;
+        // Cast all values to int
+        return array_map('intval', $values);
     }
 
     /**
