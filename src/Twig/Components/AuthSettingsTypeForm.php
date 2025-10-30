@@ -3,6 +3,7 @@
 namespace App\Twig\Components;
 
 use App\DTO\AuthSettingsTypeDTO;
+use App\Enum\SettingName;
 use App\Form\AuthSettingsType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormInterface;
@@ -46,52 +47,50 @@ final class AuthSettingsTypeForm extends AbstractController
 
         // Submit the current DTO values
         $form->submit([
-            'AUTH_METHOD_SAML_ENABLED' => $this->authSettingsTypeDTO?->AUTH_METHOD_SAML_ENABLED,
-            'AUTH_METHOD_SAML_LABEL' => $this->authSettingsTypeDTO?->AUTH_METHOD_SAML_LABEL,
-            'AUTH_METHOD_SAML_DESCRIPTION' => $this->authSettingsTypeDTO?->AUTH_METHOD_SAML_DESCRIPTION,
-            'PROFILE_LIMIT_DATE_SAML' => $this->authSettingsTypeDTO?->PROFILE_LIMIT_DATE_SAML,
+            SettingName::AUTH_METHOD_SAML_ENABLED->value => $this->authSettingsTypeDTO->AUTH_METHOD_SAML_ENABLED,
+            SettingName::AUTH_METHOD_SAML_LABEL->value => $this->authSettingsTypeDTO->AUTH_METHOD_SAML_LABEL,
+            SettingName::AUTH_METHOD_SAML_DESCRIPTION->value => $this->authSettingsTypeDTO->AUTH_METHOD_SAML_DESCRIPTION,
+            SettingName::PROFILE_LIMIT_DATE_SAML->value => $this->authSettingsTypeDTO->PROFILE_LIMIT_DATE_SAML,
 
-            'AUTH_METHOD_GOOGLE_LOGIN_ENABLED' =>
-                $this->authSettingsTypeDTO?->AUTH_METHOD_GOOGLE_LOGIN_ENABLED,
-            'AUTH_METHOD_GOOGLE_LOGIN_LABEL' => $this->authSettingsTypeDTO?->AUTH_METHOD_GOOGLE_LOGIN_LABEL,
-            'AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION' =>
-                $this->authSettingsTypeDTO?->AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION,
-            'VALID_DOMAINS_GOOGLE_LOGIN' => $this->authSettingsTypeDTO?->VALID_DOMAINS_GOOGLE_LOGIN,
-            'PROFILE_LIMIT_DATE_GOOGLE' => $this->authSettingsTypeDTO?->PROFILE_LIMIT_DATE_GOOGLE,
+            SettingName::AUTH_METHOD_GOOGLE_LOGIN_ENABLED->value =>
+                $this->authSettingsTypeDTO->AUTH_METHOD_GOOGLE_LOGIN_ENABLED,
+            SettingName::AUTH_METHOD_GOOGLE_LOGIN_LABEL->value => $this->authSettingsTypeDTO->AUTH_METHOD_GOOGLE_LOGIN_LABEL,
+            SettingName::AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION->value =>
+                $this->authSettingsTypeDTO->AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION,
+            SettingName::VALID_DOMAINS_GOOGLE_LOGIN->value => $this->authSettingsTypeDTO->VALID_DOMAINS_GOOGLE_LOGIN,
+            SettingName::PROFILE_LIMIT_DATE_GOOGLE->value => $this->authSettingsTypeDTO->PROFILE_LIMIT_DATE_GOOGLE,
 
-            'AUTH_METHOD_MICROSOFT_LOGIN_ENABLED' =>
-                $this->authSettingsTypeDTO?->AUTH_METHOD_MICROSOFT_LOGIN_ENABLED,
-            'AUTH_METHOD_MICROSOFT_LOGIN_LABEL' =>
-                $this->authSettingsTypeDTO?->AUTH_METHOD_MICROSOFT_LOGIN_LABEL,
-            'AUTH_METHOD_MICROSOFT_LOGIN_DESCRIPTION' => $this->
-            authSettingsTypeDTO?->
-            AUTH_METHOD_MICROSOFT_LOGIN_DESCRIPTION,
-            'VALID_DOMAINS_MICROSOFT_LOGIN' => $this->authSettingsTypeDTO?->VALID_DOMAINS_MICROSOFT_LOGIN,
-            'PROFILE_LIMIT_DATE_MICROSOFT' => $this->authSettingsTypeDTO?->PROFILE_LIMIT_DATE_MICROSOFT,
+            SettingName::AUTH_METHOD_MICROSOFT_LOGIN_ENABLED->value =>
+                $this->authSettingsTypeDTO->AUTH_METHOD_MICROSOFT_LOGIN_ENABLED,
+            SettingName::AUTH_METHOD_MICROSOFT_LOGIN_LABEL->value =>
+                $this->authSettingsTypeDTO->AUTH_METHOD_MICROSOFT_LOGIN_LABEL,
+            SettingName::AUTH_METHOD_MICROSOFT_LOGIN_DESCRIPTION->value => $this->authSettingsTypeDTO->AUTH_METHOD_MICROSOFT_LOGIN_DESCRIPTION,
+            SettingName::VALID_DOMAINS_MICROSOFT_LOGIN->value => $this->authSettingsTypeDTO->VALID_DOMAINS_MICROSOFT_LOGIN,
+            SettingName::PROFILE_LIMIT_DATE_MICROSOFT->value => $this->authSettingsTypeDTO->PROFILE_LIMIT_DATE_MICROSOFT,
 
-            'AUTH_METHOD_REGISTER_ENABLED' => $this->authSettingsTypeDTO?->AUTH_METHOD_REGISTER_ENABLED,
-            'AUTH_METHOD_REGISTER_LABEL' => $this->authSettingsTypeDTO?->AUTH_METHOD_REGISTER_LABEL,
-            'AUTH_METHOD_REGISTER_DESCRIPTION' =>
-                $this->authSettingsTypeDTO?->AUTH_METHOD_REGISTER_DESCRIPTION,
-            'PROFILE_LIMIT_DATE_EMAIL' => $this->authSettingsTypeDTO?->PROFILE_LIMIT_DATE_EMAIL,
-            'EMAIL_TIMER_RESEND' => $this->authSettingsTypeDTO?->EMAIL_TIMER_RESEND,
-            'LINK_VALIDITY' => $this->authSettingsTypeDTO?->LINK_VALIDITY,
+            SettingName::AUTH_METHOD_REGISTER_ENABLED->value => $this->authSettingsTypeDTO->AUTH_METHOD_REGISTER_ENABLED,
+            SettingName::AUTH_METHOD_REGISTER_LABEL->value => $this->authSettingsTypeDTO->AUTH_METHOD_REGISTER_LABEL,
+            SettingName::AUTH_METHOD_REGISTER_DESCRIPTION->value =>
+                $this->authSettingsTypeDTO->AUTH_METHOD_REGISTER_DESCRIPTION,
+            SettingName::PROFILE_LIMIT_DATE_EMAIL->value => $this->authSettingsTypeDTO->PROFILE_LIMIT_DATE_EMAIL,
+            SettingName::EMAIL_TIMER_RESEND->value => $this->authSettingsTypeDTO->EMAIL_TIMER_RESEND,
+            SettingName::LINK_VALIDITY->value => $this->authSettingsTypeDTO->LINK_VALIDITY,
 
-            'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED' =>
-                $this->authSettingsTypeDTO?->AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED,
-            'AUTH_METHOD_LOGIN_TRADITIONAL_LABEL' =>
-                $this->authSettingsTypeDTO?->AUTH_METHOD_LOGIN_TRADITIONAL_LABEL,
-            'AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION' =>
-                $this->authSettingsTypeDTO?->AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION,
+            SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED->value =>
+                $this->authSettingsTypeDTO->AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED,
+            SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_LABEL->value =>
+                $this->authSettingsTypeDTO->AUTH_METHOD_LOGIN_TRADITIONAL_LABEL,
+            SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION->value =>
+                $this->authSettingsTypeDTO->AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION,
 
-            'LOGIN_WITH_UUID_ONLY' => $this->authSettingsTypeDTO?->LOGIN_WITH_UUID_ONLY,
+            SettingName::LOGIN_WITH_UUID_ONLY->value => $this->authSettingsTypeDTO->LOGIN_WITH_UUID_ONLY,
 
-            'AUTH_METHOD_SMS_REGISTER_ENABLED' =>
-                $this->authSettingsTypeDTO?->AUTH_METHOD_SMS_REGISTER_ENABLED,
-            'AUTH_METHOD_SMS_REGISTER_LABEL' => $this->authSettingsTypeDTO?->AUTH_METHOD_SMS_REGISTER_LABEL,
-            'AUTH_METHOD_SMS_REGISTER_DESCRIPTION' =>
-                $this->authSettingsTypeDTO?->AUTH_METHOD_SMS_REGISTER_DESCRIPTION,
-            'PROFILE_LIMIT_DATE_SMS' => $this->authSettingsTypeDTO?->PROFILE_LIMIT_DATE_SMS,
+            SettingName::AUTH_METHOD_SMS_REGISTER_ENABLED->value =>
+                $this->authSettingsTypeDTO->AUTH_METHOD_SMS_REGISTER_ENABLED,
+            SettingName::AUTH_METHOD_SMS_REGISTER_LABEL->value => $this->authSettingsTypeDTO->AUTH_METHOD_SMS_REGISTER_LABEL,
+            SettingName::AUTH_METHOD_SMS_REGISTER_DESCRIPTION->value =>
+                $this->authSettingsTypeDTO->AUTH_METHOD_SMS_REGISTER_DESCRIPTION,
+            SettingName::PROFILE_LIMIT_DATE_SMS->value => $this->authSettingsTypeDTO->PROFILE_LIMIT_DATE_SMS,
         ], false);
 
         $this->form = $form;
