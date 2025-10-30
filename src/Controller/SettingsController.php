@@ -784,15 +784,11 @@ class SettingsController extends AbstractController
         $authSettingsTypeDTO = new AuthSettingsTypeDTO();
 
         $form = $this->createForm(AuthSettingsType::class, $authSettingsTypeDTO, [
-            'settings' => $settingsTranslated,
-            'profileLimitDate' => $profileLimitDate,
-            'humanReadableExpirationDate' => $humanReadableExpirationDate
         ]);
 
         $form->handleRequest($request);
-
         if ($form->isSubmitted() && $form->isValid()) {
-            $submittedData = $form->getData();
+            dd($authSettingsTypeDTO);
 
             $settingsToUpdate = [
                 SettingName::AUTH_METHOD_SAML_ENABLED->value,
