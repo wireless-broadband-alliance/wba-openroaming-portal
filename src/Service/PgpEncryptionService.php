@@ -40,6 +40,10 @@ class PgpEncryptionService
             // Try importing the public key
             $importResult = $gpg->import($publicKeyContent);
 
+            if (!is_array($importResult) || !isset($importResult['fingerprint'])) {
+                throw new RuntimeException('Failed to import the PGP public key.');
+            }
+
             // Get errors
             $gpg->seterrormode(gnupg::ERROR_EXCEPTION);
 
