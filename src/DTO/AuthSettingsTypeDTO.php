@@ -6,63 +6,136 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 class AuthSettingsTypeDTO
 {
+    // SAML
     #[Assert\Choice(
         choices: ['true', 'false'],
         message: 'invalidChoice'
     )]
-    public ?string $AUTH_METHOD_SAML_ENABLED = null;
+    public ?string $authMethodSamlEnabled = null;
+
+    #[Assert\Length(min: 3, max: 50, minMessage: 'fieldCannotBeShorterThan', maxMessage: 'fieldCannotBeLongerThan')]
     #[Assert\NotBlank(message: 'fieldCannotBeBlank')]
-    public ?string $AUTH_METHOD_SAML_LABEL = null;
-    public ?string $AUTH_METHOD_SAML_DESCRIPTION = null;
-    public ?string $PROFILE_LIMIT_DATE_SAML = null;
+    public ?string $authMethodSamlLabel = null;
 
+    #[Assert\Length(max: 100, maxMessage: 'fieldCannotBeLongerThan')]
+    #[Assert\NotBlank(message: 'fieldCannotBeBlank')]
+    public ?string $authMethodSamlDescription = null;
+
+    #[Assert\NotBlank(message: 'fieldCannotBeBlank')]
+    #[Assert\GreaterThanOrEqual(value: 1, message: 'timerShouldNeverBeLessThan')]
+    public ?int $profileLimitDateSaml = null;
+
+    // Google
     #[Assert\Choice(
         choices: ['true', 'false'],
         message: 'invalidChoice'
     )]
-    public ?string $AUTH_METHOD_GOOGLE_LOGIN_ENABLED = null;
-    public ?string $AUTH_METHOD_GOOGLE_LOGIN_LABEL = null;
-    public ?string $AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION = null;
-    public ?string $VALID_DOMAINS_GOOGLE_LOGIN = null;
-    public ?string $PROFILE_LIMIT_DATE_GOOGLE = null;
+    public ?string $authMethodGOOGLELoginEnabled = null;
 
+    #[Assert\Length(min: 3, max: 50, minMessage: 'fieldCannotBeShorterThan', maxMessage: 'fieldCannotBeLongerThan')]
+    #[Assert\NotBlank(message: 'fieldCannotBeBlank')]
+    public ?string $authMethodGOOGLELoginLabel = null;
+
+    #[Assert\Length(max: 100, maxMessage: 'fieldCannotBeLongerThan')]
+    #[Assert\NotBlank(message: 'fieldCannotBeBlank')]
+    public ?string $authMethodGOOGLELoginDescription = null;
+
+    #[Assert\NotBlank(message: 'fieldCannotBeBlank')]
+    public ?string $validDomainsGOOGLELogin = null;
+
+    #[Assert\NotBlank(message: 'fieldCannotBeBlank')]
+    #[Assert\GreaterThanOrEqual(value: 1, message: 'timerShouldNeverBeLessThan')]
+    public ?int $profileLimitDateGOOGLE = null;
+
+    // Microsoft
     #[Assert\Choice(
         choices: ['true', 'false'],
         message: 'invalidChoice'
     )]
-    public ?string $AUTH_METHOD_MICROSOFT_LOGIN_ENABLED = null;
-    public ?string $AUTH_METHOD_MICROSOFT_LOGIN_LABEL = null;
-    public ?string $AUTH_METHOD_MICROSOFT_LOGIN_DESCRIPTION = null;
-    public ?string $VALID_DOMAINS_MICROSOFT_LOGIN = null;
-    public ?string $PROFILE_LIMIT_DATE_MICROSOFT = null;
+    public ?string $authMethodMICROSOFTLoginEnabled = null;
 
+    #[Assert\Length(min: 3, max: 50, minMessage: 'fieldCannotBeShorterThan', maxMessage: 'fieldCannotBeLongerThan')]
+    #[Assert\NotBlank(message: 'fieldCannotBeBlank')]
+    public ?string $authMethodMICROSOFTLoginLabel = null;
+
+    #[Assert\Length(max: 100, maxMessage: 'fieldCannotBeLongerThan')]
+    #[Assert\NotBlank(message: 'fieldCannotBeBlank')]
+    public ?string $authMethodMICROSOFTLoginDescription = null;
+
+    #[Assert\NotBlank(message: 'fieldCannotBeBlank')]
+    public ?string $validDomainsMICROSOFTLogin = null;
+
+    #[Assert\NotBlank(message: 'fieldCannotBeBlank')]
+    #[Assert\GreaterThanOrEqual(value: 1, message: 'timerShouldNeverBeLessThan')]
+    public ?int $profileLimitDateMICROSOFT = null;
+
+    // Email
     #[Assert\Choice(
         choices: ['true', 'false'],
         message: 'invalidChoice'
     )]
-    public ?string $AUTH_METHOD_REGISTER_ENABLED = null;
-    public ?string $AUTH_METHOD_REGISTER_LABEL = null;
-    public ?string $AUTH_METHOD_REGISTER_DESCRIPTION = null;
-    public ?string $PROFILE_LIMIT_DATE_EMAIL = null;
-    public ?string $EMAIL_TIMER_RESEND = null;
-    public ?string $LINK_VALIDITY = null;
+    public ?string $authMethodRegisterEnabled = null;
 
+    #[Assert\Length(min: 3, max: 50, minMessage: 'fieldCannotBeShorterThan', maxMessage: 'fieldCannotBeLongerThan')]
+    #[Assert\NotBlank(message: 'fieldCannotBeBlank')]
+    public ?string $authMethodRegisterLabel = null;
+
+    #[Assert\Length(max: 100, maxMessage: 'fieldCannotBeLongerThan')]
+    #[Assert\NotBlank(message: 'fieldCannotBeBlank')]
+    public ?string $authMethodRegisterDescription = null;
+
+    #[Assert\NotBlank(message: 'fieldCannotBeBlank')]
+    #[Assert\GreaterThanOrEqual(value: 1, message: 'timerShouldNeverBeLessThan')]
+    public ?int $profileLimitDateEmail = null;
+
+    #[Assert\Length( max: 3, maxMessage: 'fieldCannotBeLongerThan')]
+    #[Assert\GreaterThanOrEqual(value: 1, message: 'timerShouldNeverBeLessThan')]
+    #[Assert\NotBlank(message: 'fieldCannotBeBlank')]
+    public ?int $emailTimerResend = null;
+
+    #[Assert\Length( max: 3, maxMessage: 'fieldCannotBeLongerThan')]
+    #[Assert\GreaterThanOrEqual(value: 1, message: 'timerShouldNeverBeLessThan')]
+    #[Assert\NotBlank(message: 'fieldCannotBeBlank')]
+    public ?int $LinkValidity = null;
+
+    // Login
     #[Assert\Choice(
         choices: ['true', 'false'],
         message: 'invalidChoice'
     )]
-    public ?string $AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED = null;
-    public ?string $AUTH_METHOD_LOGIN_TRADITIONAL_LABEL = null;
-    public ?string $AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION = null;
+    public ?string $authMethodLoginTraditionalEnabled = null;
 
-    public ?string $LOGIN_WITH_UUID_ONLY = null;
+    #[Assert\Length(min: 3, max: 50, minMessage: 'fieldCannotBeShorterThan', maxMessage: 'fieldCannotBeLongerThan')]
+    #[Assert\NotBlank(message: 'fieldCannotBeBlank')]
+    public ?string $authMethodLoginTraditionalLabel = null;
 
+    #[Assert\Length(max: 100, maxMessage: 'fieldCannotBeLongerThan')]
+    #[Assert\NotBlank(message: 'fieldCannotBeBlank')]
+    public ?string $authMethodLoginTraditionalDescription = null;
+
+    // Login with UUID only
     #[Assert\Choice(
         choices: ['true', 'false'],
         message: 'invalidChoice'
     )]
-    public ?string $AUTH_METHOD_SMS_REGISTER_ENABLED = null;
-    public ?string $AUTH_METHOD_SMS_REGISTER_LABEL = null;
-    public ?string $AUTH_METHOD_SMS_REGISTER_DESCRIPTION = null;
-    public ?string $PROFILE_LIMIT_DATE_SMS = null;
+    public ?string $loginWithUUIDOnly = null;
+
+    // SMS
+    #[Assert\Choice(
+        choices: ['true', 'false'],
+        message: 'invalidChoice'
+    )]
+    public ?string $authMethodSMSRegisterEnabled = null;
+
+    #[Assert\Length(min: 3, max: 50, minMessage: 'fieldCannotBeShorterThan', maxMessage: 'fieldCannotBeLongerThan')]
+    #[Assert\NotBlank(message: 'fieldCannotBeBlank')]
+    public ?string $authMethodSMSRegisterLabel = null;
+
+    #[Assert\Length(max: 100, maxMessage: 'fieldCannotBeLongerThan')]
+    #[Assert\NotBlank(message: 'fieldCannotBeBlank')]
+    public ?string $authMethodSMSRegisterDescription = null;
+
+    #[Assert\NotBlank(message: 'fieldCannotBeBlank')]
+    #[Assert\GreaterThanOrEqual(value: 1, message: 'timerShouldNeverBeLessThan')]
+    public ?int $profileLimitDateSMS = null;
 }
