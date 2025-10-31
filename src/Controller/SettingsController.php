@@ -536,6 +536,7 @@ class SettingsController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function settingsLDAP(Request $request): Response
     {
+        /** @var array<string, array{value: string, description: string}> $data */
         $data = $this->getSettings->getSettings();
 
         /** @var User $currentUser */
@@ -588,6 +589,7 @@ class SettingsController extends AbstractController
     public function settingsRadius(
         Request $request,
     ): Response {
+        /** @var array<string, array{value: string, description: string}> $data */
         $data = $this->getSettings->getSettings();
 
         /** @var User $currentUser */
@@ -640,6 +642,7 @@ class SettingsController extends AbstractController
     public function settingsStatus(
         Request $request
     ): Response {
+        /** @var array<string, array{value: string, description: string}> $data */
         $data = $this->getSettings->getSettings();
 
         /** @var User $currentUser */
@@ -688,6 +691,7 @@ class SettingsController extends AbstractController
     public function settingsTwoFA(
         Request $request,
     ): Response {
+        /** @var array<string, array{value: string, description: string}> $data */
         $data = $this->getSettings->getSettings();
 
         /** @var User $currentUser */
@@ -829,6 +833,7 @@ class SettingsController extends AbstractController
     public function settingsCAPPORT(
         Request $request,
     ): Response {
+        /** @var array<string, array{value: string, description: string}> $data */
         $data = $this->getSettings->getSettings();
 
         /** @var User $currentUser */
@@ -877,6 +882,7 @@ class SettingsController extends AbstractController
     public function settingsSMS(
         Request $request
     ): Response {
+        /** @var array<string, array{value: string, description: string}> $data */
         $data = $this->getSettings->getSettings();
 
         /** @var User $currentUser */
