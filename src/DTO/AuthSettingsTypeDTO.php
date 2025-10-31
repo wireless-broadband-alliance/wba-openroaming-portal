@@ -2,6 +2,7 @@
 
 namespace App\DTO;
 
+use App\Enum\SettingName;
 use Symfony\Component\Validator\Constraints as Assert;
 
 
@@ -203,4 +204,48 @@ class AuthSettingsTypeDTO
     )]
     #[Assert\GreaterThanOrEqual(value: 1, message: 'timerShouldNeverBeLessThan')]
     public ?int $profileLimitDateSMS = null;
+
+
+    /**
+     * Initialize DTO from settings array.
+     *
+     * @param array<string, array{value: string|null, description?: string}> $data
+     */
+    public function __construct(array $data = [])
+    {
+        $this->authMethodSamlEnabled = $data[SettingName::AUTH_METHOD_SAML_ENABLED->value]['value'] ?? null;
+        $this->authMethodSamlLabel = $data[SettingName::AUTH_METHOD_SAML_LABEL->value]['value'] ?? null;
+        $this->authMethodSamlDescription = $data[SettingName::AUTH_METHOD_REGISTER_DESCRIPTION->value]['value'] ?? null;
+        $this->profileLimitDateSaml = $data[SettingName::PROFILE_LIMIT_DATE_SAML->value]['value'] ?? null;
+
+        $this->authMethodGOOGLELoginEnabled = $data[SettingName::AUTH_METHOD_GOOGLE_LOGIN_ENABLED->value]['value'] ?? null;
+        $this->authMethodGOOGLELoginLabel = $data[SettingName::AUTH_METHOD_SAML_LABEL->value]['value'] ?? null;
+        $this->authMethodGOOGLELoginDescription = $data[SettingName::AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION->value]['value'] ?? null;
+        $this->validDomainsGOOGLELogin = $data[SettingName::VALID_DOMAINS_GOOGLE_LOGIN->value]['value'] ?? null;
+        $this->profileLimitDateGOOGLE = $data[SettingName::PROFILE_LIMIT_DATE_GOOGLE->value]['value'] ?? null;
+
+        $this->authMethodMICROSOFTLoginEnabled = $data[SettingName::AUTH_METHOD_MICROSOFT_LOGIN_ENABLED->value]['value'] ?? null;
+        $this->authMethodMICROSOFTLoginLabel = $data[SettingName::AUTH_METHOD_MICROSOFT_LOGIN_LABEL->value]['value'] ?? null;
+        $this->authMethodMICROSOFTLoginDescription = $data[SettingName::AUTH_METHOD_MICROSOFT_LOGIN_DESCRIPTION->value]['value'] ?? null;
+        $this->validDomainsMICROSOFTLogin = $data[SettingName::VALID_DOMAINS_MICROSOFT_LOGIN->value]['value'] ?? null;
+        $this->profileLimitDateMICROSOFT = $data[SettingName::PROFILE_LIMIT_DATE_MICROSOFT->value]['value'] ?? null;
+
+        $this->authMethodRegisterEnabled = $data[SettingName::AUTH_METHOD_REGISTER_ENABLED->value]['value'] ?? null;
+        $this->authMethodRegisterLabel = $data[SettingName::AUTH_METHOD_REGISTER_LABEL->value]['value'] ?? null;
+        $this->authMethodRegisterDescription = $data[SettingName::AUTH_METHOD_REGISTER_DESCRIPTION->value]['value'] ?? null;
+        $this->profileLimitDateEmail = $data[SettingName::PROFILE_LIMIT_DATE_EMAIL->value]['value'] ?? null;
+        $this->emailTimerResend = $data[SettingName::EMAIL_TIMER_RESEND->value]['value'] ?? null;
+        $this->LinkValidity = $data[SettingName::LINK_VALIDITY->value]['value'] ?? null;
+
+        $this->authMethodLoginTraditionalEnabled = $data[SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED->value]['value'] ?? null;
+        $this->authMethodLoginTraditionalLabel = $data[SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_LABEL->value]['value'] ?? null;
+        $this->authMethodLoginTraditionalDescription = $data[SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION->value]['value'] ?? null;
+
+        $this->loginWithUUIDOnly = $data[SettingName::LOGIN_WITH_UUID_ONLY->value]['value'] ?? null;
+
+        $this->authMethodSMSRegisterEnabled = $data[SettingName::AUTH_METHOD_SMS_REGISTER_ENABLED->value]['value'] ?? null;
+        $this->authMethodSMSRegisterLabel = $data[SettingName::AUTH_METHOD_SMS_REGISTER_LABEL->value]['value'] ?? null;
+        $this->authMethodSMSRegisterDescription = $data[SettingName::AUTH_METHOD_SMS_REGISTER_DESCRIPTION->value]['value'] ?? null;
+        $this->profileLimitDateSMS = $data[SettingName::PROFILE_LIMIT_DATE_SMS->value]['value'] ?? null;
+    }
 }

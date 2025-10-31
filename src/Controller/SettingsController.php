@@ -781,7 +781,7 @@ class SettingsController extends AbstractController
         // Get the settings value according to the language
         $settingsTranslated = $this->getSettings->getSettingsByLocale($settings, $data);
 
-        $authSettingsTypeDTO = new AuthSettingsTypeDTO();
+        $authSettingsTypeDTO = new AuthSettingsTypeDTO($data);
 
         $form = $this->createForm(AuthSettingsType::class, $authSettingsTypeDTO, [
         ]);
