@@ -58,7 +58,7 @@ class FreeradiusLastConnectionCommand extends Command
             'name' => SettingName::TIME_STAMP_FREERADIUS_CRON->value
         ]);
         if ($timestampFreeradiusCron && is_null($timestampFreeradiusCron->getValue())) {
-            $timestampFreeradiusCron->setValue((string)0);
+            $timestampFreeradiusCron->setValue("0");
         }
 
         if (!$timestampFreeradiusCron) {
@@ -85,16 +85,9 @@ class FreeradiusLastConnectionCommand extends Command
 
         $updated = false;
 
-        $latestConnectionTime = $this->radiusAccountingRepository->findLatestConnectionTime();
-        $latestStartTime = $latestConnectionTime['acctStartTime'] ?? null;
-
-        if ($latestStartTime instanceof \DateTimeInterface) {
-            $latestTimestamp = $latestStartTime->getTimestamp();
-        } else {
-            $latestTimestamp = (int)$latestStartTime;
-        }
-
-        if ((int)$timestampFreeradiusCron->getValue() < $latestTimestamp) {
+        $latestTimestamp = $this->radiusAccountingRepository->findLatestConnectionTime();
+        $cronTimestamp = (int)$timestampFreeradiusCron->getValue();
+        if ($latestTimestamp !== null && $cronTimestamp < $latestTimestamp) {
             $this->entityManager->beginTransaction();
 
             try {
@@ -106,13 +99,13 @@ class FreeradiusLastConnectionCommand extends Command
 
                 $profileMap = [];
                 foreach ($activeProfiles as $profileData) {
-                    $profileMap[$profileData['radius_user']] = $profileData;
+                    $profileMap[$profileData->getRadiusUser()] = $profileData;
                 }
 
                 foreach ($radAcct as $row) {
-                    $username = $row['username'] ?? null;
-                    $startTime = $row['acctStartTime'] ?? null;
-                    $stopTime = $row['acctStopTime'] ?? null;
+                    $username = $row->getUsername() ?? null;
+                    $startTime = $row->getAcctStartTime() ?? null;
+                    $stopTime = $row->getAcctStopTime() ?? null;
 
                     if (!$username || !$startTime || !$stopTime) {
                         continue;
@@ -124,14 +117,16 @@ class FreeradiusLastConnectionCommand extends Command
                     $entity = $profileMap[$username];
                     $needsUpdate = false;
 
-                    if ($entity['lastConnectionStartAt'] === null || $startTime > $entity['lastConnectionStartAt']) {
-                        $entity['lastConnectionStartAt'] = $startTime;
+                    if (
+                        $entity->getLastConnectionStartAt() === null || $startTime > $entity->getLastConnectionStartAt()
+                    ) {
+                        $entity->setLastConnectionStartAt($startTime);
                         $needsUpdate = true;
                     }
                     if (
-                        $entity['lastConnectionStopAt'] === null || $stopTime > $entity['lastConnectionStopAt']
+                        $entity->getLastConnectionStopAt() === null || $stopTime > $entity->getLastConnectionStopAt()
                     ) {
-                        $entity['lastConnectionStopAt'] = $stopTime;
+                        $entity->setLastConnectionStopAt($stopTime);
                         $needsUpdate = true;
                     }
 

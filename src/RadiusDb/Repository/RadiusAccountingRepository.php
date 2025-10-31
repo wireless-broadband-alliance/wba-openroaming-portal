@@ -5,7 +5,9 @@ namespace App\RadiusDb\Repository;
 use App\RadiusDb\Entity\RadiusAccounting;
 use DateTime;
 use DateTimeImmutable;
+use DateTimeInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\AbstractQuery;
 use Doctrine\ORM\Query;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -121,10 +123,7 @@ class RadiusAccountingRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    /**
-     * @return RadiusAccounting[]
-     */
-    public function findLatestConnectionTime(?int $sinceTimestamp = null): ?array
+    public function findLatestConnectionTime(?int $sinceTimestamp = null): ?int
     {
         $qb = $this->createQueryBuilder('ra')
             ->select('ra.acctStartTime')
@@ -133,14 +132,18 @@ class RadiusAccountingRepository extends ServiceEntityRepository
 
         if ($sinceTimestamp !== null) {
             $sinceDateTime = new DateTimeImmutable()->setTimestamp($sinceTimestamp);
-
-            $qb->where('ra.acctStartTime >= :since')
+            $qb->andWhere('ra.acctStartTime >= :since')
                 ->setParameter('since', $sinceDateTime);
         }
 
-        return $qb->getQuery()->getOneOrNullResult();
-    }
+        $latest = $qb->getQuery()->getOneOrNullResult(AbstractQuery::HYDRATE_ARRAY);
 
+        if (!$latest || !isset($latest['acctStartTime'])) {
+            return null;
+        }
+
+        return $latest['acctStartTime']->getTimestamp();
+    }
 
     /**
      * @throws \DateMalformedStringException
@@ -158,10 +161,9 @@ class RadiusAccountingRepository extends ServiceEntityRepository
             ->getDQL();
 
         // Main query to fetch the rows where acctStartTime is the latest per user
-        $qb->select('ra.username, ra.acctStartTime, ra.acctStopTime')
-            ->where('ra.acctStartTime = (' . $sub . ')')
+        $qb->where('ra.acctStartTime = (' . $sub . ')')
             ->setParameter('since', new DateTimeImmutable('@' . $sinceTimestamp));
 
-        return $qb->getQuery()->getArrayResult();
+        return $qb->getQuery()->getResult();
     }
 }
