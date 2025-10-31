@@ -66,6 +66,7 @@ class FreeradiusController extends AbstractController
             );
         }
 
+        /** @var array<string, array{value: string, description: string}> $data */
         $data = $this->getSettings->getSettings();
 
         $user = $this->getUser();
@@ -102,6 +103,7 @@ class FreeradiusController extends AbstractController
             $this->radiusAuthsRepository,
             $this->radiusAccountingRepository
         );
+
         $fetchChartAuthenticationsFreeradius = $statisticsService
             ->fetchChartAuthenticationsFreeradius($startDate, $endDate);
         $fetchChartRealmsFreeradius = $statisticsService->fetchChartRealmsFreeradius($startDate, $endDate);
@@ -310,18 +312,6 @@ class FreeradiusController extends AbstractController
                 'total_input' => number_format($totalInput / (1024 * 1024 * 1024), 1),
                 'total_output_flat' => $totalOutput,
                 'total_output' => number_format($totalOutput / (1024 * 1024 * 1024), 1),
-            ];
-        }
-
-        // Prepare the realm Usage data for Excel
-        $realmUsageData = [];
-        foreach ($fetchChartRealmsFreeradius as $session_date) {
-            $realm = $fetchChartRealmsFreeradius[0]['realm'] ?? 0;
-            $totalCount = $fetchChartRealmsFreeradius[0]['count'] ?? 0;
-
-            $realmUsageData[] = [
-                'realm' => $realm,
-                'total_count' => $totalCount,
             ];
         }
 

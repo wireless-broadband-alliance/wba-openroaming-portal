@@ -345,10 +345,10 @@ readonly class Statistics
      *         backgroundColor: string[],
      *         borderRadius: string
      *     }[]
-     * }|JsonResponse
-     * @throws Exception
+     * }
+     * @throws \DateMalformedStringException
      */
-    public function fetchChartAuthenticationsFreeradius(DateTime $startDate, DateTime $endDate): JsonResponse|array
+    public function fetchChartAuthenticationsFreeradius(DateTime $startDate, DateTime $endDate): array
     {
         $events = $this->radiusAuthsRepository->findAuthRequests($startDate, $endDate);
 
@@ -370,10 +370,10 @@ readonly class Statistics
             $eventDateTime = new DateTime($event->getAuthdate());
 
             $period = match ($granularity) {
-                'year'  => $eventDateTime->format('Y'),
+                'year' => $eventDateTime->format('Y'),
                 'month' => $eventDateTime->format('Y-m'),
-                'week'  => $eventDateTime->format('o-W'),
-                default  => $eventDateTime->format('Y-m-d'),
+                'week' => $eventDateTime->format('o-W'),
+                default => $eventDateTime->format('Y-m-d'),
             };
 
             if (!isset($authsCounts['Accepted'][$period])) {
@@ -414,13 +414,13 @@ readonly class Statistics
         $realmCounts = [];
 
         foreach ($events as $event) {
-            $realm = (string) $event->getRealm();
+            $realm = (string)$event->getRealm();
             $date = $event->getAcctStartTime();
 
             $groupKey = match ($granularity) {
-                'year'  => $date->format('Y'),
+                'year' => $date->format('Y'),
                 'month' => $date->format('Y-m'),
-                'week'  => $date->format('o-W'),
+                'week' => $date->format('o-W'),
                 default => $date->format('Y-m-d'),
             };
 
@@ -438,7 +438,7 @@ readonly class Statistics
                 $result[] = [
                     'group' => $groupKey,
                     'realm' => $realm,
-                    'count' => (int) $count,
+                    'count' => (int)$count,
                 ];
             }
         }
@@ -584,8 +584,8 @@ readonly class Statistics
         foreach ($sessionAverageTimes as $groupKey => $data) {
             $averageSessionTime = $data['totalTime'] / $data['count'];
             $result[] = [
-                'group' => (string) $groupKey,
-                'averageSessionTime' => (float) $averageSessionTime,
+                'group' => (string)$groupKey,
+                'averageSessionTime' => (float)$averageSessionTime,
             ];
         }
 
@@ -607,10 +607,10 @@ readonly class Statistics
      *         borderRadius: string,
      *         tooltips: string[]
      *     }[]
-     * }|JsonResponse
+     * }
      * @throws Exception
      */
-    public function fetchChartSessionTotalFreeradius(DateTime $startDate, DateTime $endDate): JsonResponse|array
+    public function fetchChartSessionTotalFreeradius(DateTime $startDate, DateTime $endDate): array
     {
         [$startDate, $endDate, $granularity] = $this->determineDateRangeAndGranularity(
             $startDate,
@@ -625,7 +625,8 @@ readonly class Statistics
         foreach ($events as $event) {
             $sessionTime = $event->getAcctSessionTime() ?? 0;
             $date = $event->getAcctStartTime();
-            $groupKey = (string) match ($granularity) {
+
+            $groupKey = match ($granularity) {
                 'year'  => $date->format('Y'),
                 'month' => $date->format('Y-m'),
                 'week'  => $date->format('o-W'),
@@ -635,6 +636,7 @@ readonly class Statistics
             $sessionTotalTimes[$groupKey] = ($sessionTotalTimes[$groupKey] ?? 0) + (float) $sessionTime;
         }
 
+        /** @var array<int, array{group: string, totalSessionTime: float}> $result */
         $result = [];
         foreach ($sessionTotalTimes as $groupKey => $totalSessionTime) {
             $result[] = [
@@ -645,7 +647,6 @@ readonly class Statistics
 
         return new StatisticsGenerators()->generateDatasetsSessionTotal($result);
     }
-
 
     /**
      * Fetch data related to Wi-Fi tag usage on the freeradius database
@@ -658,15 +659,12 @@ readonly class Statistics
      *         backgroundColor: string[],
      *         borderRadius: string
      *     }[]
-     * }|JsonResponse
+     * }
      * @throws Exception
      */
-    public function fetchChartWifiVersion(DateTime $startDate, DateTime $endDate): JsonResponse|array
+    public function fetchChartWifiVersion(DateTime $startDate, DateTime $endDate): array
     {
-        [$startDate, $endDate] = $this->determineDateRangeAndGranularity(
-            $startDate,
-            $endDate,
-        );
+        [$startDate, $endDate] = $this->determineDateRangeAndGranularity($startDate, $endDate);
 
         $events = $this->radiusAccountingRepository->fetchByDateRange($startDate, $endDate);
         $wifiUsage = [];
@@ -683,14 +681,14 @@ readonly class Statistics
         foreach ($wifiUsage as $standard => $count) {
             $result[] = [
                 'standard' => $standard,
-                'count' => $count
+                'count' => $count,
             ];
         }
 
         // Sort $result array by descending count
         usort($result, static fn($a, $b) => $b['count'] <=> $a['count']);
 
-        return new StatisticsGenerators()->generateDatasetsWifiTags($result);
+        return (new StatisticsGenerators())->generateDatasetsWifiTags($result);
     }
 
     /**
