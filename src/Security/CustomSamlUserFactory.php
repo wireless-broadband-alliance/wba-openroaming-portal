@@ -9,10 +9,11 @@ namespace App\Security;
 use ApiPlatform\Metadata\UrlGeneratorInterface;
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
+use App\Enum\PlatformMode;
 use App\Enum\SettingName;
 use App\Enum\UserProvider;
+use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
-use App\Service\GetSettings;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Nbgrp\OneloginSamlBundle\Security\User\SamlUserFactoryInterface;
@@ -40,10 +41,10 @@ class CustomSamlUserFactory implements SamlUserFactoryInterface
     public function __construct(
         private readonly UserRepository $userRepository,
         private readonly EntityManagerInterface $entityManager,
-        private readonly GetSettings $getSettings,
         private readonly UrlGeneratorInterface $urlGenerator,
         RequestStack $requestStack,
-        private readonly TranslatorInterface $translator
+        private readonly TranslatorInterface $translator,
+        private readonly SettingRepository $settingRepository
     ) {
         $this->session = $requestStack->getSession();
         $this->attribute_mapping = [
@@ -65,9 +66,9 @@ class CustomSamlUserFactory implements SamlUserFactoryInterface
     public function createUser(string $identifier, array $attributes): UserInterface
     {
         // Call the getSettings method of GetSettings class to retrieve the data
-        $data = $this->getSettings->getSettings();
+        $platformModeStatus = $this->settingRepository->findOneBy(['name' => SettingName::PLATFORM_MODE]);
 
-        if ($data[SettingName::PLATFORM_MODE->value]['value'] === true) {
+        if ($platformModeStatus == PlatformMode::DEMO->value) {
             throw new RuntimeException(
                 $this->translator->trans('impossibleUseThisAuthenticationMethodInDemoMode', [], 'Security')
             );
@@ -149,7 +150,7 @@ class CustomSamlUserFactory implements SamlUserFactoryInterface
     }
 
     /**
-     * @param array<string, list<string>> $attributes
+     * @param array<string, array<int, string>> $attributes
      */
     private function getAttributeValue(array $attributes, string $attribute): mixed
     {
