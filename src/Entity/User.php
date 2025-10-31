@@ -9,6 +9,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use libphonenumber\PhoneNumber;
+use LogicException;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -228,7 +229,11 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
      */
     public function getUserIdentifier(): string
     {
-        return (string)$this->uuid;
+        if (empty($this->uuid)) {
+            throw new LogicException('User UUID cannot be empty.');
+        }
+
+        return $this->uuid;
     }
 
     /**
