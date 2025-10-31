@@ -228,10 +228,12 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
 
         if ($searchTerm !== null) {
             $qb->andWhere(
-                'u.uuid LIKE :searchTerm OR
-                 u.email LIKE :searchTerm OR
-                 u.first_name LIKE :searchTerm OR
-                 u.last_name LIKE :searchTerm'
+                '(' .
+                'u.uuid LIKE :searchTerm OR ' .
+                'u.email LIKE :searchTerm OR ' .
+                'u.first_name LIKE :searchTerm OR ' .
+                'u.last_name LIKE :searchTerm' .
+                ')'
             )
                 ->setParameter('searchTerm', '%' . $searchTerm . '%');
         }
@@ -243,7 +245,7 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
             $qb->andWhere('u.bannedAt IS NOT NULL');
         }
 
-        return $qb->getQuery()->getSingleScalarResult();
+        return (int) $qb->getQuery()->getSingleScalarResult();
     }
 
     /**
@@ -262,22 +264,24 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
 
         if ($searchTerm !== null) {
             $qb->andWhere(
-                'u.uuid LIKE :searchTerm OR
-                 u.email LIKE :searchTerm OR
-                 u.first_name LIKE :searchTerm OR
-                 u.last_name LIKE :searchTerm'
+                '(' .
+                'u.uuid LIKE :searchTerm OR ' .
+                'u.email LIKE :searchTerm OR ' .
+                'u.first_name LIKE :searchTerm OR ' .
+                'u.last_name LIKE :searchTerm' .
+                ')'
             )
                 ->setParameter('searchTerm', '%' . $searchTerm . '%');
         }
 
-        return $qb->getQuery()->getSingleScalarResult();
+        return (int) $qb->getQuery()->getSingleScalarResult();
     }
 
     /**
      * @throws NonUniqueResultException
      * @throws NoResultException
      */
-    public function totalBannedUsers(?string $searchTerm = null): int
+    public function countBannedUsers(?string $searchTerm = null): int
     {
         $qb = $this->createQueryBuilder('u');
         $qb->select('COUNT(u.id)')
@@ -286,15 +290,17 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
 
         if ($searchTerm !== null) {
             $qb->andWhere(
-                'u.uuid LIKE :searchTerm OR
-                 u.email LIKE :searchTerm OR
-                 u.first_name LIKE :searchTerm OR
-                 u.last_name LIKE :searchTerm'
+                '(' .
+                'u.uuid LIKE :searchTerm OR ' .
+                'u.email LIKE :searchTerm OR ' .
+                'u.first_name LIKE :searchTerm OR ' .
+                'u.last_name LIKE :searchTerm' .
+                ')'
             )
                 ->setParameter('searchTerm', '%' . $searchTerm . '%');
         }
 
-        return $qb->getQuery()->getSingleScalarResult();
+        return (int) $qb->getQuery()->getSingleScalarResult();
     }
 
     public function findAdmin(): ?User

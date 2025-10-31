@@ -91,7 +91,7 @@ readonly class MetricsService
             $userGauge->set($verifiedUsers, ['state' => 'verified']);
             $this->logger->info('Set verified users metric: ' . $verifiedUsers);
 
-            $bannedUsers = $this->userRepository->totalBannedUsers();
+            $bannedUsers = $this->userRepository->countBannedUsers();
             $userGauge->set($bannedUsers, ['state' => 'banned']);
             $this->logger->info('Set banned users metric: ' . $bannedUsers);
         } catch (Exception $e) {

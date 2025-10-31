@@ -81,7 +81,7 @@ class AdminController extends AbstractController
         // Fetch user counts for table header (All/Verified/Banned)
         $allUsersCount = $this->userRepository->countAllUsersExcludingAdmin($searchTerm, $filter);
         $verifiedUsersCount = $this->userRepository->countVerifiedUsers($searchTerm);
-        $bannedUsersCount = $this->userRepository->totalBannedUsers($searchTerm);
+        $bannedUsersCount = $this->userRepository->countBannedUsers($searchTerm);
 
         // Check if the export users operation is enabled
         $exportUsers = $this->parameterBag->get('app.export_users');
