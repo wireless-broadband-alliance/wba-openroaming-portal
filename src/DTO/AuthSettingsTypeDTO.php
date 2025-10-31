@@ -2,6 +2,7 @@
 
 namespace App\DTO;
 
+use App\Enum\OperationMode;
 use App\Enum\SettingName;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -172,7 +173,7 @@ class AuthSettingsTypeDTO
 
     // Login with UUID only
     #[Assert\Choice(
-        choices: ['true', 'false'],
+        choices: [OperationMode::ON->value, OperationMode::OFF->value],
         message: 'invalidChoice'
     )]
     public ?string $loginWithUUIDOnly = null;

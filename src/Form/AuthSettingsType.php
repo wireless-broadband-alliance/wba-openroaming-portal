@@ -129,8 +129,8 @@ class AuthSettingsType extends AbstractType
             // Login with UUID only
             ->add('loginWithUUIDOnly', ChoiceType::class, [
                 'choices' => [
-                    OperationMode::ON->value => 'true',
-                    OperationMode::OFF->value => 'false',
+                    OperationMode::ON->value => OperationMode::ON->value,
+                    OperationMode::OFF->value => OperationMode::OFF->value,
                 ],
                 'required' => false,
             ])
