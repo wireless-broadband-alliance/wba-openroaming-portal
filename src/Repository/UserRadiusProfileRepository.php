@@ -68,18 +68,13 @@ class UserRadiusProfileRepository extends ServiceEntityRepository
 //    }
 
     /**
-     * Returns array of arrays with only radius_user, lastConnectionStartAt, lastConnectionStopAt
+     * Returns all active UserRadiusProfile entities
      *
-     * @return array<int, array{
-     *     radius_user: string,
-     *     lastConnectionStartAt: \DateTimeInterface|null,
-     *     lastConnectionStopAt: \DateTimeInterface|null
-     * }>
+     * @return UserRadiusProfile[]
      */
     public function findRadiusUserAndConnectionTimes(): array
     {
         return $this->createQueryBuilder('u')
-            ->select('partial u.{id, radius_user, lastConnectionStartAt, lastConnectionStopAt}')
             ->where('u.status = :active')
             ->setParameter('active', UserRadiusProfileStatus::ACTIVE->value)
             ->getQuery()
