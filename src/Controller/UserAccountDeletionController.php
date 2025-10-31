@@ -79,9 +79,13 @@ class UserAccountDeletionController extends AbstractController
 
             return $this->redirectToRoute('app_landing');
         }
-        if (
-            $data[SettingName::LOGIN_WITH_UUID_ONLY->value]['value'] === OperationMode::ON->value
-        ) {
+
+        $loginWithUuidOnly = false;
+        if (is_array($data) && isset($data[SettingName::LOGIN_WITH_UUID_ONLY->value]['value'])) {
+            $loginWithUuidOnly = $data[SettingName::LOGIN_WITH_UUID_ONLY->value]['value'] === OperationMode::ON->value;
+        }
+
+        if ($loginWithUuidOnly) {
             if (
                 $this->twoFAService->canValidationCode($currentUser, AnalyticalEventType::USER_AUTO_DELETE_CODE->value)
             ) {
