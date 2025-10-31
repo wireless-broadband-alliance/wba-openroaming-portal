@@ -9,6 +9,7 @@ use App\Enum\FirewallType;
 use App\Enum\OperationMode;
 use App\Enum\OSType;
 use App\Enum\PlatformMode;
+use App\Enum\SettingName;
 use App\Enum\TwoFAType;
 use App\Enum\UserProvider;
 use App\Enum\UserRadiusProfileRevokeReason;
@@ -75,6 +76,7 @@ class SiteController extends AbstractController
         EntityManagerInterface $entityManager,
     ): Response {
         // Call the getSettings method of GetSettings class to retrieve the data
+        /** @var array<string, array{value: string, description: string}> $data */
         $data = $this->getSettings->getSettings();
 
         /** @var User|null $currentUser */
@@ -83,10 +85,7 @@ class SiteController extends AbstractController
 
         // Check if the user_verification setting is active
         if ($currentUser) {
-            if (
-                isset($data["USER_VERIFICATION"]["value"]) &&
-                $data["USER_VERIFICATION"]["value"] === OperationMode::ON->value
-            ) {
+            if ($data[SettingName::USER_VERIFICATION->value]["value"] === OperationMode::ON->value) {
                 // Retrieve the cookie about SAML_ACCOUNT Deletion from the request
                 $previousLoggedID = $request->cookies->get('previousLoggedID');
                 $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $currentUser]);
@@ -117,7 +116,7 @@ class SiteController extends AbstractController
                 if (
                     $userExternalAuths[0]->getProvider() === UserProvider::PORTAL_ACCOUNT->value &&
                     !$session->has('session_verified') &&
-                    $data['LOGIN_WITH_UUID_ONLY']['value'] === OperationMode::OFF->value
+                    $data[SettingName::LOGIN_WITH_UUID_ONLY->value]['value'] === OperationMode::OFF->value
                 ) {
                     if (
                         $this->twoFAService->canValidationCode(
@@ -155,23 +154,23 @@ class SiteController extends AbstractController
                 }
 
                 if (
-                    $data["LOGIN_WITH_UUID_ONLY"]["value"] === OperationMode::OFF->value ||
+                    $data[SettingName::LOGIN_WITH_UUID_ONLY->value]["value"] === OperationMode::OFF->value ||
                     $currentUser->getUserExternalAuths()[0]->getProvider() !== UserProvider::PORTAL_ACCOUNT->value
                 ) {
                     // Checks the 2FA status of the platform if mandatory and force the user to configure it
                     if (
-                        $data['TWO_FACTOR_AUTH_STATUS']['value'] ===
-                            TwoFAType::ENFORCED_FOR_LOCAL->value &&
-                            $currentUser->getUserExternalAuths()->get(0)->getProvider() ===
-                            UserProvider::PORTAL_ACCOUNT->value &&
-                                $currentUser->getTwoFAType() ===
-                                UserTwoFactorAuthenticationStatus::DISABLED->value
+                        $data[SettingName::TWO_FACTOR_AUTH_STATUS->value]['value'] ===
+                        TwoFAType::ENFORCED_FOR_LOCAL->value &&
+                        $currentUser->getUserExternalAuths()->get(0)->getProvider() ===
+                        UserProvider::PORTAL_ACCOUNT->value &&
+                        $currentUser->getTwoFAType() ===
+                        UserTwoFactorAuthenticationStatus::DISABLED->value
                     ) {
                         return $this->redirectToRoute('app_configure2FA');
                     }
                     if (
-                        $data['TWO_FACTOR_AUTH_STATUS']['value'] === TwoFAType::ENFORCED_FOR_ALL->value &&
-                            $currentUser->getTwoFAType() === UserTwoFactorAuthenticationStatus::DISABLED->value
+                        $data[SettingName::TWO_FACTOR_AUTH_STATUS->value]['value'] === TwoFAType::ENFORCED_FOR_ALL->value &&
+                        $currentUser->getTwoFAType() === UserTwoFactorAuthenticationStatus::DISABLED->value
                     ) {
                         return $this->redirectToRoute('app_configure2FA');
                     }
@@ -179,7 +178,7 @@ class SiteController extends AbstractController
             }
 
             if (
-                $data["LOGIN_WITH_UUID_ONLY"]["value"] === OperationMode::OFF->value ||
+                $data[SettingName::LOGIN_WITH_UUID_ONLY->value]["value"] === OperationMode::OFF->value ||
                 $currentUser->getUserExternalAuths()[0]->getProvider() !== UserProvider::PORTAL_ACCOUNT->value
             ) {
                 if (
@@ -232,10 +231,10 @@ class SiteController extends AbstractController
         $userAgent = $request->headers->get('User-Agent');
         $actionName = $request->attributes->get('_route');
 
-        if ($data['PLATFORM_MODE']['value'] === PlatformMode::DEMO->value) {
+        if ($data[SettingName::PLATFORM_MODE->value]['value'] === PlatformMode::DEMO->value) {
             if ($request->isMethod('POST')) {
                 $payload = $request->request->all();
-                if ($data['TURNSTILE_CHECKER']['value'] === OperationMode::ON->value) {
+                if ($data[SettingName::TURNSTILE_CHECKER->value]['value'] === OperationMode::ON->value) {
                     $turnstileResponse = $request->request->get('cf-turnstile-response');
                     // Validate the Turnstile CAPTCHA
                     if ((empty($turnstileResponse) && !$this->getUser())) {
@@ -290,11 +289,11 @@ class SiteController extends AbstractController
                         );
                     }
 
-                    if ($data["USER_VERIFICATION"]['value'] === OperationMode::ON->value) {
+                    if ($data[SettingName::USER_VERIFICATION->value]['value'] === OperationMode::ON->value) {
                         return $this->redirectToRoute('app_login_confirmation');
                     }
 
-                    if ($data["USER_VERIFICATION"]['value'] === OperationMode::OFF->value) {
+                    if ($data[SettingName::USER_VERIFICATION->value]['value'] === OperationMode::OFF->value) {
                         return $this->redirectToRoute('app_landing');
                     }
                 }
@@ -316,12 +315,22 @@ class SiteController extends AbstractController
                      * Overriding macOS to iOS due to the profiles being the same and there being no route for the macOS
                      * enum value, so the UI shows macOS but on the logic to generate the profile iOS is used instead
                      */
-                    if ($payload['radio-os'] === OSType::MACOS->value) {
-                        $payload['radio-os'] = OSType::IOS->value;
+                    $osValue = $payload['radio-os'];
+                    if (is_array($osValue)) {
+                        // handle array case safely; for example, pick the first value
+                        $osValue = reset($osValue) ?: '';
+                    } elseif (!is_string($osValue)) {
+                        // fallback for non-string types
+                        $osValue = (string) $osValue;
                     }
+
+                    if ($osValue === OSType::MACOS->value) {
+                        $osValue = OSType::IOS->value;
+                    }
+
                     return $this->redirectToRoute(
-                        'profile_' . strtolower((string)$payload['radio-os']),
-                        ['os' => $payload['radio-os']]
+                        'profile_' . strtolower($osValue),
+                        ['os' => $osValue]
                     );
                 }
             }
@@ -345,19 +354,27 @@ class SiteController extends AbstractController
                     $payload['radio-os'] = $payload['detected-os'];
                 }
             }
-            if (
-                $payload['radio-os'] !== 'none' && $this->getUser() instanceof UserInterface
-            ) {
+            if ($payload['radio-os'] !== 'none' && $this->getUser() instanceof UserInterface) {
                 /**
                  * Overriding macOS to iOS due to the profiles being the same and there being no route for the macOS
                  * enum value, so the UI shows macOS but on the logic to generate the profile iOS is used instead
                  */
-                if ($payload['radio-os'] === OSType::MACOS->value) {
-                    $payload['radio-os'] = OSType::IOS->value;
+                $osValue = $payload['radio-os'];
+
+                // Ensure $osValue is a string
+                if (is_array($osValue)) {
+                    $osValue = reset($osValue) ?: '';
+                } elseif (!is_string($osValue)) {
+                    $osValue = (string) $osValue;
                 }
+
+                if ($osValue === OSType::MACOS->value) {
+                    $osValue = OSType::IOS->value;
+                }
+
                 return $this->redirectToRoute(
-                    'profile_' . strtolower((string)$payload['radio-os']),
-                    ['os' => $payload['radio-os']]
+                    'profile_' . strtolower($osValue),
+                    ['os' => $osValue]
                 );
             }
         }
