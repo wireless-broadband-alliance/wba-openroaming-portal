@@ -36,7 +36,8 @@ class AuthSettingsTypeDTO
         message: "fieldCannotBeBlank"
     )]
     #[Assert\Expression(
-        expression: "this.authMethodSamlEnabled != 'true' or (this.authMethodSamlEnabled == 'true' and value < this.profileLimitDate)",
+        expression: "this.authMethodSamlEnabled != 'true' or (this.authMethodSamlEnabled == 'true' and 
+        value < this.profileLimitDate)",
         message: "profileLimitMessage"
     )]
     #[Assert\GreaterThanOrEqual(value: 1, message: 'timerShouldNeverBeLessThan')]
@@ -51,30 +52,35 @@ class AuthSettingsTypeDTO
 
     #[Assert\Length(min: 3, max: 50, minMessage: 'fieldCannotBeShorterThan', maxMessage: 'fieldCannotBeLongerThan')]
     #[Assert\Expression(
-        expression: "this.authMethodGOOGLELoginEnabled != 'true' or (this.authMethodGOOGLELoginEnabled == 'true' and value != '')",
+        expression: "this.authMethodGOOGLELoginEnabled != 'true' or (this.authMethodGOOGLELoginEnabled == 
+        'true' and value != '')",
         message: "fieldCannotBeBlank"
     )]
     public ?string $authMethodGOOGLELoginLabel = null;
 
     #[Assert\Length(max: 100, maxMessage: 'fieldCannotBeLongerThan')]
     #[Assert\Expression(
-        expression: "this.authMethodGOOGLELoginEnabled != 'true' or (this.authMethodGOOGLELoginEnabled == 'true' and value != '')",
+        expression: "this.authMethodGOOGLELoginEnabled != 'true' or (this.authMethodGOOGLELoginEnabled == 
+        'true' and value != '')",
         message: "fieldCannotBeBlank"
     )]
     public ?string $authMethodGOOGLELoginDescription = null;
 
     #[Assert\Expression(
-        expression: "this.authMethodGOOGLELoginEnabled != 'true' or (this.authMethodGOOGLELoginEnabled == 'true' and value != '')",
+        expression: "this.authMethodGOOGLELoginEnabled != 'true' or (this.authMethodGOOGLELoginEnabled == 
+        'true' and value != '')",
         message: "fieldCannotBeBlank"
     )]
     public ?string $validDomainsGOOGLELogin = null;
 
     #[Assert\Expression(
-        expression: "this.authMethodGOOGLELoginEnabled != 'true' or (this.authMethodGOOGLELoginEnabled == 'true' and value != '')",
+        expression: "this.authMethodGOOGLELoginEnabled != 'true' or (this.authMethodGOOGLELoginEnabled == 
+        'true' and value != '')",
         message: "fieldCannotBeBlank"
     )]
     #[Assert\Expression(
-        expression: "this.authMethodGOOGLELoginEnabled != 'true' or (this.authMethodGOOGLELoginEnabled == 'true' and value < this.profileLimitDate)",
+        expression: "this.authMethodGOOGLELoginEnabled != 'true' or (this.authMethodGOOGLELoginEnabled == 
+        'true' and value < this.profileLimitDate)",
         message: "profileLimitMessage"
     )]
     #[Assert\GreaterThanOrEqual(value: 1, message: 'timerShouldNeverBeLessThan')]
@@ -89,30 +95,35 @@ class AuthSettingsTypeDTO
 
     #[Assert\Length(min: 3, max: 50, minMessage: 'fieldCannotBeShorterThan', maxMessage: 'fieldCannotBeLongerThan')]
     #[Assert\Expression(
-        expression: "this.authMethodMICROSOFTLoginEnabled != 'true' or (this.authMethodMICROSOFTLoginEnabled == 'true' and value != '')",
+        expression: "this.authMethodMICROSOFTLoginEnabled != 'true' or (this
+        .authMethodMICROSOFTLoginEnabled == 'true' and value != '')",
         message: "fieldCannotBeBlank"
     )]
     public ?string $authMethodMICROSOFTLoginLabel = null;
 
     #[Assert\Length(max: 100, maxMessage: 'fieldCannotBeLongerThan')]
     #[Assert\Expression(
-        expression: "this.authMethodMICROSOFTLoginEnabled != 'true' or (this.authMethodMICROSOFTLoginEnabled == 'true' and value != '')",
+        expression: "this.authMethodMICROSOFTLoginEnabled != 'true' or (this
+        .authMethodMICROSOFTLoginEnabled == 'true' and value != '')",
         message: "fieldCannotBeBlank"
     )]
     public ?string $authMethodMICROSOFTLoginDescription = null;
 
     #[Assert\Expression(
-        expression: "this.authMethodMICROSOFTLoginEnabled != 'true' or (this.authMethodMICROSOFTLoginEnabled == 'true' and value != '')",
+        expression: "this.authMethodMICROSOFTLoginEnabled != 'true' or (this
+        .authMethodMICROSOFTLoginEnabled == 'true' and value != '')",
         message: "fieldCannotBeBlank"
     )]
     public ?string $validDomainsMICROSOFTLogin = null;
 
     #[Assert\Expression(
-        expression: "this.authMethodMICROSOFTLoginEnabled != 'true' or (this.authMethodMICROSOFTLoginEnabled == 'true' and value != '')",
+        expression: "this.authMethodMICROSOFTLoginEnabled != 'true' or (this
+        .authMethodMICROSOFTLoginEnabled == 'true' and value != '')",
         message: "fieldCannotBeBlank"
     )]
     #[Assert\Expression(
-        expression: "this.authMethodMICROSOFTLoginEnabled != 'true' or (this.authMethodMICROSOFTLoginEnabled == 'true' and value < this.profileLimitDate)",
+        expression: "this.authMethodMICROSOFTLoginEnabled != 'true' or (this
+        .authMethodMICROSOFTLoginEnabled == 'true' and value < this.profileLimitDate)",
         message: "profileLimitMessage"
     )]
     #[Assert\GreaterThanOrEqual(value: 1, message: 'timerShouldNeverBeLessThan')]
@@ -127,24 +138,28 @@ class AuthSettingsTypeDTO
 
     #[Assert\Length(min: 3, max: 50, minMessage: 'fieldCannotBeShorterThan', maxMessage: 'fieldCannotBeLongerThan')]
     #[Assert\Expression(
-        expression: "this.authMethodRegisterEnabled != 'true' or (this.authMethodRegisterEnabled == 'true' and value != '')",
+        expression: "this.authMethodRegisterEnabled != 'true' or (this.authMethodRegisterEnabled == 'true' 
+        and value != '')",
         message: "fieldCannotBeBlank"
     )]
     public ?string $authMethodRegisterLabel = null;
 
     #[Assert\Length(max: 100, maxMessage: 'fieldCannotBeLongerThan')]
     #[Assert\Expression(
-        expression: "this.authMethodRegisterEnabled != 'true' or (this.authMethodRegisterEnabled == 'true' and value != '')",
+        expression: "this.authMethodRegisterEnabled != 'true' or (this.authMethodRegisterEnabled == 'true' 
+        and value != '')",
         message: "fieldCannotBeBlank"
     )]
     public ?string $authMethodRegisterDescription = null;
 
     #[Assert\Expression(
-        expression: "this.authMethodRegisterEnabled != 'true' or (this.authMethodRegisterEnabled == 'true' and value != '')",
+        expression: "this.authMethodRegisterEnabled != 'true' or (this.authMethodRegisterEnabled == 'true' 
+        and value != '')",
         message: "fieldCannotBeBlank"
     )]
     #[Assert\Expression(
-        expression: "this.authMethodRegisterEnabled != 'true' or (this.authMethodRegisterEnabled == 'true' and value < this.profileLimitDate)",
+        expression: "this.authMethodRegisterEnabled != 'true' or (this.authMethodRegisterEnabled == 'true' 
+        and value < this.profileLimitDate)",
         message: "profileLimitMessage"
     )]
     #[Assert\GreaterThanOrEqual(value: 1, message: 'timerShouldNeverBeLessThan')]

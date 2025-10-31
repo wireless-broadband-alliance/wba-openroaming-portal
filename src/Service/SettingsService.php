@@ -59,8 +59,10 @@ readonly class SettingsService
      *
      * @param array<string, array{value: string|null, description?: string}> $settingsData
      */
-    public function updateAuthSettingsToTranslateFromArray(array $settingsData, ?string $locale = LanguageType::EN->value): void
-    {
+    public function updateAuthSettingsToTranslateFromArray(
+        array $settingsData,
+        ?string $locale = LanguageType::EN->value
+    ): void {
         $authSettingsToTranslate = [
             SettingName::AUTH_METHOD_SAML_LABEL->value,
             SettingName::AUTH_METHOD_GOOGLE_LOGIN_LABEL->value,
@@ -95,7 +97,6 @@ readonly class SettingsService
                 } else {
                     $setting->setValue($value);
                 }
-
             } else {
                 // Create new setting if it doesn't exist
                 $setting = new Setting();

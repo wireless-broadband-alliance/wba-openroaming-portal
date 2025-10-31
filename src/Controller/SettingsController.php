@@ -790,7 +790,6 @@ class SettingsController extends AbstractController
 
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-
             $this->settingsService->updateAuthSettingsToTranslateFromArray($authSettingsTypeDTO->toArray(), $language);
 
             $this->settingsService->flush();

@@ -117,7 +117,8 @@ class ProfileController extends AbstractController
                 $radiusUser->getUsername(),
                 base64_encode((string)$radiusUser->getValue()),
                 (string)$this->settingRepository->findOneBy(['name' => SettingName::DOMAIN_NAME->value])->getValue(),
-                (string)$this->settingRepository->findOneBy(['name' => SettingName::RADIUS_TLS_NAME->value])->getValue(),
+                (string)$this->settingRepository->findOneBy(['name' =>
+                    SettingName::RADIUS_TLS_NAME->value])->getValue(),
                 (string)$this->settingRepository->findOneBy(['name' => SettingName::DISPLAY_NAME->value])->getValue(),
                 $expirationDate['limitTime']->format('Y-m-d')
             ],

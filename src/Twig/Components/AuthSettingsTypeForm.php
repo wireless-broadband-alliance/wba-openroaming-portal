@@ -73,7 +73,8 @@ final class AuthSettingsTypeForm extends AbstractController
 
             'authMethodLoginTraditionalEnabled' => $this->authSettingsTypeDTO->authMethodLoginTraditionalEnabled,
             'authMethodLoginTraditionalLabel' => $this->authSettingsTypeDTO->authMethodLoginTraditionalLabel,
-            'authMethodLoginTraditionalDescription' => $this->authSettingsTypeDTO->authMethodLoginTraditionalDescription,
+            'authMethodLoginTraditionalDescription' =>
+                $this->authSettingsTypeDTO->authMethodLoginTraditionalDescription,
 
             'loginWithUUIDOnly' => $this->authSettingsTypeDTO->loginWithUUIDOnly,
 

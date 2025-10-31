@@ -4,30 +4,18 @@ namespace App\Form;
 
 use App\DTO\AuthSettingsTypeDTO;
 use App\Enum\OperationMode;
-use App\Enum\SettingName;
-use App\Service\GetSettings;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Validator\Constraints\Callback;
-use Symfony\Component\Validator\Constraints\GreaterThanOrEqual;
-use Symfony\Component\Validator\Constraints\Length;
-use Symfony\Component\Validator\Constraints\NotBlank;
-use Symfony\Component\Validator\Context\ExecutionContextInterface;
-use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * @extends AbstractType<null>
  */
 class AuthSettingsType extends AbstractType
 {
-    public function __construct(
-    ) {
-    }
-
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
 

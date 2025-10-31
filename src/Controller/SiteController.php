@@ -169,7 +169,8 @@ class SiteController extends AbstractController
                         return $this->redirectToRoute('app_configure2FA');
                     }
                     if (
-                        $data[SettingName::TWO_FACTOR_AUTH_STATUS->value]['value'] === TwoFAType::ENFORCED_FOR_ALL->value &&
+                        $data[SettingName::TWO_FACTOR_AUTH_STATUS->value]['value']
+                        === TwoFAType::ENFORCED_FOR_ALL->value &&
                         $currentUser->getTwoFAType() === UserTwoFactorAuthenticationStatus::DISABLED->value
                     ) {
                         return $this->redirectToRoute('app_configure2FA');
