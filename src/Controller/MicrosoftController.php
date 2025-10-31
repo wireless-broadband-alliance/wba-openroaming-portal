@@ -66,6 +66,7 @@ class MicrosoftController extends AbstractController
     public function connect(Request $request): RedirectResponse
     {
         // Call the getSettings method of GetSettings class to retrieve the data
+        /** @var array<string, array{value: string, description: string}> $data */
         $data = $this->getSettings->getSettings();
 
         // Check if the user clicked on the 'sms' variable present only on the SMS authentication buttons
@@ -81,7 +82,7 @@ class MicrosoftController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
-        if ($data['AUTH_METHOD_MICROSOFT_LOGIN_ENABLED']['value'] === "false") {
+        if ($data[SettingName::AUTH_METHOD_MICROSOFT_LOGIN_ENABLED->value]['value'] === "false") {
             $this->addFlash(
                 'error',
                 $this->translator->trans(
