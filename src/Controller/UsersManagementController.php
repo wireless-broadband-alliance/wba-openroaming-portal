@@ -351,8 +351,6 @@ class UsersManagementController extends AbstractController
         /** @var User $currentUser */
         $currentUser = $this->getUser();
 
-
-
         if (!$user = $this->userRepository->find($id)) {
             // Get the 'id' parameter from the route URL
             $this->addFlash(
@@ -489,8 +487,17 @@ class UsersManagementController extends AbstractController
                     $user,
                     AnalyticalEventType::USER_ACCOUNT_UPDATE_PASSWORD_FROM_UI->value
                 );
-                // Retrieve the SMS resend interval from the settings
-                $smsResendInterval = $data[SettingName::SMS_TIMER_RESEND->value]['value'];
+
+                $smsResendInterval = null;
+                if (is_array($data) && isset($data[SettingName::SMS_TIMER_RESEND->value]['value'])) {
+                    $smsResendInterval = $data[SettingName::SMS_TIMER_RESEND->value]['value'];
+                }
+
+                if ($smsResendInterval === null) {
+                    // Fallback value if the setting is missing just for phpstan be happy
+                    $smsResendInterval = 5;
+                }
+
                 $minInterval = new DateInterval('PT' . $smsResendInterval . 'M');
                 $currentTime = new DateTime();
 
