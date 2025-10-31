@@ -35,6 +35,10 @@ class AuthSettingsTypeDTO
         expression: "this.authMethodSamlEnabled != 'true' or (this.authMethodSamlEnabled == 'true' and value != '')",
         message: "fieldCannotBeBlank"
     )]
+    #[Assert\Expression(
+        expression: "this.authMethodSamlEnabled != 'true' or (this.authMethodSamlEnabled == 'true' and value < this.profileLimitDate)",
+        message: "profileLimitMessage"
+    )]
     #[Assert\GreaterThanOrEqual(value: 1, message: 'timerShouldNeverBeLessThan')]
     public ?int $profileLimitDateSaml = null;
 
@@ -68,6 +72,10 @@ class AuthSettingsTypeDTO
     #[Assert\Expression(
         expression: "this.authMethodGOOGLELoginEnabled != 'true' or (this.authMethodGOOGLELoginEnabled == 'true' and value != '')",
         message: "fieldCannotBeBlank"
+    )]
+    #[Assert\Expression(
+        expression: "this.authMethodGOOGLELoginEnabled != 'true' or (this.authMethodGOOGLELoginEnabled == 'true' and value < this.profileLimitDate)",
+        message: "profileLimitMessage"
     )]
     #[Assert\GreaterThanOrEqual(value: 1, message: 'timerShouldNeverBeLessThan')]
     public ?int $profileLimitDateGOOGLE = null;
@@ -103,6 +111,10 @@ class AuthSettingsTypeDTO
         expression: "this.authMethodMICROSOFTLoginEnabled != 'true' or (this.authMethodMICROSOFTLoginEnabled == 'true' and value != '')",
         message: "fieldCannotBeBlank"
     )]
+    #[Assert\Expression(
+        expression: "this.authMethodMICROSOFTLoginEnabled != 'true' or (this.authMethodMICROSOFTLoginEnabled == 'true' and value < this.profileLimitDate)",
+        message: "profileLimitMessage"
+    )]
     #[Assert\GreaterThanOrEqual(value: 1, message: 'timerShouldNeverBeLessThan')]
     public ?int $profileLimitDateMICROSOFT = null;
 
@@ -130,6 +142,10 @@ class AuthSettingsTypeDTO
     #[Assert\Expression(
         expression: "this.authMethodRegisterEnabled != 'true' or (this.authMethodRegisterEnabled == 'true' and value != '')",
         message: "fieldCannotBeBlank"
+    )]
+    #[Assert\Expression(
+        expression: "this.authMethodRegisterEnabled != 'true' or (this.authMethodRegisterEnabled == 'true' and value < this.profileLimitDate)",
+        message: "profileLimitMessage"
     )]
     #[Assert\GreaterThanOrEqual(value: 1, message: 'timerShouldNeverBeLessThan')]
     public ?int $profileLimitDateEmail = null;
@@ -203,8 +219,14 @@ class AuthSettingsTypeDTO
         expression: "this.authMethodSMSRegisterEnabled != 'true' or (this.authMethodSMSRegisterEnabled == 'true' and value != '')",
         message: "fieldCannotBeBlank"
     )]
+    #[Assert\Expression(
+        expression: "this.authMethodSMSRegisterEnabled != 'true' or (this.authMethodSMSRegisterEnabled == 'true' and value < this.profileLimitDate)",
+        message: "profileLimitMessage"
+    )]
     #[Assert\GreaterThanOrEqual(value: 1, message: 'timerShouldNeverBeLessThan')]
     public ?int $profileLimitDateSMS = null;
+
+    public ?int $profileLimitDate = null;
 
 
     /**
@@ -212,8 +234,10 @@ class AuthSettingsTypeDTO
      *
      * @param array<string, array{value: string|null, description?: string}> $data
      */
-    public function __construct(array $data = [])
+    public function __construct(array $data = [], ?int $profileLimitDate = 0)
     {
+        $this->profileLimitDate = $profileLimitDate;
+
         $this->authMethodSamlEnabled = $data[SettingName::AUTH_METHOD_SAML_ENABLED->value]['value'] ?? null;
         $this->authMethodSamlLabel = $data[SettingName::AUTH_METHOD_SAML_LABEL->value]['value'] ?? null;
         $this->authMethodSamlDescription = $data[SettingName::AUTH_METHOD_SAML_DESCRIPTION->value]['value'] ?? null;

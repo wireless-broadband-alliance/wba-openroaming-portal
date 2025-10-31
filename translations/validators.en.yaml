@@ -44,3 +44,4 @@ valueCannotBeLessThanAttempt: 'This value cannot be less than {{ limit }} attemp
 valueCannotBeLessThanMinutes: 'This value cannot be less than {{ limit }} minutes.'
 valueNotValidURL: 'Please insert a valid URL.'
 timerShouldNeverBeLessThan: 'This timer should never be less than 1.'
+profileLimitMessage: 'Please select a value between 1 (minimum, fixed value) and {{ limit }} (maximum, determined by the number of days left until the certificate expires.'
