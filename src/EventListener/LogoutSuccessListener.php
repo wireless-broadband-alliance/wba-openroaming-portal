@@ -40,7 +40,7 @@ readonly class LogoutSuccessListener implements EventSubscriberInterface
         if ($user instanceof User) {
             $eventMetadata = [
                 'platform' => $platformModeStatus,
-                'ip' => $_SERVER['REMOTE_ADDR'] ?? 'unknown',
+                'ip' => $_SERVER['REMOTE_ADDR'] ?? 'Unknown',
                 'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? 'Unknown',
                 'uuid' => $user->getUuid(),
             ];

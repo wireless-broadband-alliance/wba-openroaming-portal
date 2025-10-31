@@ -2,11 +2,13 @@
 
 namespace App\EventListener;
 
+use App\Entity\Setting;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Enum\OperationMode;
 use App\Enum\PlatformMode;
 use App\Enum\SettingName;
+use App\Repository\SettingRepository;
 use App\Service\EventActions;
 use App\Service\GetSettings;
 use DateTime;
@@ -18,9 +20,9 @@ use Symfony\Component\Security\Http\SecurityEvents;
 readonly class LoginSuccessListener implements EventSubscriberInterface
 {
     public function __construct(
-        private GetSettings $getSettings,
         private EventActions $eventActions,
-        private RequestStack $requestStack
+        private RequestStack $requestStack,
+        private SettingRepository $settingRepository
     ) {
     }
 
@@ -34,15 +36,15 @@ readonly class LoginSuccessListener implements EventSubscriberInterface
     public function onLoginSuccess(InteractiveLoginEvent $event): void
     {
         $user = $event->getAuthenticationToken()->getUser();
-        // Call the getSettings method of GetSettings class to retrieve the data
-        $data = $this->getSettings->getSettings();
-        $platformMode = $data[SettingName::PLATFORM_MODE->value]['value'] ?
-            PlatformMode::DEMO->value : PlatformMode::LIVE->value;
+        /** @var Setting $platformModeStatus */
+        $platformModeStatus = $this->settingRepository->findOneBy([
+            'name' => SettingName::PLATFORM_MODE->value
+        ]);
         $session = $this->requestStack->getSession();
 
         if ($user instanceof User) {
-            if (
-                $data[SettingName::LOGIN_WITH_UUID_ONLY->value]["value"] === OperationMode::OFF->value &&
+            if ($this->settingRepository->findOneBy(
+                    ['name' => SettingName::LOGIN_WITH_UUID_ONLY->value])->getValue() === OperationMode::OFF->value &&
                 $user->isVerified()
             ) {
                 $session->set('session_verified', true);
@@ -50,8 +52,8 @@ readonly class LoginSuccessListener implements EventSubscriberInterface
 
             // Defines the Event to the table
             $eventMetadata = [
-                'platform' => $platformMode,
-                'ip' => $_SERVER['REMOTE_ADDR'],
+                'platform' => $platformModeStatus,
+                'ip' => $_SERVER['REMOTE_ADDR'] ?? 'Unknown',
                 'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? 'Unknown',
                 'uuid' => $user->getUuid(),
             ];
