@@ -85,6 +85,7 @@ class SecurityController extends AbstractController
         }
 
         // Call the getSettings method of GetSettings class to retrieve the data
+        /** @var array<string, array{value: string, description: string}> $data */
         $data = $this->getSettings->getSettings();
         if ($data[SettingName::PLATFORM_MODE->value]['value'] === PlatformMode::DEMO->value) {
             return $this->redirectToRoute('app_landing');
@@ -163,6 +164,7 @@ class SecurityController extends AbstractController
         UserPasswordHasherInterface $userPasswordHasher,
         SessionInterface $session,
     ): Response {
+        /** @var array<string, array{value: string, description: string}> $data */
         $data = $this->getSettings->getSettings();
 
         if ($data[SettingName::LOGIN_WITH_UUID_ONLY->value]['value'] === OperationMode::OFF->value) {
@@ -430,6 +432,7 @@ class SecurityController extends AbstractController
         }
 
         // Call the getSettings method of GetSettings class to retrieve the data
+        /** @var array<string, array{value: string, description: string}> $data */
         $data = $this->getSettings->getSettings();
 
         // Last username entered by the user (this will be empty if the user clicked the verification link)
@@ -499,6 +502,7 @@ class SecurityController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
+        /** @var array<string, array{value: string, description: string}> $data */
         $data = $this->getSettings->getSettings();
 
         $form = $this->createForm(TwoFACode::class);
