@@ -15,6 +15,7 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use LDAP\Result;
 
 #[AsCommand(
     name: 'ldap:sync',
@@ -94,7 +95,7 @@ class LDAPSyncCommand extends Command
     }
 
     /**
-     * @return array<string, mixed>|null
+     * @return array<int|string, mixed>|null
      */
     private function fetchUserFromLDAP(string $identifier): ?array
     {
@@ -117,22 +118,27 @@ class LDAPSyncCommand extends Command
             $identifier,
             $this->settingRepository->findOneBy(['name' => SettingName::SYNC_LDAP_SEARCH_FILTER->value])->getValue()
         );
+
         $searchBaseDN = $this->settingRepository->findOneBy([
             'name' => SettingName::SYNC_LDAP_SEARCH_BASE_DN->value
         ])->getValue();
-        $searchResult = ldap_search(
-            $ldapConnection,
-            $searchBaseDN,
-            $searchFilter,
-        );
 
+        $searchResult = ldap_search($ldapConnection, $searchBaseDN, $searchFilter);
+        if ($searchResult === false) {
+            ldap_unbind($ldapConnection);
+            return null;
+        }
+
+        /** @var Result $searchResult */
         $entry = ldap_first_entry($ldapConnection, $searchResult);
         if (!$entry) {
             ldap_unbind($ldapConnection);
             return null;
         }
+
         $attrs = ldap_get_attributes($ldapConnection, $entry);
         ldap_unbind($ldapConnection);
+
         return $attrs;
     }
 
