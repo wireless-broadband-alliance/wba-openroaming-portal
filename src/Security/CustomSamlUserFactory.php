@@ -68,7 +68,7 @@ class CustomSamlUserFactory implements SamlUserFactoryInterface
         // Call the getSettings method of GetSettings class to retrieve the data
         $platformModeStatus = $this->settingRepository->findOneBy(['name' => SettingName::PLATFORM_MODE]);
 
-        if ($platformModeStatus == PlatformMode::DEMO->value) {
+        if ($platformModeStatus->getValue() === PlatformMode::DEMO->value) {
             throw new RuntimeException(
                 $this->translator->trans('impossibleUseThisAuthenticationMethodInDemoMode', [], 'Security')
             );
