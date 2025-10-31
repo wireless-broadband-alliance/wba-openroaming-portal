@@ -17,7 +17,7 @@ readonly class ApiResponseService
      *     name: string,
      *     path: string,
      *     methods: string[],
-     *     responses: array<string, mixed>,
+     *     responses: array<int|string, mixed>,
      *     isProtected: bool,
      *     description: string|null,
      *     requestBody: array<string, mixed>|null
