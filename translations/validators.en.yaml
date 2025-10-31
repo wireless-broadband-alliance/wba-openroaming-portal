@@ -44,3 +44,4 @@ valueCannotBeLessThanAttempt: 'This value cannot be less than {{ limit }} attemp
 valueCannotBeLessThanMinutes: 'This value cannot be less than {{ limit }} minutes.'
 valueNotValidURL: 'Please insert a valid URL.'
 timerShouldNeverBeLessThan: 'This timer should never be less than 1.'
+profileLimitMessage: "The selected value exceeds the validity date of the project's certificates."

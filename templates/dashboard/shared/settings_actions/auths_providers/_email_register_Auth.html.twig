@@ -146,6 +146,10 @@
                 <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="m14 18l4-4l4 4M16 2v4m2 16v-8"/><path d="M21 11.343V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h9M3 10h18M8 2v4"/></g></svg>
             </button>
         </div>
+
+        <div class="mt-2 -mb-2 text-center text-red-500 text-base">
+            {{ form_errors(form.profileLimitDateEmail) }}
+        </div>
     </div>
 
     {# emailTimerResend #}
@@ -165,6 +169,10 @@
 
         <div class="flex items-center space-x-2 mt-5">
             {{ form_widget(form.emailTimerResend, {attr: {class: 'form-widget', 'data-radio-card-target': 'input'}}) }}
+        </div>
+
+        <div class="mt-2 -mb-2 text-center text-red-500 text-base">
+            {{ form_errors(form.emailTimerResend) }}
         </div>
     </div>
 
@@ -186,6 +194,11 @@
         <div class="flex items-center space-x-2 mt-5">
             {{ form_widget(form.LinkValidity, {attr: {class: 'form-widget', 'data-radio-card-target': 'input'}}) }}
         </div>
+
+        <div class="mt-2 -mb-2 text-center text-red-500 text-base">
+            {{ form_errors(form.LinkValidity) }}
+        </div>
     </div>
+
 
 </div>
