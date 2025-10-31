@@ -46,14 +46,24 @@ class RadiusAuthsRepository extends ServiceEntityRepository
      */
     public function findAuthRequests(DateTime $startDate, DateTime $endDate): array
     {
-        // Fetch all data with date filtering
-        return $this->createQueryBuilder('u')
+        $qb = $this->createQueryBuilder('u');
+
+        // Subquery: get the MAX id per username + authdate truncated to seconds
+        $sub = $this->createQueryBuilder('sub')
+            ->select('MAX(sub.id)')
+            ->where('sub.username = u.username')
+            ->andWhere("DATE_FORMAT(sub.authdate, '%Y-%m-%d %H:%i:%s') = DATE_FORMAT(u.authdate, '%Y-%m-%d %H:%i:%s')")
+            ->getDQL();
+
+        return $qb
             ->where('u.reply IN (:replies)')
             ->andWhere('u.authdate >= :startDate')
             ->andWhere('u.authdate <= :endDate')
+            ->andWhere('u.id = (' . $sub . ')')
             ->setParameter('replies', ['Access-Accept', 'Access-Reject'])
             ->setParameter('startDate', $startDate->format('Y-m-d H:i:s'))
             ->setParameter('endDate', $endDate->format('Y-m-d H:i:s'))
+            ->orderBy('u.authdate', 'ASC')
             ->getQuery()
             ->getResult();
     }
