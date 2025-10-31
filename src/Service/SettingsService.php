@@ -27,7 +27,7 @@ readonly class SettingsService
     /**
      * Update or create multiple settings from a generic array.
      *
-     * @param array<string, array{value: string|null, description?: string}> $settingsData
+     * @param array<string, array{value: int|string|null}> $settingsData
      */
     public function updateSettingsFromArray(array $settingsData): void
     {
@@ -37,13 +37,14 @@ readonly class SettingsService
             // Try to fetch existing setting
             $setting = $this->settingRepository->findOneBy(['name' => $name]);
 
+            $valueToSet = $value !== null ? (string)$value : null;
+
             if ($setting) {
-                $setting->setValue($value);
+                $setting->setValue($valueToSet);
             } else {
-                // Create new setting if it doesn't exist
                 $setting = new Setting();
                 $setting->setName($name);
-                $setting->setValue($value);
+                $setting->setValue($valueToSet);
                 $this->entityManager->persist($setting);
             }
         }
