@@ -81,6 +81,7 @@ class ForgotPasswordController extends AbstractController
         }
 
         // Call the getSettings method of GetSettings class to retrieve the data
+        /** @var array<string, array{value: string, description: string}> $data */
         $data = $this->getSettings->getSettings();
 
         if ($data[SettingName::PLATFORM_MODE->value]['value'] === PlatformMode::DEMO->value) {
@@ -210,6 +211,7 @@ class ForgotPasswordController extends AbstractController
     public function forgotPasswordUserSMS(
         Request $request,
     ): Response {
+        /** @var array<string, array{value: string, description: string}> $data */
         $data = $this->getSettings->getSettings();
 
         if ($this->getUser() instanceof UserInterface) {
@@ -444,6 +446,7 @@ class ForgotPasswordController extends AbstractController
     public function forgotPasswordCode(
         Request $request,
     ): Response {
+        /** @var array<string, array{value: string, description: string}> $data */
         $data = $this->getSettings->getSettings();
 
         // Get the uuid and verification code from the URL query parameters
@@ -547,6 +550,7 @@ class ForgotPasswordController extends AbstractController
         }
 
         // Call the getSettings method of GetSettings class to retrieve the data
+        /** @var array<string, array{value: string, description: string}> $data */
         $data = $this->getSettings->getSettings();
 
         if ($data[SettingName::PLATFORM_MODE->value]['value'] === PlatformMode::DEMO->value) {
