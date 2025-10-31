@@ -11,6 +11,7 @@ use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use DateTime;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 readonly class MagicLinkService
 {
@@ -19,6 +20,7 @@ readonly class MagicLinkService
         private SettingRepository $settingRepository,
         private EventRepository $eventRepository,
         private UrlGeneratorInterface $urlGenerator,
+        private TranslatorInterface $translator,
     ) {
     }
 
@@ -50,10 +52,26 @@ readonly class MagicLinkService
 
     public function linkValidity(User $user): bool
     {
-        $linkValidity = $this->settingRepository->findOneBy(['name' => SettingName::LINK_VALIDITY->value])->getValue();
+        $linkValiditySetting = $this->settingRepository->findOneBy([
+            'name' => SettingName::LINK_VALIDITY->value,
+        ]);
+
+        if ($linkValiditySetting === null) {
+            return false;
+        }
+
+        $linkValidity = (int) $linkValiditySetting->getValue();
+
         $limitTime = new DateTime();
         $limitTime->modify('-' . $linkValidity . ' minutes');
-        return $limitTime < $user->getTwoFAcodeGeneratedAt();
+
+        $codeGeneratedAt = $user->getTwoFAcodeGeneratedAt();
+
+        if (!$codeGeneratedAt instanceof DateTime) {
+            return false;
+        }
+
+        return $limitTime < $codeGeneratedAt;
     }
 
     public function timeToResend(string $timeInterval, Event $event): string
@@ -69,7 +87,11 @@ readonly class MagicLinkService
         $interval_seconds += $interval->i;
         $interval_seconds += $interval->s;
 
-        return 'Too many requests. Please wait ' . $interval_seconds . ' seconds before requesting a new login link.';
+        return $this->translator->trans(
+            'too_many_requests_wait',
+            ['%seconds%' => $interval_seconds],
+            'MagicLinkService'
+        );
     }
 
     public function linkCanBeUsed(User $user, string $eventType): bool
@@ -78,15 +100,21 @@ readonly class MagicLinkService
             $user,
             $eventType
         );
-        $linkTimeInterval = $this->settingRepository->findOneBy(['name' => 'LINK_VALIDITY'])->getValue();
-        $lastAttemptTime = $lastEvent instanceof Event ?
-            $lastEvent->getEventDatetime() : $linkTimeInterval;
-        $now = new DateTime();
-        $interval = date_diff($now, $lastAttemptTime);
-        $interval_minutes = $interval->days * 1440;
-        $interval_minutes += $interval->h * 60;
-        $interval_minutes += $interval->i;
 
-        return $interval_minutes > ((int)$linkTimeInterval);
+        $linkTimeInterval = (int) $this->settingRepository
+            ->findOneBy(['name' => SettingName::LINK_VALIDITY->value])
+            ->getValue();
+
+        // If no event exists, make $lastAttemptTime far in the past
+        $lastAttemptTime = $lastEvent instanceof Event
+            ? $lastEvent->getEventDatetime()
+            : new DateTime()->modify('-' . ($linkTimeInterval + 1) . ' minutes');
+
+        $now = new DateTime();
+        $interval = $now->diff($lastAttemptTime);
+
+        $interval_minutes = ($interval->days * 1440) + ($interval->h * 60) + $interval->i;
+
+        return $interval_minutes > $linkTimeInterval;
     }
 }
