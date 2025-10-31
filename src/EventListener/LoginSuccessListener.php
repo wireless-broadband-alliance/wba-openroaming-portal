@@ -43,9 +43,11 @@ readonly class LoginSuccessListener implements EventSubscriberInterface
         $session = $this->requestStack->getSession();
 
         if ($user instanceof User) {
-            if ($this->settingRepository->findOneBy(
-                    ['name' => SettingName::LOGIN_WITH_UUID_ONLY->value])->getValue() === OperationMode::OFF->value &&
-                $user->isVerified()
+            if (
+                $this->settingRepository->findOneBy(
+                    ['name' => SettingName::LOGIN_WITH_UUID_ONLY->value]
+                )->getValue() ===
+                OperationMode::OFF->value && $user->isVerified()
             ) {
                 $session->set('session_verified', true);
             }
