@@ -215,11 +215,11 @@ class AuthSettingsTypeDTO
     {
         $this->authMethodSamlEnabled = $data[SettingName::AUTH_METHOD_SAML_ENABLED->value]['value'] ?? null;
         $this->authMethodSamlLabel = $data[SettingName::AUTH_METHOD_SAML_LABEL->value]['value'] ?? null;
-        $this->authMethodSamlDescription = $data[SettingName::AUTH_METHOD_REGISTER_DESCRIPTION->value]['value'] ?? null;
+        $this->authMethodSamlDescription = $data[SettingName::AUTH_METHOD_SAML_DESCRIPTION->value]['value'] ?? null;
         $this->profileLimitDateSaml = $data[SettingName::PROFILE_LIMIT_DATE_SAML->value]['value'] ?? null;
 
         $this->authMethodGOOGLELoginEnabled = $data[SettingName::AUTH_METHOD_GOOGLE_LOGIN_ENABLED->value]['value'] ?? null;
-        $this->authMethodGOOGLELoginLabel = $data[SettingName::AUTH_METHOD_SAML_LABEL->value]['value'] ?? null;
+        $this->authMethodGOOGLELoginLabel = $data[SettingName::AUTH_METHOD_GOOGLE_LOGIN_LABEL->value]['value'] ?? null;
         $this->authMethodGOOGLELoginDescription = $data[SettingName::AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION->value]['value'] ?? null;
         $this->validDomainsGOOGLELogin = $data[SettingName::VALID_DOMAINS_GOOGLE_LOGIN->value]['value'] ?? null;
         $this->profileLimitDateGOOGLE = $data[SettingName::PROFILE_LIMIT_DATE_GOOGLE->value]['value'] ?? null;
@@ -247,5 +247,51 @@ class AuthSettingsTypeDTO
         $this->authMethodSMSRegisterLabel = $data[SettingName::AUTH_METHOD_SMS_REGISTER_LABEL->value]['value'] ?? null;
         $this->authMethodSMSRegisterDescription = $data[SettingName::AUTH_METHOD_SMS_REGISTER_DESCRIPTION->value]['value'] ?? null;
         $this->profileLimitDateSMS = $data[SettingName::PROFILE_LIMIT_DATE_SMS->value]['value'] ?? null;
+    }
+
+    /**
+     * Map the DTO back to an array for SettingsService.
+     *
+     * @return array<string, array{value: string|null}>
+     */
+    public function toArray(): array
+    {
+        return [
+            SettingName::AUTH_METHOD_SAML_ENABLED->value => ['value' => $this->authMethodSamlEnabled],
+            SettingName::AUTH_METHOD_SAML_LABEL->value => ['value' => $this->authMethodSamlLabel],
+            SettingName::AUTH_METHOD_SAML_DESCRIPTION->value => ['value' => $this->authMethodSamlDescription],
+            SettingName::PROFILE_LIMIT_DATE_SAML->value => ['value' => $this->profileLimitDateSaml],
+
+            SettingName::AUTH_METHOD_GOOGLE_LOGIN_ENABLED->value => ['value' => $this->authMethodGOOGLELoginEnabled],
+            SettingName::AUTH_METHOD_GOOGLE_LOGIN_LABEL->value => ['value' => $this->authMethodGOOGLELoginLabel],
+            SettingName::AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION->value => ['value' => $this->authMethodGOOGLELoginDescription],
+            SettingName::VALID_DOMAINS_GOOGLE_LOGIN->value => ['value' => $this->validDomainsMICROSOFTLogin],
+            SettingName::PROFILE_LIMIT_DATE_GOOGLE->value => ['value' => $this->profileLimitDateGOOGLE],
+
+            SettingName::AUTH_METHOD_MICROSOFT_LOGIN_ENABLED->value => ['value' => $this->authMethodMICROSOFTLoginEnabled],
+            SettingName::AUTH_METHOD_MICROSOFT_LOGIN_LABEL->value => ['value' => $this->authMethodMICROSOFTLoginLabel],
+            SettingName::AUTH_METHOD_MICROSOFT_LOGIN_DESCRIPTION->value => ['value' => $this->authMethodMICROSOFTLoginDescription],
+            SettingName::VALID_DOMAINS_MICROSOFT_LOGIN->value => ['value' => $this->validDomainsMICROSOFTLogin],
+            SettingName::PROFILE_LIMIT_DATE_MICROSOFT->value => ['value' => $this->profileLimitDateMICROSOFT],
+
+            SettingName::AUTH_METHOD_REGISTER_ENABLED->value => ['value' => $this->authMethodRegisterEnabled],
+            SettingName::AUTH_METHOD_REGISTER_LABEL->value => ['value' => $this->authMethodRegisterLabel],
+            SettingName::AUTH_METHOD_REGISTER_DESCRIPTION->value => ['value' => $this->authMethodRegisterDescription],
+            SettingName::PROFILE_LIMIT_DATE_EMAIL->value => ['value' => $this->profileLimitDateEmail],
+            SettingName::EMAIL_TIMER_RESEND->value => ['value' => $this->emailTimerResend],
+            SettingName::LINK_VALIDITY->value => ['value' => $this->LinkValidity],
+
+            SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED->value => ['value' => $this->authMethodLoginTraditionalEnabled],
+            SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_LABEL->value => ['value' => $this->authMethodLoginTraditionalLabel],
+            SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION->value => ['value' => $this->authMethodLoginTraditionalDescription],
+
+            SettingName::LOGIN_WITH_UUID_ONLY->value => ['value' => $this->loginWithUUIDOnly],
+
+            SettingName::AUTH_METHOD_SMS_REGISTER_ENABLED->value => ['value' => $this->authMethodSMSRegisterEnabled],
+            SettingName::AUTH_METHOD_SMS_REGISTER_LABEL->value => ['value' => $this->authMethodSMSRegisterLabel],
+            SettingName::AUTH_METHOD_SMS_REGISTER_DESCRIPTION->value => ['value' => $this->authMethodSMSRegisterDescription],
+            SettingName::PROFILE_LIMIT_DATE_SMS->value => ['value' => $this->profileLimitDateSMS],
+
+        ];
     }
 }

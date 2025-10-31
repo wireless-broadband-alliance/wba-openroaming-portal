@@ -792,112 +792,11 @@ class SettingsController extends AbstractController
 
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-            dd($authSettingsTypeDTO);
 
-            $settingsToUpdate = [
-                SettingName::AUTH_METHOD_SAML_ENABLED->value,
-                SettingName::AUTH_METHOD_SAML_LABEL->value,
-                SettingName::AUTH_METHOD_SAML_DESCRIPTION->value,
+            $this->settingsService->updateAuthSettingsToTranslateFromArray($authSettingsTypeDTO->toArray(), $language);
 
-                SettingName::AUTH_METHOD_GOOGLE_LOGIN_ENABLED->value,
-                SettingName::AUTH_METHOD_GOOGLE_LOGIN_LABEL->value,
-                SettingName::AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION->value,
-                SettingName::VALID_DOMAINS_GOOGLE_LOGIN->value,
-                SettingName::PROFILE_LIMIT_DATE_GOOGLE->value,
+            $this->settingsService->flush();
 
-                SettingName::AUTH_METHOD_MICROSOFT_LOGIN_ENABLED->value,
-                SettingName::AUTH_METHOD_MICROSOFT_LOGIN_LABEL->value,
-                SettingName::AUTH_METHOD_MICROSOFT_LOGIN_DESCRIPTION->value,
-                SettingName::VALID_DOMAINS_MICROSOFT_LOGIN->value,
-                SettingName::PROFILE_LIMIT_DATE_MICROSOFT->value,
-
-                SettingName::AUTH_METHOD_REGISTER_ENABLED->value,
-                SettingName::AUTH_METHOD_REGISTER_LABEL->value,
-                SettingName::AUTH_METHOD_REGISTER_DESCRIPTION->value,
-                SettingName::PROFILE_LIMIT_DATE_EMAIL->value,
-
-                SettingName::EMAIL_TIMER_RESEND->value,
-                SettingName::LINK_VALIDITY->value,
-
-                SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED->value,
-                SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_LABEL->value,
-                SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION->value,
-                SettingName::LOGIN_WITH_UUID_ONLY->value,
-
-                SettingName::AUTH_METHOD_SMS_REGISTER_ENABLED->value,
-                SettingName::AUTH_METHOD_SMS_REGISTER_LABEL->value,
-                SettingName::AUTH_METHOD_SMS_REGISTER_DESCRIPTION->value,
-                SettingName::PROFILE_LIMIT_DATE_SMS->value,
-            ];
-
-            $labelsFields = [
-                SettingName::AUTH_METHOD_SAML_LABEL->value,
-                SettingName::AUTH_METHOD_GOOGLE_LOGIN_LABEL->value,
-                SettingName::AUTH_METHOD_MICROSOFT_LOGIN_LABEL->value,
-                SettingName::AUTH_METHOD_REGISTER_LABEL->value,
-                SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_LABEL->value,
-                SettingName::AUTH_METHOD_SMS_REGISTER_LABEL->value,
-            ];
-
-            $descriptionsFields = [
-                SettingName::AUTH_METHOD_SAML_DESCRIPTION->value,
-                SettingName::AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION->value,
-                SettingName::AUTH_METHOD_MICROSOFT_LOGIN_DESCRIPTION->value,
-                SettingName::AUTH_METHOD_REGISTER_DESCRIPTION->value,
-                SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION->value,
-                SettingName::AUTH_METHOD_SMS_REGISTER_DESCRIPTION->value,
-            ];
-
-            foreach ($settingsToUpdate as $settingName) {
-                $value = $authSettingsTypeDTO->{$settingName} ?? null;
-
-                if (in_array($settingName, $this->getSettings->arraySettingsToTranslate())) {
-                    $locale = $language;
-                    $submittedValue = $authSettingsTypeDTO->{$settingName};
-                    // Get the translated setting
-                    $setting = $settingsRepository->findOneBy(['name' => $settingName]);
-                    $settingTranslation = $this->settingTranslationRepository->findOneBy(
-                        ['setting' => $setting, 'locale' => $locale]
-                    );
-                    if (in_array($settingName, $descriptionsFields) && $submittedValue === null) {
-                        $settingTranslation?->setTranslation('');
-                    } else {
-                        $settingTranslation?->setTranslation($submittedValue);
-                    }
-                }
-
-                // Check if the setting is a label, to be impossible to set it null of empty
-                if (($value === null || $value === "") && in_array($settingName, $labelsFields)) {
-                    continue;
-                }
-
-                $setting = $settingsRepository->findOneBy(['name' => $settingName]);
-
-                if ($setting !== null) {
-                    $setting->setValue($value);
-                    $this->entityManager->persist($setting);
-                }
-
-                if (
-                    $settingName === SettingName::LOGIN_WITH_UUID_ONLY->value &&
-                    $setting &&
-                    ($setting->getValue() === OperationMode::OFF->value && $value === OperationMode::OFF->value)
-                ) {
-                    // Set every portal account with a password reset action, to require everyone to use a new password
-                    $this->enforcePasswordResetService->enforceReset(
-                        $currentUser,
-                        $request->getClientIp(),
-                        $request->headers->get('User-Agent')
-                    );
-                }
-
-                if (
-                    $settingName === SettingName::VALID_DOMAINS_GOOGLE_LOGIN->value ||
-                    $settingName === SettingName::VALID_DOMAINS_MICROSOFT_LOGIN->value
-                ) {
-                    continue;
-                }
-            }
 
             $eventMetadata = [
                 'ip' => $request->getClientIp(),
