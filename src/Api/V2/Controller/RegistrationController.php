@@ -17,7 +17,6 @@ use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
 use App\Service\CaptchaValidator;
 use App\Service\EventActions;
-use App\Service\GetSettings;
 use App\Service\EmailGenerator;
 use App\Service\SendSMS;
 use DateInterval;
