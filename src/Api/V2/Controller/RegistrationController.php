@@ -57,7 +57,6 @@ class RegistrationController extends AbstractController
         private readonly EventActions $eventActions,
         private readonly ParameterBagInterface $parameterBag,
         private readonly SendSMS $sendSMSService,
-        private readonly GetSettings $getSettings,
         private readonly SettingRepository $settingRepository,
         private readonly UserPasswordHasherInterface $userPasswordHasher,
         private readonly CaptchaValidator $captchaValidator,
@@ -655,8 +654,6 @@ class RegistrationController extends AbstractController
                 }
             }
 
-            $data = $this->getSettings->getSettings();
-
             if ($hasValidPortalAccount) {
                 try {
                     $randomPassword = bin2hex(random_bytes(4));
@@ -664,7 +661,9 @@ class RegistrationController extends AbstractController
 
                     // Retrieve the latest SMS attempt event for the user
                     $latestEvent = $this->eventRepository->findLatestSmsAttemptEvent($user);
-                    $smsResendInterval = $data[SettingName::SMS_TIMER_RESEND->value]['value']; // Interval in minutes
+                    $smsResendInterval = $this->settingRepository->findOneBy(
+                        ['name' => SettingName::SMS_TIMER_RESEND->value] // Interval in minutes
+                    )?->getValue();
                     $minInterval = new DateInterval('PT' . $smsResendInterval . 'M');
                     $maxAttempts = 3;
                     $currentTime = new DateTime();
