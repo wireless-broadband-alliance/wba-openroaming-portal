@@ -244,7 +244,7 @@ class AuthSettingsTypeDTO
         $this->authMethodSamlEnabled = $data[SettingName::AUTH_METHOD_SAML_ENABLED->value]['value'] ?? null;
         $this->authMethodSamlLabel = $data[SettingName::AUTH_METHOD_SAML_LABEL->value]['value'] ?? null;
         $this->authMethodSamlDescription = $data[SettingName::AUTH_METHOD_SAML_DESCRIPTION->value]['value'] ?? null;
-        $this->profileLimitDateSaml = $data[SettingName::PROFILE_LIMIT_DATE_SAML->value]['value'] ?? null;
+        $this->profileLimitDateSaml = (int) $data[SettingName::PROFILE_LIMIT_DATE_SAML->value]['value'];
 
         $this->authMethodGOOGLELoginEnabled =
             $data[SettingName::AUTH_METHOD_GOOGLE_LOGIN_ENABLED->value]['value'] ?? null;
@@ -254,8 +254,7 @@ class AuthSettingsTypeDTO
             $data[SettingName::AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION->value]['value'] ?? null;
         $this->validDomainsGOOGLELogin = $data[SettingName::VALID_DOMAINS_GOOGLE_LOGIN->value]['value'] ??
             null;
-        $this->profileLimitDateGOOGLE = $data[SettingName::PROFILE_LIMIT_DATE_GOOGLE->value]['value'] ??
-            null;
+        $this->profileLimitDateGOOGLE = (int) $data[SettingName::PROFILE_LIMIT_DATE_GOOGLE->value]['value'];
 
         $this->authMethodMICROSOFTLoginEnabled =
             $data[SettingName::AUTH_METHOD_MICROSOFT_LOGIN_ENABLED->value]['value'] ?? null;
@@ -266,7 +265,7 @@ class AuthSettingsTypeDTO
         $this->validDomainsMICROSOFTLogin =
             $data[SettingName::VALID_DOMAINS_MICROSOFT_LOGIN->value]['value'] ?? null;
         $this->profileLimitDateMICROSOFT =
-            $data[SettingName::PROFILE_LIMIT_DATE_MICROSOFT->value]['value'] ?? null;
+            (int) $data[SettingName::PROFILE_LIMIT_DATE_MICROSOFT->value]['value'];
 
         $this->authMethodRegisterEnabled =
             $data[SettingName::AUTH_METHOD_REGISTER_ENABLED->value]['value'] ?? null;
@@ -274,9 +273,9 @@ class AuthSettingsTypeDTO
             $data[SettingName::AUTH_METHOD_REGISTER_LABEL->value]['value'] ?? null;
         $this->authMethodRegisterDescription =
             $data[SettingName::AUTH_METHOD_REGISTER_DESCRIPTION->value]['value'] ?? null;
-        $this->profileLimitDateEmail = $data[SettingName::PROFILE_LIMIT_DATE_EMAIL->value]['value'] ?? null;
-        $this->emailTimerResend = $data[SettingName::EMAIL_TIMER_RESEND->value]['value'] ?? null;
-        $this->LinkValidity = $data[SettingName::LINK_VALIDITY->value]['value'] ?? null;
+        $this->profileLimitDateEmail = (int) $data[SettingName::PROFILE_LIMIT_DATE_EMAIL->value]['value'] ;
+        $this->emailTimerResend = (int) $data[SettingName::EMAIL_TIMER_RESEND->value]['value'];
+        $this->LinkValidity = (int) $data[SettingName::LINK_VALIDITY->value]['value'];
 
         $this->authMethodLoginTraditionalEnabled =
             $data[SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED->value]['value'] ?? null;
@@ -293,13 +292,13 @@ class AuthSettingsTypeDTO
             $data[SettingName::AUTH_METHOD_SMS_REGISTER_LABEL->value]['value'] ?? null;
         $this->authMethodSMSRegisterDescription =
             $data[SettingName::AUTH_METHOD_SMS_REGISTER_DESCRIPTION->value]['value'] ?? null;
-        $this->profileLimitDateSMS = $data[SettingName::PROFILE_LIMIT_DATE_SMS->value]['value'] ?? null;
+        $this->profileLimitDateSMS = (int) $data[SettingName::PROFILE_LIMIT_DATE_SMS->value]['value'];
     }
 
     /**
      * Map the DTO back to an array for SettingsService.
      *
-     * @return array<string, array{value: string|null}>
+     * @return array<string, array{value: int|string|null}>
      */
     public function toArray(): array
     {
@@ -398,7 +397,7 @@ class AuthSettingsTypeDTO
 
 
     #[Assert\Callback]
-    public function timeLimitValidate(ExecutionContextInterface $context)
+    public function timeLimitValidate(ExecutionContextInterface $context): void
     {
         if (
             $this->authMethodSamlEnabled === "true" &&
@@ -406,7 +405,7 @@ class AuthSettingsTypeDTO
         ) {
             $context->buildViolation('profileLimitMessage')
                 ->atPath('profileLimitDateSaml')
-                ->setParameter('%limit%', $this->profileLimitDate)
+                ->setParameter('%limit%', (string) $this->profileLimitDate)
                 ->setParameter('%expirationDate%', $this->humanReadableExpirationDate)
                 ->addViolation();
         }
@@ -416,7 +415,7 @@ class AuthSettingsTypeDTO
         ) {
             $context->buildViolation('profileLimitMessage')
                 ->atPath('profileLimitDateGOOGLE')
-                ->setParameter('%limit%', $this->profileLimitDate)
+                ->setParameter('%limit%', (string) $this->profileLimitDate)
                 ->setParameter('%expirationDate%', $this->humanReadableExpirationDate)
                 ->addViolation();
         }
@@ -426,7 +425,7 @@ class AuthSettingsTypeDTO
         ) {
             $context->buildViolation('profileLimitMessage')
                 ->atPath('profileLimitDateMICROSOFT')
-                ->setParameter('%limit%', $this->profileLimitDate)
+                ->setParameter('%limit%', (string) $this->profileLimitDate)
                 ->setParameter('%expirationDate%', $this->humanReadableExpirationDate)
                 ->addViolation();
         }
@@ -436,7 +435,7 @@ class AuthSettingsTypeDTO
         ) {
             $context->buildViolation('profileLimitMessage')
                 ->atPath('profileLimitDateEmail')
-                ->setParameter('%limit%', $this->profileLimitDate)
+                ->setParameter('%limit%', (string) $this->profileLimitDate)
                 ->setParameter('%expirationDate%', $this->humanReadableExpirationDate)
                 ->addViolation();
         }
@@ -446,7 +445,7 @@ class AuthSettingsTypeDTO
         ) {
             $context->buildViolation('profileLimitMessage')
                 ->atPath('profileLimitDateSMS')
-                ->setParameter('%limit%', $this->profileLimitDate)
+                ->setParameter('%limit%', (string) $this->profileLimitDate)
                 ->setParameter('%expirationDate%', $this->humanReadableExpirationDate)
                 ->addViolation();
         }
