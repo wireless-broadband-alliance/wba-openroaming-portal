@@ -127,11 +127,12 @@ class UserAccountController extends AbstractController
                 if ($externalAuth->getProvider() === UserProvider::SAML->value) {
                     // Get SAML Response
                     $samlResponseBase64 = $request->request->get('SAMLResponse');
-                    if (!$samlResponseBase64) {
+
+                    if (!is_string($samlResponseBase64) || trim($samlResponseBase64) === '') {
                         return new BaseResponse(
                             400,
                             null,
-                            'SAML Response not found'
+                            'SAML Response not found or invalid'
                         )->toResponse();
                     }
 
@@ -139,6 +140,7 @@ class UserAccountController extends AbstractController
                         $samlResponseBase64,
                         $this->getParameter('app.saml_idp_entity_id')
                     );
+
                     $idpCertificate = $samlResponseData['certificate'];
 
                     // Compare certificates
@@ -228,9 +230,11 @@ class UserAccountController extends AbstractController
                     // Generate JWT Token
                     $token = $this->tokenGenerator->generateToken($currentUser);
                     if (is_array($token) && $token['success'] === false) {
-                        $statusCode = $token['error'] ===
-                        'Invalid user provided. Please verify the user data.' ? 400 : 500;
-                        return new BaseResponse($statusCode, null, $token['error'])->toResponse();
+                        $errorMessage = $token['error'] ?? 'Unknown error';
+                        $statusCode =
+                            $errorMessage === 'Invalid user provided. Please verify the user data.' ? 400 : 500;
+
+                        return new BaseResponse($statusCode, null, $errorMessage)->toResponse();
                     }
                 }
 
@@ -269,9 +273,11 @@ class UserAccountController extends AbstractController
                     // Generate JWT Token
                     $token = $this->tokenGenerator->generateToken($currentUser);
                     if (is_array($token) && $token['success'] === false) {
-                        $statusCode = $token['error'] ===
-                        'Invalid user provided. Please verify the user data.' ? 400 : 500;
-                        return new BaseResponse($statusCode, null, $token['error'])->toResponse();
+                        $errorMessage = $token['error'] ?? 'Unknown error';
+                        $statusCode =
+                            $errorMessage === 'Invalid user provided. Please verify the user data.' ? 400 : 500;
+
+                        return new BaseResponse($statusCode, null, $errorMessage)->toResponse();
                     }
                 }
             }
