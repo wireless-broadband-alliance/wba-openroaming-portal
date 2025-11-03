@@ -351,7 +351,7 @@ readonly class Statistics
     public function fetchChartAuthenticationsFreeradius(DateTime $startDate, DateTime $endDate): array
     {
         $events = $this->radiusAuthsRepository->findAuthRequests($startDate, $endDate);
-dd($events);
+
         $interval = $startDate->diff($endDate);
 
         $granularity = match (true) {

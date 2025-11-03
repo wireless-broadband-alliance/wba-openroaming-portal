@@ -16,6 +16,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Lock\LockFactory;
 use Symfony\Component\Lock\Store\FlockStore;
 
+use function Symfony\Component\String\s;
+
 #[AsCommand(
     name: 'backup:freeradiusLastConnection',
     description: 'Backups all lastConnection made on the freeradius database for the OpenRoaming',
@@ -134,7 +136,7 @@ class FreeradiusLastConnectionCommand extends Command
                         $updated = true;
                     }
                 }
-                dd($updated);
+
                 if ($updated) {
                     // Update timestamp only if changes were made
                     // Make all the db OpenRoaming changes at once to avoid server load

@@ -151,18 +151,20 @@ class RadiusAccountingRepository extends ServiceEntityRepository
      */
     public function findConnectionTime(int $sinceTimestamp): array
     {
+        $sinceDateTime = new \DateTimeImmutable('@' . $sinceTimestamp);
+
         $qb = $this->createQueryBuilder('ra');
 
-        // Subquery to get the maximum acctStartTime per user since the given timestamp
+        // Subquery: get the latest acctStartTime per user since $sinceTimestamp
         $sub = $this->createQueryBuilder('sub')
             ->select('MAX(sub.acctStartTime)')
             ->where('sub.username = ra.username')
             ->andWhere('sub.acctStartTime >= :since')
             ->getDQL();
 
-        // Main query to fetch the rows where acctStartTime is the latest per user
+        // Main query: match only the latest per user
         $qb->where('ra.acctStartTime = (' . $sub . ')')
-            ->setParameter('since', new DateTimeImmutable('@' . $sinceTimestamp));
+            ->setParameter('since', $sinceDateTime);
 
         return $qb->getQuery()->getResult();
     }

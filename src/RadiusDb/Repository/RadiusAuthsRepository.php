@@ -46,25 +46,18 @@ class RadiusAuthsRepository extends ServiceEntityRepository
      */
     public function findAuthRequests(DateTime $startDate, DateTime $endDate): array
     {
-        $qb = $this->createQueryBuilder('u');
-
-        // Subquery: get the MAX id per username + authdate truncated to seconds
-        $sub = $this->createQueryBuilder('sub')
-            ->select('MAX(sub.id)')
-            ->where('sub.username = u.username')
-            ->andWhere("DATE_FORMAT(sub.authdate, '%Y-%m-%d %H:%i:%s') = DATE_FORMAT(u.authdate, '%Y-%m-%d %H:%i:%s')")
-            ->getDQL();
-
-        return $qb
+        $qb = $this->createQueryBuilder('u')
             ->where('u.reply IN (:replies)')
-            ->andWhere('u.authdate >= :startDate')
-            ->andWhere('u.authdate <= :endDate')
-            ->andWhere('u.id = (' . $sub . ')')
+            ->andWhere('u.authdate BETWEEN :startDate AND :endDate')
+            ->andWhere('u.id IN (
+            SELECT MAX(sub2.id) FROM App\RadiusDb\Entity\RadiusAuths sub2
+            WHERE sub2.username = u.username
+        )')
             ->setParameter('replies', ['Access-Accept', 'Access-Reject'])
-            ->setParameter('startDate', $startDate->format('Y-m-d H:i:s'))
-            ->setParameter('endDate', $endDate->format('Y-m-d H:i:s'))
-            ->orderBy('u.authdate', 'ASC')
-            ->getQuery()
-            ->getResult();
+            ->setParameter('startDate', $startDate)
+            ->setParameter('endDate', $endDate)
+            ->orderBy('u.authdate', 'ASC');
+
+        return $qb->getQuery()->getResult();
     }
 }
