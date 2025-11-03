@@ -190,9 +190,12 @@ class AuthController extends AbstractController
 
         // Generate JWT Token
         $token = $this->tokenGenerator->generateToken($user);
+
         if (is_array($token) && $token['success'] === false) {
-            $statusCode = $token['error'] === 'Invalid user provided. Please verify the user data.' ? 400 : 500;
-            return new BaseResponse($statusCode, null, $token['error'])->toResponse();
+            $errorMessage = $token['error'] ?? 'Unknown error generating token';
+            $statusCode = $errorMessage === 'Invalid user provided. Please verify the user data.' ? 400 : 500;
+
+            return new BaseResponse($statusCode, null, $errorMessage)->toResponse();
         }
 
         // Prepare response data
@@ -222,10 +225,13 @@ class AuthController extends AbstractController
     public function authSaml(Request $request, Auth $samlAuth): JsonResponse
     {
         // Get SAML Response
-        $samlResponseBase64 = $request->request->get('SAMLResponse');
-        if (!$samlResponseBase64) {
+        $samlResponseRaw = $request->request->get('SAMLResponse');
+
+        if (!is_string($samlResponseRaw) || $samlResponseRaw === '') {
             return new BaseResponse(400, null, 'SAML Response not found')->toResponse();
         }
+
+        $samlResponseBase64 = (string)$samlResponseRaw;
 
         $samlResponseData = $this->samlResolverService->decodeSamlResponse(
             $samlResponseBase64,
@@ -320,7 +326,7 @@ class AuthController extends AbstractController
             }
 
             if ($twoFAEnforcementResult['canSkip2FA'] === false) {
-                $twoFACode = $request->request->get('twoFACode');
+                $twoFACode = (string) $request->request->get('twoFACode');
                 if (!$twoFACode) {
                     return new BaseResponse(
                         400,
