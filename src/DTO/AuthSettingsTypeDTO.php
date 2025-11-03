@@ -400,35 +400,50 @@ class AuthSettingsTypeDTO
     #[Assert\Callback]
     public function timeLimitValidate(ExecutionContextInterface $context)
     {
-        if ($this->profileLimitDate < $this->profileLimitDateSaml) {
+        if (
+            $this->authMethodSamlEnabled === "true" &&
+            $this->profileLimitDate < $this->profileLimitDateSaml
+        ) {
             $context->buildViolation('profileLimitMessage')
                 ->atPath('profileLimitDateSaml')
                 ->setParameter('%limit%', $this->profileLimitDate)
                 ->setParameter('%expirationDate%', $this->humanReadableExpirationDate)
                 ->addViolation();
         }
-        if ($this->profileLimitDate < $this->profileLimitDateGOOGLE) {
+        if (
+            $this->authMethodGOOGLELoginEnabled === "true" &&
+            $this->profileLimitDate < $this->profileLimitDateGOOGLE
+        ) {
             $context->buildViolation('profileLimitMessage')
                 ->atPath('profileLimitDateGOOGLE')
                 ->setParameter('%limit%', $this->profileLimitDate)
                 ->setParameter('%expirationDate%', $this->humanReadableExpirationDate)
                 ->addViolation();
         }
-        if ($this->profileLimitDate < $this->profileLimitDateMICROSOFT) {
+        if (
+            $this->authMethodMICROSOFTLoginEnabled === "true" &&
+            $this->profileLimitDate < $this->profileLimitDateMICROSOFT
+        ) {
             $context->buildViolation('profileLimitMessage')
                 ->atPath('profileLimitDateMICROSOFT')
                 ->setParameter('%limit%', $this->profileLimitDate)
                 ->setParameter('%expirationDate%', $this->humanReadableExpirationDate)
                 ->addViolation();
         }
-        if ($this->profileLimitDate < $this->profileLimitDateEmail) {
+        if (
+            $this->authMethodRegisterEnabled === "true" &&
+            $this->profileLimitDate < $this->profileLimitDateEmail
+        ) {
             $context->buildViolation('profileLimitMessage')
                 ->atPath('profileLimitDateEmail')
                 ->setParameter('%limit%', $this->profileLimitDate)
                 ->setParameter('%expirationDate%', $this->humanReadableExpirationDate)
                 ->addViolation();
         }
-        if ($this->profileLimitDate < $this->profileLimitDateSMS) {
+        if (
+            $this->authMethodSMSRegisterEnabled === "true" &&
+            $this->profileLimitDate < $this->profileLimitDateSMS
+        ) {
             $context->buildViolation('profileLimitMessage')
                 ->atPath('profileLimitDateSMS')
                 ->setParameter('%limit%', $this->profileLimitDate)
