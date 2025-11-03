@@ -5,6 +5,7 @@ namespace App\RadiusDb\Repository;
 use App\RadiusDb\Entity\RadiusAuths;
 use DateTime;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\DBAL\Exception;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -42,22 +43,42 @@ class RadiusAuthsRepository extends ServiceEntityRepository
     }
 
     /**
-     * @return RadiusAuths[]
+     * Fetch authentication events grouped by second, ignoring anonymous users
+     *
+     * @throws \Exception
+     * @return array<int, array{username: string, authdate: \DateTimeInterface, reply: string}>
      */
-    public function findAuthRequests(DateTime $startDate, DateTime $endDate): array
+    public function getAuthEventsBySecond(DateTime $startDate, DateTime $endDate): array
     {
-        $qb = $this->createQueryBuilder('u')
-            ->where('u.reply IN (:replies)')
-            ->andWhere('u.authdate BETWEEN :startDate AND :endDate')
-            ->andWhere('u.id IN (
-            SELECT MAX(sub2.id) FROM App\RadiusDb\Entity\RadiusAuths sub2
-            WHERE sub2.username = u.username
-        )')
-            ->setParameter('replies', ['Access-Accept', 'Access-Reject'])
+        $auths = $this->createQueryBuilder('u')
+            ->select('u')
+            ->where('u.authdate BETWEEN :startDate AND :endDate')
+            ->andWhere('u.reply IN (:replies)')
+            ->andWhere("u.username NOT LIKE 'anonymous@%'")
             ->setParameter('startDate', $startDate)
             ->setParameter('endDate', $endDate)
-            ->orderBy('u.authdate', 'ASC');
+            ->setParameter('replies', ['Access-Accept', 'Access-Reject'])
+            ->orderBy('u.username', 'ASC')
+            ->addOrderBy('u.authdate', 'ASC')
+            ->getQuery()
+            ->getResult();
 
-        return $qb->getQuery()->getResult();
+        $result = [];
+        foreach ($auths as $auth) {
+            $secondKey = $auth->getAuthdate()->format('Y-m-d H:i:s');
+
+            // Keep only one event per user per second
+            $result[$auth->getUsername()][$secondKey] = $auth;
+        }
+
+        // Flatten back to simple list of events
+        $flattened = [];
+        foreach ($result as $userEvents) {
+            foreach ($userEvents as $event) {
+                $flattened[] = $event;
+            }
+        }
+
+        return $flattened;
     }
 }

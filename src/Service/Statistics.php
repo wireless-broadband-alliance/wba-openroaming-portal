@@ -347,13 +347,12 @@ readonly class Statistics
      *     }[]
      * }
      * @throws \DateMalformedStringException
+     * @throws Exception
      */
     public function fetchChartAuthenticationsFreeradius(DateTime $startDate, DateTime $endDate): array
     {
-        $events = $this->radiusAuthsRepository->findAuthRequests($startDate, $endDate);
-
+        $events = $this->radiusAuthsRepository->getAuthEventsBySecond($startDate, $endDate);
         $interval = $startDate->diff($endDate);
-
         $granularity = match (true) {
             $interval->days > 365.2 => 'year',
             $interval->days > 90 => 'month',
@@ -367,8 +366,9 @@ readonly class Statistics
         ];
 
         foreach ($events as $event) {
-            $eventDateTime = new DateTime($event->getAuthdate());
-
+            // This tag is necessary here because this entity doesn't belong to this project
+            /** @phpstan-ignore-next-line */
+            $eventDateTime = $event->getAuthdate();
             $period = match ($granularity) {
                 'year' => $eventDateTime->format('Y'),
                 'month' => $eventDateTime->format('Y-m'),
@@ -381,10 +381,12 @@ readonly class Statistics
                 $authsCounts['Rejected'][$period] = 0;
             }
 
-            $reply = $event->getReply();
-            if ($reply === 'Access-Accept') {
+            /** @phpstan-ignore-next-line */
+            if ($event->getReply() === 'Access-Accept') {
                 $authsCounts['Accepted'][$period]++;
-            } elseif ($reply === 'Access-Reject') {
+
+                /** @phpstan-ignore-next-line */
+            } elseif ($event->getReply() === 'Access-Reject') {
                 $authsCounts['Rejected'][$period]++;
             }
         }
@@ -627,21 +629,21 @@ readonly class Statistics
             $date = $event->getAcctStartTime();
 
             $groupKey = match ($granularity) {
-                'year'  => $date->format('Y'),
+                'year' => $date->format('Y'),
                 'month' => $date->format('Y-m'),
-                'week'  => $date->format('o-W'),
+                'week' => $date->format('o-W'),
                 default => $date->format('Y-m-d'),
             };
 
-            $sessionTotalTimes[$groupKey] = ($sessionTotalTimes[$groupKey] ?? 0) + (float) $sessionTime;
+            $sessionTotalTimes[$groupKey] = ($sessionTotalTimes[$groupKey] ?? 0) + (float)$sessionTime;
         }
 
         /** @var array<int, array{group: string, totalSessionTime: float}> $result */
         $result = [];
         foreach ($sessionTotalTimes as $groupKey => $totalSessionTime) {
             $result[] = [
-                'group' => (string) $groupKey,
-                'totalSessionTime' => (float) $totalSessionTime,
+                'group' => (string)$groupKey,
+                'totalSessionTime' => (float)$totalSessionTime,
             ];
         }
 

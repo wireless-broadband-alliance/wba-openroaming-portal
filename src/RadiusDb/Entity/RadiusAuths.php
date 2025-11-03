@@ -3,6 +3,7 @@
 namespace App\RadiusDb\Entity;
 
 use App\RadiusDb\Repository\RadiusAuthsRepository;
+use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: RadiusAuthsRepository::class)]
@@ -30,9 +31,9 @@ class RadiusAuths
     /** @phpstan-ignore-next-line */
     private ?string $reply = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(type: 'datetime', nullable: true)]
     /** @phpstan-ignore-next-line */
-    private ?string $authdate = null;
+    private ?\DateTimeInterface $authdate = null;
 
     #[ORM\Column(length: 255)]
     /** @phpstan-ignore-next-line */
@@ -58,7 +59,7 @@ class RadiusAuths
         return $this->reply;
     }
 
-    public function getAuthdate(): ?string
+    public function getAuthdate(): ?DateTimeInterface
     {
         return $this->authdate;
     }

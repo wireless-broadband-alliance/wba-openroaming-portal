@@ -225,7 +225,7 @@ class AuthSettingsTypeDTO
 
     public ?int $profileLimitDate = null;
 
-    public ?string $humanReadableExpirationDate= null;
+    public ?string $humanReadableExpirationDate = null;
 
 
     /**
@@ -233,8 +233,11 @@ class AuthSettingsTypeDTO
      *
      * @param array<string, array{value: string|null, description?: string}> $data
      */
-    public function __construct(array $data = [], ?int $profileLimitDate = 0, ?string $humanReadableExpirationDate = null)
-    {
+    public function __construct(
+        array $data = [],
+        ?int $profileLimitDate = 0,
+        ?string $humanReadableExpirationDate = null
+    ) {
         $this->profileLimitDate = $profileLimitDate;
         $this->humanReadableExpirationDate = $humanReadableExpirationDate;
 
@@ -303,55 +306,91 @@ class AuthSettingsTypeDTO
         return [
             SettingName::AUTH_METHOD_SAML_ENABLED->value => ['value' => $this->authMethodSamlEnabled],
             SettingName::AUTH_METHOD_SAML_LABEL->value => ['value' => $this->authMethodSamlLabel],
-            SettingName::AUTH_METHOD_SAML_DESCRIPTION->value => ['value' =>
-                $this->authMethodSamlDescription],
+            SettingName::AUTH_METHOD_SAML_DESCRIPTION->value => [
+                'value' =>
+                    $this->authMethodSamlDescription
+            ],
             SettingName::PROFILE_LIMIT_DATE_SAML->value => ['value' => $this->profileLimitDateSaml],
 
-            SettingName::AUTH_METHOD_GOOGLE_LOGIN_ENABLED->value => ['value' =>
-                $this->authMethodGOOGLELoginEnabled],
-            SettingName::AUTH_METHOD_GOOGLE_LOGIN_LABEL->value => ['value' =>
-                $this->authMethodGOOGLELoginLabel],
-            SettingName::AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION->value => ['value' =>
-                $this->authMethodGOOGLELoginDescription],
-            SettingName::VALID_DOMAINS_GOOGLE_LOGIN->value => ['value' =>
-                $this->validDomainsMICROSOFTLogin],
+            SettingName::AUTH_METHOD_GOOGLE_LOGIN_ENABLED->value => [
+                'value' =>
+                    $this->authMethodGOOGLELoginEnabled
+            ],
+            SettingName::AUTH_METHOD_GOOGLE_LOGIN_LABEL->value => [
+                'value' =>
+                    $this->authMethodGOOGLELoginLabel
+            ],
+            SettingName::AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION->value => [
+                'value' =>
+                    $this->authMethodGOOGLELoginDescription
+            ],
+            SettingName::VALID_DOMAINS_GOOGLE_LOGIN->value => [
+                'value' =>
+                    $this->validDomainsMICROSOFTLogin
+            ],
             SettingName::PROFILE_LIMIT_DATE_GOOGLE->value => ['value' => $this->profileLimitDateGOOGLE],
 
-            SettingName::AUTH_METHOD_MICROSOFT_LOGIN_ENABLED->value => ['value' =>
-                $this->authMethodMICROSOFTLoginEnabled],
-            SettingName::AUTH_METHOD_MICROSOFT_LOGIN_LABEL->value => ['value' =>
-                $this->authMethodMICROSOFTLoginLabel],
-            SettingName::AUTH_METHOD_MICROSOFT_LOGIN_DESCRIPTION->value => ['value' =>
-                $this->authMethodMICROSOFTLoginDescription],
-            SettingName::VALID_DOMAINS_MICROSOFT_LOGIN->value => ['value' =>
-                $this->validDomainsMICROSOFTLogin],
-            SettingName::PROFILE_LIMIT_DATE_MICROSOFT->value => ['value' =>
-                $this->profileLimitDateMICROSOFT],
+            SettingName::AUTH_METHOD_MICROSOFT_LOGIN_ENABLED->value => [
+                'value' =>
+                    $this->authMethodMICROSOFTLoginEnabled
+            ],
+            SettingName::AUTH_METHOD_MICROSOFT_LOGIN_LABEL->value => [
+                'value' =>
+                    $this->authMethodMICROSOFTLoginLabel
+            ],
+            SettingName::AUTH_METHOD_MICROSOFT_LOGIN_DESCRIPTION->value => [
+                'value' =>
+                    $this->authMethodMICROSOFTLoginDescription
+            ],
+            SettingName::VALID_DOMAINS_MICROSOFT_LOGIN->value => [
+                'value' =>
+                    $this->validDomainsMICROSOFTLogin
+            ],
+            SettingName::PROFILE_LIMIT_DATE_MICROSOFT->value => [
+                'value' =>
+                    $this->profileLimitDateMICROSOFT
+            ],
 
-            SettingName::AUTH_METHOD_REGISTER_ENABLED->value => ['value' =>
-                $this->authMethodRegisterEnabled],
+            SettingName::AUTH_METHOD_REGISTER_ENABLED->value => [
+                'value' =>
+                    $this->authMethodRegisterEnabled
+            ],
             SettingName::AUTH_METHOD_REGISTER_LABEL->value => ['value' => $this->authMethodRegisterLabel],
-            SettingName::AUTH_METHOD_REGISTER_DESCRIPTION->value => ['value' =>
-                $this->authMethodRegisterDescription],
+            SettingName::AUTH_METHOD_REGISTER_DESCRIPTION->value => [
+                'value' =>
+                    $this->authMethodRegisterDescription
+            ],
             SettingName::PROFILE_LIMIT_DATE_EMAIL->value => ['value' => $this->profileLimitDateEmail],
             SettingName::EMAIL_TIMER_RESEND->value => ['value' => $this->emailTimerResend],
             SettingName::LINK_VALIDITY->value => ['value' => $this->LinkValidity],
 
-            SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED->value => ['value' =>
-                $this->authMethodLoginTraditionalEnabled],
-            SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_LABEL->value => ['value' =>
-                $this->authMethodLoginTraditionalLabel],
-            SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION->value => ['value' =>
-                $this->authMethodLoginTraditionalDescription],
+            SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED->value => [
+                'value' =>
+                    $this->authMethodLoginTraditionalEnabled
+            ],
+            SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_LABEL->value => [
+                'value' =>
+                    $this->authMethodLoginTraditionalLabel
+            ],
+            SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION->value => [
+                'value' =>
+                    $this->authMethodLoginTraditionalDescription
+            ],
 
             SettingName::LOGIN_WITH_UUID_ONLY->value => ['value' => $this->loginWithUUIDOnly],
 
-            SettingName::AUTH_METHOD_SMS_REGISTER_ENABLED->value => ['value' =>
-                $this->authMethodSMSRegisterEnabled],
-            SettingName::AUTH_METHOD_SMS_REGISTER_LABEL->value => ['value' =>
-                $this->authMethodSMSRegisterLabel],
-            SettingName::AUTH_METHOD_SMS_REGISTER_DESCRIPTION->value => ['value' =>
-                $this->authMethodSMSRegisterDescription],
+            SettingName::AUTH_METHOD_SMS_REGISTER_ENABLED->value => [
+                'value' =>
+                    $this->authMethodSMSRegisterEnabled
+            ],
+            SettingName::AUTH_METHOD_SMS_REGISTER_LABEL->value => [
+                'value' =>
+                    $this->authMethodSMSRegisterLabel
+            ],
+            SettingName::AUTH_METHOD_SMS_REGISTER_DESCRIPTION->value => [
+                'value' =>
+                    $this->authMethodSMSRegisterDescription
+            ],
             SettingName::PROFILE_LIMIT_DATE_SMS->value => ['value' => $this->profileLimitDateSMS],
 
         ];
@@ -360,42 +399,41 @@ class AuthSettingsTypeDTO
 
     #[Assert\Callback]
     public function timeLimitValidate(ExecutionContextInterface $context)
-        {
-            if ($this->profileLimitDate < $this->profileLimitDateSaml) {
-                $context->buildViolation('profileLimitMessage')
-                    ->atPath('profileLimitDateSaml')
-                    ->setParameter('%limit%', $this->profileLimitDate)
-                    ->setParameter('%expirationDate%', $this->humanReadableExpirationDate)
-                    ->addViolation();
-            }
-            if ($this->profileLimitDate < $this->profileLimitDateGOOGLE) {
-                $context->buildViolation('profileLimitMessage')
-                    ->atPath('profileLimitDateGOOGLE')
-                    ->setParameter('%limit%', $this->profileLimitDate)
-                    ->setParameter('%expirationDate%', $this->humanReadableExpirationDate)
-                    ->addViolation();
-
-            }
-            if ($this->profileLimitDate < $this->profileLimitDateMICROSOFT) {
-                $context->buildViolation('profileLimitMessage')
-                    ->atPath('profileLimitDateMICROSOFT')
-                    ->setParameter('%limit%', $this->profileLimitDate)
-                    ->setParameter('%expirationDate%', $this->humanReadableExpirationDate)
-                    ->addViolation();
-            }
-            if ($this->profileLimitDate < $this->profileLimitDateEmail) {
-                $context->buildViolation('profileLimitMessage')
-                    ->atPath('profileLimitDateEmail')
-                    ->setParameter('%limit%', $this->profileLimitDate)
-                    ->setParameter('%expirationDate%', $this->humanReadableExpirationDate)
-                    ->addViolation();
-            }
-            if ($this->profileLimitDate < $this->profileLimitDateSMS) {
+    {
+        if ($this->profileLimitDate < $this->profileLimitDateSaml) {
+            $context->buildViolation('profileLimitMessage')
+                ->atPath('profileLimitDateSaml')
+                ->setParameter('%limit%', $this->profileLimitDate)
+                ->setParameter('%expirationDate%', $this->humanReadableExpirationDate)
+                ->addViolation();
+        }
+        if ($this->profileLimitDate < $this->profileLimitDateGOOGLE) {
+            $context->buildViolation('profileLimitMessage')
+                ->atPath('profileLimitDateGOOGLE')
+                ->setParameter('%limit%', $this->profileLimitDate)
+                ->setParameter('%expirationDate%', $this->humanReadableExpirationDate)
+                ->addViolation();
+        }
+        if ($this->profileLimitDate < $this->profileLimitDateMICROSOFT) {
+            $context->buildViolation('profileLimitMessage')
+                ->atPath('profileLimitDateMICROSOFT')
+                ->setParameter('%limit%', $this->profileLimitDate)
+                ->setParameter('%expirationDate%', $this->humanReadableExpirationDate)
+                ->addViolation();
+        }
+        if ($this->profileLimitDate < $this->profileLimitDateEmail) {
+            $context->buildViolation('profileLimitMessage')
+                ->atPath('profileLimitDateEmail')
+                ->setParameter('%limit%', $this->profileLimitDate)
+                ->setParameter('%expirationDate%', $this->humanReadableExpirationDate)
+                ->addViolation();
+        }
+        if ($this->profileLimitDate < $this->profileLimitDateSMS) {
             $context->buildViolation('profileLimitMessage')
                 ->atPath('profileLimitDateSMS')
                 ->setParameter('%limit%', $this->profileLimitDate)
                 ->setParameter('%expirationDate%', $this->humanReadableExpirationDate)
                 ->addViolation();
         }
-        }
+    }
 }
