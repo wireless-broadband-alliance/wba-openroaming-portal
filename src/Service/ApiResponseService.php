@@ -1255,6 +1255,7 @@ readonly class ApiResponseService
                     ],
                     500 => [
                         'Failed to encrypt the password',
+                        'Encryption succeeded but no encrypted data was returned.'
                     ]
                 ]
             ],
@@ -1306,7 +1307,7 @@ readonly class ApiResponseService
                     ],
                     500 => [
                         'Failed to encrypt the password',
-                    ]
+                        'Encryption succeeded but no encrypted data was returned.'                    ]
                 ]
             ],
             'api_v2_auth_local_register' => [
