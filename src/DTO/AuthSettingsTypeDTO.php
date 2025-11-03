@@ -5,8 +5,8 @@ namespace App\DTO;
 use App\Enum\OperationMode;
 use App\Enum\SettingName;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
-// TODO make a validations vor profile limit date using the profile expiration date
 class AuthSettingsTypeDTO
 {
     // SAML
@@ -33,11 +33,6 @@ class AuthSettingsTypeDTO
     #[Assert\Expression(
         expression: "this.authMethodSamlEnabled != 'true' or (this.authMethodSamlEnabled == 'true' and value != '')",
         message: "fieldCannotBeBlank"
-    )]
-    #[Assert\Expression(
-        expression: "this.authMethodSamlEnabled != 'true' or (this.authMethodSamlEnabled == 'true' and 
-        value < this.profileLimitDate)",
-        message: "profileLimitMessage"
     )]
     #[Assert\GreaterThanOrEqual(value: 1, message: 'timerShouldNeverBeLessThan')]
     public ?int $profileLimitDateSaml = null;
@@ -77,11 +72,6 @@ class AuthSettingsTypeDTO
         'true' and value != '')",
         message: "fieldCannotBeBlank"
     )]
-    #[Assert\Expression(
-        expression: "this.authMethodGOOGLELoginEnabled != 'true' or (this.authMethodGOOGLELoginEnabled == 
-        'true' and value < this.profileLimitDate)",
-        message: "profileLimitMessage"
-    )]
     #[Assert\GreaterThanOrEqual(value: 1, message: 'timerShouldNeverBeLessThan')]
     public ?int $profileLimitDateGOOGLE = null;
 
@@ -120,11 +110,6 @@ class AuthSettingsTypeDTO
         .authMethodMICROSOFTLoginEnabled == 'true' and value != '')",
         message: "fieldCannotBeBlank"
     )]
-    #[Assert\Expression(
-        expression: "this.authMethodMICROSOFTLoginEnabled != 'true' or (this
-        .authMethodMICROSOFTLoginEnabled == 'true' and value < this.profileLimitDate)",
-        message: "profileLimitMessage"
-    )]
     #[Assert\GreaterThanOrEqual(value: 1, message: 'timerShouldNeverBeLessThan')]
     public ?int $profileLimitDateMICROSOFT = null;
 
@@ -155,11 +140,6 @@ class AuthSettingsTypeDTO
         expression: "this.authMethodRegisterEnabled != 'true' or (this.authMethodRegisterEnabled == 'true' 
         and value != '')",
         message: "fieldCannotBeBlank"
-    )]
-    #[Assert\Expression(
-        expression: "this.authMethodRegisterEnabled != 'true' or (this.authMethodRegisterEnabled == 'true' 
-        and value < this.profileLimitDate)",
-        message: "profileLimitMessage"
     )]
     #[Assert\GreaterThanOrEqual(value: 1, message: 'timerShouldNeverBeLessThan')]
     public ?int $profileLimitDateEmail = null;
@@ -240,15 +220,12 @@ class AuthSettingsTypeDTO
         'true' and value != '')",
         message: "fieldCannotBeBlank"
     )]
-    #[Assert\Expression(
-        expression: "this.authMethodSMSRegisterEnabled != 'true' or (this.authMethodSMSRegisterEnabled == 
-        'true' and value < this.profileLimitDate)",
-        message: "profileLimitMessage"
-    )]
     #[Assert\GreaterThanOrEqual(value: 1, message: 'timerShouldNeverBeLessThan')]
     public ?int $profileLimitDateSMS = null;
 
     public ?int $profileLimitDate = null;
+
+    public ?string $humanReadableExpirationDate= null;
 
 
     /**
@@ -256,9 +233,10 @@ class AuthSettingsTypeDTO
      *
      * @param array<string, array{value: string|null, description?: string}> $data
      */
-    public function __construct(array $data = [], ?int $profileLimitDate = 0)
+    public function __construct(array $data = [], ?int $profileLimitDate = 0, ?string $humanReadableExpirationDate = null)
     {
         $this->profileLimitDate = $profileLimitDate;
+        $this->humanReadableExpirationDate = $humanReadableExpirationDate;
 
         $this->authMethodSamlEnabled = $data[SettingName::AUTH_METHOD_SAML_ENABLED->value]['value'] ?? null;
         $this->authMethodSamlLabel = $data[SettingName::AUTH_METHOD_SAML_LABEL->value]['value'] ?? null;
@@ -378,4 +356,46 @@ class AuthSettingsTypeDTO
 
         ];
     }
+
+
+    #[Assert\Callback]
+    public function timeLimitValidate(ExecutionContextInterface $context)
+        {
+            if ($this->profileLimitDate < $this->profileLimitDateSaml) {
+                $context->buildViolation('profileLimitMessage')
+                    ->atPath('profileLimitDateSaml')
+                    ->setParameter('%limit%', $this->profileLimitDate)
+                    ->setParameter('%expirationDate%', $this->humanReadableExpirationDate)
+                    ->addViolation();
+            }
+            if ($this->profileLimitDate < $this->profileLimitDateGOOGLE) {
+                $context->buildViolation('profileLimitMessage')
+                    ->atPath('profileLimitDateGOOGLE')
+                    ->setParameter('%limit%', $this->profileLimitDate)
+                    ->setParameter('%expirationDate%', $this->humanReadableExpirationDate)
+                    ->addViolation();
+
+            }
+            if ($this->profileLimitDate < $this->profileLimitDateMICROSOFT) {
+                $context->buildViolation('profileLimitMessage')
+                    ->atPath('profileLimitDateMICROSOFT')
+                    ->setParameter('%limit%', $this->profileLimitDate)
+                    ->setParameter('%expirationDate%', $this->humanReadableExpirationDate)
+                    ->addViolation();
+            }
+            if ($this->profileLimitDate < $this->profileLimitDateEmail) {
+                $context->buildViolation('profileLimitMessage')
+                    ->atPath('profileLimitDateEmail')
+                    ->setParameter('%limit%', $this->profileLimitDate)
+                    ->setParameter('%expirationDate%', $this->humanReadableExpirationDate)
+                    ->addViolation();
+            }
+            if ($this->profileLimitDate < $this->profileLimitDateSMS) {
+            $context->buildViolation('profileLimitMessage')
+                ->atPath('profileLimitDateSMS')
+                ->setParameter('%limit%', $this->profileLimitDate)
+                ->setParameter('%expirationDate%', $this->humanReadableExpirationDate)
+                ->addViolation();
+        }
+        }
 }
