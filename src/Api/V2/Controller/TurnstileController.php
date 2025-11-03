@@ -15,7 +15,12 @@ class TurnstileController extends AbstractController
         if (!file_exists($filePath)) {
             return new Response('HTML file not found.', Response::HTTP_NOT_FOUND);
         }
+
         $html = file_get_contents($filePath);
+
+        if ($html === false) {
+            return new Response('Failed to read HTML file.', Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
 
         // Return the file content as an HTML response
         return new Response($html, Response::HTTP_OK, ['Content-Type' => 'text/html']);
@@ -28,7 +33,12 @@ class TurnstileController extends AbstractController
         if (!file_exists($filePath)) {
             return new Response('HTML file not found.', Response::HTTP_NOT_FOUND);
         }
+
         $html = file_get_contents($filePath);
+
+        if ($html === false) {
+            return new Response('Failed to read HTML file.', Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
 
         // Return the file content as an HTML response
         return new Response($html, Response::HTTP_OK, ['Content-Type' => 'text/html']);
