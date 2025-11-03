@@ -735,6 +735,9 @@ class SettingsController extends AbstractController
         ]);
     }
 
+    /**
+     * @throws \DateInvalidTimeZoneException
+     */
     #[Route(
         '/dashboard/settings/auth/{language}',
         name: 'admin_dashboard_settings_auth',

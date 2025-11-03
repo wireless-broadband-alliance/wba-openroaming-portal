@@ -134,7 +134,7 @@ class FreeradiusLastConnectionCommand extends Command
                         $updated = true;
                     }
                 }
-
+                dd($updated);
                 if ($updated) {
                     // Update timestamp only if changes were made
                     // Make all the db OpenRoaming changes at once to avoid server load
