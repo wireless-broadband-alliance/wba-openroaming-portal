@@ -14,6 +14,7 @@ use App\Enum\UserProvider;
 use App\Enum\UserTwoFactorAuthenticationStatus;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
+use App\Service\AuthAPIResponseService;
 use App\Service\CaptchaValidator;
 use App\Service\EventActions;
 use App\Service\JWTTokenGenerator;
@@ -54,6 +55,7 @@ class AuthController extends AbstractController
         private readonly TwoFAService $twoFAService,
         private readonly TOTPService $TOTPService,
         private readonly SettingRepository $settingRepository,
+        private readonly AuthAPIResponseService $authAPIResponseService,
     ) {
     }
 
@@ -188,9 +190,12 @@ class AuthController extends AbstractController
 
         // Generate JWT Token
         $token = $this->tokenGenerator->generateToken($user);
-        if (is_array($token) && isset($token['success']) && $token['success'] === false) {
-            $statusCode = $token['error'] === 'Invalid user provided. Please verify the user data.' ? 400 : 500;
-            return new BaseResponse($statusCode, null, $token['error'])->toResponse();
+
+        if (is_array($token) && $token['success'] === false) {
+            $errorMessage = $token['error'] ?? 'Unknown error generating token';
+            $statusCode = $errorMessage === 'Invalid user provided. Please verify the user data.' ? 400 : 500;
+
+            return new BaseResponse($statusCode, null, $errorMessage)->toResponse();
         }
 
         // Prepare response data
@@ -220,13 +225,14 @@ class AuthController extends AbstractController
     public function authSaml(Request $request, Auth $samlAuth): JsonResponse
     {
         // Get SAML Response
-        $samlResponseBase64 = $request->request->get('SAMLResponse');
-        if (!$samlResponseBase64) {
+        $samlResponseRaw = $request->request->get('SAMLResponse');
+
+        if (!is_string($samlResponseRaw) || $samlResponseRaw === '') {
             return new BaseResponse(400, null, 'SAML Response not found')->toResponse();
         }
 
         $samlResponseData = $this->samlResolverService->decodeSamlResponse(
-            $samlResponseBase64,
+            $samlResponseRaw,
             $this->getParameter('app.saml_idp_entity_id')
         );
         $idpCertificate = $samlResponseData['certificate'];
@@ -318,8 +324,8 @@ class AuthController extends AbstractController
             }
 
             if ($twoFAEnforcementResult['canSkip2FA'] === false) {
-                $twoFACode = $request->request->get('twoFACode');
-                if (!$twoFACode) {
+                $twoFACode = (string) $request->request->get('twoFACode');
+                if ($twoFACode === '' || $twoFACode === '0') {
                     return new BaseResponse(
                         400,
                         null,
@@ -355,33 +361,12 @@ class AuthController extends AbstractController
                 }
             }
 
-            // Generate JWT Token
-            $token = $this->tokenGenerator->generateToken($user);
-            if (is_array($token) && isset($token['success']) && $token['success'] === false) {
-                $statusCode = $token['error'] === 'Invalid user provided. Please verify the user data.' ? 400 : 500;
-                return new BaseResponse($statusCode, null, $token['error'])->toResponse();
-            }
-
-            // Use the toApiResponse method to generate the response
-            $responseData = $user->toApiResponse([
-                'token' => $token,
-            ]);
-
-            // Defines the Event to the table
-            $eventMetaData = [
-                'user_agent' => $request->headers->get('User-Agent'),
-                'uuid' => $user->getUuid(),
-                'ip' => $request->getClientIp(),
-            ];
-
-            $this->eventActions->saveEvent(
+            // Generate JWT Token and the success msg
+            return $this->authAPIResponseService->handleSuccessfulAuth(
+                $request,
                 $user,
-                AnalyticalEventType::AUTH_SAML_API->value,
-                new DateTime(),
-                $eventMetaData
+                AnalyticalEventType::AUTH_MICROSOFT_API->value
             );
-
-            return new BaseResponse(200, $responseData)->toResponse(); // Success
         } catch (Exception) {
             return new BaseResponse(
                 500,
@@ -486,30 +471,12 @@ class AuthController extends AbstractController
             // Authenticate the user using a custom Google authentication function already on the project
             $this->googleController->authenticateUserGoogle($user);
 
-            // Generate JWT Token
-            $token = $this->tokenGenerator->generateToken($user);
-            if (is_array($token) && isset($token['success']) && $token['success'] === false) {
-                $statusCode = $token['error'] === 'Invalid user provided. Please verify the user data.' ? 400 : 500;
-                return new BaseResponse($statusCode, null, $token['error'])->toResponse();
-            }
-
-            $formattedUserData = $user->toApiResponse(['token' => $token]);
-
-            // Defines the Event to the table
-            $eventMetaData = [
-                'user_agent' => $request->headers->get('User-Agent'),
-                'uuid' => $user->getUuid(),
-                'ip' => $request->getClientIp(),
-            ];
-
-            $this->eventActions->saveEvent(
+            // Generate JWT Token and the success msg
+            return $this->authAPIResponseService->handleSuccessfulAuth(
+                $request,
                 $user,
-                AnalyticalEventType::AUTH_GOOGLE_API->value,
-                new DateTime(),
-                $eventMetaData
+                AnalyticalEventType::AUTH_MICROSOFT_API->value
             );
-
-            return new BaseResponse(200, $formattedUserData, null)->toResponse();
         } catch (IdentityProviderException) {
             // Handle OAuth identity provider-specific errors
             return new BaseResponse(500, null, 'Authentication failed')->toResponse();
@@ -614,30 +581,12 @@ class AuthController extends AbstractController
             // Authenticate the user using a custom Microsoft authentication function already on the project
             $this->microsoftController->authenticateUserMicrosoft($user);
 
-            // Generate JWT Token
-            $token = $this->tokenGenerator->generateToken($user);
-            if (is_array($token) && isset($token['success']) && $token['success'] === false) {
-                $statusCode = $token['error'] === 'Invalid user provided. Please verify the user data.' ? 400 : 500;
-                return new BaseResponse($statusCode, null, $token['error'])->toResponse();
-            }
-
-            $formattedUserData = $user->toApiResponse(['token' => $token]);
-
-            // Defines the Event to the table
-            $eventMetaData = [
-                'user_agent' => $request->headers->get('User-Agent'),
-                'uuid' => $user->getUuid(),
-                'ip' => $request->getClientIp(),
-            ];
-
-            $this->eventActions->saveEvent(
+            // Generate JWT Token and the success msg
+            return $this->authAPIResponseService->handleSuccessfulAuth(
+                $request,
                 $user,
-                AnalyticalEventType::AUTH_MICROSOFT_API->value,
-                new DateTime(),
-                $eventMetaData
+                AnalyticalEventType::AUTH_MICROSOFT_API->value
             );
-
-            return new BaseResponse(200, $formattedUserData, null)->toResponse();
         } catch (IdentityProviderException) {
             // Handle OAuth identity provider-specific errors
             return new BaseResponse(500, null, 'Authentication failed')->toResponse();

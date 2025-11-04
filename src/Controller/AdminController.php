@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\DTO\CustomTypeDTO;
 use App\Entity\Setting;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
@@ -59,6 +60,7 @@ class AdminController extends AbstractController
         #[MapQueryParameter] ?int $count = 7
     ): Response {
         // Call the getSettings method of GetSettings class to retrieve the data
+        /** @var array<string, array{value: string, description: string}> $data */
         $data = $this->getSettings->getSettings();
 
         $searchTerm = $request->query->get('u');
@@ -80,7 +82,7 @@ class AdminController extends AbstractController
         // Fetch user counts for table header (All/Verified/Banned)
         $allUsersCount = $this->userRepository->countAllUsersExcludingAdmin($searchTerm, $filter);
         $verifiedUsersCount = $this->userRepository->countVerifiedUsers($searchTerm);
-        $bannedUsersCount = $this->userRepository->totalBannedUsers($searchTerm);
+        $bannedUsersCount = $this->userRepository->countBannedUsers($searchTerm);
 
         // Check if the export users operation is enabled
         $exportUsers = $this->parameterBag->get('app.export_users');
@@ -193,6 +195,7 @@ class AdminController extends AbstractController
     public function customize(Request $request, EntityManagerInterface $em, string $language): Response
     {
         // Call the getSettings method of GetSettings class to retrieve the data
+        /** @var array<string, array{value: string, description: string}> $data */
         $data = $this->getSettings->getSettings($language);
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
@@ -204,17 +207,16 @@ class AdminController extends AbstractController
         // Get the settings value according to the language
         $settingsTranslated = $this->getSettings->getSettingsByLocale($settings, $data);
 
+        $customTypeDTO = new CustomTypeDTO();
+
         // Create the form with the CustomType and pass the relevant settings
-        $form = $this->createForm(CustomType::class, null, [
+        $form = $this->createForm(CustomType::class, $customTypeDTO, [
             'settings' => $settingsTranslated,
         ]);
 
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // Handle submitted data and update the settings accordingly
-            $submittedData = $form->getData();
-
             // Update the settings based on the form submission
             foreach ($settings as $setting) {
                 $settingName = $setting->getName();
@@ -235,7 +237,7 @@ class AdminController extends AbstractController
                 ) {
                     if (in_array($settingName, $this->getSettings->arraySettingsToTranslate(), true)) {
                         $locale = $language;
-                        $submittedValue = $submittedData[$settingName];
+                        $submittedValue = $customTypeDTO->{$settingName} ?? null;
                         if ($locale === LanguageType::EN->value) {
                             // Update the setting value
                             $setting->setValue($submittedValue);
@@ -251,7 +253,7 @@ class AdminController extends AbstractController
                         }
                     } else {
                         // Get the value from the submitted form data
-                        $submittedValue = $submittedData[$settingName];
+                        $submittedValue = $customTypeDTO->{$settingName} ?? null;
 
                         // Update the setting value
                         $setting->setValue($submittedValue);
@@ -320,7 +322,8 @@ class AdminController extends AbstractController
             'settings' => $settingsTranslated,
             'form' => $form->createView(),
             'data' => $data,
-            'language' => $language
+            'language' => $language,
+            'customTypeDTO' => $customTypeDTO,
         ]);
     }
 }

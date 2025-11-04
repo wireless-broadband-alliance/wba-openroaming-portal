@@ -53,6 +53,7 @@ or, only for local usage and testing,
 ```bash
 - php bin/console doctrine:migrations:migrate
 - php bin/console doctrine:fixtures:load
+- mkdir /var/www/openroaming/public/resources/uploaded/
 - chown -R www-data:www-data /var/www/openroaming/public/resources/uploaded/
 ```
 

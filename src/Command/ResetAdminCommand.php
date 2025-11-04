@@ -86,7 +86,7 @@ class ResetAdminCommand extends Command
             $admin->setRoles(['ROLE_ADMIN']);
             $admin->setIsVerified(true);
             $admin->setForgotPasswordRequest(true);
-            $admin->setTwoFAcode(random_int(100000, 999999));
+            $admin->setTwoFAcode((string)random_int(100000, 999999));
             $admin->setTwoFAcodeGeneratedAt(new DateTime());
             $admin->setTwoFAcodeIsActive(true);
             $admin->setCreatedAt(new DateTime());

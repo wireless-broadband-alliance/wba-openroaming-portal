@@ -13,6 +13,9 @@ readonly class EventActions
     {
     }
 
+    /**
+     * @param array<string, mixed> $eventMetadata
+     */
     public function saveEvent(
         User $user,
         string $eventName,

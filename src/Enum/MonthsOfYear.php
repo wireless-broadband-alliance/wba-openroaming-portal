@@ -19,6 +19,7 @@ enum MonthsOfYear: int
 
     /**
      * Returns an array for ChoiceType.
+     * @return array<string, int>
      */
     public static function choices(): array
     {

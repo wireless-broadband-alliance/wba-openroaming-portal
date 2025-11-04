@@ -5,45 +5,60 @@ namespace App\Service;
 class StatisticsGenerators
 {
     /**
-     * Generated Datasets for charts graphics
+     * Generate datasets for charts graphics
+     *
+     * @param array<string, int|float> $counts
+     * @return array{
+     *     labels: string[],
+     *     datasets: array{
+     *         data: int[],
+     *         backgroundColor: string[],
+     *         borderColor: string,
+     *         borderRadius: string
+     *     }[]
+     * }
      */
     public function generateDatasets(array $counts): array
     {
-        $datasets = [];
         $labels = array_keys($counts);
-        $dataValues = array_values($counts);
 
-        $data = [];
+        // Convert all values to int to satisfy PHPStan
+        $data = array_map(fn($value) => (int) round($value), array_values($counts));
 
-        // Calculate the colors with varying opacities
-        $colors = $this->generateColorsWithOpacity($dataValues);
-
-        foreach (array_keys($labels) as $index) {
-            $data[] = $dataValues[$index];
-        }
-
-        $datasets[] = [
-            'data' => $data,
-            'backgroundColor' => $colors,
-            'borderColor' => "rgb(125, 185, 40)",
-            'borderRadius' => "15",
-        ];
+        $backgroundColors = $this->generateColorsWithOpacity($data);
 
         return [
             'labels' => $labels,
-            'datasets' => $datasets,
+            'datasets' => [
+                [
+                    'data' => $data,
+                    'backgroundColor' => $backgroundColors,
+                    'borderColor' => "rgb(125, 185, 40)",
+                    'borderRadius' => "15",
+                ],
+            ],
         ];
     }
 
     /**
      * Generate datasets for session average time
+     *
+     * @param array<int, array{group: string, averageSessionTime: int|float}> $sessionTime
+     * @return array{
+     *     labels: string[],
+     *     datasets: array{
+     *         label: string,
+     *         data: int[]|float[],
+     *         backgroundColor: string[],
+     *         borderRadius: string,
+     *         tooltips: string[]
+     *     }[]
+     * }
      */
     public function generateDatasetsSessionAverage(array $sessionTime): array
     {
         $labels = array_column($sessionTime, 'group');
-        $averageTimes = array_map(static function ($item) {
-            return $item['averageSessionTime']; // Keep numerical values for plotting
-        }, $sessionTime);
+        $averageTimes = array_map(static fn($item) => $item['averageSessionTime'], $sessionTime);
 
         $averageTimesReadable = array_map(static function ($seconds) {
             $hours = floor($seconds / 3600);
@@ -72,6 +87,18 @@ class StatisticsGenerators
 
     /**
      * Generate datasets for session total time
+     *
+     * @param array<int, array{group: string, totalSessionTime: int|float}> $sessionTime
+     * @return array{
+     *     labels: string[],
+     *     datasets: array{
+     *         label: string,
+     *         data: int[]|float[],
+     *         backgroundColor: string[],
+     *         borderRadius: string,
+     *         tooltips: string[]
+     *     }[]
+     * }
      */
     public function generateDatasetsSessionTotal(array $sessionTime): array
     {
@@ -105,6 +132,18 @@ class StatisticsGenerators
 
     /**
      * Generate datasets for Wi-Fi tags
+     *
+     * @param array<int, array{standard: string, count: int}> $wifiUsage
+     * @return array{
+     *     labels: string[],
+     *     datasets: array{
+     *         label: string,
+     *         data: int[],
+     *         backgroundColor: string[],
+     *         borderRadius: string
+     *     }[],
+     *     rawData: int[]
+     * }
      */
     public function generateDatasetsWifiTags(array $wifiUsage): array
     {
@@ -132,10 +171,26 @@ class StatisticsGenerators
 
     /**
      * Generate datasets for authentication attempts
+     *
+     * @param array{
+     *     Accepted: array<int|string, int>,
+     *     Rejected: array<int|string, int>
+     * } $authsCounts
+     *
+     * @return array{
+     *     labels: string[],
+     *     datasets: array{
+     *         label: string,
+     *         data: int[],
+     *         backgroundColor: string[],
+     *         borderRadius: string
+     *     }[]
+     * }
      */
     public function generateDatasetsAuths(array $authsCounts): array
     {
-        $labels = array_keys($authsCounts['Accepted']);
+        // Ensure keys are strings
+        $labels = array_map(strval(...), array_keys($authsCounts['Accepted']));
         $acceptedCounts = array_values($authsCounts['Accepted']);
         $rejectedCounts = array_values($authsCounts['Rejected']);
 
@@ -143,13 +198,13 @@ class StatisticsGenerators
             [
                 'label' => 'Accepted',
                 'data' => $acceptedCounts,
-                'backgroundColor' => '#7DB928',
+                'backgroundColor' => $this->generateColorsWithOpacity($acceptedCounts), // keep green
                 'borderRadius' => "15",
             ],
             [
                 'label' => 'Rejected',
                 'data' => $rejectedCounts,
-                'backgroundColor' => '#FE4068',
+                'backgroundColor' => array_map(fn($v) => "rgba(254, 64, 104, 0.8)", $rejectedCounts),
                 'borderRadius' => "15",
             ]
         ];
@@ -160,6 +215,19 @@ class StatisticsGenerators
         ];
     }
 
+    /**
+     * Generate datasets for realm counting
+     *
+     * @param array<string, int> $counts Realm names mapped to counts.
+     * @return array{
+     *     labels: string[],
+     *     datasets: array{
+     *         data: int[],
+     *         backgroundColor: string[],
+     *         borderRadius: string
+     *     }[]
+     * }
+     */
     public function generateDatasetsRealmsCounting(array $counts): array
     {
         $datasets = [];
@@ -192,6 +260,21 @@ class StatisticsGenerators
         ];
     }
 
+    /**
+     * Generate datasets for realm traffic
+     *
+     * @param array<string, array{total_input: int, total_output: int}> $trafficData
+     * @return array{
+     *     labels: string[],
+     *     datasets: array{
+     *         data: int[],
+     *         label: string,
+     *         backgroundColor: string[],
+     *         borderWidth?: int,
+     *         borderRadius: string
+     *     }[]
+     * }
+     */
     public function generateDatasetsRealmsTraffic(array $trafficData): array
     {
         $datasets = [];
@@ -247,23 +330,33 @@ class StatisticsGenerators
 
     /**
      * Generate colors with varying opacities based on data values
+     *
+     * @param array<int|float> $values
+     * @return string[]
      */
     public function generateColorsWithOpacity(array $values): array
     {
-        if (array_filter($values, static fn($value) => $value !== 0) !== []) {
-            $maxValue = max($values);
+        if ($values === []) {
+            return []; // or array_fill(0, 0, "rgba(125, 185, 40, 1)");
+        }
+
+        // Filter out zero values
+        $nonZeroValues = array_filter($values, static fn($value) => $value !== 0);
+
+        if ($nonZeroValues !== []) {
+            $maxValue = max($nonZeroValues); // safe: nonZeroValues is non-empty
             $colors = [];
 
             foreach ($values as $value) {
-                // Calculate the opacity relative to the max value, scaled to the opacity range
                 $opacity = 0.4 + ($value / $maxValue) * (1 - 0.4);
-                $opacity = round($opacity, 2); // Round to 2 decimal places for better control
+                $opacity = round($opacity, 2);
                 $colors[] = "rgba(125, 185, 40, {$opacity})";
             }
 
             return $colors;
         }
 
-        return array_fill(0, count($values), "rgba(125, 185, 40, 1)"); // Default color if no non-zero values
+        // If all values are zero, return default colors
+        return array_fill(0, count($values), "rgba(125, 185, 40, 1)");
     }
 }

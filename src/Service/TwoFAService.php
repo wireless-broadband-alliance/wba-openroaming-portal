@@ -71,7 +71,7 @@ readonly class TwoFAService
     public function twoFACode(User $user): ?string
     {
         // Generate a random verification code with 6 digits
-        $verificationCode = random_int(100000, 999999);
+        $verificationCode = (string)random_int(100000, 999999);
         $user->setTwoFACode($verificationCode);
         $user->setTwoFACodeGeneratedAt(new DateTime());
         $user->setTwoFAcodeIsActive(true);
@@ -108,15 +108,14 @@ readonly class TwoFAService
      */
     public function generateOTPCodes(User $user): void
     {
-        // If the user already has codes, they must be removed before generating new ones.
-        if ($user->getOTPcodes()) {
-            foreach ($user->getOTPcodes() as $code) {
-                $this->entityManager->remove($code);
-            }
+        // Remove existing codes
+        foreach ($user->getOTPcodes() as $code) {
+            $this->entityManager->remove($code);
         }
+
         $nCodes = 12; // Number of codes generated.
-        $createdCodes = 0;
-        while ($createdCodes < $nCodes) {
+
+        for ($i = 0; $i < $nCodes; $i++) {
             $code = $this->generateMixedCode();
             $otpCode = new OTPcode();
             $otpCode->setCode($code);
@@ -125,9 +124,9 @@ readonly class TwoFAService
             $otpCode->setCreatedAt(new DateTime());
             $user->addOTPcode($otpCode);
             $this->entityManager->persist($otpCode);
-            $this->entityManager->persist($user);
-            $createdCodes++;
         }
+
+        $this->entityManager->persist($user);
         $this->entityManager->flush();
     }
 
@@ -357,7 +356,7 @@ readonly class TwoFAService
 
     public function canResendCode(User $user, string $eventType): bool
     {
-        $nrAttempts = $this->settingRepository->findOneBy(
+        $nrAttempts = (int) $this->settingRepository->findOneBy(
             ['name' => SettingName::TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE->value]
         )->getValue();
         $timeToResetAttempts = $this->settingRepository->findOneBy(
@@ -445,15 +444,21 @@ readonly class TwoFAService
 
     public function canValidationCode(User $user, string $eventType): bool
     {
-        $timeToResetAttempts = $this->settingRepository->findOneBy(
+        $timeToResetAttempts = (int) $this->settingRepository->findOneBy(
             ['name' => SettingName::TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS->value]
         )->getValue();
-        $nrAttempts = $this->settingRepository->findOneBy(
+        $nrAttempts = (int) $this->settingRepository->findOneBy(
             ['name' => SettingName::TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE->value]
         )->getValue();
         $limitTime = new DateTime();
         $limitTime->modify('-' . $timeToResetAttempts . ' minutes');
-        $attempts = $this->eventRepository->find2FACodeAttemptEvent($user, $nrAttempts, $limitTime, $eventType);
+        $attempts = $this->eventRepository->find2FACodeAttemptEvent(
+            $user,
+            $nrAttempts,
+            $limitTime,
+            $eventType
+        );
+
         return count($attempts) < $nrAttempts;
     }
 

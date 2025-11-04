@@ -23,6 +23,8 @@ use App\Utils\CacheUtils;
 use DateTime;
 use DateTimeInterface;
 use Exception;
+use Psr\Cache\InvalidArgumentException;
+use Random\RandomException;
 use RuntimeException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -60,7 +62,7 @@ class ProfileController extends AbstractController
     ): Response {
         /** @var User $user */
         $user = $this->getUser();
-        if (!$user) {
+        if (!$this->isGranted('IS_AUTHENTICATED_FULLY')) {
             return $this->redirectToRoute('app_login');
         }
 
@@ -101,29 +103,48 @@ class ProfileController extends AbstractController
         );
 
         $profile = file_get_contents('../profile_templates/android/profile.xml');
-        $profile = str_replace([
-            '@USERNAME@',
-            '@PASSWORD@',
-            '@DOMAIN_NAME@',
-            '@RADIUS_TLS_NAME@',
-            '@DISPLAY_NAME@',
-            '@EXPIRATION_DATE@'
-        ], [
-            $radiusUser->getUsername(),
-            base64_encode((string)$radiusUser->getValue()),
-            $this->settingRepository->findOneBy(['name' => SettingName::DOMAIN_NAME->value])->getValue(),
-            $this->settingRepository->findOneBy(['name' => SettingName::RADIUS_TLS_NAME->value])->getValue(),
-            $this->settingRepository->findOneBy(['name' => SettingName::DISPLAY_NAME->value])->getValue(),
-            $expirationDate['limitTime']->format('Y-m-d')
-        ], $profile);
+        if ($profile === false) {
+            throw new RuntimeException('Failed to load Android profile template');
+        }
+        $profile = str_replace(
+            [
+                '@USERNAME@',
+                '@PASSWORD@',
+                '@DOMAIN_NAME@',
+                '@RADIUS_TLS_NAME@',
+                '@DISPLAY_NAME@',
+                '@EXPIRATION_DATE@'
+            ],
+            [
+                $radiusUser->getUsername(),
+                base64_encode((string)$radiusUser->getValue()),
+                (string)$this->settingRepository->findOneBy(['name' => SettingName::DOMAIN_NAME->value])->getValue(),
+                (string)$this->settingRepository->findOneBy(['name' =>
+                    SettingName::RADIUS_TLS_NAME->value])->getValue(),
+                (string)$this->settingRepository->findOneBy(['name' => SettingName::DISPLAY_NAME->value])->getValue(),
+                $expirationDate['limitTime']->format('Y-m-d')
+            ],
+            $profile
+        );
+
         $profileTemplate = file_get_contents('../profile_templates/android/template.txt');
+        if ($profileTemplate === false) {
+            throw new RuntimeException('Failed to load Android template file');
+        }
+
         $ca = file_get_contents('../signing-keys/ca.pem');
+        if ($ca === false) {
+            throw new RuntimeException('Failed to load ca.pem file');
+        }
+
         $ca = str_replace(
             ["-----BEGIN CERTIFICATE-----\n", "-----END CERTIFICATE-----\n", "-----END CERTIFICATE-----"],
             '',
             $ca
         );
+
         $profileTemplate = str_replace('@CA@', $ca, $profileTemplate);
+        $profileTemplate = str_replace('@PROFILE@', base64_encode($profile), $profileTemplate);
         $profileTemplate = str_replace('@PROFILE@', base64_encode($profile), $profileTemplate);
         $response = new Response(base64_encode($profileTemplate));
 
@@ -150,6 +171,9 @@ class ProfileController extends AbstractController
         return $response;
     }
 
+    /**
+     * @throws RandomException
+     */
     #[Route('/profile/ios.mobileconfig', name: 'profile_ios')]
     public function profileIos(
         RadiusUserRepository $radiusUserRepository,
@@ -158,7 +182,7 @@ class ProfileController extends AbstractController
     ): Response {
         /** @var User $user */
         $user = $this->getUser();
-        if (!$user) {
+        if (!$this->isGranted('IS_AUTHENTICATED_FULLY')) {
             return $this->redirectToRoute('app_login');
         }
 
@@ -198,6 +222,9 @@ class ProfileController extends AbstractController
         );
 
         $profile = file_get_contents('../profile_templates/iphone_templates/template.xml');
+        if ($profile === false) {
+            throw new RuntimeException('Failed to load iOS template file');
+        }
         $profile = str_replace([
             '@USERNAME@',
             '@PASSWORD@',
@@ -267,10 +294,11 @@ class ProfileController extends AbstractController
         $signedProfileContents = file_get_contents($signedFilePath);
         unlink($signedFilePath);
 
+        if ($signedProfileContents === false) {
+            throw new RuntimeException('Failed to read signed iOS profile.');
+        }
         $response = new Response($signedProfileContents);
-
         $response->headers->set('Content-Type', 'application/x-apple-aspen-config');
-
 
         // Save the event Action using the service
         $userAgent = $request->headers->get('User-Agent');
@@ -305,6 +333,10 @@ class ProfileController extends AbstractController
         return $response;
     }
 
+    /**
+     * @throws RandomException
+     * @throws InvalidArgumentException
+     */
     #[Route('/profile/windows', name: 'profile_windows')]
     public function profileWindows(
         RadiusUserRepository $radiusUserRepository,
@@ -314,7 +346,7 @@ class ProfileController extends AbstractController
     ): Response {
         /** @var User $user */
         $user = $this->getUser();
-        if (!$user) {
+        if (!$this->isGranted('IS_AUTHENTICATED_FULLY')) {
             return $this->redirectToRoute('app_login');
         }
 
@@ -342,6 +374,9 @@ class ProfileController extends AbstractController
             $this->settingRepository->findOneBy(['name' => SettingName::RADIUS_REALM_NAME->value])->getValue()
         );
         $profile = file_get_contents('../profile_templates/windows/template.xml');
+        if ($profile === false) {
+            throw new RuntimeException('Failed to load Windows template file');
+        }
         $profile = str_replace([
             '@USERNAME@',
             '@PASSWORD@',
@@ -448,6 +483,12 @@ class ProfileController extends AbstractController
         return $response;
     }
 
+    /**
+     *
+     * @param int $length
+     * @return string
+     * @throws RandomException
+     */
     private function generateToken($length = 16)
     {
         $stringSpace = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -459,20 +500,23 @@ class ProfileController extends AbstractController
         return implode('', $pieces);
     }
 
-    private function generateWindowsUuid()
+    /**
+     * @throws RandomException
+     */
+    private function generateWindowsUuid(): string
     {
         $format = '%04x%04x-%04x-%04x-%04x-%04x%04x%04x';
 
         return sprintf(
             $format,
-            mt_rand(0, 0xffff),
-            mt_rand(0, 0xffff), // 8 hex characters
-            mt_rand(0, 0xffff), // 4 hex characters
-            mt_rand(0, 0x0fff) | 0x4000, // 4 hex characters, 13th bit set to 0100 (version 4 UUID)
-            mt_rand(0, 0x3fff) | 0x8000, // 4 hex characters, 17th bit set to 1000 (variant 1 UUID)
-            mt_rand(0, 0xffff),
-            mt_rand(0, 0xffff),
-            mt_rand(0, 0xffff) // 12 hex characters
+            random_int(0, 0xffff),
+            random_int(0, 0xffff), // 8 hex characters
+            random_int(0, 0xffff), // 4 hex characters
+            random_int(0, 0x0fff) | 0x4000, // 4 hex characters, 13th bit set to 0100 (version 4 UUID)
+            random_int(0, 0x3fff) | 0x8000, // 4 hex characters, 17th bit set to 1000 (variant 1 UUID)
+            random_int(0, 0xffff),
+            random_int(0, 0xffff),
+            random_int(0, 0xffff) // 12 hex characters
         );
     }
 
@@ -488,6 +532,7 @@ class ProfileController extends AbstractController
         $radiusProfile = $radiusProfileRepository->findOneBy(
             ['user' => $user, 'status' => UserRadiusProfileStatus::ACTIVE->value]
         );
+
         $userExternalAuth = $this->userExternalAuthRepository->findOneBy(['user' => $user]);
 
         if (!$radiusProfile) {
@@ -502,7 +547,6 @@ class ProfileController extends AbstractController
             $radiusProfile->setRadiusUser($username);
             $radiusProfile->setStatus(UserRadiusProfileStatus::ACTIVE->value);
             $radiusProfile->setIssuedAt(new DateTime());
-
             // Get the expiration date from the service
             $expirationData = $this->expirationProfileService->calculateExpiration(
                 $userExternalAuth->getProvider(),
@@ -594,26 +638,14 @@ class ProfileController extends AbstractController
                 ['name' => SettingName::USER_VERIFICATION->value]
             )->getValue() === OperationMode::ON->value
         ) {
-            $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $user]);
-            if ($userExternalAuths === UserProvider::EMAIL->value) {
-                $this->addFlash(
-                    'error',
-                    $this->translator->trans(
-                        'accountNotVerifiedToDownloadProfile',
-                        [],
-                        'controllers'
-                    )
-                );
-            } elseif ($userExternalAuths === UserProvider::PHONE_NUMBER->value) {
-                $this->addFlash(
-                    'error',
-                    $this->translator->trans(
-                        'accountNotVerifiedToDownloadProfileSMS',
-                        [],
-                        'controllers'
-                    )
-                );
-            }
+            $this->addFlash(
+                'error',
+                $this->translator->trans(
+                    'accountNotVerifiedToDownloadProfile',
+                    [],
+                    'controllers'
+                )
+            );
             $this->redirectToRoute('app_landing');
             return true;
         }

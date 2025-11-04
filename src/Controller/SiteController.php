@@ -76,147 +76,143 @@ class SiteController extends AbstractController
         EntityManagerInterface $entityManager,
     ): Response {
         // Call the getSettings method of GetSettings class to retrieve the data
+        /** @var array<string, array{value: string, description: string}> $data */
         $data = $this->getSettings->getSettings();
 
-        /** @var User $currentUser */
+        /** @var User|null $currentUser */
         $currentUser = $this->getUser();
         $session = $request->getSession();
 
         // Check if the user_verification setting is active
-        if (
-            isset($data[SettingName::USER_VERIFICATION->value]["value"]) &&
-            $data[SettingName::USER_VERIFICATION->value]["value"] === OperationMode::ON->value &&
-            $currentUser
-        ) {
-            // Retrieve the cookie about SAML_ACCOUNT Deletion from the request
-            $previousLoggedID = $request->cookies->get('previousLoggedID');
-            $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $currentUser]);
-            if ($previousLoggedID && $previousLoggedID == $currentUser->getId()) {
-                $this->userDeletionService->deleteUser(
-                    $currentUser,
-                    $userExternalAuths,
-                    $request,
-                    $currentUser
-                );
+        if ($currentUser) {
+            if ($data[SettingName::USER_VERIFICATION->value]["value"] === OperationMode::ON->value) {
+                // Retrieve the cookie about SAML_ACCOUNT Deletion from the request
+                $previousLoggedID = $request->cookies->get('previousLoggedID');
+                $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $currentUser]);
+                if ($previousLoggedID && $previousLoggedID == $currentUser->getId()) {
+                    $this->userDeletionService->deleteUser(
+                        $currentUser,
+                        $userExternalAuths,
+                        $request,
+                        $currentUser
+                    );
 
-                return $this->redirectToRoute('app_logout');
-            }
+                    return $this->redirectToRoute('app_logout');
+                }
 
-            // Checks if the user has a "forgot_password_request", if yes, return to the password-reset form
-            if ($currentUser->isForgotPasswordRequest()) {
-                $this->addFlash(
-                    'error',
-                    $this->translator->trans('confirmNewPasswordBeforeDownloadProfile', [], 'controllers')
-                );
-                return $this->redirectToRoute('app_site_forgot_password_checker');
-            }
-            if ($currentUser->getDeletedAt()) {
-                return $this->redirectToRoute('app_logout');
-            }
+                // Checks if the user has a "forgot_password_request", if yes, return to the password-reset form
+                if ($currentUser->isForgotPasswordRequest()) {
+                    $this->addFlash(
+                        'error',
+                        $this->translator->trans('confirmNewPasswordBeforeDownloadProfile', [], 'controllers')
+                    );
+                    return $this->redirectToRoute('app_site_forgot_password_checker');
+                }
+                if ($currentUser->getDeletedAt()) {
+                    return $this->redirectToRoute('app_logout');
+                }
 
-            // Check if the user is verified
-            if (
-                $userExternalAuths[0]->getProvider() === UserProvider::PORTAL_ACCOUNT->value &&
-                !$session->has('session_verified') &&
-                $data['LOGIN_WITH_UUID_ONLY']['value'] === OperationMode::OFF->value
-            ) {
+                // Check if the user is verified
                 if (
-                    $this->twoFAService->canValidationCode(
-                        $currentUser,
-                        AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE->value
-                    )
+                    $userExternalAuths[0]->getProvider() === UserProvider::PORTAL_ACCOUNT->value &&
+                    !$session->has('session_verified') &&
+                    $data[SettingName::LOGIN_WITH_UUID_ONLY->value]['value'] === OperationMode::OFF->value
                 ) {
-                    $this->twoFAService->generate2FACode(
+                    if (
+                        $this->twoFAService->canValidationCode(
+                            $currentUser,
+                            AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE->value
+                        )
+                    ) {
+                        $this->twoFAService->generate2FACode(
+                            $currentUser,
+                            $request->getClientIp(),
+                            $request->headers->get('User-Agent'),
+                            AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE->value
+                        );
+                        $this->addFlash(
+                            'success',
+                            $this->translator->trans('codeSentSuccessfully', [], 'controllers')
+                        );
+                        return $this->redirectToRoute('app_login_confirmation');
+                    }
+                    $interval_minutes = $this->twoFAService->timeLeftToResendCode(
                         $currentUser,
-                        $request->getClientIp(),
-                        $request->headers->get('User-Agent'),
                         AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE->value
                     );
                     $this->addFlash(
-                        'success',
-                        $this->translator->trans('codeSentSuccessfully', [], 'controllers')
+                        'error',
+                        $this->translator->trans(
+                            'codeAlreadySent',
+                            [
+                                '%minutes%' => $interval_minutes
+                            ],
+                            'controllers'
+                        )
                     );
                     return $this->redirectToRoute('app_login_confirmation');
                 }
-                $interval_minutes = $this->twoFAService->timeLeftToResendCode(
-                    $currentUser,
-                    AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE->value
-                );
-                $this->addFlash(
-                    'error',
-                    $this->translator->trans(
-                        'codeAlreadySent',
-                        [
-                            '%minutes%' => $interval_minutes
-                        ],
-                        'controllers'
-                    )
-                );
-                return $this->redirectToRoute('app_login_confirmation');
+
+                if (
+                    $data[SettingName::LOGIN_WITH_UUID_ONLY->value]["value"] === OperationMode::OFF->value ||
+                    $currentUser->getUserExternalAuths()[0]->getProvider() !== UserProvider::PORTAL_ACCOUNT->value
+                ) {
+                    // Checks the 2FA status of the platform if mandatory and force the user to configure it
+                    if (
+                        $data[SettingName::TWO_FACTOR_AUTH_STATUS->value]['value'] ===
+                        TwoFAType::ENFORCED_FOR_LOCAL->value &&
+                        $currentUser->getUserExternalAuths()->get(0)->getProvider() ===
+                        UserProvider::PORTAL_ACCOUNT->value &&
+                        $currentUser->getTwoFAType() ===
+                        UserTwoFactorAuthenticationStatus::DISABLED->value
+                    ) {
+                        return $this->redirectToRoute('app_configure2FA');
+                    }
+                    if (
+                        $data[SettingName::TWO_FACTOR_AUTH_STATUS->value]['value']
+                        === TwoFAType::ENFORCED_FOR_ALL->value &&
+                        $currentUser->getTwoFAType() === UserTwoFactorAuthenticationStatus::DISABLED->value
+                    ) {
+                        return $this->redirectToRoute('app_configure2FA');
+                    }
+                }
             }
 
             if (
-                $currentUser &&
-                ($data["LOGIN_WITH_UUID_ONLY"]["value"] === OperationMode::OFF->value ||
-                    $currentUser->getUserExternalAuths()[0]->getProvider() !== UserProvider::PORTAL_ACCOUNT->value)
+                $data[SettingName::LOGIN_WITH_UUID_ONLY->value]["value"] === OperationMode::OFF->value ||
+                $currentUser->getUserExternalAuths()[0]->getProvider() !== UserProvider::PORTAL_ACCOUNT->value
             ) {
-                // Checks the 2FA status of the platform if mandatory and force the user to configure it
                 if (
-                    $currentUser->getUserExternalAuths() &&
-                    ($data['TWO_FACTOR_AUTH_STATUS']['value'] ===
-                        TwoFAType::ENFORCED_FOR_LOCAL->value &&
-                        $currentUser->getUserExternalAuths()->get(0)->getProvider() ===
-                        UserProvider::PORTAL_ACCOUNT->value && ($currentUser->getTwoFAType() === null ||
-                            $currentUser->getTwoFAType() ===
-                            UserTwoFactorAuthenticationStatus::DISABLED->value))
+                    $currentUser->getTwoFAType() !==
+                    UserTwoFactorAuthenticationStatus::DISABLED->value &&
+                    !$session->has('2fa_verified_landing')
                 ) {
-                    return $this->redirectToRoute('app_configure2FA');
-                }
-                if (
-                    $data['TWO_FACTOR_AUTH_STATUS']['value'] === TwoFAType::ENFORCED_FOR_ALL->value &&
-                    ($currentUser->getTwoFAType() === null ||
+                    if (
                         $currentUser->getTwoFAType() ===
-                        UserTwoFactorAuthenticationStatus::DISABLED->value)
-                ) {
-                    return $this->redirectToRoute('app_configure2FA');
+                        UserTwoFactorAuthenticationStatus::SMS->value
+                    ) {
+                        return $this->redirectToRoute('app_2FA_generate_code');
+                    }
+                    if (
+                        $currentUser->getTwoFAType() ===
+                        UserTwoFactorAuthenticationStatus::EMAIL->value
+                    ) {
+                        return $this->redirectToRoute('app_2FA_generate_code');
+                    }
+                    if (
+                        $currentUser->getTwoFAType() ===
+                        UserTwoFactorAuthenticationStatus::TOTP->value
+                    ) {
+                        return $this->redirectToRoute('app_verify2FA_TOTP');
+                    }
                 }
-            }
-        }
-        if (
-            $currentUser &&
-            ($data["LOGIN_WITH_UUID_ONLY"]["value"] === OperationMode::OFF->value ||
-                $currentUser->getUserExternalAuths()[0]->getProvider() !== UserProvider::PORTAL_ACCOUNT->value)
-        ) {
-            if (
-                $currentUser->getTwoFAType() !==
-                UserTwoFactorAuthenticationStatus::DISABLED->value &&
-                !$session->has('2fa_verified_landing')
-            ) {
+                // Check if the user has OTPCodes
                 if (
-                    $currentUser->getTwoFAType() ===
-                    UserTwoFactorAuthenticationStatus::SMS->value
+                    $currentUser->getTwoFAtype() !== UserTwoFactorAuthenticationStatus::DISABLED->value &&
+                    !$this->twoFAService->hasValidOTPCodes($currentUser)
                 ) {
-                    return $this->redirectToRoute('app_2FA_generate_code');
+                    return $this->redirectToRoute('app_otpCodes');
                 }
-                if (
-                    $currentUser->getTwoFAType() ===
-                    UserTwoFactorAuthenticationStatus::EMAIL->value
-                ) {
-                    return $this->redirectToRoute('app_2FA_generate_code');
-                }
-                if (
-                    $currentUser->getTwoFAType() ===
-                    UserTwoFactorAuthenticationStatus::TOTP->value
-                ) {
-                    return $this->redirectToRoute('app_verify2FA_TOTP');
-                }
-            }
-            // Check if the user has OTPCodes
-            if (
-                $currentUser->getTwoFAtype() !== UserTwoFactorAuthenticationStatus::DISABLED->value &&
-                !$this->twoFAService->hasValidOTPCodes($currentUser)
-            ) {
-                return $this->redirectToRoute('app_otpCodes');
             }
         }
 
@@ -236,10 +232,10 @@ class SiteController extends AbstractController
         $userAgent = $request->headers->get('User-Agent');
         $actionName = $request->attributes->get('_route');
 
-        if ($data['PLATFORM_MODE']['value'] === PlatformMode::DEMO->value) {
+        if ($data[SettingName::PLATFORM_MODE->value]['value'] === PlatformMode::DEMO->value) {
             if ($request->isMethod('POST')) {
                 $payload = $request->request->all();
-                if ($data['TURNSTILE_CHECKER']['value'] === OperationMode::ON->value) {
+                if ($data[SettingName::TURNSTILE_CHECKER->value]['value'] === OperationMode::ON->value) {
                     $turnstileResponse = $request->request->get('cf-turnstile-response');
                     // Validate the Turnstile CAPTCHA
                     if ((empty($turnstileResponse) && !$this->getUser())) {
@@ -294,11 +290,11 @@ class SiteController extends AbstractController
                         );
                     }
 
-                    if ($data["USER_VERIFICATION"]['value'] === OperationMode::ON->value) {
+                    if ($data[SettingName::USER_VERIFICATION->value]['value'] === OperationMode::ON->value) {
                         return $this->redirectToRoute('app_login_confirmation');
                     }
 
-                    if ($data["USER_VERIFICATION"]['value'] === OperationMode::OFF->value) {
+                    if ($data[SettingName::USER_VERIFICATION->value]['value'] === OperationMode::OFF->value) {
                         return $this->redirectToRoute('app_landing');
                     }
                 }
@@ -320,12 +316,22 @@ class SiteController extends AbstractController
                      * Overriding macOS to iOS due to the profiles being the same and there being no route for the macOS
                      * enum value, so the UI shows macOS but on the logic to generate the profile iOS is used instead
                      */
-                    if ($payload['radio-os'] === OSType::MACOS->value) {
-                        $payload['radio-os'] = OSType::IOS->value;
+                    $osValue = $payload['radio-os'];
+                    if (is_array($osValue)) {
+                        // handle array case safely; for example, pick the first value
+                        $osValue = reset($osValue) ?: '';
+                    } elseif (!is_string($osValue)) {
+                        // fallback for non-string types
+                        $osValue = (string) $osValue;
                     }
+
+                    if ($osValue === OSType::MACOS->value) {
+                        $osValue = OSType::IOS->value;
+                    }
+
                     return $this->redirectToRoute(
-                        'profile_' . strtolower((string)$payload['radio-os']),
-                        ['os' => $payload['radio-os']]
+                        'profile_' . strtolower((string) $osValue),
+                        ['os' => $osValue]
                     );
                 }
             }
@@ -349,19 +355,27 @@ class SiteController extends AbstractController
                     $payload['radio-os'] = $payload['detected-os'];
                 }
             }
-            if (
-                $payload['radio-os'] !== 'none' && $this->getUser() instanceof UserInterface
-            ) {
+            if ($payload['radio-os'] !== 'none' && $this->getUser() instanceof UserInterface) {
                 /**
                  * Overriding macOS to iOS due to the profiles being the same and there being no route for the macOS
                  * enum value, so the UI shows macOS but on the logic to generate the profile iOS is used instead
                  */
-                if ($payload['radio-os'] === OSType::MACOS->value) {
-                    $payload['radio-os'] = OSType::IOS->value;
+                $osValue = $payload['radio-os'];
+
+                // Ensure $osValue is a string
+                if (is_array($osValue)) {
+                    $osValue = reset($osValue) ?: '';
+                } elseif (!is_string($osValue)) {
+                    $osValue = (string) $osValue;
                 }
+
+                if ($osValue === OSType::MACOS->value) {
+                    $osValue = OSType::IOS->value;
+                }
+
                 return $this->redirectToRoute(
-                    'profile_' . strtolower((string)$payload['radio-os']),
-                    ['os' => $payload['radio-os']]
+                    'profile_' . strtolower((string) $osValue),
+                    ['os' => $osValue]
                 );
             }
         }

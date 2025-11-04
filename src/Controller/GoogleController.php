@@ -37,9 +37,6 @@ use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-/**
- *
- */
 class GoogleController extends AbstractController
 {
     public function __construct(
@@ -67,6 +64,7 @@ class GoogleController extends AbstractController
     public function connect(Request $request): RedirectResponse
     {
         // Call the getSettings method of GetSettings class to retrieve the data
+        /** @var array<string, array{value: string, description: string}> $data */
         $data = $this->getSettings->getSettings();
 
         // Check if the user clicked on the 'sms' variable present only on the SMS authentication buttons
@@ -81,7 +79,7 @@ class GoogleController extends AbstractController
             );
             return $this->redirectToRoute('app_landing');
         }
-        if ($data['AUTH_METHOD_GOOGLE_LOGIN_ENABLED']['value'] === "false") {
+        if ($data[SettingName::AUTH_METHOD_GOOGLE_LOGIN_ENABLED->value]['value'] === "false") {
             $this->addFlash(
                 'error',
                 $this->translator->trans(
@@ -144,6 +142,7 @@ class GoogleController extends AbstractController
         ]);
 
         // Retrieve the user ID and email from the resource owner
+        /** @phpstan-ignore-next-line */
         $resourceOwner = $client->fetchUserFromToken($accessToken);
         /** @phpstan-ignore-next-line */
         $googleUserId = $resourceOwner->getId();
@@ -351,6 +350,7 @@ class GoogleController extends AbstractController
         ]);
 
         // Fetch user info from Google
+        /** @phpstan-ignore-next-line */
         $resourceOwner = $client->fetchUserFromToken($accessToken);
         $googleUserId = $resourceOwner->getId();
         /** @phpstan-ignore-next-line */

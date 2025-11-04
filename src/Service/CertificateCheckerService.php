@@ -57,6 +57,11 @@ readonly class CertificateCheckerService
         return $certInfo['validTo_time_t'] > $now;
     }
 
+    /**
+     * Verify presence of required certificate files.
+     *
+     * @return string[] List of missing filenames
+     */
     public function verifyCertificates(): array
     {
         $missingFiles = [];

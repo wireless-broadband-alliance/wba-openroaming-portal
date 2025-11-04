@@ -24,14 +24,19 @@ readonly class JWTTokenGenerator
         private ParameterBagInterface $parameterBag,
     ) {
         $projectDir = $this->kernel->getProjectDir();
-        $this->publicKeyJwtPath = "$projectDir/config/jwt/public.pem" ?? $this->parameterBag->get(
-            'app.jwt_public_key'
-        );
-        $this->privateKeyJwtPath = "$projectDir/config/jwt/private.pem" ?? $this->parameterBag->get(
-            'app.jwt_secret_key'
-        );
+
+        $this->publicKeyJwtPath = file_exists("$projectDir/config/jwt/public.pem")
+            ? "$projectDir/config/jwt/public.pem"
+            : $this->parameterBag->get('app.jwt_public_key');
+
+        $this->privateKeyJwtPath = file_exists("$projectDir/config/jwt/private.pem")
+            ? "$projectDir/config/jwt/private.pem"
+            : $this->parameterBag->get('app.jwt_secret_key');
     }
 
+    /**
+     * @return array{success: bool, error?: string, token?: string}
+     */
     public function generateToken(UserInterface $user): string|array
     {
         if (!$user instanceof User) {
@@ -66,19 +71,18 @@ readonly class JWTTokenGenerator
             }
 
             $uuid = $decodedPayload['uuid'] ?? null;
-            $tokenPassworHash = $decodedPayload['password_hash'] ?? null;
+            $tokenPasswordHash = $decodedPayload['password_hash'] ?? null;
 
-            if (!$uuid || !$tokenPassworHash) {
-                return false; // Token does not contain any uuid or password -> is not valid
+            if (!$uuid || !$tokenPasswordHash) {
+                return false;
             }
 
             $user = $this->userRepository->findOneBy(['uuid' => $uuid]);
             if (!$user) {
-                return false; // That user doesn't exist in the DB
+                return false;
             }
 
-            $currentPasswordHash = $user->getPassword();
-            return $currentPasswordHash === $tokenPassworHash;
+            return $user->getPassword() === $tokenPasswordHash;
         } catch (JWTDecodeFailureException) {
             return false;
         }

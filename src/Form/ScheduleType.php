@@ -13,6 +13,9 @@ use Symfonycasts\DynamicForms\DependentField;
 use Symfonycasts\DynamicForms\DynamicFormBuilder;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
+/**
+ * @extends AbstractType<ScheduleDTO>
+ */
 class ScheduleType extends AbstractType
 {
     public function __construct(

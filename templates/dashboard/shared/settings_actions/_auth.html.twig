@@ -4,7 +4,13 @@
     warningMessage: true,
 }) }}
 
-<form action="{{ path('admin_dashboard_settings_auth', {language: language}) }}" method="post" enctype="multipart/form-data">
+<twig:AuthSettingsTypeForm
+        :authSettingsTypeDTO="authSettingsTypeDTO"
+        :profileLimitDate="profileLimitDate"
+        :data="data"
+        :form="form">
+
+    {{ form_start(form) }}
     {{ form_row(form._token) }}
 
     {# SAML #}
@@ -51,4 +57,6 @@
                 type="submit">{{ 'saveChanges'|trans({}, 'settings_actions_general') }}
         </button>
     </div>
-</form>
+    {{ form_end(form, {render_rest: false}) }}
+
+</twig:AuthSettingsTypeForm>

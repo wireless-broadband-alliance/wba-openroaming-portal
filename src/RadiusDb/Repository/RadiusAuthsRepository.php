@@ -5,15 +5,17 @@ namespace App\RadiusDb\Repository;
 use App\RadiusDb\Entity\RadiusAuths;
 use DateTime;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\DBAL\Exception;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
  * @extends ServiceEntityRepository<RadiusAuths>
  *
  * @method RadiusAuths|null find($id, $lockMode = null, $lockVersion = null)
- * @method RadiusAuths|null findOneBy(array $criteria, array $orderBy = null)
+ * @method RadiusAuths|null findOneBy(array <string, mixed> $criteria, array<string, string>|null $orderBy = null)
  * @method RadiusAuths[]    findAll()
- * @method RadiusAuths[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * phpcs:ignore Generic.Files.LineLength.TooLong
+ * @method RadiusAuths[]    findBy(array <string, mixed> $criteria, array<string, string>|null $orderBy = null, $limit = null, $offset = null)
  */
 class RadiusAuthsRepository extends ServiceEntityRepository
 {
@@ -40,17 +42,43 @@ class RadiusAuthsRepository extends ServiceEntityRepository
         }
     }
 
-    public function findAuthRequests(DateTime $startDate, DateTime $endDate)
+    /**
+     * Fetch authentication events grouped by second, ignoring anonymous users
+     *
+     * @throws \Exception
+     * @return array<int, array{username: string, authdate: \DateTimeInterface, reply: string}>
+     */
+    public function getAuthEventsBySecond(DateTime $startDate, DateTime $endDate): array
     {
-        // Fetch all data with date filtering
-        return $this->createQueryBuilder('u')
-            ->where('u.reply IN (:replies)')
-            ->andWhere('u.authdate >= :startDate')
-            ->andWhere('u.authdate <= :endDate')
+        $auths = $this->createQueryBuilder('u')
+            ->select('u')
+            ->where('u.authdate BETWEEN :startDate AND :endDate')
+            ->andWhere('u.reply IN (:replies)')
+            ->andWhere("u.username NOT LIKE 'anonymous@%'")
+            ->setParameter('startDate', $startDate)
+            ->setParameter('endDate', $endDate)
             ->setParameter('replies', ['Access-Accept', 'Access-Reject'])
-            ->setParameter('startDate', $startDate->format('Y-m-d H:i:s'))
-            ->setParameter('endDate', $endDate->format('Y-m-d H:i:s'))
+            ->orderBy('u.username', 'ASC')
+            ->addOrderBy('u.authdate', 'ASC')
             ->getQuery()
             ->getResult();
+
+        $result = [];
+        foreach ($auths as $auth) {
+            $secondKey = $auth->getAuthdate()->format('Y-m-d H:i:s');
+
+            // Keep only one event per user per second
+            $result[$auth->getUsername()][$secondKey] = $auth;
+        }
+
+        // Flatten back to simple list of events
+        $flattened = [];
+        foreach ($result as $userEvents) {
+            foreach ($userEvents as $event) {
+                $flattened[] = $event;
+            }
+        }
+
+        return $flattened;
     }
 }

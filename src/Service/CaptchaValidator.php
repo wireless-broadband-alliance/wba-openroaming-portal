@@ -25,6 +25,13 @@ readonly class CaptchaValidator
     }
 
     /**
+     * Validate a Turnstile CAPTCHA token.
+     *
+     * @return array{
+     *     success: bool,
+     *     error?: string
+     * }
+     *
      * @throws ServerExceptionInterface
      * @throws RedirectionExceptionInterface
      * @throws ClientExceptionInterface

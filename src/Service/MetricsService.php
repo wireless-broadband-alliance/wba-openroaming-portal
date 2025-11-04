@@ -91,7 +91,7 @@ readonly class MetricsService
             $userGauge->set($verifiedUsers, ['state' => 'verified']);
             $this->logger->info('Set verified users metric: ' . $verifiedUsers);
 
-            $bannedUsers = $this->userRepository->totalBannedUsers();
+            $bannedUsers = $this->userRepository->countBannedUsers();
             $userGauge->set($bannedUsers, ['state' => 'banned']);
             $this->logger->info('Set banned users metric: ' . $bannedUsers);
         } catch (Exception $e) {
@@ -225,10 +225,15 @@ readonly class MetricsService
         $composerJsonPath = $this->projectDir . '/composer.json';
 
         if (!file_exists($composerJsonPath)) {
-            throw new RuntimeException('Unable to fetch version');
+            throw new RuntimeException('Unable to fetch version: composer.json not found');
         }
 
         $composerJsonContent = file_get_contents($composerJsonPath);
+
+        if (!is_string($composerJsonContent)) {
+            throw new RuntimeException('Unable to read composer.json content');
+        }
+
         /** @noinspection JsonEncodingApiUsageInspection */
         $composerJsonDecoded = json_decode($composerJsonContent, true);
 

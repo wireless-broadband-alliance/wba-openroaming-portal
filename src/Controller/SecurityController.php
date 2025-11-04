@@ -30,9 +30,13 @@ use Doctrine\ORM\NonUniqueResultException;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Random\RandomException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Form\Exception\LogicException;
+use Symfony\Component\Form\Exception\RuntimeException;
+use Symfony\Component\HttpFoundation\Exception\SessionNotFoundException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
@@ -76,13 +80,12 @@ class SecurityController extends AbstractController
         Request $request,
         AuthenticationUtils $authenticationUtils
     ): Response {
-        /** @var User $user */
-        $user = $this->getUser();
-        if ($user instanceof User) {
+        if ($this->isGranted('IS_AUTHENTICATED_FULLY')) {
             return $this->redirectToRoute('app_landing');
         }
 
         // Call the getSettings method of GetSettings class to retrieve the data
+        /** @var array<string, array{value: string, description: string}> $data */
         $data = $this->getSettings->getSettings();
         if ($data[SettingName::PLATFORM_MODE->value]['value'] === PlatformMode::DEMO->value) {
             return $this->redirectToRoute('app_landing');
@@ -161,6 +164,7 @@ class SecurityController extends AbstractController
         UserPasswordHasherInterface $userPasswordHasher,
         SessionInterface $session,
     ): Response {
+        /** @var array<string, array{value: string, description: string}> $data */
         $data = $this->getSettings->getSettings();
 
         if ($data[SettingName::LOGIN_WITH_UUID_ONLY->value]['value'] === OperationMode::OFF->value) {
@@ -423,13 +427,12 @@ class SecurityController extends AbstractController
     #[Route('/dashboard/login', name: 'app_dashboard_login')]
     public function dashboardLogin(Request $request, AuthenticationUtils $authenticationUtils): Response
     {
-        /** @var User $user */
-        $user = $this->getUser();
-        if ($user instanceof User) {
+        if ($this->isGranted('IS_AUTHENTICATED_FULLY')) {
             return $this->redirectToRoute('admin_page');
         }
 
         // Call the getSettings method of GetSettings class to retrieve the data
+        /** @var array<string, array{value: string, description: string}> $data */
         $data = $this->getSettings->getSettings();
 
         // Last username entered by the user (this will be empty if the user clicked the verification link)
@@ -471,6 +474,12 @@ class SecurityController extends AbstractController
         ]);
     }
 
+    /**
+     * @throws HttpException
+     * @throws SessionNotFoundException
+     * @throws RuntimeException
+     * @throws LogicException
+     */
     #[Route('/login/confirmation', name: 'app_login_confirmation')]
     public function loginConfirmation(
         Request $request,
@@ -478,7 +487,7 @@ class SecurityController extends AbstractController
         /** @var User $user */
         $user = $this->getUser();
 
-        if (!$user instanceof User) {
+        if (!$this->isGranted('IS_AUTHENTICATED_FULLY')) {
             return $this->redirectToRoute('app_login');
         }
 
@@ -493,13 +502,16 @@ class SecurityController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
+        /** @var array<string, array{value: string, description: string}> $data */
         $data = $this->getSettings->getSettings();
 
         $form = $this->createForm(TwoFACode::class);
         $form->handleRequest($request);
         $session = $request->getSession();
         if ($form->isSubmitted() && $form->isValid()) {
-            $code = $form->getData()['code'];
+            /** @var array<string, mixed> $formData */
+            $formData = $form->getData();
+            $code = $formData['code'] ?? null;
             if ($this->twoFAService->validate2FACode($user, $code)) {
                 $user->setIsVerified(true);
                 $user->setForgotPasswordRequest(false);

@@ -81,6 +81,7 @@ class ForgotPasswordController extends AbstractController
         }
 
         // Call the getSettings method of GetSettings class to retrieve the data
+        /** @var array<string, array{value: string, description: string}> $data */
         $data = $this->getSettings->getSettings();
 
         if ($data[SettingName::PLATFORM_MODE->value]['value'] === PlatformMode::DEMO->value) {
@@ -150,7 +151,7 @@ class ForgotPasswordController extends AbstractController
                         $latestEventMetadata['lastVerificationCodeTime'] =
                             $currentTime->format(DateTimeInterface::ATOM);
                         $latestEvent->setEventMetadata($latestEventMetadata);
-                        $user->setTwoFAcode(random_int(100000, 999999));
+                        $user->setTwoFAcode((string)random_int(100000, 999999));
                         $user->setTwoFACodeGeneratedAt(new DateTime());
                         $user->setTwoFAcodeIsActive(true);
 
@@ -210,6 +211,7 @@ class ForgotPasswordController extends AbstractController
     public function forgotPasswordUserSMS(
         Request $request,
     ): Response {
+        /** @var array<string, array{value: string, description: string}> $data */
         $data = $this->getSettings->getSettings();
 
         if ($this->getUser() instanceof UserInterface) {
@@ -278,7 +280,7 @@ class ForgotPasswordController extends AbstractController
                         $latestEventMetadata['verificationAttempts'] = $attempts;
                         $latestEvent->setEventMetadata($latestEventMetadata);
 
-                        $user->setTwoFAcode(random_int(100000, 999999));
+                        $user->setTwoFAcode((string)random_int(100000, 999999));
                         $user->setTwoFACodeGeneratedAt(new DateTime());
                         $user->setTwoFAcodeIsActive(true);
                         $this->eventRepository->save($latestEvent, true);
@@ -444,6 +446,7 @@ class ForgotPasswordController extends AbstractController
     public function forgotPasswordCode(
         Request $request,
     ): Response {
+        /** @var array<string, array{value: string, description: string}> $data */
         $data = $this->getSettings->getSettings();
 
         // Get the uuid and verification code from the URL query parameters
@@ -536,7 +539,7 @@ class ForgotPasswordController extends AbstractController
         UserPasswordHasherInterface $userPasswordHasher,
         string $context
     ): Response {
-        /** @var User $currentUser */
+        /** @var User|null $currentUser */
         $currentUser = $this->getUser();
         if (!$currentUser) {
             $this->addFlash(
@@ -547,6 +550,7 @@ class ForgotPasswordController extends AbstractController
         }
 
         // Call the getSettings method of GetSettings class to retrieve the data
+        /** @var array<string, array{value: string, description: string}> $data */
         $data = $this->getSettings->getSettings();
 
         if ($data[SettingName::PLATFORM_MODE->value]['value'] === PlatformMode::DEMO->value) {
@@ -613,7 +617,7 @@ class ForgotPasswordController extends AbstractController
             );
             $currentUser->setForgotPasswordRequest(false);
             $currentUser->setIsVerified(true);
-            $currentUser->setTwoFAcode(random_int(100000, 999999));
+            $currentUser->setTwoFAcode((string)random_int(100000, 999999));
             $currentUser->setTwoFACodeGeneratedAt(new DateTime());
             $currentUser->setTwoFAcodeIsActive(true);
             $session = $request->getSession();

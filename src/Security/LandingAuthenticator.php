@@ -43,7 +43,6 @@ class LandingAuthenticator extends AbstractLoginFormAuthenticator
 
     public function __construct(
         private readonly UrlGeneratorInterface $urlGenerator,
-        private readonly FormFactoryInterface $formFactory,
         private readonly SettingRepository $settingRepository,
         private readonly CloudflareTurnstileHttpClient $turnstileHttpClient,
         private readonly UserRepository $userRepository,
@@ -58,9 +57,14 @@ class LandingAuthenticator extends AbstractLoginFormAuthenticator
      */
     public function authenticate(Request $request): Passport
     {
+        /** @var array<string, mixed> $formData */
         $formData = $request->request->all();
-        $loginMethod = $formData['login']['loginMethod'] ?? UserProvider::EMAIL->value;
-        $password = $formData['login']['password'];
+
+        /** @var array<string, mixed> $loginData */
+        $loginData = (array) ($formData['login'] ?? []);
+
+        $loginMethod = (string) ($loginData['loginMethod'] ?? UserProvider::EMAIL->value);
+        $password = (string) ($loginData['password'] ?? '');
 
         $request->getSession()->set('last_login_method', $loginMethod);
 
@@ -108,12 +112,15 @@ class LandingAuthenticator extends AbstractLoginFormAuthenticator
 
         // Turnstile CAPTCHA check
         $turnstileResponse = $request->request->get('cf-turnstile-response');
+        $turnstileResponse = is_string($turnstileResponse) ? $turnstileResponse : '';
         $turnstileSetting = $this->settingRepository->findOneBy(['name' => SettingName::TURNSTILE_CHECKER->value]);
         $isTurnstileEnabled = $turnstileSetting && $turnstileSetting->getValue() === OperationMode::ON->value;
         if (
-            $isTurnstileEnabled && (empty($turnstileResponse) || !$this->turnstileHttpClient->verifyResponse(
-                $turnstileResponse
-            ))
+            $isTurnstileEnabled &&
+            ($turnstileResponse === '' ||
+                $turnstileResponse === '0' || !$this->turnstileHttpClient->verifyResponse(
+                    $turnstileResponse
+                ))
         ) {
             throw new CustomUserMessageAuthenticationException(
                 $this->translator->trans('invalidCAPTCHAValidation', [], 'Security')
@@ -123,7 +130,10 @@ class LandingAuthenticator extends AbstractLoginFormAuthenticator
         $request->getSession()->set(SecurityRequestAttributes::LAST_USERNAME, $identifier);
 
         // Remember-me badge
-        $badges = [new CsrfTokenBadge('authenticate', $request->request->get('_csrf_token'))];
+        $csrfToken = $request->request->get('_csrf_token');
+        $csrfToken = is_string($csrfToken) ? $csrfToken : null;
+
+        $badges = [new CsrfTokenBadge('authenticate', $csrfToken)];
         $cookie = $request->cookies->get('cookie_preferences');
         if ($cookie) {
             $preferences = json_decode($cookie, true, 512, JSON_THROW_ON_ERROR);
