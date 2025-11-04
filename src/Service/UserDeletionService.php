@@ -71,7 +71,7 @@ readonly class UserDeletionService
         $pgpEncryptedData = $this->encryptionService->encrypt($jsonDataCombined);
 
         // Make sure encryption returned a string
-        if (!is_string($pgpEncryptedData) || empty($pgpEncryptedData)) {
+        if (!is_string($pgpEncryptedData) || ($pgpEncryptedData === '' || $pgpEncryptedData === '0')) {
             return [
                 'success' => false,
                 'message' => $this->translator->trans('encryptionFailed', [], 'UserDeletionService'),
