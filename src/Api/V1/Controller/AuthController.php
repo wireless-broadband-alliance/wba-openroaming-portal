@@ -231,10 +231,8 @@ class AuthController extends AbstractController
             return new BaseResponse(400, null, 'SAML Response not found')->toResponse();
         }
 
-        $samlResponseBase64 = (string)$samlResponseRaw;
-
         $samlResponseData = $this->samlResolverService->decodeSamlResponse(
-            $samlResponseBase64,
+            $samlResponseRaw,
             $this->getParameter('app.saml_idp_entity_id')
         );
         $idpCertificate = $samlResponseData['certificate'];
@@ -327,7 +325,7 @@ class AuthController extends AbstractController
 
             if ($twoFAEnforcementResult['canSkip2FA'] === false) {
                 $twoFACode = (string) $request->request->get('twoFACode');
-                if (!$twoFACode) {
+                if ($twoFACode === '' || $twoFACode === '0') {
                     return new BaseResponse(
                         400,
                         null,
