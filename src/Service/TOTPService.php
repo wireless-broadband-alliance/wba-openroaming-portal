@@ -25,7 +25,7 @@ readonly class TOTPService
 
     public function generateTOTP(string $secret): string
     {
-        if (empty($secret)) {
+        if ($secret === '' || $secret === '0') {
             throw new InvalidArgumentException('TOTP secret cannot be empty.');
         }
 
@@ -56,11 +56,11 @@ readonly class TOTPService
 
     public function verifyTOTP(string $secret, string $code): bool
     {
-        if (empty($secret)) {
+        if ($secret === '' || $secret === '0') {
             throw new InvalidArgumentException('TOTP secret cannot be empty.');
         }
 
-        if (empty($code)) {
+        if ($code === '' || $code === '0') {
             throw new InvalidArgumentException('TOTP code cannot be empty.');
         }
 

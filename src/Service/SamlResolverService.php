@@ -117,7 +117,7 @@ readonly class SamlResolverService
         if ($audienceNodes && $audienceNodes->length > 0) {
             foreach ($audienceNodes as $node) {
                 if ($node instanceof DOMNode) {
-                    $audiences[] = trim((string) $node->textContent);
+                    $audiences[] = trim($node->textContent);
                 }
             }
         } else {
