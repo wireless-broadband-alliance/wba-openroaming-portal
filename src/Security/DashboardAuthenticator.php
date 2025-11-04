@@ -107,7 +107,7 @@ class DashboardAuthenticator extends AbstractLoginFormAuthenticator
         $isTurnstileEnabled = $turnstileSetting && $turnstileSetting->getValue() === OperationMode::ON->value;
 
         if (
-            $isTurnstileEnabled && (empty($turnstileResponse) ||
+            $isTurnstileEnabled && ($turnstileResponse === '' || $turnstileResponse === '0' ||
                 !$this->turnstileHttpClient->verifyResponse($turnstileResponse))
         ) {
             throw new CustomUserMessageAuthenticationException(
