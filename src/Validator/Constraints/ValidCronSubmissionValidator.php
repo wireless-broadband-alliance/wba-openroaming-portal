@@ -183,7 +183,7 @@ class ValidCronSubmissionValidator extends ConstraintValidator
         }
 
         // Cast all values to int
-        return array_map('intval', $values);
+        return array_map(intval(...), $values);
     }
 
     /**

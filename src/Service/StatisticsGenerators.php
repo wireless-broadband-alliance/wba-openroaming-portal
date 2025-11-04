@@ -190,7 +190,7 @@ class StatisticsGenerators
     public function generateDatasetsAuths(array $authsCounts): array
     {
         // Ensure keys are strings
-        $labels = array_map('strval', array_keys($authsCounts['Accepted']));
+        $labels = array_map(strval(...), array_keys($authsCounts['Accepted']));
         $acceptedCounts = array_values($authsCounts['Accepted']);
         $rejectedCounts = array_values($authsCounts['Rejected']);
 
@@ -336,7 +336,7 @@ class StatisticsGenerators
      */
     public function generateColorsWithOpacity(array $values): array
     {
-        if (empty($values)) {
+        if ($values === []) {
             return []; // or array_fill(0, 0, "rgba(125, 185, 40, 1)");
         }
 
