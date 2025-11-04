@@ -1,34 +1,48 @@
 import { Controller } from "@hotwired/stimulus";
 
 export default class extends Controller {
-    static targets = ["resultArea", "testButton"];
+    static targets = ["testButton", "buttonLabel", "waitingWidget", "resultMessage"];
 
-    runTest() {
-        this.testButton.disabled = true;
-        this.testButton.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span> Running Tests...`;
-        this.resultAreaTarget.style.display = "block";
-        this.resultAreaTarget.innerHTML = `
-            <div class="alert alert-info d-flex align-items-center">
-                <i class="bi bi-hourglass-split me-2"></i>
-                <div>
-                    <strong>Testing in progress...</strong><br>
-                    Verifying the RadSecProxy certificate setup on the server.
-                </div>
+    async runTest(event) {
+        event.preventDefault();
+
+        // Disable button and show spinner
+        this.testButtonTarget.disabled = true;
+        this.buttonLabelTarget.textContent = "Testing...";
+        this.waitingWidgetTarget.classList.remove("hidden");
+        this.resultMessageTarget.classList.add("hidden");
+        this.resultMessageTarget.innerHTML = "";
+
+        try {
+            const response = await fetch("/dashboard/settings/certificatesManagement/radsecproxy/test/run", {
+                method: "POST",
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest",
+                    "Content-Type": "application/json",
+                },
+            });
+
+            const data = await response.json();
+
+            this.showResult(data.status, data.message);
+        } catch (error) {
+            this.showResult("error", "An unexpected error occurred while testing.");
+        } finally {
+            this.testButtonTarget.disabled = false;
+            this.buttonLabelTarget.textContent = "Test Certificates";
+            this.waitingWidgetTarget.classList.add("hidden");
+        }
+    }
+
+    showResult(status, message) {
+        const color = status === "success" ? "green" : "red";
+
+        this.resultMessageTarget.innerHTML = `
+            <div class="mt-4 p-4 border rounded-lg bg-${color}-50 border-${color}-200 text-${color}-700 text-center">
+                ${message}
             </div>
         `;
-
-        setTimeout(() => {
-            this.resultAreaTarget.innerHTML = `
-                <div class="alert alert-success d-flex align-items-center">
-                    <i class="bi bi-check-circle-fill me-2"></i>
-                    <div>
-                        <strong>Test successful!</strong><br>
-                        The RadSecProxy certificates are valid and working correctly.
-                    </div>
-                </div>
-            `;
-            this.testButton.disabled = false;
-            this.testButton.innerHTML = `<i class="bi bi-shield-check"></i> Test RadSecProxy Certificates`;
-        }, 2500);
+        this.resultMessageTarget.classList.remove("hidden");
     }
 }
+

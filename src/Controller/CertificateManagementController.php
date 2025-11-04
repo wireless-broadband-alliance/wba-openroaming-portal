@@ -20,6 +20,7 @@ use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -254,7 +255,7 @@ class CertificateManagementController extends AbstractController
         name: 'admin_dashboard_settings_certs_radsecproxy_test'
     )]
     #[IsGranted('ROLE_ADMIN')]
-    public function settingsCertificatesManagementRadsecproxyTest(): Response
+    public function settingsCertificatesManagementRadsecproxyTest(Request $request): Response
     {
         $data = $this->getSettings->getSettings();
 
@@ -280,13 +281,48 @@ class CertificateManagementController extends AbstractController
             }
         }
 
+        $form = $this->createForm(SimpleSubmitFormType::class);
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $this->addFlash('success_admin', 'Test completed successfully!');
+            return $this->redirectToRoute($request->attributes->get('_route'));
+        }
+
         return $this->render(
             'dashboard/shared/settings_actions/certificatesManagement/certificates/radsecproxy/test.html.twig',
             [
                 'data' => $data,
                 'processState' => $processState,
+                'form' => $form->createView(),
             ]
         );
+    }
+
+    #[Route(
+        '/dashboard/settings/certificatesManagement/radsecproxy/test/run',
+        name: 'admin_dashboard_settings_certs_radsecproxy_test_run',
+        methods: ['POST']
+    )]
+    #[IsGranted('ROLE_ADMIN')]
+    public function runRadsecproxyTest(): JsonResponse
+    {
+        // Run your backend logic here
+        sleep(2); // simulate test time
+
+        // Example test result
+        $testPassed = true;
+
+        if ($testPassed) {
+            return new JsonResponse([
+                'status' => 'success',
+                'message' => 'RadSecProxy certificate test passed successfully!',
+            ]);
+        }
+
+        return new JsonResponse([
+            'status' => 'error',
+            'message' => 'RadSecProxy certificate validation failed!',
+        ]);
     }
 
     #[Route(

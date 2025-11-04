@@ -1,17 +1,16 @@
 {% extends 'dashboard/shared/settings_actions/certificatesManagement/certificates/radsecproxy/base.html.twig' %}
 
 {% block radsecproxy_content %}
-    {# Action Card #}
     <div class="border border-gray-200 rounded-xl shadow-sm overflow-hidden bg-white">
         <div class="bg-gray-50 px-6 py-4 border-b border-gray-200 flex items-center gap-2">
-            <twig:ux:icon class="w-5 h-5 text-primary" name="wba:terminal"/>
+            <twig:ux:icon class="w-5 h-5 text-primary" name="wba:terminal" />
             <h5 class="text-lg font-semibold text-gray-800">
                 {{ 'test_or_proceed'|trans({}, 'test_radsec') }}
             </h5>
         </div>
 
         <div class="p-6 space-y-6 text-gray-700" data-controller="test-certificates">
-            <div class="text-center space-y-3">
+            <div class="text-center space-y-3 pt-4">
                 <twig:ux:icon name="wba:shield-check" class="w-14 h-14 mx-auto text-primary"/>
                 <h3 class="text-xl font-semibold text-gray-900">
                     {{ 'configuration_complete'|trans({}, 'test_radsec') }}
@@ -21,34 +20,46 @@
                 </p>
             </div>
 
-            {# Buttons #}
+            {# Waiting Widget #}
+            <div class="mt-6 hidden" data-test-certificates-target="waitingWidget">
+                <div class="flex items-center justify-center flex-col gap-4 bg-blue-50 border border-blue-200
+            rounded-lg p-6 text-blue-800 text-center animate-fade-in">
+                    <div class="animate-spin h-8 w-8 border-4 border-blue-400 border-t-transparent rounded-full"></div>
+                    <div>
+                        <p class="font-semibold text-blue-900">
+                            {{ 'in_progress_title'|trans({}, 'test_radsec') }}
+                        </p>
+                        <p class="text-sm text-blue-700">
+                            {{ 'in_progress_description'|trans({}, 'test_radsec') }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            {# Result Message #}
+            <div class="mt-4 hidden" data-test-certificates-target="resultMessage"></div>
+
+            {# Interactive Buttons #}
             <div class="flex flex-col md:flex-row justify-center items-center gap-4 pt-4">
-                <button type="button"
-                        class="px-6 py-3 bg-primary text-white font-medium rounded-lg shadow hover:bg-primary-dark focus:ring-2 focus:ring-primary/50 transition flex items-center gap-2"
+                <button
+                        type="button"
+                        class="px-6 py-3 bg-primary text-white font-medium rounded-lg shadow hover:bg-primary-dark
+                focus:ring-2 focus:ring-primary/50 transition flex items-center gap-2"
                         data-action="click->test-certificates#runTest"
                         data-test-certificates-target="testButton"
                 >
-                    <twig:ux:icon name="wba:shield-check" class="w-5 h-5"/>
-                    {{ 'test_certificates'|trans({}, 'test_radsec') }}
+                    <twig:ux:icon name="wba:shield-check" class="w-5 h-5" />
+                    <span data-test-certificates-target="buttonLabel">
+                {{ 'test_certificates'|trans({}, 'test_radsec') }}
+            </span>
                 </button>
 
                 <a href="{{ path('admin_dashboard_settings_certs_freeradius') }}"
-                   class="px-6 py-3 bg-white border border-gray-300 text-gray-800 font-medium rounded-lg shadow-sm hover:bg-gray-50 focus:ring-2 focus:ring-primary/30 transition flex items-center gap-2"
-                >
-                    <twig:ux:icon name="wba:right" class="w-5 h-5"/>
+                   class="px-6 py-3 bg-white border border-gray-300 text-gray-800 font-medium rounded-lg shadow-sm
+              hover:bg-gray-50 focus:ring-2 focus:ring-primary/30 transition flex items-center gap-2">
+                    <twig:ux:icon name="wba:right" class="w-5 h-5" />
                     {{ 'proceed_freeradius'|trans({}, 'test_radsec') }}
                 </a>
-            </div>
-
-            {# Test Result Section #}
-            <div class="mt-6" data-test-certificates-target="resultArea" style="display:none;">
-                <div class="alert alert-info flex items-start gap-2 bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm text-blue-800">
-                    <twig:ux:icon name="wba:hourglass-outline" class="w-5 h-5 flex-shrink-0 text-blue-500"/>
-                    <div>
-                        <strong>{{ 'in_progress_title'|trans({}, 'test_radsec') }}</strong><br>
-                        {{ 'in_progress_description'|trans({}, 'test_radsec') }}
-                    </div>
-                </div>
             </div>
         </div>
     </div>

@@ -1,0 +1,8 @@
+test_or_proceed: "Testar ou Prosseguir"
+configuration_complete: "Configuração concluída (ainda não testada)"
+instructions: "Execute o teste do servidor para confirmar que os certificados RadSecProxy foram instalados corretamente. Depois de concluído o teste, prossiga para configurar os certificados do FreeRADIUS."
+test_certificates: "Testar Certificados RadSecProxy"
+proceed_freeradius: "Prosseguir para Certificados FreeRADIUS"
+in_progress_title: "Teste em progresso..."
+in_progress_description: "A verificar a configuração dos certificados RadSecProxy no servidor. Por favor, aguarde."
+start_test_connection: "Tem a certeza de que deseja iniciar o teste de ligação?"
