@@ -229,7 +229,7 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
      */
     public function getUserIdentifier(): string
     {
-        if (empty($this->uuid)) {
+        if (in_array($this->uuid, [null, '', '0'], true)) {
             throw new LogicException('User UUID cannot be empty.');
         }
 
