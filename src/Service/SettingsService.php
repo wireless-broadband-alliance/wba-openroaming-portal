@@ -57,7 +57,7 @@ readonly class SettingsService
     /**
      * Update or create multiple settings from a generic array.
      *
-     * @param array<string, array{value: string|null, description?: string}> $settingsData
+     * @param array<string, array{value: int|string|null}> $settingsData
      */
     public function updateAuthSettingsToTranslateFromArray(
         array $settingsData,
@@ -92,16 +92,16 @@ readonly class SettingsService
                     if ($value === null) {
                         $settingTranslation?->setTranslation('');
                     } else {
-                        $settingTranslation?->setTranslation($value);
+                        $settingTranslation?->setTranslation((string)$value);
                     }
                 } else {
-                    $setting->setValue($value);
+                    $setting->setValue((string)$value);
                 }
             } else {
                 // Create new setting if it doesn't exist
                 $setting = new Setting();
                 $setting->setName($name);
-                $setting->setValue($value);
+                $setting->setValue((string)$value);
                 $this->entityManager->persist($setting);
             }
         }

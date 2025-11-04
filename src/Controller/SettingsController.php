@@ -761,6 +761,7 @@ class SettingsController extends AbstractController
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
         $currentUser = $this->getUser();
+        /** @var array<string, array{value: string, description: string}> $data */
         $data = $this->getSettings->getSettings($language);
 
         $settingsRepository = $this->entityManager->getRepository(Setting::class);
@@ -777,7 +778,7 @@ class SettingsController extends AbstractController
 
         $defaultTimeZone = date_default_timezone_get();
         $dateTime = new DateTime()
-            ->setTimestamp($certificateLimitDate)
+            ->setTimestamp((int)$certificateLimitDate)
             ->setTimezone(new DateTimeZone($defaultTimeZone));
 
         // Convert to human-readable format
