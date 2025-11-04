@@ -281,19 +281,11 @@ class CertificateManagementController extends AbstractController
             }
         }
 
-        $form = $this->createForm(SimpleSubmitFormType::class);
-        $form->handleRequest($request);
-        if ($form->isSubmitted() && $form->isValid()) {
-            $this->addFlash('success_admin', 'Test completed successfully!');
-            return $this->redirectToRoute($request->attributes->get('_route'));
-        }
-
         return $this->render(
             'dashboard/shared/settings_actions/certificatesManagement/certificates/radsecproxy/test.html.twig',
             [
                 'data' => $data,
                 'processState' => $processState,
-                'form' => $form->createView(),
             ]
         );
     }
@@ -306,10 +298,10 @@ class CertificateManagementController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function runRadsecproxyTest(): JsonResponse
     {
-        // Run your backend logic here
+        // Run backend logic here
         sleep(2); // simulate test time
 
-        // Example test result
+        // TODO make the rest logic here result
         $testPassed = true;
 
         if ($testPassed) {
