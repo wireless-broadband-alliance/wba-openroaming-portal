@@ -22,9 +22,9 @@
         <div {{ attributes }}>
             {{ form_start(form, {attr: {autocomplete: 'off'}}) }}
 
-            <div class="grid gap-4 lg:grid-cols-2 xl:grid-cols-3 p-2 z-0">
+            <div class="grid gap-4 lg:grid-cols-2 xl:grid-cols-2 p-2 z-0">
 
-                {# --- OpenRoaming Card --- #}
+                {# --- OpenRoaming User Name Card --- #}
                 <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full">
                     <div class="flex flex-row justify-between">
                         <div class="text-base font-medium text-center break-normal md:break-all">
@@ -44,7 +44,7 @@
                     }) }}
 
                     <div class="flex items-center space-x-2 mt-5">
-                        {{ form_widget(form.dbOpenRoaming, {
+                        {{ form_widget(form.dbOpenRoamingUserName, {
                             attr: {
                                 class: 'form-widget w-full border border-gray-300 rounded-lg p-2 focus:border-indigo-500 focus:ring-indigo-500',
                                 'wire:model.debounce.500ms': 'dbSetupDTO.dbOpenRoaming',
@@ -53,11 +53,11 @@
                     </div>
 
                     <div class="mt-2 text-center text-red-500 text-base">
-                        {{ form_errors(form.dbOpenRoaming) }}
+                        {{ form_errors(form.dbOpenRoamingUserName) }}
                     </div>
                 </div>
 
-                {# --- Freeradius Card --- #}
+                {# --- Freeradius User Name Card --- #}
                 <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full">
                     <div class="flex flex-row justify-between">
                         <div class="text-base font-medium text-center break-normal md:break-all">
@@ -77,7 +77,7 @@
                     }) }}
 
                     <div class="flex items-center space-x-2 mt-5">
-                        {{ form_widget(form.dbFreeradius, {
+                        {{ form_widget(form.dbFreeradiusUserName, {
                             attr: {
                                 class: 'form-widget w-full border border-gray-300 rounded-lg p-2 focus:border-indigo-500 focus:ring-indigo-500',
                                 'wire:model.debounce.500ms': 'dbSetupDTO.dbFreeradius',
@@ -86,7 +86,205 @@
                     </div>
 
                     <div class="mt-2 text-center text-red-500 text-base">
-                        {{ form_errors(form.dbFreeradius) }}
+                        {{ form_errors(form.dbFreeradiusUserName) }}
+                    </div>
+                </div>
+
+                {# --- OpenRoaming Password Card --- #}
+                <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full">
+                    <div class="flex flex-row justify-between">
+                        <div class="text-base font-medium text-center break-normal md:break-all">
+                            <h1 class="text-base md:text-lg whitespace-nowrap">
+                                {{ 'dbOpenRoamingLabel'|trans({}, 'dataBase') }}
+                            </h1>
+                        </div>
+                        <label class="flex items-center bg-opacity-40">
+                            <img class="w-6 cursor-pointer"
+                                 src="{{ asset('resources/logos/info_icon.svg') }}"
+                                 alt="info_icon"/>
+                        </label>
+                    </div>
+
+                    {{ include('/dashboard/shared/settings_actions/_description.html.twig', {
+                        description: 'dbOpenRoamingDescription'|trans({}, 'dataBase'),
+                    }) }}
+
+                    <div class="flex items-center space-x-2 mt-5">
+                        {{ form_widget(form.dbOpenRoamingPassword, {
+                            attr: {
+                                class: 'form-widget w-full border border-gray-300 rounded-lg p-2 focus:border-indigo-500 focus:ring-indigo-500',
+                                'wire:model.debounce.500ms': 'dbSetupDTO.dbOpenRoaming',
+                            },
+                        }) }}
+                    </div>
+
+                    <div class="mt-2 text-center text-red-500 text-base">
+                        {{ form_errors(form.dbOpenRoamingPassword) }}
+                    </div>
+                </div>
+
+                {# --- Freeradius Password Card --- #}
+                <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full">
+                    <div class="flex flex-row justify-between">
+                        <div class="text-base font-medium text-center break-normal md:break-all">
+                            <h1 class="text-base md:text-lg whitespace-nowrap">
+                                {{ 'dbFreeradiusLabel'|trans({}, 'dataBase') }}
+                            </h1>
+                        </div>
+                        <label class="flex items-center bg-opacity-40">
+                            <img class="w-6 cursor-pointer"
+                                 src="{{ asset('resources/logos/info_icon.svg') }}"
+                                 alt="info_icon"/>
+                        </label>
+                    </div>
+
+                    {{ include('/dashboard/shared/settings_actions/_description.html.twig', {
+                        description: 'dbFreeradiusDescription'|trans({}, 'dataBase'),
+                    }) }}
+
+                    <div class="flex items-center space-x-2 mt-5">
+                        {{ form_widget(form.dbFreeradiusPassword, {
+                            attr: {
+                                class: 'form-widget w-full border border-gray-300 rounded-lg p-2 focus:border-indigo-500 focus:ring-indigo-500',
+                                'wire:model.debounce.500ms': 'dbSetupDTO.dbFreeradius',
+                            },
+                        }) }}
+                    </div>
+
+                    <div class="mt-2 text-center text-red-500 text-base">
+                        {{ form_errors(form.dbFreeradiusPassword) }}
+                    </div>
+                </div>
+
+                {# --- OpenRoaming IP Card --- #}
+                <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full">
+                    <div class="flex flex-row justify-between">
+                        <div class="text-base font-medium text-center break-normal md:break-all">
+                            <h1 class="text-base md:text-lg whitespace-nowrap">
+                                {{ 'dbOpenRoamingLabel'|trans({}, 'dataBase') }}
+                            </h1>
+                        </div>
+                        <label class="flex items-center bg-opacity-40">
+                            <img class="w-6 cursor-pointer"
+                                 src="{{ asset('resources/logos/info_icon.svg') }}"
+                                 alt="info_icon"/>
+                        </label>
+                    </div>
+
+                    {{ include('/dashboard/shared/settings_actions/_description.html.twig', {
+                        description: 'dbOpenRoamingDescription'|trans({}, 'dataBase'),
+                    }) }}
+
+                    <div class="flex items-center space-x-2 mt-5">
+                        {{ form_widget(form.dbOpenRoamingIp, {
+                            attr: {
+                                class: 'form-widget w-full border border-gray-300 rounded-lg p-2 focus:border-indigo-500 focus:ring-indigo-500',
+                                'wire:model.debounce.500ms': 'dbSetupDTO.dbOpenRoaming',
+                            },
+                        }) }}
+                    </div>
+
+                    <div class="mt-2 text-center text-red-500 text-base">
+                        {{ form_errors(form.dbOpenRoamingIp) }}
+                    </div>
+                </div>
+
+                {# --- Freeradius IP Card --- #}
+                <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full">
+                    <div class="flex flex-row justify-between">
+                        <div class="text-base font-medium text-center break-normal md:break-all">
+                            <h1 class="text-base md:text-lg whitespace-nowrap">
+                                {{ 'dbFreeradiusLabel'|trans({}, 'dataBase') }}
+                            </h1>
+                        </div>
+                        <label class="flex items-center bg-opacity-40">
+                            <img class="w-6 cursor-pointer"
+                                 src="{{ asset('resources/logos/info_icon.svg') }}"
+                                 alt="info_icon"/>
+                        </label>
+                    </div>
+
+                    {{ include('/dashboard/shared/settings_actions/_description.html.twig', {
+                        description: 'dbFreeradiusDescription'|trans({}, 'dataBase'),
+                    }) }}
+
+                    <div class="flex items-center space-x-2 mt-5">
+                        {{ form_widget(form.dbFreeradiusIp, {
+                            attr: {
+                                class: 'form-widget w-full border border-gray-300 rounded-lg p-2 focus:border-indigo-500 focus:ring-indigo-500',
+                                'wire:model.debounce.500ms': 'dbSetupDTO.dbFreeradius',
+                            },
+                        }) }}
+                    </div>
+
+                    <div class="mt-2 text-center text-red-500 text-base">
+                        {{ form_errors(form.dbFreeradiusIp) }}
+                    </div>
+                </div>
+
+                {# --- OpenRoaming Port Card --- #}
+                <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full">
+                    <div class="flex flex-row justify-between">
+                        <div class="text-base font-medium text-center break-normal md:break-all">
+                            <h1 class="text-base md:text-lg whitespace-nowrap">
+                                {{ 'dbOpenRoamingLabel'|trans({}, 'dataBase') }}
+                            </h1>
+                        </div>
+                        <label class="flex items-center bg-opacity-40">
+                            <img class="w-6 cursor-pointer"
+                                 src="{{ asset('resources/logos/info_icon.svg') }}"
+                                 alt="info_icon"/>
+                        </label>
+                    </div>
+
+                    {{ include('/dashboard/shared/settings_actions/_description.html.twig', {
+                        description: 'dbOpenRoamingDescription'|trans({}, 'dataBase'),
+                    }) }}
+
+                    <div class="flex items-center space-x-2 mt-5">
+                        {{ form_widget(form.dbOpenRoamingPort, {
+                            attr: {
+                                class: 'form-widget w-full border border-gray-300 rounded-lg p-2 focus:border-indigo-500 focus:ring-indigo-500',
+                                'wire:model.debounce.500ms': 'dbSetupDTO.dbOpenRoaming',
+                            },
+                        }) }}
+                    </div>
+
+                    <div class="mt-2 text-center text-red-500 text-base">
+                        {{ form_errors(form.dbOpenRoamingPort) }}
+                    </div>
+                </div>
+
+                {# --- Freeradius Port Card --- #}
+                <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full">
+                    <div class="flex flex-row justify-between">
+                        <div class="text-base font-medium text-center break-normal md:break-all">
+                            <h1 class="text-base md:text-lg whitespace-nowrap">
+                                {{ 'dbFreeradiusLabel'|trans({}, 'dataBase') }}
+                            </h1>
+                        </div>
+                        <label class="flex items-center bg-opacity-40">
+                            <img class="w-6 cursor-pointer"
+                                 src="{{ asset('resources/logos/info_icon.svg') }}"
+                                 alt="info_icon"/>
+                        </label>
+                    </div>
+
+                    {{ include('/dashboard/shared/settings_actions/_description.html.twig', {
+                        description: 'dbFreeradiusDescription'|trans({}, 'dataBase'),
+                    }) }}
+
+                    <div class="flex items-center space-x-2 mt-5">
+                        {{ form_widget(form.dbFreeradiusPort, {
+                            attr: {
+                                class: 'form-widget w-full border border-gray-300 rounded-lg p-2 focus:border-indigo-500 focus:ring-indigo-500',
+                                'wire:model.debounce.500ms': 'dbSetupDTO.dbFreeradius',
+                            },
+                        }) }}
+                    </div>
+
+                    <div class="mt-2 text-center text-red-500 text-base">
+                        {{ form_errors(form.dbFreeradiusPort) }}
                     </div>
                 </div>
 
