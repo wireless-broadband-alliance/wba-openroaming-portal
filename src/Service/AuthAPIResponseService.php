@@ -42,6 +42,6 @@ readonly class AuthAPIResponseService
             $eventMetadata
         );
 
-        return new BaseResponse(200, $formattedUserData, null)->toResponse();
+        return new BaseResponse(200, $formattedUserData)->toResponse();
     }
 }
