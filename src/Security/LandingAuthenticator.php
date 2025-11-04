@@ -116,9 +116,11 @@ class LandingAuthenticator extends AbstractLoginFormAuthenticator
         $turnstileSetting = $this->settingRepository->findOneBy(['name' => SettingName::TURNSTILE_CHECKER->value]);
         $isTurnstileEnabled = $turnstileSetting && $turnstileSetting->getValue() === OperationMode::ON->value;
         if (
-            $isTurnstileEnabled && ($turnstileResponse === '' || $turnstileResponse === '0' || !$this->turnstileHttpClient->verifyResponse(
-                $turnstileResponse
-            ))
+            $isTurnstileEnabled &&
+            ($turnstileResponse === '' ||
+                $turnstileResponse === '0' || !$this->turnstileHttpClient->verifyResponse(
+                    $turnstileResponse
+                ))
         ) {
             throw new CustomUserMessageAuthenticationException(
                 $this->translator->trans('invalidCAPTCHAValidation', [], 'Security')
