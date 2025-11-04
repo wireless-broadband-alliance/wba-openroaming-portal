@@ -397,8 +397,6 @@ readonly class Statistics
     /**
      * Fetch data related to realms usage on the freeradius database
      *
-     * @param DateTime $startDate
-     * @param DateTime $endDate
      *
      * @return array<int, array{group: string, realm: string, count: int}>
      * @throws Exception
@@ -597,8 +595,6 @@ readonly class Statistics
     /**
      * Fetch data related to session time (total) on the freeradius database
      *
-     * @param DateTime $startDate
-     * @param DateTime $endDate
      *
      * @return array{
      *     labels: string[],
@@ -690,7 +686,7 @@ readonly class Statistics
         // Sort $result array by descending count
         usort($result, static fn($a, $b) => $b['count'] <=> $a['count']);
 
-        return (new StatisticsGenerators())->generateDatasetsWifiTags($result);
+        return new StatisticsGenerators()->generateDatasetsWifiTags($result);
     }
 
     /**
