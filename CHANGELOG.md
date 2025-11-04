@@ -13,7 +13,7 @@
 
 # Release V1.9.0
 
-- Increased the level of php-stan from 3 to 6, for more fixes with security updates.
+- Increased the level of php-stan from 3 to 7, for more fixes with security updates.
 - Profile download instructions page.
 - New page dedicated for profile download steps and prepared for both translations implemented on the project.
 - Added new screenshots for each case (PT/EN) and for each operating system.
