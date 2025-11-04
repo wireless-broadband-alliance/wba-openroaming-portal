@@ -223,11 +223,6 @@ class AuthSettingsTypeDTO
     #[Assert\GreaterThanOrEqual(value: 1, message: 'timerShouldNeverBeLessThan')]
     public ?int $profileLimitDateSMS = null;
 
-    public ?int $profileLimitDate = null;
-
-    public ?string $humanReadableExpirationDate = null;
-
-
     /**
      * Initialize DTO from settings array.
      *
@@ -235,12 +230,9 @@ class AuthSettingsTypeDTO
      */
     public function __construct(
         array $data = [],
-        ?int $profileLimitDate = 0,
-        ?string $humanReadableExpirationDate = null
+        public ?int $profileLimitDate = 0,
+        public ?string $humanReadableExpirationDate = null
     ) {
-        $this->profileLimitDate = $profileLimitDate;
-        $this->humanReadableExpirationDate = $humanReadableExpirationDate;
-
         $this->authMethodSamlEnabled = $data[SettingName::AUTH_METHOD_SAML_ENABLED->value]['value'] ?? null;
         $this->authMethodSamlLabel = $data[SettingName::AUTH_METHOD_SAML_LABEL->value]['value'] ?? null;
         $this->authMethodSamlDescription = $data[SettingName::AUTH_METHOD_SAML_DESCRIPTION->value]['value'] ?? null;
@@ -394,7 +386,6 @@ class AuthSettingsTypeDTO
 
         ];
     }
-
 
     #[Assert\Callback]
     public function timeLimitValidate(ExecutionContextInterface $context): void

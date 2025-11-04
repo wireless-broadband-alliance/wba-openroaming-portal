@@ -330,7 +330,7 @@ class SiteController extends AbstractController
                     }
 
                     return $this->redirectToRoute(
-                        'profile_' . strtolower($osValue),
+                        'profile_' . strtolower((string) $osValue),
                         ['os' => $osValue]
                     );
                 }
@@ -374,7 +374,7 @@ class SiteController extends AbstractController
                 }
 
                 return $this->redirectToRoute(
-                    'profile_' . strtolower($osValue),
+                    'profile_' . strtolower((string) $osValue),
                     ['os' => $osValue]
                 );
             }

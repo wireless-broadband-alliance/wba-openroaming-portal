@@ -491,8 +491,7 @@ class ProfileController extends AbstractController
     }
 
     /**
-     *
-     * @return string
+     * @throws RandomException
      */
     private function generateWindowsUuid(): string
     {
@@ -500,14 +499,14 @@ class ProfileController extends AbstractController
 
         return sprintf(
             $format,
-            mt_rand(0, 0xffff),
-            mt_rand(0, 0xffff), // 8 hex characters
-            mt_rand(0, 0xffff), // 4 hex characters
-            mt_rand(0, 0x0fff) | 0x4000, // 4 hex characters, 13th bit set to 0100 (version 4 UUID)
-            mt_rand(0, 0x3fff) | 0x8000, // 4 hex characters, 17th bit set to 1000 (variant 1 UUID)
-            mt_rand(0, 0xffff),
-            mt_rand(0, 0xffff),
-            mt_rand(0, 0xffff) // 12 hex characters
+            random_int(0, 0xffff),
+            random_int(0, 0xffff), // 8 hex characters
+            random_int(0, 0xffff), // 4 hex characters
+            random_int(0, 0x0fff) | 0x4000, // 4 hex characters, 13th bit set to 0100 (version 4 UUID)
+            random_int(0, 0x3fff) | 0x8000, // 4 hex characters, 17th bit set to 1000 (variant 1 UUID)
+            random_int(0, 0xffff),
+            random_int(0, 0xffff),
+            random_int(0, 0xffff) // 12 hex characters
         );
     }
 
@@ -523,6 +522,7 @@ class ProfileController extends AbstractController
         $radiusProfile = $radiusProfileRepository->findOneBy(
             ['user' => $user, 'status' => UserRadiusProfileStatus::ACTIVE->value]
         );
+
         $userExternalAuth = $this->userExternalAuthRepository->findOneBy(['user' => $user]);
 
         if (!$radiusProfile) {
@@ -537,7 +537,6 @@ class ProfileController extends AbstractController
             $radiusProfile->setRadiusUser($username);
             $radiusProfile->setStatus(UserRadiusProfileStatus::ACTIVE->value);
             $radiusProfile->setIssuedAt(new DateTime());
-
             // Get the expiration date from the service
             $expirationData = $this->expirationProfileService->calculateExpiration(
                 $userExternalAuth->getProvider(),
