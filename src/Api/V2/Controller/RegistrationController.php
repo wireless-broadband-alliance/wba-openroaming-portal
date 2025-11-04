@@ -389,7 +389,6 @@ class RegistrationController extends AbstractController
         return new BaseResponse(
             200,
             sprintf('If the email address exists in our system, we’ve sent a new one to: %s.', $data['email']),
-            null,
         )->toResponse(); // Not Found User doesn't exist request
     }
 
@@ -777,7 +776,6 @@ class RegistrationController extends AbstractController
         return new BaseResponse(
             200,
             sprintf('If the phone number exists, we have sent you a new code to: %s', $dataRequest['phone_number']),
-            null,
         )->toResponse();
     }
 }
