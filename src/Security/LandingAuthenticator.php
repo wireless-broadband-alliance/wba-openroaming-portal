@@ -116,7 +116,7 @@ class LandingAuthenticator extends AbstractLoginFormAuthenticator
         $turnstileSetting = $this->settingRepository->findOneBy(['name' => SettingName::TURNSTILE_CHECKER->value]);
         $isTurnstileEnabled = $turnstileSetting && $turnstileSetting->getValue() === OperationMode::ON->value;
         if (
-            $isTurnstileEnabled && (empty($turnstileResponse) || !$this->turnstileHttpClient->verifyResponse(
+            $isTurnstileEnabled && ($turnstileResponse === '' || $turnstileResponse === '0' || !$this->turnstileHttpClient->verifyResponse(
                 $turnstileResponse
             ))
         ) {
