@@ -56,13 +56,9 @@ class SettingsController extends AbstractController
         private readonly GetSettings $getSettings,
         private readonly EntityManagerInterface $entityManager,
         private readonly TranslatorInterface $translator,
-        private readonly SettingTranslationRepository $settingTranslationRepository,
-        private readonly EnforcePasswordResetService $enforcePasswordResetService,
         private readonly CertificateCheckerService $certificateService,
         private readonly TextEditorRepository $textEditorRepository,
-        private readonly CertificateService $certificateService,
         private readonly SettingsService $settingsService,
-        private readonly TextEditorRepository $textEditorRepository,
     ) {
     }
 
