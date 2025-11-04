@@ -6,17 +6,18 @@
         <div class="bg-gray-50 px-6 py-4 border-b border-gray-200 flex items-center gap-2">
             <twig:ux:icon class="w-5 h-5 text-primary" name="wba:terminal"/>
             <h5 class="text-lg font-semibold text-gray-800">
-                Test or Proceed
+                {{ 'test_or_proceed'|trans({}, 'test_radsec') }}
             </h5>
         </div>
 
         <div class="p-6 space-y-6 text-gray-700" data-controller="test-certificates">
             <div class="text-center space-y-3">
                 <twig:ux:icon name="wba:shield-check" class="w-14 h-14 mx-auto text-primary"/>
-                <h3 class="text-xl font-semibold text-gray-900">Configuration Complete (Not Yet Tested)</h3>
+                <h3 class="text-xl font-semibold text-gray-900">
+                    {{ 'configuration_complete'|trans({}, 'test_radsec') }}
+                </h3>
                 <p class="text-gray-600">
-                    Run the server test to confirm that the RadSecProxy certificates are installed correctly.<br>
-                    Once testing is done, proceed to configure the FreeRADIUS certificates.
+                    {{ 'instructions'|trans({}, 'test_radsec') }}
                 </p>
             </div>
 
@@ -28,14 +29,14 @@
                         data-test-certificates-target="testButton"
                 >
                     <twig:ux:icon name="wba:shield-check" class="w-5 h-5"/>
-                    Test RadSecProxy Certificates
+                    {{ 'test_certificates'|trans({}, 'test_radsec') }}
                 </button>
 
                 <a href="{{ path('admin_dashboard_settings_certs_freeradius') }}"
                    class="px-6 py-3 bg-white border border-gray-300 text-gray-800 font-medium rounded-lg shadow-sm hover:bg-gray-50 focus:ring-2 focus:ring-primary/30 transition flex items-center gap-2"
                 >
                     <twig:ux:icon name="wba:right" class="w-5 h-5"/>
-                    Proceed to FreeRADIUS Certificates
+                    {{ 'proceed_freeradius'|trans({}, 'test_radsec') }}
                 </a>
             </div>
 
@@ -44,8 +45,8 @@
                 <div class="alert alert-info flex items-start gap-2 bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm text-blue-800">
                     <twig:ux:icon name="wba:hourglass-outline" class="w-5 h-5 flex-shrink-0 text-blue-500"/>
                     <div>
-                        <strong>Testing in progress...</strong><br>
-                        Verifying the RadSecProxy certificate setup on the server. Please wait.
+                        <strong>{{ 'in_progress_title'|trans({}, 'test_radsec') }}</strong><br>
+                        {{ 'in_progress_description'|trans({}, 'test_radsec') }}
                     </div>
                 </div>
             </div>

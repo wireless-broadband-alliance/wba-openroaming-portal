@@ -5,15 +5,14 @@
     <div class="toast-light-warning mb-6">
         <twig:ux:icon name="wba:info" class="w-10 md:w-5 h-10 md:h-5 inline mr-3" fill="currentColor"/>
         <span>
-            {{ 'warning.root_command'|trans({}, 'upload') }}
+            {{ 'warning.root_command'|trans({}, 'upload_radsec') }}
         </span>
     </div>
-
     {% if commands is defined and commands is not empty %}
         <div class="border border-gray-200 rounded-xl shadow-sm overflow-hidden mt-6">
             <div class="bg-gray-50 px-6 py-4 border-b border-gray-200 flex items-center gap-2">
                 <twig:ux:icon class="w-5 h-5 text-primary" name="wba:terminal"/>
-                <h5 class="text-lg font-semibold text-gray-800">{{ 'configTitle'|trans({}, 'config') }}</h5>
+                <h5 class="text-lg font-semibold text-gray-800">{{ 'configTitle'|trans({}, 'config_radsec') }}</h5>
             </div>
 
             <div class="px-6 py-5 space-y-5 bg-white">
@@ -22,7 +21,7 @@
                     <div class="space-y-2 relative" data-controller="clipboard">
                         {# Step description #}
                         <p class="text-sm font-medium text-gray-700">
-                            {{ 'step'|trans({}, 'config') }} {{ loop.index }} – {{ step.description }}
+                            {{ 'step'|trans({}, 'config_radsec') }} {{ loop.index }} – {{ step.description }}
                         </p>
 
                         {% if isSensitive %}
@@ -31,7 +30,7 @@
                                 <button type="button"
                                         class="mt-1 mb-2 text-sm text-primary underline"
                                         data-action="command-visibility#toggle">
-                                    {{ 'show_sensitive'|trans({}, 'config') }}
+                                    {{ 'show_sensitive'|trans({}, 'config_radsec') }}
                                 </button>
 
                                 {# Hidden Block (Blurred but copyable) #}
@@ -52,8 +51,8 @@
                                     {# Copy button #}
                                     <button type="button"
                                             class="absolute top-2 right-2 flex items-center justify-center p-1.5 rounded-md bg-gray-700 hover:bg-gray-600 focus:ring-2 focus:ring-primary/50 transition"
-                                            title="{{ 'copy_command.title'|trans({}, 'config') }}"
-                                            aria-label="{{ 'copy_command.aria_label'|trans({}, 'config') }}"
+                                            title="{{ 'copy_command.title'|trans({}, 'config_radsec') }}"
+                                            aria-label="{{ 'copy_command.aria_label'|trans({}, 'config_radsec') }}"
                                             data-action="click->clipboard#copyToClipboard">
                                         <twig:ux:icon class="w-4 h-4 text-white" name="wba:copy"/>
                                     </button>
@@ -65,8 +64,8 @@
                                      data-clipboard-target="code">{{ step.command }}</pre>
                                 <button type="button"
                                         class="absolute top-2 right-2 flex items-center justify-center p-1.5 rounded-md bg-gray-700 hover:bg-gray-600 focus:ring-2 focus:ring-primary/50 transition"
-                                        title="{{ 'copy_command.title'|trans({}, 'config') }}"
-                                        aria-label="{{ 'copy_command.aria_label'|trans({}, 'config') }}"
+                                        title="{{ 'copy_command.title'|trans({}, 'config_radsec') }}"
+                                        aria-label="{{ 'copy_command.aria_label'|trans({}, 'config_radsec') }}"
                                         data-action="click->clipboard#copyToClipboard">
                                     <twig:ux:icon class="w-4 h-4 text-white" name="wba:copy"/>
                                 </button>
@@ -92,11 +91,11 @@
                 {% else %}
                     bg-primary text-white hover:bg-primary-dark focus:ring-2 focus:ring-offset-2 focus:ring-primary
                 {% endif %}"
-                {% if configApplied %} disabled title="{{ 'config_already_applied'|trans({}, 'config') }}" {% else %}
-                    onclick="return confirm('{{ 'confirm_follow_steps'|trans({}, 'config') }}');"
+                {% if configApplied %} disabled title="{{ 'config_already_applied'|trans({}, 'config_radsec') }}" {% else %}
+                    onclick="return confirm('{{ 'confirm_follow_steps'|trans({}, 'config_radsec') }}');"
                 {% endif %}
         >
-            {{ 'submit'|trans({}, 'config') }}
+            {{ 'submit'|trans({}, 'config_radsec') }}
         </button>
         {{ form_end(form, {render_rest: false}) }}
     </div>

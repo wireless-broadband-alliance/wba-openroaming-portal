@@ -7,7 +7,7 @@ step:
         title: 'Aplicar configuração RadSecProxy'
         description: 'Execute os comandos gerados para configurar o seu resolver.'
     radsecproxy_test:
-        title: 'Testart Implementação'
+        title: 'Testar Implementação'
         description: 'A configuração dos certificados está quase concluída.'
 
 abort: 'Abortar Processo'

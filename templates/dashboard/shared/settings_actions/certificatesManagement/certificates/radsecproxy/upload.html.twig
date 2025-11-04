@@ -3,16 +3,16 @@
 {% block radsecproxy_content %}
     <div class="cert-upload-card">
         <h3 class="cert-upload-header">
-            {{ 'title'|trans({}, 'upload') }}
+            {{ 'title'|trans({}, 'upload_radsec') }}
         </h3>
 
         {{ form_start(form, {attr: {enctype: 'multipart/form-data'}}) }}
 
         <div class="cert-upload-group space-y-2 mb-4">
             <p class="text-lg font-medium text-gray-700">
-                {{ 'client.description'|trans({}, 'upload') }}
+                {{ 'client.description'|trans({}, 'upload_radsec') }}
             </p>
-            {{ form_label(form.client, 'client.label'|trans({}, 'upload')) }}
+            {{ form_label(form.client, 'client.label'|trans({}, 'upload_radsec')) }}
             {{ form_widget(form.client, {attr: {class: 'border rounded-lg p-2 w-full'}}) }}
             <div class="text-red-500 text-sm ml-1">
                 {{ form_errors(form.client) }}
@@ -21,9 +21,9 @@
 
         <div class="cert-upload-group space-y-2 mb-4">
             <p class="text-lg font-medium text-gray-700">
-                {{ 'key.description'|trans({}, 'upload') }}
+                {{ 'key.description'|trans({}, 'upload_radsec') }}
             </p>
-            {{ form_label(form.key, 'key.label'|trans({}, 'upload')) }}
+            {{ form_label(form.key, 'key.label'|trans({}, 'upload_radsec')) }}
             {{ form_widget(form.key, {attr: {class: 'border rounded-lg p-2 w-full'}}) }}
             <div class="text-red-500 text-sm ml-1">
                 {{ form_errors(form.key) }}
@@ -32,7 +32,7 @@
 
         <div class="flex justify-end mt-4">
             <button class="cert-upload-btn text-white px-6 py-2 rounded-lg shadow-sm transition">
-                {{ 'submit'|trans({}, 'upload') }}
+                {{ 'submit'|trans({}, 'upload_radsec') }}
             </button>
         </div>
 
