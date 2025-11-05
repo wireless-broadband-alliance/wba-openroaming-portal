@@ -90,7 +90,7 @@ readonly class CertificateCommandsService
         }
 
         // Docker rebuild/restart
-        $commands = array_merge($commands, [
+        return array_merge($commands, [
             [
                 'description' => $this->translator->trans('navigate_to_dir', domain: 'CertificateCommandsService'),
                 'command' => 'cd ~/openroaming-oss/hybrid',
@@ -109,7 +109,7 @@ readonly class CertificateCommandsService
             ],
             [
                 'description' => $this->translator->trans('start_container', domain: 'CertificateCommandsService'),
-                'command' => 'docker compose up -d radsecproxy',
+                'command' => 'docker compose up -d',
             ],
             [
                 'description' => $this->translator->trans('verify_container', domain: 'CertificateCommandsService'),
@@ -120,7 +120,5 @@ readonly class CertificateCommandsService
                 'command' => 'docker logs hybrid-radsecproxy-1 --tail 50',
             ],
         ]);
-
-        return $commands;
     }
 }
