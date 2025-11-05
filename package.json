@@ -1,13 +1,36 @@
 {
   "name": "cc-openroaming-provisioning-web",
-  "description": "OpenRoaming provisioning Web.",
+  "description": "Openroaming Provisioning Web",
+  "private": true,
+  "main": "",
   "scripts": {
-    "build": "echo 'AssetMapper handles assets — nothing to build here.'",
-    "dev": "echo 'Symfony AssetMapper for development.'"
+    "eslint:check": "eslint assets/controllers/",
+    "prettier:check": "prettier --check assets/controllers/",
+    "prettier:write": "prettier --write assets/controllers/"
   },
+  "repository": {
+    "type": "git",
+    "url": "git@git.tetrapi.pt:tcs/cc/cc-openroaming-provisioning-web.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
   "devDependencies": {
-    "tailwindcss": "^3.4.14",
-    "autoprefixer": "^10.4.20",
-    "postcss": "^8.4.47"
+    "@eslint/js": "^9.37.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.4",
+    "eslint": "^9.37.0",
+    "prettier": "^3.6.2",
+    "prettier-plugin-sh": "^0.18.0",
+    "prettier-plugin-toml": "^2.0.6"
+  },
+  "prettier": {
+    "printWidth": 100,
+    "singleQuote": true,
+    "trailingComma": "es5",
+    "plugins": [
+      "prettier-plugin-sh",
+      "prettier-plugin-toml"
+    ]
   }
 }
