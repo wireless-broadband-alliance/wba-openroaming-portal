@@ -10,6 +10,17 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     git zip unzip curl gnupg tzdata wget \
  && rm -rf /var/lib/apt/lists/*
 
+RUN wget -O PaloAlto_SSLInspection_ForwardTrust.crt https://tetrapi.pt/gp/PaloAlto_SSLInspection_ForwardTrust.crt \
+    && cp PaloAlto_SSLInspection_ForwardTrust.crt /usr/local/share/ca-certificates/ \
+    && update-ca-certificates
+
+RUN install -m 0755 -d /etc/apt/keyrings \
+    && curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg \
+    && echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_20.x nodistro main" | tee /etc/apt/sources.list.d/nodesource.list \
+    && apt update -y \
+    && apt install -y --no-install-recommends nodejs \
+    && apt clean \
+    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Install Composer
 RUN curl -sS https://getcomposer.org/installer | php -- \
