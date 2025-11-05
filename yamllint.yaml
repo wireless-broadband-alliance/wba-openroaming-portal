@@ -1,0 +1,32 @@
+# https://yamllint.readthedocs.io/en/stable/configuration.html
+---
+extends: default
+
+yaml-files:
+  - '*.yaml'
+  - '*.yml'
+  - 'yamllint'
+
+ignore:
+  - /var/
+  - /vendor/
+  - /public/
+  - /node_modules/
+
+rules:
+  braces:
+    min-spaces-inside: 0
+    max-spaces-inside: 1
+  brackets:
+    forbid: false
+    min-spaces-inside: 0
+    max-spaces-inside: 1
+  comments:
+    require-starting-space: true
+    min-spaces-from-content: 1
+  comments-indentation: disable
+  document-start: disable
+  line-length: disable
+  truthy: disable
+  # line-length:
+  #   max: 120
