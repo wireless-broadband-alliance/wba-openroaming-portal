@@ -86,4 +86,25 @@ class DatabaseConnectionService
             default => throw new \InvalidArgumentException("Unsupported database scheme: $scheme"),
         };
     }
+
+    function buildDatabaseUrl(
+        string $username,
+        string $password,
+        string $host,
+        int $port,
+        string $database,
+        string $serverVersion = '8',
+        string $charset = 'utf8mb4'
+    ): string {
+        return sprintf(
+            'mysql://%s:%s@%s:%d/%s?serverVersion=%s&charset=%s',
+            urlencode($username),
+            urlencode($password),
+            $host,
+            $port,
+            $database,
+            $serverVersion,
+            $charset
+        );
+    }
 }

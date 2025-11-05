@@ -77,15 +77,25 @@ class InstallationController extends AbstractController
 
         $dbDTO = new DbSetupDTO();
 
-        // TODO this form needs to have more fields,
-        // TODO the user gives some information and we need to put this together and create a DB URL
-        // TODO ask Facha for more information!!!
         $form = $this->createForm(DbSetupType::class, $dbDTO);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $openRoamingDb = $dbDTO->dbOpenRoaming;
-            $freeradiusDb = $dbDTO->dbFreeradius;
+            $openRoamingDb = $this->databaseConnectionService->buildDatabaseUrl(
+                $dbDTO->dbOpenRoamingUserName,
+                $dbDTO->dbOpenRoamingPassword,
+                $dbDTO->dbOpenRoamingIp,
+                $dbDTO->dbOpenRoamingPort,
+                'openroaming'
+            );
+            $freeradiusDb = $this->databaseConnectionService->buildDatabaseUrl(
+                $dbDTO->dbFreeradiusUserName,
+                $dbDTO->dbFreeradiusPassword,
+                $dbDTO->dbFreeradiusIp,
+                $dbDTO->dbFreeradiusPort,
+                'radius'
+            );
+
 
             $orConnection = $this->databaseConnectionService->testDatabaseConnection($openRoamingDb);
             $frConnection = $this->databaseConnectionService->testDatabaseConnection($freeradiusDb);
