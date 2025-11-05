@@ -23,9 +23,12 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Process\Exception\ProcessFailedException;
+use Symfony\Component\Process\Process;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Throwable;
 
 class CertificateManagementController extends AbstractController
 {
@@ -255,7 +258,7 @@ class CertificateManagementController extends AbstractController
         name: 'admin_dashboard_settings_certs_radsecproxy_test'
     )]
     #[IsGranted('ROLE_ADMIN')]
-    public function settingsCertificatesManagementRadsecproxyTest(Request $request): Response
+    public function settingsCertificatesManagementRadsecproxyTest(): Response
     {
         $data = $this->getSettings->getSettings();
 
@@ -298,23 +301,106 @@ class CertificateManagementController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function runRadsecproxyTest(): JsonResponse
     {
-        // Run backend logic here
-        sleep(2); // simulate test time
+        $container = 'hybrid-radsecproxy-1';
+        $certPath = '/etc/radsecproxy/certs/client.pem';
+        $keyPath = '/etc/radsecproxy/certs/key.pem';
 
-        // TODO make the rest logic here result
-        $testPassed = true;
+        try {
+            // Step 1 – Check if cert files exist
+            $checkFiles = new Process([
+                'docker', 'exec', $container,
+                'sh', '-c',
+                "[ -f $certPath ] && [ -f $keyPath ] && echo 'exists' || echo 'missing'"
+            ]);
+            $checkFiles->run();
 
-        if ($testPassed) {
+            $output = trim($checkFiles->getOutput());
+            /*
+             * TODO LATER this command works and should be something like this to check if the files exist on the container
+             * marcelo_fernandes@MarceloTetrapi:~/openroaming-oss/hybrid$ docker exec hybrid-radsecproxy-1 sh -c '[ -f /etc/radsecproxy/certs/client.pem ] && echo "client.pem exists" || echo "client.pem missing"'
+                docker exec hybrid-radsecproxy-1 sh -c '[ -f /etc/radsecproxy/certs/key.pem ] && echo "key.pem exists" || echo "key.pem missing"'
+                client.pem exists
+                key.pem exists
+                marcelo_fernandes@MarceloTetrapi:~/openroaming-oss/hybrid$
+             *
+             */
+            if ($output !== 'exists') {
+                return new JsonResponse([
+                    'status' => 'error',
+                    'message' => 'Certificate or key files are missing in radsecproxy container.',
+                    'debug' => [
+                        'command' => $checkFiles->getCommandLine(),
+                        'exit_code' => $checkFiles->getExitCode(),
+                        'stdout' => $checkFiles->getOutput(),
+                        'stderr' => $checkFiles->getErrorOutput(),
+                    ]
+                ]);
+            }
+
+            // Step 2 – Validate certificate format
+            $validateCert = new Process([
+                'docker', 'exec', $container,
+                'sh', '-c',
+                "openssl x509 -in $certPath -noout -text"
+            ]);
+            $validateCert->run();
+
+            if (!$validateCert->isSuccessful()) {
+                return new JsonResponse([
+                    'status' => 'error',
+                    'message' => 'Certificate validation failed',
+                    'debug' => [
+                        'command' => $validateCert->getCommandLine(),
+                        'exit_code' => $validateCert->getExitCode(),
+                        'stderr' => $validateCert->getErrorOutput(),
+                    ]
+                ]);
+            }
+
+            // Step 3 – Verify key matches certificate
+            $verifyMatch = new Process([
+                'docker', 'exec', $container,
+                'sh', '-c',
+                "openssl x509 -noout -modulus -in $certPath | openssl md5 && " .
+                "openssl rsa -noout -modulus -in $keyPath | openssl md5"
+            ]);
+            $verifyMatch->run();
+
+            if (!$verifyMatch->isSuccessful()) {
+                return new JsonResponse([
+                    'status' => 'error',
+                    'message' => 'Certificate/key match verification failed',
+                    'debug' => [
+                        'command' => $verifyMatch->getCommandLine(),
+                        'exit_code' => $verifyMatch->getExitCode(),
+                        'stderr' => $verifyMatch->getErrorOutput(),
+                    ]
+                ]);
+            }
+
+            $output = trim($verifyMatch->getOutput());
+            $lines = array_filter(explode("\n", $output));
+            $match = count($lines) === 2 && $lines[0] === $lines[1];
+
+            if (!$match) {
+                return new JsonResponse([
+                    'status' => 'error',
+                    'message' => 'Certificate and key do not match!',
+                    'debug' => $lines,
+                ]);
+            }
+
             return new JsonResponse([
                 'status' => 'success',
-                'message' => 'RadSecProxy certificate test passed successfully!',
+                'message' => 'RadSecProxy certificates are valid and correctly installed!',
+            ]);
+
+        } catch (Throwable $e) {
+            return new JsonResponse([
+                'status' => 'error',
+                'message' => 'Unexpected error: ' . $e->getMessage(),
             ]);
         }
-
-        return new JsonResponse([
-            'status' => 'error',
-            'message' => 'RadSecProxy certificate validation failed!',
-        ]);
     }
 
     #[Route(

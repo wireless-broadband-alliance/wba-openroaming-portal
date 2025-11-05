@@ -335,3 +335,18 @@
         @apply transition-all duration-500 ease-in-out;
     }
 }
+
+@keyframes fade-in-test-run {
+    from {
+        opacity: 0;
+        transform: translateY(4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fade-in-test-run {
+    animation: fade-in-test-run 0.4s ease-out;
+}

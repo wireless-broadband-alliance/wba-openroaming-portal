@@ -23,8 +23,7 @@ export default class extends Controller {
             });
 
             const data = await response.json();
-
-            this.showResult(data.status, data.message);
+            this.showResult(data);
         } catch (error) {
             this.showResult("error", "An unexpected error occurred while testing.");
         } finally {
@@ -34,15 +33,40 @@ export default class extends Controller {
         }
     }
 
-    showResult(status, message) {
-        const color = status === "success" ? "green" : "red";
+    showResult(data) {
+        const isSuccess = data.status === "success";
+        const color = isSuccess ? "green" : "red";
+        const title = isSuccess ? "Test Successful" : "Test Failed";
+
+        // You can now show all JSON fields dynamically
+        const extraInfo = Object.entries(data)
+            .filter(([key]) => !["status", "message"].includes(key))
+            .map(([key, value]) => {
+                return `<p class="text-xs text-gray-600"><strong>${key}:</strong> ${value}</p>`;
+            })
+            .join("");
 
         this.resultMessageTarget.innerHTML = `
-            <div class="mt-4 p-4 border rounded-lg bg-${color}-50 border-${color}-200 text-${color}-700 text-center">
-                ${message}
+        <div class="mt-6 p-5 border border-${color}-300 rounded-xl bg-${color}-50 text-${color}-800 shadow-sm animate-fade-in-test-run transition-all duration-500">
+            <h4 class="font-semibold text-lg text-center mb-1">${title}</h4>
+            <p class="text-sm text-${color}-700 text-center mb-2">${data.message}</p>
+            ${extraInfo}
+            <div class="mt-3 flex justify-center">
+                <button
+                    class="px-4 py-2 text-sm font-medium bg-white border border-${color}-300 rounded-lg text-${color}-700 hover:bg-${color}-100 transition"
+                    data-action="click->test-certificates#dismissResult"
+                >
+                    OK
+                </button>
             </div>
-        `;
+        </div>
+    `;
+
         this.resultMessageTarget.classList.remove("hidden");
     }
-}
 
+    dismissResult() {
+        this.resultMessageTarget.classList.add("hidden");
+        this.resultMessageTarget.innerHTML = "";
+    }
+}
