@@ -14,7 +14,17 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Install Composer
 RUN curl -sS https://getcomposer.org/installer | php -- \
     --install-dir=/usr/local/bin --filename=composer \
- && composer self-update --2
+ && composer self-update --2 \
+
+# Install NPM depenencies
+RUN npm config set cafile /usr/local/share/ca-certificates/PaloAlto_SSLInspection_ForwardTrust.crt \
+    && npm config set strict-ssl false \
+    && echo 'cafile "/usr/local/share/ca-certificates/PaloAlto_SSLInspection_ForwardTrust.crt"' >> ~/.yarnrc \
+    && echo 'strict-ssl false' >> ~/.yarnrc \
+    && echo 'httpsCaFilePath: "/usr/local/share/ca-certificates/PaloAlto_SSLInspection_ForwardTrust.crt"' >> ~/.yarnrc.yml \
+    && echo 'enableStrictSsl: false' >> ~/.yarnrc.yml \
+    && npm i -g yarn --force \
+    && yarn install --force --immutable --check-cache
 
 # Copy Symfony app
 COPY . .
