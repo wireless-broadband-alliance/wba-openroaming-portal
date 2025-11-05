@@ -48,8 +48,8 @@ WORKDIR /app
 # Install Node dependencies & build assets
 COPY package*.json yarn.lock* ./
 COPY --from=vendor /app/vendor ./vendor
-#RUN npm ci --no-audit --progress=false
-RUN npm install --force
+RUN npm ci --no-audit --progress=false
+#RUN npm install --force
 
 COPY . .
 RUN npm run build
