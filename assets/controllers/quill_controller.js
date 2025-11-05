@@ -1,10 +1,10 @@
-import { Controller } from "@hotwired/stimulus";
-import Quill from "quill";
+import { Controller } from '@hotwired/stimulus';
+import Quill from 'quill';
 
-import "quill/dist/quill.snow.css";
+import 'quill/dist/quill.snow.css';
 
 export default class extends Controller {
-    static targets = ["editor", "input"];
+    static targets = ['editor', 'input'];
 
     resizeEditor() {
         const windowHeight = window.innerHeight;
@@ -12,22 +12,22 @@ export default class extends Controller {
         this.editorTarget.style.height = `${newHeight}px`;
 
         // Also make the inner editor fill the container
-        const editorContent = this.editorTarget.querySelector(".ql-editor");
+        const editorContent = this.editorTarget.querySelector('.ql-editor');
         if (editorContent) {
-            editorContent.style.minHeight = "0";
-            editorContent.style.height = "100%";
+            editorContent.style.minHeight = '0';
+            editorContent.style.height = '100%';
         }
     }
 
     connect() {
         this.quill = new Quill(this.editorTarget, {
-            theme: "snow",
+            theme: 'snow',
             modules: {
                 toolbar: [
                     [{ header: [1, 2, false] }],
-                    ["bold", "italic", "underline"],
-                    ["link", "blockquote", "code-block"],
-                    [{ list: "ordered" }, { list: "bullet" }],
+                    ['bold', 'italic', 'underline'],
+                    ['link', 'blockquote', 'code-block'],
+                    [{ list: 'ordered' }, { list: 'bullet' }],
                 ],
             },
         });
@@ -38,7 +38,7 @@ export default class extends Controller {
         }
 
         // Sync changes back to hidden input
-        this.quill.on("text-change", () => {
+        this.quill.on('text-change', () => {
             this.inputTarget.value = this.quill.root.innerHTML;
         });
 
@@ -46,6 +46,6 @@ export default class extends Controller {
         this.resizeEditor();
 
         // Resize on window resize
-        window.addEventListener("resize", () => this.resizeEditor());
+        window.addEventListener('resize', () => this.resizeEditor());
     }
 }

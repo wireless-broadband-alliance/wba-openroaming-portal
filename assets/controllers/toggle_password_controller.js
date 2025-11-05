@@ -1,11 +1,11 @@
-import { Controller } from "@hotwired/stimulus";
+import { Controller } from '@hotwired/stimulus';
 
 export default class extends Controller {
     static values = {
-        visibleLabel: { type: String, default: "Show" },
-        visibleIcon: { type: String, default: "Default" },
-        hiddenLabel: { type: String, default: "Hide" },
-        hiddenIcon: { type: String, default: "Default" },
+        visibleLabel: { type: String, default: 'Show' },
+        visibleIcon: { type: String, default: 'Default' },
+        hiddenLabel: { type: String, default: 'Hide' },
+        hiddenIcon: { type: String, default: 'Default' },
         buttonClasses: Array,
     };
 
@@ -19,29 +19,29 @@ export default class extends Controller {
 	</svg>`;
 
     connect() {
-        if (this.visibleIconValue !== "Default") {
+        if (this.visibleIconValue !== 'Default') {
             this.visibleIcon = this.visibleIconValue;
         }
 
-        if (this.hiddenIconValue !== "Default") {
+        if (this.hiddenIconValue !== 'Default') {
             this.hiddenIcon = this.hiddenIconValue;
         }
 
         const button = this.createButton();
 
-        this.element.insertAdjacentElement("afterend", button);
-        this.dispatchEvent("connect", { element: this.element, button });
+        this.element.insertAdjacentElement('afterend', button);
+        this.dispatchEvent('connect', { element: this.element, button });
     }
 
     /**
      * @returns {HTMLButtonElement}
      */
     createButton() {
-        const button = document.createElement("button");
-        button.type = "button";
+        const button = document.createElement('button');
+        button.type = 'button';
         button.classList.add(...this.buttonClassesValue);
-        button.setAttribute("tabindex", "-1");
-        button.addEventListener("click", this.toggle.bind(this));
+        button.setAttribute('tabindex', '-1');
+        button.addEventListener('click', this.toggle.bind(this));
         button.innerHTML = `${this.visibleIcon} ${this.visibleLabelValue}`;
         return button;
     }
@@ -55,14 +55,14 @@ export default class extends Controller {
         toggleButtonElement.innerHTML = this.isDisplayed
             ? `${this.hiddenIcon} ${this.hiddenLabelValue}`
             : `${this.visibleIcon} ${this.visibleLabelValue}`;
-        this.element.setAttribute("type", this.isDisplayed ? "text" : "password");
-        this.dispatchEvent(this.isDisplayed ? "show" : "hide", {
+        this.element.setAttribute('type', this.isDisplayed ? 'text' : 'password');
+        this.dispatchEvent(this.isDisplayed ? 'show' : 'hide', {
             element: this.element,
             button: toggleButtonElement,
         });
     }
 
     dispatchEvent(name, payload) {
-        this.dispatch(name, { detail: payload, prefix: "toggle-password" });
+        this.dispatch(name, { detail: payload, prefix: 'toggle-password' });
     }
 }

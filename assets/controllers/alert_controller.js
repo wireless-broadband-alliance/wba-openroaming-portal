@@ -1,14 +1,14 @@
-import { Controller } from "@hotwired/stimulus";
+import { Controller } from '@hotwired/stimulus';
 
 export default class extends Controller {
-    static targets = ["button", "form"];
+    static targets = ['button', 'form'];
 
     connect() {
         super.connect();
     }
 
     delete_user() {
-        const message = this.buttonTarget.getAttribute("data-user-actions-confirm-delete");
+        const message = this.buttonTarget.getAttribute('data-user-actions-confirm-delete');
         // Show warning message
         if (confirm(message)) {
             // If confirmed, submit the form
@@ -17,7 +17,7 @@ export default class extends Controller {
     }
 
     revoke_profiles() {
-        const message = this.buttonTarget.getAttribute("data-user-actions-confirm-revoke");
+        const message = this.buttonTarget.getAttribute('data-user-actions-confirm-revoke');
         // Show warning message
         if (confirm(message)) {
             // If confirmed, submit the form

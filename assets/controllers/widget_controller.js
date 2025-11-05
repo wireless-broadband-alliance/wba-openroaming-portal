@@ -1,7 +1,7 @@
-import { Controller } from "@hotwired/stimulus";
+import { Controller } from '@hotwired/stimulus';
 
 export default class extends Controller {
-    static targets = ["modal"];
+    static targets = ['modal'];
 
     connect() {
         super.connect();
@@ -25,7 +25,7 @@ export default class extends Controller {
             return;
         }
 
-        console.log("Toggle Initial Visibility - Checkbox checked state:", checkbox.checked);
+        console.log('Toggle Initial Visibility - Checkbox checked state:', checkbox.checked);
         if (checkbox.checked) {
             this.open();
         } else {
@@ -34,10 +34,10 @@ export default class extends Controller {
     }
 
     open() {
-        this.modalTarget.classList.remove("hidden");
+        this.modalTarget.classList.remove('hidden');
     }
 
     close() {
-        this.modalTarget.classList.add("hidden");
+        this.modalTarget.classList.add('hidden');
     }
 }

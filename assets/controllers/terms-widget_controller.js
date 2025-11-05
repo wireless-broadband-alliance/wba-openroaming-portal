@@ -1,10 +1,10 @@
-import { Controller } from "@hotwired/stimulus";
+import { Controller } from '@hotwired/stimulus';
 
 export default class extends Controller {
-    static targets = ["agreeTerms", "confirmationModal", "button"];
+    static targets = ['agreeTerms', 'confirmationModal', 'button'];
 
     connect() {
-        fetch("/get-terms-status")
+        fetch('/get-terms-status')
             .then((res) => res.json())
             .then((data) => {
                 this.updateTermsCheckbox(data.termsAccepted);
@@ -16,19 +16,19 @@ export default class extends Controller {
         event.preventDefault();
         // Show the modal if the terms checkbox is not checked
         if (!this.agreeTermsTarget.checked) {
-            this.confirmationModalTarget.classList.remove("hidden");
+            this.confirmationModalTarget.classList.remove('hidden');
         } else {
             // Get href of clicked link
-            window.location.href = event.currentTarget.getAttribute("href");
+            window.location.href = event.currentTarget.getAttribute('href');
         }
     }
 
     handleCheckboxChange() {
         const isChecked = this.agreeTermsTarget.checked;
 
-        fetch(isChecked ? "/accept-terms" : "/reject-terms", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
+        fetch(isChecked ? '/accept-terms' : '/reject-terms', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
         })
             .then((res) => res.json())
             .then((data) => {
@@ -51,15 +51,15 @@ export default class extends Controller {
         const isChecked = this.agreeTermsTarget?.checked || false;
         for (let button of this.buttonTargets) {
             // btn-disabled (for general buttons)
-            button.classList.toggle("btn-disabled", !isChecked);
-            if (button.classList.contains("btn-secondary")) {
+            button.classList.toggle('btn-disabled', !isChecked);
+            if (button.classList.contains('btn-secondary')) {
                 // btn-secondary-disabled (for the specific login button)
-                button.classList.toggle("btn-secondary-disabled", !isChecked);
+                button.classList.toggle('btn-secondary-disabled', !isChecked);
             }
         }
     }
 
     closeConfirmationModal() {
-        this.confirmationModalTarget.classList.add("hidden");
+        this.confirmationModalTarget.classList.add('hidden');
     }
 }

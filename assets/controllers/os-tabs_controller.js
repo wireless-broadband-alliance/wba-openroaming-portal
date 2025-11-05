@@ -1,11 +1,12 @@
-import { Controller } from "@hotwired/stimulus";
+import { Controller } from '@hotwired/stimulus';
 
 export default class extends Controller {
-    static targets = ["content", "tab"];
+    static targets = ['content', 'tab'];
 
     connect() {
         const defaultOs =
-            this.data.get("defaultOs") || (this.hasContentTarget ? this.contentTargets[0].dataset.os : null);
+            this.data.get('defaultOs') ||
+            (this.hasContentTarget ? this.contentTargets[0].dataset.os : null);
         if (defaultOs) this.showTab(defaultOs);
     }
 
@@ -16,30 +17,30 @@ export default class extends Controller {
 
         // Update URL param (no reload)
         const url = new URL(window.location.href);
-        url.searchParams.set("os", os);
-        window.history.replaceState({}, "", url);
+        url.searchParams.set('os', os);
+        window.history.replaceState({}, '', url);
     }
 
     showTab(os) {
         const activeClasses = [
-            "bg-white",
-            "shadow-md",
-            "rounded-t-lg",
-            "border-b-2",
-            "border-[#8AB742]",
-            "-mb-[2px]",
-            "text-black",
+            'bg-white',
+            'shadow-md',
+            'rounded-t-lg',
+            'border-b-2',
+            'border-[#8AB742]',
+            '-mb-[2px]',
+            'text-black',
         ];
         const inactiveClasses = [
-            "text-gray-400",
-            "hover:text-black",
-            "bg-transparent",
-            "border-b-2",
-            "border-transparent",
+            'text-gray-400',
+            'hover:text-black',
+            'bg-transparent',
+            'border-b-2',
+            'border-transparent',
         ];
 
         // Toggle content visibility
-        this.contentTargets.forEach((el) => el.classList.toggle("hidden", el.dataset.os !== os));
+        this.contentTargets.forEach((el) => el.classList.toggle('hidden', el.dataset.os !== os));
 
         // Toggle tab styles
         this.tabTargets.forEach((btn) => {

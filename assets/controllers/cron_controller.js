@@ -1,7 +1,7 @@
-import { Controller } from "@hotwired/stimulus";
+import { Controller } from '@hotwired/stimulus';
 
 export default class extends Controller {
-    static targets = ["input", "warning", "label"];
+    static targets = ['input', 'warning', 'label'];
 
     connect() {
         if (this.hasInputTarget && this.hasLabelTarget) {
@@ -12,7 +12,7 @@ export default class extends Controller {
 
     onInputChange(event) {
         let value = event.target.value;
-        const max = parseInt(this.inputTarget.getAttribute("max"), 10) || 1;
+        const max = parseInt(this.inputTarget.getAttribute('max'), 10) || 1;
 
         if (parseInt(value, 10) > max) {
             value = max;
@@ -32,7 +32,7 @@ export default class extends Controller {
         const hasFrequency = this.hasRelevantFrequency(cron);
 
         if (this.hasWarningTarget) {
-            this.warningTarget.style.display = hasFrequency ? "block" : "none";
+            this.warningTarget.style.display = hasFrequency ? 'block' : 'none';
         }
     }
 
@@ -48,7 +48,7 @@ export default class extends Controller {
     }
 
     parseFrequency(part) {
-        if (part === "*") return 1;
+        if (part === '*') return 1;
 
         const match = part.match(/^\*\/(\d+)$/);
         if (match) return parseInt(match[1], 10);
