@@ -1,0 +1,13 @@
+{
+  "name": "cc-openroaming-provisioning-web",
+  "description": "OpenRoaming provisioning Web.",
+  "scripts": {
+    "build": "echo 'AssetMapper handles assets — nothing to build here.'",
+    "dev": "echo 'Symfony AssetMapper for development.'"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.14",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.47"
+  }
+}

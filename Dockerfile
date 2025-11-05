@@ -25,9 +25,9 @@ RUN install -m 0755 -d /etc/apt/keyrings \
 # Install Composer
 RUN curl -sS https://getcomposer.org/installer | php -- \
     --install-dir=/usr/local/bin --filename=composer \
- && composer self-update --2 \
+ && composer self-update --2
 
-# Install NPM depenencies
+# Install NPM dependencies
 RUN npm config set cafile /usr/local/share/ca-certificates/PaloAlto_SSLInspection_ForwardTrust.crt \
     && npm config set strict-ssl false \
     && echo 'cafile "/usr/local/share/ca-certificates/PaloAlto_SSLInspection_ForwardTrust.crt"' >> ~/.yarnrc \
