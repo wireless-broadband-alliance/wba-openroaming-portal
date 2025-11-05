@@ -2,7 +2,7 @@ subject_registration_details: 'Detalhes da sua inscrição no OpenRoaming'
 title_welcome: 'Abra a porta para o OpenRoaming!'
 header_welcome: 'Bem-vindo ao Portal de Provisionamento OpenRoaming!'
 intro_new_user: >
-    Para usar a sua conta no Portal OpenRoaming, <strong style='color: #0B1A58;'>%link_text%</strong>. 
+    Para usar a sua conta no Portal OpenRoaming, <strong style='color: #0B1A58;'>%link_text%</strong>.
     <strong>%download_text%</strong> para configurar o seu dispositivo.
 
 new_user_steps:
