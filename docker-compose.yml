@@ -1,3 +1,4 @@
+---
 services:
   web:
     image: ghcr.io/wireless-broadband-alliance/wba-openroaming-portal:1.8.0
@@ -31,7 +32,7 @@ services:
 
 volumes:
   uploads:
-      driver: local
+    driver: local
   mysql:
     driver: local
   geoLiteDB:
