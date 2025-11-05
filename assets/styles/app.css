@@ -1,5 +1,3 @@
-@import 'custom.css';
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -249,4 +247,76 @@
 
 .instructions-content {
     @apply h-[60vh] overflow-y-auto p-2;
+}
+
+/* Hamburger Menu */
+.hamburger {
+    cursor: pointer;
+    width: 24px;
+    height: 24px;
+    transition: all 0.25s;
+    position: relative;
+}
+
+.hamburger-top,
+.hamburger-middle,
+.hamburger-bottom {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 24px;
+    height: 2px;
+    background: #000;
+    transform: rotate(0);
+    transition: all 0.5s;
+}
+
+.hamburger-middle {
+    transform: translateY(7px);
+}
+
+.hamburger-bottom {
+    transform: translateY(14px);
+}
+
+.open {
+    transform: translateY(0px);
+}
+
+.open .hamburger-top {
+    transform: rotate(45deg) translateY(6px) translate(6px);
+}
+
+.open .hamburger-middle {
+    display: none;
+}
+
+.open .hamburger-bottom {
+    transform: rotate(-45deg) translateY(6px) translate(-6px);
+}
+
+
+/* Add a background color and text color for selected buttons of the sidebar*/
+.selected {
+    background-color: #f1f8f4;
+    color: #57a475;
+    font-weight: bold;
+}
+
+/* Animation for the donut graphic in the freeradius statistics page */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.animate-fadeIn {
+    animation: fadeIn 0.5s ease-in-out forwards;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
 }

@@ -40,28 +40,7 @@ RUN echo "memory_limit=512M" > /usr/local/etc/php/conf.d/memory.ini \
  && composer install --optimize-autoloader --no-interaction
 
 # Warm Symfony cache
-RUN php bin/console cache:warmup --env=prod
-
-# =========================
-# Frontend build stage
-# =========================
-FROM node:22-bullseye-slim AS frontend
-WORKDIR /app
-
-# Install Node dependencies & build assets
-COPY package*.json yarn.lock* ./
-COPY --from=vendor /app/vendor ./vendor
-RUN npm config set cafile /usr/local/share/ca-certificates/PaloAlto_SSLInspection_ForwardTrust.crt
-RUN npm config set strict-ssl false
-RUN echo 'cafile "/usr/local/share/ca-certificates/PaloAlto_SSLInspection_ForwardTrust.crt"' >> ~/.yarnrc
-RUN echo 'strict-ssl false' >> ~/.yarnrc
-RUN echo 'httpsCaFilePath: "/usr/local/share/ca-certificates/PaloAlto_SSLInspection_ForwardTrust.crt"' >> ~/.yarnrc.yml
-RUN echo 'enableStrictSsl: false' >> ~/.yarnrc.yml
-RUN npm ci --no-audit --progress=false
-#RUN npm install --force
-
-COPY . .
-RUN npm run build
+RUN php bin/console cache:warmup
 
 # =========================
 # Final runtime image
@@ -85,9 +64,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # Copy Symfony app from vendor stage
 COPY --from=vendor /app /var/www/openroaming
-
-# Copy built frontend assets
-COPY --from=frontend /app/public/build /var/www/openroaming/public/build
 
 # Copy configs
 COPY service-config/supervisor/supervisord.conf /etc/supervisor/conf.d/

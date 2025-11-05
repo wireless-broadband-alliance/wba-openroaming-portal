@@ -40,21 +40,6 @@ RUN echo "memory_limit=512M" > /usr/local/etc/php/conf.d/memory.ini \
 RUN php bin/console cache:warmup --env=prod
 
 # =========================
-# Frontend build stage
-# =========================
-FROM node:22-bullseye-slim AS frontend
-WORKDIR /app
-
-# Install Node dependencies & build assets
-COPY package*.json yarn.lock* ./
-COPY --from=vendor /app/vendor ./vendor
-RUN npm ci --no-audit --progress=false
-#RUN npm install --force
-
-COPY . .
-RUN npm run build
-
-# =========================
 # Final runtime image
 # =========================
 FROM php:8.4-fpm-bullseye AS runtime
@@ -77,8 +62,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Copy Symfony app from vendor stage
 COPY --from=vendor /app /var/www/openroaming
 
-# Copy built frontend assets
-COPY --from=frontend /app/public/build /var/www/openroaming/public/build
+RUN php bin/console cache:clear --env=prod --no-debug \
+    && php bin/console tailwind:build --minify --env=prod \
+    && php bin/console asset-map:compile --env=prod
 
 # Copy configs
 COPY service-config/supervisor/supervisord.conf /etc/supervisor/conf.d/

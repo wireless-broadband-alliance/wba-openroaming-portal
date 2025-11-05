@@ -12,14 +12,12 @@ import './styles/app.css';
 // Used for chart.js graphic on the statistics page
 import { Chart } from 'chart.js';
 
-// start the Stimulus application
-import './bootstrap';
-
 // Initialization for ES Users
+/*
 import {
 	Dropdown,
 	Ripple,
 	initTE,
 } from "tw-elements";
-
 initTE({Dropdown, Ripple});
+*/
