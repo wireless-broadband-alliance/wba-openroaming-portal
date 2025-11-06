@@ -1,10 +1,10 @@
-{% extends '/dashboard/base.html.twig' %}
+{% extends 'landing/authUser/base.html.twig' %}
 
 {% block title %}
     {{ 'adminPageWBA'|trans({}, '_header_admin') }}
 {% endblock %}
 
-{% block container %}
+{% block content %}
 
     <div class="mt-6 leading-7">
         <p class="font-bold text-base sm:text-lg md:text-xl lg:text-2xl">
@@ -122,6 +122,16 @@
             <div class="mt-8 divider-solid"></div>
 
             <div class="mt-6 flex flex-row w-full justify-end items-center gap-2">
+                <a href="{{ path('admin_dashboard_settings_certs_installation_abortProcess') }}"
+                   class="w-[160px] btn-logout">
+                    {{ 'abort'|trans({}, 'settings') }}
+                </a>
+
+                <a href="{{ path('admin_dashboard_settings_certs_management') }}"
+                   class="w-[160px] btn-logout">
+                    {{ 'twoFactorAuth.goBack'|trans({}, '_account_widget') }}
+                </a>
+
                 <button type="submit" class="btn-primary" onclick="return confirm('{{ 'saveChangesMessage'|trans({}, 'adminConfig') }}')">
                     {{ 'databaseApplyBtn'|trans({}, 'adminConfig') }}
                 </button>
