@@ -4,3 +4,4 @@ radsecproxy:
     test: 'RadSecProxy configuration is done. Proceed to follow the next page for more details.'
 
 noActiveProcess: 'No current process active.'
+pendingActiveProcess: 'There is already a pending process active at the moment.'

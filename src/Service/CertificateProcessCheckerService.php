@@ -4,6 +4,7 @@ namespace App\Service;
 
 use App\Entity\CertificateSetupProcess;
 use App\Enum\CertificateProcessStatus;
+use App\Enum\CertificateRouteAccess;
 use App\Enum\CertificateTestResult;
 use App\Repository\CertificateSetupProcessRepository;
 use DateTimeImmutable;
@@ -12,12 +13,6 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
 readonly class CertificateProcessCheckerService
 {
-    private const array STAGE_ORDER = [
-        'radsecproxy_upload',
-        'radsecproxy_config',
-        'radsecproxy_test',
-    ];
-
     public function __construct(
         private CertificateSetupProcessRepository $certificateSetupProcessRepository,
         private TranslatorInterface $translator
@@ -47,40 +42,31 @@ readonly class CertificateProcessCheckerService
             ];
         }
 
-        // Determine stages completion
-        $stages = [
-            'radsecproxy_upload' => $process->getRadsecproxyFormCompletedAt() instanceof DateTimeImmutable,
-            'radsecproxy_config' => $process->getRadsecproxyConfigAppliedAt() instanceof DateTimeImmutable,
-            'radsecproxy_test'   => $process->getRadsecproxyTestResult() instanceof CertificateTestResult,
-        ];
+        // Build the stages dynamically using the enum
+        $stages = [];
+        foreach (CertificateRouteAccess::orderedStages() as $stage) {
+            $stages[$stage->value] = match ($stage) {
+                CertificateRouteAccess::RADSECPROXY_UPLOAD => $process->getRadsecproxyFormCompletedAt(
+                    ) instanceof DateTimeImmutable,
+                CertificateRouteAccess::RADSECPROXY_CONFIG => $process->getRadsecproxyConfigAppliedAt(
+                    ) instanceof DateTimeImmutable,
+                CertificateRouteAccess::RADSECPROXY_TEST => $process->getRadsecproxyTestResult(
+                    ) instanceof CertificateTestResult,
+
+                CertificateRouteAccess::FREERADIUS_UPLOAD => $process->getFreeradiusFormCompletedAt(
+                    ) instanceof DateTimeImmutable,
+                CertificateRouteAccess::FREERADIUS_CONFIG => $process->getFreeradiusConfigAppliedAt(
+                    ) instanceof DateTimeImmutable,
+                CertificateRouteAccess::FREERADIUS_TEST => $process->getFreeradiusTestResult(
+                    ) instanceof CertificateTestResult,
+            };
+        }
 
         return [
             'active' => true,
             'stages' => $stages,
             'process' => $process,
+            'message' => $this->translator->trans('pendingActiveProcess', [], 'CertificateProcessCheckerService'),
         ];
-    }
-
-    /**
-     * Ensures the user can only access a stage if all previous stages are complete.
-     * Returns the route name of the first incomplete stage if access is denied, or null if allowed.
-     */
-    public function ensureStageAccess(string $requestedStage, array $stages): ?string
-    {
-        $requestedIndex = array_search($requestedStage, self::STAGE_ORDER, true);
-
-        if ($requestedIndex === false) {
-            throw new InvalidArgumentException("Invalid stage: $requestedStage");
-        }
-
-        for ($i = 0; $i < $requestedIndex; $i++) {
-            $prevStage = self::STAGE_ORDER[$i];
-            if (!($stages[$prevStage] ?? false)) {
-                // Return the route name as string
-                return 'admin_dashboard_settings_certs_' . $prevStage;
-            }
-        }
-
-        return null; // Access allowed
     }
 }

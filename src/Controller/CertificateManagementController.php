@@ -23,7 +23,6 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
@@ -46,8 +45,6 @@ class CertificateManagementController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function settingsCertificatesManagement(): Response
     {
-        $data = $this->getSettings->getSettings();
-
         // TODO - Make the same verifications of the process steps for the installation here
         // Check current certificateProcess status
         $processState = $this->certificateProcessCheckerService->getProcessState();
@@ -66,6 +63,8 @@ class CertificateManagementController extends AbstractController
                 return $this->redirectToRoute('admin_dashboard_settings_certs_radsecproxy_test');
             }
         }
+
+        $data = $this->getSettings->getSettings();
 
         // Default render
         return $this->render('dashboard/shared/settings_actions.html.twig', [
@@ -121,6 +120,15 @@ class CertificateManagementController extends AbstractController
     public function settingsCertificatesManagementRadsecproxyUpload(
         Request $request
     ): Response {
+        // Get current process state
+        $processState = $this->certificateProcessCheckerService->getProcessState();
+
+        // If there's no active process
+        if ($processState['active']) {
+            $this->addFlash('error', $processState['message']);
+            return $this->redirectToRoute('admin_dashboard_settings_certs_radsecproxy_config');
+        }
+
         $data = $this->getSettings->getSettings();
 
         // Prepare DTO
@@ -140,8 +148,7 @@ class CertificateManagementController extends AbstractController
                     $certificateUploadDTO->client,
                     CertificateMachineType::RADSECPROXY->value,
                     CertificateFileName::CLIENT_PEM->value,
-                    $process,
-                    false
+                    $process
                 );
             }
 
@@ -192,36 +199,26 @@ class CertificateManagementController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function settingsCertificatesManagementRadsecproxyConfig(Request $request): Response
     {
-        $data = $this->getSettings->getSettings();
-
-        // Check current certificateProcess status
+        // Get current process state
         $processState = $this->certificateProcessCheckerService->getProcessState();
-        $process = $processState['process'] ?? [];
+        $process = $processState['process'] ?? null;
 
-        // In case there's not active process
+        // If there's no active process
         if (!$processState['active']) {
             $this->addFlash('error', $processState['message']);
-            return $this->redirectToRoute($processState['nextRoute']);
+            return $this->redirectToRoute('admin_dashboard_settings_certs_radsecproxy_upload');
         }
 
-        // Ensure stage access
-        $redirectRoute = $this->certificateProcessCheckerService->ensureStageAccess(
-            'radsecproxy_config',
-            $processState['stages']
-        );
-        if ($redirectRoute) {
-            return $this->redirectToRoute($redirectRoute);
-        }
-
-        // Return the commands to be executed on the resolver
+        // Fetch any data/settings needed for the page
+        $data = $this->getSettings->getSettings();
         $commands = $this->certificateCommandsService->getRadsecproxyRenewCommands();
 
+        // Form handling
         $form = $this->createForm(SimpleSubmitFormType::class);
         $form->handleRequest($request);
 
         if ($form->isSubmitted()) {
             if ($process?->getRadsecproxyConfigAppliedAt() instanceof DateTimeImmutable) {
-                // Just ignore the submission and warning
                 $this->addFlash(
                     'error',
                     $this->translator->trans('radsecProxyConfigAlreadyApplied', [], 'controllers')
@@ -238,7 +235,10 @@ class CertificateManagementController extends AbstractController
                     $this->translator->trans('radsecProxyConfigAppliedSuccessfully', [], 'controllers')
                 );
 
-                return $this->redirectToRoute('admin_dashboard_settings_certs_radsecproxy_test');
+                // Redirect to the next stage automatically
+                return $this->redirectToRoute(
+                    'admin_dashboard_settings_certs_radsecproxy_test',
+                );
             }
         }
 
@@ -260,29 +260,17 @@ class CertificateManagementController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function settingsCertificatesManagementRadsecproxyTest(): Response
     {
-        $data = $this->getSettings->getSettings();
-
-        // Check current certificateProcess status
+        // Get current process state
         $processState = $this->certificateProcessCheckerService->getProcessState();
 
-        // In case there's not active process
+        // If no active process, redirect to the first stage or fallback
         if (!$processState['active']) {
             $this->addFlash('error', $processState['message']);
-            return $this->redirectToRoute($processState['nextRoute']);
+            return $this->redirectToRoute('admin_dashboard_settings_certs_radsecproxy_upload');
         }
 
-        $stages = $processState['stages'];
-
-        // Only enforce stage access if config has NOT been applied
-        if (!($stages['radsecproxy_config'] ?? false)) {
-            $redirectRoute = $this->certificateProcessCheckerService->ensureStageAccess(
-                'radsecproxy_test',
-                $stages
-            );
-            if ($redirectRoute) {
-                return $this->redirectToRoute($redirectRoute);
-            }
-        }
+        // Fetch settings/data needed for the page
+        $data = $this->getSettings->getSettings();
 
         return $this->render(
             'dashboard/shared/settings_actions/certificatesManagement/certificates/radsecproxy/test.html.twig',
@@ -308,8 +296,11 @@ class CertificateManagementController extends AbstractController
         try {
             // Step 1 – Check if cert files exist
             $checkFiles = new Process([
-                'docker', 'exec', $container,
-                'sh', '-c',
+                'docker',
+                'exec',
+                $container,
+                'sh',
+                '-c',
                 "[ -f $certPath ] && [ -f $keyPath ] && echo 'exists' || echo 'missing'"
             ]);
             $checkFiles->run();
@@ -339,8 +330,11 @@ class CertificateManagementController extends AbstractController
 
             // Step 2 – Validate certificate format
             $validateCert = new Process([
-                'docker', 'exec', $container,
-                'sh', '-c',
+                'docker',
+                'exec',
+                $container,
+                'sh',
+                '-c',
                 "openssl x509 -in $certPath -noout -text"
             ]);
             $validateCert->run();
@@ -359,8 +353,11 @@ class CertificateManagementController extends AbstractController
 
             // Step 3 – Verify key matches certificate
             $verifyMatch = new Process([
-                'docker', 'exec', $container,
-                'sh', '-c',
+                'docker',
+                'exec',
+                $container,
+                'sh',
+                '-c',
                 "openssl x509 -noout -modulus -in $certPath | openssl md5 && " .
                 "openssl rsa -noout -modulus -in $keyPath | openssl md5"
             ]);
@@ -394,7 +391,6 @@ class CertificateManagementController extends AbstractController
                 'status' => 'success',
                 'message' => 'RadSecProxy certificates are valid and correctly installed!',
             ]);
-
         } catch (Throwable $e) {
             return new JsonResponse([
                 'status' => 'error',
@@ -410,6 +406,15 @@ class CertificateManagementController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function settingsCertificatesManagementFreeradius(): Response
     {
+        // Get current process state
+        $processState = $this->certificateProcessCheckerService->getProcessState();
+
+        // If no active process, redirect to the first stage or fallback
+        if (!$processState['active']) {
+            $this->addFlash('error', $processState['message']);
+            return $this->redirectToRoute('admin_dashboard_settings_certs_radsecproxy_upload');
+        }
+
         $data = $this->getSettings->getSettings();
 
         return $this->render('dashboard/shared/settings_actions.html.twig', [
