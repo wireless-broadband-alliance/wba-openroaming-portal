@@ -1,10 +1,10 @@
-{% extends '/dashboard/base.html.twig' %}
+{% extends 'landing/authUser/base.html.twig' %}
 
 {% block title %}
     {{ 'adminPageWBA'|trans({}, '_header_admin') }}
 {% endblock %}
 
-{% block container %}
+{% block content %}
 
     <div class="mt-6 leading-7">
         <p class="font-bold text-base sm:text-lg md:text-xl lg:text-2xl">
@@ -25,7 +25,7 @@
             <div class="grid gap-4 lg:grid-cols-2 xl:grid-cols-3 p-2 z-0">
 
                 {# --- Trusted Proxies Card --- #}
-                <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full">
+                <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full" {{ stimulus_target('radio-card', 'card') }} {{ stimulus_controller('card') }}>
                     <div class="flex flex-row justify-between">
                         <div class="text-base font-medium text-center break-normal md:break-all">
                             <h1 class="text-base md:text-lg whitespace-nowrap">
@@ -33,14 +33,14 @@
                             </h1>
                         </div>
                         <label class="flex items-center bg-opacity-40">
-                            <img class="w-6 cursor-pointer"
-                                 src="{{ asset('resources/logos/info_icon.svg') }}"
-                                 alt="info_icon"/>
+                            <img class="w-6 cursor-pointer" {{ stimulus_target('card', 'button') }}
+                                    {{ stimulus_action('card', 'show_info', 'mouseover')|stimulus_action('card', 'hide_info', 'mouseout') }}
+                                 src="{{ asset('resources/logos/info_icon.svg') }}" alt="info_icon"/>
                         </label>
                     </div>
 
                     {{ include('/dashboard/shared/settings_actions/_description.html.twig', {
-                        description: ''|trans({}, 'dataBase'),
+                        description: 'trustedProxiesDescription'|trans({}, 'settings'),
                     }) }}
 
                     <div class="flex items-center space-x-2 mt-5">
@@ -58,7 +58,7 @@
                 </div>
 
                 {# --- Turnstile Key Card --- #}
-                <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full">
+                <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full" {{ stimulus_target('radio-card', 'card') }} {{ stimulus_controller('card') }}>
                     <div class="flex flex-row justify-between">
                         <div class="text-base font-medium text-center break-normal md:break-all">
                             <h1 class="text-base md:text-lg whitespace-nowrap">
@@ -66,14 +66,14 @@
                             </h1>
                         </div>
                         <label class="flex items-center bg-opacity-40">
-                            <img class="w-6 cursor-pointer"
-                                 src="{{ asset('resources/logos/info_icon.svg') }}"
-                                 alt="info_icon"/>
+                            <img class="w-6 cursor-pointer" {{ stimulus_target('card', 'button') }}
+                                    {{ stimulus_action('card', 'show_info', 'mouseover')|stimulus_action('card', 'hide_info', 'mouseout') }}
+                                 src="{{ asset('resources/logos/info_icon.svg') }}" alt="info_icon"/>
                         </label>
                     </div>
 
                     {{ include('/dashboard/shared/settings_actions/_description.html.twig', {
-                        description: ''|trans({}, 'dataBase'),
+                        description: 'trustedKeyDescription'|trans({}, 'settings'),
                     }) }}
 
                     <div class="flex items-center space-x-2 mt-5">
@@ -91,7 +91,7 @@
                 </div>
 
                 {# --- Turnstile Secret Card --- #}
-                <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full">
+                <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full" {{ stimulus_target('radio-card', 'card') }} {{ stimulus_controller('card') }}>
                     <div class="flex flex-row justify-between">
                         <div class="text-base font-medium text-center break-normal md:break-all">
                             <h1 class="text-base md:text-lg whitespace-nowrap">
@@ -99,14 +99,14 @@
                             </h1>
                         </div>
                         <label class="flex items-center bg-opacity-40">
-                            <img class="w-6 cursor-pointer"
-                                 src="{{ asset('resources/logos/info_icon.svg') }}"
-                                 alt="info_icon"/>
+                            <img class="w-6 cursor-pointer" {{ stimulus_target('card', 'button') }}
+                                    {{ stimulus_action('card', 'show_info', 'mouseover')|stimulus_action('card', 'hide_info', 'mouseout') }}
+                                 src="{{ asset('resources/logos/info_icon.svg') }}" alt="info_icon"/>
                         </label>
                     </div>
 
                     {{ include('/dashboard/shared/settings_actions/_description.html.twig', {
-                        description: ''|trans({}, 'dataBase'),
+                        description: 'turnstileSecretDescription'|trans({}, 'settings'),
                     }) }}
 
                     <div class="flex items-center space-x-2 mt-5">
@@ -187,6 +187,17 @@
             <div class="mt-8 divider-solid"></div>
 
             <div class="mt-6 flex flex-row w-full justify-end items-center gap-2">
+
+                <a href="{{ path('admin_dashboard_settings_certs_installation_abortProcess') }}"
+                   class="w-[160px] btn-logout">
+                    {{ 'abort'|trans({}, 'settings') }}
+                </a>
+
+                <a href="{{ path('admin_dashboard_settings_certs_management') }}"
+                   class="w-[160px] btn-logout">
+                    {{ 'twoFactorAuth.goBack'|trans({}, '_account_widget') }}
+                </a>
+
                 <button type="submit" class="btn-primary" onclick="return confirm('{{ 'saveChangesMessage'|trans({}, 'dataBase') }}')">
                     {{ 'databaseApplyBtn'|trans({}, 'settings') }}
                 </button>

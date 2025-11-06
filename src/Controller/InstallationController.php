@@ -509,4 +509,20 @@ class InstallationController extends AbstractController
                 ]
         );
     }
+
+    #[Route(
+    '/dashboard/settings/certificatesManagement/installation/abortProcess',
+    name: 'admin_dashboard_settings_certs_installation_abortProcess'
+    )]
+    #[IsGranted('ROLE_ADMIN')]
+    public function abortProcess()
+    {
+        $lastInstallation = $this->installationService->lastInstallation();
+        if ($lastInstallation instanceof InstallationProgress) {
+            $lastInstallation->setInstallationState(InstallationProgressType::ABORTED->value);
+            $this->entityManager->persist($lastInstallation);
+            $this->entityManager->flush();
+        }
+        return $this->redirectToRoute('admin_dashboard_settings_certs_management');
+    }
 }
