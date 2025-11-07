@@ -8,14 +8,11 @@ use App\Enum\CertificateRouteAccess;
 use App\Enum\CertificateTestResult;
 use App\Repository\CertificateSetupProcessRepository;
 use DateTimeImmutable;
-use InvalidArgumentException;
-use Symfony\Contracts\Translation\TranslatorInterface;
 
 readonly class CertificateProcessCheckerService
 {
     public function __construct(
         private CertificateSetupProcessRepository $certificateSetupProcessRepository,
-        private TranslatorInterface $translator
     ) {
     }
 
@@ -37,28 +34,30 @@ readonly class CertificateProcessCheckerService
         if (!$process || $process->getStatus() === CertificateProcessStatus::ABORTED) {
             return [
                 'active' => false,
-                'message' => $this->translator->trans('noActiveProcess', [], 'CertificateProcessCheckerService'),
                 'stages' => [],
             ];
         }
 
-        // Build the stages dynamically using the enum
         $stages = [];
         foreach (CertificateRouteAccess::orderedStages() as $stage) {
             $stages[$stage->value] = match ($stage) {
-                CertificateRouteAccess::RADSECPROXY_UPLOAD => $process->getRadsecproxyFormCompletedAt(
-                    ) instanceof DateTimeImmutable,
-                CertificateRouteAccess::RADSECPROXY_CONFIG => $process->getRadsecproxyConfigAppliedAt(
-                    ) instanceof DateTimeImmutable,
-                CertificateRouteAccess::RADSECPROXY_TEST => $process->getRadsecproxyTestResult(
-                    ) instanceof CertificateTestResult,
+                CertificateRouteAccess::RADSECPROXY_UPLOAD =>
+                    $process->getRadsecproxyFormCompletedAt() instanceof DateTimeImmutable,
 
-                CertificateRouteAccess::FREERADIUS_UPLOAD => $process->getFreeradiusFormCompletedAt(
-                    ) instanceof DateTimeImmutable,
-                CertificateRouteAccess::FREERADIUS_CONFIG => $process->getFreeradiusConfigAppliedAt(
-                    ) instanceof DateTimeImmutable,
-                CertificateRouteAccess::FREERADIUS_TEST => $process->getFreeradiusTestResult(
-                    ) instanceof CertificateTestResult,
+                CertificateRouteAccess::RADSECPROXY_CONFIG =>
+                    $process->getRadsecproxyConfigAppliedAt() instanceof DateTimeImmutable,
+
+                CertificateRouteAccess::RADSECPROXY_TEST =>
+                    $process->getRadsecproxyTestResult() === CertificateTestResult::PASSED,
+
+                CertificateRouteAccess::FREERADIUS_UPLOAD =>
+                    $process->getFreeradiusFormCompletedAt() instanceof DateTimeImmutable,
+
+                CertificateRouteAccess::FREERADIUS_CONFIG =>
+                    $process->getFreeradiusConfigAppliedAt() instanceof DateTimeImmutable,
+
+                CertificateRouteAccess::FREERADIUS_TEST =>
+                    $process->getFreeradiusTestResult() === CertificateTestResult::PASSED,
             };
         }
 
@@ -66,7 +65,6 @@ readonly class CertificateProcessCheckerService
             'active' => true,
             'stages' => $stages,
             'process' => $process,
-            'message' => $this->translator->trans('pendingActiveProcess', [], 'CertificateProcessCheckerService'),
         ];
     }
 }
