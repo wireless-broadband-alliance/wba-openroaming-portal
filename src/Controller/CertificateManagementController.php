@@ -126,7 +126,14 @@ class CertificateManagementController extends AbstractController
 
         // If there's no active process
         if ($processState['active']) {
-            $this->addFlash('error', $processState['message']);
+            $this->addFlash(
+                'error',
+                $this->translator->trans(
+                    'pendingActiveProcess',
+                    [],
+                    'CertificateProcessCheckerService'
+                )
+            );
             return $this->redirectToRoute('admin_dashboard_settings_certs_radsecproxy_config');
         }
 
@@ -206,7 +213,14 @@ class CertificateManagementController extends AbstractController
 
         // If there's no active process
         if (!$processState['active']) {
-            $this->addFlash('error', $processState['message']);
+            $this->addFlash(
+                'error',
+                $this->translator->trans(
+                    'noActiveProcess',
+                    [],
+                    'CertificateProcessCheckerService'
+                )
+            );
             return $this->redirectToRoute('admin_dashboard_settings_certs_radsecproxy_upload');
         }
 
@@ -266,7 +280,14 @@ class CertificateManagementController extends AbstractController
 
         // If no active process, redirect to the first stage or fallback
         if (!$processState['active']) {
-            $this->addFlash('error', $processState['message']);
+            $this->addFlash(
+                'error',
+                $this->translator->trans(
+                    'noActiveProcess',
+                    [],
+                    'CertificateProcessCheckerService'
+                )
+            );
             return $this->redirectToRoute('admin_dashboard_settings_certs_radsecproxy_upload');
         }
 
@@ -296,15 +317,13 @@ class CertificateManagementController extends AbstractController
 
         $processEntity = $this->certificateProcessCheckerService->getCurrentProcess();
 
-        /*
-         * TODO LATER this command works and should be something like this to check if the files exist on the container
-         * marcelo_fernandes@MarceloTetrapi:~/openroaming-oss/hybrid$ docker exec hybrid-radsecproxy-1 sh -c '[ -f /etc/radsecproxy/certs/client.pem ] && echo "client.pem exists" || echo "client.pem missing"'
-            docker exec hybrid-radsecproxy-1 sh -c '[ -f /etc/radsecproxy/certs/key.pem ] && echo "key.pem exists" || echo "key.pem missing"'
-            client.pem exists
-            key.pem exists
-            marcelo_fernandes@MarceloTetrapi:~/openroaming-oss/hybrid$
-         *
-         */
+        // If there's no active process
+        if (!$processEntity instanceof \App\Entity\CertificateSetupProcess) {
+            return new JsonResponse([
+                'status' => 'error',
+                'message' => 'No active certificate process found. Please start the process before running tests.',
+            ], Response::HTTP_BAD_REQUEST);
+        }
 
         try {
             // Step 1 — Check if certificate and key files exist

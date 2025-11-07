@@ -3,7 +3,7 @@
     {% for message in app.session.flashbag.get('error_admin') %}
         {{ include('dashboard/shared/_toast.html.twig', {
             toast_type: 'toast-warning-dashboard',
-            message: message
+            message: message,
         }) }}
     {% endfor %}
 
@@ -11,7 +11,7 @@
     {% for message in app.session.flashbag.get('success_admin') %}
         {{ include('dashboard/shared/_toast.html.twig', {
             toast_type: 'toast-success-dashboard',
-            message: message
+            message: message,
         }) }}
     {% endfor %}
 </div>

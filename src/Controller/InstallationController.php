@@ -511,8 +511,8 @@ class InstallationController extends AbstractController
     }
 
     #[Route(
-    '/dashboard/settings/certificatesManagement/installation/abortProcess',
-    name: 'admin_dashboard_settings_certs_installation_abortProcess'
+        '/dashboard/settings/certificatesManagement/installation/abortProcess',
+        name: 'admin_dashboard_settings_certs_installation_abortProcess'
     )]
     #[IsGranted('ROLE_ADMIN')]
     public function abortProcess()

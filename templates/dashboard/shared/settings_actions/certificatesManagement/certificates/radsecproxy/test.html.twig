@@ -44,14 +44,14 @@
                 <button
                         type="button"
                         class="px-6 py-3 bg-primary text-white font-medium rounded-lg shadow hover:bg-primary-dark
-                focus:ring-2 focus:ring-primary/50 transition flex items-center gap-2"
+           focus:ring-2 focus:ring-primary/50 transition flex items-center gap-2"
                         data-action="click->test-certificates#runTest"
                         data-test-certificates-target="testButton"
-                >
+                        data-url="{{ path('admin_dashboard_settings_certs_radsecproxy_test_run') }}">
                     <twig:ux:icon name="wba:shield-check" class="w-5 h-5" />
                     <span data-test-certificates-target="buttonLabel">
-                {{ 'test_certificates'|trans({}, 'test_radsec') }}
-            </span>
+                        {{ 'test_certificates'|trans({}, 'test_radsec') }}
+                    </span>
                 </button>
 
                 <a {% if processState.stages.radsecproxy_test %}

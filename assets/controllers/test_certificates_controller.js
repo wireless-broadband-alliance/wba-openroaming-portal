@@ -6,6 +6,13 @@ export default class extends Controller {
     async runTest(event) {
         event.preventDefault();
 
+        // Get the URL from the clicked button
+        const url = event.currentTarget.dataset.url;
+        if (!url) {
+            console.error("No URL provided for the test endpoint.");
+            return;
+        }
+
         // Disable button and show spinner
         this.testButtonTarget.disabled = true;
         this.buttonLabelTarget.textContent = "Testing...";
@@ -14,7 +21,7 @@ export default class extends Controller {
         this.resultMessageTarget.innerHTML = "";
 
         try {
-            const response = await fetch("/dashboard/settings/certificatesManagement/radsecproxy/test/run", {
+            const response = await fetch(url, {
                 method: "POST",
                 headers: {
                     "X-Requested-With": "XMLHttpRequest",
@@ -25,11 +32,10 @@ export default class extends Controller {
             const data = await response.json();
             this.showResult(data);
 
-            // Check if test passed
+            // Enable FreeRADIUS button if the test passed
             if (data.status === "success") {
                 this.enableFreeradiusButton();
             }
-
         } catch (error) {
             this.showResult({ status: "error", message: "An unexpected error occurred while testing." });
         } finally {
@@ -46,7 +52,10 @@ export default class extends Controller {
 
         const extraInfo = Object.entries(data)
             .filter(([key]) => !["status", "message"].includes(key))
-            .map(([key, value]) => `<p class="text-xs text-gray-600"><strong>${key}:</strong> ${value}</p>`)
+            .map(([key, value]) => {
+                const display = typeof value === "object" ? JSON.stringify(value, null, 2) : value;
+                return `<p class="text-xs text-gray-600"><strong>${key}:</strong> <pre>${display}</pre></p>`;
+            })
             .join("");
 
         this.resultMessageTarget.innerHTML = `
@@ -69,9 +78,20 @@ export default class extends Controller {
     }
 
     enableFreeradiusButton() {
-        // Remove disabled styles
-        this.freeradiusButtonTarget.classList.remove("bg-gray-100", "text-gray-400", "cursor-not-allowed", "pointer-events-none");
-        this.freeradiusButtonTarget.classList.add("bg-white", "text-gray-800", "hover:bg-gray-50", "focus:ring-2", "focus:ring-primary/30", "transition");
+        this.freeradiusButtonTarget.classList.remove(
+            "bg-gray-100",
+            "text-gray-400",
+            "cursor-not-allowed",
+            "pointer-events-none",
+        );
+        this.freeradiusButtonTarget.classList.add(
+            "bg-white",
+            "text-gray-800",
+            "hover:bg-gray-50",
+            "focus:ring-2",
+            "focus:ring-primary/30",
+            "transition",
+        );
     }
 
     dismissResult() {
@@ -79,4 +99,3 @@ export default class extends Controller {
         this.resultMessageTarget.innerHTML = "";
     }
 }
-
