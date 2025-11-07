@@ -300,6 +300,7 @@ class CertificateManagementController extends AbstractController
             [
                 'data' => $data,
                 'processState' => $processState,
+                'process' => $processState['process'],
             ]
         );
     }
@@ -332,10 +333,10 @@ class CertificateManagementController extends AbstractController
             JSON_THROW_ON_ERROR
         );
 
-        $remoteHost = $payload['remote_host'] ?? null;
-        $remotePort = isset($payload['remote_port']) ? (int)$payload['remote_port'] : 22;
-        $remoteUser = $payload['remote_user'] ?? null;
-        $remotePassword = $payload['remote_password'] ?? null;
+        $remoteHost = $payload['remote_host'] ?? $processEntity->getRemoteHost();
+        $remotePort = isset($payload['remote_port']) ? (int)$payload['remote_port'] : 2083;
+        $remoteUser = $payload['remote_user'] ?? $processEntity->getRemoteUser();
+        $remotePassword = $payload['remote_password'] ?? $processEntity->getRemotePassword();
         $timeout = isset($payload['timeout']) ? (int)$payload['timeout'] : 5;
 
         if (!$remoteHost || !$remoteUser || !$remotePassword) {
@@ -344,6 +345,15 @@ class CertificateManagementController extends AbstractController
                 'message' => 'remote_host, remote_user and remote_password are required.'
             ], Response::HTTP_BAD_REQUEST);
         }
+
+        // Everytime the user tries a new test it will save the used credentials
+        $processEntity->setRemoteHost($remoteHost);
+        $processEntity->setRemotePort($remotePort);
+        $processEntity->setRemoteUser($remoteUser);
+        $processEntity->setRemotePassword($remotePassword);
+        $processEntity->setUpdatedAt(new DateTimeImmutable());
+        $this->entityManager->persist($processEntity);
+        $this->entityManager->flush();
 
         // Check if ssh2 extension is loaded
         if (!function_exists('ssh2_connect')) {

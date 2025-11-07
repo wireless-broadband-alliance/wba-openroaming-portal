@@ -48,6 +48,18 @@ class CertificateSetupProcess
     #[ORM\OneToMany(targetEntity: Certificate::class, mappedBy: 'setupProcess')]
     private Collection $certificates;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $remoteHost = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?int $remotePort = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $remoteUser = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $remotePassword = null;
+
     public function __construct()
     {
         $this->certificates = new ArrayCollection();
@@ -193,6 +205,54 @@ class CertificateSetupProcess
         ) {
             $certificate->setSetupProcess(null);
         }
+
+        return $this;
+    }
+
+    public function getRemoteHost(): ?string
+    {
+        return $this->remoteHost;
+    }
+
+    public function setRemoteHost(?string $remoteHost): static
+    {
+        $this->remoteHost = $remoteHost;
+
+        return $this;
+    }
+
+    public function getRemotePort(): ?int
+    {
+        return $this->remotePort;
+    }
+
+    public function setRemotePort(?int $remotePort): static
+    {
+        $this->remotePort = $remotePort;
+
+        return $this;
+    }
+
+    public function getRemoteUser(): ?string
+    {
+        return $this->remoteUser;
+    }
+
+    public function setRemoteUser(?string $remoteUser): static
+    {
+        $this->remoteUser = $remoteUser;
+
+        return $this;
+    }
+
+    public function getRemotePassword(): ?string
+    {
+        return $this->remotePassword;
+    }
+
+    public function setRemotePassword(?string $remotePassword): static
+    {
+        $this->remotePassword = $remotePassword;
 
         return $this;
     }
