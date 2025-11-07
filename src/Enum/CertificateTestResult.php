@@ -4,6 +4,6 @@ namespace App\Enum;
 
 enum CertificateTestResult: int
 {
-    case PASSED = 0;
-    case FAILED = 1;
+    case PASSED = 1;
+    case FAILED = 0;
 }

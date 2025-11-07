@@ -9,6 +9,7 @@ use App\Entity\CertificateSetupProcess;
 use App\Enum\CertificateFileName;
 use App\Enum\CertificateMachineType;
 use App\Enum\CertificateProcessStatus;
+use App\Enum\CertificateTestResult;
 use App\Enum\FirewallType;
 use App\Form\CertificateUploadType;
 use App\Form\SimpleSubmitFormType;
@@ -93,7 +94,7 @@ class CertificateManagementController extends AbstractController
         }
 
         // Cancel the process and add a tag IN_COMPLETED
-        // When a process is incompleted the page should ALERT the user always about this miss configured action
+        // TODO When a process is incompleted the page should ALERT the user always about this miss configured action
         $process->setStatus(CertificateProcessStatus::ABORTED);
         $process->setUpdatedAt(new DateTimeImmutable());
 
@@ -387,6 +388,13 @@ class CertificateManagementController extends AbstractController
                 ]);
             }
 
+            $process = $this->certificateProcessCheckerService->getCurrentProcess();
+            $process?->setRadsecproxyTestResult(CertificateTestResult::PASSED);
+            if ($process) {
+                $this->entityManager->persist($process);
+                $this->entityManager->flush();
+            }
+
             return new JsonResponse([
                 'status' => 'success',
                 'message' => 'RadSecProxy certificates are valid and correctly installed!',
@@ -409,10 +417,16 @@ class CertificateManagementController extends AbstractController
         // Get current process state
         $processState = $this->certificateProcessCheckerService->getProcessState();
 
-        // If no active process, redirect to the first stage or fallback
+        // If no active process, redirect to the first stage
         if (!$processState['active']) {
-            $this->addFlash('error', $processState['message']);
+            $this->translator->trans('noActiveProcess', [], 'CertificateProcessCheckerService');
             return $this->redirectToRoute('admin_dashboard_settings_certs_radsecproxy_upload');
+        }
+
+        // If there's active process, redirect to the config stage
+        if ($processState['stages']['radsecproxy_test'] === false) {
+            $this->translator->trans('blockAccessUntilRadsecproxyTestPassed', [], 'CertificateProcessCheckerService');
+            return $this->redirectToRoute('admin_dashboard_settings_certs_radsecproxy_config');
         }
 
         $data = $this->getSettings->getSettings();

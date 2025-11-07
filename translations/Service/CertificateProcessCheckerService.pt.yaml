@@ -5,3 +5,4 @@ radsecproxy:
 
 noActiveProcess: 'Nenhum processo ativo no momento.'
 pendingActiveProcess: 'Já existe um processo pendente ativo no momento.'
+blockAccessUntilRadsecproxyTestPassed: 'O seu processo atual não têm os requisitos concluídos para acessar esta página.'
