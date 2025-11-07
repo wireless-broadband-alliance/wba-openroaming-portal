@@ -11,6 +11,7 @@ export default class extends Controller {
         "hostInput",
         "portInput",
         "userInput",
+        "passwordInput",
         "timeoutInput"
     ];
 
@@ -27,6 +28,8 @@ export default class extends Controller {
         const remoteHost = this.hostInputTarget?.value?.trim() || "";
         const remotePort = parseInt(this.portInputTarget?.value || "22", 10);
         const remoteUser = this.userInputTarget?.value?.trim() || "";
+        const remotePassword = this.passwordInputTarget?.value?.trim() || "";
+
         const timeout = parseInt(this.timeoutInputTarget?.value || "5", 10);
 
         // very small client-side validation
@@ -55,6 +58,7 @@ export default class extends Controller {
                 remote_host: remoteHost,
                 remote_port: remotePort,
                 remote_user: remoteUser,
+                remote_password: remotePassword,
                 timeout: timeout
             };
 

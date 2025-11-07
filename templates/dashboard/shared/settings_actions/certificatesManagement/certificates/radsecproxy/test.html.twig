@@ -20,8 +20,8 @@
                 </p>
             </div>
 
-            {# Ask details for the SSH test #}
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-3 items-end">
+            {# Details for the SSH #}
+            <div class="grid grid-cols-1 md:grid-cols-5 gap-3 items-end">
                 <div>
                     <label class="block text-xs font-medium text-gray-600">Host</label>
                     <label>
@@ -52,6 +52,17 @@
                                class="form-widget mt-1 block w-full rounded-md border-gray-200 p-2"
                                placeholder="ssh user"
                                value="{{ processState.remote_user ?? '' }}">
+                    </label>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-medium text-gray-600">Password</label>
+                    <label>
+                        <input type="password"
+                               data-test-certificates-target="passwordInput"
+                               class="form-widget mt-1 block w-full rounded-md border-gray-200 p-2"
+                               placeholder="SSH password"
+                               value="{{ processState.password ?? '' }}">
                     </label>
                 </div>
 

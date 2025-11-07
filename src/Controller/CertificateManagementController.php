@@ -19,6 +19,7 @@ use App\Service\CertificateStorageService;
 use App\Service\GetSettings;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
+use RuntimeException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -334,34 +335,65 @@ class CertificateManagementController extends AbstractController
         $remoteHost = $payload['remote_host'] ?? null;
         $remotePort = isset($payload['remote_port']) ? (int)$payload['remote_port'] : 22;
         $remoteUser = $payload['remote_user'] ?? null;
+        $remotePassword = $payload['remote_password'] ?? null;
         $timeout = isset($payload['timeout']) ? (int)$payload['timeout'] : 5;
 
-        if (!$remoteHost || !$remoteUser) {
-            return new JsonResponse(['status' => 'error', 'message' => 'remote_host and remote_user are required.'],
-                Response::HTTP_BAD_REQUEST);
-        }
-
-        // only test reachability for now (use stream_socket_client as before)
-        $address = sprintf('tcp://%s:%d', $remoteHost, $remotePort);
-        $errno = 0;
-        $errstr = '';
-        $fp = @stream_socket_client($address, $errno, $errstr, $timeout);
-
-        if ($fp === false) {
+        if (!$remoteHost || !$remoteUser || !$remotePassword) {
             return new JsonResponse([
                 'status' => 'error',
-                'message' => sprintf('Unable to reach %s:%d', $remoteHost, $remotePort),
-                'debug' => ['errno' => $errno, 'errstr' => $errstr],
-            ], Response::HTTP_SERVICE_UNAVAILABLE);
+                'message' => 'remote_host, remote_user and remote_password are required.'
+            ], Response::HTTP_BAD_REQUEST);
         }
 
-        fclose($fp);
+        // Check if ssh2 extension is loaded
+        if (!function_exists('ssh2_connect')) {
+            return new JsonResponse([
+                'status' => 'error',
+                'message' => 'PHP ssh2 extension is not installed.'
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
 
-        return new JsonResponse([
-            'status' => 'success',
-            'message' => sprintf('Successfully reached %s:%d', $remoteHost, $remotePort),
-            'debug' => ['address' => $address, 'timeout' => $timeout]
-        ]);
+        try {
+            $connection = @ssh2_connect($remoteHost, $remotePort, [], ['timeout' => $timeout]);
+            if (!$connection) {
+                throw new RuntimeException("Could not connect to {$remoteHost}:{$remotePort}");
+            }
+
+            if (!@ssh2_auth_password($connection, $remoteUser, $remotePassword)) {
+                throw new RuntimeException("Authentication failed for user {$remoteUser}");
+            }
+
+            // Optional: execute a simple command to confirm login works
+            $stream = @ssh2_exec($connection, 'whoami');
+            if (!$stream) {
+                throw new RuntimeException("Failed to execute test command on {$remoteHost}");
+            }
+
+            stream_set_blocking($stream, true);
+            $output = stream_get_contents($stream);
+            fclose($stream);
+
+            return new JsonResponse([
+                'status' => 'success',
+                'message' => sprintf(
+                    'Successfully logged in as %s on %s:%d',
+                    trim($output),
+                    $remoteHost,
+                    $remotePort
+                ),
+                'debug' => [
+                    'host' => $remoteHost,
+                    'port' => $remotePort,
+                    'user' => $remoteUser,
+                    'timeout' => $timeout
+                ]
+            ]);
+        } catch (Throwable $e) {
+            return new JsonResponse([
+                'status' => 'error',
+                'message' => $e->getMessage(),
+            ], Response::HTTP_SERVICE_UNAVAILABLE);
+        }
     }
 
     #[Route(
