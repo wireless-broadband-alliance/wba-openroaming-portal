@@ -54,9 +54,16 @@
             </span>
                 </button>
 
-                <a href="{{ path('admin_dashboard_settings_certs_freeradius') }}"
-                   class="px-6 py-3 bg-white border border-gray-300 text-gray-800 font-medium rounded-lg shadow-sm
-              hover:bg-gray-50 focus:ring-2 focus:ring-primary/30 transition flex items-center gap-2">
+                <a {% if processState.stages.radsecproxy_test %}
+                    href="{{ path('admin_dashboard_settings_certs_freeradius') }}"
+                {% endif %}
+                        data-test-certificates-target="freeradiusButton"
+                        class="px-6 py-3 border border-gray-300 font-medium rounded-lg shadow-sm flex items-center gap-2
+          {% if not processState.stages.radsecproxy_test %}
+              bg-gray-100 text-gray-400 cursor-not-allowed pointer-events-none
+          {% else %}
+              bg-white text-gray-800 hover:bg-gray-50 focus:ring-2 focus:ring-primary/30 transition
+          {% endif %}">
                     <twig:ux:icon name="wba:right" class="w-5 h-5" />
                     {{ 'proceed_freeradius'|trans({}, 'test_radsec') }}
                 </a>
