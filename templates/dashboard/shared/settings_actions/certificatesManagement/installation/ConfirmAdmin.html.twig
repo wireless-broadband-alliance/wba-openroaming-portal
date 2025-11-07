@@ -57,17 +57,20 @@
 
     <div class="mt-8 divider-solid"></div>
 
-    <a href="{{ path('admin_dashboard_settings_certs_installation_abortProcess') }}"
-       class="w-[160px] btn-logout">
-        {{ 'abort'|trans({}, 'settings') }}
-    </a>
 
-    <a href="{{ path('admin_dashboard_settings_certs_management') }}"
-       class="w-[160px] btn-logout">
-        {{ 'twoFactorAuth.goBack'|trans({}, '_account_widget') }}
-    </a>
 
     <div class="mt-6 flex flex-row w-full justify-end items-center gap-2">
+
+        <a href="{{ path('admin_dashboard_settings_certs_installation_abortProcess') }}"
+           class="w-[160px] btn-logout">
+            {{ 'abort'|trans({}, 'settings') }}
+        </a>
+
+        <a href="{{ path('admin_dashboard_settings_certs_management') }}"
+           class="w-[160px] btn-logout">
+            {{ 'twoFactorAuth.goBack'|trans({}, '_account_widget') }}
+        </a>
+
         <button type="submit" class="btn-primary" onclick="return confirm('{{ 'saveChangesMessage'|trans({}, 'adminConfig') }}')">
             {{ 'databaseApplyBtn'|trans({}, 'adminConfig') }}
         </button>

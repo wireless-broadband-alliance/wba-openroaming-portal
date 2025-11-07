@@ -1,14 +1,21 @@
-{% extends '/dashboard/base.html.twig' %}
+{% extends 'landing/authUser/base.html.twig' %}
 
 {% block title %}
     {{ 'adminPageWBA'|trans({}, '_header_admin') }}
 {% endblock %}
 
-{% block container %}
+{% block content %}
+
+    <div class="mt-6 leading-7">
+        <p class="font-bold text-base sm:text-lg md:text-xl lg:text-2xl">
+            {{ 'summaryTitle'|trans({}, 'summary') }}
+        </p>
+        <p class="mt-3 text-sm sm:text-base md:text-lg lg:text-xl text-gray-600">
+            {{ 'summaryDescription'|trans({}, 'summary') }}
+        </p>
+    </div>
 
     <div class="my-[25px] divider"></div>
-
-    <h1 class="text-2xl font-bold mb-6">Installation Details</h1>
 
     <div class="space-y-2">
         <p><strong>Installation State:</strong> {{ Installation.installationState }}</p>
@@ -22,6 +29,14 @@
         <p><strong>Admin Confirmation:</strong> {{ Installation.adminConfirmation ? 'Sim' : 'Não' }}</p>
         <p><strong>Created At:</strong> {{ Installation.createdAt|date('d/m/Y H:i') }}</p>
         <p><strong>Updated At:</strong> {{ Installation.updatedAt ? Installation.updatedAt|date('d/m/Y H:i') : '-' }}</p>
+    </div>
+
+    <div class="mt-6 flex flex-row w-full justify-end items-center gap-2">
+
+        <a href="{{ path('admin_dashboard_settings_certs_management') }}"
+           class="w-[160px] btn-primary">
+            {{ 'finish'|trans({}, 'summary') }}
+        </a>
     </div>
 
 {% endblock %}
