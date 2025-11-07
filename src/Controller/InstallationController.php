@@ -499,13 +499,15 @@ class InstallationController extends AbstractController
             }
         }
 
+        $installationDTO = $this->installationService->fillDto($lastInstallation);
+
         $data = $this->getSettings->getSettings();
 
         return $this->render(
             'dashboard/shared/settings_actions/certificatesManagement/installation/summary.html.twig',
             [
             'data' => $data,
-            'Installation' => $lastInstallation,
+            'Installation' => $installationDTO,
                 ]
         );
     }

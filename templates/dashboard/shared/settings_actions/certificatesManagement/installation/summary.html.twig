@@ -18,17 +18,36 @@
     <div class="my-[25px] divider"></div>
 
     <div class="space-y-2">
-        <p><strong>Installation State:</strong> {{ Installation.installationState }}</p>
-        <p><strong>DB OpenRoaming:</strong> {{ Installation.dbOpenRoaming }}</p>
-        <p><strong>DB Freeradius:</strong> {{ Installation.dbFreeradius }}</p>
-        <p><strong>Trusted Proxies:</strong> {{ Installation.trustedProxies }}</p>
-        <p><strong>Turnstile Key:</strong> {{ Installation.turnstileKey }}</p>
-        <p><strong>Turnstile Secret:</strong> {{ Installation.turnstileSecret }}</p>
-        <p><strong>JWT Passphrase:</strong> {{ Installation.jwtPassphrase }}</p>
-        <p><strong>Email Admin:</strong> {{ Installation.emailAdmin }}</p>
-        <p><strong>Admin Confirmation:</strong> {{ Installation.adminConfirmation ? 'Sim' : 'Não' }}</p>
-        <p><strong>Created At:</strong> {{ Installation.createdAt|date('d/m/Y H:i') }}</p>
-        <p><strong>Updated At:</strong> {{ Installation.updatedAt ? Installation.updatedAt|date('d/m/Y H:i') : '-' }}</p>
+        <p class="mt-3 text-sm sm:text-base md:text-lg lg:text-xl text-gray-600">
+            <strong>{{ 'installationState'|trans({}, 'summary') }}</strong> {{ Installation.installationState }}</p>
+        <p class="mt-3 text-sm sm:text-base md:text-lg lg:text-xl text-gray-600">
+            <strong>{{ 'dbOpenRoamingUserName'|trans({}, 'summary') }}</strong> {{ Installation.dbOpenRoamingUserName }}</p>
+        <p class="mt-3 text-sm sm:text-base md:text-lg lg:text-xl text-gray-600">
+            <strong>{{ 'dbOpenRoamingPassword'|trans({}, 'summary') }}</strong> {{ Installation.dbOpenRoamingPassword }}</p>
+        <p class="mt-3 text-sm sm:text-base md:text-lg lg:text-xl text-gray-600">
+            <strong>{{ 'dbOpenRoamingHost'|trans({}, 'summary') }}</strong> {{ Installation.dbOpenRoamingIp}}</p>
+        <p class="mt-3 text-sm sm:text-base md:text-lg lg:text-xl text-gray-600">
+            <strong>{{ 'dbOpenRoamingPort'|trans({}, 'summary') }}</strong> {{ Installation.dbOpenRoamingPort}}</p>
+        <p class="mt-3 text-sm sm:text-base md:text-lg lg:text-xl text-gray-600">
+            <strong>{{ 'dbFreeradiusUserName'|trans({}, 'summary') }}</strong> {{ Installation.dbFreeradiusUserName  }}</p>
+        <p class="mt-3 text-sm sm:text-base md:text-lg lg:text-xl text-gray-600">
+            <strong>{{ 'dbFreeradiusPassword'|trans({}, 'summary') }}</strong> {{ Installation.dbFreeradiusPassword }}</p>
+        <p class="mt-3 text-sm sm:text-base md:text-lg lg:text-xl text-gray-600">
+            <strong>{{ 'dbFreeradiusHost'|trans({}, 'summary') }}</strong> {{ Installation.dbFreeradiusIp }}</p>
+        <p class="mt-3 text-sm sm:text-base md:text-lg lg:text-xl text-gray-600">
+            <strong>{{ 'dbFreeradiusPort'|trans({}, 'summary') }}</strong> {{ Installation.dbFreeradiusPort }}</p>
+        <p class="mt-3 text-sm sm:text-base md:text-lg lg:text-xl text-gray-600">
+            <strong>{{ 'trustedProxies'|trans({}, 'summary') }}</strong> {{ Installation.trustedProxies }}</p>
+        <p class="mt-3 text-sm sm:text-base md:text-lg lg:text-xl text-gray-600">
+            <strong>{{ 'turnstileKey'|trans({}, 'summary') }}</strong> {{ Installation.turnstileKey }}</p>
+        <p class="mt-3 text-sm sm:text-base md:text-lg lg:text-xl text-gray-600">
+            <strong>{{ 'turnstileSecret'|trans({}, 'summary') }}</strong> {{ Installation.turnstileSecret }}</p>
+        <p class="mt-3 text-sm sm:text-base md:text-lg lg:text-xl text-gray-600">
+            <strong>{{ 'emailAdmin'|trans({}, 'summary') }}</strong> {{ Installation.emailAdmin }}</p>
+        <p class="mt-3 text-sm sm:text-base md:text-lg lg:text-xl text-gray-600">
+            <strong>{{ 'createdAt'|trans({}, 'summary') }}</strong> {{ Installation.createdAt|date('d/m/Y H:i') }}</p>
+        <p class="mt-3 text-sm sm:text-base md:text-lg lg:text-xl text-gray-600">
+            <strong>{{ 'updatedAt'|trans({}, 'summary') }}</strong> {{ Installation.updatedAt ? Installation.updatedAt|date('d/m/Y H:i') : '-' }}</p>
     </div>
 
     <div class="mt-6 flex flex-row w-full justify-end items-center gap-2">

@@ -5,6 +5,7 @@ namespace App\Service;
 use App\Enum\DataBaseSetupType;
 use App\Enum\SettingsConfigType;
 use Doctrine\DBAL\DriverManager;
+use InvalidArgumentException;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 class DatabaseConnectionService
@@ -106,5 +107,29 @@ class DatabaseConnectionService
             $serverVersion,
             $charset
         );
+    }
+
+    function parseDatabaseUrl(string $url): array
+    {
+        $parts = parse_url($url);
+
+        if ($parts === false) {
+            throw new InvalidArgumentException('Invalid database URL');
+        }
+
+        $query = [];
+        if (isset($parts['query'])) {
+            parse_str($parts['query'], $query);
+        }
+
+        return [
+            'username'      => isset($parts['user']) ? urldecode($parts['user']) : null,
+            'password'      => isset($parts['pass']) ? urldecode($parts['pass']) : null,
+            'host'          => $parts['host'] ?? null,
+            'port'          => isset($parts['port']) ? (int)$parts['port'] : null,
+            'database'      => isset($parts['path']) ? ltrim($parts['path'], '/') : null,
+            'serverVersion' => $query['serverVersion'] ?? null,
+            'charset'       => $query['charset'] ?? null,
+        ];
     }
 }
