@@ -419,13 +419,27 @@ class CertificateManagementController extends AbstractController
 
         // If no active process, redirect to the first stage
         if (!$processState['active']) {
-            $this->translator->trans('noActiveProcess', [], 'CertificateProcessCheckerService');
+            $this->addFlash(
+                'error',
+                $this->translator->trans(
+                    'noActiveProcess',
+                    [],
+                    'CertificateProcessCheckerService'
+                )
+            );
             return $this->redirectToRoute('admin_dashboard_settings_certs_radsecproxy_upload');
         }
 
         // If there's active process, redirect to the config stage
         if ($processState['stages']['radsecproxy_test'] === false) {
-            $this->translator->trans('blockAccessUntilRadsecproxyTestPassed', [], 'CertificateProcessCheckerService');
+            $this->addFlash(
+                'error',
+                $this->translator->trans(
+                    'blockAccessUntilRadsecproxyTestPassed',
+                    [],
+                    'CertificateProcessCheckerService'
+                )
+            );
             return $this->redirectToRoute('admin_dashboard_settings_certs_radsecproxy_config');
         }
 
