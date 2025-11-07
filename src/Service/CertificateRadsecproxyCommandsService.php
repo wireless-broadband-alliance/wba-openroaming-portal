@@ -5,23 +5,27 @@ namespace App\Service;
 use App\Entity\CertificateSetupProcess;
 use App\Enum\CertificateMachineType;
 use App\Enum\CertificateProcessStatus;
+use App\Enum\CertificateTestResult;
 use App\Repository\CertificateSetupProcessRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpKernel\KernelInterface;
+use Symfony\Component\Process\Process;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-readonly class CertificateCommandsService
+readonly class CertificateRadsecproxyCommandsService
 {
     public function __construct(
         private CertificateSetupProcessRepository $certificateSetupProcessRepository,
         private KernelInterface $kernel,
         private TranslatorInterface $translator,
+        private EntitymanagerInterface $entityManager,
     ) {
     }
 
     /**
      * Return shell commands to update local RADSecProxy certificates.
      */
-    public function getRadsecproxyRenewCommands(): array
+    public function getRenewCommands(): array
     {
         $process = $this->certificateSetupProcessRepository->findOneBy(
             ['status' => CertificateProcessStatus::IN_PROGRESS->value],
@@ -77,7 +81,7 @@ readonly class CertificateCommandsService
             }
 
             $content = str_replace("'", "'\"'\"'", $content);
-            $targetFile = str_contains(strtolower((string) $originalFile), 'client') ? 'client.pem' : 'key.pem';
+            $targetFile = str_contains(strtolower((string)$originalFile), 'client') ? 'client.pem' : 'key.pem';
 
             $commands[] = [
                 'description' => $this->translator->trans(
@@ -120,5 +124,30 @@ readonly class CertificateCommandsService
                 'command' => 'docker logs hybrid-radsecproxy-1 --tail 50',
             ],
         ]);
+    }
+
+    /**
+     * Helper to update the process with the test result
+     */
+    public function updateRadsecproxyTestResult(
+        CertificateSetupProcess $process,
+        CertificateTestResult $result
+    ): void {
+        $process->setRadsecproxyTestResult($result);
+        $this->entityManager->persist($process);
+        $this->entityManager->flush();
+    }
+
+    /**
+     * Helper to collect debug info from Symfony Process
+     */
+    public function buildDebugInfo(Process $process): array
+    {
+        return [
+            'command' => $process->getCommandLine(),
+            'exit_code' => $process->getExitCode(),
+            'stdout' => $process->getOutput(),
+            'stderr' => $process->getErrorOutput(),
+        ];
     }
 }

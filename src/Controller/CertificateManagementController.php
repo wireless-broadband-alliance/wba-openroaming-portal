@@ -13,7 +13,7 @@ use App\Enum\CertificateTestResult;
 use App\Enum\FirewallType;
 use App\Form\CertificateUploadType;
 use App\Form\SimpleSubmitFormType;
-use App\Service\CertificateCommandsService;
+use App\Service\CertificateRadsecproxyCommandsService;
 use App\Service\CertificateProcessCheckerService;
 use App\Service\CertificateStorageService;
 use App\Service\GetSettings;
@@ -38,7 +38,7 @@ class CertificateManagementController extends AbstractController
         private readonly CertificateStorageService $certificateStorageService,
         private readonly CertificateProcessCheckerService $certificateProcessCheckerService,
         private readonly EntityManagerInterface $entityManager,
-        private readonly CertificateCommandsService $certificateCommandsService,
+        private readonly CertificateRadsecproxyCommandsService $certificateRadsecproxyCommandsService,
     ) {
     }
 
@@ -212,7 +212,7 @@ class CertificateManagementController extends AbstractController
 
         // Fetch any data/settings needed for the page
         $data = $this->getSettings->getSettings();
-        $commands = $this->certificateCommandsService->getRadsecproxyRenewCommands();
+        $commands = $this->certificateRadsecproxyCommandsService->getRenewCommands();
 
         // Form handling
         $form = $this->createForm(SimpleSubmitFormType::class);
@@ -294,8 +294,20 @@ class CertificateManagementController extends AbstractController
         $certPath = '/etc/radsecproxy/certs/client.pem';
         $keyPath = '/etc/radsecproxy/certs/key.pem';
 
+        $processEntity = $this->certificateProcessCheckerService->getCurrentProcess();
+
+        /*
+         * TODO LATER this command works and should be something like this to check if the files exist on the container
+         * marcelo_fernandes@MarceloTetrapi:~/openroaming-oss/hybrid$ docker exec hybrid-radsecproxy-1 sh -c '[ -f /etc/radsecproxy/certs/client.pem ] && echo "client.pem exists" || echo "client.pem missing"'
+            docker exec hybrid-radsecproxy-1 sh -c '[ -f /etc/radsecproxy/certs/key.pem ] && echo "key.pem exists" || echo "key.pem missing"'
+            client.pem exists
+            key.pem exists
+            marcelo_fernandes@MarceloTetrapi:~/openroaming-oss/hybrid$
+         *
+         */
+
         try {
-            // Step 1 – Check if cert files exist
+            // Step 1 — Check if certificate and key files exist
             $checkFiles = new Process([
                 'docker',
                 'exec',
@@ -305,31 +317,22 @@ class CertificateManagementController extends AbstractController
                 "[ -f $certPath ] && [ -f $keyPath ] && echo 'exists' || echo 'missing'"
             ]);
             $checkFiles->run();
-
             $output = trim($checkFiles->getOutput());
-            /*
-             * TODO LATER this command works and should be something like this to check if the files exist on the container
-             * marcelo_fernandes@MarceloTetrapi:~/openroaming-oss/hybrid$ docker exec hybrid-radsecproxy-1 sh -c '[ -f /etc/radsecproxy/certs/client.pem ] && echo "client.pem exists" || echo "client.pem missing"'
-                docker exec hybrid-radsecproxy-1 sh -c '[ -f /etc/radsecproxy/certs/key.pem ] && echo "key.pem exists" || echo "key.pem missing"'
-                client.pem exists
-                key.pem exists
-                marcelo_fernandes@MarceloTetrapi:~/openroaming-oss/hybrid$
-             *
-             */
+
             if ($output !== 'exists') {
+                $this->certificateRadsecproxyCommandsService->updateRadsecproxyTestResult(
+                    $processEntity,
+                    CertificateTestResult::FAILED
+                );
+
                 return new JsonResponse([
                     'status' => 'error',
-                    'message' => 'Certificate or key files are missing in radsecproxy container.',
-                    'debug' => [
-                        'command' => $checkFiles->getCommandLine(),
-                        'exit_code' => $checkFiles->getExitCode(),
-                        'stdout' => $checkFiles->getOutput(),
-                        'stderr' => $checkFiles->getErrorOutput(),
-                    ]
+                    'message' => 'Certificate or key files are missing in the radsecproxy container.',
+                    'debug' => $this->certificateRadsecproxyCommandsService->buildDebugInfo($checkFiles),
                 ]);
             }
 
-            // Step 2 – Validate certificate format
+            // Step 2 — Validate certificate format
             $validateCert = new Process([
                 'docker',
                 'exec',
@@ -341,18 +344,19 @@ class CertificateManagementController extends AbstractController
             $validateCert->run();
 
             if (!$validateCert->isSuccessful()) {
+                $this->certificateRadsecproxyCommandsService->updateRadsecproxyTestResult(
+                    $processEntity,
+                    CertificateTestResult::FAILED
+                );
+
                 return new JsonResponse([
                     'status' => 'error',
-                    'message' => 'Certificate validation failed',
-                    'debug' => [
-                        'command' => $validateCert->getCommandLine(),
-                        'exit_code' => $validateCert->getExitCode(),
-                        'stderr' => $validateCert->getErrorOutput(),
-                    ]
+                    'message' => 'Certificate validation failed.',
+                    'debug' => $this->certificateRadsecproxyCommandsService->buildDebugInfo($validateCert),
                 ]);
             }
 
-            // Step 3 – Verify key matches certificate
+            // Step 3 — Verify certificate/key match
             $verifyMatch = new Process([
                 'docker',
                 'exec',
@@ -365,41 +369,50 @@ class CertificateManagementController extends AbstractController
             $verifyMatch->run();
 
             if (!$verifyMatch->isSuccessful()) {
+                $this->certificateRadsecproxyCommandsService->updateRadsecproxyTestResult(
+                    $processEntity,
+                    CertificateTestResult::FAILED
+                );
+
                 return new JsonResponse([
                     'status' => 'error',
-                    'message' => 'Certificate/key match verification failed',
-                    'debug' => [
-                        'command' => $verifyMatch->getCommandLine(),
-                        'exit_code' => $verifyMatch->getExitCode(),
-                        'stderr' => $verifyMatch->getErrorOutput(),
-                    ]
+                    'message' => 'Certificate/key match verification failed.',
+                    'debug' => $this->certificateRadsecproxyCommandsService->buildDebugInfo($verifyMatch),
                 ]);
             }
 
-            $output = trim($verifyMatch->getOutput());
-            $lines = array_filter(explode("\n", $output));
+            $lines = array_filter(explode("\n", trim($verifyMatch->getOutput())));
             $match = count($lines) === 2 && $lines[0] === $lines[1];
 
             if (!$match) {
+                $this->certificateRadsecproxyCommandsService->updateRadsecproxyTestResult(
+                    $processEntity,
+                    CertificateTestResult::FAILED
+                );
+
                 return new JsonResponse([
                     'status' => 'error',
-                    'message' => 'Certificate and key do not match!',
+                    'message' => 'Certificate and key do not match.',
                     'debug' => $lines,
                 ]);
             }
 
-            $process = $this->certificateProcessCheckerService->getCurrentProcess();
-            $process?->setRadsecproxyTestResult(CertificateTestResult::PASSED);
-            if ($process) {
-                $this->entityManager->persist($process);
-                $this->entityManager->flush();
-            }
+            // Success: mark as PASSED
+            $this->certificateRadsecproxyCommandsService->updateRadsecproxyTestResult(
+                $processEntity,
+                CertificateTestResult::PASSED
+            );
 
             return new JsonResponse([
                 'status' => 'success',
                 'message' => 'RadSecProxy certificates are valid and correctly installed!',
             ]);
         } catch (Throwable $e) {
+            $this->certificateRadsecproxyCommandsService->updateRadsecproxyTestResult(
+                $processEntity,
+                CertificateTestResult::FAILED
+            );
+
             return new JsonResponse([
                 'status' => 'error',
                 'message' => 'Unexpected error: ' . $e->getMessage(),
