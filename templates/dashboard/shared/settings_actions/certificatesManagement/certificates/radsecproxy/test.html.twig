@@ -20,6 +20,53 @@
                 </p>
             </div>
 
+            {# Ask details for the SSH test #}
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-3 items-end">
+                <div>
+                    <label class="block text-xs font-medium text-gray-600">Host</label>
+                    <label>
+                        <input type="text"
+                               data-test-certificates-target="hostInput"
+                               class="form-widget mt-1 block w-full rounded-md border-gray-200 p-2"
+                               placeholder="192.168.1.100 or host.example.com"
+                               value="{{ processState.remote_host ?? '' }}">
+                    </label>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-medium text-gray-600">Port</label>
+                    <label>
+                        <input type="number"
+                               data-test-certificates-target="portInput"
+                               class="form-widget mt-1 block w-full rounded-md border-gray-200 p-2"
+                               placeholder="22"
+                               value="{{ processState.remote_port ?? 2083 }}">
+                    </label>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-medium text-gray-600">User</label>
+                    <label>
+                        <input type="text"
+                               data-test-certificates-target="userInput"
+                               class="form-widget mt-1 block w-full rounded-md border-gray-200 p-2"
+                               placeholder="ssh user"
+                               value="{{ processState.remote_user ?? '' }}">
+                    </label>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-medium text-gray-600">Timeout (s)</label>
+                    <label>
+                        <input type="number"
+                               data-test-certificates-target="timeoutInput"
+                               class="form-widget mt-1 block w-full rounded-md border-gray-200 p-2"
+                               placeholder="5"
+                               value="5" min="1" max="30">
+                    </label>
+                </div>
+            </div>
+
             {# Waiting Widget #}
             <div class="mt-6 hidden" data-test-certificates-target="waitingWidget">
                 <div class="flex items-center justify-center flex-col gap-4 bg-blue-50 border border-blue-200

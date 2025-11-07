@@ -303,140 +303,65 @@ class CertificateManagementController extends AbstractController
         );
     }
 
+    /**
+     * @throws \JsonException
+     */
     #[Route(
         '/dashboard/settings/certificatesManagement/radsecproxy/test/run',
         name: 'admin_dashboard_settings_certs_radsecproxy_test_run',
         methods: ['POST']
     )]
     #[IsGranted('ROLE_ADMIN')]
-    public function runRadsecproxyTest(): JsonResponse
+    public function runRadsecproxyTest(Request $request): JsonResponse
     {
-        $container = 'hybrid-radsecproxy-1';
-        $certPath = '/etc/radsecproxy/certs/client.pem';
-        $keyPath = '/etc/radsecproxy/certs/key.pem';
-
         $processEntity = $this->certificateProcessCheckerService->getCurrentProcess();
 
         // If there's no active process
-        if (!$processEntity instanceof \App\Entity\CertificateSetupProcess) {
+        if (!$processEntity instanceof CertificateSetupProcess) {
             return new JsonResponse([
                 'status' => 'error',
                 'message' => 'No active certificate process found. Please start the process before running tests.',
             ], Response::HTTP_BAD_REQUEST);
         }
 
-        try {
-            // Step 1 — Check if certificate and key files exist
-            $checkFiles = new Process([
-                'docker',
-                'exec',
-                $container,
-                'sh',
-                '-c',
-                "[ -f $certPath ] && [ -f $keyPath ] && echo 'exists' || echo 'missing'"
-            ]);
-            $checkFiles->run();
-            $output = trim($checkFiles->getOutput());
+        $payload = json_decode(
+            $request->getContent() ?: '{}',
+            true,
+            512,
+            JSON_THROW_ON_ERROR
+        );
 
-            if ($output !== 'exists') {
-                $this->certificateRadsecproxyCommandsService->updateRadsecproxyTestResult(
-                    $processEntity,
-                    CertificateTestResult::FAILED
-                );
+        $remoteHost = $payload['remote_host'] ?? null;
+        $remotePort = isset($payload['remote_port']) ? (int)$payload['remote_port'] : 22;
+        $remoteUser = $payload['remote_user'] ?? null;
+        $timeout = isset($payload['timeout']) ? (int)$payload['timeout'] : 5;
 
-                return new JsonResponse([
-                    'status' => 'error',
-                    'message' => 'Certificate or key files are missing in the radsecproxy container.',
-                    'debug' => $this->certificateRadsecproxyCommandsService->buildDebugInfo($checkFiles),
-                ]);
-            }
+        if (!$remoteHost || !$remoteUser) {
+            return new JsonResponse(['status' => 'error', 'message' => 'remote_host and remote_user are required.'],
+                Response::HTTP_BAD_REQUEST);
+        }
 
-            // Step 2 — Validate certificate format
-            $validateCert = new Process([
-                'docker',
-                'exec',
-                $container,
-                'sh',
-                '-c',
-                "openssl x509 -in $certPath -noout -text"
-            ]);
-            $validateCert->run();
+        // only test reachability for now (use stream_socket_client as before)
+        $address = sprintf('tcp://%s:%d', $remoteHost, $remotePort);
+        $errno = 0;
+        $errstr = '';
+        $fp = @stream_socket_client($address, $errno, $errstr, $timeout);
 
-            if (!$validateCert->isSuccessful()) {
-                $this->certificateRadsecproxyCommandsService->updateRadsecproxyTestResult(
-                    $processEntity,
-                    CertificateTestResult::FAILED
-                );
-
-                return new JsonResponse([
-                    'status' => 'error',
-                    'message' => 'Certificate validation failed.',
-                    'debug' => $this->certificateRadsecproxyCommandsService->buildDebugInfo($validateCert),
-                ]);
-            }
-
-            // Step 3 — Verify certificate/key match
-            $verifyMatch = new Process([
-                'docker',
-                'exec',
-                $container,
-                'sh',
-                '-c',
-                "openssl x509 -noout -modulus -in $certPath | openssl md5 && " .
-                "openssl rsa -noout -modulus -in $keyPath | openssl md5"
-            ]);
-            $verifyMatch->run();
-
-            if (!$verifyMatch->isSuccessful()) {
-                $this->certificateRadsecproxyCommandsService->updateRadsecproxyTestResult(
-                    $processEntity,
-                    CertificateTestResult::FAILED
-                );
-
-                return new JsonResponse([
-                    'status' => 'error',
-                    'message' => 'Certificate/key match verification failed.',
-                    'debug' => $this->certificateRadsecproxyCommandsService->buildDebugInfo($verifyMatch),
-                ]);
-            }
-
-            $lines = array_filter(explode("\n", trim($verifyMatch->getOutput())));
-            $match = count($lines) === 2 && $lines[0] === $lines[1];
-
-            if (!$match) {
-                $this->certificateRadsecproxyCommandsService->updateRadsecproxyTestResult(
-                    $processEntity,
-                    CertificateTestResult::FAILED
-                );
-
-                return new JsonResponse([
-                    'status' => 'error',
-                    'message' => 'Certificate and key do not match.',
-                    'debug' => $lines,
-                ]);
-            }
-
-            // Success: mark as PASSED
-            $this->certificateRadsecproxyCommandsService->updateRadsecproxyTestResult(
-                $processEntity,
-                CertificateTestResult::PASSED
-            );
-
-            return new JsonResponse([
-                'status' => 'success',
-                'message' => 'RadSecProxy certificates are valid and correctly installed!',
-            ]);
-        } catch (Throwable $e) {
-            $this->certificateRadsecproxyCommandsService->updateRadsecproxyTestResult(
-                $processEntity,
-                CertificateTestResult::FAILED
-            );
-
+        if ($fp === false) {
             return new JsonResponse([
                 'status' => 'error',
-                'message' => 'Unexpected error: ' . $e->getMessage(),
-            ]);
+                'message' => sprintf('Unable to reach %s:%d', $remoteHost, $remotePort),
+                'debug' => ['errno' => $errno, 'errstr' => $errstr],
+            ], Response::HTTP_SERVICE_UNAVAILABLE);
         }
+
+        fclose($fp);
+
+        return new JsonResponse([
+            'status' => 'success',
+            'message' => sprintf('Successfully reached %s:%d', $remoteHost, $remotePort),
+            'debug' => ['address' => $address, 'timeout' => $timeout]
+        ]);
     }
 
     #[Route(
