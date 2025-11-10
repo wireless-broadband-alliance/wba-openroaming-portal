@@ -318,7 +318,7 @@ class CertificateManagementController extends AbstractController
     {
         $processEntity = $this->certificateProcessCheckerService->getCurrentProcess();
 
-        // If there's no active process
+        // Ensure an active process exists
         if (!$processEntity instanceof CertificateSetupProcess) {
             return new JsonResponse([
                 'status' => 'error',
@@ -326,6 +326,7 @@ class CertificateManagementController extends AbstractController
             ], Response::HTTP_BAD_REQUEST);
         }
 
+        // Decode request payload
         $payload = json_decode(
             $request->getContent() ?: '{}',
             true,
@@ -354,28 +355,49 @@ class CertificateManagementController extends AbstractController
         $this->entityManager->persist($processEntity);
         $this->entityManager->flush();
 
-        // Check if ssh2 extension is loaded
-        if (!function_exists('ssh2_connect')) {
-            return new JsonResponse([
-                'status' => 'error',
-                'message' => 'PHP ssh2 extension is not installed.'
-            ], Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
-
         try {
-            $connection = @ssh2_connect($remoteHost, $remotePort, [], ['timeout' => $timeout]);
+            // Test TCP connectivity first
+            $start = microtime(true);
+            $connection = @fsockopen($remoteHost, 22, $errno, $errstr, $timeout);
+            $latency = round((microtime(true) - $start) * 1000, 2);
+
             if (!$connection) {
-                throw new RuntimeException("Could not connect to {$remoteHost}:{$remotePort}");
+                return new JsonResponse([
+                    'status' => 'error',
+                    'message' => sprintf(
+                        'Failed to connect to %s:%d — %s (code: %d)',
+                        $remoteHost,
+                        22,
+                        $errstr ?: 'unknown error',
+                        $errno
+                    ),
+                    'debug' => [
+                        'host' => $remoteHost,
+                        'port' => 22,
+                        'timeout' => $timeout,
+                        'latency_ms' => $latency,
+                    ]
+                ], Response::HTTP_SERVICE_UNAVAILABLE);
+            }
+            fclose($connection);
+
+            $sshConnection = @ssh2_connect($remoteHost, $remotePort, [], ['timeout' => $timeout]);
+            if (!$sshConnection || !@ssh2_auth_password($sshConnection, $remoteUser, $remotePassword)) {
+                return new JsonResponse([
+                    'status' => 'error',
+                    'message' => 'SSH connection/authentication failed.'
+                ], Response::HTTP_SERVICE_UNAVAILABLE);
             }
 
-            if (!@ssh2_auth_password($connection, $remoteUser, $remotePassword)) {
-                throw new RuntimeException("Authentication failed for user {$remoteUser}");
-            }
+            // Execute Docker command inside the container
+            $command = sprintf(
+                "docker exec %s /bin/bash -c 'whoami; ls /etc'",
+                escapeshellarg('hybrid-radsecproxy')
+            );
 
-            // Optional: execute a simple command to confirm login works
-            $stream = @ssh2_exec($connection, 'whoami');
+            $stream = @ssh2_exec($sshConnection, $command);
             if (!$stream) {
-                throw new RuntimeException("Failed to execute test command on {$remoteHost}");
+                throw new RuntimeException("Failed to execute command in container hybrid-radsecproxy");
             }
 
             stream_set_blocking($stream, true);
@@ -385,16 +407,18 @@ class CertificateManagementController extends AbstractController
             return new JsonResponse([
                 'status' => 'success',
                 'message' => sprintf(
-                    'Successfully logged in as %s on %s:%d',
-                    trim($output),
+                    'Successfully reached %s:%d (%.2f ms) and executed command in container %s',
                     $remoteHost,
-                    $remotePort
+                    22,
+                    $latency,
+                    'hybrid-radsecproxy'
                 ),
                 'debug' => [
                     'host' => $remoteHost,
-                    'port' => $remotePort,
-                    'user' => $remoteUser,
-                    'timeout' => $timeout
+                    'port' => 22,
+                    'latency_ms' => $latency,
+                    'remoteUser' => $remoteUser,
+                    'container_output' => $output
                 ]
             ]);
         } catch (Throwable $e) {
