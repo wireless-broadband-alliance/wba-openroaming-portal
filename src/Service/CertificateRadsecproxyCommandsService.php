@@ -137,17 +137,4 @@ readonly class CertificateRadsecproxyCommandsService
         $this->entityManager->persist($process);
         $this->entityManager->flush();
     }
-
-    /**
-     * Helper to collect debug info from Symfony Process
-     */
-    public function buildDebugInfo(Process $process): array
-    {
-        return [
-            'command' => $process->getCommandLine(),
-            'exit_code' => $process->getExitCode(),
-            'stdout' => $process->getOutput(),
-            'stderr' => $process->getErrorOutput(),
-        ];
-    }
 }

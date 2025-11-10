@@ -50,7 +50,7 @@
 }
 
 .form-widget {
-    @apply w-full border px-5 py-2.5 text-[#656565] placeholder-opacity-40 bg-transparent rounded-[5px] border-[#CECECE] appearance-none focus:outline-none focus:ring-0 focus:border-primary pr-10;
+    @apply w-full border px-5 py-2.5 text-[#656565] placeholder-opacity-40 bg-transparent rounded-[5px] border-[#CECECE] appearance-none focus:outline-none focus:ring-0 focus:border-primary pr-10 hover:border-gray-400;
 }
 
 .form-widget-text-area {

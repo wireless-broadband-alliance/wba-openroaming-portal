@@ -363,12 +363,18 @@ class CertificateManagementController extends AbstractController
             $latency = round((microtime(true) - $start) * 1000, 2);
 
             if (!$connection) {
+                // Update DB when test fails
+                $this->certificateRadsecproxyCommandsService->updateRadsecproxyTestResult(
+                    $processEntity,
+                    CertificateTestResult::FAILED
+                );
+
                 return new JsonResponse([
                     'status' => 'error',
                     'message' => sprintf(
-                        'Failed to connect to %s:%d — %s (code: %d)',
+                        'TCP test failed: cannot reach host %s on port %d — %s (code: %d)',
                         $remoteHost,
-                        22,
+                        $remotePort,
                         $errstr ?: 'unknown error',
                         $errno
                     ),
@@ -387,47 +393,92 @@ class CertificateManagementController extends AbstractController
 
             $sshConnection = @ssh2_connect($remoteHost, $remotePort, [], ['timeout' => $timeout]);
             if (!$sshConnection || !@ssh2_auth_password($sshConnection, $remoteUser, $remotePassword)) {
+                // Update DB when test fails
+                $this->certificateRadsecproxyCommandsService->updateRadsecproxyTestResult(
+                    $processEntity,
+                    CertificateTestResult::FAILED
+                );
+
                 return new JsonResponse([
                     'status' => 'error',
-                    'message' => 'SSH connection/authentication failed.'
+                    'message' => sprintf(
+                        'SSH test failed: authentication to %s:%d with user %s failed',
+                        $remoteHost,
+                        $remotePort,
+                        $remoteUser
+                    ),
                 ], Response::HTTP_SERVICE_UNAVAILABLE);
             }
 
-            // Execute Docker command inside the container
+            // Command to list the files and check for client.pem and key.pem
             $command = sprintf(
-                "docker exec %s /bin/bash -c 'whoami; ls /etc'",
-                escapeshellarg('hybrid-radsecproxy-1')
+                "docker exec %s /bin/bash -c 'ls %s'",
+                escapeshellarg('hybrid-radsecproxy-1'),
+                '/etc/radsecproxy/certs/'
             );
 
             $stream = @ssh2_exec($sshConnection, $command);
             if (!$stream) {
                 throw new RuntimeException("Failed to execute command in container hybrid-radsecproxy-1");
             }
+
             stream_set_blocking($stream, true);
+            $output = stream_get_contents($stream);
             fclose($stream);
-            /* $output = stream_get_contents($stream);
-            $debug = [
-                'host' => $remoteHost,
-                'port' => $remotePort,
-                'user' => $remoteUser,
-                'latency_ms' => $latency,
-                'ssh_command' => $command
-            ];
-            */
+
+            // Analyze output to see if files exist
+            $hasClient = str_contains($output, 'client.pem');
+            $hasKey = str_contains($output, 'key.pem');
+
+            // If both files exist → passes, otherwise → fails
+            if ($hasClient && $hasKey) {
+                // Update DB when test passes
+                $this->certificateRadsecproxyCommandsService->updateRadsecproxyTestResult(
+                    $processEntity,
+                    CertificateTestResult::PASSED
+                );
+
+                return new JsonResponse([
+                    'status' => 'success',
+                    'message' => sprintf(
+                        'Radsecproxy test passed, both the client.pem and key.pem are present in container %s',
+                        'hybrid-radsecproxy-1'
+                    ),
+                    'container_output' => $output,
+                ]);
+            }
+
+            // Update DB when test fails
+            $this->certificateRadsecproxyCommandsService->updateRadsecproxyTestResult(
+                $processEntity,
+                CertificateTestResult::FAILED
+            );
+
+            // Construct error message specifying which file is missing
+            $missingFiles = [];
+            if (!$hasClient) {
+                $missingFiles[] = 'client.pem';
+            }
+            if (!$hasKey) {
+                $missingFiles[] = 'key.pem';
+            }
+
             return new JsonResponse([
-                'status' => 'success',
+                'status' => 'error',
                 'message' => sprintf(
-                    'Successfully reached %s:%d (%.2f ms) and executed command in container %s',
+                    'Radsecproxy test failed on host %s:%d — missing file(s) in container %s: %s',
                     $remoteHost,
                     $remotePort,
-                    $latency,
-                    'hybrid-radsecproxy-1'
+                    'hybrid-radsecproxy-1',
+                    implode(', ', $missingFiles)
                 ),
-                /*
-                'debug' => array_merge($debug, ['container_output' => $output])
-                */
-            ]);
+            ], Response::HTTP_SERVICE_UNAVAILABLE);
         } catch (Throwable $e) {
+            // Update DB when test fails
+            $this->certificateRadsecproxyCommandsService->updateRadsecproxyTestResult(
+                $processEntity,
+                CertificateTestResult::FAILED
+            );
             return new JsonResponse([
                 'status' => 'error',
                 'message' => $e->getMessage(),
