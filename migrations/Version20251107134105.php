@@ -20,12 +20,12 @@ final class Version20251107134105 extends AbstractMigration
     public function up(Schema $schema): void
     {
         // this up() migration is auto-generated, please modify it to your needs
-        $this->addSql('ALTER TABLE CertificateSetupProcess ADD remoteHost VARCHAR(255) DEFAULT NULL, ADD remotePort INT DEFAULT NULL, ADD remoteUser VARCHAR(255) DEFAULT NULL, ADD remotePassword VARCHAR(255) DEFAULT NULL');
+        $this->addSql('ALTER TABLE CertificateSetupProcess ADD remoteHost VARCHAR(255) DEFAULT NULL, ADD remotePort INT DEFAULT NULL, ADD remoteUser VARCHAR(255) DEFAULT NULL');
     }
 
     public function down(Schema $schema): void
     {
         // this down() migration is auto-generated, please modify it to your needs
-        $this->addSql('ALTER TABLE CertificateSetupProcess DROP remoteHost, DROP remotePort, DROP remoteUser, DROP remotePassword');
+        $this->addSql('ALTER TABLE CertificateSetupProcess DROP remoteHost, DROP remotePort, DROP remoteUser');
     }
 }

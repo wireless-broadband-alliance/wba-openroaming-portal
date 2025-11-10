@@ -57,9 +57,6 @@ class CertificateSetupProcess
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $remoteUser = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $remotePassword = null;
-
     public function __construct()
     {
         $this->certificates = new ArrayCollection();
@@ -241,18 +238,6 @@ class CertificateSetupProcess
     public function setRemoteUser(?string $remoteUser): static
     {
         $this->remoteUser = $remoteUser;
-
-        return $this;
-    }
-
-    public function getRemotePassword(): ?string
-    {
-        return $this->remotePassword;
-    }
-
-    public function setRemotePassword(?string $remotePassword): static
-    {
-        $this->remotePassword = $remotePassword;
 
         return $this;
     }
