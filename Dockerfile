@@ -66,9 +66,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN echo "memory_limit=1024M" > /usr/local/etc/php/conf.d/memory.ini \
 
 # Copy Symfony app from vendor stage
-COPY --from=vendor /app /var/www/openroaming
 COPY . /var/www/openroaming
-RUN php bin/console cache:clear --env=prod --no-debug --no-warmup
+COPY --from=vendor /app /var/www/openroaming
+RUN php bin/console cache:clear --env=prod --no-debug
 RUN php bin/console tailwind:build --minify --env=prod
 RUN php bin/console asset-map:compile --env=prod
 # Copy configs
