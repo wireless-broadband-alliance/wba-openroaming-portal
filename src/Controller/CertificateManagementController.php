@@ -25,6 +25,7 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
@@ -371,12 +372,15 @@ class CertificateManagementController extends AbstractController
                         $errstr ?: 'unknown error',
                         $errno
                     ),
+                    /*
                     'debug' => [
                         'host' => $remoteHost,
                         'port' => 22,
                         'timeout' => $timeout,
                         'latency_ms' => $latency,
+                        'connection' => $connection
                     ]
+                    */
                 ], Response::HTTP_SERVICE_UNAVAILABLE);
             }
             fclose($connection);
@@ -392,34 +396,36 @@ class CertificateManagementController extends AbstractController
             // Execute Docker command inside the container
             $command = sprintf(
                 "docker exec %s /bin/bash -c 'whoami; ls /etc'",
-                escapeshellarg('hybrid-radsecproxy')
+                escapeshellarg('hybrid-radsecproxy-1')
             );
 
             $stream = @ssh2_exec($sshConnection, $command);
             if (!$stream) {
-                throw new RuntimeException("Failed to execute command in container hybrid-radsecproxy");
+                throw new RuntimeException("Failed to execute command in container hybrid-radsecproxy-1");
             }
-
             stream_set_blocking($stream, true);
-            $output = stream_get_contents($stream);
             fclose($stream);
-
+            /* $output = stream_get_contents($stream);
+            $debug = [
+                'host' => $remoteHost,
+                'port' => $remotePort,
+                'user' => $remoteUser,
+                'latency_ms' => $latency,
+                'ssh_command' => $command
+            ];
+            */
             return new JsonResponse([
                 'status' => 'success',
                 'message' => sprintf(
                     'Successfully reached %s:%d (%.2f ms) and executed command in container %s',
                     $remoteHost,
-                    22,
+                    $remotePort,
                     $latency,
-                    'hybrid-radsecproxy'
+                    'hybrid-radsecproxy-1'
                 ),
-                'debug' => [
-                    'host' => $remoteHost,
-                    'port' => 22,
-                    'latency_ms' => $latency,
-                    'remoteUser' => $remoteUser,
-                    'container_output' => $output
-                ]
+                /*
+                'debug' => array_merge($debug, ['container_output' => $output])
+                */
             ]);
         } catch (Throwable $e) {
             return new JsonResponse([
