@@ -11,9 +11,13 @@ class SettingsDTO
     public ?string $trustedProxies = null;
 
     #[Assert\NotBlank(message: 'fieldNotBlank')]
+    #[Assert\Length(min:5, max:100, minMessage: 'minCharacters', maxMessage: 'maxCharacters')]
+    #[Assert\Regex('/^[a-zA-Z0-9\-_]+$/', message: 'invalidFormat')]
     public ?string $turnstileKey = null;
 
     #[Assert\NotBlank(message: 'fieldNotBlank')]
+    #[Assert\Length(min:5, max:100, minMessage: 'minCharacters', maxMessage: 'maxCharacters')]
+    #[Assert\Regex('/^[a-zA-Z0-9\-_]+$/', message: 'invalidFormat')]
     public ?string $turnstileSecret = null;
 
     public ?bool $jwtPassphraseEnable = false;
