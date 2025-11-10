@@ -6,4 +6,8 @@ proceed_freeradius: "Proceed to FreeRADIUS Certificates"
 in_progress_title: "Testing in progress..."
 in_progress_description: "Verifying the RadSecProxy certificate setup on the server. Please wait."
 start_test_connection: "Are you sure you wish to start the connection test?"
-
+host: 'Host'
+port: 'Port'
+user: 'User'
+password: 'Password'
+timeOut: 'Timeout (seconds)'

@@ -24,7 +24,7 @@
             <div class="grid grid-cols-1 md:grid-cols-5 gap-3 items-end">
                 <div>
                     <label class="block text-xs font-medium text-gray-600">
-                        Host
+                        {{ 'host'|trans({}, 'test_radsec') }}
                         <input type="text"
                                data-test-certificates-target="hostInput"
                                class="form-widget mt-1 block w-full rounded-md border-gray-200 p-2"
@@ -36,7 +36,7 @@
 
                 <div>
                     <label class="block text-xs font-medium text-gray-600">
-                        Port
+                        {{ 'port'|trans({}, 'test_radsec') }}
                         <input type="number"
                                data-test-certificates-target="portInput"
                                class="form-widget mt-1 block w-full rounded-md border-gray-200 p-2"
@@ -47,7 +47,7 @@
 
                 <div>
                     <label class="block text-xs font-medium text-gray-600">
-                        User
+                        {{ 'user'|trans({}, 'test_radsec') }}
                         <input type="text"
                                data-test-certificates-target="userInput"
                                class="form-widget mt-1 block w-full rounded-md border-gray-200 p-2"
@@ -58,7 +58,7 @@
 
                 <div>
                     <label class="block text-xs font-medium text-gray-600">
-                        Password
+                        {{ 'password'|trans({}, 'test_radsec') }}
                         <input type="password"
                                data-test-certificates-target="passwordInput"
                                class="form-widget mt-1 block w-full rounded-md border-gray-200 p-2"
@@ -69,7 +69,7 @@
 
                 <div>
                     <label class="block text-xs font-medium text-gray-600">
-                        Timeout (s)
+                        {{ 'timeOut'|trans({}, 'test_radsec') }}
                         <input type="number"
                                data-test-certificates-target="timeoutInput"
                                class="form-widget mt-1 block w-full rounded-md border-gray-200 p-2"
