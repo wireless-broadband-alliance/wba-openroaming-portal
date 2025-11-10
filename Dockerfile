@@ -68,9 +68,9 @@ RUN echo "memory_limit=1024M" > /usr/local/etc/php/conf.d/memory.ini \
 # Copy Symfony app from vendor stage
 COPY --from=vendor /app /var/www/openroaming
 
-RUN php bin/console cache:clear --env=prod --no-debug --no-warmup \
-    && php bin/console tailwind:build --minify --env=prod \
-    && php bin/console asset-map:compile --env=prod
+RUN php bin/console cache:clear --env=prod --no-debug --no-warmup
+RUN php bin/console tailwind:build --minify --env=prod
+RUN php bin/console asset-map:compile --env=prod
 # Copy configs
 COPY service-config/supervisor/supervisord.conf /etc/supervisor/conf.d/
 COPY service-config/nginx/nginx.conf /etc/nginx/nginx.conf
