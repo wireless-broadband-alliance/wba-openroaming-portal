@@ -323,7 +323,11 @@ class CertificateManagementController extends AbstractController
         if (!$processEntity instanceof CertificateSetupProcess) {
             return new JsonResponse([
                 'status' => 'error',
-                'message' => 'No active certificate process found. Please start the process before running tests.',
+                'message' => $this->translator->trans(
+                    'noActiveProcess',
+                    [],
+                    'CertificateProcessCheckerService'
+                ),
             ], Response::HTTP_BAD_REQUEST);
         }
 
@@ -344,7 +348,11 @@ class CertificateManagementController extends AbstractController
         if (!$remoteHost || !$remoteUser || !$remotePassword) {
             return new JsonResponse([
                 'status' => 'error',
-                'message' => 'remote_host, remote_user and remote_password are required.'
+                'message' => $this->translator->trans(
+                    'missingRequiredForRadsecProxyTest',
+                    [],
+                    'controllers'
+                ),
             ], Response::HTTP_BAD_REQUEST);
         }
 
@@ -371,12 +379,15 @@ class CertificateManagementController extends AbstractController
 
                 return new JsonResponse([
                     'status' => 'error',
-                    'message' => sprintf(
-                        'TCP test failed: cannot reach host %s on port %d — %s (code: %d)',
-                        $remoteHost,
-                        $remotePort,
-                        $errstr ?: 'unknown error',
-                        $errno
+                    'message' => $this->translator->trans(
+                        'tcp_radsecproxy_test_failed',
+                        [
+                            '%host%' => $remoteHost,
+                            '%port%' => $remotePort,
+                            '%error%' => $errstr ?: 'unknown error',
+                            '%code%' => $errno,
+                        ],
+                        'controllers'
                     ),
                     /*
                     'debug' => [
@@ -401,11 +412,14 @@ class CertificateManagementController extends AbstractController
 
                 return new JsonResponse([
                     'status' => 'error',
-                    'message' => sprintf(
-                        'SSH test failed: authentication to %s:%d with user %s failed',
-                        $remoteHost,
-                        $remotePort,
-                        $remoteUser
+                    'message' => $this->translator->trans(
+                        'ssh_radsecproxy_auth_failed',
+                        [
+                            '%host%' => $remoteHost,
+                            '%port%' => $remotePort,
+                            '%user%' => $remoteUser,
+                        ],
+                        'controllers'
                     ),
                 ], Response::HTTP_SERVICE_UNAVAILABLE);
             }
@@ -440,11 +454,11 @@ class CertificateManagementController extends AbstractController
 
                 return new JsonResponse([
                     'status' => 'success',
-                    'message' => sprintf(
-                        'Radsecproxy test passed, both the client.pem and key.pem are present in container %s',
-                        'hybrid-radsecproxy-1'
+                    'message' => $this->translator->trans(
+                        'radsecproxy_test_passed',
+                        ['%container%' => 'hybrid-radsecproxy-1'],
+                        'controllers'
                     ),
-                    'container_output' => $output,
                 ]);
             }
 
@@ -465,12 +479,15 @@ class CertificateManagementController extends AbstractController
 
             return new JsonResponse([
                 'status' => 'error',
-                'message' => sprintf(
-                    'Radsecproxy test failed on host %s:%d — missing file(s) in container %s: %s',
-                    $remoteHost,
-                    $remotePort,
-                    'hybrid-radsecproxy-1',
-                    implode(', ', $missingFiles)
+                'message' => $this->translator->trans(
+                    'radsecproxy_test_failed',
+                    [
+                        '%host%' => $remoteHost,
+                        '%port%' => $remotePort,
+                        '%container%' => 'hybrid-radsecproxy-1',
+                        '%files%' => implode(', ', $missingFiles),
+                    ],
+                    'controllers'
                 ),
             ], Response::HTTP_SERVICE_UNAVAILABLE);
         } catch (Throwable $e) {
