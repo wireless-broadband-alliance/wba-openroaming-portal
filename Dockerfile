@@ -62,13 +62,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
  && docker-php-ext-enable gnupg memcached \
  && rm -rf /var/lib/apt/lists/*
 
+# Set PHP memory limit
+RUN echo "memory_limit=1024M" > /usr/local/etc/php/conf.d/memory.ini \
+
 # Copy Symfony app from vendor stage
 COPY --from=vendor /app /var/www/openroaming
 
-RUN php bin/console cache:clear --env=prod --no-debug \
+RUN php bin/console cache:clear --env=prod --no-debug --no-warmup \
     && php bin/console tailwind:build --minify --env=prod \
     && php bin/console asset-map:compile --env=prod
-
 # Copy configs
 COPY service-config/supervisor/supervisord.conf /etc/supervisor/conf.d/
 COPY service-config/nginx/nginx.conf /etc/nginx/nginx.conf
