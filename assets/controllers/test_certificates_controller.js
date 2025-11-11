@@ -7,6 +7,7 @@ export default class extends Controller {
         "waitingWidget",
         "resultMessage",
         "freeradiusButton",
+        "statusIndicator",
         // inputs:
         "hostInput",
         "portInput",
@@ -67,7 +68,6 @@ export default class extends Controller {
                 headers: {
                     "X-Requested-With": "XMLHttpRequest",
                     "Content-Type": "application/json",
-                    // If you use Symfony's CSRF token, add: "X-CSRF-Token": "<token>"
                 },
                 body: JSON.stringify(payload),
             });

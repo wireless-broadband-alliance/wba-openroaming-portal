@@ -1,5 +1,5 @@
 test_or_proceed: "Testar ou Prosseguir"
-configuration_complete: "Configuração concluída (ainda não testada)"
+configuration_complete: "Configuração Concluída"
 instructions: "Execute o teste do servidor para confirmar que os certificados RadSecProxy foram instalados corretamente. Depois de concluído o teste, prossiga para configurar os certificados do FreeRADIUS."
 test_certificates: "Testar Certificados RadSecProxy"
 proceed_freeradius: "Prosseguir para Certificados FreeRADIUS"
@@ -11,3 +11,6 @@ port: 'Porta'
 user: 'Utilizador'
 password: 'Palavra-passe'
 timeOut: 'Tempo limite (segundos)'
+test_not_done: 'Nenhum teste realizado no momento'
+test_passed: 'Teste Aprovado'
+test_failed: 'Teste Reprovado'

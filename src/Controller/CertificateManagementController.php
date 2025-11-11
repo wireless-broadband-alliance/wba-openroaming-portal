@@ -366,10 +366,7 @@ class CertificateManagementController extends AbstractController
 
         try {
             // Test TCP connectivity first
-            $start = microtime(true);
             $connection = @fsockopen($remoteHost, 22, $errno, $errstr, $timeout);
-            $latency = round((microtime(true) - $start) * 1000, 2);
-
             if (!$connection) {
                 // Update DB when test fails
                 $this->certificateRadsecproxyCommandsService->updateRadsecproxyTestResult(
@@ -394,7 +391,6 @@ class CertificateManagementController extends AbstractController
                         'host' => $remoteHost,
                         'port' => 22,
                         'timeout' => $timeout,
-                        'latency_ms' => $latency,
                         'connection' => $connection
                     ]
                     */
@@ -476,6 +472,8 @@ class CertificateManagementController extends AbstractController
 
             // If both files exist → passes, otherwise → fails
             if ($hasClient && $hasKey) {
+                // TODO NOW GET THE CURRENT PROCESS AND CHECK IF THE CONTENTS OF THE KEY IS THE SAME OF THE ONES ON THE TMP FOLDER
+
                 // Update DB when test passes
                 $this->certificateRadsecproxyCommandsService->updateRadsecproxyTestResult(
                     $processEntity,

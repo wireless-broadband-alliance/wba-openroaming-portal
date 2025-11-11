@@ -32,6 +32,12 @@ readonly class TermsAcceptanceListener
         $session = $request->getSession();
         $termsAccepted = $session->get('termsAccepted', false);
 
+        // Skip if the current route is app_landing
+        $currentRoute = $request->attributes->get('_route');
+        if ($currentRoute === 'app_landing') {
+            return;
+        }
+
         // Paths that DO NOT require terms acceptance
         $excludedPrefixes = [
             '/_profiler',
@@ -39,7 +45,6 @@ readonly class TermsAcceptanceListener
             '/api',
             '/_components',
             '/assets',
-            '/', // Actual landing page
             '/landing', // For different routes with two-factor
             '/dashboard',
             '/instructions',

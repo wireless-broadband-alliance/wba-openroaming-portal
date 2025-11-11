@@ -1,5 +1,5 @@
 test_or_proceed: "Test or Proceed"
-configuration_complete: "Configuration Complete (Not Yet Tested)"
+configuration_complete: "Configuration Complete"
 instructions: "Run the server test to confirm that the RadSecProxy certificates are installed correctly. Once testing is done, proceed to configure the FreeRADIUS certificates."
 test_certificates: "Test RadSecProxy Certificates"
 proceed_freeradius: "Proceed to FreeRADIUS Certificates"
@@ -11,3 +11,6 @@ port: 'Port'
 user: 'User'
 password: 'Password'
 timeOut: 'Timeout (seconds)'
+test_not_done: 'Test not done yet'
+test_passed: 'Test Passed'
+test_failed: 'Test Failed'
