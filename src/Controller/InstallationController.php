@@ -27,7 +27,7 @@ use App\Service\TwoFAService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Console\Application;
+use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\Form\Exception\LogicException;
@@ -182,7 +182,7 @@ class InstallationController extends AbstractController
                 return $this->redirectToRoute('admin_dashboard_settings_certs_installation_admin');
             }
         } else {
-            return $this->redirectToRoute('admin_dashboard_settings_certs_installation_settings');
+            return $this->redirectToRoute('admin_dashboard_settings_certs_installation');
         }
         $data = $this->getSettings->getSettings();
 
@@ -330,7 +330,7 @@ class InstallationController extends AbstractController
                 return $this->redirectToRoute('admin_dashboard_settings_certs_installation_settings');
             }
         } else {
-            return $this->redirectToRoute('admin_dashboard_settings_certs_installation_settings');
+            return $this->redirectToRoute('admin_dashboard_settings_certs_installation');
         }
 
         $data = $this->getSettings->getSettings();
@@ -395,7 +395,7 @@ class InstallationController extends AbstractController
                 return $this->redirectToRoute('admin_dashboard_settings_certs_installation_admin');
             }
         } else {
-            return $this->redirectToRoute('admin_dashboard_settings_certs_installation_settings');
+            return $this->redirectToRoute('admin_dashboard_settings_certs_installation');
         }
 
         $data = $this->getSettings->getSettings();
@@ -489,7 +489,7 @@ class InstallationController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function installationSummary()
     {
-        $lastInstallation = $this->installationProgressRepository->getLastCompleted();
+        $lastInstallation = $this->installationProgressRepository->getLast();
         if ($lastInstallation instanceof InstallationProgress) {
             $step = $this->installationService->getStep($lastInstallation);
             if ($step === InstallationStep::DATABASE->value) {
@@ -502,7 +502,7 @@ class InstallationController extends AbstractController
                 return $this->redirectToRoute('admin_dashboard_settings_certs_installation_admin');
             }
         } else {
-            return $this->redirectToRoute('admin_dashboard_settings_certs_installation_settings');
+            return $this->redirectToRoute('admin_dashboard_settings_certs_installation');
         }
 
         $installationDTO = $this->installationService->fillDto($lastInstallation);
