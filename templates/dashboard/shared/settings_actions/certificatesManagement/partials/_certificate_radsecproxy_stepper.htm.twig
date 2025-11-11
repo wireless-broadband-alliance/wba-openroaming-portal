@@ -14,9 +14,11 @@
 {% endfor %}
 
 <div class="w-full max-w-5xl mx-auto mt-8 mb-10 px-4">
-    {{ include('dashboard/shared/_hover_info_details.html.twig', {
-        info_text: 'info_text_stepper_details'|trans({}, '_certificate_stepper'),
-    }) }}
+    <div class="p-2">
+        {{ include('dashboard/shared/_info_details.html.twig', {
+            info_text: 'info_text_stepper_details'|trans({}, '_certificate_stepper'),
+        }) }}
+    </div>
 
     <div class="relative flex flex-col md:flex-row items-start md:items-center md:justify-between">
         {# Progress bar #}
@@ -36,7 +38,7 @@
             {% set previousCompleted = index == 0 or (steps[index - 1].id in stages and stages[steps[index - 1].id]) %}
 
             <div class="w-full md:flex-1 flex flex-col md:items-center text-center mb-8 p-2">
-                <div class="flex items-center justify-center w-10 h-10 sm:w-9 sm:h-9 rounded-full border-2 z-10 font-semibold transition-all duration-300 text-center
+                <div class="flex items-center justify-center w-10 h-10 rounded-full border-2 z-10 font-semibold transition-all duration-300 text-center
                     {% if completed %} bg-primary border-primary text-white
                     {% elseif active %} bg-white border-primary text-primary step-active
                     {% else %} bg-white border-gray-300 text-gray-400 {% endif %}
@@ -66,7 +68,7 @@
                     {% endif %}
                 </div>
 
-                <div class="mt-2 sm:mt-1 md:mt-2">
+                <div class="mt-4 sm:mt-1 md:mt-2">
                     <h4 class="text-sm sm:text-xs font-semibold
                         {% if completed or active %} text-primary {% else %} text-gray-500 {% endif %}">
                         {{ title }}
