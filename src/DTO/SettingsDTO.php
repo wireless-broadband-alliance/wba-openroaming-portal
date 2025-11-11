@@ -8,6 +8,10 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
 class SettingsDTO
 {
     #[Assert\NotBlank(message: 'fieldNotBlank')]
+    #[Assert\Regex(
+        pattern: '/^([0-9]{1,3}(\.[0-9]{1,3}){3}(\/[0-9]{1,2})?)(\s*,\s*([0-9]{1,3}(\.[0-9]{1,3}){3}(\/[0-9]{1,2})?))*$/',
+        message: 'notValidIp'
+    )]
     public ?string $trustedProxies = null;
 
     #[Assert\NotBlank(message: 'fieldNotBlank')]
@@ -24,18 +28,4 @@ class SettingsDTO
 
     public ?string $jwtPassphrase = null;
 
-
-    #[Assert\Callback]
-    public function validateTrustedProxies(ExecutionContextInterface $context)
-    {
-        $ips = array_map('trim', explode(',', $this->trustedProxies));
-        foreach ($ips as $ip) {
-            if (!filter_var($ip, FILTER_VALIDATE_IP)) {
-                $context->buildViolation('notValidIp')
-                    ->atPath('trustedProxies')
-                    ->setParameter('%value%', $ip)
-                    ->addViolation();
-            }
-        }
-    }
 }

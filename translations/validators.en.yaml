@@ -57,5 +57,5 @@ valueCannotBeLessThanMinutes: 'This value cannot be less than {{ limit }} minute
 valueNotValidURL: 'Please insert a valid URL.'
 timerShouldNeverBeLessThan: 'This timer should never be less than 1.'
 profileLimitMessage: 'Please select a value between 1 (minimum, fixed value) and %limit% (maximum, determined by the number of days left until the certificate expires on %expirationDate%).'
-notValidIp: 'The value %value% is not a valid IP address.'
+notValidIp: 'Please provide a comma-separated list of valid IP addresses or CIDR ranges (e.g. 192.168.1.1,10.0.0.0/8).'
 invalidFormat: 'Invalid Format'
