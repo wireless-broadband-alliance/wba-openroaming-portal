@@ -12,58 +12,66 @@ use Symfony\Component\HttpFoundation\Session\Session;
 
 readonly class TermsAcceptanceListener
 {
-    public function __construct(
-        private RouterInterface $router,
-        private TranslatorInterface $translator
-    ) {
+  public function __construct(
+      private RouterInterface $router,
+      private TranslatorInterface $translator
+  ) {
+  }
+
+  #[AsEventListener(event: KernelEvents::REQUEST, priority: -255)]
+  public function onKernelRequest(RequestEvent $event): void
+  {
+    if (!$event->isMainRequest()) {
+      return;
     }
 
-    #[AsEventListener(event: KernelEvents::REQUEST, priority: -255)]
-    public function onKernelRequest(RequestEvent $event): void
-    {
-        if (!$event->isMainRequest()) {
-            return;
-        }
+    $request = $event->getRequest();
+    $path = $request->getPathInfo();
 
-        $request = $event->getRequest();
-        $path = $request->getPathInfo();
+    /** @var Session $session */
+    $session = $request->getSession();
+    $termsAccepted = $session->get('termsAccepted', false);
 
-        /** @var Session $session */
-        $session = $request->getSession();
-        $termsAccepted = $session->get('termsAccepted', false);
-
-        // Paths that DO NOT require terms acceptance
-        $excludedPrefixes = [
-            '/_profiler',
-            '/_wdt',
-            '/api',
-            '/_components',
-            '/assets',
-            '/', // Actual landing page
-            '/landing', // For different routes with two-factor
-            '/dashboard',
-            '/instructions',
-            '/change-language',
-            '/accept-terms',
-            '/reject-terms',
-            '/terms-conditions',
-            '/privacy-policy',
-            '/metrics'
-        ];
-
-        if (array_any($excludedPrefixes, fn($prefix) => str_starts_with($path, $prefix))) {
-            return;
-        }
-
-        // If terms not accepted, redirect
-        if (!$termsAccepted) {
-            $message = $this->translator->trans(
-                'cannotAccessThisPageWithoutAcceptTerms',
-                [],
-                'controllers'
-            );
-            $session->getFlashBag()->add('error', $message);
-            $event->setResponse(new RedirectResponse($this->router->generate('app_landing')));
-        }
+    // Skip if the current route is app_landing
+    $currentRoute = $request->attributes->get('_route');
+    if ($currentRoute === 'app_landing') {
+      return;
     }
+
+    // Paths that DO NOT require terms acceptance
+    $excludedPrefixes = [
+        '/_profiler',
+        '/_wdt',
+        '/api',
+        '/_components',
+        '/assets',
+        '/landing', // For different routes with two-factor
+        '/dashboard',
+        '/instructions',
+        '/change-language',
+        '/accept-terms',
+        '/reject-terms',
+        '/terms-conditions',
+        '/privacy-policy',
+        '/metrics',
+        '/profile/android',
+        '/profile/ios',
+        '/profile/windows',
+    ];
+
+    if (array_any($excludedPrefixes, fn($prefix) => str_starts_with($path, $prefix))) {
+      return;
+    }
+
+    // If terms not accepted, redirect
+    if (!$termsAccepted) {
+      $message = $this->translator->trans(
+          'cannotAccessThisPageWithoutAcceptTerms',
+          [],
+          'controllers'
+      );
+      $session->getFlashBag()->add('error', $message);
+      $event->setResponse(new RedirectResponse($this->router->generate('app_landing')));
+    }
+  }
 }
