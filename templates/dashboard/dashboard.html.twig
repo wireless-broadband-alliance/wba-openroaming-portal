@@ -5,7 +5,7 @@
 {% import 'dashboard/shared/_sort_arrow.html.twig' as sharedSort %}
 
 {% block container %}
-    <div class="p-5">
+    <div class="p-5 space-y-2">
         {% set eeaStatus = isEEAUser() %}
         {% set message = '' %}
         {% if eeaStatus == constant('App\\Enum\\GeoLocation\\IsEEAHandler::LOCATION_ERROR').value %}
