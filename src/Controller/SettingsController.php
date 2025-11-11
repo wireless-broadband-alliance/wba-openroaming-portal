@@ -32,6 +32,7 @@ use App\Service\CertificateService;
 use App\Service\EnforcePasswordResetService;
 use App\Service\EventActions;
 use App\Service\GetSettings;
+use App\Service\HtmlSanitizerService;
 use App\Service\SanitizeHTML;
 use App\Service\SettingsService;
 use DateTime;
@@ -57,6 +58,7 @@ class SettingsController extends AbstractController
         private readonly CertificateService $certificateService,
         private readonly SettingsService $settingsService,
         private readonly TextEditorRepository $textEditorRepository,
+        private readonly HtmlSanitizerService $htmlSanitizerService,
     ) {
     }
 
@@ -474,8 +476,6 @@ class SettingsController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $sanitizeHtml = new SanitizeHTML();
-
             // Update settings using the service
             foreach (
                 [
@@ -493,10 +493,14 @@ class SettingsController extends AbstractController
 
             // Update TextEditors
             $tosTextEditor->setContent(
-                $sanitizeHtml->sanitizeHtml($form->get(TextEditorName::TOS_EDITOR->value)->getData())
+                $this->htmlSanitizerService->sanitize(
+                    $form->get(TextEditorName::TOS_EDITOR->value)->getData()
+                )
             );
             $privacyPolicyTextEditor->setContent(
-                $sanitizeHtml->sanitizeHtml($form->get(TextEditorName::PRIVACY_POLICY_EDITOR->value)->getData())
+                $this->htmlSanitizerService->sanitize(
+                    $form->get(TextEditorName::PRIVACY_POLICY_EDITOR->value)->getData()
+                )
             );
             $this->entityManager->persist($tosTextEditor);
             $this->entityManager->persist($privacyPolicyTextEditor);
