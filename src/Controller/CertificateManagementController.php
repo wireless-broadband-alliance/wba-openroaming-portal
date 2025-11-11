@@ -25,8 +25,6 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
-use Symfony\Component\Process\Process;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -34,6 +32,8 @@ use Throwable;
 
 class CertificateManagementController extends AbstractController
 {
+    private const string RADSECPROXY_CONTAINER = 'hybrid-radsecproxy-1';
+
     public function __construct(
         private readonly GetSettings $getSettings,
         private readonly TranslatorInterface $translator,
@@ -424,10 +424,40 @@ class CertificateManagementController extends AbstractController
                 ], Response::HTTP_SERVICE_UNAVAILABLE);
             }
 
+            // Check if the
+            $checkContainerCommand = sprintf(
+                "docker ps --filter 'name=%s' --format '{{.Names}}'",
+                escapeshellarg(self::RADSECPROXY_CONTAINER)
+            );
+
+            $checkStream = @ssh2_exec($sshConnection, $checkContainerCommand);
+            if (!$checkStream) {
+                throw new RuntimeException("Failed to check container status for hybrid-radsecproxy-1");
+            }
+
+            stream_set_blocking($checkStream, true);
+            $checkOutput = trim(stream_get_contents($checkStream));
+            fclose($checkStream);
+
+            if (empty($checkOutput) || $checkOutput !== self::RADSECPROXY_CONTAINER) {
+                return new JsonResponse([
+                    'status' => 'error',
+                    'message' => $this->translator->trans(
+                        'radsecproxy_container_not_running',
+                        [
+                            '%container%' => self::RADSECPROXY_CONTAINER,
+                            '%host%' => $remoteHost,
+                            '%port%' => $remotePort,
+                        ],
+                        'controllers'
+                    ),
+                ], Response::HTTP_SERVICE_UNAVAILABLE);
+            }
+
             // Command to list the files and check for client.pem and key.pem
             $command = sprintf(
                 "docker exec %s /bin/bash -c 'ls %s'",
-                escapeshellarg('hybrid-radsecproxy-1'),
+                escapeshellarg(self::RADSECPROXY_CONTAINER),
                 '/etc/radsecproxy/certs/'
             );
 
@@ -456,7 +486,7 @@ class CertificateManagementController extends AbstractController
                     'status' => 'success',
                     'message' => $this->translator->trans(
                         'radsecproxy_test_passed',
-                        ['%container%' => 'hybrid-radsecproxy-1'],
+                        ['%container%' => self::RADSECPROXY_CONTAINER],
                         'controllers'
                     ),
                 ]);
@@ -484,7 +514,7 @@ class CertificateManagementController extends AbstractController
                     [
                         '%host%' => $remoteHost,
                         '%port%' => $remotePort,
-                        '%container%' => 'hybrid-radsecproxy-1',
+                        '%container%' => self::RADSECPROXY_CONTAINER,
                         '%files%' => implode(', ', $missingFiles),
                     ],
                     'controllers'

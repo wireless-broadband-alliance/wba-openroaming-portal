@@ -139,3 +139,4 @@ tcp_radsecproxy_test_failed: 'Teste TCP falhou: não foi possível alcançar o h
 ssh_radsecproxy_auth_failed: 'Teste SSH falhou: autenticação para %host%:%port% com o utilizador %user% falhou'
 radsecproxy_test_passed: 'Teste Radsecproxy passou, tanto client.pem como key.pem estão presentes no container %container%'
 radsecproxy_test_failed: 'Teste Radsecproxy falhou no host %host%:%port% — ficheiro(s) em falta no container %container%: %files%'
+radsecproxy_container_not_running: 'O contentor %container% não está em execução no host %host%:%port%'

@@ -142,3 +142,4 @@ tcp_radsecproxy_test_failed: 'TCP test failed: cannot reach host %host% on port 
 ssh_radsecproxy_auth_failed: 'SSH test failed: authentication to %host%:%port% with user %user% failed'
 radsecproxy_test_passed: 'Radsecproxy test passed, both the client.pem and key.pem are present in container %container%'
 radsecproxy_test_failed: 'Radsecproxy test failed on host %host%:%port% — missing file(s) in container %container%: %files%'
+radsecproxy_container_not_running: 'Container %container% is not running on host %host%:%port%'
