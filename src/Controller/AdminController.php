@@ -223,17 +223,14 @@ class AdminController extends AbstractController
 
                 // Check if the setting is in the allowed settings for customization
                 if (
-                    in_array(
-                        $settingName,
-                        [
-                            SettingName::WELCOME_TEXT->value,
-                            SettingName::PAGE_TITLE->value,
-                            SettingName::WELCOME_DESCRIPTION->value,
-                            SettingName::ADDITIONAL_LABEL->value,
-                            SettingName::CONTACT_EMAIL->value,
-                            SettingName::CUSTOMER_LOGO_ENABLED->value
-                        ]
-                    )
+                    in_array($settingName, [
+                        SettingName::WELCOME_TEXT->value,
+                        SettingName::PAGE_TITLE->value,
+                        SettingName::WELCOME_DESCRIPTION->value,
+                        SettingName::ADDITIONAL_LABEL->value,
+                        SettingName::CONTACT_EMAIL->value,
+                        SettingName::CUSTOMER_LOGO_ENABLED->value
+                    ], true)
                 ) {
                     if (in_array($settingName, $this->getSettings->arraySettingsToTranslate(), true)) {
                         $locale = $language;
