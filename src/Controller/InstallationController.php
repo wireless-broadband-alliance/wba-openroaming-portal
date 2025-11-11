@@ -181,6 +181,8 @@ class InstallationController extends AbstractController
             if ($step === InstallationStep::ADMIN->value) {
                 return $this->redirectToRoute('admin_dashboard_settings_certs_installation_admin');
             }
+        } else {
+            return $this->redirectToRoute('admin_dashboard_settings_certs_installation_settings');
         }
         $data = $this->getSettings->getSettings();
 
@@ -233,8 +235,6 @@ class InstallationController extends AbstractController
                 );
             }
 
-            // TODO we need verification for trusted proxies too
-            // TODO ask Facha about turnstile verification
             // JWT Verification
             try {
                 $application = new Application($kernel);
@@ -329,6 +329,8 @@ class InstallationController extends AbstractController
             if ($step === InstallationStep::SETTINGS->value) {
                 return $this->redirectToRoute('admin_dashboard_settings_certs_installation_settings');
             }
+        } else {
+            return $this->redirectToRoute('admin_dashboard_settings_certs_installation_settings');
         }
 
         $data = $this->getSettings->getSettings();
@@ -392,6 +394,8 @@ class InstallationController extends AbstractController
             if ($step === InstallationStep::ADMIN->value && !($lastInstallation->getEmailAdmin())) {
                 return $this->redirectToRoute('admin_dashboard_settings_certs_installation_admin');
             }
+        } else {
+            return $this->redirectToRoute('admin_dashboard_settings_certs_installation_settings');
         }
 
         $data = $this->getSettings->getSettings();
@@ -497,6 +501,8 @@ class InstallationController extends AbstractController
             if ($step === InstallationStep::ADMIN->value) {
                 return $this->redirectToRoute('admin_dashboard_settings_certs_installation_admin');
             }
+        } else {
+            return $this->redirectToRoute('admin_dashboard_settings_certs_installation_settings');
         }
 
         $installationDTO = $this->installationService->fillDto($lastInstallation);
