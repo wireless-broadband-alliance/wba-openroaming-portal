@@ -16,6 +16,7 @@ use App\Repository\SettingTranslationRepository;
 use App\Repository\UserRepository;
 use App\Service\EventActions;
 use App\Service\GetSettings;
+use App\Service\HtmlSanitizerService;
 use App\Service\VerificationCodeEmailGenerator;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
@@ -43,7 +44,8 @@ class AdminController extends AbstractController
         private readonly VerificationCodeEmailGenerator $verificationCodeGenerator,
         private readonly EventRepository $eventRepository,
         private readonly TranslatorInterface $translator,
-        private readonly SettingTranslationRepository $settingTranslationRepository
+        private readonly SettingTranslationRepository $settingTranslationRepository,
+        private readonly HtmlSanitizerService $htmlSanitizerService,
     ) {
     }
 
@@ -235,9 +237,10 @@ class AdminController extends AbstractController
                     if (in_array($settingName, $this->getSettings->arraySettingsToTranslate(), true)) {
                         $locale = $language;
                         $submittedValue = $customTypeDTO->{$settingName} ?? null;
+                        $sanitizedValue = $this->htmlSanitizerService->sanitize($submittedValue);
                         if ($locale === LanguageType::EN->value) {
                             // Update the setting value
-                            $setting->setValue($submittedValue);
+                            $setting->setValue($sanitizedValue);
                         }
                         // Get the translated setting
                         $settingTranslation = $this->settingTranslationRepository->findOneBy(
@@ -246,7 +249,7 @@ class AdminController extends AbstractController
                         if ($settingName === SettingName::ADDITIONAL_LABEL->value && $submittedValue === null) {
                             $settingTranslation?->setTranslation('');
                         } else {
-                            $settingTranslation?->setTranslation($submittedValue);
+                            $settingTranslation?->setTranslation($sanitizedValue);
                         }
                     } else {
                         // Get the value from the submitted form data
