@@ -1,5 +1,4 @@
 @import 'custom.css';
-@import 'info_hover_details.css';
 
 @tailwind base;
 @tailwind components;
@@ -228,7 +227,7 @@
 }
 
 .landing-container {
-    @apply m-4 w-[95%] sm:w-[90%] lg:w-[85%] xl:w-[80%] 2xl:w-[75%] max-w-[1800px] bg-white rounded-xl shadow-2xl py-12 sm:py-16 lg:py-20 px-6 sm:px-10;
+    @apply bg-white shadow-2xl rounded-2xl w-[95%] sm:w-[90%] min-h-[80vh] sm:min-h-[85vh] pt-12 px-6 sm:px-10 flex flex-col;
 }
 
 .landing-header {
@@ -236,7 +235,7 @@
 }
 
 .landing-content {
-    @apply h-[60vh] overflow-y-auto p-2;
+    @apply h-[70vh] overflow-y-auto p-4;
 }
 
 .landing-language-selector {
