@@ -57,11 +57,10 @@ class TwoFAController extends AbstractController
     )]
     public function configure2FA(string $context): Response
     {
-        /** @var User $user */
         $user = $this->getUser();
 
         // Ensure the user is logged in
-        if (!($user instanceof User)) {
+        if (!$user instanceof User) {
             $this->addFlash(
                 'error',
                 $this->translator->trans('onlyAccessThisPageLoggedIn', [], 'controllers')
@@ -101,11 +100,10 @@ class TwoFAController extends AbstractController
         string $context,
         Request $request
     ): Response {
-        /** @var User $user */
         $user = $this->getUser();
 
-        // Ensure user is logged in
-        if (!($user instanceof User)) {
+        // Ensure the user is logged in
+        if (!$user instanceof User) {
             $this->addFlash(
                 'error',
                 $this->translator->trans('onlyAccessThisPageLoggedIn', [], 'controllers')
@@ -201,12 +199,11 @@ class TwoFAController extends AbstractController
     )]
     public function verify2FA(string $context, Request $request): Response
     {
-        /** @var User $user */
-        $user = $this->getUser();
         $session = $request->getSession();
+        $user = $this->getUser();
 
-        // If the user isn't logged in, redirect to the landing page
-        if (!($user instanceof User)) {
+        // Ensure the user is logged in
+        if (!$user instanceof User) {
             $this->addFlash(
                 'error',
                 $this->translator->trans('onlyAccessThisPageLoggedIn', [], 'controllers')
@@ -287,9 +284,9 @@ class TwoFAController extends AbstractController
     )]
     public function verify2FAPortal(string $context, Request $request): Response
     {
-        /** @var User $user */
         $user = $this->getUser();
-        if (!($user instanceof User)) {
+        // Ensure the user is logged in
+        if (!$user instanceof User) {
             $this->addFlash(
                 'error',
                 $this->translator->trans('onlyAccessThisPageLoggedIn', [], 'controllers')
@@ -368,10 +365,9 @@ class TwoFAController extends AbstractController
     )]
     public function disable2FA(string $context, Request $request): RedirectResponse
     {
-        /** @var User $user */
         $user = $this->getUser();
         // Ensure the user is logged in
-        if (!($user instanceof User)) {
+        if (!$user instanceof User) {
             $this->addFlash(
                 'error',
                 $this->translator->trans('onlyAccessThisPageLoggedIn', [], 'controllers')
@@ -460,11 +456,9 @@ class TwoFAController extends AbstractController
     )]
     public function disable2FALocal(string $context, Request $request): Response
     {
-        /** @var User $user */
         $user = $this->getUser();
-
         // Ensure the user is logged in
-        if (!($user instanceof User)) {
+        if (!$user instanceof User) {
             $this->addFlash(
                 'error',
                 $this->translator->trans('onlyAccessThisPageLoggedIn', [], 'controllers')
@@ -532,11 +526,9 @@ class TwoFAController extends AbstractController
     )]
     public function disable2FAApp(string $context, Request $request): Response
     {
-        /** @var User $user */
         $user = $this->getUser();
-
         // Ensure the user is logged in
-        if (!($user instanceof User)) {
+        if (!$user instanceof User) {
             $this->addFlash(
                 'error',
                 $this->translator->trans('onlyAccessThisPageLoggedIn', [], 'controllers')
@@ -601,11 +593,9 @@ class TwoFAController extends AbstractController
     )]
     public function twoFACodes(string $context, Request $request): Response
     {
-        /** @var User $user */
         $user = $this->getUser();
-
         // Ensure the user is logged in
-        if (!($user instanceof User)) {
+        if (!$user instanceof User) {
             $this->addFlash(
                 'error',
                 $this->translator->trans('onlyAccessThisPageLoggedIn', [], 'controllers')
@@ -659,11 +649,9 @@ class TwoFAController extends AbstractController
     )]
     public function saveCodes(string $context, Request $request): Response
     {
-        /** @var User $user */
         $user = $this->getUser();
-
         // Ensure the user is logged in
-        if (!($user instanceof User)) {
+        if (!$user instanceof User) {
             $this->addFlash(
                 'error',
                 $this->translator->trans('onlyAccessThisPageLoggedIn', [], 'controllers')
@@ -709,10 +697,9 @@ class TwoFAController extends AbstractController
     )]
     public function resendCode(string $context, string $type, Request $request): RedirectResponse
     {
-        /** @var User $user */
         $user = $this->getUser();
-
-        if (!($user instanceof User)) {
+        // Ensure the user is logged in
+        if (!$user instanceof User) {
             $this->addFlash(
                 'error',
                 $this->translator->trans('onlyAccessThisPageLoggedIn', [], 'controllers')
@@ -727,13 +714,13 @@ class TwoFAController extends AbstractController
             );
             return $this->redirectToRoute('app_dashboard_login');
         }
-        $timeToResetAttempts = (int) $this->settingRepository->findOneBy(
+        $timeToResetAttempts = (int)$this->settingRepository->findOneBy(
             ['name' => SettingName::TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS->value]
         )->getValue();
-        $nrAttempts = (int) $this->settingRepository->findOneBy(
+        $nrAttempts = (int)$this->settingRepository->findOneBy(
             ['name' => SettingName::TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE->value]
         )->getValue();
-        $timeIntervalToResendCode = (int) $this->settingRepository->findOneBy(
+        $timeIntervalToResendCode = (int)$this->settingRepository->findOneBy(
             ['name' => SettingName::TWO_FACTOR_AUTH_RESEND_INTERVAL->value]
         )->getValue();
         $limitTime = new DateTime();
@@ -844,11 +831,9 @@ class TwoFAController extends AbstractController
     )]
     public function generateCode(string $context, Request $request): Response
     {
-        /** @var User $user */
         $user = $this->getUser();
-
         // Ensure the user is logged in
-        if (!($user instanceof User)) {
+        if (!$user instanceof User) {
             $this->addFlash(
                 'error',
                 $this->translator->trans('onlyAccessThisPageLoggedIn', [], 'controllers')
@@ -916,11 +901,9 @@ class TwoFAController extends AbstractController
     )]
     public function downloadCodes(string $context): Response
     {
-        /** @var User $user */
         $user = $this->getUser();
-
         // Ensure the user is logged in
-        if (!($user instanceof User)) {
+        if (!$user instanceof User) {
             $this->addFlash(
                 'error',
                 $this->translator->trans('onlyAccessThisPageLoggedIn', [], 'controllers')
@@ -969,11 +952,9 @@ class TwoFAController extends AbstractController
     )]
     public function firstSetupPortal(string $context, Request $request): RedirectResponse
     {
-        /** @var User $user */
         $user = $this->getUser();
-
         // Ensure the user is logged in
-        if (!($user instanceof User)) {
+        if (!$user instanceof User) {
             $this->addFlash(
                 'error',
                 $this->translator->trans('onlyAccessThisPageLoggedIn', [], 'controllers')
@@ -1062,11 +1043,9 @@ class TwoFAController extends AbstractController
     )]
     public function firstVerificationLocal(string $context, Request $request): Response
     {
-        /** @var User $user */
         $user = $this->getUser();
-
         // Ensure the user is logged in
-        if (!($user instanceof User)) {
+        if (!$user instanceof User) {
             $this->addFlash(
                 'error',
                 $this->translator->trans('onlyAccessThisPageLoggedIn', [], 'controllers')
@@ -1182,10 +1161,9 @@ class TwoFAController extends AbstractController
     )]
     public function swapMethod2FADisableLocal(string $context, Request $request): Response
     {
-        /** @var User $user */
         $user = $this->getUser();
         // Ensure the user is logged in
-        if (!($user instanceof User)) {
+        if (!$user instanceof User) {
             $this->addFlash(
                 'error',
                 $this->translator->trans('onlyAccessThisPageLoggedIn', [], 'controllers')
@@ -1262,11 +1240,9 @@ class TwoFAController extends AbstractController
     )]
     public function generateCodeSwapMethod(string $context, Request $request): Response
     {
-        /** @var User $user */
         $user = $this->getUser();
-
         // Ensure the user is logged in
-        if (!($user instanceof User)) {
+        if (!$user instanceof User) {
             $this->addFlash(
                 'error',
                 $this->translator->trans('onlyAccessThisPageLoggedIn', [], 'controllers')
@@ -1329,11 +1305,9 @@ class TwoFAController extends AbstractController
     )]
     public function swapMethod2FADisableTOTP(string $context, Request $request): Response
     {
-        /** @var User $user */
         $user = $this->getUser();
-
         // Ensure the user is logged in
-        if (!($user instanceof User)) {
+        if (!$user instanceof User) {
             $this->addFlash(
                 'error',
                 $this->translator->trans('onlyAccessThisPageLoggedIn', [], 'controllers')
