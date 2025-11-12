@@ -258,7 +258,7 @@ class AuthSettingsTypeDTO
         $this->authMethodRegisterDescription =
             $data[SettingName::AUTH_METHOD_REGISTER_DESCRIPTION->value]['value'] ?? null;
         $this->profileLimitDateEmail = (int) ($data[SettingName::PROFILE_LIMIT_DATE_EMAIL->value]['value'] ?? null);
-        $this->emailTimerResend = (int) ($data[SettingName::EMAIL_TIMER_RESEND->value]['value']?? null);
+        $this->emailTimerResend = (int) ($data[SettingName::EMAIL_TIMER_RESEND->value]['value'] ?? null);
         $this->linkValidity = (int) ($data[SettingName::LINK_VALIDITY->value]['value'] ?? null);
 
         $this->authMethodLoginTraditionalEnabled =
