@@ -152,7 +152,7 @@ class AuthSettingsTypeDTO
         and value != '')",
         message: "fieldCannotBeBlank"
     )]
-    public ?int $LinkValidity = null;
+    public ?int $linkValidity = null;
 
     // Login
     #[Assert\Choice(
@@ -259,7 +259,7 @@ class AuthSettingsTypeDTO
             $data[SettingName::AUTH_METHOD_REGISTER_DESCRIPTION->value]['value'] ?? null;
         $this->profileLimitDateEmail = (int) ($data[SettingName::PROFILE_LIMIT_DATE_EMAIL->value]['value'] ?? null);
         $this->emailTimerResend = (int) ($data[SettingName::EMAIL_TIMER_RESEND->value]['value']?? null);
-        $this->LinkValidity = (int) ($data[SettingName::LINK_VALIDITY->value]['value'] ?? null);
+        $this->linkValidity = (int) ($data[SettingName::LINK_VALIDITY->value]['value'] ?? null);
 
         $this->authMethodLoginTraditionalEnabled =
             $data[SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED->value]['value'] ?? null;
@@ -345,7 +345,7 @@ class AuthSettingsTypeDTO
             ],
             SettingName::PROFILE_LIMIT_DATE_EMAIL->value => ['value' => $this->profileLimitDateEmail],
             SettingName::EMAIL_TIMER_RESEND->value => ['value' => $this->emailTimerResend],
-            SettingName::LINK_VALIDITY->value => ['value' => $this->LinkValidity],
+            SettingName::LINK_VALIDITY->value => ['value' => $this->linkValidity],
 
             SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED->value => [
                 'value' =>
