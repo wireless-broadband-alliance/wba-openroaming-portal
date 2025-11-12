@@ -192,11 +192,11 @@
         {{ include('/dashboard/shared/settings_actions/_description.html.twig', {description: data.LINK_VALIDITY.description}) }}
 
         <div class="flex items-center space-x-2 mt-5">
-            {{ form_widget(form.LinkValidity, {attr: {class: 'form-widget', 'data-radio-card-target': 'input'}}) }}
+            {{ form_widget(form.linkValidity, {attr: {class: 'form-widget', 'data-radio-card-target': 'input'}}) }}
         </div>
 
         <div class="mt-2 -mb-2 text-center text-red-500 text-base">
-            {{ form_errors(form.LinkValidity) }}
+            {{ form_errors(form.linkValidity) }}
         </div>
     </div>
 
