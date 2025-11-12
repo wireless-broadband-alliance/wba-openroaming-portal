@@ -1066,7 +1066,7 @@ class TwoFAController extends AbstractController
         $user = $this->getUser();
 
         // Ensure the user is logged in
-        if (!$this->isGranted('IS_AUTHENTICATED_FULLY')) {
+        if (!($user instanceof User)) {
             $this->addFlash(
                 'error',
                 $this->translator->trans('onlyAccessThisPageLoggedIn', [], 'controllers')
@@ -1184,9 +1184,8 @@ class TwoFAController extends AbstractController
     {
         /** @var User $user */
         $user = $this->getUser();
-
         // Ensure the user is logged in
-        if (!$this->isGranted('IS_AUTHENTICATED_FULLY')) {
+        if (!($user instanceof User)) {
             $this->addFlash(
                 'error',
                 $this->translator->trans('onlyAccessThisPageLoggedIn', [], 'controllers')
@@ -1267,7 +1266,7 @@ class TwoFAController extends AbstractController
         $user = $this->getUser();
 
         // Ensure the user is logged in
-        if (!$this->isGranted('IS_AUTHENTICATED_FULLY')) {
+        if (!($user instanceof User)) {
             $this->addFlash(
                 'error',
                 $this->translator->trans('onlyAccessThisPageLoggedIn', [], 'controllers')
@@ -1334,7 +1333,7 @@ class TwoFAController extends AbstractController
         $user = $this->getUser();
 
         // Ensure the user is logged in
-        if (!$this->isGranted('IS_AUTHENTICATED_FULLY')) {
+        if (!($user instanceof User)) {
             $this->addFlash(
                 'error',
                 $this->translator->trans('onlyAccessThisPageLoggedIn', [], 'controllers')
