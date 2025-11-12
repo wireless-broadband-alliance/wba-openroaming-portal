@@ -46,4 +46,3 @@ readonly class UserProviderDetectorResolverService
         ];
     }
 }
-
