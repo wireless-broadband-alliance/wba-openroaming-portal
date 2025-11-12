@@ -24,6 +24,7 @@ use App\Service\EmailGenerator;
 use App\Service\SendSMS;
 use App\Service\TwoFAService;
 use App\Service\UserCreationService;
+use App\Service\UserProviderDetectorResolverService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
@@ -69,6 +70,7 @@ class SecurityController extends AbstractController
         private readonly EmailGenerator $emailGenerator,
         private readonly UserCreationService $userCreationService,
         private readonly TokenStorageInterface $tokenStorage,
+        private readonly UserProviderDetectorResolverService $userProviderDetectorResolverService,
     ) {
     }
 
@@ -96,20 +98,26 @@ class SecurityController extends AbstractController
         }
 
         // Last username entered by the user (this will be empty if the user clicked the verification link)
+        $uuid = $request->request->get('uuid') ?? $request->query->get('uuid');
         $email = $request->request->get('email') ?? $request->query->get('email');
         $phoneNumber = $request->request->get('phoneNumber') ?? $request->query->get('phoneNumber');
 
-        if (!empty($email)) {
-            $lastUsername = $email;
-        } elseif (!empty($phoneNumber)) {
-            $lastUsername = $phoneNumber;
-        } else {
-            // Fallback to Symfony's AuthenticationUtils
-            $lastUsername = $authenticationUtils->getLastUsername();
+        $resolved = null;
+        if ($uuid) {
+            $resolved = $this->userProviderDetectorResolverService->resolve($uuid);
         }
 
         // Create the DTO with injected default regions and required password for this login method
         $dto = new LoginChoiceDTO();
+        if (!empty($email)) {
+            $dto->email = $email;
+        } elseif (!empty($phoneNumber)) {
+            $dto->phoneNumber = $phoneNumber;
+        } elseif ($resolved && $resolved['uuidType'] === UserProvider::EMAIL->value) {
+            $dto->email = $uuid;
+        } elseif ($resolved && $resolved['uuidType'] === UserProvider::PHONE_NUMBER->value) {
+            $dto->phoneNumber = $uuid;
+        }
 
         $emailMethod = $data[SettingName::AUTH_METHOD_REGISTER_ENABLED->value]['value'];
         $phoneNumberMethod = $data[SettingName::AUTH_METHOD_SMS_REGISTER_ENABLED->value]['value'];
@@ -145,7 +153,6 @@ class SecurityController extends AbstractController
         }
 
         return $this->render('landing/login/login_landing.html.twig', [
-            'last_username' => $lastUsername,
             'error' => $error,
             'data' => $data,
             'form' => $form,
