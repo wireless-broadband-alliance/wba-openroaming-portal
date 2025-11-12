@@ -32,6 +32,7 @@ use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 class ProfileController extends AbstractController
@@ -53,6 +54,7 @@ class ProfileController extends AbstractController
      * @throws Exception
      */
     #[Route('/profile/android', name: 'profile_android')]
+    #[IsGranted("ROLE_USER")]
     public function profileAndroid(
         RadiusUserRepository $radiusUserRepository,
         UserRadiusProfileRepository $radiusProfileRepository,
@@ -64,9 +66,6 @@ class ProfileController extends AbstractController
 
         /** @var User $user */
         $user = $this->getUser();
-        if (!($user instanceof User)) {
-            return $this->redirectToRoute('app_login');
-        }
 
         if ($this->checkUserStatus($user)) {
             return $this->redirectToRoute('app_landing');
@@ -173,6 +172,7 @@ class ProfileController extends AbstractController
      * @throws RandomException
      */
     #[Route('/profile/ios.mobileconfig', name: 'profile_ios')]
+    #[IsGranted("ROLE_USER")]
     public function profileIos(
         RadiusUserRepository $radiusUserRepository,
         UserRadiusProfileRepository $radiusProfileRepository,
@@ -180,9 +180,6 @@ class ProfileController extends AbstractController
     ): Response {
         /** @var User $user */
         $user = $this->getUser();
-        if (!($user instanceof User)) {
-            return $this->redirectToRoute('app_login');
-        }
 
         if ($this->checkUserStatus($user)) {
             return $this->redirectToRoute('app_landing');
@@ -332,6 +329,7 @@ class ProfileController extends AbstractController
      * @throws InvalidArgumentException
      */
     #[Route('/profile/windows', name: 'profile_windows')]
+    #[IsGranted("ROLE_USER")]
     public function profileWindows(
         RadiusUserRepository $radiusUserRepository,
         UrlGeneratorInterface $urlGenerator,
@@ -340,9 +338,6 @@ class ProfileController extends AbstractController
     ): Response {
         /** @var User $user */
         $user = $this->getUser();
-        if (!($user instanceof User)) {
-            return $this->redirectToRoute('app_login');
-        }
 
         if ($this->checkUserStatus($user)) {
             return $this->redirectToRoute('app_landing');
