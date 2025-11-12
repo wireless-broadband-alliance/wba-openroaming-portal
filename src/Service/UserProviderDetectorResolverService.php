@@ -15,14 +15,13 @@ readonly class UserProviderDetectorResolverService
     /**
      * Resolves the username and login type from uuid, email, or phone number.
      *
-     * @param string $uuid
      * @return array{uuidType: string}
      */
     public function resolve(string $uuid): array
     {
         $uuidType = null;
 
-        if ($uuid) {
+        if ($uuid !== '' && $uuid !== '0') {
             $user = $this->userRepository->findOneBy(['uuid' => $uuid]);
 
             if ($user) {
