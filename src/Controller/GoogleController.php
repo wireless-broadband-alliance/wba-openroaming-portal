@@ -118,6 +118,7 @@ class GoogleController extends AbstractController
         $client = $this->clientRegistry->getClient('google');
 
         $code = $request->query->get('code');
+        // For testing and api debugging pls check this dd($code);
         if ($code === null) {
             $this->addFlash(
                 'error',
