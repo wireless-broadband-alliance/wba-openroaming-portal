@@ -114,7 +114,7 @@ class SecurityController extends AbstractController
         // Create the DTO with injected default regions and required password for this login method
         $dto = new LoginChoiceDTO();
         $phoneUtil = PhoneNumberUtil::getInstance();
-        $defaultRegion = $data[SettingName::DEFAULT_REGION_PHONE_INPUTS->value]['value'] ?? 'PT';
+        $defaultRegion = $data[SettingName::DEFAULT_REGION_PHONE_INPUTS->value]['value'];
 
         if (!empty($email)) {
             $dto->email = $email;
