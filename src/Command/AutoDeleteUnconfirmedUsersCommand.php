@@ -5,6 +5,7 @@ namespace App\Command;
 use App\Enum\SettingName;
 use App\Repository\SettingRepository;
 use App\Repository\UserExternalAuthRepository;
+use App\Repository\UserRadiusProfileRepository;
 use App\Repository\UserRepository;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
@@ -27,6 +28,7 @@ class AutoDeleteUnconfirmedUsersCommand extends Command
         private readonly UserRepository $userRepository,
         private readonly UserExternalAuthRepository $userExternalAuthRepository,
         private readonly SettingRepository $settingRepository,
+        private readonly UserRadiusProfileRepository $userRadiusProfileRepository,
     ) {
         parent::__construct();
     }
@@ -54,8 +56,7 @@ class AutoDeleteUnconfirmedUsersCommand extends Command
             $limitTime->modify("+{$time} hours");
 
             $realTime = new DateTime();
-
-            if ($limitTime < $realTime && !($user->isVerified() && !$user->isDisabled())) {
+            if ($limitTime < $realTime && !($user->isVerified() && !$user->isDisabled()) & !$user->getDeletedAt()) {
                 $uuid = $user->getUuid();
                 if (!(u($uuid)->containsAny('-DEMO-'))) {
                     // Remove related external auths
@@ -65,7 +66,7 @@ class AutoDeleteUnconfirmedUsersCommand extends Command
                     }
 
                     // Remove related radius profiles
-                    $userRadiusProfiles = $this->userExternalAuthRepository->findBy(['user' => $user]);
+                    $userRadiusProfiles = $this->userRadiusProfileRepository->findBy(['user' => $user]);
                     foreach ($userRadiusProfiles as $userRadiusProfile) {
                         $this->entityManager->remove($userRadiusProfile);
                     }
@@ -97,8 +98,6 @@ class AutoDeleteUnconfirmedUsersCommand extends Command
                 "<info>Success:</info> $deletedCount user(s) with unverified accounts have been deleted."
             );
         } catch (Exception $e) {
-            // Handle any exceptions and roll back in case of an error
-            $this->entityManager->rollback();
             $output->writeln('<error>An error occurred:</error> ' . $e->getMessage());
             return Command::FAILURE;
         }
