@@ -28,7 +28,9 @@ use App\Service\UserProviderDetectorResolverService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
+use libphonenumber\NumberParseException;
 use libphonenumber\PhoneNumber;
+use libphonenumber\PhoneNumberUtil;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Random\RandomException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -100,9 +102,9 @@ class SecurityController extends AbstractController
         }
 
         // Last username entered by the user (this will be empty if the user clicked the verification link)
-        $uuid = (string) $request->request->get('uuid');
-        $email = (string) $request->request->get('email');
-        $phoneNumber = $request->request->get('phoneNumber');
+        $uuid = (string)$request->request->get('uuid');
+        $email = (string)$request->request->get('email');
+        $phoneNumber = $request->request->get('phoneNumber') ?? $request->query->get('phoneNumber');
 
         $resolved = null;
         if ($uuid) {
@@ -111,14 +113,25 @@ class SecurityController extends AbstractController
 
         // Create the DTO with injected default regions and required password for this login method
         $dto = new LoginChoiceDTO();
+        $phoneUtil = PhoneNumberUtil::getInstance();
+        $defaultRegion = $data[SettingName::DEFAULT_REGION_PHONE_INPUTS->value]['value'] ?? 'PT';
+
         if (!empty($email)) {
             $dto->email = $email;
         } elseif (!empty($phoneNumber)) {
-            $dto->phoneNumber = $phoneNumber;
+            try {
+                $dto->phoneNumber = $phoneUtil->parse((string)$phoneNumber, $defaultRegion);
+            } catch (NumberParseException) {
+                $dto->phoneNumber = null;
+            }
         } elseif ($resolved && $resolved['uuidType'] === UserProvider::EMAIL->value) {
             $dto->email = $uuid;
         } elseif ($resolved && $resolved['uuidType'] === UserProvider::PHONE_NUMBER->value) {
-            $dto->phoneNumber = $uuid;
+            try {
+                $dto->phoneNumber = $phoneUtil->parse($uuid, $defaultRegion);
+            } catch (NumberParseException) {
+                $dto->phoneNumber = null;
+            }
         }
 
         $emailMethod = $data[SettingName::AUTH_METHOD_REGISTER_ENABLED->value]['value'];
