@@ -64,7 +64,7 @@ class ProfileController extends AbstractController
 
         /** @var User $user */
         $user = $this->getUser();
-        if (!$this->isGranted('IS_AUTHENTICATED_FULLY')) {
+        if (!($user instanceof User)) {
             return $this->redirectToRoute('app_login');
         }
 
@@ -180,7 +180,7 @@ class ProfileController extends AbstractController
     ): Response {
         /** @var User $user */
         $user = $this->getUser();
-        if (!$this->isGranted('IS_AUTHENTICATED_FULLY')) {
+        if (!($user instanceof User)) {
             return $this->redirectToRoute('app_login');
         }
 
@@ -340,7 +340,7 @@ class ProfileController extends AbstractController
     ): Response {
         /** @var User $user */
         $user = $this->getUser();
-        if (!$this->isGranted('IS_AUTHENTICATED_FULLY')) {
+        if (!($user instanceof User)) {
             return $this->redirectToRoute('app_login');
         }
 
