@@ -107,7 +107,7 @@ class SecurityController extends AbstractController
         $phoneNumber = $request->request->get('phoneNumber') ?? $request->query->get('phoneNumber');
 
         $resolved = null;
-        if ($uuid) {
+        if ($uuid !== '' && $uuid !== '0') {
             $resolved = $this->userProviderDetectorResolverService->resolve($uuid);
         }
 
@@ -116,7 +116,7 @@ class SecurityController extends AbstractController
         $phoneUtil = PhoneNumberUtil::getInstance();
         $defaultRegion = $data[SettingName::DEFAULT_REGION_PHONE_INPUTS->value]['value'];
 
-        if (!empty($email)) {
+        if ($email !== '' && $email !== '0') {
             $dto->email = $email;
         } elseif (!empty($phoneNumber)) {
             try {
