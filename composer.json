@@ -85,8 +85,7 @@
     "twig/extra-bundle": "^2.12|^3.0",
     "twig/twig": "^2.12|^3.0",
     "vich/uploader-bundle": "^2.8",
-    "vincentlanglet/twig-cs-fixer": "^3.5",
-    "ext-ssh2": "*"
+    "vincentlanglet/twig-cs-fixer": "^3.5"
   },
   "config": {
     "allow-plugins": {
