@@ -4,6 +4,7 @@ namespace App\DTO;
 
 use App\Entity\User;
 use DateTimeInterface;
+use libphonenumber\PhoneNumber;
 use Symfony\Component\Validator\Constraints as Assert;
 use Misd\PhoneNumberBundle\Validator\Constraints\PhoneNumber as AssertPhoneNumber;
 
@@ -22,9 +23,9 @@ class UserUpdateDTO
     #[Assert\Length(max: 100)]
     public ?string $lastName = null;
 
-    #[Assert\Length(max: 20)]
+
     #[AssertPhoneNumber]
-    public mixed $phoneNumber = null;
+    public ?PhoneNumber $phoneNumber = null;
 
     public bool $isVerified = false;
 

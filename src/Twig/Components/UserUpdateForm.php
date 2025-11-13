@@ -4,6 +4,8 @@ namespace App\Twig\Components;
 
 use App\DTO\UserUpdateDTO;
 use App\Form\UserUpdateType;
+use libphonenumber\NumberParseException;
+use libphonenumber\PhoneNumberUtil;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormInterface;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
@@ -24,6 +26,12 @@ final class UserUpdateForm extends AbstractController
     public UserUpdateDTO|null $userUpdateDTO = null;
 
     /**
+     * Store the raw phone number string separately
+     */
+    #[LiveProp]
+    public string|null $rawPhoneNumber = null;
+
+    /**
      * @return FormInterface<mixed>
      */
     #[\Override]
@@ -35,6 +43,19 @@ final class UserUpdateForm extends AbstractController
     #[LiveAction]
     public function validate(): void
     {
+
+        // Parse the raw phone number string into a PhoneNumber object
+        if (!in_array($this->rawPhoneNumber, [null, '', '0'], true)) {
+            try {
+                $phoneUtil = PhoneNumberUtil::getInstance();
+                $this->userUpdateDTO->phoneNumber = $phoneUtil->parse(
+                    $this->rawPhoneNumber,
+                    'US'
+                );
+            } catch (NumberParseException) {
+                $this->userUpdateDTO->phoneNumber = null;
+            }
+        }
         // Rebuild the form with current DTO data
         $form = $this->createForm(UserUpdateType::class, $this->userUpdateDTO);
 
