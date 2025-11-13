@@ -372,8 +372,12 @@ readonly class Statistics
             $period = match ($granularity) {
                 'year' => $eventDateTime->format('Y'),
                 'month' => $eventDateTime->format('Y-m'),
-                'week' => $eventDateTime->format('o-W'),
-                default => $eventDateTime->format('Y-m-d'),
+                'week' => sprintf(
+                    '%s – %s',
+                    $eventDateTime->modify('monday this week')->format('Y-m-d'),
+                    (clone $eventDateTime)->modify('sunday this week')->format('Y-m-d')
+                ),
+              default => $eventDateTime->format('Y-m-d'),
             };
 
             if (!isset($authsCounts['Accepted'][$period])) {
@@ -420,8 +424,12 @@ readonly class Statistics
             $groupKey = match ($granularity) {
                 'year' => $date->format('Y'),
                 'month' => $date->format('Y-m'),
-                'week' => $date->format('o-W'),
-                default => $date->format('Y-m-d'),
+                'week' => sprintf(
+                    '%s – %s',
+                    (clone $date)->modify('monday this week')->format('Y-m-d'),
+                    (clone $date)->modify('sunday this week')->format('Y-m-d'),
+                ),
+              default => $date->format('Y-m-d'),
             };
 
             if ($realm === '') {
@@ -506,7 +514,11 @@ readonly class Statistics
             $groupKey = match ($granularity) {
                 'year' => $date->format('Y'),
                 'month' => $date->format('Y-m'),
-                'week' => $date->format('o-W'),
+                'week' => sprintf(
+                    '%s – %s',
+                    (clone $date)->modify('monday this week')->format('Y-m-d'),
+                    (clone $date)->modify('sunday this week')->format('Y-m-d'),
+                ),
                 default => $date->format('Y-m-d'),
             };
 
@@ -568,7 +580,11 @@ readonly class Statistics
             $groupKey = match ($granularity) {
                 'year' => $date->format('Y'),
                 'month' => $date->format('Y-m'),
-                'week' => $date->format('o-W'),
+                'week' => sprintf(
+                    '%s – %s',
+                    (clone $date)->modify('monday this week')->format('Y-m-d'),
+                    (clone $date)->modify('sunday this week')->format('Y-m-d'),
+                ),
                 default => $date->format('Y-m-d'),
             };
 
@@ -627,7 +643,11 @@ readonly class Statistics
             $groupKey = match ($granularity) {
                 'year' => $date->format('Y'),
                 'month' => $date->format('Y-m'),
-                'week' => $date->format('o-W'),
+                'week' => sprintf(
+                    '%s – %s',
+                    (clone $date)->modify('monday this week')->format('Y-m-d'),
+                    (clone $date)->modify('sunday this week')->format('Y-m-d'),
+                ),
                 default => $date->format('Y-m-d'),
             };
 
