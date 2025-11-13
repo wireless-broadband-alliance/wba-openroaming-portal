@@ -377,7 +377,7 @@ readonly class Statistics
                     $eventDateTime->modify('monday this week')->format('Y-m-d'),
                     (clone $eventDateTime)->modify('sunday this week')->format('Y-m-d')
                 ),
-              default => $eventDateTime->format('Y-m-d'),
+                default => $eventDateTime->format('Y-m-d'),
             };
 
             if (!isset($authsCounts['Accepted'][$period])) {
@@ -429,7 +429,7 @@ readonly class Statistics
                     (clone $date)->modify('monday this week')->format('Y-m-d'),
                     (clone $date)->modify('sunday this week')->format('Y-m-d'),
                 ),
-              default => $date->format('Y-m-d'),
+                default => $date->format('Y-m-d'),
             };
 
             if ($realm === '') {
