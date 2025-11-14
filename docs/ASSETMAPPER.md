@@ -18,7 +18,7 @@ php bin/console tailwind:build -w &
 ```
 
 > __Tip:__
-> If changes to your assets aren't visible after running `asset-map:compile`, try clearing the `public/assets/` folder:
+> If changes to your assets aren't visible after running `asset-map:compile`, try clearing the `assets/vendor/` folder:
 >
 > ```sh
 > rm -rf assets/vendor/*
