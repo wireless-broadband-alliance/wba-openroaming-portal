@@ -382,6 +382,7 @@ class CertificateManagementController extends AbstractController
             // Clear previous warnings (Doctrine DBAL deprecation!)
             error_clear_last();
 
+            // TODO FIX THIS PROBLEM LATER FINALLY I KNOW WHAT TODO -> openssl s_client -connect 192.168.1.140:2083 -tls1_2
             $cryptoEnabled = @stream_socket_enable_crypto(
                 $connection,
                 true,
