@@ -4,7 +4,6 @@ namespace App\DTO;
 
 class InstallationProgressDTO
 {
-
     public ?string $installationState = null;
 
     public ?string $dbOpenRoamingUserName = null;
@@ -35,5 +34,4 @@ class InstallationProgressDTO
     public ?\DateTimeInterface $updatedAt = null;
 
     public ?\DateTimeInterface $createdAt = null;
-
 }

@@ -359,102 +359,68 @@ class CertificateManagementController extends AbstractController
         $processEntity->setUpdatedAt(new DateTimeImmutable());
         $this->entityManager->persist($processEntity);
         $this->entityManager->flush();
+        $cafile = $this->getParameter('kernel.project_dir') . '/config/wba_chain/ca-bundle-wba.pem';
 
         try {
-            // Test TCP
-            $connection = @fsockopen($remoteHost, $remotePort, $errno, $errstr);
-
-            if (!$connection) {
+            if (!file_exists($cafile)) {
                 return new JsonResponse([
                     'status' => 'error',
-                    'message' => 'TCP Connection Failed',
+                    'message' => 'CA bundle file not found',
+                    'path' => realpath($cafile)
+                ], Response::HTTP_INTERNAL_SERVER_ERROR);
+            }
+
+            // Create the SSL context
+            $context = stream_context_create([
+                'ssl' => [
+                    'verify_peer' => true,
+                    'verify_peer_name' => true,
+                    'allow_self_signed' => false,
+                    'cafile' => $cafile,
+                    'crypto_method' => STREAM_CRYPTO_METHOD_TLS_CLIENT
+                ]
+            ]);
+
+            // Open the TLS Connection
+            $connection = @stream_socket_client(
+                "tls://{$remoteHost}:{$remotePort}",
+                $errno,
+                $errstr,
+                15,
+                STREAM_CLIENT_CONNECT,
+                $context
+            );
+
+            if (!$connection) {
+                // Update DB when test fails
+                $this->certificateRadsecproxyCommandsService->updateRadsecproxyTestResult(
+                    $processEntity,
+                    CertificateTestResult::FAILED
+                );
+
+                return new JsonResponse([
+                    'status' => 'error',
+                    'message' => 'TLS Handshake Failed',
                     'details' => [
                         'host' => $remoteHost,
                         'port' => $remotePort,
                         'error' => $errstr,
-                        'code'  => $errno,
-                    ]
+                        'code' => $errno,
+                    ],
                 ], Response::HTTP_SERVICE_UNAVAILABLE);
             }
-
-            // Try TLS handshake
-            stream_set_blocking($connection, true);
-            // Clear previous warnings (Doctrine DBAL deprecation!)
-            error_clear_last();
-
-            // TODO FIX THIS PROBLEM LATER FINALLY I KNOW WHAT TODO -> openssl s_client -connect 192.168.1.140:2083 -tls1_2
-            $cryptoEnabled = @stream_socket_enable_crypto(
-                $connection,
-                true,
-                STREAM_CRYPTO_METHOD_TLS_CLIENT
-            );
-
-            $err = error_get_last();
 
             fclose($connection);
 
-            if ($cryptoEnabled !== true) {
-                return new JsonResponse([
-                    'status' => 'error',
-                    'message' => "TLS handshake failed",
-                    'debug' => [
-                        'host' => $remoteHost,
-                        'port' => $remotePort,
-                        'tls_error' => $err,
-                    ]
-                ], Response::HTTP_SERVICE_UNAVAILABLE);
-            }
-
-            return new JsonResponse([
-                'status' => 'success',
-                'message' => 'TLS handshake OK'
-            ]);
-
-            // Check cert files inside local container
-            $containerName = 'hybrid-radsecproxy-1';
-            $path = '/etc/radsecproxy/certs/';
-
-            $command = sprintf(
-                "docker exec %s sh -c 'ls %s'",
-                escapeshellarg($containerName),
-                escapeshellarg($path)
-            );
-
-            $output = shell_exec($command);
-
-            $hasClient = str_contains($output, 'client.pem');
-            $hasKey = str_contains($output, 'key.pem');
-
-            if ($hasClient && $hasKey) {
-                $this->certificateRadsecproxyCommandsService->updateRadsecproxyTestResult(
-                    $processEntity,
-                    CertificateTestResult::PASSED
-                );
-
-                return new JsonResponse([
-                    'status' => 'success',
-                    'message' => 'TLS connection OK and certificate files found.',
-                ]);
-            }
-
-            // Missing file(s)
-            $missing = [];
-            if (!$hasClient) {
-                $missing[] = 'client.pem';
-            }
-            if (!$hasKey) {
-                $missing[] = 'key.pem';
-            }
-
+            // Update DB when test passes
             $this->certificateRadsecproxyCommandsService->updateRadsecproxyTestResult(
                 $processEntity,
-                CertificateTestResult::FAILED
+                CertificateTestResult::PASSED
             );
-
             return new JsonResponse([
-                'status' => 'error',
-                'message' => 'Missing files: ' . implode(', ', $missing),
-            ], Response::HTTP_SERVICE_UNAVAILABLE);
+                'status' => 'success',
+                'message' => 'TLS handshake OK using WBA CA bundle'
+            ]);
         } catch (Throwable $e) {
             // Update DB when test fails
             $this->certificateRadsecproxyCommandsService->updateRadsecproxyTestResult(
