@@ -11,9 +11,6 @@ export default class extends Controller {
         // inputs:
         "hostInput",
         "portInput",
-        "userInput",
-        "passwordInput",
-        "timeoutInput"
     ];
 
     async runTest(event) {
@@ -28,10 +25,6 @@ export default class extends Controller {
         // gather values from inputs
         const remoteHost = this.hostInputTarget?.value?.trim() || "";
         const remotePort = parseInt(this.portInputTarget?.value || "22", 10);
-        const remoteUser = this.userInputTarget?.value?.trim() || "";
-        const remotePassword = this.passwordInputTarget?.value?.trim() || "";
-
-        const timeout = parseInt(this.timeoutInputTarget?.value || "5", 10);
 
         // very small client-side validation
         if (!remoteHost) {
@@ -40,10 +33,6 @@ export default class extends Controller {
         }
         if (!Number.isFinite(remotePort) || remotePort <= 0) {
             this.showResult({ status: "error", message: "Please provide a valid port." });
-            return;
-        }
-        if (!remoteUser) {
-            this.showResult({ status: "error", message: "Please provide an SSH user." });
             return;
         }
 
@@ -58,9 +47,6 @@ export default class extends Controller {
             const payload = {
                 remote_host: remoteHost,
                 remote_port: remotePort,
-                remote_user: remoteUser,
-                remote_password: remotePassword,
-                timeout: timeout
             };
 
             const response = await fetch(url, {

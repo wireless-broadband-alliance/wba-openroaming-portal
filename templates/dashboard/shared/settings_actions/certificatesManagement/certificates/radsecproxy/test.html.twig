@@ -21,8 +21,8 @@
             </p>
         </div>
 
-        {# Details for the SSH #}
-        <div class="grid grid-cols-1 md:grid-cols-5 gap-3 items-end">
+        {# Details for the TLS #}
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 items-end">
             <div>
                 <label class="block text-xs font-medium text-gray-600">
                     {{ 'host'|trans({}, 'test_radsec') }}
@@ -43,39 +43,6 @@
                            class="form-widget mt-1 block w-full rounded-md border-gray-200 p-2"
                            placeholder="22"
                            value="{{ process.getRemotePort() ?? 22 }}">
-                </label>
-            </div>
-
-            <div>
-                <label class="block text-xs font-medium text-gray-600">
-                    {{ 'user'|trans({}, 'test_radsec') }}
-                    <input type="text"
-                           data-test-certificates-target="userInput"
-                           class="form-widget mt-1 block w-full rounded-md border-gray-200 p-2"
-                           placeholder="SSH User"
-                           value="{{ process.getRemoteUser() ?? '' }}">
-                </label>
-            </div>
-
-            <div>
-                <label class="block text-xs font-medium text-gray-600">
-                    {{ 'password'|trans({}, 'test_radsec') }}
-                    <input type="password"
-                           data-test-certificates-target="passwordInput"
-                           class="form-widget mt-1 block w-full rounded-md border-gray-200 p-2"
-                           placeholder="SSH password"
-                    >
-                </label>
-            </div>
-
-            <div>
-                <label class="block text-xs font-medium text-gray-600">
-                    {{ 'timeOut'|trans({}, 'test_radsec') }}
-                    <input type="number"
-                           data-test-certificates-target="timeoutInput"
-                           class="form-widget mt-1 block w-full rounded-md border-gray-200 p-2"
-                           placeholder="5"
-                           value="5" min="1" max="30">
                 </label>
             </div>
         </div>

@@ -341,11 +341,8 @@ class CertificateManagementController extends AbstractController
 
         $remoteHost = $payload['remote_host'] ?? $processEntity->getRemoteHost();
         $remotePort = isset($payload['remote_port']) ? (int)$payload['remote_port'] : 22;
-        $remoteUser = $payload['remote_user'] ?? $processEntity->getRemoteUser();
-        $remotePassword = $payload['remote_password'];
-        $timeout = isset($payload['timeout']) ? (int)$payload['timeout'] : 5;
 
-        if (!$remoteHost || !$remoteUser || !$remotePassword) {
+        if (!$remoteHost) {
             return new JsonResponse([
                 'status' => 'error',
                 'message' => $this->translator->trans(
@@ -359,7 +356,6 @@ class CertificateManagementController extends AbstractController
         // Everytime the user tries a new test it will save the used credentials
         $processEntity->setRemoteHost($remoteHost);
         $processEntity->setRemotePort($remotePort);
-        $processEntity->setRemoteUser($remoteUser);
         $processEntity->setUpdatedAt(new DateTimeImmutable());
         $this->entityManager->persist($processEntity);
         $this->entityManager->flush();

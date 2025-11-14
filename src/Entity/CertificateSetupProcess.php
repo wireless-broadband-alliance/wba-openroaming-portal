@@ -54,8 +54,6 @@ class CertificateSetupProcess
     #[ORM\Column(nullable: true)]
     private ?int $remotePort = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $remoteUser = null;
 
     public function __construct()
     {
@@ -226,18 +224,6 @@ class CertificateSetupProcess
     public function setRemotePort(?int $remotePort): static
     {
         $this->remotePort = $remotePort;
-
-        return $this;
-    }
-
-    public function getRemoteUser(): ?string
-    {
-        return $this->remoteUser;
-    }
-
-    public function setRemoteUser(?string $remoteUser): static
-    {
-        $this->remoteUser = $remoteUser;
 
         return $this;
     }
