@@ -1,0 +1,13 @@
+step:
+  database:
+    title: "Configuração da Base de Dados"
+    description: "Introduza os dados de ligação à base de dados para iniciar a instalação."
+  settings:
+    title: "Definições da Aplicação"
+    description: "Configure as definições principais e parâmetros essenciais da aplicação."
+  admin_credentials:
+    title: "Credenciais do Administrador"
+    description: "Crie a conta de administrador para aceder ao painel de gestão."
+confirm_abort: "Tem a certeza que deseja cancelar a instalação?"
+abort: "Cancelar Instalação"
+installer_info: "Siga os passos para concluir a instalação do sistema."
