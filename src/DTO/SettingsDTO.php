@@ -27,5 +27,4 @@ class SettingsDTO
     public ?bool $jwtPassphraseEnable = false;
 
     public ?string $jwtPassphrase = null;
-
 }

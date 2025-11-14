@@ -142,8 +142,7 @@ readonly class InstallationService
 
     public function fillDto(
         InstallationProgress $installationProgress
-    ): InstallationProgressDTO
-    {
+    ): InstallationProgressDTO {
         $dto = new InstallationProgressDTO();
         $dto->installationState = $installationProgress->getInstallationState();
 
