@@ -1,0 +1,85 @@
+{% set steps = [
+    {id: 'database', route: 'admin_dashboard_settings_certs_installation'},
+    {id: 'settings', route: 'admin_dashboard_settings_certs_installation_settings'},
+    {id: 'admin_credentials', route: 'admin_dashboard_settings_certs_installation_admin'},
+] %}
+
+{% set currentRoute = app.request.attributes.get('_route') %}
+{% set currentIndex = 0 %}
+
+{% for s in steps %}
+    {% if s.route == currentRoute %}
+        {% set currentIndex = loop.index0 %}
+    {% endif %}
+{% endfor %}
+
+<div class="w-full max-w-5xl mx-auto mt-8 mb-10 px-4">
+    <div class="p-2">
+        {{ include('dashboard/shared/_info_details.html.twig', {
+            info_text: 'info_text_stepper_details'|trans({}, '_certificate_stepper'),
+        }) }}
+    </div>
+
+    <div class="relative flex flex-col md:flex-row items-start md:items-center md:justify-between">
+        {# Progress bar #}
+        <div class="hidden md:block absolute top-1/2 left-0 h-1 bg-primary rounded-full transform -translate-y-1/2 transition-all duration-500 ease-in-out"
+             style="width: calc({{ ((currentIndex + 1) / steps|length) * 100 }}%)"
+        ></div>
+
+        {% set stages = processState.stages ?? {} %}
+
+        {% for step in steps %}
+            {% set title = ('step.' ~ step.id ~ '.title')|trans(domain: '_installer') %}
+            {% set description = ('step.' ~ step.id ~ '.description')|trans(domain: '_installer') %}
+            {% set index = loop.index0 %}
+            {% set active = step.route == currentRoute %}
+            {% set completed = stages[step.id] ?? false %}
+            {% set previousCompleted = index == 0 or (steps[index - 1].id in stages and stages[steps[index - 1].id]) %}
+
+            <div class="w-full md:flex-1 flex flex-col md:items-center text-center mb-8 p-2">
+                <div class="flex items-center justify-center w-10 h-10 rounded-full border-2 z-10 font-semibold transition-all duration-300
+                    {% if completed %} bg-primary border-primary text-white
+                    {% elseif active %} bg-white border-primary text-primary
+                    {% else %} bg-white border-gray-300 text-gray-400 {% endif %}
+                ">
+                    {% if index == 0 %}
+                        <a href="{{ path(step.route) }}"
+                           class="flex items-center justify-center w-full h-full text-inherit no-underline">
+                            {{ loop.index }}
+                        </a>
+                    {% else %}
+                        {% if previousCompleted %}
+                            <a href="{{ path(step.route) }}"
+                               class="flex items-center justify-center w-full h-full text-inherit no-underline">
+                                {{ loop.index }}
+                            </a>
+                        {% else %}
+                            <span class="flex items-center justify-center w-full h-full cursor-not-allowed opacity-50">
+                                {{ loop.index }}
+                            </span>
+                        {% endif %}
+                    {% endif %}
+                </div>
+
+                <div class="mt-4 sm:mt-1 md:mt-2">
+                    <h4 class="text-sm sm:text-xs font-semibold
+                        {% if completed or active %} text-primary {% else %} text-gray-500 {% endif %}">
+                        {{ title }}
+                    </h4>
+                    <p class="text-xs sm:text-[9px] text-gray-400 mt-1 break-words">{{ description }}</p>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    {% if processState is defined and processState.active %}
+        <div class="mt-8 flex justify-end">
+            <form action="{{ path('installer_abort') }}" method="POST"
+                  onsubmit="return confirm('{{ 'confirm_abort'|trans({}, '_installer') }}');">
+                <button type="submit" class="btn-logout flex items-center gap-2">
+                    {{ 'abort'|trans({}, '_installer') }}
+                </button>
+            </form>
+        </div>
+    {% endif %}
+</div>
