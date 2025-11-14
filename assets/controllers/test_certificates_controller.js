@@ -24,7 +24,7 @@ export default class extends Controller {
 
         // gather values from inputs
         const remoteHost = this.hostInputTarget?.value?.trim() || "";
-        const remotePort = parseInt(this.portInputTarget?.value || "22", 10);
+        const remotePort = parseInt(this.portInputTarget?.value || "2083", 10);
 
         // very small client-side validation
         if (!remoteHost) {

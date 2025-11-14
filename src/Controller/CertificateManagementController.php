@@ -340,7 +340,7 @@ class CertificateManagementController extends AbstractController
         );
 
         $remoteHost = $payload['remote_host'] ?? $processEntity->getRemoteHost();
-        $remotePort = isset($payload['remote_port']) ? (int)$payload['remote_port'] : 22;
+        $remotePort = isset($payload['remote_port']) ? (int)$payload['remote_port'] : 2083;
 
         if (!$remoteHost) {
             return new JsonResponse([
@@ -361,116 +361,70 @@ class CertificateManagementController extends AbstractController
         $this->entityManager->flush();
 
         try {
-            // Test TCP connectivity first
-            $connection = @fsockopen($remoteHost, 22, $errno, $errstr, $timeout);
-            if (!$connection) {
-                // Update DB when test fails
-                $this->certificateRadsecproxyCommandsService->updateRadsecproxyTestResult(
-                    $processEntity,
-                    CertificateTestResult::FAILED
-                );
+            // Test TCP
+            $connection = @fsockopen($remoteHost, $remotePort, $errno, $errstr);
 
+            if (!$connection) {
                 return new JsonResponse([
                     'status' => 'error',
-                    'message' => $this->translator->trans(
-                        'tcp_radsecproxy_test_failed',
-                        [
-                            '%host%' => $remoteHost,
-                            '%port%' => $remotePort,
-                            '%error%' => $errstr ?: 'unknown error',
-                            '%code%' => $errno,
-                        ],
-                        'controllers'
-                    ),
-                    /*
-                    'debug' => [
+                    'message' => 'TCP Connection Failed',
+                    'details' => [
                         'host' => $remoteHost,
-                        'port' => 22,
-                        'timeout' => $timeout,
-                        'connection' => $connection
+                        'port' => $remotePort,
+                        'error' => $errstr,
+                        'code'  => $errno,
                     ]
-                    */
                 ], Response::HTTP_SERVICE_UNAVAILABLE);
             }
+
+            // Try TLS handshake
+            stream_set_blocking($connection, true);
+            // Clear previous warnings (Doctrine DBAL deprecation!)
+            error_clear_last();
+
+            $cryptoEnabled = @stream_socket_enable_crypto(
+                $connection,
+                true,
+                STREAM_CRYPTO_METHOD_TLS_CLIENT
+            );
+
+            $err = error_get_last();
+
             fclose($connection);
 
-            $sshConnection = @ssh2_connect($remoteHost, $remotePort, [], ['timeout' => $timeout]);
-            if (!$sshConnection || !@ssh2_auth_password($sshConnection, $remoteUser, $remotePassword)) {
-                // Update DB when test fails
-                $this->certificateRadsecproxyCommandsService->updateRadsecproxyTestResult(
-                    $processEntity,
-                    CertificateTestResult::FAILED
-                );
-
+            if ($cryptoEnabled !== true) {
                 return new JsonResponse([
                     'status' => 'error',
-                    'message' => $this->translator->trans(
-                        'ssh_radsecproxy_auth_failed',
-                        [
-                            '%host%' => $remoteHost,
-                            '%port%' => $remotePort,
-                            '%user%' => $remoteUser,
-                        ],
-                        'controllers'
-                    ),
+                    'message' => "TLS handshake failed",
+                    'debug' => [
+                        'host' => $remoteHost,
+                        'port' => $remotePort,
+                        'tls_error' => $err,
+                    ]
                 ], Response::HTTP_SERVICE_UNAVAILABLE);
             }
 
-            // Check if the
-            $checkContainerCommand = sprintf(
-                "docker ps --filter 'name=%s' --format '{{.Names}}'",
-                escapeshellarg(self::RADSECPROXY_CONTAINER)
-            );
+            return new JsonResponse([
+                'status' => 'success',
+                'message' => 'TLS handshake OK'
+            ]);
 
-            $checkStream = @ssh2_exec($sshConnection, $checkContainerCommand);
-            if (!$checkStream) {
-                throw new RuntimeException("Failed to check container status for hybrid-radsecproxy-1");
-            }
+            // Check cert files inside local container
+            $containerName = 'hybrid-radsecproxy-1';
+            $path = '/etc/radsecproxy/certs/';
 
-            stream_set_blocking($checkStream, true);
-            $checkOutput = trim(stream_get_contents($checkStream));
-            fclose($checkStream);
-
-            if (empty($checkOutput) || $checkOutput !== self::RADSECPROXY_CONTAINER) {
-                return new JsonResponse([
-                    'status' => 'error',
-                    'message' => $this->translator->trans(
-                        'radsecproxy_container_not_running',
-                        [
-                            '%container%' => self::RADSECPROXY_CONTAINER,
-                            '%host%' => $remoteHost,
-                            '%port%' => $remotePort,
-                        ],
-                        'controllers'
-                    ),
-                ], Response::HTTP_SERVICE_UNAVAILABLE);
-            }
-
-            // Command to list the files and check for client.pem and key.pem
             $command = sprintf(
-                "docker exec %s /bin/bash -c 'ls %s'",
-                escapeshellarg(self::RADSECPROXY_CONTAINER),
-                '/etc/radsecproxy/certs/'
+                "docker exec %s sh -c 'ls %s'",
+                escapeshellarg($containerName),
+                escapeshellarg($path)
             );
 
-            $stream = @ssh2_exec($sshConnection, $command);
-            if (!$stream) {
-                throw new RuntimeException("Failed to execute command in container hybrid-radsecproxy-1");
-            }
+            $output = shell_exec($command);
 
-            stream_set_blocking($stream, true);
-            $output = stream_get_contents($stream);
-            fclose($stream);
-
-            // Analyze output to see if files exist
             $hasClient = str_contains($output, 'client.pem');
             $hasKey = str_contains($output, 'key.pem');
 
-            // If both files exist → passes, otherwise → fails
             if ($hasClient && $hasKey) {
-                // TODO NOW GET THE CURRENT PROCESS AND CHECK IF THE CONTENTS OF THE KEY IS THE SAME OF THE ONES ON THE TMP FOLDER
-
-                // Update DB when test passes
                 $this->certificateRadsecproxyCommandsService->updateRadsecproxyTestResult(
                     $processEntity,
                     CertificateTestResult::PASSED
@@ -478,41 +432,27 @@ class CertificateManagementController extends AbstractController
 
                 return new JsonResponse([
                     'status' => 'success',
-                    'message' => $this->translator->trans(
-                        'radsecproxy_test_passed',
-                        ['%container%' => self::RADSECPROXY_CONTAINER],
-                        'controllers'
-                    ),
+                    'message' => 'TLS connection OK and certificate files found.',
                 ]);
             }
 
-            // Update DB when test fails
+            // Missing file(s)
+            $missing = [];
+            if (!$hasClient) {
+                $missing[] = 'client.pem';
+            }
+            if (!$hasKey) {
+                $missing[] = 'key.pem';
+            }
+
             $this->certificateRadsecproxyCommandsService->updateRadsecproxyTestResult(
                 $processEntity,
                 CertificateTestResult::FAILED
             );
 
-            // Construct error message specifying which file is missing
-            $missingFiles = [];
-            if (!$hasClient) {
-                $missingFiles[] = 'client.pem';
-            }
-            if (!$hasKey) {
-                $missingFiles[] = 'key.pem';
-            }
-
             return new JsonResponse([
                 'status' => 'error',
-                'message' => $this->translator->trans(
-                    'radsecproxy_test_failed',
-                    [
-                        '%host%' => $remoteHost,
-                        '%port%' => $remotePort,
-                        '%container%' => self::RADSECPROXY_CONTAINER,
-                        '%files%' => implode(', ', $missingFiles),
-                    ],
-                    'controllers'
-                ),
+                'message' => 'Missing files: ' . implode(', ', $missing),
             ], Response::HTTP_SERVICE_UNAVAILABLE);
         } catch (Throwable $e) {
             // Update DB when test fails
