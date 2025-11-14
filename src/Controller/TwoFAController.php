@@ -780,6 +780,14 @@ class TwoFAController extends AbstractController
                     'controllers'
                 )
             );
+            // TODO Remove this flash message in Prod!!
+            if ($_ENV['APP_ENV'] === 'dev') {
+                $this->addFlash(
+                    'error',
+                    'Your code is: ' . $user->getTwoFAcode()
+                );
+            }
+
         } else {
             $lastEvent = $this->eventRepository->findLatest2FACodeAttemptEvent(
                 $user,
@@ -878,6 +886,13 @@ class TwoFAController extends AbstractController
                 'success',
                 $this->translator->trans('confirmationCodeSentSuccessfully', [], 'controllers')
             );
+            // TODO Remove this flash message in Prod!!
+            if ($_ENV['APP_ENV'] === 'dev') {
+                $this->addFlash(
+                    'error',
+                    'Your code is: ' . $user->getTwoFAcode()
+                );
+            }
             return $this->redirectToRoute('app_verify2FA_portal', [
                 'context' => $context
             ]);
@@ -1012,6 +1027,13 @@ class TwoFAController extends AbstractController
                     'success',
                     $this->translator->trans('confirmationCodeSentSuccessfully', [], 'controllers')
                 );
+                // TODO Remove this flash message in Prod!!
+                if ($_ENV['APP_ENV'] === 'dev') {
+                    $this->addFlash(
+                        'error',
+                        'Your code is: ' . $user->getTwoFAcode()
+                    );
+                }
                 return $this->redirectToRoute('app_2FA_first_verification_local', [
                     'context' => $context
                 ]);
@@ -1295,6 +1317,13 @@ class TwoFAController extends AbstractController
                 'success',
                 $this->translator->trans('confirmationCodeSentSuccessfully', [], 'controllers')
             );
+            // TODO Remove this flash message in Prod!!
+            if ($_ENV['APP_ENV'] === 'dev') {
+                $this->addFlash(
+                    'error',
+                    'Your code is: ' . $user->getTwoFAcode()
+                );
+            }
             return $this->redirectToRoute('app_swap2FA_disable_Local', [
                 'context' => $context
             ]);
