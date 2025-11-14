@@ -67,6 +67,8 @@ readonly class InstallationService
                     $installationProgress->getAdminConfirmation()
                 ) {
                     $installationProgress->setInstallationState(InstallationProgressType::COMPLETED->value);
+                    $this->entityManager->persist($installationProgress);
+                    $this->entityManager->flush();
                     return InstallationStep::COMPLETED->value;
                 }
                 return InstallationStep::ADMIN->value;
