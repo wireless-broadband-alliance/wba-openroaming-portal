@@ -64,15 +64,6 @@ class InstallationController extends AbstractController
         Request $request
     ): Response {
         $lastInstallation = $this->installationService->lastInstallation();
-        if ($lastInstallation instanceof InstallationProgress) {
-            $step = $this->installationService->getStep($lastInstallation);
-            if ($step === InstallationStep::ADMIN->value) {
-                return $this->redirectToRoute('admin_dashboard_settings_certs_installation_admin');
-            }
-            if ($step === InstallationStep::SETTINGS->value) {
-                return $this->redirectToRoute('admin_dashboard_settings_certs_installation_settings');
-            }
-        }
         $data = $this->getSettings->getSettings();
 
         $dbDTO = new DbSetupDTO();
@@ -177,9 +168,6 @@ class InstallationController extends AbstractController
             $step = $this->installationService->getStep($lastInstallation);
             if ($step === InstallationStep::DATABASE->value) {
                 return $this->redirectToRoute('admin_dashboard_settings_certs_installation_settings');
-            }
-            if ($step === InstallationStep::ADMIN->value) {
-                return $this->redirectToRoute('admin_dashboard_settings_certs_installation_admin');
             }
         } else {
             return $this->redirectToRoute('admin_dashboard_settings_certs_installation');
