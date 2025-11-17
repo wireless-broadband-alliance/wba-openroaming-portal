@@ -26,14 +26,14 @@ class CertificateSetupProcess
 
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $radsecproxyConfigAppliedAt = null;
-    #[ORM\Column(enumType: CertificateTestResult::class, nullable: true)]
+    #[ORM\Column(nullable: true, enumType: CertificateTestResult::class)]
     private ?CertificateTestResult $radsecproxyTestResult = null;
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $freeradiusFormCompletedAt = null;
 
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $freeradiusConfigAppliedAt = null;
-    #[ORM\Column(enumType: CertificateTestResult::class, nullable: true)]
+    #[ORM\Column(nullable: true, enumType: CertificateTestResult::class)]
     private ?CertificateTestResult $freeradiusTestResult = null;
 
     #[ORM\Column]
@@ -45,7 +45,7 @@ class CertificateSetupProcess
     /**
      * @var Collection<int, Certificate>
      */
-    #[ORM\OneToMany(targetEntity: Certificate::class, mappedBy: 'setupProcess')]
+    #[ORM\OneToMany(targetEntity: Certificate::class, mappedBy: 'setupProcess', cascade: ['persist', 'remove'])]
     private Collection $certificates;
 
     #[ORM\Column(length: 255, nullable: true)]
@@ -185,22 +185,14 @@ class CertificateSetupProcess
             $this->certificates->add($certificate);
             $certificate->setSetupProcess($this);
         }
-
         return $this;
     }
 
     public function removeCertificate(Certificate $certificate): static
     {
-        // set the owning side to null (unless already changed)
-        if (
-            $this->certificates->removeElement($certificate) &&
-            ($this->certificates->removeElement(
-                $certificate
-            ) && $certificate->getSetupProcess() === $this)
-        ) {
+        if ($this->certificates->removeElement($certificate)) {
             $certificate->setSetupProcess(null);
         }
-
         return $this;
     }
 

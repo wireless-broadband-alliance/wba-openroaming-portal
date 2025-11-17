@@ -48,7 +48,7 @@ readonly class CertificateStorageService
         ?bool $isAKey = false,
     ): Certificate {
         $certificate = new Certificate();
-        $certificate->setName($name . $type . ' Certificate');
+        $certificate->setName($name . $type);
         $certificate->setType($type);
         $certificate->setCreatedAt(new DateTimeImmutable());
         $certificate->setFile($file);

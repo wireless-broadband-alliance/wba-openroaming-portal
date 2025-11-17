@@ -13,13 +13,13 @@ use App\Enum\CertificateTestResult;
 use App\Enum\FirewallType;
 use App\Form\CertificateUploadType;
 use App\Form\SimpleSubmitFormType;
+use App\Repository\CertificateRepository;
 use App\Service\CertificateRadsecproxyCommandsService;
 use App\Service\CertificateProcessCheckerService;
 use App\Service\CertificateStorageService;
 use App\Service\GetSettings;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
-use RuntimeException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -32,8 +32,6 @@ use Throwable;
 
 class CertificateManagementController extends AbstractController
 {
-    private const string RADSECPROXY_CONTAINER = 'hybrid-radsecproxy-1';
-
     public function __construct(
         private readonly GetSettings $getSettings,
         private readonly TranslatorInterface $translator,
@@ -41,6 +39,7 @@ class CertificateManagementController extends AbstractController
         private readonly CertificateProcessCheckerService $certificateProcessCheckerService,
         private readonly EntityManagerInterface $entityManager,
         private readonly CertificateRadsecproxyCommandsService $certificateRadsecproxyCommandsService,
+        private readonly CertificateRepository $certificateRepository,
     ) {
     }
 
@@ -362,26 +361,52 @@ class CertificateManagementController extends AbstractController
         $cafile = $this->getParameter('kernel.project_dir') . '/config/wba_chain/ca-bundle-wba.pem';
 
         try {
+            // Check CA bundle file exists
             if (!file_exists($cafile)) {
                 return new JsonResponse([
                     'status' => 'error',
                     'message' => 'CA bundle file not found',
-                    'path' => realpath($cafile)
+                    'path' => realpath($cafile),
                 ], Response::HTTP_INTERNAL_SERVER_ERROR);
             }
 
-            // Create the SSL context
+            // Build full paths
+            $clientCert = $this->certificateRepository->findLatestByProcessAndName(
+                $processEntity,
+                'clientRADSECPROXY' // This name comes from the DTO Upload Radsecproxy
+            );
+            $keyCert = $this->certificateRepository->findLatestByProcessAndName(
+                $processEntity,
+                'keyRADSECPROXY' // Same for this one
+            );
+
+            $basePath = $this->getParameter('kernel.project_dir') . '/var/certs/';
+            $clientCertPath = $clientCert ? $basePath . $clientCert->getFilePath() : null;
+            $keyCertPath = $keyCert ? $basePath . $keyCert->getFilePath() : null;
+
+            // Validate certificate files exist
+            if (!$clientCertPath || !$keyCertPath || !file_exists($clientCertPath) || !file_exists($keyCertPath)) {
+                return new JsonResponse([
+                    'status' => 'error',
+                    'message' => 'Client or key certificate file not found',
+                    'clientCertPath' => $clientCertPath,
+                    'keyCertPath' => $keyCertPath,
+                ], Response::HTTP_INTERNAL_SERVER_ERROR);
+            }
+
             $context = stream_context_create([
                 'ssl' => [
                     'verify_peer' => true,
                     'verify_peer_name' => true,
                     'allow_self_signed' => false,
                     'cafile' => $cafile,
-                    'crypto_method' => STREAM_CRYPTO_METHOD_TLS_CLIENT
+                    'local_cert' => $clientCertPath,
+                    'local_pk'   => $keyCertPath,
+                    'crypto_method' => STREAM_CRYPTO_METHOD_TLS_CLIENT,
                 ]
             ]);
 
-            // Open the TLS Connection
+            // Open the TLS connection
             $connection = @stream_socket_client(
                 "tls://{$remoteHost}:{$remotePort}",
                 $errno,
@@ -406,6 +431,10 @@ class CertificateManagementController extends AbstractController
                         'port' => $remotePort,
                         'error' => $errstr,
                         'code' => $errno,
+                        'basePath' => $basePath,
+                        'cafile' => $cafile,
+                        'clientCertPath' => $clientCertPath,
+                        'keyCertPath' => $keyCertPath,
                     ],
                 ], Response::HTTP_SERVICE_UNAVAILABLE);
             }
@@ -417,9 +446,10 @@ class CertificateManagementController extends AbstractController
                 $processEntity,
                 CertificateTestResult::PASSED
             );
+
             return new JsonResponse([
                 'status' => 'success',
-                'message' => 'TLS handshake OK using WBA CA bundle'
+                'message' => 'TLS handshake OK using WBA CA bundle',
             ]);
         } catch (Throwable $e) {
             // Update DB when test fails
@@ -427,6 +457,7 @@ class CertificateManagementController extends AbstractController
                 $processEntity,
                 CertificateTestResult::FAILED
             );
+
             return new JsonResponse([
                 'status' => 'error',
                 'message' => $e->getMessage(),

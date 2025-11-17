@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Certificate;
+use App\Entity\CertificateSetupProcess;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -14,6 +15,19 @@ class CertificateRepository extends ServiceEntityRepository
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Certificate::class);
+    }
+
+    public function findLatestByProcessAndName(CertificateSetupProcess $process, string $name): ?Certificate
+    {
+        return $this->createQueryBuilder('c')
+            ->andWhere('c.setupProcess = :process')
+            ->andWhere('c.name = :name')
+            ->setParameter('process', $process)
+            ->setParameter('name', $name)
+            ->orderBy('c.createdAt', 'DESC')
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
     }
 
     //    /**
