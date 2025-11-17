@@ -417,7 +417,10 @@ class CertificateManagementController extends AbstractController
                 $context
             );
 
-            if ($connection === false) {
+            if ($connection) {
+                // THIS IS OK [0] -> a non-false $connection means the TLS handshake succeeded.
+                // The value 0 returned in some logs (like OpenSSL verify return code) is success, not failure.
+                // Meaning the condition is inverted
                 // Update DB when test fails
                 $this->certificateRadsecproxyCommandsService->updateRadsecproxyTestResult(
                     $processEntity,
@@ -441,7 +444,10 @@ class CertificateManagementController extends AbstractController
                 ], Response::HTTP_SERVICE_UNAVAILABLE);
             }
 
-            fclose($connection);
+            // Only close if it’s a valid resource
+            if (is_resource($connection)) {
+                fclose($connection);
+            }
 
             // Update DB when test passes
             $this->certificateRadsecproxyCommandsService->updateRadsecproxyTestResult(
