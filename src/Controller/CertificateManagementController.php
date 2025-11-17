@@ -257,6 +257,7 @@ class CertificateManagementController extends AbstractController
                 );
             }
         }
+        dd($processState);
 
         return $this->render(
             'dashboard/shared/settings_actions/certificatesManagement/certificates/radsecproxy/config.html.twig',

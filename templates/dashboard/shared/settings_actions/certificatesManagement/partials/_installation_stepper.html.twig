@@ -2,13 +2,14 @@
     {id: 'database', route: ['admin_dashboard_settings_certs_installation']},
     {id: 'settings', route: ['admin_dashboard_settings_certs_installation_settings']},
     {id: 'admin_credentials', route: ['admin_dashboard_settings_certs_installation_admin']},
+    {id: 'summary', route: ['admin_dashboard_settings_certs_installation_summary']},
 ] %}
 
 {% set currentRoute = app.request.attributes.get('_route') %}
 {% set currentIndex = 0 %}
 
 {% for s in steps %}
-    {% if s.route in currentRoute %}
+    {% if currentRoute in s.route   %}
         {% set currentIndex = loop.index0 %}
     {% endif %}
 {% endfor %}
@@ -20,9 +21,9 @@
         }) }}
     </div>
 
-    <div class="relative flex flex-col md:flex-row items-start md:items-center md:justify-between">
+    <div class="relative flex flex-col md:flex-row items-start md:items-center">
         {# Progress bar #}
-        <div class="hidden md:block absolute top-1/2 left-0 h-1 bg-primary rounded-full transform -translate-y-1/2 transition-all duration-500 ease-in-out"
+        <div class="hidden md:block absolute top-1/2 left-0 h-1 rounded-full transform -translate-y-1/2 transition-all duration-500 ease-in-out"
              style="width: calc({{ ((currentIndex + 1) / steps|length) * 100 }}%)"
         ></div>
 
@@ -39,7 +40,7 @@
             <div class="w-full md:flex-1 flex flex-col md:items-center text-center mb-8 p-2">
                 <div class="flex items-center justify-center w-10 h-10 rounded-full border-2 z-10 font-semibold transition-all duration-300
                     {% if completed %} bg-primary border-primary text-white
-                    {% elseif active %} bg-white border-primary text-primary
+                    {% elseif active %} bg-white border-primary text-primary step-active
                     {% else %} bg-white border-gray-300 text-gray-400 {% endif %}
                 ">
                     {% if index == 0 %}
@@ -50,7 +51,7 @@
                     {% else %}
                         {% if previousCompleted %}
                             <a href="{{ path(step.route[0]) }}"
-                               class="flex items-center justify-center w-full h-full text-inherit no-underline">
+                               class="flex items-center justify-center w-full h-full text-inherit no-underline landing-none">
                                 {{ loop.index }}
                             </a>
                         {% else %}

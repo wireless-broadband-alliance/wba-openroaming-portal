@@ -78,6 +78,8 @@ readonly class InstallationService
         return InstallationStep::DATABASE->value;
     }
 
+
+
     /**
      * @throws RandomException
      * @throws TransportExceptionInterface
