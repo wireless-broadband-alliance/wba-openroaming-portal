@@ -118,6 +118,11 @@ export default class extends Controller {
         this.freeradiusButtonTarget.classList.add(
             "bg-white", "text-gray-800", "hover:bg-gray-50", "focus:ring-2", "focus:ring-primary/30", "transition"
         );
+
+        // Optional: ensure the href is set if it was disabled
+        if (!this.freeradiusButtonTarget.getAttribute("href")) {
+            this.freeradiusButtonTarget.href = this.freeradiusButtonTarget.dataset.hrefEnabled;
+        }
     }
 
     dismissResult() {

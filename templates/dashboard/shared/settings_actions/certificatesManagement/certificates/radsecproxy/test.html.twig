@@ -77,13 +77,11 @@
                     <span class="text-primary font-medium">
                 {{ 'test_passed'|trans({}, 'test_radsec') }}
             </span>
-
                 {% elseif process.getRadsecproxyTestResult() == constant('App\\Enum\\CertificateTestResult::FAILED') %}
                     <twig:ux:icon name="wba:cross-circle-rounded" class="w-5 h-5 text-red-500"/>
                     <span class="text-red-500">
                 {{ 'test_failed'|trans({}, 'test_radsec') }}
             </span>
-
                 {% else %}
                     <twig:ux:icon name="wba:cross-circle-rounded" class="w-5 h-5 text-gray-400"/>
                     <span class="text-gray-500">
@@ -111,7 +109,7 @@
                 {# Next Step #}
                 <a
                         {% if processState.stages.radsecproxy_test %}
-                            href="{{ path('admin_dashboard_settings_certs_freeradius') }}"
+                            data-href-enabled="{{ path('admin_dashboard_settings_certs_freeradius') }}"
                         {% endif %}
                         data-test-certificates-target="freeradiusButton"
                         class="px-6 py-3 border border-gray-300 font-medium rounded-lg shadow-sm flex items-center gap-2
