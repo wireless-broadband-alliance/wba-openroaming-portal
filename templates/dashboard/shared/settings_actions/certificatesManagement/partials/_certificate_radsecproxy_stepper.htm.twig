@@ -20,9 +20,9 @@
         }) }}
     </div>
 
-    <div class="relative flex flex-col md:flex-row items-start md:items-center md:justify-between">
+    <div class="relative flex flex-col md:flex-row items-start md:items-center">
         {# Progress bar #}
-        <div class="hidden md:block absolute top-1/2 left-0 h-1 bg-primary rounded-full transform -translate-y-1/2 transition-all duration-500 ease-in-out"
+        <div class="hidden md:block absolute top-1/2 left-0 h-1 rounded-full transform -translate-y-1/2 transition-all duration-500 ease-in-out"
              style="width: calc({{ ((currentIndex + 1) / steps|length) * 100 }}%)"
         ></div>
 
@@ -78,16 +78,16 @@
             </div>
         {% endfor %}
     </div>
-
-    {# Abort button (POST only) #}
-    {% if processState is defined and processState.active %}
-        <div class="mt-8 flex justify-end">
-            <form action="{{ path('admin_dashboard_settings_certs_management_abort') }}" method="POST"
-                  onsubmit="return confirm('{{ 'confirm_abort'|trans({}, '_certificate_stepper') }}');">
-                <button type="submit" class="btn-logout flex items-center gap-2">
-                    {{ 'abort'|trans({}, '_certificate_stepper') }}
-                </button>
-            </form>
-        </div>
-    {% endif %}
 </div>
+
+{# Abort button (POST only) #}
+{% if processState is defined and processState.active %}
+    <div class="mt-8 flex justify-end">
+        <form action="{{ path('admin_dashboard_settings_certs_management_abort') }}" method="POST"
+              onsubmit="return confirm('{{ 'confirm_abort'|trans({}, '_certificate_stepper') }}');">
+            <button type="submit" class="btn-logout flex items-center gap-2">
+                {{ 'abort'|trans({}, '_certificate_stepper') }}
+            </button>
+        </form>
+    </div>
+{% endif %}
