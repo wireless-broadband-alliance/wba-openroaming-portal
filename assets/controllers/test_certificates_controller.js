@@ -22,21 +22,18 @@ export default class extends Controller {
             return;
         }
 
-        // gather values from inputs
         const remoteHost = this.hostInputTarget?.value?.trim() || "";
         const remotePort = parseInt(this.portInputTarget?.value || "2083", 10);
 
-        // very small client-side validation
         if (!remoteHost) {
-            this.showResult({ status: "error", message: "Please provide a remote host." });
+            this.showResult({status: "error", message: "Please provide a remote host."});
             return;
         }
         if (!Number.isFinite(remotePort) || remotePort <= 0) {
-            this.showResult({ status: "error", message: "Please provide a valid port." });
+            this.showResult({status: "error", message: "Please provide a valid port."});
             return;
         }
 
-        // Prepare UI
         this.testButtonTarget.disabled = true;
         this.buttonLabelTarget.textContent = "Testing...";
         this.waitingWidgetTarget.classList.remove("hidden");
@@ -65,7 +62,11 @@ export default class extends Controller {
                 this.enableFreeradiusButton();
             }
         } catch (error) {
-            this.showResult({ status: "error", message: "An unexpected error occurred while testing." });
+            this.showResult({
+                status: "error",
+                message: "An unexpected error occurred while testing.",
+                error: error.message,
+            });
         } finally {
             this.testButtonTarget.disabled = false;
             this.buttonLabelTarget.textContent = "Test Certificates";
@@ -78,10 +79,14 @@ export default class extends Controller {
         const color = isSuccess ? "green" : "red";
         const title = isSuccess ? "Test Successful" : "Test Failed";
 
-        // show debug nicely if object
+        // show debug info nicely
         const extraInfo = Object.entries(data)
             .filter(([key]) => !["status", "message"].includes(key))
             .map(([key, value]) => {
+                // For certificates, format as pre/code block for readability
+                if (key === "local_cert" || key === "local_key") {
+                    return `<p class="text-xs text-gray-600"><strong>${key}:</strong><pre class="whitespace-pre-wrap break-words">${value}</pre></p>`;
+                }
                 const display = typeof value === "object" ? JSON.stringify(value, null, 2) : value;
                 return `<p class="text-xs text-gray-600"><strong>${key}:</strong> <pre>${display}</pre></p>`;
             })
@@ -117,6 +122,5 @@ export default class extends Controller {
 
     dismissResult() {
         this.resultMessageTarget.classList.add("hidden");
-        this.resultMessageTarget.innerHTML = "";
     }
 }
