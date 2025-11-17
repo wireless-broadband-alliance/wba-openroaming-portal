@@ -11,4 +11,5 @@ step:
         description: 'Certificate setup almost finished.'
 
 abort: 'Abort Process'
+leave: 'Leave Process Configuration'
 confirm_abort: 'Are you sure you want to abort the current certificate setup process?'

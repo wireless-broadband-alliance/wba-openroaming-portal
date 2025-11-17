@@ -11,4 +11,5 @@ step:
         description: 'A configuração dos certificados está quase concluída.'
 
 abort: 'Abortar Processo'
+leave: 'Sair da Configuração do Processo'
 confirm_abort: 'Tem a certeza que deseja cancelar o processo de configuração de certificados?'
