@@ -20,6 +20,7 @@ use App\Service\CertificateStorageService;
 use App\Service\GetSettings;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
+use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -257,7 +258,6 @@ class CertificateManagementController extends AbstractController
                 );
             }
         }
-        dd($processState);
 
         return $this->render(
             'dashboard/shared/settings_actions/certificatesManagement/certificates/radsecproxy/config.html.twig',
@@ -399,11 +399,11 @@ class CertificateManagementController extends AbstractController
                 'ssl' => [
                     'verify_peer' => true,
                     'verify_peer_name' => true,
-                    'allow_self_signed' => false,
+                    'allow_self_signed' => true,
                     'cafile' => $cafile,
                     'local_cert' => $clientCertPath,
-                    'local_pk'   => $keyCertPath,
-                    'crypto_method' => STREAM_CRYPTO_METHOD_TLS_CLIENT,
+                    'local_pk' => $keyCertPath,
+                    'crypto_method' => STREAM_CRYPTO_METHOD_TLSv1_3_CLIENT,
                 ]
             ]);
 
@@ -417,7 +417,7 @@ class CertificateManagementController extends AbstractController
                 $context
             );
 
-            if (!$connection) {
+            if ($connection === false) {
                 // Update DB when test fails
                 $this->certificateRadsecproxyCommandsService->updateRadsecproxyTestResult(
                     $processEntity,
@@ -427,6 +427,7 @@ class CertificateManagementController extends AbstractController
                 return new JsonResponse([
                     'status' => 'error',
                     'message' => 'TLS Handshake Failed',
+                    'messageDetails' => "Failed to create socket: [$errno] $errstr",
                     'details' => [
                         'host' => $remoteHost,
                         'port' => $remotePort,
