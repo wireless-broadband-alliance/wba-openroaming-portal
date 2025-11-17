@@ -1,7 +1,7 @@
 {% set steps = [
     {id: 'database', route: ['admin_dashboard_settings_certs_installation']},
     {id: 'settings', route: ['admin_dashboard_settings_certs_installation_settings']},
-    {id: 'admin_credentials', route: ['admin_dashboard_settings_certs_installation_admin']},
+    {id: 'admin_credentials', route: ['admin_dashboard_settings_certs_installation_admin', 'admin_dashboard_settings_certs_installation_admin_confirmation']},
     {id: 'summary', route: ['admin_dashboard_settings_certs_installation_summary']},
 ] %}
 
@@ -27,7 +27,6 @@
              style="width: calc({{ ((currentIndex + 1) / steps|length) * 100 }}%)"
         ></div>
 
-        {% set stages = processState.stages ?? {} %}
 
         {% for step in steps %}
             {% set title = ('step.' ~ step.id ~ '.title')|trans(domain: '_installation_stepper') %}

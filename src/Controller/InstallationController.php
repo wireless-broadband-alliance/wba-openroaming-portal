@@ -64,6 +64,12 @@ class InstallationController extends AbstractController
         Request $request
     ): Response {
         $lastInstallation = $this->installationService->lastInstallation();
+        if ($lastInstallation instanceof InstallationProgress) {
+            $step = $this->installationService->getStep($lastInstallation) ??
+                InstallationStep::DATABASE->value;
+        } else {
+            $step = InstallationStep::DATABASE->value;
+        }
         $data = $this->getSettings->getSettings();
 
         $dbDTO = new DbSetupDTO();
@@ -95,14 +101,14 @@ class InstallationController extends AbstractController
 
             if (!$orConnection) {
                 $connectionsFailed[] = 'OpenRoaming';
-            }
+            }/*
             if (!$frConnection) {
                 $connectionsFailed[] = 'Freeradius';
-            }
+            }*/
 
             if ($connectionsFailed !== []) {
                 $this->addFlash(
-                    'error_admin',
+                    'error',
                     $this->translator->trans(
                         'connectionFailed',
                         ['%dbConnections%' => implode(', ', $connectionsFailed)],
@@ -146,6 +152,7 @@ class InstallationController extends AbstractController
                 'data' => $data,
                 'form' => $form->createView(),
                 'formDTO' => $dbDTO,
+                'stages' => $this->installationService->getStepperStatus($step)
             ]
         );
     }
@@ -269,20 +276,20 @@ class InstallationController extends AbstractController
 
                 if ($success) {
                     $this->addFlash(
-                        'success_admin',
+                        'success',
                         $this->translator->trans('jwtSuccessfully', [], 'controllers')
                     );
                     return $this->redirectToRoute('admin_dashboard_settings_certs_installation_admin');
                 }
                 $this->addFlash(
-                    'error_admin',
+                    'error',
                     $this->translator->trans('jwtFailed', [], 'controllers')
                 );
 
                 return $this->redirectToRoute('admin_dashboard_settings_certs_installation_admin');
             } catch (\Exception) {
                 $this->addFlash(
-                    'error_admin',
+                    'error',
                     $this->translator->trans('jwtFailed', [], 'controllers')
                 );
                 return $this->redirectToRoute('admin_dashboard_settings_certs_installation_settings');
@@ -295,6 +302,7 @@ class InstallationController extends AbstractController
                 'data' => $data,
                 'form' => $form->createView(),
                 'formDTO' => $settingsDTO,
+                'stages' => $this->installationService->getStepperStatus($step)
             ]
         );
     }
@@ -358,6 +366,7 @@ class InstallationController extends AbstractController
                 'data' => $data,
                 'form' => $form->createView(),
                 'formDTO' => $adminConfigDTO,
+                'stages' => $this->installationService->getStepperStatus($step)
             ]
         );
     }
@@ -415,7 +424,7 @@ class InstallationController extends AbstractController
                 return $this->redirectToRoute('admin_dashboard_settings_certs_installation_summary');
             }
             $this->addFlash(
-                'error_admin',
+                'error',
                 $this->translator->trans('invalidCodeMessage', [], 'controllers')
             );
         }
@@ -438,7 +447,7 @@ class InstallationController extends AbstractController
                     );
 
                     $this->addFlash(
-                        'success_admin',
+                        'success',
                         $this->translator->trans('codeSentSuccessfully', [], 'controllers')
                     );
                 } else {
@@ -448,7 +457,7 @@ class InstallationController extends AbstractController
                     );
 
                     $this->addFlash(
-                        'error_admin',
+                        'error',
                         $this->translator->trans(
                             'codeAlreadySent',
                             [
@@ -466,6 +475,7 @@ class InstallationController extends AbstractController
             [
                 'data' => $data,
                 'form' => $form->createView(),
+                'stages' => $this->installationService->getStepperStatus($step)
             ]
         );
     }
@@ -500,9 +510,10 @@ class InstallationController extends AbstractController
         return $this->render(
             'dashboard/shared/settings_actions/certificatesManagement/installation/summary.html.twig',
             [
-            'data' => $data,
-            'Installation' => $installationDTO,
-                ]
+                'data' => $data,
+                'Installation' => $installationDTO,
+                'stages' => $this->installationService->getStepperStatus($step)
+            ]
         );
     }
 

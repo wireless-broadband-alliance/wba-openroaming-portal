@@ -8,6 +8,7 @@ use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Enum\InstallationProgressType;
 use App\Enum\InstallationStep;
+use App\Enum\InstallationWidgetStepsEnum;
 use App\Enum\SettingName;
 use App\Repository\EventRepository;
 use App\Repository\InstallationProgressRepository;
@@ -76,6 +77,31 @@ readonly class InstallationService
             return InstallationStep::SETTINGS->value;
         }
         return InstallationStep::DATABASE->value;
+    }
+
+    public function getStepperStatus(string $step): array
+    {
+        $status = [
+            InstallationWidgetStepsEnum::DATABASE->value => false,
+            InstallationWidgetStepsEnum::SETTINGS->value => false,
+            InstallationWidgetStepsEnum::ADMIN_CREDENTIALS->value => false,
+            InstallationWidgetStepsEnum::SUMMARY->value => false,
+        ];
+
+        if ($step === InstallationStep::SETTINGS->value) {
+            $status[InstallationWidgetStepsEnum::DATABASE->value] = true;
+        }
+        if ($step === InstallationStep::ADMIN->value) {
+            $status[InstallationWidgetStepsEnum::DATABASE->value] = true;
+            $status[InstallationWidgetStepsEnum::SETTINGS->value] = true;
+        }
+        if ($step === InstallationStep::COMPLETED->value) {
+            $status[InstallationWidgetStepsEnum::DATABASE->value] = true;
+            $status[InstallationWidgetStepsEnum::SETTINGS->value] = true;
+            $status[InstallationWidgetStepsEnum::ADMIN_CREDENTIALS->value] = true;
+        }
+
+        return $status;
     }
 
 
