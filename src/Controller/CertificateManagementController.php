@@ -417,11 +417,9 @@ class CertificateManagementController extends AbstractController
                 $context
             );
 
-            if ($connection) {
-                // THIS IS OK [0] -> a non-false $connection means the TLS handshake succeeded.
-                // The value 0 returned in some logs (like OpenSSL verify return code) is success, not failure.
-                // Meaning the condition is inverted
-                // Update DB when test fails
+            // If connection failed with a real error, handle it
+            if ($connection === false && ($errno !== 0 || $errstr !== '')) {
+                // TLS handshake failed
                 $this->certificateRadsecproxyCommandsService->updateRadsecproxyTestResult(
                     $processEntity,
                     CertificateTestResult::FAILED
@@ -436,24 +434,24 @@ class CertificateManagementController extends AbstractController
                         'port' => $remotePort,
                         'error' => $errstr,
                         'code' => $errno,
-                        'basePath' => $basePath,
-                        'cafile' => $cafile,
-                        'clientCertPath' => $clientCertPath,
-                        'keyCertPath' => $keyCertPath,
+//                        'basePath' => $basePath,
+//                        'cafile' => $cafile,
+//                        'clientCertPath' => $clientCertPath,
+//                        'keyCertPath' => $keyCertPath,
                     ],
                 ], Response::HTTP_SERVICE_UNAVAILABLE);
             }
+
+            // THIS IS OK [0] -> a non-false $connection OR errno=0 and errstr="" means TLS handshake succeeded
+            $this->certificateRadsecproxyCommandsService->updateRadsecproxyTestResult(
+                $processEntity,
+                CertificateTestResult::PASSED
+            );
 
             // Only close if it’s a valid resource
             if (is_resource($connection)) {
                 fclose($connection);
             }
-
-            // Update DB when test passes
-            $this->certificateRadsecproxyCommandsService->updateRadsecproxyTestResult(
-                $processEntity,
-                CertificateTestResult::PASSED
-            );
 
             return new JsonResponse([
                 'status' => 'success',
