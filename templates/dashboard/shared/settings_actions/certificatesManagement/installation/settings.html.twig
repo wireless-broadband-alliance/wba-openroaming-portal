@@ -46,7 +46,7 @@
                     <div class="flex items-center space-x-2 mt-5">
                         {{ form_widget(form.trustedProxies, {
                             attr: {
-                                class: 'form-widget w-full border border-gray-300 rounded-lg p-2 focus:border-indigo-500 focus:ring-indigo-500',
+                                class: 'form-widget mt-1 block w-full rounded-md border-gray-200 p-2',
                                 'wire:model.debounce.500ms': 'settingsDTO.trustedProxies',
                             },
                         }) }}
@@ -79,7 +79,7 @@
                     <div class="flex items-center space-x-2 mt-5">
                         {{ form_widget(form.turnstileKey, {
                             attr: {
-                                class: 'form-widget w-full border border-gray-300 rounded-lg p-2 focus:border-indigo-500 focus:ring-indigo-500',
+                                class: 'form-widget mt-1 block w-full rounded-md border-gray-200 p-2',
                                 'wire:model.debounce.500ms': 'settingsDTO.turnstileKey',
                             },
                         }) }}
@@ -112,7 +112,7 @@
                     <div class="flex items-center space-x-2 mt-5">
                         {{ form_widget(form.turnstileSecret, {
                             attr: {
-                                class: 'form-widget w-full border border-gray-300 rounded-lg p-2 focus:border-indigo-500 focus:ring-indigo-500',
+                                class: 'form-widget mt-1 block w-full rounded-md border-gray-200 p-2',
                                 'wire:model.debounce.500ms': 'settingsDTO.turnstileSecret',
                             },
                         }) }}
@@ -170,7 +170,7 @@
                         <div class="flex items-center space-x-2 mt-5">
                             {{ form_widget(form.jwtPassphrase, {
                                 attr: {
-                                    class: 'form-widget w-full border border-gray-300 rounded-lg p-2 focus:border-indigo-500 focus:ring-indigo-500',
+                                    class: 'form-widget mt-1 block w-full rounded-md border-gray-200 p-2',
                                     'wire:model.debounce.500ms': 'settingsDTO.jwtPassphrase',
                                 },
                             }) }}
