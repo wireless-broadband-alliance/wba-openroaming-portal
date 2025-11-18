@@ -3,6 +3,11 @@ radsecproxy:
     config: 'RadSecProxy upload process still active. Please follow the setups to configure your resolver.'
     test: 'RadSecProxy configuration is done. Proceed to follow the next page for more details.'
 
+freeradius:
+    upload: 'Awaiting Freeradius certificate upload.'
+    config: 'Freeradius upload process still active. Please follow the setups to configure your resolver.'
+    test: 'Freeradius configuration is done. Proceed to follow the next page for more details.'
+
 noActiveProcess: 'No current process active.'
 pendingActiveProcess: 'There is already a pending process active at the moment.'
 blockAccessUntilRadsecproxyTestPassed: 'Your current process does not meet the requirements to access this page.'

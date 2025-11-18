@@ -3,6 +3,11 @@ radsecproxy:
     config: 'O processo de carregamento do RadSecProxy ainda está ativo. Por favor, siga as instruções para configurar o seu resolver.'
     test: 'A configuração do RadSecProxy está concluída. Prossiga para a próxima página para mais detalhes.'
 
+freeradius:
+    upload: 'Aguardando o carregamento do certificado Freeradius.'
+    config: 'O processo de carregamento do Freeradius ainda está ativo. Por favor, siga as instruções para configurar o seu resolver.'
+    test: 'A configuração do Freeradius está concluída. Prossiga para a próxima página para mais detalhes.'
+
 noActiveProcess: 'Nenhum processo ativo no momento.'
 pendingActiveProcess: 'Já existe um processo pendente ativo no momento.'
 blockAccessUntilRadsecproxyTestPassed: 'O seu processo atual não têm os requisitos concluídos para acessar esta página.'

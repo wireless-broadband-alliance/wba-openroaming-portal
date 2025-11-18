@@ -7,12 +7,10 @@ namespace App\Controller;
 use App\DTO\CertificateFreeradiusUploadDTO;
 use App\Enum\FirewallType;
 use App\Form\CertificateFreeradiusUploadType;
-use App\Form\SimpleSubmitFormType;
 use App\Service\CertificateFreeradiusCommandsService;
 use App\Service\CertificateProcessCheckerService;
 use App\Service\CertificateStorageService;
 use App\Service\GetSettings;
-use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -43,18 +41,18 @@ class CertificateFreeradiusManagementController extends AbstractController
     ): Response {
         // Get current process state
         $processState = $this->certificateProcessCheckerService->getProcessState();
+        if ($processState['active']) {
+            $nextRoute = $this->certificateProcessCheckerService
+                ->getNextRequiredRoute($processState['stages']);
 
-        // If there's no active process
-        if (!$processState['active']) {
-            $this->addFlash(
-                'error',
-                $this->translator->trans(
-                    'noActiveProcess',
-                    [],
-                    'CertificateProcessCheckerService'
-                )
-            );
-            return $this->redirectToRoute('admin_dashboard_settings_certs_radsecproxy_config');
+            // If the required next step is NOT this page, redirect
+            if ($nextRoute !== $request->attributes->get('_route')) {
+                $this->addFlash(
+                    'error',
+                    $this->translator->trans('pendingActiveProcess', [], 'CertificateProcessCheckerService')
+                );
+                return $this->redirectToRoute($nextRoute);
+            }
         }
 
         $data = $this->getSettings->getSettings();
@@ -77,7 +75,7 @@ class CertificateFreeradiusManagementController extends AbstractController
             $this->entityManager->flush();
 
             $this->addFlash(
-                'success_admin',
+                'success',
                 $this->translator->trans(
                     'radsecProxyCertUploadedSuccessfully',
                     [],
@@ -145,7 +143,7 @@ class CertificateFreeradiusManagementController extends AbstractController
                 $this->entityManager->flush();
 
                 $this->addFlash(
-                    'success_admin',
+                    'success',
                     $this->translator->trans('freeradiusConfigAppliedSuccessfully', [], 'controllers')
                 );
 
