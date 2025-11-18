@@ -156,6 +156,72 @@
                     </div>
                 </div>
 
+                {# --- OpenRoaming DB Name --- #}
+                <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full" {{ stimulus_target('radio-card', 'card') }} {{ stimulus_controller('card') }}>
+                    <div class="flex flex-row justify-between">
+                        <div class="text-base font-medium text-center break-normal md:break-all">
+                            <h1 class="text-base md:text-lg whitespace-nowrap">
+                                {{ 'dbOpenRoamingDbName'|trans({}, 'dataBase') }}
+                            </h1>
+                        </div>
+                        <label class="flex items-center bg-opacity-40">
+                            <img class="w-6 cursor-pointer" {{ stimulus_target('card', 'button') }}
+                                    {{ stimulus_action('card', 'show_info', 'mouseover')|stimulus_action('card', 'hide_info', 'mouseout') }}
+                                 src="{{ asset('resources/logos/info_icon.svg') }}" alt="info_icon"/>
+                        </label>
+                    </div>
+
+                    {{ include('/dashboard/shared/settings_actions/_description.html.twig', {
+                        description: 'dbOpenRoamingDbNameDescription'|trans({}, 'dataBase'),
+                    }) }}
+
+                    <div class="flex items-center space-x-2 mt-5">
+                        {{ form_widget(form.dbOpenRoamingDbName, {
+                            attr: {
+                                class: 'form-widget mt-1 block w-full rounded-md border-gray-200 p-2',
+                                'wire:model.debounce.500ms': 'dbSetupDTO.dbOpenRoamingDbName',
+                            },
+                        }) }}
+                    </div>
+
+                    <div class="mt-2 text-center text-red-500 text-base">
+                        {{ form_errors(form.dbOpenRoamingDbName) }}
+                    </div>
+                </div>
+
+                {# --- Freeradius DB Name --- #}
+                <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full" {{ stimulus_target('radio-card', 'card') }} {{ stimulus_controller('card') }}>
+                    <div class="flex flex-row justify-between">
+                        <div class="text-base font-medium text-center break-normal md:break-all">
+                            <h1 class="text-base md:text-lg whitespace-nowrap">
+                                {{ 'dbFreeradiusDbName'|trans({}, 'dataBase') }}
+                            </h1>
+                        </div>
+                        <label class="flex items-center bg-opacity-40">
+                            <img class="w-6 cursor-pointer" {{ stimulus_target('card', 'button') }}
+                                    {{ stimulus_action('card', 'show_info', 'mouseover')|stimulus_action('card', 'hide_info', 'mouseout') }}
+                                 src="{{ asset('resources/logos/info_icon.svg') }}" alt="info_icon"/>
+                        </label>
+                    </div>
+
+                    {{ include('/dashboard/shared/settings_actions/_description.html.twig', {
+                        description: 'dbFreeradiusDbNameDescription'|trans({}, 'dataBase'),
+                    }) }}
+
+                    <div class="flex items-center space-x-2 mt-5">
+                        {{ form_widget(form.dbFreeradiusDbName, {
+                            attr: {
+                                class: 'form-widget mt-1 block w-full rounded-md border-gray-200 p-2',
+                                'wire:model.debounce.500ms': 'dbSetupDTO.dbFreeradiusDbName',
+                            },
+                        }) }}
+                    </div>
+
+                    <div class="mt-2 text-center text-red-500 text-base">
+                        {{ form_errors(form.dbFreeradiusDbName) }}
+                    </div>
+                </div>
+
                 {# --- OpenRoaming IP Card --- #}
                 <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full" {{ stimulus_target('radio-card', 'card') }} {{ stimulus_controller('card') }}>
                     <div class="flex flex-row justify-between">

@@ -83,14 +83,14 @@ class InstallationController extends AbstractController
                 $dbDTO->dbOpenRoamingPassword,
                 $dbDTO->dbOpenRoamingIp,
                 $dbDTO->dbOpenRoamingPort,
-                'openroaming'
+                $dbDTO->dbOpenRoamingDbName
             );
             $freeradiusDb = $this->databaseConnectionService->buildDatabaseUrl(
                 $dbDTO->dbFreeradiusUserName,
                 $dbDTO->dbFreeradiusPassword,
                 $dbDTO->dbFreeradiusIp,
                 $dbDTO->dbFreeradiusPort,
-                'radius'
+                $dbDTO->dbFreeradiusDbName
             );
 
 
@@ -101,10 +101,10 @@ class InstallationController extends AbstractController
 
             if (!$orConnection) {
                 $connectionsFailed[] = 'OpenRoaming';
-            }/*
+            }
             if (!$frConnection) {
                 $connectionsFailed[] = 'Freeradius';
-            }*/
+            }
 
             if ($connectionsFailed !== []) {
                 $this->addFlash(
