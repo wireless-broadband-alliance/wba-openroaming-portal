@@ -22,6 +22,9 @@ class DbSetupType extends AbstractType
             ->add('dbOpenRoamingPassword', TextType::class, [
                 'required' => false,
             ])
+            ->add('dbOpenRoamingDbName', TextType::class, [
+                'required' => false,
+            ])
             ->add('dbOpenRoamingIp', TextType::class, [
                 'required' => false,
             ])
@@ -32,6 +35,9 @@ class DbSetupType extends AbstractType
                 'required' => false,
             ])
             ->add('dbFreeradiusPassword', TextType::class, [
+                'required' => false,
+            ])
+            ->add('dbFreeradiusDbName', TextType::class, [
                 'required' => false,
             ])
             ->add('dbFreeradiusIp', TextType::class, [
