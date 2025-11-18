@@ -21,7 +21,7 @@ php bin/console tailwind:build -w &
 > If changes to your assets aren't visible after running `asset-map:compile`, try clearing the `public/assets/` folder:
 >
 > ```sh
-> rm -rf public/assets/*
+> rm -rf assets/vendor/*
 > ```
 >
 > This allows Symfony to serve assets dynamically again.
