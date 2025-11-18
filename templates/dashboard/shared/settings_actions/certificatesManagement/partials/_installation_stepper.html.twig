@@ -14,12 +14,37 @@
     {% endif %}
 {% endfor %}
 
+{# Abort Button + Leave Configuration #}
+<div class="flex flex-col sm:flex-row justify-end items-stretch sm:items-center gap-2 sm:gap-3">
+    <form action="{{ path('admin_dashboard_settings_certs_installation_abortProcess') }}"
+          method="POST"
+          onsubmit="return confirm('{{ 'confirm_abort'|trans({}, '_certificate_stepper') }}');">
+        <button type="submit"
+                class="w-full sm:w-auto flex items-center gap-2
+              px-3 py-1.5 sm:px-4 sm:py-2
+              text-xs sm:text-sm
+              rounded-lg shadow font-medium
+              text-red-700 bg-white border border-red-200
+              hover:bg-red-50 hover:border-red-300 transition">
+            <twig:ux:icon name="wba:cross-circle-rounded"
+                          class="w-4 h-4 opacity-80 fill-current"/>
+            {{ 'abort'|trans({}, '_certificate_stepper') }}
+        </button>
+    </form>
+    <a href="{{ path('admin_page') }}"
+       class="w-full sm:w-auto  flex items-center gap-2
+              px-3 py-1.5 sm:px-4 sm:py-2
+              text-xs sm:text-sm
+              rounded-lg shadow font-medium
+              text-gray-700 bg-white border border-gray-200
+              hover:bg-gray-50 hover:border-gray-300 transition">
+        <twig:ux:icon name="wba:exit"
+                      class="w-4 h-4 opacity-70 fill-current"/>
+        {{ 'leave'|trans({}, '_certificate_stepper') }}
+    </a>
+</div>
+
 <div class="w-full max-w-5xl mx-auto mt-8 mb-10 px-4">
-    <div class="p-2">
-        {{ include('dashboard/shared/_info_details.html.twig', {
-            info_text: 'info_text_stepper_details'|trans({}, '_certificate_stepper'),
-        }) }}
-    </div>
 
     <div class="relative flex flex-col md:flex-row items-start md:items-center">
         {# Progress bar #}
@@ -71,15 +96,4 @@
             </div>
         {% endfor %}
     </div>
-
-    {% if processState is defined and processState.active %}
-        <div class="mt-8 flex justify-end">
-            <form action="{{ path('installer_abort') }}" method="POST"
-                  onsubmit="return confirm('{{ 'confirm_abort'|trans({}, '_installation_stepper') }}');">
-                <button type="submit" class="btn-logout flex items-center gap-2">
-                    {{ 'abort'|trans({}, '_installation_stepper') }}
-                </button>
-            </form>
-        </div>
-    {% endif %}
 </div>
