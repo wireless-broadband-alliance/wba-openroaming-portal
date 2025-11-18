@@ -1,4 +1,4 @@
-<div class="grid grid-cols-1 gap-[5px] my-3 p-3">
+<div class="grid grid-cols-1 gap-[5px] my-3">
     {# Error Toasts Dashboard #}
     {% for message in app.session.flashbag.get('error_admin') %}
         {{ include('dashboard/shared/_toast.html.twig', {

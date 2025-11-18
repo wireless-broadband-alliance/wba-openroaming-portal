@@ -6,14 +6,6 @@
 
 {% block second_col %}
     {# Form Column #}
-    {# Toasts #}
-    <div class="grid grid-cols-1 gap-[5px]">
-        {# Flash error messages #}
-        {% for message in app.session.flashbag.get('error') %}
-            {{ include('site/shared/_toast.html.twig', {toast_type: 'toast-warning'}) }}
-        {% endfor %}
-    </div>
-
     {% if data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\OperationMode::ON').value %}
         <img class="w-[120px] h-[58px] object-scale-down mt-[75px]" src="{{ data.CUSTOMER_LOGO.value }}" alt="Logo"/>
     {% endif %}

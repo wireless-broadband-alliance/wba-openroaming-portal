@@ -5,31 +5,31 @@
 {% import 'dashboard/shared/_sort_arrow.html.twig' as sharedSort %}
 
 {% block container %}
-    <div class="p-5 space-y-2">
-        {% set eeaStatus = isEEAUser() %}
-        {% set message = '' %}
-        {% if eeaStatus == constant('App\\Enum\\GeoLocation\\IsEEAHandler::LOCATION_ERROR').value %}
-            {% set message = 'locationError'|trans({}, 'dashboard') %}
-        {% elseif eeaStatus == constant('App\\Enum\\GeoLocation\\IsEEAHandler::MISSING_FILE').value %}
-            {% set message = 'missingFile'|trans({}, 'dashboard') %}
-        {% elseif eeaStatus == constant('App\\Enum\\GeoLocation\\IsEEAHandler::INVALID_DB').value %}
-            {% set message = 'invalidDb'|trans({}, 'dashboard') %}
-        {% endif %}
+    {% set eeaStatus = isEEAUser() %}
+    {% set message = '' %}
+    {% if eeaStatus == constant('App\\Enum\\GeoLocation\\IsEEAHandler::LOCATION_ERROR').value %}
+        {% set message = 'locationError'|trans({}, 'dashboard') %}
+    {% elseif eeaStatus == constant('App\\Enum\\GeoLocation\\IsEEAHandler::MISSING_FILE').value %}
+        {% set message = 'missingFile'|trans({}, 'dashboard') %}
+    {% elseif eeaStatus == constant('App\\Enum\\GeoLocation\\IsEEAHandler::INVALID_DB').value %}
+        {% set message = 'invalidDb'|trans({}, 'dashboard') %}
+    {% endif %}
 
-        {% if message != '' %}
-            {{ include('landing/shared/_toast.html.twig', {
-                message: message,
-                toast_type: 'toast-warning',
-            }) }}
-        {% endif %}
+    {% if message != '' %}
+        {{ include('dashboard/shared/_toast.html.twig', {
+            message: message,
+            toast_type: 'toast-warning-dashboard',
+            auto_remove: false
+        }) }}
+    {% endif %}
 
-        {% if isCertificateAborted() %}
-            {{ include('landing/shared/_toast.html.twig', {
-                message: 'abortedCertificatesWarning'|trans({}, 'dashboard'),
-                toast_type: 'toast-warning',
-            }) }}
-        {% endif %}
-    </div>
+    {% if isCertificateAborted() %}
+        {{ include('dashboard/shared/_toast.html.twig', {
+            message: 'abortedCertificatesWarning'|trans({}, 'dashboard'),
+            toast_type: 'toast-warning-dashboard',
+            auto_remove: false
+        }) }}
+    {% endif %}
     <div class="pt-5 pb-1 text-left space-y-3 rounded-xl bg-white">
         <div class="w-full">
             <div class="sm:w-auto px-5 py-4">

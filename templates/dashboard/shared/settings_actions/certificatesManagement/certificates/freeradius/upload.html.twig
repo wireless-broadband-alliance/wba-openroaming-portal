@@ -1,7 +1,21 @@
 {% extends 'dashboard/shared/settings_actions/certificatesManagement/certificates/freeradius/base.html.twig' %}
 
 {% block freeradius_content %}
-    <div class="bg-red-500 text-white p-4 m-4 rounded-lg">
-        Display content about previous step completed
+    <div class="toast-success-dashboard m-4 rounded-lg px-6 py-4 shadow">
+        <div class="flex flex-col space-y-2">
+            <p class="font-semibold text-base">
+                Radsecproxy configuration completed
+            </p>
+            <div class="text-sm">
+                <p>
+                    You have successfully finished all steps required for the Radsecproxy setup.
+                </p>
+                <p>
+                    You may now proceed with the next phase:
+                    <span class="font-semibold">FreeRADIUS certificate upload, configuration and testing.</span>
+                </p>
+            </div>
+
+        </div>
     </div>
 {% endblock %}
