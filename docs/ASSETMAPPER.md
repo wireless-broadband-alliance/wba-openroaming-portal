@@ -22,6 +22,8 @@ php bin/console tailwind:build -w &
 >
 > ```sh
 > rm -rf assets/vendor/*
+> or
+> rm -rf public/assets/*
 > ```
 >
 > This allows Symfony to serve assets dynamically again.
