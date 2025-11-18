@@ -11,7 +11,7 @@ use App\Enum\CertificateMachineType;
 use App\Enum\CertificateProcessStatus;
 use App\Enum\CertificateTestResult;
 use App\Enum\FirewallType;
-use App\Form\CertificateUploadType;
+use App\Form\CertificateRadsecUploadType;
 use App\Form\SimpleSubmitFormType;
 use App\Repository\CertificateRepository;
 use App\Service\CertificateRadsecproxyCommandsService;
@@ -144,7 +144,7 @@ class CertificateRadsecproxyManagementController extends AbstractController
         $certificateUploadDTO = new CertificateRadSecUploadDTO();
 
         // Create & handle form
-        $form = $this->createForm(CertificateUploadType::class, $certificateUploadDTO);
+        $form = $this->createForm(CertificateRadsecUploadType::class, $certificateUploadDTO);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -237,7 +237,7 @@ class CertificateRadsecproxyManagementController extends AbstractController
             if ($process?->getRadsecproxyConfigAppliedAt() instanceof DateTimeImmutable) {
                 $this->addFlash(
                     'error',
-                    $this->translator->trans('radsecProxyConfigAlreadyApplied', [], 'controllers')
+                    $this->translator->trans('configAlreadyApplied', [], 'controllers')
                 );
             } elseif ($form->isValid()) {
                 $process->setRadsecproxyConfigAppliedAt(new DateTimeImmutable());

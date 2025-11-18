@@ -9,6 +9,15 @@ step:
     radsecproxy_test:
         title: 'Testar Implementação'
         description: 'A configuração dos certificados está quase concluída.'
+    freeradius_upload:
+        title: 'Carregar certificados Freeradius'
+        description: 'arregue os seus certificados Freeradius para iniciar o processo.'
+    freeradius_config:
+        title: 'Aplicar configuração Freeradius'
+        description: 'Execute os comandos gerados para configurar o seu resolver.'
+    freeradius_test:
+        title: 'Testar Implementação'
+        description: 'A configuração dos certificados está quase concluída.'
 
 abort: 'Abortar Processo'
 leave: 'Sair da Configuração do Processo'

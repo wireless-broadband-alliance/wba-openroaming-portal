@@ -1,130 +1,133 @@
 {% extends 'dashboard/shared/settings_actions/certificatesManagement/certificates/radsecproxy/base.html.twig' %}
 
 {% block radsecproxy_content %}
-<div class="border border-gray-200 rounded-xl shadow-sm overflow-hidden bg-white">
-    <div class="bg-gray-50 px-6 py-4 border-b border-gray-200 flex items-center gap-2">
-        <twig:ux:icon class="w-5 h-5 text-primary" name="wba:terminal"/>
-        <h5 class="text-lg font-semibold text-gray-800">
-            {{ 'test_or_proceed'|trans({}, 'test_radsec') }}
-        </h5>
-    </div>
-
-    <div class="p-6 space-y-6 text-gray-700" data-controller="test-certificates">
-        <div class="text-center space-y-3 pt-4">
-            <twig:ux:icon name="wba:shield-check" class="w-14 h-14 mx-auto text-primary"/>
-            <h3 class="text-gray-900 text-xl font-semibold"
-            >
-                {{ 'configuration_complete'|trans({}, 'test_radsec') }}
-            </h3>
-            <p class="text-gray-600">
-                {{ 'instructions'|trans({}, 'test_radsec') }}
-            </p>
+    <div class="border border-gray-200 rounded-xl shadow-sm overflow-hidden bg-white">
+        <div class="bg-gray-50 px-6 py-4 border-b border-gray-200 flex items-center gap-2">
+            <twig:ux:icon class="w-5 h-5 text-primary" name="wba:terminal"/>
+            <h5 class="text-lg font-semibold text-gray-800">
+                {{ 'test_or_proceed'|trans({}, 'test_radsec') }}
+            </h5>
         </div>
 
-        {# Details for the TLS #}
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 items-end">
-            <div>
-                <label class="block text-xs font-medium text-gray-600">
-                    {{ 'host'|trans({}, 'test_radsec') }}
-                    <input type="text"
-                           data-test-certificates-target="hostInput"
-                           class="form-widget mt-1 block w-full rounded-md border-gray-200 p-2"
-                           placeholder="192.168.1.100 or host.example.com"
-                           value="{{ process.getRemoteHost() ?? '' }}"
-                    >
-                </label>
+        <div class="p-6 space-y-6 text-gray-700" data-controller="test-certificates">
+            <div class="text-center space-y-3 pt-4">
+                <twig:ux:icon name="wba:shield-check" class="w-14 h-14 mx-auto text-primary"/>
+                <h3 class="text-gray-900 text-xl font-semibold"
+                >
+                    {{ 'configuration_complete'|trans({}, 'test_radsec') }}
+                </h3>
+                <p class="text-gray-600">
+                    {{ 'instructions'|trans({}, 'test_radsec') }}
+                </p>
             </div>
 
-            <div>
-                <label class="block text-xs font-medium text-gray-600">
-                    {{ 'port'|trans({}, 'test_radsec') }}
-                    <input type="number"
-                           data-test-certificates-target="portInput"
-                           class="form-widget mt-1 block w-full rounded-md border-gray-200 p-2"
-                           placeholder="2083"
-                           value="{{ process.getRemotePort() ?? 2083 }}">
-                </label>
-            </div>
-        </div>
-
-        {# Waiting Widget #}
-        <div class="mt-6 hidden" data-test-certificates-target="waitingWidget">
-            <div class="flex items-center justify-center flex-col gap-4 bg-blue-50 border border-blue-200
-            rounded-lg p-6 text-blue-800 text-center animate-fade-in">
-                <div class="animate-spin h-8 w-8 border-4 border-blue-400 border-t-transparent rounded-full"></div>
+            {# Details for the TLS #}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 items-end">
                 <div>
-                    <p class="font-semibold text-blue-900">
-                        {{ 'in_progress_title'|trans({}, 'test_radsec') }}
-                    </p>
-                    <p class="text-sm text-blue-700">
-                        {{ 'in_progress_description'|trans({}, 'test_radsec') }}
-                    </p>
+                    <label class="block text-xs font-medium text-gray-600">
+                        {{ 'host'|trans({}, 'test_radsec') }}
+                        <input type="text"
+                               data-test-certificates-target="hostInput"
+                               class="form-widget mt-1 block w-full rounded-md border-gray-200 p-2"
+                               placeholder="192.168.1.100 or host.example.com"
+                               value="{{ process.getRemoteHost() ?? '' }}"
+                        >
+                    </label>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-medium text-gray-600">
+                        {{ 'port'|trans({}, 'test_radsec') }}
+                        <input type="number"
+                               data-test-certificates-target="portInput"
+                               class="form-widget mt-1 block w-full rounded-md border-gray-200 p-2"
+                               placeholder="2083"
+                               value="{{ process.getRemotePort() ?? 2083 }}">
+                    </label>
+                </div>
+            </div>
+
+            {# Waiting Widget #}
+            <div class="mt-6 hidden" data-test-certificates-target="waitingWidget">
+                <div class="flex items-center justify-center flex-col gap-4 bg-blue-50 border border-blue-200
+            rounded-lg p-6 text-blue-800 text-center animate-fade-in">
+                    <div class="animate-spin h-8 w-8 border-4 border-blue-400 border-t-transparent rounded-full"></div>
+                    <div>
+                        <p class="font-semibold text-blue-900">
+                            {{ 'in_progress_title'|trans({}, 'test_radsec') }}
+                        </p>
+                        <p class="text-sm text-blue-700">
+                            {{ 'in_progress_description'|trans({}, 'test_radsec') }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            {# Result Message #}
+            <div class="mt-4 hidden" data-test-certificates-target="resultMessage"></div>
+
+            {# Result Message #}
+            <div class="mt-4 hidden" data-test-certificates-target="resultMessage"></div>
+
+            <div class="flex flex-col items-center gap-6 w-full">
+                {# Status #}
+                <div class="text-sm flex items-center gap-2 justify-center">
+                    {% if process.getRadsecproxyTestResult() == constant('App\\Enum\\CertificateTestResult::PASSED') %}
+                        <twig:ux:icon name="wba:check-circle-rounded" class="w-5 h-5 text-primary fill-current"/>
+                        <span class="text-primary font-medium">
+                {{ 'test_passed'|trans({}, 'test_radsec') }}
+            </span>
+                    {% elseif process.getRadsecproxyTestResult() == constant('App\\Enum\\CertificateTestResult::FAILED') %}
+                        <twig:ux:icon name="wba:cross-circle-rounded" class="w-5 h-5 text-red-500"/>
+                        <span class="text-red-500">
+                {{ 'test_failed'|trans({}, 'test_radsec') }}
+            </span>
+                    {% else %}
+                        <twig:ux:icon name="wba:cross-circle-rounded" class="w-5 h-5 text-gray-400"/>
+                        <span class="text-gray-500">
+                {{ 'test_not_done'|trans({}, 'test_radsec') }}
+            </span>
+                    {% endif %}
+                </div>
+
+                {# Action Buttons #}
+                <div class="flex flex-col md:flex-row items-center justify-center gap-4 w-full md:w-auto">
+                    {# Run Test #}
+                    <button
+                            type="button"
+                            class="px-6 py-3 bg-primary text-white font-medium rounded-lg shadow hover:bg-primary-dark
+                   focus:ring-2 focus:ring-primary/50 transition flex items-center gap-2 w-full md:w-auto justify-center"
+                            data-action="click->test-certificates#runTest"
+                            data-test-certificates-target="testButton"
+                            data-url="{{ path('admin_dashboard_settings_certs_radsecproxy_test_run') }}"
+                    >
+                        <twig:ux:icon name="wba:shield-check" class="w-5 h-5"/>
+                        <span data-test-certificates-target="buttonLabel">
+                {{ 'test_certificates'|trans({}, 'test_radsec') }}
+            </span>
+                    </button>
+                    {# Next Step #}
+                    <a
+                            {% if processState.stages.radsecproxy_test %}
+                                href="{{ path('admin_dashboard_settings_certs_freeradius_upload') }}"
+                                data-href-enabled="{{ path('admin_dashboard_settings_certs_freeradius_upload') }}"
+                            {% else %}
+                                data-href-enabled="{{ path('admin_dashboard_settings_certs_freeradius_upload') }}"
+                            {% endif %}
+                            data-test-certificates-target="freeradiusButton"
+                            class="px-6 py-3 border border-gray-300 font-medium rounded-lg shadow-sm flex items-center gap-2
+                       w-full md:w-auto justify-center
+                       {% if not processState.stages.radsecproxy_test %}
+                           bg-gray-100 text-gray-400 cursor-not-allowed pointer-events-none
+                       {% else %}
+                           bg-white text-gray-800 hover:bg-gray-50 focus:ring-2 focus:ring-primary/30 transition
+                       {% endif %}"
+                    >
+                        <twig:ux:icon name="wba:right" class="w-5 h-5"/>
+                        {{ 'proceed_freeradius'|trans({}, 'test_radsec') }}
+                    </a>
                 </div>
             </div>
         </div>
-
-        {# Result Message #}
-        <div class="mt-4 hidden" data-test-certificates-target="resultMessage"></div>
-
-        {# Result Message #}
-        <div class="mt-4 hidden" data-test-certificates-target="resultMessage"></div>
-
-        <div class="flex flex-col items-center gap-6 w-full">
-            {# Status #}
-            <div class="text-sm flex items-center gap-2 justify-center">
-                {% if process.getRadsecproxyTestResult() == constant('App\\Enum\\CertificateTestResult::PASSED') %}
-                    <twig:ux:icon name="wba:check-circle-rounded" class="w-5 h-5 text-primary fill-current"/>
-                    <span class="text-primary font-medium">
-                {{ 'test_passed'|trans({}, 'test_radsec') }}
-            </span>
-                {% elseif process.getRadsecproxyTestResult() == constant('App\\Enum\\CertificateTestResult::FAILED') %}
-                    <twig:ux:icon name="wba:cross-circle-rounded" class="w-5 h-5 text-red-500"/>
-                    <span class="text-red-500">
-                {{ 'test_failed'|trans({}, 'test_radsec') }}
-            </span>
-                {% else %}
-                    <twig:ux:icon name="wba:cross-circle-rounded" class="w-5 h-5 text-gray-400"/>
-                    <span class="text-gray-500">
-                {{ 'test_not_done'|trans({}, 'test_radsec') }}
-            </span>
-                {% endif %}
-            </div>
-
-            {# Action Buttons #}
-            <div class="flex flex-col md:flex-row items-center justify-center gap-4 w-full md:w-auto">
-                {# Run Test #}
-                <button
-                        type="button"
-                        class="px-6 py-3 bg-primary text-white font-medium rounded-lg shadow hover:bg-primary-dark
-                   focus:ring-2 focus:ring-primary/50 transition flex items-center gap-2 w-full md:w-auto justify-center"
-                        data-action="click->test-certificates#runTest"
-                        data-test-certificates-target="testButton"
-                        data-url="{{ path('admin_dashboard_settings_certs_radsecproxy_test_run') }}"
-                >
-                    <twig:ux:icon name="wba:shield-check" class="w-5 h-5"/>
-                    <span data-test-certificates-target="buttonLabel">
-                {{ 'test_certificates'|trans({}, 'test_radsec') }}
-            </span>
-                </button>
-                {# Next Step #}
-                <a
-                        {% if processState.stages.radsecproxy_test %}
-                            data-href-enabled="{{ path('admin_dashboard_settings_certs_freeradius') }}"
-                        {% endif %}
-                        data-test-certificates-target="freeradiusButton"
-                        class="px-6 py-3 border border-gray-300 font-medium rounded-lg shadow-sm flex items-center gap-2
-                   w-full md:w-auto justify-center
-                   {% if not processState.stages.radsecproxy_test %}
-                       bg-gray-100 text-gray-400 cursor-not-allowed pointer-events-none
-                   {% else %}
-                       bg-white text-gray-800 hover:bg-gray-50 focus:ring-2 focus:ring-primary/30 transition
-                   {% endif %}"
-                >
-                    <twig:ux:icon name="wba:right" class="w-5 h-5"/>
-                    {{ 'proceed_freeradius'|trans({}, 'test_radsec') }}
-                </a>
-            </div>
-        </div>
     </div>
-</div>
 {% endblock %}

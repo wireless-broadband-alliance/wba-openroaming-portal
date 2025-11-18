@@ -9,6 +9,15 @@ step:
     radsecproxy_test:
         title: 'Test Implementation'
         description: 'Certificate setup almost finished.'
+    freeradius_upload:
+        title: 'Upload Freeradius Certs'
+        description: 'Upload your Freeradius certificates to start the process.'
+    freeradius_config:
+        title: 'Apply Freeradius Config'
+        description: 'Run the generated commands to configure your resolver.'
+    freeradius_test:
+        title: 'Test Implementation'
+        description: 'Certificate setup almost finished.'
 
 abort: 'Abort Process'
 leave: 'Leave Process Configuration'
