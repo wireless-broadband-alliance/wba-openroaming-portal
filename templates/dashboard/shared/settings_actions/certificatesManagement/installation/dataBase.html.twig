@@ -19,8 +19,7 @@
 
     {# Live Component do formulário #}
     <twig:DataBaseForm :dbSetupDTO="formDTO">
-        <div {{ attributes }}>
-            {{ form_start(form, {attr: {autocomplete: 'off'}}) }}
+            {{ form_start(form) }}
 
             <div class="grid gap-4 lg:grid-cols-2 xl:grid-cols-2 p-2 z-0">
                 <div class="transition bg-white rounded-md p-6 w-full" >
@@ -126,11 +125,10 @@
                         description: 'dbOpenRoamingPasswordDescription'|trans({}, 'dataBase'),
                     }) }}
 
-                    <div class="flex items-center space-x-2 mt-5">
+                    <div class="relative mt-[32px]">
                         {{ form_widget(form.dbOpenRoamingPassword, {
                             attr: {
                                 class: 'form-widget mt-1 block w-full rounded-md border-gray-200 p-2',
-                                'wire:model.debounce.500ms': 'dbSetupDTO.dbOpenRoaming',
                             },
                         }) }}
                     </div>
@@ -159,11 +157,10 @@
                         description: 'dbFreeradiusPasswordDescription'|trans({}, 'dataBase'),
                     }) }}
 
-                    <div class="flex items-center space-x-2 mt-5">
+                    <div class="relative mt-[32px]">
                         {{ form_widget(form.dbFreeradiusPassword, {
                             attr: {
                                 class: 'form-widget mt-1 block w-full rounded-md border-gray-200 p-2',
-                                'wire:model.debounce.500ms': 'dbSetupDTO.dbFreeradius',
                             },
                         }) }}
                     </div>
@@ -388,6 +385,5 @@
             </div>
 
             {{ form_end(form) }}
-        </div>
     </twig:DataBaseForm>
 {% endblock %}

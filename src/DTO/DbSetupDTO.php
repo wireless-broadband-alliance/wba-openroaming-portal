@@ -9,7 +9,6 @@ class DbSetupDTO
     #[Assert\NotBlank(message: 'fieldNotBlank')]
     public ?string $dbOpenRoamingUserName = null;
 
-    #[Assert\NotBlank(message: 'fieldNotBlank')]
     public ?string $dbOpenRoamingPassword = null;
 
     #[Assert\NotBlank(message: 'fieldNotBlank')]
@@ -25,7 +24,6 @@ class DbSetupDTO
     #[Assert\NotBlank(message: 'fieldNotBlank')]
     public ?string $dbFreeradiusUserName = null;
 
-    #[Assert\NotBlank(message: 'fieldNotBlank')]
     public ?string $dbFreeradiusPassword = null;
 
     #[Assert\NotBlank(message: 'fieldNotBlank')]
