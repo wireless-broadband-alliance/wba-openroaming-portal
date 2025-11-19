@@ -10,15 +10,40 @@ use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class AdminConfigType extends AbstractType
 {
+    public function __construct(
+        private readonly TranslatorInterface $translator
+    ) {
+    }
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            ->add('email', EmailType::class)
-            ->add('password', PasswordType::class)
-            ->add('confirmPassword', PasswordType::class);
+            ->add('email', EmailType::class, [
+                'attr' => [
+                    'placeholder' => $this->translator->trans('email', [], 'AdminConfigType'),
+                ],
+            ])
+            ->add('password', PasswordType::class, [
+                'toggle' => true,
+                'hidden_label' => null,
+                'visible_label' => null,
+                'attr' => [
+                    'placeholder' => $this->translator->trans('password', [], 'AdminConfigType'),
+                    'data-live-ignore' => 'true',
+                ],
+            ])
+            ->add('confirmPassword', PasswordType::class, [
+                'toggle' => true,
+                'hidden_label' => null,
+                'visible_label' => null,
+                'attr' => [
+                    'placeholder' => $this->translator->trans('confirmPassword', [], 'AdminConfigType'),
+                    'data-live-ignore' => 'true',
+                ],
+            ]);
     }
 
     public function configureOptions(OptionsResolver $resolver)
