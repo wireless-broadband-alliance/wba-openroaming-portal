@@ -26,7 +26,7 @@
 
         {# Cookie Preferences Modal #}
         <div class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" {{ stimulus_target('cookie', 'modalCookie') }}>
-            <div class="px-10 py-[35px] h-[calc(90%)] lg:h-[calc(80%)] w-[810px] bg-white lg:w-1/2 p-6 mx-4 rounded shadow space-y-4 overflow-auto">
+            <div class="px-10 py-[35px] h-[calc(90%)] lg:h-[calc(80%)] w-[810px] bg-white lg:w-1/2 p-6 mx-4 rounded-2xl shadow space-y-4 overflow-auto">
                 <div class="flex justify-between items-center border-b pb-3">
                     <h2 class="text-primary text-xl font-semibold">
                         {{ 'title'|trans({}, '_cookie_banner') }}
