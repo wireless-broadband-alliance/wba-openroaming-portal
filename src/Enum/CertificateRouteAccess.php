@@ -36,4 +36,17 @@ enum CertificateRouteAccess: string
             self::FREERADIUS_TEST,
         ];
     }
+
+    public function phase(): string
+    {
+        return match ($this) {
+            self::RADSECPROXY_UPLOAD,
+            self::RADSECPROXY_CONFIG,
+            self::RADSECPROXY_TEST => 'radsecproxy',
+
+            self::FREERADIUS_UPLOAD,
+            self::FREERADIUS_CONFIG,
+            self::FREERADIUS_TEST => 'freeradius',
+        };
+    }
 }
