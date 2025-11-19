@@ -6,7 +6,10 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Validator\Constraints as Assert;
 use App\Validator\Constraints as CustomAssert;
 
-#[CustomAssert\PemKeyMatchesCertificate] // Class level so this validator can access the client/key at the same time
+#[CustomAssert\PemKeyMatchesCertificate(
+    certificateField: 'client',
+    privateKeyField: 'key'
+)] // Class level so this validator can access the client/key at the same time
 class CertificateRadSecUploadDTO
 {
     #[Assert\File(

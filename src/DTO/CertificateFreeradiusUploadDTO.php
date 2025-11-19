@@ -6,6 +6,10 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Validator\Constraints as Assert;
 use App\Validator\Constraints as CustomAssert;
 
+#[CustomAssert\PemKeyMatchesCertificate(
+    certificateField: 'cert',
+    privateKeyField: 'privKey'
+)] // Class level so this validator can access the client/key at the same time
 class CertificateFreeradiusUploadDTO
 {
     #[Assert\File(
@@ -20,8 +24,8 @@ class CertificateFreeradiusUploadDTO
         mimeTypesMessage: 'invalidFileTypeCA'
     )]
     #[CustomAssert\ValidPemCertificate]
+    #[CustomAssert\ValidRsaCertificate]
     public ?UploadedFile $ca = null;
-
 
     #[Assert\File(
         maxSize: '5M',
@@ -34,8 +38,8 @@ class CertificateFreeradiusUploadDTO
         mimeTypesMessage: 'invalidFileTypeCert'
     )]
     #[CustomAssert\ValidPemCertificate]
+    #[CustomAssert\ValidRsaCertificate]
     public ?UploadedFile $cert = null;
-
 
     #[Assert\File(
         maxSize: '5M',
@@ -48,8 +52,8 @@ class CertificateFreeradiusUploadDTO
         mimeTypesMessage: 'invalidFileTypeChain'
     )]
     #[CustomAssert\ValidPemCertificate]
+    #[CustomAssert\ValidRsaCertificate]
     public ?UploadedFile $chain = null;
-
 
     #[Assert\File(
         maxSize: '5M',
@@ -62,8 +66,8 @@ class CertificateFreeradiusUploadDTO
         mimeTypesMessage: 'invalidFileTypeFullChain'
     )]
     #[CustomAssert\ValidPemCertificate]
+    #[CustomAssert\ValidRsaCertificate]
     public ?UploadedFile $fullChain = null;
-
 
     #[Assert\File(
         maxSize: '5M',
