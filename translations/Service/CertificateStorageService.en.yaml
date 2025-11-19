@@ -1,2 +1,4 @@
 invalidPEMCertificate: 'Invalid PEM certificate.'
 unableParse: 'Unable to parse PEM certificate.'
+failedToReadFile: "Failed to read the uploaded file: %file%"
+uploadedFileNotFound: "Uploaded file not found: %file%"

@@ -47,6 +47,30 @@ readonly class CertificateStorageService
         CertificateSetupProcess $process,
         ?bool $isAKey = false,
     ): Certificate {
+        $path = $file->getPathname(); // stores path early to not crash sqlFileInfo::getSize()
+
+        if (!file_exists($path)) {
+            throw new RuntimeException(
+                $this->translator->trans(
+                    'uploadedFileNotFound',
+                    ['%file%' => $file->getClientOriginalName()],
+                    'CertificateStorageService'
+                )
+            );
+        }
+
+        // Read the file content immediately
+        $content = file_get_contents($path);
+        if ($content === false) {
+            throw new RuntimeException(
+                $this->translator->trans(
+                    'failedToReadFile',
+                    ['%file%' => $file->getClientOriginalName()],
+                    'CertificateStorageService'
+                )
+            );
+        }
+
         $certificate = new Certificate();
         $certificate->setName($name . $type);
         $certificate->setType($type);
@@ -58,7 +82,7 @@ readonly class CertificateStorageService
         $certificate->setMetadata([
             'originalName' => $file->getClientOriginalName(),
             'mimeType' => $file->getClientMimeType(),
-            'size' => $file->getSize(),
+            'size' => file_exists($path) ? $file->getSize() : null,
         ]);
 
         // Extract fingerprint and validity

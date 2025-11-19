@@ -101,7 +101,7 @@ class CertificateFreeradiusManagementController extends AbstractController
             if ($certificateUploadDTO->chain instanceof UploadedFile) {
                 // Save on the tmp folder the uploaded certificates after the validation
                 $this->certificateStorageService->storeUploadedFile(
-                    $certificateUploadDTO->cert,
+                    $certificateUploadDTO->chain,
                     CertificateMachineType::FREERADIUS->value,
                     CertificateFileName::CHAIN_PEM->value,
                     $process
