@@ -71,7 +71,6 @@ readonly class CertificateProcessCheckerService
     public function getNextRequiredRoute(array $stages): ?string
     {
         foreach (CertificateRouteAccess::orderedStages() as $stage) {
-
             // If the stage is not completed, this is the page where the user must go.
             if (!($stages[$stage->value] ?? false)) {
                 return $stage->routeName();

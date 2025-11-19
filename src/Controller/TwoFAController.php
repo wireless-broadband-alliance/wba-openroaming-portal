@@ -787,7 +787,6 @@ class TwoFAController extends AbstractController
                     'Your code is: ' . $user->getTwoFAcode()
                 );
             }
-
         } else {
             $lastEvent = $this->eventRepository->findLatest2FACodeAttemptEvent(
                 $user,
