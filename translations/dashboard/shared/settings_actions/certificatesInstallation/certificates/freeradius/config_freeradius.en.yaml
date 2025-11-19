@@ -1,5 +1,0 @@
-config:
-    completed: "Radsecproxy configuration completed"
-    finished_steps: "You have successfully finished all steps required for the Radsecproxy setup."
-    next_phase: "You may now proceed with the next phase:"
-    details: "FreeRADIUS certificate upload, configuration and testing."

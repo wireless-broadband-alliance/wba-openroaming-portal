@@ -1,0 +1,30 @@
+radsecproxy_process:
+    completed: "Radsecproxy configuration completed"
+    finished_steps: "You have successfully finished all steps required for the Radsecproxy setup."
+    next_phase: "You may now proceed with the next phase:"
+    details: "FreeRADIUS certificate upload, configuration and testing."
+
+
+title: "FreeRADIUS Certificate Upload"
+
+ca:
+    label: "CA (.pem)"
+    description: "Upload the Certificate Authority file used by FreeRADIUS."
+
+cert:
+    label: "Certificate (.pem)"
+    description: "Upload the device/server certificate."
+
+chain:
+    label: "Chain (.pem)"
+    description: "Upload the intermediate chain file."
+
+fullChain:
+    label: "Full Chain (.pem)"
+    description: "Upload the full certificate chain file."
+
+privKey:
+    label: "Private Key (.pem)"
+    description: "Upload the private key associated with your certificate."
+
+submit: "Upload Certificates"

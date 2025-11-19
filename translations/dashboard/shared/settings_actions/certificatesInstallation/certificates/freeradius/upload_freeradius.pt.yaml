@@ -1,0 +1,29 @@
+radsecproxy_process:
+    completed: "Configuração do Radsecproxy concluída"
+    finished_steps: "Concluiu com sucesso todos os passos necessários para a configuração do Radsecproxy."
+    next_phase: "Pode agora prosseguir para a fase seguinte:"
+    details: "Envio, configuração e teste dos certificados do FreeRADIUS."
+
+title: "Envio de Certificados FreeRADIUS"
+
+ca:
+    label: "CA (.pem)"
+    description: "Envie o ficheiro da Autoridade Certificadora utilizado pelo FreeRADIUS."
+
+cert:
+    label: "Certificado (.pem)"
+    description: "Envie o certificado do dispositivo/servidor."
+
+chain:
+    label: "Cadeia (.pem)"
+    description: "Envie o ficheiro da cadeia intermédia."
+
+fullChain:
+    label: "Cadeia Completa (.pem)"
+    description: "Envie o ficheiro da cadeia completa do certificado."
+
+privKey:
+    label: "Chave Privada (.pem)"
+    description: "Envie a chave privada associada ao seu certificado."
+
+submit: "Enviar Certificados"

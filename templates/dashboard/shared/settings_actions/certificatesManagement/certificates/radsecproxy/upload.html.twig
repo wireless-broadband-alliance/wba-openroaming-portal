@@ -1,41 +1,44 @@
 {% extends 'dashboard/shared/settings_actions/certificatesManagement/certificates/radsecproxy/base.html.twig' %}
 
 {% block radsecproxy_content %}
-    <div class="cert-upload-card">
-        <h3 class="cert-upload-header">
-            {{ 'title'|trans({}, 'upload_radsec') }}
-        </h3>
+    {{ form_start(form, {attr: {enctype: 'multipart/form-data'}}) }}
+    <div class="border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+        <div class="bg-gray-50 px-6 py-4 border-b border-gray-200 flex items-center gap-2">
+            <twig:ux:icon class="w-5 h-5 text-primary" name="wba:upload-rounded"/>
+            <h5 class="text-lg font-semibold text-gray-800">
+                {{ 'title'|trans({}, 'upload_radsec') }}
+            </h5>
+        </div>
 
-        {{ form_start(form, {attr: {enctype: 'multipart/form-data'}}) }}
+        <div class="px-6 py-6 bg-white space-y-6">
+            <div class="space-y-2">
+                <p class="text-sm font-medium text-gray-700">
+                    {{ 'client.description'|trans({}, 'upload_radsec') }}
+                </p>
+                {{ form_label(form.client, 'client.label'|trans({}, 'upload_radsec'), {label_attr: {class: 'font-semibold'}}) }}
+                {{ form_widget(form.client, {attr: {class: 'border rounded-lg p-2 w-full'}}) }}
+                <div class="text-red-500 text-sm ml-1">
+                    {{ form_errors(form.client) }}
+                </div>
+            </div>
 
-        <div class="cert-upload-group space-y-2 mb-4">
-            <p class="text-lg font-medium text-gray-700">
-                {{ 'client.description'|trans({}, 'upload_radsec') }}
-            </p>
-            {{ form_label(form.client, 'client.label'|trans({}, 'upload_radsec')) }}
-            {{ form_widget(form.client, {attr: {class: 'border rounded-lg p-2 w-full'}}) }}
-            <div class="text-red-500 text-sm ml-1">
-                {{ form_errors(form.client) }}
+            <div class="space-y-2">
+                <p class="text-sm font-medium text-gray-700">
+                    {{ 'key.description'|trans({}, 'upload_radsec') }}
+                </p>
+                {{ form_label(form.key, 'key.label'|trans({}, 'upload_radsec'), {label_attr: {class: 'font-semibold'}}) }}
+                {{ form_widget(form.key, {attr: {class: 'border rounded-lg p-2 w-full'}}) }}
+                <div class="text-red-500 text-sm ml-1">
+                    {{ form_errors(form.key) }}
+                </div>
             </div>
         </div>
-
-        <div class="cert-upload-group space-y-2 mb-4">
-            <p class="text-lg font-medium text-gray-700">
-                {{ 'key.description'|trans({}, 'upload_radsec') }}
-            </p>
-            {{ form_label(form.key, 'key.label'|trans({}, 'upload_radsec')) }}
-            {{ form_widget(form.key, {attr: {class: 'border rounded-lg p-2 w-full'}}) }}
-            <div class="text-red-500 text-sm ml-1">
-                {{ form_errors(form.key) }}
-            </div>
-        </div>
-
-        <div class="flex justify-end mt-4">
-            <button class="cert-upload-btn text-white px-6 py-2 rounded-lg shadow-sm transition">
-                {{ 'submit'|trans({}, 'upload_radsec') }}
-            </button>
-        </div>
-
-        {{ form_end(form) }}
     </div>
+
+    <div class="flex justify-end pt-4">
+        <button class="px-6 py-2.5 rounded-lg bg-primary text-white shadow-sm hover:bg-primary-dark transition">
+            {{ 'submit'|trans({}, 'upload_radsec') }}
+        </button>
+    </div>
+    {{ form_end(form) }}
 {% endblock %}

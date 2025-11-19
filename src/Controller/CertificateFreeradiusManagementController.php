@@ -5,14 +5,18 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\DTO\CertificateFreeradiusUploadDTO;
+use App\Entity\CertificateSetupProcess;
+use App\Enum\CertificateFileName;
+use App\Enum\CertificateMachineType;
 use App\Enum\FirewallType;
 use App\Form\CertificateFreeradiusUploadType;
-use App\Service\CertificateFreeradiusCommandsService;
 use App\Service\CertificateProcessCheckerService;
 use App\Service\CertificateStorageService;
 use App\Service\GetSettings;
+use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -27,7 +31,6 @@ class CertificateFreeradiusManagementController extends AbstractController
         private readonly CertificateProcessCheckerService $certificateProcessCheckerService,
         private readonly CertificateStorageService $certificateStorageService,
         private readonly EntityManagerInterface $entityManager,
-        private readonly CertificateFreeradiusCommandsService $certificateFreeradiusCommandsService,
     ) {
     }
 
@@ -65,11 +68,70 @@ class CertificateFreeradiusManagementController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // TODO MAKE THE LOGIC AFTER THE FORM IS SUBMITTED
+            $process = $this->certificateProcessCheckerService->getCurrentProcess();
+            // In case there's not active process
+            if (!$process instanceof CertificateSetupProcess) {
+                $this->addFlash(
+                    'error',
+                    $this->translator->trans('noActiveProcess', [], 'CertificateProcessCheckerService')
+                );
+                return $this->redirectToRoute('admin_dashboard_settings_certs_radsecproxy_upload');
+            }
+
+            if ($certificateUploadDTO->ca instanceof UploadedFile) {
+                // Save on the tmp folder the uploaded certificates after the validation
+                $this->certificateStorageService->storeUploadedFile(
+                    $certificateUploadDTO->ca,
+                    CertificateMachineType::FREERADIUS->value,
+                    CertificateFileName::CA_PEM->value,
+                    $process
+                );
+            }
+
+            if ($certificateUploadDTO->cert instanceof UploadedFile) {
+                // Save on the tmp folder the uploaded certificates after the validation
+                $this->certificateStorageService->storeUploadedFile(
+                    $certificateUploadDTO->cert,
+                    CertificateMachineType::FREERADIUS->value,
+                    CertificateFileName::CERT_PEM->value,
+                    $process
+                );
+            }
+
+            if ($certificateUploadDTO->chain instanceof UploadedFile) {
+                // Save on the tmp folder the uploaded certificates after the validation
+                $this->certificateStorageService->storeUploadedFile(
+                    $certificateUploadDTO->cert,
+                    CertificateMachineType::FREERADIUS->value,
+                    CertificateFileName::CHAIN_PEM->value,
+                    $process
+                );
+            }
+
+            if ($certificateUploadDTO->fullChain instanceof UploadedFile) {
+                // Save on the tmp folder the uploaded certificates after the validation
+                $this->certificateStorageService->storeUploadedFile(
+                    $certificateUploadDTO->fullChain,
+                    CertificateMachineType::FREERADIUS->value,
+                    CertificateFileName::FULL_CHAIN_PEM->value,
+                    $process
+                );
+            }
+
+            if ($certificateUploadDTO->privKey instanceof UploadedFile) {
+                // Save on the tmp folder the uploaded certificates after the validation
+                $this->certificateStorageService->storeUploadedFile(
+                    $certificateUploadDTO->privKey,
+                    CertificateMachineType::FREERADIUS->value,
+                    CertificateFileName::PRIVATE_KEY_PEM->value,
+                    $process,
+                    true
+                );
+            }
 
             // After the files are validated and the processed, update them once again to add
-            // $process->setFreeradiusFormCompletedAt(new DateTimeImmutable()); TODO GET THE CURRENT ACTIVE PROCESS
-            // $process->setUpdatedAt(new DateTimeImmutable());
+            $process->setFreeradiusFormCompletedAt(new DateTimeImmutable());
+            $process->setUpdatedAt(new DateTimeImmutable());
 
             $this->entityManager->persist($process);
             $this->entityManager->flush();
