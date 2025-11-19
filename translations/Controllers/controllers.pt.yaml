@@ -128,6 +128,7 @@ loginVerificationCodeSent: 'Enviámos um código de verificação de início de 
 loginSuccessfully: 'Login efetuado com sucesso'
 invalidLogin: 'O seu link de login é inválido ou expirou. Solicite um novo link de login para continuar.'
 connectionFailed: 'Falha na ligação à base de dados: %dbConnections%'
+dbConnectionApplied: 'Configurações das bases de dados aplicadas com sucesso.'
 jwtSuccessfully: 'Par de chaves JWT gerado com sucesso!'
 jwtFailed: 'Falha ao gerar o par de chaves JWT'
 adminConfirmedSuccessfully: 'E-mail do administrador confirmado com sucesso'

@@ -108,7 +108,7 @@ class InstallationController extends AbstractController
 
             if ($connectionsFailed !== []) {
                 $this->addFlash(
-                    'error',
+                    'error_admin',
                     $this->translator->trans(
                         'connectionFailed',
                         ['%dbConnections%' => implode(', ', $connectionsFailed)],
@@ -141,6 +141,15 @@ class InstallationController extends AbstractController
             $this->databaseConnectionService->writeDatabaseUrlToEnv(
                 $freeradiusDb,
                 DataBaseSetupType::DATABASE_FREERADIUS_URL->value
+            );
+
+            $this->addFlash(
+                'success_admin',
+                $this->translator->trans(
+                    'dbConnectionApplied',
+                    [],
+                    'controllers'
+                )
             );
 
             return $this->redirectToRoute('admin_dashboard_settings_certs_installation_settings');
@@ -276,20 +285,20 @@ class InstallationController extends AbstractController
 
                 if ($success) {
                     $this->addFlash(
-                        'success',
+                        'success_admin',
                         $this->translator->trans('jwtSuccessfully', [], 'controllers')
                     );
                     return $this->redirectToRoute('admin_dashboard_settings_certs_installation_admin');
                 }
                 $this->addFlash(
-                    'error',
+                    'error_admin',
                     $this->translator->trans('jwtFailed', [], 'controllers')
                 );
 
                 return $this->redirectToRoute('admin_dashboard_settings_certs_installation_admin');
             } catch (\Exception) {
                 $this->addFlash(
-                    'error',
+                    'error_admin',
                     $this->translator->trans('jwtFailed', [], 'controllers')
                 );
                 return $this->redirectToRoute('admin_dashboard_settings_certs_installation_settings');
@@ -417,14 +426,14 @@ class InstallationController extends AbstractController
                 $this->entityManager->flush();
 
                 $this->addFlash(
-                    'success',
+                    'success_admin',
                     $this->translator->trans('adminConfirmedSuccessfully', [], 'controllers')
                 );
 
                 return $this->redirectToRoute('admin_dashboard_settings_certs_installation_summary');
             }
             $this->addFlash(
-                'error',
+                'error_admin',
                 $this->translator->trans('invalidCodeMessage', [], 'controllers')
             );
         }
@@ -447,7 +456,7 @@ class InstallationController extends AbstractController
                     );
 
                     $this->addFlash(
-                        'success',
+                        'success_admin',
                         $this->translator->trans('codeSentSuccessfully', [], 'controllers')
                     );
                 } else {
@@ -457,7 +466,7 @@ class InstallationController extends AbstractController
                     );
 
                     $this->addFlash(
-                        'error',
+                        'error_admin',
                         $this->translator->trans(
                             'codeAlreadySent',
                             [

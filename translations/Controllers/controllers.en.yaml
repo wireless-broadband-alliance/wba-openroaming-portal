@@ -130,6 +130,7 @@ invalidLogin: 'Your login link is invalid or has expired. Please request a new l
 passwordSentSMS: 'A new account password has been sent to your phone number via SMS.'
 passwordNotSentSMS: 'We were unable to send the new password to your phone number. Please try again.'
 connectionFailed: 'Database connection failed: %dbConnections%'
+dbConnectionApplied: 'Database settings applied successfully.'
 jwtSuccessfully: 'JWT key pair generated successfully'
 jwtFailed: 'Failed to generate JWT key pair'
 adminConfirmedSuccessfully: 'Admin email confirmed successfully'
