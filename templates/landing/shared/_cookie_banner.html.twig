@@ -2,26 +2,27 @@
     <div class="flex items-center justify-center relative">
 
         {# Cookie Banner #}
-        <section
-                class="w-full p-5 mt-8 bg-slate-200 duration-100 rounded hover:shadow z-10 flex flex-col justify-between"
-                {{ stimulus_target('cookie', 'banner') }}>
-            <div class="md:flex items-center justify-between text-center md:text-left text-xs mb-4">
-                <div class="md:flex-1">
-                    {{ 'text'|trans({}, '_cookie_banner') }}
+        <div {{ stimulus_target('cookie', 'bannerWrapper') }} class="flex items-center justify-center relative">
+            <section
+                    class="w-full p-5 mt-8 bg-slate-200 duration-100 rounded hover:shadow z-10 flex flex-col justify-between">
+                <div class="md:flex items-center justify-between text-center md:text-left text-xs mb-4">
+                    <div class="md:flex-1">
+                        {{ 'text'|trans({}, '_cookie_banner') }}
+                    </div>
                 </div>
-            </div>
-            <div class="flex flex-col md:flex-row justify-center md:space-x-4 space-x-0 space-y-4 md:space-y-0">
-                <button class="py-1 px-2 btn-primary text-sm" data-action="cookie#acceptCookies">
-                    {{ 'accept'|trans({}, '_cookie_banner') }}
-                </button>
-                <button class="py-1 px-2 btn-logout text-sm" data-action="cookie#rejectCookies">
-                    {{ 'reject'|trans({}, '_cookie_banner') }}
-                </button>
-                <button class="py-1 px-2 btn-secondary text-sm" data-action="cookie#showModal">
-                    {{ 'settings'|trans({}, '_cookie_banner') }}
-                </button>
-            </div>
-        </section>
+                <div class="flex flex-col md:flex-row justify-center md:space-x-4 space-x-0 space-y-4 md:space-y-0">
+                    <button class="py-1 px-2 btn-primary text-sm" data-action="cookie#acceptCookies">
+                        {{ 'accept'|trans({}, '_cookie_banner') }}
+                    </button>
+                    <button class="py-1 px-2 btn-logout text-sm" data-action="cookie#rejectCookies">
+                        {{ 'reject'|trans({}, '_cookie_banner') }}
+                    </button>
+                    <button class="py-1 px-2 btn-secondary text-sm" data-action="cookie#showModal">
+                        {{ 'settings'|trans({}, '_cookie_banner') }}
+                    </button>
+                </div>
+            </section>
+        </div>
 
         {# Cookie Preferences Modal #}
         <div class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" {{ stimulus_target('cookie', 'modalCookie') }}>
@@ -323,7 +324,8 @@
                         <div class="md:flex md:justify-between justify-cente items-centerr">
                             <div class="md:flex-1 text-center md:text-left text-xs">
                                 {{ 'dataSafetyText'|trans({}, '_cookie_banner') }}
-                                <a href="{{ path('app_privacy_policy') }}" target="_blank" class="underline text-primary font-semibold">
+                                <a href="{{ path('app_privacy_policy') }}" target="_blank"
+                                   class="underline text-primary font-semibold">
                                     {{ 'privacyPolicy'|trans({}, '_cookie_banner') }}
                                 </a>
                             </div>
@@ -348,7 +350,7 @@
             <span class="text-sm text-[#707070]">{{ 'manage'|trans({}, '_cookie_banner') }}</span>
             <button id="modalManageCookies" type="button" data-action="cookie#showModal"
                     class="flex items-center duration-300 cursor-pointer rounded-full text-[#707070] focus:animate-spin-slow focus:bg-[#7DB928] focus:text-white hover:shadow-lg p-2.5 relative z-0">
-                <twig:ux:icon name="wba:cookie" class="stroke-current" />
+                <twig:ux:icon name="wba:cookie" class="stroke-current"/>
             </button>
         </div>
     </div>
