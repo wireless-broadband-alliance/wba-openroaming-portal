@@ -3,19 +3,35 @@
 {% block freeradius_content %}
     {{ form_start(form, {attr: {enctype: 'multipart/form-data'}}) }}
 
+    <div class="toast-success-dashboard">
+        <div class="flex flex-col space-y-2">
+            <p class="font-semibold text-base">
+                {{ 'radsecproxy_process.completed'|trans({}, 'upload_freeradius') }}
+            </p>
+            <div class="text-sm">
+                <p>
+                    {{ 'radsecproxy_process.finished_steps'|trans({}, 'upload_freeradius') }}
+                </p>
+                <p>
+                    {{ 'radsecproxy_process.next_phase'|trans({}, 'upload_freeradius') }}
+                    <span class="font-semibold">
+                        {{ 'radsecproxy_process.details'|trans({}, 'upload_freeradius') }}
+                    </span>
+                </p>
+            </div>
+        </div>
+    </div>
+
     <div class="border border-gray-200 rounded-xl shadow-sm overflow-hidden">
-        {# Header same style as radsecproxy #}
         <div class="bg-gray-50 px-6 py-4 border-b border-gray-200 flex items-center gap-2">
-            <twig:ux:icon class="w-5 h-5 text-primary" name="wba:upload-rounded" />
+            <twig:ux:icon class="w-5 h-5 text-primary" name="wba:upload-rounded"/>
             <h5 class="text-lg font-semibold text-gray-800">
                 {{ 'title'|trans({}, 'upload_freeradius') }}
             </h5>
         </div>
 
-        {# Body #}
         <div class="px-6 py-6 bg-white space-y-6">
 
-            {# CA #}
             <div class="space-y-2">
                 <p class="text-sm font-medium text-gray-700">
                     {{ 'ca.description'|trans({}, 'upload_freeradius') }}
@@ -29,7 +45,6 @@
                 </div>
             </div>
 
-            {# CERT #}
             <div class="space-y-2">
                 <p class="text-sm font-medium text-gray-700">
                     {{ 'cert.description'|trans({}, 'upload_freeradius') }}
@@ -43,7 +58,6 @@
                 </div>
             </div>
 
-            {# CHAIN #}
             <div class="space-y-2">
                 <p class="text-sm font-medium text-gray-700">
                     {{ 'chain.description'|trans({}, 'upload_freeradius') }}
@@ -57,7 +71,6 @@
                 </div>
             </div>
 
-            {# FULL CHAIN #}
             <div class="space-y-2">
                 <p class="text-sm font-medium text-gray-700">
                     {{ 'fullChain.description'|trans({}, 'upload_freeradius') }}
@@ -71,7 +84,6 @@
                 </div>
             </div>
 
-            {# PRIVATE KEY #}
             <div class="space-y-2">
                 <p class="text-sm font-medium text-gray-700">
                     {{ 'privKey.description'|trans({}, 'upload_freeradius') }}
@@ -84,7 +96,6 @@
                     {{ form_errors(form.privKey) }}
                 </div>
             </div>
-
         </div>
     </div>
 
