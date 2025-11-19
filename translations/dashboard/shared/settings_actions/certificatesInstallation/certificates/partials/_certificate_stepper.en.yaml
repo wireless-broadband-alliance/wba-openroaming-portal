@@ -21,4 +21,5 @@ step:
 
 abort: 'Abort Process'
 leave: 'Leave Process Configuration'
+warn_return_previous_step: "Returning to this step will reset progress on later steps. Do you want to continue?"
 confirm_abort: 'Are you sure you want to abort the current certificate setup process?'

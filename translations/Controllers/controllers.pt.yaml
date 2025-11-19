@@ -138,7 +138,10 @@ radsecproxy_test_failed: 'Teste Radsecproxy falhou no host %host%:%port% — fic
 radsecproxy_container_not_running: 'O contentor %container% não está em execução no host %host%:%port%'
 radsecProxyCertUploadedSuccessfully: 'Certificados RadSecProxy carregados com sucesso!'
 radsecProxyConfigAppliedSuccessfully: 'Configuração do RadSecProxy concluída!'
-freeradiusConfigAppliedSuccessfully: 'Configuração do Freeradius concluída!'
+freeradiusCertUploadedSuccessfully: 'Certificados Freeradius carregados com sucesso!'
+# TODO ADD MORE FREERADIUS RESPONSES HERE
 configAlreadyApplied: 'Está configuração já está aplicada! Não podes re-submeter o mesmo formulário.'
 certificateProcessAborted: "Este processo foi abortado com sucesso. Por favor, não se esqueça de reconfigurar todo o processo corretamente!"
 not_ev_warning: "Estes certificados não são EV. A geração de perfis OpenRoaming para Windows irá falhar, mas pode continuar."
+cannotReturnToPreviousPhase: 'Já não pode aceder a esta etapa porque já foi concluída.'
+cannotAccessStageYet: "Não pode aceder a esta etapa porque as etapas anteriores não estão concluídas."

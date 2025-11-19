@@ -8,6 +8,7 @@ use App\DTO\CertificateFreeradiusUploadDTO;
 use App\Entity\CertificateSetupProcess;
 use App\Enum\CertificateFileName;
 use App\Enum\CertificateMachineType;
+use App\Enum\CertificateRouteAccess;
 use App\Enum\FirewallType;
 use App\Form\CertificateFreeradiusUploadType;
 use App\Form\SimpleSubmitFormType;
@@ -43,20 +44,24 @@ class CertificateFreeradiusManagementController extends AbstractController
     public function settingsCertificatesManagementFreeradiusUpload(
         Request $request
     ): Response {
+        if ($redirect = $this->enforceStageAccess(CertificateRouteAccess::FREERADIUS_UPLOAD)) {
+            return $redirect;
+        }
+
         // Get current process state
         $processState = $this->certificateProcessCheckerService->getProcessState();
-        if ($processState['active']) {
-            $nextRoute = $this->certificateProcessCheckerService
-                ->getNextRequiredRoute($processState['stages']);
 
-            // If the required next step is NOT this page, redirect
-            if ($nextRoute !== $request->attributes->get('_route')) {
-                $this->addFlash(
-                    'error',
-                    $this->translator->trans('pendingActiveProcess', [], 'CertificateProcessCheckerService')
-                );
-                return $this->redirectToRoute($nextRoute);
-            }
+        // If there's no active process
+        if (!$processState['active']) {
+            $this->addFlash(
+                'error',
+                $this->translator->trans(
+                    'noActiveProcess',
+                    [],
+                    'CertificateProcessCheckerService'
+                )
+            );
+            return $this->redirectToRoute('admin_dashboard_settings_certs_radsecproxy_upload');
         }
 
         $data = $this->getSettings->getSettings();
@@ -154,7 +159,7 @@ class CertificateFreeradiusManagementController extends AbstractController
             $this->addFlash(
                 'success',
                 $this->translator->trans(
-                    'radsecProxyCertUploadedSuccessfully',
+                    'freeradiusCertUploadedSuccessfully',
                     [],
                     'controllers'
                 )
@@ -181,6 +186,10 @@ class CertificateFreeradiusManagementController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function settingsCertificatesManagementFreeradiusConfig(Request $request): Response
     {
+        if ($redirect = $this->enforceStageAccess(CertificateRouteAccess::FREERADIUS_CONFIG)) {
+            return $redirect;
+        }
+
         // Get current process state
         $processState = $this->certificateProcessCheckerService->getProcessState();
         $process = $processState['process'] ?? null;
@@ -195,7 +204,7 @@ class CertificateFreeradiusManagementController extends AbstractController
                     'CertificateProcessCheckerService'
                 )
             );
-            return $this->redirectToRoute('admin_dashboard_settings_certs_freeradius_upload');
+            return $this->redirectToRoute('admin_dashboard_settings_certs_radsecproxy_upload');
         }
 
         // Fetch any data/settings needed for the page
@@ -247,8 +256,23 @@ class CertificateFreeradiusManagementController extends AbstractController
         name: 'admin_dashboard_settings_certs_freeradius_test'
     )]
     #[IsGranted('ROLE_ADMIN')]
-    public function settingsCertificatesManagementFreeradiusTest(): Response
+    public function settingsCertificatesManagementFreeradiusTest(Request $request): Response
     {
+        // Get current process state
+        $requestedStage = CertificateRouteAccess::from(
+            str_replace('admin_dashboard_settings_certs_', '', $request->attributes->get('_route'))
+        );
+
+        if ($this->certificateProcessCheckerService->isRouteBehindProcess($requestedStage)) {
+            $this->addFlash(
+                'error',
+                $this->translator->trans('cannotReturnToPreviousPhase', [], 'controllers')
+            );
+
+            // Send user to the first Freeradius step ALWAYS
+            return $this->redirectToRoute('admin_dashboard_settings_certs_freeradius_upload');
+        }
+
         // Get current process state
         $processState = $this->certificateProcessCheckerService->getProcessState();
 
@@ -276,5 +300,45 @@ class CertificateFreeradiusManagementController extends AbstractController
                 'process' => $processState['process'],
             ]
         );
+    }
+
+    private function enforceStageAccess(CertificateRouteAccess $requestedStage): ?Response
+    {
+        // Check if user can access this stage
+        if (!$this->certificateProcessCheckerService->canAccessStage($requestedStage)) {
+            $this->addFlash(
+                'warning',
+                $this->translator->trans('cannotAccessStageYet', [], 'controllers')
+            );
+            $nextRoute = $this->certificateProcessCheckerService->getNextRequiredRoute(
+                $this->certificateProcessCheckerService->getProcessState()['stages'] ?? []
+            );
+            return $this->redirectToRoute($nextRoute ?? CertificateRouteAccess::FREERADIUS_UPLOAD->routeName());
+        }
+
+        // Prevent going back to previous phase
+        if ($this->certificateProcessCheckerService->isRouteBehindProcess($requestedStage)) {
+            $this->addFlash('warning', $this->translator->trans('cannotReturnToPreviousPhase', [], 'controllers'));
+            return $this->redirectToRoute(CertificateRouteAccess::FREERADIUS_UPLOAD->routeName());
+        }
+
+        // Reset later Freeradius steps if user navigated backwards
+        $process = $this->certificateProcessCheckerService->getCurrentProcess();
+        $currentStage = $this->certificateProcessCheckerService->getProcessCurrentStage();
+        if ($process && $currentStage instanceof CertificateRouteAccess) {
+            $requestedIndex = $this->certificateProcessCheckerService->indexOf($requestedStage);
+            $currentIndex = $this->certificateProcessCheckerService->indexOf($currentStage);
+
+            if ($requestedIndex >= 0 &&
+                $requestedIndex < $currentIndex &&
+                $requestedStage->phase() === 'freeradius' &&
+                $currentStage->phase() === 'freeradius') {
+                $this->certificateProcessCheckerService->resetStagesFrom($requestedStage);
+                $this->entityManager->persist($process);
+                $this->entityManager->flush();
+            }
+        }
+
+        return null; // no redirect, proceed
     }
 }

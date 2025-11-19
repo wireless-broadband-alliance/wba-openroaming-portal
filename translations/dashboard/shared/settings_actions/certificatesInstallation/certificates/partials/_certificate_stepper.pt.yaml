@@ -21,4 +21,5 @@ step:
 
 abort: 'Abortar Processo'
 leave: 'Sair da Configuração do Processo'
+warn_return_previous_step: 'Se regressares a este passo, o progresso dos passos seguintes será perdido. Desejas continuar?'
 confirm_abort: 'Tem a certeza que deseja cancelar o processo de configuração de certificados?'

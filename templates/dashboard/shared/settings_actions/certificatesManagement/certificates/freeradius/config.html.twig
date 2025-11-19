@@ -1,6 +1,6 @@
 {% extends 'dashboard/shared/settings_actions/certificatesManagement/certificates/freeradius/base.html.twig' %}
 
-{% block radsecproxy_content %}
+{% block freeradius_content %}
     {# Warning message box #}
     <div class="toast-success-dashboard">
         <twig:ux:icon name="wba:info" class="w-10 md:w-5 h-10 md:h-5 inline mr-3 fill-currentColor"/>
@@ -22,7 +22,7 @@
         <button
                 type="submit"
                 class="px-6 py-2.5 rounded-lg shadow font-medium transition bg-primary text-white hover:bg-primary-dark focus:ring-2 focus:ring-offset-2 focus:ring-primary"
-                onclick="return confirm('{{ 'confirm_follow_steps'|trans({}, 'config_radsec') }}');"
+                onclick="return confirm('{{ 'confirm_follow_steps'|trans({}, 'config_freeradius') }}');"
         >
             {{ 'submit'|trans({}, 'config_freeradius') }}
         </button>
