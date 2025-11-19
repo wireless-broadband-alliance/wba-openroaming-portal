@@ -23,6 +23,23 @@
             {{ form_start(form, {attr: {autocomplete: 'off'}}) }}
 
             <div class="grid gap-4 lg:grid-cols-2 xl:grid-cols-2 p-2 z-0">
+                <div class="transition bg-white rounded-md p-6 w-full" >
+                    <p class="font-bold text-base sm:text-lg md:text-xl lg:text-2xl">
+                        {{ 'dbOpenRoamingLabel'|trans({}, 'dataBase') }}
+                    </p>
+                    <p class="mt-3 text-sm sm:text-base md:text-lg lg:text-xl text-gray-600">
+                        {{ 'dbOpenRoamingDescription'|trans({}, 'dataBase') }}
+                    </p>
+                </div>
+                <div class="transition bg-white rounded-md p-6 w-full" >
+                    <p class="font-bold text-base sm:text-lg md:text-xl lg:text-2xl">
+                        {{ 'dbFreeradiusLabel'|trans({}, 'dataBase') }}
+                    </p>
+                    <p class="mt-3 text-sm sm:text-base md:text-lg lg:text-xl text-gray-600">
+                        {{ 'dbFreeradiusDescription'|trans({}, 'dataBase') }}
+                    </p>
+                </div>
+
 
                 {# --- OpenRoaming User Name Card --- #}
                 <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full" {{ stimulus_target('radio-card', 'card') }} {{ stimulus_controller('card') }}>
