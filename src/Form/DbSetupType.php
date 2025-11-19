@@ -25,6 +25,9 @@ class DbSetupType extends AbstractType
         $builder
             ->add('dbOpenRoamingUserName', TextType::class, [
                 'required' => false,
+                'attr' => [
+                    'placeholder' => $this->translator->trans('dbOpenRoamingUserName', [], 'DbSetupType'),
+                ],
             ])
             ->add('dbOpenRoamingPassword', PasswordType::class, [
                 'required' => false,
@@ -32,21 +35,33 @@ class DbSetupType extends AbstractType
                 'hidden_label' => null,
                 'visible_label' => null,
                 'attr' => [
-                    'placeholder' => $this->translator->trans('EnterPassword', [], 'LoginFormType'),
+                    'placeholder' => $this->translator->trans('dbOpenRoamingPassword', [], 'DbSetupType'),
                     'data-live-ignore' => 'true',
                 ],
             ])
             ->add('dbOpenRoamingDbName', TextType::class, [
                 'required' => false,
+                'attr' => [
+                    'placeholder' => $this->translator->trans('dbOpenRoamingDbName', [], 'DbSetupType'),
+                ],
             ])
             ->add('dbOpenRoamingIp', TextType::class, [
                 'required' => false,
+                'attr' => [
+                    'placeholder' => $this->translator->trans('dbOpenRoamingIp', [], 'DbSetupType'),
+                ],
             ])
             ->add('dbOpenRoamingPort', IntegerType::class, [
                 'required' => false,
+                'attr' => [
+                    'placeholder' => $this->translator->trans('dbOpenRoamingPort', [], 'DbSetupType'),
+                ],
             ])
             ->add('dbFreeradiusUserName', TextType::class, [
                 'required' => false,
+                'attr' => [
+                    'placeholder' => $this->translator->trans('dbFreeradiusUserName', [], 'DbSetupType'),
+                ],
             ])
             ->add('dbFreeradiusPassword', PasswordType::class, [
                 'required' => false,
@@ -54,18 +69,27 @@ class DbSetupType extends AbstractType
                 'hidden_label' => null,
                 'visible_label' => null,
                 'attr' => [
-                    'placeholder' => $this->translator->trans('EnterPassword', [], 'LoginFormType'),
+                    'placeholder' => $this->translator->trans('dbFreeradiusPassword', [], 'DbSetupType'),
                     'data-live-ignore' => 'true',
                 ],
             ])
             ->add('dbFreeradiusDbName', TextType::class, [
                 'required' => false,
+                'attr' => [
+                    'placeholder' => $this->translator->trans('dbFreeradiusDbName', [], 'DbSetupType'),
+                ],
             ])
             ->add('dbFreeradiusIp', TextType::class, [
                 'required' => false,
+                'attr' => [
+                    'placeholder' => $this->translator->trans('dbFreeradiusIp', [], 'DbSetupType'),
+                ],
             ])
             ->add('dbFreeradiusPort', IntegerType::class, [
                 'required' => false,
+                'attr' => [
+                    'placeholder' => $this->translator->trans('dbFreeradiusPort', [], 'DbSetupType'),
+                ],
             ]);
     }
 
