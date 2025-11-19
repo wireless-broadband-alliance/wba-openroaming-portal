@@ -1,16 +1,24 @@
 <div class="grid grid-cols-1 gap-[5px] my-3">
-    {# Error Toasts Dashboard #}
-    {% for message in app.session.flashbag.get('error_admin') %}
+    {# Success Toasts Dashboard #}
+    {% for message in app.session.flashbag.get('success_admin') %}
+        {{ include('dashboard/shared/_toast.html.twig', {
+            toast_type: 'toast-success-dashboard',
+            message: message,
+        }) }}
+    {% endfor %}
+
+    {# Warning Toasts Dashboard #}
+    {% for message in app.session.flashbag.get('warning_admin') %}
         {{ include('dashboard/shared/_toast.html.twig', {
             toast_type: 'toast-warning-dashboard',
             message: message,
         }) }}
     {% endfor %}
 
-    {# Success Toasts Dashboard #}
-    {% for message in app.session.flashbag.get('success_admin') %}
+    {# Error Toasts Dashboard #}
+    {% for message in app.session.flashbag.get('error_admin') %}
         {{ include('dashboard/shared/_toast.html.twig', {
-            toast_type: 'toast-success-dashboard',
+            toast_type: 'toast-error-dashboard',
             message: message,
         }) }}
     {% endfor %}

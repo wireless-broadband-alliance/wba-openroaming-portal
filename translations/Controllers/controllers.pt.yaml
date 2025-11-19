@@ -140,3 +140,4 @@ radsecProxyConfigAppliedSuccessfully: 'Configuração do RadSecProxy concluída!
 freeradiusConfigAppliedSuccessfully: 'Configuração do Freeradius concluída!'
 configAlreadyApplied: 'Está configuração já está aplicada! Não podes re-submeter o mesmo formulário.'
 certificateProcessAborted: "Este processo foi abortado com sucesso. Por favor, não se esqueça de reconfigurar todo o processo corretamente!"
+not_ev_warning: "Estes certificados não são EV. A geração de perfis OpenRoaming para Windows irá falhar, mas pode continuar."

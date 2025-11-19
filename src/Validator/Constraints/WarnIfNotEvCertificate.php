@@ -1,0 +1,16 @@
+<?php
+
+namespace App\Validator\Constraints;
+
+use Symfony\Component\Validator\Constraint;
+
+#[\Attribute]
+class WarnIfNotEvCertificate extends Constraint
+{
+    public string $message = 'certificateIsNotEV';
+
+    public function getTargets(): string
+    {
+        return self::PROPERTY_CONSTRAINT;
+    }
+}

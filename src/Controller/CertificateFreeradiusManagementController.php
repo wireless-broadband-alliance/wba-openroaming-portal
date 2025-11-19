@@ -78,6 +78,20 @@ class CertificateFreeradiusManagementController extends AbstractController
                 return $this->redirectToRoute('admin_dashboard_settings_certs_radsecproxy_upload');
             }
 
+            // Check for EV warning manually or let the validator store it
+            foreach ($form->get('cert')->getErrors(true) as $error) {
+                if ($error->getMessage() === 'certificateIsNotEV') {
+                    $this->addFlash(
+                        'warning',
+                        $this->translator->trans(
+                            'not_ev_warning',
+                            [],
+                            'controllers'
+                        )
+                    );
+                }
+            }
+
             if ($certificateUploadDTO->ca instanceof UploadedFile) {
                 // Save on the tmp folder the uploaded certificates after the validation
                 $this->certificateStorageService->storeUploadedFile(

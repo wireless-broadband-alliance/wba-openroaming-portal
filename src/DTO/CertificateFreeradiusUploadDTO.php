@@ -12,6 +12,8 @@ use App\Validator\Constraints as CustomAssert;
 )] // Class level so this validator can access the client/key at the same time
 class CertificateFreeradiusUploadDTO
 {
+    public array $notices = [];
+
     #[Assert\File(
         maxSize: '5M',
         mimeTypes: [
@@ -39,6 +41,7 @@ class CertificateFreeradiusUploadDTO
     )]
     #[CustomAssert\ValidPemCertificate]
     #[CustomAssert\ValidRsaCertificate]
+    #[CustomAssert\WarnIfNotEvCertificate]
     public ?UploadedFile $cert = null;
 
     #[Assert\File(
