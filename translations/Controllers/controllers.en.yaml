@@ -131,7 +131,7 @@ passwordSentSMS: 'A new account password has been sent to your phone number via 
 passwordNotSentSMS: 'We were unable to send the new password to your phone number. Please try again.'
 connectionFailed: 'Database connection failed: %dbConnections%'
 dbConnectionApplied: 'Database settings applied successfully.'
-jwtSuccessfully: 'JWT key pair generated successfully'
+jwtSuccessfully: 'Application settings applied successfully'
 jwtFailed: 'Failed to generate JWT key pair'
 adminConfirmedSuccessfully: 'Admin email confirmed successfully'
 missingRequiredForRadsecProxyTest: 'Remote_host and remote_port are required.'
