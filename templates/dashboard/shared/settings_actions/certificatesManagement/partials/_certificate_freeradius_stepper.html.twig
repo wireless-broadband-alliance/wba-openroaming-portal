@@ -45,12 +45,6 @@
 
 
 <div class="w-full max-w-5xl mx-auto mt-8 mb-10 px-4">
-    <div class="p-2">
-        {{ include('dashboard/shared/_info_details.html.twig', {
-            info_text: 'info_text_stepper_details'|trans({}, '_certificate_stepper'),
-        }) }}
-    </div>
-
     <div class="relative flex flex-col md:flex-row items-start md:items-center">
         {# Progress bar #}
         <div class="hidden md:block absolute top-1/2 left-0 h-1 rounded-full transform -translate-y-1/2 transition-all duration-500 ease-in-out"
@@ -75,17 +69,16 @@
                     {% else %} bg-white border-gray-300 text-gray-400 {% endif %}
                 ">
                     {% if previousCompleted %}
-                        <a href="{{ path(step.route) }}"
-                           class="flex items-center justify-center w-full h-full text-inherit no-underline leading-none">
+                        <p
+                           class="flex items-center justify-center w-full h-full text-inherit no-underline leading-none cursor-default">
                             {{ loop.index }}
-                        </a>
+                        </p>
                     {% else %}
-                        <span class="flex items-center justify-center w-full h-full cursor-not-allowed opacity-50 leading-none">
+                        <span class="flex items-center justify-center w-full h-full cursor-default opacity-50 leading-none">
                             {{ loop.index }}
                         </span>
                     {% endif %}
                 </div>
-
                 <div class="mt-4 sm:mt-1 md:mt-2">
                     <h4 class="text-sm sm:text-xs font-semibold
                         {% if completed or active %} text-primary {% else %} text-gray-500 {% endif %}">

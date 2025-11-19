@@ -10,6 +10,7 @@ use App\Enum\CertificateFileName;
 use App\Enum\CertificateMachineType;
 use App\Enum\FirewallType;
 use App\Form\CertificateFreeradiusUploadType;
+use App\Form\SimpleSubmitFormType;
 use App\Service\CertificateProcessCheckerService;
 use App\Service\CertificateStorageService;
 use App\Service\GetSettings;
@@ -172,7 +173,7 @@ class CertificateFreeradiusManagementController extends AbstractController
             ]
         );
     }
-/*
+
     #[Route(
         '/dashboard/settings/certificatesManagement/freeradius/config',
         name: 'admin_dashboard_settings_certs_freeradius_config'
@@ -276,5 +277,4 @@ class CertificateFreeradiusManagementController extends AbstractController
             ]
         );
     }
-*/
 }

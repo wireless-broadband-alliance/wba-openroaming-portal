@@ -51,7 +51,8 @@ class ValidRsaCertificateValidator extends ConstraintValidator
             }
 
             $keyDetails = openssl_pkey_get_details($pubKey);
-            if ($keyDetails['type'] !== OPENSSL_KEYTYPE_RSA) {
+            $keyType = $keyDetails['type'];
+            if (!in_array($keyType, [OPENSSL_KEYTYPE_RSA, OPENSSL_KEYTYPE_EC], true)) {
                 $this->context->buildViolation($constraint->message)->addViolation();
                 return;
             }

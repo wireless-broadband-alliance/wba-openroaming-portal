@@ -1,10 +1,31 @@
 {% extends 'dashboard/shared/settings_actions/certificatesManagement/certificates/freeradius/base.html.twig' %}
 
-{% block freeradius_content %}
+{% block radsecproxy_content %}
+    {# Warning message box #}
+    <div class="toast-success-dashboard">
+        <twig:ux:icon name="wba:info" class="w-10 md:w-5 h-10 md:h-5 inline mr-3 fill-currentColor"/>
+        <span>
+            {# {{ 'warning.root_command'|trans({}, 'upload_freeradius') }} TODO ADD A WARNING HERE LATER TO WORK WITH THE SUBMIT #}
+            {#
+            TODO
+            Main idea - after the user clicks the submit button the page triggers the logic to change and update the current certs on the folder for the new ones
+            Also if a ev is returned it should execute the generate Fx with the new certs for windows profiles
+            #}
+            Potato good text after the upload validation its done
+        </span>
+    </div>
 
+    <div class="mt-8 flex justify-end">
+        {{ form_start(form) }}
+        {{ form_row(form._token) }}
+
+        <button
+                type="submit"
+                class="px-6 py-2.5 rounded-lg shadow font-medium transition bg-primary text-white hover:bg-primary-dark focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+                onclick="return confirm('{{ 'confirm_follow_steps'|trans({}, 'config_radsec') }}');"
+        >
+            {{ 'submit'|trans({}, 'config_freeradius') }}
+        </button>
+        {{ form_end(form, {render_rest: false}) }}
+    </div>
 {% endblock %}
-
-{% block certificates_content %}
-
-{% endblock %}
-
