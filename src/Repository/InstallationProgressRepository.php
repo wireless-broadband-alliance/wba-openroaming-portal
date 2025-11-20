@@ -50,7 +50,7 @@ class InstallationProgressRepository extends ServiceEntityRepository
             ->getOneOrNullResult();
     }
 
-    public function getLastCompleted()
+    public function getLastCompleted():?InstallationProgress
     {
         return $this->createQueryBuilder('i')
             ->where('i.installationState = :installationState')

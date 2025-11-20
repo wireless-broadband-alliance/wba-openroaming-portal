@@ -6,6 +6,7 @@ namespace App\Controller;
 
 use App\DTO\CertificateRadSecUploadDTO;
 use App\Entity\CertificateSetupProcess;
+use App\Entity\InstallationProgress;
 use App\Enum\CertificateFileName;
 use App\Enum\CertificateMachineType;
 use App\Enum\CertificateProcessStatus;
@@ -15,6 +16,7 @@ use App\Enum\TrustedWBAFingerprints;
 use App\Form\CertificateRadsecUploadType;
 use App\Form\SimpleSubmitFormType;
 use App\Repository\CertificateRepository;
+use App\Repository\InstallationProgressRepository;
 use App\Service\CertificateRadsecproxyCommandsService;
 use App\Service\CertificateProcessCheckerService;
 use App\Service\CertificateStorageService;
@@ -41,6 +43,7 @@ class CertificateRadsecproxyManagementController extends AbstractController
         private readonly EntityManagerInterface $entityManager,
         private readonly CertificateRadsecproxyCommandsService $certificateRadsecproxyCommandsService,
         private readonly CertificateRepository $certificateRepository,
+        private readonly InstallationProgressRepository $installationProgressRepository,
     ) {
     }
 
@@ -49,10 +52,16 @@ class CertificateRadsecproxyManagementController extends AbstractController
     public function settingsCertificatesManagement(): Response
     {
         $data = $this->getSettings->getSettings();
+        $lastCompletedInstallation = $this->installationProgressRepository->getLastCompleted();
+        if ($lastCompletedInstallation instanceof InstallationProgress) {
+            $installationDate = $lastCompletedInstallation->getUpdatedAt() ?? null;
+        }
+
 
         // Default render
         return $this->render('dashboard/shared/settings_actions.html.twig', [
             'data' => $data,
+            'lastCompletedInstallation' => $installationDate ?? null,
         ]);
     }
 
