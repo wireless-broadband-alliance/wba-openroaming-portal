@@ -11,6 +11,7 @@ use App\Enum\CertificateMachineType;
 use App\Enum\CertificateProcessStatus;
 use App\Enum\CertificateTestResult;
 use App\Enum\FirewallType;
+use App\Enum\TrustedWBAFingerprints;
 use App\Form\CertificateRadsecUploadType;
 use App\Form\SimpleSubmitFormType;
 use App\Repository\CertificateRepository;
@@ -336,51 +337,41 @@ class CertificateRadsecproxyManagementController extends AbstractController
         $processEntity->setUpdatedAt(new DateTimeImmutable());
         $this->entityManager->persist($processEntity);
         $this->entityManager->flush();
-        $cafile = $this->getParameter('kernel.project_dir') . '/config/wba_chain/ca-bundle-wba.pem';
+
+        // Build full paths
+        $clientCert = $this->certificateRepository->findLatestByProcessAndName(
+            $processEntity,
+            'clientRADSECPROXY' // This name comes from the DTO Upload Radsecproxy
+        );
+        $keyCert = $this->certificateRepository->findLatestByProcessAndName(
+            $processEntity,
+            'keyRADSECPROXY' // Same for this one
+        );
+
+        $basePath = $this->getParameter('kernel.project_dir') . '/var/certs/';
+        $clientCertPath = $clientCert ? $basePath . $clientCert->getFilePath() : null;
+        $keyCertPath = $keyCert ? $basePath . $keyCert->getFilePath() : null;
+
+        // Validate certificate files exist
+        if (!$clientCertPath || !$keyCertPath || !file_exists($clientCertPath) || !file_exists($keyCertPath)) {
+            return new JsonResponse([
+                'status' => 'error',
+                'message' => 'Client or key certificate file not found',
+                'clientCertPath' => $clientCertPath,
+                'keyCertPath' => $keyCertPath,
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
 
         try {
-            // Check CA bundle file exists
-            if (!file_exists($cafile)) {
-                return new JsonResponse([
-                    'status' => 'error',
-                    'message' => 'CA bundle file not found',
-                    'path' => realpath($cafile),
-                ], Response::HTTP_INTERNAL_SERVER_ERROR);
-            }
-
-            // Build full paths
-            $clientCert = $this->certificateRepository->findLatestByProcessAndName(
-                $processEntity,
-                'clientRADSECPROXY' // This name comes from the DTO Upload Radsecproxy
-            );
-            $keyCert = $this->certificateRepository->findLatestByProcessAndName(
-                $processEntity,
-                'keyRADSECPROXY' // Same for this one
-            );
-
-            $basePath = $this->getParameter('kernel.project_dir') . '/var/certs/';
-            $clientCertPath = $clientCert ? $basePath . $clientCert->getFilePath() : null;
-            $keyCertPath = $keyCert ? $basePath . $keyCert->getFilePath() : null;
-
-            // Validate certificate files exist
-            if (!$clientCertPath || !$keyCertPath || !file_exists($clientCertPath) || !file_exists($keyCertPath)) {
-                return new JsonResponse([
-                    'status' => 'error',
-                    'message' => 'Client or key certificate file not found',
-                    'clientCertPath' => $clientCertPath,
-                    'keyCertPath' => $keyCertPath,
-                ], Response::HTTP_INTERNAL_SERVER_ERROR);
-            }
-
             $context = stream_context_create([
                 'ssl' => [
-                    'verify_peer' => true,
-                    'verify_peer_name' => true,
-                    'allow_self_signed' => true,
-                    'cafile' => $cafile,
+                    'verify_peer' => false,
+                    'verify_peer_name' => false,
+                    'allow_self_signed' => false,
+                    'capture_peer_cert_chain' => true,
                     'local_cert' => $clientCertPath,
                     'local_pk' => $keyCertPath,
-                    'crypto_method' => STREAM_CRYPTO_METHOD_TLSv1_3_CLIENT,
+                    'crypto_method' => STREAM_CRYPTO_METHOD_TLS_CLIENT,
                 ]
             ]);
 
@@ -417,6 +408,46 @@ class CertificateRadsecproxyManagementController extends AbstractController
 //                        'keyCertPath' => $keyCertPath,
                     ],
                 ], Response::HTTP_SERVICE_UNAVAILABLE);
+            }
+
+            // Extract peer certificate chain
+            $trustedHashes = array_map(static fn($e) => strtolower($e->value), TrustedWBAFingerprints::cases());
+            $params = stream_context_get_params($connection);
+            $chain = $params['options']['ssl']['peer_certificate_chain'] ?? [];
+
+            // Include the leaf certificate itself
+            $leafCert = $params['options']['ssl']['peer_certificate'] ?? null;
+            if ($leafCert) {
+                array_unshift($chain, $leafCert);
+            }
+
+            $validated = false;
+            foreach ($chain as $cert) {
+                $pem = openssl_x509_export($cert, $out) ? $out : null;
+                if ($pem) {
+                    // Convert PEM to DER
+                    $der = base64_decode(preg_replace('#-----.*?-----#', '', $pem));
+                    $hash = strtolower(hash('sha256', $der));
+
+                    if (in_array($hash, $trustedHashes, true)) {
+                        $validated = true;
+                        break;
+                    }
+                }
+            }
+
+            if ($validated === false) {
+                fclose($connection);
+
+                $this->certificateRadsecproxyCommandsService->updateRadsecproxyTestResult(
+                    $processEntity,
+                    CertificateTestResult::FAILED
+                );
+
+                return new JsonResponse([
+                    'status' => 'error',
+                    'message' => 'TLS handshake succeeded but certificate chain is NOT signed by a known WBA CA.',
+                ], Response::HTTP_FORBIDDEN);
             }
 
             // THIS IS OK [0] -> a non-false $connection OR errno=0 and errstr="" means TLS handshake succeeded
