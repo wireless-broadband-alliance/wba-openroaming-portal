@@ -7,7 +7,7 @@ use Symfony\Component\Validator\Constraint;
 #[\Attribute]
 class ValidWbaChain extends Constraint
 {
-    public string $message = 'The certificate is not signed by a trusted WBA root CA.';
+    public string $message = 'notValidWbaChainRadsec';
 
     #[\Override]
     public function getTargets(): string

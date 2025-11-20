@@ -35,7 +35,7 @@ class PlatformStatusSettingsDTO
     #[GreaterThanOrEqual(value: 0, message: 'timerShouldNotBeLessThan')]
     public ?int $userDeleteTime = null;
 
-    #[Assert\NotBlank(message: 'PleaseSetTimer')]
+    #[Assert\NotBlank(message: 'pleaseSetTimer')]
     #[Length(max: 3, maxMessage: 'fieldCannotBeLongerThan')]
     #[GreaterThanOrEqual(value: 1, message: 'timerShouldNotBeLessThanProfileNotification')]
     public ?int $timeIntervalNotification = null;
