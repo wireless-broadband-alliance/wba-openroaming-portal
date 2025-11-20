@@ -73,7 +73,8 @@ class InstallationController extends AbstractController
     )]
     #[IsGranted('ROLE_ADMIN')]
     public function settingsCertificatesManagementInstallation(
-        Request $request
+        Request $request,
+        KernelInterface $kernel
     ): Response {
         $lastInstallation = $this->installationService->lastInstallation();
         if ($lastInstallation instanceof InstallationProgress) {
@@ -145,6 +146,8 @@ class InstallationController extends AbstractController
             $lastInstallation->setInstallationState(InstallationProgressType::IN_PROGRESS->value);
             $this->entityManager->persist($lastInstallation);
             $this->entityManager->flush();
+
+            $this->installationService->envPermitions($kernel);
 
             $this->databaseConnectionService->writeDatabaseUrlToEnv(
                 $openRoamingDb,
@@ -238,6 +241,8 @@ class InstallationController extends AbstractController
                 );
                 return $this->redirectToRoute('admin_dashboard_settings_certs_installation_settings');
             }
+
+            $this->installationService->envPermitions($kernel);
 
             $this->databaseConnectionService->writeDatabaseUrlToEnv(
                 $trustedProxies,

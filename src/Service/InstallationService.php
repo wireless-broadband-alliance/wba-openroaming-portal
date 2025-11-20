@@ -17,7 +17,11 @@ use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Random\RandomException;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
+use Symfony\Bundle\FrameworkBundle\Console\Application;
+use Symfony\Component\Console\Input\ArrayInput;
+use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
@@ -199,5 +203,20 @@ readonly class InstallationService
         $dto->updatedAt = $installationProgress->getUpdatedAt();
 
         return $dto;
+    }
+
+    public function envPermitions(KernelInterface $kernel): void {
+        $application = new Application($kernel);
+        $application->setAutoExit(false);
+
+        $input = new ArrayInput([
+            'command' => 'chown -R www-data:www-data .env',
+        ]);
+
+        $output = new BufferedOutput();
+        if (!defined('STDIN')) {
+            define('STDIN', fopen('php://stdin', 'r'));
+        }
+        $application->run($input, $output);
     }
 }
