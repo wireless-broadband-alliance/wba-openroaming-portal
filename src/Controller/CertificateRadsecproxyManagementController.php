@@ -403,7 +403,6 @@ class CertificateRadsecproxyManagementController extends AbstractController
                         'error' => $errstr,
                         'code' => $errno,
 //                        'basePath' => $basePath,
-//                        'cafile' => $cafile,
 //                        'clientCertPath' => $clientCertPath,
 //                        'keyCertPath' => $keyCertPath,
                     ],
