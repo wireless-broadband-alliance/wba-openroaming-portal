@@ -15,11 +15,11 @@ cert:
     description: "Envie o certificado do dispositivo/servidor."
 
 chain:
-    label: "Cadeia (.pem)"
+    label: "Chain (.pem)"
     description: "Envie o ficheiro da cadeia intermédia."
 
 fullChain:
-    label: "Cadeia Completa (.pem)"
+    label: "Full Chain (.pem)"
     description: "Envie o ficheiro da cadeia completa do certificado."
 
 privKey:
