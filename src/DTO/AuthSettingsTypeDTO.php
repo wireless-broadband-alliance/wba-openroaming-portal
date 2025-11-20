@@ -236,7 +236,7 @@ class AuthSettingsTypeDTO
         $this->authMethodSamlEnabled = $data[SettingName::AUTH_METHOD_SAML_ENABLED->value]['value'] ?? null;
         $this->authMethodSamlLabel = $data[SettingName::AUTH_METHOD_SAML_LABEL->value]['value'] ?? null;
         $this->authMethodSamlDescription = $data[SettingName::AUTH_METHOD_SAML_DESCRIPTION->value]['value'] ?? null;
-        $this->profileLimitDateSaml = (int) $data[SettingName::PROFILE_LIMIT_DATE_SAML->value]['value'];
+        $this->profileLimitDateSaml =(int) ($data[SettingName::PROFILE_LIMIT_DATE_SAML->value]['value'] ?? null);
 
         $this->authMethodGOOGLELoginEnabled =
             $data[SettingName::AUTH_METHOD_GOOGLE_LOGIN_ENABLED->value]['value'] ?? null;
@@ -246,7 +246,7 @@ class AuthSettingsTypeDTO
             $data[SettingName::AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION->value]['value'] ?? null;
         $this->validDomainsGOOGLELogin = $data[SettingName::VALID_DOMAINS_GOOGLE_LOGIN->value]['value'] ??
             null;
-        $this->profileLimitDateGOOGLE = (int) $data[SettingName::PROFILE_LIMIT_DATE_GOOGLE->value]['value'];
+        $this->profileLimitDateGOOGLE = (int) ($data[SettingName::PROFILE_LIMIT_DATE_GOOGLE->value]['value'] ?? null);
 
         $this->authMethodMICROSOFTLoginEnabled =
             $data[SettingName::AUTH_METHOD_MICROSOFT_LOGIN_ENABLED->value]['value'] ?? null;
@@ -257,7 +257,7 @@ class AuthSettingsTypeDTO
         $this->validDomainsMICROSOFTLogin =
             $data[SettingName::VALID_DOMAINS_MICROSOFT_LOGIN->value]['value'] ?? null;
         $this->profileLimitDateMICROSOFT =
-            (int) $data[SettingName::PROFILE_LIMIT_DATE_MICROSOFT->value]['value'];
+            (int) ($data[SettingName::PROFILE_LIMIT_DATE_MICROSOFT->value]['value'] ?? null);
 
         $this->authMethodRegisterEnabled =
             $data[SettingName::AUTH_METHOD_REGISTER_ENABLED->value]['value'] ?? null;
@@ -265,9 +265,9 @@ class AuthSettingsTypeDTO
             $data[SettingName::AUTH_METHOD_REGISTER_LABEL->value]['value'] ?? null;
         $this->authMethodRegisterDescription =
             $data[SettingName::AUTH_METHOD_REGISTER_DESCRIPTION->value]['value'] ?? null;
-        $this->profileLimitDateEmail = (int) $data[SettingName::PROFILE_LIMIT_DATE_EMAIL->value]['value'] ;
-        $this->emailTimerResend = (int) $data[SettingName::EMAIL_TIMER_RESEND->value]['value'];
-        $this->LinkValidity = (int) $data[SettingName::LINK_VALIDITY->value]['value'];
+        $this->profileLimitDateEmail = (int) ($data[SettingName::PROFILE_LIMIT_DATE_EMAIL->value]['value'] ?? null) ;
+        $this->emailTimerResend = (int) ($data[SettingName::EMAIL_TIMER_RESEND->value]['value'] ?? null);
+        $this->LinkValidity = (int) ($data[SettingName::LINK_VALIDITY->value]['value'] ?? null);
 
         $this->authMethodLoginTraditionalEnabled =
             $data[SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED->value]['value'] ?? null;
@@ -284,7 +284,7 @@ class AuthSettingsTypeDTO
             $data[SettingName::AUTH_METHOD_SMS_REGISTER_LABEL->value]['value'] ?? null;
         $this->authMethodSMSRegisterDescription =
             $data[SettingName::AUTH_METHOD_SMS_REGISTER_DESCRIPTION->value]['value'] ?? null;
-        $this->profileLimitDateSMS = (int) $data[SettingName::PROFILE_LIMIT_DATE_SMS->value]['value'];
+        $this->profileLimitDateSMS = (int) ($data[SettingName::PROFILE_LIMIT_DATE_SMS->value]['value'] ?? null);
     }
 
     /**
