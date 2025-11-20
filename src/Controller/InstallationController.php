@@ -605,35 +605,45 @@ class InstallationController extends AbstractController
             $this->twoFAService->canResendCode($user, $eventType) &&
             $this->twoFAService->timeIntervalToResendCode($user, $eventType)
         ) {
-            $this->twoFAService->resendCode(
-                $user,
-                $request->getClientIp(),
-                $request->headers->get('User-Agent'),
-                $eventType,
-            );
-            $attempts = $this->eventRepository->find2FACodeAttemptEvent(
-                $user,
-                $nrAttempts,
-                $limitTime,
-                $eventType
-            );
-            $attemptsLeft = $nrAttempts - count($attempts);
-            $this->addFlash(
-                'success_admin',
-                $this->translator->trans(
-                    'codeResentSuccessfully',
-                    [
-                        '%attempts%' => $attemptsLeft
-                    ],
-                    'controllers'
-                )
-            );
-            // TODO Remove this flash message in Prod!!
-            if ($_ENV['APP_ENV'] === 'dev') {
-                $this->addFlash(
-                    'error_admin',
-                    'Your code is: ' . $user->getTwoFAcode()
+            $lastInstallation = $this->installationService->lastInstallation();
+            if ($lastInstallation instanceof InstallationProgress) {
+                $this->installationService->sendAdminConfirmationCode($lastInstallation);
+                $eventMetaData = [
+                    'platform' => PlatformMode::LIVE->value,
+                    'user_agent' => $request->headers->get('User-Agent'),
+                    'uuid' => $user->getUuid(),
+                    'ip' => $request->getClientIp(),
+                ];
+                $this->eventActions->saveEvent(
+                    $user,
+                    AnalyticalEventType::INSTALLATION_ADMIN_CONFIRM_CODE_RESENT->value,
+                    new DateTime(),
+                    $eventMetaData
                 );
+                $attempts = $this->eventRepository->find2FACodeAttemptEvent(
+                    $user,
+                    $nrAttempts,
+                    $limitTime,
+                    $eventType
+                );
+                $attemptsLeft = $nrAttempts - count($attempts);
+                $this->addFlash(
+                    'success_admin',
+                    $this->translator->trans(
+                        'codeResentSuccessfully',
+                        [
+                            '%attempts%' => $attemptsLeft
+                        ],
+                        'controllers'
+                    )
+                );
+                // TODO Remove this flash message in Prod!!
+                if ($_ENV['APP_ENV'] === 'dev') {
+                    $this->addFlash(
+                        'error_admin',
+                        'Your code is: ' . $user->getTwoFAcode()
+                    );
+                }
             }
         } else {
             $lastEvent = $this->eventRepository->findLatest2FACodeAttemptEvent(
