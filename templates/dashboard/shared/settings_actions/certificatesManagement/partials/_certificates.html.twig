@@ -7,5 +7,13 @@
            class="btn-primary">
             {{ 'RenewCertificates'|trans({}, '_certificates') }}
         </a>
+
     </div>
+    {% if lastCompletedCertificates %}
+    <div class="p-2 z-0">
+        <p class="mt-3 text-xs sm:text-sm md:text-base text-red-400">
+            {{ 'lastCompletedInstallation'|trans({}, '_installationPartial') }} {{ lastCompletedCertificates|date('d/m/Y H:i') }}
+        </p>
+    </div>
+    {% endif %}
 </div>

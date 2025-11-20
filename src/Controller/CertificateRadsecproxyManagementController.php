@@ -16,6 +16,7 @@ use App\Enum\TrustedWBAFingerprints;
 use App\Form\CertificateRadsecUploadType;
 use App\Form\SimpleSubmitFormType;
 use App\Repository\CertificateRepository;
+use App\Repository\CertificateSetupProcessRepository;
 use App\Repository\InstallationProgressRepository;
 use App\Service\CertificateRadsecproxyCommandsService;
 use App\Service\CertificateProcessCheckerService;
@@ -44,6 +45,7 @@ class CertificateRadsecproxyManagementController extends AbstractController
         private readonly CertificateRadsecproxyCommandsService $certificateRadsecproxyCommandsService,
         private readonly CertificateRepository $certificateRepository,
         private readonly InstallationProgressRepository $installationProgressRepository,
+        private readonly CertificateSetupProcessRepository $certificateSetupProcessRepository,
     ) {
     }
 
@@ -53,8 +55,12 @@ class CertificateRadsecproxyManagementController extends AbstractController
     {
         $data = $this->getSettings->getSettings();
         $lastCompletedInstallation = $this->installationProgressRepository->getLastCompleted();
+        $lastCompletedCertificate = $this->certificateSetupProcessRepository->getLatestCompletedProcess();
         if ($lastCompletedInstallation instanceof InstallationProgress) {
             $installationDate = $lastCompletedInstallation->getUpdatedAt() ?? null;
+        }
+        if ($lastCompletedCertificate instanceof CertificateSetupProcess) {
+            $certificateDate = $lastCompletedCertificate->getUpdatedAt() ?? null;
         }
 
 
@@ -62,6 +68,7 @@ class CertificateRadsecproxyManagementController extends AbstractController
         return $this->render('dashboard/shared/settings_actions.html.twig', [
             'data' => $data,
             'lastCompletedInstallation' => $installationDate ?? null,
+            'lastCompletedCertificates' => $certificateDate ?? null,
         ]);
     }
 

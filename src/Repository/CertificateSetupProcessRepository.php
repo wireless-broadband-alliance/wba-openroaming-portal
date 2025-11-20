@@ -34,6 +34,19 @@ class CertificateSetupProcessRepository extends ServiceEntityRepository
             ->getOneOrNullResult();
     }
 
+    public function getLatestCompletedProcess(): ?CertificateSetupProcess
+    {
+        return $this->createQueryBuilder('p')
+            ->where('p.status IN (:statuses)')
+            ->setParameter('statuses', [
+                CertificateProcessStatus::COMPLETED,
+            ])
+            ->orderBy('p.updatedAt', 'DESC')
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
     //    /**
     //     * @return CertificateSetupProcess[] Returns an array of CertificateSetupProcess objects
     //     */
