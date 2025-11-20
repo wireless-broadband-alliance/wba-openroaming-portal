@@ -52,6 +52,12 @@
                         }) }}
                     </div>
 
+                    <div>
+                        <p class="mt-3 text-xs sm:text-sm md:text-base text-gray-400">
+                            {{ 'domainsWarning'|trans({}, 'settings') }}
+                        </p>
+                    </div>
+
                     <div class="mt-2 text-center text-red-500 text-base">
                         {{ form_errors(form.trustedProxies) }}
                     </div>
@@ -187,16 +193,6 @@
             <div class="mt-8 divider-solid"></div>
 
             <div class="mt-6 flex flex-row w-full justify-end items-center gap-2">
-
-                <a href="{{ path('admin_dashboard_settings_certs_installation_abortProcess') }}"
-                   class="w-[160px] btn-logout">
-                    {{ 'abort'|trans({}, 'settings') }}
-                </a>
-
-                <a href="{{ path('admin_dashboard_settings_certs_management') }}"
-                   class="w-[160px] btn-logout">
-                    {{ 'twoFactorAuth.goBack'|trans({}, '_account_widget') }}
-                </a>
 
                 <button type="submit" class="btn-primary" onclick="return confirm('{{ 'saveChangesMessage'|trans({}, 'dataBase') }}')">
                     {{ 'databaseApplyBtn'|trans({}, 'settings') }}
