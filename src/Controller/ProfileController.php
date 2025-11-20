@@ -15,6 +15,7 @@ use App\RadiusDb\Repository\RadiusUserRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRadiusProfileRepository;
+use App\Service\CertificateProcessCheckerService;
 use App\Service\EventActions;
 use App\Service\ExpirationProfileService;
 use App\Service\TwoFAService;
@@ -48,6 +49,7 @@ class ProfileController extends AbstractController
         private readonly TwoFAService $twoFAService,
         private readonly TranslatorInterface $translator,
         private readonly CertificateProcessExtension $certificateProcessExtension,
+        private readonly CertificateProcessCheckerService $certificateProcessCheckerService,
     ) {
     }
 
@@ -60,6 +62,10 @@ class ProfileController extends AbstractController
         UserRadiusProfileRepository $radiusProfileRepository,
         Request $request
     ): Response {
+        if ($this->certificateProcessExtension->isCertificateAborted()) {
+            return $this->redirectToRoute('app_landing');
+        }
+
         /** @var User $user */
         $user = $this->getUser();
         if (!$this->isGranted('IS_AUTHENTICATED_FULLY')) {
@@ -180,6 +186,10 @@ class ProfileController extends AbstractController
         UserRadiusProfileRepository $radiusProfileRepository,
         Request $request
     ): Response {
+        if ($this->certificateProcessExtension->isCertificateAborted()) {
+            return $this->redirectToRoute('app_landing');
+        }
+
         /** @var User $user */
         $user = $this->getUser();
         if (!$this->isGranted('IS_AUTHENTICATED_FULLY')) {
@@ -344,6 +354,25 @@ class ProfileController extends AbstractController
         UserRadiusProfileRepository $radiusProfileRepository,
         Request $request
     ): Response {
+        if ($this->certificateProcessExtension->isCertificateAborted()) {
+            return $this->redirectToRoute('app_landing');
+        }
+
+        // Block Windows profile if FreeRADIUS cert is not EV
+        $currentProcess = $this->certificateProcessCheckerService->getCurrentProcess();
+        if ($currentProcess && !$currentProcess->isFreeradiusCertEV()) {
+            $this->addFlash(
+                'error',
+                $this->translator->trans(
+                    'freeradius_is_not_ev_cert_warning',
+                    [],
+                    'controllers'
+                )
+            );
+
+            return $this->redirectToRoute('app_landing');
+        }
+
         /** @var User $user */
         $user = $this->getUser();
         if (!$this->isGranted('IS_AUTHENTICATED_FULLY')) {

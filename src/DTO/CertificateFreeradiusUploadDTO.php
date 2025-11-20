@@ -82,6 +82,5 @@ class CertificateFreeradiusUploadDTO
         notFoundMessage: 'nullKey',
         mimeTypesMessage: 'invalidFileTypeKey'
     )]
-    #[CustomAssert\ValidPemPrivateKey]
     public ?UploadedFile $privKey = null;
 }

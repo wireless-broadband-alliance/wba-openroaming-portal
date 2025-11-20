@@ -94,7 +94,6 @@ class SettingFixture extends Fixture
                 'name' => SettingName::AUTH_METHOD_SMS_REGISTER_DESCRIPTION->value,
                 'value' => 'Don\'t have an account? Create one'
             ],
-            ['name' => SettingName::LOGIN_WITH_UUID_ONLY->value, 'value' => 'OFF'],
 
             ['name' => SettingName::EMAIL_TIMER_RESEND->value, 'value' => '2'],
             ['name' => SettingName::LINK_VALIDITY->value, 'value' => '10'],

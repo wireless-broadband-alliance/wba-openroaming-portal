@@ -144,6 +144,6 @@ freeradiusCertUploadedSuccessfully: 'Freeradius certificates uploaded successful
 # TODO ADD MORE FREERADIUS RESPONSES HERE
 configAlreadyApplied: 'Configuration is been already applied. You can not re-submit this form.'
 certificateProcessAborted: "This process was aborted successfully. Please don't forget to re-configure all the process once again correctly!"
-not_ev_warning: "This certificates are not EV's. OpenRoaming profiles generate for Windows will fail, but you can continue." # TODO TOO CHECK IF THIS IS WORKING TOMORROW
+freeradius_is_not_ev_cert_warning: 'The option to download Windows OpenRoaming profiles is disabled because it is not supported with the current configuration.'
 cannotReturnToPreviousPhase: 'You can no longer access this stage because it has already been completed.'
 cannotAccessStageYet: "You cannot access this stage yet because previous steps are incomplete."

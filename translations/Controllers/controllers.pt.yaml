@@ -142,6 +142,6 @@ freeradiusCertUploadedSuccessfully: 'Certificados Freeradius carregados com suce
 # TODO ADD MORE FREERADIUS RESPONSES HERE
 configAlreadyApplied: 'Está configuração já está aplicada! Não podes re-submeter o mesmo formulário.'
 certificateProcessAborted: "Este processo foi abortado com sucesso. Por favor, não se esqueça de reconfigurar todo o processo corretamente!"
-not_ev_warning: "Estes certificados não são EV. A geração de perfis OpenRoaming para Windows irá falhar, mas pode continuar."
+freeradius_is_not_ev_cert_warning: 'A opção de descarregar perfis OpenRoaming para Windows está desativada porque não é suportada com a configuração atual.'
 cannotReturnToPreviousPhase: 'Já não pode aceder a esta etapa porque já foi concluída.'
 cannotAccessStageYet: "Não pode aceder a esta etapa porque as etapas anteriores não estão concluídas."

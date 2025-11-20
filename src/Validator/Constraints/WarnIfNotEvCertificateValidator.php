@@ -54,8 +54,8 @@ class WarnIfNotEvCertificateValidator extends ConstraintValidator
         if (!$isEv) {
             // Non-blocking notice: safely add to DTO if available
             $object = $this->context?->getObject(); // null-safe operator
-            if ($object && property_exists($object, 'warning') && is_array($object->notices)) { // TODO Check this
-                $object->notices[] = 'Certificate is not EV (optional warning).';
+            if ($object && property_exists($object, 'notices') && is_array($object->notices)) {
+                $object->notices[] = 'CERTIFICATE_NOT_EV_WARNING';
             }
         }
     }
