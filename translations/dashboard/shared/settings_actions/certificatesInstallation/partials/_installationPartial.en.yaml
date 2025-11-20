@@ -1,2 +1,3 @@
 tittleInstallation: 'Installation'
 reinstallPlatform: 'Reinstall Platform'
+lastCompletedInstallation: 'Last complete installation at: '
