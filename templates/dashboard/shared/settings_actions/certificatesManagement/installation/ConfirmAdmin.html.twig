@@ -52,7 +52,15 @@
             <div class="mt-2 text-center text-red-500 text-base">
                 {{ form_errors(form.code) }}
             </div>
+
+            <a href="{{ path('admin_dashboard_settings_certs_installation_admin_confirmation_resend') }}"
+               class="w-[160px] btn-secondary">
+                {{ 'resendCode'|trans({}, 'adminConfig') }}
+            </a>
+
         </div>
+
+
 
     </div>
 

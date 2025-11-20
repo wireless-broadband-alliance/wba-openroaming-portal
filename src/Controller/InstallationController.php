@@ -5,19 +5,25 @@ namespace App\Controller;
 use App\DTO\AdminConfigDTO;
 use App\DTO\DbSetupDTO;
 use App\DTO\SettingsDTO;
+use App\Entity\Event;
 use App\Entity\InstallationProgress;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
+use App\Enum\CodeVerificationType;
 use App\Enum\DataBaseSetupType;
+use App\Enum\FirewallType;
 use App\Enum\InstallationProgressType;
 use App\Enum\InstallationStep;
 use App\Enum\PlatformMode;
+use App\Enum\SettingName;
 use App\Enum\SettingsConfigType;
 use App\Form\AdminConfigType;
 use App\Form\DbSetupType;
 use App\Form\SettingsType;
 use App\Form\TwoFACode;
+use App\Repository\EventRepository;
 use App\Repository\InstallationProgressRepository;
+use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use App\Service\DatabaseConnectionService;
 use App\Service\EventActions;
@@ -26,11 +32,13 @@ use App\Service\InstallationService;
 use App\Service\TwoFAService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
+use Random\RandomException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\Form\Exception\LogicException;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
@@ -52,6 +60,8 @@ class InstallationController extends AbstractController
         private readonly EntityManagerInterface $entityManager,
         private readonly TwoFAService $twoFAService,
         private readonly InstallationProgressRepository $installationProgressRepository,
+        private readonly SettingRepository $settingRepository,
+        private readonly EventRepository $eventRepository,
     ) {
     }
 
@@ -366,7 +376,7 @@ class InstallationController extends AbstractController
                 $this->entityManager->flush();
             }
 
-            return $this->redirectToRoute('admin_dashboard_settings_certs_installation_admin_confirmation');
+            return $this->redirectToRoute('admin_dashboard_settings_certs_installation_admin_sendCode');
         }
 
         return $this->render(
@@ -378,6 +388,60 @@ class InstallationController extends AbstractController
                 'stages' => $this->installationService->getStepperStatus($step)
             ]
         );
+    }
+
+    #[Route(
+        '/dashboard/settings/certificatesManagement/installation/admin/sendCode',
+        name: 'admin_dashboard_settings_certs_installation_admin_sendCode'
+    )]
+    #[IsGranted('ROLE_ADMIN')]
+    public function sendCode(
+        Request $request,
+    ) {
+        $lastInstallation = $this->installationService->lastInstallation();
+        if ($lastInstallation instanceof InstallationProgress) {
+            $admin = $this->userRepository->findAdmin();
+            if ($admin instanceof User) {
+                if ($this->installationService->canSendCode($lastInstallation, $admin)) {
+                    $this->installationService->sendAdminConfirmationCode($lastInstallation);
+                    $eventMetaData = [
+                        'platform' => PlatformMode::LIVE->value,
+                        'user_agent' => $request->headers->get('User-Agent'),
+                        'uuid' => $admin->getUuid(),
+                        'ip' => $request->getClientIp(),
+                    ];
+                    $this->eventActions->saveEvent(
+                        $admin,
+                        AnalyticalEventType::INSTALLATION_ADMIN_CONFIRM_CODE_SENT->value,
+                        new DateTime(),
+                        $eventMetaData
+                    );
+
+                    $this->addFlash(
+                        'success_admin',
+                        $this->translator->trans('codeSentSuccessfully', [], 'controllers')
+                    );
+                } else {
+                    $interval_minutes = $this->twoFAService->timeLeftToResendCode(
+                        $admin,
+                        AnalyticalEventType::INSTALLATION_ADMIN_CONFIRM_CODE_SENT->value
+                    );
+
+                    $this->addFlash(
+                        'error_admin',
+                        $this->translator->trans(
+                            'codeAlreadySent',
+                            [
+                                '%minutes%' => $interval_minutes,
+                            ],
+                            'controllers'
+                        )
+                    );
+                }
+            }
+        }
+
+        return $this->redirectToRoute('admin_dashboard_settings_certs_installation_admin_confirmation');
     }
 
     #[Route(
@@ -436,47 +500,6 @@ class InstallationController extends AbstractController
                 'error_admin',
                 $this->translator->trans('invalidCodeMessage', [], 'controllers')
             );
-        }
-        if ($lastInstallation instanceof InstallationProgress) {
-            $admin = $this->userRepository->findAdmin();
-            if ($admin instanceof User) {
-                if ($this->installationService->canSendCode($lastInstallation, $admin)) {
-                    $this->installationService->sendAdminConfirmationCode($lastInstallation);
-                    $eventMetaData = [
-                        'platform' => PlatformMode::LIVE->value,
-                        'user_agent' => $request->headers->get('User-Agent'),
-                        'uuid' => $admin->getUuid(),
-                        'ip' => $request->getClientIp(),
-                    ];
-                    $this->eventActions->saveEvent(
-                        $admin,
-                        AnalyticalEventType::INSTALLATION_ADMIN_CONFIRM_CODE_SENT->value,
-                        new DateTime(),
-                        $eventMetaData
-                    );
-
-                    $this->addFlash(
-                        'success_admin',
-                        $this->translator->trans('codeSentSuccessfully', [], 'controllers')
-                    );
-                } else {
-                    $interval_minutes = $this->twoFAService->timeLeftToResendCode(
-                        $admin,
-                        AnalyticalEventType::INSTALLATION_ADMIN_CONFIRM_CODE_SENT->value
-                    );
-
-                    $this->addFlash(
-                        'error_admin',
-                        $this->translator->trans(
-                            'codeAlreadySent',
-                            [
-                                '%minutes%' => $interval_minutes,
-                            ],
-                            'controllers'
-                        )
-                    );
-                }
-            }
         }
 
         return $this->render(
@@ -540,5 +563,126 @@ class InstallationController extends AbstractController
             $this->entityManager->flush();
         }
         return $this->redirectToRoute('admin_dashboard_settings_certs_management');
+    }
+
+    /**
+     * @throws \DateMalformedStringException
+     * @throws RandomException
+     */
+    #[Route(
+        '/dashboard/settings/certificatesManagement/installation/admin/confirmation/resend',
+        name: 'admin_dashboard_settings_certs_installation_admin_confirmation_resend',
+    )]
+    #[IsGranted('ROLE_ADMIN')]
+    public function resendCode(Request $request): RedirectResponse
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+
+        if (!$this->isGranted('IS_AUTHENTICATED_FULLY')) {
+            $this->addFlash(
+                'error',
+                $this->translator->trans('onlyAccessThisPageLoggedIn', [], 'controllers')
+            );
+            return $this->redirectToRoute('app_landing');
+        }
+        // Handle access restrictions based on the context
+        $timeToResetAttempts = (int) $this->settingRepository->findOneBy(
+            ['name' => SettingName::TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS->value]
+        )->getValue();
+        $nrAttempts = (int) $this->settingRepository->findOneBy(
+            ['name' => SettingName::TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE->value]
+        )->getValue();
+        $timeIntervalToResendCode = (int) $this->settingRepository->findOneBy(
+            ['name' => SettingName::TWO_FACTOR_AUTH_RESEND_INTERVAL->value]
+        )->getValue();
+        $limitTime = new DateTime();
+        $limitTime->modify('-' . $timeToResetAttempts . ' minutes');
+
+        $eventType = AnalyticalEventType::INSTALLATION_ADMIN_CONFIRM_CODE_RESENT->value;
+
+        if (
+            $this->twoFAService->canResendCode($user, $eventType) &&
+            $this->twoFAService->timeIntervalToResendCode($user, $eventType)
+        ) {
+            $this->twoFAService->resendCode(
+                $user,
+                $request->getClientIp(),
+                $request->headers->get('User-Agent'),
+                $eventType,
+            );
+            $attempts = $this->eventRepository->find2FACodeAttemptEvent(
+                $user,
+                $nrAttempts,
+                $limitTime,
+                $eventType
+            );
+            $attemptsLeft = $nrAttempts - count($attempts);
+            $this->addFlash(
+                'success_admin',
+                $this->translator->trans(
+                    'codeResentSuccessfully',
+                    [
+                        '%attempts%' => $attemptsLeft
+                    ],
+                    'controllers'
+                )
+            );
+            // TODO Remove this flash message in Prod!!
+            if ($_ENV['APP_ENV'] === 'dev') {
+                $this->addFlash(
+                    'error_admin',
+                    'Your code is: ' . $user->getTwoFAcode()
+                );
+            }
+        } else {
+            $lastEvent = $this->eventRepository->findLatest2FACodeAttemptEvent(
+                $user,
+                $eventType
+            );
+            $now = new DateTime();
+            // Suppose $lastAttemptTime is DateTimeInterface
+            $lastAttemptTime = $lastEvent instanceof Event
+                ? $lastEvent->getEventDatetime()
+                : new DateTime(); // fallback
+
+            // Ensure $limitTime is a DateTime instance
+            $limitTime = $lastAttemptTime instanceof DateTime
+                ? clone $lastAttemptTime
+                : new DateTime($lastAttemptTime->format('Y-m-d H:i:s')); // convert interface to DateTime
+            if (!$this->twoFAService->canResendCode($user, $eventType)) {
+                $limitTime->modify('+' . $timeToResetAttempts . ' minutes');
+                $interval = date_diff($now, $limitTime);
+                $interval_minutes = $interval->days * 1440;
+                $interval_minutes += $interval->h * 60;
+                $interval_minutes += $interval->i;
+
+                $this->addFlash(
+                    'error_admin',
+                    $this->translator->trans(
+                        'attemptsExceeded',
+                        ['%minutes%' => $interval_minutes],
+                        'controllers'
+                    )
+                );
+            } else {
+                $limitTime->modify('+' . $timeIntervalToResendCode . ' seconds');
+                $interval = date_diff($now, $limitTime);
+                $interval_seconds = $interval->days * 1440;
+                $interval_seconds += $interval->h * 60;
+                $interval_seconds += $interval->i;
+                $interval_seconds += $interval->s;
+
+                $this->addFlash(
+                    'error_admin',
+                    $this->translator->trans(
+                        'errorAdminWait',
+                        ['%time%' => $interval_seconds],
+                        'controllers'
+                    )
+                );
+            }
+        }
+        return $this->redirectToRoute('admin_dashboard_settings_certs_installation_admin_confirmation');
     }
 }
