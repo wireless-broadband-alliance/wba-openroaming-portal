@@ -25,6 +25,7 @@ use App\Repository\EventRepository;
 use App\Repository\InstallationProgressRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
+use App\Service\CaptchaValidator;
 use App\Service\DatabaseConnectionService;
 use App\Service\EventActions;
 use App\Service\GetSettings;
@@ -62,6 +63,7 @@ class InstallationController extends AbstractController
         private readonly InstallationProgressRepository $installationProgressRepository,
         private readonly SettingRepository $settingRepository,
         private readonly EventRepository $eventRepository,
+        private readonly CaptchaValidator $captchaValidator,
     ) {
     }
 
@@ -226,6 +228,16 @@ class InstallationController extends AbstractController
             $lastInstallation->setInstallationState(InstallationProgressType::IN_PROGRESS->value);
             $this->entityManager->persist($lastInstallation);
             $this->entityManager->flush();
+
+            $captchaValidation = $this->captchaValidator->validateCredentials($turnstileSecret);
+
+            if (!$captchaValidation['success']) {
+                $this->addFlash(
+                    'error_admin',
+                    $this->translator->trans('captchaValidationFailed', [], 'controllers')
+                );
+                return $this->redirectToRoute('admin_dashboard_settings_certs_installation_settings');
+            }
 
             $this->databaseConnectionService->writeDatabaseUrlToEnv(
                 $trustedProxies,
