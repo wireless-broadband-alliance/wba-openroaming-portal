@@ -148,3 +148,4 @@ cert_is_lets_encrypt_warning: "The uploaded certificate is issued by Let's Encry
 freeradius_is_not_ev_cert_warning: 'The option to download Windows OpenRoaming profiles is disabled because it is not supported with the current configuration.'
 cannotReturnToPreviousPhase: 'You can no longer access this stage because it has already been completed.'
 cannotAccessStageYet: "You cannot access this stage yet because previous steps are incomplete."
+captchaValidationFailed: 'Captcha validation failed.'

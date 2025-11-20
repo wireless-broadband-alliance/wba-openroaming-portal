@@ -104,4 +104,31 @@ readonly class CaptchaValidator
             ];
         }
     }
+
+    public function validateCredentials(string $secretKey): array
+    {
+        try {
+            $response = $this->httpClient->request(
+                'POST',
+                'https://challenges.cloudflare.com/turnstile/v0/siteverify',
+                [
+                    'body' => http_build_query([
+                        'secret' => $secretKey,
+                        'response' => 'dummy-token', // token falso
+                    ]),
+                ]
+            );
+
+            $data = $response->toArray();
+
+            if (in_array('invalid-input-secret', $data['error-codes'] ?? [])) {
+                return ['success' => false, 'error' => 'Invalid secret key'];
+            }
+
+            return ['success' => true];
+
+        } catch (\Throwable $e) {
+            return ['success' => false, 'error' => $e->getMessage()];
+        }
+    }
 }
