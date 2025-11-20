@@ -7,7 +7,7 @@ WORKDIR /app
 
 # Install minimal build deps for Composer
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    git zip unzip curl gnupg tzdata wget \
+    nginx supervisor git zip unzip curl gnupg tzdata wget \
  && rm -rf /var/lib/apt/lists/*
 
 #RUN wget -O PaloAlto_SSLInspection_ForwardTrust.crt https://tetrapi.pt/gp/PaloAlto_SSLInspection_ForwardTrust.crt \
@@ -23,10 +23,10 @@ RUN curl -sS https://getcomposer.org/installer | php -- \
 COPY . .
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    nginx supervisor tzdata xmlsec1 libxmlsec1-openssl \
+    xmlsec1 libxmlsec1-openssl \
     libpng-dev libjpeg-dev libfreetype6-dev libsqlite3-dev libicu-dev libzip-dev \
     libonig-dev libxml2-dev libgpgme-dev libgpg-error-dev libmemcached-dev \
-    libldap2-dev build-essential pkg-config autoconf curl gnupg bash \
+    libldap2-dev build-essential pkg-config autoconf bash \
  && docker-php-ext-configure gd --with-jpeg --with-freetype \
  && docker-php-ext-install intl zip bcmath mbstring pdo pdo_mysql pdo_sqlite soap gd dom exif opcache ldap \
  && pecl channel-update pecl.php.net \
