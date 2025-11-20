@@ -1,0 +1,4 @@
+trustedProxiesPlaceholder: "Proxies de confiança (ex. 127.0.0.1,10.0.0.1)"
+turnstileKeyPlaceholder: "Chave pública do Turnstile"
+turnstileSecretPlaceholder: "Chave secreta do Turnstile"
+jwtPassphrasePlaceholder: "Passphrase JWT"
