@@ -46,7 +46,7 @@ fieldCannotBeShorterThan: 'This field cannot be shorter than {{ limit }} charact
 timerShouldNotBeLessThan: 'This timer should never be less than 0 for user auto-deletion.'
 timerValueRequired: 'The timer value is required. Please provide a valid timer'
 timerShouldNotBeLessThanProfileNotification: 'This timer should never be less than 0 for user profile notification.'
-PleaseSetTimer: 'Please make sure to set a timer'
+pleaseSetTimer: 'Please make sure to set a timer'
 enterCode: 'You should enter a code.'
 enterValidLabel: 'Please enter a valid label.'
 enterValidNumber: 'Please enter a valid number.'
@@ -60,3 +60,5 @@ profileLimitMessage: 'Please select a value between 1 (minimum, fixed value) and
 notValidIp: 'Please provide a comma-separated list of valid IP addresses or CIDR ranges (e.g. 192.168.1.1,10.0.0.0/8).'
 invalidFormat: 'Invalid Format'
 invalidCertificateType: 'The certificate is not of type RSA. Only RSA certificates are supported.'
+notValidWbaChainRadsec: 'The certificate is not signed by a trusted WBA root CA'
+invalidCertificateChain: "The uploaded certificate does not belong to the uploaded chain."

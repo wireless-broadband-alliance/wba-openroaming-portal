@@ -46,7 +46,7 @@ fieldCannotBeShorterThan: 'Este campo não pode ter menos de {{ limit }} caracte
 timerShouldNotBeLessThan: 'O temporizador nunca deve ser inferior a 0 para a autoeliminação de utilizadores.'
 timerValueRequired: 'O valor do temporizador é obrigatório. Por favor, insira um temporizador válido.'
 timerShouldNotBeLessThanProfileNotification: 'O temporizador nunca deve ser inferior a 0 para a notificação de perfil do utilizador.'
-PleaseSetTimer: 'Por favor, certifique-se de configurar um temporizador.'
+pleaseSetTimer: 'Por favor, certifique-se de configurar um temporizador.'
 enterCode: 'Deve introduzir um código.'
 enterValidLabel: 'Por favor, introduza uma etiqueta válida.'
 enterValidNumber.: 'Por favor, introduza um número válido.'
@@ -60,3 +60,5 @@ profileLimitMessage: 'Por favor, selecione um valor entre 1 (mínimo, valor fixo
 notValidIp: 'Forneça uma lista de endereços IP válidos ou intervalos CIDR separados por vírgulas (por exemplo, 192.168.1.1,10.0.0.0/8).'
 invalidFormat: 'Formato Inválido'
 invalidCertificateType: 'O certificado não é do tipo RSA. Apenas certificados RSA são suportados.'
+notValidWbaChainRadsec: 'O certificado não é assinado pela root confiável da WBA.'
+invalidCertificateChain: "O certificado carregado não pertence à chain.pem fornecida."

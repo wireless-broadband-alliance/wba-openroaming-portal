@@ -6,10 +6,15 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Validator\Constraints as Assert;
 use App\Validator\Constraints as CustomAssert;
 
+// Class level so this validator can access the client/key at the same time
 #[CustomAssert\PemKeyMatchesCertificate(
     certificateField: 'cert',
     privateKeyField: 'privKey'
-)] // Class level so this validator can access the client/key at the same time
+)]
+#[CustomAssert\ValidCertificateChain(
+    certField: 'cert',
+    chainField: 'chain',
+)]
 class CertificateFreeradiusUploadDTO
 {
     public array $notices = [];
