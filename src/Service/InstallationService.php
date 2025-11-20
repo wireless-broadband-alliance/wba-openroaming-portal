@@ -21,6 +21,7 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 readonly class InstallationService
 {
@@ -32,6 +33,7 @@ readonly class InstallationService
         private EntityManagerInterface $entityManager,
         private EventRepository $eventRepository,
         private DatabaseConnectionService $databaseConnectionService,
+        private TranslatorInterface $translator
     ) {
     }
 
@@ -136,13 +138,14 @@ readonly class InstallationService
                 )
             )
             ->to($installationProgress->getEmailAdmin())
-            ->subject('Confirm Code')
-            ->htmlTemplate('email/confirmation_code.html.twig')
+            ->subject($this->translator->trans('adminConfirmationEmail', [], 'InstallationService'
+            ))
+            ->htmlTemplate('email/installation_admin_code.html.twig')
             ->context([
                 'uuid' => $installationProgress->getEmailAdmin(),
                 'emailTitle' => $emailTitle,
                 'contactEmail' => $contactEmail,
-                'twoFaCode' => $verificationCode,
+                'code' => $verificationCode,
             ])
             ->embedFromPath($logoPath, 'logo_cid');
 
