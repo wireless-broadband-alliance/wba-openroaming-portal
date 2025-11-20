@@ -95,6 +95,16 @@ class CertificateFreeradiusManagementController extends AbstractController
                 $process->setIsFreeradiusCertEV(true);
             }
 
+            if (in_array('CERTIFICATE_LETS_ENCRYPT_WARNING', $certificateUploadDTO->notices, true)) {
+                $process->setIsFreeradiusCertEV(false);
+                $this->addFlash(
+                    'warning',
+                    $this->translator->trans('cert_is_lets_encrypt_warning', [], 'controllers')
+                );
+            } else {
+                $process->setIsFreeradiusCertEV(true);
+            }
+
             if ($certificateUploadDTO->ca instanceof UploadedFile) {
                 // Save on the tmp folder the uploaded certificates after the validation
                 $this->certificateStorageService->storeUploadedFile(
