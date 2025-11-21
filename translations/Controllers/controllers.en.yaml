@@ -141,6 +141,7 @@ radsecproxy_container_not_running: 'Container %container% is not running on host
 radsecProxyCertUploadedSuccessfully: 'RadSecProxy certificates uploaded successfully!'
 radsecProxyConfigAppliedSuccessfully: 'RadSecProxy configuration completed!'
 freeradiusCertUploadedSuccessfully: 'Freeradius certificates uploaded successfully!'
+freeradiusConfigAppliedSuccessfully: 'Freeradius configuration applied successfully!'
 configAlreadyApplied: 'Configuration is been already applied. You can not re-submit this form.'
 certificateProcessAborted: "This process was aborted successfully. Please don't forget to re-configure all the process once again correctly!"
 not_ev_warning: "These certificates are not valid EV's. OpenRoaming profile generation for Windows will fail because of this, but you can proceed if you wish."

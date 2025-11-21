@@ -137,8 +137,9 @@ radsecproxy_test_passed: 'Teste Radsecproxy passou, tanto client.pem como key.pe
 radsecproxy_test_failed: 'Teste Radsecproxy falhou no host %host%:%port% — ficheiro(s) em falta no container %container%: %files%'
 radsecproxy_container_not_running: 'O contentor %container% não está em execução no host %host%:%port%'
 radsecProxyCertUploadedSuccessfully: 'Certificados RadSecProxy carregados com sucesso!'
-radsecProxyConfigAppliedSuccessfully: 'Configuração do RadSecProxy concluída!'
+radsecProxyConfigAppliedSuccessfully: 'Configuração do RadSecProxy aplicada com sucesso!'
 freeradiusCertUploadedSuccessfully: 'Certificados Freeradius carregados com sucesso!'
+freeradiusConfigAppliedSuccessfully: 'Configuração do Freeradius aplicada com sucesso!'
 configAlreadyApplied: 'Está configuração já está aplicada! Não podes re-submeter o mesmo formulário.'
 certificateProcessAborted: "Este processo foi abortado com sucesso. Por favor, não se esqueça de reconfigurar todo o processo corretamente!"
 not_ev_warning: "Estes certificados não são EV's válidos. A geração do perfil OpenRoaming para Windows irá falhar por causa disso, mas podes progredir se assim o desejares."

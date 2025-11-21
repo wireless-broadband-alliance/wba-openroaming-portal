@@ -216,20 +216,20 @@ class CertificateFreeradiusManagementController extends AbstractController
 
         // Fetch any data/settings needed for the page
         $data = $this->getSettings->getSettings();
-        // $commands = $this->certificateFreeradiusCommandsService->getRenewCommands(); TODO MAKE THIS FUNCTION AND LOGIC
 
         // Form handling
         $form = $this->createForm(SimpleSubmitFormType::class);
         $form->handleRequest($request);
 
         if ($form->isSubmitted()) {
-            if ($process?->getRadsecproxyConfigAppliedAt() instanceof DateTimeImmutable) {
+            if ($process?->getFreeradiusConfigAppliedAt() instanceof DateTimeImmutable) {
                 $this->addFlash(
                     'error',
                     $this->translator->trans('configAlreadyApplied', [], 'controllers')
                 );
             } elseif ($form->isValid()) {
-                $process->setRadsecproxyConfigAppliedAt(new DateTimeImmutable());
+                // TODO MAKE LOGIC TO UPDATE THE SIGNING_KEY FOLDER AND READ the certs of the last step
+                $process->setFreeradiusConfigAppliedAt(new DateTimeImmutable());
                 $process->setUpdatedAt(new DateTimeImmutable());
 
                 $this->entityManager->persist($process);
