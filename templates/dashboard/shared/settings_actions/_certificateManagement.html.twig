@@ -1,14 +1,10 @@
-{# TODO Implement the rest of the interation buttons of this page #}
-{# CERTIFICATES #}
-<div>
-    {{ include('dashboard/shared/settings_actions/certificatesManagement/partials/_certificates.html.twig') }}
-</div>
-
-{# INSTALLATION #}
-<div>
-    {{ include('dashboard/shared/settings_actions/certificatesManagement/partials/_installation.html.twig') }}
-</div>
-
-{# INSTALLATION + Certificate #}
-<div>
+<div class="w-full px-4 py-8 space-y-12">
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+        {# CERTIFICATES #}
+        {{ include('dashboard/shared/settings_actions/certificatesManagement/partials/_certificates.html.twig') }}
+        {# INSTALLATION #}
+        {{ include('dashboard/shared/settings_actions/certificatesManagement/partials/_installation.html.twig') }}
+        {# THIRD CARD BUTTON #}
+        {{ include('dashboard/shared/settings_actions/certificatesManagement/partials/_certificates_and_installation.html.twig') }}
+    </div>
 </div>

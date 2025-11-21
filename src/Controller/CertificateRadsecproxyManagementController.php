@@ -53,20 +53,18 @@ class CertificateRadsecproxyManagementController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function settingsCertificatesManagement(): Response
     {
-        $data = $this->getSettings->getSettings();
         $lastCompletedInstallation = $this->installationProgressRepository->getLastCompleted();
         $lastCompletedCertificate = $this->certificateSetupProcessRepository->getLatestCompletedProcess();
         if ($lastCompletedInstallation instanceof InstallationProgress) {
-            $installationDate = $lastCompletedInstallation->getUpdatedAt() ?? null;
+            $installationDate = $lastCompletedInstallation->getUpdatedAt();
         }
         if ($lastCompletedCertificate instanceof CertificateSetupProcess) {
-            $certificateDate = $lastCompletedCertificate->getUpdatedAt() ?? null;
+            $certificateDate = $lastCompletedCertificate->getUpdatedAt();
         }
-
 
         // Default render
         return $this->render('dashboard/shared/settings_actions.html.twig', [
-            'data' => $data,
+            'data' => $this->getSettings->getSettings(),
             'lastCompletedInstallation' => $installationDate ?? null,
             'lastCompletedCertificates' => $certificateDate ?? null,
         ]);
