@@ -1,29 +1,47 @@
 {% extends 'dashboard/shared/settings_actions/certificatesManagement/certificates/freeradius/base.html.twig' %}
 
 {% block freeradius_content %}
-    {# Warning message box #}
-    <div class="toast-success-dashboard">
-        <twig:ux:icon name="wba:info" class="w-10 md:w-5 h-10 md:h-5 inline mr-3 fill-currentColor"/>
-        <span>
-            {# {{ 'warning.root_command'|trans({}, 'upload_freeradius') }} TODO ADD A WARNING HERE LATER TO WORK WITH THE SUBMIT #}
-            {#
-            TODO
-            Main idea - after the user clicks the submit button the page triggers the logic to change and update the current certs on the folder for the new ones
-            Also if a ev is returned it should execute the generate Fx with the new certs for windows profiles
-            #}
-            Potato good text after the upload validation its done
-        </span>
+    <div data-controller="certificates">
+        <div class="mb-4 flex justify-end">
+            <button
+                    type="button"
+                    data-action="click->certificates#toggleAll"
+                    data-certificates-target="toggleAllButton"
+                    class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">
+                Expand All
+            </button>
+        </div>
+
+        {% for cert in certificateSet %}
+            <div data-card-target="card" class="border rounded-lg mb-3">
+                {# TODO FIX THIS LATER THE OPEN DISPLAY ITS NOT WORKING -> check this stimulus controller "certificates" #}
+                <button
+                        type="button"
+                        class="w-full px-4 py-3 text-left font-semibold bg-gray-100 hover:bg-gray-200 focus:outline-none flex justify-between items-center"
+                        data-action="click->certificates#toggleCard">
+                    <span>{{ cert.name }} ({{ cert.type }})</span>
+                    <twig:ux:icon class="w-4 h-4 text-gray-500" name="wba:arrow-down"/>
+                </button>
+
+                <div data-card-target="content" class="px-4 py-3 bg-white hidden">
+                    <p><strong>Original Name:</strong> {{ cert.metadata.originalName }}</p>
+                    <p><strong>SHA1 Fingerprint:</strong> {{ cert.fingerprintSHA1 }}</p>
+                    <p><strong>Valid From:</strong> {{ cert.validFrom ? cert.validFrom|date('Y-m-d H:i:s') : 'N/A' }}
+                    </p>
+                    <p><strong>Valid To:</strong> {{ cert.validTo ? cert.validTo|date('Y-m-d H:i:s') : 'N/A' }}</p>
+                    <p><strong>Subject CN:</strong> {{ cert.parsedSubject.CN ?? 'N/A' }}</p>
+                    <p><strong>Issuer CN:</strong> {{ cert.parsedIssuer.CN ?? 'N/A' }}</p>
+                </div>
+            </div>
+        {% endfor %}
     </div>
 
-    {% for cert in certificateSet %}
-        <h4>{{ cert.name }} ({{ cert.type }})</h4>
-        <p>Original Name: {{ cert.metadata.originalName }}</p>
-        <p>SHA1 Fingerprint: {{ cert.fingerprintSHA1 }}</p>
-        <p>Valid From: {{ cert.validFrom ? cert.validFrom|date('Y-m-d H:i:s') : 'N/A' }}</p>
-        <p>Valid To: {{ cert.validTo ? cert.validTo|date('Y-m-d H:i:s') : 'N/A' }}</p>
-        <p>Subject CN: {{ cert.parsedSubject.CN ?? 'N/A' }}</p>
-        <p>Issuer CN: {{ cert.parsedIssuer.CN ?? 'N/A' }}</p>
-    {% endfor %}
+    <div class="toast-success-dashboard mb-4">
+        <twig:ux:icon name="wba:info" class="w-10 md:w-5 h-10 md:h-5 inline mr-3 fill-currentColor"/>
+        <span>
+            {{ 'warning.root_command'|trans({}, 'config_freeradius') }}
+        </span>
+    </div>
 
     <div class="mt-8 flex justify-end">
         {{ form_start(form) }}

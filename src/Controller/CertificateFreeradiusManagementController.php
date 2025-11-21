@@ -233,8 +233,11 @@ class CertificateFreeradiusManagementController extends AbstractController
                     $this->translator->trans('configAlreadyApplied', [], 'controllers')
                 );
             } elseif ($form->isValid()) {
-                // TODO MAKE LOGIC TO UPDATE THE SIGNING_KEY FOLDER AND READ the certs of the last step
-                // MAKE THE LOGIC TO UPDATE THE FREERADIUS MACHINE IT NEEDS TO RETURN COMMAND LIKE THE RADSECPROXY
+                /* TODO
+                 - MAKE LOGIC TO UPDATE THE SIGNING_KEY FOLDER AND READ the certs of the last step
+                 - MAKE CHECKER (IF) TO DETECT IF THE CERTS WAS A EV (CHECK DB VALUE) should execute the generate Fx with the new certs for windows profiles
+                 - MAKE THE LOGIC TO UPDATE THE FREERADIUS MACHINE - IT NEEDS TO RETURN COMMANDs LIKE THE RADSECPROXY
+                */
                 $process->setFreeradiusConfigAppliedAt(new DateTimeImmutable());
                 $process->setUpdatedAt(new DateTimeImmutable());
 

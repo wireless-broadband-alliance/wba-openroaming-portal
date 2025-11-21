@@ -4,7 +4,6 @@ radsecproxy_process:
     next_phase: "You may now proceed with the next phase:"
     details: "FreeRADIUS certificate upload, configuration and testing."
 
-
 title: "FreeRADIUS Certificate Upload"
 
 ca:

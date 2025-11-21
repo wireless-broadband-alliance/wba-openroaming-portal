@@ -1,2 +1,4 @@
-confirm_follow_steps: 'Tem a certeza de que pretende continuar e aplicar os certificados carregados anteriormente?'
+warning:
+    root_command: "Execute os seguintes comandos como 'root' no terminal antes de começar!"
+confirm_follow_steps: 'Tem a certeza de que pretende continuar para aplicar os certificados carregados anteriormente e a nova configuração no resolver?'
 submit: 'Confirmar Configuração'
