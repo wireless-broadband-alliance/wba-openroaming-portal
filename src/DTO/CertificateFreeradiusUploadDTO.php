@@ -15,6 +15,11 @@ use App\Validator\Constraints as CustomAssert;
     certField: 'cert',
     chainField: 'chain',
 )]
+#[CustomAssert\ValidTrustAnchor(
+    certField: 'cert',
+    chainField: 'chain',
+    rootField: 'ca'
+)]
 class CertificateFreeradiusUploadDTO
 {
     public array $notices = [];

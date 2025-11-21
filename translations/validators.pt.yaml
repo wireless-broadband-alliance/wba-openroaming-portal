@@ -62,3 +62,5 @@ invalidFormat: 'Formato Inválido'
 invalidCertificateType: 'O certificado não é do tipo RSA. Apenas certificados RSA são suportados.'
 notValidWbaChainRadsec: 'O certificado não é assinado pela root confiável da WBA.'
 invalidCertificateChain: "O certificado carregado não pertence à chain.pem fornecida."
+incompleteChainMessage: 'A chain de certificados não chega a uma autoridade de confiança.'
+untrustedRootMessage: 'A autoridade de confiança fornecida não é confiável.'
