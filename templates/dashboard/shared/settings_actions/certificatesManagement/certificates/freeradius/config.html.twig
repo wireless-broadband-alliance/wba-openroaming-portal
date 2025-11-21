@@ -15,6 +15,16 @@
         </span>
     </div>
 
+    {% for cert in certificateSet %}
+        <h4>{{ cert.name }} ({{ cert.type }})</h4>
+        <p>Original Name: {{ cert.metadata.originalName }}</p>
+        <p>SHA1 Fingerprint: {{ cert.fingerprintSHA1 }}</p>
+        <p>Valid From: {{ cert.validFrom ? cert.validFrom|date('Y-m-d H:i:s') : 'N/A' }}</p>
+        <p>Valid To: {{ cert.validTo ? cert.validTo|date('Y-m-d H:i:s') : 'N/A' }}</p>
+        <p>Subject CN: {{ cert.parsedSubject.CN ?? 'N/A' }}</p>
+        <p>Issuer CN: {{ cert.parsedIssuer.CN ?? 'N/A' }}</p>
+    {% endfor %}
+
     <div class="mt-8 flex justify-end">
         {{ form_start(form) }}
         {{ form_row(form._token) }}

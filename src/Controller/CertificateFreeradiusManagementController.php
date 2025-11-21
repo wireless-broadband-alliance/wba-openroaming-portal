@@ -12,6 +12,7 @@ use App\Enum\CertificateRouteAccess;
 use App\Enum\FirewallType;
 use App\Form\CertificateFreeradiusUploadType;
 use App\Form\SimpleSubmitFormType;
+use App\Service\CertificateFreeradiusInfoService;
 use App\Service\CertificateProcessCheckerService;
 use App\Service\CertificateStorageService;
 use App\Service\GetSettings;
@@ -33,6 +34,7 @@ class CertificateFreeradiusManagementController extends AbstractController
         private readonly CertificateProcessCheckerService $certificateProcessCheckerService,
         private readonly CertificateStorageService $certificateStorageService,
         private readonly EntityManagerInterface $entityManager,
+        private readonly CertificateFreeradiusInfoService $certificateFreeradiusInfoService,
     ) {
     }
 
@@ -214,6 +216,9 @@ class CertificateFreeradiusManagementController extends AbstractController
             return $this->redirectToRoute('admin_dashboard_settings_certs_radsecproxy_upload');
         }
 
+        // Return last uploaded certificates from the previous step and reads the contents
+        $certificateSet = $this->certificateFreeradiusInfoService->getLatestCertificatesSet($process);
+
         // Fetch any data/settings needed for the page
         $data = $this->getSettings->getSettings();
 
@@ -229,6 +234,7 @@ class CertificateFreeradiusManagementController extends AbstractController
                 );
             } elseif ($form->isValid()) {
                 // TODO MAKE LOGIC TO UPDATE THE SIGNING_KEY FOLDER AND READ the certs of the last step
+                // MAKE THE LOGIC TO UPDATE THE FREERADIUS MACHINE IT NEEDS TO RETURN COMMAND LIKE THE RADSECPROXY
                 $process->setFreeradiusConfigAppliedAt(new DateTimeImmutable());
                 $process->setUpdatedAt(new DateTimeImmutable());
 
@@ -252,8 +258,8 @@ class CertificateFreeradiusManagementController extends AbstractController
             [
                 'data' => $data,
                 'form' => $form->createView(),
-                // 'commands' => $commands,
                 'processState' => $processState,
+                'certificateSet' => $certificateSet,
             ]
         );
     }
