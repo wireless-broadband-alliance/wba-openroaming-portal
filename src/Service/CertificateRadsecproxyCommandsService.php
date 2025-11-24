@@ -3,6 +3,7 @@
 namespace App\Service;
 
 use App\Entity\CertificateSetupProcess;
+use App\Enum\CertificateFileName;
 use App\Enum\CertificateTestResult;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpKernel\KernelInterface;
@@ -69,7 +70,7 @@ readonly class CertificateRadsecproxyCommandsService
 
             // Determine target filename based on certificate name
             $lowerName = strtolower($cert['name']);
-            $targetFile = str_contains($lowerName, 'client') ? 'client.pem' : 'key.pem';
+            $targetFile = str_contains($lowerName, CertificateFileName::CLIENT_PEM->value) ? 'client.pem' : 'key.pem';
 
             $commands[] = [
                 'description' => $this->translator->trans(
@@ -87,7 +88,7 @@ readonly class CertificateRadsecproxyCommandsService
                 'rebuild_and_start_container',
                 domain: 'CertificateRadsecCommandsService'
             ),
-            'command' => 'docker-compose.yml up -d --build radsecproxy',
+            'command' => 'docker compose up -d --build radsecproxy',
         ];
 
         // Verify container status

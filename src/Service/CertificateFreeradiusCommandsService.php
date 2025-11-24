@@ -3,6 +3,8 @@
 namespace App\Service;
 
 use App\Entity\CertificateSetupProcess;
+use App\Enum\CertificateFileName;
+use App\Enum\CertificateMachineType;
 use App\Enum\CertificateTestResult;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -60,28 +62,29 @@ readonly class CertificateFreeradiusCommandsService
         ];
 
         $fileMap = [
-            'ca' => 'ca.pem',
-            'cert' => 'cert.pem',
-            'chain' => 'chain.pem',
-            'full_chain' => 'fullchain.pem',
-            'privkey' => 'privkey.pem',
+            CertificateFileName::CA_PEM->value => 'ca.pem',
+            CertificateFileName::CERT_PEM->value => 'cert.pem',
+            CertificateFileName::CHAIN_PEM->value => 'chain.pem',
+            CertificateFileName::FULL_CHAIN_PEM->value => 'fullchain.pem',
+            CertificateFileName::PRIVATE_KEY_PEM->value => 'privkey.pem',
         ];
 
         // Write new certificate files
-        foreach ($fileMap as $nameKey => $filename) {
-            // Find a certificate whose name contains the key (case-insensitive)
-            $certItem = null;
-            foreach ($certificates as $c) {
-                if (str_contains(strtolower($c['name']), $nameKey)) {
-                    $certItem = $c;
-                    break;
-                }
+        foreach ($fileMap as $enumName => $filename) {
+            // DTO key format: "full_chainFREERADIUS"
+            $dtoKey = $enumName . CertificateMachineType::FREERADIUS->value;
+
+            if (!isset($certificates[$dtoKey])) {
+                continue; // skip missing entries
             }
 
-            if (!$certItem || empty($certItem['content'])) {
-                continue; // skip if no content
+            $certItem = $certificates[$dtoKey];
+
+            if (empty($certItem['content'])) {
+                continue;
             }
 
+            // Safe shell escaping for echo
             $content = str_replace("'", "'\"'\"'", $certItem['content']);
 
             $commands[] = [
@@ -90,7 +93,12 @@ readonly class CertificateFreeradiusCommandsService
                     ['%filename%' => $filename],
                     'CertificateFreeradiusCommandsService'
                 ),
-                'command' => sprintf("echo '%s' > %s%s", $content, $this->certDir, $filename),
+                'command' => sprintf(
+                    "echo '%s' > %s%s",
+                    $content,
+                    $this->certDir,
+                    $filename
+                ),
             ];
         }
 
@@ -100,7 +108,7 @@ readonly class CertificateFreeradiusCommandsService
                 'rebuild_and_start_container',
                 domain: 'CertificateFreeradiusCommandsService'
             ),
-            'command' => 'docker-compose.yml up -d --build freeradius',
+            'command' => 'docker compose up -d --build freeradius',
         ];
 
         // Verify container status

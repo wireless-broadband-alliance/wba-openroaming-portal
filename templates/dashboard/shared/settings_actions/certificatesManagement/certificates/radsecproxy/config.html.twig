@@ -1,5 +1,10 @@
 {% extends 'dashboard/shared/settings_actions/certificatesManagement/certificates/radsecproxy/base.html.twig' %}
 
+{% set certDisplayNames = {
+    'clientRADSECPROXY': 'client'|trans({}, 'config_radsec'),
+    'keyRADSECPROXY': 'key'|trans({}, 'config_radsec'),
+} %}
+
 {% block radsecproxy_content %}
 
     <div data-controller="certificates-content" class="space-y-6">

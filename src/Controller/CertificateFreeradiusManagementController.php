@@ -224,7 +224,7 @@ class CertificateFreeradiusManagementController extends AbstractController
         // Fetch any data/settings needed for the page
         $data = $this->getSettings->getSettings();
         $commands = $this->certificateFreeradiusCommandsService->getRenewCommands($certificateSet);
-        dd($commands, $certificateSet);
+
         // Form handling
         $form = $this->createForm(SimpleSubmitFormType::class);
         $form->handleRequest($request);

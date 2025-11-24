@@ -14,3 +14,5 @@ config_already_applied: 'Configuração ja foi aplicada!'
 resolverCommands: 'Comandos do Resolver'
 warning:
     root_command: "Execute os seguintes comandos como 'root' no terminal antes de começar!"
+client: 'Cliente'
+key: 'Chave Privada'

@@ -1,11 +1,11 @@
 {% extends 'dashboard/shared/settings_actions/certificatesManagement/certificates/freeradius/base.html.twig' %}
 
 {% set certDisplayNames = {
-    'caFREERADIUS': 'CA Root'|trans({}, 'config_freeradius'),
-    'certFREERADIUS': 'Server Certificate'|trans({}, 'config_freeradius'),
-    'chainFREERADIUS': 'Certificate Chain'|trans({}, 'config_freeradius'),
-    'full_chainFREERADIUS': 'Full Chain'|trans({}, 'config_freeradius'),
-    'private_keyFREERADIUS': 'Private Key'|trans({}, 'config_freeradius')
+    'caFREERADIUS': 'CARoot'|trans({}, 'config_freeradius'),
+    'certFREERADIUS': 'serverCertificate'|trans({}, 'config_freeradius'),
+    'chainFREERADIUS': 'certificateChain'|trans({}, 'config_freeradius'),
+    'full_chainFREERADIUS': 'fullChain'|trans({}, 'config_freeradius'),
+    'private_keyFREERADIUS': 'privateKey'|trans({}, 'config_freeradius')
 } %}
 
 {% block freeradius_content %}

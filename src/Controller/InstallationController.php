@@ -598,7 +598,7 @@ class InstallationController extends AbstractController
         name: 'admin_dashboard_settings_certs_installation_abortProcess'
     )]
     #[IsGranted('ROLE_ADMIN')]
-    public function abortProcess()
+    public function abortProcess(): RedirectResponse
     {
         $lastInstallation = $this->installationService->lastInstallation();
         if ($lastInstallation instanceof InstallationProgress) {
