@@ -12,6 +12,5 @@ valid_from: "Válido desde"
 valid_to: "Válido até"
 subject_cn: "CN do Sujeito"
 issuer_cn: "CN do Emissor"
-warning.root_command: "Aviso: privilégios de root são necessários para alguns comandos."
 confirm_follow_steps: 'Tem a certeza de que pretende continuar para aplicar os certificados carregados anteriormente e a nova configuração no resolver?'
 submit: 'Confirmar Configuração'

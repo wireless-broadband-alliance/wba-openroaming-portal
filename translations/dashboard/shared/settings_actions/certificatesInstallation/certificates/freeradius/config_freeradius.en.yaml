@@ -12,6 +12,5 @@ valid_from: "Valid From"
 valid_to: "Valid To"
 subject_cn: "Subject CN"
 issuer_cn: "Issuer CN"
-warning.root_command: "Warning: root privileges are required for some commands."
 confirm_follow_steps: 'Are you sure you want to proceed to apply the previous uploaded certificates and the new configuration on the resolver?'
 submit: 'Confirm Configuration'
