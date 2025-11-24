@@ -339,6 +339,7 @@
     }
 }
 
+/* Smooth Animations */
 @keyframes fade-in-test-run {
     from {
         opacity: 0;
@@ -352,4 +353,11 @@
 
 .animate-fade-in-test-run {
     animation: fade-in-test-run 0.4s ease-out;
+}
+
+.transition-transform {
+    transition: transform 0.2s ease;
+}
+.rotate-180 {
+    transform: rotate(180deg);
 }

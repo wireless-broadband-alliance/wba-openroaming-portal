@@ -9,7 +9,7 @@
 {% set currentIndex = 0 %}
 
 {% for s in steps %}
-    {% if currentRoute in s.route   %}
+    {% if currentRoute in s.route %}
         {% set currentIndex = loop.index0 %}
     {% endif %}
 {% endfor %}
@@ -52,12 +52,11 @@
              style="width: calc({{ ((currentIndex + 1) / steps|length) * 100 }}%)"
         ></div>
 
-
         {% for step in steps %}
             {% set title = ('step.' ~ step.id ~ '.title')|trans(domain: '_installation_stepper') %}
             {% set description = ('step.' ~ step.id ~ '.description')|trans(domain: '_installation_stepper') %}
             {% set index = loop.index0 %}
-            {% set active = currentRoute in step.route   %}
+            {% set active = currentRoute in step.route %}
             {% set completed = stages[step.id] ?? false %}
             {% set previousCompleted = index == 0 or (steps[index - 1].id in stages and stages[steps[index - 1].id]) %}
 

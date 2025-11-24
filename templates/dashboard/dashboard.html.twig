@@ -19,7 +19,7 @@
         {{ include('dashboard/shared/_toast.html.twig', {
             message: 'abortedCertificatesWarning'|trans({}, 'dashboard'),
             toast_type: 'toast-error-dashboard',
-            auto_remove: false
+            auto_remove: false,
         }) }}
     {% endif %}
 
@@ -27,7 +27,7 @@
         {{ include('dashboard/shared/_toast.html.twig', {
             message: message,
             toast_type: 'toast-warning-dashboard',
-            auto_remove: false
+            auto_remove: false,
         }) }}
     {% endif %}
 
@@ -35,7 +35,7 @@
         {{ include('dashboard/shared/_toast.html.twig', {
             message: 'freeradius_is_not_ev_cert_warning'|trans({}, 'dashboard'),
             toast_type: 'toast-warning-dashboard',
-            auto_remove: false
+            auto_remove: false,
         }) }}
     {% endif %}
     <div class="pt-5 pb-1 text-left space-y-3 rounded-xl bg-white">
