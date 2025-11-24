@@ -37,7 +37,7 @@ readonly class CertificateRadsecproxyCommandsService
                 [
                     'description' => $this->translator->trans(
                         'no_active_process',
-                        domain: 'CertificateCommandsService'
+                        domain: 'CertificateRadsecCommandsService'
                     ),
                     'command' => '# No action required.',
                 ]
@@ -59,7 +59,7 @@ readonly class CertificateRadsecproxyCommandsService
 
         // Remove old files
         $commands[] = [
-            'description' => $this->translator->trans('remove_old_files', domain: 'CertificateCommandsService'),
+            'description' => $this->translator->trans('remove_old_files', domain: 'CertificateRadsecCommandsService'),
             'command' => sprintf('rm -f %sclient.pem %skey.pem', $targetPath, $targetPath),
         ];
 
@@ -87,7 +87,7 @@ readonly class CertificateRadsecproxyCommandsService
                 'description' => $this->translator->trans(
                     'write_cert_file',
                     ['%filename%' => $targetFile],
-                    'CertificateCommandsService'
+                    'CertificateRadsecCommandsService'
                 ),
                 'command' => sprintf("cat > %s%s << 'EOF'\n%s\nEOF", $targetPath, $targetFile, $content),
             ];
@@ -96,31 +96,31 @@ readonly class CertificateRadsecproxyCommandsService
         // Docker rebuild/restart
         return array_merge($commands, [
             [
-                'description' => $this->translator->trans('navigate_to_dir', domain: 'CertificateCommandsService'),
+                'description' => $this->translator->trans('navigate_to_dir', domain: 'CertificateRadsecCommandsService'),
                 'command' => 'cd ~/openroaming-oss/hybrid',
             ],
             [
-                'description' => $this->translator->trans('stop_containers', domain: 'CertificateCommandsService'),
+                'description' => $this->translator->trans('stop_containers', domain: 'CertificateRadsecCommandsService'),
                 'command' => 'docker compose down',
             ],
             [
-                'description' => $this->translator->trans('remove_old_images', domain: 'CertificateCommandsService'),
+                'description' => $this->translator->trans('remove_old_images', domain: 'CertificateRadsecCommandsService'),
                 'command' => 'docker images hybrid-radsecproxy -q | xargs -r docker rmi -f',
             ],
             [
-                'description' => $this->translator->trans('rebuild_image', domain: 'CertificateCommandsService'),
+                'description' => $this->translator->trans('rebuild_image', domain: 'CertificateRadsecCommandsService'),
                 'command' => 'docker compose build --no-cache radsecproxy',
             ],
             [
-                'description' => $this->translator->trans('start_container', domain: 'CertificateCommandsService'),
+                'description' => $this->translator->trans('start_container', domain: 'CertificateRadsecCommandsService'),
                 'command' => 'docker compose up -d',
             ],
             [
-                'description' => $this->translator->trans('verify_container', domain: 'CertificateCommandsService'),
+                'description' => $this->translator->trans('verify_container', domain: 'CertificateRadsecCommandsService'),
                 'command' => 'docker ps | grep radsecproxy',
             ],
             [
-                'description' => $this->translator->trans('check_logs', domain: 'CertificateCommandsService'),
+                'description' => $this->translator->trans('check_logs', domain: 'CertificateRadsecCommandsService'),
                 'command' => 'docker logs hybrid-radsecproxy-1 --tail 50',
             ],
         ]);

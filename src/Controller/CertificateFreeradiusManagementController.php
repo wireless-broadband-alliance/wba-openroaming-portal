@@ -12,6 +12,7 @@ use App\Enum\CertificateRouteAccess;
 use App\Enum\FirewallType;
 use App\Form\CertificateFreeradiusUploadType;
 use App\Form\SimpleSubmitFormType;
+use App\Service\CertificateFreeradiusCommandsService;
 use App\Service\CertificateFreeradiusInfoService;
 use App\Service\CertificateProcessCheckerService;
 use App\Service\CertificateStorageService;
@@ -35,6 +36,7 @@ class CertificateFreeradiusManagementController extends AbstractController
         private readonly CertificateStorageService $certificateStorageService,
         private readonly EntityManagerInterface $entityManager,
         private readonly CertificateFreeradiusInfoService $certificateFreeradiusInfoService,
+        private readonly CertificateFreeradiusCommandsService $certificateFreeradiusCommandsService
     ) {
     }
 
@@ -221,6 +223,7 @@ class CertificateFreeradiusManagementController extends AbstractController
 
         // Fetch any data/settings needed for the page
         $data = $this->getSettings->getSettings();
+        $commands = $this->certificateFreeradiusCommandsService->getRenewCommands();
 
         // Form handling
         $form = $this->createForm(SimpleSubmitFormType::class);
@@ -236,7 +239,6 @@ class CertificateFreeradiusManagementController extends AbstractController
                 /* TODO
                  - MAKE LOGIC TO UPDATE THE SIGNING_KEY FOLDER AND READ the certs of the last step
                  - MAKE CHECKER (IF) TO DETECT IF THE CERTS WAS A EV (CHECK DB VALUE) should execute the generate Fx with the new certs for windows profiles
-                 - MAKE THE LOGIC TO UPDATE THE FREERADIUS MACHINE - IT NEEDS TO RETURN COMMANDs LIKE THE RADSECPROXY
                 */
                 $process->setFreeradiusConfigAppliedAt(new DateTimeImmutable());
                 $process->setUpdatedAt(new DateTimeImmutable());
@@ -263,6 +265,7 @@ class CertificateFreeradiusManagementController extends AbstractController
                 'form' => $form->createView(),
                 'processState' => $processState,
                 'certificateSet' => $certificateSet,
+                'commands' => $commands,
             ]
         );
     }
