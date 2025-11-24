@@ -1,5 +1,13 @@
 {% extends 'dashboard/shared/settings_actions/certificatesManagement/certificates/freeradius/base.html.twig' %}
 
+{% set certDisplayNames = {
+    'caFREERADIUS': 'CA Root'|trans({}, 'config_freeradius'),
+    'certFREERADIUS': 'Server Certificate'|trans({}, 'config_freeradius'),
+    'chainFREERADIUS': 'Certificate Chain'|trans({}, 'config_freeradius'),
+    'full_chainFREERADIUS': 'Full Chain'|trans({}, 'config_freeradius'),
+    'private_keyFREERADIUS': 'Private Key'|trans({}, 'config_freeradius')
+} %}
+
 {% block freeradius_content %}
     <div data-controller="certificates-freeradius" class="space-y-6">
 
@@ -8,15 +16,15 @@
                     type="button"
                     data-action="click->certificates-freeradius#toggleAll"
                     data-certificates-freeradius-target="toggleAllButton"
-                    class="w-full sm:w-auto  flex items-center gap-2
-              px-3 py-1.5 sm:px-4 sm:py-2
-              text-xs sm:text-sm
-              rounded-lg shadow font-medium
-              text-gray-700 bg-white border border-gray-200
-              hover:bg-gray-50 hover:border-gray-300 transition"
+                    class="w-full sm:w-auto flex items-center gap-2
+                           px-3 py-1.5 sm:px-4 sm:py-2
+                           text-xs sm:text-sm
+                           rounded-lg shadow font-medium
+                           text-gray-700 bg-white border border-gray-200
+                           hover:bg-gray-50 hover:border-gray-300 transition"
             >
                 <twig:ux:icon name="wba:arrow-down" class="w-4 h-4 transition-transform"/>
-                <span>Expand All</span>
+                <span>{{ 'expand_all'|trans({}, 'config_freeradius') }}</span>
             </button>
         </div>
 
@@ -30,7 +38,10 @@
                         class="w-full px-5 py-4 flex justify-between items-center bg-gray-50 hover:bg-gray-100 transition"
                 >
                     <div>
-                        <p class="font-semibold text-gray-800">{{ cert.name }}</p>
+
+                        <p class="font-semibold text-gray-800">
+                            {{ certDisplayNames[cert.name]|default(cert.name) }}
+                        </p>
                     </div>
 
                     <twig:ux:icon name="wba:arrow-down" class="w-5 h-5 text-gray-500 transition-transform"/>
@@ -40,32 +51,32 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
 
                         <div>
-                            <p class="text-gray-500 text-xs">Original Filename</p>
+                            <p class="text-gray-500 text-xs">{{ 'original_filename'|trans({}, 'config_freeradius') }}</p>
                             <p class="font-medium text-gray-800">{{ cert.metadata.originalName }}</p>
                         </div>
 
                         <div>
-                            <p class="text-gray-500 text-xs">SHA1 Fingerprint</p>
+                            <p class="text-gray-500 text-xs">{{ 'sha1_fingerprint'|trans({}, 'config_freeradius') }}</p>
                             <p class="font-mono break-all text-gray-800">{{ cert.fingerprintSHA1 }}</p>
                         </div>
 
                         <div>
-                            <p class="text-gray-500 text-xs">Valid From</p>
+                            <p class="text-gray-500 text-xs">{{ 'valid_from'|trans({}, 'config_freeradius') }}</p>
                             <p class="font-medium text-gray-800">{{ cert.validFrom ? cert.validFrom|date('Y-m-d H:i:s') : 'N/A' }}</p>
                         </div>
 
                         <div>
-                            <p class="text-gray-500 text-xs">Valid To</p>
+                            <p class="text-gray-500 text-xs">{{ 'valid_to'|trans({}, 'config_freeradius') }}</p>
                             <p class="font-medium text-gray-800">{{ cert.validTo ? cert.validTo|date('Y-m-d H:i:s') : 'N/A' }}</p>
                         </div>
 
                         <div>
-                            <p class="text-gray-500 text-xs">Subject CN</p>
+                            <p class="text-gray-500 text-xs">{{ 'subject_cn'|trans({}, 'config_freeradius') }}</p>
                             <p class="font-medium text-gray-800">{{ cert.parsedSubject.CN ?? 'N/A' }}</p>
                         </div>
 
                         <div>
-                            <p class="text-gray-500 text-xs">Issuer CN</p>
+                            <p class="text-gray-500 text-xs">{{ 'issuer_cn'|trans({}, 'config_freeradius') }}</p>
                             <p class="font-medium text-gray-800">{{ cert.parsedIssuer.CN ?? 'N/A' }}</p>
                         </div>
                     </div>

@@ -1,4 +1,17 @@
 warning:
     root_command: 'Run the following commands as the root user in your terminal before starting!'
+CA Root: "Root CA"
+Server Certificate: "Server Certificate"
+Certificate Chain: "Certificate Chain"
+Full Chain: "Full Chain"
+Private Key: "Private Key"
+expand_all: "Expand All"
+original_filename: "Original Filename"
+sha1_fingerprint: "SHA1 Fingerprint"
+valid_from: "Valid From"
+valid_to: "Valid To"
+subject_cn: "Subject CN"
+issuer_cn: "Issuer CN"
+warning.root_command: "Warning: root privileges are required for some commands."
 confirm_follow_steps: 'Are you sure you want to proceed to apply the previous uploaded certificates and the new configuration on the resolver?'
 submit: 'Confirm Configuration'
