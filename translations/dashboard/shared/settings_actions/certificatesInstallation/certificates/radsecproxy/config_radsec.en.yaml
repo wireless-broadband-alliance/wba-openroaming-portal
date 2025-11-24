@@ -1,18 +1,18 @@
 configTitle: 'Renewal Steps'
 step: 'Step'
 submit: 'Confirm Configuration'
-confirm_follow_steps: 'Are you sure you followed all the required steps?'
-show_sensitive: 'Show'
-hide_sensitive: 'Hide'
-sensitive_hidden_text: 'Sensitive content'
-copy_command:
+confirmFollowSteps: 'Are you sure you followed all the required steps?'
+showSensitive: 'Show'
+hideSensitive: 'Hide'
+sensitiveHiddenText: 'Sensitive content'
+copyCommand:
     title: "Copy"
-    aria_label: "Copy"
+    ariaLabel: "Copy"
     success: "Copied!"
     error: "It was not possible to copy the content."
-config_already_applied: 'Config already applied!'
+configAlreadyApplied: 'Config already applied!'
 resolverCommands: 'Resolver Commands'
 warning:
-    root_command: 'Run the following commands as the root user in your terminal before starting!'
+    rootCommand: 'Run the following commands as the root user in your terminal before starting!'
 client: 'Client'
 key: 'Private Key'

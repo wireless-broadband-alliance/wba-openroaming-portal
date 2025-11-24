@@ -16,7 +16,7 @@
         <div class="toast-success-dashboard">
             <twig:ux:icon name="wba:info" class="w-10 md:w-5 h-10 md:h-5 inline mr-3 fill-currentColor"/>
             <span>
-            {{ 'warning.root_command'|trans({}, 'config_radsec') }}
+            {{ 'warning.rootCommand'|trans({}, 'config_radsec') }}
         </span>
         </div>
 
@@ -40,8 +40,8 @@
                 {% else %}
                     bg-primary text-white hover:bg-primary-dark focus:ring-2 focus:ring-offset-2 focus:ring-primary
                 {% endif %}"
-                    {% if configApplied %} disabled title="{{ 'config_already_applied'|trans({}, 'config_radsec') }}" {% else %}
-                        onclick="return confirm('{{ 'confirm_follow_steps'|trans({}, 'config_radsec') }}');"
+                    {% if configApplied %} disabled title="{{ 'configAlreadyApplied'|trans({}, 'config_radsec') }}" {% else %}
+                        onclick="return confirm('{{ 'confirmFollowSteps'|trans({}, 'config_radsec') }}');"
                     {% endif %}
             >
                 {{ 'submit'|trans({}, 'config_radsec') }}

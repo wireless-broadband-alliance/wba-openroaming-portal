@@ -16,6 +16,7 @@ use App\Service\CertificateFreeradiusCommandsService;
 use App\Service\CertificateFreeradiusInfoService;
 use App\Service\CertificateProcessCheckerService;
 use App\Service\CertificateStorageService;
+use App\Service\CertificateWriterUpdateService;
 use App\Service\GetSettings;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
@@ -36,7 +37,8 @@ class CertificateFreeradiusManagementController extends AbstractController
         private readonly CertificateStorageService $certificateStorageService,
         private readonly EntityManagerInterface $entityManager,
         private readonly CertificateFreeradiusInfoService $certificateFreeradiusInfoService,
-        private readonly CertificateFreeradiusCommandsService $certificateFreeradiusCommandsService
+        private readonly CertificateFreeradiusCommandsService $certificateFreeradiusCommandsService,
+        private readonly CertificateWriterUpdateService $certificateWriterUpdateService
     ) {
     }
 
@@ -236,6 +238,8 @@ class CertificateFreeradiusManagementController extends AbstractController
                     $this->translator->trans('configAlreadyApplied', [], 'controllers')
                 );
             } elseif ($form->isValid()) {
+                $this->certificateWriterUpdateService->writeCertificates($certificateSet);
+                dd('nice');
                 /* TODO
                  - MAKE LOGIC TO UPDATE THE SIGNING_KEY FOLDER AND READ the certs of the last step
                  - MAKE CHECKER (IF) TO DETECT IF THE CERTS WAS A EV (CHECK DB VALUE) should execute the generate Fx with the new certs for windows profiles

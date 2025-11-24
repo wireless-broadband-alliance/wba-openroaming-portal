@@ -40,8 +40,8 @@
                 {% else %}
                     bg-primary text-white hover:bg-primary-dark focus:ring-2 focus:ring-offset-2 focus:ring-primary
                 {% endif %}"
-                    {% if configApplied %} disabled title="{{ 'config_already_applied'|trans({}, 'config_freeradius') }}" {% else %}
-                        onclick="return confirm('{{ 'confirm_follow_steps'|trans({}, 'config_freeradius') }}');"
+                    {% if configApplied %} disabled title="{{ 'configAlreadyApplied'|trans({}, 'config_freeradius') }}" {% else %}
+                        onclick="return confirm('{{ 'confirmFollowSteps'|trans({}, 'config_freeradius') }}');"
                     {% endif %}
             >
                 {{ 'submit'|trans({}, 'config_radsec') }}
