@@ -7,7 +7,7 @@ use App\Entity\Certificate;
 use App\Enum\CertificateMachineType;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
-readonly class CertificateFreeradiusInfoService
+readonly class CertificateRadsecproxyInfoService
 {
     public function __construct(
         private ParameterBagInterface $parameterBag
@@ -15,27 +15,24 @@ readonly class CertificateFreeradiusInfoService
     }
 
     /**
-     * Returns the latest Freeradius certificate of each type:
-     * - CA
-     * - CERT
-     * - CHAIN
-     * - FULL_CHAIN
-     * - PRIVATE_KEY
+     * Returns the latest Radsecproxy certificate of each type:
+     * - CLIENT
+     * - KEY
      */
     public function getLatestCertificatesSet(CertificateSetupProcess $process): array
     {
-        // Filter only FREERADIUS certs
-        $freeradiusCerts = $process->getCertificates()->filter(
-            fn(Certificate $c) => str_contains($c->getType(), CertificateMachineType::FREERADIUS->value)
+        // Filter only RADSECPROXY certs
+        $radsecproxyCerts = $process->getCertificates()->filter(
+            fn(Certificate $c) => str_contains($c->getType(), CertificateMachineType::RADSECPROXY->value)
         );
 
-        if ($freeradiusCerts->isEmpty()) {
+        if ($radsecproxyCerts->isEmpty()) {
             return [];
         }
 
-        // Keep only newest per type (ca, cert, chain, full_chain, private_key)
+        // Keep only newest per type (client, key)
         $latest = [];
-        foreach ($freeradiusCerts as $cert) {
+        foreach ($radsecproxyCerts as $cert) {
             $type = $cert->getName(); // ex: "caFREERADIUS"
 
             if (!isset($latest[$type]) || $cert->getCreatedAt() > $latest[$type]->getCreatedAt()) {

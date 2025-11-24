@@ -1,5 +1,5 @@
 warning:
-    root_command: "Execute os seguintes comandos como 'root' no terminal antes de começar!"
+    root_command: "Execute os seguintes comandos como 'root' no terminal antes de começar no diretório local do portal!"
 CA Root: "Root CA"
 Server Certificate: "Certificado do Servidor"
 Certificate Chain: "Chain do Certificado"
@@ -12,5 +12,8 @@ valid_from: "Válido desde"
 valid_to: "Válido até"
 subject_cn: "CN do Sujeito"
 issuer_cn: "CN do Emissor"
+resolverCommands: 'Comandos do Resolver'
+localCommands: 'Comandos Locais'
 confirm_follow_steps: 'Tem a certeza de que pretende continuar para aplicar os certificados carregados anteriormente e a nova configuração no resolver?'
+config_already_applied: 'Configuração ja foi aplicada!'
 submit: 'Confirmar Configuração'

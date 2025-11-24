@@ -20,6 +20,7 @@ use App\Repository\CertificateSetupProcessRepository;
 use App\Repository\InstallationProgressRepository;
 use App\Service\CertificateRadsecproxyCommandsService;
 use App\Service\CertificateProcessCheckerService;
+use App\Service\CertificateRadsecproxyInfoService;
 use App\Service\CertificateStorageService;
 use App\Service\GetSettings;
 use DateTimeImmutable;
@@ -46,6 +47,7 @@ class CertificateRadsecproxyManagementController extends AbstractController
         private readonly CertificateRepository $certificateRepository,
         private readonly InstallationProgressRepository $installationProgressRepository,
         private readonly CertificateSetupProcessRepository $certificateSetupProcessRepository,
+        private readonly CertificateRadsecproxyInfoService $certificateRadsecproxyInfoService,
     ) {
     }
 
@@ -218,9 +220,12 @@ class CertificateRadsecproxyManagementController extends AbstractController
             return $this->redirectToRoute('admin_dashboard_settings_certs_radsecproxy_upload');
         }
 
+        // Return last uploaded certificates from the previous step and reads the contents
+        $certificateSet = $this->certificateRadsecproxyInfoService->getLatestCertificatesSet($process);
+
         // Fetch any data/settings needed for the page
         $data = $this->getSettings->getSettings();
-        $commands = $this->certificateRadsecproxyCommandsService->getRenewCommands();
+        $commands = $this->certificateRadsecproxyCommandsService->getRenewCommands($certificateSet);
 
         // Form handling
         $form = $this->createForm(SimpleSubmitFormType::class);
@@ -256,8 +261,9 @@ class CertificateRadsecproxyManagementController extends AbstractController
             [
                 'data' => $data,
                 'form' => $form->createView(),
-                'commands' => $commands,
                 'processState' => $processState,
+                'certificateSet' => $certificateSet,
+                'commands' => $commands,
             ]
         );
     }

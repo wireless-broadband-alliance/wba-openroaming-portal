@@ -11,5 +11,6 @@ copy_command:
     success: 'Copiado!'
     error: 'Não foi possível copiar o contéudo.'
 config_already_applied: 'Configuração ja foi aplicada!'
+resolverCommands: 'Comandos do Resolver'
 warning:
     root_command: "Execute os seguintes comandos como 'root' no terminal antes de começar!"

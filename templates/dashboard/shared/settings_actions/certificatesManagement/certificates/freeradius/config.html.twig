@@ -9,101 +9,49 @@
 } %}
 
 {% block freeradius_content %}
-    <div data-controller="certificates-freeradius" class="space-y-6">
+    <div data-controller="certificates-content" class="space-y-6">
 
-        <div class="flex justify-end">
-            <button
-                    type="button"
-                    data-action="click->certificates-freeradius#toggleAll"
-                    data-certificates-freeradius-target="toggleAllButton"
-                    class="w-full sm:w-auto flex items-center gap-2
-                           px-3 py-1.5 sm:px-4 sm:py-2
-                           text-xs sm:text-sm
-                           rounded-lg shadow font-medium
-                           text-gray-700 bg-white border border-gray-200
-                           hover:bg-gray-50 hover:border-gray-300 transition"
-            >
-                <twig:ux:icon name="wba:arrow-down" class="w-4 h-4 transition-transform"/>
-                <span>{{ 'expand_all'|trans({}, 'config_freeradius') }}</span>
-            </button>
-        </div>
+        {# Certificates Content #}
+        {{ include('dashboard/shared/settings_actions/certificatesManagement/partials/_certificates_content.html.twig') }}
 
-        {% for cert in certificateSet %}
-            <div data-certificates-freeradius-target="card"
-                 class="border border-gray-200 rounded-xl shadow-sm bg-white overflow-hidden"
-            >
-                <button
-                        type="button"
-                        data-action="click->certificates-freeradius#toggleCard"
-                        class="w-full px-5 py-4 flex justify-between items-center bg-gray-50 hover:bg-gray-100 transition"
-                >
-                    <div>
-
-                        <p class="font-semibold text-gray-800">
-                            {{ certDisplayNames[cert.name]|default(cert.name) }}
-                        </p>
-                    </div>
-
-                    <twig:ux:icon name="wba:arrow-down" class="w-5 h-5 text-gray-500 transition-transform"/>
-                </button>
-
-                <div data-certificates-freeradius-target="content" class="px-5 py-4 space-y-3 hidden">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-
-                        <div>
-                            <p class="text-gray-500 text-xs">{{ 'original_filename'|trans({}, 'config_freeradius') }}</p>
-                            <p class="font-medium text-gray-800">{{ cert.metadata.originalName }}</p>
-                        </div>
-
-                        <div>
-                            <p class="text-gray-500 text-xs">{{ 'sha1_fingerprint'|trans({}, 'config_freeradius') }}</p>
-                            <p class="font-mono break-all text-gray-800">{{ cert.fingerprintSHA1 }}</p>
-                        </div>
-
-                        <div>
-                            <p class="text-gray-500 text-xs">{{ 'valid_from'|trans({}, 'config_freeradius') }}</p>
-                            <p class="font-medium text-gray-800">{{ cert.validFrom ? cert.validFrom|date('Y-m-d H:i:s') : 'N/A' }}</p>
-                        </div>
-
-                        <div>
-                            <p class="text-gray-500 text-xs">{{ 'valid_to'|trans({}, 'config_freeradius') }}</p>
-                            <p class="font-medium text-gray-800">{{ cert.validTo ? cert.validTo|date('Y-m-d H:i:s') : 'N/A' }}</p>
-                        </div>
-
-                        <div>
-                            <p class="text-gray-500 text-xs">{{ 'subject_cn'|trans({}, 'config_freeradius') }}</p>
-                            <p class="font-medium text-gray-800">{{ cert.parsedSubject.CN ?? 'N/A' }}</p>
-                        </div>
-
-                        <div>
-                            <p class="text-gray-500 text-xs">{{ 'issuer_cn'|trans({}, 'config_freeradius') }}</p>
-                            <p class="font-medium text-gray-800">{{ cert.parsedIssuer.CN ?? 'N/A' }}</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        {% endfor %}
-
+        {# Warning message box #}
         <div class="toast-success-dashboard mb-4">
             <twig:ux:icon name="wba:info" class="w-10 md:w-5 h-10 md:h-5 inline mr-3 fill-currentColor"/>
             <span>{{ 'warning.root_command'|trans({}, 'config_freeradius') }}</span>
         </div>
 
         {# Update Server Commands #}
-        {{ include('dashboard/shared/settings_actions/certificatesManagement/partials/_update_commands.html.twig') }}
+        {{ include(
+            'dashboard/shared/settings_actions/certificatesManagement/partials/_update_commands.html.twig',
+            { commands: commandsLocal, title: 'localCommands'|trans({}, 'config_freeradius') }
+        ) }}
 
+        {# Update Server Commands TODO MAKE COMMANDS FOR RESOLVER HERE
+        {{ include(
+            'dashboard/shared/settings_actions/certificatesManagement/partials/_update_commands.html.twig',
+            { commands: commandsLocal, title: 'resolverCommands'|trans({}, 'config_freeradius') }
+        ) }}
+        #}
         <div class="mt-8 flex justify-end">
             {{ form_start(form) }}
             {{ form_row(form._token) }}
 
+            {% set configApplied = processState.process.freeradiusConfigAppliedAt is not null %}
+
             <button
                     type="submit"
-                    class="px-6 py-2.5 rounded-lg shadow font-medium transition bg-primary text-white hover:bg-primary-dark focus:ring-2 focus:ring-offset-2 focus:ring-primary"
-                    onclick="return confirm('{{ 'confirm_follow_steps'|trans({}, 'config_freeradius') }}');"
+                    class="px-6 py-2.5 rounded-lg shadow font-medium transition
+                {% if configApplied %}
+                    bg-gray-300 text-gray-700 cursor-not-allowed
+                {% else %}
+                    bg-primary text-white hover:bg-primary-dark focus:ring-2 focus:ring-offset-2 focus:ring-primary
+                {% endif %}"
+                    {% if configApplied %} disabled title="{{ 'config_already_applied'|trans({}, 'config_freeradius') }}" {% else %}
+                        onclick="return confirm('{{ 'confirm_follow_steps'|trans({}, 'config_freeradius') }}');"
+                    {% endif %}
             >
-                {{ 'submit'|trans({}, 'config_freeradius') }}
+                {{ 'submit'|trans({}, 'config_radsec') }}
             </button>
-
             {{ form_end(form, {render_rest: false}) }}
         </div>
     </div>
