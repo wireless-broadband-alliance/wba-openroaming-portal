@@ -377,6 +377,10 @@ class InstallationController extends AbstractController
 
         $adminConfigDTO = new AdminConfigDTO();
 
+        if ($lastInstallation->getEmailAdmin() !== null) {
+            $adminConfigDTO->email = $lastInstallation->getEmailAdmin();
+        }
+
         $form = $this->createForm(AdminConfigType::class, $adminConfigDTO);
         $form->handleRequest($request);
 
