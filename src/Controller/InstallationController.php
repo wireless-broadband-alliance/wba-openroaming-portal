@@ -114,17 +114,16 @@ class InstallationController extends AbstractController
 
 
             $orConnection = $this->databaseConnectionService->testDatabaseConnection($openRoamingDb);
-           // $frConnection = $this->databaseConnectionService->testDatabaseConnection($freeradiusDb);
+            $frConnection = $this->databaseConnectionService->testDatabaseConnection($freeradiusDb);
 
             $connectionsFailed = [];
 
             if (!$orConnection) {
                 $connectionsFailed[] = 'OpenRoaming';
-            }/*
+            }
             if (!$frConnection) {
                 $connectionsFailed[] = 'Freeradius';
             }
-*/
             if ($connectionsFailed !== []) {
                 $this->addFlash(
                     'error_admin',
