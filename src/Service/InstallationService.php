@@ -6,13 +6,16 @@ use App\DTO\InstallationProgressDTO;
 use App\Entity\InstallationProgress;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
+use App\Enum\DataBaseSetupType;
 use App\Enum\InstallationProgressType;
 use App\Enum\InstallationStep;
 use App\Enum\InstallationWidgetStepsEnum;
 use App\Enum\SettingName;
+use App\Enum\SettingsConfigType;
 use App\Repository\EventRepository;
 use App\Repository\InstallationProgressRepository;
 use App\Repository\SettingRepository;
+use App\Repository\UserRepository;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Random\RandomException;
@@ -37,7 +40,8 @@ readonly class InstallationService
         private EntityManagerInterface $entityManager,
         private EventRepository $eventRepository,
         private DatabaseConnectionService $databaseConnectionService,
-        private TranslatorInterface $translator
+        private TranslatorInterface $translator,
+        private readonly UserRepository $userRepository,
     ) {
     }
 
@@ -218,5 +222,47 @@ readonly class InstallationService
             define('STDIN', fopen('php://stdin', 'r'));
         }
         $application->run($input, $output);
+    }
+
+    public function resetToLastInstallation()
+    {
+        $lastCompleted = $this->installationProgressRepository->getLastCompleted();
+        if ($lastCompleted instanceof InstallationProgress) {
+            $this->databaseConnectionService->writeDatabaseUrlToEnv(
+                $lastCompleted->getDbOpenRoaming(),
+                DataBaseSetupType::DATABASE_URL->value
+            );
+            $this->databaseConnectionService->writeDatabaseUrlToEnv(
+                $lastCompleted->getDbFreeradius(),
+                DataBaseSetupType::DATABASE_FREERADIUS_URL->value
+            );
+            $this->databaseConnectionService->writeDatabaseUrlToEnv(
+                $lastCompleted->getTrustedProxies(),
+                SettingsConfigType::TRUSTED_PROXIES->value
+            );
+
+            $this->databaseConnectionService->writeDatabaseUrlToEnv(
+                $lastCompleted->getTurnstileKey(),
+                SettingsConfigType::TURNSTILE_KEY->value
+            );
+
+            $this->databaseConnectionService->writeDatabaseUrlToEnv(
+                $lastCompleted->getTurnstileSecret(),
+                SettingsConfigType::TURNSTILE_SECRET->value
+            );
+            if ($lastCompleted->getJwtPassphrase() !== null) {
+                $this->databaseConnectionService->writeDatabaseUrlToEnv(
+                    $lastCompleted->getJwtPassphrase(),
+                    SettingsConfigType::JWT_PASSPHRASE->value
+                );
+            }
+            $adminUser = $this->userRepository->findAdmin();
+            if ($adminUser instanceof User) {
+                $adminUser->setEmail($lastCompleted->getEmailAdmin());
+                $adminUser->setPassword($lastCompleted->getPasswordAdmin());
+                $this->entityManager->persist($adminUser);
+                $this->entityManager->flush();
+            }
+        }
     }
 }
