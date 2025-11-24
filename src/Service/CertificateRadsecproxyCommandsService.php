@@ -17,7 +17,7 @@ readonly class CertificateRadsecproxyCommandsService
         private EntityManagerInterface $entityManager,
     ) {
         // Local path where RADSecProxy expects the certs
-        $this->certDir = '~/wba-openroaming-connector/hybrid/signing-keys/';
+        $this->certDir = '~/wba-openroaming-connector/hybrid/configs/radsecproxy/certs/';
     }
 
     /**

@@ -11,7 +11,7 @@
                            hover:bg-gray-50 hover:border-gray-300 transition"
     >
         <twig:ux:icon name="wba:arrow-down" class="w-4 h-4 transition-transform"/>
-        <span>{{ 'expand_all'|trans({}, 'config_freeradius') }}</span>
+        <span>{{ 'expandAll'|trans({}, 'config_freeradius') }}</span>
     </button>
 </div>
 
@@ -38,22 +38,22 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
 
                 <div>
-                    <p class="text-gray-500 text-xs">{{ 'original_filename'|trans({}, 'config_freeradius') }}</p>
+                    <p class="text-gray-500 text-xs">{{ 'originalFilename'|trans({}, 'config_freeradius') }}</p>
                     <p class="font-medium text-gray-800">{{ cert.metadata.originalName }}</p>
                 </div>
 
                 <div>
-                    <p class="text-gray-500 text-xs">{{ 'sha1_fingerprint'|trans({}, 'config_freeradius') }}</p>
+                    <p class="text-gray-500 text-xs">{{ 'sha1Fingerprint'|trans({}, 'config_freeradius') }}</p>
                     <p class="font-mono break-all text-gray-800">{{ cert.fingerprintSHA1 }}</p>
                 </div>
 
                 <div>
-                    <p class="text-gray-500 text-xs">{{ 'valid_from'|trans({}, 'config_freeradius') }}</p>
+                    <p class="text-gray-500 text-xs">{{ 'validFrom'|trans({}, 'config_freeradius') }}</p>
                     <p class="font-medium text-gray-800">{{ cert.validFrom ? cert.validFrom|date('Y-m-d H:i:s') : 'N/A' }}</p>
                 </div>
 
                 <div>
-                    <p class="text-gray-500 text-xs">{{ 'valid_to'|trans({}, 'config_freeradius') }}</p>
+                    <p class="text-gray-500 text-xs">{{ 'validTo'|trans({}, 'config_freeradius') }}</p>
                     <p class="font-medium text-gray-800">{{ cert.validTo ? cert.validTo|date('Y-m-d H:i:s') : 'N/A' }}</p>
                 </div>
 

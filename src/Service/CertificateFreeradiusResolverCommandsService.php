@@ -7,7 +7,7 @@ use App\Enum\CertificateTestResult;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-readonly class CertificateFreeradiusLocalCommandsService
+readonly class CertificateFreeradiusResolverCommandsService
 {
     private string $certDir;
 

@@ -1,19 +1,20 @@
 warning:
-    root_command: 'Run the following commands as the root user in your terminal before starting on the local directory of the portal!'
-CA Root: "Root CA"
-Server Certificate: "Server Certificate"
-Certificate Chain: "Certificate Chain"
-Full Chain: "Full Chain"
-Private Key: "Private Key"
-expand_all: "Expand All"
-original_filename: "Original Filename"
-sha1_fingerprint: "SHA1 Fingerprint"
-valid_from: "Valid From"
-valid_to: "Valid To"
+    rootCommandLocal: 'Run the following commands as the root user in your terminal before starting on the local directory of the portal!'
+    rootCommandResolver: 'Now execute this new commands on the root folder of the resolver to update the certificates!'
+CARoot: "Root CA"
+serverCertificate: "Server Certificate"
+certificateChain: "Certificate Chain"
+fullChain: "Full Chain"
+privateJey: "Private Key"
+expandAll: "Expand All"
+originalFilename: "Original Filename"
+sha1Fingerprint: "SHA1 Fingerprint"
+validFrom: "Valid From"
+validTo: "Valid To"
 subject_cn: "Subject CN"
 issuer_cn: "Issuer CN"
 resolverCommands: 'Resolver Commands'
 localCommands: 'Local Commands'
-confirm_follow_steps: 'Are you sure you want to proceed to apply the previous uploaded certificates and the new configuration on the resolver?'
-config_already_applied: 'Config already applied!'
+confirmFollowSteps: 'Are you sure you want to proceed to apply the previous uploaded certificates and the new configuration on the resolver?'
+configAlreadyApplied: 'Config already applied!'
 submit: 'Confirm Configuration'
