@@ -66,22 +66,15 @@
                     {% elseif active %} bg-white border-primary text-primary step-active
                     {% else %} bg-white border-gray-300 text-gray-400 {% endif %}
                 ">
-                    {% if index == 0 %}
+                    {% if currentRoute in step.route  %}
                         <a href="{{ path(step.route[0]) }}"
                            class="flex items-center justify-center w-full h-full text-inherit no-underline">
                             {{ loop.index }}
                         </a>
                     {% else %}
-                        {% if previousCompleted %}
-                            <a href="{{ path(step.route[0]) }}"
-                               class="flex items-center justify-center w-full h-full text-inherit no-underline landing-none">
-                                {{ loop.index }}
-                            </a>
-                        {% else %}
                             <span class="flex items-center justify-center w-full h-full cursor-not-allowed opacity-50">
                                 {{ loop.index }}
                             </span>
-                        {% endif %}
                     {% endif %}
                 </div>
 

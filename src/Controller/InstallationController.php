@@ -78,11 +78,17 @@ class InstallationController extends AbstractController
     ): Response {
         $lastInstallation = $this->installationService->lastInstallation();
         if ($lastInstallation instanceof InstallationProgress) {
-            $step = $this->installationService->getStep($lastInstallation) ??
-                InstallationStep::DATABASE->value;
+            $step = $this->installationService->getStep($lastInstallation);
+            if ($step === InstallationStep::SETTINGS->value) {
+                return $this->redirectToRoute('admin_dashboard_settings_certs_installation_settings');
+            }
+            if ($step === InstallationStep::ADMIN->value) {
+                return $this->redirectToRoute('admin_dashboard_settings_certs_installation_admin');
+            }
         } else {
             $step = InstallationStep::DATABASE->value;
         }
+
         $data = $this->getSettings->getSettings();
 
         $dbDTO = new DbSetupDTO();
@@ -199,6 +205,9 @@ class InstallationController extends AbstractController
             $step = $this->installationService->getStep($lastInstallation);
             if ($step === InstallationStep::DATABASE->value) {
                 return $this->redirectToRoute('admin_dashboard_settings_certs_installation_settings');
+            }
+            if ($step === InstallationStep::ADMIN->value) {
+                return $this->redirectToRoute('admin_dashboard_settings_certs_installation_admin');
             }
         } else {
             return $this->redirectToRoute('admin_dashboard_settings_certs_installation');
@@ -417,6 +426,13 @@ class InstallationController extends AbstractController
     ) {
         $lastInstallation = $this->installationService->lastInstallation();
         if ($lastInstallation instanceof InstallationProgress) {
+            $step = $this->installationService->getStep($lastInstallation);
+            if ($step === InstallationStep::DATABASE->value) {
+                return $this->redirectToRoute('admin_dashboard_settings_certs_installation_settings');
+            }
+            if ($step === InstallationStep::SETTINGS->value) {
+                return $this->redirectToRoute('admin_dashboard_settings_certs_installation_settings');
+            }
             $admin = $this->userRepository->findAdmin();
             if ($admin instanceof User) {
                 if ($this->installationService->canSendCode($lastInstallation, $admin)) {
@@ -456,6 +472,9 @@ class InstallationController extends AbstractController
                     );
                 }
             }
+        }
+        else {
+            return $this->redirectToRoute('admin_dashboard_settings_certs_installation');
         }
 
         return $this->redirectToRoute('admin_dashboard_settings_certs_installation_admin_confirmation');
