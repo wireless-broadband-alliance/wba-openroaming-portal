@@ -7,7 +7,7 @@ use App\Enum\CertificateTestResult;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-readonly class CertificateFreeradiusLocalCommandsService
+readonly class CertificateFreeradiusCommandsService
 {
     private string $certDir;
 
@@ -15,8 +15,8 @@ readonly class CertificateFreeradiusLocalCommandsService
         private TranslatorInterface $translator,
         private EntityManagerInterface $entityManager,
     ) {
-        // Absolute path to the local signing keys folder
-        $this->certDir = 'signing-keys/';
+        // Absolute path to the resolver
+        $this->certDir = '~/wba-openroaming-connector/hybrid/configs/freeradius/certs/';
     }
 
     /**
@@ -94,6 +94,32 @@ readonly class CertificateFreeradiusLocalCommandsService
             ];
         }
 
+        // Rebuild and restart container with new certs
+        $commands[] = [
+            'description' => $this->translator->trans(
+                'rebuild_and_start_container',
+                domain: 'CertificateFreeradiusCommandsService'
+            ),
+            'command' => 'docker-compose.yml up -d --build freeradius',
+        ];
+
+        // Verify container status
+        $commands[] = [
+            'description' => $this->translator->trans(
+                'verify_container',
+                domain: 'CertificateFreeradiusCommandsService'
+            ),
+            'command' => 'docker compose ps freeradius',
+        ];
+
+        // Display last logs
+        $commands[] = [
+            'description' => $this->translator->trans(
+                'check_logs',
+                domain: 'CertificateFreeradiusCommandsService'
+            ),
+            'command' => 'docker compose logs --tail=50 freeradius',
+        ];
         return $commands;
     }
 

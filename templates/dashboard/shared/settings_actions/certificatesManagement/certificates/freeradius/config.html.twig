@@ -17,27 +17,15 @@
         {# Warning message box #}
         <div class="toast-success-dashboard mb-4">
             <twig:ux:icon name="wba:info" class="w-10 md:w-5 h-10 md:h-5 inline mr-3 fill-currentColor"/>
-            <span>{{ 'warning.rootCommandLocal'|trans({}, 'config_freeradius') }}</span>
+            <span>{{ 'warning.rootCommand'|trans({}, 'config_freeradius') }}</span>
         </div>
 
         {# Update Server Commands #}
         {{ include(
             'dashboard/shared/settings_actions/certificatesManagement/partials/_update_commands.html.twig',
-            { commands: commandsLocal, title: 'localCommands'|trans({}, 'config_freeradius') }
+            { commands: commands, title: 'title'|trans({}, 'config_freeradius') }
         ) }}
 
-        {# Warning message box #}
-        <div class="toast-success-dashboard mb-4">
-            <twig:ux:icon name="wba:info" class="w-10 md:w-5 h-10 md:h-5 inline mr-3 fill-currentColor"/>
-            <span>{{ 'warning.rootCommandResolver'|trans({}, 'config_freeradius') }}</span>
-        </div>
-
-        {# Update Server Commands TODO MAKE COMMANDS FOR RESOLVER HERE
-        {{ include(
-            'dashboard/shared/settings_actions/certificatesManagement/partials/_update_commands.html.twig',
-            { commands: commandsLocal, title: 'resolverCommands'|trans({}, 'config_freeradius') }
-        ) }}
-        #}
         <div class="mt-8 flex justify-end">
             {{ form_start(form) }}
             {{ form_row(form._token) }}

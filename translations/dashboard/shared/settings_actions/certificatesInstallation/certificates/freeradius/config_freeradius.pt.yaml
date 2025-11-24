@@ -1,6 +1,5 @@
 warning:
-    rootCommandLocal: "Execute os seguintes comandos como 'root' no terminal antes de começar no diretório local do portal!"
-    rootCommandResolver: 'Agora executa estes novos comandos na pasta root do resolver para atualizar os certificados!'
+    rootCommandLocal: "Execute os seguintes comandos como 'root' no terminal antes de começar no diretório do resolver do portal!"
 CARoot: "Root CA"
 serverCertificate: "Certificado do Servidor"
 certificateChain: "Chain do Certificado"
@@ -18,3 +17,4 @@ localCommands: 'Comandos Locais'
 confirmFollowSteps: 'Tem a certeza de que pretende continuar para aplicar os certificados carregados anteriormente e a nova configuração no resolver?'
 configAlreadyApplied: 'Configuração ja foi aplicada!'
 submit: 'Confirmar Configuração'
+title: 'Comandos para atualização do Resolver'

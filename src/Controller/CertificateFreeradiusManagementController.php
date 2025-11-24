@@ -12,7 +12,7 @@ use App\Enum\CertificateRouteAccess;
 use App\Enum\FirewallType;
 use App\Form\CertificateFreeradiusUploadType;
 use App\Form\SimpleSubmitFormType;
-use App\Service\CertificateFreeradiusLocalCommandsService;
+use App\Service\CertificateFreeradiusCommandsService;
 use App\Service\CertificateFreeradiusInfoService;
 use App\Service\CertificateProcessCheckerService;
 use App\Service\CertificateStorageService;
@@ -36,7 +36,7 @@ class CertificateFreeradiusManagementController extends AbstractController
         private readonly CertificateStorageService $certificateStorageService,
         private readonly EntityManagerInterface $entityManager,
         private readonly CertificateFreeradiusInfoService $certificateFreeradiusInfoService,
-        private readonly CertificateFreeradiusLocalCommandsService $certificateFreeradiusLocalCommandsService
+        private readonly CertificateFreeradiusCommandsService $certificateFreeradiusCommandsService
     ) {
     }
 
@@ -223,9 +223,8 @@ class CertificateFreeradiusManagementController extends AbstractController
 
         // Fetch any data/settings needed for the page
         $data = $this->getSettings->getSettings();
-        $commandsLocal = $this->certificateFreeradiusLocalCommandsService->getRenewCommands($certificateSet);
-        # TODO FINISH THIS TO DISPLAY THIS COMMANDS $commandsResolver = $this->certificateFreeradiusResolverCommandsService->getRenewCommands($certificateSet);
-
+        $commands = $this->certificateFreeradiusCommandsService->getRenewCommands($certificateSet);
+        dd($commands, $certificateSet);
         // Form handling
         $form = $this->createForm(SimpleSubmitFormType::class);
         $form->handleRequest($request);
@@ -266,7 +265,7 @@ class CertificateFreeradiusManagementController extends AbstractController
                 'form' => $form->createView(),
                 'processState' => $processState,
                 'certificateSet' => $certificateSet,
-                'commandsLocal' => $commandsLocal,
+                'commands' => $commands,
             ]
         );
     }

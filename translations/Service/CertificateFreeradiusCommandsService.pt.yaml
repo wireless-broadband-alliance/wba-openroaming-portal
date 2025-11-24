@@ -4,7 +4,7 @@ write_cert_file: 'Escrever o ficheiro de certificado %filename% no diretório de
 navigate_to_dir: 'Navegar para o diretório do projeto OpenRoaming Hybrid.'
 stop_containers: 'Parar todos os containers em execução.'
 remove_old_images: 'Remover quaisquer imagens antigas para garantir uma reconstrução limpa.'
-rebuild_image: 'Reconstruir a imagem sem utilizar cache.'
+rebuild_and_start_container: 'Reconstruir a imagem do freeradius sem utilizar cache e iniciar o container.'
 start_container: 'Iniciar o container do FreeRADIUS em modo destacado.'
 verify_container: 'Verificar se o container do FreeRADIUS está em execução.'
 check_logs: 'Verificar os registos recentes do FreeRADIUS para confirmar um arranque bem-sucedido.'

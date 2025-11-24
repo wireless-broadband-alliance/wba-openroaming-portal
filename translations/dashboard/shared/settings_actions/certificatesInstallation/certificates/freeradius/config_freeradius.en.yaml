@@ -1,6 +1,5 @@
 warning:
-    rootCommandLocal: 'Run the following commands as the root user in your terminal before starting on the local directory of the portal!'
-    rootCommandResolver: 'Now execute this new commands on the root folder of the resolver to update the certificates!'
+    rootCommand: 'Run the following commands as the root user in your terminal before starting on the resolver directory of the portal!'
 CARoot: "Root CA"
 serverCertificate: "Server Certificate"
 certificateChain: "Certificate Chain"
@@ -18,3 +17,4 @@ localCommands: 'Local Commands'
 confirmFollowSteps: 'Are you sure you want to proceed to apply the previous uploaded certificates and the new configuration on the resolver?'
 configAlreadyApplied: 'Config already applied!'
 submit: 'Confirm Configuration'
+title: 'Commands to Update the Resolver'
