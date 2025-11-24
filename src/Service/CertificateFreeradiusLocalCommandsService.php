@@ -43,7 +43,7 @@ readonly class CertificateFreeradiusLocalCommandsService
     {
         $commands = [];
 
-        // Remove old files
+        // Remove any existing certificate files
         $commands[] = [
             'description' => $this->translator->trans(
                 'remove_old_files',
@@ -59,45 +59,38 @@ readonly class CertificateFreeradiusLocalCommandsService
             ),
         ];
 
-        // Copy/write new files
         $fileMap = [
             'ca' => 'ca.pem',
             'cert' => 'cert.pem',
             'chain' => 'chain.pem',
-            'fullchain' => 'fullchain.pem',
+            'full_chain' => 'fullchain.pem',
             'privkey' => 'privkey.pem',
         ];
 
-        foreach ($certificates as $cert) {
-            $content = $cert['content'] ?? null;
-            if (!$content) {
-                continue;
-            }
-
-            $content = str_replace("'", "'\"'\"'", $content);
-
-            // Match file type based on the cert name
-            $lowerName = strtolower($cert['name']);
-            $targetFile = null;
-
-            foreach ($fileMap as $key => $filename) {
-                if (str_contains($lowerName, $key)) {
-                    $targetFile = $filename;
+        // Write new certificate files
+        foreach ($fileMap as $nameKey => $filename) {
+            // Find a certificate whose name contains the key (case-insensitive)
+            $certItem = null;
+            foreach ($certificates as $c) {
+                if (str_contains(strtolower($c['name']), $nameKey)) {
+                    $certItem = $c;
                     break;
                 }
             }
 
-            if (!$targetFile) {
-                continue; // Skip unknown certs
+            if (!$certItem || empty($certItem['content'])) {
+                continue; // skip if no content
             }
+
+            $content = str_replace("'", "'\"'\"'", $certItem['content']);
 
             $commands[] = [
                 'description' => $this->translator->trans(
                     'write_cert_file',
-                    ['%filename%' => $targetFile],
+                    ['%filename%' => $filename],
                     'CertificateFreeradiusCommandsService'
                 ),
-                'command' => sprintf("echo '%s' > %s%s", $content, $this->certDir, $targetFile),
+                'command' => sprintf("echo '%s' > %s%s", $content, $this->certDir, $filename),
             ];
         }
 
