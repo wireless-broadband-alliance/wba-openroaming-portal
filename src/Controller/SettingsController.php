@@ -60,7 +60,6 @@ class SettingsController extends AbstractController
         private readonly CertificateCheckerService $certificateService,
         private readonly TextEditorRepository $textEditorRepository,
         private readonly SettingsService $settingsService,
-        private readonly TextEditorRepository $textEditorRepository,
         private readonly HtmlSanitizerService $htmlSanitizerService,
     ) {
     }
