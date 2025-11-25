@@ -30,7 +30,7 @@ yarn-error.log
 
 .idea/
 
-signing-keys/privkey.pem
+signing-keys/privKey.pem
 
 signing-keys/cert.pem
 
