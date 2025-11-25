@@ -126,7 +126,6 @@ readonly class CaptchaValidator
             }
 
             return ['success' => true];
-
         } catch (\Throwable $e) {
             return ['success' => false, 'error' => $e->getMessage()];
         }
