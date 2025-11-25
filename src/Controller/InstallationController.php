@@ -157,7 +157,6 @@ class InstallationController extends AbstractController
             $this->entityManager->persist($lastInstallation);
             $this->entityManager->flush();
 
-            $this->installationService->envPermitions($kernel);
 
             $this->databaseConnectionService->writeDatabaseUrlToEnv(
                 $openRoamingDb,
@@ -254,8 +253,6 @@ class InstallationController extends AbstractController
                 );
                 return $this->redirectToRoute('admin_dashboard_settings_certs_installation_settings');
             }
-
-            $this->installationService->envPermitions($kernel);
 
             $this->databaseConnectionService->writeDatabaseUrlToEnv(
                 $trustedProxies,
