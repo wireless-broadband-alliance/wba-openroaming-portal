@@ -79,4 +79,34 @@ readonly class CertificateFreeradiusInfoService
             'parsedIssuer' => $parsed['issuer'] ?? null,
         ];
     }
+
+    public function isEvCertificate(string $certificateContent): bool
+    {
+        $cert = @openssl_x509_read($certificateContent);
+        if (!$cert) {
+            return false;
+        }
+
+        $details = openssl_x509_parse($cert);
+        if (!$details) {
+            return false;
+        }
+
+        // EV OID
+        $evOids = ['2.23.140.1.1'];
+
+        if (!empty($details['extensions']['certificatePolicies'])) {
+            $policies = (array) $details['extensions']['certificatePolicies'];
+
+            foreach ($policies as $policy) {
+                foreach ($evOids as $oid) {
+                    if (str_contains($policy, $oid)) {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
 }

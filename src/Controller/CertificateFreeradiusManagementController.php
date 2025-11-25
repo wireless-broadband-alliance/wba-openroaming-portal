@@ -24,9 +24,12 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Process\Exception\ProcessFailedException;
+use Symfony\Component\Process\Process;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Throwable;
 
 class CertificateFreeradiusManagementController extends AbstractController
 {
@@ -238,12 +241,47 @@ class CertificateFreeradiusManagementController extends AbstractController
                     $this->translator->trans('configAlreadyApplied', [], 'controllers')
                 );
             } elseif ($form->isValid()) {
+                $process = $this->certificateProcessCheckerService->getCurrentProcess();
+                // Update local certificates in "signing-keys"
                 $this->certificateWriterUpdateService->writeCertificates($certificateSet);
-                dd('nice');
-                /* TODO
-                 - MAKE LOGIC TO UPDATE THE SIGNING_KEY FOLDER AND READ the certs of the last step
-                 - MAKE CHECKER (IF) TO DETECT IF THE CERTS WAS A EV (CHECK DB VALUE) should execute the generate Fx with the new certs for windows profiles
-                */
+
+                // Check if the uploaded cert is a EV
+                $certContent = $certificateSet['certFREERADIUS']['content'] ?? null;
+
+                if ($certContent !== null) {
+                    $isEv = $this->certificateFreeradiusInfoService->isEvCertificate($certContent);
+
+                    // If the uploaded certificates are EV's it should generate the PfxSigningKey for windows profiles
+                    if ($isEv) {
+                        $scriptPath = $this->getParameter('kernel.project_dir') . '/tools/generatePfxSigningKey.sh';
+                        $generatePFX = new Process(['/bin/sh', $scriptPath]);
+                        $generatePFX->setTimeout(30);
+
+                        try {
+                            $generatePFX->run();
+
+                            if (!$generatePFX->isSuccessful()) {
+                                throw new ProcessFailedException($generatePFX);
+                            }
+
+                            $this->addFlash(
+                                'success',
+                                $this->translator->trans('pfx.success', [], 'controllers')
+                            );
+                        } catch (Throwable) {
+                            $this->addFlash(
+                                'error',
+                                $this->translator->trans('pfx.failure', [], 'controllers')
+                            );
+
+                            // Redirect to the next stage automatically
+                            return $this->redirectToRoute(
+                                'admin_dashboard_settings_certs_freeradius_upload',
+                            );
+                        }
+                    }
+                }
+
                 $process->setFreeradiusConfigAppliedAt(new DateTimeImmutable());
                 $process->setUpdatedAt(new DateTimeImmutable());
 

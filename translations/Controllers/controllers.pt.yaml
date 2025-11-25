@@ -148,3 +148,6 @@ freeradius_is_not_ev_cert_warning: 'A opção de descarregar perfis OpenRoaming 
 cannotReturnToPreviousPhase: 'Já não pode aceder a esta etapa porque já foi concluída.'
 cannotAccessStageYet: "Não pode aceder a esta etapa porque as etapas anteriores não estão concluídas."
 captchaValidationFailed: 'A validação captcha falhou.'
+pfx:
+    success: "O ficheiro Windows PFX foi gerado com sucesso!"
+    failure: "Falha ao gerar o ficheiro Windows PFX por favor confirma se esta a inserir EV's válidos!"
