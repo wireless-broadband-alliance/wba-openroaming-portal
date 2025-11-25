@@ -3,12 +3,15 @@
             type="button"
             data-action="click->certificates-content#toggleAll"
             data-certificates-content-target="toggleAllButton"
+
+            data-collapse-text="{{ 'collapseAll'|trans({}, 'config_freeradius') }}"
+            data-expand-text="{{ 'expandAll'|trans({}, 'config_freeradius') }}"
+
             class="w-full sm:w-auto flex items-center gap-2
-                           px-3 py-1.5 sm:px-4 sm:py-2
-                           text-xs sm:text-sm
-                           rounded-lg shadow font-medium
-                           text-gray-700 bg-white border border-gray-200
-                           hover:bg-gray-50 hover:border-gray-300 transition"
+               px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm
+               rounded-lg shadow font-medium
+               text-gray-700 bg-white border border-gray-200
+               hover:bg-gray-50 hover:border-gray-300 transition"
     >
         <twig:ux:icon name="wba:arrow-down" class="w-4 h-4 transition-transform"/>
         <span>{{ 'expandAll'|trans({}, 'config_freeradius') }}</span>

@@ -7,7 +7,7 @@ export default class extends Controller {
         this.openAll = false;
     }
 
-    // Called when header button clicked
+    // Toggle one card
     toggleCard(event) {
         const card = event.currentTarget.closest(`[data-${this.identifier}-target="card"]`);
         const content = card.querySelector(`[data-${this.identifier}-target="content"]`);
@@ -17,7 +17,7 @@ export default class extends Controller {
         icon.classList.toggle('rotate-180');
     }
 
-    // Expand/collapse all contents
+    // Expand/Collapse all
     toggleAll() {
         this.openAll = !this.openAll;
 
@@ -34,10 +34,15 @@ export default class extends Controller {
             }
         });
 
-        this.toggleAllButtonTarget.querySelector("span").textContent =
-            this.openAll ? "Collapse All" : "Expand All";
+        // Fetch translated texts from Twig → data attributes
+        const expandedText = this.toggleAllButtonTarget.dataset.collapseText;
+        const collapsedText = this.toggleAllButtonTarget.dataset.expandText;
 
-        const btnIcon = this.toggleAllButtonTarget.querySelector("svg");
-        btnIcon.classList.toggle("rotate-180", this.openAll);
+        this.toggleAllButtonTarget.querySelector("span").textContent =
+            this.openAll ? expandedText : collapsedText;
+
+        // Rotate main button icon
+        this.toggleAllButtonTarget.querySelector("svg")
+            .classList.toggle("rotate-180", this.openAll);
     }
 }
