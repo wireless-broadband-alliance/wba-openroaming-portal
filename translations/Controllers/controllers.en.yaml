@@ -151,5 +151,5 @@ cannotReturnToPreviousPhase: 'You can no longer access this stage because it has
 cannotAccessStageYet: "You cannot access this stage yet because previous steps are incomplete."
 captchaValidationFailed: 'Captcha validation failed.'
 pfx:
-    success: "Windows PFX file generated successfully!"
+    success: "Windows PFX created successfully!"
     failure: "Failed to generate Windows PFX please make sure you are submitting valid EV'S!"
