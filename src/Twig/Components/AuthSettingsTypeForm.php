@@ -69,7 +69,7 @@ final class AuthSettingsTypeForm extends AbstractController
             'authMethodRegisterDescription' => $this->authSettingsTypeDTO->authMethodRegisterDescription,
             'profileLimitDateEmail' => $this->authSettingsTypeDTO->profileLimitDateEmail,
             'emailTimerResend' => $this->authSettingsTypeDTO->emailTimerResend,
-            'LinkValidity' => $this->authSettingsTypeDTO->LinkValidity,
+            'linkValidity' => $this->authSettingsTypeDTO->linkValidity,
 
             'authMethodLoginTraditionalEnabled' => $this->authSettingsTypeDTO->authMethodLoginTraditionalEnabled,
             'authMethodLoginTraditionalLabel' => $this->authSettingsTypeDTO->authMethodLoginTraditionalLabel,

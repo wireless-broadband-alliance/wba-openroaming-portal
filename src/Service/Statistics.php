@@ -15,6 +15,8 @@ use App\RadiusDb\Repository\RadiusAccountingRepository;
 use App\RadiusDb\Repository\RadiusAuthsRepository;
 use App\Repository\UserExternalAuthRepository;
 use DateTime;
+use DateTimeImmutable;
+use DateTimeInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -368,11 +370,15 @@ readonly class Statistics
         foreach ($events as $event) {
             // This tag is necessary here because this entity doesn't belong to this project
             /** @phpstan-ignore-next-line */
-            $eventDateTime = $event->getAuthdate();
+            $eventDateTime = new DateTimeImmutable($event->getAuthdate()->format('Y-m-d H:i:s'));
             $period = match ($granularity) {
                 'year' => $eventDateTime->format('Y'),
                 'month' => $eventDateTime->format('Y-m'),
-                'week' => $eventDateTime->format('o-W'),
+                'week' => sprintf(
+                    '%s – %s',
+                    $eventDateTime->modify('monday this week')->format('Y-m-d'),
+                    (clone $eventDateTime)->modify('sunday this week')->format('Y-m-d')
+                ),
                 default => $eventDateTime->format('Y-m-d'),
             };
 
@@ -384,7 +390,6 @@ readonly class Statistics
             /** @phpstan-ignore-next-line */
             if ($event->getReply() === 'Access-Accept') {
                 $authsCounts['Accepted'][$period]++;
-
                 /** @phpstan-ignore-next-line */
             } elseif ($event->getReply() === 'Access-Reject') {
                 $authsCounts['Rejected'][$period]++;
@@ -415,12 +420,20 @@ readonly class Statistics
 
         foreach ($events as $event) {
             $realm = (string)$event->getRealm();
-            $date = $event->getAcctStartTime();
+            $dateObj = $event->getAcctStartTime();
+
+            $date = $dateObj instanceof DateTimeImmutable
+                ? $dateObj
+                : DateTimeImmutable::createFromMutable($dateObj);
 
             $groupKey = match ($granularity) {
                 'year' => $date->format('Y'),
                 'month' => $date->format('Y-m'),
-                'week' => $date->format('o-W'),
+                'week' => sprintf(
+                    '%s – %s',
+                    (clone $date)->modify('monday this week')->format('Y-m-d'),
+                    (clone $date)->modify('sunday this week')->format('Y-m-d'),
+                ),
                 default => $date->format('Y-m-d'),
             };
 
@@ -497,22 +510,27 @@ readonly class Statistics
         $trafficData = $this->radiusAccountingRepository->findTrafficPerRealm($startDate, $endDate)->getResult();
         $realmTraffic = [];
 
-        // Group the traffic data based on the determined granularity
         foreach ($trafficData as $content) {
-            $realm = $content['realm'];
-            $totalInput = $content['total_input'];
-            $totalOutput = $content['total_output'];
-            $date = $content['acctStartTime'];
+            $realm = (string) $content['realm'];
+            $totalInput = (int) $content['total_input'];
+            $totalOutput = (int) $content['total_output'];
+
+            $dateObj = $content['acctStartTime'];
+            $date = $dateObj instanceof DateTimeImmutable
+                ? $dateObj
+                : DateTimeImmutable::createFromMutable($dateObj);
+
+            /** @var \DateTimeImmutable $date */
             $groupKey = match ($granularity) {
                 'year' => $date->format('Y'),
                 'month' => $date->format('Y-m'),
-                'week' => $date->format('o-W'),
+                'week' => sprintf(
+                    '%s – %s',
+                    (clone $date)->modify('monday this week')->format('Y-m-d'),
+                    (clone $date)->modify('sunday this week')->format('Y-m-d'),
+                ),
                 default => $date->format('Y-m-d'),
             };
-
-            if (!isset($realmTraffic[$realm])) {
-                $realmTraffic[$realm] = [];
-            }
 
             if (!isset($realmTraffic[$realm][$groupKey])) {
                 $realmTraffic[$realm][$groupKey] = ['total_input' => 0, 'total_output' => 0];
@@ -527,7 +545,7 @@ readonly class Statistics
             foreach ($groups as $groupKey => $traffic) {
                 $result[] = [
                     'realm' => $realm,
-                    'group' => $groupKey,
+                    'group' => (string) $groupKey,
                     'total_input' => $traffic['total_input'],
                     'total_output' => $traffic['total_output'],
                 ];
@@ -563,17 +581,27 @@ readonly class Statistics
         $sessionAverageTimes = [];
 
         foreach ($events as $event) {
-            $sessionTime = $event->getAcctSessionTime();
-            $date = $event->getAcctStartTime();
+            $sessionTime = (float) $event->getAcctSessionTime();
+
+            $dateObj = $event->getAcctStartTime();
+            $date = $dateObj instanceof DateTimeImmutable
+                ? $dateObj
+                : DateTimeImmutable::createFromMutable($dateObj);
+
+            /** @var \DateTimeImmutable $date */
             $groupKey = match ($granularity) {
                 'year' => $date->format('Y'),
                 'month' => $date->format('Y-m'),
-                'week' => $date->format('o-W'),
+                'week' => sprintf(
+                    '%s – %s',
+                    (clone $date)->modify('monday this week')->format('Y-m-d'),
+                    (clone $date)->modify('sunday this week')->format('Y-m-d'),
+                ),
                 default => $date->format('Y-m-d'),
             };
 
             if (!isset($sessionAverageTimes[$groupKey])) {
-                $sessionAverageTimes[$groupKey] = ['totalTime' => 0, 'count' => 0];
+                $sessionAverageTimes[$groupKey] = ['totalTime' => 0.0, 'count' => 0];
             }
 
             $sessionAverageTimes[$groupKey]['totalTime'] += $sessionTime;
@@ -584,8 +612,8 @@ readonly class Statistics
         foreach ($sessionAverageTimes as $groupKey => $data) {
             $averageSessionTime = $data['totalTime'] / $data['count'];
             $result[] = [
-                'group' => (string)$groupKey,
-                'averageSessionTime' => (float)$averageSessionTime,
+                'group' => (string) $groupKey,
+                'averageSessionTime' => $averageSessionTime,
             ];
         }
 
@@ -623,11 +651,21 @@ readonly class Statistics
         foreach ($events as $event) {
             $sessionTime = $event->getAcctSessionTime() ?? 0;
             $date = $event->getAcctStartTime();
+            if (!$date instanceof DateTimeInterface) {
+                continue; // or throw an exception if it must always be a DateTime
+            }
+
+            /** @var DateTime $date */
+            $date = clone $date;
 
             $groupKey = match ($granularity) {
                 'year' => $date->format('Y'),
                 'month' => $date->format('Y-m'),
-                'week' => $date->format('o-W'),
+                'week' => sprintf(
+                    '%s – %s',
+                    (clone $date)->modify('monday this week')->format('Y-m-d'),
+                    (clone $date)->modify('sunday this week')->format('Y-m-d'),
+                ),
                 default => $date->format('Y-m-d'),
             };
 

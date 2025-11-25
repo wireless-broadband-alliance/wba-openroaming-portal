@@ -23,6 +23,7 @@ class UserUpdateDTO
     #[Assert\Length(max: 100)]
     public ?string $lastName = null;
 
+
     #[AssertPhoneNumber]
     public ?PhoneNumber $phoneNumber = null;
 

@@ -12,3 +12,4 @@ default: 'A autenticação de dois fatores ajuda a proteger a sua conta, adicion
 placeholder: 'Insira o seu Código'
 submit: 'Enviar'
 resend: 'Reenviar código'
+code: 'Código'

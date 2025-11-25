@@ -60,11 +60,7 @@ class AuthSettingsTypeDTO
     )]
     public ?string $authMethodGOOGLELoginDescription = null;
 
-    #[Assert\Expression(
-        expression: "this.authMethodGOOGLELoginEnabled != 'true' or (this.authMethodGOOGLELoginEnabled == 
-        'true' and value != '')",
-        message: "fieldCannotBeBlank"
-    )]
+
     public ?string $validDomainsGOOGLELogin = null;
 
     #[Assert\Expression(
@@ -98,11 +94,7 @@ class AuthSettingsTypeDTO
     )]
     public ?string $authMethodMICROSOFTLoginDescription = null;
 
-    #[Assert\Expression(
-        expression: "this.authMethodMICROSOFTLoginEnabled != 'true' or (this
-        .authMethodMICROSOFTLoginEnabled == 'true' and value != '')",
-        message: "fieldCannotBeBlank"
-    )]
+
     public ?string $validDomainsMICROSOFTLogin = null;
 
     #[Assert\Expression(
@@ -160,7 +152,7 @@ class AuthSettingsTypeDTO
         and value != '')",
         message: "fieldCannotBeBlank"
     )]
-    public ?int $LinkValidity = null;
+    public ?int $linkValidity = null;
 
     // Login
     #[Assert\Choice(
@@ -236,7 +228,7 @@ class AuthSettingsTypeDTO
         $this->authMethodSamlEnabled = $data[SettingName::AUTH_METHOD_SAML_ENABLED->value]['value'] ?? null;
         $this->authMethodSamlLabel = $data[SettingName::AUTH_METHOD_SAML_LABEL->value]['value'] ?? null;
         $this->authMethodSamlDescription = $data[SettingName::AUTH_METHOD_SAML_DESCRIPTION->value]['value'] ?? null;
-        $this->profileLimitDateSaml =(int) ($data[SettingName::PROFILE_LIMIT_DATE_SAML->value]['value'] ?? null);
+        $this->profileLimitDateSaml = (int) ($data[SettingName::PROFILE_LIMIT_DATE_SAML->value]['value'] ?? null);
 
         $this->authMethodGOOGLELoginEnabled =
             $data[SettingName::AUTH_METHOD_GOOGLE_LOGIN_ENABLED->value]['value'] ?? null;
@@ -265,9 +257,9 @@ class AuthSettingsTypeDTO
             $data[SettingName::AUTH_METHOD_REGISTER_LABEL->value]['value'] ?? null;
         $this->authMethodRegisterDescription =
             $data[SettingName::AUTH_METHOD_REGISTER_DESCRIPTION->value]['value'] ?? null;
-        $this->profileLimitDateEmail = (int) ($data[SettingName::PROFILE_LIMIT_DATE_EMAIL->value]['value'] ?? null) ;
+        $this->profileLimitDateEmail = (int) ($data[SettingName::PROFILE_LIMIT_DATE_EMAIL->value]['value'] ?? null);
         $this->emailTimerResend = (int) ($data[SettingName::EMAIL_TIMER_RESEND->value]['value'] ?? null);
-        $this->LinkValidity = (int) ($data[SettingName::LINK_VALIDITY->value]['value'] ?? null);
+        $this->linkValidity = (int) ($data[SettingName::LINK_VALIDITY->value]['value'] ?? null);
 
         $this->authMethodLoginTraditionalEnabled =
             $data[SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED->value]['value'] ?? null;
@@ -353,7 +345,7 @@ class AuthSettingsTypeDTO
             ],
             SettingName::PROFILE_LIMIT_DATE_EMAIL->value => ['value' => $this->profileLimitDateEmail],
             SettingName::EMAIL_TIMER_RESEND->value => ['value' => $this->emailTimerResend],
-            SettingName::LINK_VALIDITY->value => ['value' => $this->LinkValidity],
+            SettingName::LINK_VALIDITY->value => ['value' => $this->linkValidity],
 
             SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED->value => [
                 'value' =>

@@ -12,3 +12,4 @@ default: 'Two-factor authentication helps protect your account by adding a layer
 placeholder: 'Enter your Code'
 submit: 'Submit'
 resend: 'Resend code'
+code: 'Code'

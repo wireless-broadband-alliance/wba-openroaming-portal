@@ -42,7 +42,8 @@
     {# Form Column #}
     {{ form_start(form) }}
     <div class="relative mt-10">
-        {{ form_widget(form.code, {
+      {{ form_label(form.code, 'code'|trans({}, 'login_landing_code_confirmation'), {label_attr: {class: 'form-label'}}) }}
+      {{ form_widget(form.code, {
             attr: {
                 class: 'form-widget',
                 placeholder: 'placeholder'|trans({}, 'verify2FA'),
