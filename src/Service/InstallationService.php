@@ -211,6 +211,25 @@ readonly class InstallationService
         return $dto;
     }
 
+    public function chackDatabaseSettings(InstallationProgress $installationProgress): bool
+    {
+
+    }
+
+    public function envValueMatches(string $key, string $expectedValue): bool
+    {
+        $envPath = $this->parameterBag->get('kernel.project_dir') . '/.env';
+        $envContent = file_get_contents($envPath);
+
+        $pattern = sprintf('/^%s="?(.*?)"?$/m', preg_quote($key, '/'));
+
+        if (preg_match($pattern, $envContent, $matches)) {
+            return trim($matches[1]) === $expectedValue;
+        }
+
+        return false;
+    }
+
     public function resetToLastInstallation()
     {
         $lastCompleted = $this->installationProgressRepository->getLastCompleted();

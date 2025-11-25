@@ -42,9 +42,13 @@ class DatabaseConnectionService
         }
     }
 
-    public function writeDatabaseUrlToEnv(string $url, string $type): void
+    public function writeDatabaseUrlToEnv(string $url, string $type): bool
     {
         $envPath = $this->params->get('kernel.project_dir') . '/.env';
+
+        if (!is_writable($envPath)) {
+            return false;
+        }
         $envContent = file_get_contents($envPath);
 
         if ($type === DataBaseSetupType::DATABASE_URL->value) {
@@ -75,7 +79,9 @@ class DatabaseConnectionService
             $newLine = '';
         }
 
-        file_put_contents($envPath, trim($envContent) . "\n" . $newLine);
+        $result = @file_put_contents($envPath, trim($envContent) . "\n" . $newLine);
+
+        return $result !== false;
     }
 
     private function getDriverFromScheme(string $scheme): string

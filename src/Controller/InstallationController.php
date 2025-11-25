@@ -74,7 +74,6 @@ class InstallationController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function settingsCertificatesManagementInstallation(
         Request $request,
-        KernelInterface $kernel
     ): Response {
         $lastInstallation = $this->installationService->lastInstallation();
         if ($lastInstallation instanceof InstallationProgress) {
@@ -119,16 +118,16 @@ class InstallationController extends AbstractController
 
 
             $orConnection = $this->databaseConnectionService->testDatabaseConnection($openRoamingDb);
-            $frConnection = $this->databaseConnectionService->testDatabaseConnection($freeradiusDb);
+            //$frConnection = $this->databaseConnectionService->testDatabaseConnection($freeradiusDb);
 
             $connectionsFailed = [];
 
             if (!$orConnection) {
                 $connectionsFailed[] = 'OpenRoaming';
-            }
+            }/*
             if (!$frConnection) {
                 $connectionsFailed[] = 'Freeradius';
-            }
+            }*/
             if ($connectionsFailed !== []) {
                 $this->addFlash(
                     'error_admin',
@@ -158,14 +157,26 @@ class InstallationController extends AbstractController
             $this->entityManager->flush();
 
 
-            $this->databaseConnectionService->writeDatabaseUrlToEnv(
+            $orResult = $this->databaseConnectionService->writeDatabaseUrlToEnv(
                 $openRoamingDb,
                 DataBaseSetupType::DATABASE_URL->value
             );
-            $this->databaseConnectionService->writeDatabaseUrlToEnv(
+            $radiusResult = $this->databaseConnectionService->writeDatabaseUrlToEnv(
                 $freeradiusDb,
                 DataBaseSetupType::DATABASE_FREERADIUS_URL->value
             );
+
+            if (!$orResult || !$radiusResult) {
+                $this->addFlash(
+                    'error_admin',
+                    $this->translator->trans(
+                        'envPermissionDenied',
+                        [],
+                        'controllers')
+                );
+
+                return $this->redirectToRoute('admin_dashboard_settings_certs_installation_database_command');
+            }
 
             $this->addFlash(
                 'success_admin',
@@ -189,6 +200,37 @@ class InstallationController extends AbstractController
             ]
         );
     }
+
+    #[Route(
+        '/dashboard/settings/certificatesManagement/installation/database/command',
+        name: 'admin_dashboard_settings_certs_installation_database_command',
+    )]
+    #[IsGranted('ROLE_ADMIN')]
+    public function settingsCertificatesManagementInstallationDatabaseCommand(
+        Request $request,
+    ): Response {
+        $lastInstallation = $this->installationService->lastInstallation();
+        if ($lastInstallation instanceof InstallationProgress) {
+            $step = $this->installationService->getStep($lastInstallation);
+        } else {
+            $step = InstallationStep::DATABASE->value;
+        }
+        $data = $this->getSettings->getSettings();
+
+        $commands = [
+            [
+                'description' => 'comando 1',
+                'command' => 'comando 1',
+            ]
+        ];
+
+        return $this->render('dashboard/shared/settings_actions/certificatesManagement/installation/manualInstallation/dataBase.html.twig', [
+            'data' => $data,
+            'stages' => $this->installationService->getStepperStatus($step),
+            'commands' => $commands
+        ]);
+    }
+
 
     /**
      * @throws HttpException
