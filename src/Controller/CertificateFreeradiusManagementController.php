@@ -317,21 +317,11 @@ class CertificateFreeradiusManagementController extends AbstractController
         name: 'admin_dashboard_settings_certs_freeradius_test'
     )]
     #[IsGranted('ROLE_ADMIN')]
-    public function settingsCertificatesManagementFreeradiusTest(Request $request): Response
+    public function settingsCertificatesManagementFreeradiusTest(): Response
     {
         // Get current process state
-        $requestedStage = CertificateRouteAccess::from(
-            str_replace('admin_dashboard_settings_certs_', '', $request->attributes->get('_route'))
-        );
-
-        if ($this->certificateProcessCheckerService->isRouteBehindProcess($requestedStage)) {
-            $this->addFlash(
-                'error',
-                $this->translator->trans('cannotReturnToPreviousPhase', [], 'controllers')
-            );
-
-            // Send user to the first Freeradius step ALWAYS
-            return $this->redirectToRoute('admin_dashboard_settings_certs_freeradius_upload');
+        if ($redirect = $this->enforceStageAccess(CertificateRouteAccess::FREERADIUS_TEST)) {
+            return $redirect;
         }
 
         // Get current process state
