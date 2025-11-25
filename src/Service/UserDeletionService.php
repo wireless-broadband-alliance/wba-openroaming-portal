@@ -4,6 +4,7 @@ namespace App\Service;
 
 use App\Entity\DeletedUserData;
 use App\Entity\User;
+use App\Entity\UserExternalAuth;
 use App\Enum\AnalyticalEventType;
 use App\Enum\UserRadiusProfileRevokeReason;
 use App\Enum\UserVerificationStatus;
@@ -24,6 +25,11 @@ readonly class UserDeletionService
     ) {
     }
 
+    /**
+     * @param UserExternalAuth[] $userExternalAuths Array of external auth objects
+     * @return array<string, mixed>
+     * @throws \JsonException
+     */
     public function deleteUser(User $user, array $userExternalAuths, Request $request, User $currentUser): array
     {
         $deletedUserUuid = $user->getUuid();
@@ -64,17 +70,26 @@ readonly class UserDeletionService
 
         $pgpEncryptedData = $this->encryptionService->encrypt($jsonDataCombined);
 
-        if ($pgpEncryptedData[0] === UserVerificationStatus::MISSING_PUBLIC_KEY_CONTENT->value) {
+        // Make sure encryption returned a string
+        if (!is_string($pgpEncryptedData) || ($pgpEncryptedData === '' || $pgpEncryptedData === '0')) {
             return [
                 'success' => false,
-                'message' => $this->translator->trans('publicKeyMissing', [], 'UserDeletionService')
+                'message' => $this->translator->trans('encryptionFailed', [], 'UserDeletionService'),
             ];
         }
 
-        if ($pgpEncryptedData[0] === UserVerificationStatus::EMPTY_PUBLIC_KEY_CONTENT->value) {
+        // Check for special error signals returned by the service
+        if ($pgpEncryptedData === UserVerificationStatus::MISSING_PUBLIC_KEY_CONTENT->value) {
             return [
                 'success' => false,
-                'message' => $this->translator->trans('publicKeyEmpty', [], 'UserDeletionService')
+                'message' => $this->translator->trans('publicKeyMissing', [], 'UserDeletionService'),
+            ];
+        }
+
+        if ($pgpEncryptedData === UserVerificationStatus::EMPTY_PUBLIC_KEY_CONTENT->value) {
+            return [
+                'success' => false,
+                'message' => $this->translator->trans('publicKeyEmpty', [], 'UserDeletionService'),
             ];
         }
 
@@ -82,10 +97,10 @@ readonly class UserDeletionService
         $deletedUserDataEntity->setPgpEncryptedJsonFile($pgpEncryptedData);
         $deletedUserDataEntity->setUser($user);
 
-        $user->setUuid($user->getId());
+        $user->setUuid((string) $user->getId());
         $user->setEmail(null);
         $user->setPhoneNumber(null);
-        $user->setPassword($user->getId());
+        $user->setPassword((string) $user->getId());
         $user->setFirstName(null);
         $user->setLastName(null);
         $user->setDeletedAt(new DateTime());

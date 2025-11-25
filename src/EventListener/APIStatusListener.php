@@ -15,6 +15,7 @@ final class APIStatusListener
 {
     private string $apiEntryPoint = '/api';
 
+    /** @var string[] */
     private array $ignoredPaths = [
         '/api/v1/capport/json',
         '/api/v2/capport/json'

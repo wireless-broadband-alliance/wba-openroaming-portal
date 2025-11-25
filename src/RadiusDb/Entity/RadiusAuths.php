@@ -3,6 +3,7 @@
 namespace App\RadiusDb\Entity;
 
 use App\RadiusDb\Repository\RadiusAuthsRepository;
+use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: RadiusAuthsRepository::class)]
@@ -12,24 +13,30 @@ class RadiusAuths
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    /** @phpstan-ignore-next-line */
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    /** @phpstan-ignore-next-line */
     private ?string $username = null;
 
     /**
      * @var string The hashed password
      */
     #[ORM\Column(length: 255)]
+    /** @phpstan-ignore-next-line */
     private string $pass;
 
     #[ORM\Column(length: 255)]
+    /** @phpstan-ignore-next-line */
     private ?string $reply = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $authdate = null;
+    #[ORM\Column(type: 'datetime', nullable: true)]
+    /** @phpstan-ignore-next-line */
+    private ?\DateTimeInterface $authdate = null;
 
     #[ORM\Column(length: 255)]
+    /** @phpstan-ignore-next-line */
     private ?string $class = null;
 
     public function getId(): ?int
@@ -52,7 +59,7 @@ class RadiusAuths
         return $this->reply;
     }
 
-    public function getAuthdate(): ?string
+    public function getAuthdate(): ?DateTimeInterface
     {
         return $this->authdate;
     }

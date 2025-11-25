@@ -3,3 +3,4 @@ welcomeMessage: 'Selecionou login com email ou número de telefone. Foi enviado 
 enterCode: 'Introduza o seu código'
 resendCode: 'Reenviar código'
 login: 'Iniciar sessão'
+code: 'Código'

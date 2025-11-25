@@ -11,6 +11,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
 class JWTExceptionListener implements EventSubscriberInterface
 {
+    /** @var string[] */
     private array $excludeRoutes = [
         'api_v1_auth_saml',
         'api_v2_auth_saml',

@@ -121,8 +121,7 @@ class TwoFAController extends AbstractController
         }
 
         if (
-            $user->getTwoFAtype() !== UserTwoFactorAuthenticationStatus::EMAIL->value &&
-            $user->getTwoFAtype() !== UserTwoFactorAuthenticationStatus::SMS->value
+            $user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::DISABLED->value
         ) {
             return new BaseResponse(
                 403,
@@ -133,7 +132,6 @@ class TwoFAController extends AbstractController
         }
 
         if (
-            $user->getTwoFAtype() !== UserTwoFactorAuthenticationStatus::DISABLED->value &&
             $user->getOTPcodes()->isEmpty()
         ) {
             return new BaseResponse(

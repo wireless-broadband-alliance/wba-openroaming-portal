@@ -9,6 +9,7 @@ use Symfony\Component\HttpKernel\KernelInterface;
 
 class DevModeBlockerSubscriber implements EventSubscriberInterface
 {
+    /** @var string[] */
     private array $approvedDomains = [
         '127.0.0.1',
         'localhost',

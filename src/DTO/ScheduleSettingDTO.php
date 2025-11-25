@@ -16,12 +16,15 @@ class ScheduleSettingDTO
 {
     public ?string $advanced = null;
 
+    /** @var list<int|string>|null */
     public ?array $day_of_week = ["*"];
     public ?int $day_of_week_frequency = 1;
 
+    /** @var list<int|string>|null */
     public ?array $day_of_month = ["*"];
     public ?int $day_of_month_frequency = 1;
 
+    /** @var list<int|string>|null */
     public ?array $months_of_the_year = ["*"];
     public ?int $months_of_the_year_frequency = 1;
 
@@ -46,11 +49,13 @@ class ScheduleSettingDTO
             )['parts'] ?? [];
 
             // Extract representative time from minutes/hours (ignoring frequency)
+            /** @var int[] $hourValues */
             $hourValues = $parts['hour']['values'] ?? [];
+            /** @var int[] $minuteValues */
             $minuteValues = $parts['minute']['values'] ?? [];
 
-            $hour = is_array($hourValues) && count($hourValues) > 0 ? (int)min($hourValues) : 0;
-            $minute = is_array($minuteValues) && count($minuteValues) > 0 ? (int)min($minuteValues) : 0;
+            $hour = empty($hourValues) ? 0 : min($hourValues);
+            $minute = empty($minuteValues) ? 0 : min($minuteValues);
 
             try {
                 $this->time = new DateTimeImmutable()->setTime($hour, $minute);
@@ -99,6 +104,10 @@ class ScheduleSettingDTO
         return "{$minute} {$hour} {$dayOfMonthExpr} {$monthExpr} {$dayOfWeekExpr}";
     }
 
+    /**
+     * @param array<string, array<string, mixed>> $parts
+     * @return list<int|string>
+     */
     private function setDayValues(array $parts, string $field): array
     {
         // Helper function to expand cron expressions like "28-31/2" into [28, 30]
@@ -135,6 +144,9 @@ class ScheduleSettingDTO
         return $this->expandCronPart($raw, $min, $max);
     }
 
+    /**
+     * @return list<int>
+     */
     private function expandCronPart(string $expr, int $min, int $max): array
     {
         if ($expr === '*' || $expr === '') {
@@ -185,7 +197,7 @@ class ScheduleSettingDTO
     {
         if (
             $this->months_of_the_year !== ['*'] &&
-            is_array($this->months_of_the_year) &&
+            $this->months_of_the_year &&
             $this->months_of_the_year_frequency !== null &&
             $this->months_of_the_year_frequency > count($this->months_of_the_year)
         ) {
@@ -200,7 +212,7 @@ class ScheduleSettingDTO
     {
         if (
             $this->day_of_month !== ['*'] &&
-            is_array($this->day_of_month) &&
+            $this->day_of_month &&
             $this->day_of_month_frequency !== null &&
             $this->day_of_month_frequency > count($this->day_of_month)
         ) {
@@ -215,7 +227,7 @@ class ScheduleSettingDTO
     {
         if (
             $this->day_of_week !== ['*'] &&
-            is_array($this->day_of_week) &&
+            $this->day_of_week &&
             $this->day_of_week_frequency !== null &&
             $this->day_of_week_frequency > count($this->day_of_week)
         ) {

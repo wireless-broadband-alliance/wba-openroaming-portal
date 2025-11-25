@@ -29,6 +29,6 @@ services:
 
 volumes:
   uploads:
-      driver: local
+    driver: local
   mysql:
     driver: local

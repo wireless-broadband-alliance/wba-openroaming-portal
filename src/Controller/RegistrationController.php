@@ -2,7 +2,6 @@
 
 namespace App\Controller;
 
-use App\Entity\Event;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Enum\FirewallType;
@@ -12,8 +11,6 @@ use App\Enum\SettingName;
 use App\Enum\UserProvider;
 use App\Form\RegistrationFormSMSType;
 use App\Form\RegistrationFormType;
-use App\Repository\EventRepository;
-use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use App\Service\EventActions;
 use App\Service\GetSettings;
@@ -81,6 +78,7 @@ class RegistrationController extends AbstractController
         UserPasswordHasherInterface $userPasswordHasher,
     ): Response {
         // Call the getSettings method of GetSettings class to retrieve the data
+        /** @var array<string, array{value: string, description: string}> $data */
         $data = $this->getSettings->getSettings();
 
         // Check if the user clicked on the 'sms' variable present only on the SMS authentication buttons
@@ -186,6 +184,7 @@ class RegistrationController extends AbstractController
         SessionInterface $session
     ): Response {
         // Call the getSettings method of GetSettings class to retrieve the data
+        /** @var array<string, array{value: string, description: string}> $data */
         $data = $this->getSettings->getSettings();
 
         // Check if the user clicked on the 'sms' variable present only on the SMS authentication buttons

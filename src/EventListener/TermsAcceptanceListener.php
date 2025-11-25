@@ -28,40 +28,44 @@ readonly class TermsAcceptanceListener
         $request = $event->getRequest();
         $path = $request->getPathInfo();
 
-        if (
-            str_starts_with($path, '/dashboard') ||
-            str_starts_with($path, '/_components') ||
-            str_starts_with($path, '/api') ||
-            str_starts_with($path, '/landing') ||
-            str_starts_with($path, '/profile')
-        ) {
-            return;
-        }
-
-        if (str_starts_with($path, '/_profiler') || str_starts_with($path, '/_wdt')) {
-            return;
-        }
-
-        $allowedPaths = [
-            '/',
-            '/instructions',
-            '/change-language',
-            '/accept-terms',
-            '/reject-terms',
-            '/terms-conditions',
-            '/privacy-policy',
-            '/metrics',
-        ];
-
-        /** @var Session $session */
+      /** @var Session $session */
         $session = $request->getSession();
         $termsAccepted = $session->get('termsAccepted', false);
 
-        if (
-            !$termsAccepted &&
-            !in_array($path, $allowedPaths, true) &&
-            $path !== $this->router->generate('app_landing')
-        ) {
+      // Skip if the current route is app_landing
+        $currentRoute = $request->attributes->get('_route');
+        if ($currentRoute === 'app_landing') {
+            return;
+        }
+
+      // Paths that DO NOT require terms acceptance
+        $excludedPrefixes = [
+        '/_profiler',
+        '/_wdt',
+        '/api',
+        '/_components',
+        '/assets',
+        '/landing', // For different routes with two-factor
+        '/dashboard',
+        '/instructions',
+        '/change-language',
+        '/accept-terms',
+        '/reject-terms',
+        '/terms-conditions',
+        '/privacy-policy',
+        '/metrics',
+        '/profile/android',
+        '/profile/ios',
+        '/profile/windows',
+        '/login/magic'
+        ];
+
+        if (array_any($excludedPrefixes, fn($prefix) => str_starts_with($path, $prefix))) {
+            return;
+        }
+
+      // If terms not accepted, redirect
+        if (!$termsAccepted) {
             $message = $this->translator->trans(
                 'cannotAccessThisPageWithoutAcceptTerms',
                 [],

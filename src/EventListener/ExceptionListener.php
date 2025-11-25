@@ -10,6 +10,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Symfony\Component\HttpKernel\KernelEvents;
+use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\Contracts\Translation\LocaleAwareInterface;
 use Twig\Environment;
@@ -25,6 +26,7 @@ readonly class ExceptionListener
         private TranslatorInterface $translator,
         private SettingRepository $settingRepository,
         private LocaleAwareInterface $translatorLocale,
+        private KernelInterface $kernel,
     ) {
     }
 
@@ -35,6 +37,11 @@ readonly class ExceptionListener
      */
     public function __invoke(ExceptionEvent $event): void
     {
+        // Only trigger in prod mode
+        if ($this->kernel->getEnvironment() === 'dev') {
+            return;
+        }
+
         $request = $event->getRequest();
         // Allow the user to still be able to change the language
         if ($request->attributes->get('_route') === 'app_change_language') {
@@ -86,6 +93,9 @@ readonly class ExceptionListener
         $event->setResponse($response);
     }
 
+    /**
+     * @return array<string, array{value: mixed}>
+     */
     private function getSettings(): array
     {
         $wanted = [

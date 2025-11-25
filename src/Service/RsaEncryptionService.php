@@ -6,6 +6,16 @@ use Exception;
 
 class RsaEncryptionService
 {
+    /**
+     * @return array{
+     *     success: bool,
+     *     data?: string,
+     *     error?: array{
+     *         code: int,
+     *         message: string
+     *     }
+     * }
+     */
     public function encryptApi(string $publicKeyContent, string $data): array
     {
         try {
@@ -22,8 +32,6 @@ class RsaEncryptionService
 
             $encryptedData = '';
             $success = openssl_public_encrypt($data, $encryptedData, $publicKey);
-
-            openssl_free_key($publicKey);
 
             if (!$success) {
                 return [

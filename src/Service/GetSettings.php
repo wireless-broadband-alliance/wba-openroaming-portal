@@ -8,6 +8,7 @@ use App\Enum\SettingName;
 use App\Enum\TextEditorName;
 use App\Repository\SettingRepository;
 use App\Repository\SettingTranslationRepository;
+use RuntimeException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -24,6 +25,9 @@ readonly class GetSettings
     ) {
     }
 
+    /**
+     * @return array<string, array{value: string, description: string}>|JsonResponse
+     */
     public function getSettings(?string $language = null): array|JsonResponse
     {
         // Get the current request from the RequestStack
@@ -104,6 +108,12 @@ readonly class GetSettings
         return $data;
     }
 
+    /**
+     * @param Setting[] $settings Array of Setting entities
+     * @param array<string, array{value: string}> $data Associative array of setting values by name
+     *
+     * @return Setting[] Array of Setting entities with updated values
+     */
     public function getSettingsByLocale(array $settings, array $data): array
     {
         $settingsToTranslate = $this->arraySettingsToTranslate();
@@ -113,15 +123,19 @@ readonly class GetSettings
                 $setting->setValue($data[$setting->getName()]['value']);
             }
         }
+
         return $settings;
     }
 
-    public function getSettingDescription($settingName): ?string
+    /**
+     * Get the description for a given setting name in the current locale.
+     */
+    public function getSettingDescription(string $settingName): ?string
     {
         // Retrieve current locale from the session, default to 'en' if not found
         $request = $this->requestStack->getCurrentRequest();
         if (!$request instanceof Request) {
-            throw new \RuntimeException(
+            throw new RuntimeException(
                 $this->translator->trans('noRequestAvailable', [], 'GetSettings')
             );
         }
@@ -313,6 +327,9 @@ readonly class GetSettings
             ?? null;
     }
 
+    /**
+     * @return string[]
+     */
     public function arraySettingsToTranslate(): array
     {
         return [
@@ -334,9 +351,13 @@ readonly class GetSettings
         ];
     }
 
+    /**
+     * @param string[] $settingsWanted
+     *
+     * @return array<string, array{value: string}>
+     */
     public function getSpecificSettings(array $settingsWanted): array
     {
-
         $settings = $this->settingRepository->findBy([
             'name' => $settingsWanted,
         ]);

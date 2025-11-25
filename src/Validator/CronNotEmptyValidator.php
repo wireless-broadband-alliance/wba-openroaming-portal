@@ -9,21 +9,24 @@ use Symfony\Component\Validator\ConstraintValidator;
 
 class CronNotEmptyValidator extends ConstraintValidator
 {
-    public function validate($value, Constraint $constraint): void
+    /**
+     * @param ScheduleSettingDTO|null $value
+     */
+    public function validate(mixed $value, Constraint $constraint): void
     {
         if (!$constraint instanceof CronNotEmpty) {
             throw new UnexpectedTypeException($constraint, CronNotEmpty::class);
         }
 
-        /** @var ?ScheduleSettingDTO $value */
-
         // custom constraints should ignore null and empty values to allow
-        if (is_null($value)) {
+        if (!$value instanceof ScheduleSettingDTO) {
             return;
         }
 
-        if (empty($value->advanced)) {
-            $this->context->buildViolation($constraint->message)->atPath("advanced")->addViolation();
+        if (in_array($value->advanced, [null, '', '0'], true)) {
+            $this->context->buildViolation($constraint->message)
+                ->atPath("advanced")
+                ->addViolation();
         }
     }
 }

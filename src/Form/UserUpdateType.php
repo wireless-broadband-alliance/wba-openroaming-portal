@@ -15,6 +15,9 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
+/**
+ * @extends AbstractType<UserUpdateDTO>
+ */
 class UserUpdateType extends AbstractType
 {
     public function __construct(
@@ -32,7 +35,7 @@ class UserUpdateType extends AbstractType
 
         // If the setting exists, explode and trim; otherwise use a default
         $regionInputs = $regionsSetting && $regionsSetting->getValue()
-            ? array_map('trim', explode(',', $regionsSetting->getValue()))
+            ? array_map(trim(...), explode(',', $regionsSetting->getValue()))
             : ['PT', 'US', 'GB']; // fallback default
 
         /** @var UserUpdateDTO $dto */
@@ -75,7 +78,7 @@ class UserUpdateType extends AbstractType
             ]);
 
         // Only add banned/isVerified if NOT editing an admin
-        if ($dto instanceof UserUpdateDTO && !$dto->editingAdmin) {
+        if (!$dto->editingAdmin) {
             $builder
                 ->add('banned', CheckboxType::class, [
                     'label' => $this->translator->trans('banned', [], 'UserUpdateType'),

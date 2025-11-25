@@ -5,7 +5,9 @@ namespace App\RadiusDb\Repository;
 use App\RadiusDb\Entity\RadiusAccounting;
 use DateTime;
 use DateTimeImmutable;
+use DateTimeInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\AbstractQuery;
 use Doctrine\ORM\Query;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -13,9 +15,10 @@ use Doctrine\Persistence\ManagerRegistry;
  * @extends ServiceEntityRepository<RadiusAccounting>
  *
  * @method RadiusAccounting|null find($id, $lockMode = null, $lockVersion = null)
- * @method RadiusAccounting|null findOneBy(array $criteria, array $orderBy = null)
+ * @method RadiusAccounting|null findOneBy(array <string, mixed> $criteria, array<string, string>|null $orderBy = null)
  * @method RadiusAccounting[]    findAll()
- * @method RadiusAccounting[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * phpcs:ignore Generic.Files.LineLength.TooLong
+ * @method RadiusAccounting[]    findBy(array <string, mixed> $criteria, array<string, string>|null $orderBy = null, $limit = null, $offset = null)
  */
 class RadiusAccountingRepository extends ServiceEntityRepository
 {
@@ -87,10 +90,14 @@ class RadiusAccountingRepository extends ServiceEntityRepository
         return $queryBuilder->getQuery();
     }
 
-    public function findDistinctRealms(?DateTime $startDate, ?DateTime $endDate): array
+    /**
+     * Fetch RadiusAccounting records filtered by range
+     *
+     * @return RadiusAccounting[]
+     */
+    public function fetchByDateRange(?DateTime $startDate, ?DateTime $endDate): array
     {
-        $queryBuilder = $this->createQueryBuilder('ra')
-            ->select('DISTINCT ra.realm, ra.acctStartTime');
+        $queryBuilder = $this->createQueryBuilder('ra');
 
         // Apply date filters if provided
         if ($startDate && $endDate) {
@@ -116,94 +123,7 @@ class RadiusAccountingRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    public function findSessionTimeRealms(?DateTime $startDate, ?DateTime $endDate): array
-    {
-        $queryBuilder = $this->createQueryBuilder('ra')
-            ->select('DISTINCT ra.realm, ra.acctSessionTime, ra.acctStartTime, ra.acctStopTime');
-
-        // Apply date filters if provided
-        if ($startDate && $endDate) {
-            $queryBuilder
-                ->andWhere('ra.acctStartTime >= :startDate')
-                ->andWhere('ra.acctStopTime <= :endDate')
-                ->setParameter('startDate', $startDate)
-                ->setParameter('endDate', $endDate);
-        } elseif ($startDate instanceof DateTime) {
-            // If only start date is provided, search from start date to now
-            $queryBuilder
-                ->andWhere('ra.acctStartTime >= :startDate')
-                ->setParameter('startDate', $startDate);
-        } elseif ($endDate instanceof DateTime) {
-            // If only end date is provided, search from end date to the past
-            $queryBuilder
-                ->andWhere('ra.acctStopTime <= :endDate')
-                ->setParameter('endDate', $endDate);
-        }
-
-        return $queryBuilder
-            ->getQuery()
-            ->getResult();
-    }
-
-    public function findWifiVersion(?DateTime $startDate, ?DateTime $endDate): array
-    {
-        $queryBuilder = $this->createQueryBuilder('ra')
-            ->select('DISTINCT ra.realm, ra.connectInfo_start, ra.acctStartTime, ra.acctStopTime');
-
-        // Apply date filters if provided
-        if ($startDate && $endDate) {
-            $queryBuilder
-                ->andWhere('ra.acctStartTime >= :startDate')
-                ->andWhere('ra.acctStopTime <= :endDate')
-                ->setParameter('startDate', $startDate)
-                ->setParameter('endDate', $endDate);
-        } elseif ($startDate instanceof DateTime) {
-            // If only start date is provided, search from start date to now
-            $queryBuilder
-                ->andWhere('ra.acctStartTime >= :startDate')
-                ->setParameter('startDate', $startDate);
-        } elseif ($endDate instanceof DateTime) {
-            // If only end date is provided, search from end date to the past
-            $queryBuilder
-                ->andWhere('ra.acctStopTime <= :endDate')
-                ->setParameter('endDate', $endDate);
-        }
-
-        return $queryBuilder
-            ->getQuery()
-            ->getResult();
-    }
-
-    public function findApUsage(?DateTime $startDate, ?DateTime $endDate): array
-    {
-        $queryBuilder = $this->createQueryBuilder('ra')
-            ->select('ra.calledStationId');
-
-        // Apply date filters if provided
-        if ($startDate && $endDate) {
-            $queryBuilder
-                ->andWhere('ra.acctStartTime >= :startDate')
-                ->andWhere('ra.acctStopTime <= :endDate')
-                ->setParameter('startDate', $startDate)
-                ->setParameter('endDate', $endDate);
-        } elseif ($startDate instanceof DateTime) {
-            // If only start date is provided, search from start date to now
-            $queryBuilder
-                ->andWhere('ra.acctStartTime >= :startDate')
-                ->setParameter('startDate', $startDate);
-        } elseif ($endDate instanceof DateTime) {
-            // If only end date is provided, search from end date to the past
-            $queryBuilder
-                ->andWhere('ra.acctStopTime <= :endDate')
-                ->setParameter('endDate', $endDate);
-        }
-
-        return $queryBuilder
-            ->getQuery()
-            ->getResult();
-    }
-
-    public function findLatestConnectionTime(?int $sinceTimestamp = null): ?array
+    public function findLatestConnectionTime(?int $sinceTimestamp = null): ?int
     {
         $qb = $this->createQueryBuilder('ra')
             ->select('ra.acctStartTime')
@@ -212,34 +132,40 @@ class RadiusAccountingRepository extends ServiceEntityRepository
 
         if ($sinceTimestamp !== null) {
             $sinceDateTime = new DateTimeImmutable()->setTimestamp($sinceTimestamp);
-
-            $qb->where('ra.acctStartTime >= :since')
+            $qb->andWhere('ra.acctStartTime >= :since')
                 ->setParameter('since', $sinceDateTime);
         }
 
-        return $qb->getQuery()->getOneOrNullResult();
-    }
+        $latest = $qb->getQuery()->getOneOrNullResult(AbstractQuery::HYDRATE_ARRAY);
 
+        if (!$latest || !isset($latest['acctStartTime'])) {
+            return null;
+        }
+
+        return $latest['acctStartTime']->getTimestamp();
+    }
 
     /**
      * @throws \DateMalformedStringException
+     * @return RadiusAccounting[]
      */
     public function findConnectionTime(int $sinceTimestamp): array
     {
+        $sinceDateTime = new \DateTimeImmutable('@' . $sinceTimestamp);
+
         $qb = $this->createQueryBuilder('ra');
 
-        // Subquery to get the maximum acctStartTime per user since the given timestamp
+        // Subquery: get the latest acctStartTime per user since $sinceTimestamp
         $sub = $this->createQueryBuilder('sub')
             ->select('MAX(sub.acctStartTime)')
             ->where('sub.username = ra.username')
             ->andWhere('sub.acctStartTime >= :since')
             ->getDQL();
 
-        // Main query to fetch the rows where acctStartTime is the latest per user
-        $qb->select('ra.username, ra.acctStartTime, ra.acctStopTime')
-            ->where('ra.acctStartTime = (' . $sub . ')')
-            ->setParameter('since', new DateTimeImmutable('@' . $sinceTimestamp));
+        // Main query: match only the latest per user
+        $qb->where('ra.acctStartTime = (' . $sub . ')')
+            ->setParameter('since', $sinceDateTime);
 
-        return $qb->getQuery()->getArrayResult();
+        return $qb->getQuery()->getResult();
     }
 }

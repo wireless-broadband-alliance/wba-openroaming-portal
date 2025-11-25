@@ -14,6 +14,9 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
+/**
+ * @extends AbstractType<null>
+ */
 class RegistrationFormSMSType extends AbstractType
 {
     public function __construct(
@@ -31,7 +34,7 @@ class RegistrationFormSMSType extends AbstractType
             ['name' => SettingName::DEFAULT_REGION_PHONE_INPUTS->value]
         )->getValue();
         $regionInputs = explode(',', (string)$regionInputValue);
-        $regionInputs = array_map('trim', $regionInputs);
+        $regionInputs = array_map(trim(...), $regionInputs);
 
         $builder
             ->add('phoneNumber', PhoneNumberType::class, [

@@ -9,5 +9,6 @@ parameters:
     excludePaths:
         - vendor/*
         - var/*
+        - node_modules/*
     scanDirectories:
         - var/cache/dev/Symfony/Config

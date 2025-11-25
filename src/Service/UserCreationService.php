@@ -30,7 +30,7 @@ readonly class UserCreationService
 
         // Set the hashed password for the user
         $user->setPassword($password);
-        $user->setTwoFAcode(random_int(100000, 999999));
+        $user->setTwoFAcode((string) random_int(100000, 999999));
         $user->setTwoFAcodeGeneratedAt(new DateTime());
         $user->setTwoFAcodeIsActive(true);
         $user->setCreatedAt(new DateTime());

@@ -66,6 +66,7 @@ class FreeradiusController extends AbstractController
             );
         }
 
+        /** @var array<string, array{value: string, description: string}> $data */
         $data = $this->getSettings->getSettings();
 
         $user = $this->getUser();
@@ -102,6 +103,7 @@ class FreeradiusController extends AbstractController
             $this->radiusAuthsRepository,
             $this->radiusAccountingRepository
         );
+
         $fetchChartAuthenticationsFreeradius = $statisticsService
             ->fetchChartAuthenticationsFreeradius($startDate, $endDate);
         $fetchChartRealmsFreeradius = $statisticsService->fetchChartRealmsFreeradius($startDate, $endDate);
@@ -325,23 +327,11 @@ class FreeradiusController extends AbstractController
             ];
         }
 
-        // Prepare the realm Usage data for Excel
-        $realmUsageData = [];
-        foreach ($fetchChartRealmsFreeradius as $session_date) {
-            $realm = $fetchChartRealmsFreeradius[0]['realm'] ?? 0;
-            $totalCount = $fetchChartRealmsFreeradius[0]['count'] ?? 0;
-
-            $realmUsageData[] = [
-                'realm' => $realm,
-                'total_count' => $totalCount,
-            ];
-        }
-
         // Prepare the AP Usage data for Excel
         $apUsageData = [];
         foreach (array_keys($fetchChartApUsage) as $index) {
-            $apName = $fetchChartApUsage[$index]['ap'] ?? 0;
-            $apUsage = $fetchChartApUsage[$index]['count'] ?? 0;
+            $apName = $fetchChartApUsage[$index]['ap'];
+            $apUsage = $fetchChartApUsage[$index]['count'];
             $apUsageData[] = [
                 'ap_Name' => $apName,
                 'ap_Usage' => $apUsage,

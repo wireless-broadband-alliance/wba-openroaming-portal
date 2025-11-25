@@ -20,6 +20,9 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
+/**
+ * @extends AbstractType<LoginChoiceDTO>
+ */
 class LoginType extends AbstractType
 {
     public function __construct(
@@ -37,7 +40,7 @@ class LoginType extends AbstractType
 
         // If the setting exists, explode and trim; otherwise use a default
         $regionInputs = $regionsSetting && $regionsSetting->getValue()
-            ? array_map('trim', explode(',', $regionsSetting->getValue()))
+            ? array_map(trim(...), explode(',', $regionsSetting->getValue()))
             : ['PT', 'US', 'GB']; // fallback default
 
         $turnstileCheckerValue = $this->settingRepository->findOneBy(
@@ -60,7 +63,7 @@ class LoginType extends AbstractType
                 'expanded' => true,
                 'multiple' => false,
                 'label' => 'Login via',
-                'data' => $builder->getData()?->loginMethod ?? UserProvider::EMAIL->value,
+                'data' => $builder->getData()->loginMethod ?? UserProvider::EMAIL->value,
             ]);
         }
 
@@ -84,7 +87,7 @@ class LoginType extends AbstractType
         ]);
 
         // Only add password if DTO requires it
-        if ($builder->getData()?->requirePassword ?? true) {
+        if ($builder->getData()->requirePassword ?? true) {
             $builder->add('password', PasswordType::class, [
                 'label' => 'Password',
                 'toggle' => true,

@@ -135,12 +135,16 @@ All the present items can be customizable:
 
 ### Settings Management
 
-- **Platform Status**
+- **Platform Status (Live/Demo)**
+- **API Status**
 - **Landing Page Configuration**
 - **Terms and Policies**
+- **Schedule Automation for CRON's**
 - **Radius Configuration**
 - **Authentication Methods**
 - **Two Factor Authenticator**
+- **LDAP Synchronization**
+- **Profile Radius Configuration**
 - **User Engagement**
 - **SMS Configuration**
 
@@ -174,7 +178,7 @@ purpose, required inputs, and expected outputs.
 Additionally, the documentation shows the necessary security measures,
 such as CAPTCHA validation, that are integrated to protect user data and ensure secure interactions with the API.
 
-Please refer to the [API documentation](docs/api/index.html) for detailed usage instructions and examples.
+Please refer to the [API documentation](docs/Api/V2/index_v2.html) for detailed usage instructions and examples.
 
 Follow this link for more information on API documentation: [Api Guide](docs/APIGUI.md)
 

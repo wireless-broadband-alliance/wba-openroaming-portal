@@ -43,7 +43,7 @@ readonly class PasswordResetRequestHandler
         // Update user
         $user->setForgotPasswordRequest(true);
         $user->setIsVerified(true);
-        $user->setTwoFAcode(random_int(100000, 999999));
+        $user->setTwoFAcode((string)random_int(100000, 999999));
         $user->setTwoFACodeGeneratedAt(new DateTime());
         $user->setTwoFAcodeIsActive(true);
         $this->entityManager->persist($user);

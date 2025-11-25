@@ -57,11 +57,10 @@ class TwoFAController extends AbstractController
     )]
     public function configure2FA(string $context): Response
     {
-        /** @var User $user */
         $user = $this->getUser();
 
         // Ensure the user is logged in
-        if (!$user instanceof UserInterface) {
+        if (!$user instanceof User) {
             $this->addFlash(
                 'error',
                 $this->translator->trans('onlyAccessThisPageLoggedIn', [], 'controllers')
@@ -101,11 +100,10 @@ class TwoFAController extends AbstractController
         string $context,
         Request $request
     ): Response {
-        /** @var User $user */
         $user = $this->getUser();
 
-        // Ensure user is logged in
-        if (!$user instanceof UserInterface) {
+        // Ensure the user is logged in
+        if (!$user instanceof User) {
             $this->addFlash(
                 'error',
                 $this->translator->trans('onlyAccessThisPageLoggedIn', [], 'controllers')
@@ -132,54 +130,43 @@ class TwoFAController extends AbstractController
         if ($form->handleRequest($request)->isSubmitted() && $form->isValid()) {
             // Get the introduced code
             $code = $form->get('code')->getData();
-            if ($user instanceof User) {
-                // Get the secret code to communicate with app.
-                $secret = $user->gettwoFASecret();
-                // Check if the code used is the one generated in the application.
-                if ($this->totpService->verifyTOTP($secret, $code)) {
-                    $session->set('2fa_verified_' . $context, true);
-                    $this->twoFAService->event2FA(
-                        $request->getClientIp(),
-                        $user,
-                        AnalyticalEventType::ENABLE_TOTP_2FA->value,
-                        $request->headers->get('User-Agent')
-                    );
-                    $user->setTwoFAtype(UserTwoFactorAuthenticationStatus::TOTP->value);
-                    $this->entityManager->persist($user);
-                    $this->entityManager->flush();
-                    return $this->redirectToRoute('app_otpCodes', [
-                        'context' => $context
-                    ]);
-                }
-                $this->addFlash(
-                    'error',
-                    $this->translator->trans('invalidCodeTOTP', [], 'controllers')
+            // Get the secret code to communicate with app.
+            $secret = $user->gettwoFASecret();
+            // Check if the code used is the one generated in the application.
+            if ($this->totpService->verifyTOTP($secret, $code)) {
+                $session->set('2fa_verified_' . $context, true);
+                $this->twoFAService->event2FA(
+                    $request->getClientIp(),
+                    $user,
+                    AnalyticalEventType::ENABLE_TOTP_2FA->value,
+                    $request->headers->get('User-Agent')
                 );
-            }
-        }
-        $secret = $user->getTwoFAsecret() ?: $this->totpService->generateSecret();
-        if ($user instanceof User) {
-            if (
-                $user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::SMS->value ||
-                $user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::EMAIL->value
-            ) {
-                return $this->redirectToRoute('app_2FA_generate_code_swap_method', [
+                $user->setTwoFAtype(UserTwoFactorAuthenticationStatus::TOTP->value);
+                $this->entityManager->persist($user);
+                $this->entityManager->flush();
+                return $this->redirectToRoute('app_otpCodes', [
                     'context' => $context
                 ]);
             }
-            $user->setTwoFAsecret($secret);
-            $this->entityManager->persist($user);
-            $this->entityManager->flush();
-        } else {
             $this->addFlash(
                 'error',
-                $this->translator->trans('onlyAccessThisPageLoggedIn', [], 'controllers')
+                $this->translator->trans('invalidCodeTOTP', [], 'controllers')
             );
-            if ($context === FirewallType::DASHBOARD->value) {
-                return $this->redirectToRoute('admin_page');
-            }
-            return $this->redirectToRoute('app_landing');
         }
+        $secret = $user->getTwoFAsecret() ?: $this->totpService->generateSecret();
+
+        if (
+            $user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::SMS->value ||
+            $user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::EMAIL->value
+        ) {
+            return $this->redirectToRoute('app_2FA_generate_code_swap_method', [
+                'context' => $context
+            ]);
+        }
+        $user->setTwoFAsecret($secret);
+        $this->entityManager->persist($user);
+        $this->entityManager->flush();
+
         $formattedSecret = implode(' ', str_split($secret, 10));
 
         $provisioningUri = $this->totpService->generateTOTP($secret);
@@ -212,12 +199,11 @@ class TwoFAController extends AbstractController
     )]
     public function verify2FA(string $context, Request $request): Response
     {
-        /** @var User $user */
-        $user = $this->getUser();
         $session = $request->getSession();
+        $user = $this->getUser();
 
-        // If the user isn't logged in, redirect to the landing page
-        if (!$user instanceof UserInterface) {
+        // Ensure the user is logged in
+        if (!$user instanceof User) {
             $this->addFlash(
                 'error',
                 $this->translator->trans('onlyAccessThisPageLoggedIn', [], 'controllers')
@@ -243,42 +229,40 @@ class TwoFAController extends AbstractController
         if ($form->handleRequest($request)->isSubmitted() && $form->isValid()) {
             // Get the introduced code
             $code = $form->get('code')->getData();
-            if ($user instanceof User) {
-                // Get the secret code to communicate with app.
-                $secret = $user->gettwoFASecret();
-                // Check if the used code is one of the OTP codes
-                if ($this->twoFAService->validateOTPCodes($user, $code)) {
-                    $session->set('2fa_verified_' . $context, true);
-                    $this->twoFAService->event2FA(
-                        $request->getClientIp(),
-                        $user,
-                        AnalyticalEventType::VERIFY_OTP_2FA->value,
-                        $request->headers->get('User-Agent')
-                    );
-                    if ($context === FirewallType::DASHBOARD->value) {
-                        return $this->redirectToRoute('admin_page');
-                    }
-                    return $this->redirectToRoute('app_landing');
-                }
-                // Check if the code used is the one generated in the application.
-                if ($this->totpService->verifyTOTP($secret, $code)) {
-                    $session->set('2fa_verified_' . $context, true);
-                    $this->twoFAService->event2FA(
-                        $request->getClientIp(),
-                        $user,
-                        AnalyticalEventType::VERIFY_TOTP_2FA->value,
-                        $request->headers->get('User-Agent')
-                    );
-                    if ($context === FirewallType::DASHBOARD->value) {
-                        return $this->redirectToRoute('admin_page');
-                    }
-                    return $this->redirectToRoute('app_landing');
-                }
-                $this->addFlash(
-                    'error',
-                    $this->translator->trans('invalidCodeTOTP', [], 'controllers')
+            // Get the secret code to communicate with app.
+            $secret = $user->gettwoFASecret();
+            // Check if the used code is one of the OTP codes
+            if ($this->twoFAService->validateOTPCodes($user, $code)) {
+                $session->set('2fa_verified_' . $context, true);
+                $this->twoFAService->event2FA(
+                    $request->getClientIp(),
+                    $user,
+                    AnalyticalEventType::VERIFY_OTP_2FA->value,
+                    $request->headers->get('User-Agent')
                 );
+                if ($context === FirewallType::DASHBOARD->value) {
+                    return $this->redirectToRoute('admin_page');
+                }
+                return $this->redirectToRoute('app_landing');
             }
+            // Check if the code used is the one generated in the application.
+            if ($this->totpService->verifyTOTP($secret, $code)) {
+                $session->set('2fa_verified_' . $context, true);
+                $this->twoFAService->event2FA(
+                    $request->getClientIp(),
+                    $user,
+                    AnalyticalEventType::VERIFY_TOTP_2FA->value,
+                    $request->headers->get('User-Agent')
+                );
+                if ($context === FirewallType::DASHBOARD->value) {
+                    return $this->redirectToRoute('admin_page');
+                }
+                return $this->redirectToRoute('app_landing');
+            }
+            $this->addFlash(
+                'error',
+                $this->translator->trans('invalidCodeTOTP', [], 'controllers')
+            );
         }
         return $this->render('landing/twoFAAuthentication/verify/verify2FA.html.twig', [
             'data' => $data,
@@ -300,9 +284,9 @@ class TwoFAController extends AbstractController
     )]
     public function verify2FAPortal(string $context, Request $request): Response
     {
-        /** @var User $user */
         $user = $this->getUser();
-        if (!$user instanceof UserInterface) {
+        // Ensure the user is logged in
+        if (!$user instanceof User) {
             $this->addFlash(
                 'error',
                 $this->translator->trans('onlyAccessThisPageLoggedIn', [], 'controllers')
@@ -381,10 +365,9 @@ class TwoFAController extends AbstractController
     )]
     public function disable2FA(string $context, Request $request): RedirectResponse
     {
-        /** @var User $user */
         $user = $this->getUser();
         // Ensure the user is logged in
-        if (!$user instanceof UserInterface) {
+        if (!$user instanceof User) {
             $this->addFlash(
                 'error',
                 $this->translator->trans('onlyAccessThisPageLoggedIn', [], 'controllers')
@@ -404,8 +387,9 @@ class TwoFAController extends AbstractController
             $user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::SMS->value ||
             $user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::EMAIL->value
         ) {
-            $data = $this->getSettings->getSettings();
-            $timeToResetAttempts = $data[SettingName::TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS->value]["value"];
+            $timeToResetAttempts = $this->settingRepository->findOneBy(
+                ['name' => SettingName::TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS->value]
+            )->getValue();
             $limitTime = new DateTime();
             $limitTime->modify('-' . $timeToResetAttempts . ' minutes');
             if ($this->twoFAService->canValidationCode($user, AnalyticalEventType::TWO_FA_CODE_DISABLE->value)) {
@@ -472,11 +456,9 @@ class TwoFAController extends AbstractController
     )]
     public function disable2FALocal(string $context, Request $request): Response
     {
-        /** @var User $user */
         $user = $this->getUser();
-
         // Ensure the user is logged in
-        if (!$user instanceof UserInterface) {
+        if (!$user instanceof User) {
             $this->addFlash(
                 'error',
                 $this->translator->trans('onlyAccessThisPageLoggedIn', [], 'controllers')
@@ -544,11 +526,9 @@ class TwoFAController extends AbstractController
     )]
     public function disable2FAApp(string $context, Request $request): Response
     {
-        /** @var User $user */
         $user = $this->getUser();
-
         // Ensure the user is logged in
-        if (!$user instanceof UserInterface) {
+        if (!$user instanceof User) {
             $this->addFlash(
                 'error',
                 $this->translator->trans('onlyAccessThisPageLoggedIn', [], 'controllers')
@@ -613,11 +593,9 @@ class TwoFAController extends AbstractController
     )]
     public function twoFACodes(string $context, Request $request): Response
     {
-        /** @var User $user */
         $user = $this->getUser();
-
         // Ensure the user is logged in
-        if (!$user instanceof UserInterface) {
+        if (!$user instanceof User) {
             $this->addFlash(
                 'error',
                 $this->translator->trans('onlyAccessThisPageLoggedIn', [], 'controllers')
@@ -645,25 +623,15 @@ class TwoFAController extends AbstractController
             }
             return $this->redirectToRoute('app_landing');
         }
-        if ($user instanceof User) {
-            if ($user->getOTPcodes()->isEmpty()) {
-                $this->twoFAService->generateOTPCodes($user);
-            }
-            return $this->render('landing/twoFAAuthentication/otpCodes.html.twig', [
-                'data' => $data,
-                'codes' => $user->getOTPcodes(),
-                'user' => $user,
-                'context' => $context
-            ]);
+        if ($user->getOTPcodes()->isEmpty()) {
+            $this->twoFAService->generateOTPCodes($user);
         }
-        $this->addFlash(
-            'error',
-            $this->translator->trans('userNotFound', [], 'controllers')
-        );
-        if ($context === FirewallType::DASHBOARD->value) {
-            return $this->redirectToRoute('admin_page');
-        }
-        return $this->redirectToRoute('app_landing');
+        return $this->render('landing/twoFAAuthentication/otpCodes.html.twig', [
+            'data' => $data,
+            'codes' => $user->getOTPcodes(),
+            'user' => $user,
+            'context' => $context
+        ]);
     }
 
     /**
@@ -681,11 +649,9 @@ class TwoFAController extends AbstractController
     )]
     public function saveCodes(string $context, Request $request): Response
     {
-        /** @var User $user */
         $user = $this->getUser();
-
         // Ensure the user is logged in
-        if (!$user instanceof UserInterface) {
+        if (!$user instanceof User) {
             $this->addFlash(
                 'error',
                 $this->translator->trans('onlyAccessThisPageLoggedIn', [], 'controllers')
@@ -731,10 +697,9 @@ class TwoFAController extends AbstractController
     )]
     public function resendCode(string $context, string $type, Request $request): RedirectResponse
     {
-        /** @var User $user */
         $user = $this->getUser();
-
-        if (!$user instanceof UserInterface) {
+        // Ensure the user is logged in
+        if (!$user instanceof User) {
             $this->addFlash(
                 'error',
                 $this->translator->trans('onlyAccessThisPageLoggedIn', [], 'controllers')
@@ -749,10 +714,15 @@ class TwoFAController extends AbstractController
             );
             return $this->redirectToRoute('app_dashboard_login');
         }
-        $data = $this->getSettings->getSettings();
-        $timeToResetAttempts = $data[SettingName::TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS->value]["value"];
-        $nrAttempts = $data[SettingName::TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE->value]["value"];
-        $timeIntervalToResendCode = $data[SettingName::TWO_FACTOR_AUTH_RESEND_INTERVAL->value]["value"];
+        $timeToResetAttempts = (int)$this->settingRepository->findOneBy(
+            ['name' => SettingName::TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS->value]
+        )->getValue();
+        $nrAttempts = (int)$this->settingRepository->findOneBy(
+            ['name' => SettingName::TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE->value]
+        )->getValue();
+        $timeIntervalToResendCode = (int)$this->settingRepository->findOneBy(
+            ['name' => SettingName::TWO_FACTOR_AUTH_RESEND_INTERVAL->value]
+        )->getValue();
         $limitTime = new DateTime();
         $limitTime->modify('-' . $timeToResetAttempts . ' minutes');
 
@@ -803,35 +773,38 @@ class TwoFAController extends AbstractController
                 $eventType
             );
             $now = new DateTime();
+            // Suppose $lastAttemptTime is DateTimeInterface
+            $lastAttemptTime = $lastEvent instanceof Event
+                ? $lastEvent->getEventDatetime()
+                : new DateTime(); // fallback
+
+            // Ensure $limitTime is a DateTime instance
+            $limitTime = $lastAttemptTime instanceof DateTime
+                ? clone $lastAttemptTime
+                : new DateTime($lastAttemptTime->format('Y-m-d H:i:s')); // convert interface to DateTime
             if (!$this->twoFAService->canResendCode($user, $eventType)) {
-                $lastAttemptTime = $lastEvent instanceof Event ?
-                    $lastEvent->getEventDatetime() : $timeToResetAttempts;
-                $limitTime = $lastAttemptTime;
                 $limitTime->modify('+' . $timeToResetAttempts . ' minutes');
                 $interval = date_diff($now, $limitTime);
                 $interval_minutes = $interval->days * 1440;
                 $interval_minutes += $interval->h * 60;
                 $interval_minutes += $interval->i;
+
                 $this->addFlash(
                     'error',
                     $this->translator->trans(
                         'attemptsExceeded',
-                        [
-                            '%minutes%' => $interval_minutes
-                        ],
+                        ['%minutes%' => $interval_minutes],
                         'controllers'
                     )
                 );
             } else {
-                $lastAttemptTime = $lastEvent instanceof Event ?
-                    $lastEvent->getEventDatetime() : $timeIntervalToResendCode;
-                $limitTime = $lastAttemptTime;
                 $limitTime->modify('+' . $timeIntervalToResendCode . ' seconds');
                 $interval = date_diff($now, $limitTime);
                 $interval_seconds = $interval->days * 1440;
                 $interval_seconds += $interval->h * 60;
                 $interval_seconds += $interval->i;
                 $interval_seconds += $interval->s;
+
                 $this->addFlash(
                     'error',
                     $this->translator->trans(
@@ -858,11 +831,9 @@ class TwoFAController extends AbstractController
     )]
     public function generateCode(string $context, Request $request): Response
     {
-        /** @var User $user */
         $user = $this->getUser();
-
         // Ensure the user is logged in
-        if (!$user instanceof UserInterface) {
+        if (!$user instanceof User) {
             $this->addFlash(
                 'error',
                 $this->translator->trans('onlyAccessThisPageLoggedIn', [], 'controllers')
@@ -930,11 +901,9 @@ class TwoFAController extends AbstractController
     )]
     public function downloadCodes(string $context): Response
     {
-        /** @var User $user */
         $user = $this->getUser();
-
         // Ensure the user is logged in
-        if (!$user instanceof UserInterface) {
+        if (!$user instanceof User) {
             $this->addFlash(
                 'error',
                 $this->translator->trans('onlyAccessThisPageLoggedIn', [], 'controllers')
@@ -983,11 +952,9 @@ class TwoFAController extends AbstractController
     )]
     public function firstSetupPortal(string $context, Request $request): RedirectResponse
     {
-        /** @var User $user */
         $user = $this->getUser();
-
         // Ensure the user is logged in
-        if (!$user instanceof UserInterface) {
+        if (!$user instanceof User) {
             $this->addFlash(
                 'error',
                 $this->translator->trans('onlyAccessThisPageLoggedIn', [], 'controllers')
@@ -1076,11 +1043,9 @@ class TwoFAController extends AbstractController
     )]
     public function firstVerificationLocal(string $context, Request $request): Response
     {
-        /** @var User $user */
         $user = $this->getUser();
-
         // Ensure the user is logged in
-        if (!$user instanceof UserInterface) {
+        if (!$user instanceof User) {
             $this->addFlash(
                 'error',
                 $this->translator->trans('onlyAccessThisPageLoggedIn', [], 'controllers')
@@ -1133,26 +1098,16 @@ class TwoFAController extends AbstractController
             if ($this->twoFAService->validate2FACode($user, $formCode)) {
                 $session->set('2fa_verified_' . $context, true);
                 if ($user->getPhoneNumber() instanceof PhoneNumber) {
-                    if ($user instanceof User) {
-                        $user->setTwoFAtype(UserTwoFactorAuthenticationStatus::SMS->value);
-                        $this->entityManager->persist($user);
-                        $this->twoFAService->event2FA(
-                            $request->getClientIp(),
-                            $user,
-                            AnalyticalEventType::ENABLE_LOCAL_2FA->value,
-                            $request->headers->get('User-Agent')
-                        );
-                        $this->entityManager->flush();
-                    } else {
-                        $this->addFlash(
-                            'error',
-                            $this->translator->trans('onlyAccessThisPageLoggedIn', [], 'controllers')
-                        );
-                        if ($context === FirewallType::DASHBOARD->value) {
-                            return $this->redirectToRoute('admin_page');
-                        }
-                        return $this->redirectToRoute('app_landing');
-                    }
+                    $user->setTwoFAtype(UserTwoFactorAuthenticationStatus::SMS->value);
+                    $this->entityManager->persist($user);
+                    $this->twoFAService->event2FA(
+                        $request->getClientIp(),
+                        $user,
+                        AnalyticalEventType::ENABLE_LOCAL_2FA->value,
+                        $request->headers->get('User-Agent')
+                    );
+                    $this->entityManager->flush();
+
                     return $this->redirectToRoute('app_otpCodes', [
                         'context' => $context
                     ]);
@@ -1206,11 +1161,9 @@ class TwoFAController extends AbstractController
     )]
     public function swapMethod2FADisableLocal(string $context, Request $request): Response
     {
-        /** @var User $user */
         $user = $this->getUser();
-
         // Ensure the user is logged in
-        if (!$user instanceof UserInterface) {
+        if (!$user instanceof User) {
             $this->addFlash(
                 'error',
                 $this->translator->trans('onlyAccessThisPageLoggedIn', [], 'controllers')
@@ -1287,11 +1240,9 @@ class TwoFAController extends AbstractController
     )]
     public function generateCodeSwapMethod(string $context, Request $request): Response
     {
-        /** @var User $user */
         $user = $this->getUser();
-
         // Ensure the user is logged in
-        if (!$user instanceof UserInterface) {
+        if (!$user instanceof User) {
             $this->addFlash(
                 'error',
                 $this->translator->trans('onlyAccessThisPageLoggedIn', [], 'controllers')
@@ -1354,11 +1305,9 @@ class TwoFAController extends AbstractController
     )]
     public function swapMethod2FADisableTOTP(string $context, Request $request): Response
     {
-        /** @var User $user */
         $user = $this->getUser();
-
         // Ensure the user is logged in
-        if (!$user instanceof UserInterface) {
+        if (!$user instanceof User) {
             $this->addFlash(
                 'error',
                 $this->translator->trans('onlyAccessThisPageLoggedIn', [], 'controllers')

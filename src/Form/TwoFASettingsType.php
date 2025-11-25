@@ -2,175 +2,55 @@
 
 namespace App\Form;
 
-use App\Enum\SettingName;
+use App\DTO\TwoFASettingsDTO;
 use App\Enum\TwoFAType;
-use App\Service\GetSettings;
-use App\Validator\NoSpecialCharacters;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Validator\Constraints\Length;
-use Symfony\Component\Validator\Constraints\NotBlank;
-use Symfony\Component\Validator\Constraints\Range;
-use Symfony\Contracts\Translation\TranslatorInterface;
 
+/**
+ * @extends AbstractType<TwoFASettingsDTO>
+ */
 class TwoFASettingsType extends AbstractType
 {
-    public function __construct(
-        private readonly GetSettings $getSettings,
-        private readonly TranslatorInterface $translator
-    ) {
-    }
-
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
-        $settings = $options['settings'];
-        foreach ($settings as $setting) {
-            $settingName = $setting->getName();
-            $settingValue = $setting->getValue();
-            $description = $this->getSettings->getSettingDescription($settingName);
-
-            if ($settingName === SettingName::TWO_FACTOR_AUTH_STATUS->value) {
-                $builder->add(SettingName::TWO_FACTOR_AUTH_STATUS->value, ChoiceType::class, [
-                    'choices' => [
-                        'Not Enforced' => TwoFAType::NOT_ENFORCED->value,
-                        'Enforced for Local accounts only' => TwoFAType::ENFORCED_FOR_LOCAL->value,
-                        'Enforced for All accounts' => TwoFAType::ENFORCED_FOR_ALL->value,
-                    ],
-                    'data' => $settingValue,
-                    'attr' => [
-                        'description' => $description,
-                    ],
-                    'constraints' => [
-                        new NotBlank([
-                            'message' => $this->translator->trans('selectOption', [], 'TwoFA'),
-                        ]),
-                    ],
-                    'invalid_message' => $this->translator->trans('selectValidOption', [], 'TwoFA'),
-                ]);
-            } elseif ($settingName === SettingName::TWO_FACTOR_AUTH_APP_LABEL->value) {
-                $builder->add(SettingName::TWO_FACTOR_AUTH_APP_LABEL->value, TextType::class, [
-                    'data' => $settingValue,
-                    'attr' => [
-                        'description' => $description,
-                    ],
-                    'constraints' => [
-                        new NotBlank([
-                            'message' => $this->translator->trans('fieldCannotBeBlank', [], 'TwoFA'),
-                        ]),
-                        new Length([
-                            'min' => 3,
-                            'minMessage' => $this->translator->trans('fieldCannotBeShorterThan', [], 'TwoFA'),
-                            'max' => 64,
-                            'maxMessage' => $this->translator->trans('fieldCannotBeLongerThan', [], 'TwoFA'),
-                        ]),
-                        new NoSpecialCharacters()
-                    ],
-                    'invalid_message' => $this->translator->trans('enterValidLabel', [], 'TwoFA'),
-                ]);
-            } elseif ($settingName === SettingName::TWO_FACTOR_AUTH_APP_ISSUER->value) {
-                $builder->add(SettingName::TWO_FACTOR_AUTH_APP_ISSUER->value, TextType::class, [
-                    'data' => $settingValue,
-                    'attr' => [
-                        'description' => $description,
-                    ],
-                    'constraints' => [
-                        new NotBlank([
-                            'message' => $this->translator->trans('fieldCannotBeBlank', [], 'TwoFA'),
-                        ]),
-                        new Length([
-                            'min' => 3,
-                            'minMessage' => $this->translator->trans('fieldCannotBeShorterThan', [], 'TwoFA'),
-                            'max' => 32,
-                            'maxMessage' => $this->translator->trans('fieldCannotBeLongerThan', [], 'TwoFA'),
-                        ]),
-                        new NoSpecialCharacters()
-                    ],
-                    'invalid_message' => $this->translator->trans('enterValidLabel', [], 'TwoFA'),
-                ]);
-            } elseif ($settingName === SettingName::TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME->value) {
-                $builder->add(SettingName::TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME->value, IntegerType::class, [
-                    'data' => (int)$settingValue,
-                    'attr' => [
-                        'description' => $description,
-                    ],
-                    'constraints' => [
-                        new NotBlank([
-                            'message' => $this->translator->trans('fieldCannotBeBlank', [], 'TwoFA'),
-                        ]),
-                        new Range([
-                            'min' => 60,
-                            'minMessage' => $this->translator->trans('ValueCannotBeLessThan', [], 'TwoFA'),
-                        ]),
-                    ],
-                    'invalid_message' => $this->translator->trans('enterValidNumber', [], 'TwoFA'),
-                ]);
-            } elseif ($settingName === SettingName::TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE->value) {
-                $builder->add(
-                    SettingName::TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE->value,
-                    IntegerType::class,
-                    [
-                        'data' => (int)$settingValue,
-                        'attr' => [
-                            'description' => $description,
-                        ],
-                        'constraints' => [
-                            new NotBlank([
-                                'message' => $this->translator->trans('fieldCannotBeBlank', [], 'TwoFA'),
-                            ]),
-                            new Range([
-                                'min' => 1,
-                                'minMessage' => $this->translator->trans('valueCannotBeLessThanAttempt', [], 'TwoFA'),
-                            ]),
-                        ],
-                        'invalid_message' => $this->translator->trans('enterValidNumber', [], 'TwoFA'),
-                    ]
-                );
-            } elseif ($settingName === SettingName::TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS->value) {
-                $builder->add(SettingName::TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS->value, IntegerType::class, [
-                    'data' => (int)$settingValue,
-                    'attr' => [
-                        'description' => $description,
-                    ],
-                    'constraints' => [
-                        new NotBlank([
-                            'message' => $this->translator->trans('fieldCannotBeBlank', [], 'TwoFA'),
-                        ]),
-                        new Range([
-                            'min' => 5,
-                            'minMessage' => $this->translator->trans('valueCannotBeLessThanMinutes', [], 'TwoFA'),
-                        ]),
-                    ],
-                    'invalid_message' => $this->translator->trans('enterValidNumber', [], 'TwoFA'),
-                ]);
-            } elseif ($settingName === SettingName::TWO_FACTOR_AUTH_RESEND_INTERVAL->value) {
-                $builder->add(SettingName::TWO_FACTOR_AUTH_RESEND_INTERVAL->value, IntegerType::class, [
-                    'data' => (int)$settingValue,
-                    'attr' => [
-                        'description' => $description,
-                    ],
-                    'constraints' => [
-                        new NotBlank([
-                            'message' => $this->translator->trans('fieldCannotBeBlank', [], 'TwoFA'),
-                        ]),
-                        new Range([
-                            'min' => 30,
-                            'minMessage' => $this->translator->trans('ValueCannotBeLessThan', [], 'TwoFA'),
-                        ]),
-                    ],
-                    'invalid_message' => $this->translator->trans('enterValidNumber', [], 'TwoFA'),
-                ]);
-            }
-        }
+        $builder
+            ->add('twoFaStatus', ChoiceType::class, [
+                'choices' => [
+                    TwoFAType::NOT_ENFORCED->value => TwoFAType::NOT_ENFORCED->value,
+                    TwoFAType::ENFORCED_FOR_LOCAL->value => TwoFAType::ENFORCED_FOR_LOCAL->value,
+                    TwoFAType::ENFORCED_FOR_ALL->value => TwoFAType::ENFORCED_FOR_ALL->value,
+                ],
+                'required' => false,
+            ])
+            ->add('twoFaAppLabel', TextType::class, [
+                'required' => false,
+            ])
+            ->add('twoFaAppIssuer', TextType::class, [
+                'required' => false,
+            ])
+            ->add('twoFaCodeExpirationTime', IntegerType::class, [
+                'required' => false,
+            ])
+            ->add('twoFaAttemptsNumberResendCode', IntegerType::class, [
+                'required' => false,
+            ])
+            ->add('twoFaTimeResetAttempts', IntegerType::class, [
+                'required' => false,
+            ])
+            ->add('twoFaResendInterval', IntegerType::class, [
+                'required' => false,
+            ]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'settings' => [],
+            'data_class' => TwoFASettingsDTO::class,
         ]);
     }
 }

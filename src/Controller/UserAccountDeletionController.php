@@ -79,10 +79,13 @@ class UserAccountDeletionController extends AbstractController
 
             return $this->redirectToRoute('app_landing');
         }
-        if (
-            $data[SettingName::LOGIN_WITH_UUID_ONLY->value]['value'] === OperationMode::ON->value &&
-            $currentUser->getUserExternalAuths()[0]->getProvider() === UserProvider::PORTAL_ACCOUNT->value
-        ) {
+
+        $loginWithUuidOnly = false;
+        if (is_array($data) && isset($data[SettingName::LOGIN_WITH_UUID_ONLY->value]['value'])) {
+            $loginWithUuidOnly = $data[SettingName::LOGIN_WITH_UUID_ONLY->value]['value'] === OperationMode::ON->value;
+        }
+
+        if ($loginWithUuidOnly) {
             if (
                 $this->twoFAService->canValidationCode($currentUser, AnalyticalEventType::USER_AUTO_DELETE_CODE->value)
             ) {
@@ -118,20 +121,18 @@ class UserAccountDeletionController extends AbstractController
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $currentPasswordDB = $currentUser->getPassword();
-            if ($currentUser->getUserExternalAuths()[0]->getProvider() === UserProvider::PORTAL_ACCOUNT->value) {
-                $typedPassword = $form->get('password')->getData();
+            $typedPassword = $form->get('password')->getData();
 
-                // Compare the typed password with the hashed password from the database
-                if (password_verify((string)$typedPassword, $currentPasswordDB)) {
-                    $this->userDeletionService->deleteUser($currentUser, $userExternalAuths, $request, $currentUser);
+            // Compare the typed password with the hashed password from the database
+            if (password_verify((string)$typedPassword, $currentPasswordDB)) {
+                $this->userDeletionService->deleteUser($currentUser, $userExternalAuths, $request, $currentUser);
 
-                    return $this->redirectToRoute('app_landing');
-                }
-                $this->addFlash(
-                    'error',
-                    $this->translator->trans('invalidPassword', [], 'controllers')
-                );
+                return $this->redirectToRoute('app_landing');
             }
+            $this->addFlash(
+                'error',
+                $this->translator->trans('invalidPassword', [], 'controllers')
+            );
         }
 
         if ($form->isSubmitted() && !$form->isValid()) {
@@ -148,6 +149,9 @@ class UserAccountDeletionController extends AbstractController
         ]);
     }
 
+    /**
+     * @throws \JsonException
+     */
     #[Route('/landing/userAccount/deletion/local/code', name: 'app_user_account_deletion_local_code')]
     #[IsGranted('ROLE_USER')]
     public function userAccountDeletionLocalConfirm(Request $request): Response
@@ -178,11 +182,7 @@ class UserAccountDeletionController extends AbstractController
 
         $form = $this->createForm(AutoDeleteCodeType::class);
         $form->handleRequest($request);
-        if (
-            $form->isSubmitted() &&
-            $form->isValid() &&
-            $currentUser->getUserExternalAuths()[0]->getProvider() === UserProvider::PORTAL_ACCOUNT->value
-        ) {
+        if ($form->isSubmitted() && $form->isValid()) {
             $typedCode = $form->get('code')->getData();
 
             // Compare the typed code with the 2fa code from the database
@@ -219,10 +219,6 @@ class UserAccountDeletionController extends AbstractController
     {
         /** @var User $currentUser */
         $currentUser = $this->getUser();
-        if (!$currentUser) {
-            // Redirect if the current user cannot be retrieved
-            return $this->redirectToRoute('app_landing');
-        }
 
         // Check if the account has either a phone number or email
         if ($currentUser->getPhoneNumber() === null && empty($currentUser->getEmail())) {
@@ -255,7 +251,7 @@ class UserAccountDeletionController extends AbstractController
 
         // SAML ACCOUNT
         if ($userExternalAuths[0]->getProvider() === UserProvider::SAML->value) {
-            $previousLoggedID = $currentUser->getId();
+            $previousLoggedID = (string)$currentUser->getId();
 
             $cookie = new Cookie(
                 'previousLoggedID',
@@ -308,10 +304,8 @@ class UserAccountDeletionController extends AbstractController
 
         /** @var User $user */
         $user = $this->userRepository->findOneBy(['id' => $currentLoggedUserID]);
-        if ($user) {
-            $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $user]);
-            $this->userDeletionService->deleteUser($user, $userExternalAuths, $request, $user);
-        }
+        $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $user]);
+        $this->userDeletionService->deleteUser($user, $userExternalAuths, $request, $user);
 
         return $this->redirectToRoute('app_landing');
     }

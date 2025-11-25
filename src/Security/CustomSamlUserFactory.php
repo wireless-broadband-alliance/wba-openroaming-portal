@@ -9,10 +9,11 @@ namespace App\Security;
 use ApiPlatform\Metadata\UrlGeneratorInterface;
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
+use App\Enum\PlatformMode;
 use App\Enum\SettingName;
 use App\Enum\UserProvider;
+use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
-use App\Service\GetSettings;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Nbgrp\OneloginSamlBundle\Security\User\SamlUserFactoryInterface;
@@ -31,17 +32,19 @@ class CustomSamlUserFactory implements SamlUserFactoryInterface
 {
     /**
      * Default attribute mapping.
+     * @var array<string, int|string|list<string>>
      */
     private readonly array $attribute_mapping;
+
     private readonly SessionInterface $session;
 
     public function __construct(
         private readonly UserRepository $userRepository,
         private readonly EntityManagerInterface $entityManager,
-        private readonly GetSettings $getSettings,
         private readonly UrlGeneratorInterface $urlGenerator,
         RequestStack $requestStack,
-        private readonly TranslatorInterface $translator
+        private readonly TranslatorInterface $translator,
+        private readonly SettingRepository $settingRepository
     ) {
         $this->session = $requestStack->getSession();
         $this->attribute_mapping = [
@@ -56,15 +59,16 @@ class CustomSamlUserFactory implements SamlUserFactoryInterface
     }
 
     /**
+     * @param array<string, array<int, string>> $attributes
      * @throws ReflectionException
      * @throws \Exception
      */
     public function createUser(string $identifier, array $attributes): UserInterface
     {
         // Call the getSettings method of GetSettings class to retrieve the data
-        $data = $this->getSettings->getSettings();
+        $platformModeStatus = $this->settingRepository->findOneBy(['name' => SettingName::PLATFORM_MODE]);
 
-        if ($data[SettingName::PLATFORM_MODE->value]['value'] === true) {
+        if ($platformModeStatus->getValue() === PlatformMode::DEMO->value) {
             throw new RuntimeException(
                 $this->translator->trans('impossibleUseThisAuthenticationMethodInDemoMode', [], 'Security')
             );
@@ -145,6 +149,9 @@ class CustomSamlUserFactory implements SamlUserFactoryInterface
         return $user;
     }
 
+    /**
+     * @param array<string, array<int, string>> $attributes
+     */
     private function getAttributeValue(array $attributes, string $attribute): mixed
     {
         $isArrayValue = str_ends_with($attribute, '[]');
@@ -158,7 +165,7 @@ class CustomSamlUserFactory implements SamlUserFactoryInterface
             ));
         }
 
-        $attributeValue = (array)$attributes[$attribute];
+        $attributeValue = $attributes[$attribute];
         if (!$isArrayValue) {
             /** @psalm-suppress MixedAssignment */
             $attributeValue = reset($attributeValue);

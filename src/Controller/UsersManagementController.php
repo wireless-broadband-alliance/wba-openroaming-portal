@@ -76,7 +76,7 @@ class UsersManagementController extends AbstractController
     public function revokeUsers(
         Request $request,
         UserRepository $userRepository,
-        $id
+        int $id
     ): Response {
         /** @var User $currentUser */
         $currentUser = $this->getUser();
@@ -342,8 +342,7 @@ class UsersManagementController extends AbstractController
         Request $request,
         UserPasswordHasherInterface $passwordHasher,
         EntityManagerInterface $em,
-        MailerInterface $mailer,
-        $id
+        int $id
     ): Response {
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings();
@@ -351,8 +350,6 @@ class UsersManagementController extends AbstractController
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
         $currentUser = $this->getUser();
-
-
 
         if (!$user = $this->userRepository->find($id)) {
             // Get the 'id' parameter from the route URL
@@ -488,10 +485,19 @@ class UsersManagementController extends AbstractController
             ) {
                 $latestEvent = $this->eventRepository->findLatestRequestAttemptEvent(
                     $user,
-                    AnalyticalEventType::USER_ACCOUNT_UPDATE_PASSWORD_FROM_UI
+                    AnalyticalEventType::USER_ACCOUNT_UPDATE_PASSWORD_FROM_UI->value
                 );
-                // Retrieve the SMS resend interval from the settings
-                $smsResendInterval = $data[SettingName::SMS_TIMER_RESEND->value]['value'];
+
+                $smsResendInterval = null;
+                if (is_array($data) && isset($data[SettingName::SMS_TIMER_RESEND->value]['value'])) {
+                    $smsResendInterval = $data[SettingName::SMS_TIMER_RESEND->value]['value'];
+                }
+
+                if ($smsResendInterval === null) {
+                    // Fallback value if the setting is missing just for phpstan be happy
+                    $smsResendInterval = 5;
+                }
+
                 $minInterval = new DateInterval('PT' . $smsResendInterval . 'M');
                 $currentTime = new DateTime();
 
@@ -616,8 +622,8 @@ class UsersManagementController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function disabledBy2FA(
         Request $request,
-        $id,
-        MailerInterface $mailer
+        MailerInterface $mailer,
+        int $id,
     ): RedirectResponse {
         if (!$user = $this->userRepository->find($id)) {
             // Get the 'id' parameter from the route URL

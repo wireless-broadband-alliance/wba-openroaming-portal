@@ -17,7 +17,6 @@ use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
 use App\Service\CaptchaValidator;
 use App\Service\EventActions;
-use App\Service\GetSettings;
 use App\Service\EmailGenerator;
 use App\Service\SendSMS;
 use DateInterval;
@@ -57,7 +56,6 @@ class RegistrationController extends AbstractController
         private readonly EventActions $eventActions,
         private readonly ParameterBagInterface $parameterBag,
         private readonly SendSMS $sendSMSService,
-        private readonly GetSettings $getSettings,
         private readonly SettingRepository $settingRepository,
         private readonly UserPasswordHasherInterface $userPasswordHasher,
         private readonly CaptchaValidator $captchaValidator,
@@ -148,7 +146,7 @@ class RegistrationController extends AbstractController
         $hashedPassword = $userPasswordHasher->hashPassword($user, $data['password']);
         $user->setPassword($hashedPassword);
         $user->setIsVerified(false);
-        $user->setTwoFAcode(random_int(100000, 999999));
+        $user->setTwoFAcode((string)random_int(100000, 999999));
         $user->setTwoFAcodeGeneratedAt(new DateTime());
         $user->setTwoFAcodeIsActive(true);
         $user->setFirstName($data['first_name'] ?? null);
@@ -391,7 +389,6 @@ class RegistrationController extends AbstractController
         return new BaseResponse(
             200,
             sprintf('If the email address exists in our system, we’ve sent a new one to: %s.', $data['email']),
-            null,
         )->toResponse(); // Not Found User doesn't exist request
     }
 
@@ -463,7 +460,7 @@ class RegistrationController extends AbstractController
                 $data['phone_number'],
                 strtoupper((string)$data['country_code'])
             );
-            if ($parsedPhoneNumber && !$phoneNumberUtil->isValidNumber($parsedPhoneNumber)) {
+            if (!$phoneNumberUtil->isValidNumber($parsedPhoneNumber)) {
                 return new BaseResponse(
                     400,
                     null,
@@ -494,7 +491,7 @@ class RegistrationController extends AbstractController
         $hashedPassword = $userPasswordHasher->hashPassword($user, $data['password']);
         $user->setPassword($hashedPassword);
         $user->setIsVerified(false);
-        $user->setTwoFAcode(random_int(100000, 999999));
+        $user->setTwoFAcode((string)random_int(100000, 999999));
         $user->setTwoFAcodeIsActive(true);
         $user->setTwoFAcodeGeneratedAt(new DateTime());
         $user->setFirstName($data['first_name'] ?? null);
@@ -613,7 +610,7 @@ class RegistrationController extends AbstractController
                 $dataRequest['phone_number'],
                 strtoupper((string)$dataRequest['country_code'])
             );
-            if ($parsedPhoneNumber && !$phoneNumberUtil->isValidNumber($parsedPhoneNumber)) {
+            if (!$phoneNumberUtil->isValidNumber($parsedPhoneNumber)) {
                 return new BaseResponse(
                     400,
                     null,
@@ -655,8 +652,6 @@ class RegistrationController extends AbstractController
                 }
             }
 
-            $data = $this->getSettings->getSettings();
-
             if ($hasValidPortalAccount) {
                 try {
                     $randomPassword = bin2hex(random_bytes(4));
@@ -664,7 +659,9 @@ class RegistrationController extends AbstractController
 
                     // Retrieve the latest SMS attempt event for the user
                     $latestEvent = $this->eventRepository->findLatestSmsAttemptEvent($user);
-                    $smsResendInterval = $data[SettingName::SMS_TIMER_RESEND->value]['value']; // Interval in minutes
+                    $smsResendInterval = $this->settingRepository->findOneBy(
+                        ['name' => SettingName::SMS_TIMER_RESEND->value] // Interval in minutes
+                    )?->getValue();
                     $minInterval = new DateInterval('PT' . $smsResendInterval . 'M');
                     $maxAttempts = 3;
                     $currentTime = new DateTime();
@@ -733,11 +730,9 @@ class RegistrationController extends AbstractController
                     $this->entityManager->flush();
 
                     // Send SMS
-                    $message = sprintf(
-                        "Your account password is: %s\n Verification code is: %s",
-                        $randomPassword,
-                        $user->getTwoFAcode()
-                    );
+                    $message = "Your account password is: "
+                    . $randomPassword . "%0A" . "Verification code is: "
+                    . $user->getTwoFAcode();
 
                     $result = $this->sendSMSService->sendSmsNoValidation($user, $message);
 
@@ -779,7 +774,6 @@ class RegistrationController extends AbstractController
         return new BaseResponse(
             200,
             sprintf('If the phone number exists, we have sent you a new code to: %s', $dataRequest['phone_number']),
-            null,
         )->toResponse();
     }
 }

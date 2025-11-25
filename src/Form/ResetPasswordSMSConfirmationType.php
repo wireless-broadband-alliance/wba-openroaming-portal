@@ -9,6 +9,9 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
+/**
+ * @extends AbstractType<null>
+ */
 class ResetPasswordSMSConfirmationType extends AbstractType
 {
     public function __construct(

@@ -4,7 +4,7 @@ handle: 'Handle'
 from: 'From'
 timeToResend: 'Time to Resend'
 defaultRegionPhoneInputs: 'Default Region Phone Inputs'
-sms_provider_notice: 'This is for the 
+sms_provider_notice: 'This is for the
   <a class="font-semibold underline inline-block" href="https://www.budgetsms.net/" target="_blank">
       BudgetSMS.net
   </a>

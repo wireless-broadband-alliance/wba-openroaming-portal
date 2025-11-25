@@ -86,6 +86,9 @@ class ScheduleDTO
         );
     }
 
+    /**
+     * @return array<string, string>
+     */
     public function toCronExpressions(CronExpressionHelperService $cronExpressionHelperService): array
     {
         return [

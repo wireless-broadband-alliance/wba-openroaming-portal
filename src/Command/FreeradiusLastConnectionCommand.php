@@ -16,6 +16,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Lock\LockFactory;
 use Symfony\Component\Lock\Store\FlockStore;
 
+use function Symfony\Component\String\s;
+
 #[AsCommand(
     name: 'backup:freeradiusLastConnection',
     description: 'Backups all lastConnection made on the freeradius database for the OpenRoaming',
@@ -58,7 +60,7 @@ class FreeradiusLastConnectionCommand extends Command
             'name' => SettingName::TIME_STAMP_FREERADIUS_CRON->value
         ]);
         if ($timestampFreeradiusCron && is_null($timestampFreeradiusCron->getValue())) {
-            $timestampFreeradiusCron->setValue(0);
+            $timestampFreeradiusCron->setValue("0");
         }
 
         if (!$timestampFreeradiusCron) {
@@ -85,9 +87,9 @@ class FreeradiusLastConnectionCommand extends Command
 
         $updated = false;
 
-        $latestConnectionTime = $this->radiusAccountingRepository->findLatestConnectionTime();
-
-        if ((int)$timestampFreeradiusCron->getValue() < $latestConnectionTime['acctStartTime']->getTimestamp()) {
+        $latestTimestamp = $this->radiusAccountingRepository->findLatestConnectionTime();
+        $cronTimestamp = (int)$timestampFreeradiusCron->getValue();
+        if ($latestTimestamp !== null && $cronTimestamp < $latestTimestamp) {
             $this->entityManager->beginTransaction();
 
             try {
@@ -103,9 +105,9 @@ class FreeradiusLastConnectionCommand extends Command
                 }
 
                 foreach ($radAcct as $row) {
-                    $username = $row['username'] ?? null;
-                    $startTime = $row['acctStartTime'] ?? null;
-                    $stopTime = $row['acctStopTime'] ?? null;
+                    $username = $row->getUsername() ?? null;
+                    $startTime = $row->getAcctStartTime() ?? null;
+                    $stopTime = $row->getAcctStopTime() ?? null;
 
                     if (!$username || !$startTime || !$stopTime) {
                         continue;
@@ -118,8 +120,7 @@ class FreeradiusLastConnectionCommand extends Command
                     $needsUpdate = false;
 
                     if (
-                        $entity->getLastConnectionStartAt() === null || $startTime > $entity->getLastConnectionStartAt(
-                        )
+                        $entity->getLastConnectionStartAt() === null || $startTime > $entity->getLastConnectionStartAt()
                     ) {
                         $entity->setLastConnectionStartAt($startTime);
                         $needsUpdate = true;
@@ -139,7 +140,7 @@ class FreeradiusLastConnectionCommand extends Command
                 if ($updated) {
                     // Update timestamp only if changes were made
                     // Make all the db OpenRoaming changes at once to avoid server load
-                    $timestampFreeradiusCron->setValue(time());
+                    $timestampFreeradiusCron->setValue((string)time());
                     $this->entityManager->persist($timestampFreeradiusCron);
                     $this->entityManager->flush();
                     $this->entityManager->commit();
