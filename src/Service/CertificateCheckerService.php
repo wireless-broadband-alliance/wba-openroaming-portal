@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use App\Enum\CertificateFileName;
 use Exception;
 use RuntimeException;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -42,21 +43,6 @@ readonly class CertificateCheckerService
         return date('Y-m-d H:i:s', $certInfo['validTo_time_t']);
     }
 
-    public function isCertificateValidFromString(string $content): bool
-    {
-        // Parse the certificate
-        $certInfo = openssl_x509_parse($content);
-
-        // If parsing failed or no validity info, consider invalid
-        if ($certInfo === false || !isset($certInfo['validTo_time_t'])) {
-            return false;
-        }
-
-        // Check current time against certificate expiration
-        $now = time();
-        return $certInfo['validTo_time_t'] > $now;
-    }
-
     /**
      * Verify presence of required certificate files.
      *
@@ -66,19 +52,19 @@ readonly class CertificateCheckerService
     {
         $missingFiles = [];
         if (!file_exists('/var/www/openroaming/signing-keys/ca.pem')) {
-            $missingFiles[] = 'ca.pem';
+            $missingFiles[] = CertificateFileName::CA_PEM_FILE->value;
         }
         if (!file_exists('/var/www/openroaming/signing-keys/cert.pem')) {
-            $missingFiles[] = 'cert.pem';
+            $missingFiles[] = CertificateFileName::CERT_PEM_FILE->value;
         }
         if (!file_exists('/var/www/openroaming/signing-keys/chain.pem')) {
-            $missingFiles[] = 'chain.pem';
+            $missingFiles[] = CertificateFileName::CHAIN_PEM_FILE->value;
         }
         if (!file_exists('/var/www/openroaming/signing-keys/fullchain.pem')) {
-            $missingFiles[] = 'fullchain.pem';
+            $missingFiles[] = CertificateFileName::FULL_CHAIN_PEM_FILE->value;
         }
         if (!file_exists('/var/www/openroaming/signing-keys/privkey.pem')) {
-            $missingFiles[] = 'privkey.pem';
+            $missingFiles[] = CertificateFileName::PRIVATE_KEY_PEM_FILE->value;
         }
         return $missingFiles;
     }

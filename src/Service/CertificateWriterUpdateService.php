@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use App\Enum\CertificateFileName;
 use RuntimeException;
 use Symfony\Component\HttpKernel\KernelInterface;
 
@@ -25,11 +26,11 @@ class CertificateWriterUpdateService
     public function writeCertificates(array $certificateSet): void
     {
         $map = [
-            'caFREERADIUS' => 'ca.pem',
-            'certFREERADIUS' => 'cert.pem',
-            'chainFREERADIUS' => 'chain.pem',
-            'full_chainFREERADIUS' => 'fullchain.pem',
-            // 'private_keyFREERADIUS' => 'privKey.pem', private key should never be present on the portal web
+            'caFREERADIUS' => CertificateFileName::CA_PEM_FILE->value,
+            'certFREERADIUS' => CertificateFileName::CERT_PEM_FILE->value,
+            'chainFREERADIUS' => CertificateFileName::CHAIN_PEM_FILE->value,
+            'full_chainFREERADIUS' => CertificateFileName::FULL_CHAIN_PEM_FILE->value,
+            'private_keyFREERADIUS' => CertificateFileName::PRIVATE_KEY_PEM_FILE->value,
         ];
 
         // Ensure the folder exists
