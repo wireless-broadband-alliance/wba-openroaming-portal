@@ -28,6 +28,8 @@ use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
+use Symfony\Component\Process\Exception\ProcessFailedException;
+use Symfony\Component\Process\Process;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 readonly class InstallationService
@@ -207,21 +209,6 @@ readonly class InstallationService
         $dto->updatedAt = $installationProgress->getUpdatedAt();
 
         return $dto;
-    }
-
-    public function envPermitions(KernelInterface $kernel): void {
-        $application = new Application($kernel);
-        $application->setAutoExit(false);
-
-        $input = new ArrayInput([
-            'command' => 'chown -R www-data:www-data .env',
-        ]);
-
-        $output = new BufferedOutput();
-        if (!defined('STDIN')) {
-            define('STDIN', fopen('php://stdin', 'r'));
-        }
-        $application->run($input, $output);
     }
 
     public function resetToLastInstallation()
