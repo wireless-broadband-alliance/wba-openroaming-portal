@@ -14,7 +14,7 @@ class CertificateWriterUpdateService
         private readonly KernelInterface $kernel
     ) {
         $this->signingKeysPath = $this->kernel->getProjectDir(
-            ) . DIRECTORY_SEPARATOR . 'signing-keys' . DIRECTORY_SEPARATOR;
+        ) . DIRECTORY_SEPARATOR . 'signing-keys' . DIRECTORY_SEPARATOR;
     }
 
     /**
@@ -34,9 +34,11 @@ class CertificateWriterUpdateService
         ];
 
         // Ensure the folder exists
-        if (!is_dir($this->signingKeysPath) && !mkdir($this->signingKeysPath, 0755, true) && !is_dir(
+        if (
+            !is_dir($this->signingKeysPath) && !mkdir($this->signingKeysPath, 0755, true) && !is_dir(
                 $this->signingKeysPath
-            )) {
+            )
+        ) {
             throw new RuntimeException(
                 sprintf('Could not create signing keys directory at "%s"', $this->signingKeysPath)
             );

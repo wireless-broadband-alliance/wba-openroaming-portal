@@ -519,8 +519,7 @@ class InstallationController extends AbstractController
                     );
                 }
             }
-        }
-        else {
+        } else {
             return $this->redirectToRoute('admin_dashboard_settings_certs_installation');
         }
 

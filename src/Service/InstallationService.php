@@ -117,7 +117,6 @@ readonly class InstallationService
     }
 
 
-
     /**
      * @throws RandomException
      * @throws TransportExceptionInterface
@@ -148,8 +147,7 @@ readonly class InstallationService
                 )
             )
             ->to($installationProgress->getEmailAdmin())
-            ->subject($this->translator->trans('adminConfirmationEmail', [], 'InstallationService'
-            ))
+            ->subject($this->translator->trans('adminConfirmationEmail', [], 'InstallationService'))
             ->htmlTemplate('email/installation_admin_code.html.twig')
             ->context([
                 'uuid' => $installationProgress->getEmailAdmin(),
@@ -187,13 +185,17 @@ readonly class InstallationService
         $dto = new InstallationProgressDTO();
         $dto->installationState = $installationProgress->getInstallationState();
 
-        $dbOpenRoamingPartials = $this->databaseConnectionService->parseDatabaseUrl($installationProgress->getDbOpenRoaming());
+        $dbOpenRoamingPartials = $this->databaseConnectionService->parseDatabaseUrl(
+            $installationProgress->getDbOpenRoaming()
+        );
         $dto->dbOpenRoamingUserName = $dbOpenRoamingPartials['username'];
         $dto->dbOpenRoamingPassword = $dbOpenRoamingPartials['password'];
         $dto->dbOpenRoamingIp = $dbOpenRoamingPartials['host'];
         $dto->dbOpenRoamingPort = $dbOpenRoamingPartials['port'];
 
-        $dbFreeradiusPartials = $this->databaseConnectionService->parseDatabaseUrl($installationProgress->getDbFreeradius());
+        $dbFreeradiusPartials = $this->databaseConnectionService->parseDatabaseUrl(
+            $installationProgress->getDbFreeradius()
+        );
         $dto->dbFreeradiusUserName = $dbFreeradiusPartials['username'];
         $dto->dbFreeradiusPassword = $dbFreeradiusPartials['password'];
         $dto->dbFreeradiusIp = $dbFreeradiusPartials['host'];

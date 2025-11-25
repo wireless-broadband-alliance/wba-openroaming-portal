@@ -380,10 +380,12 @@ class CertificateFreeradiusManagementController extends AbstractController
             $requestedIndex = $this->certificateProcessCheckerService->indexOf($requestedStage);
             $currentIndex = $this->certificateProcessCheckerService->indexOf($currentStage);
 
-            if ($requestedIndex >= 0 &&
+            if (
+                $requestedIndex >= 0 &&
                 $requestedIndex < $currentIndex &&
                 $requestedStage->phase() === 'freeradius' &&
-                $currentStage->phase() === 'freeradius') {
+                $currentStage->phase() === 'freeradius'
+            ) {
                 $this->certificateProcessCheckerService->resetStagesFrom($requestedStage);
                 $this->entityManager->persist($process);
                 $this->entityManager->flush();

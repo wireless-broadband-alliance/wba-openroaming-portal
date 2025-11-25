@@ -24,9 +24,13 @@ use App\Service\EmailGenerator;
 use App\Service\SendSMS;
 use App\Service\TwoFAService;
 use App\Service\UserCreationService;
+use App\Service\UserProviderDetectorResolverService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
+use libphonenumber\NumberParseException;
+use libphonenumber\PhoneNumber;
+use libphonenumber\PhoneNumberUtil;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Random\RandomException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -44,6 +48,7 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -69,6 +74,7 @@ class SecurityController extends AbstractController
         private readonly EmailGenerator $emailGenerator,
         private readonly UserCreationService $userCreationService,
         private readonly TokenStorageInterface $tokenStorage,
+        private readonly UserProviderDetectorResolverService $userProviderDetectorResolverService,
     ) {
     }
 
@@ -96,20 +102,37 @@ class SecurityController extends AbstractController
         }
 
         // Last username entered by the user (this will be empty if the user clicked the verification link)
-        $email = $request->request->get('email') ?? $request->query->get('email');
+        $uuid = (string)$request->request->get('uuid');
+        $email = (string)$request->request->get('email');
         $phoneNumber = $request->request->get('phoneNumber') ?? $request->query->get('phoneNumber');
 
-        if (!empty($email)) {
-            $lastUsername = $email;
-        } elseif (!empty($phoneNumber)) {
-            $lastUsername = $phoneNumber;
-        } else {
-            // Fallback to Symfony's AuthenticationUtils
-            $lastUsername = $authenticationUtils->getLastUsername();
+        $resolved = null;
+        if ($uuid !== '' && $uuid !== '0') {
+            $resolved = $this->userProviderDetectorResolverService->resolve($uuid);
         }
 
         // Create the DTO with injected default regions and required password for this login method
         $dto = new LoginChoiceDTO();
+        $phoneUtil = PhoneNumberUtil::getInstance();
+        $defaultRegion = $data[SettingName::DEFAULT_REGION_PHONE_INPUTS->value]['value'];
+
+        if ($email !== '' && $email !== '0') {
+            $dto->email = $email;
+        } elseif (!empty($phoneNumber)) {
+            try {
+                $dto->phoneNumber = $phoneUtil->parse((string)$phoneNumber, $defaultRegion);
+            } catch (NumberParseException) {
+                $dto->phoneNumber = null;
+            }
+        } elseif ($resolved && $resolved['uuidType'] === UserProvider::EMAIL->value) {
+            $dto->email = $uuid;
+        } elseif ($resolved && $resolved['uuidType'] === UserProvider::PHONE_NUMBER->value) {
+            try {
+                $dto->phoneNumber = $phoneUtil->parse($uuid, $defaultRegion);
+            } catch (NumberParseException) {
+                $dto->phoneNumber = null;
+            }
+        }
 
         $emailMethod = $data[SettingName::AUTH_METHOD_REGISTER_ENABLED->value]['value'];
         $phoneNumberMethod = $data[SettingName::AUTH_METHOD_SMS_REGISTER_ENABLED->value]['value'];
@@ -145,7 +168,6 @@ class SecurityController extends AbstractController
         }
 
         return $this->render('landing/login/login_landing.html.twig', [
-            'last_username' => $lastUsername,
             'error' => $error,
             'data' => $data,
             'form' => $form,
@@ -481,15 +503,13 @@ class SecurityController extends AbstractController
      * @throws LogicException
      */
     #[Route('/login/confirmation', name: 'app_login_confirmation')]
+    #[IsGranted("ROLE_USER")]
     public function loginConfirmation(
         Request $request,
     ): Response {
         /** @var User $user */
         $user = $this->getUser();
 
-        if (!$this->isGranted('IS_AUTHENTICATED_FULLY')) {
-            return $this->redirectToRoute('app_login');
-        }
 
         $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $user]);
 

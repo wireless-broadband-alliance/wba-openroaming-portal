@@ -730,11 +730,9 @@ class RegistrationController extends AbstractController
                     $this->entityManager->flush();
 
                     // Send SMS
-                    $message = sprintf(
-                        "Your account password is: %s\n Verification code is: %s",
-                        $randomPassword,
-                        $user->getTwoFAcode()
-                    );
+                    $message = "Your account password is: "
+                    . $randomPassword . "%0A" . "Verification code is: "
+                    . $user->getTwoFAcode();
 
                     $result = $this->sendSMSService->sendSmsNoValidation($user, $message);
 

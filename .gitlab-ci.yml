@@ -18,37 +18,50 @@ php-security-checker:
   script:
     - cd ${COMPOSER_LOCATION:-.} && security-checker security:check composer.lock
 
+yamllint:
+  image: registry.gitlab.com/pipeline-components/yamllint:latest
+  allow_failure: false
+  script:
+    - yamllint -f colored -c yamllint.yaml .
+  rules:
+    - if: '$CI_COMMIT_BRANCH'
+      when: always
+    - if: '$CI_COMMIT_TAG'
+      when: never
+    - when: never
+  stage: lint
+
 
 test-rector:
   image: "$CI_REGISTRY_IMAGE:develop"
   allow_failure: false
   before_script:
-  - cp .env.sample .env
-  - COMPOSER_CACHE_DIR=composer-cache composer install
+    - cp .env.sample .env
+    - COMPOSER_CACHE_DIR=composer-cache composer install
   script:
-  - vendor/bin/rector process src --dry-run
+    - vendor/bin/rector process src --dry-run
   stage: test
 
 test-twig:
   image: "$CI_REGISTRY_IMAGE:develop"
   allow_failure: false
   before_script:
-  - cp .env.sample .env
-  - COMPOSER_CACHE_DIR=composer-cache composer install
+    - cp .env.sample .env
+    - COMPOSER_CACHE_DIR=composer-cache composer install
   script:
-  - vendor/bin/twig-cs-fixer lint ./templates
+    - vendor/bin/twig-cs-fixer lint ./templates
   stage: test
 
-test-phpstan :
-  image : "$CI_REGISTRY_IMAGE:develop"
-  allow_failure : false
+test-phpstan:
+  image: "$CI_REGISTRY_IMAGE:develop"
+  allow_failure: false
   before_script:
-  - cp .env.sample .env
-  - COMPOSER_CACHE_DIR=composer-cache composer install
+    - cp .env.sample .env
+    - COMPOSER_CACHE_DIR=composer-cache composer install
   script:
-  - php -d memory_limit=4G vendor/bin/phpstan analyse .
+    - php -d memory_limit=4G vendor/bin/phpstan analyse .
 
-  stage : test
+  stage: test
 
 eslint:
   image: node:latest
@@ -75,7 +88,7 @@ build_image:
 
 trivy-scan:
   stage: scan
-  allow_failure: true
+  allow_failure: false
   variables:
     DOCKER_DRIVER: overlay2
     TRIVY_NO_PROGRESS: "true"
@@ -90,8 +103,8 @@ trivy-scan:
     - |
       IMAGE="$CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME"
       echo "Scanning Docker image: $IMAGE"
-      ./trivy image --exit-code 0 --severity HIGH,CRITICAL,MEDIUM --format template --template "@contrib/gitlab.tpl" -o trivy-image-report.json "$IMAGE"
-      ./trivy image --exit-code 0 --severity HIGH,CRITICAL,MEDIUM --format table "$IMAGE"
+      ./trivy image --exit-code 0 --severity HIGH,CRITICAL,MEDIUM --ignore-status will_not_fix,fix_deferred,fixed --format template --template "@contrib/gitlab.tpl" -o trivy-image-report.json "$IMAGE"
+      ./trivy image --exit-code 0 --severity HIGH,CRITICAL,MEDIUM --ignore-status will_not_fix,fix_deferred,fixed --format table "$IMAGE"
     # Scan do Dockerfile
     - echo "Scanning Dockerfile"
     - ./trivy config --exit-code 0 --severity HIGH,CRITICAL,MEDIUM --format template --template "@contrib/gitlab.tpl" -o trivy-dockerfile-report.json ./Dockerfile
@@ -101,10 +114,10 @@ trivy-scan:
       - trivy-image-report.json
       - trivy-dockerfile-report.json
     expire_in: 1 hour
-    # reports:
-    #   container_scanning: trivy-image-report.json
+    reports:
+      container_scanning: trivy-image-report.json
 
 
-include :
-  - template : Security/Dependency-Scanning.gitlab-ci.yml
-  - template : Security/Secret-Detection.gitlab-ci.yml
+include:
+  - template: Security/Dependency-Scanning.gitlab-ci.yml
+  - template: Security/Secret-Detection.gitlab-ci.yml

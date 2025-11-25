@@ -97,7 +97,7 @@ class AuthSettingsType extends AbstractType
             ->add('emailTimerResend', IntegerType::class, [
                 'required' => false,
             ])
-            ->add('LinkValidity', IntegerType::class, [
+            ->add('linkValidity', IntegerType::class, [
                 'required' => false,
             ])
             // Login
