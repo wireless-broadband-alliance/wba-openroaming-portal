@@ -207,7 +207,7 @@ readonly class InstallationService
         $dto->dbFreeradiusIp = $dbFreeradiusPartials['host'];
         $dto->dbFreeradiusPort = $dbFreeradiusPartials['port'];
 
-        $dto->trustedProxies = $installationProgress->getTrustedProxies();
+        $dto->trustedProxies = implode(',', $installationProgress->getTrustedProxies());
         $dto->turnstileKey = $installationProgress->getTurnstileKey();
         $dto->turnstileSecret = $installationProgress->getTurnstileSecret();
 
@@ -232,7 +232,7 @@ readonly class InstallationService
 
     public function checkSettingsValues(InstallationProgress $installationProgress): bool
     {
-        if (!$this->envValueMatches(SettingsConfigType::TRUSTED_PROXIES->value, $installationProgress->getTrustedProxies() )) {
+        if (!$this->envValueMatches(SettingsConfigType::TRUSTED_PROXIES->value, implode(',', $installationProgress->getTrustedProxies()) )) {
             return false;
         }
         if (!$this->envValueMatches(SettingsConfigType::TURNSTILE_KEY->value, $installationProgress->getTurnstileKey())) {
@@ -307,10 +307,10 @@ readonly class InstallationService
     public function commandToSettings(InstallationProgress $installationProgress): string
     {
         if ($installationProgress->getJwtPassphrase() !== null) {
-            return 'scripts/update-settings-env.sh "'. $installationProgress->getJwtPassphrase() . '" "' . $installationProgress->getTrustedProxies() .
+            return 'scripts/update-settings-env.sh "'. $installationProgress->getJwtPassphrase() . '" "' . implode(',', $installationProgress->getTrustedProxies()) .
                 '" "' . $installationProgress->getTurnstileKey() . '" "' . $installationProgress->getTurnstileSecret() . '"';
         }
-        return 'scripts/update-settings-env.sh "" "' . $installationProgress->getTrustedProxies() .
+        return 'scripts/update-settings-env.sh "" "' . implode(',', $installationProgress->getTrustedProxies()) .
             '" "' . $installationProgress->getTurnstileKey() . '" "' . $installationProgress->getTurnstileSecret() . '"';
     }
 }
