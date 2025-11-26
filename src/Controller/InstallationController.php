@@ -20,6 +20,7 @@ use App\Enum\SettingsConfigType;
 use App\Form\AdminConfigType;
 use App\Form\DbSetupType;
 use App\Form\SettingsType;
+use App\Form\SimpleSubmitFormType;
 use App\Form\TwoFACode;
 use App\Repository\EventRepository;
 use App\Repository\InstallationProgressRepository;
@@ -223,6 +224,34 @@ class InstallationController extends AbstractController
         }
         $data = $this->getSettings->getSettings();
 
+        $form = $this->createForm(SimpleSubmitFormType::class);
+        $form->handleRequest($request);
+
+
+        if ($form->isSubmitted()) {
+            if ($this->installationService->checkDatabaseSettings($lastInstallation)) {
+                $this->addFlash(
+                    'success_admin',
+                    $this->translator->trans(
+                        'dbSettingsApplied',
+                        [],
+                        'controllers')
+                );
+                return $this->redirectToRoute('admin_dashboard_settings_certs_installation_settings');
+            }
+
+            $this->addFlash(
+                'error_admin',
+                $this->translator->trans(
+                    'dbSettingsNotApplied',
+                    [],
+                    'controllers')
+            );
+            return $this->redirectToRoute('admin_dashboard_settings_certs_installation_database_command');
+        }
+
+        // TODO: in case the user can't run the command add the "chmod +x scripts/update-db-env.sh" command to give to the file permissions to run (Test with Marcelo)
+
         $commands = [
             [
                 'description' => $this->translator->trans(
@@ -237,7 +266,8 @@ class InstallationController extends AbstractController
         return $this->render('dashboard/shared/settings_actions/certificatesManagement/installation/manualInstallation/dataBase.html.twig', [
             'data' => $data,
             'stages' => $this->installationService->getStepperStatus($step),
-            'commands' => $commands
+            'commands' => $commands,
+            'form' => $form->createView(),
         ]);
     }
 

@@ -155,3 +155,5 @@ pfx:
     failure: "Failed to generate Windows PFX please make sure you are submitting valid EV'S!"
 envPermissionDenied: 'The .env file does not have write permissions. Please use the following commands.'
 writeDbSettingsEnv: 'Write the new database settings in the .env file.'
+dbSettingsApplied: 'Database settings applied successfully.'
+dbSettingsNotApplied: 'Database settings were not applied. Please try again.'
