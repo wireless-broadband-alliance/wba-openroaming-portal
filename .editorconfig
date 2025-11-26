@@ -45,6 +45,10 @@ ij_gherkin_keep_indents_on_empty_lines = false
 indent_style = space
 indent_size = 2
 
+[*.js]
+indent_style = space
+indent_size = 2
+
 [*.less]
 indent_size = 2
 ij_less_align_closing_brace_with_properties = false

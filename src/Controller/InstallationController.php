@@ -33,6 +33,7 @@ use App\Service\InstallationService;
 use App\Service\TwoFAService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
+use Exception;
 use Random\RandomException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
@@ -193,6 +194,7 @@ class InstallationController extends AbstractController
     /**
      * @throws HttpException
      * @throws LogicException
+     * @throws \Exception
      */
     #[Route(
         '/dashboard/settings/certificatesManagement/installation/settings',
@@ -223,28 +225,18 @@ class InstallationController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $trustedProxies = $settingsDTO->trustedProxies;
-            $turnstileKey = $settingsDTO->turnstileKey;
-            $turnstileSecret = $settingsDTO->turnstileSecret;
-            $jwtPassphraseEnable = $settingsDTO->jwtPassphraseEnable;
-            $jwtPassphrase = $settingsDTO->jwtPassphrase;
-
-            if (!($lastInstallation instanceof InstallationProgress)) {
-                $lastInstallation = new InstallationProgress();
-                $lastInstallation->setCreatedAt(new \DateTime());
-            }
-            $lastInstallation->setUpdatedAt(new \DateTime());
-            $lastInstallation->setTrustedProxies($trustedProxies);
-            $lastInstallation->setTurnstileKey($turnstileKey);
-            $lastInstallation->setTurnstileSecret($turnstileSecret);
-            if ($jwtPassphraseEnable) {
-                $lastInstallation->setJwtPassphrase($jwtPassphrase);
+            $lastInstallation->setUpdatedAt(new DateTime());
+            $lastInstallation->setTrustedProxies($settingsDTO->trustedProxies);
+            $lastInstallation->setTurnstileKey($settingsDTO->turnstileKey);
+            $lastInstallation->setTurnstileSecret($settingsDTO->turnstileSecret);
+            if ($settingsDTO->jwtPassphraseEnable) {
+                $lastInstallation->setJwtPassphrase($settingsDTO->jwtPassphrase);
             }
             $lastInstallation->setInstallationState(InstallationProgressType::IN_PROGRESS->value);
             $this->entityManager->persist($lastInstallation);
             $this->entityManager->flush();
 
-            $captchaValidation = $this->captchaValidator->validateCredentials($turnstileSecret);
+            $captchaValidation = $this->captchaValidator->validateCredentials($settingsDTO->turnstileSecret);
 
             if (!$captchaValidation['success']) {
                 $this->addFlash(
@@ -255,23 +247,23 @@ class InstallationController extends AbstractController
             }
 
             $this->databaseConnectionService->writeDatabaseUrlToEnv(
-                $trustedProxies,
+                implode(',', $settingsDTO->trustedProxies),
                 SettingsConfigType::TRUSTED_PROXIES->value
             );
 
             $this->databaseConnectionService->writeDatabaseUrlToEnv(
-                $turnstileKey,
+                $settingsDTO->turnstileKey,
                 SettingsConfigType::TURNSTILE_KEY->value
             );
 
             $this->databaseConnectionService->writeDatabaseUrlToEnv(
-                $turnstileSecret,
+                $settingsDTO->turnstileSecret,
                 SettingsConfigType::TURNSTILE_SECRET->value
             );
 
-            if ($jwtPassphraseEnable) {
+            if ($settingsDTO->jwtPassphraseEnable) {
                 $this->databaseConnectionService->writeDatabaseUrlToEnv(
-                    $jwtPassphrase,
+                    $settingsDTO->jwtPassphrase,
                     SettingsConfigType::JWT_PASSPHRASE->value
                 );
             }
@@ -281,11 +273,11 @@ class InstallationController extends AbstractController
                 $application = new Application($kernel);
                 $application->setAutoExit(false);
 
-                if ($jwtPassphraseEnable) {
+                if ($settingsDTO->jwtPassphraseEnable) {
                     $input = new ArrayInput([
                         'command' => 'lexik:jwt:generate-keypair',
                         '--overwrite' => true,
-                        '--passphrase' => $jwtPassphrase,
+                        '--passphrase' => $settingsDTO->jwtPassphrase,
                     ]);
                 } else {
                     $input = new ArrayInput([
@@ -298,9 +290,9 @@ class InstallationController extends AbstractController
                 if (!defined('STDIN')) {
                     define('STDIN', fopen('php://stdin', 'r'));
                 }
-                $application->run($input, $output);
 
-                $result = $output->fetch();
+                $application->run($input, $output);
+                // $result = $output->fetch();
 
                 $privateKeyPath = $this->getParameter('kernel.project_dir') . '/config/jwt/private.pem';
                 $publicKeyPath = $this->getParameter('kernel.project_dir') . '/config/jwt/public.pem';
@@ -333,7 +325,7 @@ class InstallationController extends AbstractController
                 );
 
                 return $this->redirectToRoute('admin_dashboard_settings_certs_installation_admin');
-            } catch (\Exception) {
+            } catch (Exception) {
                 $this->addFlash(
                     'error_admin',
                     $this->translator->trans('jwtFailed', [], 'controllers')
@@ -602,6 +594,7 @@ class InstallationController extends AbstractController
             $this->entityManager->persist($lastInstallation);
             $this->entityManager->flush();
 
+            // TODO REVIEW THIS FUNCTION AND RECAP IF ITS STILL DEAD BECAUSE OF ARRAY TRUSTEDPROXIES
             $this->installationService->resetToLastInstallation();
         }
         return $this->redirectToRoute('admin_dashboard_settings_certs_management');
