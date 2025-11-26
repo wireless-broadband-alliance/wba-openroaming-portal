@@ -15,22 +15,26 @@
         {% set message = 'invalidDb'|trans({}, 'dashboard') %}
     {% endif %}
 
+    {# Certificate Process Status - Checks if the certificates are applied correctly #}
     {% if isCertificateAborted() %}
-        {{ include('dashboard/shared/_toast.html.twig', {
+        {% set isDashboard = app.request.pathinfo starts with '/dashboard' %}
+        {% set toastType = isDashboard ? 'toast-error-dashboard' : 'toast-error' %}
+
+        {{ include('shared/_toast.html.twig', {
             message: 'abortedCertificatesWarning'|trans({}, 'dashboard'),
-            toast_type: 'toast-error-dashboard',
+            toast_type: toastType,
         }) }}
     {% endif %}
 
     {% if message != '' %}
-        {{ include('dashboard/shared/_toast.html.twig', {
+        {{ include('shared/_toast.html.twig', {
             message: message,
             toast_type: 'toast-warning-dashboard',
         }) }}
     {% endif %}
 
     {% if not isFreeradiusCertEV() %}
-        {{ include('dashboard/shared/_toast.html.twig', {
+        {{ include('shared/_toast.html.twig', {
             message: 'freeradius_is_not_ev_cert_warning'|trans({}, 'dashboard'),
             toast_type: 'toast-warning-dashboard',
         }) }}

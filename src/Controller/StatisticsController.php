@@ -60,7 +60,7 @@ class StatisticsController extends AbstractController
 
         if ($interval->days > 366) {
             $this->addFlash(
-                'error_admin',
+                'error',
                 $this->translator->trans('maximumDateRange1Year', [], 'controllers')
             );
             return $this->redirectToRoute('admin_dashboard_statistics');
@@ -85,7 +85,7 @@ class StatisticsController extends AbstractController
         // Check that the memory usage does not exceed the PHP memory limit of 128M
         if ($memory_diff > 134217728) {
             $this->addFlash(
-                'error_admin',
+                'error',
                 $this->translator->trans('dataRequestedTooLarge', [], 'controllers')
             );
             return $this->redirectToRoute('admin_dashboard_statistics');

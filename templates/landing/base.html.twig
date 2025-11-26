@@ -42,14 +42,17 @@
             {% endblock %}
 
             {% block toast_messages %}
-                {{ include('landing/shared/_render_toasts.html.twig') }}
+                {{ include('shared/_render_toasts.html.twig') }}
             {% endblock %}
 
-            {# Certificate Process Status - Checks if the certificates are applied correcly #}
+            {# Certificate Process Status - Checks if the certificates are applied correctly #}
             {% if isCertificateAborted() %}
-                {{ include('landing/shared/_toast.html.twig', {
+                {% set isDashboard = app.request.pathinfo starts with '/dashboard' %}
+                {% set toastType = isDashboard ? 'toast-error-dashboard' : 'toast-error' %}
+
+                {{ include('shared/_toast.html.twig', {
                     message: 'abortedCertificatesWarning'|trans({}, 'dashboard'),
-                    toast_type: 'toast-error',
+                    toast_type: toastType,
                 }) }}
             {% endif %}
 

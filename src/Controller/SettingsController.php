@@ -90,7 +90,7 @@ class SettingsController extends AbstractController
                 $output = $process->getOutput();
                 $errorOutput = $process->getErrorOutput();
                 $this->addFlash(
-                    'success_admin',
+                    'success',
                     $this->translator->trans(
                         'settingResetSuccessfully',
                         [],
@@ -124,7 +124,7 @@ class SettingsController extends AbstractController
                 $output = $process->getOutput();
                 $errorOutput = $process->getErrorOutput();
                 $this->addFlash(
-                    'success_admin',
+                    'success',
                     $this->translator->trans('termsPoliciesSettingsResetSuccessfully', [], 'controllers')
                 );
 
@@ -155,7 +155,7 @@ class SettingsController extends AbstractController
                 $output = $process->getOutput();
                 $errorOutput = $process->getErrorOutput();
                 $this->addFlash(
-                    'success_admin',
+                    'success',
                     $this->translator->trans('radiusConfigurationsResetSuccessfully', [], 'controllers')
                 );
 
@@ -186,7 +186,7 @@ class SettingsController extends AbstractController
                 $output = $process->getOutput();
                 $errorOutput = $process->getErrorOutput();
                 $this->addFlash(
-                    'success_admin',
+                    'success',
                     $this->translator->trans('LDAPSettingsResetSuccessfully', [], 'controllers')
                 );
 
@@ -217,7 +217,7 @@ class SettingsController extends AbstractController
                 $output = $process->getOutput();
                 $errorOutput = $process->getErrorOutput();
                 $this->addFlash(
-                    'success_admin',
+                    'success',
                     $this->translator->trans('platformModeStatusResetSuccessfully', [], 'controllers')
                 );
 
@@ -248,7 +248,7 @@ class SettingsController extends AbstractController
                 $output = $process->getOutput();
                 $errorOutput = $process->getErrorOutput();
                 $this->addFlash(
-                    'success_admin',
+                    'success',
                     $this->translator->trans('platformModeStatusResetSuccessfully', [], 'controllers')
                 );
 
@@ -279,7 +279,7 @@ class SettingsController extends AbstractController
                 $output = $process->getOutput();
                 $errorOutput = $process->getErrorOutput();
                 $this->addFlash(
-                    'success_admin',
+                    'success',
                     $this->translator->trans('authenticationSettingsResetSuccessfully', [], 'controllers')
                 );
 
@@ -310,7 +310,7 @@ class SettingsController extends AbstractController
                 $output = $process->getOutput();
                 $errorOutput = $process->getErrorOutput();
                 $this->addFlash(
-                    'success_admin',
+                    'success',
                     $this->translator->trans('authenticationSettingsResetSuccessfully', [], 'controllers')
                 );
 
@@ -341,7 +341,7 @@ class SettingsController extends AbstractController
                 $output = $process->getOutput();
                 $errorOutput = $process->getErrorOutput();
                 $this->addFlash(
-                    'success_admin',
+                    'success',
                     $this->translator->trans('SMSSettingsClearSuccessfully', [], 'controllers')
                 );
 
@@ -372,7 +372,7 @@ class SettingsController extends AbstractController
                 $output = $process->getOutput();
                 $errorOutput = $process->getErrorOutput();
                 $this->addFlash(
-                    'success_admin',
+                    'success',
                     $this->translator->trans('configurationScheduleClearSuccessfully', [], 'controllers'),
                 );
 
@@ -393,7 +393,7 @@ class SettingsController extends AbstractController
         }
 
         $this->addFlash(
-            'error_admin',
+            'error',
             $this->translator->trans('incorrectVerificationCode', [], 'controllers')
         );
         return $this->redirectToRoute('admin_confirm_reset', ['type' => $type]);
@@ -516,7 +516,7 @@ class SettingsController extends AbstractController
             );
 
             $this->addFlash(
-                'success_admin',
+                'success',
                 $this->translator->trans('termsPoliciesLinksChangesAppliedSuccessfully', [], 'controllers')
             );
 
@@ -571,7 +571,7 @@ class SettingsController extends AbstractController
             );
 
             $this->addFlash(
-                'success_admin',
+                'success',
                 $this->translator->trans('LDAPConfigurationAppliedSuccessfully', [], 'controllers')
             );
 
@@ -624,7 +624,7 @@ class SettingsController extends AbstractController
             );
 
             $this->addFlash(
-                'success_admin',
+                'success',
                 $this->translator->trans('radiusConfigurationAppliedSuccessfully', [], 'controllers')
             );
 
@@ -674,7 +674,7 @@ class SettingsController extends AbstractController
             );
 
             $this->addFlash(
-                'success_admin',
+                'success',
                 $this->translator->trans('newChangesAppliedSuccessfully', [], 'controllers')
             );
             return $this->redirectToRoute('admin_dashboard_settings_status');
@@ -723,7 +723,7 @@ class SettingsController extends AbstractController
             );
 
             $this->addFlash(
-                'success_admin',
+                'success',
                 $this->translator->trans('newChangesAppliedSuccessfully', [], 'controllers')
             );
             return $this->redirectToRoute('admin_dashboard_settings_two_fa');
@@ -817,7 +817,7 @@ class SettingsController extends AbstractController
                 $eventMetadata
             );
             $this->addFlash(
-                'success_admin',
+                'success',
                 $this->translator->trans('authenticationConfigurationAppliedSuccessfully', [], 'controllers')
             );
             return $this->redirectToRoute('admin_dashboard_settings_auth', ['language' => $language]);
@@ -872,7 +872,7 @@ class SettingsController extends AbstractController
             );
 
             $this->addFlash(
-                'success_admin',
+                'success',
                 $this->translator->trans('CAPPORTConfigurationAppliedSuccessfully', [], 'controllers')
             );
             return $this->redirectToRoute('admin_dashboard_settings_capport');
@@ -921,7 +921,7 @@ class SettingsController extends AbstractController
             );
 
             $this->addFlash(
-                'success_admin',
+                'success',
                 $this->translator->trans('SMSConfigurationAppliedSuccessfully', [], 'controllers')
             );
             return $this->redirectToRoute('admin_dashboard_settings_sms');

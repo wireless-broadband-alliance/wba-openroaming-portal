@@ -63,7 +63,7 @@ class CertificateManagementFreeradiusController extends AbstractController
         // If there's no active process
         if (!$processState['active']) {
             $this->addFlash(
-                'error_admin',
+                'error',
                 $this->translator->trans(
                     'noActiveProcess',
                     [],
@@ -87,7 +87,7 @@ class CertificateManagementFreeradiusController extends AbstractController
             // In case there's not active process
             if (!$process instanceof CertificateSetupProcess) {
                 $this->addFlash(
-                    'error_admin',
+                    'error',
                     $this->translator->trans('noActiveProcess', [], 'CertificateProcessCheckerService')
                 );
                 return $this->redirectToRoute('admin_dashboard_settings_certs_radsecproxy_upload');
@@ -213,7 +213,7 @@ class CertificateManagementFreeradiusController extends AbstractController
         // If there's no active process
         if (!$processState['active']) {
             $this->addFlash(
-                'error_admin',
+                'error',
                 $this->translator->trans(
                     'noActiveProcess',
                     [],
@@ -237,7 +237,7 @@ class CertificateManagementFreeradiusController extends AbstractController
         if ($form->isSubmitted()) {
             if ($process?->getFreeradiusConfigAppliedAt() instanceof DateTimeImmutable) {
                 $this->addFlash(
-                    'error_admin',
+                    'error',
                     $this->translator->trans('configAlreadyApplied', [], 'controllers')
                 );
             } elseif ($form->isValid()) {
@@ -270,7 +270,7 @@ class CertificateManagementFreeradiusController extends AbstractController
                             );
                         } catch (Throwable) {
                             $this->addFlash(
-                                'error_admin',
+                                'error',
                                 $this->translator->trans('pfx.failure', [], 'controllers')
                             );
 
@@ -330,7 +330,7 @@ class CertificateManagementFreeradiusController extends AbstractController
         // If no active process, redirect to the first stage or fallback
         if (!$processState['active']) {
             $this->addFlash(
-                'error_admin',
+                'error',
                 $this->translator->trans(
                     'noActiveProcess',
                     [],
@@ -358,7 +358,7 @@ class CertificateManagementFreeradiusController extends AbstractController
         // Check if user can access this stage
         if (!$this->certificateProcessCheckerService->canAccessStage($requestedStage)) {
             $this->addFlash(
-                'warning_admin',
+                'warning',
                 $this->translator->trans('cannotAccessStageYet', [], 'controllers')
             );
             $nextRoute = $this->certificateProcessCheckerService->getNextRequiredRoute(

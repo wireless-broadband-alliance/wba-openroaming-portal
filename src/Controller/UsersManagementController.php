@@ -95,7 +95,7 @@ class UsersManagementController extends AbstractController
         );
         if (!$revokeProfiles) {
             $this->addFlash(
-                'error_admin',
+                'error',
                 $this->translator->trans('accountWithoutProfilesAssociated', [], 'controllers')
             );
             return $this->redirectToRoute('admin_page');
@@ -116,7 +116,7 @@ class UsersManagementController extends AbstractController
         );
 
         $this->addFlash(
-            'success_admin',
+            'success',
             $this->translator->trans(
                 'profileRevoked',
                 [
@@ -148,7 +148,7 @@ class UsersManagementController extends AbstractController
         $exportUsers = $this->parameterBag->get('app.export_users');
         if ($exportUsers === OperationMode::OFF->value) {
             $this->addFlash(
-                'error_admin',
+                'error',
                 $this->translator->trans('operationDisabledForSecurityReasons', [], 'controllers')
             );
             return $this->redirectToRoute('admin_page');
@@ -301,7 +301,7 @@ class UsersManagementController extends AbstractController
 
         if ($user->getDeletedAt() !== null) {
             $this->addFlash(
-                'error_admin',
+                'error',
                 $this->translator->trans('userAlreadyDeleted', [], 'controllers')
             );
             return $this->redirectToRoute('admin_page');
@@ -310,12 +310,12 @@ class UsersManagementController extends AbstractController
         $result = $this->userDeletionService->deleteUser($user, $userExternalAuths, $request, $currentUser);
         // Handle the success or failure response
         if (!$result['success']) {
-            $this->addFlash('error_admin', $result['message']);
+            $this->addFlash('error', $result['message']);
             return $this->redirectToRoute('admin_page');
         }
 
         $this->addFlash(
-            'success_admin',
+            'success',
             $this->translator->trans(
                 'userDeleted',
                 [
@@ -354,7 +354,7 @@ class UsersManagementController extends AbstractController
         if (!$user = $this->userRepository->find($id)) {
             // Get the 'id' parameter from the route URL
             $this->addFlash(
-                'error_admin',
+                'error',
                 $this->translator->trans('userNotFound', [], 'controllers')
             );
             return $this->redirectToRoute('admin_page');
@@ -362,7 +362,7 @@ class UsersManagementController extends AbstractController
 
         if ($user->getDeletedAt() !== null) {
             $this->addFlash(
-                'error_admin',
+                'error',
                 $this->translator->trans('userAlreadyDeleted', [], 'controllers')
             );
             return $this->redirectToRoute('admin_page');
@@ -421,7 +421,7 @@ class UsersManagementController extends AbstractController
 
             $uuid = $user->getUuid();
             $this->addFlash(
-                'success_admin',
+                'success',
                 $this->translator->trans(
                     'userUpdated',
                     [
@@ -446,7 +446,7 @@ class UsersManagementController extends AbstractController
 
             if ($newPassword !== $confirmPassword) {
                 $this->addFlash(
-                    'error_admin',
+                    'error',
                     $this->translator->trans('PasswordPasswordConfirmationMustMatch', [], 'controllers')
                 );
                 return $this->redirectToRoute('admin_user_edit', ['id' => $user->getId()]);
@@ -554,7 +554,7 @@ class UsersManagementController extends AbstractController
                 }
             }
             $this->addFlash(
-                'success_admin',
+                'success',
                 $this->translator->trans(
                     'passwordUpdated',
                     [
@@ -628,7 +628,7 @@ class UsersManagementController extends AbstractController
         if (!$user = $this->userRepository->find($id)) {
             // Get the 'id' parameter from the route URL
             $this->addFlash(
-                'error_admin',
+                'error',
                 $this->translator->trans('userNotFound', [], 'controllers')
             );
             return $this->redirectToRoute('admin_page');
@@ -664,18 +664,18 @@ class UsersManagementController extends AbstractController
 
             if ($smsResponse !== '' && $smsResponse !== '0') {
                 $this->addFlash(
-                    'success_admin',
+                    'success',
                     $this->translator->trans('2faDisabledSMSSent', [], 'controllers')
                 );
             } else {
                 $this->addFlash(
-                    'success_admin',
+                    'success',
                     $this->translator->trans('2faDisabledSMSFailed', [], 'controllers')
                 );
             }
         } else {
             $this->addFlash(
-                'success_admin',
+                'success',
                 $this->translator->trans('twoFASuccessfullyDisabled', [], 'controllers')
             );
         }

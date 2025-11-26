@@ -61,7 +61,7 @@ class CertificateManagementRadsecproxyController extends AbstractController
             // If the required next step is NOT this page, redirect
             if ($nextRoute !== $request->attributes->get('_route')) {
                 $this->addFlash(
-                    'error_admin',
+                    'error',
                     $this->translator->trans('pendingActiveProcess', [], 'CertificateProcessCheckerService')
                 );
                 return $this->redirectToRoute($nextRoute);
@@ -110,7 +110,7 @@ class CertificateManagementRadsecproxyController extends AbstractController
             $this->entityManager->flush();
 
             $this->addFlash(
-                'success_admin',
+                'success',
                 $this->translator->trans(
                     'radsecProxyCertUploadedSuccessfully',
                     [],
@@ -145,7 +145,7 @@ class CertificateManagementRadsecproxyController extends AbstractController
         // If there's no active process
         if (!$processState['active']) {
             $this->addFlash(
-                'error_admin',
+                'error',
                 $this->translator->trans(
                     'noActiveProcess',
                     [],
@@ -169,7 +169,7 @@ class CertificateManagementRadsecproxyController extends AbstractController
         if ($form->isSubmitted()) {
             if ($process?->getRadsecproxyConfigAppliedAt() instanceof DateTimeImmutable) {
                 $this->addFlash(
-                    'error_admin',
+                    'error',
                     $this->translator->trans('configAlreadyApplied', [], 'controllers')
                 );
             } elseif ($form->isValid()) {
@@ -180,7 +180,7 @@ class CertificateManagementRadsecproxyController extends AbstractController
                 $this->entityManager->flush();
 
                 $this->addFlash(
-                    'success_admin',
+                    'success',
                     $this->translator->trans('radsecProxyConfigAppliedSuccessfully', [], 'controllers')
                 );
 
@@ -216,7 +216,7 @@ class CertificateManagementRadsecproxyController extends AbstractController
         // If no active process, redirect to the first stage or fallback
         if (!$processState['active']) {
             $this->addFlash(
-                'error_admin',
+                'error',
                 $this->translator->trans(
                     'noActiveProcess',
                     [],
