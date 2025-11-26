@@ -86,7 +86,7 @@ class FreeradiusController extends AbstractController
         $interval = $startDate->diff($endDate);
         if ($interval->days > 365) {
             $this->addFlash(
-                'error_admin',
+                'error',
                 $this->translator->trans(
                     'maximumDateRange1Year',
                     [],
@@ -122,7 +122,7 @@ class FreeradiusController extends AbstractController
         // Check that the memory usage does not exceed the PHP memory limit of 128M
         if ($memory_diff > 134217728) {
             $this->addFlash(
-                'error_admin',
+                'error',
                 $this->translator->trans(
                     'maximumDateRange1Year',
                     [],

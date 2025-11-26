@@ -2,7 +2,7 @@
 
 {% block content %}
     <div class="max-w-full mx-auto p-2 z-0">
-        {{ include('dashboard/shared/_render_toasts.html.twig') }}
+        {{ include('shared/_render_toasts.html.twig') }}
         {{ include('dashboard/shared/settings_actions/certificatesManagement/partials/_installation_stepper.html.twig') }}
         {% block installation_content %}{% endblock %}
     </div>

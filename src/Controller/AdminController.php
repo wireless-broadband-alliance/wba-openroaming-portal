@@ -161,7 +161,7 @@ class AdminController extends AbstractController
 
                 $this->mailer->send($email);
                 $this->addFlash(
-                    'success_admin',
+                    'success',
                     $this->translator->trans(
                         'successResendAdmin',
                         ['%email%' => $currentUser->getEmail()],
@@ -172,7 +172,7 @@ class AdminController extends AbstractController
             }
             $timeLeft = $this->verificationCodeGenerator->timeLeftToResendCode($timeIntervalInSeconds, $lastResend);
             $this->addFlash(
-                'error_admin',
+                'error',
                 $this->translator->trans(
                     'errorAdminWait',
                     ['%time%' => $timeLeft],
@@ -294,7 +294,7 @@ class AdminController extends AbstractController
             }
 
             $this->addFlash(
-                'success_admin',
+                'success',
                 $this->translator->trans(
                     'settingsUpdatedSuccessfully',
                     [],

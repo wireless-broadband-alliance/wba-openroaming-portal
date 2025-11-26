@@ -65,7 +65,7 @@ class CertificateManagementController extends AbstractController
         // In case there's not active process
         if (!$process instanceof CertificateSetupProcess) {
             $this->addFlash(
-                'error_admin',
+                'error',
                 $this->translator->trans('noActiveProcess', [], 'CertificateProcessCheckerService')
             );
             return $this->redirectToRoute('admin_dashboard_settings_certs_radsecproxy_upload');
@@ -79,7 +79,7 @@ class CertificateManagementController extends AbstractController
         $this->entityManager->flush();
 
         $this->addFlash(
-            'error_admin',
+            'error',
             $this->translator->trans(
                 'certificateProcessAborted',
                 [],

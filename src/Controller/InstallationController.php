@@ -343,7 +343,7 @@ class InstallationController extends AbstractController
 
             if (!$captchaValidation['success']) {
                 $this->addFlash(
-                    'error_admin',
+                    'error',
                     $this->translator->trans('captchaValidationFailed', [], 'controllers')
                 );
                 return $this->redirectToRoute('admin_dashboard_settings_certs_installation_settings');
@@ -708,7 +708,7 @@ class InstallationController extends AbstractController
         // If there's no active installation process
         if (!$lastInstallation instanceof InstallationProgress) {
             $this->addFlash(
-                'error_admin',
+                'error',
                 $this->translator->trans(
                     'noActiveProcess',
                     [],
@@ -722,7 +722,7 @@ class InstallationController extends AbstractController
         // Check if installation is in a state that can be aborted
         if ($lastInstallation->getInstallationState() !== InstallationProgressType::IN_PROGRESS) {
             $this->addFlash(
-                'error_admin',
+                'error',
                 $this->translator->trans(
                     'noActiveProcess',
                     [],
@@ -744,7 +744,7 @@ class InstallationController extends AbstractController
         $this->installationService->resetToLastInstallation();
 
         $this->addFlash(
-            'error_admin',
+            'error',
             $this->translator->trans(
                 'certificateProcessAborted',
                 [],

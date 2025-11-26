@@ -72,7 +72,7 @@ class ScheduleAutomationController extends AbstractController
             $this->entityManager->flush();
 
             $this->addFlash(
-                'success_admin',
+                'success',
                 $this->translator->trans('scheduleConfigSuccess', [], 'controllers')
             );
             return $this->redirectToRoute('admin_dashboard_settings_schedule');
