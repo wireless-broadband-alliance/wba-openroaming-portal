@@ -155,3 +155,7 @@ envPermissionDenied: 'O ficheiro . env não tem permissões de escrita. Por favo
 writeDbSettingsEnv: 'Escreva as novas configurações da base de dados no ficheiro .env'
 dbSettingsApplied: 'Configurações da base de dados aplicadas com sucesso.'
 dbSettingsNotApplied: 'As definições da base de dados não foram aplicadas. Tente novamente.'
+settingsApplied: 'Configurações  aplicadas com sucesso.'
+settingsNotApplied: 'As definições não foram aplicadas. Tente novamente.'
+writeSettingsEnv: 'Escreva as novas configurações no ficheiro .env'
+createJwtPair: 'Gere um novo par de chaves JWT.'

@@ -85,6 +85,9 @@ class InstallationController extends AbstractController
             if ($step === InstallationStep::ADMIN->value) {
                 return $this->redirectToRoute('admin_dashboard_settings_certs_installation_admin');
             }
+            if ($step === InstallationStep::COMMAND->value) {
+                return $this->redirectToRoute('admin_dashboard_settings_certs_installation_command');
+            }
         } else {
             $step = InstallationStep::DATABASE->value;
         }
@@ -168,15 +171,7 @@ class InstallationController extends AbstractController
             );
 
             if (!$orResult || !$radiusResult) {
-                $this->addFlash(
-                    'error_admin',
-                    $this->translator->trans(
-                        'envPermissionDenied',
-                        [],
-                        'controllers')
-                );
-
-                return $this->redirectToRoute('admin_dashboard_settings_certs_installation_database_command');
+                return $this->redirectToRoute('admin_dashboard_settings_certs_installation_settings');
             }
 
             $this->addFlash(
@@ -203,8 +198,8 @@ class InstallationController extends AbstractController
     }
 
     #[Route(
-        '/dashboard/settings/certificatesManagement/installation/database/command',
-        name: 'admin_dashboard_settings_certs_installation_database_command',
+        '/dashboard/settings/certificatesManagement/installation/commands',
+        name: 'admin_dashboard_settings_certs_installation_command',
     )]
     #[IsGranted('ROLE_ADMIN')]
     public function settingsCertificatesManagementInstallationDatabaseCommand(
@@ -213,6 +208,9 @@ class InstallationController extends AbstractController
         $lastInstallation = $this->installationService->lastInstallation();
         if ($lastInstallation instanceof InstallationProgress) {
             $step = $this->installationService->getStep($lastInstallation);
+            if ($step === InstallationStep::DATABASE->value) {
+                return $this->redirectToRoute('admin_dashboard_settings_certs_installation_settings');
+            }
             if ($step === InstallationStep::SETTINGS->value) {
                 return $this->redirectToRoute('admin_dashboard_settings_certs_installation_settings');
             }
@@ -229,25 +227,29 @@ class InstallationController extends AbstractController
 
 
         if ($form->isSubmitted()) {
-            if ($this->installationService->checkDatabaseSettings($lastInstallation)) {
+
+            if (
+                $this->installationService->checkDatabaseSettings($lastInstallation) &&
+                $this->installationService->checkSettingsValues($lastInstallation)
+            ) {
                 $this->addFlash(
                     'success_admin',
                     $this->translator->trans(
-                        'dbSettingsApplied',
+                        'settingsApplied',
                         [],
                         'controllers')
                 );
-                return $this->redirectToRoute('admin_dashboard_settings_certs_installation_settings');
+                return $this->redirectToRoute('admin_dashboard_settings_certs_installation_summary');
             }
 
             $this->addFlash(
                 'error_admin',
                 $this->translator->trans(
-                    'dbSettingsNotApplied',
+                    'settingsNotApplied',
                     [],
                     'controllers')
             );
-            return $this->redirectToRoute('admin_dashboard_settings_certs_installation_database_command');
+            return $this->redirectToRoute('admin_dashboard_settings_certs_installation_command');
         }
 
         // TODO: in case the user can't run the command add the "chmod +x scripts/update-db-env.sh" command to give to the file permissions to run (Test with Marcelo)
@@ -260,10 +262,26 @@ class InstallationController extends AbstractController
                     'controllers'
                 ),
                 'command' => $this->installationService->commandToDataBase($lastInstallation),
+            ],
+            [
+                'description' => $this->translator->trans(
+                    'writeSettingsEnv',
+                    [],
+                    'controllers'
+                ),
+                'command' => $this->installationService->commandToSettings($lastInstallation),
+            ],
+            [
+                'description' => $this->translator->trans(
+                    'createJwtPair',
+                    [],
+                    'controllers'
+                ),
+                'command' => 'php bin/console lexik:jwt:generate-keypair --overwrite',
             ]
         ];
 
-        return $this->render('dashboard/shared/settings_actions/certificatesManagement/installation/manualInstallation/dataBase.html.twig', [
+        return $this->render('dashboard/shared/settings_actions/certificatesManagement/installation/manualInstallation/manualInstallation.html.twig', [
             'data' => $data,
             'stages' => $this->installationService->getStepperStatus($step),
             'commands' => $commands,
@@ -294,6 +312,9 @@ class InstallationController extends AbstractController
             if ($step === InstallationStep::ADMIN->value) {
                 return $this->redirectToRoute('admin_dashboard_settings_certs_installation_admin');
             }
+            if ($step === InstallationStep::COMMAND->value) {
+                return $this->redirectToRoute('admin_dashboard_settings_certs_installation_command');
+            }
         } else {
             return $this->redirectToRoute('admin_dashboard_settings_certs_installation');
         }
@@ -311,6 +332,16 @@ class InstallationController extends AbstractController
             $jwtPassphraseEnable = $settingsDTO->jwtPassphraseEnable;
             $jwtPassphrase = $settingsDTO->jwtPassphrase;
 
+            $captchaValidation = $this->captchaValidator->validateCredentials($turnstileSecret);
+/*
+            if (!$captchaValidation['success']) {
+                $this->addFlash(
+                    'error_admin',
+                    $this->translator->trans('captchaValidationFailed', [], 'controllers')
+                );
+                return $this->redirectToRoute('admin_dashboard_settings_certs_installation_settings');
+            }
+*/
             if (!($lastInstallation instanceof InstallationProgress)) {
                 $lastInstallation = new InstallationProgress();
                 $lastInstallation->setCreatedAt(new \DateTime());
@@ -326,27 +357,17 @@ class InstallationController extends AbstractController
             $this->entityManager->persist($lastInstallation);
             $this->entityManager->flush();
 
-            $captchaValidation = $this->captchaValidator->validateCredentials($turnstileSecret);
-
-            if (!$captchaValidation['success']) {
-                $this->addFlash(
-                    'error_admin',
-                    $this->translator->trans('captchaValidationFailed', [], 'controllers')
-                );
-                return $this->redirectToRoute('admin_dashboard_settings_certs_installation_settings');
-            }
-
-            $this->databaseConnectionService->writeDatabaseUrlToEnv(
+            $trustedProxiesPermissions = $this->databaseConnectionService->writeDatabaseUrlToEnv(
                 $trustedProxies,
                 SettingsConfigType::TRUSTED_PROXIES->value
             );
 
-            $this->databaseConnectionService->writeDatabaseUrlToEnv(
+            $turnstileKeyPermissions = $this->databaseConnectionService->writeDatabaseUrlToEnv(
                 $turnstileKey,
                 SettingsConfigType::TURNSTILE_KEY->value
             );
 
-            $this->databaseConnectionService->writeDatabaseUrlToEnv(
+            $turnstileSecretPermissions = $this->databaseConnectionService->writeDatabaseUrlToEnv(
                 $turnstileSecret,
                 SettingsConfigType::TURNSTILE_SECRET->value
             );
@@ -356,6 +377,11 @@ class InstallationController extends AbstractController
                     $jwtPassphrase,
                     SettingsConfigType::JWT_PASSPHRASE->value
                 );
+            }
+
+            if (!$trustedProxiesPermissions || !$turnstileKeyPermissions || !$turnstileSecretPermissions) {
+
+                return $this->redirectToRoute('admin_dashboard_settings_certs_installation_settings_command');
             }
 
             // JWT Verification
@@ -452,6 +478,9 @@ class InstallationController extends AbstractController
             }
             if ($step === InstallationStep::SETTINGS->value) {
                 return $this->redirectToRoute('admin_dashboard_settings_certs_installation_settings');
+            }
+            if ($step === InstallationStep::COMMAND->value) {
+                return $this->redirectToRoute('admin_dashboard_settings_certs_installation_command');
             }
         } else {
             return $this->redirectToRoute('admin_dashboard_settings_certs_installation');
@@ -652,6 +681,9 @@ class InstallationController extends AbstractController
             }
             if ($step === InstallationStep::ADMIN->value) {
                 return $this->redirectToRoute('admin_dashboard_settings_certs_installation_admin');
+            }
+            if ($step === InstallationStep::COMMAND->value) {
+                return $this->redirectToRoute('admin_dashboard_settings_certs_installation_command');
             }
         } else {
             return $this->redirectToRoute('admin_dashboard_settings_certs_installation');

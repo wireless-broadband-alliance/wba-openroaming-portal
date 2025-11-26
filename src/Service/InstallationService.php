@@ -67,8 +67,7 @@ readonly class InstallationService
     {
         if (
             $installationProgress->getDbOpenRoaming() &&
-            $installationProgress->getDbFreeradius() &&
-            $this->checkDatabaseSettings($installationProgress)
+            $installationProgress->getDbFreeradius()
         ) {
             if (
                 $installationProgress->getTurnstileKey() &&
@@ -80,10 +79,16 @@ readonly class InstallationService
                     $installationProgress->getPasswordAdmin() &&
                     $installationProgress->getAdminConfirmation()
                 ) {
-                    $installationProgress->setInstallationState(InstallationProgressType::COMPLETED->value);
-                    $this->entityManager->persist($installationProgress);
-                    $this->entityManager->flush();
-                    return InstallationStep::COMPLETED->value;
+                    if ($this->checkDatabaseSettings($installationProgress) &&
+                        $this->checkSettingsValues($installationProgress)
+                    ) {
+                        $installationProgress->setInstallationState(InstallationProgressType::COMPLETED->value);
+                        $this->entityManager->persist($installationProgress);
+                        $this->entityManager->flush();
+                        return InstallationStep::COMPLETED->value;
+                    }
+                    return InstallationStep::COMMAND->value;
+
                 }
                 return InstallationStep::ADMIN->value;
             }
@@ -225,6 +230,20 @@ readonly class InstallationService
         return true;
     }
 
+    public function checkSettingsValues(InstallationProgress $installationProgress): bool
+    {
+        if (!$this->envValueMatches(SettingsConfigType::TRUSTED_PROXIES->value, $installationProgress->getTrustedProxies() )) {
+            return false;
+        }
+        if (!$this->envValueMatches(SettingsConfigType::TURNSTILE_KEY->value, $installationProgress->getTurnstileKey())) {
+            return false;
+        }
+        if (!$this->envValueMatches(SettingsConfigType::TURNSTILE_SECRET->value, $installationProgress->getTurnstileSecret())) {
+            return false;
+        }
+        return true;
+    }
+
     public function envValueMatches(string $key, string $expectedValue): bool
     {
         $envPath = $this->parameterBag->get('kernel.project_dir') . '/.env';
@@ -284,5 +303,15 @@ readonly class InstallationService
     public function commandToDataBase(InstallationProgress $installationProgress): string
     {
         return 'scripts/update-db-env.sh "'. $installationProgress->getDbOpenRoaming() . '" "' . $installationProgress->getDbFreeradius() . '"';
+    }
+
+    public function commandToSettings(InstallationProgress $installationProgress): string
+    {
+        if ($installationProgress->getJwtPassphrase() !== null) {
+            return 'scripts/update-settings-env.sh "'. $installationProgress->getJwtPassphrase() . '" "' . $installationProgress->getTrustedProxies() .
+                '" "' . $installationProgress->getTurnstileKey() . '" "' . $installationProgress->getTurnstileSecret() . '"';
+        }
+        return 'scripts/update-settings-env.sh "" "' . $installationProgress->getTrustedProxies() .
+            '" "' . $installationProgress->getTurnstileKey() . '" "' . $installationProgress->getTurnstileSecret() . '"';
     }
 }

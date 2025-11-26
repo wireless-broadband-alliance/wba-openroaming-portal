@@ -8,4 +8,5 @@ enum InstallationStep: string
     case SETTINGS = 'SETTINGS';
     case ADMIN = 'ADMIN';
     case COMPLETED = 'COMPLETED';
+    case COMMAND = 'COMMAND';
 }

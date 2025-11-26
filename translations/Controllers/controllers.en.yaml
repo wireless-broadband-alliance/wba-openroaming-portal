@@ -157,3 +157,7 @@ envPermissionDenied: 'The .env file does not have write permissions. Please use 
 writeDbSettingsEnv: 'Write the new database settings in the .env file.'
 dbSettingsApplied: 'Database settings applied successfully.'
 dbSettingsNotApplied: 'Database settings were not applied. Please try again.'
+settingsApplied: 'Settings applied successfully.'
+settingsNotApplied: 'Settings were not applied. Please try again.'
+writeSettingsEnv: 'Write the new settings in the .env file.'
+createJwtPair: 'Generate a new jwt key pair '
