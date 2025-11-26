@@ -333,7 +333,7 @@ class InstallationController extends AbstractController
             $jwtPassphrase = $settingsDTO->jwtPassphrase;
 
             $captchaValidation = $this->captchaValidator->validateCredentials($turnstileSecret);
-/*
+
             if (!$captchaValidation['success']) {
                 $this->addFlash(
                     'error_admin',
@@ -341,7 +341,7 @@ class InstallationController extends AbstractController
                 );
                 return $this->redirectToRoute('admin_dashboard_settings_certs_installation_settings');
             }
-*/
+
             if (!($lastInstallation instanceof InstallationProgress)) {
                 $lastInstallation = new InstallationProgress();
                 $lastInstallation->setCreatedAt(new \DateTime());
@@ -381,7 +381,7 @@ class InstallationController extends AbstractController
 
             if (!$trustedProxiesPermissions || !$turnstileKeyPermissions || !$turnstileSecretPermissions) {
 
-                return $this->redirectToRoute('admin_dashboard_settings_certs_installation_settings_command');
+                return $this->redirectToRoute('admin_dashboard_settings_certs_installation_command');
             }
 
             // JWT Verification
