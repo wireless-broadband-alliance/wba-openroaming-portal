@@ -113,7 +113,7 @@ readonly class InstallationService
             $status[InstallationWidgetStepsEnum::DATABASE->value] = true;
             $status[InstallationWidgetStepsEnum::SETTINGS->value] = true;
         }
-        if ($step === InstallationStep::COMPLETED->value) {
+        if ($step === InstallationStep::COMPLETED->value || $step === InstallationStep::COMMAND->value) {
             $status[InstallationWidgetStepsEnum::DATABASE->value] = true;
             $status[InstallationWidgetStepsEnum::SETTINGS->value] = true;
             $status[InstallationWidgetStepsEnum::ADMIN_CREDENTIALS->value] = true;
