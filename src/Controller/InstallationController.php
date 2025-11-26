@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\DTO\AdminConfigDTO;
 use App\DTO\DbSetupDTO;
 use App\DTO\SettingsDTO;
+use App\Entity\CertificateSetupProcess;
 use App\Entity\Event;
 use App\Entity\InstallationProgress;
 use App\Entity\User;
@@ -30,6 +31,7 @@ use App\Service\GetSettings;
 use App\Service\InstallationService;
 use App\Service\TwoFAService;
 use DateTime;
+use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Random\RandomException;
@@ -580,20 +582,60 @@ class InstallationController extends AbstractController
 
     #[Route(
         '/dashboard/settings/certificatesManagement/installation/abortProcess',
-        name: 'admin_dashboard_settings_certs_installation_abortProcess'
+        name: 'admin_dashboard_settings_certs_installation_abortProcess',
+        methods: ['POST']
     )]
     #[IsGranted('ROLE_ADMIN')]
     public function abortProcess(): RedirectResponse
     {
         $lastInstallation = $this->installationService->lastInstallation();
-        if ($lastInstallation instanceof InstallationProgress) {
-            $lastInstallation->setInstallationState(InstallationProgressType::ABORTED->value);
-            $this->entityManager->persist($lastInstallation);
-            $this->entityManager->flush();
 
-            // TODO REVIEW THIS FUNCTION AND RECAP IF ITS STILL DEAD BECAUSE OF ARRAY TRUSTEDPROXIES
-            $this->installationService->resetToLastInstallation();
+        // If there's no active installation process
+        if (!$lastInstallation instanceof InstallationProgress) {
+            $this->addFlash(
+                'error_admin',
+                $this->translator->trans(
+                    'noActiveProcess',
+                    [],
+                    'CertificateProcessCheckerService'
+                )
+            );
+
+            return $this->redirectToRoute('admin_dashboard_settings_certs_installation');
         }
+
+        // Check if installation is in a state that can be aborted
+        if ($lastInstallation->getInstallationState() !== InstallationProgressType::IN_PROGRESS) {
+            $this->addFlash(
+                'error_admin',
+                $this->translator->trans(
+                    'noActiveProcess',
+                    [],
+                    'CertificateProcessCheckerService'
+                )
+            );
+
+            return $this->redirectToRoute('admin_dashboard_settings_certs_installation');
+        }
+
+        // Abort the process
+        $lastInstallation->setInstallationState(InstallationProgressType::ABORTED->value);
+        $lastInstallation->setUpdatedAt(new DateTimeImmutable());
+
+        $this->entityManager->persist($lastInstallation);
+        $this->entityManager->flush();
+
+        // Reset the system to the last valid installation config
+        $this->installationService->resetToLastInstallation();
+
+        $this->addFlash(
+            'error_admin',
+            $this->translator->trans(
+                'certificateProcessAborted',
+                [],
+                'controllers'
+            )
+        );
 
         return $this->redirectToRoute('admin_dashboard_settings_certs_installation');
     }
