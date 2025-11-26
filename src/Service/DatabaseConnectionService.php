@@ -8,11 +8,13 @@ use Doctrine\DBAL\DriverManager;
 use InvalidArgumentException;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
-class DatabaseConnectionService
+readonly class DatabaseConnectionService
 {
-    public function __construct(private readonly ParameterBagInterface $params)
-    {
+    public function __construct(
+        private ParameterBagInterface $params
+    ) {
     }
+
     public function testDatabaseConnection(string $dbUrl): bool
     {
         try {
@@ -25,12 +27,12 @@ class DatabaseConnectionService
             $dbname = ltrim($parts['path'], '/');
 
             $connectionParams = [
-                'dbname'   => $dbname,
-                'user'     => $parts['user'],
+                'dbname' => $dbname,
+                'user' => $parts['user'],
                 'password' => $parts['pass'] ?? null,
-                'host'     => $parts['host'],
-                'port'     => $parts['port'] ?? null,
-                'driver'   => $this->getDriverFromScheme($parts['scheme']),
+                'host' => $parts['host'],
+                'port' => $parts['port'] ?? null,
+                'driver' => $this->getDriverFromScheme($parts['scheme']),
             ];
 
             $connection = DriverManager::getConnection($connectionParams);
@@ -94,7 +96,7 @@ class DatabaseConnectionService
         };
     }
 
-    function buildDatabaseUrl(
+    public function buildDatabaseUrl(
         string $username,
         string $password,
         string $host,
@@ -115,7 +117,7 @@ class DatabaseConnectionService
         );
     }
 
-    function parseDatabaseUrl(string $url): array
+    public function parseDatabaseUrl(string $url): array
     {
         $parts = parse_url($url);
 
@@ -129,13 +131,13 @@ class DatabaseConnectionService
         }
 
         return [
-            'username'      => isset($parts['user']) ? urldecode($parts['user']) : null,
-            'password'      => isset($parts['pass']) ? urldecode($parts['pass']) : null,
-            'host'          => $parts['host'] ?? null,
-            'port'          => isset($parts['port']) ? (int)$parts['port'] : null,
-            'database'      => isset($parts['path']) ? ltrim($parts['path'], '/') : null,
+            'username' => isset($parts['user']) ? urldecode($parts['user']) : null,
+            'password' => isset($parts['pass']) ? urldecode($parts['pass']) : null,
+            'host' => $parts['host'] ?? null,
+            'port' => isset($parts['port']) ? (int)$parts['port'] : null,
+            'database' => isset($parts['path']) ? ltrim($parts['path'], '/') : null,
             'serverVersion' => $query['serverVersion'] ?? null,
-            'charset'       => $query['charset'] ?? null,
+            'charset' => $query['charset'] ?? null,
         ];
     }
 }

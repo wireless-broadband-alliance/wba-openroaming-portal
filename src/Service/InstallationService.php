@@ -258,7 +258,7 @@ readonly class InstallationService
         return false;
     }
 
-    public function resetToLastInstallation()
+    public function resetToLastInstallation(): void
     {
         $lastCompleted = $this->installationProgressRepository->getLastCompleted();
         if ($lastCompleted instanceof InstallationProgress) {
@@ -274,12 +274,10 @@ readonly class InstallationService
                 $lastCompleted->getTrustedProxies(),
                 SettingsConfigType::TRUSTED_PROXIES->value
             );
-
             $this->databaseConnectionService->writeDatabaseUrlToEnv(
                 $lastCompleted->getTurnstileKey(),
                 SettingsConfigType::TURNSTILE_KEY->value
             );
-
             $this->databaseConnectionService->writeDatabaseUrlToEnv(
                 $lastCompleted->getTurnstileSecret(),
                 SettingsConfigType::TURNSTILE_SECRET->value
@@ -290,6 +288,7 @@ readonly class InstallationService
                     SettingsConfigType::JWT_PASSPHRASE->value
                 );
             }
+
             $adminUser = $this->userRepository->findAdmin();
             if ($adminUser instanceof User) {
                 $adminUser->setEmail($lastCompleted->getEmailAdmin());

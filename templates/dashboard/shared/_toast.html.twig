@@ -1,11 +1,4 @@
-{% set auto_remove = auto_remove ?? true %}
-
 <div
-        {% if auto_remove %}
-            {{ stimulus_controller('remove') }}
-            {{ stimulus_target('remove', 'target') }}
-        {% endif %}
-
         {{ stimulus_controller('toast') }}
         {{ stimulus_target('toast', 'toast') }}
 >

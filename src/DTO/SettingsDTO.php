@@ -3,16 +3,15 @@
 namespace App\DTO;
 
 use Symfony\Component\Validator\Constraints as Assert;
-use Symfony\Component\Validator\Context\ExecutionContextInterface;
+use App\Validator\Constraints as CustomAssert;
 
 class SettingsDTO
 {
     #[Assert\NotBlank(message: 'fieldNotBlank')]
-    #[Assert\Regex(
-        pattern: '/^([0-9]{1,3}(\.[0-9]{1,3}){3}(\/[0-9]{1,2})?)(\s*,\s*([0-9]{1,3}(\.[0-9]{1,3}){3}(\/[0-9]{1,2})?))*$/',
-        message: 'notValidIp'
-    )]
-    public ?string $trustedProxies = null;
+    #[Assert\All([
+        new CustomAssert\IpOrCidr()
+    ])]
+    public array $trustedProxies = [];
 
     #[Assert\NotBlank(message: 'fieldNotBlank')]
     #[Assert\Length(min:5, max:100, minMessage: 'minCharacters', maxMessage: 'maxCharacters')]

@@ -1,4 +1,4 @@
-trustedProxiesPlaceholder: "Trusted proxies (ex. 127.0.0.1,10.0.0.1)"
+trustedProxiesPlaceholder: "Trusted proxies (ex. 192.0.0.1 or 10.0.0.1)"
 turnstileKeyPlaceholder: "Turnstile public key"
 turnstileSecretPlaceholder: "Turnstile secret key"
 jwtPassphrasePlaceholder: "JWT passphrase"

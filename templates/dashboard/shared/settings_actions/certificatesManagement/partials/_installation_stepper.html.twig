@@ -16,21 +16,23 @@
 
 {# Abort Button + Leave Configuration #}
 <div class="flex flex-col sm:flex-row justify-end items-stretch sm:items-center gap-2 sm:gap-3">
-    <form action="{{ path('admin_dashboard_settings_certs_installation_abortProcess') }}"
-          method="POST"
-          onsubmit="return confirm('{{ 'confirm_abort'|trans({}, '_certificate_stepper') }}');">
-        <button type="submit"
-                class="w-full sm:w-auto flex items-center gap-2
+    {% if processState is defined and processState.active %}
+        <form action="{{ path('admin_dashboard_settings_certs_installation_abortProcess') }}"
+              method="POST"
+              onsubmit="return confirm('{{ 'confirm_abort'|trans({}, '_certificate_stepper') }}');">
+            <button type="submit"
+                    class="w-full sm:w-auto flex items-center gap-2
               px-3 py-1.5 sm:px-4 sm:py-2
               text-xs sm:text-sm
               rounded-lg shadow font-medium
               text-red-700 bg-white border border-red-200
               hover:bg-red-50 hover:border-red-300 transition">
-            <twig:ux:icon name="wba:cross-circle-rounded"
-                          class="w-4 h-4 opacity-80 fill-current"/>
-            {{ 'abort'|trans({}, '_certificate_stepper') }}
-        </button>
-    </form>
+                <twig:ux:icon name="wba:cross-circle-rounded"
+                              class="w-4 h-4 opacity-80 fill-current"/>
+                {{ 'abort'|trans({}, '_certificate_stepper') }}
+            </button>
+        </form>
+    {% endif %}
     <a href="{{ path('admin_page') }}"
        class="w-full sm:w-auto  flex items-center gap-2
               px-3 py-1.5 sm:px-4 sm:py-2
@@ -66,13 +68,13 @@
                     {% elseif active %} bg-white border-primary text-primary step-active
                     {% else %} bg-white border-gray-300 text-gray-400 {% endif %}
                 ">
-                    {% if currentRoute in step.route  %}
+                    {% if currentRoute in step.route %}
                         <a href="{{ path(step.route[0]) }}"
                            class="flex items-center justify-center w-full h-full text-inherit no-underline">
                             {{ loop.index }}
                         </a>
                     {% else %}
-                            <span class="flex items-center justify-center w-full h-full cursor-not-allowed opacity-50">
+                        <span class="flex items-center justify-center w-full h-full cursor-not-allowed opacity-50">
                                 {{ loop.index }}
                             </span>
                     {% endif %}

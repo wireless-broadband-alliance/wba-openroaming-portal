@@ -5,13 +5,12 @@ namespace App\Controller;
 use App\DTO\AdminConfigDTO;
 use App\DTO\DbSetupDTO;
 use App\DTO\SettingsDTO;
+use App\Entity\CertificateSetupProcess;
 use App\Entity\Event;
 use App\Entity\InstallationProgress;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
-use App\Enum\CodeVerificationType;
 use App\Enum\DataBaseSetupType;
-use App\Enum\FirewallType;
 use App\Enum\InstallationProgressType;
 use App\Enum\InstallationStep;
 use App\Enum\PlatformMode;
@@ -33,7 +32,9 @@ use App\Service\GetSettings;
 use App\Service\InstallationService;
 use App\Service\TwoFAService;
 use DateTime;
+use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
+use Exception;
 use Random\RandomException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
@@ -150,10 +151,10 @@ class InstallationController extends AbstractController
                 $lastInstallation->getInstallationState() === InstallationProgressType::ABORTED->value
             ) {
                 $lastInstallation = new InstallationProgress();
-                $lastInstallation->setCreatedAt(new \DateTime());
+                $lastInstallation->setCreatedAt(new DateTime());
             }
 
-            $lastInstallation->setUpdatedAt(new \DateTime());
+            $lastInstallation->setUpdatedAt(new DateTime());
             $lastInstallation->setDbOpenRoaming($openRoamingDb);
             $lastInstallation->setDbFreeradius($freeradiusDb);
             $lastInstallation->setInstallationState(InstallationProgressType::IN_PROGRESS->value);
@@ -293,6 +294,7 @@ class InstallationController extends AbstractController
     /**
      * @throws HttpException
      * @throws LogicException
+     * @throws \Exception
      */
     #[Route(
         '/dashboard/settings/certificatesManagement/installation/settings',
@@ -326,55 +328,45 @@ class InstallationController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $trustedProxies = $settingsDTO->trustedProxies;
-            $turnstileKey = $settingsDTO->turnstileKey;
-            $turnstileSecret = $settingsDTO->turnstileSecret;
-            $jwtPassphraseEnable = $settingsDTO->jwtPassphraseEnable;
-            $jwtPassphrase = $settingsDTO->jwtPassphrase;
-
-            $captchaValidation = $this->captchaValidator->validateCredentials($turnstileSecret);
-
-            if (!$captchaValidation['success']) {
-                $this->addFlash(
-                    'error',
-                    $this->translator->trans('captchaValidationFailed', [], 'controllers')
-                );
-                return $this->redirectToRoute('admin_dashboard_settings_certs_installation_settings');
-            }
-
-            if (!($lastInstallation instanceof InstallationProgress)) {
-                $lastInstallation = new InstallationProgress();
-                $lastInstallation->setCreatedAt(new \DateTime());
-            }
-            $lastInstallation->setUpdatedAt(new \DateTime());
-            $lastInstallation->setTrustedProxies($trustedProxies);
-            $lastInstallation->setTurnstileKey($turnstileKey);
-            $lastInstallation->setTurnstileSecret($turnstileSecret);
-            if ($jwtPassphraseEnable) {
-                $lastInstallation->setJwtPassphrase($jwtPassphrase);
+            $lastInstallation->setUpdatedAt(new DateTime());
+            $lastInstallation->setTrustedProxies($settingsDTO->trustedProxies);
+            $lastInstallation->setTurnstileKey($settingsDTO->turnstileKey);
+            $lastInstallation->setTurnstileSecret($settingsDTO->turnstileSecret);
+            if ($settingsDTO->jwtPassphraseEnable) {
+                $lastInstallation->setJwtPassphrase($settingsDTO->jwtPassphrase);
             }
             $lastInstallation->setInstallationState(InstallationProgressType::IN_PROGRESS->value);
             $this->entityManager->persist($lastInstallation);
             $this->entityManager->flush();
 
+            $captchaValidation = $this->captchaValidator->validateCredentials($settingsDTO->turnstileSecret);
+
+            if (!$captchaValidation['success']) {
+                $this->addFlash(
+                    'error_admin',
+                    $this->translator->trans('captchaValidationFailed', [], 'controllers')
+                );
+                return $this->redirectToRoute('admin_dashboard_settings_certs_installation_settings');
+            }
+
             $trustedProxiesPermissions = $this->databaseConnectionService->writeDatabaseUrlToEnv(
-                $trustedProxies,
+                implode(',', $settingsDTO->trustedProxies),
                 SettingsConfigType::TRUSTED_PROXIES->value
             );
 
             $turnstileKeyPermissions = $this->databaseConnectionService->writeDatabaseUrlToEnv(
-                $turnstileKey,
+                $settingsDTO->turnstileKey,
                 SettingsConfigType::TURNSTILE_KEY->value
             );
 
             $turnstileSecretPermissions = $this->databaseConnectionService->writeDatabaseUrlToEnv(
-                $turnstileSecret,
+                $settingsDTO->turnstileSecret,
                 SettingsConfigType::TURNSTILE_SECRET->value
             );
 
-            if ($jwtPassphraseEnable) {
+            if ($settingsDTO->jwtPassphraseEnable) {
                 $this->databaseConnectionService->writeDatabaseUrlToEnv(
-                    $jwtPassphrase,
+                    $settingsDTO->jwtPassphrase,
                     SettingsConfigType::JWT_PASSPHRASE->value
                 );
             }
@@ -389,11 +381,11 @@ class InstallationController extends AbstractController
                 $application = new Application($kernel);
                 $application->setAutoExit(false);
 
-                if ($jwtPassphraseEnable) {
+                if ($settingsDTO->jwtPassphraseEnable) {
                     $input = new ArrayInput([
                         'command' => 'lexik:jwt:generate-keypair',
                         '--overwrite' => true,
-                        '--passphrase' => $jwtPassphrase,
+                        '--passphrase' => $settingsDTO->jwtPassphrase,
                     ]);
                 } else {
                     $input = new ArrayInput([
@@ -406,9 +398,9 @@ class InstallationController extends AbstractController
                 if (!defined('STDIN')) {
                     define('STDIN', fopen('php://stdin', 'r'));
                 }
-                $application->run($input, $output);
 
-                $result = $output->fetch();
+                $application->run($input, $output);
+                // $result = $output->fetch();
 
                 $privateKeyPath = $this->getParameter('kernel.project_dir') . '/config/jwt/private.pem';
                 $publicKeyPath = $this->getParameter('kernel.project_dir') . '/config/jwt/public.pem';
@@ -441,7 +433,7 @@ class InstallationController extends AbstractController
                 );
 
                 return $this->redirectToRoute('admin_dashboard_settings_certs_installation_admin');
-            } catch (\Exception) {
+            } catch (Exception) {
                 $this->addFlash(
                     'error',
                     $this->translator->trans('jwtFailed', [], 'controllers')
@@ -705,20 +697,62 @@ class InstallationController extends AbstractController
 
     #[Route(
         '/dashboard/settings/certificatesManagement/installation/abortProcess',
-        name: 'admin_dashboard_settings_certs_installation_abortProcess'
+        name: 'admin_dashboard_settings_certs_installation_abortProcess',
+        methods: ['POST']
     )]
     #[IsGranted('ROLE_ADMIN')]
     public function abortProcess(): RedirectResponse
     {
         $lastInstallation = $this->installationService->lastInstallation();
-        if ($lastInstallation instanceof InstallationProgress) {
-            $lastInstallation->setInstallationState(InstallationProgressType::ABORTED->value);
-            $this->entityManager->persist($lastInstallation);
-            $this->entityManager->flush();
 
-            $this->installationService->resetToLastInstallation();
+        // If there's no active installation process
+        if (!$lastInstallation instanceof InstallationProgress) {
+            $this->addFlash(
+                'error_admin',
+                $this->translator->trans(
+                    'noActiveProcess',
+                    [],
+                    'CertificateProcessCheckerService'
+                )
+            );
+
+            return $this->redirectToRoute('admin_dashboard_settings_certs_installation');
         }
-        return $this->redirectToRoute('admin_dashboard_settings_certs_management');
+
+        // Check if installation is in a state that can be aborted
+        if ($lastInstallation->getInstallationState() !== InstallationProgressType::IN_PROGRESS) {
+            $this->addFlash(
+                'error_admin',
+                $this->translator->trans(
+                    'noActiveProcess',
+                    [],
+                    'CertificateProcessCheckerService'
+                )
+            );
+
+            return $this->redirectToRoute('admin_dashboard_settings_certs_installation');
+        }
+
+        // Abort the process
+        $lastInstallation->setInstallationState(InstallationProgressType::ABORTED->value);
+        $lastInstallation->setUpdatedAt(new DateTimeImmutable());
+
+        $this->entityManager->persist($lastInstallation);
+        $this->entityManager->flush();
+
+        // Reset the system to the last valid installation config
+        $this->installationService->resetToLastInstallation();
+
+        $this->addFlash(
+            'error_admin',
+            $this->translator->trans(
+                'certificateProcessAborted',
+                [],
+                'controllers'
+            )
+        );
+
+        return $this->redirectToRoute('admin_dashboard_settings_certs_installation');
     }
 
     /**

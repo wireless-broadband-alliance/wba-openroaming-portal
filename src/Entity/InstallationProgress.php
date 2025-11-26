@@ -23,8 +23,8 @@ class InstallationProgress
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $dbFreeradius = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $trustedProxies = null;
+    #[ORM\Column(type: Types::JSON, nullable: true)]
+    private ?array $trustedProxies = [];
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $turnstileKey = null;
@@ -93,15 +93,14 @@ class InstallationProgress
         return $this;
     }
 
-    public function getTrustedProxies(): ?string
+    public function getTrustedProxies(): ?array
     {
         return $this->trustedProxies;
     }
 
-    public function setTrustedProxies(?string $trustedProxies): static
+    public function setTrustedProxies(?array $trustedProxies): static
     {
         $this->trustedProxies = $trustedProxies;
-
         return $this;
     }
 

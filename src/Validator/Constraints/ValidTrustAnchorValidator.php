@@ -74,6 +74,9 @@ class ValidTrustAnchorValidator extends ConstraintValidator
             $matches
         );
 
-        return array_map(static fn($data) => "-----BEGIN CERTIFICATE-----$data-----END CERTIFICATE-----", $matches[1] ?? []);
+        return array_map(
+            static fn($data) => "-----BEGIN CERTIFICATE-----$data-----END CERTIFICATE-----",
+            $matches[1] ?? []
+        );
     }
 }
