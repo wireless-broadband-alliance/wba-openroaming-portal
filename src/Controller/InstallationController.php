@@ -9,9 +9,7 @@ use App\Entity\Event;
 use App\Entity\InstallationProgress;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
-use App\Enum\CodeVerificationType;
 use App\Enum\DataBaseSetupType;
-use App\Enum\FirewallType;
 use App\Enum\InstallationProgressType;
 use App\Enum\InstallationStep;
 use App\Enum\PlatformMode;
@@ -75,7 +73,6 @@ class InstallationController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function settingsCertificatesManagementInstallation(
         Request $request,
-        KernelInterface $kernel
     ): Response {
         $lastInstallation = $this->installationService->lastInstallation();
         if ($lastInstallation instanceof InstallationProgress) {
@@ -148,10 +145,10 @@ class InstallationController extends AbstractController
                 $lastInstallation->getInstallationState() === InstallationProgressType::ABORTED->value
             ) {
                 $lastInstallation = new InstallationProgress();
-                $lastInstallation->setCreatedAt(new \DateTime());
+                $lastInstallation->setCreatedAt(new DateTime());
             }
 
-            $lastInstallation->setUpdatedAt(new \DateTime());
+            $lastInstallation->setUpdatedAt(new DateTime());
             $lastInstallation->setDbOpenRoaming($openRoamingDb);
             $lastInstallation->setDbFreeradius($freeradiusDb);
             $lastInstallation->setInstallationState(InstallationProgressType::IN_PROGRESS->value);
@@ -597,7 +594,8 @@ class InstallationController extends AbstractController
             // TODO REVIEW THIS FUNCTION AND RECAP IF ITS STILL DEAD BECAUSE OF ARRAY TRUSTEDPROXIES
             $this->installationService->resetToLastInstallation();
         }
-        return $this->redirectToRoute('admin_dashboard_settings_certs_management');
+
+        return $this->redirectToRoute('admin_dashboard_settings_certs_installation');
     }
 
     /**

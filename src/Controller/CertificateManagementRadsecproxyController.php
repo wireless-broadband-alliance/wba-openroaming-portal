@@ -6,18 +6,14 @@ namespace App\Controller;
 
 use App\DTO\CertificateRadSecUploadDTO;
 use App\Entity\CertificateSetupProcess;
-use App\Entity\InstallationProgress;
 use App\Enum\CertificateFileName;
 use App\Enum\CertificateMachineType;
-use App\Enum\CertificateProcessStatus;
 use App\Enum\CertificateTestResult;
 use App\Enum\FirewallType;
 use App\Enum\TrustedWBAFingerprints;
 use App\Form\CertificateRadsecUploadType;
 use App\Form\SimpleSubmitFormType;
 use App\Repository\CertificateRepository;
-use App\Repository\CertificateSetupProcessRepository;
-use App\Repository\InstallationProgressRepository;
 use App\Service\CertificateRadsecproxyCommandsService;
 use App\Service\CertificateProcessCheckerService;
 use App\Service\CertificateRadsecproxyInfoService;
@@ -35,7 +31,7 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Throwable;
 
-class CertificateRadsecproxyManagementController extends AbstractController
+class CertificateManagementRadsecproxyController extends AbstractController
 {
     public function __construct(
         private readonly GetSettings $getSettings,
@@ -45,69 +41,8 @@ class CertificateRadsecproxyManagementController extends AbstractController
         private readonly EntityManagerInterface $entityManager,
         private readonly CertificateRadsecproxyCommandsService $certificateRadsecproxyCommandsService,
         private readonly CertificateRepository $certificateRepository,
-        private readonly InstallationProgressRepository $installationProgressRepository,
-        private readonly CertificateSetupProcessRepository $certificateSetupProcessRepository,
         private readonly CertificateRadsecproxyInfoService $certificateRadsecproxyInfoService,
     ) {
-    }
-
-    #[Route('/dashboard/settings/certificatesManagement', name: 'admin_dashboard_settings_certs_management')]
-    #[IsGranted('ROLE_ADMIN')]
-    public function settingsCertificatesManagement(): Response
-    {
-        $lastCompletedInstallation = $this->installationProgressRepository->getLastCompleted();
-        $lastCompletedCertificate = $this->certificateSetupProcessRepository->getLatestCompletedProcess();
-        if ($lastCompletedInstallation instanceof InstallationProgress) {
-            $installationDate = $lastCompletedInstallation->getUpdatedAt();
-        }
-        if ($lastCompletedCertificate instanceof CertificateSetupProcess) {
-            $certificateDate = $lastCompletedCertificate->getUpdatedAt();
-        }
-
-        // Default render
-        return $this->render('dashboard/shared/settings_actions.html.twig', [
-            'data' => $this->getSettings->getSettings(),
-            'lastCompletedInstallation' => $installationDate ?? null,
-            'lastCompletedCertificates' => $certificateDate ?? null,
-        ]);
-    }
-
-    #[Route(
-        '/dashboard/settings/certificatesManagement/abort',
-        name: 'admin_dashboard_settings_certs_management_abort',
-        methods: ['POST']
-    )]
-    #[IsGranted('ROLE_ADMIN')]
-    public function settingsCertificatesManagementAbort(): Response
-    {
-        $process = $this->certificateProcessCheckerService->getCurrentProcess();
-
-        // In case there's not active process
-        if (!$process instanceof CertificateSetupProcess) {
-            $this->addFlash(
-                'error',
-                $this->translator->trans('noActiveProcess', [], 'CertificateProcessCheckerService')
-            );
-            return $this->redirectToRoute('admin_dashboard_settings_certs_radsecproxy_upload');
-        }
-
-        // Cancel the process and add a tag IN_COMPLETED
-        $process->setStatus(CertificateProcessStatus::ABORTED);
-        $process->setUpdatedAt(new DateTimeImmutable());
-
-        $this->entityManager->persist($process);
-        $this->entityManager->flush();
-
-        $this->addFlash(
-            'error',
-            $this->translator->trans(
-                'certificateProcessAborted',
-                [],
-                'controllers'
-            )
-        );
-
-        return $this->redirectToRoute('admin_dashboard_settings_certs_radsecproxy_upload');
     }
 
     #[Route(
@@ -126,7 +61,7 @@ class CertificateRadsecproxyManagementController extends AbstractController
             // If the required next step is NOT this page, redirect
             if ($nextRoute !== $request->attributes->get('_route')) {
                 $this->addFlash(
-                    'error',
+                    'error_admin',
                     $this->translator->trans('pendingActiveProcess', [], 'CertificateProcessCheckerService')
                 );
                 return $this->redirectToRoute($nextRoute);
@@ -175,7 +110,7 @@ class CertificateRadsecproxyManagementController extends AbstractController
             $this->entityManager->flush();
 
             $this->addFlash(
-                'success',
+                'success_admin',
                 $this->translator->trans(
                     'radsecProxyCertUploadedSuccessfully',
                     [],
@@ -210,7 +145,7 @@ class CertificateRadsecproxyManagementController extends AbstractController
         // If there's no active process
         if (!$processState['active']) {
             $this->addFlash(
-                'error',
+                'error_admin',
                 $this->translator->trans(
                     'noActiveProcess',
                     [],
@@ -234,7 +169,7 @@ class CertificateRadsecproxyManagementController extends AbstractController
         if ($form->isSubmitted()) {
             if ($process?->getRadsecproxyConfigAppliedAt() instanceof DateTimeImmutable) {
                 $this->addFlash(
-                    'error',
+                    'error_admin',
                     $this->translator->trans('configAlreadyApplied', [], 'controllers')
                 );
             } elseif ($form->isValid()) {
@@ -245,7 +180,7 @@ class CertificateRadsecproxyManagementController extends AbstractController
                 $this->entityManager->flush();
 
                 $this->addFlash(
-                    'success',
+                    'success_admin',
                     $this->translator->trans('radsecProxyConfigAppliedSuccessfully', [], 'controllers')
                 );
 
@@ -281,7 +216,7 @@ class CertificateRadsecproxyManagementController extends AbstractController
         // If no active process, redirect to the first stage or fallback
         if (!$processState['active']) {
             $this->addFlash(
-                'error',
+                'error_admin',
                 $this->translator->trans(
                     'noActiveProcess',
                     [],
