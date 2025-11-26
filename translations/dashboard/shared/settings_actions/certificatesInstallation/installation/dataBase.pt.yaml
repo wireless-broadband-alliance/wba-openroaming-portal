@@ -26,3 +26,4 @@ dbOpenRoamingIPDescription: 'Endereço IP ou nome do servidor onde está alojada
 dbFreeradiusIPDescription: 'Endereço IP ou nome do servidor onde está alojada a base de dados do Freeradius.'
 dbOpenRoamingPortDescription: 'Porta usada para a ligação à base de dados do OpenRoaming.'
 dbFreeradiusPortDescription: 'Porta usada para a ligação à base de dados do Freeradius.'
+dbCommandTitle: 'Comando para atualizar as definições da base de dados'

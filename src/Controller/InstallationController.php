@@ -212,6 +212,12 @@ class InstallationController extends AbstractController
         $lastInstallation = $this->installationService->lastInstallation();
         if ($lastInstallation instanceof InstallationProgress) {
             $step = $this->installationService->getStep($lastInstallation);
+            if ($step === InstallationStep::SETTINGS->value) {
+                return $this->redirectToRoute('admin_dashboard_settings_certs_installation_settings');
+            }
+            if ($step === InstallationStep::ADMIN->value) {
+                return $this->redirectToRoute('admin_dashboard_settings_certs_installation_admin');
+            }
         } else {
             $step = InstallationStep::DATABASE->value;
         }
@@ -219,8 +225,12 @@ class InstallationController extends AbstractController
 
         $commands = [
             [
-                'description' => 'comando 1',
-                'command' => 'comando 1',
+                'description' => $this->translator->trans(
+                    'writeDbSettingsEnv',
+                    [],
+                    'controllers'
+                ),
+                'command' => $this->installationService->commandToDataBase($lastInstallation),
             ]
         ];
 

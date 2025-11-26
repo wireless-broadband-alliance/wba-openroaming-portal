@@ -26,3 +26,4 @@ dbOpenRoamingIPDescription: 'IP address or hostname where the OpenRoaming databa
 dbFreeradiusIPDescription: 'IP address or hostname where the Freeradius database is hosted.'
 dbOpenRoamingPortDescription: 'Port used to connect to the OpenRoaming database.'
 dbFreeradiusPortDescription: 'Port used to connect to the Freeradius database.'
+dbCommandTitle: 'Command to update DB settings'

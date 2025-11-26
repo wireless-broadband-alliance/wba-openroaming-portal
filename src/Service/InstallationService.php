@@ -67,7 +67,8 @@ readonly class InstallationService
     {
         if (
             $installationProgress->getDbOpenRoaming() &&
-            $installationProgress->getDbFreeradius()
+            $installationProgress->getDbFreeradius() &&
+            $this->checkDatabaseSettings($installationProgress)
         ) {
             if (
                 $installationProgress->getTurnstileKey() &&
@@ -213,9 +214,15 @@ readonly class InstallationService
         return $dto;
     }
 
-    public function chackDatabaseSettings(InstallationProgress $installationProgress): bool
+    public function checkDatabaseSettings(InstallationProgress $installationProgress): bool
     {
-
+        if (!$this->envValueMatches(DataBaseSetupType::DATABASE_URL->value, $installationProgress->getDbOpenRoaming() )) {
+            return false;
+        }
+        if (!$this->envValueMatches(DataBaseSetupType::DATABASE_FREERADIUS_URL->value, $installationProgress->getDbFreeradius())) {
+            return false;
+        }
+        return true;
     }
 
     public function envValueMatches(string $key, string $expectedValue): bool
@@ -226,7 +233,7 @@ readonly class InstallationService
         $pattern = sprintf('/^%s="?(.*?)"?$/m', preg_quote($key, '/'));
 
         if (preg_match($pattern, $envContent, $matches)) {
-            return trim($matches[1]) === $expectedValue;
+            return trim($matches[1], "\"' \r\n") === $expectedValue;
         }
 
         return false;
@@ -272,5 +279,10 @@ readonly class InstallationService
                 $this->entityManager->flush();
             }
         }
+    }
+
+    public function commandToDataBase(InstallationProgress $installationProgress): string
+    {
+        return 'scripts/update-db-env.sh "'. $installationProgress->getDbOpenRoaming() . '" "' . $installationProgress->getDbFreeradius() . '"';
     }
 }

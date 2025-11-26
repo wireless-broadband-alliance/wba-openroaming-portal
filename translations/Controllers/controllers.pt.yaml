@@ -152,3 +152,4 @@ pfx:
     success: "Windows PFX foi criado com sucesso!"
     failure: "Falha ao gerar o ficheiro Windows PFX por favor confirma se esta a inserir EV's válidos!"
 envPermissionDenied: 'O ficheiro . env não tem permissões de escrita. Por favor utilize os seguintes comandos.'
+writeDbSettingsEnv: 'Escreva as novas configurações da base de dados no ficheiro .env'

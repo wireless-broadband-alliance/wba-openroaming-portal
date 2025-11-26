@@ -24,13 +24,13 @@ set_env() {
     KEY="$1"
     VALUE="$2"
 
-    if grep -q "^$KEY=" "$ENV_FILE"; then
-        sed -i "s|^$KEY=.*|$KEY=\"$VALUE\"|" "$ENV_FILE"
-        echo "Updated: $KEY"
-    else
-        echo "$KEY=\"$VALUE\"" >> "$ENV_FILE"
-        echo "Added: $KEY"
-    fi
+    # Remove all old occurrences of the variable
+    sed -i "/^$KEY=/d" "$ENV_FILE"
+
+    # Add the new value
+    echo "$KEY=\"$VALUE\"" >> "$ENV_FILE"
+
+    echo "Updated: $KEY"
 }
 
 # update env values
