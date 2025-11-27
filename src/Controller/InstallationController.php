@@ -228,7 +228,6 @@ class InstallationController extends AbstractController
 
 
         if ($form->isSubmitted()) {
-
             if (
                 $this->installationService->checkDatabaseSettings($lastInstallation) &&
                 $this->installationService->checkSettingsValues($lastInstallation)
@@ -238,7 +237,8 @@ class InstallationController extends AbstractController
                     $this->translator->trans(
                         'settingsApplied',
                         [],
-                        'controllers')
+                        'controllers'
+                    )
                 );
                 return $this->redirectToRoute('admin_dashboard_settings_certs_installation_summary');
             }
@@ -248,7 +248,8 @@ class InstallationController extends AbstractController
                 $this->translator->trans(
                     'settingsNotApplied',
                     [],
-                    'controllers')
+                    'controllers'
+                )
             );
             return $this->redirectToRoute('admin_dashboard_settings_certs_installation_command');
         }
@@ -287,15 +288,19 @@ class InstallationController extends AbstractController
             $this->translator->trans(
                 'envPermissionDenied',
                 [],
-                'controllers')
+                'controllers'
+            )
         );
 
-        return $this->render('dashboard/shared/settings_actions/certificatesManagement/installation/manualInstallation/manualInstallation.html.twig', [
-            'data' => $data,
-            'stages' => $this->installationService->getStepperStatus($step),
-            'commands' => $commands,
-            'form' => $form->createView(),
-        ]);
+        return $this->render(
+            'dashboard/shared/settings_actions/certificatesManagement/installation/manualInstallation/manualInstallation.html.twig',
+            [
+                'data' => $data,
+                'stages' => $this->installationService->getStepperStatus($step),
+                'commands' => $commands,
+                'form' => $form->createView(),
+            ]
+        );
     }
 
 
@@ -336,7 +341,6 @@ class InstallationController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-
             $captchaValidation = $this->captchaValidator->validateCredentials($settingsDTO->turnstileSecret);
 
             if (!$captchaValidation['success']) {
@@ -357,7 +361,6 @@ class InstallationController extends AbstractController
             $lastInstallation->setInstallationState(InstallationProgressType::IN_PROGRESS->value);
             $this->entityManager->persist($lastInstallation);
             $this->entityManager->flush();
-
 
 
             $trustedProxiesPermissions = $this->databaseConnectionService->writeDatabaseUrlToEnv(
@@ -383,7 +386,6 @@ class InstallationController extends AbstractController
             }
 
             if (!$trustedProxiesPermissions || !$turnstileKeyPermissions || !$turnstileSecretPermissions) {
-
                 return $this->redirectToRoute('admin_dashboard_settings_certs_installation_command');
             }
 
@@ -715,7 +717,6 @@ class InstallationController extends AbstractController
     public function abortProcess(): RedirectResponse
     {
         $lastInstallation = $this->installationService->lastInstallation();
-
         // If there's no active installation process
         if (!$lastInstallation instanceof InstallationProgress) {
             $this->addFlash(
@@ -731,7 +732,7 @@ class InstallationController extends AbstractController
         }
 
         // Check if installation is in a state that can be aborted
-        if ($lastInstallation->getInstallationState() !== InstallationProgressType::IN_PROGRESS) {
+        if ($lastInstallation->getInstallationState() !== InstallationProgressType::IN_PROGRESS->value ) {
             $this->addFlash(
                 'error',
                 $this->translator->trans(
@@ -746,7 +747,7 @@ class InstallationController extends AbstractController
 
         // Abort the process
         $lastInstallation->setInstallationState(InstallationProgressType::ABORTED->value);
-        $lastInstallation->setUpdatedAt(new DateTimeImmutable());
+        $lastInstallation->setUpdatedAt(new DateTime());
 
         $this->entityManager->persist($lastInstallation);
         $this->entityManager->flush();
@@ -788,13 +789,13 @@ class InstallationController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
         // Handle access restrictions based on the context
-        $timeToResetAttempts = (int) $this->settingRepository->findOneBy(
+        $timeToResetAttempts = (int)$this->settingRepository->findOneBy(
             ['name' => SettingName::TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS->value]
         )->getValue();
-        $nrAttempts = (int) $this->settingRepository->findOneBy(
+        $nrAttempts = (int)$this->settingRepository->findOneBy(
             ['name' => SettingName::TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE->value]
         )->getValue();
-        $timeIntervalToResendCode = (int) $this->settingRepository->findOneBy(
+        $timeIntervalToResendCode = (int)$this->settingRepository->findOneBy(
             ['name' => SettingName::TWO_FACTOR_AUTH_RESEND_INTERVAL->value]
         )->getValue();
         $limitTime = new DateTime();

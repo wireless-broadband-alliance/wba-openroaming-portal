@@ -16,10 +16,10 @@
 
 {# Abort Button + Leave Configuration #}
 <div class="flex flex-col sm:flex-row justify-end items-stretch sm:items-center gap-2 sm:gap-3">
-    {% if processState is defined and processState.active %}
+    {% if app.request.attributes.get('_route') != 'admin_dashboard_settings_certs_installation' %}
         <form action="{{ path('admin_dashboard_settings_certs_installation_abortProcess') }}"
               method="POST"
-              onsubmit="return confirm('{{ 'confirm_abort'|trans({}, '_certificate_stepper') }}');">
+              onsubmit="return confirm('{{ 'confirm_abort'|trans({}, '_installation_stepper') }}');">
             <button type="submit"
                     class="w-full sm:w-auto flex items-center gap-2
               px-3 py-1.5 sm:px-4 sm:py-2
@@ -29,7 +29,7 @@
               hover:bg-red-50 hover:border-red-300 transition">
                 <twig:ux:icon name="wba:cross-circle-rounded"
                               class="w-4 h-4 opacity-80 fill-current"/>
-                {{ 'abort'|trans({}, '_certificate_stepper') }}
+                {{ 'abort'|trans({}, '_installation_stepper') }}
             </button>
         </form>
     {% endif %}
@@ -42,7 +42,7 @@
               hover:bg-gray-50 hover:border-gray-300 transition">
         <twig:ux:icon name="wba:exit"
                       class="w-4 h-4 opacity-70 fill-current"/>
-        {{ 'leave'|trans({}, '_certificate_stepper') }}
+        {{ 'leave'|trans({}, '_installation_stepper') }}
     </a>
 </div>
 

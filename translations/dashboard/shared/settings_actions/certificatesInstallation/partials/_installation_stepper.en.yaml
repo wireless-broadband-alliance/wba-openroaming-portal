@@ -14,3 +14,4 @@ step:
 confirm_abort: "Are you sure you want to abort the installation?"
 abort: "Abort Installation"
 installer_info: "Follow the steps to complete the system installation."
+leave: 'Leave Process Configuration'
