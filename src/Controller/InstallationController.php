@@ -46,6 +46,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\KernelInterface;
+use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
@@ -188,7 +189,7 @@ class InstallationController extends AbstractController
         }
 
         return $this->render(
-            'dashboard/shared/settings_actions/certificatesManagement/installation/dataBase.html.twig',
+            'dashboard/shared/settings_actions/certificatesManagement/installation/data_base.html.twig',
             [
                 'data' => $data,
                 'form' => $form->createView(),
@@ -293,7 +294,7 @@ class InstallationController extends AbstractController
         );
 
         return $this->render(
-            'dashboard/shared/settings_actions/certificatesManagement/installation/manualInstallation/manualInstallation.html.twig',
+            'dashboard/shared/settings_actions/certificatesManagement/installation/manualInstallation/manual_installation.html.twig',
             [
                 'data' => $data,
                 'stages' => $this->installationService->getStepperStatus($step),
@@ -544,7 +545,7 @@ class InstallationController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function sendCode(
         Request $request,
-    ) {
+    ): RedirectResponse {
         $lastInstallation = $this->installationService->lastInstallation();
         if ($lastInstallation instanceof InstallationProgress) {
             $step = $this->installationService->getStep($lastInstallation);
@@ -607,7 +608,7 @@ class InstallationController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function settingsCertificatesManagementInstallationAdminConfirmation(
         Request $request,
-    ) {
+    ): RedirectResponse|Response {
         $lastInstallation = $this->installationService->lastInstallation();
         if ($lastInstallation instanceof InstallationProgress) {
             $step = $this->installationService->getStep($lastInstallation);
@@ -633,7 +634,7 @@ class InstallationController extends AbstractController
             $data = $form->getData();
             $code = $data["code"];
 
-            if ($lastInstallation && $code === $lastInstallation->getConfirmCodeAdmin()) {
+            if ($code === $lastInstallation->getConfirmCodeAdmin()) {
                 $adminUser = $this->userRepository->findAdmin();
                 $lastInstallation->setAdminConfirmation(true);
                 if ($adminUser instanceof User) {
@@ -659,7 +660,7 @@ class InstallationController extends AbstractController
         }
 
         return $this->render(
-            'dashboard/shared/settings_actions/certificatesManagement/installation/ConfirmAdmin.html.twig',
+            'dashboard/shared/settings_actions/certificatesManagement/installation/confirm_admin.html.twig',
             [
                 'data' => $data,
                 'form' => $form->createView(),
@@ -673,7 +674,7 @@ class InstallationController extends AbstractController
         name: 'admin_dashboard_settings_certs_installation_summary'
     )]
     #[IsGranted('ROLE_ADMIN')]
-    public function installationSummary()
+    public function installationSummary(): RedirectResponse|Response
     {
         $lastInstallation = $this->installationProgressRepository->getLast();
         if ($lastInstallation instanceof InstallationProgress) {
@@ -732,7 +733,7 @@ class InstallationController extends AbstractController
         }
 
         // Check if installation is in a state that can be aborted
-        if ($lastInstallation->getInstallationState() !== InstallationProgressType::IN_PROGRESS->value ) {
+        if ($lastInstallation->getInstallationState() !== InstallationProgressType::IN_PROGRESS->value) {
             $this->addFlash(
                 'error',
                 $this->translator->trans(
@@ -770,6 +771,7 @@ class InstallationController extends AbstractController
     /**
      * @throws \DateMalformedStringException
      * @throws RandomException
+     * @throws TransportExceptionInterface
      */
     #[Route(
         '/dashboard/settings/certificatesManagement/installation/admin/confirmation/resend',

@@ -8,10 +8,10 @@
 
     <div class="mt-6 leading-7">
         <p class="font-bold text-base sm:text-lg md:text-xl lg:text-2xl">
-            {{ 'title'|trans({}, 'manualInstallation') }}
+            {{ 'title'|trans({}, 'manual_installation') }}
         </p>
         <p class="mt-3 text-sm sm:text-base md:text-lg lg:text-xl text-gray-600">
-            {{ 'description'|trans({}, 'manualInstallation') }}
+            {{ 'description'|trans({}, 'manual_installation') }}
         </p>
     </div>
 
@@ -21,7 +21,7 @@
     {# Update Server Commands #}
     {{ include(
         'dashboard/shared/settings_actions/certificatesManagement/partials/_update_commands.html.twig',
-        { commands: commands, title: 'commandsTitle'|trans({}, 'manualInstallation') }
+        { commands: commands, title: 'commandsTitle'|trans({}, 'manual_installation') }
     ) }}
 
         <div class="mt-8 divider-solid"></div>
@@ -31,9 +31,8 @@
             {{ form_start(form) }}
             {{ form_row(form._token) }}
                 <button type="submit" class="w-[160px] btn-primary" >
-                    {{ 'done'|trans({}, 'manualInstallation') }}
+                    {{ 'done'|trans({}, 'manual_installation') }}
                 </button>
             {{ form_end(form, {render_rest: false}) }}
         </div>
-
 {% endblock %}

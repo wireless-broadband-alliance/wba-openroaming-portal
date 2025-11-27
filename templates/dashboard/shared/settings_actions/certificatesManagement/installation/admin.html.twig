@@ -8,10 +8,10 @@
 
     <div class="mt-6 leading-7">
         <p class="font-bold text-base sm:text-lg md:text-xl lg:text-2xl">
-            {{ 'adminConfigTitle'|trans({}, 'adminConfig') }}
+            {{ 'adminConfigTitle'|trans({}, 'admin_config') }}
         </p>
         <p class="mt-3 text-sm sm:text-base md:text-lg lg:text-xl text-gray-600">
-            {{ 'adminConfigDescription'|trans({}, 'adminConfig') }}
+            {{ 'adminConfigDescription'|trans({}, 'admin_config') }}
         </p>
     </div>
 
@@ -26,7 +26,7 @@
                     <div class="flex flex-row justify-between">
                         <div class="text-base font-medium text-center break-normal md:break-all">
                             <h1 class="text-base md:text-lg whitespace-nowrap">
-                                {{ 'emailLabel'|trans({}, 'adminConfig') }}
+                                {{ 'emailLabel'|trans({}, 'admin_config') }}
                             </h1>
                         </div>
                         <label class="flex items-center bg-opacity-40">
@@ -37,7 +37,7 @@
                     </div>
 
                     {{ include('/dashboard/shared/settings_actions/_description.html.twig', {
-                        description: 'emailDescription'|trans({}, 'adminConfig'),
+                        description: 'emailDescription'|trans({}, 'admin_config'),
                     }) }}
 
                     <div class="flex items-center space-x-2 mt-5">
@@ -50,7 +50,7 @@
 
                     <div>
                         <p class="mt-3 text-xs sm:text-sm md:text-base text-gray-400">
-                            {{ 'emailWarning'|trans({}, 'adminConfig') }}
+                            {{ 'emailWarning'|trans({}, 'admin_config') }}
                         </p>
                     </div>
 
@@ -64,7 +64,7 @@
                     <div class="flex flex-row justify-between">
                         <div class="text-base font-medium text-center break-normal md:break-all">
                             <h1 class="text-base md:text-lg whitespace-nowrap">
-                                {{ 'passwordLabel'|trans({}, 'adminConfig') }}
+                                {{ 'passwordLabel'|trans({}, 'admin_config') }}
                             </h1>
                         </div>
                     </div>
@@ -87,7 +87,7 @@
                     <div class="flex flex-row justify-between">
                         <div class="text-base font-medium text-center break-normal md:break-all">
                             <h1 class="text-base md:text-lg whitespace-nowrap">
-                                {{ 'passwordConfirmLabel'|trans({}, 'adminConfig') }}
+                                {{ 'passwordConfirmLabel'|trans({}, 'admin_config') }}
                             </h1>
                         </div>
                     </div>
@@ -111,8 +111,8 @@
 
             <div class="mt-6 flex flex-row w-full justify-end items-center gap-2">
 
-                <button type="submit" class="btn-primary" onclick="return confirm('{{ 'saveChangesMessage'|trans({}, 'adminConfig') }}')">
-                    {{ 'databaseApplyBtn'|trans({}, 'adminConfig') }}
+                <button type="submit" class="btn-primary" onclick="return confirm('{{ 'saveChangesMessage'|trans({}, 'admin_config') }}')">
+                    {{ 'databaseApplyBtn'|trans({}, 'admin_config') }}
                 </button>
             </div>
 
