@@ -15,21 +15,21 @@
 
 {# Abort Button + Leave Configuration #}
 <div class="flex flex-col sm:flex-row justify-end items-stretch sm:items-center gap-2 sm:gap-3">
-        <form action="{{ path('admin_dashboard_settings_certs_management_abort') }}"
-              method="POST"
-              onsubmit="return confirm('{{ 'confirm_abort'|trans({}, '_certificate_stepper') }}');">
-            <button type="submit"
-                    class="w-full sm:w-auto flex items-center gap-2
+    <form action="{{ path('admin_dashboard_settings_certs_management_abort') }}"
+          method="POST"
+          onsubmit="return confirm('{{ 'confirm_abort'|trans({}, '_certificate_stepper') }}');">
+        <button type="submit"
+                class="w-full sm:w-auto flex items-center gap-2
               px-3 py-1.5 sm:px-4 sm:py-2
               text-xs sm:text-sm
               rounded-lg shadow font-medium
               text-red-700 bg-white border border-red-200
               hover:bg-red-50 hover:border-red-300 transition">
-                <twig:ux:icon name="wba:cross-circle-rounded"
-                              class="w-4 h-4 opacity-80 fill-current"/>
-                {{ 'abort'|trans({}, '_certificate_stepper') }}
-            </button>
-        </form>
+            <twig:ux:icon name="wba:cross-circle-rounded"
+                          class="w-4 h-4 opacity-80 fill-current"/>
+            {{ 'abort'|trans({}, '_certificate_stepper') }}
+        </button>
+    </form>
     <a href="{{ path('admin_page') }}"
        class="w-full sm:w-auto  flex items-center gap-2
               px-3 py-1.5 sm:px-4 sm:py-2
@@ -75,7 +75,6 @@
                 ">
                     {% if previousCompleted %}
                         <a href="{{ path(step.route) }}"
-                           onclick="return confirm('{{ 'warn_return_previous_step'|trans({}, '_certificate_stepper') }}');"
                            class="flex items-center justify-center w-full h-full text-inherit no-underline leading-none">
                             {{ loop.index }}
                         </a>

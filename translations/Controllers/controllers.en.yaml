@@ -135,13 +135,14 @@ jwtSuccessfully: 'Application settings applied successfully'
 jwtFailed: 'Failed to generate JWT key pair'
 adminConfirmedSuccessfully: 'Admin email confirmed successfully'
 missingRequiredForRadsecProxyTest: 'Remote_host and remote_port are required.'
-radsecproxy_test_passed: 'Radsecproxy test passed, both the client.pem and key.pem are present in container %container%'
-radsecproxy_test_failed: 'Radsecproxy test failed on host %host%:%port% — missing file(s) in container %container%: %files%'
 radsecproxy_container_not_running: 'Container %container% is not running on host %host%:%port%'
 radsecProxyCertUploadedSuccessfully: 'RadSecProxy certificates uploaded successfully!'
 radsecProxyConfigAppliedSuccessfully: 'RadSecProxy configuration completed!'
+radsecProxyTestPassed: "TLS handshake OK using WBA CA bundle"
+missingRequiredForFreeradiusTest: 'Remote_host and remote_port are required.'
 freeradiusCertUploadedSuccessfully: 'Freeradius certificates uploaded successfully!'
 freeradiusConfigAppliedSuccessfully: 'Freeradius configuration applied successfully!'
+freeradiusTestPassed: 'TEST OK DÁ UPDATE THIS DPS' # TODO DÁ UPDATE DPS
 configAlreadyApplied: 'Configuration is been already applied. You can not re-submit this form.'
 certificateProcessAborted: "This process was aborted successfully. Please don't forget to re-configure all the process once again correctly!"
 not_ev_warning: "These certificates are not valid EV's. OpenRoaming profile generation for Windows will fail because of this, but you can proceed if you wish."

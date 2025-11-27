@@ -288,7 +288,6 @@ class CertificateManagementRadsecproxyController extends AbstractController
 
         // Everytime the user tries a new test it will save the used credentials
         $processEntity->setRemoteHost($remoteHost);
-        $processEntity->setRemotePort($remotePort);
         $processEntity->setUpdatedAt(new DateTimeImmutable());
         $this->entityManager->persist($processEntity);
         $this->entityManager->flush();
@@ -417,7 +416,11 @@ class CertificateManagementRadsecproxyController extends AbstractController
 
             return new JsonResponse([
                 'status' => 'success',
-                'message' => 'TLS handshake OK using WBA CA bundle',
+                'message' => $this->translator->trans(
+                    'radsecProxyTestPassed',
+                    [],
+                    'controllers'
+                ),
             ]);
         } catch (Throwable $e) {
             // Update DB when test fails

@@ -6,7 +6,7 @@ export default class extends Controller {
         "buttonLabel",
         "waitingWidget",
         "resultMessage",
-        "freeradiusButton",
+        "nextPageButton",
         "statusIndicator",
         // inputs:
         "hostInput",
@@ -59,7 +59,7 @@ export default class extends Controller {
             this.showResult(data);
 
             if (data.status === "success") {
-                this.enableFreeradiusButton();
+                this.enableNextPageButton();
             }
         } catch (error) {
             this.showResult({
@@ -111,17 +111,17 @@ export default class extends Controller {
         this.resultMessageTarget.classList.remove("hidden");
     }
 
-    enableFreeradiusButton() {
-        this.freeradiusButtonTarget.classList.remove(
+    enableNextPageButton() {
+        this.nextPageButtonTarget.classList.remove(
             "bg-gray-100", "text-gray-400", "cursor-not-allowed", "pointer-events-none"
         );
-        this.freeradiusButtonTarget.classList.add(
+        this.nextPageButtonTarget.classList.add(
             "bg-white", "text-gray-800", "hover:bg-gray-50", "focus:ring-2", "focus:ring-primary/30", "transition"
         );
 
         // Optional: ensure the href is set if it was disabled
-        if (!this.freeradiusButtonTarget.getAttribute("href")) {
-            this.freeradiusButtonTarget.href = this.freeradiusButtonTarget.dataset.hrefEnabled;
+        if (!this.nextPageButtonTarget.getAttribute("href")) {
+            this.nextPageButtonTarget.href = this.nextPageButtonTarget.dataset.hrefEnabled;
         }
     }
 
