@@ -22,6 +22,7 @@ use App\Service\CertificateWriterUpdateService;
 use App\Service\GetSettings;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
+use RuntimeException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -56,10 +57,6 @@ class CertificateManagementFreeradiusController extends AbstractController
     public function settingsCertificatesManagementFreeradiusUpload(
         Request $request
     ): Response {
-        if ($redirect = $this->enforceStageAccess(CertificateRouteAccess::FREERADIUS_UPLOAD)) {
-            return $redirect;
-        }
-
         // Get current process state
         $processState = $this->certificateProcessCheckerService->getProcessState();
 
@@ -205,10 +202,6 @@ class CertificateManagementFreeradiusController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function settingsCertificatesManagementFreeradiusConfig(Request $request): Response
     {
-        if ($redirect = $this->enforceStageAccess(CertificateRouteAccess::FREERADIUS_CONFIG)) {
-            return $redirect;
-        }
-
         // Get current process state
         $processState = $this->certificateProcessCheckerService->getProcessState();
         $process = $processState['process'] ?? null;
@@ -323,11 +316,6 @@ class CertificateManagementFreeradiusController extends AbstractController
     public function settingsCertificatesManagementFreeradiusTest(): Response
     {
         // Get current process state
-        if ($redirect = $this->enforceStageAccess(CertificateRouteAccess::FREERADIUS_TEST)) {
-            return $redirect;
-        }
-
-        // Get current process state
         $processState = $this->certificateProcessCheckerService->getProcessState();
 
         // If no active process, redirect to the first stage or fallback
@@ -354,48 +342,6 @@ class CertificateManagementFreeradiusController extends AbstractController
                 'process' => $processState['process'],
             ]
         );
-    }
-
-    private function enforceStageAccess(CertificateRouteAccess $requestedStage): ?Response
-    {
-        // Check if user can access this stage
-        if (!$this->certificateProcessCheckerService->canAccessStage($requestedStage)) {
-            $this->addFlash(
-                'warning',
-                $this->translator->trans('cannotAccessStageYet', [], 'controllers')
-            );
-            $nextRoute = $this->certificateProcessCheckerService->getNextRequiredRoute(
-                $this->certificateProcessCheckerService->getProcessState()['stages'] ?? []
-            );
-            return $this->redirectToRoute($nextRoute ?? CertificateRouteAccess::FREERADIUS_UPLOAD->routeName());
-        }
-
-        // Prevent going back to previous phase
-        if ($this->certificateProcessCheckerService->isRouteBehindProcess($requestedStage)) {
-            $this->addFlash('warning', $this->translator->trans('cannotReturnToPreviousPhase', [], 'controllers'));
-            return $this->redirectToRoute(CertificateRouteAccess::FREERADIUS_UPLOAD->routeName());
-        }
-
-        // Reset later Freeradius steps if user navigated backwards
-        $process = $this->certificateProcessCheckerService->getCurrentProcess();
-        $currentStage = $this->certificateProcessCheckerService->getProcessCurrentStage();
-        if ($process && $currentStage instanceof CertificateRouteAccess) {
-            $requestedIndex = $this->certificateProcessCheckerService->indexOf($requestedStage);
-            $currentIndex = $this->certificateProcessCheckerService->indexOf($currentStage);
-
-            if (
-                $requestedIndex >= 0 &&
-                $requestedIndex < $currentIndex &&
-                $requestedStage->phase() === 'freeradius' &&
-                $currentStage->phase() === 'freeradius'
-            ) {
-                $this->certificateProcessCheckerService->resetStagesFrom($requestedStage);
-                $this->entityManager->persist($process);
-                $this->entityManager->flush();
-            }
-        }
-
-        return null; // no redirect, proceed
     }
 
     /**
@@ -451,21 +397,31 @@ class CertificateManagementFreeradiusController extends AbstractController
         $this->entityManager->persist($processEntity);
         $this->entityManager->flush();
 
-        // TODO MAKE NEW LOGIC FOR TEST RUN FROM HERE
-        dd('pls die');
-        // Build full paths
-        $clientCert = $this->certificateRepository->findLatestByProcessAndName(
-            $processEntity,
-            'clientRADSECPROXY' // This name comes from the DTO Upload Radsecproxy
-        );
-        $keyCert = $this->certificateRepository->findLatestByProcessAndName(
-            $processEntity,
-            'keyRADSECPROXY' // Same for this one
-        );
+        // Build known signing-keys paths
+        $basePath = $this->getParameter('kernel.project_dir') . '/signing-keys/';
 
-        $basePath = $this->getParameter('kernel.project_dir') . '/var/certs/';
-        $clientCertPath = $clientCert ? $basePath . $clientCert->getFilePath() : null;
-        $keyCertPath = $keyCert ? $basePath . $keyCert->getFilePath() : null;
+        $paths = [
+            'ca' => $basePath . CertificateFileName::CA_PEM_FILE->value,
+            'cert' => $basePath . CertificateFileName::CERT_PEM_FILE->value,
+            'chain' => $basePath . CertificateFileName::CHAIN_PEM_FILE->value,
+            'fullchain' => $basePath . CertificateFileName::FULL_CHAIN_PEM_FILE->value,
+            'privkey' => $basePath . CertificateFileName::PRIVATE_KEY_PEM_FILE->value,
+        ];
+
+        // Validate all exist
+        foreach ($paths as $key => $path) {
+            if (!file_exists($path)) {
+                throw new RuntimeException("Missing certificate file: " . $path);
+            }
+        }
+
+        return new JsonResponse([
+            'status' => 'success',
+            'details' => [
+                'certificatePaths' => $paths,
+                'key' => $key
+            ],
+        ]);
 
         // Validate certificate files exist
         if (!$clientCertPath || !$keyCertPath || !file_exists($clientCertPath) || !file_exists($keyCertPath)) {
@@ -477,6 +433,8 @@ class CertificateManagementFreeradiusController extends AbstractController
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
 
+        // TODO MAKE NEW LOGIC FOR TEST RUN FROM HERE
+        dd('pls die');
         try {
             $context = stream_context_create([
                 'ssl' => [
