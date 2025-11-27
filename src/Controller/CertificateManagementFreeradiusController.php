@@ -409,28 +409,16 @@ class CertificateManagementFreeradiusController extends AbstractController
         ];
 
         // Validate all exist
-        foreach ($paths as $key => $path) {
-            if (!file_exists($path)) {
-                throw new RuntimeException("Missing certificate file: " . $path);
-            }
-        }
+        $missing = array_filter($paths, static function ($path) {
+            return !file_exists($path);
+        });
 
-        return new JsonResponse([
-            'status' => 'success',
-            'details' => [
-                'certificatePaths' => $paths,
-                'key' => $key
-            ],
-        ]);
-
-        // Validate certificate files exist
-        if (!$clientCertPath || !$keyCertPath || !file_exists($clientCertPath) || !file_exists($keyCertPath)) {
+        if (!empty($missing)) {
             return new JsonResponse([
                 'status' => 'error',
-                'message' => 'Client or key certificate file not found',
-                'clientCertPath' => $clientCertPath,
-                'keyCertPath' => $keyCertPath,
-            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+                'message' => 'Missing certificate files',
+                'missing_files' => $missing,
+            ], Response::HTTP_BAD_REQUEST);
         }
 
         // TODO MAKE NEW LOGIC FOR TEST RUN FROM HERE
