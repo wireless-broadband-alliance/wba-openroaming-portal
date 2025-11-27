@@ -282,6 +282,14 @@ class InstallationController extends AbstractController
             ]
         ];
 
+        $this->addFlash(
+            'error',
+            $this->translator->trans(
+                'envPermissionDenied',
+                [],
+                'controllers')
+        );
+
         return $this->render('dashboard/shared/settings_actions/certificatesManagement/installation/manualInstallation/manualInstallation.html.twig', [
             'data' => $data,
             'stages' => $this->installationService->getStepperStatus($step),

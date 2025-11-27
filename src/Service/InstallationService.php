@@ -241,6 +241,15 @@ readonly class InstallationService
         if (!$this->envValueMatches(SettingsConfigType::TURNSTILE_SECRET->value, $installationProgress->getTurnstileSecret())) {
             return false;
         }
+        if (
+            $installationProgress->getJwtPassphrase() !== null &&
+            !$this->envValueMatches(
+                SettingsConfigType::JWT_PASSPHRASE->value,
+                $installationProgress->getJwtPassphrase()
+            )
+        ) {
+            return false;
+        }
         return true;
     }
 
