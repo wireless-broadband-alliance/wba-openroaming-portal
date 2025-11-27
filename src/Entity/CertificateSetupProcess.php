@@ -51,9 +51,6 @@ class CertificateSetupProcess
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $remoteHost = null;
 
-    #[ORM\Column(nullable: true)]
-    private ?int $remotePort = null;
-
     #[ORM\Column(type: 'boolean', options: ['default' => false])]
     private bool $isFreeradiusCertEV = false;
 
@@ -206,18 +203,6 @@ class CertificateSetupProcess
     public function setRemoteHost(?string $remoteHost): static
     {
         $this->remoteHost = $remoteHost;
-
-        return $this;
-    }
-
-    public function getRemotePort(): ?int
-    {
-        return $this->remotePort;
-    }
-
-    public function setRemotePort(?int $remotePort): static
-    {
-        $this->remotePort = $remotePort;
 
         return $this;
     }

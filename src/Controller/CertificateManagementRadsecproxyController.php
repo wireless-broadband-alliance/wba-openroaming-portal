@@ -288,7 +288,6 @@ class CertificateManagementRadsecproxyController extends AbstractController
 
         // Everytime the user tries a new test it will save the used credentials
         $processEntity->setRemoteHost($remoteHost);
-        $processEntity->setRemotePort($remotePort);
         $processEntity->setUpdatedAt(new DateTimeImmutable());
         $this->entityManager->persist($processEntity);
         $this->entityManager->flush();

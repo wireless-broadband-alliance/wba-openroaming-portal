@@ -9,7 +9,9 @@ use App\Entity\CertificateSetupProcess;
 use App\Enum\CertificateFileName;
 use App\Enum\CertificateMachineType;
 use App\Enum\CertificateRouteAccess;
+use App\Enum\CertificateTestResult;
 use App\Enum\FirewallType;
+use App\Enum\TrustedWBAFingerprints;
 use App\Form\CertificateFreeradiusUploadType;
 use App\Form\SimpleSubmitFormType;
 use App\Service\CertificateFreeradiusCommandsService;
@@ -22,6 +24,7 @@ use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Process\Exception\ProcessFailedException;
@@ -393,5 +396,200 @@ class CertificateManagementFreeradiusController extends AbstractController
         }
 
         return null; // no redirect, proceed
+    }
+
+    /**
+     * @throws \JsonException
+     */
+    #[Route(
+        '/dashboard/settings/certificatesManagement/freeradius/test/run',
+        name: 'admin_dashboard_settings_certs_freeradius_test_run',
+        methods: ['POST']
+    )]
+    #[IsGranted('ROLE_ADMIN')]
+    public function runFreeradiusTest(Request $request): JsonResponse
+    {
+        $processEntity = $this->certificateProcessCheckerService->getCurrentProcess();
+
+        // Ensure an active process exists
+        if (!$processEntity instanceof CertificateSetupProcess) {
+            return new JsonResponse([
+                'status' => 'error',
+                'message' => $this->translator->trans(
+                    'noActiveProcess',
+                    [],
+                    'CertificateProcessCheckerService'
+                ),
+            ], Response::HTTP_BAD_REQUEST);
+        }
+
+        // Decode request payload
+        $payload = json_decode(
+            $request->getContent() ?: '{}',
+            true,
+            512,
+            JSON_THROW_ON_ERROR
+        );
+
+        $remoteHost = $payload['remote_host'] ?? $processEntity->getRemoteHost();
+        $remotePort = isset($payload['remote_port']) ? (int)$payload['remote_port'] : 2083;
+
+        if (!$remoteHost) {
+            return new JsonResponse([
+                'status' => 'error',
+                'message' => $this->translator->trans(
+                    'missingRequiredForRadsecProxyTest',
+                    [],
+                    'controllers'
+                ),
+            ], Response::HTTP_BAD_REQUEST);
+        }
+
+        // Everytime the user tries a new test it will save the used credentials
+        $processEntity->setRemoteHost($remoteHost);
+        $processEntity->setUpdatedAt(new DateTimeImmutable());
+        $this->entityManager->persist($processEntity);
+        $this->entityManager->flush();
+
+        // TODO MAKE NEW LOGIC FOR TEST RUN FROM HERE
+        dd('pls die');
+        // Build full paths
+        $clientCert = $this->certificateRepository->findLatestByProcessAndName(
+            $processEntity,
+            'clientRADSECPROXY' // This name comes from the DTO Upload Radsecproxy
+        );
+        $keyCert = $this->certificateRepository->findLatestByProcessAndName(
+            $processEntity,
+            'keyRADSECPROXY' // Same for this one
+        );
+
+        $basePath = $this->getParameter('kernel.project_dir') . '/var/certs/';
+        $clientCertPath = $clientCert ? $basePath . $clientCert->getFilePath() : null;
+        $keyCertPath = $keyCert ? $basePath . $keyCert->getFilePath() : null;
+
+        // Validate certificate files exist
+        if (!$clientCertPath || !$keyCertPath || !file_exists($clientCertPath) || !file_exists($keyCertPath)) {
+            return new JsonResponse([
+                'status' => 'error',
+                'message' => 'Client or key certificate file not found',
+                'clientCertPath' => $clientCertPath,
+                'keyCertPath' => $keyCertPath,
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+
+        try {
+            $context = stream_context_create([
+                'ssl' => [
+                    'verify_peer' => false,
+                    'verify_peer_name' => false,
+                    'allow_self_signed' => false,
+                    'capture_peer_cert_chain' => true,
+                    'local_cert' => $clientCertPath,
+                    'local_pk' => $keyCertPath,
+                    'crypto_method' => STREAM_CRYPTO_METHOD_TLS_CLIENT,
+                ]
+            ]);
+
+            // Open the TLS connection
+            $connection = @stream_socket_client(
+                "tls://{$remoteHost}:{$remotePort}",
+                $errno,
+                $errstr,
+                15,
+                STREAM_CLIENT_CONNECT,
+                $context
+            );
+
+            // If connection failed with a real error, handle it
+            if ($connection === false && ($errno !== 0 || $errstr !== '')) {
+                // TLS handshake failed
+                $this->certificateRadsecproxyCommandsService->updateRadsecproxyTestResult(
+                    $processEntity,
+                    CertificateTestResult::FAILED
+                );
+
+                return new JsonResponse([
+                    'status' => 'error',
+                    'message' => 'TLS Handshake Failed',
+                    'messageDetails' => "Failed to create socket: [$errno] $errstr",
+                    'details' => [
+                        'host' => $remoteHost,
+                        'port' => $remotePort,
+                        'error' => $errstr,
+                        'code' => $errno,
+//                        'basePath' => $basePath,
+//                        'clientCertPath' => $clientCertPath,
+//                        'keyCertPath' => $keyCertPath,
+                    ],
+                ], Response::HTTP_SERVICE_UNAVAILABLE);
+            }
+
+            // Extract peer certificate chain
+            $trustedHashes = array_map(static fn($e) => strtolower($e->value), TrustedWBAFingerprints::cases());
+            $params = stream_context_get_params($connection);
+            $chain = $params['options']['ssl']['peer_certificate_chain'] ?? [];
+
+            // Include the leaf certificate itself
+            $leafCert = $params['options']['ssl']['peer_certificate'] ?? null;
+            if ($leafCert) {
+                array_unshift($chain, $leafCert);
+            }
+
+            $validated = false;
+            foreach ($chain as $cert) {
+                $pem = openssl_x509_export($cert, $out) ? $out : null;
+                if ($pem) {
+                    // Convert PEM to DER
+                    $der = base64_decode(preg_replace('#-----.*?-----#', '', $pem));
+                    $hash = strtolower(hash('sha256', $der));
+
+                    if (in_array($hash, $trustedHashes, true)) {
+                        $validated = true;
+                        break;
+                    }
+                }
+            }
+
+            if ($validated === false) {
+                fclose($connection);
+
+                $this->certificateRadsecproxyCommandsService->updateRadsecproxyTestResult(
+                    $processEntity,
+                    CertificateTestResult::FAILED
+                );
+
+                return new JsonResponse([
+                    'status' => 'error',
+                    'message' => 'TLS handshake succeeded but certificate chain is NOT signed by a known WBA CA.',
+                ], Response::HTTP_FORBIDDEN);
+            }
+
+            // THIS IS OK [0] -> a non-false $connection OR errno=0 and errstr="" means TLS handshake succeeded
+            $this->certificateRadsecproxyCommandsService->updateRadsecproxyTestResult(
+                $processEntity,
+                CertificateTestResult::PASSED
+            );
+
+            // Only close if it’s a valid resource
+            if (is_resource($connection)) {
+                fclose($connection);
+            }
+
+            return new JsonResponse([
+                'status' => 'success',
+                'message' => 'TLS handshake OK using WBA CA bundle',
+            ]);
+        } catch (Throwable $e) {
+            // Update DB when test fails
+            $this->certificateRadsecproxyCommandsService->updateRadsecproxyTestResult(
+                $processEntity,
+                CertificateTestResult::FAILED
+            );
+
+            return new JsonResponse([
+                'status' => 'error',
+                'message' => $e->getMessage(),
+            ], Response::HTTP_SERVICE_UNAVAILABLE);
+        }
     }
 }

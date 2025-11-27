@@ -1,10 +1,10 @@
 test_and_proceed: "Test and Proceed"
 configuration_complete: "Configuration Complete"
-instructions: "Run the server test to confirm that the RadSecProxy certificates are installed correctly. Once testing is done, proceed to configure the FreeRADIUS certificates."
-test_certificates: "Test RadSecProxy Certificates"
-proceed_freeradius: "Proceed to FreeRADIUS Certificates"
+instructions: "Run the server test to confirm that the Freeradius certificates are installed correctly. Once testing is done, the certificates configuration is complete."
+test_certificates: "Test Freeradius Certificates"
+finish_configuration: "Finish Configuration"
 in_progress_title: "Testing in progress..."
-in_progress_description: "Verifying the RadSecProxy certificate setup on the server. Please wait."
+in_progress_description: "Verifying the Freeradius certificate setup on the server. Please wait."
 start_test_connection: "Are you sure you wish to start the connection test?"
 host: 'Host'
 port: 'Port'
