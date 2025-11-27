@@ -378,13 +378,13 @@ class CertificateManagementFreeradiusController extends AbstractController
         );
 
         $remoteHost = $payload['remote_host'] ?? $processEntity->getRemoteHost();
-        $remotePort = isset($payload['remote_port']) ? (int)$payload['remote_port'] : 2083;
+        $remotePort = isset($payload['remote_port']) ? (int)$payload['remote_port'] : 11812;
 
         if (!$remoteHost) {
             return new JsonResponse([
                 'status' => 'error',
                 'message' => $this->translator->trans(
-                    'missingRequiredForRadsecProxyTest',
+                    'missingRequiredForFreeradiusTest',
                     [],
                     'controllers'
                 ),
@@ -422,7 +422,7 @@ class CertificateManagementFreeradiusController extends AbstractController
         }
 
         // TODO MAKE NEW LOGIC FOR TEST RUN FROM HERE
-        dd('pls die');
+
         try {
             $context = stream_context_create([
                 'ssl' => [
@@ -449,7 +449,7 @@ class CertificateManagementFreeradiusController extends AbstractController
             // If connection failed with a real error, handle it
             if ($connection === false && ($errno !== 0 || $errstr !== '')) {
                 // TLS handshake failed
-                $this->certificateRadsecproxyCommandsService->updateRadsecproxyTestResult(
+                $this->certificateFreeradiusCommandsService->updateFreeradiusTestResult(
                     $processEntity,
                     CertificateTestResult::FAILED
                 );
@@ -499,7 +499,7 @@ class CertificateManagementFreeradiusController extends AbstractController
             if ($validated === false) {
                 fclose($connection);
 
-                $this->certificateRadsecproxyCommandsService->updateRadsecproxyTestResult(
+                $this->certificateFreeradiusCommandsService->updateFreeradiusTestResult(
                     $processEntity,
                     CertificateTestResult::FAILED
                 );
@@ -511,7 +511,7 @@ class CertificateManagementFreeradiusController extends AbstractController
             }
 
             // THIS IS OK [0] -> a non-false $connection OR errno=0 and errstr="" means TLS handshake succeeded
-            $this->certificateRadsecproxyCommandsService->updateRadsecproxyTestResult(
+            $this->certificateFreeradiusCommandsService->updateFreeradiusTestResult(
                 $processEntity,
                 CertificateTestResult::PASSED
             );
@@ -523,11 +523,15 @@ class CertificateManagementFreeradiusController extends AbstractController
 
             return new JsonResponse([
                 'status' => 'success',
-                'message' => 'TLS handshake OK using WBA CA bundle',
+                'message' => $this->translator->trans(
+                    'freeradiusTestPassed',
+                    [],
+                    'controllers'
+                ),
             ]);
         } catch (Throwable $e) {
             // Update DB when test fails
-            $this->certificateRadsecproxyCommandsService->updateRadsecproxyTestResult(
+            $this->certificateFreeradiusCommandsService->updateFreeradiusTestResult(
                 $processEntity,
                 CertificateTestResult::FAILED
             );

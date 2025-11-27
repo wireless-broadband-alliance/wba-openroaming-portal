@@ -416,7 +416,11 @@ class CertificateManagementRadsecproxyController extends AbstractController
 
             return new JsonResponse([
                 'status' => 'success',
-                'message' => 'TLS handshake OK using WBA CA bundle',
+                'message' => $this->translator->trans(
+                    'radsecProxyTestPassed',
+                    [],
+                    'controllers'
+                ),
             ]);
         } catch (Throwable $e) {
             // Update DB when test fails
