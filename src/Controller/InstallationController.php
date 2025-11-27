@@ -336,6 +336,17 @@ class InstallationController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+
+            $captchaValidation = $this->captchaValidator->validateCredentials($settingsDTO->turnstileSecret);
+
+            if (!$captchaValidation['success']) {
+                $this->addFlash(
+                    'error',
+                    $this->translator->trans('captchaValidationFailed', [], 'controllers')
+                );
+                return $this->redirectToRoute('admin_dashboard_settings_certs_installation_settings');
+            }
+
             $lastInstallation->setUpdatedAt(new DateTime());
             $lastInstallation->setTrustedProxies($settingsDTO->trustedProxies);
             $lastInstallation->setTurnstileKey($settingsDTO->turnstileKey);
@@ -347,15 +358,7 @@ class InstallationController extends AbstractController
             $this->entityManager->persist($lastInstallation);
             $this->entityManager->flush();
 
-            $captchaValidation = $this->captchaValidator->validateCredentials($settingsDTO->turnstileSecret);
 
-            if (!$captchaValidation['success']) {
-                $this->addFlash(
-                    'error',
-                    $this->translator->trans('captchaValidationFailed', [], 'controllers')
-                );
-                return $this->redirectToRoute('admin_dashboard_settings_certs_installation_settings');
-            }
 
             $trustedProxiesPermissions = $this->databaseConnectionService->writeDatabaseUrlToEnv(
                 implode(',', $settingsDTO->trustedProxies),

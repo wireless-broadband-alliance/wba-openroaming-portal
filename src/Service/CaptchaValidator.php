@@ -114,8 +114,10 @@ readonly class CaptchaValidator
                 [
                     'body' => http_build_query([
                         'secret' => $secretKey,
-                        'response' => 'dummy-token', // token falso
+                        'response' => '01AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==',
                     ]),
+                    'verify_peer' => false,
+                    'verify_host' => false,
                 ]
             );
 
