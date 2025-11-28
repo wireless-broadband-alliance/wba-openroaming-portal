@@ -51,39 +51,50 @@ readonly class DatabaseConnectionService
         if (!is_writable($envPath)) {
             return false;
         }
+
         $envContent = file_get_contents($envPath);
 
+        $newLine = '';
+        $regex = '';
+
         if ($type === DataBaseSetupType::DATABASE_URL->value) {
-            $envContent = preg_replace('/^DATABASE_URL=.*$/m', '', $envContent);
-            $newLine = sprintf("DATABASE_URL=\"%s\"\n", $url);
+            $regex = '/^DATABASE_URL=.*$/m';
+            $newLine = sprintf('DATABASE_URL="%s"', $url);
         } elseif ($type === DataBaseSetupType::DATABASE_FREERADIUS_URL->value) {
-            $envContent = preg_replace('/^DATABASE_FREERADIUS_URL=.*$/m', '', $envContent);
-            $newLine = sprintf("DATABASE_FREERADIUS_URL=\"%s\"\n", $url);
+            $regex = '/^DATABASE_FREERADIUS_URL=.*$/m';
+            $newLine = sprintf('DATABASE_FREERADIUS_URL="%s"', $url);
         } elseif ($type === SettingsConfigType::TRUSTED_PROXIES->value) {
-            $envContent = preg_replace('/^TRUSTED_PROXIES=.*$/m', '', $envContent);
-            $newLine = sprintf("TRUSTED_PROXIES=%s\n", $url);
+            $regex = '/^TRUSTED_PROXIES=.*$/m';
+            $newLine = sprintf('TRUSTED_PROXIES=%s', $url);
         } elseif ($type === SettingsConfigType::TURNSTILE_KEY->value) {
-            $envContent = preg_replace('/^TURNSTILE_KEY=.*$/m', '', $envContent);
-            $newLine = sprintf("TURNSTILE_KEY=%s\n", $url);
+            $regex = '/^TURNSTILE_KEY=.*$/m';
+            $newLine = sprintf('TURNSTILE_KEY=%s', $url);
         } elseif ($type === SettingsConfigType::TURNSTILE_SECRET->value) {
-            $envContent = preg_replace('/^TURNSTILE_SECRET=.*$/m', '', $envContent);
-            $newLine = sprintf("TURNSTILE_SECRET=%s\n", $url);
+            $regex = '/^TURNSTILE_SECRET=.*$/m';
+            $newLine = sprintf('TURNSTILE_SECRET=%s', $url);
         } elseif ($type === SettingsConfigType::JWT_SECRET_KEY->value) {
-            $envContent = preg_replace('/^JWT_SECRET_KEY=.*$/m', '', $envContent);
-            $newLine = sprintf("JWT_SECRET_KEY=%s\n", $url);
+            $regex = '/^JWT_SECRET_KEY=.*$/m';
+            $newLine = sprintf('JWT_SECRET_KEY=%s', $url);
         } elseif ($type === SettingsConfigType::JWT_PUBLIC_KEY->value) {
-            $envContent = preg_replace('/^JWT_PUBLIC_KEY=.*$/m', '', $envContent);
-            $newLine = sprintf("JWT_PUBLIC_KEY=%s\n", $url);
+            $regex = '/^JWT_PUBLIC_KEY=.*$/m';
+            $newLine = sprintf('JWT_PUBLIC_KEY=%s', $url);
         } elseif ($type === SettingsConfigType::JWT_PASSPHRASE->value) {
-            $envContent = preg_replace('/^JWT_PASSPHRASE=.*$/m', '', $envContent);
-            $newLine = sprintf("JWT_PASSPHRASE=%s\n", $url);
-        } else {
-            $newLine = '';
+            $regex = '/^JWT_PASSPHRASE=.*$/m';
+            $newLine = sprintf('JWT_PASSPHRASE=%s', $url);
         }
 
-        $result = @file_put_contents($envPath, trim($envContent) . "\n" . $newLine);
+        // Tentamos substituir
+        $updated = preg_replace($regex, $newLine, $envContent, -1, $count);
 
-        return $result !== false;
+        // Se $count === 0 significa que não existia → adicionamos ao final
+        if ($count === 0) {
+            $updated = rtrim($envContent) . "\n" . $newLine . "\n";
+        } else {
+            // Caso contrário, só garantimos que termina com newline
+            $updated = rtrim($updated) . "\n";
+        }
+
+        return file_put_contents($envPath, $updated) !== false;
     }
 
     private function getDriverFromScheme(string $scheme): string
