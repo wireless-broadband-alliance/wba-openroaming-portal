@@ -1,5 +1,5 @@
 tittleCert: 'Certificates'
 tittleInstallation: 'Installation'
-RenewCertificates: 'Renew Certificates'
+renewCertificates: 'Renew Certificates'
 reinstallPlatform: 'Reinstall Platform'
-
+lastCompletedCertificates: 'Last execution at: '

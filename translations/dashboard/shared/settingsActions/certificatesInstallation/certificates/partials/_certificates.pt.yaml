@@ -1,4 +1,5 @@
 tittleCert: 'Certificados'
 tittleInstallation: 'Instalação'
-RenewCertificates: 'Renovar Certificados'
+renewCertificates: 'Renovar Certificados'
 reinstallPlatform: 'Reinstalar Plataforma'
+lastCompletedCertificates: 'Última execução em: '
