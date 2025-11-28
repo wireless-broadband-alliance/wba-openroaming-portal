@@ -563,6 +563,7 @@ class CertificateManagementFreeradiusController extends AbstractController
                 ]
             );
 
+            // TODO DONT FORGET TO CLEAR THIS SESSION TOKEN EVERYTHING THIS TEST IS DONE -> first_system_reset
             return new JsonResponse([
                 'status' => 'success',
                 'message' => $this->translator->trans(
