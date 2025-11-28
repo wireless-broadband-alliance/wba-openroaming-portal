@@ -274,7 +274,7 @@ readonly class InstallationService
                 DataBaseSetupType::DATABASE_FREERADIUS_URL->value
             );
             $this->databaseConnectionService->writeDatabaseUrlToEnv(
-                $lastCompleted->getTrustedProxies(),
+                implode(',', $lastCompleted->getTrustedProxies()),
                 SettingsConfigType::TRUSTED_PROXIES->value
             );
             $this->databaseConnectionService->writeDatabaseUrlToEnv(
