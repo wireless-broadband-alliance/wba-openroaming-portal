@@ -4,27 +4,45 @@ namespace App\Service;
 
 use App\Entity\Certificate;
 use App\Entity\CertificateSetupProcess;
+use App\Entity\Event;
+use App\Entity\User;
+use App\Enum\AnalyticalEventType;
 use App\Enum\CertificateProcessStatus;
+use App\Repository\EventRepository;
+use DateTime;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use RuntimeException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 readonly class CertificateStorageService
 {
     public function __construct(
         private EntityManagerInterface $entityManager,
-        private TranslatorInterface $translator
+        private TranslatorInterface $translator,
+        private EventActions $eventActions,
     ) {
     }
 
-    public function createCertificateProcess(): CertificateSetupProcess
+    public function createCertificateProcess(User $user, Request $request): CertificateSetupProcess
     {
         $process = new CertificateSetupProcess();
         $process->setStatus(CertificateProcessStatus::IN_PROGRESS);
         $process->setCreatedAt(new DateTimeImmutable());
         $process->setUpdatedAt(new DateTimeImmutable());
+
+        $this->eventActions->saveEvent(
+            $user,
+            AnalyticalEventType::CERTIFICATE_SETUP_PROCESS_CREATION->value,
+            new DateTime(),
+            [
+                'ip' => $request->getClientIp(),
+                'user_agent' => $request->headers->get('User-Agent'),
+                'by' => $user->getUuid(),
+            ]
+        );
 
         $this->entityManager->persist($process);
         $this->entityManager->flush();
@@ -119,11 +137,13 @@ readonly class CertificateStorageService
 
         $certInfo = openssl_x509_parse($certResource);
         if (!$certInfo) {
-            throw new RuntimeException($this->translator->trans(
-                'unableParse',
-                [],
-                'CertificateStorageService'
-            ));
+            throw new RuntimeException(
+                $this->translator->trans(
+                    'unableParse',
+                    [],
+                    'CertificateStorageService'
+                )
+            );
         }
 
         // Compute fingerprint (SHA1 hash of DER encoding)

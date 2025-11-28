@@ -6,9 +6,10 @@ namespace App\Controller;
 
 use App\DTO\CertificateFreeradiusUploadDTO;
 use App\Entity\CertificateSetupProcess;
+use App\Entity\User;
+use App\Enum\AnalyticalEventType;
 use App\Enum\CertificateFileName;
 use App\Enum\CertificateMachineType;
-use App\Enum\CertificateRouteAccess;
 use App\Enum\CertificateTestResult;
 use App\Enum\FirewallType;
 use App\Enum\TrustedWBAFingerprints;
@@ -19,10 +20,11 @@ use App\Service\CertificateFreeradiusInfoService;
 use App\Service\CertificateProcessCheckerService;
 use App\Service\CertificateStorageService;
 use App\Service\CertificateWriterUpdateService;
+use App\Service\EventActions;
 use App\Service\GetSettings;
+use DateTime;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
-use RuntimeException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -45,7 +47,8 @@ class CertificateManagementFreeradiusController extends AbstractController
         private readonly EntityManagerInterface $entityManager,
         private readonly CertificateFreeradiusInfoService $certificateFreeradiusInfoService,
         private readonly CertificateFreeradiusCommandsService $certificateFreeradiusCommandsService,
-        private readonly CertificateWriterUpdateService $certificateWriterUpdateService
+        private readonly CertificateWriterUpdateService $certificateWriterUpdateService,
+        private readonly EventActions $eventActions
     ) {
     }
 
@@ -172,6 +175,19 @@ class CertificateManagementFreeradiusController extends AbstractController
             $this->entityManager->persist($process);
             $this->entityManager->flush();
 
+            /** @var User $user */
+            $user = $this->getUser();
+            $this->eventActions->saveEvent(
+                $user,
+                AnalyticalEventType::CERTIFICATE_SETUP_PROCESS_FREERAEDIUS_UPLOAD->value,
+                new DateTime(),
+                [
+                    'ip' => $request->getClientIp(),
+                    'user_agent' => $request->headers->get('User-Agent'),
+                    'by' => $user->getUuid(),
+                ]
+            );
+
             $this->addFlash(
                 'success',
                 $this->translator->trans(
@@ -283,6 +299,19 @@ class CertificateManagementFreeradiusController extends AbstractController
 
                 $this->entityManager->persist($process);
                 $this->entityManager->flush();
+
+                /** @var User $user */
+                $user = $this->getUser();
+                $this->eventActions->saveEvent(
+                    $user,
+                    AnalyticalEventType::CERTIFICATE_SETUP_PROCESS_FREERAEDIUS_CONFIG->value,
+                    new DateTime(),
+                    [
+                        'ip' => $request->getClientIp(),
+                        'user_agent' => $request->headers->get('User-Agent'),
+                        'by' => $user->getUuid(),
+                    ]
+                );
 
                 $this->addFlash(
                     'success',
@@ -520,6 +549,19 @@ class CertificateManagementFreeradiusController extends AbstractController
             if (is_resource($connection)) {
                 fclose($connection);
             }
+
+            /** @var User $user */
+            $user = $this->getUser();
+            $this->eventActions->saveEvent(
+                $user,
+                AnalyticalEventType::CERTIFICATE_SETUP_PROCESS_FREERAEDIUS_TEST->value,
+                new DateTime(),
+                [
+                    'ip' => $request->getClientIp(),
+                    'user_agent' => $request->headers->get('User-Agent'),
+                    'by' => $user->getUuid(),
+                ]
+            );
 
             return new JsonResponse([
                 'status' => 'success',

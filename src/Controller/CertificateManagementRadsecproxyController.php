@@ -6,6 +6,8 @@ namespace App\Controller;
 
 use App\DTO\CertificateRadSecUploadDTO;
 use App\Entity\CertificateSetupProcess;
+use App\Entity\User;
+use App\Enum\AnalyticalEventType;
 use App\Enum\CertificateFileName;
 use App\Enum\CertificateMachineType;
 use App\Enum\CertificateTestResult;
@@ -18,7 +20,9 @@ use App\Service\CertificateRadsecproxyCommandsService;
 use App\Service\CertificateProcessCheckerService;
 use App\Service\CertificateRadsecproxyInfoService;
 use App\Service\CertificateStorageService;
+use App\Service\EventActions;
 use App\Service\GetSettings;
+use DateTime;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -42,6 +46,7 @@ class CertificateManagementRadsecproxyController extends AbstractController
         private readonly CertificateRadsecproxyCommandsService $certificateRadsecproxyCommandsService,
         private readonly CertificateRepository $certificateRepository,
         private readonly CertificateRadsecproxyInfoService $certificateRadsecproxyInfoService,
+        private readonly EventActions $eventActions,
     ) {
     }
 
@@ -78,8 +83,13 @@ class CertificateManagementRadsecproxyController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            /** @var User $user */
+            $user = $this->getUser();
             // Create a certificate process before upload and making any actually changes on the DB and files
-            $process = $this->certificateStorageService->createCertificateProcess();
+            $process = $this->certificateStorageService->createCertificateProcess(
+                $user,
+                $request
+            );
 
             if ($certificateUploadDTO->client instanceof UploadedFile) {
                 // Save on the tmp folder the uploaded certificates after the validation
@@ -108,6 +118,17 @@ class CertificateManagementRadsecproxyController extends AbstractController
 
             $this->entityManager->persist($process);
             $this->entityManager->flush();
+
+            $this->eventActions->saveEvent(
+                $user,
+                AnalyticalEventType::CERTIFICATE_SETUP_PROCESS_RADSECPROXY_UPLOAD->value,
+                new DateTime(),
+                [
+                    'ip' => $request->getClientIp(),
+                    'user_agent' => $request->headers->get('User-Agent'),
+                    'by' => $user->getUuid(),
+                ]
+            );
 
             $this->addFlash(
                 'success',
@@ -173,11 +194,24 @@ class CertificateManagementRadsecproxyController extends AbstractController
                     $this->translator->trans('configAlreadyApplied', [], 'controllers')
                 );
             } elseif ($form->isValid()) {
+                /** @var User $user */
+                $user = $this->getUser();
                 $process->setRadsecproxyConfigAppliedAt(new DateTimeImmutable());
                 $process->setUpdatedAt(new DateTimeImmutable());
 
                 $this->entityManager->persist($process);
                 $this->entityManager->flush();
+
+                $this->eventActions->saveEvent(
+                    $user,
+                    AnalyticalEventType::CERTIFICATE_SETUP_PROCESS_RADSECPROXY_CONFIG->value,
+                    new DateTime(),
+                    [
+                        'ip' => $request->getClientIp(),
+                        'user_agent' => $request->headers->get('User-Agent'),
+                        'by' => $user->getUuid(),
+                    ]
+                );
 
                 $this->addFlash(
                     'success',
@@ -413,6 +447,19 @@ class CertificateManagementRadsecproxyController extends AbstractController
             if (is_resource($connection)) {
                 fclose($connection);
             }
+
+            /** @var User $user */
+            $user = $this->getUser();
+            $this->eventActions->saveEvent(
+                $user,
+                AnalyticalEventType::CERTIFICATE_SETUP_PROCESS_RADSECPROXY_TEST->value,
+                new DateTime(),
+                [
+                    'ip' => $request->getClientIp(),
+                    'user_agent' => $request->headers->get('User-Agent'),
+                    'by' => $user->getUuid(),
+                ]
+            );
 
             return new JsonResponse([
                 'status' => 'success',
