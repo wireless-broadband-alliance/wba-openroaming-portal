@@ -32,6 +32,8 @@ class LogoutListener implements EventSubscriberInterface
             $session->remove("2fa_verified_$firewallName");
             $session->remove('session_verified');
             $session->remove('forgot_password_uuid');
+            $session->remove('session_installation_started');
+            $session->remove('session_certificate_started');
         }
     }
 }

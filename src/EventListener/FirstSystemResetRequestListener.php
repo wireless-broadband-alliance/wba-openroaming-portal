@@ -23,8 +23,9 @@ readonly class FirstSystemResetRequestListener
     ) {
     }
 
-    public function __invoke(InteractiveLoginEvent $event, SessionInterface $session): void
+    public function __invoke(InteractiveLoginEvent $event): void
     {
+        $session = $event->getRequest()->getSession();
         $user = $event->getAuthenticationToken()->getUser();
 
         if (!$user || !$this->security->isGranted('ROLE_ADMIN', $user)) {
@@ -34,8 +35,8 @@ readonly class FirstSystemResetRequestListener
         $completedInstallation = $this->installationProgressRepository->findOneBy([
             'installationState' => ProcessStatusType::COMPLETED
         ]);
-
         if (!$completedInstallation) {
+            $session->set('session_verified', true);
             $this->handleRedirect(
                 $event,
                 $session,
@@ -43,11 +44,24 @@ readonly class FirstSystemResetRequestListener
                 'You do not have any created installation process on this portal.',
                 'admin_dashboard_settings_certs_installation'
             );
+            return;
         }
 
         $completedCertificates = $this->certificateSetupProcessRepository->getLatestProcess();
+        if (!$completedCertificates) {
+            $session->set('session_verified', true);
+            $this->handleRedirect(
+                $event,
+                $session,
+                'session_certificate_started',
+                'No active certificate process found.',
+                'admin_dashboard_settings_certs_radsecproxy_upload'
+            );
+            return;
+        }
 
-        if ($completedCertificates) {
+        if ($completedCertificates->getStatus() !== ProcessStatusType::COMPLETED) {
+            $session->set('session_verified', true);
             $this->handleRedirect(
                 $event,
                 $session,
@@ -55,7 +69,12 @@ readonly class FirstSystemResetRequestListener
                 'A certificate process is already in progress.',
                 'admin_dashboard_settings_certs_radsecproxy_upload'
             );
+            return;
         }
+
+        // All checks are valid, remove session flags
+        $session->remove('session_installation_started');
+        $session->remove('session_certificate_started');
     }
 
     /**
