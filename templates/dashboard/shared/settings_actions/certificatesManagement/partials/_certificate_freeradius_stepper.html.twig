@@ -15,32 +15,45 @@
 
 {# Abort Button + Leave Configuration #}
 <div class="flex flex-col sm:flex-row justify-end items-stretch sm:items-center gap-2 sm:gap-3">
-    <form action="{{ path('admin_dashboard_settings_certs_management_abort') }}"
-          method="POST"
-          onsubmit="return confirm('{{ 'confirm_abort'|trans({}, '_certificate_stepper') }}');">
-        <button type="submit"
-                class="w-full sm:w-auto flex items-center gap-2
-              px-3 py-1.5 sm:px-4 sm:py-2
-              text-xs sm:text-sm
-              rounded-lg shadow font-medium
-              text-red-700 bg-white border border-red-200
-              hover:bg-red-50 hover:border-red-300 transition">
-            <twig:ux:icon name="wba:cross-circle-rounded"
-                          class="w-4 h-4 opacity-80 fill-current"/>
-            {{ 'abort'|trans({}, '_certificate_stepper') }}
-        </button>
-    </form>
-    <a href="{{ path('admin_page') }}"
-       class="w-full sm:w-auto  flex items-center gap-2
-              px-3 py-1.5 sm:px-4 sm:py-2
-              text-xs sm:text-sm
-              rounded-lg shadow font-medium
-              text-gray-700 bg-white border border-gray-200
-              hover:bg-gray-50 hover:border-gray-300 transition">
-        <twig:ux:icon name="wba:exit"
-                      class="w-4 h-4 opacity-70 fill-current"/>
-        {{ 'leave'|trans({}, '_certificate_stepper') }}
-    </a>
+    {% if not app.session.has('first_system_reset') %}
+        <form action="{{ path('admin_dashboard_settings_certs_management_abort') }}"
+              method="POST"
+              onsubmit="return confirm('{{ 'confirm_abort'|trans({}, '_certificate_stepper') }}');">
+            <button type="submit"
+                    class="w-full sm:w-auto flex items-center gap-2
+          px-3 py-1.5 sm:px-4 sm:py-2
+          text-xs sm:text-sm
+          rounded-lg shadow font-medium
+          text-red-700 bg-white border border-red-200
+          hover:bg-red-50 hover:border-red-300 transition">
+                <twig:ux:icon name="wba:cross-circle-rounded"
+                              class="w-4 h-4 opacity-80 fill-current"/>
+                {{ 'abort'|trans({}, '_certificate_stepper') }}
+            </button>
+        </form>
+        <a href="{{ path('admin_page') }}"
+           class="w-full sm:w-auto flex items-center gap-2
+          px-3 py-1.5 sm:px-4 sm:py-2
+          text-xs sm:text-sm
+          rounded-lg shadow font-medium
+          text-gray-700 bg-white border border-gray-200
+          hover:bg-gray-50 hover:border-gray-300 transition">
+            <twig:ux:icon name="wba:exit"
+                          class="w-4 h-4 opacity-70 fill-current"/>
+            {{ 'leave'|trans({}, '_installation_stepper') }}
+        </a>
+    {% else %}
+        <a href="{{ path('app_logout') }}" class="w-full sm:w-auto flex items-center gap-2
+          px-3 py-1.5 sm:px-4 sm:py-2
+          text-xs sm:text-sm
+          rounded-lg shadow font-medium
+          text-red-700 bg-white border border-red-200
+          hover:bg-red-50 hover:border-red-300 transition">
+            <twig:ux:icon name="wba:logout"
+                          class="w-4 h-4 opacity-80 fill-none stroke-current"/>
+            {{ 'logout'|trans({}, 'landing') }}
+        </a>
+    {% endif %}
 </div>
 
 <div class="w-full max-w-5xl mx-auto mt-8 mb-10 px-4">
