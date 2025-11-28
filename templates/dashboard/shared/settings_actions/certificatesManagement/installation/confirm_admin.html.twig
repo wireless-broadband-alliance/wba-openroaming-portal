@@ -17,48 +17,45 @@
 
     <div class="my-6 divider-solid"></div>
 
+
+
     {{ form_start(form, {attr: {autocomplete: 'off'}}) }}
 
-    <div class="grid gap-4 grid-cols-1 md:grid-cols-4 p-2 z-0">
+    <div class="w-full 2xl:w-1/2 bg-white rounded-md p-4">
 
         {# --- Code Card --- #}
         <div class="cert-upload-card col-span-1 sm:col-span-1 md:col-span-2 transition hover:shadow-lg hover:-translate-y-1 duration-200"
                 {{ stimulus_target('radio-card', 'card') }}
                 {{ stimulus_controller('card') }}>
 
-            <div class="flex justify-between items-center mb-4">
+            <div class="block text-center text-lg mb-6">
                 <h2 class="text-lg sm:text-xl font-medium text-gray-700">
-                    {{ 'code'|trans({}, 'admin_config') }}
+                    {{ 'enterVerificationCode'|trans({}, 'confirm') }}
                 </h2>
 
-                <button type="button"
-                        class="ml-2 p-1"
-                        {{ stimulus_target('card', 'button') }}
-                        {{ stimulus_action('card', 'show_info', 'mouseover')|stimulus_action('card', 'hide_info', 'mouseout') }}>
-                    <img src="{{ asset('resources/logos/info_icon.svg') }}" alt="info icon" class="w-6 h-6"/>
-                </button>
             </div>
-
-            {{ include('/dashboard/shared/settings_actions/_description.html.twig', {
-                description: 'codeDescription'|trans({}, 'admin_config'),
-            }) }}
 
             <div class="mt-4 flex flex-col sm:flex-row items-center gap-3">
                 {{ form_widget(form.code, {
                     attr: {
-                        class: 'form-widget flex-1',
+                        class: 'form-widget',
                         placeholder: 'codePlaceholder'|trans({}, 'admin_config'),
                     },
                 }) }}
 
-                <a href="{{ path('admin_dashboard_settings_certs_installation_admin_confirmation_resend') }}"
-                   class="btn-secondary whitespace-nowrap mt-2 sm:mt-0">
-                    {{ 'resendCode'|trans({}, 'admin_config') }}
-                </a>
             </div>
 
             <div class="mt-2 text-red-500 text-sm">
                 {{ form_errors(form.code) }}
+            </div>
+
+            <div class="flex flex-col md:flex-row justify-center md:justify-between space-x-2 space-y-2 mt-4">
+                <div class="flex justify-start items-end pb-2">
+                    <p>
+                        {{ 'generateNewEmail'|trans({'%url%':path('admin_dashboard_settings_certs_installation_admin_confirmation_resend')}, 'confirm')|raw }}
+                    </p>
+                </div>
+
             </div>
 
         </div>
@@ -69,14 +66,13 @@
 
     <div class="mt-6 flex flex-col sm:flex-row justify-end items-center gap-2">
         <a href="{{ path('admin_dashboard_settings_certs_installation_admin') }}"
-           class="btn-secondary w-full sm:w-auto">
+           class="btn-secondary w-[200px]">
             {{ 'changeEmail'|trans({}, 'admin_config') }}
         </a>
-
         <button type="submit"
-                class="btn-primary w-full sm:w-auto"
-                onclick="return confirm('{{ 'saveChangesMessage'|trans({}, 'admin_config') }}')">
-            {{ 'databaseApplyBtn'|trans({}, 'admin_config') }}
+                    class="btn-primary w-[200px]"
+                    onclick="return confirm('{{ 'saveChangesMessage'|trans({}, 'admin_config') }}')">
+            {{ 'verify'|trans({}, 'confirm') }}
         </button>
     </div>
 
