@@ -564,6 +564,7 @@ class CertificateManagementFreeradiusController extends AbstractController
             );
 
             // TODO DONT FORGET TO CLEAR THIS SESSION TOKEN EVERYTHING THIS TEST IS DONE -> first_system_reset
+            // TODO Also update this entity -> SystemResetRequest to completed when the test is done and passed
             return new JsonResponse([
                 'status' => 'success',
                 'message' => $this->translator->trans(

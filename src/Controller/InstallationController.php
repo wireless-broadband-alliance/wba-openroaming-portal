@@ -159,6 +159,7 @@ class InstallationController extends AbstractController
             $lastInstallation->setInstallationState(ProcessStatusType::IN_PROGRESS);
             $this->entityManager->persist($lastInstallation);
             $this->entityManager->flush();
+            // TODO Also update this entity -> SystemResetRequest create the first row and only update it again when the installation is done
 
 
             $orResult = $this->databaseConnectionService->writeDatabaseUrlToEnv(

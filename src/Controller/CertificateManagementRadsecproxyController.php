@@ -115,6 +115,7 @@ class CertificateManagementRadsecproxyController extends AbstractController
             // After the files are validated and the processed, update them once again to add
             $process->setRadsecproxyFormCompletedAt(new DateTimeImmutable());
             $process->setUpdatedAt(new DateTimeImmutable());
+            // TODO Also update this entity -> SystemResetRequest update the row and set the certificateSetupProcess ID
 
             $this->entityManager->persist($process);
             $this->entityManager->flush();
