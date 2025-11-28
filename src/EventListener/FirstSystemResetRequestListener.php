@@ -36,7 +36,8 @@ readonly class FirstSystemResetRequestListener
             'installationState' => ProcessStatusType::COMPLETED
         ]);
         if (!$completedInstallation) {
-            $session->set('session_verified', true);
+            $session->set('2fa_verified_dashboard', true);
+            $session->set('first_system_reset', 'admin_dashboard_settings_certs_installation');
             $this->handleRedirect(
                 $event,
                 $session,
@@ -49,7 +50,8 @@ readonly class FirstSystemResetRequestListener
 
         $completedCertificates = $this->certificateSetupProcessRepository->getLatestProcess();
         if (!$completedCertificates) {
-            $session->set('session_verified', true);
+            $session->set('2fa_verified_dashboard', true);
+            $session->set('first_system_reset', 'admin_dashboard_settings_certs_radsecproxy_upload');
             $this->handleRedirect(
                 $event,
                 $session,
@@ -61,7 +63,8 @@ readonly class FirstSystemResetRequestListener
         }
 
         if ($completedCertificates->getStatus() !== ProcessStatusType::COMPLETED) {
-            $session->set('session_verified', true);
+            $session->set('2fa_verified_dashboard', true);
+            $session->set('first_system_reset', 'admin_dashboard_settings_certs_radsecproxy_upload');
             $this->handleRedirect(
                 $event,
                 $session,
@@ -88,7 +91,7 @@ readonly class FirstSystemResetRequestListener
         string $routeName
     ): void {
         $session->set($sessionKey, true);
-        $session->getFlashBag()->add('info', $flashMessage);
+        $session->getFlashBag()->add('success', $flashMessage);
 
         $url = $this->urlGenerator->generate($routeName);
         $response = new RedirectResponse($url);

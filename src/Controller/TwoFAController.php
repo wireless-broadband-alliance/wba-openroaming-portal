@@ -847,6 +847,15 @@ class TwoFAController extends AbstractController
             );
             return $this->redirectToRoute('app_landing');
         }
+        $session = $request->getSession();
+        $route = $session->get('first_system_reset');
+
+        if ($route && $session->get('session_installation_started') === true) {
+            return $this->redirectToRoute($route);
+        }
+        if ($route && $session->get('session_certificate_started') === true) {
+            return $this->redirectToRoute($route);
+        }
 
         // Handle access restrictions based on the context
         if ($context === FirewallType::DASHBOARD->value && !$this->isGranted('ROLE_ADMIN')) {
