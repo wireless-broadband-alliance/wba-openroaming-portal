@@ -122,16 +122,16 @@ class InstallationController extends AbstractController
 
 
             $orConnection = $this->databaseConnectionService->testDatabaseConnection($openRoamingDb);
-            //$frConnection = $this->databaseConnectionService->testDatabaseConnection($freeradiusDb);
+            $frConnection = $this->databaseConnectionService->testDatabaseConnection($freeradiusDb);
 
             $connectionsFailed = [];
 
             if (!$orConnection) {
                 $connectionsFailed[] = 'OpenRoaming';
-            }/*
+            }
             if (!$frConnection) {
                 $connectionsFailed[] = 'Freeradius';
-            }*/
+            }
             if ($connectionsFailed !== []) {
                 $this->addFlash(
                     'error',
@@ -173,6 +173,21 @@ class InstallationController extends AbstractController
             if (!$orResult || !$radiusResult) {
                 return $this->redirectToRoute('admin_dashboard_settings_certs_installation_settings');
             }
+
+            /** @var User $user */
+            $user = $this->getUser();
+
+            $this->eventActions->saveEvent(
+                $user,
+                AnalyticalEventType::INSTALLATION_DATABASE_CONFIG->value,
+                new DateTime(),
+                [
+                    'ip' => $request->getClientIp(),
+                    'user_agent' => $request->headers->get('User-Agent'),
+                    'by' => $user->getUuid(),
+                ]
+            );
+
 
             $this->addFlash(
                 'success',
@@ -241,6 +256,20 @@ class InstallationController extends AbstractController
                 );
                 return $this->redirectToRoute('admin_dashboard_settings_certs_installation_summary');
             }
+
+            /** @var User $user */
+            $user = $this->getUser();
+
+            $this->eventActions->saveEvent(
+                $user,
+                AnalyticalEventType::INSTALLATION_COMMAND_CONFIG->value,
+                new DateTime(),
+                [
+                    'ip' => $request->getClientIp(),
+                    'user_agent' => $request->headers->get('User-Agent'),
+                    'by' => $user->getUuid(),
+                ]
+            );
 
             $this->addFlash(
                 'error',
@@ -431,6 +460,20 @@ class InstallationController extends AbstractController
                         $success = true;
                     }
                 }
+
+                /** @var User $user */
+                $user = $this->getUser();
+
+                $this->eventActions->saveEvent(
+                    $user,
+                    AnalyticalEventType::INSTALLATION_SETTINGS_CONFIG->value,
+                    new DateTime(),
+                    [
+                        'ip' => $request->getClientIp(),
+                        'user_agent' => $request->headers->get('User-Agent'),
+                        'by' => $user->getUuid(),
+                    ]
+                );
 
                 if ($success) {
                     $this->addFlash(
@@ -640,6 +683,20 @@ class InstallationController extends AbstractController
                 $this->entityManager->persist($lastInstallation);
                 $this->entityManager->flush();
 
+                /** @var User $user */
+                $user = $this->getUser();
+
+                $this->eventActions->saveEvent(
+                    $user,
+                    AnalyticalEventType::INSTALLATION_ADMIN_CONFIG->value,
+                    new DateTime(),
+                    [
+                        'ip' => $request->getClientIp(),
+                        'user_agent' => $request->headers->get('User-Agent'),
+                        'by' => $user->getUuid(),
+                    ]
+                );
+
                 $this->addFlash(
                     'success',
                     $this->translator->trans('adminConfirmedSuccessfully', [], 'controllers')
@@ -709,7 +766,7 @@ class InstallationController extends AbstractController
         methods: ['POST']
     )]
     #[IsGranted('ROLE_ADMIN')]
-    public function abortProcess(): RedirectResponse
+    public function abortProcess(Request $request): RedirectResponse
     {
         $lastInstallation = $this->installationService->lastInstallation();
         // If there's no active installation process
@@ -749,6 +806,20 @@ class InstallationController extends AbstractController
 
         // Reset the system to the last valid installation config
         $this->installationService->resetToLastInstallation();
+
+        /** @var User $user */
+        $user = $this->getUser();
+
+        $this->eventActions->saveEvent(
+            $user,
+            AnalyticalEventType::INSTALLATION_CONFIG_ABORTED->value,
+            new DateTime(),
+            [
+                'ip' => $request->getClientIp(),
+                'user_agent' => $request->headers->get('User-Agent'),
+                'by' => $user->getUuid(),
+            ]
+        );
 
         $this->addFlash(
             'error',
