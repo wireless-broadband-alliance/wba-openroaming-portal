@@ -964,4 +964,50 @@ class InstallationController extends AbstractController
         }
         return $this->redirectToRoute('admin_dashboard_settings_certs_installation_admin_confirmation');
     }
+
+    #[Route(
+        '/dashboard/settings/certificatesManagement/verifyIdentity/installation',
+        name: 'admin_dashboard_settings_certs_installation_admin_confirmation'
+    )]
+    #[IsGranted('ROLE_ADMIN')]
+    public function settingsCertificatesManagementInstallationVerifyIdentity(
+        Request $request,
+    ): RedirectResponse|Response {
+        $lastInstallation = $this->installationService->lastInstallation() ?? new InstallationProgress();
+
+        $data = $this->getSettings->getSettings();
+
+        /** @var User $user */
+        $user = $this->getUser();
+
+        $form = $this->createForm(TwoFACode::class);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $data = $form->getData();
+            $code = $data["code"];
+
+            if ($code === $user->getTwoFAcode()) {
+                $session = $request->getSession();
+                $session->set('session_installation_started', true);
+
+                $this->addFlash(
+                    'success',
+                    $this->translator->trans('installationStartedSuccessfully', [], 'controllers') // TODO: make msg for this flash
+                );
+            }
+            $this->addFlash(
+                'error',
+                $this->translator->trans('invalidCodeMessage', [], 'controllers')
+            );
+        }
+
+        return $this->render(
+            'dashboard/shared/settings_actions/certificatesManagement/confirm_identity.html.twig',
+            [
+                'data' => $data,
+                'form' => $form->createView(),
+            ]
+        );
+    }
 }
