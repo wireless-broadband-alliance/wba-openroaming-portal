@@ -3,7 +3,7 @@
 namespace App\Service;
 
 use App\Entity\CertificateSetupProcess;
-use App\Enum\CertificateProcessStatus;
+use App\Enum\ProcessStatusType;
 use App\Enum\CertificateRouteAccess;
 use App\Enum\CertificateTestResult;
 use App\Repository\CertificateSetupProcessRepository;
@@ -31,7 +31,7 @@ readonly class CertificateProcessCheckerService
     {
         $process = $this->getCurrentProcess();
 
-        if (!$process || $process->getStatus() === CertificateProcessStatus::ABORTED) {
+        if (!$process || $process->getStatus() === ProcessStatusType::ABORTED) {
             return [
                 'active' => false,
                 'stages' => [],

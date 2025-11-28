@@ -7,7 +7,7 @@ use App\Entity\CertificateSetupProcess;
 use App\Entity\Event;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
-use App\Enum\CertificateProcessStatus;
+use App\Enum\ProcessStatusType;
 use App\Repository\EventRepository;
 use DateTime;
 use DateTimeImmutable;
@@ -29,7 +29,7 @@ readonly class CertificateStorageService
     public function createCertificateProcess(User $user, Request $request): CertificateSetupProcess
     {
         $process = new CertificateSetupProcess();
-        $process->setStatus(CertificateProcessStatus::IN_PROGRESS);
+        $process->setStatus(ProcessStatusType::IN_PROGRESS);
         $process->setCreatedAt(new DateTimeImmutable());
         $process->setUpdatedAt(new DateTimeImmutable());
 

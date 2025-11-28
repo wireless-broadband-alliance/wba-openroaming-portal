@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Enum\ProcessStatusType;
 use App\Repository\InstallationProgressRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
@@ -14,8 +15,8 @@ class InstallationProgress
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $installationState = null;
+    #[ORM\Column(nullable: true, enumType: ProcessStatusType::class)]
+    private ?ProcessStatusType $installationState = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $dbOpenRoaming = null;
@@ -54,17 +55,20 @@ class InstallationProgress
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $createdAt = null;
 
+    #[ORM\OneToOne(mappedBy: 'installationProgress', cascade: ['persist', 'remove'])]
+    private ?SystemResetRequest $systemResetRequest = null;
+
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getInstallationState(): ?string
+    public function getInstallationState(): ?ProcessStatusType
     {
         return $this->installationState;
     }
 
-    public function setInstallationState(?string $installationState): void
+    public function setInstallationState(?ProcessStatusType $installationState): void
     {
         $this->installationState = $installationState;
     }
@@ -202,5 +206,27 @@ class InstallationProgress
     public function setCreatedAt(?\DateTimeInterface $createdAt): void
     {
         $this->createdAt = $createdAt;
+    }
+
+    public function getSystemResetRequest(): ?SystemResetRequest
+    {
+        return $this->systemResetRequest;
+    }
+
+    public function setSystemResetRequest(?SystemResetRequest $systemResetRequest): static
+    {
+        // unset the owning side of the relation if necessary
+        if ($systemResetRequest === null && $this->systemResetRequest !== null) {
+            $this->systemResetRequest->setInstallationProgress(null);
+        }
+
+        // set the owning side of the relation if necessary
+        if ($systemResetRequest !== null && $systemResetRequest->getInstallationProgress() !== $this) {
+            $systemResetRequest->setInstallationProgress($this);
+        }
+
+        $this->systemResetRequest = $systemResetRequest;
+
+        return $this;
     }
 }

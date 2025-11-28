@@ -2,7 +2,7 @@
 
 namespace App\Entity;
 
-use App\Enum\CertificateProcessStatus;
+use App\Enum\ProcessStatusType;
 use App\Enum\CertificateTestResult;
 use App\Repository\CertificateSetupProcessRepository;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -18,8 +18,8 @@ class CertificateSetupProcess
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(enumType: CertificateProcessStatus::class)]
-    private ?CertificateProcessStatus $status = null;
+    #[ORM\Column(enumType: ProcessStatusType::class)]
+    private ?ProcessStatusType $status = null;
 
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $radsecproxyFormCompletedAt = null;
@@ -54,6 +54,9 @@ class CertificateSetupProcess
     #[ORM\Column(type: 'boolean', options: ['default' => false])]
     private bool $isFreeradiusCertEV = false;
 
+    #[ORM\OneToOne(mappedBy: 'certificateSetupProcess', cascade: ['persist', 'remove'])]
+    private ?SystemResetRequest $systemResetRequest = null;
+
     public function __construct()
     {
         $this->certificates = new ArrayCollection();
@@ -64,12 +67,12 @@ class CertificateSetupProcess
         return $this->id;
     }
 
-    public function getStatus(): ?CertificateProcessStatus
+    public function getStatus(): ?ProcessStatusType
     {
         return $this->status;
     }
 
-    public function setStatus(CertificateProcessStatus $status): static
+    public function setStatus(ProcessStatusType $status): static
     {
         $this->status = $status;
 
@@ -215,6 +218,28 @@ class CertificateSetupProcess
     public function setIsFreeradiusCertEV(bool $isFreeradiusCertEV): static
     {
         $this->isFreeradiusCertEV = $isFreeradiusCertEV;
+
+        return $this;
+    }
+
+    public function getSystemResetRequest(): ?SystemResetRequest
+    {
+        return $this->systemResetRequest;
+    }
+
+    public function setSystemResetRequest(?SystemResetRequest $systemResetRequest): static
+    {
+        // unset the owning side of the relation if necessary
+        if ($systemResetRequest === null && $this->systemResetRequest !== null) {
+            $this->systemResetRequest->setCertificateSetupProcess(null);
+        }
+
+        // set the owning side of the relation if necessary
+        if ($systemResetRequest !== null && $systemResetRequest->getCertificateSetupProcess() !== $this) {
+            $systemResetRequest->setCertificateSetupProcess($this);
+        }
+
+        $this->systemResetRequest = $systemResetRequest;
 
         return $this;
     }

@@ -6,7 +6,7 @@ namespace App\Controller;
 
 use App\Entity\CertificateSetupProcess;
 use App\Entity\InstallationProgress;
-use App\Enum\CertificateProcessStatus;
+use App\Enum\ProcessStatusType;
 use App\Repository\CertificateSetupProcessRepository;
 use App\Repository\InstallationProgressRepository;
 use App\Service\CertificateProcessCheckerService;
@@ -72,7 +72,7 @@ class CertificateManagementController extends AbstractController
         }
 
         // Cancel the process and add a tag IN_COMPLETED
-        $process->setStatus(CertificateProcessStatus::ABORTED);
+        $process->setStatus(ProcessStatusType::ABORTED);
         $process->setUpdatedAt(new DateTimeImmutable());
 
         $this->entityManager->persist($process);

@@ -2,9 +2,11 @@
 
 namespace App\DTO;
 
+use App\Enum\ProcessStatusType;
+
 class InstallationProgressDTO
 {
-    public ?string $installationState = null;
+    public ?ProcessStatusType $installationState = null;
 
     public ?string $dbOpenRoamingUserName = null;
 

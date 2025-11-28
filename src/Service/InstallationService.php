@@ -7,9 +7,9 @@ use App\Entity\InstallationProgress;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Enum\DataBaseSetupType;
-use App\Enum\InstallationProgressType;
 use App\Enum\InstallationStep;
 use App\Enum\InstallationWidgetStepsEnum;
+use App\Enum\ProcessStatusType;
 use App\Enum\SettingName;
 use App\Enum\SettingsConfigType;
 use App\Repository\EventRepository;
@@ -20,16 +20,10 @@ use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Random\RandomException;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
-use Symfony\Bundle\FrameworkBundle\Console\Application;
-use Symfony\Component\Console\Input\ArrayInput;
-use Symfony\Component\Console\Output\BufferedOutput;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-use Symfony\Component\HttpKernel\KernelInterface;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
-use Symfony\Component\Process\Exception\ProcessFailedException;
-use Symfony\Component\Process\Process;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 readonly class InstallationService
@@ -43,7 +37,7 @@ readonly class InstallationService
         private EventRepository $eventRepository,
         private DatabaseConnectionService $databaseConnectionService,
         private TranslatorInterface $translator,
-        private readonly UserRepository $userRepository,
+        private UserRepository $userRepository,
     ) {
     }
 
@@ -53,8 +47,8 @@ readonly class InstallationService
 
         if ($lastInstallation instanceof InstallationProgress) {
             if (
-                $lastInstallation->getInstallationState() === InstallationProgressType::COMPLETED->value ||
-                $lastInstallation->getInstallationState() === InstallationProgressType::ABORTED->value
+                $lastInstallation->getInstallationState() === ProcessStatusType::COMPLETED ||
+                $lastInstallation->getInstallationState() === ProcessStatusType::ABORTED
             ) {
                 return null;
             }
@@ -82,7 +76,7 @@ readonly class InstallationService
                     if ($this->checkDatabaseSettings($installationProgress) &&
                         $this->checkSettingsValues($installationProgress)
                     ) {
-                        $installationProgress->setInstallationState(InstallationProgressType::COMPLETED->value);
+                        $installationProgress->setInstallationState(ProcessStatusType::COMPLETED);
                         $this->entityManager->persist($installationProgress);
                         $this->entityManager->flush();
                         return InstallationStep::COMPLETED->value;

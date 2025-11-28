@@ -3,7 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\CertificateSetupProcess;
-use App\Enum\CertificateProcessStatus;
+use App\Enum\ProcessStatusType;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -25,8 +25,8 @@ class CertificateSetupProcessRepository extends ServiceEntityRepository
         return $this->createQueryBuilder('p')
             ->where('p.status IN (:statuses)')
             ->setParameter('statuses', [
-                CertificateProcessStatus::IN_PROGRESS,
-                CertificateProcessStatus::ABORTED,
+                ProcessStatusType::IN_PROGRESS,
+                ProcessStatusType::ABORTED,
             ])
             ->orderBy('p.updatedAt', 'DESC')
             ->setMaxResults(1)
@@ -39,7 +39,7 @@ class CertificateSetupProcessRepository extends ServiceEntityRepository
         return $this->createQueryBuilder('p')
             ->where('p.status IN (:statuses)')
             ->setParameter('statuses', [
-                CertificateProcessStatus::COMPLETED,
+                ProcessStatusType::COMPLETED,
             ])
             ->orderBy('p.updatedAt', 'DESC')
             ->setMaxResults(1)

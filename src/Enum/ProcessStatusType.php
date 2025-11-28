@@ -2,7 +2,7 @@
 
 namespace App\Enum;
 
-enum CertificateProcessStatus: int
+enum ProcessStatusType: int
 {
     case IN_PROGRESS = 0;
     case COMPLETED = 1;

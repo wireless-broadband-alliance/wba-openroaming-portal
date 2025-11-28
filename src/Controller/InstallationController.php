@@ -5,15 +5,14 @@ namespace App\Controller;
 use App\DTO\AdminConfigDTO;
 use App\DTO\DbSetupDTO;
 use App\DTO\SettingsDTO;
-use App\Entity\CertificateSetupProcess;
 use App\Entity\Event;
 use App\Entity\InstallationProgress;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Enum\DataBaseSetupType;
-use App\Enum\InstallationProgressType;
 use App\Enum\InstallationStep;
 use App\Enum\PlatformMode;
+use App\Enum\ProcessStatusType;
 use App\Enum\SettingName;
 use App\Enum\SettingsConfigType;
 use App\Form\AdminConfigType;
@@ -32,7 +31,6 @@ use App\Service\GetSettings;
 use App\Service\InstallationService;
 use App\Service\TwoFAService;
 use DateTime;
-use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Random\RandomException;
@@ -148,8 +146,8 @@ class InstallationController extends AbstractController
 
             if (
                 !($lastInstallation instanceof InstallationProgress) ||
-                $lastInstallation->getInstallationState() === InstallationProgressType::COMPLETED->value ||
-                $lastInstallation->getInstallationState() === InstallationProgressType::ABORTED->value
+                $lastInstallation->getInstallationState() === ProcessStatusType::COMPLETED ||
+                $lastInstallation->getInstallationState() === ProcessStatusType::ABORTED
             ) {
                 $lastInstallation = new InstallationProgress();
                 $lastInstallation->setCreatedAt(new DateTime());
@@ -158,7 +156,7 @@ class InstallationController extends AbstractController
             $lastInstallation->setUpdatedAt(new DateTime());
             $lastInstallation->setDbOpenRoaming($openRoamingDb);
             $lastInstallation->setDbFreeradius($freeradiusDb);
-            $lastInstallation->setInstallationState(InstallationProgressType::IN_PROGRESS->value);
+            $lastInstallation->setInstallationState(ProcessStatusType::IN_PROGRESS);
             $this->entityManager->persist($lastInstallation);
             $this->entityManager->flush();
 
@@ -359,7 +357,7 @@ class InstallationController extends AbstractController
             if ($settingsDTO->jwtPassphraseEnable) {
                 $lastInstallation->setJwtPassphrase($settingsDTO->jwtPassphrase);
             }
-            $lastInstallation->setInstallationState(InstallationProgressType::IN_PROGRESS->value);
+            $lastInstallation->setInstallationState(ProcessStatusType::IN_PROGRESS);
             $this->entityManager->persist($lastInstallation);
             $this->entityManager->flush();
 
@@ -512,14 +510,10 @@ class InstallationController extends AbstractController
 
             if ($adminUser instanceof User) {
                 $hashedPassword = $userPasswordHasher->hashPassword($adminUser, $adminPassword);
-                if (!($lastInstallation instanceof InstallationProgress)) {
-                    $lastInstallation = new InstallationProgress();
-                    $lastInstallation->setCreatedAt(new \DateTime());
-                }
-                $lastInstallation->setUpdatedAt(new \DateTime());
+                $lastInstallation->setUpdatedAt(new DateTime());
                 $lastInstallation->setEmailAdmin($adminEmail);
                 $lastInstallation->setPasswordAdmin($hashedPassword);
-                $lastInstallation->setInstallationState(InstallationProgressType::IN_PROGRESS->value);
+                $lastInstallation->setInstallationState(ProcessStatusType::IN_PROGRESS);
                 $this->entityManager->persist($lastInstallation);
                 $this->entityManager->flush();
             }
@@ -733,7 +727,7 @@ class InstallationController extends AbstractController
         }
 
         // Check if installation is in a state that can be aborted
-        if ($lastInstallation->getInstallationState() !== InstallationProgressType::IN_PROGRESS->value) {
+        if ($lastInstallation->getInstallationState() !== ProcessStatusType::IN_PROGRESS) {
             $this->addFlash(
                 'error',
                 $this->translator->trans(
@@ -747,7 +741,7 @@ class InstallationController extends AbstractController
         }
 
         // Abort the process
-        $lastInstallation->setInstallationState(InstallationProgressType::ABORTED->value);
+        $lastInstallation->setInstallationState(ProcessStatusType::ABORTED);
         $lastInstallation->setUpdatedAt(new DateTime());
 
         $this->entityManager->persist($lastInstallation);

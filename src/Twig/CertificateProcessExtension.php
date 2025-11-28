@@ -4,7 +4,7 @@ namespace App\Twig;
 
 use App\Entity\CertificateSetupProcess;
 use App\Service\CertificateProcessCheckerService;
-use App\Enum\CertificateProcessStatus;
+use App\Enum\ProcessStatusType;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFunction;
 
@@ -34,6 +34,6 @@ class CertificateProcessExtension extends AbstractExtension
             return false;
         }
 
-        return $currentProcess->getStatus() === CertificateProcessStatus::ABORTED;
+        return $currentProcess->getStatus() === ProcessStatusType::ABORTED;
     }
 }
