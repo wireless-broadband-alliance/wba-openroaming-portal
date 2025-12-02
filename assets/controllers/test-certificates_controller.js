@@ -23,7 +23,7 @@ export default class extends Controller {
         }
 
         const remoteHost = this.hostInputTarget?.value?.trim() || "";
-        const remotePort = parseInt(this.portInputTarget?.value || "2083", 10);
+        const remotePort = parseInt(this.portInputTarget?.value, 10);
 
         if (!remoteHost) {
             this.showResult({status: "error", message: "Please provide a remote host."});

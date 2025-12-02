@@ -140,7 +140,7 @@ radsecProxyTestPassed: "Handshake TLS realizado com sucesso usando o conjunto de
 missingRequiredForFreeradiusTest: 'É necessário especificar o remote_host e a remote_port.'
 freeradiusCertUploadedSuccessfully: 'Certificados Freeradius carregados com sucesso!'
 freeradiusConfigAppliedSuccessfully: 'Configuração do Freeradius aplicada com sucesso!'
-freeradiusTestPassed: 'Testes concluídos com sucesso. Atualize isso mais tarde.'
+freeradiusTestPassed: 'Testes concluídos com sucesso. TODO Update this translation' # TODO Update this translation
 configAlreadyApplied: 'Está configuração já está aplicada! Não podes re-submeter o mesmo formulário.'
 certificateProcessAborted: "Este processo foi abortado com sucesso. Por favor, não se esqueça de reconfigurar todo o processo corretamente!"
 not_ev_warning: "Estes certificados não são EV's válidos. A geração do perfil OpenRoaming para Windows irá falhar por causa disso, mas podes progredir se assim o desejares."

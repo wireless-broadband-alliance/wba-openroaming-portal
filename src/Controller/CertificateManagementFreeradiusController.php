@@ -453,8 +453,6 @@ class CertificateManagementFreeradiusController extends AbstractController
             ], Response::HTTP_BAD_REQUEST);
         }
 
-        // TODO MAKE NEW LOGIC FOR TEST RUN FROM HERE
-
         try {
             $context = stream_context_create([
                 'ssl' => [
@@ -462,13 +460,13 @@ class CertificateManagementFreeradiusController extends AbstractController
                     'verify_peer_name' => false,
                     'allow_self_signed' => false,
                     'capture_peer_cert_chain' => true,
-                    'local_cert' => $clientCertPath,
-                    'local_pk' => $keyCertPath,
+                    'local_cert' => $paths['cert'],   // or $paths['cert']
+                    'local_pk'   => $paths['privkey'],
+                    'cafile'     => $paths['ca'],
                     'crypto_method' => STREAM_CRYPTO_METHOD_TLS_CLIENT,
                 ]
             ]);
 
-            // Open the TLS connection
             $connection = @stream_socket_client(
                 "tls://{$remoteHost}:{$remotePort}",
                 $errno,
