@@ -59,7 +59,7 @@ readonly class Schedule implements ScheduleProviderInterface
                 )
             )
 
-            // Executes once a week on Sunday at 04:30
+            // Executes once a week on Sunday at 03:30
             ->add(
                 RecurringMessage::cron(
                     '30 3 * * 0',
