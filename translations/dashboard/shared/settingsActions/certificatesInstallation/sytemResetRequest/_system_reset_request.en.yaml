@@ -1,3 +1,4 @@
 tittleSystemResetRequest: 'Restore'
 restorePlatform: 'Restore Platform'
 lastCompletedSystemRequestReset: 'Last execution at: '
+confirmReinstall: "Are you sure you want to reinstall the platform? This process will compromise its current configuration."
