@@ -15,7 +15,7 @@
 
 {# Abort Button + Leave Configuration #}
 <div class="flex flex-col sm:flex-row justify-end items-stretch sm:items-center gap-2 sm:gap-3">
-    {% if not app.session.has('first_system_reset') %}
+    {% if not app.session.has('system_reset_request') %}
         <form action="{{ path('admin_dashboard_settings_certs_management_abort') }}"
               method="POST"
               onsubmit="return confirm('{{ 'confirm_abort'|trans({}, '_certificate_stepper') }}');">

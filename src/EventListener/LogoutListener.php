@@ -34,7 +34,7 @@ class LogoutListener implements EventSubscriberInterface
             $session->remove('forgot_password_uuid');
             $session->remove('session_installation_started');
             $session->remove('session_certificate_started');
-            $session->remove('first_system_reset');
+            $session->remove('system_reset_request');
         }
     }
 }

@@ -848,7 +848,7 @@ class TwoFAController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
         $session = $request->getSession();
-        $route = $session->get('first_system_reset');
+        $route = $session->get('system_reset_request');
 
         if ($route && $session->get('session_installation_started') === true) {
             return $this->redirectToRoute($route);

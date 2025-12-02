@@ -16,7 +16,7 @@
 
 {# Abort Button + Leave Configuration #}
 <div class="flex flex-col sm:flex-row justify-end items-stretch sm:items-center gap-2 sm:gap-3">
-    {% if not app.session.has('first_system_reset') %}
+    {% if not app.session.has('system_reset_request') %}
         {% if app.request.attributes.get('_route') != 'admin_dashboard_settings_certs_installation' %}
             <form action="{{ path('admin_dashboard_settings_certs_installation_abortProcess') }}"
                   method="POST"

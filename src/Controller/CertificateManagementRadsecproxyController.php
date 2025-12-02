@@ -123,7 +123,7 @@ class CertificateManagementRadsecproxyController extends AbstractController
             $session = $request->getSession();
             if ($systemResetRequest &&
                 $systemResetRequest->getStatus() === ProcessStatusType::IN_PROGRESS &&
-                $session->has('first_system_reset')
+                $session->has('system_reset_request')
             ) {
                 $systemResetRequest->setCertificateSetupProcess($process);
                 $this->entityManager->persist($systemResetRequest);

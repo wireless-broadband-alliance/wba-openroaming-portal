@@ -1,4 +1,4 @@
-<a href="#"
+<a href="{{ path('admin_dashboard_settings_certs_management_system_reset') }}"
    onclick="return confirm('{{ 'confirmReinstall'|trans({}, '_system_reset_request') }}')"
    class="group flex flex-col items-center text-center bg-white shadow-md rounded-2xl p-8 border border-gray-200
                   transition-all hover:shadow-lg hover:-translate-y-1">
@@ -8,7 +8,7 @@
     </h2>
 
     <twig:ux:icon name="wba:round-restore"
-                  class="w-10 h-10 text-gray-600 transition-colors group-hover:text-primary mb-6" />
+                  class="w-10 h-10 text-gray-600 transition-colors group-hover:text-primary mb-6"/>
 
     <div class="mt-auto pt-3 text-gray-600 transition-colors group-hover:text-primary">
         {{ 'restorePlatform'|trans({}, '_system_reset_request') }}

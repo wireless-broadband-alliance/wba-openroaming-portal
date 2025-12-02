@@ -89,4 +89,15 @@ class CertificateManagementController extends AbstractController
 
         return $this->redirectToRoute('admin_dashboard_settings_certs_radsecproxy_upload');
     }
+
+    #[Route('/dashboard/settings/certificatesManagement/systemReset',
+        name: 'admin_dashboard_settings_certs_management_system_reset'
+    )]
+    #[IsGranted('ROLE_ADMIN')]
+    public function settingsCertificatesManagementSystemReset(): Response
+    {
+        dd('potato start process');
+        // TODO FIND A WAY TO TRIGGER THE RESET OF ALL THE PLATFORM LIKE THE SYSTEM_RESET
+        // TODO CREATE THIS SESSION_TOKEN "system_reset_request" -> rename first_reset and use it
+    }
 }

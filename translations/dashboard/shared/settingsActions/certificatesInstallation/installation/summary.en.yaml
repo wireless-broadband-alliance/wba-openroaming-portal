@@ -1,6 +1,7 @@
 summaryTitle: 'Installation Details'
 summaryDescription: 'Review the configuration details before completing the installation.'
 finish: 'Finish Process'
+proceed: 'Next Configuration'
 installationState: 'Installation State'
 dbOpenRoamingUserName: 'OpenRoaming DataBase User Name'
 dbOpenRoamingPassword: 'OpenRoaming DataBase Password'

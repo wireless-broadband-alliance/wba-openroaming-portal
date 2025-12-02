@@ -80,8 +80,14 @@
     </div>
 
     <div class="mt-8 flex justify-end">
-        <a href="{{ path('admin_dashboard_settings_certs_management') }}" class="btn-primary w-[160px]">
-            {{ 'finish'|trans({}, 'summary') }}
-        </a>
+        {% if not app.session.has('system_reset_request') %}
+            <a href="{{ path('admin_dashboard_settings_certs_management') }}" class="btn-primary w-[160px]">
+                {{ 'finish'|trans({}, 'summary') }}
+            </a>
+        {% else %}
+            <a href="{{ path('admin_dashboard_settings_certs_radsecproxy_upload') }}" class="btn-primary w-[160px]">
+                {{ 'proceed'|trans({}, 'summary') }}
+            </a>
+        {% endif %}
     </div>
 {% endblock %}

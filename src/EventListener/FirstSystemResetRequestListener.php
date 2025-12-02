@@ -59,12 +59,12 @@ readonly class FirstSystemResetRequestListener
             $this->entityManager->flush();
 
             $session->set('2fa_verified_dashboard', true);
-            $session->set('first_system_reset', 'admin_dashboard_settings_certs_installation');
+            $session->set('system_reset_request', 'admin_dashboard_settings_certs_installation');
             $this->handleRedirect(
                 $event,
                 $session,
                 'session_installation_started',
-                'You do not have any created installation process on this portal.',
+                'You do not have any created installation process on this portal.', // TODO MAKE TRANSLATIONS
                 'admin_dashboard_settings_certs_installation'
             );
             return;
@@ -73,12 +73,12 @@ readonly class FirstSystemResetRequestListener
         $completedCertificates = $this->certificateSetupProcessRepository->getLatestProcess();
         if (!$completedCertificates) {
             $session->set('2fa_verified_dashboard', true);
-            $session->set('first_system_reset', 'admin_dashboard_settings_certs_radsecproxy_upload');
+            $session->set('system_reset_request', 'admin_dashboard_settings_certs_radsecproxy_upload');
             $this->handleRedirect(
                 $event,
                 $session,
                 'session_certificate_started',
-                'No active certificate process found.',
+                'No active certificate process found.', // TODO MAKE TRANSLATIONS
                 'admin_dashboard_settings_certs_radsecproxy_upload'
             );
             return;
@@ -86,12 +86,12 @@ readonly class FirstSystemResetRequestListener
 
         if ($completedCertificates->getStatus() !== ProcessStatusType::COMPLETED) {
             $session->set('2fa_verified_dashboard', true);
-            $session->set('first_system_reset', 'admin_dashboard_settings_certs_radsecproxy_upload');
+            $session->set('system_reset_request', 'admin_dashboard_settings_certs_radsecproxy_upload');
             $this->handleRedirect(
                 $event,
                 $session,
                 'session_certificate_started',
-                'A certificate process is already in progress.',
+                'A certificate process is already in progress.', // TODO MAKE TRANSLATIONS
                 'admin_dashboard_settings_certs_radsecproxy_upload'
             );
             return;

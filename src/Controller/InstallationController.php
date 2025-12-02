@@ -170,7 +170,7 @@ class InstallationController extends AbstractController
             $session = $request->getSession();
             if ($systemResetRequest &&
                 $systemResetRequest->getStatus() === ProcessStatusType::STARTED &&
-                $session->has('first_system_reset')
+                $session->has('system_reset_request')
             ) {
                 $systemResetRequest->setStatus(ProcessStatusType::IN_PROGRESS);
                 $systemResetRequest->setUser($user);

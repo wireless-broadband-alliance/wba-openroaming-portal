@@ -1,6 +1,7 @@
 summaryTitle: 'Detalhes da Instalação'
 summaryDescription: 'Revise os detalhes da configuração antes de completar a instalação.'
 finish: 'Concluir Processo'
+proceed: 'Próxima configuração'
 installationState: 'Estado da Instalação'
 dbOpenRoamingUserName: 'Nome de Utilizador da Base de Dados OpenRoaming'
 dbOpenRoamingPassword: 'Palavra-passe da Base de Dados OpenRoaming'
