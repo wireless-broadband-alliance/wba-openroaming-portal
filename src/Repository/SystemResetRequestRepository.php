@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\SystemResetRequest;
+use App\Enum\ProcessStatusType;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -14,6 +15,20 @@ class SystemResetRequestRepository extends ServiceEntityRepository
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, SystemResetRequest::class);
+    }
+
+    public function findActive(): ?SystemResetRequest
+    {
+        return $this->createQueryBuilder('r')
+            ->andWhere('r.status NOT IN (:terminalStatuses)')
+            ->setParameter('terminalStatuses', [
+                ProcessStatusType::COMPLETED,
+                ProcessStatusType::ABORTED,
+            ])
+            ->orderBy('r.createdAt', 'DESC')
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
     }
 
 //    /**

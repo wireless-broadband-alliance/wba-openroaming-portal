@@ -12,9 +12,11 @@ use App\Enum\CertificateFileName;
 use App\Enum\CertificateMachineType;
 use App\Enum\CertificateTestResult;
 use App\Enum\FirewallType;
+use App\Enum\ProcessStatusType;
 use App\Enum\TrustedWBAFingerprints;
 use App\Form\CertificateFreeradiusUploadType;
 use App\Form\SimpleSubmitFormType;
+use App\Repository\SystemResetRequestRepository;
 use App\Service\CertificateFreeradiusCommandsService;
 use App\Service\CertificateFreeradiusInfoService;
 use App\Service\CertificateProcessCheckerService;
@@ -48,7 +50,8 @@ class CertificateManagementFreeradiusController extends AbstractController
         private readonly CertificateFreeradiusInfoService $certificateFreeradiusInfoService,
         private readonly CertificateFreeradiusCommandsService $certificateFreeradiusCommandsService,
         private readonly CertificateWriterUpdateService $certificateWriterUpdateService,
-        private readonly EventActions $eventActions
+        private readonly EventActions $eventActions,
+        private readonly SystemResetRequestRepository $systemResetRequestRepository
     ) {
     }
 
@@ -562,6 +565,22 @@ class CertificateManagementFreeradiusController extends AbstractController
                     'by' => $user->getUuid(),
                 ]
             );
+
+            $systemResetRequest = $this->systemResetRequestRepository->findActive();
+            $session = $request->getSession();
+            if ($systemResetRequest &&
+                $systemResetRequest->getStatus() === ProcessStatusType::IN_PROGRESS &&
+                $session->has('first_system_reset')
+            ) {
+                $systemResetRequest->setStatus(ProcessStatusType::COMPLETED);
+                $this->entityManager->persist($systemResetRequest);
+                $this->entityManager->flush();
+
+                // Clear all the sessions requests in case the system_reset is completed
+                $session->remove('first_system_reset');
+                $session->remove('session_installation_started');
+                $session->remove('session_certificate_started');
+            }
 
             // TODO DONT FORGET TO CLEAR THIS SESSION TOKEN EVERYTHING THIS TEST IS DONE -> first_system_reset
             // TODO Also update this entity -> SystemResetRequest to completed when the test is done and passed

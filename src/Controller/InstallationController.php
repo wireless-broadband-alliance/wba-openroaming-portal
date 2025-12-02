@@ -7,6 +7,7 @@ use App\DTO\DbSetupDTO;
 use App\DTO\SettingsDTO;
 use App\Entity\Event;
 use App\Entity\InstallationProgress;
+use App\Entity\SystemResetRequest;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Enum\DataBaseSetupType;
@@ -23,6 +24,7 @@ use App\Form\TwoFACode;
 use App\Repository\EventRepository;
 use App\Repository\InstallationProgressRepository;
 use App\Repository\SettingRepository;
+use App\Repository\SystemResetRequestRepository;
 use App\Repository\UserRepository;
 use App\Service\CaptchaValidator;
 use App\Service\DatabaseConnectionService;
@@ -31,6 +33,7 @@ use App\Service\GetSettings;
 use App\Service\InstallationService;
 use App\Service\TwoFAService;
 use DateTime;
+use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Random\RandomException;
@@ -65,6 +68,7 @@ class InstallationController extends AbstractController
         private readonly SettingRepository $settingRepository,
         private readonly EventRepository $eventRepository,
         private readonly CaptchaValidator $captchaValidator,
+        private readonly SystemResetRequestRepository $systemResetRequestRepository,
     ) {
     }
 
@@ -105,6 +109,9 @@ class InstallationController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            /** @var User $user */
+            $user = $this->getUser();
+
             $openRoamingDb = $this->databaseConnectionService->buildDatabaseUrl(
                 $dbDTO->dbOpenRoamingUserName,
                 $dbDTO->dbOpenRoamingPassword,
@@ -119,7 +126,6 @@ class InstallationController extends AbstractController
                 $dbDTO->dbFreeradiusPort,
                 $dbDTO->dbFreeradiusDbName
             );
-
 
             $orConnection = $this->databaseConnectionService->testDatabaseConnection($openRoamingDb);
             $frConnection = $this->databaseConnectionService->testDatabaseConnection($freeradiusDb);
@@ -159,8 +165,19 @@ class InstallationController extends AbstractController
             $lastInstallation->setInstallationState(ProcessStatusType::IN_PROGRESS);
             $this->entityManager->persist($lastInstallation);
             $this->entityManager->flush();
-            // TODO Also update this entity -> SystemResetRequest create the first row and only update it again when the installation is done
 
+            $systemResetRequest = $this->systemResetRequestRepository->findActive();
+            $session = $request->getSession();
+            if ($systemResetRequest &&
+                $systemResetRequest->getStatus() === ProcessStatusType::STARTED &&
+                $session->has('first_system_reset')
+            ) {
+                $systemResetRequest->setStatus(ProcessStatusType::IN_PROGRESS);
+                $systemResetRequest->setUser($user);
+                $systemResetRequest->setInstallationProgress($lastInstallation);
+                $this->entityManager->persist($systemResetRequest);
+                $this->entityManager->flush();
+            }
 
             $orResult = $this->databaseConnectionService->writeDatabaseUrlToEnv(
                 $openRoamingDb,
@@ -175,9 +192,6 @@ class InstallationController extends AbstractController
                 return $this->redirectToRoute('admin_dashboard_settings_certs_installation_settings');
             }
 
-            /** @var User $user */
-            $user = $this->getUser();
-
             $this->eventActions->saveEvent(
                 $user,
                 AnalyticalEventType::INSTALLATION_DATABASE_CONFIG->value,
@@ -188,7 +202,6 @@ class InstallationController extends AbstractController
                     'by' => $user->getUuid(),
                 ]
             );
-
 
             $this->addFlash(
                 'success',
@@ -994,7 +1007,11 @@ class InstallationController extends AbstractController
 
                 $this->addFlash(
                     'success',
-                    $this->translator->trans('installationStartedSuccessfully', [], 'controllers') // TODO: make msg for this flash
+                    $this->translator->trans(
+                        'installationStartedSuccessfully',
+                        [],
+                        'controllers'
+                    ) // TODO: make msg for this flash
                 );
             }
             $this->addFlash(

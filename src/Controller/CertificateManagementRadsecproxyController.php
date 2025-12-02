@@ -12,10 +12,12 @@ use App\Enum\CertificateFileName;
 use App\Enum\CertificateMachineType;
 use App\Enum\CertificateTestResult;
 use App\Enum\FirewallType;
+use App\Enum\ProcessStatusType;
 use App\Enum\TrustedWBAFingerprints;
 use App\Form\CertificateRadsecUploadType;
 use App\Form\SimpleSubmitFormType;
 use App\Repository\CertificateRepository;
+use App\Repository\SystemResetRequestRepository;
 use App\Service\CertificateRadsecproxyCommandsService;
 use App\Service\CertificateProcessCheckerService;
 use App\Service\CertificateRadsecproxyInfoService;
@@ -47,6 +49,7 @@ class CertificateManagementRadsecproxyController extends AbstractController
         private readonly CertificateRepository $certificateRepository,
         private readonly CertificateRadsecproxyInfoService $certificateRadsecproxyInfoService,
         private readonly EventActions $eventActions,
+        private readonly SystemResetRequestRepository $systemResetRequestRepository,
     ) {
     }
 
@@ -115,7 +118,17 @@ class CertificateManagementRadsecproxyController extends AbstractController
             // After the files are validated and the processed, update them once again to add
             $process->setRadsecproxyFormCompletedAt(new DateTimeImmutable());
             $process->setUpdatedAt(new DateTimeImmutable());
-            // TODO Also update this entity -> SystemResetRequest update the row and set the certificateSetupProcess ID
+
+            $systemResetRequest = $this->systemResetRequestRepository->findActive();
+            $session = $request->getSession();
+            if ($systemResetRequest &&
+                $systemResetRequest->getStatus() === ProcessStatusType::IN_PROGRESS &&
+                $session->has('first_system_reset')
+            ) {
+                $systemResetRequest->setCertificateSetupProcess($process);
+                $this->entityManager->persist($systemResetRequest);
+                $this->entityManager->flush();
+            }
 
             $this->entityManager->persist($process);
             $this->entityManager->flush();

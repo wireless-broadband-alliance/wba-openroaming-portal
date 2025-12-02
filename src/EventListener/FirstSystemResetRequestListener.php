@@ -2,9 +2,14 @@
 
 namespace App\EventListener;
 
+use App\Entity\SystemResetRequest;
+use App\Entity\User;
 use App\Enum\ProcessStatusType;
 use App\Repository\CertificateSetupProcessRepository;
 use App\Repository\InstallationProgressRepository;
+use App\Repository\SystemResetRequestRepository;
+use DateTimeImmutable;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -19,7 +24,9 @@ readonly class FirstSystemResetRequestListener
         private Security $security,
         private InstallationProgressRepository $installationProgressRepository,
         private CertificateSetupProcessRepository $certificateSetupProcessRepository,
-        private UrlGeneratorInterface $urlGenerator
+        private UrlGeneratorInterface $urlGenerator,
+        private SystemResetRequestRepository $systemResetRequestRepository,
+        private EntityManagerInterface $entityManager
     ) {
     }
 
@@ -28,14 +35,29 @@ readonly class FirstSystemResetRequestListener
         $session = $event->getRequest()->getSession();
         $user = $event->getAuthenticationToken()->getUser();
 
-        if (!$user || !$this->security->isGranted('ROLE_ADMIN', $user)) {
+        if (!$user instanceof User || !$this->security->isGranted('ROLE_ADMIN', $user)) {
             return;
+        }
+
+        $systemResetRequest = $this->systemResetRequestRepository->findActive();
+        if (!$systemResetRequest) {
+            $systemResetRequest = new SystemResetRequest();
+            $systemResetRequest->setStatus(ProcessStatusType::STARTED);
+            $systemResetRequest->setCreatedAt(new DateTimeImmutable());
+            $systemResetRequest->setUser($user);
+
+            $this->entityManager->persist($systemResetRequest);
+            $this->entityManager->flush();
         }
 
         $completedInstallation = $this->installationProgressRepository->findOneBy([
             'installationState' => ProcessStatusType::COMPLETED
         ]);
         if (!$completedInstallation) {
+            $systemResetRequest->setInstallationProgress(null);
+            $this->entityManager->persist($systemResetRequest);
+            $this->entityManager->flush();
+
             $session->set('2fa_verified_dashboard', true);
             $session->set('first_system_reset', 'admin_dashboard_settings_certs_installation');
             $this->handleRedirect(
