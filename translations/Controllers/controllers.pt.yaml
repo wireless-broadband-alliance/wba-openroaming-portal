@@ -140,7 +140,7 @@ radsecProxyTestPassed: "Handshake TLS realizado com sucesso usando o conjunto de
 missingRequiredForFreeradiusTest: 'É necessário especificar o remote_host e a remote_port.'
 freeradiusCertUploadedSuccessfully: 'Certificados Freeradius carregados com sucesso!'
 freeradiusConfigAppliedSuccessfully: 'Configuração do Freeradius aplicada com sucesso!'
-freeradiusTestPassed: 'TEST OK DÁ UPDATE THIS DPS' # TODO DÁ UPDATE DPS
+freeradiusTestPassed: 'Testes concluídos com sucesso. Atualize isso mais tarde.'
 configAlreadyApplied: 'Está configuração já está aplicada! Não podes re-submeter o mesmo formulário.'
 certificateProcessAborted: "Este processo foi abortado com sucesso. Por favor, não se esqueça de reconfigurar todo o processo corretamente!"
 not_ev_warning: "Estes certificados não são EV's válidos. A geração do perfil OpenRoaming para Windows irá falhar por causa disso, mas podes progredir se assim o desejares."
@@ -160,4 +160,5 @@ settingsApplied: 'Configurações  aplicadas com sucesso.'
 settingsNotApplied: 'As definições não foram aplicadas. Tente novamente.'
 writeSettingsEnv: 'Escreva as novas configurações no ficheiro .env'
 createJwtPair: 'Gere um novo par de chaves JWT.'
+installationStartedSuccessfully: 'Verificação concluída com sucesso.'
 systemResetRequestStarted: 'Pedido de Restauro do Sistema iniciado. Certifique-se de completar cuidadosamente cada passo do processo de configuração.'
