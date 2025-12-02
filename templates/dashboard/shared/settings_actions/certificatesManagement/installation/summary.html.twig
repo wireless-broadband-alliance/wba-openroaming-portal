@@ -81,11 +81,11 @@
 
     <div class="mt-8 flex justify-end">
         {% if not app.session.has('system_reset_request') %}
-            <a href="{{ path('admin_dashboard_settings_certs_management') }}" class="btn-primary w-[160px]">
+            <a href="{{ path('admin_dashboard_settings_certs_management') }}"  class="btn-primary flex justify-center items-center px-4 py-2 min-w-[120px]">
                 {{ 'finish'|trans({}, 'summary') }}
             </a>
         {% else %}
-            <a href="{{ path('admin_dashboard_settings_certs_radsecproxy_upload') }}" class="btn-primary w-[160px]">
+            <a href="{{ path('admin_dashboard_settings_certs_radsecproxy_upload') }}" class="btn-primary flex justify-center items-center px-4 py-2 min-w-[120px]">
                 {{ 'proceed'|trans({}, 'summary') }}
             </a>
         {% endif %}
