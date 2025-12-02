@@ -40,7 +40,7 @@ readonly class InstallationListener
             if ($session->has('session_installation_started')) {
                 return;
             }
-            $url = $this->router->generate('admin_dashboard_settings_certs_installation_admin_confirmation');
+            $url = $this->router->generate('admin_dashboard_settings_certs_installation_verify_send_code');
             $event->setResponse(new RedirectResponse($url));
         }
     }

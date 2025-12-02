@@ -160,7 +160,46 @@ readonly class InstallationService
         $this->mailer->send($email);
     }
 
-    public function canSendCode(InstallationProgress $installationProgress, User $user): bool
+    public function sendAdminVerificationCode(User $user): void
+    {
+        $verificationCode = random_int(100000, 999999);
+        $user->setTwoFAcode($verificationCode);
+        $user->setTwoFAcodeGeneratedAt(new DateTime());
+        $this->entityManager->persist($user);
+        $this->entityManager->flush();
+
+        $emailTitle = $this->settingRepository->findOneBy(['name' => SettingName::PAGE_TITLE->value])->getValue();
+        $contactEmail = $this->settingRepository->findOneBy([
+            'name' => SettingName::CONTACT_EMAIL->value,
+        ])->getValue();
+        $customerLogo = $this->settingRepository->findOneBy([
+            'name' => SettingName::CUSTOMER_LOGO->value,
+        ])->getValue();
+        $projectDir = $this->parameterBag->get('kernel.project_dir');
+        $logoPath = $projectDir . '/public' . $customerLogo;
+
+        $email = new TemplatedEmail()
+            ->from(
+                new Address(
+                    $this->parameterBag->get('app.email_address'),
+                    $this->parameterBag->get('app.sender_name')
+                )
+            )
+            ->to($user->getEmail())
+            ->subject($this->translator->trans('adminIdentityVerification', [], 'InstallationService'))
+            ->htmlTemplate('email/installation_entity_verification.html.twig')
+            ->context([
+                'uuid' => $user->getUuid(),
+                'emailTitle' => $emailTitle,
+                'contactEmail' => $contactEmail,
+                'code' => $verificationCode,
+            ])
+            ->embedFromPath($logoPath, 'logo_cid');
+
+        $this->mailer->send($email);
+    }
+
+    public function canSendCode(string $eventType, User $user): bool
     {
         $nrAttempts = $this->settingRepository->findOneBy(
             ['name' => SettingName::TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE->value]
@@ -174,7 +213,7 @@ readonly class InstallationService
             $user,
             $nrAttempts,
             $limitTime,
-            AnalyticalEventType::INSTALLATION_ADMIN_CONFIRM_CODE_SENT->value
+            $eventType
         );
         return count($attempts) < $nrAttempts;
     }

@@ -1,0 +1,82 @@
+{% extends 'dashboard/shared/settings_actions/certificatesManagement/partials/base.html.twig' %}
+
+{% block title %}
+    {{ 'adminPageWBA'|trans({}, '_header_admin') }}
+{% endblock %}
+
+{% block installation_content %}
+
+    <div class="mt-6">
+        <h1 class="text-2xl sm:text-3xl font-bold leading-tight">
+            {{ 'adminConfigTitle'|trans({}, 'admin_config') }}
+        </h1>
+        <p class="mt-3 text-gray-600 text-base sm:text-lg">
+            {{ 'adminConfirmDescription'|trans({}, 'admin_config') }}
+        </p>
+    </div>
+
+    <div class="my-6 divider-solid"></div>
+
+
+
+    {{ form_start(form, {attr: {autocomplete: 'off'}}) }}
+
+    <div class="w-full 2xl:w-1/2 bg-white rounded-md p-4">
+
+        {# --- Code Card --- #}
+        <div class="cert-upload-card col-span-1 sm:col-span-1 md:col-span-2 transition hover:shadow-lg hover:-translate-y-1 duration-200"
+                {{ stimulus_target('radio-card', 'card') }}
+                {{ stimulus_controller('card') }}>
+
+            <div class="block text-center text-lg mb-6">
+                <h2 class="text-lg sm:text-xl font-medium text-gray-700">
+                    {{ 'enterVerificationCode'|trans({}, 'confirm') }}
+                </h2>
+
+            </div>
+
+            <div class="mt-4 flex flex-col sm:flex-row items-center gap-3">
+                {{ form_widget(form.code, {
+                    attr: {
+                        class: 'form-widget',
+                        placeholder: 'codePlaceholder'|trans({}, 'admin_config'),
+                    },
+                }) }}
+
+            </div>
+
+            <div class="mt-2 text-red-500 text-sm">
+                {{ form_errors(form.code) }}
+            </div>
+
+            <div class="flex flex-col md:flex-row justify-center md:justify-between space-x-2 space-y-2 mt-4">
+                <div class="flex justify-start items-end pb-2">
+                    <p>
+                        {{ 'generateNewEmail'|trans({'%url%':path('admin_dashboard_settings_certs_installation_admin_confirmation_resend')}, 'confirm')|raw }}
+                    </p>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="mt-8 divider-solid"></div>
+
+    <div class="mt-6 flex flex-col sm:flex-row justify-end items-center gap-2">
+        <a href="{{ path('admin_dashboard_settings_certs_installation_admin') }}"
+           class="btn-secondary w-[200px]">
+            {{ 'changeEmail'|trans({}, 'admin_config') }}
+        </a>
+        <button type="submit"
+                class="btn-primary w-[200px]"
+                onclick="return confirm('{{ 'saveChangesMessage'|trans({}, 'admin_config') }}')">
+            {{ 'verify'|trans({}, 'confirm') }}
+        </button>
+    </div>
+
+    {{ form_row(form._token) }}
+    {{ form_end(form) }}
+
+{% endblock %}
