@@ -1,20 +1,27 @@
-<a href="{{ path('admin_dashboard_settings_certs_management_system_reset') }}"
-   onclick="return confirm('{{ 'confirmReinstall'|trans({}, '_system_reset_request') }}')"
-   class="group flex flex-col items-center text-center bg-white shadow-md rounded-2xl p-8 border border-gray-200
-                  transition-all hover:shadow-lg hover:-translate-y-1">
+<form method="post" action="{{ path('admin_dashboard_settings_certs_management_system_reset') }}"
+      onsubmit="return confirm('{{ 'confirmReinstall'|trans({}, '_system_reset_request')|e('js') }}')"
+      class="relative group flex flex-col items-center text-center bg-white shadow-md rounded-2xl p-8 border border-gray-200
+             transition-all hover:shadow-lg hover:-translate-y-1">
 
-    <h2 class="text-xl md:text-2xl font-bold mb-6 transition-colors group-hover:text-primary">
+    <input type="hidden" name="_token" value="{{ csrf_token('system_reset') }}">
+
+    <button type="submit"
+            class="absolute inset-0 w-full h-full bg-transparent border-none p-0 m-0 cursor-pointer">
+        <span class="sr-only">Submit System Reset</span>
+    </button>
+
+    <h2 class="text-xl md:text-2xl font-bold mb-6 transition-colors group-hover:text-primary z-10">
         {{ 'tittleSystemResetRequest'|trans({}, '_system_reset_request') }}
     </h2>
 
     <twig:ux:icon name="wba:round-restore"
-                  class="w-10 h-10 text-gray-600 transition-colors group-hover:text-primary mb-6"/>
+                  class="w-10 h-10 text-gray-600 transition-colors group-hover:text-primary mb-6 z-10"/>
 
-    <div class="mt-auto pt-3 text-gray-600 transition-colors group-hover:text-primary">
+    <div class="mt-auto pt-3 text-gray-600 transition-colors group-hover:text-primary z-10">
         {{ 'restorePlatform'|trans({}, '_system_reset_request') }}
     </div>
 
-    <p class="mt-3 text-[11px] text-gray-400">
+    <p class="mt-3 text-[11px] text-gray-400 z-10">
         {{ 'lastCompletedSystemRequestReset'|trans({}, '_system_reset_request') }}
     </p>
-</a>
+</form>

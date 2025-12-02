@@ -6,14 +6,22 @@ namespace App\Controller;
 
 use App\Entity\CertificateSetupProcess;
 use App\Entity\InstallationProgress;
+use App\Entity\SystemResetRequest;
+use App\Entity\User;
+use App\Enum\AnalyticalEventType;
 use App\Enum\ProcessStatusType;
 use App\Repository\CertificateSetupProcessRepository;
 use App\Repository\InstallationProgressRepository;
+use App\Repository\SystemResetRequestRepository;
 use App\Service\CertificateProcessCheckerService;
+use App\Service\EventActions;
 use App\Service\GetSettings;
+use App\Service\InstallationService;
+use DateTime;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
@@ -28,6 +36,9 @@ class CertificateManagementController extends AbstractController
         private readonly EntityManagerInterface $entityManager,
         private readonly InstallationProgressRepository $installationProgressRepository,
         private readonly CertificateSetupProcessRepository $certificateSetupProcessRepository,
+        private readonly SystemResetRequestRepository $systemResetRequestRepository,
+        private readonly EventActions $eventActions,
+        private readonly InstallationService $installationService,
     ) {
     }
 
@@ -58,8 +69,11 @@ class CertificateManagementController extends AbstractController
         methods: ['POST']
     )]
     #[IsGranted('ROLE_ADMIN')]
-    public function settingsCertificatesManagementAbort(): Response
-    {
+    public function settingsCertificatesManagementAbort(
+        Request $request
+    ): Response {
+        /** @var User $user */
+        $user = $this->getUser();
         $process = $this->certificateProcessCheckerService->getCurrentProcess();
 
         // In case there's not active process
@@ -78,6 +92,17 @@ class CertificateManagementController extends AbstractController
         $this->entityManager->persist($process);
         $this->entityManager->flush();
 
+        $this->eventActions->saveEvent(
+            $user,
+            AnalyticalEventType::CERTIFICATE_SETUP_PROCESS_ABORTED->value,
+            new DateTime(),
+            [
+                'ip' => $request->getClientIp(),
+                'user_agent' => $request->headers->get('User-Agent'),
+                'by' => $user->getUuid(),
+            ]
+        );
+
         $this->addFlash(
             'error',
             $this->translator->trans(
@@ -90,14 +115,77 @@ class CertificateManagementController extends AbstractController
         return $this->redirectToRoute('admin_dashboard_settings_certs_radsecproxy_upload');
     }
 
-    #[Route('/dashboard/settings/certificatesManagement/systemReset',
-        name: 'admin_dashboard_settings_certs_management_system_reset'
+    #[Route(
+        '/dashboard/settings/certificatesManagement/systemReset',
+        name: 'admin_dashboard_settings_certs_management_system_reset',
+        methods: ['POST']
     )]
     #[IsGranted('ROLE_ADMIN')]
-    public function settingsCertificatesManagementSystemReset(): Response
+    public function settingsCertificatesManagementSystemReset(Request $request): Response
     {
-        dd('potato start process');
-        // TODO FIND A WAY TO TRIGGER THE RESET OF ALL THE PLATFORM LIKE THE SYSTEM_RESET
-        // TODO CREATE THIS SESSION_TOKEN "system_reset_request" -> rename first_reset and use it
+        /** @var User $user */
+        $user = $this->getUser();
+
+        // Abort existing active SystemResetRequest if it exists
+        $existingRequest = $this->systemResetRequestRepository->findActive();
+        if ($existingRequest) {
+            $existingRequest->setStatus(ProcessStatusType::ABORTED);
+            $this->entityManager->persist($existingRequest);
+        }
+
+        $systemResetRequest = new SystemResetRequest();
+        $systemResetRequest->setStatus(ProcessStatusType::STARTED);
+        $systemResetRequest->setCreatedAt(new DateTimeImmutable());
+        $systemResetRequest->setUser($user);
+        $this->entityManager->persist($systemResetRequest);
+
+        // Abort pending Installation process if exists
+        $installationProcess = $this->installationProgressRepository->getLast();
+        if ($installationProcess &&
+            $installationProcess->getInstallationState() !== ProcessStatusType::COMPLETED
+        ) {
+            $installationProcess->setInstallationState(ProcessStatusType::ABORTED);
+            $installationProcess->setUpdatedAt(new DateTime());
+            $this->entityManager->persist($installationProcess);
+
+            // Reset system to last valid installation config
+            $this->installationService->resetToLastInstallation();
+        }
+
+        // Abort pending Certificate process if exists
+        $certificateProcess = $this->certificateProcessCheckerService->getCurrentProcess();
+        if ($certificateProcess) {
+            $certificateProcess->setStatus(ProcessStatusType::ABORTED);
+            $certificateProcess->setUpdatedAt(new DateTimeImmutable());
+            $this->entityManager->persist($certificateProcess);
+        }
+
+        $this->entityManager->flush();
+
+        // Set session to redirect the user
+        $session = $request->getSession();
+        $session->set('system_reset_request', 'admin_dashboard_settings_certs_installation');
+
+        $this->eventActions->saveEvent(
+            $user,
+            AnalyticalEventType::SYSTEM_RESET_REQUEST_STARTED->value,
+            new DateTime(),
+            [
+                'ip' => $request->getClientIp(),
+                'user_agent' => $request->headers->get('User-Agent'),
+                'by' => $user->getUuid(),
+            ]
+        );
+
+        $this->addFlash(
+            'success',
+            $this->translator->trans(
+                'systemResetRequestStarted',
+                [],
+                'controllers'
+            )
+        );
+
+        return $this->redirectToRoute('admin_dashboard_settings_certs_installation');
     }
 }

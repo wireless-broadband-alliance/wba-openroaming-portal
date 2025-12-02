@@ -127,7 +127,7 @@
                     </li>
                 {% endif %}
                 <li {{ stimulus_controller('alert') }}>
-                    <form method="POST"
+                    <form method="post"
                           action="{{ path('admin_user_revoke_profiles', {id: user.id}) }}"
                             {{ stimulus_target('alert', 'form') }}>
                         {{ form_start(formRevokeProfiles) }}

@@ -16,6 +16,7 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 #[AsEventListener(event: InteractiveLoginEvent::class)]
 readonly class FirstSystemResetRequestListener
@@ -26,7 +27,8 @@ readonly class FirstSystemResetRequestListener
         private CertificateSetupProcessRepository $certificateSetupProcessRepository,
         private UrlGeneratorInterface $urlGenerator,
         private SystemResetRequestRepository $systemResetRequestRepository,
-        private EntityManagerInterface $entityManager
+        private EntityManagerInterface $entityManager,
+        private TranslatorInterface $translator
     ) {
     }
 
@@ -64,7 +66,11 @@ readonly class FirstSystemResetRequestListener
                 $event,
                 $session,
                 'session_installation_started',
-                'You do not have any created installation process on this portal.', // TODO MAKE TRANSLATIONS
+                $this->translator->trans(
+                    'missingInstallationProcess',
+                    [],
+                    'eventListener'
+                ),
                 'admin_dashboard_settings_certs_installation'
             );
             return;
@@ -78,7 +84,11 @@ readonly class FirstSystemResetRequestListener
                 $event,
                 $session,
                 'session_certificate_started',
-                'No active certificate process found.', // TODO MAKE TRANSLATIONS
+                $this->translator->trans(
+                    'missingCertificateProcess',
+                    [],
+                    'eventListener'
+                ),
                 'admin_dashboard_settings_certs_radsecproxy_upload'
             );
             return;
@@ -91,7 +101,11 @@ readonly class FirstSystemResetRequestListener
                 $event,
                 $session,
                 'session_certificate_started',
-                'A certificate process is already in progress.', // TODO MAKE TRANSLATIONS
+                $this->translator->trans(
+                    'certificateProcessPending',
+                    [],
+                    'eventListener'
+                ),
                 'admin_dashboard_settings_certs_radsecproxy_upload'
             );
             return;
