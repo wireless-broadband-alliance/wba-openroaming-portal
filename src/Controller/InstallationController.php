@@ -12,6 +12,7 @@ use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Enum\DataBaseSetupType;
 use App\Enum\InstallationStep;
+use App\Enum\InstallationType;
 use App\Enum\PlatformMode;
 use App\Enum\ProcessStatusType;
 use App\Enum\SettingName;
@@ -52,6 +53,8 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Contracts\Translation\TranslatorInterface;
+
+use function Symfony\Component\Translation\t;
 
 class InstallationController extends AbstractController
 {
@@ -987,16 +990,30 @@ class InstallationController extends AbstractController
     }
 
     #[Route(
-        '/dashboard/settings/certificatesManagement/verifyIdentity/installation',
-        name: 'admin_dashboard_settings_certs_installation_verify'
+        '/dashboard/settings/certificatesManagement/verifyIdentity/{type}',
+        name: 'admin_dashboard_settings_certs_installation_verify',
+        requirements: [
+            'type' => 'installation|certificates'
+        ],
+        defaults: [
+            'type' => InstallationType::INSTALLATION->value,
+        ]
+
     )]
     #[IsGranted('ROLE_ADMIN')]
     public function settingsCertificatesManagementInstallationVerifyIdentity(
         Request $request,
+        string $type
     ): RedirectResponse|Response {
 
         /** @var User $user */
         $user = $this->getUser();
+
+        if ($type === InstallationType::INSTALLATION->value) {
+            $eventType = AnalyticalEventType::INSTALLATION_IDENTITY_VERIFIED_CODE->value;
+        } else {
+            $eventType = AnalyticalEventType::CERTIFICATES_IDENTITY_VERIFIED_CODE->value;
+        }
 
         $form = $this->createForm(TwoFACode::class);
         $form->handleRequest($request);
@@ -1007,8 +1024,23 @@ class InstallationController extends AbstractController
 
             if ($this->twoFAService->validate2FACode($user, $code)) {
                 $session = $request->getSession();
-                $session->set('session_installation_started', true);
-
+                if ($type === InstallationType::INSTALLATION->value) {
+                    $session->set('session_installation_started', true);
+                } else {
+                    $session->set('session_certificate_started', true);
+                }
+                $eventMetaData = [
+                    'platform' => PlatformMode::LIVE->value,
+                    'user_agent' => $request->headers->get('User-Agent'),
+                    'uuid' => $user->getUuid(),
+                    'ip' => $request->getClientIp(),
+                ];
+                $this->eventActions->saveEvent(
+                    $user,
+                    $eventType,
+                    new DateTime(),
+                    $eventMetaData
+                );
                 $this->addFlash(
                     'success',
                     $this->translator->trans(
@@ -1018,7 +1050,11 @@ class InstallationController extends AbstractController
                     )
                 );
 
-                return $this->redirectToRoute('admin_dashboard_settings_certs_installation');
+                if ($type === InstallationType::INSTALLATION->value) {
+                    return $this->redirectToRoute('admin_dashboard_settings_certs_installation');
+                }
+                return $this->redirectToRoute('admin_dashboard_settings_certs_radsecproxy_upload');
+
 
             }
             $this->addFlash(
@@ -1033,24 +1069,38 @@ class InstallationController extends AbstractController
             [
                 'data' => $data,
                 'form' => $form->createView(),
+                'type' => $type,
             ]
         );
     }
 
     #[Route(
-        '/dashboard/settings/certificatesManagement/verifyIdentity/installation/code',
-        name: 'admin_dashboard_settings_certs_installation_verify_send_code'
+        '/dashboard/settings/certificatesManagement/verifyIdentity/{type}/code',
+        name: 'admin_dashboard_settings_certs_installation_verify_send_code',
+        requirements: [
+            'type' => 'installation|certificates'
+        ],
+        defaults: [
+            'type' => InstallationType::INSTALLATION->value,
+        ]
     )]
     #[IsGranted('ROLE_ADMIN')]
     public function settingsCertificatesManagementInstallationVerifyIdentitySendCode(
         Request $request,
+        string $type
     ): RedirectResponse|Response {
         /** @var User $user */
         $user = $this->getUser();
 
+        if ($type === InstallationType::INSTALLATION->value) {
+            $eventType = AnalyticalEventType::INSTALLATION_IDENTITY_VERIFIED_CODE->value;
+        } else {
+            $eventType = AnalyticalEventType::CERTIFICATES_IDENTITY_VERIFIED_CODE->value;
+        }
+
         if ($user instanceof User) {
             if ($this->installationService->canSendCode(
-                AnalyticalEventType::INSTALLATION_IDENTITY_VERIFIED_CODE->value,
+                $eventType,
                 $user)
             ) {
                 $this->installationService->sendAdminVerificationCode($user);
@@ -1062,7 +1112,7 @@ class InstallationController extends AbstractController
                 ];
                 $this->eventActions->saveEvent(
                     $user,
-                    AnalyticalEventType::INSTALLATION_IDENTITY_VERIFIED_CODE->value,
+                    $eventType,
                     new DateTime(),
                     $eventMetaData
                 );
@@ -1074,7 +1124,7 @@ class InstallationController extends AbstractController
             } else {
                 $interval_minutes = $this->twoFAService->timeLeftToResendCode(
                     $user,
-                    AnalyticalEventType::INSTALLATION_IDENTITY_VERIFIED_CODE->value
+                    $eventType
                 );
 
                 $this->addFlash(
@@ -1090,7 +1140,9 @@ class InstallationController extends AbstractController
             }
         }
 
-        return $this->redirectToRoute('admin_dashboard_settings_certs_installation_verify');
+        return $this->redirectToRoute('admin_dashboard_settings_certs_installation_verify', [
+            'type' => $type,
+        ]);
     }
 
     /**
@@ -1099,11 +1151,17 @@ class InstallationController extends AbstractController
      * @throws TransportExceptionInterface
      */
     #[Route(
-        '/dashboard/settings/certificatesManagement/verifyIdentity/installation/resend',
+        '/dashboard/settings/certificatesManagement/verifyIdentity/{type}/resend',
         name: 'admin_dashboard_settings_certs_installation_verify_resend_code',
+        requirements: [
+            'type' => 'installation|certificates'
+        ],
+        defaults: [
+            'type' => InstallationType::INSTALLATION->value,
+        ]
     )]
     #[IsGranted('ROLE_ADMIN')]
-    public function entityVerificationResendCode(Request $request): RedirectResponse
+    public function entityVerificationResendCode(Request $request, string $type): RedirectResponse
     {
 
         /** @var User $user */
@@ -1129,12 +1187,15 @@ class InstallationController extends AbstractController
         $limitTime = new DateTime();
         $limitTime->modify('-' . $timeToResetAttempts . ' minutes');
 
-        $eventType = AnalyticalEventType::INSTALLATION_IDENTITY_VERIFIED_RESEND_CODE->value;
+        if ($type === InstallationType::INSTALLATION->value) {
+            $eventType = AnalyticalEventType::INSTALLATION_IDENTITY_VERIFIED_RESEND_CODE->value;
+        } else {
+            $eventType = AnalyticalEventType::CERTIFICATES_IDENTITY_VERIFIED_RESEND_CODE->value;
+        }
         if (
             $this->twoFAService->canResendCode($user, $eventType) &&
             $this->twoFAService->timeIntervalToResendCode($user, $eventType)
         ) {
-            $lastInstallation = $this->installationService->lastInstallation();
 
             $this->installationService->sendAdminVerificationCode($user);
 
@@ -1146,7 +1207,7 @@ class InstallationController extends AbstractController
             ];
             $this->eventActions->saveEvent(
                 $user,
-                AnalyticalEventType::INSTALLATION_IDENTITY_VERIFIED_RESEND_CODE->value,
+                $eventType,
                 new DateTime(),
                 $eventMetaData
             );
@@ -1215,6 +1276,8 @@ class InstallationController extends AbstractController
                 );
             }
         }
-        return $this->redirectToRoute('admin_dashboard_settings_certs_installation_verify');
+        return $this->redirectToRoute('admin_dashboard_settings_certs_installation_verify', [
+            'type' => $type
+        ]);
     }
 }
