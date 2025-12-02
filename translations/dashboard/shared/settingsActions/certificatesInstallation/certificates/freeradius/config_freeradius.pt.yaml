@@ -1,5 +1,5 @@
 warning:
-    rootCommandLocal: "Execute os seguintes comandos como 'root' no terminal antes de começar no diretório do resolver do portal!"
+    rootCommand: "Execute os seguintes comandos como 'root' no terminal antes de começar no diretório do resolver do portal!"
 CARoot: "Root CA"
 serverCertificate: "Certificado do Servidor"
 certificateChain: "Chain do Certificado"
