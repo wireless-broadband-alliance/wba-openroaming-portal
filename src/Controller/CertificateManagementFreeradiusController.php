@@ -572,6 +572,17 @@ class CertificateManagementFreeradiusController extends AbstractController
                 $systemResetRequest->getStatus() === ProcessStatusType::IN_PROGRESS &&
                 $session->has('system_reset_request')
             ) {
+                $this->eventActions->saveEvent(
+                    $user,
+                    AnalyticalEventType::SYSTEM_RESET_REQUEST_COMPLETED->value,
+                    new DateTime(),
+                    [
+                        'ip' => $request->getClientIp(),
+                        'user_agent' => $request->headers->get('User-Agent'),
+                        'by' => $user->getUuid(),
+                    ]
+                );
+
                 $systemResetRequest->setStatus(ProcessStatusType::COMPLETED);
                 $this->entityManager->persist($systemResetRequest);
                 $this->entityManager->flush();

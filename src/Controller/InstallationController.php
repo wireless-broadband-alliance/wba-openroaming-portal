@@ -177,6 +177,17 @@ class InstallationController extends AbstractController
                 $systemResetRequest->setInstallationProgress($lastInstallation);
                 $this->entityManager->persist($systemResetRequest);
                 $this->entityManager->flush();
+
+                $this->eventActions->saveEvent(
+                    $user,
+                    AnalyticalEventType::SYSTEM_RESET_REQUEST_IN_PROGRESS->value,
+                    new DateTime(),
+                    [
+                        'ip' => $request->getClientIp(),
+                        'user_agent' => $request->headers->get('User-Agent'),
+                        'by' => $user->getUuid(),
+                    ]
+                );
             }
 
             $orResult = $this->databaseConnectionService->writeDatabaseUrlToEnv(
