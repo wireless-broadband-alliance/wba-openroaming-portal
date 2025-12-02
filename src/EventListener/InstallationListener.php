@@ -38,27 +38,33 @@ readonly class InstallationListener
 
         $user = $this->userRepository->find($userToken->getId());
         if ($user && str_starts_with($path, '/dashboard/settings/certificatesManagement/installation')) {
-            if (!$session->has('session_installation_started')) {
+            if (!$session->get('session_installation_started')) {
                 $url = $this->router->generate('admin_dashboard_settings_certs_installation_verify_send_code', [
                     'type' => InstallationType::INSTALLATION->value
                 ]);
                 $event->setResponse(new RedirectResponse($url));
             }
+            return;
         }
-
         if ($user &&
             (
                 str_starts_with($path, '/dashboard/settings/certificatesManagement/freeradius/') ||
                 str_starts_with($path, '/dashboard/settings/certificatesManagement/radsecproxy/')
             )
         ) {
-            if (!$session->has('session_certificate_started')) {
+            if (!$session->get('session_certificate_started')) {
                 $url = $this->router->generate('admin_dashboard_settings_certs_installation_verify_send_code', [
                     'type' => InstallationType::CERTIFICATES->value,
                 ]);
                 $event->setResponse(new RedirectResponse($url));
             }
-
+            return;
+        }
+        if ($session->get('session_installation_started')) {
+            $session->set('session_installation_started', false);
+        }
+        if ($session->get('session_certificate_started')) {
+            $session->set('session_certificate_started', false);
         }
     }
 }
