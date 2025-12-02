@@ -11,7 +11,11 @@
             {{ 'title'|trans({}, 'confirm_identity') }}
         </h1>
         <p class="mt-3 text-gray-600 text-base sm:text-lg">
-            {{ 'description'|trans({}, 'confirm_identity') }}
+            {% if type == constant('App\\Enum\\AnalyticalEventType::INSTALLATION_IDENTITY_VERIFIED_RESEND_CODE').value  %}
+                {{ 'installationDescription'|trans({}, 'confirm_identity') }}
+            {% else %}
+                {{ 'certificatesDescription'|trans({}, 'confirm_identity') }}
+            {% endif %}
         </p>
     </div>
 

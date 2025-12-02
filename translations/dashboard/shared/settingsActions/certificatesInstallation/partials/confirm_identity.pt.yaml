@@ -1,2 +1,3 @@
 title: 'Verificação de identidade do administrador'
-description: 'Para aceder ao processo de instalação da plataforma, confirme a sua identidade.'
+installationDescription: 'Para aceder ao processo de instalação da plataforma, confirme a sua identidade.'
+certificatesDescription: 'Para aceder ao processo de renovação de certificados, confirme a sua identidade.'
