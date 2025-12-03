@@ -106,8 +106,8 @@
                     {# Next Step #}
                     <a
                             {% if processState.stages.freeradius_test %}
-                                href="{{ path('admin_dashboard_settings_certs_freeradius_upload') }}"
-                                data-href-enabled="{{ path('admin_dashboard_settings_certs_freeradius_upload') }}"
+                                href="{{ path('admin_page') }}"
+                                data-href-enabled="{{ path('admin_page') }}"
                             {% else %}
                                 data-href-enabled="{{ path('admin_dashboard_settings_certs_freeradius_upload') }}"
                             {% endif %}
