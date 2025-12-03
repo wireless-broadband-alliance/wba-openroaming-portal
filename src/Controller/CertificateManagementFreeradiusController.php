@@ -12,7 +12,6 @@ use App\Enum\CertificateFileName;
 use App\Enum\CertificateMachineType;
 use App\Enum\CertificateTestResult;
 use App\Enum\FirewallType;
-use App\Enum\ProcessStatusType;
 use App\Enum\TrustedWBAFingerprints;
 use App\Form\CertificateFreeradiusUploadType;
 use App\Form\SimpleSubmitFormType;

@@ -17,7 +17,7 @@
 <div class="flex flex-col sm:flex-row justify-end items-stretch sm:items-center gap-2 sm:gap-3">
     {% if not app.session.has('system_reset_request') %}
         {% if processState is defined and processState.active %}
-            <form action="{{ path('admin_dashboard_settings_certs_management_abort') }}"
+            <form action="{{ path('admin_dashboard_settings_certs_management_certificates_abort') }}"
                   method="POST"
                   onsubmit="return confirm('{{ 'confirm_abort'|trans({}, '_certificate_stepper') }}');">
                 <button type="submit"
@@ -90,7 +90,7 @@
                 ">
                     {% if loop.first %}
                         {# Step 1 (Upload): always clickable via abort form #}
-                        <form action="{{ path('admin_dashboard_settings_certs_management_abort') }}" method="POST"
+                        <form action="{{ path('admin_dashboard_settings_certs_management_certificates_abort') }}" method="POST"
                               class="w-full h-full">
                             <button type="submit"
                                     class="flex items-center justify-center w-full h-full text-inherit bg-transparent border-none p-0 m-0 cursor-pointer leading-none"

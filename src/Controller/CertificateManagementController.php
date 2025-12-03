@@ -61,12 +61,12 @@ class CertificateManagementController extends AbstractController
     }
 
     #[Route(
-        '/dashboard/settings/certificatesManagement/abort',
-        name: 'admin_dashboard_settings_certs_management_abort',
+        '/dashboard/settings/certificatesManagement/certificates/abort',
+        name: 'admin_dashboard_settings_certs_management_certificates_abort',
         methods: ['POST']
     )]
     #[IsGranted('ROLE_ADMIN')]
-    public function settingsCertificatesManagementAbort(
+    public function settingsCertificatesManagementCertificatesAbort(
         Request $request
     ): Response {
         /** @var User $user */
