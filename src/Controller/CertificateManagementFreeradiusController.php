@@ -16,7 +16,6 @@ use App\Enum\ProcessStatusType;
 use App\Enum\TrustedWBAFingerprints;
 use App\Form\CertificateFreeradiusUploadType;
 use App\Form\SimpleSubmitFormType;
-use App\Repository\SystemResetRequestRepository;
 use App\Service\CertificateFreeradiusCommandsService;
 use App\Service\CertificateFreeradiusInfoService;
 use App\Service\CertificateProcessCheckerService;
@@ -51,7 +50,6 @@ class CertificateManagementFreeradiusController extends AbstractController
         private readonly CertificateFreeradiusCommandsService $certificateFreeradiusCommandsService,
         private readonly CertificateWriterUpdateService $certificateWriterUpdateService,
         private readonly EventActions $eventActions,
-        private readonly SystemResetRequestRepository $systemResetRequestRepository
     ) {
     }
 
@@ -564,12 +562,8 @@ class CertificateManagementFreeradiusController extends AbstractController
                 ]
             );
 
-            $systemResetRequest = $this->systemResetRequestRepository->findActive();
             $session = $request->getSession();
-            if ($systemResetRequest &&
-                $systemResetRequest->getStatus() === ProcessStatusType::IN_PROGRESS &&
-                $session->has('system_reset_request')
-            ) {
+            if ($session->has('system_reset_request')) {
                 $this->eventActions->saveEvent(
                     $user,
                     AnalyticalEventType::SYSTEM_RESET_REQUEST_COMPLETED->value,
@@ -580,10 +574,6 @@ class CertificateManagementFreeradiusController extends AbstractController
                         'by' => $user->getUuid(),
                     ]
                 );
-
-                $systemResetRequest->setStatus(ProcessStatusType::COMPLETED);
-                $this->entityManager->persist($systemResetRequest);
-                $this->entityManager->flush();
 
                 // Clear all the sessions requests in case the system_reset is completed
                 $session->remove('system_reset_request');

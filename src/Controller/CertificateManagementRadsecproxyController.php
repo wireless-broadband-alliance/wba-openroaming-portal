@@ -17,7 +17,6 @@ use App\Enum\TrustedWBAFingerprints;
 use App\Form\CertificateRadsecUploadType;
 use App\Form\SimpleSubmitFormType;
 use App\Repository\CertificateRepository;
-use App\Repository\SystemResetRequestRepository;
 use App\Service\CertificateRadsecproxyCommandsService;
 use App\Service\CertificateProcessCheckerService;
 use App\Service\CertificateRadsecproxyInfoService;
@@ -49,7 +48,6 @@ class CertificateManagementRadsecproxyController extends AbstractController
         private readonly CertificateRepository $certificateRepository,
         private readonly CertificateRadsecproxyInfoService $certificateRadsecproxyInfoService,
         private readonly EventActions $eventActions,
-        private readonly SystemResetRequestRepository $systemResetRequestRepository,
     ) {
     }
 
@@ -118,17 +116,6 @@ class CertificateManagementRadsecproxyController extends AbstractController
             // After the files are validated and the processed, update them once again to add
             $process->setRadsecproxyFormCompletedAt(new DateTimeImmutable());
             $process->setUpdatedAt(new DateTimeImmutable());
-
-            $systemResetRequest = $this->systemResetRequestRepository->findActive();
-            $session = $request->getSession();
-            if ($systemResetRequest &&
-                $systemResetRequest->getStatus() === ProcessStatusType::IN_PROGRESS &&
-                $session->has('system_reset_request')
-            ) {
-                $systemResetRequest->setCertificateSetupProcess($process);
-                $this->entityManager->persist($systemResetRequest);
-                $this->entityManager->flush();
-            }
 
             $this->entityManager->persist($process);
             $this->entityManager->flush();

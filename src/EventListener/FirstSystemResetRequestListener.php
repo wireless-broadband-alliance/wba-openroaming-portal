@@ -2,14 +2,11 @@
 
 namespace App\EventListener;
 
-use App\Entity\SystemResetRequest;
 use App\Entity\User;
+use App\Enum\CertificateTestResult;
 use App\Enum\ProcessStatusType;
 use App\Repository\CertificateSetupProcessRepository;
 use App\Repository\InstallationProgressRepository;
-use App\Repository\SystemResetRequestRepository;
-use DateTimeImmutable;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -26,8 +23,6 @@ readonly class FirstSystemResetRequestListener
         private InstallationProgressRepository $installationProgressRepository,
         private CertificateSetupProcessRepository $certificateSetupProcessRepository,
         private UrlGeneratorInterface $urlGenerator,
-        private SystemResetRequestRepository $systemResetRequestRepository,
-        private EntityManagerInterface $entityManager,
         private TranslatorInterface $translator
     ) {
     }
@@ -41,25 +36,11 @@ readonly class FirstSystemResetRequestListener
             return;
         }
 
-        $systemResetRequest = $this->systemResetRequestRepository->findActive();
-        if (!$systemResetRequest) {
-            $systemResetRequest = new SystemResetRequest();
-            $systemResetRequest->setStatus(ProcessStatusType::STARTED);
-            $systemResetRequest->setCreatedAt(new DateTimeImmutable());
-            $systemResetRequest->setUser($user);
-
-            $this->entityManager->persist($systemResetRequest);
-            $this->entityManager->flush();
-        }
-
         $completedInstallation = $this->installationProgressRepository->findOneBy([
             'installationState' => ProcessStatusType::COMPLETED
         ]);
-        if (!$completedInstallation) {
-            $systemResetRequest->setInstallationProgress(null);
-            $this->entityManager->persist($systemResetRequest);
-            $this->entityManager->flush();
 
+        if (!$completedInstallation) {
             $session->set('2fa_verified_dashboard', true);
             $session->set('system_reset_request', 'admin_dashboard_settings_certs_installation');
             $this->handleRedirect(
@@ -94,7 +75,7 @@ readonly class FirstSystemResetRequestListener
             return;
         }
 
-        if ($completedCertificates->getStatus() !== ProcessStatusType::COMPLETED) {
+        if ($completedCertificates->getRadsecproxyTestResult() === null) {
             $session->set('2fa_verified_dashboard', true);
             $session->set('system_reset_request', 'admin_dashboard_settings_certs_radsecproxy_upload');
             $this->handleRedirect(
@@ -106,7 +87,24 @@ readonly class FirstSystemResetRequestListener
                     [],
                     'eventListener'
                 ),
-                'admin_dashboard_settings_certs_radsecproxy_upload'
+                'admin_dashboard_settings_certs_freeradius_upload'
+            );
+            return;
+        }
+
+        if ($completedCertificates->getRadsecproxyTestResult() === CertificateTestResult::PASSED) {
+            $session->set('2fa_verified_dashboard', true);
+            $session->set('system_reset_request', 'admin_dashboard_settings_certs_freeradius_upload');
+            $this->handleRedirect(
+                $event,
+                $session,
+                'session_certificate_started',
+                $this->translator->trans(
+                    'certificateProcessPending',
+                    [],
+                    'eventListener'
+                ),
+                'admin_dashboard_settings_certs_freeradius_upload'
             );
             return;
         }

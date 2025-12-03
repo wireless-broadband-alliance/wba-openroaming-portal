@@ -54,9 +54,6 @@ class CertificateSetupProcess
     #[ORM\Column(type: 'boolean', options: ['default' => false])]
     private bool $isFreeradiusCertEV = false;
 
-    #[ORM\OneToOne(mappedBy: 'certificateSetupProcess', cascade: ['persist', 'remove'])]
-    private ?SystemResetRequest $systemResetRequest = null;
-
     public function __construct()
     {
         $this->certificates = new ArrayCollection();
@@ -218,28 +215,6 @@ class CertificateSetupProcess
     public function setIsFreeradiusCertEV(bool $isFreeradiusCertEV): static
     {
         $this->isFreeradiusCertEV = $isFreeradiusCertEV;
-
-        return $this;
-    }
-
-    public function getSystemResetRequest(): ?SystemResetRequest
-    {
-        return $this->systemResetRequest;
-    }
-
-    public function setSystemResetRequest(?SystemResetRequest $systemResetRequest): static
-    {
-        // unset the owning side of the relation if necessary
-        if ($systemResetRequest === null && $this->systemResetRequest !== null) {
-            $this->systemResetRequest->setCertificateSetupProcess(null);
-        }
-
-        // set the owning side of the relation if necessary
-        if ($systemResetRequest !== null && $systemResetRequest->getCertificateSetupProcess() !== $this) {
-            $systemResetRequest->setCertificateSetupProcess($this);
-        }
-
-        $this->systemResetRequest = $systemResetRequest;
 
         return $this;
     }

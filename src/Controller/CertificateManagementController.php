@@ -6,13 +6,11 @@ namespace App\Controller;
 
 use App\Entity\CertificateSetupProcess;
 use App\Entity\InstallationProgress;
-use App\Entity\SystemResetRequest;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Enum\ProcessStatusType;
 use App\Repository\CertificateSetupProcessRepository;
 use App\Repository\InstallationProgressRepository;
-use App\Repository\SystemResetRequestRepository;
 use App\Service\CertificateProcessCheckerService;
 use App\Service\EventActions;
 use App\Service\GetSettings;
@@ -36,7 +34,6 @@ class CertificateManagementController extends AbstractController
         private readonly EntityManagerInterface $entityManager,
         private readonly InstallationProgressRepository $installationProgressRepository,
         private readonly CertificateSetupProcessRepository $certificateSetupProcessRepository,
-        private readonly SystemResetRequestRepository $systemResetRequestRepository,
         private readonly EventActions $eventActions,
         private readonly InstallationService $installationService,
     ) {
@@ -125,19 +122,6 @@ class CertificateManagementController extends AbstractController
     {
         /** @var User $user */
         $user = $this->getUser();
-
-        // Abort existing active SystemResetRequest if it exists
-        $existingRequest = $this->systemResetRequestRepository->findActive();
-        if ($existingRequest) {
-            $existingRequest->setStatus(ProcessStatusType::ABORTED);
-            $this->entityManager->persist($existingRequest);
-        }
-
-        $systemResetRequest = new SystemResetRequest();
-        $systemResetRequest->setStatus(ProcessStatusType::STARTED);
-        $systemResetRequest->setCreatedAt(new DateTimeImmutable());
-        $systemResetRequest->setUser($user);
-        $this->entityManager->persist($systemResetRequest);
 
         // Abort pending Installation process if exists
         $installationProcess = $this->installationProgressRepository->getLast();

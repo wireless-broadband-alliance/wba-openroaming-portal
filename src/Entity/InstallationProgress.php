@@ -55,9 +55,6 @@ class InstallationProgress
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $createdAt = null;
 
-    #[ORM\OneToOne(mappedBy: 'installationProgress', cascade: ['persist', 'remove'])]
-    private ?SystemResetRequest $systemResetRequest = null;
-
     public function getId(): ?int
     {
         return $this->id;
@@ -206,27 +203,5 @@ class InstallationProgress
     public function setCreatedAt(?\DateTimeInterface $createdAt): void
     {
         $this->createdAt = $createdAt;
-    }
-
-    public function getSystemResetRequest(): ?SystemResetRequest
-    {
-        return $this->systemResetRequest;
-    }
-
-    public function setSystemResetRequest(?SystemResetRequest $systemResetRequest): static
-    {
-        // unset the owning side of the relation if necessary
-        if ($systemResetRequest === null && $this->systemResetRequest !== null) {
-            $this->systemResetRequest->setInstallationProgress(null);
-        }
-
-        // set the owning side of the relation if necessary
-        if ($systemResetRequest !== null && $systemResetRequest->getInstallationProgress() !== $this) {
-            $systemResetRequest->setInstallationProgress($this);
-        }
-
-        $this->systemResetRequest = $systemResetRequest;
-
-        return $this;
     }
 }
