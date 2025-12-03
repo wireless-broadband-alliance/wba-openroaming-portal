@@ -17,6 +17,11 @@
 
     {# SideBar Buttons #}
     <div class="py-4 flex flex-col space-y-2 font-medium">
+        {% set userManagementRoutes = [
+            'admin_page',
+            'admin_roles_management',
+            'admin_user_edit',
+        ] %}
         {% set portalSettingsRoutes = [
             'admin_dashboard_settings_status',
             'admin_dashboard_customize',
@@ -36,18 +41,41 @@
             'admin_dashboard_statistics_freeradius',
         ] %}
 
-        {# User - Button #}
-        <a href="{{ path('admin_page') }}">
-            <div class="duration-300 rounded p-2 flex flex-row justify-between items-center cursor-pointer hover:shadow hover:text-lightGreen
-                {% if app.request.attributes.get('_route') in ['admin_page', 'admin_user_edit'] %}selected{% endif %}">
+        {# User Management - Submenu #}
+        <div class="relative" {{ stimulus_controller('nav-submenu') }}>
+            <button type="button" class="w-full duration-300 rounded p-2 flex flex-row justify-between items-center cursor-pointer hover:shadow hover:text-lightGreen
+                {% if app.request.attributes.get('_route') in userManagementRoutes %}selected{% endif %}" {{ stimulus_action('nav-submenu', 'toggle') }}>
                 <div class="flex items-center space-x-2">
                     <twig:ux:icon name="wba:user" class="w-5 mr-2 fill-none stroke-current" />
                     {{ 'usersManagement'|trans({}, '_header_admin') }}
                 </div>
 
-                <twig:ux:icon name="wba:right" class="w-4 fill-none stroke-current" />
+                <twig:ux:icon name="wba:right"
+                              class="w-4 fill-none stroke-current transition ease-in {{ (app.request.attributes.get('_route') in userManagementRoutes) ? 'rotate-90' : '' }}"
+                              data-nav-submenu-target="icon"/>
+            </button>
+            <div {{ stimulus_target('nav-submenu', 'container') }}
+                    class="py-2 mt-1 bg-lightGray rounded-md duration-300 shadow {{ (app.request.attributes.get('_route') in userManagementRoutes) ? '' : 'hidden' }}">
+                <ul class="mx-2">
+                    <li>
+                        {# SideBar Button - User Management - Button #}
+                        <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300 {% if app.request.attributes.get('_route') == 'admin_page' %}selected{% endif %}"
+                           href="{{ path('admin_page') }}">
+                            <twig:ux:icon name="wba:user" class="w-5 mr-2 fill-none stroke-current" />
+                            {{ 'usersManagement'|trans({}, '_header_admin') }}
+                        </a>
+                    </li>
+                    <li>
+                        {# SideBar Button - Admin Roles Management - Button #}
+                        <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300 {% if app.request.attributes.get('_route') == 'admin_roles_management' %}selected{% endif %}"
+                           href="{{ path('admin_roles_management') }}">
+                            <twig:ux:icon name="wba:user" class="w-5 mr-2 fill-none stroke-current" />
+                            {{ 'adminRoles'|trans({}, '_header_admin') }}
+                        </a>
+                    </li>
+                </ul>
             </div>
-        </a>
+        </div>
 
         {# Portal Settings - Submenu #}
         <div class="relative" {{ stimulus_controller('nav-submenu') }}>

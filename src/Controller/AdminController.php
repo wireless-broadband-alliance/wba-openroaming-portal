@@ -116,6 +116,18 @@ class AdminController extends AbstractController
         ]);
     }
 
+    #[Route('/dashboard/adminManagement', name: 'admin_roles_management')]
+    #[IsGranted('ROLE_SUPER_ADMIN')]
+    public function adminRolesManagement(
+        Request $request,
+        #[MapQueryParameter] int $page = 1,
+        #[MapQueryParameter] string $sort = 'createdAt',
+        #[MapQueryParameter] string $order = 'desc',
+        #[MapQueryParameter] ?int $count = 7
+    ): Response {
+        return $this->redirectToRoute('admin_page');
+    }
+
     /**
      * Regenerate the verification code for the user and send a new email.
      *
