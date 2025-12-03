@@ -1011,9 +1011,9 @@ class InstallationController extends AbstractController
             if ($this->twoFAService->validate2FACode($user, $code)) {
                 $session = $request->getSession();
                 if ($type === InstallationType::INSTALLATION->value) {
-                    $session->set('session_installation_started', true);
+                    $session->set('installation_verification', true);
                 } else {
-                    $session->set('session_certificate_started', true);
+                    $session->set('certificate_verification', true);
                 }
                 $eventMetaData = [
                     'platform' => PlatformMode::LIVE->value,

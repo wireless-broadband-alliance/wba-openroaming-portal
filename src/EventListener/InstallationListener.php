@@ -3,6 +3,7 @@
 namespace App\EventListener;
 
 use App\Entity\User;
+use App\Enum\DefaultUser;
 use App\Enum\FirewallType;
 use App\Enum\InstallationType;
 use App\Repository\UserRepository;
@@ -37,8 +38,12 @@ readonly class InstallationListener
         $userToken = $token->getUser();
 
         $user = $this->userRepository->find($userToken->getId());
+
+        if ($user && $user->getEmail() === DefaultUser::ADMIN->value) {
+            return;
+        }
         if ($user && str_starts_with($path, '/dashboard/settings/certificatesManagement/installation')) {
-            if (!$session->get('session_installation_started')) {
+            if (!$session->get('installation_verification')) {
                 $url = $this->router->generate('admin_dashboard_settings_certs_installation_verify_send_code', [
                     'type' => InstallationType::INSTALLATION->value
                 ]);
@@ -52,7 +57,7 @@ readonly class InstallationListener
                 str_starts_with($path, '/dashboard/settings/certificatesManagement/radsecproxy/')
             )
         ) {
-            if (!$session->get('session_certificate_started')) {
+            if (!$session->get('certificate_verification')) {
                 $url = $this->router->generate('admin_dashboard_settings_certs_installation_verify_send_code', [
                     'type' => InstallationType::CERTIFICATES->value,
                 ]);
@@ -60,11 +65,11 @@ readonly class InstallationListener
             }
             return;
         }
-        if ($session->get('session_installation_started')) {
-            $session->set('session_installation_started', false);
+        if ($session->get('installation_verification')) {
+            $session->set('installation_verification', false);
         }
-        if ($session->get('session_certificate_started')) {
-            $session->set('session_certificate_started', false);
+        if ($session->get('certificate_verification')) {
+            $session->set('certificate_verification', false);
         }
     }
 }
