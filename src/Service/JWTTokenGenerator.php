@@ -4,9 +4,11 @@ namespace App\Service;
 
 use App\Entity\User;
 use App\Repository\UserRepository;
+use Exception;
 use Lexik\Bundle\JWTAuthenticationBundle\Encoder\JWTEncoderInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Exception\JWTDecodeFailureException;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
+use RuntimeException;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -85,6 +87,24 @@ readonly class JWTTokenGenerator
             return $user->getPassword() === $tokenPasswordHash;
         } catch (JWTDecodeFailureException) {
             return false;
+        }
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function validateToken(string $token): array
+    {
+        try {
+            $payload = $this->JWTEncoder->decode($token);
+
+            if (!$payload || !isset($payload['uuid'])) {
+                throw new RuntimeException("Invalid payload");
+            }
+
+            return $payload;
+        } catch (JWTDecodeFailureException) {
+            throw new RuntimeException("Token decode failed");
         }
     }
 }
