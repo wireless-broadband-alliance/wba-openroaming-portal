@@ -827,6 +827,36 @@ readonly class ApiResponseService
             ]
         ];
         $apiResponseV2 = [
+            'api_v2_auth_refresh' => [
+                'description' => 'This endpoint refreshes the JWT token for an authenticated user. 
+                The client must send the current valid JWT token in the Authorization header (Bearer token). 
+                If the token is valid, a new token is returned extending the session.',
+                'isProtected' => true,
+                'responses' => [
+                    200 => [
+                        'default' => json_decode(
+                            '{
+                    "success": true,
+                    "data": {
+                        "token": "newValidToken"
+                    }
+                }',
+                            true,
+                            512,
+                            JSON_THROW_ON_ERROR
+                        ),
+                    ],
+                    401 => [
+                        'Authorization header missing',
+                        'Invalid token',
+                        'Invalid user'
+                    ],
+                    500 => [
+                        'Token generation failed',
+                        'JWT key files are missing. Please ensure both private and public keys exist.'
+                    ]
+                ],
+            ],
             'api_v2_auth_local' => [
                 'requestBody' => [
                     'uuid' => 'user-uuid-example',
@@ -1307,7 +1337,8 @@ readonly class ApiResponseService
                     ],
                     500 => [
                         'Failed to encrypt the password',
-                        'Encryption succeeded but no encrypted data was returned.'                    ]
+                        'Encryption succeeded but no encrypted data was returned.'
+                    ]
                 ]
             ],
             'api_v2_auth_local_register' => [
