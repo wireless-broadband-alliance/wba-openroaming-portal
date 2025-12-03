@@ -1,4 +1,4 @@
 tittleInstallation: 'Installation'
 reinstallPlatform: 'Reinstall Platform'
 lastCompletedInstallation: 'Last execution at: '
-confirmReinstall: "Are you sure you want to reinstall the platform?"
+confirmInstallation: "Are you sure you want to reinstall the platform?"
