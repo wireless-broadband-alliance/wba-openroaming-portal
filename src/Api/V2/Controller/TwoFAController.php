@@ -107,19 +107,21 @@ class TwoFAController extends AbstractController
                 AnalyticalEventType::TWO_FA_CODE_ENABLE->value
             );
 
-            if ($currentUser->getUserExternalAuths()[0] === UserProvider::EMAIL->value) {
-                  $message = 'Two Factor Code send to : ' . $currentUser->getEmail();
-            } elseif ($currentUser->getUserExternalAuths()[0] === UserProvider::PHONE_NUMBER->value) {
-                $message = 'Two Factor Code send to : ' . $currentUser->getPhoneNumber();
-            } else {
-                return new BaseResponse(
-                    400,
-                    null,
-                    'Code not sent, the user does not have a valid method.'
-                )->toResponse();
-            }
+          $provider = $currentUser->getUserExternalAuths()[0]->getProviderId();
 
+          if ($provider === UserProvider::EMAIL->value) {
+            $message = 'Two Factor Code sent to: ' . $currentUser->getEmail();
+          } elseif ($provider === UserProvider::PHONE_NUMBER->value) {
+            $message = 'Two Factor Code sent to: ' . $currentUser->getPhoneNumber();
+          } else {
             return new BaseResponse(
+                400,
+                null,
+                'Code not sent, the user does not have a valid method.'
+            )->toResponse();
+          }
+
+          return new BaseResponse(
                 200,
                 [
                 'message' => $message,
