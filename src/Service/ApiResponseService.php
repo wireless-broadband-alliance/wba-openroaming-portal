@@ -935,7 +935,6 @@ readonly class ApiResponseService
                 'uuid' => 'user-uuid-example',
                 'password' => 'user-password-example',
                 'turnstile_token' => 'valid_test_token',
-                'twoFACode' => '02YZR88R'
             ],
             'description' => 'This endpoint authenticates a user using their UUID, password, 
         and a CAPTCHA token.
@@ -1059,7 +1058,6 @@ readonly class ApiResponseService
         'api_v2_auth_google' => [
             'requestBody' => [
                 'code' => '4/0AdKgLCxjQ74mKAg9vs_f7PuO99DR',
-                'twoFACode' => '02YZR88R'
             ],
             'description' => 'This endpoint authenticates a user using their Google account. 
                 A valid Google OAuth authorization code is required. If the user is successfully authenticated,
@@ -1112,7 +1110,6 @@ readonly class ApiResponseService
         'api_v2_auth_microsoft' => [
             'requestBody' => [
                 'code' => '0.AQk6Lf2I2XGhQkWlU8gBp0KmxeNn2KTcbsJh.8Qt3OeYCB4sQ2FHo',
-                'twoFACode' => '02YZR88R'
             ],
             'description' => 'This endpoint authenticates a user using their Microsoft account. 
                 A valid Microsoft OAuth authorization code is required. If the user is successfully authenticated, 
