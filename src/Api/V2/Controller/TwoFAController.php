@@ -53,8 +53,8 @@ class TwoFAController extends AbstractController
         if ($token instanceof TokenInterface && $token->getUser() instanceof User) {
           /** @var User $currentUser */
             $currentUser = $token->getUser();
-          // This line is begin ignore because the getCredentials belongs to another service
-          /** @phpstan-ignore-next-line */
+            // This line is begin ignore because the getCredentials belongs to another service
+            /** @phpstan-ignore-next-line */
             $jwtTokenString = $token->getCredentials();
 
             if (!$this->JWTTokenGenerator->isJWTTokenValid($jwtTokenString)) {
@@ -70,7 +70,7 @@ class TwoFAController extends AbstractController
                 return $statusCheckerResponse->toResponse();
             }
 
-          // Only manually update the 2fa totp if the user checks it
+            // Only manually update the 2fa totp if the user checks it
             if ($type === 'totp') {
                 $secret = $this->TOTPService->generateSecret();
                 $currentUser->setTwoFAsecret($secret);
@@ -99,7 +99,7 @@ class TwoFAController extends AbstractController
                 )->toResponse();
             }
 
-          // Auto-detects if the user did select email||sms
+            // Auto-detects if the user did select email||sms
             $this->twoFAService->generate2FACode(
                 $currentUser,
                 $request->getClientIp(),
@@ -107,25 +107,25 @@ class TwoFAController extends AbstractController
                 AnalyticalEventType::TWO_FA_CODE_ENABLE->value
             );
 
-          $provider = $currentUser->getUserExternalAuths()[0]->getProviderId();
+            $provider = $currentUser->getUserExternalAuths()[0]->getProviderId();
 
-          if ($provider === UserProvider::EMAIL->value) {
-            $message = 'Two Factor Code sent to: ' . $currentUser->getEmail();
-          } elseif ($provider === UserProvider::PHONE_NUMBER->value) {
-            $message = 'Two Factor Code sent to: ' . $currentUser->getPhoneNumber();
-          } else {
+            if ($provider === UserProvider::EMAIL->value) {
+                $message = 'Two Factor Code sent to: ' . $currentUser->getEmail();
+            } elseif ($provider === UserProvider::PHONE_NUMBER->value) {
+                $message = 'Two Factor Code sent to: ' . $currentUser->getPhoneNumber();
+            } else {
+                return new BaseResponse(
+                    400,
+                    null,
+                    'Code not sent, the user does not have a valid method.'
+                )->toResponse();
+            }
+
             return new BaseResponse(
-                400,
-                null,
-                'Code not sent, the user does not have a valid method.'
-            )->toResponse();
-          }
-
-          return new BaseResponse(
                 200,
                 [
-                'message' => $message,
-                ]
+                    'message' => $message,
+                    ]
             )->toResponse();
         }
 
