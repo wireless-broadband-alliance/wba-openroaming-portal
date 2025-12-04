@@ -28,39 +28,39 @@ readonly class JWTTokenGenerator
         $projectDir = $this->kernel->getProjectDir();
 
         $this->publicKeyJwtPath = file_exists("$projectDir/config/jwt/public.pem")
-            ? "$projectDir/config/jwt/public.pem"
-            : $this->parameterBag->get('app.jwt_public_key');
+        ? "$projectDir/config/jwt/public.pem"
+        : $this->parameterBag->get('app.jwt_public_key');
 
         $this->privateKeyJwtPath = file_exists("$projectDir/config/jwt/private.pem")
-            ? "$projectDir/config/jwt/private.pem"
-            : $this->parameterBag->get('app.jwt_secret_key');
+        ? "$projectDir/config/jwt/private.pem"
+        : $this->parameterBag->get('app.jwt_secret_key');
     }
 
-    /**
-     * @return array{success: bool, error?: string, token?: string}
-     */
+  /**
+   * @return array{success: bool, error?: string, token?: string}
+   */
     public function generateToken(UserInterface $user): string|array
     {
         if (!$user instanceof User) {
             return [
-                'success' => false,
-                'error' => 'Invalid user provided. Please verify the user data.',
+            'success' => false,
+            'error' => 'Invalid user provided. Please verify the user data.',
             ];
         }
 
-        // Check if both private and public keys exist
+      // Check if both private and public keys exist
         if (!file_exists($this->privateKeyJwtPath) || !file_exists($this->publicKeyJwtPath)) {
             return [
-                'success' => false,
-                'error' => 'JWT key files are missing. Please ensure both private and public keys exist.',
+            'success' => false,
+            'error' => 'JWT key files are missing. Please ensure both private and public keys exist.',
             ];
         }
 
         $customPayload = [
-            'password_hash' => $user->getPassword(),
+        'password_hash' => $user->getPassword(),
         ];
 
-        // Generate the JWT token with the current_hashed_password
+      // Generate the JWT token with the current_hashed_password
         return $this->jwtManager->createFromPayload($user, $customPayload);
     }
 
@@ -90,9 +90,10 @@ readonly class JWTTokenGenerator
         }
     }
 
-    /**
-     * @throws Exception
-     */
+  /**
+   * @return array<string, mixed>
+   * @throws Exception
+   */
     public function validateToken(string $token): array
     {
         try {
