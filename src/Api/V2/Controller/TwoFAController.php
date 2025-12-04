@@ -89,14 +89,12 @@ class TwoFAController extends AbstractController
             $eventMetadata
         );
 
-        $content = [
-            'totpId' => $currentUser->getTwoFAsecret()
-        ];
-
         return new BaseResponse(
             200,
-            $content,
-            'Two Factor TOTP Secret generated successfully'
+            [
+                'message' => 'Two Factor TOTP Secret generated successfully',
+                'totpId' => $currentUser->getTwoFAsecret()
+            ]
         )->toResponse();
       }
 
@@ -111,7 +109,7 @@ class TwoFAController extends AbstractController
       return new BaseResponse(
           200,
           null,
-          'Two Factor Code send to you successfully'
+          'Two Factor Code send successfully to : ' . $currentUser->getUuid()
       )->toResponse();
     }
 
