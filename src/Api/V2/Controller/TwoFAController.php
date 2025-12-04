@@ -5,49 +5,110 @@ namespace App\Api\V2\Controller;
 use App\Api\V2\BaseResponse;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
-use App\Enum\OperationMode;
-use App\Enum\SettingName;
 use App\Enum\UserTwoFactorAuthenticationStatus;
-use App\Repository\EventRepository;
-use App\Repository\SettingRepository;
-use App\Repository\UserRepository;
-use App\Service\CaptchaValidator;
 use App\Service\EventActions;
+use App\Service\JWTTokenGenerator;
+use App\Service\TOTPService;
 use App\Service\TwoFAService;
 use App\Service\UserStatusChecker;
 use DateTime;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Exception\JsonException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 
 class TwoFAController extends AbstractController
 {
     public function __construct(
-        private readonly CaptchaValidator $captchaValidator,
-        private readonly UserRepository $userRepository,
-        private readonly UserPasswordHasherInterface $passwordHarsher,
         private readonly UserStatusChecker $userStatusChecker,
         private readonly TwoFAService $twoFAService,
         private readonly EventActions $eventActions,
-        private readonly SettingRepository $settingRepository,
-        private readonly EventRepository $eventRepository,
+        private readonly TokenStorageInterface $tokenStorage,
+        private readonly JWTTokenGenerator $JWTTokenGenerator,
+        private readonly TOTPService $TOTPService,
+        private readonly EntityManagerInterface $entityManager,
     ) {
     }
 
-    /**
-     * @throws RedirectionExceptionInterface
-     * @throws ClientExceptionInterface
-     * @throws ServerExceptionInterface
-     * @throws \JsonException
-     */
-    #[Route('/twoFA/request', name: 'api_v2_twoFA_request', methods: ['POST'])]
-    public function twoFARequest(Request $request): JsonResponse
+    #[Route(
+        '/twoFA/{type}',
+        name: 'api_v2_twoFA_enable',
+        requirements: [
+            'type' => 'totp|email|sms',
+        ],
+        defaults: [
+            'type' => 'email',
+        ],
+        methods: ['POST'])]
+    public function twoFAEnable(Request $request, string $type): JsonResponse
+    {
+        $token = $this->tokenStorage->getToken();
+
+        if ($token instanceof TokenInterface && $token->getUser() instanceof User) {
+            /** @var User $currentUser */
+            $currentUser = $token->getUser();
+            // This line is begin ignore because the getCredentials belongs to another service
+            /** @phpstan-ignore-next-line */
+            $jwtTokenString = $token->getCredentials();
+
+            if (!$this->JWTTokenGenerator->isJWTTokenValid($jwtTokenString)) {
+                return new BaseResponse(
+                    401,
+                    null,
+                    'JWT Token is invalid!'
+                )->toResponse();
+            }
+
+            $statusCheckerResponse = $this->userStatusChecker->checkUserStatus($currentUser);
+            if ($statusCheckerResponse instanceof BaseResponse) {
+                return $statusCheckerResponse->toResponse();
+            }
+
+            if ($type === 'totp') {
+                $secret = $this->TOTPService->generateSecret();
+                $currentUser->setTwoFAsecret($secret);
+                $this->entityManager->persist($currentUser);
+                $this->entityManager->flush();
+                // Utilize the toApiResponse method to generate the response content
+                $content = $currentUser->toApiResponse([
+                    'success' => true,
+                    'msg' => 'Two Factor TOTP Secret generated successfully',
+                    'totpId' => $currentUser->getTwoFAsecret(),
+                ]);
+            } else {
+                $this->twoFAService->generate2FACode(
+                    $currentUser,
+                    $request->getClientIp(),
+                    $request->headers->get('User-Agent'),
+                    AnalyticalEventType::TWO_FA_CODE_ENABLE->value
+                );
+
+                // Utilize the toApiResponse method to generate the response content
+                $content = $currentUser->toApiResponse([
+                    'success' => true,
+                    'msg' => 'Code sent successfully.',
+                    'totpId' => null,
+                ]);
+            }
+
+            return new BaseResponse(200, $content)->toResponse();
+        }
+
+        // Handle the case where the user is not authenticated
+        return new BaseResponse(
+            403,
+            null,
+            'Unauthorized - You do not have permission to access this resource'
+        )->toResponse(); // Bad Request Response
+
+    }
+
+    #[Route('/twoFA/validate', name: 'api_v2_twoFA_validate', methods: ['POST'])]
+    public function twoFAValidate(Request $request): JsonResponse
     {
         try {
             $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
@@ -55,202 +116,104 @@ class TwoFAController extends AbstractController
             return new BaseResponse(400, null, 'Invalid JSON format')->toResponse(); # Bad Request Response
         }
 
-        $turnstileSetting = $this->settingRepository->findOneBy(
-            ['name' => SettingName::TURNSTILE_CHECKER->value]
-        )->getValue();
-        if (!$turnstileSetting) {
-            throw new \RuntimeException('Missing settings: TURNSTILE_CHECKER not found');
-        }
+        $token = $this->tokenStorage->getToken();
 
-        if ($turnstileSetting === OperationMode::ON->value) {
-            if (!isset($data['turnstile_token'])) {
-                return new BaseResponse(400, null, 'CAPTCHA validation failed')->toResponse(); # Bad Request Response
+        if ($token instanceof TokenInterface && $token->getUser() instanceof User) {
+            /** @var User $currentUser */
+            $currentUser = $token->getUser();
+            // This line is begin ignore because the getCredentials belongs to another service
+            /** @phpstan-ignore-next-line */
+            $jwtTokenString = $token->getCredentials();
+
+            if (!$this->JWTTokenGenerator->isJWTTokenValid($jwtTokenString)) {
+                return new BaseResponse(
+                    401,
+                    null,
+                    'JWT Token is invalid!'
+                )->toResponse();
             }
 
-            $turnstileValidation = $this->captchaValidator->validate(
-                $data['turnstile_token'],
-                $request->getClientIp()
-            );
-
-            if (!$turnstileValidation['success']) {
-                $errorMessage = $turnstileValidation['error'] ?? 'CAPTCHA validation failed';
-                return new BaseResponse(400, null, $errorMessage)->toResponse();
+            $statusCheckerResponse = $this->userStatusChecker->checkUserStatus($currentUser);
+            if ($statusCheckerResponse instanceof BaseResponse) {
+                return $statusCheckerResponse->toResponse();
             }
-        }
 
-        $errors = [];
-        // Check for missing fields and add them to the array errors
-        if (empty($data['uuid'])) {
-            $errors[] = 'uuid';
-        }
-        if (empty($data['password'])) {
-            $errors[] = 'password';
-        }
-        if ($errors !== []) {
-            return new BaseResponse(
-                400,
-                ['missing_fields' => $errors],
-                'Invalid data: Missing required fields.'
-            )->toResponse();
-        }
+            if (
+                ($data['type'] === 'email' || $data['type'] === 'sms') &&
+                $data['code'] === $currentUser->getTwoFAcode()
+            ) {
+                if ($data['type'] === 'email') {
+                    $currentUser->setTwoFAtype(UserTwoFactorAuthenticationStatus::EMAIL->value);
+                }
+                if ($data['type'] === 'sms') {
+                    $currentUser->setTwoFAtype(UserTwoFactorAuthenticationStatus::SMS->value);
+                }
+                $this->eventAndSaveUser(
+                    $request,
+                    $currentUser,
+                    AnalyticalEventType::ENABLE_LOCAL_2FA->value
+                );
 
-        // Check if user exists are valid
-        $user = $this->userRepository->findOneBy(['uuid' => $data['uuid']]);
+                $content = $currentUser->toApiResponse([
+                    'success' => true,
+                    'msg' => 'Two Factor authentication validated successfully!',
+                ]);
 
-        if (!$user instanceof User) {
-            return new BaseResponse(401, null, 'Invalid credentials')->toResponse();
-            // Unauthorized Response
-        }
+                return new BaseResponse(200, $content)->toResponse();
+            }
 
-        if (!$this->passwordHarsher->isPasswordValid($user, $data['password'])) {
-            return new BaseResponse(401, null, 'Invalid credentials')->toResponse(); // Unauthorized Request Response
-        }
+            if ($data['type'] === 'totp' && $this->TOTPService->verifyTOTP(
+                    $currentUser->getTwoFAsecret(),
+                    $data['code']
+                )) {
+                $currentUser->setTwoFAtype(UserTwoFactorAuthenticationStatus::TOTP->value);
+                $this->eventAndSaveUser(
+                    $request,
+                    $currentUser,
+                    AnalyticalEventType::ENABLE_TOTP_2FA->value
+                );
+                $content = $currentUser->toApiResponse([
+                    'success' => true,
+                    'msg' => 'Two Factor authentication validated successfully!',
+                ]);
 
-        $statusCheckerResponse = $this->userStatusChecker->checkUserStatus($user);
-        if ($statusCheckerResponse instanceof BaseResponse) {
-            return $statusCheckerResponse->toResponse();
-        }
+                return new BaseResponse(200, $content)->toResponse();
+            }
 
-        $portalAccountType = $this->userStatusChecker->portalAccountType($user);
-        if ($portalAccountType === 'false') {
-            return new BaseResponse(
-                403,
-                null,
-                'Invalid account type. Please only use email/phone number accounts from the portal'
-            )->toResponse();
-        }
-
-        if (
-            $user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::DISABLED->value
-        ) {
             return new BaseResponse(
                 403,
                 null,
-                'Invalid Two-Factor Authentication configuration.' .
-                ' Please ensure that 2FA is set up using either email or SMS for this account.'
+                'Invalid code'
             )->toResponse();
         }
 
-        if (
-            $user->getOTPcodes()->isEmpty()
-        ) {
-            return new BaseResponse(
-                403,
-                null,
-                'The Two-Factor Authentication (2FA) configuration is incomplete.' .
-                ' Please set up 2FA using either email or SMS.'
-            )->toResponse();
-        }
-
-        // Fetch and validate settings with fallback defaults
-        $timeToResendIntervalValue = $this->settingRepository->findOneBy(
-            ['name' => SettingName::TWO_FACTOR_AUTH_RESEND_INTERVAL->value]
-        );
-        $timeToResendIntervalValue = $timeToResendIntervalValue ? (int)$timeToResendIntervalValue->getValue() : 30;
-        $nrAttemptsValue = $this->settingRepository->findOneBy([
-            'name' => SettingName::TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE->value,
-        ]);
-        $nrAttemptsValue = $nrAttemptsValue ? (int)$nrAttemptsValue->getValue() : 3;
-        $timeToResetAttemptsValue = $this->settingRepository->findOneBy(
-            ['name' => SettingName::TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS->value]
-        );
-        $timeToResetAttemptsValue = $timeToResetAttemptsValue ? (int)$timeToResetAttemptsValue->getValue() : 60;
-
-        // 1. Validate a waiting interval before resending
-        $timeInterval = $this->twoFAService->timeIntervalToResendCode(
-            $user,
-            AnalyticalEventType::TWO_FA_CODE_VALIDATE_RESEND->value
-        );
-        if ($timeInterval === false) {
-            return new BaseResponse(
-                429,
-                null,
-                sprintf(
-                    'You need to wait %d seconds before asking for a new code.',
-                    $timeToResendIntervalValue
-                )
-            )->toResponse();
-        }
-
-        // 2. Validate resend attempts - Resend attempts restriction
-        $canResendCode = $this->twoFAService->canResendCode(
-            $user,
-            AnalyticalEventType::TWO_FA_CODE_VALIDATE_RESEND->value
-        );
-        if ($canResendCode === false) {
-            return new BaseResponse(
-                429,
-                null,
-                sprintf(
-                    'Too many attempts.' .
-                    ' You have exceeded the limit of %d attempts. Please wait %d minutes before trying again.',
-                    $nrAttemptsValue,
-                    $timeToResetAttemptsValue
-                )
-            )->toResponse();
-        }
-
-        // 3. Validate code validation restrictions - Attempt validation restriction
-        $canValidationCode = $this->twoFAService->canValidationCode(
-            $user,
-            AnalyticalEventType::TWO_FA_CODE_VALIDATE_RESEND->value
-        );
-        if ($canValidationCode === false) {
-            return new BaseResponse(
-                429,
-                null,
-                sprintf(
-                    'Too many validation attempts.' .
-                    'You have exceeded the limit of %d attempts. Please wait %d minute(s) before trying again.',
-                    $nrAttemptsValue,
-                    ceil($timeToResetAttemptsValue / 60) // Converted minutes to hours
-                )
-            )->toResponse();
-        }
-
-        // Send the 2fa code to the user
-        $this->twoFAService->resendCode(
-            $user,
+        // Handle the case where the user is not authenticated
+        return new BaseResponse(
+            403,
             null,
-            null,
-            AnalyticalEventType::TWO_FA_CODE_VALIDATE_RESEND->value,
-        );
+            'Unauthorized - You do not have permission to access this resource'
+        )->toResponse(); // Bad Request Response
+
+    }
+
+    private function eventAndSaveUser(Request $request, User $currentUser, string $event): void
+    {
+        $this->entityManager->persist($currentUser);
+        $this->entityManager->flush();
 
         // Defines the Event to the table
         $eventMetadata = [
             'ip' => $request->getClientIp(),
-            'uuid' => $user->getUuid(),
+            'user_agent' => $request->headers->get('User-Agent'),
+            'uuid' => $currentUser->getUuid(),
         ];
+
         $this->eventActions->saveEvent(
-            $user,
-            AnalyticalEventType::TWO_FA_CODE_VALIDATE_RESEND->value,
+            $currentUser,
+            $event,
             new DateTime(),
             $eventMetadata
         );
-
-        $limitTime = new DateTime();
-        $limitTime->modify('-' . $timeToResetAttemptsValue . ' minutes');
-        // Retrieve the 2FA attempts from the repository
-        $attempts = $this->eventRepository->find2FACodeAttemptEvent(
-            $user,
-            $nrAttemptsValue,
-            $limitTime,
-            AnalyticalEventType::TWO_FA_CODE_VALIDATE_RESEND->value
-        );
-
-        $attemptsLeft = $nrAttemptsValue - count($attempts);
-        $message = 'Two-Factor authentication code successfully sent. You have ' .
-            $attemptsLeft .
-            ' attempt' .
-            ($attemptsLeft === 1 ? '' : 's') .
-            ' remaining to request a new one.';
-
-        // Prepare the response with just the message
-        $responseData = [
-            'message' => $message,
-        ];
-
-        // Return success response using BaseResponse
-        return new BaseResponse(200, $responseData)->toResponse(); # Success Response
     }
+
 }
