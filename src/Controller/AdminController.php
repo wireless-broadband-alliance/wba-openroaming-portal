@@ -125,7 +125,59 @@ class AdminController extends AbstractController
         #[MapQueryParameter] string $order = 'desc',
         #[MapQueryParameter] ?int $count = 7
     ): Response {
-        return $this->redirectToRoute('admin_page');
+        // Call the getSettings method of GetSettings class to retrieve the data
+        /** @var array<string, array{value: string, description: string}> $data */
+        $data = $this->getSettings->getSettings();
+
+        $searchTerm = $request->query->get('u');
+
+        $filter = $request->query->get('filter', 'all'); // Default filter
+
+        // Use the updated searchWithFilter method to handle both filter and search term
+        $users = $this->userRepository->searchWithFilter($filter, $sort, $order, $searchTerm);
+
+        // Perform pagination manually
+        $totalUsers = count($users);
+
+        $totalPages = ceil($totalUsers / $count);
+
+        $offset = ($page - 1) * $count;
+
+        $users = array_slice($users, $offset, $count);
+
+        // Fetch user counts for table header (All/Verified/Banned)
+        $allUsersCount = $this->userRepository->countAllUsersExcludingAdmin($searchTerm, $filter);
+        $verifiedUsersCount = $this->userRepository->countVerifiedUsers($searchTerm);
+        $bannedUsersCount = $this->userRepository->countBannedUsers($searchTerm);
+
+        // Check if the export users operation is enabled
+        $exportUsers = $this->parameterBag->get('app.export_users');
+        // Check if the delete action has a public PGP key defined
+        $deleteUsers = $this->parameterBag->get('app.pgp_public_key');
+        // Create form views
+        $formRevokeProfiles = $this->createForm(RevokeProfilesType::class, $this->getUser());
+
+        /** @var User $user */
+        $user = $this->getUser();
+        return $this->render('dashboard/admin_roles.html.twig', [
+            'user' => $user,
+            'users' => $users,
+            'currentPage' => $page,
+            'totalPages' => $totalPages,
+            'searchTerm' => $searchTerm,
+            'data' => $data,
+            'allUsersCount' => $allUsersCount,
+            'verifiedUsersCount' => $verifiedUsersCount,
+            'bannedUsersCount' => $bannedUsersCount,
+            'activeFilter' => $filter,
+            'activeSort' => $sort,
+            'activeOrder' => $order,
+            'count' => $count,
+            'export_users' => $exportUsers,
+            'delete_users' => $deleteUsers,
+            'ApUsage' => null,
+            'formRevokeProfiles' => $formRevokeProfiles
+        ]);
     }
 
     /**
