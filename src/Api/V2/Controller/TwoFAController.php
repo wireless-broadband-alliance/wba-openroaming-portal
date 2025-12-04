@@ -27,11 +27,11 @@ class TwoFAController extends AbstractController
   public function __construct(
       private readonly UserStatusChecker $userStatusChecker,
       private readonly TwoFAService $twoFAService,
-      private readonly EventActions $eventActions,
       private readonly TokenStorageInterface $tokenStorage,
       private readonly JWTTokenGenerator $JWTTokenGenerator,
       private readonly TOTPService $TOTPService,
       private readonly EntityManagerInterface $entityManager,
+      private readonly EventActions $eventActions,
   ) {
   }
 
@@ -75,6 +75,19 @@ class TwoFAController extends AbstractController
         $currentUser->setTwoFAsecret($secret);
         $this->entityManager->persist($currentUser);
         $this->entityManager->flush();
+
+        // Defines the Event to the table
+        $eventMetadata = [
+            'ip' => $request->getClientIp(),
+            'user_agent' => $request->headers->get('User-Agent'),
+            'uuid' => $currentUser->getUuid(),
+        ];
+        $this->eventActions->saveEvent(
+            $currentUser,
+            AnalyticalEventType::TWO_FA_CODE_ENABLE->value,
+            new DateTime(),
+            $eventMetadata
+        );
 
         $content = [
             'totpId' => $currentUser->getTwoFAsecret()
