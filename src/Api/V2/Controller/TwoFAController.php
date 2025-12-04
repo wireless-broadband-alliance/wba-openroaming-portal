@@ -162,18 +162,25 @@ class TwoFAController extends AbstractController
         if ($data['type'] === 'sms') {
           $currentUser->setTwoFAtype(UserTwoFactorAuthenticationStatus::SMS->value);
         }
-        $this->eventAndSaveUser(
-            $request,
+        // Defines the Event to the table
+        $eventMetadata = [
+            'ip' => $request->getClientIp(),
+            'user_agent' => $request->headers->get('User-Agent'),
+            'uuid' => $currentUser->getUuid(),
+        ];
+        $this->eventActions->saveEvent(
             $currentUser,
-            AnalyticalEventType::ENABLE_LOCAL_2FA->value
+            AnalyticalEventType::ENABLE_LOCAL_2FA->value,
+            new DateTime(),
+            $eventMetadata
         );
 
-        $content = $currentUser->toApiResponse([
-            'success' => true,
-            'msg' => 'Two Factor authentication validated successfully!',
-        ]);
-
-        return new BaseResponse(200, $content)->toResponse();
+        return new BaseResponse(
+            200,
+            [
+                'message' => 'Two Factor authentication validated successfully!',
+            ]
+        )->toResponse();
       }
 
       if ($data['type'] === 'totp' && $this->TOTPService->verifyTOTP(
@@ -181,17 +188,26 @@ class TwoFAController extends AbstractController
               $data['code']
           )) {
         $currentUser->setTwoFAtype(UserTwoFactorAuthenticationStatus::TOTP->value);
-        $this->eventAndSaveUser(
-            $request,
-            $currentUser,
-            AnalyticalEventType::ENABLE_TOTP_2FA->value
-        );
-        $content = $currentUser->toApiResponse([
-            'success' => true,
-            'msg' => 'Two Factor authentication validated successfully!',
-        ]);
 
-        return new BaseResponse(200, $content)->toResponse();
+        // Defines the Event to the table
+        $eventMetadata = [
+            'ip' => $request->getClientIp(),
+            'user_agent' => $request->headers->get('User-Agent'),
+            'uuid' => $currentUser->getUuid(),
+        ];
+        $this->eventActions->saveEvent(
+            $currentUser,
+            AnalyticalEventType::ENABLE_TOTP_2FA->value,
+            new DateTime(),
+            $eventMetadata
+        );
+
+        return new BaseResponse(
+            200,
+            [
+                'message' => 'Two Factor authentication validated successfully!',
+            ]
+        )->toResponse();
       }
 
       return new BaseResponse(
@@ -207,6 +223,5 @@ class TwoFAController extends AbstractController
         null,
         'Unauthorized - You do not have permission to access this resource'
     )->toResponse(); // Bad Request Response
-
   }
 }
