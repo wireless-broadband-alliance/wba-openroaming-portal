@@ -7,10 +7,10 @@ use Symfony\Component\Routing\RouterInterface;
 
 readonly class ApiResponseService
 {
-  public function __construct(
-      private RouterInterface $router
-  ) {
-  }
+    public function __construct(
+        private RouterInterface $router
+    ) {
+    }
 
   /**
    * @return array<string, array<int, array{
@@ -24,39 +24,39 @@ readonly class ApiResponseService
    * }>>
    * @throws \JsonException
    */
-  public function getRoutesByPrefix(string $version): array
-  {
-    $routes = $this->router->getRouteCollection();
-    $grouped = [];
-    $responses = $this->getResponseMetadata($version);
+    public function getRoutesByPrefix(string $version): array
+    {
+        $routes = $this->router->getRouteCollection();
+        $grouped = [];
+        $responses = $this->getResponseMetadata($version);
 
-    $prefix = $version === ApiVersion::API_V1->value ? '/api/v1' : '/api/v2';
+        $prefix = $version === ApiVersion::API_V1->value ? '/api/v1' : '/api/v2';
 
-    foreach ($routes as $name => $route) {
-      $path = $route->getPath();
+        foreach ($routes as $name => $route) {
+            $path = $route->getPath();
 
-      if ($path !== $prefix && str_starts_with($path, $prefix)) {
-        // Extract the first segment after the version
-        $relativePath = trim(str_replace($prefix, '', $path), '/');
-        $segments = explode('/', $relativePath);
-        $groupKey = $segments[0] ?: 'general';
+            if ($path !== $prefix && str_starts_with($path, $prefix)) {
+                // Extract the first segment after the version
+                $relativePath = trim(str_replace($prefix, '', $path), '/');
+                $segments = explode('/', $relativePath);
+                $groupKey = $segments[0] ?: 'general';
 
-        $grouped[$groupKey][] = [
-            'name' => $name,
-            'path' => $path,
-            'methods' => $route->getMethods(),
-            'responses' => $responses[$name]['responses'] ?? [],
-            'isProtected' => $responses[$name]['isProtected'] ?? false,
-            'description' => $responses[$name]['description'] ?? null,
-            'requestBody' => $responses[$name]['requestBody'] ?? null,
-        ];
-      }
+                $grouped[$groupKey][] = [
+                'name' => $name,
+                'path' => $path,
+                'methods' => $route->getMethods(),
+                'responses' => $responses[$name]['responses'] ?? [],
+                'isProtected' => $responses[$name]['isProtected'] ?? false,
+                'description' => $responses[$name]['description'] ?? null,
+                'requestBody' => $responses[$name]['requestBody'] ?? null,
+                ];
+            }
+        }
+
+        ksort($grouped);
+
+        return $grouped;
     }
-
-    ksort($grouped);
-
-    return $grouped;
-  }
 
   /**
    * @return array<string, array{
@@ -67,9 +67,9 @@ readonly class ApiResponseService
    * }>
    * @throws \JsonException
    */
-  private function getResponseMetadata(string $version): array
-  {
-    $apiResponseV1 = [
+    private function getResponseMetadata(string $version): array
+    {
+        $apiResponseV1 = [
         'api_v1_auth_local' => [
             'requestBody' => [
                 'uuid' => 'user-uuid-example',
@@ -825,8 +825,8 @@ readonly class ApiResponseService
                 ]
             ]
         ]
-    ];
-    $apiResponseV2 = [
+        ];
+        $apiResponseV2 = [
         'api_v2_twoFA_validate' => [
             'description' => 'This endpoint validates a 2FA code (email, SMS, or TOTP). 
     The client must send a valid JWT Bearer token in the Authorization header, 
@@ -838,7 +838,6 @@ readonly class ApiResponseService
                 'code' => '123456'
             ],
             'responses' => [
-
                 200 => [
                     'default' => json_decode(
                         '{
@@ -852,24 +851,22 @@ readonly class ApiResponseService
                         JSON_THROW_ON_ERROR
                     ),
                 ],
-
                 400 => [
                     'Invalid JSON format',
                     'Missing required body fields'
                 ],
-
                 401 => [
                     'JWT Token is invalid!',
                     'User account is not verified.'
                 ],
-
+              // phpcs:disable Generic.Files.LineLength.TooLong
                 403 => [
                     'Invalid code',
                     'User account is banned from the system.',
                     "Your request cannot be processed at this time due to a pending action. If your account is active, re-login to complete the action.",
                     'Unauthorized - You do not have permission to access this resource'
                 ],
-
+              // phpcs:enable
                 500 => [
                     'Unexpected server error occurred'
                 ]
@@ -921,8 +918,6 @@ readonly class ApiResponseService
                     'examples' => [
                         'invalid_token' => json_decode(
                             '{
-                        "success": false,
-                        "data": null,
                         "message": "JWT Token is invalid!"
                     }',
                             true,
@@ -931,8 +926,6 @@ readonly class ApiResponseService
                         ),
                         'user_not_verified' => json_decode(
                             '{
-                        "success": false,
-                        "data": null,
                         "message": "User account is not verified."
                     }',
                             true,
@@ -946,8 +939,6 @@ readonly class ApiResponseService
                     'examples' => [
                         'not_authenticated' => json_decode(
                             '{
-                        "success": false,
-                        "data": null,
                         "message": "Unauthorized - You do not have permission to access this resource"
                     }',
                             true,
@@ -956,24 +947,22 @@ readonly class ApiResponseService
                         ),
                         'user_banned' => json_decode(
                             '{
-                        "success": false,
-                        "data": null,
                         "message": "User account is banned from the system."
                     }',
                             true,
                             512,
                             JSON_THROW_ON_ERROR
                         ),
+                      // phpcs:disable Generic.Files.LineLength.TooLong
                         'pending_action' => json_decode(
                             '{
-                        "success": false,
-                        "data": null,
                         "message": "Your request cannot be processed at this time due to a pending action. If your account is active, re-login to complete the action."
                     }',
                             true,
                             512,
                             JSON_THROW_ON_ERROR
                         ),
+                      // phpcs:enable
                     ],
                 ],
                 500 => [
@@ -1728,22 +1717,22 @@ configuration for the IOS App.</p></body></html>'
                 ]
             ]
         ]
-    ];
+        ];
 
-    if ($version === ApiVersion::API_V1->value) {
-      return $apiResponseV1;
+        if ($version === ApiVersion::API_V1->value) {
+            return $apiResponseV1;
+        }
+        return $apiResponseV2;
     }
-    return $apiResponseV2;
-  }
 
   /**
    * Return common API responses grouped by HTTP status code.
    *
    * @return array<int, string[]> Array keyed by HTTP status code, each value is a list of messages
    */
-  public function getCommonResponses(): array
-  {
-    return [
+    public function getCommonResponses(): array
+    {
+        return [
         400 => [
             'Invalid JSON format',
             'Invalid data: Missing required fields.',
@@ -1759,6 +1748,6 @@ configuration for the IOS App.</p></body></html>'
         500 => [
             'Internal Server Error',
         ],
-    ];
-  }
+        ];
+    }
 }
