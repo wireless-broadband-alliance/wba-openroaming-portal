@@ -827,10 +827,57 @@ readonly class ApiResponseService
         ]
     ];
     $apiResponseV2 = [
+        'api_v2_twoFA_validate' => [
+            'description' => 'This endpoint validates a 2FA code (email, SMS, or TOTP). 
+    The client must send a valid JWT Bearer token in the Authorization header, 
+    along with the 2FA type and confirmation code in the request body. 
+    If the code is valid, 2FA is enabled for that method.',
+            'isProtected' => true,
+            'requestBody' => [
+                'type' => 'email or sms or topt',
+                'code' => '123456'
+            ],
+            'responses' => [
+
+                200 => [
+                    'default' => json_decode(
+                        '{
+                    "success": true,
+                    "data": {
+                        "message": "Two Factor authentication validated successfully!"
+                    }
+                }',
+                        true,
+                        512,
+                        JSON_THROW_ON_ERROR
+                    ),
+                ],
+
+                400 => [
+                    'Invalid JSON format',
+                    'Missing required body fields'
+                ],
+
+                401 => [
+                    'JWT Token is invalid!',
+                    'User account is not verified.'
+                ],
+
+                403 => [
+                    'Invalid code',
+                    'User account is banned from the system.',
+                    "Your request cannot be processed at this time due to a pending action. If your account is active, re-login to complete the action.",
+                    'Unauthorized - You do not have permission to access this resource'
+                ],
+
+                500 => [
+                    'Unexpected server error occurred'
+                ]
+            ]
+        ],
         'api_v2_twoFA_enable' => [
             'description' => 'Enables Two-Factor Authentication (2FA) for the authenticated user. 
-        Supports the following types, 2fa with: ("totp", "email", "sms"). 
-        Requires a valid JWT Bearer token.',
+        Supports ("totp", "email", "sms"). Requires a valid JWT Bearer token.',
             'isProtected' => true,
             'responses' => [
                 200 => [
@@ -838,10 +885,10 @@ readonly class ApiResponseService
                         '{
                     "success": true,
                     "data": {
+                        "message": "Two Factor TOTP Secret generated successfully",
                         "totpId": "ABCDEF123456"
-                    },
-                    "message": "Two Factor TOTP Secret generated successfully"
-                }',
+                    }
+                  }',
                         true,
                         512,
                         JSON_THROW_ON_ERROR
@@ -850,9 +897,8 @@ readonly class ApiResponseService
                         '{
                     "success": true,
                     "data": {
-                        "destination": "user@example.com"
-                    },
-                    "message": "Two Factor Code sent to: user@example.com"
+                        "message": "Two Factor Code sent to: user@example.com"
+                    }
                 }',
                         true,
                         512,
@@ -863,8 +909,6 @@ readonly class ApiResponseService
                     'description' => 'User does not have a valid email or phone to send the code.',
                     'example' => json_decode(
                         '{
-                    "success": false,
-                    "data": null,
                     "message": "Code not sent, the user does not have a valid method."
                 }',
                         true,
@@ -873,23 +917,64 @@ readonly class ApiResponseService
                     ),
                 ],
                 401 => [
-                    'description' => 'Invalid, missing, or expired JWT token.',
+                    'description' => 'Invalid, missing or expired JWT token OR user is not verified.',
                     'examples' => [
-                        'invalid_token' => 'JWT Token is invalid!',
-                    ],
+                        'invalid_token' => json_decode(
+                            '{
+                        "success": false,
+                        "data": null,
+                        "message": "JWT Token is invalid!"
+                    }',
+                            true,
+                            512,
+                            JSON_THROW_ON_ERROR
+                        ),
+                        'user_not_verified' => json_decode(
+                            '{
+                        "success": false,
+                        "data": null,
+                        "message": "User account is not verified."
+                    }',
+                            true,
+                            512,
+                            JSON_THROW_ON_ERROR
+                        ),
+                    ]
                 ],
                 403 => [
-                    'description' => 'User is not authenticated.',
-                    'example' => json_decode(
-                        '{
-                    "success": false,
-                    "data": null,
-                    "message": "Unauthorized - You do not have permission to access this resource"
-                }',
-                        true,
-                        512,
-                        JSON_THROW_ON_ERROR
-                    ),
+                    'description' => 'User is authenticated but not allowed to access the resource.',
+                    'examples' => [
+                        'not_authenticated' => json_decode(
+                            '{
+                        "success": false,
+                        "data": null,
+                        "message": "Unauthorized - You do not have permission to access this resource"
+                    }',
+                            true,
+                            512,
+                            JSON_THROW_ON_ERROR
+                        ),
+                        'user_banned' => json_decode(
+                            '{
+                        "success": false,
+                        "data": null,
+                        "message": "User account is banned from the system."
+                    }',
+                            true,
+                            512,
+                            JSON_THROW_ON_ERROR
+                        ),
+                        'pending_action' => json_decode(
+                            '{
+                        "success": false,
+                        "data": null,
+                        "message": "Your request cannot be processed at this time due to a pending action. If your account is active, re-login to complete the action."
+                    }',
+                            true,
+                            512,
+                            JSON_THROW_ON_ERROR
+                        ),
+                    ],
                 ],
                 500 => [
                     'description' => 'Internal error while generating 2FA code or TOTP secret.',

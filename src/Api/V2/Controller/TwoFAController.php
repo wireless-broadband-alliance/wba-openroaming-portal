@@ -107,15 +107,15 @@ class TwoFAController extends AbstractController
       );
 
       if ($currentUser->getUserExternalAuths()[0] !== UserProvider::EMAIL->value) {
-          $message = 'Two Factor Code send to : ' . $currentUser->getEmail();
+        $message = 'Two Factor Code send to : ' . $currentUser->getEmail();
       } elseif ($currentUser->getUserExternalAuths()[0] !== UserProvider::SAML->value) {
-          $message = 'Two Factor Code send to : ' . $currentUser->getPhoneNumber();
+        $message = 'Two Factor Code send to : ' . $currentUser->getPhoneNumber();
       } else {
-          return new BaseResponse(
-              400,
-              null,
-              'Code not sent, the user does not have a valid method.'
-          )->toResponse();
+        return new BaseResponse(
+            400,
+            null,
+            'Code not sent, the user does not have a valid method.'
+        )->toResponse();
       }
 
       return new BaseResponse(
@@ -134,13 +134,20 @@ class TwoFAController extends AbstractController
     )->toResponse(); // Bad Request Response
   }
 
-  #[Route('/twoFA/validate', name: 'api_v2_twoFA_validate', methods: ['POST'])]
+  #[Route('/twoFA/validate',
+      name: 'api_v2_twoFA_validate',
+      methods: ['POST']
+  )]
   public function twoFAValidate(Request $request): JsonResponse
   {
     try {
       $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
     } catch (JsonException) {
-      return new BaseResponse(400, null, 'Invalid JSON format')->toResponse(); # Bad Request Response
+      return new BaseResponse(
+          400,
+          null,
+          'Invalid JSON format'
+      )->toResponse(); # Bad Request Response
     }
 
     $token = $this->tokenStorage->getToken();
