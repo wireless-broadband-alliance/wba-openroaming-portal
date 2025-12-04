@@ -107,9 +107,9 @@ class TwoFAController extends AbstractController
                 AnalyticalEventType::TWO_FA_CODE_ENABLE->value
             );
 
-            if ($currentUser->getUserExternalAuths()[0] !== UserProvider::EMAIL->value) {
+            if ($currentUser->getUserExternalAuths()[0] === UserProvider::EMAIL->value) {
                   $message = 'Two Factor Code send to : ' . $currentUser->getEmail();
-            } elseif ($currentUser->getUserExternalAuths()[0] !== UserProvider::SAML->value) {
+            } elseif ($currentUser->getUserExternalAuths()[0] === UserProvider::PHONE_NUMBER->value) {
                 $message = 'Two Factor Code send to : ' . $currentUser->getPhoneNumber();
             } else {
                 return new BaseResponse(
