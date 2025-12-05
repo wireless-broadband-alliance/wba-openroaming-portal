@@ -177,8 +177,12 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
             ->getResult();
     }
 
-    public function searchWithAdminFilter(string $filter, ?string $sort, ?string $order, ?string $searchTerm = null): array
-    {
+    public function searchWithAdminFilter(
+        string $filter,
+        ?string $sort,
+        ?string $order,
+        ?string $searchTerm = null
+    ): array {
         $qb = $this->createQueryBuilder('u');
         //dd($filter);
 
@@ -189,7 +193,7 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
                 ->setParameter('superAdmin', '%ROLE_SUPER_ADMIN%');
         } elseif ($filter !== 'all') {
             $qb->where('u.roles LIKE :role')
-                ->setParameter('role', '%'.$filter.'%');
+                ->setParameter('role', '%' . $filter . '%');
         }
 
 
