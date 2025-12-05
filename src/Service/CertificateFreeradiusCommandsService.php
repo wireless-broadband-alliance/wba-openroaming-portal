@@ -66,7 +66,7 @@ readonly class CertificateFreeradiusCommandsService
             CertificateFileName::CERT_PEM->value => CertificateFileName::CERT_PEM_FILE->value,
             CertificateFileName::CHAIN_PEM->value => CertificateFileName::CHAIN_PEM_FILE->value,
             CertificateFileName::FULL_CHAIN_PEM->value => CertificateFileName::FULL_CHAIN_PEM_FILE->value,
-            CertificateFileName::PRIVATE_KEY_PEM->value => CertificateFileName::FULL_CHAIN_PEM_FILE->value,
+            CertificateFileName::PRIVATE_KEY_PEM->value => CertificateFileName::PRIVATE_KEY_PEM_FILE->value,
         ];
 
         // Write new certificate files
