@@ -60,7 +60,7 @@ readonly class ApiResponseService
 
   /**
    * @return array<string, array{
-   *     responses: array<int|string, mixed>,
+   *     responses?: array<int|string, mixed>,
    *     isProtected?: bool,
    *     description?: string,
    *     requestBody?: array<string, mixed>
