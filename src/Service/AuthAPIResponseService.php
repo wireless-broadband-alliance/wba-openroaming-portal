@@ -46,7 +46,7 @@ readonly class AuthAPIResponseService
             }
 
             if (is_array($jwt)) {
-                if (($jwt['success'] ?? false) === true && isset($jwt['token'])) {
+                if ($jwt['success'] === true && isset($jwt['token'])) {
                     $accessToken = $jwt['token'];
                 } else {
                     $errorMessage = $jwt['error'] ?? 'Token generation failed';
