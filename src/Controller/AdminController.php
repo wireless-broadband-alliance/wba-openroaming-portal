@@ -134,7 +134,7 @@ class AdminController extends AbstractController
         $filter = $request->query->get('filter', 'all'); // Default filter
 
         // Use the updated searchWithFilter method to handle both filter and search term
-        $users = $this->userRepository->searchWithFilter($filter, $sort, $order, $searchTerm);
+        $users = $this->userRepository->searchWithAdminFilter($filter, $sort, $order, $searchTerm);
 
         // Perform pagination manually
         $totalUsers = count($users);
@@ -146,9 +146,9 @@ class AdminController extends AbstractController
         $users = array_slice($users, $offset, $count);
 
         // Fetch user counts for table header (All/Verified/Banned)
-        $allUsersCount = $this->userRepository->countAllUsersExcludingAdmin($searchTerm, $filter);
-        $verifiedUsersCount = $this->userRepository->countVerifiedUsers($searchTerm);
-        $bannedUsersCount = $this->userRepository->countBannedUsers($searchTerm);
+        $allUsersCount = $this->userRepository->countAllUsers($searchTerm, $filter);
+        $adminUsersCount = $this->userRepository->countAdminUsers($searchTerm);
+        $usersCount = $this->userRepository->countUsers($searchTerm);
 
         // Check if the export users operation is enabled
         $exportUsers = $this->parameterBag->get('app.export_users');
@@ -167,8 +167,8 @@ class AdminController extends AbstractController
             'searchTerm' => $searchTerm,
             'data' => $data,
             'allUsersCount' => $allUsersCount,
-            'verifiedUsersCount' => $verifiedUsersCount,
-            'bannedUsersCount' => $bannedUsersCount,
+            'adminUsersCount' => $adminUsersCount,
+            'usersCount' => $usersCount,
             'activeFilter' => $filter,
             'activeSort' => $sort,
             'activeOrder' => $order,

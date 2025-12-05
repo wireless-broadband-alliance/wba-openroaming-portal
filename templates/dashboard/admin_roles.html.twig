@@ -30,7 +30,7 @@
 
                     {# Left Search Filters #}
                     <div class="flex items-center space-x-6">
-                        <a href="{{ path('admin_page', {filter: 'all', u: app.request.query.get('u')}) }}"
+                        <a href="{{ path('admin_roles_management', {filter: 'all', u: app.request.query.get('u')}) }}"
                            class="flex flex-row group hover:border-b-2 hover:border-y-veryDarkButton transition-all duration-100 {% if app.request.query.get('filter') == null or app.request.query.get('filter') == 'all' %}border-b-2 border-y-veryDarkButton transition-all{% endif %}">
                             <h1 class="px-2">
                                 {{ 'all'|trans({}, 'dashboard') }}
@@ -39,29 +39,29 @@
                                 {{ allUsersCount }}
                             </div>
                         </a>
-                        <a href="{{ path('admin_page', {filter: constant('App\\Enum\\UserVerificationStatus::VERIFIED').value, u: app.request.query.get('u')}) }}"
-                           class="flex flex-row group hover:text-lightGreen hover:border-b-2 hover:border-y-lightGreen/50 transition-all duration-100 {% if app.request.query.get('filter') == constant('App\\Enum\\UserVerificationStatus::VERIFIED').value %}text-lightGreen border-b-2 border-y-lightGreen transition-all{% endif %}">
+                        <a href="{{ path('admin_roles_management', {filter: constant('App\\Enum\\AdminRoleType::ROLE_USER').value, u: app.request.query.get('u')}) }}"
+                           class="flex flex-row group hover:text-lightGreen hover:border-b-2 hover:border-y-lightGreen/50 transition-all duration-100 {% if app.request.query.get('filter') == constant('App\\Enum\\AdminRoleType::ROLE_USER').value %}text-lightGreen border-b-2 border-y-lightGreen transition-all{% endif %}">
                             <h1 class="px-2">
                                 {{ 'users'|trans({}, 'dashboard') }}
                             </h1>
                             <div class="w-auto h-6 mb-1 px-2 bg-veryLightGreen group-hover:bg-lightGreen rounded-md group-hover:text-white text-center transition-all duration-100">
-                                {{ verifiedUsersCount }}
+                                {{ usersCount }}
                             </div>
                         </a>
-                        <a href="{{ path('admin_page', {filter: constant('App\\Enum\\UserVerificationStatus::BANNED').value, u: app.request.query.get('u')}) }}"
-                           class="flex flex-row group hover:text-red-400 hover:border-b-2 hover:border-y-red-400 transition-all duration-100 {% if app.request.query.get('filter') == constant('App\\Enum\\UserVerificationStatus::BANNED').value %}text-red-400 border-b-2 border-y-red-400 transition-all{% endif %}">
+                        <a href="{{ path('admin_roles_management', {filter: constant('App\\Enum\\AdminRoleType::ROLE_ADMIN').value, u: app.request.query.get('u')}) }}"
+                           class="flex flex-row group hover:text-red-400 hover:border-b-2 hover:border-y-red-400 transition-all duration-100 {% if app.request.query.get('filter') == constant('App\\Enum\\AdminRoleType::ROLE_ADMIN').value %}text-red-400 border-b-2 border-y-red-400 transition-all{% endif %}">
                             <h1 class="px-2">
                                 {{ 'admin'|trans({}, 'dashboard') }}
                             </h1>
                             <div class="w-auto h-6 mb-1 px-2 bg-veryLightGreen group-hover:bg-red-400 rounded-md group-hover:text-white text-center transition-all duration-100">
-                                {{ bannedUsersCount }}
+                                {{ adminUsersCount }}
                             </div>
                         </a>
                     </div>
 
                     {# Midle Search Bar #}
                     <div class="w-full md:w-3/6">
-                        <form action="{{ path('admin_page') }}" method="GET">
+                        <form action="{{ path('admin_roles_management') }}" method="GET">
 
                             <div class="flex flex-row items-center border rounded-md">
                                 {# Search Icon #}
