@@ -610,11 +610,9 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
 
     public function removeRefreshJwtToken(RefreshJwtToken $refreshJwtToken): static
     {
-        if ($this->refreshJwtTokens->removeElement($refreshJwtToken)) {
-            // set the owning side to null (unless already changed)
-            if ($refreshJwtToken->getUser() === $this) {
-                $refreshJwtToken->setUser(null);
-            }
+        // set the owning side to null (unless already changed)
+        if ($this->refreshJwtTokens->removeElement($refreshJwtToken) && $refreshJwtToken->getUser() === $this) {
+            $refreshJwtToken->setUser(null);
         }
 
         return $this;

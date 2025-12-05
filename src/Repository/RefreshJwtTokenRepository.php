@@ -15,12 +15,9 @@ use Random\RandomException;
  */
 class RefreshJwtTokenRepository extends ServiceEntityRepository
 {
-    private EntityManagerInterface $entityManager;
-
-    public function __construct(ManagerRegistry $registry, EntityManagerInterface $entityManager)
+    public function __construct(ManagerRegistry $registry, private readonly EntityManagerInterface $entityManager)
     {
         parent::__construct($registry, RefreshJwtToken::class);
-        $this->entityManager = $entityManager;
     }
 
   /**
