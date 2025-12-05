@@ -7,6 +7,7 @@ use App\Entity\Event;
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
 use App\Entity\UserRadiusProfile;
+use App\Enum\AdminRoleType;
 use App\Enum\AnalyticalEventType;
 use App\Enum\FirewallType;
 use App\Enum\OperationMode;
@@ -683,5 +684,83 @@ class UsersManagementController extends AbstractController
         return $this->redirectToRoute('admin_user_edit', [
             'id' => $user->getId(),
         ]);
+    }
+
+    #[Route('/dashboard/adminPermissions/{id<\d+>}', name: 'admin_give_permissions')]
+    #[IsGranted('ROLE_SUPER_ADMIN')]
+    public function giveAdminPermissions(
+        Request $request,
+        int $id
+    ): Response {
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
+
+        // Fetch user
+        $user = $this->userRepository->find($id);
+
+        if (!$user) {
+            throw $this->createNotFoundException(
+                $this->translator->trans('userNotFound', [], 'controllers')
+            );
+        }
+
+        $user->setRoles([AdminRoleType::ROLE_ADMIN->value]);
+        $this->entityManager->persist($user);
+        $this->entityManager->flush();
+
+        $eventMetaData = [
+            'ip' => $request->getClientIp(),
+            'user_agent' => $request->headers->get('User-Agent'),
+            'platform' => PlatformMode::LIVE->value,
+            'giveAdminPermissionsTo' => $user->getUuid(),
+            'by' => $currentUser->getUuid(),
+        ];
+        $this->eventActions->saveEvent(
+            $user,
+            AnalyticalEventType::ADMIN_PERMISSIONS_GIVEN->value,
+            new DateTime(),
+            $eventMetaData
+        );
+
+        return $this->redirect($request->headers->get('Referer'));
+    }
+
+    #[Route('/dashboard/adminPermissionsRemove/{id<\d+>}', name: 'admin_remove_permissions')]
+    #[IsGranted('ROLE_SUPER_ADMIN')]
+    public function removeAdminPermissions(
+        Request $request,
+        int $id
+    ): Response {
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
+
+        // Fetch user
+        $user = $this->userRepository->find($id);
+
+        if (!$user) {
+            throw $this->createNotFoundException(
+                $this->translator->trans('userNotFound', [], 'controllers')
+            );
+        }
+
+        $user->setRoles([]);
+        $this->entityManager->persist($user);
+        $this->entityManager->flush();
+
+        $eventMetaData = [
+            'ip' => $request->getClientIp(),
+            'user_agent' => $request->headers->get('User-Agent'),
+            'platform' => PlatformMode::LIVE->value,
+            'removeAdminPermissionsTo' => $user->getUuid(),
+            'by' => $currentUser->getUuid(),
+        ];
+        $this->eventActions->saveEvent(
+            $user,
+            AnalyticalEventType::ADMIN_PERMISSIONS_REMOVED->value,
+            new DateTime(),
+            $eventMetaData
+        );
+
+        return $this->redirect($request->headers->get('Referer'));
     }
 }
