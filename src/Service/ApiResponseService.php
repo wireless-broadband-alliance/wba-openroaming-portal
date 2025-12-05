@@ -828,6 +828,9 @@ readonly class ApiResponseService
         ];
         $apiResponseV2 = [
         'api_v2_auth_refresh' => [
+            'requestBody' => [
+                'current_token' => 'currentToken||RefreshToken',
+            ],
             'description' => 'Refreshes the JWT token for an authenticated user.
 The client must send the current valid refresh token in the request body as "current_token".
 If the token is valid and not expired/revoked, a new access token and refresh token are returned.',
