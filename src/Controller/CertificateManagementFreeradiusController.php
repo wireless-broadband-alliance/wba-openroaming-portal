@@ -393,13 +393,14 @@ class CertificateManagementFreeradiusController extends AbstractController
           }
         }
 
+        // Update the settings table with the new certs content
         $caContentParsed = $this->certificateCheckerService->parseCertificate(
             $certificateSet['caFREERADIUS']['content']
         );
         $certContentParsed = $this->certificateCheckerService->parseCertificate(
             $certificateSet['certFREERADIUS']['content']
         );
-        dd($caContentParsed, $certContentParsed);
+        $this->certificateWriterUpdateService->updateFromParsedCertificates($caContentParsed, $certContentParsed);
 
         $process->setFreeradiusConfigAppliedAt(new DateTimeImmutable());
         $process->setUpdatedAt(new DateTimeImmutable());
