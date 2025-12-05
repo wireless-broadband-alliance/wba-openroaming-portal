@@ -54,7 +54,8 @@ readonly class InstallationListener
         if ($user &&
             (
                 str_starts_with($path, '/dashboard/settings/certificatesManagement/freeradius/') ||
-                str_starts_with($path, '/dashboard/settings/certificatesManagement/radsecproxy/')
+                str_starts_with($path, '/dashboard/settings/certificatesManagement/radsecproxy/') ||
+                str_starts_with($path, '/dashboard/settings/certificatesManagement/certificates/')
             )
         ) {
             if (!$session->get('certificate_verification')) {
