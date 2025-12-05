@@ -90,21 +90,22 @@ readonly class JWTTokenGenerator
         }
     }
 
-    /**
-     * @throws Exception
-     */
-    public function validateToken(string $token): array
-    {
-        try {
-            $payload = $this->JWTEncoder->decode($token);
+  /**
+   * @throws Exception
+   * @return array<string, mixed> The decoded JWT payload
+   */
+  public function validateToken(string $token): array
+  {
+    try {
+      $payload = $this->JWTEncoder->decode($token);
 
-            if (!$payload || !isset($payload['uuid'])) {
-                throw new RuntimeException("Invalid payload");
-            }
+      if (!$payload || !isset($payload['uuid'])) {
+        throw new RuntimeException("Invalid payload");
+      }
 
-            return $payload;
-        } catch (JWTDecodeFailureException) {
-            throw new RuntimeException("Token decode failed");
-        }
+      return $payload;
+    } catch (JWTDecodeFailureException) {
+      throw new RuntimeException("Token decode failed");
     }
+  }
 }
