@@ -33,7 +33,7 @@ yamllint:
 
 
 test-rector:
-    image: "$CI_REGISTRY_IMAGE:develop"
+    image: "$CI_REGISTRY_IMAGE:TestImage"
     allow_failure: false
     before_script:
         - cp .env.sample .env
@@ -43,7 +43,7 @@ test-rector:
     stage: test
 
 test-twig:
-    image: "$CI_REGISTRY_IMAGE:develop"
+    image: "$CI_REGISTRY_IMAGE:TestImage"
     allow_failure: false
     before_script:
         - cp .env.sample .env
@@ -53,7 +53,7 @@ test-twig:
     stage: test
 
 test-phpstan:
-    image: "$CI_REGISTRY_IMAGE:develop"
+    image: "$CI_REGISTRY_IMAGE:TestImage"
     allow_failure: false
     before_script:
         - cp .env.sample .env
