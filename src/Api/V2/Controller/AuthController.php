@@ -234,7 +234,7 @@ class AuthController extends AbstractController
                         $accessToken = $jwt['token'];
                     } else {
                         $errorMessage = $jwt['error'] ?? 'Token generation failed.';
-                        $statusCode = $errorMessage === 'Invalid user provided. Please verify the user data.' ? 400 : 500;
+                        $statusCode = $errorMessage === 'Invalid user provided. Verify the user data.' ? 400 : 500;
                         return new BaseResponse($statusCode, null, $errorMessage)->toResponse();
                     }
                 } else {

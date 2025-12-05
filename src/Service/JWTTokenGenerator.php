@@ -44,7 +44,7 @@ readonly class JWTTokenGenerator
         if (!$user instanceof User) {
             return [
             'success' => false,
-            'error' => 'Invalid user provided. Please verify the user data.',
+            'error' => 'Invalid user provided. Verify the user data.',
             ];
         }
 
