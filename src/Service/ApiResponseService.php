@@ -972,18 +972,6 @@ readonly class ApiResponseService
                         'unexpected_error'
                     ],
                 ],
-                400 => [
-                    'Missing or invalid request body',
-                    'current_token is required'
-                ],
-                401 => [
-                    'Invalid or expired refresh token',
-                    'Invalid user associated with the token'
-                ],
-                500 => [
-                    'Token generation failed',
-                    'JWT key files are missing. Please ensure both private and public keys exist.'
-                ]
             ],
         ],
         'api_v2_auth_refresh' => [
