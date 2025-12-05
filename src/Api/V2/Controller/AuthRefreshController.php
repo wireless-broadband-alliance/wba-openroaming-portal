@@ -3,9 +3,10 @@
 namespace App\Api\V2\Controller;
 
 use App\Api\V2\BaseResponse;
-use App\Repository\UserRepository;
+use App\Repository\RefreshJwtTokenRepository;
 use App\Service\JWTTokenGenerator;
-use Exception;
+use Doctrine\ORM\EntityManagerInterface;
+use Random\RandomException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -14,65 +15,75 @@ use Symfony\Component\Routing\Attribute\Route;
 class AuthRefreshController extends AbstractController
 {
     public function __construct(
-        private readonly UserRepository $userRepository,
-        private readonly JWTTokenGenerator $jwtTokenGenerator
+        private readonly RefreshJwtTokenRepository $refreshTokenRepository,
+        private readonly JWTTokenGenerator $jwtTokenGenerator,
+        private readonly EntityManagerInterface $entityManager
     ) {
     }
 
+  /**
+   * @throws RandomException
+   * @throws \JsonException
+   */
     #[Route('/auth/refresh', name: 'api_v2_auth_refresh', methods: ['POST'])]
     public function refreshToken(Request $request): JsonResponse
     {
-        $authHeader = $request->headers->get('Authorization');
+        $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
+        $currentTokenValue = $data['current_token'] ?? null;
 
-        if (!$authHeader || !str_starts_with($authHeader, 'Bearer ')) {
-            return new BaseResponse(
-                401,
-                null,
-                'Authorization header missing'
-            )->toResponse();
+        if (!$currentTokenValue) {
+            return new BaseResponse(400, null, 'The current_token is required')->toResponse();
         }
 
-        $oldToken = substr($authHeader, 7);
+      // Fetch refresh token
+        $accessToken = $this->refreshTokenRepository->findOneBy([
+        'accessToken' => $currentTokenValue
+        ]);
 
-        try {
-            $payload = $this->jwtTokenGenerator->validateToken($oldToken);
-        } catch (Exception) {
-            return new BaseResponse(
-                401,
-                null,
-                'Invalid token'
-            )->toResponse();
+        if (!$accessToken || $accessToken->isExpired() || $accessToken->isRevoked()) {
+            return new BaseResponse(401, null, 'Invalid or expired refresh token')->toResponse();
         }
 
-        $user = $this->userRepository->findOneBy(['uuid' => $payload['uuid']]);
-
+        $user = $accessToken->getUser();
         if (!$user) {
-            return new BaseResponse(
-                401,
-                null,
-                'Invalid user'
-            )->toResponse();
+            return new BaseResponse(401, null, 'Invalid user')->toResponse();
         }
 
-        // Generate new token
-        $newToken = $this->jwtTokenGenerator->generateToken($user);
+        $accessToken->setIsRevoked(true);
+        $this->entityManager->persist($accessToken);
+        $this->entityManager->flush();
 
-        // Handle both string or array response from generateToken()
-        if (is_array($newToken)) {
-            if ($newToken['success'] === false) {
+      // Generate new access token
+        $newAccessToken = $this->jwtTokenGenerator->generateToken($user);
+
+        if (is_array($newAccessToken)) {
+            if ($newAccessToken['success'] === false) {
                 return new BaseResponse(
                     500,
                     null,
-                    $newToken['error'] ?? 'Token generation failed'
+                    $newAccessToken['error'] ?? 'Token generation failed'
                 )->toResponse();
             }
-            $newToken = $newToken['token'] ?? null;
+
+            if (!isset($newAccessToken['token'])) {
+                return new BaseResponse(500, null, 'Token generation failed')->toResponse();
+            }
+
+            $newAccessToken = $newAccessToken['token'];
         }
 
-        if (!$newToken) {
+        if (!$newAccessToken) {
             return new BaseResponse(500, null, 'Token generation failed')->toResponse();
         }
 
-        return new BaseResponse(200, ['token' => $newToken])->toResponse();
+
+      // Return new refresh token
+        $newRefreshToken = $this->refreshTokenRepository->createForUser($user);
+
+        return new BaseResponse(200, [
+        'access_token' => $newAccessToken,
+        'refresh_token' => $newRefreshToken->getAccessToken(),
+        'expires_in' => 3600,
+        ])->toResponse();
     }
 }

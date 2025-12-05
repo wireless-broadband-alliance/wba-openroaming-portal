@@ -6,6 +6,7 @@ use App\Api\V2\BaseResponse;
 use App\Controller\GoogleController;
 use App\Controller\MicrosoftController;
 use App\Entity\Event;
+use App\Entity\RefreshJwtToken;
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
 use App\Enum\AnalyticalEventType;
@@ -14,6 +15,7 @@ use App\Enum\SettingName;
 use App\Enum\SMSResponse;
 use App\Enum\UserProvider;
 use App\Enum\UserTwoFactorAuthenticationStatus;
+use App\Repository\RefreshJwtTokenRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use App\Service\AuthAPIResponseService;
@@ -29,6 +31,7 @@ use App\Service\TwoFAAPIService;
 use App\Service\TwoFAService;
 use App\Service\UserStatusChecker;
 use DateTime;
+use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use JsonException;
@@ -63,17 +66,18 @@ class AuthController extends AbstractController
         private readonly SendSMS $sendSMS,
         private readonly EmailGenerator $emailGenerator,
         private readonly AuthAPIResponseService $authAPIResponseService,
+        private readonly RefreshJwtTokenRepository $refreshJwtTokenRepository,
     ) {
     }
 
-    /**
-     * @throws ClientExceptionInterface
-     * @throws RedirectionExceptionInterface
-     * @throws ServerExceptionInterface
-     * @throws Exception
-     * @throws TransportExceptionInterface
-     * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
-     */
+  /**
+   * @throws ClientExceptionInterface
+   * @throws RedirectionExceptionInterface
+   * @throws ServerExceptionInterface
+   * @throws Exception
+   * @throws TransportExceptionInterface
+   * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
+   */
     #[Route('/auth/local', name: 'api_v2_auth_local', methods: ['POST'])]
     public function authLocal(Request $request): JsonResponse
     {
@@ -84,7 +88,7 @@ class AuthController extends AbstractController
         }
 
         $turnstileSetting = $this->settingRepository->findOneBy([
-            'name' => SettingName::TURNSTILE_CHECKER->value
+        'name' => SettingName::TURNSTILE_CHECKER->value
         ])->getValue();
         if (!$turnstileSetting) {
             throw new RuntimeException('Missing settings: TURNSTILE_CHECKER not found');
@@ -112,13 +116,13 @@ class AuthController extends AbstractController
         }
 
         $errors = [];
-        // Check for missing fields and add them to the array errors
+      // Check for missing fields and add them to the array errors
         if (empty($data['uuid'])) {
             $errors[] = 'uuid';
         }
 
         $isLoginWithUUIDOnly = $this->settingRepository->findOneBy([
-            'name' => SettingName::LOGIN_WITH_UUID_ONLY->value
+        'name' => SettingName::LOGIN_WITH_UUID_ONLY->value
         ])->getValue();
         if ($isLoginWithUUIDOnly === OperationMode::OFF->value && empty($data['password'])) {
             $errors[] = 'password';
@@ -132,12 +136,12 @@ class AuthController extends AbstractController
             )->toResponse();
         }
 
-        // Check if user exists are valid
+      // Check if user exists are valid
         $user = $this->userRepository->findOneBy(['uuid' => $data['uuid']]);
 
         if (!$user instanceof User) {
             return new BaseResponse(401, null, 'Invalid credentials')->toResponse();
-            // Bad Request Response
+          // Bad Request Response
         }
 
         if (!$this->passwordHasher->isPasswordValid($user, $data['password'])) {
@@ -150,22 +154,48 @@ class AuthController extends AbstractController
         }
 
         if ($isLoginWithUUIDOnly === OperationMode::OFF->value) {
-            // If the login with uuid is disabled generate JWT Token
-            $token = $this->tokenGenerator->generateToken($user);
-            if (is_array($token) && $token['success'] === false) {
-                $errorMessage = $token['error'] ?? 'Token generation failed.';
-                $statusCode = $errorMessage === 'Invalid user provided. Please verify the user data.' ? 400 : 500;
+            $now = new DateTimeImmutable();
 
-                return new BaseResponse($statusCode, null, $errorMessage)->toResponse();
+          // 1. Check for existing valid token
+            $existingTokenEntity = $this->refreshJwtTokenRepository->findOneBy([
+            'user' => $user,
+            'isRevoked' => false,
+            ]);
+
+            if ($existingTokenEntity && !$existingTokenEntity->isExpired()) {
+                $accessToken = $existingTokenEntity->getAccessToken();
+            } else {
+                $jwt = $this->tokenGenerator->generateToken($user);
+                $accessToken = null;
+
+                if (is_array($jwt)) {
+                    if ($jwt['success'] === true && isset($jwt['token'])) {
+                        $accessToken = $jwt['token'];
+                    } else {
+                        $errorMessage = $jwt['error'] ?? 'Token generation failed.';
+                        $statusCode = $errorMessage === 'Invalid user provided. Verify the user data.' ? 400 : 500;
+                        return new BaseResponse($statusCode, null, $errorMessage)->toResponse();
+                    }
+                } else {
+                    $accessToken = $jwt;
+                }
+
+                $tokenEntity = $existingTokenEntity ?: new RefreshJwtToken();
+                $tokenEntity->setUser($user)
+                ->setAccessToken($accessToken)
+                ->setIsRevoked(false)
+                ->setCreatedAt($now)
+                ->setExpiredAt($now->modify('+30 day'));
+
+                $this->entityManager->persist($tokenEntity);
+                $this->entityManager->flush();
             }
 
-            // Defines the Event to the table
             $eventMetaData = [
-                'user_agent' => $request->headers->get('User-Agent'),
-                'uuid' => $user->getUuid(),
-                'ip' => $request->getClientIp(),
+            'user_agent' => $request->headers->get('User-Agent'),
+            'uuid' => $user->getUuid(),
+            'ip' => $request->getClientIp(),
             ];
-
             $this->eventActions->saveEvent(
                 $user,
                 AnalyticalEventType::AUTH_LOCAL_API->value,
@@ -173,16 +203,16 @@ class AuthController extends AbstractController
                 $eventMetaData
             );
 
-            // Prepare response data
+          // Prepare response data
             $responseData = $user->toApiResponse([
-                'token' => $token,
+              'token' => $accessToken,
             ]);
 
-            // Return success response using BaseResponse
-            return new BaseResponse(200, $responseData)->toResponse(); # Success Response
+          // Return success response using BaseResponse
+            return new BaseResponse(200, $responseData)->toResponse();
         }
 
-        // If login with UUID is enabled, generate the SMS or email with the login link
+      // If login with UUID is enabled, generate the SMS or email with the login link
         $event = $this->magicLinkService->canSendLink($user);
         if (!($event instanceof Event)) {
             $providerId = $user->getUserExternalAuths()[0]->getProviderId();
@@ -229,9 +259,9 @@ class AuthController extends AbstractController
         }
 
         $eventMetaData = [
-            'user_agent' => $request->headers->get('User-Agent'),
-            'uuid' => $user->getUuid(),
-            'ip' => $request->getClientIp(),
+        'user_agent' => $request->headers->get('User-Agent'),
+        'uuid' => $user->getUuid(),
+        'ip' => $request->getClientIp(),
         ];
         $this->eventActions->saveEvent(
             $user,
@@ -249,7 +279,7 @@ class AuthController extends AbstractController
     #[Route('/auth/saml', name: 'api_v2_auth_saml', methods: ['POST'])]
     public function authSaml(Request $request, Auth $samlAuth): JsonResponse
     {
-        // Get SAML Response
+      // Get SAML Response
         $samlResponseRaw = $request->request->get('SAMLResponse');
 
         if (!is_string($samlResponseRaw) || $samlResponseRaw === '') {
@@ -264,7 +294,7 @@ class AuthController extends AbstractController
         );
         $idpCertificate = $samlResponseData['certificate'];
 
-        // Compare certificates
+      // Compare certificates
         if ($this->getParameter('app.saml_idp_x509_cert') !== $idpCertificate) {
             return new BaseResponse(
                 403,
@@ -274,10 +304,10 @@ class AuthController extends AbstractController
         }
 
         try {
-            // Load and validate the SAML response
+          // Load and validate the SAML response
             $samlAuth->processResponse();
 
-            // Handle errors from the SAML process
+          // Handle errors from the SAML process
             if ($samlAuth->getErrors()) {
                 return new BaseResponse(
                     401,
@@ -286,7 +316,7 @@ class AuthController extends AbstractController
                 )->toResponse(); // Unauthorized
             }
 
-            // Ensure the authentication was successful
+          // Ensure the authentication was successful
             if (!$samlAuth->isAuthenticated()) {
                 return new BaseResponse(
                     401,
@@ -298,17 +328,17 @@ class AuthController extends AbstractController
             $sAMAccountName = $samlAuth->getNameId();
             $attributes = $samlAuth->getAttributes();
 
-            // Extract the necessary attributes
+          // Extract the necessary attributes
             $uuid = $attributes['samlUuid'][0] ?? null;
             $email = $attributes['urn:oid:1.2.840.113549.1.9.1'][0] ?? null;
             $firstName = $attributes['urn:oid:2.5.4.42'][0] ?? null;
             $lastName = $attributes['urn:oid:2.5.4.4'][0] ?? null;
 
-            // Retrieve or create user based on SAML attributes
+          // Retrieve or create user based on SAML attributes
             $user = $this->userRepository->findOneBy(['uuid' => $uuid]);
 
             if (!$user) {
-                // User does not exist, create a new user
+              // User does not exist, create a new user
                 $user = new User();
                 $user->setEmail($email);
                 $user->setFirstName($firstName);
@@ -318,14 +348,14 @@ class AuthController extends AbstractController
                 $user->setIsVerified(true);
                 $user->setRoles([]);
 
-                // Persist the new user
+              // Persist the new user
                 $this->entityManager->persist($user);
 
-                // Create and persist the UserExternalAuth entity
+              // Create and persist the UserExternalAuth entity
                 $userAuth = new UserExternalAuth();
                 $userAuth->setUser($user)
-                    ->setProvider(UserProvider::SAML->value)
-                    ->setProviderId($sAMAccountName);
+                ->setProvider(UserProvider::SAML->value)
+                ->setProviderId($sAMAccountName);
 
                 $this->entityManager->persist($userAuth);
                 $this->entityManager->flush();
@@ -374,7 +404,7 @@ class AuthController extends AbstractController
                 )->toResponse();
             }
 
-            // Check if the email is valid
+          // Check if the email is valid
             if (!$this->userStatusChecker->isValidEmail($user->getEmail(), UserProvider::GOOGLE_ACCOUNT->value)) {
                 return new BaseResponse(
                     403,
@@ -391,17 +421,17 @@ class AuthController extends AbstractController
             // Authenticate the user using a custom Google authentication function already on the project
             $this->googleController->authenticateUserGoogle($user);
 
-            // Generate JWT Token and the success msg
+          // Generate JWT Token and the success msg
             return $this->authAPIResponseService->handleSuccessfulAuth(
                 $request,
                 $user,
                 AnalyticalEventType::AUTH_GOOGLE_API->value
             );
         } catch (IdentityProviderException) {
-            // Handle OAuth identity provider-specific errors
+          // Handle OAuth identity provider-specific errors
             return new BaseResponse(500, null, 'Authentication failed')->toResponse();
         } catch (Exception) {
-            // Handle any other general errors
+          // Handle any other general errors
             return new BaseResponse(500, null, 'An error occurred')->toResponse();
         }
     }
@@ -429,7 +459,7 @@ class AuthController extends AbstractController
                 )->toResponse();
             }
 
-            // Check if the email is valid
+          // Check if the email is valid
             if (!$this->userStatusChecker->isValidEmail($user->getEmail(), UserProvider::MICROSOFT_ACCOUNT->value)) {
                 return new BaseResponse(
                     403,
@@ -446,17 +476,17 @@ class AuthController extends AbstractController
             // Authenticate the user using a custom Microsoft authentication function already on the project
             $this->microsoftController->authenticateUserMicrosoft($user);
 
-            // Generate JWT Token and the success msg
+          // Generate JWT Token and the success msg
             return $this->authAPIResponseService->handleSuccessfulAuth(
                 $request,
                 $user,
                 AnalyticalEventType::AUTH_MICROSOFT_API->value
             );
         } catch (IdentityProviderException) {
-            // Handle OAuth identity provider-specific errors
+          // Handle OAuth identity provider-specific errors
             return new BaseResponse(500, null, 'Authentication failed')->toResponse();
         } catch (Exception) {
-            // Handle any other general errors
+          // Handle any other general errors
             return new BaseResponse(500, null, 'An error occurred')->toResponse();
         }
     }
