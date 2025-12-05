@@ -56,21 +56,26 @@ class AuthRefreshController extends AbstractController
       // Generate new access token
         $newAccessToken = $this->jwtTokenGenerator->generateToken($user);
 
-        if (is_array($newAccessToken) && $newAccessToken['success'] === false) {
-            return new BaseResponse(
-                500,
-                null,
-                $newAccessToken['error'] ?? 'Token generation failed'
-            )->toResponse();
-        }
-
         if (is_array($newAccessToken)) {
+            if ($newAccessToken['success'] === false) {
+                return new BaseResponse(
+                    500,
+                    null,
+                    $newAccessToken['error'] ?? 'Token generation failed'
+                )->toResponse();
+            }
+
+            if (!isset($newAccessToken['token'])) {
+                return new BaseResponse(500, null, 'Token generation failed')->toResponse();
+            }
+
             $newAccessToken = $newAccessToken['token'];
         }
 
         if (!$newAccessToken) {
             return new BaseResponse(500, null, 'Token generation failed')->toResponse();
         }
+
 
       // Return new refresh token
         $newRefreshToken = $this->refreshTokenRepository->createForUser($user);

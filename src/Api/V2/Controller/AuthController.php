@@ -224,18 +224,22 @@ class AuthController extends AbstractController
             ]);
 
             if ($existingTokenEntity && !$existingTokenEntity->isExpired()) {
-                // Reuse existing JWT if it's still valid
                 $accessToken = $existingTokenEntity->getAccessToken();
             } else {
-              // Generate new JWT access token
                 $jwt = $this->tokenGenerator->generateToken($user);
-                if (is_array($jwt) && $jwt['success'] === false) {
-                    $errorMessage = $jwt['error'] ?? 'Token generation failed.';
-                    $statusCode = $errorMessage === 'Invalid user provided. Please verify the user data.' ? 400 : 500;
+                $accessToken = null;
 
-                    return new BaseResponse($statusCode, null, $errorMessage)->toResponse();
+                if (is_array($jwt)) {
+                    if ($jwt['success'] === true && isset($jwt['token'])) {
+                        $accessToken = $jwt['token'];
+                    } else {
+                        $errorMessage = $jwt['error'] ?? 'Token generation failed.';
+                        $statusCode = $errorMessage === 'Invalid user provided. Please verify the user data.' ? 400 : 500;
+                        return new BaseResponse($statusCode, null, $errorMessage)->toResponse();
+                    }
+                } else {
+                    $accessToken = $jwt;
                 }
-                $accessToken = is_array($jwt) ? $jwt['token'] : $jwt;
 
                 $tokenEntity = $existingTokenEntity ?: new RefreshJwtToken();
                 $tokenEntity->setUser($user)

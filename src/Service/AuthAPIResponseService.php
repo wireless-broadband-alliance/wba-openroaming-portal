@@ -45,7 +45,18 @@ readonly class AuthAPIResponseService
                 return new BaseResponse($statusCode, null, $errorMessage)->toResponse();
             }
 
-            $accessToken = is_array($jwt) ? $jwt['token'] : $jwt;
+            if (is_array($jwt)) {
+                if (($jwt['success'] ?? false) === true && isset($jwt['token'])) {
+                    $accessToken = $jwt['token'];
+                } else {
+                    $errorMessage = $jwt['error'] ?? 'Token generation failed';
+                    $statusCode = $errorMessage === 'Invalid user provided. Please verify the user data.' ? 400 : 500;
+
+                    return new BaseResponse($statusCode, null, $errorMessage)->toResponse();
+                }
+            } else {
+                $accessToken = $jwt;
+            }
 
           // Create new refresh token entity
             $tokenEntity = $existingTokenEntity ?: new RefreshJwtToken();
