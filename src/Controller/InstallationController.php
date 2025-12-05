@@ -700,6 +700,9 @@ class InstallationController extends AbstractController
                 $this->entityManager->persist($lastInstallation);
                 $this->entityManager->flush();
 
+                $session = $request->getSession();
+                $session->set('installation_verification', true);
+
                 /** @var User $user */
                 $user = $this->getUser();
 
