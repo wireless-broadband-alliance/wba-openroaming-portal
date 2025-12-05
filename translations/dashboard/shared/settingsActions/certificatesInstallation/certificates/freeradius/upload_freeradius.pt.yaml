@@ -4,6 +4,7 @@ radsecproxy_process:
     next_phase: "Pode agora prosseguir para a fase seguinte:"
     details: "Envio, configuração e teste dos certificados do FreeRADIUS."
 
+return: 'Retornar'
 title: "Envio de Certificados FreeRADIUS"
 
 ca:

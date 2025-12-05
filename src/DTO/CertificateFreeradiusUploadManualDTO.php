@@ -20,7 +20,7 @@ use App\Validator\Constraints as CustomAssert;
     chainField: 'chain',
     rootField: 'ca'
 )]
-class CertificateFreeradiusUploadDTO
+class CertificateFreeradiusUploadManualDTO
 {
     public array $notices = [];
 

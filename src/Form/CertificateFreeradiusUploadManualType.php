@@ -2,13 +2,13 @@
 
 namespace App\Form;
 
-use App\DTO\CertificateFreeradiusUploadDTO;
+use App\DTO\CertificateFreeradiusUploadManualDTO;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Vich\UploaderBundle\Form\Type\VichFileType;
 
-class CertificateFreeradiusUploadType extends AbstractType
+class CertificateFreeradiusUploadManualType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
@@ -48,7 +48,7 @@ class CertificateFreeradiusUploadType extends AbstractType
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'data_class' => CertificateFreeradiusUploadDTO::class,
+            'data_class' => CertificateFreeradiusUploadManualDTO::class,
         ]);
     }
 }

@@ -5,7 +5,7 @@ namespace App\Validator\Constraints;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
-use App\DTO\CertificateFreeradiusUploadDTO;
+use App\DTO\CertificateFreeradiusUploadManualDTO;
 
 class IsLetsEncryptCertificateValidator extends ConstraintValidator
 {
@@ -58,8 +58,8 @@ class IsLetsEncryptCertificateValidator extends ConstraintValidator
         }
 
         // If certificate **is** from Let's Encrypt → add notice warning
-        if ($isLetsEncrypt && $this->context->getObject() instanceof CertificateFreeradiusUploadDTO) {
-            /** @var CertificateFreeradiusUploadDTO $dto */
+        if ($isLetsEncrypt && $this->context->getObject() instanceof CertificateFreeradiusUploadManualDTO) {
+            /** @var CertificateFreeradiusUploadManualDTO $dto */
             $dto = $this->context->getObject();
             $dto->notices[] = 'CERTIFICATE_LETS_ENCRYPT_WARNING';
         }

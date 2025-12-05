@@ -1,0 +1,13 @@
+<div class="flex flex-col sm:flex-row justify-end items-stretch sm:items-center gap-2 sm:gap-3 mb-4">
+  <a href="{{ path('admin_dashboard_settings_certs_management_freeradius_selection') }}"
+     class="w-full sm:w-auto flex items-center gap-2
+          px-3 py-1.5 sm:px-4 sm:py-2
+          text-xs sm:text-sm
+          rounded-lg shadow font-medium
+          text-gray-700 bg-white border border-gray-200
+          hover:bg-gray-50 hover:border-gray-300 transition">
+    <twig:ux:icon name="wba:return"
+                  class="w-4 h-4 opacity-70 fill-current"/>
+    {{ 'return'|trans({}, 'upload_freeradius') }}
+  </a>
+</div>

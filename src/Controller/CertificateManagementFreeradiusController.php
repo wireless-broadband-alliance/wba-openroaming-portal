@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
-use App\DTO\CertificateFreeradiusUploadDTO;
+use App\DTO\CertificateFreeradiusUploadManualDTO;
 use App\Entity\CertificateSetupProcess;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
@@ -13,7 +13,7 @@ use App\Enum\CertificateMachineType;
 use App\Enum\CertificateTestResult;
 use App\Enum\FirewallType;
 use App\Enum\TrustedWBAFingerprints;
-use App\Form\CertificateFreeradiusUploadType;
+use App\Form\CertificateFreeradiusUploadManualType;
 use App\Form\SimpleSubmitFormType;
 use App\Service\CertificateFreeradiusCommandsService;
 use App\Service\CertificateFreeradiusInfoService;
@@ -79,10 +79,10 @@ class CertificateManagementFreeradiusController extends AbstractController
     $data = $this->getSettings->getSettings();
 
     // Prepare DTO
-    $certificateUploadDTO = new CertificateFreeradiusUploadDTO();
+    $certificateUploadDTO = new CertificateFreeradiusUploadManualDTO();
 
     // Create & handle form
-    $form = $this->createForm(CertificateFreeradiusUploadType::class, $certificateUploadDTO);
+    $form = $this->createForm(CertificateFreeradiusUploadManualType::class, $certificateUploadDTO);
     $form->handleRequest($request);
 
     if ($form->isSubmitted() && $form->isValid()) {
@@ -111,7 +111,7 @@ class CertificateManagementFreeradiusController extends AbstractController
         $process->setIsFreeradiusCertEV(false);
         $this->addFlash(
             'warning',
-            $this->translator->trans('cert_is_lets_encrypt_warning', [], 'controllers')
+            $this->translator->trans('cert_uploaded_are_lets_encrypt_warning', [], 'controllers')
         );
       } else {
         $process->setIsFreeradiusCertEV(true);
@@ -179,7 +179,7 @@ class CertificateManagementFreeradiusController extends AbstractController
       $user = $this->getUser();
       $this->eventActions->saveEvent(
           $user,
-          AnalyticalEventType::CERTIFICATE_SETUP_PROCESS_FREERAEDIUS_UPLOAD->value,
+          AnalyticalEventType::CERTIFICATE_SETUP_PROCESS_FREERAEDIUS_UPLOAD_MANUAL->value,
           new DateTime(),
           [
               'ip' => $request->getClientIp(),
@@ -216,9 +216,94 @@ class CertificateManagementFreeradiusController extends AbstractController
       name: 'admin_dashboard_settings_certs_freeradius_auto_renew',
   )]
   #[IsGranted('ROLE_ADMIN')]
-  public function settingsCertificatesManagementFreeradiusAutoRenewAction(
+  public function settingsCertificatesManagementFreeradiusAutoRenewAction(Request $request
   ): Response {
-    dd('potato preparing this page later');
+    // Get current process state
+    $processState = $this->certificateProcessCheckerService->getProcessState();
+
+    // If there's no active process
+    if (!$processState['active']) {
+      $this->addFlash(
+          'error',
+          $this->translator->trans(
+              'noActiveProcess',
+              [],
+              'CertificateProcessCheckerService'
+          )
+      );
+      return $this->redirectToRoute('admin_dashboard_settings_certs_radsecproxy_upload');
+    }
+
+    $data = $this->getSettings->getSettings();
+
+    // Prepare DTO
+    $certificateUploadDTO = new CertificateFreeradiusUploadAutoDTO();
+
+    // Create & handle form
+    $form = $this->createForm(CertificateFreeradiusUploadAutoType::class, $certificateUploadDTO);
+    $form->handleRequest($request);
+
+    if ($form->isSubmitted() && $form->isValid()) {
+      $process = $this->certificateProcessCheckerService->getCurrentProcess();
+      // In case there's not active process
+      if (!$process instanceof CertificateSetupProcess) {
+        $this->addFlash(
+            'error',
+            $this->translator->trans('noActiveProcess', [], 'CertificateProcessCheckerService')
+        );
+        return $this->redirectToRoute('admin_dashboard_settings_certs_radsecproxy_upload');
+      }
+
+      // TODO generate the new certs here with the command of the cert bot
+      // place them on the var tmp folder -> also update the db and define the unique tag for them
+      // only the config should take them and place the new ones on the signign-keys
+
+      // After the files are validated and the processed, update them once again to add
+      $process->setFreeradiusFormCompletedAt(new DateTimeImmutable());
+      $process->setUpdatedAt(new DateTimeImmutable());
+
+      $this->entityManager->persist($process);
+      $this->entityManager->flush();
+
+      /** @var User $user */
+      $user = $this->getUser();
+      $this->eventActions->saveEvent(
+          $user,
+          AnalyticalEventType::CERTIFICATE_SETUP_PROCESS_FREERAEDIUS_UPLOAD_AUTO->value,
+          new DateTime(),
+          [
+              'ip' => $request->getClientIp(),
+              'user_agent' => $request->headers->get('User-Agent'),
+              'by' => $user->getUuid(),
+          ]
+      );
+
+      $this->addFlash(
+          'warning',
+          $this->translator->trans('cert_generated_are_lets_encrypt_warning', [], 'controllers')
+      );
+
+      $this->addFlash(
+          'success',
+          $this->translator->trans(
+              'freeradiusCertUploadedSuccessfully',
+              [],
+              'controllers'
+          )
+      );
+
+      return $this->redirectToRoute('admin_dashboard_settings_certs_freeradius_config');
+    }
+
+    return $this->render(
+        'dashboard/shared/settings_actions/certificatesManagement/certificates/freeradius/auto_renew.html.twig',
+        [
+            'data' => $data,
+            'certificateUploadDTO' => $certificateUploadDTO,
+            'form' => $form->createView(),
+            'context' => FirewallType::DASHBOARD->value,
+        ]
+    );
   }
 
   #[Route(
@@ -303,6 +388,9 @@ class CertificateManagementFreeradiusController extends AbstractController
             }
           }
         }
+
+        // TODO make new service to update the settings based on the content of the cert.pem -> need to update the DB
+        dd($certContent);
 
         $process->setFreeradiusConfigAppliedAt(new DateTimeImmutable());
         $process->setUpdatedAt(new DateTimeImmutable());
