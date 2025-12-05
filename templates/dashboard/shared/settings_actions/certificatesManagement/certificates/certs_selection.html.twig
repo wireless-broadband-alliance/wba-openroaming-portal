@@ -5,38 +5,36 @@
   <div class="w-full px-4 py-8 space-y-12">
     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
       {# Manual Setup #}
-      <a href="#"
-         onclick="return confirm('{{ 'confirmReinstall'|trans({}, '_certificates') }}')"
+      <a href="{{ path('admin_dashboard_settings_certs_freeradius_upload') }}"
          class="group flex flex-col items-center text-center bg-white shadow-md rounded-2xl p-8 border border-gray-200
                   transition-all hover:shadow-lg hover:-translate-y-1">
 
         <h2 class="text-xl md:text-2xl font-bold mb-6 transition-colors group-hover:text-primary">
-          {{ 'tittleCert'|trans({}, '_certificates') }}
+          {{ 'manualTitle'|trans({}, 'certs_selection') }}
         </h2>
 
-        <twig:ux:icon name="wba:shield-check"
-                      class="w-10 h-10 text-gray-600 transition-colors group-hover:text-primary mb-6" />
+        <twig:ux:icon name="wba:cloud-upload"
+                      class="w-10 h-10 text-gray-600 transition-colors group-hover:text-primary mb-6"/>
 
         <div class="mt-auto pt-3 font-semibold text-gray-700 transition-colors group-hover:text-primary group-hover:underline">
-          {{ 'renewCertificates'|trans({}, '_certificates') }}
+          {{ 'manualSubtitle'|trans({}, 'certs_selection') }}
         </div>
       </a>
 
       {# Auto Generation Lets Encrypt #}
-      <a href="#"
-         onclick="return confirm('{{ 'confirmReinstall'|trans({}, '_certificates') }}')"
+      <a href="{{ path('admin_dashboard_settings_certs_freeradius_auto_renew') }}"
          class="group flex flex-col items-center text-center bg-white shadow-md rounded-2xl p-8 border border-gray-200
                   transition-all hover:shadow-lg hover:-translate-y-1">
 
         <h2 class="text-xl md:text-2xl font-bold mb-6 transition-colors group-hover:text-primary">
-          {{ 'tittleCert'|trans({}, '_certificates') }}
+          {{ 'autoTitle'|trans({}, 'certs_selection') }}
         </h2>
 
-        <twig:ux:icon name="wba:shield-check"
-                      class="w-10 h-10 text-gray-600 transition-colors group-hover:text-primary mb-6" />
+        <twig:ux:icon name="wba:autorenew-rounded"
+                      class="w-10 h-10 text-gray-600 transition-colors group-hover:text-primary mb-6"/>
 
         <div class="mt-auto pt-3 font-semibold text-gray-700 transition-colors group-hover:text-primary group-hover:underline">
-          {{ 'renewCertificates'|trans({}, '_certificates') }}
+          {{ 'autoSubtitle'|trans({}, 'certs_selection') }}
         </div>
       </a>
     </div>

@@ -39,418 +39,428 @@ use Throwable;
 
 class CertificateManagementFreeradiusController extends AbstractController
 {
-    public function __construct(
-        private readonly GetSettings $getSettings,
-        private readonly TranslatorInterface $translator,
-        private readonly CertificateProcessCheckerService $certificateProcessCheckerService,
-        private readonly CertificateStorageService $certificateStorageService,
-        private readonly EntityManagerInterface $entityManager,
-        private readonly CertificateFreeradiusInfoService $certificateFreeradiusInfoService,
-        private readonly CertificateFreeradiusCommandsService $certificateFreeradiusCommandsService,
-        private readonly CertificateWriterUpdateService $certificateWriterUpdateService,
-        private readonly EventActions $eventActions,
-    ) {
+  public function __construct(
+      private readonly GetSettings $getSettings,
+      private readonly TranslatorInterface $translator,
+      private readonly CertificateProcessCheckerService $certificateProcessCheckerService,
+      private readonly CertificateStorageService $certificateStorageService,
+      private readonly EntityManagerInterface $entityManager,
+      private readonly CertificateFreeradiusInfoService $certificateFreeradiusInfoService,
+      private readonly CertificateFreeradiusCommandsService $certificateFreeradiusCommandsService,
+      private readonly CertificateWriterUpdateService $certificateWriterUpdateService,
+      private readonly EventActions $eventActions,
+  ) {
+  }
+
+  #[Route(
+      '/dashboard/settings/certificatesManagement/freeradius/upload',
+      name: 'admin_dashboard_settings_certs_freeradius_upload'
+  )]
+  #[IsGranted('ROLE_ADMIN')]
+  public function settingsCertificatesManagementFreeradiusUpload(
+      Request $request
+  ): Response {
+    // Get current process state
+    $processState = $this->certificateProcessCheckerService->getProcessState();
+
+    // If there's no active process
+    if (!$processState['active']) {
+      $this->addFlash(
+          'error',
+          $this->translator->trans(
+              'noActiveProcess',
+              [],
+              'CertificateProcessCheckerService'
+          )
+      );
+      return $this->redirectToRoute('admin_dashboard_settings_certs_radsecproxy_upload');
     }
 
-    #[Route(
-        '/dashboard/settings/certificatesManagement/freeradius/upload',
-        name: 'admin_dashboard_settings_certs_freeradius_upload'
-    )]
-    #[IsGranted('ROLE_ADMIN')]
-    public function settingsCertificatesManagementFreeradiusUpload(
-        Request $request
-    ): Response {
-        // Get current process state
-        $processState = $this->certificateProcessCheckerService->getProcessState();
+    $data = $this->getSettings->getSettings();
 
-        // If there's no active process
-        if (!$processState['active']) {
-            $this->addFlash(
-                'error',
-                $this->translator->trans(
-                    'noActiveProcess',
-                    [],
-                    'CertificateProcessCheckerService'
-                )
-            );
-            return $this->redirectToRoute('admin_dashboard_settings_certs_radsecproxy_upload');
-        }
+    // Prepare DTO
+    $certificateUploadDTO = new CertificateFreeradiusUploadDTO();
 
-        $data = $this->getSettings->getSettings();
+    // Create & handle form
+    $form = $this->createForm(CertificateFreeradiusUploadType::class, $certificateUploadDTO);
+    $form->handleRequest($request);
 
-        // Prepare DTO
-        $certificateUploadDTO = new CertificateFreeradiusUploadDTO();
-
-        // Create & handle form
-        $form = $this->createForm(CertificateFreeradiusUploadType::class, $certificateUploadDTO);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $process = $this->certificateProcessCheckerService->getCurrentProcess();
-            // In case there's not active process
-            if (!$process instanceof CertificateSetupProcess) {
-                $this->addFlash(
-                    'error',
-                    $this->translator->trans('noActiveProcess', [], 'CertificateProcessCheckerService')
-                );
-                return $this->redirectToRoute('admin_dashboard_settings_certs_radsecproxy_upload');
-            }
-
-            // Check if the uploaded cert is a EV
-            if (in_array('CERTIFICATE_NOT_EV_WARNING', $certificateUploadDTO->notices, true)) {
-                $process->setIsFreeradiusCertEV(false);
-                $this->addFlash(
-                    'warning',
-                    $this->translator->trans('not_ev_warning', [], 'controllers')
-                );
-            } else {
-                $process->setIsFreeradiusCertEV(true);
-            }
-
-            if (in_array('CERTIFICATE_LETS_ENCRYPT_WARNING', $certificateUploadDTO->notices, true)) {
-                $process->setIsFreeradiusCertEV(false);
-                $this->addFlash(
-                    'warning',
-                    $this->translator->trans('cert_is_lets_encrypt_warning', [], 'controllers')
-                );
-            } else {
-                $process->setIsFreeradiusCertEV(true);
-            }
-
-            if ($certificateUploadDTO->ca instanceof UploadedFile) {
-                // Save on the tmp folder the uploaded certificates after the validation
-                $this->certificateStorageService->storeUploadedFile(
-                    $certificateUploadDTO->ca,
-                    CertificateMachineType::FREERADIUS->value,
-                    CertificateFileName::CA_PEM->value,
-                    $process
-                );
-            }
-
-            if ($certificateUploadDTO->cert instanceof UploadedFile) {
-                // Save on the tmp folder the uploaded certificates after the validation
-                $this->certificateStorageService->storeUploadedFile(
-                    $certificateUploadDTO->cert,
-                    CertificateMachineType::FREERADIUS->value,
-                    CertificateFileName::CERT_PEM->value,
-                    $process
-                );
-            }
-
-            if ($certificateUploadDTO->chain instanceof UploadedFile) {
-                // Save on the tmp folder the uploaded certificates after the validation
-                $this->certificateStorageService->storeUploadedFile(
-                    $certificateUploadDTO->chain,
-                    CertificateMachineType::FREERADIUS->value,
-                    CertificateFileName::CHAIN_PEM->value,
-                    $process
-                );
-            }
-
-            if ($certificateUploadDTO->fullChain instanceof UploadedFile) {
-                // Save on the tmp folder the uploaded certificates after the validation
-                $this->certificateStorageService->storeUploadedFile(
-                    $certificateUploadDTO->fullChain,
-                    CertificateMachineType::FREERADIUS->value,
-                    CertificateFileName::FULL_CHAIN_PEM->value,
-                    $process
-                );
-            }
-
-            if ($certificateUploadDTO->privKey instanceof UploadedFile) {
-                // Save on the tmp folder the uploaded certificates after the validation
-                $this->certificateStorageService->storeUploadedFile(
-                    $certificateUploadDTO->privKey,
-                    CertificateMachineType::FREERADIUS->value,
-                    CertificateFileName::PRIVATE_KEY_PEM->value,
-                    $process,
-                    true
-                );
-            }
-
-            // After the files are validated and the processed, update them once again to add
-            $process->setFreeradiusFormCompletedAt(new DateTimeImmutable());
-            $process->setUpdatedAt(new DateTimeImmutable());
-
-            $this->entityManager->persist($process);
-            $this->entityManager->flush();
-
-            /** @var User $user */
-            $user = $this->getUser();
-            $this->eventActions->saveEvent(
-                $user,
-                AnalyticalEventType::CERTIFICATE_SETUP_PROCESS_FREERAEDIUS_UPLOAD->value,
-                new DateTime(),
-                [
-                    'ip' => $request->getClientIp(),
-                    'user_agent' => $request->headers->get('User-Agent'),
-                    'by' => $user->getUuid(),
-                ]
-            );
-
-            $this->addFlash(
-                'success',
-                $this->translator->trans(
-                    'freeradiusCertUploadedSuccessfully',
-                    [],
-                    'controllers'
-                )
-            );
-
-            return $this->redirectToRoute('admin_dashboard_settings_certs_freeradius_config');
-        }
-
-        return $this->render(
-            'dashboard/shared/settings_actions/certificatesManagement/certificates/freeradius/upload.html.twig',
-            [
-                'data' => $data,
-                'certificateUploadDTO' => $certificateUploadDTO,
-                'form' => $form->createView(),
-                'context' => FirewallType::DASHBOARD->value,
-            ]
+    if ($form->isSubmitted() && $form->isValid()) {
+      $process = $this->certificateProcessCheckerService->getCurrentProcess();
+      // In case there's not active process
+      if (!$process instanceof CertificateSetupProcess) {
+        $this->addFlash(
+            'error',
+            $this->translator->trans('noActiveProcess', [], 'CertificateProcessCheckerService')
         );
+        return $this->redirectToRoute('admin_dashboard_settings_certs_radsecproxy_upload');
+      }
+
+      // Check if the uploaded cert is a EV
+      if (in_array('CERTIFICATE_NOT_EV_WARNING', $certificateUploadDTO->notices, true)) {
+        $process->setIsFreeradiusCertEV(false);
+        $this->addFlash(
+            'warning',
+            $this->translator->trans('not_ev_warning', [], 'controllers')
+        );
+      } else {
+        $process->setIsFreeradiusCertEV(true);
+      }
+
+      if (in_array('CERTIFICATE_LETS_ENCRYPT_WARNING', $certificateUploadDTO->notices, true)) {
+        $process->setIsFreeradiusCertEV(false);
+        $this->addFlash(
+            'warning',
+            $this->translator->trans('cert_is_lets_encrypt_warning', [], 'controllers')
+        );
+      } else {
+        $process->setIsFreeradiusCertEV(true);
+      }
+
+      if ($certificateUploadDTO->ca instanceof UploadedFile) {
+        // Save on the tmp folder the uploaded certificates after the validation
+        $this->certificateStorageService->storeUploadedFile(
+            $certificateUploadDTO->ca,
+            CertificateMachineType::FREERADIUS->value,
+            CertificateFileName::CA_PEM->value,
+            $process
+        );
+      }
+
+      if ($certificateUploadDTO->cert instanceof UploadedFile) {
+        // Save on the tmp folder the uploaded certificates after the validation
+        $this->certificateStorageService->storeUploadedFile(
+            $certificateUploadDTO->cert,
+            CertificateMachineType::FREERADIUS->value,
+            CertificateFileName::CERT_PEM->value,
+            $process
+        );
+      }
+
+      if ($certificateUploadDTO->chain instanceof UploadedFile) {
+        // Save on the tmp folder the uploaded certificates after the validation
+        $this->certificateStorageService->storeUploadedFile(
+            $certificateUploadDTO->chain,
+            CertificateMachineType::FREERADIUS->value,
+            CertificateFileName::CHAIN_PEM->value,
+            $process
+        );
+      }
+
+      if ($certificateUploadDTO->fullChain instanceof UploadedFile) {
+        // Save on the tmp folder the uploaded certificates after the validation
+        $this->certificateStorageService->storeUploadedFile(
+            $certificateUploadDTO->fullChain,
+            CertificateMachineType::FREERADIUS->value,
+            CertificateFileName::FULL_CHAIN_PEM->value,
+            $process
+        );
+      }
+
+      if ($certificateUploadDTO->privKey instanceof UploadedFile) {
+        // Save on the tmp folder the uploaded certificates after the validation
+        $this->certificateStorageService->storeUploadedFile(
+            $certificateUploadDTO->privKey,
+            CertificateMachineType::FREERADIUS->value,
+            CertificateFileName::PRIVATE_KEY_PEM->value,
+            $process,
+            true
+        );
+      }
+
+      // After the files are validated and the processed, update them once again to add
+      $process->setFreeradiusFormCompletedAt(new DateTimeImmutable());
+      $process->setUpdatedAt(new DateTimeImmutable());
+
+      $this->entityManager->persist($process);
+      $this->entityManager->flush();
+
+      /** @var User $user */
+      $user = $this->getUser();
+      $this->eventActions->saveEvent(
+          $user,
+          AnalyticalEventType::CERTIFICATE_SETUP_PROCESS_FREERAEDIUS_UPLOAD->value,
+          new DateTime(),
+          [
+              'ip' => $request->getClientIp(),
+              'user_agent' => $request->headers->get('User-Agent'),
+              'by' => $user->getUuid(),
+          ]
+      );
+
+      $this->addFlash(
+          'success',
+          $this->translator->trans(
+              'freeradiusCertUploadedSuccessfully',
+              [],
+              'controllers'
+          )
+      );
+
+      return $this->redirectToRoute('admin_dashboard_settings_certs_freeradius_config');
     }
 
-    #[Route(
-        '/dashboard/settings/certificatesManagement/freeradius/config',
-        name: 'admin_dashboard_settings_certs_freeradius_config'
-    )]
-    #[IsGranted('ROLE_ADMIN')]
-    public function settingsCertificatesManagementFreeradiusConfig(Request $request): Response
-    {
-        // Get current process state
-        $processState = $this->certificateProcessCheckerService->getProcessState();
-        $process = $processState['process'] ?? null;
+    return $this->render(
+        'dashboard/shared/settings_actions/certificatesManagement/certificates/freeradius/upload.html.twig',
+        [
+            'data' => $data,
+            'certificateUploadDTO' => $certificateUploadDTO,
+            'form' => $form->createView(),
+            'context' => FirewallType::DASHBOARD->value,
+        ]
+    );
+  }
 
-        // If there's no active process
-        if (!$processState['active']) {
-            $this->addFlash(
-                'error',
-                $this->translator->trans(
-                    'noActiveProcess',
-                    [],
-                    'CertificateProcessCheckerService'
-                )
-            );
-            return $this->redirectToRoute('admin_dashboard_settings_certs_radsecproxy_upload');
-        }
+  #[Route(
+      '/dashboard/settings/certificatesManagement/freeradius/autoRenew',
+      name: 'admin_dashboard_settings_certs_freeradius_auto_renew',
+  )]
+  #[IsGranted('ROLE_ADMIN')]
+  public function settingsCertificatesManagementFreeradiusAutoRenewAction(
+  ): Response {
+    dd('potato preparing this page later');
+  }
 
-        // Return last uploaded certificates from the previous step and reads the contents
-        $certificateSet = $this->certificateFreeradiusInfoService->getLatestCertificatesSet($process);
+  #[Route(
+      '/dashboard/settings/certificatesManagement/freeradius/config',
+      name: 'admin_dashboard_settings_certs_freeradius_config'
+  )]
+  #[IsGranted('ROLE_ADMIN')]
+  public function settingsCertificatesManagementFreeradiusConfig(Request $request): Response
+  {
+    // Get current process state
+    $processState = $this->certificateProcessCheckerService->getProcessState();
+    $process = $processState['process'] ?? null;
 
-        // Fetch any data/settings needed for the page
-        $data = $this->getSettings->getSettings();
-        $commands = $this->certificateFreeradiusCommandsService->getRenewCommands($certificateSet);
+    // If there's no active process
+    if (!$processState['active']) {
+      $this->addFlash(
+          'error',
+          $this->translator->trans(
+              'noActiveProcess',
+              [],
+              'CertificateProcessCheckerService'
+          )
+      );
+      return $this->redirectToRoute('admin_dashboard_settings_certs_radsecproxy_upload');
+    }
 
-        // Form handling
-        $form = $this->createForm(SimpleSubmitFormType::class);
-        $form->handleRequest($request);
+    // Return last uploaded certificates from the previous step and reads the contents
+    $certificateSet = $this->certificateFreeradiusInfoService->getLatestCertificatesSet($process);
 
-        if ($form->isSubmitted()) {
-            if ($process?->getFreeradiusConfigAppliedAt() instanceof DateTimeImmutable) {
-                $this->addFlash(
-                    'error',
-                    $this->translator->trans('configAlreadyApplied', [], 'controllers')
-                );
-            } elseif ($form->isValid()) {
-                $process = $this->certificateProcessCheckerService->getCurrentProcess();
-                // Update local certificates in "signing-keys"
-                $this->certificateWriterUpdateService->writeCertificates($certificateSet);
+    // Fetch any data/settings needed for the page
+    $data = $this->getSettings->getSettings();
+    $commands = $this->certificateFreeradiusCommandsService->getRenewCommands($certificateSet);
 
-                // Check if the uploaded cert is a EV
-                $certContent = $certificateSet['certFREERADIUS']['content'] ?? null;
+    // Form handling
+    $form = $this->createForm(SimpleSubmitFormType::class);
+    $form->handleRequest($request);
 
-                if ($certContent !== null) {
-                    $isEv = $this->certificateFreeradiusInfoService->isEvCertificate($certContent);
+    if ($form->isSubmitted()) {
+      if ($process?->getFreeradiusConfigAppliedAt() instanceof DateTimeImmutable) {
+        $this->addFlash(
+            'error',
+            $this->translator->trans('configAlreadyApplied', [], 'controllers')
+        );
+      } elseif ($form->isValid()) {
+        $process = $this->certificateProcessCheckerService->getCurrentProcess();
+        // Update local certificates in "signing-keys"
+        $this->certificateWriterUpdateService->writeCertificates($certificateSet);
 
-                    // If the uploaded certificates are EV's it should generate the PfxSigningKey for windows profiles
-                    if ($isEv) {
-                        $scriptPath = $this->getParameter('kernel.project_dir') . '/tools/generatePfxSigningKey.sh';
-                        $generatePFX = new Process(['/bin/sh', $scriptPath]);
-                        $generatePFX->setTimeout(30);
+        // Check if the uploaded cert is a EV
+        $certContent = $certificateSet['certFREERADIUS']['content'] ?? null;
 
-                        try {
-                            $generatePFX->run();
+        if ($certContent !== null) {
+          $isEv = $this->certificateFreeradiusInfoService->isEvCertificate($certContent);
 
-                            if (!$generatePFX->isSuccessful()) {
-                                throw new ProcessFailedException($generatePFX);
-                            }
+          // If the uploaded certificates are EV's it should generate the PfxSigningKey for windows profiles
+          if ($isEv) {
+            $scriptPath = $this->getParameter('kernel.project_dir') . '/tools/generatePfxSigningKey.sh';
+            $generatePFX = new Process(['/bin/sh', $scriptPath]);
+            $generatePFX->setTimeout(30);
 
-                            $this->addFlash(
-                                'success',
-                                $this->translator->trans('pfx.success', [], 'controllers')
-                            );
-                        } catch (Throwable) {
-                            $this->addFlash(
-                                'error',
-                                $this->translator->trans('pfx.failure', [], 'controllers')
-                            );
+            try {
+              $generatePFX->run();
 
-                            // Redirect to the next stage automatically
-                            return $this->redirectToRoute(
-                                'admin_dashboard_settings_certs_freeradius_upload',
-                            );
-                        }
-                    }
-                }
+              if (!$generatePFX->isSuccessful()) {
+                throw new ProcessFailedException($generatePFX);
+              }
 
-                $process->setFreeradiusConfigAppliedAt(new DateTimeImmutable());
-                $process->setUpdatedAt(new DateTimeImmutable());
+              $this->addFlash(
+                  'success',
+                  $this->translator->trans('pfx.success', [], 'controllers')
+              );
+            } catch (Throwable) {
+              $this->addFlash(
+                  'error',
+                  $this->translator->trans('pfx.failure', [], 'controllers')
+              );
 
-                $this->entityManager->persist($process);
-                $this->entityManager->flush();
-
-                /** @var User $user */
-                $user = $this->getUser();
-                $this->eventActions->saveEvent(
-                    $user,
-                    AnalyticalEventType::CERTIFICATE_SETUP_PROCESS_FREERAEDIUS_CONFIG->value,
-                    new DateTime(),
-                    [
-                        'ip' => $request->getClientIp(),
-                        'user_agent' => $request->headers->get('User-Agent'),
-                        'by' => $user->getUuid(),
-                    ]
-                );
-
-                $this->addFlash(
-                    'success',
-                    $this->translator->trans('freeradiusConfigAppliedSuccessfully', [], 'controllers')
-                );
-
-                // Redirect to the next stage automatically
-                return $this->redirectToRoute(
-                    'admin_dashboard_settings_certs_freeradius_test',
-                );
+              // Redirect to the next stage automatically
+              return $this->redirectToRoute(
+                  'admin_dashboard_settings_certs_freeradius_upload',
+              );
             }
+          }
         }
 
-        return $this->render(
-            'dashboard/shared/settings_actions/certificatesManagement/certificates/freeradius/config.html.twig',
-            [
-                'data' => $data,
-                'form' => $form->createView(),
-                'processState' => $processState,
-                'certificateSet' => $certificateSet,
-                'commands' => $commands,
-            ]
-        );
-    }
+        $process->setFreeradiusConfigAppliedAt(new DateTimeImmutable());
+        $process->setUpdatedAt(new DateTimeImmutable());
 
-    #[Route(
-        '/dashboard/settings/certificatesManagement/freeradius/test',
-        name: 'admin_dashboard_settings_certs_freeradius_test'
-    )]
-    #[IsGranted('ROLE_ADMIN')]
-    public function settingsCertificatesManagementFreeradiusTest(): Response
-    {
-        // Get current process state
-        $processState = $this->certificateProcessCheckerService->getProcessState();
-
-        // If no active process, redirect to the first stage or fallback
-        if (!$processState['active']) {
-            $this->addFlash(
-                'error',
-                $this->translator->trans(
-                    'noActiveProcess',
-                    [],
-                    'CertificateProcessCheckerService'
-                )
-            );
-            return $this->redirectToRoute('admin_dashboard_settings_certs_radsecproxy_upload');
-        }
-
-        // Fetch settings/data needed for the page
-        $data = $this->getSettings->getSettings();
-
-        return $this->render(
-            'dashboard/shared/settings_actions/certificatesManagement/certificates/freeradius/test.html.twig',
-            [
-                'data' => $data,
-                'processState' => $processState,
-                'process' => $processState['process'],
-            ]
-        );
-    }
-
-    /**
-     * @throws \JsonException
-     */
-    #[Route(
-        '/dashboard/settings/certificatesManagement/freeradius/test/run',
-        name: 'admin_dashboard_settings_certs_freeradius_test_run',
-        methods: ['POST']
-    )]
-    #[IsGranted('ROLE_ADMIN')]
-    public function runFreeradiusTest(Request $request): JsonResponse
-    {
-        $processEntity = $this->certificateProcessCheckerService->getCurrentProcess();
-
-        // Ensure an active process exists
-        if (!$processEntity instanceof CertificateSetupProcess) {
-            return new JsonResponse([
-                'status' => 'error',
-                'message' => $this->translator->trans(
-                    'noActiveProcess',
-                    [],
-                    'CertificateProcessCheckerService'
-                ),
-            ], Response::HTTP_BAD_REQUEST);
-        }
-
-        // Decode request payload
-        $payload = json_decode(
-            $request->getContent() ?: '{}',
-            true,
-            512,
-            JSON_THROW_ON_ERROR
-        );
-
-        $remoteHost = $payload['remote_host'] ?? $processEntity->getRemoteHost();
-        $remotePort = isset($payload['remote_port']) ? (int)$payload['remote_port'] : 11812;
-
-        if (!$remoteHost) {
-            return new JsonResponse([
-                'status' => 'error',
-                'message' => $this->translator->trans(
-                    'missingRequiredForFreeradiusTest',
-                    [],
-                    'controllers'
-                ),
-            ], Response::HTTP_BAD_REQUEST);
-        }
-
-        // Everytime the user tries a new test it will save the used credentials
-        $processEntity->setRemoteHost($remoteHost);
-        $processEntity->setUpdatedAt(new DateTimeImmutable());
-        $this->entityManager->persist($processEntity);
+        $this->entityManager->persist($process);
         $this->entityManager->flush();
 
-        // Build known signing-keys paths
-        $basePath = $this->getParameter('kernel.project_dir') . '/signing-keys/';
+        /** @var User $user */
+        $user = $this->getUser();
+        $this->eventActions->saveEvent(
+            $user,
+            AnalyticalEventType::CERTIFICATE_SETUP_PROCESS_FREERAEDIUS_CONFIG->value,
+            new DateTime(),
+            [
+                'ip' => $request->getClientIp(),
+                'user_agent' => $request->headers->get('User-Agent'),
+                'by' => $user->getUuid(),
+            ]
+        );
 
-        $paths = [
-            'ca' => $basePath . CertificateFileName::CA_PEM_FILE->value,
-            'cert' => $basePath . CertificateFileName::CERT_PEM_FILE->value,
-            'chain' => $basePath . CertificateFileName::CHAIN_PEM_FILE->value,
-            'fullchain' => $basePath . CertificateFileName::FULL_CHAIN_PEM_FILE->value,
-            'privkey' => $basePath . CertificateFileName::PRIVATE_KEY_PEM_FILE->value,
-        ];
+        $this->addFlash(
+            'success',
+            $this->translator->trans('freeradiusConfigAppliedSuccessfully', [], 'controllers')
+        );
 
-        // Validate all exist
-        $missing = array_filter($paths, static function ($path) {
-            return !file_exists($path);
-        });
+        // Redirect to the next stage automatically
+        return $this->redirectToRoute(
+            'admin_dashboard_settings_certs_freeradius_test',
+        );
+      }
+    }
 
-        if (!empty($missing)) {
-            return new JsonResponse([
-                'status' => 'error',
-                'message' => 'Missing certificate files',
-                'missing_files' => $missing,
-            ], Response::HTTP_BAD_REQUEST);
-        }
+    return $this->render(
+        'dashboard/shared/settings_actions/certificatesManagement/certificates/freeradius/config.html.twig',
+        [
+            'data' => $data,
+            'form' => $form->createView(),
+            'processState' => $processState,
+            'certificateSet' => $certificateSet,
+            'commands' => $commands,
+        ]
+    );
+  }
 
-        try {
+  #[Route(
+      '/dashboard/settings/certificatesManagement/freeradius/test',
+      name: 'admin_dashboard_settings_certs_freeradius_test'
+  )]
+  #[IsGranted('ROLE_ADMIN')]
+  public function settingsCertificatesManagementFreeradiusTest(): Response
+  {
+    // Get current process state
+    $processState = $this->certificateProcessCheckerService->getProcessState();
+
+    // If no active process, redirect to the first stage or fallback
+    if (!$processState['active']) {
+      $this->addFlash(
+          'error',
+          $this->translator->trans(
+              'noActiveProcess',
+              [],
+              'CertificateProcessCheckerService'
+          )
+      );
+      return $this->redirectToRoute('admin_dashboard_settings_certs_radsecproxy_upload');
+    }
+
+    // Fetch settings/data needed for the page
+    $data = $this->getSettings->getSettings();
+
+    return $this->render(
+        'dashboard/shared/settings_actions/certificatesManagement/certificates/freeradius/test.html.twig',
+        [
+            'data' => $data,
+            'processState' => $processState,
+            'process' => $processState['process'],
+        ]
+    );
+  }
+
+  /**
+   * @throws \JsonException
+   */
+  #[Route(
+      '/dashboard/settings/certificatesManagement/freeradius/test/run',
+      name: 'admin_dashboard_settings_certs_freeradius_test_run',
+      methods: ['POST']
+  )]
+  #[IsGranted('ROLE_ADMIN')]
+  public function runFreeradiusTest(Request $request): JsonResponse
+  {
+    $processEntity = $this->certificateProcessCheckerService->getCurrentProcess();
+
+    // Ensure an active process exists
+    if (!$processEntity instanceof CertificateSetupProcess) {
+      return new JsonResponse([
+          'status' => 'error',
+          'message' => $this->translator->trans(
+              'noActiveProcess',
+              [],
+              'CertificateProcessCheckerService'
+          ),
+      ], Response::HTTP_BAD_REQUEST);
+    }
+
+    // Decode request payload
+    $payload = json_decode(
+        $request->getContent() ?: '{}',
+        true,
+        512,
+        JSON_THROW_ON_ERROR
+    );
+
+    $remoteHost = $payload['remote_host'] ?? $processEntity->getRemoteHost();
+    $remotePort = isset($payload['remote_port']) ? (int)$payload['remote_port'] : 11812;
+
+    if (!$remoteHost) {
+      return new JsonResponse([
+          'status' => 'error',
+          'message' => $this->translator->trans(
+              'missingRequiredForFreeradiusTest',
+              [],
+              'controllers'
+          ),
+      ], Response::HTTP_BAD_REQUEST);
+    }
+
+    // Everytime the user tries a new test it will save the used credentials
+    $processEntity->setRemoteHost($remoteHost);
+    $processEntity->setUpdatedAt(new DateTimeImmutable());
+    $this->entityManager->persist($processEntity);
+    $this->entityManager->flush();
+
+    // Build known signing-keys paths
+    $basePath = $this->getParameter('kernel.project_dir') . '/signing-keys/';
+
+    $paths = [
+        'ca' => $basePath . CertificateFileName::CA_PEM_FILE->value,
+        'cert' => $basePath . CertificateFileName::CERT_PEM_FILE->value,
+        'chain' => $basePath . CertificateFileName::CHAIN_PEM_FILE->value,
+        'fullchain' => $basePath . CertificateFileName::FULL_CHAIN_PEM_FILE->value,
+        'privkey' => $basePath . CertificateFileName::PRIVATE_KEY_PEM_FILE->value,
+    ];
+
+    // Validate all exist
+    $missing = array_filter($paths, static function ($path) {
+      return !file_exists($path);
+    });
+
+    if (!empty($missing)) {
+      return new JsonResponse([
+          'status' => 'error',
+          'message' => 'Missing certificate files',
+          'missing_files' => $missing,
+      ], Response::HTTP_BAD_REQUEST);
+    }
+
+    try {
 //            $context = stream_context_create([
 //                'ssl' => [
 //                    'verify_peer' => false,
@@ -537,67 +547,67 @@ class CertificateManagementFreeradiusController extends AbstractController
 //                ], Response::HTTP_FORBIDDEN);
 //            }
 
-              // Only close if it’s a valid resource
+      // Only close if it’s a valid resource
 //            if (is_resource($connection)) {
 //                fclose($connection);
 //            }
-            // THIS IS OK [0] -> a non-false $connection OR errno=0 and errstr="" means TLS handshake succeeded
-            $this->certificateFreeradiusCommandsService->updateFreeradiusTestResult(
-                $processEntity,
-                CertificateTestResult::PASSED
-            );
+      // THIS IS OK [0] -> a non-false $connection OR errno=0 and errstr="" means TLS handshake succeeded
+      $this->certificateFreeradiusCommandsService->updateFreeradiusTestResult(
+          $processEntity,
+          CertificateTestResult::PASSED
+      );
 
-            /** @var User $user */
-            $user = $this->getUser();
-            $this->eventActions->saveEvent(
-                $user,
-                AnalyticalEventType::CERTIFICATE_SETUP_PROCESS_FREERAEDIUS_TEST->value,
-                new DateTime(),
-                [
-                    'ip' => $request->getClientIp(),
-                    'user_agent' => $request->headers->get('User-Agent'),
-                    'by' => $user->getUuid(),
-                ]
-            );
+      /** @var User $user */
+      $user = $this->getUser();
+      $this->eventActions->saveEvent(
+          $user,
+          AnalyticalEventType::CERTIFICATE_SETUP_PROCESS_FREERAEDIUS_TEST->value,
+          new DateTime(),
+          [
+              'ip' => $request->getClientIp(),
+              'user_agent' => $request->headers->get('User-Agent'),
+              'by' => $user->getUuid(),
+          ]
+      );
 
-            $session = $request->getSession();
-            if ($session->has('system_reset_request')) {
-                $this->eventActions->saveEvent(
-                    $user,
-                    AnalyticalEventType::SYSTEM_RESET_REQUEST_COMPLETED->value,
-                    new DateTime(),
-                    [
-                        'ip' => $request->getClientIp(),
-                        'user_agent' => $request->headers->get('User-Agent'),
-                        'by' => $user->getUuid(),
-                    ]
-                );
+      $session = $request->getSession();
+      if ($session->has('system_reset_request')) {
+        $this->eventActions->saveEvent(
+            $user,
+            AnalyticalEventType::SYSTEM_RESET_REQUEST_COMPLETED->value,
+            new DateTime(),
+            [
+                'ip' => $request->getClientIp(),
+                'user_agent' => $request->headers->get('User-Agent'),
+                'by' => $user->getUuid(),
+            ]
+        );
 
-                // Clear all the sessions requests in case the system_reset is completed
-                $session->remove('system_reset_request');
-                $session->remove('session_installation_started');
-                $session->remove('session_certificate_started');
-            }
+        // Clear all the sessions requests in case the system_reset is completed
+        $session->remove('system_reset_request');
+        $session->remove('session_installation_started');
+        $session->remove('session_certificate_started');
+      }
 
-            return new JsonResponse([
-                'status' => 'success',
-                'message' => $this->translator->trans(
-                    'freeradiusTestPassed',
-                    [],
-                    'controllers'
-                ),
-            ]);
-        } catch (Throwable $e) {
-            // Update DB when test fails
-            $this->certificateFreeradiusCommandsService->updateFreeradiusTestResult(
-                $processEntity,
-                CertificateTestResult::FAILED
-            );
+      return new JsonResponse([
+          'status' => 'success',
+          'message' => $this->translator->trans(
+              'freeradiusTestPassed',
+              [],
+              'controllers'
+          ),
+      ]);
+    } catch (Throwable $e) {
+      // Update DB when test fails
+      $this->certificateFreeradiusCommandsService->updateFreeradiusTestResult(
+          $processEntity,
+          CertificateTestResult::FAILED
+      );
 
-            return new JsonResponse([
-                'status' => 'error',
-                'message' => $e->getMessage(),
-            ], Response::HTTP_SERVICE_UNAVAILABLE);
-        }
+      return new JsonResponse([
+          'status' => 'error',
+          'message' => $e->getMessage(),
+      ], Response::HTTP_SERVICE_UNAVAILABLE);
     }
+  }
 }

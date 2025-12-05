@@ -80,7 +80,11 @@ readonly class AdminCertificateProcessEnforcerListener
             '#^/dashboard/settings/certificatesManagement/radsecproxy/test$#',
             '#^/dashboard/settings/certificatesManagement/radsecproxy/test/run$#',
 
+            // Freeradius Certificates Management Selection
+            '#^/dashboard/settings/certificatesManagement/freeradius/selection#',
+
             // Freeradius steps
+            '#^/dashboard/settings/certificatesManagement/freeradius/autoRenew$#',
             '#^/dashboard/settings/certificatesManagement/freeradius/upload$#',
             '#^/dashboard/settings/certificatesManagement/freeradius/config$#',
             '#^/dashboard/settings/certificatesManagement/freeradius/test$#',

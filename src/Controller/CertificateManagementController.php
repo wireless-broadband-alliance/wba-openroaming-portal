@@ -60,12 +60,28 @@ class CertificateManagementController extends AbstractController
     ]);
   }
 
-  #[Route('/dashboard/settings/certificatesManagement/selection',
-      name: 'admin_dashboard_settings_certs_management_selection'
+  #[Route('/dashboard/settings/certificatesManagement/freeradius/selection',
+      name: 'admin_dashboard_settings_certs_management_freeradius_selection'
   )]
   #[IsGranted('ROLE_ADMIN')]
   public function settingsCertificatesManagementSelection(): Response
   {
+    // Get current process state
+    $processState = $this->certificateProcessCheckerService->getProcessState();
+
+    // If there's no active process
+    if (!$processState['active']) {
+      $this->addFlash(
+          'error',
+          $this->translator->trans(
+              'noActiveProcess',
+              [],
+              'CertificateProcessCheckerService'
+          )
+      );
+      return $this->redirectToRoute('admin_dashboard_settings_certs_radsecproxy_upload');
+    }
+
     return $this->render(
         'dashboard/shared/settings_actions/certificatesManagement/certificates/certs_selection.html.twig',
         [

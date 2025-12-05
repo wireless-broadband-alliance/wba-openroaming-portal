@@ -106,10 +106,10 @@
           {# Next Step #}
           <a
                   {% if processState.stages.radsecproxy_test %}
-                    href="{{ path('admin_dashboard_settings_certs_management_selection') }}"
-                    data-href-enabled="{{ path('admin_dashboard_settings_certs_management_selection') }}"
+                    href="{{ path('admin_dashboard_settings_certs_management_freeradius_selection') }}"
+                    data-href-enabled="{{ path('admin_dashboard_settings_certs_management_freeradius_selection') }}"
                   {% else %}
-                    data-href-enabled="{{ path('admin_dashboard_settings_certs_management_selection') }}"
+                    data-href-enabled="{{ path('admin_dashboard_settings_certs_management_freeradius_selection') }}"
                   {% endif %}
                   data-test-certificates-target="nextPageButton"
                   class="px-6 py-3 border border-gray-300 font-medium rounded-lg shadow-sm flex items-center gap-2

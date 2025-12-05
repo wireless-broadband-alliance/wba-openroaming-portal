@@ -1,0 +1,4 @@
+manualTitle: "Configuração Manual"
+manualSubtitle: "Carregue manualmente os seus próprios certificados"
+autoTitle: "Configuração Automática"
+autoSubtitle: "A plataforma gera automaticamente um par de certificados Let’s Encrypt por si"
