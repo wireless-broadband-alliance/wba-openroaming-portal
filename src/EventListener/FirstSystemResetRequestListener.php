@@ -87,14 +87,14 @@ readonly class FirstSystemResetRequestListener
                     [],
                     'eventListener'
                 ),
-                'admin_dashboard_settings_certs_freeradius_upload'
+                'admin_dashboard_settings_certs_radsecproxy_upload'
             );
             return;
         }
 
         if ($completedCertificates->getRadsecproxyTestResult() === CertificateTestResult::PASSED) {
             $session->set('2fa_verified_dashboard', true);
-            $session->set('system_reset_request', 'admin_dashboard_settings_certs_freeradius_upload');
+            $session->set('system_reset_request', 'admin_dashboard_settings_certs_management_freeradius_selection');
             $this->handleRedirect(
                 $event,
                 $session,
@@ -104,7 +104,7 @@ readonly class FirstSystemResetRequestListener
                     [],
                     'eventListener'
                 ),
-                'admin_dashboard_settings_certs_freeradius_upload'
+                'admin_dashboard_settings_certs_freeradius_selection'
             );
             return;
         }
