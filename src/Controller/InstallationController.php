@@ -694,6 +694,7 @@ class InstallationController extends AbstractController
                 if ($adminUser instanceof User) {
                     $adminUser->setEmail($lastInstallation->getEmailAdmin());
                     $adminUser->setPassword($lastInstallation->getPasswordAdmin());
+                    $adminUser->setUuid($lastInstallation->getEmailAdmin());
                 }
 
                 $this->entityManager->persist($adminUser);
