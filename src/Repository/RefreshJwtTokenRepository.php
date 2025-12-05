@@ -15,31 +15,31 @@ use Random\RandomException;
  */
 class RefreshJwtTokenRepository extends ServiceEntityRepository
 {
-  private EntityManagerInterface $entityManager;
+    private EntityManagerInterface $entityManager;
 
-  public function __construct(ManagerRegistry $registry, EntityManagerInterface $entityManager)
-  {
-    parent::__construct($registry, RefreshJwtToken::class);
-    $this->entityManager = $entityManager;
-  }
+    public function __construct(ManagerRegistry $registry, EntityManagerInterface $entityManager)
+    {
+        parent::__construct($registry, RefreshJwtToken::class);
+        $this->entityManager = $entityManager;
+    }
 
   /**
    * @throws RandomException
    */
-  public function createForUser(User $user): RefreshJwtToken
-  {
-    $token = new RefreshJwtToken();
-    $token->setUser($user);
-    $token->setAccessToken(bin2hex(random_bytes(64)));
-    $token->setCreatedAt(new DateTimeImmutable());
-    $token->setExpiredAt(new DateTimeImmutable('+30 days'));
-    $token->setIsRevoked(false);
+    public function createForUser(User $user): RefreshJwtToken
+    {
+        $token = new RefreshJwtToken();
+        $token->setUser($user);
+        $token->setAccessToken(bin2hex(random_bytes(64)));
+        $token->setCreatedAt(new DateTimeImmutable());
+        $token->setExpiredAt(new DateTimeImmutable('+30 days'));
+        $token->setIsRevoked(false);
 
-    $this->entityManager->persist($token);
-    $this->entityManager->flush();
+        $this->entityManager->persist($token);
+        $this->entityManager->flush();
 
-    return $token;
-  }
+        return $token;
+    }
 
   //    /**
   //     * @return RefreshJwtToken[] Returns an array of RefreshJwtToken objects
