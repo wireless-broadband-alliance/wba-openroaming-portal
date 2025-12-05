@@ -15,6 +15,7 @@ use App\Enum\FirewallType;
 use App\Enum\TrustedWBAFingerprints;
 use App\Form\CertificateFreeradiusUploadManualType;
 use App\Form\SimpleSubmitFormType;
+use App\Service\CertificateCheckerService;
 use App\Service\CertificateFreeradiusCommandsService;
 use App\Service\CertificateFreeradiusInfoService;
 use App\Service\CertificateProcessCheckerService;
@@ -48,6 +49,7 @@ class CertificateManagementFreeradiusController extends AbstractController
       private readonly CertificateFreeradiusInfoService $certificateFreeradiusInfoService,
       private readonly CertificateFreeradiusCommandsService $certificateFreeradiusCommandsService,
       private readonly CertificateWriterUpdateService $certificateWriterUpdateService,
+      private readonly CertificateCheckerService $certificateCheckerService,
       private readonly EventActions $eventActions,
   ) {
   }
@@ -170,6 +172,7 @@ class CertificateManagementFreeradiusController extends AbstractController
 
       // After the files are validated and the processed, update them once again to add
       $process->setFreeradiusFormCompletedAt(new DateTimeImmutable());
+      $process->setFreeradiusConfigAppliedAt(null);
       $process->setUpdatedAt(new DateTimeImmutable());
 
       $this->entityManager->persist($process);
@@ -260,6 +263,7 @@ class CertificateManagementFreeradiusController extends AbstractController
 
       // After the files are validated and the processed, update them once again to add
       $process->setFreeradiusFormCompletedAt(new DateTimeImmutable());
+      $process->setFreeradiusConfigAppliedAt(null);
       $process->setUpdatedAt(new DateTimeImmutable());
 
       $this->entityManager->persist($process);
@@ -389,8 +393,13 @@ class CertificateManagementFreeradiusController extends AbstractController
           }
         }
 
-        // TODO make new service to update the settings based on the content of the cert.pem -> need to update the DB
-        dd($certContent);
+        $caContentParsed = $this->certificateCheckerService->parseCertificate(
+            $certificateSet['caFREERADIUS']['content']
+        );
+        $certContentParsed = $this->certificateCheckerService->parseCertificate(
+            $certificateSet['certFREERADIUS']['content']
+        );
+        dd($caContentParsed, $certContentParsed);
 
         $process->setFreeradiusConfigAppliedAt(new DateTimeImmutable());
         $process->setUpdatedAt(new DateTimeImmutable());
