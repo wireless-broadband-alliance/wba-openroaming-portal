@@ -859,14 +859,14 @@ readonly class ApiResponseService
                     'JWT Token is invalid!',
                     'User account is not verified.'
                 ],
-              // phpcs:disable Generic.Files.LineLength.TooLong
+                // phpcs:disable Generic.Files.LineLength.TooLong
                 403 => [
                     'Invalid code',
                     'User account is banned from the system.',
                     "Your request cannot be processed at this time due to a pending action. If your account is active, re-login to complete the action.",
                     'Unauthorized - You do not have permission to access this resource'
                 ],
-              // phpcs:enable
+                // phpcs:enable
                 500 => [
                     'Unexpected server error occurred'
                 ]
@@ -987,28 +987,33 @@ readonly class ApiResponseService
             ],
         ],
         'api_v2_auth_refresh' => [
-            'description' => 'This endpoint refreshes the JWT token for an authenticated user. 
-                The client must send the current valid JWT token in the Authorization header (Bearer token). 
-                If the token is valid, a new token is returned extending the session.',
+            'description' => 'Refreshes the JWT token for an authenticated user.
+The client must send the current valid refresh token in the request body as "current_token".
+If the token is valid and not expired/revoked, a new access token and refresh token are returned.',
             'isProtected' => true,
             'responses' => [
                 200 => [
                     'default' => json_decode(
                         '{
-                    "success": true,
-                    "data": {
-                        "token": "newValidToken"
-                    }
-                }',
+                                "success": true,
+                                "data": {
+                                  "access_token": "newAccessToken",
+                                  "refresh_token": "newRefreshToken",
+                                  "expires_in": 3600
+                              }
+                              }',
                         true,
                         512,
                         JSON_THROW_ON_ERROR
                     ),
                 ],
+                400 => [
+                    'Missing or invalid request body',
+                    'current_token is required'
+                ],
                 401 => [
-                    'Authorization header missing',
-                    'Invalid token',
-                    'Invalid user'
+                    'Invalid or expired refresh token',
+                    'Invalid user associated with the token'
                 ],
                 500 => [
                     'Token generation failed',
@@ -1678,74 +1683,76 @@ configuration for the IOS App.</p></body></html>'
                     'code' => 'microsoftCodeExample'
                 ],
 
-        ],
-        'api_v2_user_account_deletion' => [
-            'requestBody' => [
-                'Portal Account' => [
-                    'password' => 'user-password-example'
-                ],
-                'SAML Account' => [
-                    'SAMLResponse' => 'samlResponseExample'
-                ],
-                'Google Account' => [
-                    'code' => 'googleCodeExample'
-                ],
-                'Microsoft Account' => [
-                    'code' => 'microsoftCodeExample'
-                ],
-
             ],
-            'description' => 'This endpoint deletes the currently authenticated user account. 
+            'api_v2_user_account_deletion' => [
+                'requestBody' => [
+                    'Portal Account' => [
+                        'password' => 'user-password-example'
+                    ],
+                    'SAML Account' => [
+                        'SAMLResponse' => 'samlResponseExample'
+                    ],
+                    'Google Account' => [
+                        'code' => 'googleCodeExample'
+                    ],
+                    'Microsoft Account' => [
+                        'code' => 'microsoftCodeExample'
+                    ],
+
+                ],
+                'description' => 'This endpoint deletes the currently authenticated user account. 
                 Depending on the authentication method, the request body may require a password (Portal Account), 
                 a SAMLResponse (SAML), or an authorization code (Google/Microsoft). 
                 The request verifies the provided authentication details before performing the account deletion.',
-            'isProtected' => true,
-            'responses' => [
-                200 => [
-                    json_decode(
-                        '{
+                'isProtected' => true,
+                'responses' => [
+                    200 => [
+                        json_decode(
+                            '{
                               "success": true,
                               "data": {
                                 "message": "User with UUID \"test@example.com\" successfully deleted."
                               }
                             }',
-                        false,
-                        512,
-                        JSON_THROW_ON_ERROR
-                    )
-                ],
-                400 => [
-                    'Invalid data: Missing required fields.',
-                    'Invalid JSON format',
-                ],
-                401 => [
-                    'Invalid Request: JWT Token is invalid!',
-                    'Invalid credentials: The provided password is incorrect.',
-                    'Authentication Failed: Unable to validate SAML assertion.',
-                    'Authentication Failed: Invalid or expired authorization code.',
-                ],
-                403 => [
-                    'Unauthorized - You do not have permission to access this resource.',
-                    'Unauthorized: The SAML assertion email does not match the user account email.',
-                    'The configured IDP Entity ID does not match the expected value. Access denied.',
-                  // phpcs:disable Generic.Files.LineLength.TooLong
-                    'Invalid Two-Factor Authentication configuration. Please ensure that 2FA is set up using either email or SMS for this account.',
-                    'The Two-Factor Authentication (2FA) configuration is incomplete. Please set up 2FA using either email or SMS.',
-                  // phpcs:enable
-                    'Invalid account type. Please only use email/phone number accounts from the portal.',
-                ],
-                404 => [
-                    'Invalid Account: User account not found.',
-                    'Required data from the external service could not be located.',
-                ],
-                500 => [
-                    'An error occurred while deleting the user.',
-                    'An error occurred while communicating with an external service.',
-                    'An unexpected error occurred. Please try again later.',
+                            false,
+                            512,
+                            JSON_THROW_ON_ERROR
+                        )
+                    ],
+                    400 => [
+                        'Invalid data: Missing required fields.',
+                        'Invalid JSON format',
+                    ],
+                    401 => [
+                        'Invalid Request: JWT Token is invalid!',
+                        'Invalid credentials: The provided password is incorrect.',
+                        'Authentication Failed: Unable to validate SAML assertion.',
+                        'Authentication Failed: Invalid or expired authorization code.',
+                    ],
+                    403 => [
+                        'Unauthorized - You do not have permission to access this resource.',
+                        'Unauthorized: The SAML assertion email does not match the user account email.',
+                        'The configured IDP Entity ID does not match the expected value. Access denied.',
+                      // phpcs:disable Generic.Files.LineLength.TooLong
+                        'Invalid Two-Factor Authentication configuration. Please ensure that 2FA is set up using either email or SMS for this account.',
+                        'The Two-Factor Authentication (2FA) configuration is incomplete. Please set up 2FA using either email or SMS.',
+                      // phpcs:enable
+                        'Invalid account type. Please only use email/phone number accounts from the portal.',
+                    ],
+                    404 => [
+                        'Invalid Account: User account not found.',
+                        'Required data from the external service could not be located.',
+                    ],
+                    500 => [
+                        'An error occurred while deleting the user.',
+                        'An error occurred while communicating with an external service.',
+                        'An unexpected error occurred. Please try again later.',
+                    ]
                 ]
             ]
         ]
         ];
+
 
         if ($version === ApiVersion::API_V1->value) {
             return $apiResponseV1;
