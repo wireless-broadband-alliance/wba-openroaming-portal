@@ -12,3 +12,6 @@ confirm_revoke: "Tem a certeza de que desejas revogar todos os perfis associados
 superAdmin: 'Super Admin'
 admin: 'Administrador'
 user: 'Utilizador'
+editPermissions: 'Editar permissões de administrador'
+giveAdminPerm: 'Atribuir a função de Administrador'
+removeAdminPerm: 'Remover a função de Administrador'

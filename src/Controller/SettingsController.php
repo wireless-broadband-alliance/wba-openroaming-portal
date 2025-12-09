@@ -585,6 +585,7 @@ class SettingsController extends AbstractController
             'form' => $form->createView(),
             'ldapSettingsDTO' => $dto,
             'data' => $data,
+            'user' => $currentUser,
         ]);
     }
 
@@ -638,6 +639,7 @@ class SettingsController extends AbstractController
             'form' => $form->createView(),
             'radiusSettingsDTO' => $dto,
             'data' => $data,
+            'user' => $currentUser,
         ]);
     }
 
@@ -687,6 +689,7 @@ class SettingsController extends AbstractController
             'form' => $form->createView(),
             'platformStatusSettingsDTO' => $dto,
             'data' => $data,
+            'user' => $currentUser,
         ]);
     }
 
@@ -736,6 +739,7 @@ class SettingsController extends AbstractController
             'form' => $form->createView(),
             'twoFASettingsDTO' => $dto,
             'data' => $data,
+            'user' => $currentUser,
         ]);
     }
 
@@ -885,6 +889,7 @@ class SettingsController extends AbstractController
             'form' => $form->createView(),
             'capportSettingsDTO' => $dto,
             'data' => $data,
+            'user' => $currentUser,
         ]);
     }
 
@@ -934,6 +939,7 @@ class SettingsController extends AbstractController
             'form' => $form->createView(),
             'SMSSettingsDTO' => $dto,
             'data' => $data,
+            'user' => $currentUser,
         ]);
     }
 }

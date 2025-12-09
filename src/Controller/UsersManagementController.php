@@ -641,9 +641,13 @@ class UsersManagementController extends AbstractController
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings();
 
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
+
         return $this->render('dashboard/actions/confirm.html.twig', [
             'data' => $data,
-            'type' => $type
+            'type' => $type,
+            'user' => $currentUser,
         ]);
     }
 
