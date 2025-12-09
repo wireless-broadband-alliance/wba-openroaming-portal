@@ -474,7 +474,7 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
  *         max_host_connections?: int, // The maximum number of connections to a single host.
  *         default_options?: array{
  *             headers?: array<string, mixed>,
- *             vars?: list<mixed>,
+ *             vars?: array<string, mixed>,
  *             max_redirects?: int, // The maximum number of redirects to follow.
  *             http_version?: scalar|null, // The default HTTP version, typically 1.1 or 2.0, leave to null for the best version.
  *             resolve?: array<string, scalar|null>,
@@ -497,7 +497,7 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
  *                 md5?: mixed,
  *             },
  *             crypto_method?: scalar|null, // The minimum version of TLS to accept; must be one of STREAM_CRYPTO_METHOD_TLSv*_CLIENT constants.
- *             extra?: list<mixed>,
+ *             extra?: array<string, mixed>,
  *             rate_limiter?: scalar|null, // Rate limiter name to use for throttling requests. // Default: null
  *             caching?: bool|array{ // Caching configuration.
  *                 enabled?: bool, // Default: false
@@ -550,7 +550,7 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
  *                 md5?: mixed,
  *             },
  *             crypto_method?: scalar|null, // The minimum version of TLS to accept; must be one of STREAM_CRYPTO_METHOD_TLSv*_CLIENT constants.
- *             extra?: list<mixed>,
+ *             extra?: array<string, mixed>,
  *             rate_limiter?: scalar|null, // Rate limiter name to use for throttling requests. // Default: null
  *             caching?: bool|array{ // Caching configuration.
  *                 enabled?: bool, // Default: false
@@ -1627,9 +1627,9 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
  *             destinationStrictlyMatches?: bool,
  *             allowRepeatAttributeName?: bool,
  *             rejectUnsolicitedResponsesWithInResponseTo?: bool,
- *             signatureAlgorithm?: "http:\/\/www.w3.org\/2000\/09\/xmldsig#rsa-sha1"|"http:\/\/www.w3.org\/2000\/09\/xmldsig#dsa-sha1"|"http:\/\/www.w3.org\/2001\/04\/xmldsig-more#rsa-sha256"|"http:\/\/www.w3.org\/2001\/04\/xmldsig-more#rsa-sha384"|"http:\/\/www.w3.org\/2001\/04\/xmldsig-more#rsa-sha512",
- *             digestAlgorithm?: "http:\/\/www.w3.org\/2000\/09\/xmldsig#sha1"|"http:\/\/www.w3.org\/2001\/04\/xmlenc#sha256"|"http:\/\/www.w3.org\/2001\/04\/xmldsig-more#sha384"|"http:\/\/www.w3.org\/2001\/04\/xmlenc#sha512",
- *             encryption_algorithm?: "http:\/\/www.w3.org\/2001\/04\/xmlenc#tripledes-cbc"|"http:\/\/www.w3.org\/2001\/04\/xmlenc#aes128-cbc"|"http:\/\/www.w3.org\/2001\/04\/xmlenc#aes192-cbc"|"http:\/\/www.w3.org\/2001\/04\/xmlenc#aes256-cbc"|"http:\/\/www.w3.org\/2009\/xmlenc11#aes128-gcm"|"http:\/\/www.w3.org\/2009\/xmlenc11#aes192-gcm"|"http:\/\/www.w3.org\/2009\/xmlenc11#aes256-gcm",
+ *             signatureAlgorithm?: "http://www.w3.org/2000/09/xmldsig#rsa-sha1"|"http://www.w3.org/2000/09/xmldsig#dsa-sha1"|"http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"|"http://www.w3.org/2001/04/xmldsig-more#rsa-sha384"|"http://www.w3.org/2001/04/xmldsig-more#rsa-sha512",
+ *             digestAlgorithm?: "http://www.w3.org/2000/09/xmldsig#sha1"|"http://www.w3.org/2001/04/xmlenc#sha256"|"http://www.w3.org/2001/04/xmldsig-more#sha384"|"http://www.w3.org/2001/04/xmlenc#sha512",
+ *             encryption_algorithm?: "http://www.w3.org/2001/04/xmlenc#tripledes-cbc"|"http://www.w3.org/2001/04/xmlenc#aes128-cbc"|"http://www.w3.org/2001/04/xmlenc#aes192-cbc"|"http://www.w3.org/2001/04/xmlenc#aes256-cbc"|"http://www.w3.org/2009/xmlenc11#aes128-gcm"|"http://www.w3.org/2009/xmlenc11#aes192-gcm"|"http://www.w3.org/2009/xmlenc11#aes256-gcm",
  *             lowercaseUrlencoding?: bool,
  *         },
  *         contactPerson?: array{
@@ -1686,6 +1686,7 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
  *         traces_sampler?: scalar|null,
  *         profiles_sample_rate?: float, // The sampling factor to apply to profiles. A value of 0 will deny sending any profiles, and a value of 1 will send all profiles. Profiles are sampled in relation to traces_sample_rate
  *         enable_logs?: bool,
+ *         enable_metrics?: bool, // Default: true
  *         attach_stacktrace?: bool,
  *         attach_metric_code_locations?: bool,
  *         context_lines?: int,
@@ -1702,6 +1703,7 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
  *         before_send_check_in?: scalar|null,
  *         before_send_metrics?: scalar|null,
  *         before_send_log?: scalar|null,
+ *         before_send_metric?: scalar|null,
  *         trace_propagation_targets?: mixed,
  *         tags?: array<string, scalar|null>,
  *         error_types?: scalar|null,
@@ -1720,7 +1722,7 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
  *         http_ssl_verify_peer?: bool,
  *         http_compression?: bool,
  *         capture_silenced_errors?: bool,
- *         max_request_body_size?: "none"|"small"|"medium"|"always",
+ *         max_request_body_size?: "none"|"never"|"small"|"medium"|"always",
  *         class_serializers?: array<string, scalar|null>,
  *     },
  *     messenger?: bool|array{
@@ -2214,6 +2216,7 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
  *         erase_fields?: scalar|null, // Default: true
  *         delete_on_update?: scalar|null, // Default: true
  *         inject_on_load?: scalar|null, // Default: false
+ *         namer_keep_extension?: scalar|null, // Default: false
  *         db_driver?: scalar|null, // Default: null
  *     }>,
  * }
