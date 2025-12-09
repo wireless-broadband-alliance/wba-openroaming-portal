@@ -259,6 +259,8 @@ class CertificateManagementFreeradiusController extends AbstractController
         return $this->redirectToRoute('admin_dashboard_settings_certs_radsecproxy_upload');
       }
 
+      dd('pls die have and dont submit anything, making the DTOs validations');
+
       // TODO generate the new certs here with the command of the cert bot
       // place them on the var tmp folder -> also update the db and define the unique tag for them
       // only the config should take them and place the new ones on the signign-keys
