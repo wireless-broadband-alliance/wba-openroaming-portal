@@ -142,8 +142,11 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
     {
         $qb = $this->createQueryBuilder('u');
 
-        $qb->where('u.roles NOT LIKE :role')
-            ->setParameter('role', '%ROLE_ADMIN%');
+        $qb->where('u.roles NOT LIKE :admin')
+            ->andWhere('u.roles NOT LIKE :superAdmin')
+            ->setParameter('admin', '%ROLE_ADMIN%')
+            ->setParameter('superAdmin', '%ROLE_SUPER_ADMIN%');
+
 
         // Add filters based on verification status
         if ($filter === UserVerificationStatus::VERIFIED->value) {
@@ -268,8 +271,10 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         $qb = $this->createQueryBuilder('u');
         $qb->select('COUNT(u.id)')
             ->where('u.roles NOT LIKE :adminRole')
+            ->andWhere('u.roles NOT LIKE :superAdmin')
             ->andWhere($qb->expr()->isNull('u.deletedAt'))
-            ->setParameter('adminRole', '%ROLE_ADMIN%');
+            ->setParameter('adminRole', '%ROLE_ADMIN%')
+            ->setParameter('superAdmin', '%ROLE_SUPER_ADMIN%');
 
         if ($searchTerm !== null) {
             $qb->andWhere(
@@ -328,9 +333,11 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         $qb->select('COUNT(u.id)')
             ->where('u.isVerified = :Verified')
             ->andWhere('u.roles NOT LIKE :adminRole')
+            ->andWhere('u.roles LIKE :superAdmin')
             ->andWhere($qb->expr()->isNull('u.deletedAt'))
             ->setParameter('Verified', true)
-            ->setParameter('adminRole', '%ROLE_ADMIN%');
+            ->setParameter('adminRole', '%ROLE_ADMIN%')
+            ->setParameter('superAdmin', '%ROLE_SUPER_ADMIN%');
 
         if ($searchTerm !== null) {
             $qb->andWhere(

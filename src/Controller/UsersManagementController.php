@@ -89,6 +89,17 @@ class UsersManagementController extends AbstractController
             );
             return $this->redirectToRoute('app_landing');
         }
+
+        if (
+            (
+                in_array(AdminRoleType::ROLE_ADMIN->value, $user->getRoles(), true) &&
+                !in_array(AdminRoleType::ROLE_SUPER_ADMIN->value, $currentUser->getRoles(), true)
+            ) ||
+            in_array(AdminRoleType::ROLE_SUPER_ADMIN->value, $user->getRoles(), true)
+        ) {
+            throw $this->createAccessDeniedException();
+        }
+
         $revokeProfiles = $this->profileManager->disableProfiles(
             $user,
             UserRadiusProfileRevokeReason::ADMIN_REVOKED_PROFILE->value,
@@ -298,6 +309,17 @@ class UsersManagementController extends AbstractController
                 $this->translator->trans('userNotFound', [], 'controllers')
             );
         }
+
+        if (
+            (
+                in_array(AdminRoleType::ROLE_ADMIN->value, $user->getRoles(), true) &&
+                !in_array(AdminRoleType::ROLE_SUPER_ADMIN->value, $currentUser->getRoles(), true)
+            ) ||
+            in_array(AdminRoleType::ROLE_SUPER_ADMIN->value, $user->getRoles(), true)
+        ) {
+            throw $this->createAccessDeniedException();
+        }
+
         $getUserUuid = $user->getUuid();
 
         if ($user->getDeletedAt() !== null) {
@@ -359,6 +381,16 @@ class UsersManagementController extends AbstractController
                 $this->translator->trans('userNotFound', [], 'controllers')
             );
             return $this->redirectToRoute('admin_page');
+        }
+
+        if (
+            (
+                in_array(AdminRoleType::ROLE_ADMIN->value, $user->getRoles(), true) &&
+                !in_array(AdminRoleType::ROLE_SUPER_ADMIN->value, $currentUser->getRoles(), true)
+            ) ||
+            in_array(AdminRoleType::ROLE_SUPER_ADMIN->value, $user->getRoles(), true)
+        ) {
+            throw $this->createAccessDeniedException();
         }
 
         if ($user->getDeletedAt() !== null) {
