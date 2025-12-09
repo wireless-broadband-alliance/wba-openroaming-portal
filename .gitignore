@@ -4,7 +4,10 @@
 /.env.*.local
 /config/secrets/prod/prod.decrypt.private.php
 /public/bundles/
-/var/
+var/*
+!var/certs/
+var/certs/*
+!var/certs/.gitkeep
 /vendor/
 ###< symfony/framework-bundle ###
 
@@ -32,16 +35,12 @@ signing-keys/ca.pem
 signing-keys/chain.pem
 signing-keys/fullchain.pem
 
-.env.martelado
-
 release-package/release.zip
 
 public/resources/uploaded/*
 !upload/.gitkeep
 
 assets/styles/randomRealmsColors.css
-
-DockerfileDev
 
 pgp_public_key/*
 !pgp_public_key/.gitkeep
