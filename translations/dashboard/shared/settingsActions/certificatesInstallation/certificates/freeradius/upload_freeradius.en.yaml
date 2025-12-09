@@ -5,7 +5,8 @@ radsecproxy_process:
     details: "FreeRADIUS certificates selection, configuration and testing."
 
 return: 'Return'
-title: "FreeRADIUS Certificate Upload"
+title_upload: "FreeRADIUS Certificate Upload"
+title_auto_renew: "Preparation for the Creation of FreeRADIUS Certificates"
 
 ca:
     label: "CA (.pem)"
@@ -27,4 +28,5 @@ privKey:
     label: "Private Key (.pem)"
     description: "Upload the private key associated with your certificate."
 
-submit: "Upload Certificates"
+submit_upload: "Upload Certificates"
+submit_generate: "Generate Certificates"

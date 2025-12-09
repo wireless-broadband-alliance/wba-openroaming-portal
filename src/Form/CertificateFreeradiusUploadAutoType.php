@@ -7,6 +7,7 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Vich\UploaderBundle\Form\Type\VichFileType;
 
 class CertificateFreeradiusUploadAutoType extends AbstractType
 {
@@ -16,6 +17,13 @@ class CertificateFreeradiusUploadAutoType extends AbstractType
         ->add('radiusDomain', TextType::class, [
             'label' => 'Radius Domain',
             'required' => true,
+        ])
+        ->add('letsEncryptRootPemFile', VichFileType::class, [
+            'label' => 'Upload Let’s Encrypt Root CA PEM',
+            'required' => true,
+            'allow_delete' => false,
+            'download_uri' => false,
+            'asset_helper' => true,
         ]);
   }
 

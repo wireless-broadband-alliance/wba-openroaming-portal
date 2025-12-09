@@ -1,9 +1,48 @@
 {% extends 'dashboard/shared/settings_actions/certificatesManagement/certificates/freeradius/base.html.twig' %}
 
 {% block freeradius_content %}
-  {# Return to selection freeradius certs #}
+  {{ form_start(form, {attr: {enctype: 'multipart/form-data'}}) }}
+
+  {# Return to selection Freeradius certs #}
   {{ include('dashboard/shared/settings_actions/certificatesManagement/partials/_return_selection_freeradius.html.twig') }}
-  potato display html pls
+
+  {# Form Upload #}
+  <div class="border border-gray-200 rounded-xl shadow-sm overflow-hidden mt-4">
+    <div class="bg-gray-50 px-6 py-4 border-b border-gray-200 flex items-center gap-2">
+      <twig:ux:icon class="w-5 h-5 text-primary" name="wba:upload-rounded"/>
+      <h5 class="text-lg font-semibold text-gray-800">
+        {{ 'title_auto_renew'|trans({}, 'upload_freeradius') }}
+      </h5>
+    </div>
+
+    <div class="px-6 py-6 bg-white space-y-6">
+
+      {# Radius Domain Field #}
+      <div class="space-y-2">
+        {{ form_label(form.radiusDomain, 'Radius Domain', {label_attr: {class: 'font-semibold'}}) }}
+        {{ form_widget(form.radiusDomain, {attr: {class: 'form-widget'}}) }}
+        <div class="text-red-500 text-sm ml-1">
+          {{ form_errors(form.radiusDomain) }}
+        </div>
+      </div>
+
+      {# Let's Encrypt Root CA PEM Upload #}
+      <div class="space-y-2">
+        {{ form_label(form.letsEncryptRootPemFile, 'Upload Let’s Encrypt Root CA PEM', {label_attr: {class: 'font-semibold'}}) }}
+        {{ form_widget(form.letsEncryptRootPemFile, {attr: {class: 'form-widget-upload'}}) }}
+        <div class="text-red-500 text-sm ml-1">
+          {{ form_errors(form.letsEncryptRootPemFile) }}
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="flex justify-end pt-4">
+    <button class="px-6 py-2.5 rounded-lg bg-primary text-white shadow-sm hover:bg-primary-dark transition">
+      {{ 'submit_generate'|trans({}, 'upload_freeradius') }}
+    </button>
+  </div>
+
+  {{ form_end(form) }}
 {% endblock %}
-
-

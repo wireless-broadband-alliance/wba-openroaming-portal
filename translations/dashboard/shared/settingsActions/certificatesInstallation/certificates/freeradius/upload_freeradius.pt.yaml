@@ -5,7 +5,8 @@ radsecproxy_process:
     details: "Seleção, configuração e teste dos certificados do FreeRADIUS."
 
 return: 'Retornar'
-title: "Envio de Certificados FreeRADIUS"
+title_upload: "Envio de Certificados FreeRADIUS"
+title_auto_renew: "Preparação para a Criação dos Certificados para FreeRADIUS"
 
 ca:
     label: "CA (.pem)"
@@ -27,4 +28,5 @@ privKey:
     label: "Chave Privada (.pem)"
     description: "Envie a chave privada associada ao seu certificado."
 
-submit: "Enviar Certificados"
+submit_upload: "Enviar Certificados"
+submit_generate: "Gerar Certificados"

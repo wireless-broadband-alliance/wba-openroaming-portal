@@ -16,7 +16,7 @@
                     {{ 'client.description'|trans({}, 'upload_radsec') }}
                 </p>
                 {{ form_label(form.client, 'client.label'|trans({}, 'upload_radsec'), {label_attr: {class: 'font-semibold'}}) }}
-                {{ form_widget(form.client, {attr: {class: 'border rounded-lg p-2 w-full'}}) }}
+                {{ form_widget(form.client, {attr: {class: 'form-widget-upload'}}) }}
                 <div class="text-red-500 text-sm ml-1">
                     {{ form_errors(form.client) }}
                 </div>
@@ -27,7 +27,7 @@
                     {{ 'key.description'|trans({}, 'upload_radsec') }}
                 </p>
                 {{ form_label(form.key, 'key.label'|trans({}, 'upload_radsec'), {label_attr: {class: 'font-semibold'}}) }}
-                {{ form_widget(form.key, {attr: {class: 'border rounded-lg p-2 w-full'}}) }}
+                {{ form_widget(form.key, {attr: {class: 'form-widget-upload'}}) }}
                 <div class="text-red-500 text-sm ml-1">
                     {{ form_errors(form.key) }}
                 </div>
