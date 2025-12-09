@@ -33,7 +33,7 @@ readonly class CertificateRadsecproxyInfoService
         // Keep only newest per type (client, key)
         $latest = [];
         foreach ($radsecproxyCerts as $cert) {
-            $type = $cert->getName(); // ex: "caFREERADIUS"
+            $type = $cert->getName(); // ex: "clientRADSECPROXY"
 
             if (!isset($latest[$type]) || $cert->getCreatedAt() > $latest[$type]->getCreatedAt()) {
                 $latest[$type] = $cert;

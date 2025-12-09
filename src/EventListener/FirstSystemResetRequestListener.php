@@ -104,7 +104,7 @@ readonly class FirstSystemResetRequestListener
                     [],
                     'eventListener'
                 ),
-                'admin_dashboard_settings_certs_freeradius_selection'
+                'admin_dashboard_settings_certs_management_freeradius_selection'
             );
             return;
         }
