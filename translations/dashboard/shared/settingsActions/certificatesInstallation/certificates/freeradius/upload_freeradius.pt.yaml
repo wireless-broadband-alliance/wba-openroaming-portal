@@ -2,7 +2,7 @@ radsecproxy_process:
     completed: "Configuração do Radsecproxy concluída"
     finished_steps: "Concluiu com sucesso todos os passos necessários para a configuração do Radsecproxy."
     next_phase: "Pode agora prosseguir para a fase seguinte:"
-    details: "Envio, configuração e teste dos certificados do FreeRADIUS."
+    details: "Seleção, configuração e teste dos certificados do FreeRADIUS."
 
 return: 'Retornar'
 title: "Envio de Certificados FreeRADIUS"

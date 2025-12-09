@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\DTO\CertificateFreeradiusUploadAutoDTO;
 use App\DTO\CertificateFreeradiusUploadManualDTO;
 use App\Entity\CertificateSetupProcess;
 use App\Entity\User;
@@ -13,6 +14,7 @@ use App\Enum\CertificateMachineType;
 use App\Enum\CertificateTestResult;
 use App\Enum\FirewallType;
 use App\Enum\TrustedWBAFingerprints;
+use App\Form\CertificateFreeradiusUploadAutoType;
 use App\Form\CertificateFreeradiusUploadManualType;
 use App\Form\SimpleSubmitFormType;
 use App\Service\CertificateCheckerService;

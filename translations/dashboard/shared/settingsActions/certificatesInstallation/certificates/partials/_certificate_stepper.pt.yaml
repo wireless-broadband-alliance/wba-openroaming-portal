@@ -10,8 +10,8 @@ step:
         title: 'Testar Implementação'
         description: 'A configuração dos certificados está quase concluída.'
     freeradius_upload:
-        title: 'Carregar certificados Freeradius'
-        description: 'arregue os seus certificados Freeradius para iniciar o processo.'
+      title: 'Configurar Certificados Freeradius'
+      description: 'Carregue os certificados ou indique o domínio para começar o processo.'
     freeradius_config:
         title: 'Aplicar configuração Freeradius'
         description: 'Execute os comandos gerados para configurar o seu resolver.'

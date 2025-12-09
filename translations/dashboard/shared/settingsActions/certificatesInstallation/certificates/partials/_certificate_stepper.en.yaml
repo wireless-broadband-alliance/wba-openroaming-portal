@@ -10,8 +10,8 @@ step:
         title: 'Test Implementation'
         description: 'Certificate setup almost finished.'
     freeradius_upload:
-        title: 'Upload Freeradius Certs'
-        description: 'Upload your Freeradius certificates to start the process.'
+      title: 'Configure Freeradius Certificates'
+      description: 'Upload the certificates or provide the domain to start the process.'
     freeradius_config:
         title: 'Apply Freeradius Config'
         description: 'Run the generated commands to configure your resolver.'
