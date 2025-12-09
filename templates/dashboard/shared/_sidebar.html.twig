@@ -65,14 +65,16 @@
                             {{ 'usersManagement'|trans({}, '_header_admin') }}
                         </a>
                     </li>
+                    {% if constant('App\\Enum\\AdminRoleType::ROLE_SUPER_ADMIN').value in user.roles %}
                     <li>
                         {# SideBar Button - Admin Roles Management - Button #}
                         <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300 {% if app.request.attributes.get('_route') == 'admin_roles_management' %}selected{% endif %}"
                            href="{{ path('admin_roles_management') }}">
-                            <twig:ux:icon name="wba:user" class="w-5 mr-2 fill-none stroke-current" />
+                            <twig:ux:icon name="wba:user-admin" class="w-5 mr-2 fill-current" />
                             {{ 'adminRoles'|trans({}, '_header_admin') }}
                         </a>
                     </li>
+                    {% endif %}
                 </ul>
             </div>
         </div>
