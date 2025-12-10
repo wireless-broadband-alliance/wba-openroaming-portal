@@ -49,6 +49,9 @@ FROM php:8.4-fpm-bullseye AS runtime
 ENV TZ=UTC
 WORKDIR /var/www/openroaming
 
+# Set CA bundle for Python / requests (Certbot)
+ENV REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
+
 # Install runtime deps + PHP extensions
 RUN apt-get update && apt-get install -y --no-install-recommends \
     nginx supervisor tzdata xmlsec1 libxmlsec1-openssl ca-certificates \
