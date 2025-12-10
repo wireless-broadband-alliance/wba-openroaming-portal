@@ -23,11 +23,6 @@ class CertificateSetupProcessRepository extends ServiceEntityRepository
     public function getLatestProcess(): ?CertificateSetupProcess
     {
         return $this->createQueryBuilder('p')
-            ->where('p.status IN (:statuses)')
-            ->setParameter('statuses', [
-                ProcessStatusType::IN_PROGRESS,
-                ProcessStatusType::ABORTED,
-            ])
             ->orderBy('p.updatedAt', 'DESC')
             ->setMaxResults(1)
             ->getQuery()

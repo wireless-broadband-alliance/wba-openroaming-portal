@@ -92,22 +92,24 @@ readonly class FirstSystemResetRequestListener
             return;
         }
 
-        if ($completedCertificates->getRadsecproxyTestResult() === CertificateTestResult::PASSED) {
-            $session->set('2fa_verified_dashboard', true);
-            $session->set('system_reset_request', 'admin_dashboard_settings_certs_management_freeradius_selection');
-            $this->handleRedirect(
-                $event,
-                $session,
-                'session_certificate_started',
-                $this->translator->trans(
-                    'certificateProcessPending',
-                    [],
-                    'eventListener'
-                ),
-                'admin_dashboard_settings_certs_management_freeradius_selection'
-            );
-            return;
-        }
+        if (($completedCertificates->getRadsecproxyTestResult(
+                ) === CertificateTestResult::PASSED) && $completedCertificates->getFreeradiusTestResult(
+            ) !== CertificateTestResult::PASSED) {
+                $session->set('2fa_verified_dashboard', true);
+                $session->set('system_reset_request', 'admin_dashboard_settings_certs_management_freeradius_selection');
+                $this->handleRedirect(
+                    $event,
+                    $session,
+                    'session_certificate_started',
+                    $this->translator->trans(
+                        'certificateProcessPending',
+                        [],
+                        'eventListener'
+                    ),
+                    'admin_dashboard_settings_certs_management_freeradius_selection'
+                );
+                return;
+            }
 
         // All checks are valid, remove session flags
         $session->remove('session_installation_started');
