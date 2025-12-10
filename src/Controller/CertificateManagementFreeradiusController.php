@@ -20,6 +20,7 @@ use App\Form\CertificateFreeradiusUploadManualType;
 use App\Form\SimpleSubmitFormType;
 use App\Service\CertificateCheckerService;
 use App\Service\CertificateFreeradiusCommandsService;
+use App\Service\CertificateFreeradiusGenerator;
 use App\Service\CertificateFreeradiusInfoService;
 use App\Service\CertificateProcessCheckerService;
 use App\Service\CertificateStorageService;
@@ -29,6 +30,8 @@ use App\Service\GetSettings;
 use DateTime;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
+use Exception;
+use RuntimeException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -54,6 +57,7 @@ class CertificateManagementFreeradiusController extends AbstractController
       private readonly CertificateWriterUpdateService $certificateWriterUpdateService,
       private readonly CertificateCheckerService $certificateCheckerService,
       private readonly EventActions $eventActions,
+      private readonly CertificateFreeradiusGenerator $certificateFreeradiusGenerator,
   ) {
   }
 
@@ -260,10 +264,19 @@ class CertificateManagementFreeradiusController extends AbstractController
         return $this->redirectToRoute('admin_dashboard_settings_certs_radsecproxy_upload');
       }
 
-      dd('pls die have and dont submit anything, making the DTOs validations');
+      // Extract the domain
+      $domain = $certificateUploadDTO->radiusDomain;
+
+      try {
+        $this->certificateFreeradiusGenerator->generateCertificate($domain);
+        $this->addFlash('success', "Certificate generated successfully for domain: $domain");
+        dd('die here pls its good');
+      } catch (Exception $e) {
+        throw new RuntimeException('Failed to generate certificate: ' . $e->getMessage());
+      }
 
       // TODO generate the new certs here with the command of the cert bot
-      // place them on the var tmp folder -> also update the db and define the unique tag for them
+      // place them on the var/certs folder like the vichUploder does -> also update the db and define the unique tag for them
       // only the config should take them and place the new ones on the signign-keys
 
       // After the files are validated and the processed, update them once again to add
