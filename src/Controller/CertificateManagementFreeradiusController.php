@@ -226,7 +226,8 @@ class CertificateManagementFreeradiusController extends AbstractController
       name: 'admin_dashboard_settings_certs_freeradius_auto_renew',
   )]
   #[IsGranted('ROLE_ADMIN')]
-  public function settingsCertificatesManagementFreeradiusAutoRenewAction(Request $request
+  public function settingsCertificatesManagementFreeradiusAutoRenewAction(
+      Request $request
   ): Response {
     // Get current process state
     $processState = $this->certificateProcessCheckerService->getProcessState();
@@ -254,6 +255,9 @@ class CertificateManagementFreeradiusController extends AbstractController
     $form->handleRequest($request);
 
     if ($form->isSubmitted() && $form->isValid()) {
+      /** @var User $user */
+      $user = $this->getUser();
+
       $process = $this->certificateProcessCheckerService->getCurrentProcess();
       // In case there's not active process
       if (!$process instanceof CertificateSetupProcess) {
@@ -268,7 +272,7 @@ class CertificateManagementFreeradiusController extends AbstractController
       $domain = $certificateUploadDTO->radiusDomain;
 
       try {
-        $this->certificateFreeradiusGenerator->generateCertificate($domain);
+        $this->certificateFreeradiusGenerator->generateCertificates($domain, $user);
         $this->addFlash('success', "Certificate generated successfully for domain: $domain");
         dd('die here pls its good');
       } catch (Exception $e) {
@@ -287,8 +291,6 @@ class CertificateManagementFreeradiusController extends AbstractController
       $this->entityManager->persist($process);
       $this->entityManager->flush();
 
-      /** @var User $user */
-      $user = $this->getUser();
       $this->eventActions->saveEvent(
           $user,
           AnalyticalEventType::CERTIFICATE_SETUP_PROCESS_FREERAEDIUS_UPLOAD_AUTO->value,

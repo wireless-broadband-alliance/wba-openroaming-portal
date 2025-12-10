@@ -4,12 +4,15 @@
 /.env.*.local
 /config/secrets/prod/prod.decrypt.private.php
 /public/bundles/
+/vendor/
+###< symfony/framework-bundle ###
+
+# Required var exceptions for certificate generations and management
 var/*
 !var/certs/
 var/certs/*
-!var/certs/.gitkeep
-/vendor/
-###< symfony/framework-bundle ###
+# Except any .gitkeep file under var/certs or subfolders
+!var/certs/**/*.gitkeep
 
 ###> phpunit/phpunit ###
 /phpunit.xml
@@ -30,8 +33,6 @@ release-package/release.zip
 
 public/resources/uploaded/*
 !upload/.gitkeep
-
-assets/styles/randomRealmsColors.css
 
 pgp_public_key/*
 !pgp_public_key/.gitkeep
