@@ -13,7 +13,8 @@ class CertificateFreeradiusUploadAutoDTO
 {
   public array $notices = [];
 
-  #[NotBlank(message: 'Radius domain cannot be blank. ADD TRANSLATION HERE PLS')]
+  #[Assert\NotBlank(message: 'fieldCannotBeBlank')]
+  #[CustomAssert\ValidDomain]
   public ?string $radiusDomain = null;
 
   #[NotBlank(message: 'nullCA')]
