@@ -140,8 +140,8 @@ readonly class AdminCertificateProcessEnforcerListener
 
         // If radsec is OK → next step is freeradius
         if ($certProcess->getRadsecproxyTestResult() === CertificateTestResult::PASSED) {
-            $session->set('system_reset_request', 'admin_dashboard_settings_certs_freeradius_upload');
-            $this->redirectTo($event, 'admin_dashboard_settings_certs_freeradius_upload');
+            $session->set('system_reset_request', 'admin_dashboard_settings_certs_management_freeradius_selection');
+            $this->redirectTo($event, 'admin_dashboard_settings_certs_management_freeradius_selection');
             return;
         }
 
