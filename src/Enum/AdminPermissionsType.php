@@ -1,0 +1,27 @@
+<?php
+
+namespace App\Enum;
+
+enum AdminPermissionsType: string
+{
+    // Users Management page
+    case USERS_MANAGEMENT_WRITE = 'USERS_MANAGEMENT_WRITE';
+    case USERS_MANAGEMENT_READ = 'USERS_MANAGEMENT_READ';
+    case USERS_MANAGEMENT_NO_PERM = 'USERS_MANAGEMENT_NO_PERM';
+    // Platform Status page
+    case PLATFORM_STATUS_WRITE = 'PLATFORM_STATUS_WRITE';
+    case PLATFORM_STATUS_READ = 'PLATFORM_STATUS_READ';
+    case PLATFORM_STATUS_NO_PERM = 'PLATFORM_STATUS_NO_PERM';
+    // Landing Page Configuration page
+    case LANDING_PAGE_CONFIG_WRITE = 'LANDING_PAGE_CONFIG_WRITE';
+    case LANDING_PAGE_CONFIG_READ = 'LANDING_PAGE_CONFIG_READ';
+    case LANDING_PAGE_CONFIG_NO_PERM = 'LANDING_PAGE_CONFIG_NO_PERM';
+    // User Engagement Configuration page
+    case USER_ENGAGEMENT_WRITE = 'USER_ENGAGEMENT_WRITE';
+    case USER_ENGAGEMENT_READ = 'USER_ENGAGEMENT_READ';
+    case USER_ENGAGEMENT_NO_PERM = 'USER_ENGAGEMENT_NO_PERM';
+    // Terms and Policies Configuration page
+
+
+
+}
