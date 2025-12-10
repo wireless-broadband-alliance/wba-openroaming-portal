@@ -55,6 +55,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libpng-dev libjpeg-dev libfreetype6-dev libsqlite3-dev libicu-dev libzip-dev \
     libonig-dev libxml2-dev libgpgme-dev libgpg-error-dev libmemcached-dev \
     libldap2-dev build-essential pkg-config autoconf curl gnupg bash \
+    certbot python3-certbot-nginx python3-certbot-dns-cloudflare python3-certbot-dns-google \
  && docker-php-ext-configure gd --with-jpeg --with-freetype \
  && docker-php-ext-install intl zip bcmath mbstring pdo pdo_mysql pdo_sqlite soap gd dom exif opcache ldap \
  && pecl channel-update pecl.php.net \
