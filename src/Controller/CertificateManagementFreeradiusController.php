@@ -13,6 +13,7 @@ use App\Enum\CertificateFileName;
 use App\Enum\CertificateMachineType;
 use App\Enum\CertificateTestResult;
 use App\Enum\FirewallType;
+use App\Enum\ProcessStatusType;
 use App\Enum\TrustedWBAFingerprints;
 use App\Form\CertificateFreeradiusUploadAutoType;
 use App\Form\CertificateFreeradiusUploadManualType;
@@ -654,10 +655,10 @@ class CertificateManagementFreeradiusController extends AbstractController
 //                fclose($connection);
 //            }
       // THIS IS OK [0] -> a non-false $connection OR errno=0 and errstr="" means TLS handshake succeeded
-      $this->certificateFreeradiusCommandsService->updateFreeradiusTestResult(
-          $processEntity,
-          CertificateTestResult::PASSED
-      );
+      $processEntity->setStatus(ProcessStatusType::COMPLETED);
+      $processEntity->setFreeradiusTestResult(CertificateTestResult::PASSED);
+      $this->entityManager->persist($processEntity);
+      $this->entityManager->flush();
 
       /** @var User $user */
       $user = $this->getUser();
@@ -701,10 +702,10 @@ class CertificateManagementFreeradiusController extends AbstractController
       ]);
     } catch (Throwable $e) {
       // Update DB when test fails
-      $this->certificateFreeradiusCommandsService->updateFreeradiusTestResult(
-          $processEntity,
-          CertificateTestResult::FAILED
-      );
+      $processEntity->setStatus(ProcessStatusType::IN_PROGRESS);
+      $processEntity->setFreeradiusTestResult(CertificateTestResult::FAILED);
+      $this->entityManager->persist($processEntity);
+      $this->entityManager->flush();
 
       return new JsonResponse([
           'status' => 'error',
