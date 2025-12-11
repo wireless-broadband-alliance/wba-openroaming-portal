@@ -76,7 +76,6 @@
       {% set previousCompleted = index == 0 or (steps[index - 1].id in stages and stages[steps[index - 1].id]) %}
 
       <div class="w-full md:flex-1 flex flex-col md:items-center text-center mb-8 p-2">
-        div class="w-full md:flex-1 flex flex-col md:items-center text-center mb-8 p-2">
         <div class="flex items-center justify-center w-10 h-10 rounded-full border-2 z-10 font-semibold transition-all duration-300
               {% if completed %} bg-primary border-primary text-white
               {% elseif active %} bg-white border-primary text-primary step-active
