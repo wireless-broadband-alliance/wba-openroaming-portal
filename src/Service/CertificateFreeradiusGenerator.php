@@ -28,7 +28,7 @@ class CertificateFreeradiusGenerator
     ];
 
     $process = new Process($command);
-    $process->setTimeout(180); // 3 min, adjust as needed
+    $process->setTimeout(180); // 3 mins
 
     $process->run();
 
