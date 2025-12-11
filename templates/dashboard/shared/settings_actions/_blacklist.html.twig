@@ -1,0 +1,66 @@
+<twig:DomainBlacklistForm :dto="formDTO" :form="form">
+    <div>
+        {{ form_start(form) }}
+
+        <div class="grid gap-4 lg:grid-cols-2 xl:grid-cols-3 p-2 z-0 mt-4">
+            <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full" {{ stimulus_controller('card') }}>
+                {# Header with title and info icon #}
+                <div class="flex justify-between items-center">
+                    <h1 class="text-base md:text-lg font-medium break-words">
+                        {{ "Domínios Bloqueados" }}
+                    </h1>
+                    <img class="w-5 h-5 cursor-pointer"
+                            {{ stimulus_target('card', 'button') }}
+                            {{ stimulus_action('card', 'show_info', 'mouseover')|stimulus_action('card', 'hide_info', 'mouseout') }}
+                         src="{{ asset('resources/logos/info_icon.svg') }}"
+                         alt="info_icon"/>
+                </div>
+
+                {# Description #}
+                <div class="mt-2">
+                    {{ include('/dashboard/shared/settings_actions/_description.html.twig', {
+                        description: "Lista de domínios bloqueados na plataforma",
+                    }) }}
+                </div>
+
+                <div class="mt-4 w-full space-y-3">
+                    {% for line in form.lines %}
+                        <div class="flex flex-row w-full justify-start items-end">
+                            <div class="flex flex-col gap-y-1 w-full">
+                                {{ form_label(line.domain) }}
+                                <div class="w-full flex flex-row items-center space-x-4">
+                                    {{ form_widget(line.domain, {attr: {class: 'form-widget', placeholder: 'example.com'}}) }}
+
+                                    <div>
+                                        {{ form_row(line.vars.button_delete, {attr: {class: 'px-3 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition'}}) }}
+                                    </div>
+                                </div>
+
+                                {{ form_help(line.domain) }}
+
+                                <div class="mt-2 -mb-2 text-center text-red-500 text-base">
+                                    {{ form_errors(line.domain) }}
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+
+                    <div class="mt-6 flex flex-row justify-end">
+                        {{ form_widget(form.lines.vars.button_add, {label: 'Adicionar Domínio', attr: {class: 'mt-6 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition'}}) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-6 divider-solid"></div>
+
+        <div class="mt-6 flex flex-row w-full justify-end items-center gap-2">
+            <button type="submit" class="btn-primary">
+                {{ 'saveChanges'|trans({}, 'settings_actions_general') }}
+            </button>
+        </div>
+
+        {{ form_rest(form) }}
+        {{ form_end(form) }}
+    </div>
+</twig:DomainBlacklistForm>
