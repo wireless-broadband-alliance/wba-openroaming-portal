@@ -32,6 +32,10 @@
                 placeholder: 'form.email_placeholder'|trans({}, 'register_landing'),
             },
         }) }}
+
+        <div class="text-red-500 m-2">
+            {{ form_errors(registrationForm.email) }}
+        </div>
     </div>
 
     {# Turnstile Checker #}

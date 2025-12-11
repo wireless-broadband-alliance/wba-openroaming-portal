@@ -23,5 +23,7 @@
         {{ include('dashboard/shared/settings_actions/_schedule.html.twig') }}
     {% elseif app.request.attributes.get('_route') == 'admin_dashboard_settings_sms' %}
         {{ include('dashboard/shared/settings_actions/_sms.html.twig') }}
+    {% elseif app.request.attributes.get('_route') == 'admin_dashboard_settings_blacklist' %}
+      {{ include('dashboard/shared/settings_actions/_blacklist.html.twig') }}
     {% endif %}
 {% endblock %}
