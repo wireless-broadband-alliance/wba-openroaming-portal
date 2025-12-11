@@ -83,7 +83,8 @@ class AuthRefreshController extends AbstractController
         return new BaseResponse(200, [
         'access_token' => $newAccessToken,
         'refresh_token' => $newRefreshToken->getAccessToken(),
-        'expires_in' => 3600,
+        'access_token_expires_in' => 3600,
+        'refresh_token_expires_in' => 2592000
         ])->toResponse();
     }
 }

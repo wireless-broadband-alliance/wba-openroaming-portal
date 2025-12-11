@@ -18,10 +18,10 @@
     <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">
     <link href="./index_v2_files/css2(1)" rel="stylesheet">
 
-            <link rel="stylesheet" href="./index_v2_files/app-mEuxOyU.css">
+            <link rel="stylesheet" href="./index_v2_files/app-lsVnQWz.css">
     
             
-<link rel="stylesheet" href="./index_v2_files/app-mEuxOyU.css">
+<link rel="stylesheet" href="./index_v2_files/app-lsVnQWz.css">
 <link rel="stylesheet" href="./index_v2_files/tom-select.default-EUMPfwl.css">
 <link rel="stylesheet" href="./index_v2_files/live.min-FOtfHpc.css">
 <link rel="stylesheet" href="./index_v2_files/quill.snow-DYvVjm1.css">
@@ -1858,12 +1858,13 @@ if (!HTMLScriptElement.supports || !HTMLScriptElement.supports('importmap')) (fu
                             </svg>
                         </button>
 
-                        <div id="resp-1-5" class="hidden px-6 py-4 bg-white border-t border-gray-100 space-y-6">
+                        <div id="resp-1-5" class="px-6 py-4 bg-white border-t border-gray-100 space-y-6 hidden">
 
                                                                                         <div class="text-sm text-gray-600 italic">
                                     Refreshes the JWT token for an authenticated user.
 The client must send the current valid refresh token in the request body as "current_token".
 If the token is valid and not expired/revoked, a new access token and refresh token are returned.
+Both the jwt and the refresh token timestamps are in seconds.
                                 </div>
                             
                                                                                         <div class="flex items-center gap-2 p-4 border-l-4 border-yellow-500 bg-yellow-50 text-yellow-800 text-sm rounded-md">
@@ -1912,7 +1913,8 @@ If the token is valid and not expired/revoked, a new access token and refresh to
     "data": {
         "access_token": "newAccessToken",
         "refresh_token": "newRefreshToken",
-        "expires_in": 3600
+        "access_token_expires_in": 3600,
+        "refresh_token_expires_in": 2592000
     }
 }
     </pre>
@@ -3989,7 +3991,7 @@ If the token is valid and not expired/revoked, a new access token and refresh to
                             </svg>
                         </button>
 
-                        <div id="resp-5-1" class="hidden px-6 py-4 bg-white border-t border-gray-100 space-y-6">
+                        <div id="resp-5-1" class="px-6 py-4 bg-white border-t border-gray-100 space-y-6 hidden">
 
                                                                                         <div class="text-sm text-gray-600 italic">
                                     Enables Two-Factor Authentication (2FA) for the authenticated user. 
