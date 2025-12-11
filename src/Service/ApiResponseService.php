@@ -833,7 +833,8 @@ readonly class ApiResponseService
             ],
             'description' => 'Refreshes the JWT token for an authenticated user.
 The client must send the current valid refresh token in the request body as "current_token".
-If the token is valid and not expired/revoked, a new access token and refresh token are returned.',
+If the token is valid and not expired/revoked, a new access token and refresh token are returned.
+Both the jwt and the refresh token timestamps are in seconds.',
             'isProtected' => true,
             'responses' => [
                 200 => [
@@ -843,7 +844,8 @@ If the token is valid and not expired/revoked, a new access token and refresh to
                                 "data": {
                                   "access_token": "newAccessToken",
                                   "refresh_token": "newRefreshToken",
-                                  "expires_in": 3600
+                                  "access_token_expires_in": 3600,
+                                  "refresh_token_expires_in": 2592000
                               }
                               }',
                         true,
