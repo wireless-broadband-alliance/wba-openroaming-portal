@@ -8,6 +8,7 @@ use App\Enum\AnalyticalEventType;
 use App\Enum\CodeVerificationType;
 use App\Enum\DefaultUser;
 use App\Enum\FirewallType;
+use App\Enum\SessionStatus;
 use App\Enum\SettingName;
 use App\Enum\UserTwoFactorAuthenticationStatus;
 use App\Form\TwoFACode;
@@ -847,12 +848,12 @@ class TwoFAController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
         $session = $request->getSession();
-        $route = $session->get('system_reset_request');
+        $route = $session->get(SessionStatus::SYSTEM_RESET_REQUEST->value) ?? '';
 
-        if ($route && $session->get('session_installation_started') === true) {
+        if ($route && $session->get(SessionStatus::INSTALLATION_STARTED->value) === true) {
             return $this->redirectToRoute($route);
         }
-        if ($route && $session->get('session_certificate_started') === true) {
+        if ($route && $session->get(SessionStatus::CERTIFICATE_STARTED->value) === true) {
             return $this->redirectToRoute($route);
         }
 

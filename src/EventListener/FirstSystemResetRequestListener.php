@@ -5,6 +5,7 @@ namespace App\EventListener;
 use App\Entity\User;
 use App\Enum\CertificateTestResult;
 use App\Enum\ProcessStatusType;
+use App\Enum\SessionStatus;
 use App\Repository\CertificateSetupProcessRepository;
 use App\Repository\InstallationProgressRepository;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -42,11 +43,10 @@ readonly class FirstSystemResetRequestListener
 
     if (!$completedInstallation) {
       $session->set('2fa_verified_dashboard', true);
-      $session->set('system_reset_request', 'admin_dashboard_settings_certs_installation');
+      $session->set(SessionStatus::SYSTEM_RESET_REQUEST->value, 'admin_dashboard_settings_certs_installation');
       $this->handleRedirect(
           $event,
           $session,
-          'session_installation_started',
           $this->translator->trans(
               'missingInstallationProcess',
               [],
@@ -58,17 +58,16 @@ readonly class FirstSystemResetRequestListener
     }
 
     if ($this->certificateSetupProcessRepository->getLatestCompletedProcess() !== null) {
-        return;
+      return;
     }
 
     $completedCertificates = $this->certificateSetupProcessRepository->getLatestProcess();
     if (!$completedCertificates) {
       $session->set('2fa_verified_dashboard', true);
-      $session->set('system_reset_request', 'admin_dashboard_settings_certs_radsecproxy_upload');
+      $session->set(SessionStatus::SYSTEM_RESET_REQUEST->value, 'admin_dashboard_settings_certs_radsecproxy_upload');
       $this->handleRedirect(
           $event,
           $session,
-          'session_certificate_started',
           $this->translator->trans(
               'missingCertificateProcess',
               [],
@@ -81,11 +80,10 @@ readonly class FirstSystemResetRequestListener
 
     if ($completedCertificates->getRadsecproxyTestResult() === null) {
       $session->set('2fa_verified_dashboard', true);
-      $session->set('system_reset_request', 'admin_dashboard_settings_certs_radsecproxy_upload');
+      $session->set(SessionStatus::SYSTEM_RESET_REQUEST->value, 'admin_dashboard_settings_certs_radsecproxy_upload');
       $this->handleRedirect(
           $event,
           $session,
-          'session_certificate_started',
           $this->translator->trans(
               'certificateProcessPending',
               [],
@@ -99,11 +97,10 @@ readonly class FirstSystemResetRequestListener
     if (($completedCertificates->getRadsecproxyTestResult() === CertificateTestResult::PASSED)
         && $completedCertificates->getFreeradiusTestResult() !== CertificateTestResult::PASSED) {
       $session->set('2fa_verified_dashboard', true);
-      $session->set('system_reset_request', 'admin_dashboard_settings_certs_management_freeradius_selection');
+      $session->set(SessionStatus::SYSTEM_RESET_REQUEST->value, 'admin_dashboard_settings_certs_management_freeradius_selection');
       $this->handleRedirect(
           $event,
           $session,
-          'session_certificate_started',
           $this->translator->trans(
               'certificateProcessPending',
               [],
@@ -115,8 +112,8 @@ readonly class FirstSystemResetRequestListener
     }
 
     // All checks are valid, remove session flags
-    $session->remove('session_installation_started');
-    $session->remove('session_certificate_started');
+    $session->remove(SessionStatus::INSTALLATION_STARTED->value);
+    $session->remove(SessionStatus::CERTIFICATE_STARTED->value);
   }
 
   /**
@@ -125,11 +122,14 @@ readonly class FirstSystemResetRequestListener
   private function handleRedirect(
       InteractiveLoginEvent $event,
       SessionInterface $session,
-      string $sessionKey,
       string $flashMessage,
       string $routeName
   ): void {
-    $session->set($sessionKey, true);
+    // All checks are valid, remove session flags
+    $session->set(SessionStatus::INSTALLATION_STARTED->value, true);
+    $session->set(SessionStatus::INSTALLATION_VERIFICATION->value, true);
+    $session->set(SessionStatus::CERTIFICATE_STARTED->value, true);
+    $session->set(SessionStatus::CERTIFICATE_VERIFICATION->value, true);
     $session->getFlashBag()->add('success', $flashMessage);
 
     $url = $this->urlGenerator->generate($routeName);

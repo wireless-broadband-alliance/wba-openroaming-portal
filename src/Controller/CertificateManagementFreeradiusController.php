@@ -14,6 +14,7 @@ use App\Enum\CertificateMachineType;
 use App\Enum\CertificateTestResult;
 use App\Enum\FirewallType;
 use App\Enum\ProcessStatusType;
+use App\Enum\SessionStatus;
 use App\Enum\TrustedWBAFingerprints;
 use App\Form\CertificateFreeradiusUploadAutoType;
 use App\Form\CertificateFreeradiusUploadManualType;
@@ -31,6 +32,7 @@ use DateTime;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
+use MongoDB\Driver\Session;
 use RuntimeException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -689,7 +691,7 @@ class CertificateManagementFreeradiusController extends AbstractController
       );
 
       $session = $request->getSession();
-      if ($session->has('system_reset_request')) {
+      if ($session->has(SessionStatus::SYSTEM_RESET_REQUEST->value)) {
         $this->eventActions->saveEvent(
             $user,
             AnalyticalEventType::SYSTEM_RESET_REQUEST_COMPLETED->value,
@@ -702,9 +704,9 @@ class CertificateManagementFreeradiusController extends AbstractController
         );
 
         // Clear all the sessions requests in case the system_reset is completed
-        $session->remove('system_reset_request');
-        $session->remove('session_installation_started');
-        $session->remove('session_certificate_started');
+        $session->remove(SessionStatus::SYSTEM_RESET_REQUEST->value);
+        $session->remove(SessionStatus::INSTALLATION_STARTED->value);
+        $session->remove(SessionStatus::CERTIFICATE_STARTED->value);
       }
 
       return new JsonResponse([

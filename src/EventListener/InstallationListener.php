@@ -6,6 +6,7 @@ use App\Entity\User;
 use App\Enum\DefaultUser;
 use App\Enum\FirewallType;
 use App\Enum\InstallationType;
+use App\Enum\SessionStatus;
 use App\Repository\UserRepository;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -43,7 +44,7 @@ readonly class InstallationListener
             return;
         }
         if ($user && str_starts_with($path, '/dashboard/settings/certificatesManagement/installation')) {
-            if (!$session->get('installation_verification')) {
+            if (!$session->get(SessionStatus::INSTALLATION_VERIFICATION->value)) {
                 $url = $this->router->generate('admin_dashboard_settings_certs_installation_verify_send_code', [
                     'type' => InstallationType::INSTALLATION->value
                 ]);
@@ -58,7 +59,7 @@ readonly class InstallationListener
                 str_starts_with($path, '/dashboard/settings/certificatesManagement/certificates/')
             )
         ) {
-            if (!$session->get('certificate_verification')) {
+            if (!$session->get(SessionStatus::CERTIFICATE_VERIFICATION->value)) {
                 $url = $this->router->generate('admin_dashboard_settings_certs_installation_verify_send_code', [
                     'type' => InstallationType::CERTIFICATES->value,
                 ]);
@@ -66,11 +67,11 @@ readonly class InstallationListener
             }
             return;
         }
-        if ($session->get('installation_verification')) {
-            $session->set('installation_verification', false);
+        if ($session->get(SessionStatus::INSTALLATION_VERIFICATION->value)) {
+            $session->set(SessionStatus::INSTALLATION_VERIFICATION->value, false);
         }
-        if ($session->get('certificate_verification')) {
-            $session->set('certificate_verification', false);
+        if ($session->get(SessionStatus::CERTIFICATE_VERIFICATION->value)) {
+            $session->set(SessionStatus::CERTIFICATE_VERIFICATION->value, false);
         }
     }
 }

@@ -9,6 +9,7 @@ use App\Entity\InstallationProgress;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Enum\ProcessStatusType;
+use App\Enum\SessionStatus;
 use App\Repository\CertificateSetupProcessRepository;
 use App\Repository\InstallationProgressRepository;
 use App\Service\CertificateProcessCheckerService;
@@ -18,6 +19,7 @@ use App\Service\InstallationService;
 use DateTime;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
+use MongoDB\Driver\Session;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -178,7 +180,7 @@ class CertificateManagementController extends AbstractController
 
     // Set session to redirect the user
     $session = $request->getSession();
-    $session->set('system_reset_request', 'admin_dashboard_settings_certs_installation');
+    $session->set(SessionStatus::SYSTEM_RESET_REQUEST->value, 'admin_dashboard_settings_certs_installation');
 
     $this->eventActions->saveEvent(
         $user,

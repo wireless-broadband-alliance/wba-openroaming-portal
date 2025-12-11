@@ -14,6 +14,7 @@ use App\Enum\InstallationStep;
 use App\Enum\InstallationType;
 use App\Enum\PlatformMode;
 use App\Enum\ProcessStatusType;
+use App\Enum\SessionStatus;
 use App\Enum\SettingName;
 use App\Enum\SettingsConfigType;
 use App\Form\AdminConfigType;
@@ -166,7 +167,7 @@ class InstallationController extends AbstractController
             $this->entityManager->flush();
 
             $session = $request->getSession();
-            if ($session->has('system_reset_request')) {
+            if ($session->has(SessionStatus::SYSTEM_RESET_REQUEST->value)) {
                 $this->eventActions->saveEvent(
                     $user,
                     AnalyticalEventType::SYSTEM_RESET_REQUEST_IN_PROGRESS->value,
@@ -702,7 +703,7 @@ class InstallationController extends AbstractController
                 $this->entityManager->flush();
 
                 $session = $request->getSession();
-                $session->set('installation_verification', true);
+                $session->set(SessionStatus::INSTALLATION_VERIFICATION->value, true);
 
                 /** @var User $user */
                 $user = $this->getUser();
@@ -1015,9 +1016,9 @@ class InstallationController extends AbstractController
             if ($this->twoFAService->validate2FACode($user, $code)) {
                 $session = $request->getSession();
                 if ($type === InstallationType::INSTALLATION->value) {
-                    $session->set('installation_verification', true);
+                    $session->set(SessionStatus::INSTALLATION_VERIFICATION->value, true);
                 } else {
-                    $session->set('certificate_verification', true);
+                    $session->set(SessionStatus::CERTIFICATE_VERIFICATION->value, true);
                 }
                 $eventMetaData = [
                     'platform' => PlatformMode::LIVE->value,

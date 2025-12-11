@@ -5,6 +5,7 @@ namespace App\EventListener;
 use App\Entity\User;
 use App\Enum\CertificateTestResult;
 use App\Enum\ProcessStatusType;
+use App\Enum\SessionStatus;
 use App\Repository\CertificateSetupProcessRepository;
 use App\Repository\InstallationProgressRepository;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -40,7 +41,7 @@ readonly class AdminCertificateProcessEnforcerListener
         if (
             !$user instanceof User ||
             !$this->security->isGranted('ROLE_ADMIN') ||
-            !$session->has('system_reset_request')
+            !$session->has(SessionStatus::SYSTEM_RESET_REQUEST->value)
         ) {
             return;
         }
@@ -117,7 +118,7 @@ readonly class AdminCertificateProcessEnforcerListener
         ]);
 
         if (!$installation) {
-            $session->set('system_reset_request', 'admin_dashboard_settings_certs_installation');
+            $session->set(SessionStatus::SYSTEM_RESET_REQUEST->value, 'admin_dashboard_settings_certs_installation');
             $this->redirectTo($event, 'admin_dashboard_settings_certs_installation');
             return;
         }
@@ -126,27 +127,27 @@ readonly class AdminCertificateProcessEnforcerListener
         $certProcess = $this->certificateSetupProcessRepository->getLatestProcess();
 
         if (!$certProcess) {
-            $session->set('system_reset_request', 'admin_dashboard_settings_certs_radsecproxy_upload');
+            $session->set(SessionStatus::SYSTEM_RESET_REQUEST->value, 'admin_dashboard_settings_certs_radsecproxy_upload');
             $this->redirectTo($event, 'admin_dashboard_settings_certs_radsecproxy_upload');
             return;
         }
 
         // Radsecproxy test required
         if ($certProcess->getRadsecproxyTestResult() === null) {
-            $session->set('system_reset_request', 'admin_dashboard_settings_certs_radsecproxy_upload');
+            $session->set(SessionStatus::SYSTEM_RESET_REQUEST->value, 'admin_dashboard_settings_certs_radsecproxy_upload');
             $this->redirectTo($event, 'admin_dashboard_settings_certs_radsecproxy_upload');
             return;
         }
 
         // If radsec is OK → next step is freeradius
         if ($certProcess->getRadsecproxyTestResult() === CertificateTestResult::PASSED) {
-            $session->set('system_reset_request', 'admin_dashboard_settings_certs_management_freeradius_selection');
+            $session->set(SessionStatus::SYSTEM_RESET_REQUEST->value, 'admin_dashboard_settings_certs_management_freeradius_selection');
             $this->redirectTo($event, 'admin_dashboard_settings_certs_management_freeradius_selection');
             return;
         }
 
         // Process fully complete
-        $session->remove('system_reset_request');
+        $session->remove(SessionStatus::SYSTEM_RESET_REQUEST->value);
     }
 
     private function redirectTo(RequestEvent $event, string $routeName): void
