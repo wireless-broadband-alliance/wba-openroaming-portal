@@ -15,7 +15,7 @@ services:
       - ./service-config/supervisor/supervisord-dev.conf:/etc/supervisor/conf.d/supervisord.conf:ro
       - ./config/jwt/:/var/www/openroaming/config/jwt/
     ports:
-      - "80:80"
+      - "88:80"
   mysql:
     image: mysql:8.0
     environment:
