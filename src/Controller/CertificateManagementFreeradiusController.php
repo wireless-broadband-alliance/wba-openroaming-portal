@@ -248,74 +248,66 @@ class CertificateManagementFreeradiusController extends AbstractController
       return $this->redirectToRoute('admin_dashboard_settings_certs_radsecproxy_upload');
     }
 
-    // Create & handle form
-    $form = $this->createForm(SimpleSubmitFormType::class);
-    $form->handleRequest($request);
+    /** @var User $user */
+    $user = $this->getUser();
 
-    if ($form->isSubmitted() && $form->isValid()) {
-      /** @var User $user */
-      $user = $this->getUser();
-
-      $process = $this->certificateProcessCheckerService->getCurrentProcess();
-      // In case there's not active process
-      if (!$process instanceof CertificateSetupProcess) {
-        $this->addFlash(
-            'error',
-            $this->translator->trans('noActiveProcess', [], 'CertificateProcessCheckerService')
-        );
-        return $this->redirectToRoute('admin_dashboard_settings_certs_radsecproxy_upload');
-      }
-
-      // Extract the domain
-      $domain = 'wifi.tetrapi.pt'; // TODO UPDATE TO GET THE LOCAL DOMAIN NAME OF THE MACHINE
-
-      try {
-        $this->certificateFreeradiusGenerator->generateCertificates($domain, $user);
-        $this->addFlash('success', "Certificate generated successfully for domain: $domain");
-        dd('die here pls its good');
-      } catch (Exception $e) {
-        throw new RuntimeException('Failed to generate certificate: ' . $e->getMessage());
-      }
-
-      // TODO generate the new certs here with the command of the cert bot
-      // place them on the var/certs folder like the vichUploder does -> also update the db and define the unique tag for them
-      // only the config should take them and place the new ones on the signign-keys
-
-      // After the files are validated and the processed, update them once again to add
-      $process->setFreeradiusFormCompletedAt(new DateTimeImmutable());
-      $process->setFreeradiusConfigAppliedAt(null);
-      $process->setUpdatedAt(new DateTimeImmutable());
-
-      $this->entityManager->persist($process);
-      $this->entityManager->flush();
-
-      $this->eventActions->saveEvent(
-          $user,
-          AnalyticalEventType::CERTIFICATE_SETUP_PROCESS_FREERAEDIUS_UPLOAD_AUTO->value,
-          new DateTime(),
-          [
-              'ip' => $request->getClientIp(),
-              'user_agent' => $request->headers->get('User-Agent'),
-              'by' => $user->getUuid(),
-          ]
-      );
-
+    $process = $this->certificateProcessCheckerService->getCurrentProcess();
+    // In case there's not active process
+    if (!$process instanceof CertificateSetupProcess) {
       $this->addFlash(
-          'warning',
-          $this->translator->trans('cert_generated_are_lets_encrypt_warning', [], 'controllers')
+          'error',
+          $this->translator->trans('noActiveProcess', [], 'CertificateProcessCheckerService')
       );
-
-      $this->addFlash(
-          'success',
-          $this->translator->trans(
-              'freeradiusCertUploadedSuccessfully',
-              [],
-              'controllers'
-          )
-      );
-
-      return $this->redirectToRoute('admin_dashboard_settings_certs_freeradius_config');
+      return $this->redirectToRoute('admin_dashboard_settings_certs_radsecproxy_upload');
     }
+
+    // Extract the domain
+    $domain = 'wifi-qa.tetrapi.pt'; // TODO UPDATE TO GET THE LOCAL DOMAIN NAME OF THE MACHINE
+
+    try {
+      $this->certificateFreeradiusGenerator->generateCertificates($domain, $user);
+      $this->addFlash('success', "Certificate generated successfully for domain: $domain");
+    } catch (Exception $e) {
+      throw new RuntimeException('Failed to generate certificate: ' . $e->getMessage());
+    }
+
+    dd('die here pls its good');
+    // TODO generate the new certs here with the command of the cert bot
+    // place them on the var/certs folder like the vichUploder does -> also update the db and define the unique tag for them
+    // only the config should take them and place the new ones on the signign-keys
+
+    // After the files are validated and the processed, update them once again to add
+    $process->setFreeradiusFormCompletedAt(new DateTimeImmutable());
+    $process->setFreeradiusConfigAppliedAt(null);
+    $process->setUpdatedAt(new DateTimeImmutable());
+
+    $this->entityManager->persist($process);
+    $this->entityManager->flush();
+
+    $this->eventActions->saveEvent(
+        $user,
+        AnalyticalEventType::CERTIFICATE_SETUP_PROCESS_FREERAEDIUS_UPLOAD_AUTO->value,
+        new DateTime(),
+        [
+            'ip' => $request->getClientIp(),
+            'user_agent' => $request->headers->get('User-Agent'),
+            'by' => $user->getUuid(),
+        ]
+    );
+
+    $this->addFlash(
+        'warning',
+        $this->translator->trans('cert_generated_are_lets_encrypt_warning', [], 'controllers')
+    );
+
+    $this->addFlash(
+        'success',
+        $this->translator->trans(
+            'freeradiusCertUploadedSuccessfully',
+            [],
+            'controllers'
+        )
+    );
 
     // Redirect to the next stage automatically
     return $this->redirectToRoute(
