@@ -45,3 +45,7 @@ valueCannotBeLessThanMinutes: 'This value cannot be less than {{ limit }} minute
 valueNotValidURL: 'Please insert a valid URL.'
 timerShouldNeverBeLessThan: 'This timer should never be less than 1.'
 profileLimitMessage: 'Please select a value between 1 (minimum, fixed value) and %limit% (maximum, determined by the number of days left until the certificate expires on %expirationDate%).'
+domainBlacklisted: 'The specified email domain is blacklisted.'
+invalidDomain: 'Invalid domain.'
+domainNotWhitelisted: 'Domain already defined in the valid domains.'
+domainNotBlacklisted: 'Domain already defined in the blacklisted domains.'
