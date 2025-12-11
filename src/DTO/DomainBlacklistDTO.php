@@ -22,6 +22,7 @@ class DomainBlacklistDTO
     }
 
     /**
+     * @param DomainBlacklist[] $domainBlacklistDB
      * @return DomainBlacklist[]
      */
     public function toDomainBlacklist(array $domainBlacklistDB): array

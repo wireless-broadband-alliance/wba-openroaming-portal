@@ -151,13 +151,9 @@ readonly class UserStatusChecker
             }
         }
 
-        // Validate Blacklist domains
-        foreach ($this->domainBlacklistRepository->findAll() as $domainDB) {
-            if ($domainDB->getDomain() === $domain) {
-                return false;
-            }
-        }
-
-        return true;
+        return array_all(
+            $this->domainBlacklistRepository->findAll(),
+            fn($domainDB) => $domainDB->getDomain() !== $domain
+        );
     }
 }

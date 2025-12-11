@@ -24,7 +24,7 @@ class DomainValidNotInBlacklistValidator extends ConstraintValidator
         }
 
         // Split the valid domains into an array and trim whitespace
-        $validDomains = explode(',', $value);
+        $validDomains = explode(',', (string) $value);
         $validDomains = array_map(trim(...), $validDomains);
 
         // Validate Blacklist domains
