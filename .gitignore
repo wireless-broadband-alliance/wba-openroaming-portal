@@ -10,9 +10,10 @@
 # Required var exceptions for certificate generations and management
 var/*
 !var/certs/
-var/certs/*
 # Except any .gitkeep file under var/certs or subfolders
-!var/certs/**/*.gitkeep
+var/certs/*
+!var/certs/.gitkeep
+!var/certs/**/.gitkeep
 
 ###> phpunit/phpunit ###
 /phpunit.xml
