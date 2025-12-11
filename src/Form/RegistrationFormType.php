@@ -7,6 +7,7 @@ use App\Enum\OperationMode;
 use App\Enum\SettingName;
 use App\Repository\SettingRepository;
 use App\Service\GetSettings;
+use App\Validator\Constraints\DomainValidNotInBlacklist;
 use PixelOpen\CloudflareTurnstileBundle\Type\TurnstileType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
@@ -32,7 +33,7 @@ class RegistrationFormType extends AbstractType
         )->getValue();
 
         $builder
-            ->add('email', EmailType::class);
+            ->add('email', EmailType::class, ['constraints' => [new DomainValidNotInBlacklist()]]);
 
         // Check if TURNSTILE_CHECKER value is ON
         if ($turnstileCheckerValue === OperationMode::ON->value) {
