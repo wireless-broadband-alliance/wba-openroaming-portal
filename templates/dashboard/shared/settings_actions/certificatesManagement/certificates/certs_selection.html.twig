@@ -50,25 +50,27 @@
         </div>
       </a>
 
-      {# Auto Generation Lets Encrypt #}
-      <a href="{{ path('admin_dashboard_settings_certs_freeradius_auto_renew') }}"
-         class="group flex flex-col items-center text-center bg-white shadow-md rounded-2xl p-6 sm:p-8 border border-gray-200
-                  transition-all hover:shadow-lg hover:-translate-y-1">
+      {# Auto Generation Lets Encrypt as POST form #}
+      <form method="post" action="{{ path('admin_dashboard_settings_certs_freeradius_auto_renew') }}"
+            onsubmit="return confirm('{{ 'confirmAutoRenew'|trans({}, 'certs_selection')|e('js') }}')">
+        <button type="submit"
+                class="group flex flex-col items-center text-center bg-white shadow-md rounded-2xl p-6 sm:p-8 border border-gray-200
+                 transition-all hover:shadow-lg hover:-translate-y-1 w-full">
 
-        <h2 class="text-lg sm:text-xl md:text-2xl font-bold mb-4 sm:mb-6 transition-colors group-hover:text-primary">
-          {{ 'autoTitle'|trans({}, 'certs_selection') }}
-        </h2>
+          <h2 class="text-lg sm:text-xl md:text-2xl font-bold mb-4 sm:mb-6 transition-colors group-hover:text-primary">
+            {{ 'autoTitle'|trans({}, 'certs_selection') }}
+          </h2>
 
-        <twig:ux:icon name="wba:autorenew-rounded"
-                      class="w-8 h-8 sm:w-10 sm:h-10 text-gray-600 transition-colors group-hover:text-primary mb-4 sm:mb-6"/>
+          <twig:ux:icon name="wba:autorenew-rounded"
+                        class="w-8 h-8 sm:w-10 sm:h-10 text-gray-600 transition-colors group-hover:text-primary mb-4 sm:mb-6"/>
 
-        <div class="mt-auto pt-2 sm:pt-3 font-semibold
-                        text-sm sm:text-base md:text-lg text-gray-700
-                        transition-colors group-hover:text-primary group-hover:underline">
-          {{ 'autoSubtitle'|trans({}, 'certs_selection') }}
-        </div>
-      </a>
-
+          <div class="mt-auto pt-2 sm:pt-3 font-semibold
+                text-sm sm:text-base md:text-lg text-gray-700
+                transition-colors group-hover:text-primary group-hover:underline">
+            {{ 'autoSubtitle'|trans({}, 'certs_selection') }}
+          </div>
+        </button>
+      </form>
     </div>
   </div>
 {% endblock %}

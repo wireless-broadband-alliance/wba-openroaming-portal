@@ -226,6 +226,7 @@ class CertificateManagementFreeradiusController extends AbstractController
   #[Route(
       '/dashboard/settings/certificatesManagement/freeradius/autoRenew',
       name: 'admin_dashboard_settings_certs_freeradius_auto_renew',
+      methods: ['POST']
   )]
   #[IsGranted('ROLE_ADMIN')]
   public function settingsCertificatesManagementFreeradiusAutoRenewAction(
@@ -247,13 +248,8 @@ class CertificateManagementFreeradiusController extends AbstractController
       return $this->redirectToRoute('admin_dashboard_settings_certs_radsecproxy_upload');
     }
 
-    $data = $this->getSettings->getSettings();
-
-    // Prepare DTO
-    $certificateUploadDTO = new CertificateFreeradiusUploadAutoDTO();
-
     // Create & handle form
-    $form = $this->createForm(CertificateFreeradiusUploadAutoType::class, $certificateUploadDTO);
+    $form = $this->createForm(SimpleSubmitFormType::class);
     $form->handleRequest($request);
 
     if ($form->isSubmitted() && $form->isValid()) {
@@ -271,7 +267,7 @@ class CertificateManagementFreeradiusController extends AbstractController
       }
 
       // Extract the domain
-      $domain = $certificateUploadDTO->radiusDomain;
+      $domain = 'wifi.tetrapi.pt'; // TODO UPDATE TO GET THE LOCAL DOMAIN NAME OF THE MACHINE
 
       try {
         $this->certificateFreeradiusGenerator->generateCertificates($domain, $user);
@@ -321,14 +317,9 @@ class CertificateManagementFreeradiusController extends AbstractController
       return $this->redirectToRoute('admin_dashboard_settings_certs_freeradius_config');
     }
 
-    return $this->render(
-        'dashboard/shared/settings_actions/certificatesManagement/certificates/freeradius/auto_renew.html.twig',
-        [
-            'data' => $data,
-            'certificateUploadDTO' => $certificateUploadDTO,
-            'form' => $form->createView(),
-            'context' => FirewallType::DASHBOARD->value,
-        ]
+    // Redirect to the next stage automatically
+    return $this->redirectToRoute(
+        'admin_dashboard_settings_certs_freeradius_config',
     );
   }
 
