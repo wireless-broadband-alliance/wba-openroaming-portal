@@ -20,7 +20,8 @@ class CertificateFreeradiusGenerator
         '--non-interactive',
         '--agree-tos',
         '--email', $user->getEmail(),
-        '--standalone',
+        '--webroot',
+        '-w', '/var/www/openroaming/public',
         '--config-dir', '/var/www/openroaming/var/certs/config',
         '--work-dir', '/var/www/openroaming/var/certs/work',
         '--logs-dir', '/var/www/openroaming/var/certs/logs'
