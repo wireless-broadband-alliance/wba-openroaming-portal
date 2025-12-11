@@ -72,7 +72,7 @@ scrape_configs:
   - job_name: 'openroaming-portal'
     metrics_path: '/metrics'
     static_configs:
-      - targets: ['your-portal-hostname:80']
+      - targets: ['your-portal-hostname:88']
 ```
 
 Replace `your-portal-hostname` with the hostname or IP address of your OpenRoaming Provisioning Portal. 
