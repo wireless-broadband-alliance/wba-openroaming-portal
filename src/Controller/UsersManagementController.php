@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\DTO\UserAddDTO;
 use App\DTO\UserUpdateDTO;
 use App\Entity\Event;
 use App\Entity\User;
@@ -17,6 +18,7 @@ use App\Enum\UserProvider;
 use App\Enum\UserRadiusProfileRevokeReason;
 use App\Enum\UserTwoFactorAuthenticationStatus;
 use App\Form\ResetPasswordType;
+use App\Form\UserAddType;
 use App\Form\UserUpdateType;
 use App\Repository\EventRepository;
 use App\Repository\UserExternalAuthRepository;
@@ -29,6 +31,7 @@ use App\Service\GetSettings;
 use App\Service\ProfileManager;
 use App\Service\SendSMS;
 use App\Service\TwoFAService;
+use App\Service\UserCreationService;
 use App\Service\UserDeletionService;
 use App\Service\VerificationCodeEmailGenerator;
 use DateInterval;
@@ -63,6 +66,7 @@ class UsersManagementController extends AbstractController
         private readonly GetSettings $getSettings,
         private readonly EventRepository $eventRepository,
         private readonly SendSMS $sendSMS,
+        private readonly UserCreationService $userCreationService,
         private readonly UserDeletionService $userDeletionService,
         private readonly TwoFAService $twoFAService,
         private readonly VerificationCodeEmailGenerator $verificationCodeEmailGenerator,
@@ -265,11 +269,46 @@ class UsersManagementController extends AbstractController
 
     #[Route('/dashboard/add', name: 'admin_user_add')]
     #[IsGranted('ROLE_SUPER_ADMIN')]
-    public function addUsers(Request $request): Response
-    {
-        dd($this->getUser(), $request);
-    }
+    public function addUsers(
+        Request $request,
+    ): Response {
+      // Call the getSettings method of GetSettings class to retrieve the data
+        $data = $this->getSettings->getSettings();
 
+      // Get the current logged-in user (admin)
+      /** @var User $currentUser */
+        $currentUser = $this->getUser();
+
+        $newUser = new User();
+        $userAddDTO = new UserAddDTO($newUser);
+
+      // Create & handle form
+        $form = $this->createForm(UserAddType::class, $userAddDTO);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+          // Convert DTO → Entity data before creation
+            $userAddDTO->createUser($newUser);
+
+          // Flash message
+            $this->addFlash(
+                'success_admin',
+                $this->translator->trans('addedNewUser', [
+                '%uuid%' => $createdUser->getUuid(),
+                ], 'controllers')
+            );
+
+            return $this->redirectToRoute('admin_page');
+        }
+
+        return $this->render('dashboard/actions/add.html.twig', [
+        'form' => $form->createView(),
+        'userAddDTO' => $userAddDTO,
+        'data' => $data,
+        'current_user' => $currentUser,
+        'context' => FirewallType::DASHBOARD->value,
+        ]);
+    }
 
   /**
    * Deletes Users from the Portal, encrypts the data before delete and saves it
