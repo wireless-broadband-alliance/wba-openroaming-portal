@@ -151,8 +151,8 @@ cannotReturnToPreviousPhase: 'Já não pode aceder a esta etapa porque já foi c
 cannotAccessStageYet: "Não pode aceder a esta etapa porque as etapas anteriores não estão concluídas."
 captchaValidationFailed: 'A validação captcha falhou.'
 pfx:
-    success: "Windows PFX foi criado com sucesso!"
-    failure: "Falha ao gerar o ficheiro Windows PFX por favor confirma se esta a inserir EV's válidos!"
+  success: "Windows PFX foi criado com sucesso!"
+  failure: "Falha ao gerar o ficheiro Windows PFX por favor confirma se esta a inserir EV's válidos!"
 envPermissionDenied: 'O ficheiro . env não tem permissões de escrita. Por favor utilize os seguintes comandos.'
 writeDbSettingsEnv: 'Escreva as novas configurações da base de dados no ficheiro .env'
 dbSettingsApplied: 'Configurações da base de dados aplicadas com sucesso.'
@@ -163,3 +163,4 @@ writeSettingsEnv: 'Escreva as novas configurações no ficheiro .env'
 createJwtPair: 'Gere um novo par de chaves JWT.'
 installationStartedSuccessfully: 'Verificação concluída com sucesso.'
 systemResetRequestStarted: 'Pedido de Restauro do Sistema iniciado. Certifique-se de completar cuidadosamente cada passo do processo de configuração.'
+notValidDomainOrIP: 'O domínio "%domain%" não é válido ou não resolve para um endereço IP.'

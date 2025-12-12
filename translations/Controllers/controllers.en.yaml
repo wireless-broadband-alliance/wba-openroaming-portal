@@ -153,8 +153,8 @@ cannotReturnToPreviousPhase: 'You can no longer access this stage because it has
 cannotAccessStageYet: "You cannot access this stage yet because previous steps are incomplete."
 captchaValidationFailed: 'Captcha validation failed.'
 pfx:
-    success: "Windows PFX created successfully!"
-    failure: "Failed to generate Windows PFX please make sure you are submitting valid EV'S!"
+  success: "Windows PFX created successfully!"
+  failure: "Failed to generate Windows PFX please make sure you are submitting valid EV'S!"
 envPermissionDenied: 'The .env file does not have write permissions. Please use the following commands.'
 writeDbSettingsEnv: 'Write the new database settings in the .env file.'
 dbSettingsApplied: 'Database settings applied successfully.'
@@ -165,3 +165,4 @@ writeSettingsEnv: 'Write the new settings in the .env file.'
 createJwtPair: 'Generate a new jwt key pair '
 installationStartedSuccessfully: 'Verification completed successfully.'
 systemResetRequestStarted: 'System Reset Request started. Make sure to carefully complete each step of the configuration process.'
+notValidDomainOrIP: 'The domain "%domain%" is not valid or does not resolve to an IP address.'

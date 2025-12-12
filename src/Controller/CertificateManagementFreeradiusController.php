@@ -26,6 +26,7 @@ use App\Service\CertificateFreeradiusInfoService;
 use App\Service\CertificateProcessCheckerService;
 use App\Service\CertificateStorageService;
 use App\Service\CertificateWriterUpdateService;
+use App\Service\DomainService;
 use App\Service\EventActions;
 use App\Service\GetSettings;
 use DateTime;
@@ -60,6 +61,7 @@ class CertificateManagementFreeradiusController extends AbstractController
       private readonly CertificateCheckerService $certificateCheckerService,
       private readonly EventActions $eventActions,
       private readonly CertificateFreeradiusGenerator $certificateFreeradiusGenerator,
+      private readonly DomainService $domainService,
   ) {
   }
 
@@ -261,8 +263,15 @@ class CertificateManagementFreeradiusController extends AbstractController
       return $this->redirectToRoute('admin_dashboard_settings_certs_radsecproxy_upload');
     }
 
-    // Extract the domain
-    $domain = 'wifi-qa.tetrapi.pt'; // TODO UPDATE TO GET THE LOCAL DOMAIN NAME OF THE MACHINE
+    // Extract the domain from the project
+    $domain = $request->getHost();
+    if (!$this->domainService->isValidDomain($domain)) {
+      $this->addFlash('error', $this->translator->trans('notValidDomainOrIP', [
+          '%domain%' => $domain,
+      ], 'controllers'));
+
+      return $this->redirectToRoute('admin_dashboard_settings_certs_management_freeradius_selection');
+    }
 
     try {
       $this->certificateFreeradiusGenerator->generateCertificates($domain, $user);
