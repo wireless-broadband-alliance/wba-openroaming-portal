@@ -139,6 +139,7 @@ radsecProxyConfigAppliedSuccessfully: 'Configuração do RadSecProxy aplicada co
 radsecProxyTestPassed: "Handshake TLS realizado com sucesso usando o conjunto de CA da WBA."
 missingRequiredForFreeradiusTest: 'É necessário especificar o remote_host e a remote_port.'
 freeradiusCertUploadedSuccessfully: 'Certificados Freeradius carregados com sucesso!'
+freeradiusCertGeneratedSuccessfully: 'Certificados Freeradius gerados com sucesso para o teu domínio atualmente: "%domain%"!'
 freeradiusConfigAppliedSuccessfully: 'Configuração do Freeradius aplicada com sucesso!'
 freeradiusTestPassed: 'Testes concluídos com sucesso. TODO Update this translation' # TODO Update this translation
 configAlreadyApplied: 'Está configuração já está aplicada! Não podes re-submeter o mesmo formulário.'

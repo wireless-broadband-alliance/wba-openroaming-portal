@@ -141,6 +141,7 @@ radsecProxyConfigAppliedSuccessfully: 'RadSecProxy configuration completed!'
 radsecProxyTestPassed: "TLS handshake OK using WBA CA bundle"
 missingRequiredForFreeradiusTest: 'Remote_host and remote_port are required.'
 freeradiusCertUploadedSuccessfully: 'Freeradius certificates uploaded successfully!'
+freeradiusCertGeneratedSuccessfully: 'Freeradius certificates generated successfully for the current configured domain: "%domain%"!'
 freeradiusConfigAppliedSuccessfully: 'Freeradius configuration applied successfully!'
 freeradiusTestPassed: 'Tests completed successfully. Update this later.'
 configAlreadyApplied: 'Configuration is been already applied. You can not re-submit this form.'
