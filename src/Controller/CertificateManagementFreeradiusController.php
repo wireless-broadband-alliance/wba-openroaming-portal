@@ -266,18 +266,18 @@ class CertificateManagementFreeradiusController extends AbstractController
 
     // Extract the domain from the project
     $domain = $request->getHost();
-//    if (!$this->domainService->isValidDomain($domain)) {
-//      $this->addFlash('error', $this->translator->trans('notValidDomainOrIP', [
-//          '%domain%' => $domain,
-//      ], 'controllers'));
-//
-//      return $this->redirectToRoute('admin_dashboard_settings_certs_management_freeradius_selection');
-//    }
+    if (!$this->domainService->isValidDomain($domain)) {
+      $this->addFlash('error', $this->translator->trans('notValidDomainOrIP', [
+          '%domain%' => $domain,
+      ], 'controllers'));
+
+      return $this->redirectToRoute('admin_dashboard_settings_certs_management_freeradius_selection');
+    }
 
     try {
       // Generate certificates (simulated or real)
-      $generatedFiles = $this->certificateFreeradiusGenerator->run($domain, $user, true); // TODO remove `true` in prod
-      $isSimulation = true; // TODO remove this simulation flag
+      $generatedFiles = $this->certificateFreeradiusGenerator->run($domain, $user); // For debug add true on the end for simulation
+      $isSimulation = true; // Add this tag for simulation flag
 
       foreach ($generatedFiles as $filepath) {
         $uploadedFile = new UploadedFile(
@@ -306,6 +306,7 @@ class CertificateManagementFreeradiusController extends AbstractController
         $name = $fileEnum->value; // e.g., "CA", "Cert", "Chain", "Full Chain", "Private Key"
 
         // Determine if it’s a private key storeUploadedFile function
+        // Add this "|| $isSimulation;" for simulation testing
         $isPrivateKey = $fileEnum === CertificateFileName::PRIVATE_KEY_PEM;
 
         $this->certificateStorageService->storeUploadedFile(
