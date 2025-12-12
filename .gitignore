@@ -68,3 +68,7 @@ src/Command/ResetRadiusMarcelinaSettingsCommand.php
 /public/build/
 /node_modules/
 ###< symfony/asset-mapper ###
+
+###> DockerFileCleanedDev ###
+DockerfileCleanedDev
+###< DockerFileCleanedDev ###
