@@ -86,13 +86,11 @@
             </form>
           </div>
 
-          {% if export_users == constant('App\\Enum\\OperationMode::ON').value %}
             <div class="flex items-center space-x-6">
-              <a href="{{ path('admin_user_export') }}" class="btn-primary">
-                {{ 'exportEverything'|trans({}, 'dashboard') }}
+              <a href="{{ path('admin_user_add') }}" class="btn-primary px-4 min-w-[150px]">
+                {{ 'addUser'|trans({}, 'dashboard') }}
               </a>
             </div>
-          {% endif %}
         </div>
       </div>
 

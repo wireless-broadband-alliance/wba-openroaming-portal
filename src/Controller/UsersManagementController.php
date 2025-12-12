@@ -263,6 +263,14 @@ class UsersManagementController extends AbstractController
         return $this->file($tempFile, 'users.xlsx');
     }
 
+    #[Route('/dashboard/add', name: 'admin_user_add')]
+    #[IsGranted('ROLE_SUPER_ADMIN')]
+    public function addUsers(Request $request): Response
+    {
+        dd($this->getUser(), $request);
+    }
+
+
   /**
    * Deletes Users from the Portal, encrypts the data before delete and saves it
    */
