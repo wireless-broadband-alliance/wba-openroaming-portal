@@ -4,11 +4,11 @@ namespace App\Enum;
 
 enum CertificateFileName: string
 {
-    // Radsecproxy required files
+    // Radsecproxy references
     case CLIENT_PEM = 'Client';
     case KEY_PEM = 'Key';
 
-    // Freeradius required files
+    // Freeradius references
     case CA_PEM = 'CA';
     case CERT_PEM = 'Cert';
     case CHAIN_PEM = 'Chain';
