@@ -96,8 +96,8 @@ class CertificateManagementRadsecproxyController extends AbstractController
                 // Save on the tmp folder the uploaded certificates after the validation
                 $this->certificateStorageService->storeUploadedFile(
                     $certificateUploadDTO->client,
-                    CertificateMachineType::RADSECPROXY->value,
                     CertificateFileName::CLIENT_PEM->value,
+                    CertificateMachineType::RADSECPROXY->value,
                     $process
                 );
             }
@@ -106,8 +106,8 @@ class CertificateManagementRadsecproxyController extends AbstractController
                 // Save on the tmp folder the uploaded certificates after the validation
                 $this->certificateStorageService->storeUploadedFile(
                     $certificateUploadDTO->key,
-                    CertificateMachineType::RADSECPROXY->value,
                     CertificateFileName::KEY_PEM->value,
+                    CertificateMachineType::RADSECPROXY->value,
                     $process,
                     true
                 );
@@ -330,11 +330,11 @@ class CertificateManagementRadsecproxyController extends AbstractController
         // Build full paths
         $clientCert = $this->certificateRepository->findLatestByProcessAndName(
             $processEntity,
-            'clientRADSECPROXY' // This name comes from the DTO Upload Radsecproxy
+            CertificateFileName::CLIENT_PEM->value // This name comes from the DTO Upload Radsecproxy
         );
         $keyCert = $this->certificateRepository->findLatestByProcessAndName(
             $processEntity,
-            'keyRADSECPROXY' // Same for this one
+            CertificateFileName::KEY_PEM->value // Same for this one
         );
 
         $basePath = $this->getParameter('kernel.project_dir') . '/var/certs/';

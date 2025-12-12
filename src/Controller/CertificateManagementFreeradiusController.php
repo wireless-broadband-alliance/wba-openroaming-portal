@@ -6,6 +6,7 @@ namespace App\Controller;
 
 use App\DTO\CertificateFreeradiusUploadAutoDTO;
 use App\DTO\CertificateFreeradiusUploadManualDTO;
+use App\Entity\Certificate;
 use App\Entity\CertificateSetupProcess;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
@@ -134,8 +135,8 @@ class CertificateManagementFreeradiusController extends AbstractController
         // Save on the tmp folder the uploaded certificates after the validation
         $this->certificateStorageService->storeUploadedFile(
             $certificateUploadDTO->ca,
-            CertificateMachineType::FREERADIUS->value,
             CertificateFileName::CA_PEM->value,
+            CertificateMachineType::FREERADIUS->value,
             $process
         );
       }
@@ -144,8 +145,8 @@ class CertificateManagementFreeradiusController extends AbstractController
         // Save on the tmp folder the uploaded certificates after the validation
         $this->certificateStorageService->storeUploadedFile(
             $certificateUploadDTO->cert,
-            CertificateMachineType::FREERADIUS->value,
             CertificateFileName::CERT_PEM->value,
+            CertificateMachineType::FREERADIUS->value,
             $process
         );
       }
@@ -154,8 +155,8 @@ class CertificateManagementFreeradiusController extends AbstractController
         // Save on the tmp folder the uploaded certificates after the validation
         $this->certificateStorageService->storeUploadedFile(
             $certificateUploadDTO->chain,
-            CertificateMachineType::FREERADIUS->value,
             CertificateFileName::CHAIN_PEM->value,
+            CertificateMachineType::FREERADIUS->value,
             $process
         );
       }
@@ -164,8 +165,8 @@ class CertificateManagementFreeradiusController extends AbstractController
         // Save on the tmp folder the uploaded certificates after the validation
         $this->certificateStorageService->storeUploadedFile(
             $certificateUploadDTO->fullChain,
-            CertificateMachineType::FREERADIUS->value,
             CertificateFileName::FULL_CHAIN_PEM->value,
+            CertificateMachineType::FREERADIUS->value,
             $process
         );
       }
@@ -174,8 +175,8 @@ class CertificateManagementFreeradiusController extends AbstractController
         // Save on the tmp folder the uploaded certificates after the validation
         $this->certificateStorageService->storeUploadedFile(
             $certificateUploadDTO->privKey,
-            CertificateMachineType::FREERADIUS->value,
             CertificateFileName::PRIVATE_KEY_PEM->value,
+            CertificateMachineType::FREERADIUS->value,
             $process,
             true
         );
@@ -324,8 +325,7 @@ class CertificateManagementFreeradiusController extends AbstractController
     );
   }
 
-  #[Route(
-      '/dashboard/settings/certificatesManagement/freeradius/config',
+  #[Route('/dashboard/settings/certificatesManagement/freeradius/config',
       name: 'admin_dashboard_settings_certs_freeradius_config'
   )]
   #[IsGranted('ROLE_ADMIN')]

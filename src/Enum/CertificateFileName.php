@@ -5,15 +5,15 @@ namespace App\Enum;
 enum CertificateFileName: string
 {
     // Radsecproxy required files
-    case CLIENT_PEM = 'client';
-    case KEY_PEM = 'key';
+    case CLIENT_PEM = 'Client';
+    case KEY_PEM = 'Key';
 
     // Freeradius required files
-    case CA_PEM = 'ca';
-    case CERT_PEM = 'cert';
-    case CHAIN_PEM = 'chain';
-    case FULL_CHAIN_PEM = 'full_chain';
-    case PRIVATE_KEY_PEM = 'private_key';
+    case CA_PEM = 'CA';
+    case CERT_PEM = 'Cert';
+    case CHAIN_PEM = 'Chain';
+    case FULL_CHAIN_PEM = 'Full Chain';
+    case PRIVATE_KEY_PEM = 'Private Key';
 
 
     // Radsecproxy PEM

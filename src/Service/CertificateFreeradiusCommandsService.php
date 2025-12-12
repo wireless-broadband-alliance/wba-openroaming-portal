@@ -16,7 +16,6 @@ readonly class CertificateFreeradiusCommandsService
 
   public function __construct(
       private TranslatorInterface $translator,
-      private EntityManagerInterface $entityManager,
   ) {
     // Absolute path to the resolver
     $this->certDir = '~/wba-openroaming-connector/hybrid/configs/freeradius/certs/';
@@ -63,42 +62,39 @@ readonly class CertificateFreeradiusCommandsService
     ];
 
     $fileMap = [
-        CertificateFileName::CA_PEM->value => CertificateFileName::CA_PEM_FILE->value,
-        CertificateFileName::CERT_PEM->value => CertificateFileName::CERT_PEM_FILE->value,
-        CertificateFileName::CHAIN_PEM->value => CertificateFileName::CHAIN_PEM_FILE->value,
-        CertificateFileName::FULL_CHAIN_PEM->value => CertificateFileName::FULL_CHAIN_PEM_FILE->value,
+        CertificateFileName::CA_PEM->value           => CertificateFileName::CA_PEM_FILE->value,
+        CertificateFileName::CERT_PEM->value         => CertificateFileName::CERT_PEM_FILE->value,
+        CertificateFileName::CHAIN_PEM->value        => CertificateFileName::CHAIN_PEM_FILE->value,
+        CertificateFileName::FULL_CHAIN_PEM->value   => CertificateFileName::FULL_CHAIN_PEM_FILE->value,
         CertificateFileName::PRIVATE_KEY_PEM->value => CertificateFileName::PRIVATE_KEY_PEM_FILE->value,
     ];
 
-    // Write new certificate files
-    foreach ($fileMap as $enumName => $filename) {
-      // DTO key format: "full_chainFREERADIUS"
-      $dtoKey = $enumName . CertificateMachineType::FREERADIUS->value;
-
-      if (!isset($certificates[$dtoKey])) {
-        continue; // skip missing entries
-      }
-
-      $certItem = $certificates[$dtoKey];
-
+// Loop over the certificates array
+    foreach ($certificates as $key => $certItem) {
       if (empty($certItem['content'])) {
-        continue;
+        continue; // skip empty entries
       }
 
-      // Safe shell escaping for echo
+      // Map the certificate key to the PEM filename
+      $pemFile = $fileMap[$key] ?? null;
+      if ($pemFile === null) {
+        continue; // skip unknown keys
+      }
+
+      // Escape single quotes for safe echo
       $content = str_replace("'", "'\"'\"'", $certItem['content']);
 
       $commands[] = [
           'description' => $this->translator->trans(
               'write_cert_file',
-              ['%filename%' => $filename],
+              ['%filename%' => $pemFile],
               'CertificateFreeradiusCommandsService'
           ),
           'command' => sprintf(
               "echo '%s' > %s%s",
               $content,
               $this->certDir,
-              $filename
+              $pemFile
           ),
       ];
     }

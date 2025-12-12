@@ -60,8 +60,8 @@ readonly class CertificateStorageService
      */
     public function storeUploadedFile(
         UploadedFile $file,
-        string $type,
         string $name,
+        string $type,
         CertificateSetupProcess $process,
         ?bool $isAKey = false,
     ): Certificate {
@@ -90,7 +90,7 @@ readonly class CertificateStorageService
         }
 
         $certificate = new Certificate();
-        $certificate->setName($name . $type);
+        $certificate->setName($name);
         $certificate->setType($type);
         $certificate->setCreatedAt(new DateTimeImmutable());
         $certificate->setFile($file);
