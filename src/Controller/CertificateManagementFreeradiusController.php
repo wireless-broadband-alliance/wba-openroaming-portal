@@ -288,7 +288,7 @@ class CertificateManagementFreeradiusController extends AbstractController
             true
         );
 
-        // Map filename to CertificateFileName enum (use enum value, not the _FILE variant)
+        // Map filename to Freeradius enum
         $fileEnum = match (true) {
           str_contains($filepath, CertificateFileName::PRIVATE_KEY_PEM->value) => CertificateFileName::PRIVATE_KEY_PEM,
           str_contains($filepath, CertificateFileName::FULL_CHAIN_PEM->value) => CertificateFileName::FULL_CHAIN_PEM,
@@ -299,21 +299,19 @@ class CertificateManagementFreeradiusController extends AbstractController
         };
 
         if ($fileEnum === null) {
-          // Skip unknown files
-          continue;
+          continue; // skip unknown files
         }
 
-        // Internal type stored in the DB → just the enum value without .pem
-        $type = $fileEnum->value; // e.g., "cert", "privkey", "ca"
+        // Display name → only the enum values for Freeradius
+        $name = $fileEnum->value; // e.g., "CA", "Cert", "Chain", "Full Chain", "Private Key"
 
-        // Determine if it’s a private key or skip parsing for simulation
-        $isPrivateKey = $fileEnum === CertificateFileName::PRIVATE_KEY_PEM || $isSimulation;
+        // Determine if it’s a private key storeUploadedFile function
+        $isPrivateKey = $fileEnum === CertificateFileName::PRIVATE_KEY_PEM;
 
-        // Store the file using CertificateStorageService
         $this->certificateStorageService->storeUploadedFile(
             $uploadedFile,
-            $name,   // display name, e.g., "certFREERADIUS"
-            $type,   // internal type, e.g., "cert"
+            $name, // e.g., "Cert"
+            CertificateMachineType::FREERADIUS->value, // e.g., "FREERADIUS"
             $process,
             $isPrivateKey
         );
