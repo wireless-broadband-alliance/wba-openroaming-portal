@@ -3,37 +3,147 @@
 namespace App\Service;
 
 use App\Entity\User;
+use App\Enum\CertificateFileName;
+use RuntimeException;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 
-class CertificateFreeradiusGenerator
+readonly class CertificateFreeradiusGenerator
 {
-  public function generateCertificates(string $domain, User $user): void
+  private string $certTargetDir;
+
+  public function __construct(
+      private ParameterBagInterface $parameterBag
+  ) {
+    $projectDir = $this->parameterBag->get('kernel.project_dir');
+    $this->certTargetDir = $projectDir . '/var/certs';
+  }
+
+  /**
+   * Main entry point used by the controller.
+   * Choose between simulation or real Certbot at runtime.
+   *
+   * @param string $domain
+   * @param User $user
+   * @param bool|null $simulated Optional runtime override of simulation mode
+   * @return string[] Full paths of generated files
+   */
+  public function run(string $domain, User $user, ?bool $simulated = null): array
   {
-    // Build certbot command
+    $useSimulation = $simulated ?? false;
+
+    $files = $useSimulation
+        ? $this->simulateCertificates()
+        : $this->generateCertificates($domain, $user);
+
+    // Store the resulting certs in var/certs/
+    $this->storeCertificates($files, $useSimulation);
+
+    return $files;
+  }
+
+  /**
+   * Real certbot mode — returns full paths to generated files.
+   *
+   * @return string[] Full paths of cert files
+   */
+  public function generateCertificates(string $domain, User $user): array
+  {
     $command = [
         'certbot',
         'certonly',
-        '-d', $domain,
-        '--key-type', 'rsa',
-        '--rsa-key-size', '2048',
+        '-d',
+        $domain,
+        '--key-type',
+        'rsa',
+        '--rsa-key-size',
+        '2048',
         '--non-interactive',
         '--agree-tos',
-        '--email', $user->getEmail(),
+        '--email',
+        $user->getEmail(),
         '--webroot',
-        '-w', '/var/www/openroaming/public',
-        '--config-dir', '/var/www/openroaming/var/certs/config',
-        '--work-dir', '/var/www/openroaming/var/certs/work',
-        '--logs-dir', '/var/www/openroaming/var/certs/logs'
+        '-w',
+        '/var/www/openroaming/public',
+        '--config-dir',
+        '/etc/letsencrypt',
+        '--work-dir',
+        '/var/www/openroaming/var/certs/work',
+        '--logs-dir',
+        '/var/www/openroaming/var/certs/logs'
     ];
 
     $process = new Process($command);
-    $process->setTimeout(180); // 3 mins
-
+    $process->setTimeout(180);
     $process->run();
 
     if (!$process->isSuccessful()) {
       throw new ProcessFailedException($process);
+    }
+
+    $liveDir = "/etc/letsencrypt/live/$domain";
+
+    if (!is_dir($liveDir)) {
+      throw new RuntimeException("Certbot did not create expected directory: $liveDir");
+    }
+
+    $files = [
+        CertificateFileName::CERT_PEM_FILE->value,
+        CertificateFileName::CHAIN_PEM_FILE->value,
+        CertificateFileName::FULL_CHAIN_PEM_FILE->value,
+        CertificateFileName::PRIVATE_KEY_PEM_FILE->value
+    ];
+
+    return array_map(static function ($f) use ($liveDir) {
+      $fullPath = "$liveDir/$f";
+      if (!file_exists($fullPath)) {
+        throw new RuntimeException("Missing Certbot output file: $fullPath");
+      }
+      return $fullPath;
+    }, $files);
+  }
+
+  /**
+   * Simulation mode — returns dummy files matching Certbot naming logic.
+   *
+   * @return string[] Full paths of simulated files
+   */
+  public function simulateCertificates(): array
+  {
+    $id = substr(uniqid('', true), 0, 13);
+
+    return [
+        "$this->certTargetDir/" . CertificateFileName::CA_PEM->value . "-$id.txt",
+        "$this->certTargetDir/" . CertificateFileName::CERT_PEM->value . "-$id.txt",
+        "$this->certTargetDir/" . CertificateFileName::CHAIN_PEM->value . "-$id.txt",
+        "$this->certTargetDir/" . CertificateFileName::FULL_CHAIN_PEM->value . "-$id.txt",
+        "$this->certTargetDir/" . CertificateFileName::PRIVATE_KEY_PEM->value . "-$id.txt",
+    ];
+  }
+
+  /**
+   * Receives list of filenames and writes/copies real or dummy contents into var/certs.
+   *
+   * @param string[] $files
+   * @param bool $simulated Whether to use dummy content (true) or copy real certs (false)
+   */
+  public function storeCertificates(array $files, bool $simulated = false): void
+  {
+    $filesystem = new Filesystem();
+    $filesystem->mkdir($this->certTargetDir);
+
+    foreach ($files as $filepath) {
+      $filename = basename($filepath);
+
+      if ($simulated) {
+        $content = "SIMULATED CERT CONTENT\nFile: $filename\nGenerated in simulation mode.";
+        $filesystem->dumpFile("$this->certTargetDir/$filename", $content);
+        continue;
+      }
+
+      $filesystem->copy($filepath, "$this->certTargetDir/$filename", true);
     }
   }
 }

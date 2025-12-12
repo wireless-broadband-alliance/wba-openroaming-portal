@@ -266,25 +266,61 @@ class CertificateManagementFreeradiusController extends AbstractController
 
     // Extract the domain from the project
     $domain = $request->getHost();
-    if (!$this->domainService->isValidDomain($domain)) {
-      $this->addFlash('error', $this->translator->trans('notValidDomainOrIP', [
-          '%domain%' => $domain,
-      ], 'controllers'));
-
-      return $this->redirectToRoute('admin_dashboard_settings_certs_management_freeradius_selection');
-    }
+//    if (!$this->domainService->isValidDomain($domain)) {
+//      $this->addFlash('error', $this->translator->trans('notValidDomainOrIP', [
+//          '%domain%' => $domain,
+//      ], 'controllers'));
+//
+//      return $this->redirectToRoute('admin_dashboard_settings_certs_management_freeradius_selection');
+//    }
 
     try {
-      $this->certificateFreeradiusGenerator->generateCertificates($domain, $user);
-      $this->addFlash('success', "Certificate generated successfully for domain: $domain");
-    } catch (Exception $e) {
-      throw new RuntimeException('Failed to generate certificate: ' . $e->getMessage());
-    }
+      // Generate certificates (simulated or real)
+      $generatedFiles = $this->certificateFreeradiusGenerator->run($domain, $user, true); // TODO remove `true` in prod
+      $isSimulation = true; // TODO remove this simulation flag
 
-    dd('die here pls its good');
-    // TODO generate the new certs here with the command of the cert bot
-    // place them on the var/certs folder like the vichUploder does -> also update the db and define the unique tag for them
-    // only the config should take them and place the new ones on the signign-keys
+      foreach ($generatedFiles as $filepath) {
+        $uploadedFile = new UploadedFile(
+            $filepath,
+            basename($filepath),
+            null,
+            null,
+            true
+        );
+
+        // Map filename to CertificateFileName enum (use enum value, not the _FILE variant)
+        $fileEnum = match (true) {
+          str_contains($filepath, CertificateFileName::PRIVATE_KEY_PEM->value) => CertificateFileName::PRIVATE_KEY_PEM,
+          str_contains($filepath, CertificateFileName::FULL_CHAIN_PEM->value) => CertificateFileName::FULL_CHAIN_PEM,
+          str_contains($filepath, CertificateFileName::CHAIN_PEM->value) => CertificateFileName::CHAIN_PEM,
+          str_contains($filepath, CertificateFileName::CERT_PEM->value) => CertificateFileName::CERT_PEM,
+          str_contains($filepath, CertificateFileName::CA_PEM->value) => CertificateFileName::CA_PEM,
+          default => null
+        };
+
+        if ($fileEnum === null) {
+          // Skip unknown files
+          continue;
+        }
+
+        // Internal type stored in the DB → just the enum value without .pem
+        $type = $fileEnum->value; // e.g., "cert", "privkey", "ca"
+
+        // Determine if it’s a private key or skip parsing for simulation
+        $isPrivateKey = $fileEnum === CertificateFileName::PRIVATE_KEY_PEM || $isSimulation;
+
+        // Store the file using CertificateStorageService
+        $this->certificateStorageService->storeUploadedFile(
+            $uploadedFile,
+            $name,   // display name, e.g., "certFREERADIUS"
+            $type,   // internal type, e.g., "cert"
+            $process,
+            $isPrivateKey
+        );
+      }
+    } catch (Exception $e) {
+      throw new RuntimeException('Failed to generate or store certificates: ' . $e->getMessage());
+    }
 
     // After the files are validated and the processed, update them once again to add
     $process->setFreeradiusFormCompletedAt(new DateTimeImmutable());
@@ -313,8 +349,8 @@ class CertificateManagementFreeradiusController extends AbstractController
     $this->addFlash(
         'success',
         $this->translator->trans(
-            'freeradiusCertUploadedSuccessfully',
-            [],
+            'freeradiusCertGeneratedSuccessfully',
+            ['%domain%' => $domain],
             'controllers'
         )
     );
