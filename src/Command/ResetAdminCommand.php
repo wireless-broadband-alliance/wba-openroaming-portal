@@ -76,7 +76,7 @@ class ResetAdminCommand extends Command
      */
     protected function resetAdminUser(): void
     {
-        $admin = $this->userRepository->findAdmin();
+        $admin = $this->userRepository->findSuperAdmin();
 
         if (!$admin instanceof User) {
             $admin = new User();

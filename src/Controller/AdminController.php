@@ -82,7 +82,7 @@ class AdminController extends AbstractController
         $users = array_slice($users, $offset, $count);
 
         // Fetch user counts for table header (All/Verified/Banned)
-        $allUsersCount = $this->userRepository->countAllUsersExcludingAdmin($searchTerm, $filter);
+        $allUsersCount = $this->userRepository->countUsers($searchTerm, $filter);
         $verifiedUsersCount = $this->userRepository->countVerifiedUsers($searchTerm);
         $bannedUsersCount = $this->userRepository->countBannedUsers($searchTerm);
 
@@ -116,7 +116,7 @@ class AdminController extends AbstractController
         ]);
     }
 
-    #[Route('/dashboard/adminManagement', name: 'admin_roles_management')]
+    #[Route('/dashboard/admins', name: 'admins_management')]
     #[IsGranted('ROLE_SUPER_ADMIN')]
     public function adminRolesManagement(
         Request $request,
@@ -146,9 +146,9 @@ class AdminController extends AbstractController
         $users = array_slice($users, $offset, $count);
 
         // Fetch user counts for table header (All/Verified/Banned)
-        $allUsersCount = $this->userRepository->countAllUsers($searchTerm, $filter);
-        $adminUsersCount = $this->userRepository->countAdminUsers($searchTerm);
-        $usersCount = $this->userRepository->countUsers($searchTerm);
+        $allUsersCount = $this->userRepository->countUsers($searchTerm, $filter, true);
+        $verifiedUsersCount = $this->userRepository->countVerifiedUsers($searchTerm, true);
+        $bannedUsersCount = $this->userRepository->countBannedUsers($searchTerm, true);
 
         // Check if the export users operation is enabled
         $exportUsers = $this->parameterBag->get('app.export_users');
@@ -159,7 +159,7 @@ class AdminController extends AbstractController
 
         /** @var User $user */
         $user = $this->getUser();
-        return $this->render('dashboard/admin_roles.html.twig', [
+        return $this->render('dashboard/dashboard_admins.html.twig', [
             'user' => $user,
             'users' => $users,
             'currentPage' => $page,
@@ -167,8 +167,8 @@ class AdminController extends AbstractController
             'searchTerm' => $searchTerm,
             'data' => $data,
             'allUsersCount' => $allUsersCount,
-            'adminUsersCount' => $adminUsersCount,
-            'usersCount' => $usersCount,
+            'verifiedUsersCount' => $verifiedUsersCount,
+            'bannedUsersCount' => $bannedUsersCount,
             'activeFilter' => $filter,
             'activeSort' => $sort,
             'activeOrder' => $order,

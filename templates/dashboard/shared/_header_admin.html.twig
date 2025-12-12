@@ -3,6 +3,9 @@
     {% if app.request.attributes.get('_route') == 'admin_page' or app.request.attributes.get('_route') == 'admin_user_edit' %}
         <twig:ux:icon name="wba:user" class="w-10 mt-0.5 fill-none stroke-current"/>
         <h1 class="text-2xl font-semibold p-5">{{ 'usersManagement'|trans({}, '_header_admin') }}</h1>
+    {% elseif app.request.attributes.get('_route') == 'admins_management' %}
+      <twig:ux:icon name="wba:admin-management" class="w-10 mt-0.5 fill-current"/>
+      <h1 class="text-2xl font-semibold p-5">{{ 'adminManagement'|trans({}, '_header_admin') }}</h1>
     {% elseif app.request.attributes.get('_route') == 'admin_dashboard_customize' %}
         <twig:ux:icon name="wba:pencil-edit" class="w-10 mt-0.5 fill-none stroke-current"/>
         <h1 class="text-2xl font-semibold p-5">{{ 'landingPageConfiguration'|trans({}, '_header_admin') }}</h1>
