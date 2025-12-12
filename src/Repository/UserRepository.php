@@ -110,7 +110,7 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         $qb->where('u.roles NOT LIKE :role')
         ->andWhere($qb->expr()->isNull('u.deletedAt'))
         ->orderBy('u.createdAt', 'DESC')
-        ->setParameter('role', '%ROLE_ADMIN%');
+        ->setParameter('role', '%ROLE_SUPER_ADMIN%');
 
         if ($filter === UserVerificationStatus::VERIFIED->value) {
             $qb->andWhere('u.isVerified = :isVerified')
