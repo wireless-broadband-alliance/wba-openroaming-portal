@@ -43,7 +43,7 @@ class UserUpdateDTO
             $this->phoneNumber = $user->getPhoneNumber();
             $this->isVerified = $user->isVerified();
             $this->banned = $user->getBannedAt() instanceof DateTimeInterface;
-            $this->editingAdmin = in_array('ROLE_ADMIN', $user->getRoles(), true);
+            $this->editingAdmin = in_array('ROLE_SUPER_ADMIN', $user->getRoles(), true);
         }
     }
 
