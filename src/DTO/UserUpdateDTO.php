@@ -7,14 +7,17 @@ use DateTimeInterface;
 use libphonenumber\PhoneNumber;
 use Symfony\Component\Validator\Constraints as Assert;
 use Misd\PhoneNumberBundle\Validator\Constraints\PhoneNumber as AssertPhoneNumber;
+use App\Validator\Constraints as CustomAssert;
 
 class UserUpdateDTO
 {
     #[Assert\NotBlank(message: 'UUIDNotBlank')]
+    #[CustomAssert\UniqueUUID]
     public ?string $uuid = null;
 
     #[Assert\Email]
     #[Assert\Length(max: 180)]
+    #[CustomAssert\UniqueEmail]
     public ?string $email = null;
 
     #[Assert\Length(max: 100)]
@@ -22,7 +25,6 @@ class UserUpdateDTO
 
     #[Assert\Length(max: 100)]
     public ?string $lastName = null;
-
 
     #[AssertPhoneNumber]
     public ?PhoneNumber $phoneNumber = null;
@@ -43,7 +45,7 @@ class UserUpdateDTO
             $this->phoneNumber = $user->getPhoneNumber();
             $this->isVerified = $user->isVerified();
             $this->banned = $user->getBannedAt() instanceof DateTimeInterface;
-            $this->editingAdmin = in_array('ROLE_ADMIN', $user->getRoles(), true);
+            $this->editingAdmin = in_array('ROLE_SUPER_ADMIN', $user->getRoles(), true);
         }
     }
 

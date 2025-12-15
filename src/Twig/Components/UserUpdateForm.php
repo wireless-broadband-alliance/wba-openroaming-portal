@@ -43,7 +43,6 @@ final class UserUpdateForm extends AbstractController
     #[LiveAction]
     public function validate(): void
     {
-
         // Parse the raw phone number string into a PhoneNumber object
         if (!in_array($this->rawPhoneNumber, [null, '', '0'], true)) {
             try {

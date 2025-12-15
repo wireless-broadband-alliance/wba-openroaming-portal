@@ -30,7 +30,7 @@
 
           {# Left Search Filters #}
           <div class="flex items-center space-x-6">
-            <a href="{{ path('admin_page', {filter: 'all', u: app.request.query.get('u')}) }}"
+            <a href="{{ path('admins_management', {filter: 'all', u: app.request.query.get('u')}) }}"
                class="flex flex-row group hover:border-b-2 hover:border-y-veryDarkButton transition-all duration-100 {% if app.request.query.get('filter') == null or app.request.query.get('filter') == 'all' %}border-b-2 border-y-veryDarkButton transition-all{% endif %}">
               <h1 class="px-2">
                 {{ 'all'|trans({}, 'dashboard') }}
@@ -39,7 +39,7 @@
                 {{ allUsersCount }}
               </div>
             </a>
-            <a href="{{ path('admin_page', {filter: constant('App\\Enum\\UserVerificationStatus::VERIFIED').value, u: app.request.query.get('u')}) }}"
+            <a href="{{ path('admins_management', {filter: constant('App\\Enum\\UserVerificationStatus::VERIFIED').value, u: app.request.query.get('u')}) }}"
                class="flex flex-row group hover:text-lightGreen hover:border-b-2 hover:border-y-lightGreen/50 transition-all duration-100 {% if app.request.query.get('filter') == constant('App\\Enum\\UserVerificationStatus::VERIFIED').value %}text-lightGreen border-b-2 border-y-lightGreen transition-all{% endif %}">
               <h1 class="px-2">
                 {{ 'verified'|trans({}, 'dashboard') }}
@@ -48,7 +48,7 @@
                 {{ verifiedUsersCount }}
               </div>
             </a>
-            <a href="{{ path('admin_page', {filter: constant('App\\Enum\\UserVerificationStatus::BANNED').value, u: app.request.query.get('u')}) }}"
+            <a href="{{ path('admins_management', {filter: constant('App\\Enum\\UserVerificationStatus::BANNED').value, u: app.request.query.get('u')}) }}"
                class="flex flex-row group hover:text-red-400 hover:border-b-2 hover:border-y-red-400 transition-all duration-100 {% if app.request.query.get('filter') == constant('App\\Enum\\UserVerificationStatus::BANNED').value %}text-red-400 border-b-2 border-y-red-400 transition-all{% endif %}">
               <h1 class="px-2">
                 {{ 'banned'|trans({}, 'dashboard') }}
@@ -61,7 +61,7 @@
 
           {# Midle Search Bar #}
           <div class="w-full md:w-3/6">
-            <form action="{{ path('admin_page') }}" method="GET">
+            <form action="{{ path('admins_management') }}" method="GET">
 
               <div class="flex flex-row items-center border rounded-md">
                 {# Search Icon #}
@@ -86,13 +86,11 @@
             </form>
           </div>
 
-          {% if export_users == constant('App\\Enum\\OperationMode::ON').value %}
             <div class="flex items-center space-x-6">
-              <a href="{{ path('admin_user_export') }}" class="btn-primary px-4 min-w-[150px]">
-                {{ 'exportEverything'|trans({}, 'dashboard') }}
+              <a href="{{ path('admin_user_add') }}" class="btn-primary px-4 min-w-[150px]">
+                {{ 'addAdmin'|trans({}, 'dashboard') }}
               </a>
             </div>
-          {% endif %}
         </div>
       </div>
 
@@ -130,6 +128,10 @@
                 {{ 'bannedAt'|trans({}, 'dashboard') }}
               </th>
 
+              <th scope="col" class="px-6 py-3">
+                {{ 'roles'|trans({}, 'dashboard') }}
+              </th>
+
               <th scope="col" class="flex items-center px-6 py-3">
                 <h1 class="mr-2">{{ 'createdAt'|trans({}, 'dashboard') }}</h1>
                 <a href="{{ path('admin_page', {...app.request.query.all, sort: 'createdAt', order: activeSort == 'createdAt' and activeOrder == 'asc' ? 'desc' : 'asc'}) }}"
@@ -145,7 +147,7 @@
             </thead>
             <tbody>
             {% for user in users %}
-              {{ include('dashboard/shared/_user.html.twig', {user: user}) }}
+              {{ include('dashboard/shared/_admin.html.twig', {user: user}) }}
             {% else %}
               <tr>
                 <td colspan="7">
@@ -173,7 +175,7 @@
       {# Users Table Pagination #}
       <div class="m-8">
         <hr class="w-full h-0.5 bg-gray-300/50 border-0 border-gray-300/50 rounded">
-        {{ include('dashboard/shared/pagination/_pagination_users.html.twig', {label: 'usersPerPage'|trans({}, 'dashboard'), route: 'admin_page', occurrencies: allUsersCount}) }}
+        {{ include('dashboard/shared/pagination/_pagination_users.html.twig', {label: 'usersPerPage'|trans({}, 'dashboard'), route: 'admins_management', occurrencies: allUsersCount}) }}
       </div>
     </div>
   </div>
