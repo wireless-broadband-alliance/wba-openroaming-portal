@@ -1,6 +1,7 @@
 password: 'Password'
 firstName: 'First Name'
 lastName: 'Last Name'
+roles: 'Roles'
 phoneNumber: 'Phone Number'
 accountType: 'Please select the new account type'
 fieldCannotBeShorterThan: 'Este campo não pode ter menos de {{ limit }} caracteres'

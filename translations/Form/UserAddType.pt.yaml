@@ -1,6 +1,7 @@
 password: 'Palavra Passe'
 firstName: 'Primeiro Nome'
 lastName: 'Último Nome'
+roles: 'Permissões'
 phoneNumber: 'Número de Telefone'
 accountType: 'Por favor selecione o tipo de conta a ser criada'
 fieldCannotBeShorterThan: 'Este campo não pode ter menos de {{ limit }} caracteres'
