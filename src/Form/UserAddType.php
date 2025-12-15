@@ -84,6 +84,8 @@ class UserAddType extends AbstractType
         ->add('password', PasswordType::class, [
             'label' => $this->translator->trans('password', [], 'UserAddType'),
             'toggle' => true,
+            'hidden_label' => null,
+            'visible_label' => null,
             'attr' => [
                 'placeholder' => $this->translator->trans('password', [], 'UserAddType'),
             ],
