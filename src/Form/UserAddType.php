@@ -16,7 +16,6 @@ use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
@@ -28,7 +27,6 @@ class UserAddType extends AbstractType
   public function __construct(
       private readonly SettingRepository $settingRepository,
       private readonly TranslatorInterface $translator,
-      private readonly AuthorizationCheckerInterface $authorizationChecker,
   ) {
   }
 
@@ -66,21 +64,24 @@ class UserAddType extends AbstractType
             'country_display_emoji_flag' => true,
             'required' => false,
             'attr' => ['autocomplete' => 'tel'],
-        ]);
-
-    if ($this->authorizationChecker->isGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)) {
-      $builder->add('roles', ChoiceType::class, [
-          'label' => $this->translator->trans('roles', [], 'UserAddType'),
-          'choices' => [
-              'User' => AdminRoleType::ROLE_USER->value,
-              'Admin' => AdminRoleType::ROLE_ADMIN->value,
-              'Super Admin' => AdminRoleType::ROLE_SUPER_ADMIN->value,
-          ],
-          'required' => true,
-      ]);
-    }
-
-    $builder
+        ])
+        ->add('roles', ChoiceType::class, [
+            'label' => $this->translator->trans('roles', [], 'UserAddType'),
+            'choices' => [
+                'User' => AdminRoleType::ROLE_USER->value,
+                'Admin' => AdminRoleType::ROLE_ADMIN->value,
+                'Super Admin' => AdminRoleType::ROLE_SUPER_ADMIN->value,
+            ],
+            'required' => true,
+        ])
+        ->add('firstName', TextType::class, [
+            'label' => $this->translator->trans('firstName', [], 'UserAddType'),
+            'required' => false,
+        ])
+        ->add('lastName', TextType::class, [
+            'label' => $this->translator->trans('lastName', [], 'UserAddType'),
+            'required' => false,
+        ])
         ->add('password', PasswordType::class, [
             'label' => $this->translator->trans('password', [], 'UserAddType'),
             'toggle' => true,
@@ -97,14 +98,6 @@ class UserAddType extends AbstractType
                     'maxMessage' => $this->translator->trans('fieldCannotBeLongerThan', [], 'UserAddType'),
                 ]),
             ],
-        ])
-        ->add('firstName', TextType::class, [
-            'label' => $this->translator->trans('firstName', [], 'UserAddType'),
-            'required' => false,
-        ])
-        ->add('lastName', TextType::class, [
-            'label' => $this->translator->trans('lastName', [], 'UserAddType'),
-            'required' => false,
         ]);
   }
 
