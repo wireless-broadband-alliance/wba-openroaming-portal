@@ -92,10 +92,8 @@ class UserAddType extends AbstractType
             ],
             'constraints' => [
                 new Length([
-                    'min' => 7,
-                    'max' => 128,
-                    'minMessage' => $this->translator->trans('fieldCannotBeShorterThan', [], 'UserAddType'),
-                    'maxMessage' => $this->translator->trans('fieldCannotBeLongerThan', [], 'UserAddType'),
+                    'min' => 8,
+                    'max' => 255,
                 ]),
             ],
         ]);

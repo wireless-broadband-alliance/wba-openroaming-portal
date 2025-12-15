@@ -42,8 +42,13 @@ class UserAddDTO
   #[AssertPhoneNumber]
   public ?PhoneNumber $phoneNumber = null;
 
-  #[Assert\NotBlank(message: 'passwordTooShort')]
-  #[Assert\Length(min: 8, max: 255, minMessage: 'passwordTooShort')]
+  #[Assert\NotBlank(message: 'fieldCannotBeBlank')]
+  #[Assert\Length(
+      min: 8,
+      max: 255,
+      minMessage: 'fieldCannotBeShorterThan',
+      maxMessage: 'fieldCannotBeLongerThan'
+  )]
   public ?string $password = null;
 
   #[Assert\Length(max: 100)]

@@ -33,8 +33,8 @@ class ResetPasswordType extends AbstractType
                 ],
                 'constraints' => [
                     new Length([
-                        'min' => 7,
-                        'max' => 128,
+                        'min' => 8,
+                        'max' => 255,
                         'minMessage' => $this->translator->trans('fieldCannotBeShorterThan', [], 'ResetPasswordType'),
                         'maxMessage' => $this->translator->trans('fieldCannotBeLongerThan', [], 'ResetPasswordType'),
                     ]),
