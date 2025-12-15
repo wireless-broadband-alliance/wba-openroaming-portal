@@ -9,6 +9,7 @@ use App\Enum\OperationMode;
 use App\Enum\SettingName;
 use App\Form\ScheduleType;
 use App\Repository\SettingRepository;
+use App\Security\Voter\UserAuthenticationVoter;
 use App\Service\CronExpressionHelperService;
 use App\Service\EventActions;
 use App\Service\GetSettings;
@@ -34,21 +35,22 @@ class ScheduleAutomationController extends AbstractController
     }
 
     #[Route('/dashboard/settings/schedule', name: 'admin_dashboard_settings_schedule')]
-    #[IsGranted('ROLE_ADMIN')]
+    #[IsGranted(UserAuthenticationVoter::CRON_SCHEDULE_READ)]
     public function settingsSchedule(Request $request): Response
     {
         /** @var User $currentUser */
         $currentUser = $this->getUser();
+        $canWrite = $this->isGranted(UserAuthenticationVoter::CRON_SCHEDULE_WRITE);
 
         $data = $this->getSettings->getSettings();
 
         $scheduleDTO = new ScheduleDTO($this->settingRepository, $this->cronExpressionHelperService);
 
-        $form = $this->createForm(ScheduleType::class, $scheduleDTO);
+        $form = $this->createForm(ScheduleType::class, $scheduleDTO, ['disabled' => !$canWrite]);
 
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
+        if ($form->isSubmitted() && $form->isValid() && $canWrite) {
             foreach (
                 $scheduleDTO->toCronExpressions(
                     $this->cronExpressionHelperService

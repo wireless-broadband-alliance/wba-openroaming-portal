@@ -6,8 +6,7 @@ use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\RadiusDb\Repository\RadiusAccountingRepository;
 use App\RadiusDb\Repository\RadiusAuthsRepository;
-use App\Repository\SettingRepository;
-use App\Repository\UserRepository;
+use App\Security\Voter\UserAuthenticationVoter;
 use App\Service\EscapeSpreadSheet;
 use App\Service\EventActions;
 use App\Service\FreeradiusConnectionService;
@@ -20,7 +19,6 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
@@ -29,6 +27,7 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
+#[IsGranted(UserAuthenticationVoter::CONNECTIVITY_STATISTICS_READ)]
 class FreeradiusController extends AbstractController
 {
     public function __construct(
@@ -52,7 +51,6 @@ class FreeradiusController extends AbstractController
      * @throws Exception
      */
     #[Route('/dashboard/statistics/freeradius', name: 'admin_dashboard_statistics_freeradius')]
-    #[IsGranted('ROLE_ADMIN')]
     public function freeradiusStatisticsData(
         Request $request,
         #[MapQueryParameter] int $page = 1,
@@ -235,7 +233,6 @@ class FreeradiusController extends AbstractController
      * @throws Exception
      */
     #[Route('/dashboard/export/freeradius', name: 'admin_page_export_freeradius')]
-    #[IsGranted('ROLE_ADMIN')]
     public function exportFreeradius(Request $request): Response
     {
         // Get the current logged-in user (admin)
