@@ -42,7 +42,9 @@ security:
             security: false
 
         dashboard:
-            pattern: ^/dashboard
+            pattern:
+                - ^/dashboard
+                - ^/_components
             lazy: true
             provider: admin_user_provider
             custom_authenticators:

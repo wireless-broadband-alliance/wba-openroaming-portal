@@ -5,6 +5,7 @@ namespace App\Twig\Components;
 use App\DTO\SMSSettingsDTO;
 use App\Enum\SettingName;
 use App\Form\SMSSettingsType;
+use App\Security\Voter\UserAuthenticationVoter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormInterface;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
@@ -37,7 +38,9 @@ final class SMSSettingsForm extends AbstractController
     #[\Override]
     protected function instantiateForm(): FormInterface
     {
-        return $this->createForm(SMSSettingsType::class, $this->SMSSettingsDTO);
+        $canWrite = $this->isGranted(UserAuthenticationVoter::SMS_CONFIG_WRITE);
+
+        return $this->createForm(SMSSettingsType::class, $this->SMSSettingsDTO, ['disabled' => !$canWrite]);
     }
 
     #[LiveAction]

@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\User;
 use App\RadiusDb\Repository\RadiusAccountingRepository;
 use App\RadiusDb\Repository\RadiusAuthsRepository;
+use App\Security\Voter\UserAuthenticationVoter;
 use App\Service\GetSettings;
 use App\Service\Statistics;
 use DateTime;
@@ -37,7 +38,7 @@ class StatisticsController extends AbstractController
      * @throws Exception
      */
     #[Route('/dashboard/statistics', name: 'admin_dashboard_statistics')]
-    #[IsGranted('ROLE_ADMIN')]
+    #[IsGranted(UserAuthenticationVoter::PORTAL_STATISTICS_READ)]
     public function statisticsData(Request $request): Response
     {
         $data = $this->getSettings->getSettings();

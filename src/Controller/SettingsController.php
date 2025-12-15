@@ -28,6 +28,7 @@ use App\Form\TermsType;
 use App\Form\TwoFASettingsType;
 use App\Repository\SettingTranslationRepository;
 use App\Repository\TextEditorRepository;
+use App\Security\Voter\UserAuthenticationVoter;
 use App\Service\CertificateService;
 use App\Service\EnforcePasswordResetService;
 use App\Service\EventActions;
@@ -844,24 +845,24 @@ class SettingsController extends AbstractController
     }
 
     #[Route('/dashboard/settings/capport', name: 'admin_dashboard_settings_capport')]
-    #[IsGranted('ROLE_ADMIN')]
-    public function settingsCAPPORT(
-        Request $request,
-    ): Response {
+    #[IsGranted(UserAuthenticationVoter::USER_ENGAGEMENT_READ)]
+    public function settingsCAPPORT(Request $request): Response
+    {
         /** @var array<string, array{value: string, description: string}> $data */
         $data = $this->getSettings->getSettings();
 
         /** @var User $currentUser */
         $currentUser = $this->getUser();
+        $canWrite = $this->isGranted(UserAuthenticationVoter::USER_ENGAGEMENT_WRITE);
 
         // Initialize DTO from settings
         $dto = new CapportSettingsDTO($data);
 
         // Create form bound to DTO
-        $form = $this->createForm(CapportSettingsType::class, $dto);
+        $form = $this->createForm(CapportSettingsType::class, $dto, ['disabled' => !$canWrite]);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
+        if ($form->isSubmitted() && $form->isValid() && $canWrite) {
             // Save updated settings
             $this->settingsService->updateSettingsFromArray($dto->toArray());
             $this->settingsService->flush();
@@ -894,24 +895,24 @@ class SettingsController extends AbstractController
     }
 
     #[Route('/dashboard/settings/sms', name: 'admin_dashboard_settings_sms')]
-    #[IsGranted('ROLE_ADMIN')]
-    public function settingsSMS(
-        Request $request
-    ): Response {
+    #[IsGranted(UserAuthenticationVoter::SMS_CONFIG_READ)]
+    public function settingsSMS(Request $request): Response
+    {
         /** @var array<string, array{value: string, description: string}> $data */
         $data = $this->getSettings->getSettings();
 
         /** @var User $currentUser */
         $currentUser = $this->getUser();
+        $canWrite = $this->isGranted(UserAuthenticationVoter::SMS_CONFIG_WRITE);
 
         // Initialize DTO from settings
         $dto = new SMSSettingsDTO($data);
 
         // Create form bound to DTO
-        $form = $this->createForm(SMSSettingsType::class, $dto);
+        $form = $this->createForm(SMSSettingsType::class, $dto, ['disabled' => !$canWrite]);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
+        if ($form->isSubmitted() && $form->isValid() && $canWrite) {
             // Save updated settings
             $this->settingsService->updateSettingsFromArray($dto->toArray());
             $this->settingsService->flush();
