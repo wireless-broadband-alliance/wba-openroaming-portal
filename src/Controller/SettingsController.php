@@ -538,7 +538,7 @@ class SettingsController extends AbstractController
     }
 
     #[Route('/dashboard/settings/LDAP', name: 'admin_dashboard_settings_LDAP')]
-    #[IsGranted('ROLE_ADMIN')]
+    #[IsGranted(UserAuthenticationVoter::LDAP_SYNCHRONIZATION_READ)]
     public function settingsLDAP(Request $request): Response
     {
         /** @var array<string, array{value: string, description: string}> $data */
@@ -546,15 +546,16 @@ class SettingsController extends AbstractController
 
         /** @var User $currentUser */
         $currentUser = $this->getUser();
+        $canWrite = $this->isGranted(UserAuthenticationVoter::LDAP_SYNCHRONIZATION_WRITE);
 
         // Initialize DTO from settings
         $dto = new LDAPSettingsDTO($data);
 
         // Create form bound to DTO
-        $form = $this->createForm(LDAPSettingsType::class, $dto);
+        $form = $this->createForm(LDAPSettingsType::class, $dto, ['disabled' => !$canWrite]);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
+        if ($form->isSubmitted() && $form->isValid() && $canWrite) {
             /** @var LDAPSettingsDTO $dto */
             $dto = $form->getData();
 
