@@ -591,24 +591,23 @@ class SettingsController extends AbstractController
     }
 
     #[Route('/dashboard/settings/radius', name: 'admin_dashboard_settings_radius')]
-    #[IsGranted('ROLE_ADMIN')]
-    public function settingsRadius(
-        Request $request,
-    ): Response {
+    #[IsGranted(UserAuthenticationVoter::RADIUS_PROFILE_CONFIG_READ)]
+    public function settingsRadius(Request $request): Response {
         /** @var array<string, array{value: string, description: string}> $data */
         $data = $this->getSettings->getSettings();
 
         /** @var User $currentUser */
         $currentUser = $this->getUser();
+        $canWrite = $this->isGranted(UserAuthenticationVoter::RADIUS_PROFILE_CONFIG_WRITE);
 
         // Initialize DTO from settings
         $dto = new RadiusSettingsDTO($data);
 
         // Create form bound to DTO
-        $form = $this->createForm(RadiusSettingsType::class, $dto);
+        $form = $this->createForm(RadiusSettingsType::class, $dto, ['disabled' => !$canWrite]);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
+        if ($form->isSubmitted() && $form->isValid() && $canWrite) {
             /** @var RadiusSettingsDTO $dto */
             $dto = $form->getData();
 
@@ -646,9 +645,8 @@ class SettingsController extends AbstractController
 
     #[Route('/dashboard/settings/status', name: 'admin_dashboard_settings_status')]
     #[IsGranted(UserAuthenticationVoter::PLATFORM_STATUS_READ)]
-    public function settingsStatus(
-        Request $request
-    ): Response {
+    public function settingsStatus(Request $request): Response
+    {
         /** @var array<string, array{value: string, description: string}> $data */
         $data = $this->getSettings->getSettings();
 
