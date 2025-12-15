@@ -4,6 +4,7 @@ namespace App\DTO;
 
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
+use App\Enum\AdminPermissionsType;
 use App\Enum\AdminRoleType;
 use App\Enum\PermissionLevel;
 use App\Enum\UserProvider;
@@ -19,45 +20,6 @@ use App\Validator\Constraints as CustomAssert;
 #[CustomAssert\PasswordsMatch]
 class UserAddDTO
 {
-  #[Assert\Choice(callback: [PermissionLevel::class, 'cases'])]
-  public PermissionLevel $userManagement = PermissionLevel::NONE;
-
-  #[Assert\Choice(callback: [PermissionLevel::class, 'cases'])]
-  public PermissionLevel $platformStatus = PermissionLevel::NONE;
-
-  #[Assert\Choice(callback: [PermissionLevel::class, 'cases'])]
-  public PermissionLevel $landingPageConfig = PermissionLevel::NONE;
-
-  #[Assert\Choice(callback: [PermissionLevel::class, 'cases'])]
-  public PermissionLevel $userEngagement = PermissionLevel::NONE;
-
-  #[Assert\Choice(callback: [PermissionLevel::class, 'cases'])]
-  public PermissionLevel $termsPolicies = PermissionLevel::NONE;
-
-  #[Assert\Choice(callback: [PermissionLevel::class, 'cases'])]
-  public PermissionLevel $cronSchedule = PermissionLevel::NONE;
-
-  #[Assert\Choice(callback: [PermissionLevel::class, 'cases'])]
-  public PermissionLevel $authenticationMethods = PermissionLevel::NONE;
-
-  #[Assert\Choice(callback: [PermissionLevel::class, 'cases'])]
-  public PermissionLevel $twoFactorAuth = PermissionLevel::NONE;
-
-  #[Assert\Choice(callback: [PermissionLevel::class, 'cases'])]
-  public PermissionLevel $ldapSynchronization = PermissionLevel::NONE;
-
-  #[Assert\Choice(callback: [PermissionLevel::class, 'cases'])]
-  public PermissionLevel $radiusProfileConfig = PermissionLevel::NONE;
-
-  #[Assert\Choice(callback: [PermissionLevel::class, 'cases'])]
-  public PermissionLevel $smsConfig = PermissionLevel::NONE;
-
-  #[Assert\Choice(callback: [PermissionLevel::class, 'cases'])]
-  public PermissionLevel $portalStatistics = PermissionLevel::NONE;
-
-  #[Assert\Choice(callback: [PermissionLevel::class, 'cases'])]
-  public PermissionLevel $connectivityStatistics = PermissionLevel::NONE;
-
   #[Assert\NotBlank(message: 'accountTypeInvalid')]
   #[Assert\Choice(
       choices: [UserProvider::EMAIL->value, UserProvider::PHONE_NUMBER->value],
@@ -90,6 +52,20 @@ class UserAddDTO
 
   #[Assert\Length(max: 100)]
   public ?string $lastName = null;
+
+  public PermissionLevel $userManagement = PermissionLevel::NONE;
+  public PermissionLevel $platformStatus = PermissionLevel::NONE;
+  public PermissionLevel $landingPageConfig = PermissionLevel::NONE;
+  public PermissionLevel $userEngagement = PermissionLevel::NONE;
+  public PermissionLevel $termsPolicies = PermissionLevel::NONE;
+  public PermissionLevel $cronSchedule = PermissionLevel::NONE;
+  public PermissionLevel $authenticationMethods = PermissionLevel::NONE;
+  public PermissionLevel $twoFactorAuth = PermissionLevel::NONE;
+  public PermissionLevel $ldapSynchronization = PermissionLevel::NONE;
+  public PermissionLevel $radiusProfileConfig = PermissionLevel::NONE;
+  public PermissionLevel $smsConfig = PermissionLevel::NONE;
+  public PermissionLevel $portalStatistics = PermissionLevel::NONE;
+  public PermissionLevel $connectivityStatistics = PermissionLevel::NONE;
 
   public function __construct(
       private readonly UserPasswordHasherInterface $userPasswordHasher,
@@ -141,11 +117,52 @@ class UserAddDTO
     $hashedPassword = $this->userPasswordHasher->hashPassword($user, $this->password);
     $user->setPassword($hashedPassword);
 
+    // Set permissions
+    $adminPermissions = $this->getAdminPermissions();
+
+    // Example ["USER_ENGAGEMENT_WRITE", ...]
+    $permissionsArray = array_map(static fn(AdminPermissionsType $p) => $p->value, $adminPermissions);
+    $user->setPermissions($permissionsArray);
+
     // Persist new user
     $this->entityManager->persist($user);
     $this->entityManager->persist($userAuths);
     $this->entityManager->flush();
 
     return $user;
+  }
+
+  // Returns AdminPermissionsType strings based on selected levels
+  public function getAdminPermissions(): array
+  {
+    $mapping = [
+        'userManagement' => 'USERS_MANAGEMENT',
+        'platformStatus' => 'PLATFORM_STATUS',
+        'landingPageConfig' => 'LANDING_PAGE_CONFIG',
+        'userEngagement' => 'USER_ENGAGEMENT',
+        'termsPolicies' => 'TERMS_POLICIES',
+        'cronSchedule' => 'CRON_SCHEDULE',
+        'authenticationMethods' => 'AUTHENTICATION_METHODS',
+        'twoFactorAuth' => 'TWO_FACTOR_AUTH',
+        'ldapSynchronization' => 'LDAP_SYNCHRONIZATION',
+        'radiusProfileConfig' => 'RADIUS_PROFILE_CONFIG',
+        'smsConfig' => 'SMS_CONFIG',
+        'portalStatistics' => 'PORTAL_STATISTICS',
+        'connectivityStatistics' => 'CONNECTIVITY_STATISTICS',
+    ];
+
+    $permissions = [];
+
+    foreach ($mapping as $property => $prefix) {
+      $level = $this->$property;
+      if ($level !== PermissionLevel::NONE) {
+        $permissionName = $prefix . '_' . $level->name; // e.g., USERS_MANAGEMENT_READ
+        if (defined(AdminPermissionsType::class . '::' . $permissionName)) {
+          $permissions[] = AdminPermissionsType::from($permissionName);
+        }
+      }
+    }
+
+    return $permissions;
   }
 }

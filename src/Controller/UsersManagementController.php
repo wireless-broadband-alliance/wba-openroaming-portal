@@ -272,7 +272,7 @@ class UsersManagementController extends AbstractController
   /**
    * @throws RandomException
    */
-    #[Route('/dashboard/add', name: 'admin_user_add')]
+    #[Route('/dashboard/add/admin', name: 'dashboard_add_admin')]
     #[IsGranted('ROLE_SUPER_ADMIN')]
     public function addUsers(
         Request $request,
