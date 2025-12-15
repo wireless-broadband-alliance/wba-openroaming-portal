@@ -752,12 +752,9 @@ class SettingsController extends AbstractController
         name: 'admin_dashboard_settings_auth',
         defaults: ['language' => LanguageType::EN->value]
     )]
-    #[IsGranted('ROLE_ADMIN')]
-    public function settingsAuths(
-        Request $request,
-        CertificateService $certificateService,
-        string $language
-    ): Response {
+    #[IsGranted(UserAuthenticationVoter::AUTHENTICATION_METHODS_READ)]
+    public function settingsAuths(Request $request, CertificateService $certificateService, string $language): Response
+    {
         $missingFiles = $this->certificateService->verifyCertificates();
         if ($missingFiles !== []) {
             throw new HttpException(
@@ -770,6 +767,8 @@ class SettingsController extends AbstractController
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
         $currentUser = $this->getUser();
+        $canWrite = $this->isGranted(UserAuthenticationVoter::AUTHENTICATION_METHODS_WRITE);
+
         /** @var array<string, array{value: string, description: string}> $data */
         $data = $this->getSettings->getSettings($language);
 
@@ -802,11 +801,10 @@ class SettingsController extends AbstractController
             $humanReadableExpirationDate
         );
 
-        $form = $this->createForm(AuthSettingsType::class, $authSettingsTypeDTO, [
-        ]);
-
+        $form = $this->createForm(AuthSettingsType::class, $authSettingsTypeDTO, ['disabled' => !$canWrite]);
         $form->handleRequest($request);
-        if ($form->isSubmitted() && $form->isValid()) {
+
+        if ($form->isSubmitted() && $form->isValid() && $canWrite) {
             $this->settingsService->updateAuthSettingsToTranslateFromArray($authSettingsTypeDTO->toArray(), $language);
 
             $this->settingsService->flush();
