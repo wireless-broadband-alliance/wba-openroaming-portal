@@ -19,7 +19,7 @@
   <div class="py-4 flex flex-col space-y-2 font-medium">
     {% set userManagementRoutes = [
       'admin_page',
-      'admin_roles_management',
+      'admins_management',
       'admin_user_edit',
     ] %}
     {% set portalSettingsRoutes = [
@@ -63,9 +63,8 @@
               {{ include('dashboard/shared/_sidebar_item.html.twig', {label: 'users'|trans({}, '_header_admin'), route: 'admin_page', icon: 'wba:user'}) }}
             {% endif %}
 
-            {# SideBar Button - Admin Roles Management - Button #}
-            {% if is_granted(constant('App\\Enum\\AdminRoleType::ROLE_SUPER_ADMIN').value) %}
-              {{ include('dashboard/shared/_sidebar_item.html.twig', {label: 'admin'|trans({}, '_header_admin'), route: 'admin_roles_management', icon: 'wba:user-admin'}) }}
+            {% if constant('App\\Enum\\AdminRoleType::ROLE_SUPER_ADMIN').value in app.user.roles %}
+              {{ include('dashboard/shared/_sidebar_item.html.twig', {label: 'admin'|trans({}, '_header_admin'), route: 'admins_management', icon: 'wba:admin-management'}) }}
             {% endif %}
           </ul>
         </div>
