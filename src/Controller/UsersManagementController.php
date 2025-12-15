@@ -298,6 +298,19 @@ class UsersManagementController extends AbstractController
           ], 'controllers')
       );
 
+      $eventMetaData = [
+          'ip' => $request->getClientIp(),
+          'user_agent' => $request->headers->get('User-Agent'),
+          'userAddedBy' => $newUser->getUuid(),
+          'by' => $currentUser->getUuid(),
+      ];
+      $this->eventActions->saveEvent(
+          $currentUser,
+          AnalyticalEventType::ADMIN_ADDED_NEW_USER->value,
+          new DateTime(),
+          $eventMetaData
+      );
+
       return $this->redirectToRoute('admin_page');
     }
 
