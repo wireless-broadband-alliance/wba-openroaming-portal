@@ -25,42 +25,42 @@ use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;
  */
 class UserRepository extends ServiceEntityRepository implements PasswordUpgraderInterface
 {
-    public function __construct(ManagerRegistry $registry)
-    {
-        parent::__construct($registry, User::class);
-    }
+  public function __construct(ManagerRegistry $registry)
+  {
+    parent::__construct($registry, User::class);
+  }
 
-    public function remove(User $entity, bool $flush = false): void
-    {
-        $this->getEntityManager()->remove($entity);
+  public function remove(User $entity, bool $flush = false): void
+  {
+    $this->getEntityManager()->remove($entity);
 
-        if ($flush) {
-            $this->getEntityManager()->flush();
-        }
+    if ($flush) {
+      $this->getEntityManager()->flush();
     }
+  }
 
   /**
    * Used to upgrade (rehash) the user's password automatically over time.
    */
-    public function upgradePassword(PasswordAuthenticatedUserInterface $user, string $newHashedPassword): void
-    {
-        if (!$user instanceof User) {
-            throw new UnsupportedUserException(sprintf('Instances of "%s" are not supported.', $user::class));
-        }
-
-        $user->setPassword($newHashedPassword);
-
-        $this->save($user, true);
+  public function upgradePassword(PasswordAuthenticatedUserInterface $user, string $newHashedPassword): void
+  {
+    if (!$user instanceof User) {
+      throw new UnsupportedUserException(sprintf('Instances of "%s" are not supported.', $user::class));
     }
 
-    public function save(User $entity, bool $flush = false): void
-    {
-        $this->getEntityManager()->persist($entity);
+    $user->setPassword($newHashedPassword);
 
-        if ($flush) {
-            $this->getEntityManager()->flush();
-        }
+    $this->save($user, true);
+  }
+
+  public function save(User $entity, bool $flush = false): void
+  {
+    $this->getEntityManager()->persist($entity);
+
+    if ($flush) {
+      $this->getEntityManager()->flush();
     }
+  }
 
 //    /**
 //     * @return User[] Returns an array of User objects
@@ -89,38 +89,16 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
   /**
    * @return User[]
    */
-    public function findLDAPEnabledUsers()
-    {
-        return $this->createQueryBuilder('u')
+  public function findLDAPEnabledUsers()
+  {
+    return $this->createQueryBuilder('u')
         ->join('u.userExternalAuths', 'uea')
         ->andWhere('uea.provider = :provider')
         ->andWhere('uea.provider_id is not null')
         ->setParameter('provider', UserProvider::SAML->value)
         ->getQuery()
         ->getResult();
-    }
-
-  /* This data is to call and be used on the admin Users Page */
-  /**
-   * @return User[]
-   */
-    public function findExcludingAdmin(?string $filter = null): array
-    {
-        $qb = $this->createQueryBuilder('u');
-        $qb->where('u.roles NOT LIKE :role')
-        ->andWhere($qb->expr()->isNull('u.deletedAt'))
-        ->orderBy('u.createdAt', 'DESC')
-        ->setParameter('role', '%ROLE_SUPER_ADMIN%');
-
-        if ($filter === UserVerificationStatus::VERIFIED->value) {
-            $qb->andWhere('u.isVerified = :isVerified')
-            ->setParameter('isVerified', true);
-        } elseif ($filter === UserVerificationStatus::BANNED->value) {
-            $qb->andWhere($qb->expr()->isNotNull('u.bannedAt'));
-        }
-
-        return $qb->getQuery()->getResult();
-    }
+  }
 
   /**
    * @method array searchWithFilter(string $filter, ?string $searchTerm = null)
@@ -138,131 +116,118 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
    *
    * @return User[] A list of matched users, ordered by creation date in descending order.
    */
-    public function searchWithFilter(
-        string $filter,
-        ?string $sort,
-        ?string $order,
-        ?string $searchTerm = null
-    ): array {
-        $qb = $this->createQueryBuilder('u');
+  public function searchWithFilter(
+      string $filter,
+      ?string $sort,
+      ?string $order,
+      ?string $searchTerm = null
+  ): array {
+    $qb = $this->createQueryBuilder('u');
 
-        $qb->where('u.roles NOT LIKE :admin')
+    $qb->where('u.roles NOT LIKE :admin')
         ->andWhere('u.roles NOT LIKE :superAdmin')
         ->setParameter('admin', '%ROLE_ADMIN%')
         ->setParameter('superAdmin', '%ROLE_SUPER_ADMIN%');
 
 
-      // Add filters based on verification status
-        if ($filter === UserVerificationStatus::VERIFIED->value) {
-            $qb->andWhere('u.isVerified = :Verified')
-            ->setParameter(UserVerificationStatus::VERIFIED->value, true);
-        } elseif ($filter === UserVerificationStatus::BANNED->value) {
-            $qb->andWhere('u.bannedAt IS NOT NULL');
-        }
-
-      // Exclude deleted users
-        $qb->andWhere($qb->expr()->isNull('u.deletedAt'));
-
-        $qb->leftJoin('u.userExternalAuths', 'ua');
-
-      // Apply the search term, if provided
-        if ($searchTerm) {
-            $qb->andWhere(
-                $qb->expr()->orX(
-                    'u.uuid LIKE :searchTerm',
-                    'u.email LIKE :searchTerm',
-                    'u.first_name LIKE :searchTerm',
-                    'u.last_name LIKE :searchTerm',
-                )
-            )->setParameter('searchTerm', '%' . $searchTerm . '%');
-        }
-
-        $field = $sort === 'uuid' ? 'u.uuid' : 'u.createdAt';
-      // Order by creation date (newest first)
-        return $qb->orderBy($field, $order)
-        ->getQuery()
-        ->getResult();
+    // Add filters based on verification status
+    if ($filter === UserVerificationStatus::VERIFIED->value) {
+      $qb->andWhere('u.isVerified = :Verified')
+          ->setParameter(UserVerificationStatus::VERIFIED->value, true);
+    } elseif ($filter === UserVerificationStatus::BANNED->value) {
+      $qb->andWhere('u.bannedAt IS NOT NULL');
     }
 
-    public function searchAdminUsers(
-        string $filter,
-        ?string $sort,
-        ?string $order,
-        ?string $searchTerm = null
-    ): array {
-        $qb = $this->createQueryBuilder('u');
+    // Exclude deleted users
+    $qb->andWhere($qb->expr()->isNull('u.deletedAt'));
 
-        $qb->where('u.roles LIKE :admin')
-        ->setParameter('admin', '%ROLE_ADMIN%');
+    $qb->leftJoin('u.userExternalAuths', 'ua');
 
-      // Add filters based on verification status
-        if ($filter === UserVerificationStatus::VERIFIED->value) {
-            $qb->andWhere('u.isVerified = :Verified')
-            ->setParameter(UserVerificationStatus::VERIFIED->value, true);
-        } elseif ($filter === UserVerificationStatus::BANNED->value) {
-            $qb->andWhere('u.bannedAt IS NOT NULL');
-        }
+    // Apply the search term, if provided
+    if ($searchTerm) {
+      $qb->andWhere(
+          $qb->expr()->orX(
+              'u.uuid LIKE :searchTerm',
+              'u.email LIKE :searchTerm',
+              'u.first_name LIKE :searchTerm',
+              'u.last_name LIKE :searchTerm',
+          )
+      )->setParameter('searchTerm', '%' . $searchTerm . '%');
+    }
 
-      // Exclude deleted users
-        $qb->andWhere($qb->expr()->isNull('u.deletedAt'));
-
-        $qb->leftJoin('u.userExternalAuths', 'ua');
-
-      // Apply the search term, if provided
-        if ($searchTerm) {
-            $qb->andWhere(
-                $qb->expr()->orX(
-                    'u.uuid LIKE :searchTerm',
-                    'u.email LIKE :searchTerm',
-                    'u.first_name LIKE :searchTerm',
-                    'u.last_name LIKE :searchTerm',
-                )
-            )->setParameter('searchTerm', '%' . $searchTerm . '%');
-        }
-
-        $field = $sort === 'uuid' ? 'u.uuid' : 'u.createdAt';
-      // Order by creation date (newest first)
-        return $qb->orderBy($field, $order)
+    $field = $sort === 'uuid' ? 'u.uuid' : 'u.createdAt';
+    // Order by creation date (newest first)
+    return $qb->orderBy($field, $order)
         ->getQuery()
         ->getResult();
+  }
+
+  public function searchAdminUsers(
+      string $filter,
+      ?string $sort,
+      ?string $order,
+      ?string $searchTerm = null
+  ): array {
+    $qb = $this->createQueryBuilder('u');
+
+    $qb->andWhere(
+        $qb->expr()->orX(
+            'u.roles LIKE :admin',
+            'u.roles LIKE :superAdmin'
+        )
+    )
+        ->setParameter('admin', '%ROLE_ADMIN%')
+        ->setParameter('superAdmin', '%ROLE_SUPER_ADMIN%');
+
+    // Add filters based on verification status
+    if ($filter === UserVerificationStatus::VERIFIED->value) {
+      $qb->andWhere('u.isVerified = :Verified')
+          ->setParameter(UserVerificationStatus::VERIFIED->value, true);
+    } elseif ($filter === UserVerificationStatus::BANNED->value) {
+      $qb->andWhere('u.bannedAt IS NOT NULL');
     }
+
+    // Exclude deleted users
+    $qb->andWhere($qb->expr()->isNull('u.deletedAt'));
+
+    $qb->leftJoin('u.userExternalAuths', 'ua');
+
+    // Apply the search term, if provided
+    if ($searchTerm) {
+      $qb->andWhere(
+          $qb->expr()->orX(
+              'u.uuid LIKE :searchTerm',
+              'u.email LIKE :searchTerm',
+              'u.first_name LIKE :searchTerm',
+              'u.last_name LIKE :searchTerm',
+          )
+      )->setParameter('searchTerm', '%' . $searchTerm . '%');
+    }
+
+    $field = $sort === 'uuid' ? 'u.uuid' : 'u.createdAt';
+    // Order by creation date (newest first)
+    return $qb->orderBy($field, $order)
+        ->getQuery()
+        ->getResult();
+  }
 
   /**
    * @throws NonUniqueResultException
    */
-    public function findOneByUUIDExcludingAdmin(string $uuid): ?User
-    {
-      // Create a query builder
-        $qb = $this->createQueryBuilder('u');
+  public function findOneByUUIDExcludingAdmin(string $uuid): ?User
+  {
+    // Create a query builder
+    $qb = $this->createQueryBuilder('u');
 
-        $qb->where('u.roles NOT LIKE :role')
+    $qb->where('u.roles NOT LIKE :role')
         ->setParameter('role', '%ROLE_ADMIN%');
 
-        $qb->andWhere('u.uuid = :uuid')
+    $qb->andWhere('u.uuid = :uuid')
         ->setParameter('uuid', $uuid);
 
-      // Execute the query and return only the uuid of some specific user
-        return $qb->getQuery()->getOneOrNullResult();
-    }
-
-  /**
-   * @throws NonUniqueResultException
-   */
-    public function findOneByUUIDAdmin(string $uuid): ?User
-    {
-        $qb = $this->createQueryBuilder('u');
-
-        $qb->where('u.roles LIKE :role')
-        ->setParameter('role', '%ROLE_ADMIN%')
-        ->andWhere('u.uuid = :uuid')
-        ->setParameter('uuid', $uuid)
-        ->andWhere('u.bannedAt IS NULL')
-        ->andWhere('u.deletedAt IS NULL')
-        ->andWhere('u.isDisabled = false');
-
-      // Execute the query and return the result
-        return $qb->getQuery()->getOneOrNullResult();
-    }
+    // Execute the query and return only the uuid of some specific user
+    return $qb->getQuery()->getOneOrNullResult();
+  }
 
   /**
    * Count users, optionally filtering only admins.
@@ -270,49 +235,50 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
    * @throws NonUniqueResultException
    * @throws NoResultException
    */
-    public function countUsers(
-        ?string $searchTerm = null,
-        ?string $filter = null,
-        bool $onlyAdmins = false // default false → counts all users
-    ): int {
-        $qb = $this->createQueryBuilder('u');
-        $qb->select('COUNT(u.id)')
+  public function countUsers(
+      ?string $searchTerm = null,
+      ?string $filter = null,
+      bool $onlyAdmins = false // default false → counts all users
+  ): int
+  {
+    $qb = $this->createQueryBuilder('u');
+    $qb->select('COUNT(u.id)')
         ->andWhere($qb->expr()->isNull('u.deletedAt')); // exclude deleted users
 
-      // Filter by role if counting only admins
-        if ($onlyAdmins) {
-            $qb->andWhere('u.roles LIKE :adminRole')
-            ->setParameter('adminRole', '%ROLE_ADMIN%');
-        } else {
-          // Exclude admin & super admin when counting all other users
-            $qb->andWhere('u.roles NOT LIKE :adminRole')
-            ->andWhere('u.roles NOT LIKE :superAdmin')
-            ->setParameter('adminRole', '%ROLE_ADMIN%')
-            ->setParameter('superAdmin', '%ROLE_SUPER_ADMIN%');
-        }
-
-      // Apply search term if provided
-        if ($searchTerm !== null) {
-            $qb->andWhere(
-                $qb->expr()->orX(
-                    'u.uuid LIKE :searchTerm',
-                    'u.email LIKE :searchTerm',
-                    'u.first_name LIKE :searchTerm',
-                    'u.last_name LIKE :searchTerm'
-                )
-            )->setParameter('searchTerm', '%' . $searchTerm . '%');
-        }
-
-      // Apply verification/banned filter
-        if ($filter === UserVerificationStatus::VERIFIED->value) {
-            $qb->andWhere('u.isVerified = :verified')
-            ->setParameter('verified', true);
-        } elseif ($filter === UserVerificationStatus::BANNED->value) {
-            $qb->andWhere('u.bannedAt IS NOT NULL');
-        }
-
-        return (int)$qb->getQuery()->getSingleScalarResult();
+    // Filter by role if counting only admins
+    if ($onlyAdmins) {
+      $qb->andWhere('u.roles LIKE :adminRole')
+          ->setParameter('adminRole', '%ROLE_ADMIN%');
+    } else {
+      // Exclude admin & super admin when counting all other users
+      $qb->andWhere('u.roles NOT LIKE :adminRole')
+          ->andWhere('u.roles NOT LIKE :superAdmin')
+          ->setParameter('adminRole', '%ROLE_ADMIN%')
+          ->setParameter('superAdmin', '%ROLE_SUPER_ADMIN%');
     }
+
+    // Apply search term if provided
+    if ($searchTerm !== null) {
+      $qb->andWhere(
+          $qb->expr()->orX(
+              'u.uuid LIKE :searchTerm',
+              'u.email LIKE :searchTerm',
+              'u.first_name LIKE :searchTerm',
+              'u.last_name LIKE :searchTerm'
+          )
+      )->setParameter('searchTerm', '%' . $searchTerm . '%');
+    }
+
+    // Apply verification/banned filter
+    if ($filter === UserVerificationStatus::VERIFIED->value) {
+      $qb->andWhere('u.isVerified = :verified')
+          ->setParameter('verified', true);
+    } elseif ($filter === UserVerificationStatus::BANNED->value) {
+      $qb->andWhere('u.bannedAt IS NOT NULL');
+    }
+
+    return (int)$qb->getQuery()->getSingleScalarResult();
+  }
 
   /**
    * Count verified users, optionally including only admins.
@@ -320,41 +286,42 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
    * @throws NonUniqueResultException
    * @throws NoResultException
    */
-    public function countVerifiedUsers(
-        ?string $searchTerm = null,
-        bool $onlyAdmins = false // default false → counts normal verified users
-    ): int {
-        $qb = $this->createQueryBuilder('u');
-        $qb->select('COUNT(u.id)')
+  public function countVerifiedUsers(
+      ?string $searchTerm = null,
+      bool $onlyAdmins = false // default false → counts normal verified users
+  ): int
+  {
+    $qb = $this->createQueryBuilder('u');
+    $qb->select('COUNT(u.id)')
         ->andWhere('u.isVerified = :verified')
         ->andWhere($qb->expr()->isNull('u.deletedAt'))
         ->setParameter('verified', true);
 
-        if ($onlyAdmins) {
-          // Count only verified admins
-            $qb->andWhere('u.roles LIKE :adminRole')
-            ->setParameter('adminRole', '%ROLE_ADMIN%');
-        } else {
-          // Exclude admins
-            $qb->andWhere('u.roles NOT LIKE :adminRole')
-            ->andWhere('u.roles NOT LIKE :superAdmin')
-            ->setParameter('adminRole', '%ROLE_ADMIN%')
-            ->setParameter('superAdmin', '%ROLE_SUPER_ADMIN%');
-        }
-
-        if ($searchTerm !== null) {
-            $qb->andWhere(
-                $qb->expr()->orX(
-                    'u.uuid LIKE :searchTerm',
-                    'u.email LIKE :searchTerm',
-                    'u.first_name LIKE :searchTerm',
-                    'u.last_name LIKE :searchTerm'
-                )
-            )->setParameter('searchTerm', '%' . $searchTerm . '%');
-        }
-
-        return (int)$qb->getQuery()->getSingleScalarResult();
+    if ($onlyAdmins) {
+      // Count only verified admins
+      $qb->andWhere('u.roles LIKE :adminRole')
+          ->setParameter('adminRole', '%ROLE_ADMIN%');
+    } else {
+      // Exclude admins
+      $qb->andWhere('u.roles NOT LIKE :adminRole')
+          ->andWhere('u.roles NOT LIKE :superAdmin')
+          ->setParameter('adminRole', '%ROLE_ADMIN%')
+          ->setParameter('superAdmin', '%ROLE_SUPER_ADMIN%');
     }
+
+    if ($searchTerm !== null) {
+      $qb->andWhere(
+          $qb->expr()->orX(
+              'u.uuid LIKE :searchTerm',
+              'u.email LIKE :searchTerm',
+              'u.first_name LIKE :searchTerm',
+              'u.last_name LIKE :searchTerm'
+          )
+      )->setParameter('searchTerm', '%' . $searchTerm . '%');
+    }
+
+    return (int)$qb->getQuery()->getSingleScalarResult();
+  }
 
   /**
    * Count banned users, optionally including only admins.
@@ -362,51 +329,52 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
    * @throws NonUniqueResultException
    * @throws NoResultException
    */
-    public function countBannedUsers(
-        ?string $searchTerm = null,
-        bool $onlyAdmins = false // default false → counts normal banned users
-    ): int {
-        $qb = $this->createQueryBuilder('u');
-        $qb->select('COUNT(u.id)')
+  public function countBannedUsers(
+      ?string $searchTerm = null,
+      bool $onlyAdmins = false // default false → counts normal banned users
+  ): int
+  {
+    $qb = $this->createQueryBuilder('u');
+    $qb->select('COUNT(u.id)')
         ->andWhere('u.bannedAt IS NOT NULL')
         ->andWhere($qb->expr()->isNull('u.deletedAt'));
 
-        if ($onlyAdmins) {
-          // Count only banned admins
-            $qb->andWhere('u.roles LIKE :adminRole')
-            ->setParameter('adminRole', '%ROLE_ADMIN%');
-        } else {
-          // Exclude admins
-            $qb->andWhere('u.roles NOT LIKE :adminRole')
-            ->andWhere('u.roles NOT LIKE :superAdmin')
-            ->setParameter('adminRole', '%ROLE_ADMIN%')
-            ->setParameter('superAdmin', '%ROLE_SUPER_ADMIN%');
-        }
-
-        if ($searchTerm !== null) {
-            $qb->andWhere(
-                $qb->expr()->orX(
-                    'u.uuid LIKE :searchTerm',
-                    'u.email LIKE :searchTerm',
-                    'u.first_name LIKE :searchTerm',
-                    'u.last_name LIKE :searchTerm'
-                )
-            )->setParameter('searchTerm', '%' . $searchTerm . '%');
-        }
-
-        return (int)$qb->getQuery()->getSingleScalarResult();
+    if ($onlyAdmins) {
+      // Count only banned admins
+      $qb->andWhere('u.roles LIKE :adminRole')
+          ->setParameter('adminRole', '%ROLE_ADMIN%');
+    } else {
+      // Exclude admins
+      $qb->andWhere('u.roles NOT LIKE :adminRole')
+          ->andWhere('u.roles NOT LIKE :superAdmin')
+          ->setParameter('adminRole', '%ROLE_ADMIN%')
+          ->setParameter('superAdmin', '%ROLE_SUPER_ADMIN%');
     }
 
-    public function findSuperAdmin(): ?User
-    {
-        $qb = $this->createQueryBuilder('u');
-        $qb->andWhere('u.roles LIKE :role')
+    if ($searchTerm !== null) {
+      $qb->andWhere(
+          $qb->expr()->orX(
+              'u.uuid LIKE :searchTerm',
+              'u.email LIKE :searchTerm',
+              'u.first_name LIKE :searchTerm',
+              'u.last_name LIKE :searchTerm'
+          )
+      )->setParameter('searchTerm', '%' . $searchTerm . '%');
+    }
+
+    return (int)$qb->getQuery()->getSingleScalarResult();
+  }
+
+  public function findSuperAdmin(): ?User
+  {
+    $qb = $this->createQueryBuilder('u');
+    $qb->andWhere('u.roles LIKE :role')
         ->setParameter(
             'role',
             '%ROLE_SUPER_ADMIN%'
         )
         ->setMaxResults(1);
 
-        return $qb->getQuery()->getOneOrNullResult();
-    }
+    return $qb->getQuery()->getOneOrNullResult();
+  }
 }
