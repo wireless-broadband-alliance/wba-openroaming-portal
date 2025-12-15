@@ -3,6 +3,7 @@
 namespace App\DTO;
 
 use App\Entity\User;
+use App\Entity\UserExternalAuth;
 use App\Enum\AdminRoleType;
 use App\Enum\UserProvider;
 use libphonenumber\PhoneNumber;
@@ -13,11 +14,11 @@ class UserAddDTO
 {
   #[Assert\NotBlank(message: 'accountTypeInvalid')]
   #[Assert\Choice(callback: [UserProvider::class, 'cases'], message: 'accountTypeInvalid')]
-  public string $accountType;
+  public ?string $accountType = null;
 
   #[Assert\NotBlank(message: 'invalidRole')]
   #[Assert\Choice(callback: [AdminRoleType::class, 'cases'], message: 'invalidRole')]
-  public string $roles;
+  public ?string $roles = null;
 
   #[Assert\Email]
   #[Assert\Length(max: 180)]
@@ -36,19 +37,15 @@ class UserAddDTO
   #[Assert\Length(max: 100)]
   public ?string $lastName = null;
 
-  #[Assert\Choice(callback: [UserProvider::class, 'cases'], message: 'providerInvalid')]
-  public string $provider;
-
   public function __construct(?User $user = null)
   {
-    if ($user) {
+    if (!is_null($user)) {
       $this->email = $user->getEmail();
       $this->firstName = $user->getFirstName();
       $this->lastName = $user->getLastName();
       $this->phoneNumber = $user->getPhoneNumber();
       $this->accountType = $user->getPhoneNumber() ?
           UserProvider::PHONE_NUMBER->value : UserProvider::EMAIL->value;
-      $this->provider = $user->getEmail() ? UserProvider::EMAIL->value : UserProvider::PHONE_NUMBER->value;
     }
   }
 
@@ -57,12 +54,18 @@ class UserAddDTO
    */
   public function createUser(User $user): User
   {
+    $userAuths = new UserExternalAuth();
+
     if ($this->accountType === UserProvider::EMAIL->value && $this->email) {
       $user->setEmail($this->email);
       $user->setUuid($this->email);
+      $userAuths->setProvider(UserProvider::PORTAL_ACCOUNT->value);
+      $userAuths->setProviderId(UserProvider::EMAIL->value);
     } elseif ($this->accountType === UserProvider::PHONE_NUMBER->value && $this->phoneNumber) {
       $user->setPhoneNumber($this->phoneNumber);
       $user->setUuid('+' . $this->phoneNumber->getCountryCode() . $this->phoneNumber->getNationalNumber());
+      $userAuths->setProvider(UserProvider::PORTAL_ACCOUNT->value);
+      $userAuths->setProviderId(UserProvider::PHONE_NUMBER->value);
     }
 
     if ($this->roles) {

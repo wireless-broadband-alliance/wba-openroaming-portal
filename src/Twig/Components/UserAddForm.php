@@ -54,16 +54,13 @@ final class UserAddForm extends AbstractController
 
     $submitData = [
         'accountType' => $this->userAddDTO->accountType,
+        'roles' => $this->userAddDTO->roles,
         'email' => $this->userAddDTO->email,
         'phoneNumber' => $this->userAddDTO->phoneNumber,
         'firstName' => $this->userAddDTO->firstName,
         'lastName' => $this->userAddDTO->lastName,
         'password' => $this->userAddDTO->password ?? null,
     ];
-
-    if (property_exists($this->userAddDTO, 'roles')) {
-      $submitData['roles'] = $this->userAddDTO->roles;
-    }
 
     $form->submit($submitData, false);
 
