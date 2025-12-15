@@ -5,6 +5,7 @@ namespace App\DTO;
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
 use App\Enum\AdminRoleType;
+use App\Enum\PermissionLevel;
 use App\Enum\UserProvider;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
@@ -18,6 +19,45 @@ use App\Validator\Constraints as CustomAssert;
 #[CustomAssert\PasswordsMatch]
 class UserAddDTO
 {
+  #[Assert\Choice(callback: [PermissionLevel::class, 'cases'])]
+  public PermissionLevel $userManagement = PermissionLevel::NONE;
+
+  #[Assert\Choice(callback: [PermissionLevel::class, 'cases'])]
+  public PermissionLevel $platformStatus = PermissionLevel::NONE;
+
+  #[Assert\Choice(callback: [PermissionLevel::class, 'cases'])]
+  public PermissionLevel $landingPageConfig = PermissionLevel::NONE;
+
+  #[Assert\Choice(callback: [PermissionLevel::class, 'cases'])]
+  public PermissionLevel $userEngagement = PermissionLevel::NONE;
+
+  #[Assert\Choice(callback: [PermissionLevel::class, 'cases'])]
+  public PermissionLevel $termsPolicies = PermissionLevel::NONE;
+
+  #[Assert\Choice(callback: [PermissionLevel::class, 'cases'])]
+  public PermissionLevel $cronSchedule = PermissionLevel::NONE;
+
+  #[Assert\Choice(callback: [PermissionLevel::class, 'cases'])]
+  public PermissionLevel $authenticationMethods = PermissionLevel::NONE;
+
+  #[Assert\Choice(callback: [PermissionLevel::class, 'cases'])]
+  public PermissionLevel $twoFactorAuth = PermissionLevel::NONE;
+
+  #[Assert\Choice(callback: [PermissionLevel::class, 'cases'])]
+  public PermissionLevel $ldapSynchronization = PermissionLevel::NONE;
+
+  #[Assert\Choice(callback: [PermissionLevel::class, 'cases'])]
+  public PermissionLevel $radiusProfileConfig = PermissionLevel::NONE;
+
+  #[Assert\Choice(callback: [PermissionLevel::class, 'cases'])]
+  public PermissionLevel $smsConfig = PermissionLevel::NONE;
+
+  #[Assert\Choice(callback: [PermissionLevel::class, 'cases'])]
+  public PermissionLevel $portalStatistics = PermissionLevel::NONE;
+
+  #[Assert\Choice(callback: [PermissionLevel::class, 'cases'])]
+  public PermissionLevel $connectivityStatistics = PermissionLevel::NONE;
+
   #[Assert\NotBlank(message: 'accountTypeInvalid')]
   #[Assert\Choice(
       choices: [UserProvider::EMAIL->value, UserProvider::PHONE_NUMBER->value],
@@ -63,7 +103,6 @@ class UserAddDTO
       $this->phoneNumber = $user->getPhoneNumber();
       $this->accountType = $user->getPhoneNumber() ?
           UserProvider::PHONE_NUMBER->value : UserProvider::EMAIL->value;
-      $this->roles = AdminRoleType::ROLE_ADMIN->value;
     }
   }
 
