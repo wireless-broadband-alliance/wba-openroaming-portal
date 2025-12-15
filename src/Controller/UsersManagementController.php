@@ -763,7 +763,7 @@ class UsersManagementController extends AbstractController
         ]);
     }
 
-    #[Route('/dashboard/adminPermissions/{id<\d+>}', name: 'admin_give_permissions')]
+    #[Route('/dashboard/adminPermissionsAdd/{id<\d+>}', name: 'admin_add_permissions')]
     #[IsGranted('ROLE_SUPER_ADMIN')]
     public function giveAdminPermissions(
         Request $request,
@@ -794,7 +794,7 @@ class UsersManagementController extends AbstractController
         ];
         $this->eventActions->saveEvent(
             $user,
-            AnalyticalEventType::ADMIN_PERMISSIONS_GIVEN->value,
+            AnalyticalEventType::ADMIN_ADDED_PERMISSIONS->value,
             new DateTime(),
             $eventMetaData
         );
@@ -833,7 +833,7 @@ class UsersManagementController extends AbstractController
         ];
         $this->eventActions->saveEvent(
             $user,
-            AnalyticalEventType::ADMIN_PERMISSIONS_REMOVED->value,
+            AnalyticalEventType::ADMIN_REMOVED_PERMISSIONS->value,
             new DateTime(),
             $eventMetaData
         );
