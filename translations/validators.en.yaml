@@ -47,3 +47,5 @@ timerShouldNeverBeLessThan: 'This timer should never be less than 1.'
 profileLimitMessage: 'Please select a value between 1 (minimum, fixed value) and %limit% (maximum, determined by the number of days left until the certificate expires on %expirationDate%).'
 accountTypeInvalid: 'Invalid Account Type Provided'
 invalidRole: 'Invalid Role Provided'
+uniqueEmail: "This email is already in use."
+uniqueUUID: "This identifier is already in use."

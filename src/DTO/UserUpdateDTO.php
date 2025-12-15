@@ -7,14 +7,17 @@ use DateTimeInterface;
 use libphonenumber\PhoneNumber;
 use Symfony\Component\Validator\Constraints as Assert;
 use Misd\PhoneNumberBundle\Validator\Constraints\PhoneNumber as AssertPhoneNumber;
+use App\Validator\Constraints as CustomAssert;
 
 class UserUpdateDTO
 {
     #[Assert\NotBlank(message: 'UUIDNotBlank')]
+    #[CustomAssert\UniqueUUID]
     public ?string $uuid = null;
 
     #[Assert\Email]
     #[Assert\Length(max: 180)]
+    #[CustomAssert\UniqueEmail]
     public ?string $email = null;
 
     #[Assert\Length(max: 100)]

@@ -17,14 +17,12 @@
           <div class="text-red-500 mt-1">{{ form_errors(form.accountType) }}</div>
         </div>
 
-        {# Roles (SUPER_ADMIN only) #}
-        {% if form.roles is defined %}
-          <div class="relative">
-            {{ form_label(form.roles, 'roles'|trans({}, 'UserAddType'), {label_attr: {class: 'form-label'}}) }}
-            {{ form_widget(form.roles, {attr: {class: 'form-widget'}}) }}
-            <div class="text-red-500 mt-1">{{ form_errors(form.roles) }}</div>
-          </div>
-        {% endif %}
+        {# Roles #}
+        <div class="relative">
+          {{ form_label(form.roles, 'roles'|trans({}, 'UserAddType'), {label_attr: {class: 'form-label'}}) }}
+          {{ form_widget(form.roles, {attr: {class: 'form-widget'}}) }}
+          <div class="text-red-500 mt-1">{{ form_errors(form.roles) }}</div>
+        </div>
 
         {# Email #}
         <div class="relative lg:col-span-2">
