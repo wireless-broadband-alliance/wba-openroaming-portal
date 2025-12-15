@@ -54,6 +54,7 @@ final class UserAuthenticationVoter extends Voter
     public const string PORTAL_SETTINGS = 'PORTAL_SETTINGS';
     public const string USER_AUTHENTICATION = 'USER_AUTHENTICATION';
     public const string PORTAL_STATISTICS = 'PORTAL_STATISTICS';
+    public const string USER_MANAGEMENT = 'USER_MANAGEMENT';
 
     #[Override]
     protected function supports(string $attribute, mixed $subject): bool
@@ -101,6 +102,7 @@ final class UserAuthenticationVoter extends Voter
                     self::PORTAL_SETTINGS,
                     self::USER_AUTHENTICATION,
                     self::PORTAL_STATISTICS,
+                    self::USER_MANAGEMENT,
                 ]
             )
         ) {
@@ -202,6 +204,7 @@ final class UserAuthenticationVoter extends Voter
             self::PORTAL_SETTINGS => $this->hasPortalSettings($user),
             self::USER_AUTHENTICATION => $this->hasUserAuthentication($user),
             self::PORTAL_STATISTICS => $this->hasPortalStatistics($user),
+            self::USER_MANAGEMENT => $this->hasUserManagement($user),
             default => false,
         };
     }
@@ -254,5 +257,12 @@ final class UserAuthenticationVoter extends Voter
         return
             $this->hasPermission($user, AdminPermissionsType::PORTAL_STATISTICS_READ)
             || $this->hasPermission($user, AdminPermissionsType::CONNECTIVITY_STATISTICS_READ);
+    }
+
+    private function hasUserManagement(User $user): bool
+    {
+        return
+            $this->hasPermission($user, AdminPermissionsType::USERS_MANAGEMENT_WRITE)
+            || $this->hasPermission($user, AdminPermissionsType::USERS_MANAGEMENT_READ);
     }
 }
