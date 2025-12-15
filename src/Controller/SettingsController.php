@@ -645,7 +645,7 @@ class SettingsController extends AbstractController
     }
 
     #[Route('/dashboard/settings/status', name: 'admin_dashboard_settings_status')]
-    #[IsGranted('ROLE_ADMIN')]
+    #[IsGranted(UserAuthenticationVoter::PLATFORM_STATUS_READ)]
     public function settingsStatus(
         Request $request
     ): Response {
@@ -654,15 +654,16 @@ class SettingsController extends AbstractController
 
         /** @var User $currentUser */
         $currentUser = $this->getUser();
+        $canWrite = $this->isGranted(UserAuthenticationVoter::PLATFORM_STATUS_WRITE);
 
         // Initialize DTO from settings
         $dto = new PlatformStatusSettingsDTO($data);
 
         // Create form bound to DTO
-        $form = $this->createForm(PlatformStatusSettingsType::class, $dto);
+        $form = $this->createForm(PlatformStatusSettingsType::class, $dto, ['disabled' => !$canWrite]);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
+        if ($form->isSubmitted() && $form->isValid() && $canWrite) {
             // Save updated settings
             $this->settingsService->updateSettingsFromArray($dto->toArray());
             $this->settingsService->flush();
