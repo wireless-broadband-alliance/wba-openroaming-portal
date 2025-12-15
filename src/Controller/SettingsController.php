@@ -408,19 +408,19 @@ class SettingsController extends AbstractController
         name: 'admin_dashboard_settings_terms',
         defaults: ['language' => LanguageType::EN->value]
     )]
-    #[IsGranted('ROLE_ADMIN')]
-    public function settingsTerms(
-        Request $request,
-        string $language,
-    ): Response {
+    #[IsGranted(UserAuthenticationVoter::TERMS_POLICIES_READ)]
+    public function settingsTerms(Request $request, string $language): Response
+    {
         /** @var User $currentUser */
         $currentUser = $this->getUser();
+        $canWrite = $this->isGranted(UserAuthenticationVoter::TERMS_POLICIES_WRITE);
 
         // TOS TextEditor
         $tosTextEditor = $this->textEditorRepository->findTextEditor(
             TextEditorName::TOS->value,
             $language
         );
+
         if (!$tosTextEditor instanceof TextEditor) {
             $tosTextEditor = new TextEditor();
             $tosTextEditor->setName(TextEditorName::TOS->value);
@@ -434,6 +434,7 @@ class SettingsController extends AbstractController
             TextEditorName::PRIVACY_POLICY->value,
             $language
         );
+
         if (!$privacyPolicyTextEditor instanceof TextEditor) {
             $privacyPolicyTextEditor = new TextEditor();
             $privacyPolicyTextEditor->setName(TextEditorName::PRIVACY_POLICY->value);
@@ -473,10 +474,10 @@ class SettingsController extends AbstractController
             ),
         ]);
 
-        $form = $this->createForm(TermsType::class, null, ['settings' => $settings]);
+        $form = $this->createForm(TermsType::class, null, ['settings' => $settings, 'disabled' => !$canWrite]);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
+        if ($form->isSubmitted() && $form->isValid() && $canWrite) {
             // Update settings using the service
             foreach (
                 [
@@ -593,7 +594,8 @@ class SettingsController extends AbstractController
 
     #[Route('/dashboard/settings/radius', name: 'admin_dashboard_settings_radius')]
     #[IsGranted(UserAuthenticationVoter::RADIUS_PROFILE_CONFIG_READ)]
-    public function settingsRadius(Request $request): Response {
+    public function settingsRadius(Request $request): Response
+    {
         /** @var array<string, array{value: string, description: string}> $data */
         $data = $this->getSettings->getSettings();
 
