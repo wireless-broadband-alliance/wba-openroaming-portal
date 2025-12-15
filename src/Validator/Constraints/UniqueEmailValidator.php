@@ -8,28 +8,28 @@ use Symfony\Component\Validator\ConstraintValidator;
 
 class UniqueEmailValidator extends ConstraintValidator
 {
-  public function __construct(
-      private readonly UserRepository $userRepository
-  ) {
-  }
-
-  public function validate(mixed $value, Constraint $constraint): void
-  {
-    if (!$constraint instanceof UniqueEmail) {
-      return; // safety check
+    public function __construct(
+        private readonly UserRepository $userRepository
+    ) {
     }
 
-    // skip empty values
-    if ($value === null || $value === '') {
-      return;
-    }
+    public function validate(mixed $value, Constraint $constraint): void
+    {
+        if (!$constraint instanceof UniqueEmail) {
+            return; // safety check
+        }
 
-    $existingUser = $this->userRepository->findOneBy(['email' => $value]);
+      // skip empty values
+        if ($value === null || $value === '') {
+            return;
+        }
 
-    if ($existingUser) {
-      $this->context->buildViolation($constraint->message)
-          ->setParameter('{{ email }}', $value)
-          ->addViolation();
+        $existingUser = $this->userRepository->findOneBy(['email' => $value]);
+
+        if ($existingUser) {
+            $this->context->buildViolation($constraint->message)
+            ->setParameter('{{ email }}', $value)
+            ->addViolation();
+        }
     }
-  }
 }
