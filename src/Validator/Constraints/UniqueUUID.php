@@ -8,5 +8,9 @@ use Symfony\Component\Validator\Constraint;
 class UniqueUUID extends Constraint
 {
   public string $message = 'uniqueUUID';
-}
 
+  public function getTargets(): string
+  {
+    return self::PROPERTY_CONSTRAINT;
+  }
+}
