@@ -364,17 +364,4 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
 
     return (int)$qb->getQuery()->getSingleScalarResult();
   }
-
-  public function findSuperAdmin(): ?User
-  {
-    $qb = $this->createQueryBuilder('u');
-    $qb->andWhere('u.roles LIKE :role')
-        ->setParameter(
-            'role',
-            '%ROLE_SUPER_ADMIN%'
-        )
-        ->setMaxResults(1);
-
-    return $qb->getQuery()->getOneOrNullResult();
-  }
 }
