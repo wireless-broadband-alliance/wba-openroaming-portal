@@ -39,6 +39,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use Random\RandomException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -267,6 +268,9 @@ class UsersManagementController extends AbstractController
     return $this->file($tempFile, 'users.xlsx');
   }
 
+  /**
+   * @throws RandomException
+   */
   #[Route('/dashboard/add', name: 'admin_user_add')]
   #[IsGranted('ROLE_SUPER_ADMIN')]
   public function addUsers(
@@ -289,6 +293,10 @@ class UsersManagementController extends AbstractController
     if ($form->isSubmitted() && $form->isValid()) {
       // Convert DTO → Entity data before creation
       $userAddDTO->createUser($newUser);
+
+      // Persist new user
+      $this->entityManager->persist($newUser);
+      $this->entityManager->flush();
 
       // Flash message
       $this->addFlash(
