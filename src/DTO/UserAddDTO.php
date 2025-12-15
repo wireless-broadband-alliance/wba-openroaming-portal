@@ -6,33 +6,34 @@ use App\Entity\User;
 use App\Enum\AdminRoleType;
 use App\Enum\UserProvider;
 use libphonenumber\PhoneNumber;
+use Misd\PhoneNumberBundle\Validator\Constraints\PhoneNumber as AssertPhoneNumber;
 use Symfony\Component\Validator\Constraints as Assert;
 
 class UserAddDTO
 {
-  #[Assert\NotBlank(message: 'accountTypeNotBlank')]
+  #[Assert\NotBlank(message: 'accountTypeInvalid')]
   #[Assert\Choice(callback: [UserProvider::class, 'cases'], message: 'accountTypeInvalid')]
   public string $accountType;
 
+  #[Assert\NotBlank(message: 'invalidRole')]
   #[Assert\Choice(callback: [AdminRoleType::class, 'cases'], message: 'invalidRole')]
   public string $roles;
 
-  #[Assert\Email(message: 'emailInvalid')]
-  #[Assert\Length(max: 180, maxMessage: 'emailTooLong')]
-  #[Assert\NotBlank(groups: ['emailAccount'], message: 'emailNotBlank')]
+  #[Assert\Email]
+  #[Assert\Length(max: 180)]
   public ?string $email = null;
 
-  #[Assert\NotNull(groups: ['phoneAccount'], message: 'phoneNotBlank')]
+  #[AssertPhoneNumber]
   public ?PhoneNumber $phoneNumber = null;
 
   #[Assert\NotBlank(message: 'passwordNotBlank')]
   #[Assert\Length(min: 8, max: 255, minMessage: 'passwordTooShort')]
   public ?string $password = null;
 
-  #[Assert\Length(max: 100, maxMessage: 'firstNameTooLong')]
+  #[Assert\Length(max: 100)]
   public ?string $firstName = null;
 
-  #[Assert\Length(max: 100, maxMessage: 'lastNameTooLong')]
+  #[Assert\Length(max: 100)]
   public ?string $lastName = null;
 
   #[Assert\Choice(callback: [UserProvider::class, 'cases'], message: 'providerInvalid')]
