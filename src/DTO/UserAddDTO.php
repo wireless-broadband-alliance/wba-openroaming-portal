@@ -3,6 +3,7 @@
 namespace App\DTO;
 
 use App\Entity\User;
+use App\Enum\AdminRoleType;
 use App\Enum\UserProvider;
 use libphonenumber\PhoneNumber;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -13,7 +14,7 @@ class UserAddDTO
   #[Assert\Choice(callback: [UserProvider::class, 'cases'], message: 'accountTypeInvalid')]
   public string $accountType;
 
-  #[Assert\Choice(callback: [UserProvider::class, 'cases'], message: 'invalidRole')]
+  #[Assert\Choice(callback: [AdminRoleType::class, 'cases'], message: 'invalidRole')]
   public string $roles;
 
   #[Assert\Email(message: 'emailInvalid')]

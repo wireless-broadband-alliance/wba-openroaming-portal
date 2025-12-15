@@ -76,7 +76,7 @@ class UserAddType extends AbstractType
               'Admin' => AdminRoleType::ROLE_ADMIN->value,
               'Super Admin' => AdminRoleType::ROLE_SUPER_ADMIN->value,
           ],
-          'required' => false,
+          'required' => true,
       ]);
     }
 
