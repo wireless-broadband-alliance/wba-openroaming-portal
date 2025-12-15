@@ -695,24 +695,24 @@ class SettingsController extends AbstractController
     }
 
     #[Route('/dashboard/settings/twoFA', name: 'admin_dashboard_settings_two_fa')]
-    #[IsGranted('ROLE_ADMIN')]
-    public function settingsTwoFA(
-        Request $request,
-    ): Response {
+    #[IsGranted(UserAuthenticationVoter::TWO_FACTOR_AUTH_READ)]
+    public function settingsTwoFA(Request $request): Response
+    {
         /** @var array<string, array{value: string, description: string}> $data */
         $data = $this->getSettings->getSettings();
 
         /** @var User $currentUser */
         $currentUser = $this->getUser();
+        $canWrite = $this->isGranted(UserAuthenticationVoter::TWO_FACTOR_AUTH_WRITE);
 
         // Initialize DTO from settings
         $dto = new TwoFASettingsDTO($data);
 
         // Create form bound to DTO
-        $form = $this->createForm(TwoFASettingsType::class, $dto);
+        $form = $this->createForm(TwoFASettingsType::class, $dto, ['disabled' => !$canWrite]);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
+        if ($form->isSubmitted() && $form->isValid() && $canWrite) {
             // Save updated settings
             $this->settingsService->updateSettingsFromArray($dto->toArray());
             $this->settingsService->flush();
