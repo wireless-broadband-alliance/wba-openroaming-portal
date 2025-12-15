@@ -11,17 +11,10 @@
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
       {# Account Type #}
-      <div class="relative">
+      <div class="relative lg:col-span-2">
         {{ form_label(form.accountType, 'accountType'|trans({}, 'UserAddType'), {label_attr: {class: 'form-label'}}) }}
         {{ form_widget(form.accountType, {attr: {class: 'form-widget'}}) }}
         <div class="text-red-500 mt-1">{{ form_errors(form.accountType) }}</div>
-      </div>
-
-      {# Roles #}
-      <div class="relative">
-        {{ form_label(form.roles, 'roles'|trans({}, 'UserAddType'), {label_attr: {class: 'form-label'}}) }}
-        {{ form_widget(form.roles, {attr: {class: 'form-widget'}}) }}
-        <div class="text-red-500 mt-1">{{ form_errors(form.roles) }}</div>
       </div>
 
       {# Email #}
@@ -60,10 +53,17 @@
       </div>
 
       {# Password #}
-      <div class="relative lg:col-span-2">
+      <div class="relative">
         {{ form_label(form.password, 'password'|trans({}, 'UserAddType'), {label_attr: {class: 'form-label'}}) }}
         {{ form_widget(form.password, {attr: {class: 'form-widget'}}) }}
         <div class="text-red-500 mt-1">{{ form_errors(form.password) }}</div>
+      </div>
+
+      {# Confirm Password #}
+      <div class="relative">
+        {{ form_label(form.confirmPassword, 'confirmPassword'|trans({}, 'UserAddType'), {label_attr: {class: 'form-label'}}) }}
+        {{ form_widget(form.confirmPassword, {attr: {class: 'form-widget'}}) }}
+        <div class="text-red-500 mt-1">{{ form_errors(form.confirmPassword) }}</div>
       </div>
 
     </div>

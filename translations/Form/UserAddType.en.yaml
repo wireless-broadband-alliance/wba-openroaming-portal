@@ -1,4 +1,5 @@
 password: 'Password'
+confirmPassword: 'Confirm Password'
 firstName: 'First Name'
 lastName: 'Last Name'
 roles: 'Roles'

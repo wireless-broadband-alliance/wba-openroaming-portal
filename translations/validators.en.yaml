@@ -49,3 +49,4 @@ accountTypeInvalid: 'Invalid Account Type Provided'
 invalidRole: 'Invalid Role Provided'
 uniqueEmail: "This email is already in use."
 uniqueUUID: "This identifier is already in use."
+passwordsDoNotMatch: 'The password do not match.'

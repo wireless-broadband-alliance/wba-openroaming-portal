@@ -49,3 +49,4 @@ accountTypeInvalid: 'Tipo de conta selecionado é inválido'
 invalidRole: 'Permissões selecionadas são inválidas'
 uniqueEmail: "Este endereço de email já está em uso."
 uniqueUUID: "Este identificador já está em uso."
+passwordsDoNotMatch: 'As palavras-passe não coincidem.'

@@ -1,4 +1,5 @@
 password: 'Palavra Passe'
+confirmPassword: 'Confirmar Palavra-passe'
 firstName: 'Primeiro Nome'
 lastName: 'Último Nome'
 roles: 'Permissões'

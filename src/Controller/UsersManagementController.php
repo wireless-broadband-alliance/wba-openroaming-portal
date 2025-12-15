@@ -309,6 +309,7 @@ class UsersManagementController extends AbstractController
               'userAddedBy' => $newUser->getUuid(),
               'by' => $currentUser->getUuid(),
             ];
+
             $this->eventActions->saveEvent(
                 $currentUser,
                 AnalyticalEventType::ADMIN_ADDED_NEW_USER->value,
