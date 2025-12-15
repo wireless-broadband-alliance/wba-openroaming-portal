@@ -69,18 +69,21 @@
 
         <div class="mt-6 divider-solid"></div>
 
-        <div class="mt-6 flex flex-row w-full justify-end items-center gap-2">
-            <a href="{{ path('app_dashboard_regenerate_code_admin', {type: 'settingSchedule'}) }}"
-               onclick="return confirm('{{ 'resetDefaultSettings'|trans({}, 'schedule') }}')"
-               class="text-sm hover:text-red-600 font-bold p-2 rounded-lg transition ease-in duration-300">
-              {{ 'reset'|trans({}, 'schedule') }}
-            </a>
+        {% if is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::CRON_SCHEDULE_WRITE')) %}
+            <div class="mt-6 flex flex-row w-full justify-end items-center gap-2">
 
-            <button type="submit" class="btn-primary"
-                    onclick="return confirm('{{ 'applyChanges'|trans({}, 'schedule') }}')">
-              {{ 'saveChanges'|trans({}, 'schedule') }}
-            </button>
-        </div>
+                <a href="{{ path('app_dashboard_regenerate_code_admin', {type: 'settingSchedule'}) }}"
+                   onclick="return confirm('{{ 'resetDefaultSettings'|trans({}, 'schedule') }}')"
+                   class="text-sm hover:text-red-600 font-bold p-2 rounded-lg transition ease-in duration-300">
+                    {{ 'reset'|trans({}, 'schedule') }}
+                </a>
+
+                <button type="submit" class="btn-primary"
+                        onclick="return confirm('{{ 'applyChanges'|trans({}, 'schedule') }}')">
+                    {{ 'saveChanges'|trans({}, 'schedule') }}
+                </button>
+            </div>
+        {% endif %}
 
         {{ form_end(form) }}
     </div>
