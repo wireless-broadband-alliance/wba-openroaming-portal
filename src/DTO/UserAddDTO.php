@@ -7,9 +7,11 @@ use App\Entity\UserExternalAuth;
 use App\Enum\AdminRoleType;
 use App\Enum\UserProvider;
 use DateTime;
+use Doctrine\ORM\EntityManagerInterface;
 use libphonenumber\PhoneNumber;
 use Misd\PhoneNumberBundle\Validator\Constraints\PhoneNumber as AssertPhoneNumber;
 use Random\RandomException;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 use App\Validator\Constraints as CustomAssert;
 
@@ -57,8 +59,11 @@ class UserAddDTO
   #[Assert\Length(max: 100)]
   public ?string $lastName = null;
 
-  public function __construct(?User $user = null)
-  {
+  public function __construct(
+      private readonly UserPasswordHasherInterface $userPasswordHasher,
+      private readonly EntityManagerInterface $entityManager,
+      ?User $user = null
+  ) {
     if (!is_null($user)) {
       $this->email = $user->getEmail();
       $this->firstName = $user->getFirstName();
@@ -93,21 +98,29 @@ class UserAddDTO
     }
 
     if ($this->roles) {
-      $user->setRoles([$this->roles]);
+      if ($this->roles === AdminRoleType::ROLE_USER->value) {
+        $user->setRoles([]);
+      } else {
+        $user->setRoles([$this->roles]);
+      }
     }
 
     $user->setFirstName($this->firstName);
     $user->setLastName($this->lastName);
     $user->setForgotPasswordRequest(true);
-    $user->setTwoFAcode((string) random_int(100000, 999999));
+    $user->setTwoFAcode((string)random_int(100000, 999999));
     $user->setTwoFAcodeGeneratedAt(new DateTime());
     $user->setTwoFAcodeIsActive(true);
     $user->setCreatedAt(new DateTime());
 
-    // Set the password if provided
-    if ($this->password) {
-      $user->setPassword($this->password);
-    }
+    // Hash the password
+    $hashedPassword = $this->userPasswordHasher->hashPassword($user, $this->password);
+    $user->setPassword($hashedPassword);
+
+    // Persist new user
+    $this->entityManager->persist($user);
+    $this->entityManager->persist($userAuths);
+    $this->entityManager->flush();
 
     return $user;
   }

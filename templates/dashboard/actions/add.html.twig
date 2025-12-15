@@ -4,76 +4,74 @@
 
 {% block container %}
   <h1 class="text-3xl font-bold text-gray-800 mb-8 border-b-2 border-gray-300 pb-2">{{ 'addUser'|trans({}, 'dashboard') }}</h1>
-  <twig:UserAddForm :userAddDTO="userAddDTO" :form="form">
 
-    {{ form_start(form) }}
-    {{ form_errors(form) }}
-    <div class="p-6 bg-white rounded-lg shadow-md">
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+  {{ form_start(form) }}
+  {{ form_errors(form) }}
+  <div class="p-6 bg-white rounded-lg shadow-md">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-        {# Account Type #}
-        <div class="relative">
-          {{ form_label(form.accountType, 'accountType'|trans({}, 'UserAddType'), {label_attr: {class: 'form-label'}}) }}
-          {{ form_widget(form.accountType, {attr: {class: 'form-widget'}}) }}
-          <div class="text-red-500 mt-1">{{ form_errors(form.accountType) }}</div>
-        </div>
+      {# Account Type #}
+      <div class="relative">
+        {{ form_label(form.accountType, 'accountType'|trans({}, 'UserAddType'), {label_attr: {class: 'form-label'}}) }}
+        {{ form_widget(form.accountType, {attr: {class: 'form-widget'}}) }}
+        <div class="text-red-500 mt-1">{{ form_errors(form.accountType) }}</div>
+      </div>
 
-        {# Roles #}
-        <div class="relative">
-          {{ form_label(form.roles, 'roles'|trans({}, 'UserAddType'), {label_attr: {class: 'form-label'}}) }}
-          {{ form_widget(form.roles, {attr: {class: 'form-widget'}}) }}
-          <div class="text-red-500 mt-1">{{ form_errors(form.roles) }}</div>
-        </div>
+      {# Roles #}
+      <div class="relative">
+        {{ form_label(form.roles, 'roles'|trans({}, 'UserAddType'), {label_attr: {class: 'form-label'}}) }}
+        {{ form_widget(form.roles, {attr: {class: 'form-widget'}}) }}
+        <div class="text-red-500 mt-1">{{ form_errors(form.roles) }}</div>
+      </div>
 
-        {# Email #}
-        <div class="relative lg:col-span-2">
-          {{ form_label(form.email, 'Email', {label_attr: {class: 'form-label'}}) }}
-          {{ form_widget(form.email, {attr: {class: 'form-widget'}}) }}
-          <div class="text-red-500 mt-1">{{ form_errors(form.email) }}</div>
-        </div>
+      {# Email #}
+      <div class="relative lg:col-span-2">
+        {{ form_label(form.email, 'Email', {label_attr: {class: 'form-label'}}) }}
+        {{ form_widget(form.email, {attr: {class: 'form-widget'}}) }}
+        <div class="text-red-500 mt-1">{{ form_errors(form.email) }}</div>
+      </div>
 
-        {# Phone Number #}
-        <div class="relative lg:col-span-2">
-          {{ form_label(form.phoneNumber, 'phoneNumber'|trans({}, 'UserAddType'), {label_attr: {class: 'form-label'}}) }}
-          <div class="flex flex-row gap-4 mt-1">
-            <div class="w-1/3">
-              {{ form_widget(form.phoneNumber.children.country, {attr: {class: 'form-widget', autocomplete: 'tel'}}) }}
-            </div>
-            <div class="w-2/3">
-              {{ form_widget(form.phoneNumber.children.number, {attr: {class: 'form-widget', autocomplete: 'tel'}}) }}
-            </div>
+      {# Phone Number #}
+      <div class="relative lg:col-span-2">
+        {{ form_label(form.phoneNumber, 'phoneNumber'|trans({}, 'UserAddType'), {label_attr: {class: 'form-label'}}) }}
+        <div class="flex flex-row gap-4 mt-1">
+          <div class="w-1/3">
+            {{ form_widget(form.phoneNumber.children.country, {attr: {class: 'form-widget', autocomplete: 'tel'}}) }}
           </div>
-          <div class="text-red-500 mt-1">{{ form_errors(form.phoneNumber) }}</div>
+          <div class="w-2/3">
+            {{ form_widget(form.phoneNumber.children.number, {attr: {class: 'form-widget', autocomplete: 'tel'}}) }}
+          </div>
         </div>
-
-        {# First Name #}
-        <div class="relative">
-          {{ form_label(form.firstName, 'firstName'|trans({}, 'UserAddType'), {label_attr: {class: 'form-label'}}) }}
-          {{ form_widget(form.firstName, {attr: {class: 'form-widget'}}) }}
-          <div class="text-red-500 mt-1">{{ form_errors(form.firstName) }}</div>
-        </div>
-
-        {# Last Name #}
-        <div class="relative">
-          {{ form_label(form.lastName, 'lastName'|trans({}, 'UserAddType'), {label_attr: {class: 'form-label'}}) }}
-          {{ form_widget(form.lastName, {attr: {class: 'form-widget'}}) }}
-          <div class="text-red-500 mt-1">{{ form_errors(form.lastName) }}</div>
-        </div>
-
-        {# Password #}
-        <div class="relative lg:col-span-2">
-          {{ form_label(form.password, 'password'|trans({}, 'UserAddType'), {label_attr: {class: 'form-label'}}) }}
-          {{ form_widget(form.password, {attr: {class: 'form-widget'}}) }}
-          <div class="text-red-500 mt-1">{{ form_errors(form.password) }}</div>
-        </div>
-
+        <div class="text-red-500 mt-1">{{ form_errors(form.phoneNumber) }}</div>
       </div>
 
-      <div class="flex flex-row justify-end mt-6">
-        <button type="submit" class="btn-primary w-full lg:w-auto">{{ 'applyChanges'|trans({}, 'edit') }}</button>
+      {# First Name #}
+      <div class="relative">
+        {{ form_label(form.firstName, 'firstName'|trans({}, 'UserAddType'), {label_attr: {class: 'form-label'}}) }}
+        {{ form_widget(form.firstName, {attr: {class: 'form-widget'}}) }}
+        <div class="text-red-500 mt-1">{{ form_errors(form.firstName) }}</div>
       </div>
+
+      {# Last Name #}
+      <div class="relative">
+        {{ form_label(form.lastName, 'lastName'|trans({}, 'UserAddType'), {label_attr: {class: 'form-label'}}) }}
+        {{ form_widget(form.lastName, {attr: {class: 'form-widget'}}) }}
+        <div class="text-red-500 mt-1">{{ form_errors(form.lastName) }}</div>
+      </div>
+
+      {# Password #}
+      <div class="relative lg:col-span-2">
+        {{ form_label(form.password, 'password'|trans({}, 'UserAddType'), {label_attr: {class: 'form-label'}}) }}
+        {{ form_widget(form.password, {attr: {class: 'form-widget'}}) }}
+        <div class="text-red-500 mt-1">{{ form_errors(form.password) }}</div>
+      </div>
+
     </div>
-    {{ form_rest(form) }}
-    {{ form_end(form) }}
-  </twig:UserAddForm>
+
+    <div class="flex flex-row justify-end mt-6">
+      <button type="submit" class="btn-primary w-full lg:w-auto">{{ 'applyChanges'|trans({}, 'edit') }}</button>
+    </div>
+  </div>
+  {{ form_rest(form) }}
+  {{ form_end(form) }}
 {% endblock %}

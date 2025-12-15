@@ -70,6 +70,7 @@ class UsersManagementController extends AbstractController
       private readonly TranslatorInterface $translator,
       private readonly UserRadiusProfileRepository $radiusProfileRepository,
       private readonly EmailGenerator $emailGenerator,
+      private readonly UserPasswordHasherInterface $userPasswordHasher,
   ) {
   }
 
@@ -284,7 +285,7 @@ class UsersManagementController extends AbstractController
     $currentUser = $this->getUser();
 
     $newUser = new User();
-    $userAddDTO = new UserAddDTO($newUser);
+    $userAddDTO = new UserAddDTO($this->userPasswordHasher, $this->entityManager, $newUser);
 
     // Create & handle form
     $form = $this->createForm(UserAddType::class, $userAddDTO);
@@ -293,10 +294,6 @@ class UsersManagementController extends AbstractController
     if ($form->isSubmitted() && $form->isValid()) {
       // Convert DTO → Entity data before creation
       $userAddDTO->createUser($newUser);
-
-      // Persist new user
-      $this->entityManager->persist($newUser);
-      $this->entityManager->flush();
 
       // Flash message
       $this->addFlash(
