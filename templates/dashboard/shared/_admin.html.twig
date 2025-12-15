@@ -107,56 +107,57 @@
   </td>
 
   {# Actions Buttons #}
-  <td class="px-10 py-4 text-right" {{ stimulus_controller('nav-submenu') }}>
-    {# Items Button Dropdown #}
-    <button type="button" class="cursor-pointer p-2 rounded-lg hover:shadow duration-300"
-            {{ stimulus_action('nav-submenu', 'toggle')|stimulus_action('nav-submenu', 'lost_focus', 'focusout') }}
-            {{ stimulus_target('nav-submenu', 'button') }}>
-      <twig:ux:icon name="wba:menu-dots" class="w-5 h-5 fill-current"/>
-    </button>
+  {% if constant('App\\Enum\\AdminRoleType::ROLE_ADMIN').value in user.roles %}
+    <td class="px-10 py-4 text-right" {{ stimulus_controller('nav-submenu') }}>
+      {# Items Button Dropdown #}
+      <button type="button" class="cursor-pointer p-2 rounded-lg hover:shadow duration-300"
+              {{ stimulus_action('nav-submenu', 'toggle')|stimulus_action('nav-submenu', 'lost_focus', 'focusout') }}
+              {{ stimulus_target('nav-submenu', 'button') }}>
+        <twig:ux:icon name="wba:menu-dots" class="w-5 h-5 fill-current"/>
+      </button>
 
-    {# Items List Dropdown #}
-    <div class="hidden bg-white divide-y divide-gray-100 rounded-lg shadow min-w-max absolute right-16 mt-2 z-16"
-            {{ stimulus_target('nav-submenu', 'container') }}>
-      <ul class="p-2 text-gray-700 gap-y-2">
-        <li>
-          <a href="{{ path('admin_user_edit', {id: user.id}) }}"
-             class="flex flex-row items-center px-2 py-2 duration-100 p-2 cursor-pointer hover:text-lightGreen">
-            <twig:ux:icon name="wba:pencil-edit" class="w-5 mr-3 fill-none stroke-current"/>
-            {{ 'edit'|trans({}, '_user') }}
-          </a>
-        </li>
-        {% if delete_users == constant('App\\Enum\\OperationMode::ON').value %}
-          <li {{ stimulus_controller('alert') }}>
-            <form action="{{ path('admin_user_delete', {id: user.id}) }}"
-                  method="post" {{ stimulus_target('alert', 'form') }}>
-              <input type="hidden" name="_method" value="DELETE">
-              <a href="javascript:void(0)"
-                 data-user-id="{{ user.id }}"
-                 data-user-uuid="{{ user.uuid }}"
-                 data-user-actions-confirm-delete="{{ 'confirm_delete'|trans({'%uuid%': user.uuid}, '_user') }}"
-                      {{ stimulus_action('alert', 'delete_user') }}
-                      {{ stimulus_target('alert', 'button') }}
-                 class="flex flex-row items-center px-2 py-2 duration-100 p-2 cursor-pointer hover:text-red-400">
-                <twig:ux:icon name="wba:trash" class="w-5 mr-3 fill-none stroke-current"/>
-                {{ 'delete'|trans({}, '_user') }}
-              </a>
-            </form>
+      {# Items List Dropdown #}
+      <div class="hidden bg-white divide-y divide-gray-100 rounded-lg shadow min-w-max absolute right-16 mt-2 z-16"
+              {{ stimulus_target('nav-submenu', 'container') }}>
+        <ul class="p-2 text-gray-700 gap-y-2">
+          <li>
+            <a href="{{ path('admin_user_edit', {id: user.id}) }}"
+               class="flex flex-row items-center px-2 py-2 duration-100 p-2 cursor-pointer hover:text-lightGreen">
+              <twig:ux:icon name="wba:pencil-edit" class="w-5 mr-3 fill-none stroke-current"/>
+              {{ 'edit'|trans({}, '_user') }}
+            </a>
           </li>
-        {% endif %}
-        <li {{ stimulus_controller('alert') }}>
-          <form method="POST"
-                action="{{ path('admin_user_revoke_profiles', {id: user.id}) }}"
-                  {{ stimulus_target('alert', 'form') }}>
-            {{ form_start(formRevokeProfiles) }}
-            {{ form_errors(formRevokeProfiles) }}
-            <input type="hidden" name="_method" value="REVOKE">
-            <a href="javascript:void(0)"
-               class="flex flex-row items-center px-2 py-2 duration-100 p-2 cursor-pointer hover:text-lightGreen"
-               data-user-actions-confirm-revoke="{{ 'confirm_revoke'|trans({'%uuid%': user.uuid}, '_user') }}"
-                    {{ stimulus_action('alert', 'revoke_profiles') }}
-                    {{ stimulus_target('alert', 'button') }}
-               data-user-uuid="{% if userExternalAuths[user.id] is defined %}
+          {% if delete_users == constant('App\\Enum\\OperationMode::ON').value %}
+            <li {{ stimulus_controller('alert') }}>
+              <form action="{{ path('admin_user_delete', {id: user.id}) }}"
+                    method="post" {{ stimulus_target('alert', 'form') }}>
+                <input type="hidden" name="_method" value="DELETE">
+                <a href="javascript:void(0)"
+                   data-user-id="{{ user.id }}"
+                   data-user-uuid="{{ user.uuid }}"
+                   data-user-actions-confirm-delete="{{ 'confirm_delete'|trans({'%uuid%': user.uuid}, '_user') }}"
+                        {{ stimulus_action('alert', 'delete_user') }}
+                        {{ stimulus_target('alert', 'button') }}
+                   class="flex flex-row items-center px-2 py-2 duration-100 p-2 cursor-pointer hover:text-red-400">
+                  <twig:ux:icon name="wba:trash" class="w-5 mr-3 fill-none stroke-current"/>
+                  {{ 'delete'|trans({}, '_user') }}
+                </a>
+              </form>
+            </li>
+          {% endif %}
+          <li {{ stimulus_controller('alert') }}>
+            <form method="POST"
+                  action="{{ path('admin_user_revoke_profiles', {id: user.id}) }}"
+                    {{ stimulus_target('alert', 'form') }}>
+              {{ form_start(formRevokeProfiles) }}
+              {{ form_errors(formRevokeProfiles) }}
+              <input type="hidden" name="_method" value="REVOKE">
+              <a href="javascript:void(0)"
+                 class="flex flex-row items-center px-2 py-2 duration-100 p-2 cursor-pointer hover:text-lightGreen"
+                 data-user-actions-confirm-revoke="{{ 'confirm_revoke'|trans({'%uuid%': user.uuid}, '_user') }}"
+                      {{ stimulus_action('alert', 'revoke_profiles') }}
+                      {{ stimulus_target('alert', 'button') }}
+                 data-user-uuid="{% if userExternalAuths[user.id] is defined %}
                                {% for auth in userExternalAuths[user.id] %}
                                    {% if auth.provider == constant('App\\Enum\\UserProvider::SAML').value %}
                                        {{ auth.providerId }}
@@ -165,15 +166,14 @@
                                    {% endif %}
                                {% endfor %}
                            {% endif %}">
-              <twig:ux:icon name="wba:return" class="w-6 mr-3 full-current"/>
-              {{ 'revoke'|trans({}, '_user') }}
-            </a>
+                <twig:ux:icon name="wba:return" class="w-6 mr-3 full-current"/>
+                {{ 'revoke'|trans({}, '_user') }}
+              </a>
 
-            {{ form_rest(formRevokeProfiles) }}
-            {{ form_end(formRevokeProfiles) }}
-          </form>
-        </li>
-        {% if constant('App\\Enum\\AdminRoleType::ROLE_ADMIN').value in user.roles %}
+              {{ form_rest(formRevokeProfiles) }}
+              {{ form_end(formRevokeProfiles) }}
+            </form>
+          </li>
           <li>
             <a href="{{ path('admin_admin_edit', {id: user.id}) }}"
                class="flex flex-row items-center px-2 py-2 duration-100 p-2 cursor-pointer hover:text-lightGreen">
@@ -188,8 +188,8 @@
               {{ 'removeAdminPerm'|trans({}, '_user') }}
             </a>
           </li>
-        {% endif %}
-      </ul>
-    </div>
-  </td>
+        </ul>
+      </div>
+    </td>
+  {% endif %}
 </tr>
