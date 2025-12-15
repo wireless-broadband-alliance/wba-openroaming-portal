@@ -4,6 +4,7 @@ namespace App\Command;
 
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
+use App\Enum\AdminRoleType;
 use App\Enum\AnalyticalEventType;
 use App\Enum\DefaultUser;
 use App\Enum\UserProvider;
@@ -76,7 +77,7 @@ class ResetAdminCommand extends Command
    */
     protected function resetAdminUser(): void
     {
-        $admin = $this->userRepository->findOneBy(['uuid' => DefaultUser::ADMIN->value]);
+        $admin = $this->userRepository->findSuperAdmin();
 
         if (!$admin instanceof User) {
             $admin = new User();
