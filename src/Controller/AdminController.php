@@ -14,6 +14,7 @@ use App\Form\RevokeProfilesType;
 use App\Repository\EventRepository;
 use App\Repository\SettingTranslationRepository;
 use App\Repository\UserRepository;
+use App\Security\Voter\UserAuthenticationVoter;
 use App\Service\EventActions;
 use App\Service\GetSettings;
 use App\Service\HtmlSanitizerService;
@@ -257,15 +258,17 @@ class AdminController extends AbstractController
         name: 'admin_dashboard_customize',
         defaults: ['language' => LanguageType::EN->value]
     )]
-    #[IsGranted('ROLE_ADMIN')]
+    #[IsGranted(UserAuthenticationVoter::LANDING_PAGE_CONFIG_READ)]
     public function customize(Request $request, EntityManagerInterface $em, string $language): Response
     {
         // Call the getSettings method of GetSettings class to retrieve the data
         /** @var array<string, array{value: string, description: string}> $data */
         $data = $this->getSettings->getSettings($language);
+
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
         $currentUser = $this->getUser();
+        $canWrite = $this->isGranted(UserAuthenticationVoter::LANDING_PAGE_CONFIG_WRITE);
 
         $settingsRepository = $em->getRepository(Setting::class);
         $settings = $settingsRepository->findAll();
@@ -278,11 +281,12 @@ class AdminController extends AbstractController
         // Create the form with the CustomType and pass the relevant settings
         $form = $this->createForm(CustomType::class, $customTypeDTO, [
             'settings' => $settingsTranslated,
+            'disabled' => !$canWrite,
         ]);
 
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
+        if ($form->isSubmitted() && $form->isValid() && $canWrite) {
             // Update the settings based on the form submission
             foreach ($settings as $setting) {
                 $settingName = $setting->getName();

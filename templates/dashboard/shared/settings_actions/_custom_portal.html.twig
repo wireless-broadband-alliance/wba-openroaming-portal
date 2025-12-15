@@ -77,7 +77,10 @@
                                     <input type="radio" name="{{ form.CUSTOMER_LOGO_ENABLED.vars.full_name }}"
                                            id="onRadio"
                                            value="ON"
-                                           class="radio-input hidden" {{ form.CUSTOMER_LOGO_ENABLED.vars.data == 'ON' ? 'checked' : '' }} {{ stimulus_action('radio', 'toggle') }}>
+                                           class="radio-input hidden"
+                                            {{ form.CUSTOMER_LOGO_ENABLED.vars.data == 'ON' ? 'checked' : '' }}
+                                            {% if form.CUSTOMER_LOGO_ENABLED.vars.disabled %} disabled="disabled" {% endif %}
+                                            {{ stimulus_action('radio', 'toggle') }}>
                                     <div class="custom-radio pr-3 pt-1.5 {{ form.CUSTOMER_LOGO_ENABLED.vars.data == 'ON' ? '' : 'hidden' }}" {{ stimulus_target('radio', 'on') }}>
                                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10"
                                              viewBox="0 0 14 10"
@@ -96,7 +99,10 @@
                                     <input type="radio" name="{{ form.CUSTOMER_LOGO_ENABLED.vars.full_name }}"
                                            id="offRadio"
                                            value="OFF"
-                                           class="radio-input hidden" {{ form.CUSTOMER_LOGO_ENABLED.vars.data == 'OFF' ? 'checked' : '' }}  {{ stimulus_action('radio', 'toggle') }}>
+                                           class="radio-input hidden"
+                                            {{ form.CUSTOMER_LOGO_ENABLED.vars.data == 'OFF' ? 'checked' : '' }}
+                                            {% if form.CUSTOMER_LOGO_ENABLED.vars.disabled %} disabled="disabled" {% endif %}
+                                            {{ stimulus_action('radio', 'toggle') }}>
                                     <div class="custom-radio pr-3 pt-1.5  {{ form.CUSTOMER_LOGO_ENABLED.vars.data == 'OFF' ? '' : 'hidden' }}" {{ stimulus_target('radio', 'off') }}>
                                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10"
                                              viewBox="0 0 14 10"
@@ -139,16 +145,18 @@
 
     <div class="mt-8 divider-solid"></div>
 
-    <div class="mt-6 flex flex-row w-full justify-end items-center gap-2">
-        <a href="{{ path('app_dashboard_regenerate_code_admin', {type: 'settingCustom'}) }}"
-           onclick="return confirm('{{ 'resetMessage'|trans({}, 'settings_actions_general') }}')"
-           class="text-base font-semibold hover:text-red-600 transition ease-in duration-300 p-2 rounded-lg">
-            {{ 'reset'|trans({}, 'settings_actions_general') }}
-        </a>
+    {% if is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::LANDING_PAGE_CONFIG_WRITE')) %}
+        <div class="mt-6 flex flex-row w-full justify-end items-center gap-2">
+            <a href="{{ path('app_dashboard_regenerate_code_admin', {type: 'settingCustom'}) }}"
+               onclick="return confirm('{{ 'resetMessage'|trans({}, 'settings_actions_general') }}')"
+               class="text-base font-semibold hover:text-red-600 transition ease-in duration-300 p-2 rounded-lg">
+                {{ 'reset'|trans({}, 'settings_actions_general') }}
+            </a>
 
-        <button type="submit" class="btn-primary"
-                onclick="return confirm('{{ 'saveChangesMessage'|trans({}, 'settings_actions_general') }}')">
-            {{ 'saveChanges'|trans({}, 'settings_actions_general') }}
-        </button>
-    </div>
+            <button type="submit" class="btn-primary"
+                    onclick="return confirm('{{ 'saveChangesMessage'|trans({}, 'settings_actions_general') }}')">
+                {{ 'saveChanges'|trans({}, 'settings_actions_general') }}
+            </button>
+        </div>
+    {% endif %}
 </form>
