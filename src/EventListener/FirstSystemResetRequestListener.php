@@ -2,6 +2,7 @@
 
 namespace App\EventListener;
 
+use App\Entity\CertificateSetupProcess;
 use App\Entity\User;
 use App\Enum\CertificateTestResult;
 use App\Enum\ProcessStatusType;
@@ -38,7 +39,7 @@ readonly class FirstSystemResetRequestListener
         }
 
         $completedInstallation = $this->installationProgressRepository->findOneBy([
-        'installationState' => ProcessStatusType::COMPLETED
+            'installationState' => ProcessStatusType::COMPLETED
         ]);
 
         if (!$completedInstallation instanceof \App\Entity\InstallationProgress) {
@@ -57,12 +58,12 @@ readonly class FirstSystemResetRequestListener
             return;
         }
 
-        if ($this->certificateSetupProcessRepository->getLatestCompletedProcess() instanceof \App\Entity\CertificateSetupProcess) {
+        if ($this->certificateSetupProcessRepository->getLatestCompletedProcess() instanceof CertificateSetupProcess) {
             return;
         }
 
         $completedCertificates = $this->certificateSetupProcessRepository->getLatestProcess();
-        if (!$completedCertificates instanceof \App\Entity\CertificateSetupProcess) {
+        if (!$completedCertificates instanceof CertificateSetupProcess) {
             $session->set('2fa_verified_dashboard', true);
             $session->set(
                 SessionStatus::SYSTEM_RESET_REQUEST->value,
@@ -81,7 +82,7 @@ readonly class FirstSystemResetRequestListener
             return;
         }
 
-        if (!$completedCertificates->getRadsecproxyTestResult() instanceof \App\Enum\CertificateTestResult) {
+        if (!$completedCertificates->getRadsecproxyTestResult() instanceof CertificateTestResult) {
             $session->set('2fa_verified_dashboard', true);
             $session->set(
                 SessionStatus::SYSTEM_RESET_REQUEST->value,
@@ -122,21 +123,21 @@ readonly class FirstSystemResetRequestListener
             return;
         }
 
-      // All checks are valid, remove session flags
+        // All checks are valid, remove session flags
         $session->remove(SessionStatus::INSTALLATION_STARTED->value);
         $session->remove(SessionStatus::CERTIFICATE_STARTED->value);
     }
 
-  /**
-   * Helper to set session token, flash message, and redirect
-   */
+    /**
+     * Helper to set session token, flash message, and redirect
+     */
     private function handleRedirect(
         InteractiveLoginEvent $event,
         SessionInterface $session,
         string $flashMessage,
         string $routeName
     ): void {
-      // All checks are valid, remove session flags
+        // All checks are valid, remove session flags
         $session->set(SessionStatus::INSTALLATION_STARTED->value, true);
         $session->set(SessionStatus::INSTALLATION_VERIFICATION->value, true);
         $session->set(SessionStatus::CERTIFICATE_STARTED->value, true);
@@ -146,10 +147,10 @@ readonly class FirstSystemResetRequestListener
         $url = $this->urlGenerator->generate($routeName);
         $response = new RedirectResponse($url);
 
-      // Save session and flash messages
+        // Save session and flash messages
         $event->getRequest()->getSession()->save();
 
-      // Store the redirect in request attributes so a controller/listener can handle it
+        // Store the redirect in request attributes so a controller/listener can handle it
         $event->getRequest()->attributes->set('_redirect', $response);
     }
 }

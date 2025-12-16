@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\DTO\CertificateRadSecUploadDTO;
+use App\Entity\Certificate;
 use App\Entity\CertificateSetupProcess;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
@@ -338,8 +339,8 @@ class CertificateManagementRadsecproxyController extends AbstractController
         );
 
         $basePath = $this->getParameter('kernel.project_dir') . '/var/certs/';
-        $clientCertPath = $clientCert instanceof \App\Entity\Certificate ? $basePath . $clientCert->getFilePath() : null;
-        $keyCertPath = $keyCert instanceof \App\Entity\Certificate ? $basePath . $keyCert->getFilePath() : null;
+        $clientCertPath = $clientCert instanceof Certificate ? $basePath . $clientCert->getFilePath() : null;
+        $keyCertPath = $keyCert instanceof Certificate ? $basePath . $keyCert->getFilePath() : null;
 
         // Validate certificate files exist
         if (!$clientCertPath || !$keyCertPath || !file_exists($clientCertPath) || !file_exists($keyCertPath)) {

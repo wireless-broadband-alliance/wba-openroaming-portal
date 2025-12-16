@@ -47,7 +47,9 @@ class IsLetsEncryptCertificateValidator extends ConstraintValidator
             array_keys($issuerDict),
             $issuerDict
         ));
-        $isLetsEncrypt = array_any($this->knownIssuers, fn($issuerName) => stripos($issuerString, (string) $issuerName) !== false);
+
+        $isLetsEncrypt =
+            array_any($this->knownIssuers, fn($issuerName) => stripos($issuerString, (string) $issuerName) !== false);
 
         // If certificate **is** from Let's Encrypt → add notice warning
         if ($isLetsEncrypt && $this->context->getObject() instanceof CertificateFreeradiusUploadManualDTO) {

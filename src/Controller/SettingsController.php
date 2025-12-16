@@ -781,6 +781,7 @@ class SettingsController extends AbstractController
 
     /**
      * @throws \DateInvalidTimeZoneException
+     * @throws \Exception
      */
     #[Route(
         '/dashboard/settings/auth/{language}',
@@ -813,7 +814,9 @@ class SettingsController extends AbstractController
         $settings = $settingsRepository->findAll();
 
         $certificatePath = $this->getParameter('kernel.project_dir') . '/signing-keys/cert.pem';
-        $certificateLimitDate = strtotime((string)$this->certificateService->getCertificateExpirationDate($certificatePath));
+        $certificateLimitDate = strtotime(
+            (string)$this->certificateService->getCertificateExpirationDate($certificatePath)
+        );
         $realTime = time();
         $timeLeft = round(($certificateLimitDate - $realTime) / (86400)) - 1;
         $profileLimitDate = ((int)$timeLeft);

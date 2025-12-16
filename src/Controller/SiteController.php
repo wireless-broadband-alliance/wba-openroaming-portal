@@ -64,10 +64,9 @@ class SiteController extends AbstractController
         private readonly UserDeletionService $userDeletionService,
         private readonly EntityManagerInterface $entityManager,
         private readonly OSDetectionService $OSDetectionService,
-        private readonly \Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface $userPasswordEncoder,
-        private readonly \Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface $userAuthenticator,
-        private readonly \App\Security\LandingAuthenticator $authenticator,
-        private readonly \Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface $passwordHasher,
+        private readonly UserPasswordHasherInterface $passwordHasher,
+        private readonly UserAuthenticatorInterface $userAuthenticator,
+        private readonly LandingAuthenticator $authenticator,
     ) {
     }
 
@@ -262,7 +261,7 @@ class SiteController extends AbstractController
 
                         $user->setEmail($user->getEmail());
                         $user->setCreatedAt(new DateTime());
-                        $user->setPassword($this->userPasswordEncoder->hashPassword($user, uniqid("", true)));
+                        $user->setPassword($this->passwordHasher->hashPassword($user, uniqid("", true)));
                         $user->setUuid(str_replace('@', "-DEMO-" . uniqid("", true) . "-", $user->getEmail()));
                         $userAuths->setProvider(UserProvider::PORTAL_ACCOUNT->value);
                         $userAuths->setProviderId(UserProvider::EMAIL->value);
@@ -323,7 +322,7 @@ class SiteController extends AbstractController
                         $osValue = reset($osValue) ?: '';
                     } elseif (!is_string($osValue)) {
                         // fallback for non-string types
-                        $osValue = (string) $osValue;
+                        $osValue = (string)$osValue;
                     }
 
                     if ($osValue === OSType::MACOS->value) {
@@ -331,7 +330,7 @@ class SiteController extends AbstractController
                     }
 
                     return $this->redirectToRoute(
-                        'profile_' . strtolower((string) $osValue),
+                        'profile_' . strtolower((string)$osValue),
                         ['os' => $osValue]
                     );
                 }
@@ -367,7 +366,7 @@ class SiteController extends AbstractController
                 if (is_array($osValue)) {
                     $osValue = reset($osValue) ?: '';
                 } elseif (!is_string($osValue)) {
-                    $osValue = (string) $osValue;
+                    $osValue = (string)$osValue;
                 }
 
                 if ($osValue === OSType::MACOS->value) {
@@ -375,7 +374,7 @@ class SiteController extends AbstractController
                 }
 
                 return $this->redirectToRoute(
-                    'profile_' . strtolower((string) $osValue),
+                    'profile_' . strtolower((string)$osValue),
                     ['os' => $osValue]
                 );
             }
@@ -545,7 +544,9 @@ class SiteController extends AbstractController
                 return $this->redirectToRoute('app_landing');
             }
 
-            $user->setPassword($this->passwordHasher->hashPassword($user, $formPassword->get('newPassword')->getData()));
+            $user->setPassword(
+                $this->passwordHasher->hashPassword($user, $formPassword->get('newPassword')->getData())
+            );
             $session = $request->getSession();
 
             // Check and kill the dashboard session if the admin is logged at both firewalls at the same time
