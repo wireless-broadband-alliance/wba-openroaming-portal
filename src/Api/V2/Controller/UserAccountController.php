@@ -43,7 +43,6 @@ class UserAccountController extends AbstractController
         private readonly GoogleController $googleController,
         private readonly MicrosoftController $microsoftController,
         private readonly jwtTokenGenerator $tokenGenerator,
-        private readonly \OneLogin\Saml2\Auth $samlAuth,
     ) {
     }
 
@@ -53,7 +52,7 @@ class UserAccountController extends AbstractController
      * @throws JsonException
      */
     #[Route('/userAccount/deletion', name: 'api_v2_user_account_deletion', methods: ['DELETE'])]
-    public function userAccountDeletion(Request $request): JsonResponse
+    public function userAccountDeletion(Request $request, Auth $samlAuth): JsonResponse
     {
         $token = $this->tokenStorage->getToken();
 
@@ -154,10 +153,10 @@ class UserAccountController extends AbstractController
                     }
 
                     // Load and validate the SAML response
-                    $this->samlAuth->processResponse();
+                    $samlAuth->processResponse();
 
                     // Handle errors from the SAML process
-                    if ($this->samlAuth->getErrors()) {
+                    if ($samlAuth->getErrors()) {
                         return new BaseResponse(
                             401,
                             null,
@@ -166,7 +165,7 @@ class UserAccountController extends AbstractController
                     }
 
                     // Ensure the authentication was successful
-                    if (!$this->samlAuth->isAuthenticated()) {
+                    if (!$samlAuth->isAuthenticated()) {
                         return new BaseResponse(
                             401,
                             null,
@@ -175,7 +174,7 @@ class UserAccountController extends AbstractController
                     }
 
                     // Extract email from the SAML assertion attributes
-                    $attributes = $this->samlAuth->getAttributes();
+                    $attributes = $samlAuth->getAttributes();
                     $email = $attributes['urn:oid:1.2.840.113549.1.9.1'][0] ?? null;
 
                     if ($email === null) {
