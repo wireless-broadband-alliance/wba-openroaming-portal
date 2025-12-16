@@ -7,6 +7,7 @@ use App\Enum\AdminRoleType;
 use App\Enum\PermissionLevel;
 use App\Enum\SettingName;
 use App\Enum\UserProvider;
+use App\Form\Helper\AdminPermissionsFormBuilder;
 use App\Repository\SettingRepository;
 use libphonenumber\PhoneNumberFormat;
 use Misd\PhoneNumberBundle\Form\Type\PhoneNumberType;
@@ -28,6 +29,7 @@ class UserAddType extends AbstractType
   public function __construct(
       private readonly SettingRepository $settingRepository,
       private readonly TranslatorInterface $translator,
+      private readonly AdminPermissionsFormBuilder $adminPermissionsFormBuilder,
   ) {
   }
 
@@ -99,42 +101,13 @@ class UserAddType extends AbstractType
             ],
         ]);
 
-    $this->addPermissionField($builder, 'userManagement', 'usersManagement');
-    $this->addPermissionField($builder, 'platformStatus', 'platformStatus');
-    $this->addPermissionField($builder, 'landingPageConfig', 'landingPageConfiguration');
-    $this->addPermissionField($builder, 'userEngagement', 'userEngagement');
-    $this->addPermissionField($builder, 'termsPolicies', 'termsAndPolicies');
-    $this->addPermissionField($builder, 'cronSchedule', 'scheduleAutomation');
-    $this->addPermissionField($builder, 'authenticationMethods', 'authenticationMethods');
-    $this->addPermissionField($builder, 'twoFactorAuth', 'twoFactorAuthenticator');
-    $this->addPermissionField($builder, 'ldapSynchronization', 'LDAPSynchronization');
-    $this->addPermissionField($builder, 'radiusProfileConfig', 'radiusProfileConfiguration');
-    $this->addPermissionField($builder, 'smsConfig', 'SMSConfiguration');
-    $this->addPermissionField($builder, 'portalStatistics', 'portalStatistics');
-    $this->addPermissionField($builder, 'connectivityStatistics', 'connectivityStatistics');
+        $this->adminPermissionsFormBuilder->addPermissions($builder);
   }
 
   public function configureOptions(OptionsResolver $resolver): void
   {
     $resolver->setDefaults([
         'data_class' => UserAddDTO::class,
-    ]);
-  }
-
-  private function addPermissionField(
-      FormBuilderInterface $builder,
-      string $field,
-      string $translationKey
-  ): void {
-    $builder->add($field, ChoiceType::class, [
-        'label' => $this->translator->trans($translationKey, [], 'UserAddType'),
-        'expanded' => true,
-        'multiple' => false,
-        'choices' => [
-            $this->translator->trans('none', [], 'UserAddType') => PermissionLevel::NONE,
-            $this->translator->trans('read', [], 'UserAddType') => PermissionLevel::READ,
-            $this->translator->trans('write', [], 'UserAddType') => PermissionLevel::WRITE,
-        ],
     ]);
   }
 }
