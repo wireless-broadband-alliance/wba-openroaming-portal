@@ -14,48 +14,48 @@ use Symfony\Component\Security\Core\Authorization\Voter\Voter;
  */
 final class UserAuthenticationVoter extends Voter
 {
-    public const string USERS_MANAGEMENT_WRITE = 'USERS_MANAGEMENT_WRITE';
-    public const string USERS_MANAGEMENT_READ = 'USERS_MANAGEMENT_READ';
+    public const USERS_MANAGEMENT_WRITE = 'USERS_MANAGEMENT_WRITE';
+    public const USERS_MANAGEMENT_READ = 'USERS_MANAGEMENT_READ';
 
-    public const string PLATFORM_STATUS_WRITE = 'PLATFORM_STATUS_WRITE';
-    public const string PLATFORM_STATUS_READ = 'PLATFORM_STATUS_READ';
+    public const PLATFORM_STATUS_WRITE = 'PLATFORM_STATUS_WRITE';
+    public const PLATFORM_STATUS_READ = 'PLATFORM_STATUS_READ';
     // Landing Page Configuration page
-    public const string LANDING_PAGE_CONFIG_WRITE = 'LANDING_PAGE_CONFIG_WRITE';
-    public const string LANDING_PAGE_CONFIG_READ = 'LANDING_PAGE_CONFIG_READ';
+    public const LANDING_PAGE_CONFIG_WRITE = 'LANDING_PAGE_CONFIG_WRITE';
+    public const LANDING_PAGE_CONFIG_READ = 'LANDING_PAGE_CONFIG_READ';
     // User Engagement page
-    public const string USER_ENGAGEMENT_WRITE = 'USER_ENGAGEMENT_WRITE';
-    public const string USER_ENGAGEMENT_READ = 'USER_ENGAGEMENT_READ';
+    public const USER_ENGAGEMENT_WRITE = 'USER_ENGAGEMENT_WRITE';
+    public const USER_ENGAGEMENT_READ = 'USER_ENGAGEMENT_READ';
     // Terms and Policies page
-    public const string TERMS_POLICIES_WRITE = 'TERMS_POLICIES_WRITE';
-    public const string TERMS_POLICIES_READ = 'TERMS_POLICIES_READ';
+    public const TERMS_POLICIES_WRITE = 'TERMS_POLICIES_WRITE';
+    public const TERMS_POLICIES_READ = 'TERMS_POLICIES_READ';
     // CRON Schedule Automation page
-    public const string CRON_SCHEDULE_WRITE = 'CRON_SCHEDULE_WRITE';
-    public const string CRON_SCHEDULE_READ = 'CRON_SCHEDULE_READ';
+    public const CRON_SCHEDULE_WRITE = 'CRON_SCHEDULE_WRITE';
+    public const CRON_SCHEDULE_READ = 'CRON_SCHEDULE_READ';
     // Authentication Methods page
-    public const string AUTHENTICATION_METHODS_WRITE = 'AUTHENTICATION_METHODS_WRITE';
-    public const string AUTHENTICATION_METHODS_READ = 'AUTHENTICATION_METHODS_READ';
+    public const AUTHENTICATION_METHODS_WRITE = 'AUTHENTICATION_METHODS_WRITE';
+    public const AUTHENTICATION_METHODS_READ = 'AUTHENTICATION_METHODS_READ';
     // Two Factor Authenticator  page
-    public const string TWO_FACTOR_AUTH_WRITE = 'TWO_FACTOR_AUTH_WRITE';
-    public const string TWO_FACTOR_AUTH_READ = 'TWO_FACTOR_AUTH_READ';
+    public const TWO_FACTOR_AUTH_WRITE = 'TWO_FACTOR_AUTH_WRITE';
+    public const TWO_FACTOR_AUTH_READ = 'TWO_FACTOR_AUTH_READ';
     // LDAP Synchronization  page
-    public const string LDAP_SYNCHRONIZATION_WRITE = 'LDAP_SYNCHRONIZATION_WRITE';
-    public const string LDAP_SYNCHRONIZATION_READ = 'LDAP_SYNCHRONIZATION_READ';
+    public const LDAP_SYNCHRONIZATION_WRITE = 'LDAP_SYNCHRONIZATION_WRITE';
+    public const LDAP_SYNCHRONIZATION_READ = 'LDAP_SYNCHRONIZATION_READ';
     // Radius Profile Configuration  page
-    public const string RADIUS_PROFILE_CONFIG_WRITE = 'RADIUS_PROFILE_CONFIG_WRITE';
-    public const string RADIUS_PROFILE_CONFIG_READ = 'RADIUS_PROFILE_CONFIG_READ';
+    public const RADIUS_PROFILE_CONFIG_WRITE = 'RADIUS_PROFILE_CONFIG_WRITE';
+    public const RADIUS_PROFILE_CONFIG_READ = 'RADIUS_PROFILE_CONFIG_READ';
     // SMS Configuration page
-    public const string SMS_CONFIG_WRITE = 'SMS_CONFIG_WRITE';
-    public const string SMS_CONFIG_READ = 'SMS_CONFIG_READ';
+    public const SMS_CONFIG_WRITE = 'SMS_CONFIG_WRITE';
+    public const SMS_CONFIG_READ = 'SMS_CONFIG_READ';
     // Portal Statistics page
-    public const string PORTAL_STATISTICS_READ = 'PORTAL_STATISTICS_READ';
+    public const PORTAL_STATISTICS_READ = 'PORTAL_STATISTICS_READ';
     // Connectivity Statistics page
-    public const string CONNECTIVITY_STATISTICS_READ = 'CONNECTIVITY_STATISTICS_READ';
+    public const CONNECTIVITY_STATISTICS_READ = 'CONNECTIVITY_STATISTICS_READ';
 
 
-    public const string PORTAL_SETTINGS = 'PORTAL_SETTINGS';
-    public const string USER_AUTHENTICATION = 'USER_AUTHENTICATION';
-    public const string PORTAL_STATISTICS = 'PORTAL_STATISTICS';
-    public const string USER_MANAGEMENT = 'USER_MANAGEMENT';
+    public const PORTAL_SETTINGS = 'PORTAL_SETTINGS';
+    public const USER_AUTHENTICATION = 'USER_AUTHENTICATION';
+    public const PORTAL_STATISTICS = 'PORTAL_STATISTICS';
+    public const USER_MANAGEMENT = 'USER_MANAGEMENT';
 
     #[Override]
     protected function supports(string $attribute, mixed $subject): bool
