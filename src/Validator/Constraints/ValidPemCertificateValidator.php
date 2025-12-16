@@ -9,19 +9,24 @@ use DateTimeImmutable;
 
 class ValidPemCertificateValidator extends ConstraintValidator
 {
-    public function validate($value, Constraint $constraint): void
+    public function validate(mixed $value, Constraint $constraint): void
     {
         if (!$constraint instanceof ValidPemCertificate) {
             return;
         }
 
         if (!$value instanceof UploadedFile) {
-            return; // Skip validation if no file, let Assert\File handles it
+            return; // Skip validation if no file, let Assert\File handle it
         }
 
         $contents = @file_get_contents($value->getPathname());
-        $certResource = @openssl_x509_read($contents);
+        if ($contents === false) {
+            $this->context->buildViolation($constraint->invalidFormatMessage)
+                ->addViolation();
+            return;
+        }
 
+        $certResource = @openssl_x509_read($contents);
         if (!$certResource) {
             $this->context->buildViolation($constraint->invalidFormatMessage)
                 ->addViolation();
