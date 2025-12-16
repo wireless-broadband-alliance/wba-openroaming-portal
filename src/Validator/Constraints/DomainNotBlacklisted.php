@@ -1,0 +1,17 @@
+<?php
+
+namespace App\Validator\Constraints;
+
+use Symfony\Component\Validator\Constraint;
+
+#[\Attribute]
+class DomainNotBlacklisted extends Constraint
+{
+    public string $message = 'domainNotBlacklisted';
+
+    #[\Override]
+    public function getTargets(): string
+    {
+        return self::PROPERTY_CONSTRAINT;
+    }
+}

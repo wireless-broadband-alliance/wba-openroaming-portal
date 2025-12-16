@@ -4,10 +4,12 @@ namespace App\Service;
 
 use App\Api\V1\BaseResponse;
 use App\Api\V2\BaseResponse as BaseResponseV2;
+use App\Entity\DomainBlacklist;
 use App\Entity\User;
 use App\Enum\ApiVersion;
 use App\Enum\SettingName;
 use App\Enum\UserProvider;
+use App\Repository\DomainBlacklistRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use DateTimeInterface;
@@ -19,7 +21,8 @@ readonly class UserStatusChecker
     public function __construct(
         private UserRepository $userRepository,
         private SettingRepository $settingRepository,
-        private TranslatorInterface $translator
+        private TranslatorInterface $translator,
+        private DomainBlacklistRepository $domainBlacklistRepository,
     ) {
     }
 
@@ -129,21 +132,28 @@ readonly class UserStatusChecker
             throw new RuntimeException($this->translator->trans('validDomainsNotFound', [], 'UserStatusChecker'));
         }
 
-        // If the valid domains setting is empty, allow all domains
-        $validDomains = $validDomainsSetting->getValue();
-        if (empty($validDomains)) {
-            return true;
-        }
-
-        // Split the valid domains into an array and trim whitespace
-        $validDomains = explode(',', $validDomains);
-        $validDomains = array_map(trim(...), $validDomains);
-
         // Extract the domain from the email
         $emailParts = explode('@', $email);
         $domain = end($emailParts);
 
-        // Check if the domain is in the list of valid domains
-        return in_array($domain, $validDomains, true);
+        // If the valid domains setting is empty, allow all domains
+        $validDomains = $validDomainsSetting->getValue();
+
+        // Validate whitelist
+        if (!empty($validDomains)) {
+            // Split the valid domains into an array and trim whitespace
+            $validDomains = explode(',', $validDomains);
+            $validDomains = array_map(trim(...), $validDomains);
+
+            // Check if the domain is in the list of valid domains
+            if (!in_array($domain, $validDomains, true)) {
+                return false;
+            }
+        }
+
+        return array_all(
+            $this->domainBlacklistRepository->findAll(),
+            fn($domainDB) => $domainDB->getDomain() !== $domain
+        );
     }
 }

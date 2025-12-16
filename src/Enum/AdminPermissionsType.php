@@ -1,0 +1,44 @@
+<?php
+
+namespace App\Enum;
+
+enum AdminPermissionsType: string
+{
+    // Users Management page
+    case USERS_MANAGEMENT_WRITE = 'USERS_MANAGEMENT_WRITE';
+    case USERS_MANAGEMENT_READ = 'USERS_MANAGEMENT_READ';
+    // Platform Status page
+    case PLATFORM_STATUS_WRITE = 'PLATFORM_STATUS_WRITE';
+    case PLATFORM_STATUS_READ = 'PLATFORM_STATUS_READ';
+    // Landing Page Configuration page
+    case LANDING_PAGE_CONFIG_WRITE = 'LANDING_PAGE_CONFIG_WRITE';
+    case LANDING_PAGE_CONFIG_READ = 'LANDING_PAGE_CONFIG_READ';
+    // User Engagement page
+    case USER_ENGAGEMENT_WRITE = 'USER_ENGAGEMENT_WRITE';
+    case USER_ENGAGEMENT_READ = 'USER_ENGAGEMENT_READ';
+    // Terms and Policies page
+    case TERMS_POLICIES_WRITE = 'TERMS_POLICIES_WRITE';
+    case TERMS_POLICIES_READ = 'TERMS_POLICIES_READ';
+    // CRON Schedule Automation page
+    case CRON_SCHEDULE_WRITE = 'CRON_SCHEDULE_WRITE';
+    case CRON_SCHEDULE_READ = 'CRON_SCHEDULE_READ';
+    // Authentication Methods page
+    case AUTHENTICATION_METHODS_WRITE = 'AUTHENTICATION_METHODS_WRITE';
+    case AUTHENTICATION_METHODS_READ = 'AUTHENTICATION_METHODS_READ';
+    // Two Factor Authenticator  page
+    case TWO_FACTOR_AUTH_WRITE = 'TWO_FACTOR_AUTH_WRITE';
+    case TWO_FACTOR_AUTH_READ = 'TWO_FACTOR_AUTH_READ';
+    // LDAP Synchronization  page
+    case LDAP_SYNCHRONIZATION_WRITE = 'LDAP_SYNCHRONIZATION_WRITE';
+    case LDAP_SYNCHRONIZATION_READ = 'LDAP_SYNCHRONIZATION_READ';
+    // Radius Profile Configuration  page
+    case RADIUS_PROFILE_CONFIG_WRITE = 'RADIUS_PROFILE_CONFIG_WRITE';
+    case RADIUS_PROFILE_CONFIG_READ = 'RADIUS_PROFILE_CONFIG_READ';
+    // SMS Configuration page
+    case SMS_CONFIG_WRITE = 'SMS_CONFIG_WRITE';
+    case SMS_CONFIG_READ = 'SMS_CONFIG_READ';
+    // Portal Statistics page
+    case PORTAL_STATISTICS_READ = 'PORTAL_STATISTICS_READ';
+    // Connectivity Statistics page
+    case CONNECTIVITY_STATISTICS_READ = 'CONNECTIVITY_STATISTICS_READ';
+}

@@ -8,6 +8,7 @@ use App\Enum\OperationMode;
 use App\Enum\SettingName;
 use App\Form\ScheduleType;
 use App\Repository\SettingRepository;
+use App\Security\Voter\UserAuthenticationVoter;
 use App\Service\CronExpressionHelperService;
 use App\Service\SchedulerService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -60,7 +61,9 @@ final class ScheduleForm extends AbstractController
     #[\Override]
     protected function instantiateForm(): FormInterface
     {
-        return $this->createForm(ScheduleType::class, $this->scheduleDTO);
+        $canWrite = $this->isGranted(UserAuthenticationVoter::CRON_SCHEDULE_WRITE);
+
+        return $this->createForm(ScheduleType::class, $this->scheduleDTO, ['disabled' => !$canWrite]);
     }
 
     #[LiveAction]

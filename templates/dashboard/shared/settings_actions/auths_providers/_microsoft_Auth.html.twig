@@ -26,6 +26,7 @@
                        name="{{ form.authMethodMICROSOFTLoginEnabled.vars.full_name }}"
                        value="true"
                        class="radio-input hidden"
+                        {% if form.authMethodMICROSOFTLoginEnabled.vars.disabled %} disabled="disabled" {% endif %}
                         {{ form.authMethodMICROSOFTLoginEnabled.vars.value == 'true' ? 'checked' : '' }}
                         {{ stimulus_action('radio', 'toggle')|stimulus_action('radio-card', 'unblock') }}
                         {{ stimulus_target('radio-card', 'on') }}>
@@ -45,6 +46,7 @@
                        name="{{ form.authMethodMICROSOFTLoginEnabled.vars.full_name }}"
                        value="false"
                        class="radio-input hidden"
+                        {% if form.authMethodMICROSOFTLoginEnabled.vars.disabled %} disabled="disabled" {% endif %}
                         {{ form.authMethodMICROSOFTLoginEnabled.vars.value == 'false' ? 'checked' : '' }}
                         {{ stimulus_action('radio', 'toggle')|stimulus_action('radio-card', 'block') }}
                         {{ stimulus_target('radio-card', 'off') }}>

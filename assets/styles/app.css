@@ -45,6 +45,11 @@
     @apply px-2 py-1 text-red-400 bg-red-100/50 rounded-lg;
 }
 
+.pill-warning {
+    @apply px-2 py-1 text-yellow-600 bg-yellow-100/60 rounded-lg;
+}
+
+
 /* Form */
 .form-label {
     @apply absolute left-[10px] -top-[13px] z-10 pl-[7px] pr-[12px] font-bold bg-white;

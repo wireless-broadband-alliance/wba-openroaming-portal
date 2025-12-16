@@ -30,7 +30,6 @@ use App\Service\CertificateCheckerService;
 use App\Service\EventActions;
 use App\Service\GetSettings;
 use App\Service\HtmlSanitizerService;
-use App\Service\SanitizeHTML;
 use App\Service\SettingsService;
 use DateTime;
 use DateTimeZone;
@@ -67,10 +66,8 @@ class SettingsController extends AbstractController
      */
     #[Route('/dashboard/confirm-checker/{type}', name: 'admin_confirm_checker')]
     #[IsGranted('ROLE_ADMIN')]
-    public function checkSettings(
-        Request $request,
-        string $type
-    ): Response {
+    public function checkSettings(Request $request, string $type): Response
+    {
         // Get the entered code from the form
         $enteredCode = $request->get('code');
 
@@ -78,14 +75,19 @@ class SettingsController extends AbstractController
         $currentUser = $this->getUser();
 
         if ($enteredCode === $currentUser->getTwoFAcode()) {
-            if ($type === SettingType::SettingCustom->value) {
+            if (
+                $type === SettingType::SettingCustom->value
+                && $this->isGranted(UserAuthenticationVoter::LANDING_PAGE_CONFIG_WRITE)
+            ) {
                 $command = 'php bin/console reset:customSettings --yes';
                 $projectRootDir = $this->getParameter('kernel.project_dir');
+
                 $process = new Process(explode(' ', $command), $projectRootDir);
                 $process->run();
                 if (!$process->isSuccessful()) {
                     throw new ProcessFailedException($process);
                 }
+
                 // if you want to dd("$output, $errorOutput"), please use the following variables
                 $output = $process->getOutput();
                 $errorOutput = $process->getErrorOutput();
@@ -97,11 +99,13 @@ class SettingsController extends AbstractController
                         'controllers'
                     )
                 );
+
                 $eventMetadata = [
                     'ip' => $request->getClientIp(),
                     'user_agent' => $request->headers->get('User-Agent'),
                     'uuid' => $currentUser->getUuid(),
                 ];
+
                 $this->eventActions->saveEvent(
                     $currentUser,
                     AnalyticalEventType::SETTING_PAGE_STYLE_RESET_REQUEST->value,
@@ -112,7 +116,10 @@ class SettingsController extends AbstractController
                 return $this->redirectToRoute('admin_dashboard_customize');
             }
 
-            if ($type === SettingType::SettingTerms->value) {
+            if (
+                $type === SettingType::SettingTerms->value
+                && $this->isGranted(UserAuthenticationVoter::TERMS_POLICIES_WRITE)
+            ) {
                 $command = 'php bin/console reset:termsSettings --yes';
                 $projectRootDir = $this->getParameter('kernel.project_dir');
                 $process = new Process(explode(' ', $command), $projectRootDir);
@@ -143,7 +150,10 @@ class SettingsController extends AbstractController
                 return $this->redirectToRoute('admin_dashboard_settings_terms');
             }
 
-            if ($type === SettingType::SettingRadius->value) {
+            if (
+                $type === SettingType::SettingRadius->value
+                && $this->isGranted(UserAuthenticationVoter::RADIUS_PROFILE_CONFIG_WRITE)
+            ) {
                 $command = 'php bin/console reset:radiusSettings --yes';
                 $projectRootDir = $this->getParameter('kernel.project_dir');
                 $process = new Process(explode(' ', $command), $projectRootDir);
@@ -174,7 +184,10 @@ class SettingsController extends AbstractController
                 return $this->redirectToRoute('admin_dashboard_settings_radius');
             }
 
-            if ($type === SettingType::SettingLDAP->value) {
+            if (
+                $type === SettingType::SettingLDAP->value
+                && $this->isGranted(UserAuthenticationVoter::LDAP_SYNCHRONIZATION_WRITE)
+            ) {
                 $command = 'php bin/console reset:ldapSettings --yes';
                 $projectRootDir = $this->getParameter('kernel.project_dir');
                 $process = new Process(explode(' ', $command), $projectRootDir);
@@ -205,7 +218,10 @@ class SettingsController extends AbstractController
                 return $this->redirectToRoute('admin_dashboard_settings_LDAP');
             }
 
-            if ($type === SettingType::SettingStatus->value) {
+            if (
+                $type === SettingType::SettingStatus->value
+                && $this->isGranted(UserAuthenticationVoter::PLATFORM_STATUS_WRITE)
+            ) {
                 $command = 'php bin/console reset:statusSettings --yes';
                 $projectRootDir = $this->getParameter('kernel.project_dir');
                 $process = new Process(explode(' ', $command), $projectRootDir);
@@ -236,7 +252,10 @@ class SettingsController extends AbstractController
                 return $this->redirectToRoute('admin_dashboard_settings_status');
             }
 
-            if ($type === SettingType::SettingCAPPORT->value) {
+            if (
+                $type === SettingType::SettingCAPPORT->value
+                && $this->isGranted(UserAuthenticationVoter::USER_ENGAGEMENT_WRITE)
+            ) {
                 $command = 'php bin/console reset:capportSettings --yes';
                 $projectRootDir = $this->getParameter('kernel.project_dir');
                 $process = new Process(explode(' ', $command), $projectRootDir);
@@ -267,7 +286,10 @@ class SettingsController extends AbstractController
                 return $this->redirectToRoute('admin_dashboard_settings_capport');
             }
 
-            if ($type === SettingType::SettingAUTH->value) {
+            if (
+                $type === SettingType::SettingAUTH->value
+                && $this->isGranted(UserAuthenticationVoter::AUTHENTICATION_METHODS_WRITE)
+            ) {
                 $command = 'php bin/console reset:authSettings --yes';
                 $projectRootDir = $this->getParameter('kernel.project_dir');
                 $process = new Process(explode(' ', $command), $projectRootDir);
@@ -298,7 +320,10 @@ class SettingsController extends AbstractController
                 return $this->redirectToRoute('admin_dashboard_settings_auth');
             }
 
-            if ($type === SettingType::SettingTwoFA->value) {
+            if (
+                $type === SettingType::SettingTwoFA->value
+                && $this->isGranted(UserAuthenticationVoter::TWO_FACTOR_AUTH_WRITE)
+            ) {
                 $command = 'php bin/console reset:twoFASettings --yes';
                 $projectRootDir = $this->getParameter('kernel.project_dir');
                 $process = new Process(explode(' ', $command), $projectRootDir);
@@ -329,7 +354,10 @@ class SettingsController extends AbstractController
                 return $this->redirectToRoute('admin_dashboard_settings_two_fa');
             }
 
-            if ($type === SettingType::SettingSMS->value) {
+            if (
+                $type === SettingType::SettingSMS->value
+                && $this->isGranted(UserAuthenticationVoter::SMS_CONFIG_WRITE)
+            ) {
                 $command = 'php bin/console reset:smsSettings --yes';
                 $projectRootDir = $this->getParameter('kernel.project_dir');
                 $process = new Process(explode(' ', $command), $projectRootDir);
@@ -360,7 +388,10 @@ class SettingsController extends AbstractController
                 return $this->redirectToRoute('admin_dashboard_settings_sms');
             }
 
-            if ($type === SettingType::SettingSchedule->value) {
+            if (
+                $type === SettingType::SettingSchedule->value
+                && $this->isGranted(UserAuthenticationVoter::CRON_SCHEDULE_WRITE)
+            ) {
                 $command = 'php bin/console reset:ScheduleSettings --yes';
                 $projectRootDir = $this->getParameter('kernel.project_dir');
                 $process = new Process(explode(' ', $command), $projectRootDir);
@@ -390,6 +421,11 @@ class SettingsController extends AbstractController
 
                 return $this->redirectToRoute('admin_dashboard_settings_schedule');
             }
+        } else {
+            $this->addFlash(
+                'error_admin',
+                $this->translator->trans('incorrectVerificationCode', [], 'controllers')
+            );
         }
 
         $this->addFlash(
@@ -404,19 +440,19 @@ class SettingsController extends AbstractController
         name: 'admin_dashboard_settings_terms',
         defaults: ['language' => LanguageType::EN->value]
     )]
-    #[IsGranted('ROLE_ADMIN')]
-    public function settingsTerms(
-        Request $request,
-        string $language,
-    ): Response {
+    #[IsGranted(UserAuthenticationVoter::TERMS_POLICIES_READ)]
+    public function settingsTerms(Request $request, string $language): Response
+    {
         /** @var User $currentUser */
         $currentUser = $this->getUser();
+        $canWrite = $this->isGranted(UserAuthenticationVoter::TERMS_POLICIES_WRITE);
 
         // TOS TextEditor
         $tosTextEditor = $this->textEditorRepository->findTextEditor(
             TextEditorName::TOS->value,
             $language
         );
+
         if (!$tosTextEditor instanceof TextEditor) {
             $tosTextEditor = new TextEditor();
             $tosTextEditor->setName(TextEditorName::TOS->value);
@@ -430,6 +466,7 @@ class SettingsController extends AbstractController
             TextEditorName::PRIVACY_POLICY->value,
             $language
         );
+
         if (!$privacyPolicyTextEditor instanceof TextEditor) {
             $privacyPolicyTextEditor = new TextEditor();
             $privacyPolicyTextEditor->setName(TextEditorName::PRIVACY_POLICY->value);
@@ -469,10 +506,10 @@ class SettingsController extends AbstractController
             ),
         ]);
 
-        $form = $this->createForm(TermsType::class, null, ['settings' => $settings]);
+        $form = $this->createForm(TermsType::class, null, ['settings' => $settings, 'disabled' => !$canWrite]);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
+        if ($form->isSubmitted() && $form->isValid() && $canWrite) {
             // Update settings using the service
             foreach (
                 [
@@ -534,7 +571,7 @@ class SettingsController extends AbstractController
     }
 
     #[Route('/dashboard/settings/LDAP', name: 'admin_dashboard_settings_LDAP')]
-    #[IsGranted('ROLE_ADMIN')]
+    #[IsGranted(UserAuthenticationVoter::LDAP_SYNCHRONIZATION_READ)]
     public function settingsLDAP(Request $request): Response
     {
         /** @var array<string, array{value: string, description: string}> $data */
@@ -542,15 +579,16 @@ class SettingsController extends AbstractController
 
         /** @var User $currentUser */
         $currentUser = $this->getUser();
+        $canWrite = $this->isGranted(UserAuthenticationVoter::LDAP_SYNCHRONIZATION_WRITE);
 
         // Initialize DTO from settings
         $dto = new LDAPSettingsDTO($data);
 
         // Create form bound to DTO
-        $form = $this->createForm(LDAPSettingsType::class, $dto);
+        $form = $this->createForm(LDAPSettingsType::class, $dto, ['disabled' => !$canWrite]);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
+        if ($form->isSubmitted() && $form->isValid() && $canWrite) {
             /** @var LDAPSettingsDTO $dto */
             $dto = $form->getData();
 
@@ -582,28 +620,29 @@ class SettingsController extends AbstractController
             'form' => $form->createView(),
             'ldapSettingsDTO' => $dto,
             'data' => $data,
+            'user' => $currentUser,
         ]);
     }
 
     #[Route('/dashboard/settings/radius', name: 'admin_dashboard_settings_radius')]
-    #[IsGranted('ROLE_ADMIN')]
-    public function settingsRadius(
-        Request $request,
-    ): Response {
+    #[IsGranted(UserAuthenticationVoter::RADIUS_PROFILE_CONFIG_READ)]
+    public function settingsRadius(Request $request): Response
+    {
         /** @var array<string, array{value: string, description: string}> $data */
         $data = $this->getSettings->getSettings();
 
         /** @var User $currentUser */
         $currentUser = $this->getUser();
+        $canWrite = $this->isGranted(UserAuthenticationVoter::RADIUS_PROFILE_CONFIG_WRITE);
 
         // Initialize DTO from settings
         $dto = new RadiusSettingsDTO($data);
 
         // Create form bound to DTO
-        $form = $this->createForm(RadiusSettingsType::class, $dto);
+        $form = $this->createForm(RadiusSettingsType::class, $dto, ['disabled' => !$canWrite]);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
+        if ($form->isSubmitted() && $form->isValid() && $canWrite) {
             /** @var RadiusSettingsDTO $dto */
             $dto = $form->getData();
 
@@ -635,28 +674,29 @@ class SettingsController extends AbstractController
             'form' => $form->createView(),
             'radiusSettingsDTO' => $dto,
             'data' => $data,
+            'user' => $currentUser,
         ]);
     }
 
     #[Route('/dashboard/settings/status', name: 'admin_dashboard_settings_status')]
-    #[IsGranted('ROLE_ADMIN')]
-    public function settingsStatus(
-        Request $request
-    ): Response {
+    #[IsGranted(UserAuthenticationVoter::PLATFORM_STATUS_READ)]
+    public function settingsStatus(Request $request): Response
+    {
         /** @var array<string, array{value: string, description: string}> $data */
         $data = $this->getSettings->getSettings();
 
         /** @var User $currentUser */
         $currentUser = $this->getUser();
+        $canWrite = $this->isGranted(UserAuthenticationVoter::PLATFORM_STATUS_WRITE);
 
         // Initialize DTO from settings
         $dto = new PlatformStatusSettingsDTO($data);
 
         // Create form bound to DTO
-        $form = $this->createForm(PlatformStatusSettingsType::class, $dto);
+        $form = $this->createForm(PlatformStatusSettingsType::class, $dto, ['disabled' => !$canWrite]);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
+        if ($form->isSubmitted() && $form->isValid() && $canWrite) {
             // Save updated settings
             $this->settingsService->updateSettingsFromArray($dto->toArray());
             $this->settingsService->flush();
@@ -684,28 +724,29 @@ class SettingsController extends AbstractController
             'form' => $form->createView(),
             'platformStatusSettingsDTO' => $dto,
             'data' => $data,
+            'user' => $currentUser,
         ]);
     }
 
     #[Route('/dashboard/settings/twoFA', name: 'admin_dashboard_settings_two_fa')]
-    #[IsGranted('ROLE_ADMIN')]
-    public function settingsTwoFA(
-        Request $request,
-    ): Response {
+    #[IsGranted(UserAuthenticationVoter::TWO_FACTOR_AUTH_READ)]
+    public function settingsTwoFA(Request $request): Response
+    {
         /** @var array<string, array{value: string, description: string}> $data */
         $data = $this->getSettings->getSettings();
 
         /** @var User $currentUser */
         $currentUser = $this->getUser();
+        $canWrite = $this->isGranted(UserAuthenticationVoter::TWO_FACTOR_AUTH_WRITE);
 
         // Initialize DTO from settings
         $dto = new TwoFASettingsDTO($data);
 
         // Create form bound to DTO
-        $form = $this->createForm(TwoFASettingsType::class, $dto);
+        $form = $this->createForm(TwoFASettingsType::class, $dto, ['disabled' => !$canWrite]);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
+        if ($form->isSubmitted() && $form->isValid() && $canWrite) {
             // Save updated settings
             $this->settingsService->updateSettingsFromArray($dto->toArray());
             $this->settingsService->flush();
@@ -733,6 +774,7 @@ class SettingsController extends AbstractController
             'form' => $form->createView(),
             'twoFASettingsDTO' => $dto,
             'data' => $data,
+            'user' => $currentUser,
         ]);
     }
 
@@ -762,6 +804,8 @@ class SettingsController extends AbstractController
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
         $currentUser = $this->getUser();
+        $canWrite = $this->isGranted(UserAuthenticationVoter::AUTHENTICATION_METHODS_WRITE);
+
         /** @var array<string, array{value: string, description: string}> $data */
         $data = $this->getSettings->getSettings($language);
 
@@ -794,11 +838,10 @@ class SettingsController extends AbstractController
             $humanReadableExpirationDate
         );
 
-        $form = $this->createForm(AuthSettingsType::class, $authSettingsTypeDTO, [
-        ]);
-
+        $form = $this->createForm(AuthSettingsType::class, $authSettingsTypeDTO, ['disabled' => !$canWrite]);
         $form->handleRequest($request);
-        if ($form->isSubmitted() && $form->isValid()) {
+
+        if ($form->isSubmitted() && $form->isValid() && $canWrite) {
             $this->settingsService->updateAuthSettingsToTranslateFromArray($authSettingsTypeDTO->toArray(), $language);
 
             $this->settingsService->flush();
@@ -837,24 +880,24 @@ class SettingsController extends AbstractController
     }
 
     #[Route('/dashboard/settings/capport', name: 'admin_dashboard_settings_capport')]
-    #[IsGranted('ROLE_ADMIN')]
-    public function settingsCAPPORT(
-        Request $request,
-    ): Response {
+    #[IsGranted(UserAuthenticationVoter::USER_ENGAGEMENT_READ)]
+    public function settingsCAPPORT(Request $request): Response
+    {
         /** @var array<string, array{value: string, description: string}> $data */
         $data = $this->getSettings->getSettings();
 
         /** @var User $currentUser */
         $currentUser = $this->getUser();
+        $canWrite = $this->isGranted(UserAuthenticationVoter::USER_ENGAGEMENT_WRITE);
 
         // Initialize DTO from settings
         $dto = new CapportSettingsDTO($data);
 
         // Create form bound to DTO
-        $form = $this->createForm(CapportSettingsType::class, $dto);
+        $form = $this->createForm(CapportSettingsType::class, $dto, ['disabled' => !$canWrite]);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
+        if ($form->isSubmitted() && $form->isValid() && $canWrite) {
             // Save updated settings
             $this->settingsService->updateSettingsFromArray($dto->toArray());
             $this->settingsService->flush();
@@ -882,28 +925,29 @@ class SettingsController extends AbstractController
             'form' => $form->createView(),
             'capportSettingsDTO' => $dto,
             'data' => $data,
+            'user' => $currentUser,
         ]);
     }
 
     #[Route('/dashboard/settings/sms', name: 'admin_dashboard_settings_sms')]
-    #[IsGranted('ROLE_ADMIN')]
-    public function settingsSMS(
-        Request $request
-    ): Response {
+    #[IsGranted(UserAuthenticationVoter::SMS_CONFIG_READ)]
+    public function settingsSMS(Request $request): Response
+    {
         /** @var array<string, array{value: string, description: string}> $data */
         $data = $this->getSettings->getSettings();
 
         /** @var User $currentUser */
         $currentUser = $this->getUser();
+        $canWrite = $this->isGranted(UserAuthenticationVoter::SMS_CONFIG_WRITE);
 
         // Initialize DTO from settings
         $dto = new SMSSettingsDTO($data);
 
         // Create form bound to DTO
-        $form = $this->createForm(SMSSettingsType::class, $dto);
+        $form = $this->createForm(SMSSettingsType::class, $dto, ['disabled' => !$canWrite]);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
+        if ($form->isSubmitted() && $form->isValid() && $canWrite) {
             // Save updated settings
             $this->settingsService->updateSettingsFromArray($dto->toArray());
             $this->settingsService->flush();
@@ -931,6 +975,7 @@ class SettingsController extends AbstractController
             'form' => $form->createView(),
             'SMSSettingsDTO' => $dto,
             'data' => $data,
+            'user' => $currentUser,
         ]);
     }
 }

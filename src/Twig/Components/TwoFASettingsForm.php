@@ -5,6 +5,7 @@ namespace App\Twig\Components;
 use App\DTO\TwoFASettingsDTO;
 use App\Enum\SettingName;
 use App\Form\TwoFASettingsType;
+use App\Security\Voter\UserAuthenticationVoter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormInterface;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
@@ -34,7 +35,9 @@ final class TwoFASettingsForm extends AbstractController
     #[\Override]
     protected function instantiateForm(): FormInterface
     {
-        return $this->createForm(TwoFASettingsType::class, $this->twoFASettingsDTO);
+        $canWrite = $this->isGranted(UserAuthenticationVoter::TWO_FACTOR_AUTH_WRITE);
+
+        return $this->createForm(TwoFASettingsType::class, $this->twoFASettingsDTO, ['disabled' => !$canWrite]);
     }
 
     #[LiveAction]
