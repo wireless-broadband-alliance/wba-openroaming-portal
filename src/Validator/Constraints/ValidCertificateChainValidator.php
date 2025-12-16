@@ -8,8 +8,12 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class ValidCertificateChainValidator extends ConstraintValidator
 {
-    public function validate($value, Constraint $constraint): void
+    public function validate(mixed $value, Constraint $constraint): void
     {
+        if (!$constraint instanceof ValidCertificateChain) {
+            return;
+        }
+
         if (!$value) {
             return;
         }
@@ -21,7 +25,7 @@ class ValidCertificateChainValidator extends ConstraintValidator
             return; // Other validators (File, etc.) handle missing/invalid types
         }
 
-        $certContent  = @file_get_contents($certFile->getRealPath());
+        $certContent = @file_get_contents($certFile->getRealPath());
         $chainContent = @file_get_contents($chainFile->getRealPath());
 
         if (!$certContent || !$chainContent) {
@@ -35,10 +39,10 @@ class ValidCertificateChainValidator extends ConstraintValidator
             return; // Already validated elsewhere
         }
 
-        $certData  = openssl_x509_parse($cert);
+        $certData = openssl_x509_parse($cert);
         $chainData = openssl_x509_parse($chain);
 
-        if (!isset($certData['issuer'], $chainData['subject'])) {
+        if (!$certData || !$chainData || !isset($certData['issuer'], $chainData['subject'])) {
             return;
         }
 
