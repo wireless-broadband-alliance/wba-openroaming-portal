@@ -5,24 +5,40 @@
 {% import 'dashboard/shared/_sort_arrow.html.twig' as sharedSort %}
 
 {% block container %}
-  <div class="p-5">
-    {% set eeaStatus = isEEAUser() %}
-    {% set message = '' %}
-    {% if eeaStatus == constant('App\\Enum\\GeoLocation\\IsEEAHandler::LOCATION_ERROR').value %}
-      {% set message = 'Unable to determine user location due to a location error with the GeoLite2 database.
-             Please check the docs/geoLiteDB/GEOLITEGUI.md file in for troubleshooting steps.' %}
-    {% elseif eeaStatus == constant('App\\Enum\\GeoLocation\\IsEEAHandler::MISSING_FILE').value %}
-      {% set message = 'The required GeoLite2-City.mmdb file is missing.
-             Please ensure this file is included. Refer to the docs/geoLiteDB/GEOLITEGUI.md file for more details.' %}
-    {% elseif eeaStatus == constant('App\\Enum\\GeoLocation\\IsEEAHandler::INVALID_DB').value %}
-      {% set message = 'The GeoLite2-City.mmdb file is invalid.
-             Please verify the integrity of this file. Consult the docs/geoLiteDB/GEOLITEGUI.md file for further guidance.' %}
-    {% endif %}
+  {% set eeaStatus = isEEAUser() %}
+  {% set message = '' %}
+  {% if eeaStatus == constant('App\\Enum\\GeoLocation\\IsEEAHandler::LOCATION_ERROR').value %}
+    {% set message = 'locationError'|trans({}, 'dashboard') %}
+  {% elseif eeaStatus == constant('App\\Enum\\GeoLocation\\IsEEAHandler::MISSING_FILE').value %}
+    {% set message = 'missingFile'|trans({}, 'dashboard') %}
+  {% elseif eeaStatus == constant('App\\Enum\\GeoLocation\\IsEEAHandler::INVALID_DB').value %}
+    {% set message = 'invalidDb'|trans({}, 'dashboard') %}
+  {% endif %}
 
-    {% if message != '' %}
-      <div class="toast-warning">{{ message }}</div>
-    {% endif %}
-  </div>
+  {# Certificate Process Status - Checks if the certificates are applied correctly #}
+  {% if isCertificateAborted() %}
+    {% set isDashboard = app.request.pathinfo starts with '/dashboard' %}
+    {% set toastType = isDashboard ? 'toast-error-dashboard' : 'toast-error' %}
+
+    {{ include('shared/_toast.html.twig', {
+      message: 'abortedCertificatesWarning'|trans({}, 'dashboard'),
+      toast_type: toastType,
+    }) }}
+  {% endif %}
+
+  {% if message != '' %}
+    {{ include('shared/_toast.html.twig', {
+      message: message,
+      toast_type: 'toast-warning-dashboard',
+    }) }}
+  {% endif %}
+
+  {% if not isFreeradiusCertEV() %}
+    {{ include('shared/_toast.html.twig', {
+      message: 'freeradius_is_not_ev_cert_warning'|trans({}, 'dashboard'),
+      toast_type: 'toast-warning-dashboard',
+    }) }}
+  {% endif %}
   <div class="pt-5 pb-1 text-left space-y-3 rounded-xl bg-white">
     <div class="w-full">
       <div class="sm:w-auto px-5 py-4">
@@ -86,11 +102,11 @@
             </form>
           </div>
 
-            <div class="flex items-center space-x-6">
-              <a href="{{ path('dashboard_add_admin') }}" class="btn-primary px-4 min-w-[150px]">
-                {{ 'addAdmin'|trans({}, 'dashboard') }}
-              </a>
-            </div>
+          <div class="flex items-center space-x-6">
+            <a href="{{ path('dashboard_add_admin') }}" class="btn-primary px-4 min-w-[150px]">
+              {{ 'addAdmin'|trans({}, 'dashboard') }}
+            </a>
+          </div>
         </div>
       </div>
 
