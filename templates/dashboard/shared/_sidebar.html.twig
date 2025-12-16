@@ -112,14 +112,16 @@
               {{ include('dashboard/shared/_sidebar_item.html.twig', {label: 'scheduleAutomation'|trans({}, '_header_admin'), route: 'admin_dashboard_settings_schedule', icon: 'wba:schedule'}) }}
             {% endif %}
 
-            <li>
-              <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300
+            {% if constant('App\\Enum\\AdminRoleType::ROLE_SUPER_ADMIN').value in app.user.roles %}
+              <li>
+                <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300
                             {% if app.request.attributes.get('_route') in portalSettingsRoutes %}selected{% endif %}"
-                 href="{{ path('admin_dashboard_settings_certs_management') }}">
-                <twig:ux:icon name="wba:download" class="w-5 mr-4 fill-current"/>
-                {{ 'certsManagement'|trans({}, '_header_admin') }}
-              </a>
-            </li>
+                   href="{{ path('admin_dashboard_settings_certs_management') }}">
+                  <twig:ux:icon name="wba:download" class="w-5 mr-4 fill-current"/>
+                  {{ 'certsManagement'|trans({}, '_header_admin') }}
+                </a>
+              </li>
+            {% endif %}
           </ul>
         </div>
       </div>
