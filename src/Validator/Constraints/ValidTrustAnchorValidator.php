@@ -8,8 +8,12 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class ValidTrustAnchorValidator extends ConstraintValidator
 {
-    public function validate($value, Constraint $constraint): void
+    public function validate(mixed $value, Constraint $constraint): void
     {
+        if (!$constraint instanceof ValidTrustAnchor) {
+            return;
+        }
+
         if (!$value) {
             return;
         }
@@ -33,39 +37,56 @@ class ValidTrustAnchorValidator extends ConstraintValidator
         $chainCerts = $this->extractPemCertificates($chainPem);
         $current = openssl_x509_parse($certPem);
 
+        if (!is_array($current) || !isset($current['issuer'])) {
+            $this->context->buildViolation($constraint->invalidCertificateMessage)
+                ->atPath($constraint->certField)
+                ->addViolation();
+            return;
+        }
+
         // Ensure all parsed certs are valid
         foreach ($chainCerts as $intermediatePem) {
             $intermediate = openssl_x509_parse($intermediatePem);
-            if (!$intermediate) {
+
+            if (!is_array($intermediate) || !isset($intermediate['subject'])) {
                 $this->context->buildViolation($constraint->invalidCertificateMessage)
                     ->atPath($constraint->chainField)
                     ->addViolation();
                 return;
             }
-            if ($current['issuer'] !== $intermediate['subject']) {
+
+            if (!isset($current['issuer']) || $current['issuer'] !== $intermediate['subject']) {
                 $this->context->buildViolation($constraint->incompleteChainMessage)
                     ->atPath($constraint->chainField)
                     ->addViolation();
                 return;
             }
+
             $current = $intermediate;
         }
 
         // Check final trust anchor
         if ($rootPem) {
             $root = openssl_x509_parse($rootPem);
-            if (!$root || $current['issuer'] !== $root['subject']) {
+
+            if (!is_array($root) || !isset($current['issuer'], $root['subject']) || $current['issuer'] !== $root['subject']) {
                 $this->context->buildViolation($constraint->untrustedRootMessage)
                     ->atPath($constraint->rootField)
                     ->addViolation();
             }
-        } elseif ($current['issuer'] !== $current['subject']) {
+        } elseif (!isset($current['issuer'], $current['subject']) || $current['issuer'] !== $current['subject']) {
             $this->context->buildViolation($constraint->incompleteChainMessage)
                 ->atPath($constraint->chainField)
                 ->addViolation();
         }
     }
 
+    /**
+     * Extract individual PEM certificates from a chain.
+     *
+     * @param string $pem Full PEM chain content
+     * @return string[] List of individual PEM certificates
+     */
     private function extractPemCertificates(string $pem): array
     {
         preg_match_all(
@@ -74,9 +95,10 @@ class ValidTrustAnchorValidator extends ConstraintValidator
             $matches
         );
 
+        /** @var string[] $matches[1] always exists from preg_match_all */
         return array_map(
-            static fn($data) => "-----BEGIN CERTIFICATE-----$data-----END CERTIFICATE-----",
-            $matches[1] ?? []
+            static fn(string $data): string => "-----BEGIN CERTIFICATE-----$data-----END CERTIFICATE-----",
+            (array)$matches[1]
         );
     }
 }
