@@ -13,7 +13,8 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 class ValidWbaChainValidator extends ConstraintValidator
 {
     /**
-     * WBA root SHA-256 fingerprints (from https://wballiance.com/openroaming/pki-repository/)
+     * WBA root SHA-256 fingerprints
+     * (from https://wballiance.com/openroaming/pki-repository/)
      */
     private const array WBA_ROOTS_SHA256 = [
         // signed by wba-policy0
@@ -38,71 +39,66 @@ class ValidWbaChainValidator extends ConstraintValidator
         'WRIX',
     ];
 
-    public function validate($value, Constraint $constraint): void
+    public function validate(mixed $value, Constraint $constraint): void
     {
         if (!$constraint instanceof ValidWbaChain) {
             return;
         }
 
         if (!$value instanceof UploadedFile) {
-            return; // Let Symfony’s built-in File constraint handle this
+            return; // handled by File constraint
         }
 
-        // Read PEM content
         $content = @file_get_contents($value->getPathname());
-        if (!$content) {
-            $this->context->buildViolation('Cannot read certificate file.')->addViolation();
+        if ($content === false) {
+            $this->context->buildViolation('Cannot read certificate file.')
+                ->addViolation();
             return;
         }
 
-        // Try to load the certificate
         $cert = @openssl_x509_read($content);
-        if (!$cert) {
-            $this->context->buildViolation('Invalid PEM certificate.')->addViolation();
+        if ($cert === false) {
+            $this->context->buildViolation('Invalid PEM certificate.')
+                ->addViolation();
             return;
         }
 
-        // Compute SHA-256 fingerprint
-        $fingerprint = @openssl_x509_fingerprint($cert, 'sha256', false);
-
-        if (!$fingerprint) {
-            $this->context->buildViolation('Unable to compute certificate fingerprint.')->addViolation();
+        $fingerprint = openssl_x509_fingerprint($cert, 'sha256', false);
+        if ($fingerprint === false) {
+            $this->context->buildViolation('Unable to compute certificate fingerprint.')
+                ->addViolation();
             return;
         }
 
-        // Normalize fingerprint
         $fingerprint = strtoupper(str_replace([':', ' '], '', $fingerprint));
 
-        // Direct fingerprint match
         if (in_array($fingerprint, self::WBA_ROOTS_SHA256, true)) {
-            return; // Valid — fingerprint matches a trusted WBA root
+            return; // trusted WBA root
         }
 
-        // Parse issuer/subject details for fallback check
-        $certInfo = @openssl_x509_parse($cert);
-        if (!$certInfo) {
-            $this->context->buildViolation('Cannot parse certificate details.')->addViolation();
+        $certInfo = openssl_x509_parse($cert);
+        if ($certInfo === false) {
+            $this->context->buildViolation('Cannot parse certificate details.')
+                ->addViolation();
             return;
         }
 
-        $issuer = strtoupper(json_encode($certInfo['issuer'] ?? []));
-        $subject = strtoupper(json_encode($certInfo['subject'] ?? []));
+        $issuerJson = json_encode($certInfo['issuer'] ?? []);
+        $subjectJson = json_encode($certInfo['subject'] ?? []);
+
+        $issuer = strtoupper($issuerJson !== false ? $issuerJson : '');
+        $subject = strtoupper($subjectJson !== false ? $subjectJson : '');
 
         $isValid = array_any(
             self::POSSIBLE_INDICATORS,
-            fn($indicator) => str_contains(
-                $issuer,
-                (string)$indicator
-            ) ||
-                str_contains(
-                    $subject,
-                    (string)$indicator
-                )
+            static fn(string $indicator): bool => str_contains($issuer, $indicator) ||
+                str_contains($subject, $indicator)
         );
 
         if (!$isValid) {
             $this->context->buildViolation(
-                $constraint->message ?? 'This certificate does not belong to the trusted WBA PKI chain.'
+                $constraint->message
+                ?? 'This certificate does not belong to the trusted WBA PKI chain.'
             )->addViolation();
         }
     }
