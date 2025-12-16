@@ -38,7 +38,7 @@ class ClearUploadedCertsCommand extends Command
 
         // 2. Get the certificates for that process
         $inUseFiles = [];
-        if ($currentProcess !== null) {
+        if ($currentProcess instanceof \App\Entity\CertificateSetupProcess) {
             $certificates = $currentProcess->getCertificates();
             foreach ($certificates as $certificate) {
                 if ($certificate->getFilePath() !== null) {

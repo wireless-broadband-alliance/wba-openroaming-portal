@@ -60,7 +60,7 @@ readonly class TermsAcceptanceListener
             '/login/magic'
         ];
 
-        if (array_any($excludedPrefixes, fn($prefix) => str_starts_with($path, $prefix))) {
+        if (array_any($excludedPrefixes, fn($prefix) => str_starts_with($path, (string) $prefix))) {
             return;
         }
 

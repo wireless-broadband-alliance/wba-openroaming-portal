@@ -171,7 +171,7 @@ class CertificateManagementController extends AbstractController
 
       // Abort pending Certificate process if exists
         $certificateProcess = $this->certificateProcessCheckerService->getCurrentProcess();
-        if ($certificateProcess) {
+        if ($certificateProcess instanceof \App\Entity\CertificateSetupProcess) {
             $certificateProcess->setStatus(ProcessStatusType::ABORTED);
             $certificateProcess->setUpdatedAt(new DateTimeImmutable());
             $this->entityManager->persist($certificateProcess);

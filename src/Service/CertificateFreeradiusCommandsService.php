@@ -26,7 +26,7 @@ readonly class CertificateFreeradiusCommandsService
    */
     public function getRenewCommands(array $certificateSet): array
     {
-        if (empty($certificateSet)) {
+        if ($certificateSet === []) {
             return [
             [
               'description' => $this->translator->trans(

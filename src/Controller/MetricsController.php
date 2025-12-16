@@ -112,7 +112,7 @@ class MetricsController extends AbstractController
 
         return array_any(
             $allowedIpList,
-            fn($allowedIp) => str_contains($allowedIp, '/') && $this->ipInCidrRange($ip, $allowedIp)
+            fn($allowedIp) => str_contains((string) $allowedIp, '/') && $this->ipInCidrRange($ip, $allowedIp)
         );
     }
 

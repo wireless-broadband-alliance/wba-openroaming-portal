@@ -35,7 +35,7 @@ class IpOrCidrValidator extends ConstraintValidator
         }
 
         // CIDR notation regex (IPv4 only)
-        if (preg_match('/^(?:\d{1,3}\.){3}\d{1,3}\/(?:[0-9]|[1-2][0-9]|3[0-2])$/', $value)) {
+        if (preg_match('/^(?:\d{1,3}\.){3}\d{1,3}\/(?:\d|[1-2]\d|3[0-2])$/', $value)) {
             return;
         }
 

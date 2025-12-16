@@ -60,7 +60,9 @@ class RegistrationController extends AbstractController
         private readonly UserPasswordHasherInterface $userPasswordHasher,
         private readonly CaptchaValidator $captchaValidator,
         private readonly EmailGenerator $emailGenerator,
-        private readonly ValidatorInterface $validator
+        private readonly ValidatorInterface $validator,
+        private readonly \Symfony\Component\Mailer\MailerInterface $mailer,
+        private readonly \libphonenumber\PhoneNumberUtil $phoneNumberUtil
     ) {
     }
 
@@ -76,7 +78,6 @@ class RegistrationController extends AbstractController
     #[Route('/auth/local/register', name: 'api_v2_auth_local_register', methods: ['POST'])]
     public function localRegister(
         Request $request,
-        UserPasswordHasherInterface $userPasswordHasher,
     ): JsonResponse {
         try {
             $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
@@ -143,7 +144,7 @@ class RegistrationController extends AbstractController
         $user = new User();
         $user->setUuid($data['email']);
         $user->setEmail($data['email']);
-        $hashedPassword = $userPasswordHasher->hashPassword($user, $data['password']);
+        $hashedPassword = $this->userPasswordHasher->hashPassword($user, $data['password']);
         $user->setPassword($hashedPassword);
         $user->setIsVerified(false);
         $user->setTwoFAcode((string)random_int(100000, 999999));
@@ -195,8 +196,6 @@ class RegistrationController extends AbstractController
      */
     #[Route('/auth/local/reset', name: 'api_v2_auth_local_reset', methods: ['POST'])]
     public function localReset(
-        UserPasswordHasherInterface $userPasswordHasher,
-        MailerInterface $mailer,
         Request $request,
     ): JsonResponse {
         try {
@@ -319,7 +318,7 @@ class RegistrationController extends AbstractController
                     $this->eventRepository->save($latestEvent, true);
 
                     $randomPassword = bin2hex(random_bytes(4));
-                    $hashedPassword = $userPasswordHasher->hashPassword($user, $randomPassword);
+                    $hashedPassword = $this->userPasswordHasher->hashPassword($user, $randomPassword);
                     $user->setPassword($hashedPassword);
                     $user->setForgotPasswordRequest(true);
                     $this->entityManager->persist($user);
@@ -349,7 +348,7 @@ class RegistrationController extends AbstractController
                             )->getValue()
                         ]);
 
-                    $mailer->send($email);
+                    $this->mailer->send($email);
 
                     // Defines the Event to the table
                     $eventMetadata = [
@@ -402,9 +401,7 @@ class RegistrationController extends AbstractController
      */
     #[Route('/auth/sms/register', name: 'api_v2_auth_sms_register', methods: ['POST'])]
     public function smsRegister(
-        Request $request,
-        UserPasswordHasherInterface $userPasswordHasher,
-        PhoneNumberUtil $phoneNumberUtil
+        Request $request
     ): JsonResponse {
         try {
             $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
@@ -456,11 +453,11 @@ class RegistrationController extends AbstractController
 
         // Validate phone number with country code
         try {
-            $parsedPhoneNumber = $phoneNumberUtil->parse(
+            $parsedPhoneNumber = $this->phoneNumberUtil->parse(
                 $data['phone_number'],
                 strtoupper((string)$data['country_code'])
             );
-            if (!$phoneNumberUtil->isValidNumber($parsedPhoneNumber)) {
+            if (!$this->phoneNumberUtil->isValidNumber($parsedPhoneNumber)) {
                 return new BaseResponse(
                     400,
                     null,
@@ -476,7 +473,7 @@ class RegistrationController extends AbstractController
         }
 
         // Check for existing user with the same phone number
-        $formattedPhoneNumber = $phoneNumberUtil->format($parsedPhoneNumber, PhoneNumberFormat::E164);
+        $formattedPhoneNumber = $this->phoneNumberUtil->format($parsedPhoneNumber, PhoneNumberFormat::E164);
         if ($this->userRepository->findOneBy(['uuid' => $formattedPhoneNumber])) {
             return new BaseResponse(200, [
                 'message' => 'SMS User Account Registered Successfully.' .
@@ -488,7 +485,7 @@ class RegistrationController extends AbstractController
         $user = new User();
         $user->setUuid($formattedPhoneNumber);  // Store formatted phone number in UUID field
         $user->setPhoneNumber($parsedPhoneNumber);  // Set the PhoneNumber object directly
-        $hashedPassword = $userPasswordHasher->hashPassword($user, $data['password']);
+        $hashedPassword = $this->userPasswordHasher->hashPassword($user, $data['password']);
         $user->setPassword($hashedPassword);
         $user->setIsVerified(false);
         $user->setTwoFAcode((string)random_int(100000, 999999));
@@ -557,8 +554,7 @@ class RegistrationController extends AbstractController
      */
     #[Route('/auth/sms/reset', name: 'api_v2_auth_sms_reset', methods: ['POST'])]
     public function smsReset(
-        Request $request,
-        PhoneNumberUtil $phoneNumberUtil
+        Request $request
     ): JsonResponse {
         try {
             $dataRequest = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
@@ -606,11 +602,11 @@ class RegistrationController extends AbstractController
 
         // Validate phone number with country code
         try {
-            $parsedPhoneNumber = $phoneNumberUtil->parse(
+            $parsedPhoneNumber = $this->phoneNumberUtil->parse(
                 $dataRequest['phone_number'],
                 strtoupper((string)$dataRequest['country_code'])
             );
-            if (!$phoneNumberUtil->isValidNumber($parsedPhoneNumber)) {
+            if (!$this->phoneNumberUtil->isValidNumber($parsedPhoneNumber)) {
                 return new BaseResponse(
                     400,
                     null,
@@ -626,7 +622,7 @@ class RegistrationController extends AbstractController
         }
 
         // Check for existing user with the same phone number
-        $formattedPhoneNumber = $phoneNumberUtil->format($parsedPhoneNumber, PhoneNumberFormat::E164);
+        $formattedPhoneNumber = $this->phoneNumberUtil->format($parsedPhoneNumber, PhoneNumberFormat::E164);
         $user = $this->userRepository->findOneBy(['uuid' => $formattedPhoneNumber]);
         if ($user) {
             if ($user->getBannedAt()) {

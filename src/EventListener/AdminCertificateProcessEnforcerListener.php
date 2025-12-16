@@ -92,15 +92,7 @@ readonly class AdminCertificateProcessEnforcerListener
         '#^/dashboard/settings/certificatesManagement/freeradius/test$#',
         '#^/dashboard/settings/certificatesManagement/freeradius/test/run$#',
         ];
-
-      // Check if current path is allowed
-        $allowed = false;
-        foreach ($allowedPatterns as $pattern) {
-            if (preg_match($pattern, $path)) {
-                $allowed = true;
-                break;
-            }
-        }
+        $allowed = array_any($allowedPatterns, fn($pattern) => preg_match($pattern, $path));
 
       // If path IS allowed → do nothing
         if ($allowed) {
@@ -118,7 +110,7 @@ readonly class AdminCertificateProcessEnforcerListener
         'installationState' => ProcessStatusType::COMPLETED
         ]);
 
-        if (!$installation) {
+        if (!$installation instanceof \App\Entity\InstallationProgress) {
             $session->set(
                 SessionStatus::SYSTEM_RESET_REQUEST->value,
                 'admin_dashboard_settings_certs_installation'
@@ -130,7 +122,7 @@ readonly class AdminCertificateProcessEnforcerListener
       // Check certificates progress
         $certProcess = $this->certificateSetupProcessRepository->getLatestProcess();
 
-        if (!$certProcess) {
+        if (!$certProcess instanceof \App\Entity\CertificateSetupProcess) {
             $session->set(
                 SessionStatus::SYSTEM_RESET_REQUEST->value,
                 'admin_dashboard_settings_certs_radsecproxy_upload'
@@ -140,7 +132,7 @@ readonly class AdminCertificateProcessEnforcerListener
         }
 
       // Radsecproxy test required
-        if ($certProcess->getRadsecproxyTestResult() === null) {
+        if (!$certProcess->getRadsecproxyTestResult() instanceof \App\Enum\CertificateTestResult) {
             $session->set(
                 SessionStatus::SYSTEM_RESET_REQUEST->value,
                 'admin_dashboard_settings_certs_radsecproxy_upload'

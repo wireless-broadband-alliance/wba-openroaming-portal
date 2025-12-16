@@ -790,7 +790,6 @@ class SettingsController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function settingsAuths(
         Request $request,
-        CertificateCheckerService $certificateService,
         string $language
     ): Response {
         $missingFiles = $this->certificateService->verifyCertificates();
@@ -814,7 +813,7 @@ class SettingsController extends AbstractController
         $settings = $settingsRepository->findAll();
 
         $certificatePath = $this->getParameter('kernel.project_dir') . '/signing-keys/cert.pem';
-        $certificateLimitDate = strtotime((string)$certificateService->getCertificateExpirationDate($certificatePath));
+        $certificateLimitDate = strtotime((string)$this->certificateService->getCertificateExpirationDate($certificatePath));
         $realTime = time();
         $timeLeft = round(($certificateLimitDate - $realTime) / (86400)) - 1;
         $profileLimitDate = ((int)$timeLeft);

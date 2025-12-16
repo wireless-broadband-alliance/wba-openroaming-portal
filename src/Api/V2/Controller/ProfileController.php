@@ -56,7 +56,7 @@ class ProfileController extends AbstractController
             return new JsonResponse([
                 'status' => 'error',
                 'message' => 'The certificates configured in the portal have been aborted and are not valid.'
-            ], 403);
+            ], \Symfony\Component\HttpFoundation\Response::HTTP_FORBIDDEN);
         }
 
         try {
@@ -200,7 +200,7 @@ class ProfileController extends AbstractController
             return new JsonResponse([
                 'status' => 'error',
                 'message' => 'The certificates configured in the portal have been aborted and are not valid.'
-            ], 403);
+            ], \Symfony\Component\HttpFoundation\Response::HTTP_FORBIDDEN);
         }
 
         try {

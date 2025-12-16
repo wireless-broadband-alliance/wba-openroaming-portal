@@ -26,12 +26,13 @@ class DomainBlacklistController extends AbstractController
         private readonly GetSettings $getSettings,
         private readonly EntityManagerInterface $entityManager,
         private readonly EventActions $eventActions,
+        private readonly \App\Repository\DomainBlacklistRepository $domainBlacklistRepository,
     ) {
     }
 
     #[Route('/dashboard/settings/blacklist', name: 'admin_dashboard_settings_blacklist')]
     #[IsGranted('ROLE_SUPER_ADMIN')]
-    public function edit(Request $request, DomainBlacklistRepository $domainBlacklistRepository): Response
+    public function edit(Request $request): Response
     {
         // Call the getSettings method of GetSettings class to retrieve the data
         /** @var array<string, array{value: string, description: string}> $data */
@@ -40,7 +41,7 @@ class DomainBlacklistController extends AbstractController
         /** @var User $currentUser */
         $currentUser = $this->getUser();
 
-        $domainBlacklistDB = $domainBlacklistRepository->findAll();
+        $domainBlacklistDB = $this->domainBlacklistRepository->findAll();
 
         // Initialize DTO from settings
         $dto = new DomainBlacklistDTO($domainBlacklistDB);

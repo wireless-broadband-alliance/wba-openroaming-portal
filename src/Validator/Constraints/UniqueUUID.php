@@ -9,6 +9,7 @@ class UniqueUUID extends Constraint
 {
     public string $message = 'uniqueUUID';
 
+    #[\Override]
     public function getTargets(): string
     {
         return self::PROPERTY_CONSTRAINT;

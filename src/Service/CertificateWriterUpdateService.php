@@ -11,7 +11,7 @@ use Symfony\Component\HttpKernel\KernelInterface;
 
 class CertificateWriterUpdateService
 {
-    private string $signingKeysPath;
+    private readonly string $signingKeysPath;
 
     public function __construct(
         private readonly KernelInterface $kernel,
@@ -23,11 +23,8 @@ class CertificateWriterUpdateService
     }
 
   /**
-   * Write the certificate set contents to the signing-keys folder
-   *
-   * @param array $certificateSet
-   * @return void
-   */
+     * Write the certificate set contents to the signing-keys folder
+     */
     public function writeCertificates(array $certificateSet): void
     {
         $map = [

@@ -91,7 +91,7 @@ readonly class DatabaseConnectionService
             $updated = rtrim($envContent) . "\n" . $newLine . "\n";
         } else {
             // Caso contrário, só garantimos que termina com newline
-            $updated = rtrim($updated) . "\n";
+            $updated = rtrim((string) $updated) . "\n";
         }
 
         return file_put_contents($envPath, $updated) !== false;
@@ -145,7 +145,7 @@ readonly class DatabaseConnectionService
             'username' => isset($parts['user']) ? urldecode($parts['user']) : null,
             'password' => isset($parts['pass']) ? urldecode($parts['pass']) : null,
             'host' => $parts['host'] ?? null,
-            'port' => isset($parts['port']) ? (int)$parts['port'] : null,
+            'port' => $parts['port'] ?? null,
             'database' => isset($parts['path']) ? ltrim($parts['path'], '/') : null,
             'serverVersion' => $query['serverVersion'] ?? null,
             'charset' => $query['charset'] ?? null,

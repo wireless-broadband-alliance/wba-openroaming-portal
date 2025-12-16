@@ -10,6 +10,7 @@ class IpOrCidr extends Constraint
 {
     public string $message = 'notValidIpOrCidr';
 
+    #[\Override]
     public function validatedBy(): string
     {
         return static::class . 'Validator';

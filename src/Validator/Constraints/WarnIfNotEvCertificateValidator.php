@@ -43,7 +43,7 @@ class WarnIfNotEvCertificateValidator extends ConstraintValidator
 
             foreach ($policies as $policy) {
                 foreach ($evOids as $oid) {
-                    if (str_contains($policy, $oid)) {
+                    if (str_contains((string) $policy, $oid)) {
                         $isEv = true;
                         break 2;
                     }

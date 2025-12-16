@@ -56,6 +56,7 @@ class AuthController extends AbstractController
         private readonly TOTPService $TOTPService,
         private readonly SettingRepository $settingRepository,
         private readonly AuthAPIResponseService $authAPIResponseService,
+        private readonly \OneLogin\Saml2\Auth $samlAuth,
     ) {
     }
 
@@ -222,7 +223,7 @@ class AuthController extends AbstractController
     }
 
     #[Route('/auth/saml', name: 'api_v1_auth_saml', methods: ['POST'])]
-    public function authSaml(Request $request, Auth $samlAuth): JsonResponse
+    public function authSaml(Request $request): JsonResponse
     {
         // Get SAML Response
         $samlResponseRaw = $request->request->get('SAMLResponse');
@@ -248,10 +249,10 @@ class AuthController extends AbstractController
 
         try {
             // Load and validate the SAML response
-            $samlAuth->processResponse();
+            $this->samlAuth->processResponse();
 
             // Handle errors from the SAML process
-            if ($samlAuth->getErrors()) {
+            if ($this->samlAuth->getErrors()) {
                 return new BaseResponse(
                     401,
                     null,
@@ -260,7 +261,7 @@ class AuthController extends AbstractController
             }
 
             // Ensure the authentication was successful
-            if (!$samlAuth->isAuthenticated()) {
+            if (!$this->samlAuth->isAuthenticated()) {
                 return new BaseResponse(
                     401,
                     null,
@@ -268,8 +269,8 @@ class AuthController extends AbstractController
                 )->toResponse(); // Unauthorized
             }
 
-            $sAMAccountName = $samlAuth->getNameId();
-            $attributes = $samlAuth->getAttributes();
+            $sAMAccountName = $this->samlAuth->getNameId();
+            $attributes = $this->samlAuth->getAttributes();
 
             // Extract the necessary attributes
             $uuid = $attributes['samlUuid'][0] ?? null;

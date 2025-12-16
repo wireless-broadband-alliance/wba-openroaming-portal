@@ -72,6 +72,8 @@ class UsersManagementController extends AbstractController
         private readonly UserRadiusProfileRepository $radiusProfileRepository,
         private readonly EmailGenerator $emailGenerator,
         private readonly UserPasswordHasherInterface $userPasswordHasher,
+        private readonly \Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface $passwordHasher,
+        private readonly \Symfony\Component\Mailer\MailerInterface $mailer,
     ) {
     }
 
@@ -347,7 +349,7 @@ class UsersManagementController extends AbstractController
         $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $user->getId()]);
         $getUserUuid = $user->getUuid();
 
-        if ($user->getDeletedAt() !== null) {
+        if ($user->getDeletedAt() instanceof \DateTimeInterface) {
             $this->addFlash(
                 'error',
                 $this->translator->trans('userAlreadyDeleted', [], 'controllers')
@@ -390,7 +392,6 @@ class UsersManagementController extends AbstractController
     #[IsGranted(AdminRoleType::ROLE_ADMIN->value)]
     public function editUsers(
         Request $request,
-        UserPasswordHasherInterface $passwordHasher,
         EntityManagerInterface $em,
         User $user
     ): Response {
@@ -416,7 +417,7 @@ class UsersManagementController extends AbstractController
             }
         }
 
-        if ($user->getDeletedAt() !== null) {
+        if ($user->getDeletedAt() instanceof \DateTimeInterface) {
             $this->addFlash(
                 'error',
                 $this->translator->trans('userAlreadyDeleted', [], 'controllers')
@@ -525,7 +526,7 @@ class UsersManagementController extends AbstractController
             $userExternalAuth = $this->userExternalAuthRepository->findOneBy(['user' => $user]);
 
             // Hash the new password
-            $hashedPassword = $passwordHasher->hashPassword($user, $newPassword);
+            $hashedPassword = $this->passwordHasher->hashPassword($user, $newPassword);
             $user->setPassword($hashedPassword);
             $user->setForgotPasswordRequest(true);
             $em->flush();
@@ -696,7 +697,6 @@ class UsersManagementController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function disabledBy2FA(
         Request $request,
-        MailerInterface $mailer,
         int $id,
     ): RedirectResponse {
         if (!$user = $this->userRepository->find($id)) {
@@ -727,7 +727,7 @@ class UsersManagementController extends AbstractController
         );
 
         if ($user->getEmail()) {
-            $mailer->send($this->verificationCodeEmailGenerator->createEmail2FADisabledBy($user));
+            $this->mailer->send($this->verificationCodeEmailGenerator->createEmail2FADisabledBy($user));
         } elseif (
             $user->getPhoneNumber()
             && $userExternalAuths->getProviderId() === UserProvider::PHONE_NUMBER->value

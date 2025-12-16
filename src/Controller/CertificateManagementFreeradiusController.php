@@ -227,7 +227,7 @@ class CertificateManagementFreeradiusController extends AbstractController
         methods: ['POST']
     )]
     #[IsGranted('ROLE_SUPER_ADMIN')]
-    public function settingsCertificatesManagementFreeradiusAutoRenewAction(
+    public function settingsCertificatesManagementFreeradiusAutoRenew(
         Request $request
     ): Response {
       // Get current process state
@@ -327,7 +327,7 @@ class CertificateManagementFreeradiusController extends AbstractController
                 );
             }
         } catch (Exception $e) {
-            throw new RuntimeException('Failed to generate or store certificates: ' . $e->getMessage());
+            throw new RuntimeException('Failed to generate or store certificates: ' . $e->getMessage(), $e->getCode(), $e);
         }
 
       // After the files are validated and the processed, update them once again to add
@@ -577,7 +577,6 @@ class CertificateManagementFreeradiusController extends AbstractController
         );
 
         $remoteHost = $payload['remote_host'] ?? $processEntity->getRemoteHost();
-        $remotePort = isset($payload['remote_port']) ? (int)$payload['remote_port'] : 11812;
 
         if (!$remoteHost) {
             return new JsonResponse([
@@ -608,11 +607,9 @@ class CertificateManagementFreeradiusController extends AbstractController
         ];
 
       // Validate all exist
-        $missing = array_filter($paths, static function ($path) {
-            return !file_exists($path);
-        });
+        $missing = array_filter($paths, static fn($path) => !file_exists($path));
 
-        if (!empty($missing)) {
+        if ($missing !== []) {
             return new JsonResponse([
             'status' => 'error',
             'message' => 'Missing certificate files',

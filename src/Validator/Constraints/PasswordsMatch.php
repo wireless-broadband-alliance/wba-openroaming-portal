@@ -9,6 +9,7 @@ class PasswordsMatch extends Constraint
 {
     public string $message = 'passwordsDoNotMatch';
 
+    #[\Override]
     public function getTargets(): string
     {
         return self::CLASS_CONSTRAINT;
