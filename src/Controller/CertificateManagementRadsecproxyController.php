@@ -55,7 +55,7 @@ class CertificateManagementRadsecproxyController extends AbstractController
         '/dashboard/settings/certificatesManagement/radsecproxy/upload',
         name: 'admin_dashboard_settings_certs_radsecproxy_upload'
     )]
-    #[IsGranted('ROLE_ADMIN')]
+    #[IsGranted('ROLE_SUPER_ADMIN')]
     public function settingsCertificatesManagementRadsecproxyUpload(
         Request $request
     ): Response {
@@ -157,7 +157,7 @@ class CertificateManagementRadsecproxyController extends AbstractController
         '/dashboard/settings/certificatesManagement/radsecproxy/config',
         name: 'admin_dashboard_settings_certs_radsecproxy_config'
     )]
-    #[IsGranted('ROLE_ADMIN')]
+    #[IsGranted('ROLE_SUPER_ADMIN')]
     public function settingsCertificatesManagementRadsecproxyConfig(Request $request): Response
     {
         // Get current process state
@@ -242,7 +242,7 @@ class CertificateManagementRadsecproxyController extends AbstractController
         '/dashboard/settings/certificatesManagement/radsecproxy/test',
         name: 'admin_dashboard_settings_certs_radsecproxy_test'
     )]
-    #[IsGranted('ROLE_ADMIN')]
+    #[IsGranted('ROLE_SUPER_ADMIN')]
     public function settingsCertificatesManagementRadsecproxyTest(): Response
     {
         // Get current process state
@@ -282,7 +282,7 @@ class CertificateManagementRadsecproxyController extends AbstractController
         name: 'admin_dashboard_settings_certs_radsecproxy_test_run',
         methods: ['POST']
     )]
-    #[IsGranted('ROLE_ADMIN')]
+    #[IsGranted('ROLE_SUPER_ADMIN')]
     public function runRadsecproxyTest(Request $request): JsonResponse
     {
         $processEntity = $this->certificateProcessCheckerService->getCurrentProcess();

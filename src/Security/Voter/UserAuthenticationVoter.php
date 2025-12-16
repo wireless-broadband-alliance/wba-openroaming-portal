@@ -6,6 +6,7 @@ use App\Entity\User;
 use App\Enum\AdminPermissionsType;
 use Override;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
+use Symfony\Component\Security\Core\Authorization\Voter\Vote;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 
 /**
@@ -113,7 +114,7 @@ final class UserAuthenticationVoter extends Voter
     }
 
     #[Override]
-    protected function voteOnAttribute(string $attribute, mixed $subject, TokenInterface $token): bool
+    protected function voteOnAttribute(string $attribute, mixed $subject, TokenInterface $token, ?Vote $vote = null): bool
     {
         /** @var ?User $user */
         $user = $token->getUser();

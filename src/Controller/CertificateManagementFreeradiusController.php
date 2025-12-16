@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
-use App\DTO\CertificateFreeradiusUploadAutoDTO;
 use App\DTO\CertificateFreeradiusUploadManualDTO;
-use App\Entity\Certificate;
 use App\Entity\CertificateSetupProcess;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
@@ -16,8 +14,6 @@ use App\Enum\CertificateTestResult;
 use App\Enum\FirewallType;
 use App\Enum\ProcessStatusType;
 use App\Enum\SessionStatus;
-use App\Enum\TrustedWBAFingerprints;
-use App\Form\CertificateFreeradiusUploadAutoType;
 use App\Form\CertificateFreeradiusUploadManualType;
 use App\Form\SimpleSubmitFormType;
 use App\Service\CertificateCheckerService;
@@ -34,7 +30,6 @@ use DateTime;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
-use MongoDB\Driver\Session;
 use RuntimeException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -70,7 +65,7 @@ class CertificateManagementFreeradiusController extends AbstractController
       '/dashboard/settings/certificatesManagement/freeradius/upload',
       name: 'admin_dashboard_settings_certs_freeradius_upload'
   )]
-  #[IsGranted('ROLE_ADMIN')]
+  #[IsGranted('ROLE_SUPER_ADMIN')]
   public function settingsCertificatesManagementFreeradiusUpload(
       Request $request
   ): Response {
@@ -231,7 +226,7 @@ class CertificateManagementFreeradiusController extends AbstractController
       name: 'admin_dashboard_settings_certs_freeradius_auto_renew',
       methods: ['POST']
   )]
-  #[IsGranted('ROLE_ADMIN')]
+  #[IsGranted('ROLE_SUPER_ADMIN')]
   public function settingsCertificatesManagementFreeradiusAutoRenewAction(
       Request $request
   ): Response {
@@ -363,7 +358,7 @@ class CertificateManagementFreeradiusController extends AbstractController
   #[Route('/dashboard/settings/certificatesManagement/freeradius/config',
       name: 'admin_dashboard_settings_certs_freeradius_config'
   )]
-  #[IsGranted('ROLE_ADMIN')]
+  #[IsGranted('ROLE_SUPER_ADMIN')]
   public function settingsCertificatesManagementFreeradiusConfig(Request $request): Response
   {
     // Get current process state
@@ -498,7 +493,7 @@ class CertificateManagementFreeradiusController extends AbstractController
       '/dashboard/settings/certificatesManagement/freeradius/test',
       name: 'admin_dashboard_settings_certs_freeradius_test'
   )]
-  #[IsGranted('ROLE_ADMIN')]
+  #[IsGranted('ROLE_SUPER_ADMIN')]
   public function settingsCertificatesManagementFreeradiusTest(): Response
   {
     // Get current process state
@@ -538,7 +533,7 @@ class CertificateManagementFreeradiusController extends AbstractController
       name: 'admin_dashboard_settings_certs_freeradius_test_run',
       methods: ['POST']
   )]
-  #[IsGranted('ROLE_ADMIN')]
+  #[IsGranted('ROLE_SUPER_ADMIN')]
   public function runFreeradiusTest(Request $request): JsonResponse
   {
     $processEntity = $this->certificateProcessCheckerService->getCurrentProcess();

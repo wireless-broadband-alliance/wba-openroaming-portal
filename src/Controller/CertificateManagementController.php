@@ -19,7 +19,6 @@ use App\Service\InstallationService;
 use DateTime;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
-use MongoDB\Driver\Session;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -42,7 +41,7 @@ class CertificateManagementController extends AbstractController
   }
 
   #[Route('/dashboard/settings/certificatesManagement', name: 'admin_dashboard_settings_certs_management')]
-  #[IsGranted('ROLE_ADMIN')]
+  #[IsGranted('ROLE_SUPER_ADMIN')]
   public function settingsCertificatesManagement(): Response
   {
     $lastCompletedInstallation = $this->installationProgressRepository->getLastCompleted();
@@ -65,7 +64,7 @@ class CertificateManagementController extends AbstractController
   #[Route('/dashboard/settings/certificatesManagement/freeradius/selection',
       name: 'admin_dashboard_settings_certs_management_freeradius_selection'
   )]
-  #[IsGranted('ROLE_ADMIN')]
+  #[IsGranted('ROLE_SUPER_ADMIN')]
   public function settingsCertificatesManagementSelection(): Response
   {
     // Get current process state
@@ -97,7 +96,7 @@ class CertificateManagementController extends AbstractController
       name: 'admin_dashboard_settings_certs_management_certificates_abort',
       methods: ['POST']
   )]
-  #[IsGranted('ROLE_ADMIN')]
+  #[IsGranted('ROLE_SUPER_ADMIN')]
   public function settingsCertificatesManagementCertificatesAbort(
       Request $request
   ): Response {
@@ -149,7 +148,7 @@ class CertificateManagementController extends AbstractController
       name: 'admin_dashboard_settings_certs_management_system_reset',
       methods: ['POST']
   )]
-  #[IsGranted('ROLE_ADMIN')]
+  #[IsGranted('ROLE_SUPER_ADMIN')]
   public function settingsCertificatesManagementSystemReset(Request $request): Response
   {
     /** @var User $user */
