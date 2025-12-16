@@ -155,13 +155,15 @@
                             {{ form_end(formRevokeProfiles) }}
                         </form>
                     </li>
-                    <li>
-                        <a href="{{ path('admin_add_permissions', {id: user.id}) }}"
-                           class="flex flex-row items-center px-2 py-2 duration-100 p-2 cursor-pointer hover:text-lightGreen">
-                            <twig:ux:icon name="wba:add" class="w-5 mr-3 fill-current"/>
-                            {{ 'addAdminPerm'|trans({}, '_user') }}
-                        </a>
-                    </li>
+                    {% if constant('App\\Enum\\AdminRoleType::ROLE_SUPER_ADMIN').value in app.user.roles %}
+                        <li>
+                            <a href="{{ path('admin_add_permissions', {id: user.id}) }}"
+                               class="flex flex-row items-center px-2 py-2 duration-100 p-2 cursor-pointer hover:text-lightGreen">
+                                <twig:ux:icon name="wba:add" class="w-5 mr-3 fill-current"/>
+                                {{ 'addAdminPerm'|trans({}, '_user') }}
+                            </a>
+                        </li>
+                    {% endif %}
                 </ul>
             </div>
 
