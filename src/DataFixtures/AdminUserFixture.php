@@ -28,6 +28,7 @@ class AdminUserFixture extends Fixture
         $admin->setEmail(DefaultUser::ADMIN->value);
         $admin->setPassword($this->userPasswordHashed->hashPassword($admin, 'gnimaornepo'));
         $admin->setRoles(['ROLE_SUPER_ADMIN']);
+        $admin->setPermissions([]);
         $admin->setIsVerified(true);
         $admin->setCreatedAt(new DateTime());
         $manager->persist($admin);

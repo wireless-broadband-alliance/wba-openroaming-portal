@@ -405,20 +405,4 @@ class AdminController extends AbstractController
             'customTypeDTO' => $customTypeDTO,
         ]);
     }
-
-
-    #[Route('/dashboard/adminPermissions/{id<\d+>}', name: 'admin_admin_edit')]
-    #[IsGranted('ROLE_ADMIN')]
-    public function editAdminPermissions(
-        Request $request,
-        EntityManagerInterface $em,
-        int $id
-    ): Response {
-        return $this->render(
-            'dashboard/actions/edit.html.twig',
-            [
-                'test' => 'test',
-            ]
-        );
-    }
 }

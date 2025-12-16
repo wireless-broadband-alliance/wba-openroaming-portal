@@ -4,8 +4,10 @@ namespace App\Form;
 
 use App\DTO\UserAddDTO;
 use App\Enum\AdminRoleType;
+use App\Enum\PermissionLevel;
 use App\Enum\SettingName;
 use App\Enum\UserProvider;
+use App\Form\Helper\AdminPermissionsFormBuilder;
 use App\Repository\SettingRepository;
 use libphonenumber\PhoneNumberFormat;
 use Misd\PhoneNumberBundle\Form\Type\PhoneNumberType;
@@ -24,25 +26,26 @@ use Symfony\Contracts\Translation\TranslatorInterface;
  */
 class UserAddType extends AbstractType
 {
-  public function __construct(
-      private readonly SettingRepository $settingRepository,
-      private readonly TranslatorInterface $translator,
-  ) {
-  }
+    public function __construct(
+        private readonly SettingRepository $settingRepository,
+        private readonly TranslatorInterface $translator,
+        private readonly AdminPermissionsFormBuilder $adminPermissionsFormBuilder,
+    ) {
+    }
 
-  public function buildForm(FormBuilderInterface $builder, array $options): void
-  {
-    // Fetch the setting from the database
-    $regionsSetting = $this->settingRepository->findOneBy([
+    public function buildForm(FormBuilderInterface $builder, array $options): void
+    {
+      // Fetch the setting from the database
+        $regionsSetting = $this->settingRepository->findOneBy([
         'name' => SettingName::DEFAULT_REGION_PHONE_INPUTS->value
-    ]);
+        ]);
 
-    // If the setting exists, explode and trim; otherwise use a default
-    $regionInputs = $regionsSetting && $regionsSetting->getValue()
+      // If the setting exists, explode and trim; otherwise use a default
+        $regionInputs = $regionsSetting && $regionsSetting->getValue()
         ? array_map('trim', explode(',', $regionsSetting->getValue()))
         : ['PT', 'US', 'GB'];
 
-    $builder
+        $builder
         ->add('accountType', ChoiceType::class, [
             'label' => $this->translator->trans('accountType', [], 'UserAddType'),
             'choices' => [
@@ -97,12 +100,14 @@ class UserAddType extends AbstractType
                 'placeholder' => $this->translator->trans('enterTheConfirmation', [], 'ResetPasswordType'),
             ],
         ]);
-  }
 
-  public function configureOptions(OptionsResolver $resolver): void
-  {
-    $resolver->setDefaults([
+        $this->adminPermissionsFormBuilder->addPermissions($builder);
+    }
+
+    public function configureOptions(OptionsResolver $resolver): void
+    {
+        $resolver->setDefaults([
         'data_class' => UserAddDTO::class,
-    ]);
-  }
+        ]);
+    }
 }

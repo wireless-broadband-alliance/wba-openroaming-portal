@@ -23,8 +23,8 @@ use Symfony\Component\Console\Question\ConfirmationQuestion;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 #[AsCommand(
-    name: 'reset:admin',
-    description: 'Reset Admin Credentials',
+    name: 'reset:super-admin',
+    description: 'Reset Super Admin Credentials',
 )]
 class ResetAdminCommand extends Command
 {
@@ -40,8 +40,8 @@ class ResetAdminCommand extends Command
     protected function configure(): void
     {
         $this
-        ->setName('reset:admin')
-        ->setDescription('Reset Admin Credentials')
+        ->setName('reset:super-admin')
+        ->setDescription('Reset Super Admin Credentials')
         ->addOption('yes', 'y', InputOption::VALUE_NONE, 'Automatically confirm the reset');
     }
 
@@ -54,7 +54,7 @@ class ResetAdminCommand extends Command
         if (!$input->getOption('yes')) {
             $helper = $this->getHelper('question');
             $question = new ConfirmationQuestion(
-                'This action will reset the admin credentials to its default state without deleting any data. [y/N] ',
+                'This action will reset the super admin credentials to its default state without deleting any data. [y/N]',
                 false
             );
           /** @var QuestionHelper $helper */
@@ -85,6 +85,7 @@ class ResetAdminCommand extends Command
             $admin->setEmail(DefaultUser::ADMIN->value);
             $admin->setPassword($this->userPasswordHashed->hashPassword($admin, 'gnimaornepo'));
             $admin->setRoles(['ROLE_SUPER_ADMIN']);
+            $admin->setPermissions([]);
             $admin->setIsVerified(true);
             $admin->setForgotPasswordRequest(true);
             $admin->setTwoFAcode((string)random_int(100000, 999999));
@@ -108,6 +109,7 @@ class ResetAdminCommand extends Command
       // Set password
         $admin->setForgotPasswordRequest(true);
         $admin->setRoles(['ROLE_SUPER_ADMIN']);
+        $admin->setPermissions([]);
         $admin->setPassword($this->userPasswordHashed->hashPassword($admin, 'gnimaornepo'));
 
         $this->entityManager->flush();
