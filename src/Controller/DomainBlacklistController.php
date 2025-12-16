@@ -30,7 +30,7 @@ class DomainBlacklistController extends AbstractController
     }
 
     #[Route('/dashboard/settings/blacklist', name: 'admin_dashboard_settings_blacklist')]
-    #[IsGranted('ROLE_ADMIN')]
+    #[IsGranted('ROLE_SUPER_ADMIN')]
     public function edit(Request $request, DomainBlacklistRepository $domainBlacklistRepository): Response
     {
         // Call the getSettings method of GetSettings class to retrieve the data
