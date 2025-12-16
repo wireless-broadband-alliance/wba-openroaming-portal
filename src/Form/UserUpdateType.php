@@ -9,7 +9,6 @@ use App\Form\Helper\AdminPermissionsFormBuilder;
 use App\Repository\SettingRepository;
 use libphonenumber\PhoneNumberFormat;
 use Misd\PhoneNumberBundle\Form\Type\PhoneNumberType;
-use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
@@ -23,34 +22,33 @@ use Symfony\Contracts\Translation\TranslatorInterface;
  */
 class UserUpdateType extends AbstractType
 {
-    public function __construct(
-        private readonly SettingRepository $settingRepository,
-        private readonly TranslatorInterface $translator,
-        private readonly Security $security,
-        private readonly AdminPermissionsFormBuilder $adminPermissionsFormBuilder
-    ) {
-    }
+  public function __construct(
+      private readonly SettingRepository $settingRepository,
+      private readonly TranslatorInterface $translator,
+      private readonly AdminPermissionsFormBuilder $adminPermissionsFormBuilder
+  ) {
+  }
 
-    private bool $disabled = true;
+  private bool $disabled = true;
 
-    public function buildForm(FormBuilderInterface $builder, array $options): void
-    {
-        $this->disabled = $options['disabled'];
+  public function buildForm(FormBuilderInterface $builder, array $options): void
+  {
+    $this->disabled = $options['disabled'];
 
-      // Fetch the setting from the database
-        $regionsSetting = $this->settingRepository->findOneBy(
-            ['name' => SettingName::DEFAULT_REGION_PHONE_INPUTS->value]
-        );
+    // Fetch the setting from the database
+    $regionsSetting = $this->settingRepository->findOneBy(
+        ['name' => SettingName::DEFAULT_REGION_PHONE_INPUTS->value]
+    );
 
-      // If the setting exists, explode and trim; otherwise use a default
-        $regionInputs = $regionsSetting && $regionsSetting->getValue()
+    // If the setting exists, explode and trim; otherwise use a default
+    $regionInputs = $regionsSetting && $regionsSetting->getValue()
         ? array_map(trim(...), explode(',', $regionsSetting->getValue()))
         : ['PT', 'US', 'GB']; // fallback default
 
-      /** @var UserUpdateDTO $dto */
-        $dto = $options['data'];
+    /** @var UserUpdateDTO $dto */
+    $dto = $options['data'];
 
-        $builder
+    $builder
         ->add('uuid', TextType::class, [
             'label' => 'UUID',
             'required' => false,
@@ -93,43 +91,34 @@ class UserUpdateType extends AbstractType
             'attr' => ['autocomplete' => 'tel'],
         ]);
 
-      // Only add banned/isVerified if NOT editing an admin
-        if (!$dto->editingAdmin) {
-            $builder
-            ->add('banned', CheckboxType::class, [
+    // Only add banned/isVerified if NOT editing an admin
+    if (!$dto->editingAdmin) {
+      $builder
+          ->add('banned', CheckboxType::class, [
               'label' => $this->translator->trans('banned', [], 'UserUpdateType'),
               'required' => false,
               'disabled' => $this->disabled,
-            ])
-              ->add('isVerified', CheckboxType::class, [
+          ])
+          ->add('isVerified', CheckboxType::class, [
               'label' => $this->translator->trans('verification', [], 'UserUpdateType'),
               'required' => false,
               'disabled' => $this->disabled,
-            ]);
-        }
-
-        $currentUser = $this->security->getUser();
-      /** @var User|null $editedUser */
-        $editedUser = $options['edited_user'];
-
-        $isAdmin = $this->security->isGranted('ROLE_ADMIN');
-        $isSuperAdmin = $this->security->isGranted('ROLE_SUPER_ADMIN');
-
-        $isEditingSelf = $currentUser && $editedUser && $currentUser->getId() === $editedUser->getId();
-
-        if ($isAdmin && !$isSuperAdmin && !$isEditingSelf) {
-            $this->adminPermissionsFormBuilder->addPermissions($builder);
-        }
+          ]);
     }
 
-    public function configureOptions(OptionsResolver $resolver): void
-    {
-        $resolver->setDefaults([
+    if ($dto->editingAdmin) {
+      $this->adminPermissionsFormBuilder->addPermissions($builder);
+    }
+  }
+
+  public function configureOptions(OptionsResolver $resolver): void
+  {
+    $resolver->setDefaults([
         'data_class' => UserUpdateDTO::class,
         'disabled' => true,
         'edited_user' => null,
-        ]);
+    ]);
 
-        $resolver->setAllowedTypes('edited_user', ['null', User::class]);
-    }
+    $resolver->setAllowedTypes('edited_user', ['null', User::class]);
+  }
 }

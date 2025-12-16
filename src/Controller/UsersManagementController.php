@@ -348,7 +348,7 @@ class UsersManagementController extends AbstractController
     }
 
   /**
-   * Handles the edit of the Users by the admin
+   * Handles the edit of the Users (Super-admin || Admin || User)
    */
   /**
    * @throws TransportExceptionInterface
@@ -390,6 +390,12 @@ class UsersManagementController extends AbstractController
       // Prepare DTO
         $userUpdateDTO = new UserUpdateDTO($user);
         $initialBannedAt = $user->getBannedAt();
+        $isEditedUserAdmin = in_array('ROLE_ADMIN', $user->getRoles(), true) ||
+        in_array('ROLE_SUPER_ADMIN', $user->getRoles(), true);
+        $isCurrentUserSuperAdmin = $this->isGranted('ROLE_SUPER_ADMIN');
+        $isEditingSelf = $user->getId() === $currentUser->getId();
+      // Only allow permission editing if super admin editing another admin
+        $userUpdateDTO->editingAdmin = $isEditedUserAdmin && $isCurrentUserSuperAdmin && !$isEditingSelf;
 
       // Create & handle form
         $form = $this->createForm(
@@ -404,7 +410,7 @@ class UsersManagementController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid() && $canWrite) {
           // Use DTO method to map data back
-            $userUpdateDTO->updateUser($user);
+            $userUpdateDTO->updateUser($user, $userUpdateDTO->editingAdmin);
 
             if (!$userUpdateDTO->editingAdmin) {
                 if ($userUpdateDTO->banned && $initialBannedAt === null) {
