@@ -9,6 +9,7 @@ use App\DTO\CertificateFreeradiusUploadManualDTO;
 
 class IsLetsEncryptCertificateValidator extends ConstraintValidator
 {
+    /** @var string[] List of known Let's Encrypt issuers */
     private array $knownIssuers = [
         "Let's Encrypt",
         'R3',
@@ -18,7 +19,11 @@ class IsLetsEncryptCertificateValidator extends ConstraintValidator
         'ISRG Root X2',
     ];
 
-    public function validate($value, Constraint $constraint): void
+    /**
+     * @param UploadedFile|null $value
+     * @param Constraint $constraint
+     */
+    public function validate(mixed $value, Constraint $constraint): void
     {
         if (!$value instanceof UploadedFile) {
             return;
@@ -48,8 +53,13 @@ class IsLetsEncryptCertificateValidator extends ConstraintValidator
             $issuerDict
         ));
 
-        $isLetsEncrypt =
-            array_any($this->knownIssuers, fn($issuerName) => stripos($issuerString, (string) $issuerName) !== false);
+        $isLetsEncrypt = false;
+        foreach ($this->knownIssuers as $issuerName) {
+            if (stripos($issuerString, $issuerName) !== false) {
+                $isLetsEncrypt = true;
+                break;
+            }
+        }
 
         // If certificate **is** from Let's Encrypt → add notice warning
         if ($isLetsEncrypt && $this->context->getObject() instanceof CertificateFreeradiusUploadManualDTO) {
