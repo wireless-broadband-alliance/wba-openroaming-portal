@@ -61,9 +61,9 @@ class RegistrationController extends AbstractController
         private readonly UserCreationService $userCreationService,
         private readonly TranslatorInterface $translator,
         private readonly MagicLinkService $magicLinkService,
-        private readonly \Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface $userPasswordHasher,
-        private readonly \Symfony\Component\HttpFoundation\Session\SessionInterface $session,
-        private readonly \Psr\EventDispatcher\EventDispatcherInterface $eventDispatcher
+        private readonly UserPasswordHasherInterface $userPasswordHasher,
+        private readonly SessionInterface $session,
+        private readonly EventDispatcherInterface $eventDispatcher
     ) {
     }
 
