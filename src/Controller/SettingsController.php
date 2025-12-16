@@ -14,7 +14,6 @@ use App\Entity\TextEditor;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Enum\LanguageType;
-use App\Enum\OperationMode;
 use App\Enum\SettingName;
 use App\Enum\SettingType;
 use App\Enum\TextEditorName;
@@ -26,15 +25,12 @@ use App\Form\SMSSettingsType;
 use App\Form\AuthSettingsType;
 use App\Form\TermsType;
 use App\Form\TwoFASettingsType;
-use App\Repository\SettingTranslationRepository;
 use App\Repository\TextEditorRepository;
 use App\Security\Voter\UserAuthenticationVoter;
 use App\Service\CertificateService;
-use App\Service\EnforcePasswordResetService;
 use App\Service\EventActions;
 use App\Service\GetSettings;
 use App\Service\HtmlSanitizerService;
-use App\Service\SanitizeHTML;
 use App\Service\SettingsService;
 use DateTime;
 use DateTimeZone;
@@ -71,10 +67,8 @@ class SettingsController extends AbstractController
      */
     #[Route('/dashboard/confirm-checker/{type}', name: 'admin_confirm_checker')]
     #[IsGranted('ROLE_ADMIN')]
-    public function checkSettings(
-        Request $request,
-        string $type
-    ): Response {
+    public function checkSettings(Request $request, string $type): Response
+    {
         // Get the entered code from the form
         $enteredCode = $request->get('code');
 
@@ -82,30 +76,33 @@ class SettingsController extends AbstractController
         $currentUser = $this->getUser();
 
         if ($enteredCode === $currentUser->getTwoFAcode()) {
-            if ($type === SettingType::SettingCustom->value) {
+            if (
+                $type === SettingType::SettingCustom->value
+                && $this->isGranted(UserAuthenticationVoter::LANDING_PAGE_CONFIG_WRITE)
+            ) {
                 $command = 'php bin/console reset:customSettings --yes';
                 $projectRootDir = $this->getParameter('kernel.project_dir');
+
                 $process = new Process(explode(' ', $command), $projectRootDir);
                 $process->run();
                 if (!$process->isSuccessful()) {
                     throw new ProcessFailedException($process);
                 }
+
                 // if you want to dd("$output, $errorOutput"), please use the following variables
                 $output = $process->getOutput();
                 $errorOutput = $process->getErrorOutput();
                 $this->addFlash(
                     'success_admin',
-                    $this->translator->trans(
-                        'settingResetSuccessfully',
-                        [],
-                        'controllers'
-                    )
+                    $this->translator->trans('settingResetSuccessfully', [], 'controllers')
                 );
+
                 $eventMetadata = [
                     'ip' => $request->getClientIp(),
                     'user_agent' => $request->headers->get('User-Agent'),
                     'uuid' => $currentUser->getUuid(),
                 ];
+
                 $this->eventActions->saveEvent(
                     $currentUser,
                     AnalyticalEventType::SETTING_PAGE_STYLE_RESET_REQUEST->value,
@@ -116,7 +113,10 @@ class SettingsController extends AbstractController
                 return $this->redirectToRoute('admin_dashboard_customize');
             }
 
-            if ($type === SettingType::SettingTerms->value) {
+            if (
+                $type === SettingType::SettingTerms->value
+                && $this->isGranted(UserAuthenticationVoter::TERMS_POLICIES_WRITE)
+            ) {
                 $command = 'php bin/console reset:termsSettings --yes';
                 $projectRootDir = $this->getParameter('kernel.project_dir');
                 $process = new Process(explode(' ', $command), $projectRootDir);
@@ -147,7 +147,10 @@ class SettingsController extends AbstractController
                 return $this->redirectToRoute('admin_dashboard_settings_terms');
             }
 
-            if ($type === SettingType::SettingRadius->value) {
+            if (
+                $type === SettingType::SettingRadius->value
+                && $this->isGranted(UserAuthenticationVoter::RADIUS_PROFILE_CONFIG_WRITE)
+            ) {
                 $command = 'php bin/console reset:radiusSettings --yes';
                 $projectRootDir = $this->getParameter('kernel.project_dir');
                 $process = new Process(explode(' ', $command), $projectRootDir);
@@ -178,7 +181,10 @@ class SettingsController extends AbstractController
                 return $this->redirectToRoute('admin_dashboard_settings_radius');
             }
 
-            if ($type === SettingType::SettingLDAP->value) {
+            if (
+                $type === SettingType::SettingLDAP->value
+                && $this->isGranted(UserAuthenticationVoter::LDAP_SYNCHRONIZATION_WRITE)
+            ) {
                 $command = 'php bin/console reset:ldapSettings --yes';
                 $projectRootDir = $this->getParameter('kernel.project_dir');
                 $process = new Process(explode(' ', $command), $projectRootDir);
@@ -209,7 +215,10 @@ class SettingsController extends AbstractController
                 return $this->redirectToRoute('admin_dashboard_settings_LDAP');
             }
 
-            if ($type === SettingType::SettingStatus->value) {
+            if (
+                $type === SettingType::SettingStatus->value
+                && $this->isGranted(UserAuthenticationVoter::PLATFORM_STATUS_WRITE)
+            ) {
                 $command = 'php bin/console reset:statusSettings --yes';
                 $projectRootDir = $this->getParameter('kernel.project_dir');
                 $process = new Process(explode(' ', $command), $projectRootDir);
@@ -240,7 +249,10 @@ class SettingsController extends AbstractController
                 return $this->redirectToRoute('admin_dashboard_settings_status');
             }
 
-            if ($type === SettingType::SettingCAPPORT->value) {
+            if (
+                $type === SettingType::SettingCAPPORT->value
+                && $this->isGranted(UserAuthenticationVoter::USER_ENGAGEMENT_WRITE)
+            ) {
                 $command = 'php bin/console reset:capportSettings --yes';
                 $projectRootDir = $this->getParameter('kernel.project_dir');
                 $process = new Process(explode(' ', $command), $projectRootDir);
@@ -271,7 +283,10 @@ class SettingsController extends AbstractController
                 return $this->redirectToRoute('admin_dashboard_settings_capport');
             }
 
-            if ($type === SettingType::SettingAUTH->value) {
+            if (
+                $type === SettingType::SettingAUTH->value
+                && $this->isGranted(UserAuthenticationVoter::AUTHENTICATION_METHODS_WRITE)
+            ) {
                 $command = 'php bin/console reset:authSettings --yes';
                 $projectRootDir = $this->getParameter('kernel.project_dir');
                 $process = new Process(explode(' ', $command), $projectRootDir);
@@ -302,7 +317,10 @@ class SettingsController extends AbstractController
                 return $this->redirectToRoute('admin_dashboard_settings_auth');
             }
 
-            if ($type === SettingType::SettingTwoFA->value) {
+            if (
+                $type === SettingType::SettingTwoFA->value
+                && $this->isGranted(UserAuthenticationVoter::TWO_FACTOR_AUTH_WRITE)
+            ) {
                 $command = 'php bin/console reset:twoFASettings --yes';
                 $projectRootDir = $this->getParameter('kernel.project_dir');
                 $process = new Process(explode(' ', $command), $projectRootDir);
@@ -333,7 +351,10 @@ class SettingsController extends AbstractController
                 return $this->redirectToRoute('admin_dashboard_settings_two_fa');
             }
 
-            if ($type === SettingType::SettingSMS->value) {
+            if (
+                $type === SettingType::SettingSMS->value
+                && $this->isGranted(UserAuthenticationVoter::SMS_CONFIG_WRITE)
+            ) {
                 $command = 'php bin/console reset:smsSettings --yes';
                 $projectRootDir = $this->getParameter('kernel.project_dir');
                 $process = new Process(explode(' ', $command), $projectRootDir);
@@ -364,7 +385,10 @@ class SettingsController extends AbstractController
                 return $this->redirectToRoute('admin_dashboard_settings_sms');
             }
 
-            if ($type === SettingType::SettingSchedule->value) {
+            if (
+                $type === SettingType::SettingSchedule->value
+                && $this->isGranted(UserAuthenticationVoter::CRON_SCHEDULE_WRITE)
+            ) {
                 $command = 'php bin/console reset:ScheduleSettings --yes';
                 $projectRootDir = $this->getParameter('kernel.project_dir');
                 $process = new Process(explode(' ', $command), $projectRootDir);
@@ -394,12 +418,13 @@ class SettingsController extends AbstractController
 
                 return $this->redirectToRoute('admin_dashboard_settings_schedule');
             }
+        } else {
+            $this->addFlash(
+                'error_admin',
+                $this->translator->trans('incorrectVerificationCode', [], 'controllers')
+            );
         }
-
-        $this->addFlash(
-            'error_admin',
-            $this->translator->trans('incorrectVerificationCode', [], 'controllers')
-        );
+        
         return $this->redirectToRoute('admin_confirm_reset', ['type' => $type]);
     }
 
