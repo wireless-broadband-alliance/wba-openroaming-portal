@@ -9,12 +9,17 @@ class PemKeyMatchesCertificate extends Constraint
 {
     public string $message = 'privateKeyDoesntMatchCertificate';
 
+    /**
+     * @param array<string, mixed> $options
+     * @param array<string>|null $groups
+     * @param mixed $payload
+     */
     public function __construct(
         public string $certificateField = 'client',
         public string $privateKeyField = 'key',
         array $options = [],
-        ?string $groups = null,
-        ?string $payload = null
+        ?array $groups = null,
+        $payload = null
     ) {
         parent::__construct($options, $groups, $payload);
     }
