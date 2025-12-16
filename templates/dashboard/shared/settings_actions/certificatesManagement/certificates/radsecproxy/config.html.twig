@@ -1,8 +1,8 @@
 {% extends 'dashboard/shared/settings_actions/certificatesManagement/certificates/radsecproxy/base.html.twig' %}
 
 {% set certDisplayNames = {
-    'clientRADSECPROXY': 'client'|trans({}, 'config_radsec'),
-    'keyRADSECPROXY': 'key'|trans({}, 'config_radsec'),
+    clientRADSECPROXY: 'client'|trans({}, 'config_radsec'),
+    keyRADSECPROXY: 'key'|trans({}, 'config_radsec'),
 } %}
 
 {% block radsecproxy_content %}
@@ -23,7 +23,7 @@
         {# Update Server Commands #}
         {{ include(
             'dashboard/shared/settings_actions/certificatesManagement/partials/_update_commands.html.twig',
-            { commands: commands, title: 'resolverCommands'|trans({}, 'config_radsec') }
+            {commands: commands, title: 'resolverCommands'|trans({}, 'config_radsec')},
         ) }}
 
         <div class="mt-8 flex justify-end">

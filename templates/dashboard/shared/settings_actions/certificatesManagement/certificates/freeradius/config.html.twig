@@ -1,11 +1,11 @@
 {% extends 'dashboard/shared/settings_actions/certificatesManagement/certificates/freeradius/base.html.twig' %}
 
 {% set certDisplayNames = {
-    'caFREERADIUS': 'CARoot'|trans({}, 'config_freeradius'),
-    'certFREERADIUS': 'serverCertificate'|trans({}, 'config_freeradius'),
-    'chainFREERADIUS': 'certificateChain'|trans({}, 'config_freeradius'),
-    'full_chainFREERADIUS': 'fullChain'|trans({}, 'config_freeradius'),
-    'private_keyFREERADIUS': 'privateKey'|trans({}, 'config_freeradius')
+    caFREERADIUS: 'CARoot'|trans({}, 'config_freeradius'),
+    certFREERADIUS: 'serverCertificate'|trans({}, 'config_freeradius'),
+    chainFREERADIUS: 'certificateChain'|trans({}, 'config_freeradius'),
+    full_chainFREERADIUS: 'fullChain'|trans({}, 'config_freeradius'),
+    private_keyFREERADIUS: 'privateKey'|trans({}, 'config_freeradius'),
 } %}
 
 {% block freeradius_content %}
@@ -23,7 +23,7 @@
         {# Update Server Commands #}
         {{ include(
             'dashboard/shared/settings_actions/certificatesManagement/partials/_update_commands.html.twig',
-            { commands: commands, title: 'title'|trans({}, 'config_freeradius') }
+            {commands: commands, title: 'title'|trans({}, 'config_freeradius')},
         ) }}
 
         <div class="mt-8 flex justify-end">

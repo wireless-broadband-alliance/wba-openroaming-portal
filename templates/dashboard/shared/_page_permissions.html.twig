@@ -1,17 +1,17 @@
 {% set permissions = {
-  'userManagement' : 'usersManagement',
-  'platformStatus' : 'platformStatus',
-  'landingPageConfig' : 'landingPageConfiguration',
-  'userEngagement' : 'userEngagement',
-  'termsPolicies' : 'termsAndPolicies',
-  'cronSchedule' : 'scheduleAutomation',
-  'authenticationMethods' : 'authenticationMethods',
-  'twoFactorAuth' : 'twoFactorAuthenticator',
-  'ldapSynchronization' : 'LDAPSynchronization',
-  'radiusProfileConfig' : 'radiusProfileConfiguration',
-  'smsConfig' : 'SMSConfiguration',
-  'portalStatistics' : 'portalStatistics',
-  'connectivityStatistics' : 'connectivityStatistics'
+  userManagement: 'usersManagement',
+  platformStatus: 'platformStatus',
+  landingPageConfig: 'landingPageConfiguration',
+  userEngagement: 'userEngagement',
+  termsPolicies: 'termsAndPolicies',
+  cronSchedule: 'scheduleAutomation',
+  authenticationMethods: 'authenticationMethods',
+  twoFactorAuth: 'twoFactorAuthenticator',
+  ldapSynchronization: 'LDAPSynchronization',
+  radiusProfileConfig: 'radiusProfileConfiguration',
+  smsConfig: 'SMSConfiguration',
+  portalStatistics: 'portalStatistics',
+  connectivityStatistics: 'connectivityStatistics',
 } %}
 
 {% for field, labelKey in permissions %}
@@ -29,7 +29,7 @@
         <label class="flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-300 cursor-pointer transition-colors duration-150 hover:bg-gray-100">
 
           {# Hidden radio input as peer #}
-          {{ form_widget(choice, {attr: {'class': 'peer hidden'}}) }}
+          {{ form_widget(choice, {attr: {class: 'peer hidden'}}) }}
 
           <span class="w-5 h-5 flex items-center justify-center border border-gray-300 rounded-full
                        peer-checked:bg-primary peer-checked:border-primary transition-colors duration-150">

@@ -17,11 +17,10 @@
 
     <div class="my-[25px] divider"></div>
 
-
     {# Update Server Commands #}
     {{ include(
         'dashboard/shared/settings_actions/certificatesManagement/partials/_update_commands.html.twig',
-        { commands: commands, title: 'commandsTitle'|trans({}, 'manual_installation') }
+        {commands: commands, title: 'commandsTitle'|trans({}, 'manual_installation')},
     ) }}
 
         <div class="mt-8 divider-solid"></div>

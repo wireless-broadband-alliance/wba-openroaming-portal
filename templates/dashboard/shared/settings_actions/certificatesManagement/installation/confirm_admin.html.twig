@@ -17,8 +17,6 @@
 
     <div class="my-6 divider-solid"></div>
 
-
-
     {{ form_start(form, {attr: {autocomplete: 'off'}}) }}
 
     <div class="w-full 2xl:w-1/2 bg-white rounded-md p-4">
@@ -52,7 +50,7 @@
             <div class="flex flex-col md:flex-row justify-center md:justify-between space-x-2 space-y-2 mt-4">
                 <div class="flex justify-start items-end pb-2">
                     <p>
-                        {{ 'generateNewEmail'|trans({'%url%':path('admin_dashboard_settings_certs_installation_admin_confirmation_resend')}, 'confirm')|raw }}
+                        {{ 'generateNewEmail'|trans({'%url%': path('admin_dashboard_settings_certs_installation_admin_confirmation_resend')}, 'confirm')|raw }}
                     </p>
                 </div>
 
