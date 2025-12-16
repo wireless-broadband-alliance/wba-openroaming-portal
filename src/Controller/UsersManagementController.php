@@ -79,7 +79,7 @@ class UsersManagementController extends AbstractController
     #[IsGranted(UserAuthenticationVoter::USERS_MANAGEMENT_WRITE)]
     public function revokeUsers(Request $request, User $user): Response
     {
-      /** @var User $currentUser */
+        /** @var User $currentUser */
         $currentUser = $this->getUser();
 
         $revokeProfiles = $this->profileManager->disableProfiles(
@@ -96,12 +96,22 @@ class UsersManagementController extends AbstractController
             return $this->redirectToRoute('admin_page');
         }
 
+        if (
+            !$this->isGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)
+            && (
+                in_array(AdminRoleType::ROLE_ADMIN->value, $user->getRoles())
+                || in_array(AdminRoleType::ROLE_SUPER_ADMIN->value, $user->getRoles())
+            )
+        ) {
+            throw $this->createAccessDeniedException();
+        }
+
         $eventMetaData = [
-        'ip' => $request->getClientIp(),
-        'user_agent' => $request->headers->get('User-Agent'),
-        'platform' => PlatformMode::LIVE->value,
-        'userRevoked' => $user->getUuid(),
-        'by' => $currentUser->getUuid(),
+            'ip' => $request->getClientIp(),
+            'user_agent' => $request->headers->get('User-Agent'),
+            'platform' => PlatformMode::LIVE->value,
+            'userRevoked' => $user->getUuid(),
+            'by' => $currentUser->getUuid(),
         ];
 
         $this->eventActions->saveEvent(
@@ -125,17 +135,17 @@ class UsersManagementController extends AbstractController
         return $this->redirectToRoute('admin_page');
     }
 
-  /**
-   * Handle export of the Users Table on the Main Route
-   */
-  /**
-   * @throws \PhpOffice\PhpSpreadsheet\Writer\Exception
-   */
+    /**
+     * Handle export of the Users Table on the Main Route
+     */
+    /**
+     * @throws \PhpOffice\PhpSpreadsheet\Writer\Exception
+     */
     #[Route('/dashboard/export/users', name: 'admin_user_export')]
     #[IsGranted(AdminRoleType::ROLE_ADMIN->value)]
     public function exportUsers(): Response
     {
-      // Check if export is enabled
+        // Check if export is enabled
         $exportUsers = $this->parameterBag->get('app.export_users');
         if ($exportUsers === OperationMode::OFF->value) {
             $this->addFlash(
@@ -145,14 +155,14 @@ class UsersManagementController extends AbstractController
             return $this->redirectToRoute('admin_page');
         }
 
-      // Fetch users excluding admins
+        // Fetch users excluding admins
         $users = $this->userRepository->findAll();
 
-      // Create spreadsheet
+        // Create spreadsheet
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
 
-      // Base headers
+        // Base headers
         $sheet->setCellValue('A1', 'ID');
         $sheet->setCellValue('B1', 'UUID');
         $sheet->setCellValue('C1', 'Email');
@@ -161,7 +171,7 @@ class UsersManagementController extends AbstractController
         $sheet->setCellValue('F1', 'Last Name');
         $sheet->setCellValue('G1', 'Verification');
 
-      // Show "Is Admin" only if the SUPER ADMIN requested this export
+        // Show "Is Admin" only if the SUPER ADMIN requested this export
         $includeAdminColumn = $this->isGranted('ROLE_SUPER_ADMIN');
         if ($includeAdminColumn) {
             $sheet->setCellValue('H1', 'Roles');
@@ -182,7 +192,7 @@ class UsersManagementController extends AbstractController
         foreach ($users as $user) {
             $sheet->setCellValue('A' . $row, $escapeSpreadSheetService->escapeSpreadsheetValue($user->getId()));
 
-          // UUID (prevent scientific notation)
+            // UUID (prevent scientific notation)
             $uuid = $user->getUuid();
             if (is_numeric($uuid)) {
                 $sheet->setCellValueExplicit('B' . $row, $uuid, DataType::TYPE_STRING);
@@ -192,7 +202,7 @@ class UsersManagementController extends AbstractController
 
             $sheet->setCellValue('C' . $row, $user->getEmail());
 
-          // Phone number
+            // Phone number
             $phoneNumber = $user->getPhoneNumber();
             if ($phoneNumber) {
                 $sheet->setCellValueExplicit('D' . $row, $phoneNumber, DataType::TYPE_STRING);
@@ -204,7 +214,7 @@ class UsersManagementController extends AbstractController
             $sheet->setCellValue('F' . $row, $user->getLastName());
             $sheet->setCellValue('G' . $row, $user->isVerified() ? 'Verified' : 'Not Verified');
 
-          // If SUPER ADMIN → add admin flag
+            // If SUPER ADMIN → add admin flag
             if ($includeAdminColumn) {
                 $roles = array_map(
                     static fn($role) => str_replace('ROLE_', '', $role),
@@ -214,7 +224,7 @@ class UsersManagementController extends AbstractController
                 $sheet->setCellValue('H' . $row, implode(', ', $roles));
             }
 
-          // Fetch provider info
+            // Fetch provider info
             $userExternalAuthRepository = $this->entityManager->getRepository(UserExternalAuth::class);
             $userExternalAuth = $userExternalAuthRepository->findOneBy(['user' => $user]);
 
@@ -224,26 +234,26 @@ class UsersManagementController extends AbstractController
             $bannedColumn = chr(ord('K') + $columnOffset);
             $createdColumn = chr(ord('L') + $columnOffset);
 
-          // 2FA
+            // 2FA
             $statusEnum = UserTwoFactorAuthenticationStatus::from($user->getTwoFAtype());
             $sheet->setCellValue($twoFAColumn . $row, $statusEnum->name);
 
-          // Provider
+            // Provider
             $sheet->setCellValue($providerColumn . $row, $userExternalAuth?->getProvider() ?? 'No Provider');
 
-          // ProviderId
+            // ProviderId
             $sheet->setCellValue($providerIdColumn . $row, $userExternalAuth?->getProviderId() ?? 'No ProviderId');
 
-          // Banned At
+            // Banned At
             $sheet->setCellValue($bannedColumn . $row, $user->getBannedAt()?->format('Y-m-d H:i:s') ?? 'Not Banned');
 
-          // Created At
+            // Created At
             $sheet->setCellValue($createdColumn . $row, $user->getCreatedAt());
 
             $row++;
         }
 
-      // Output file
+        // Output file
         $tempFile = tempnam(sys_get_temp_dir(), 'users');
         $writer = new Xlsx($spreadsheet);
         $writer->save($tempFile);
@@ -251,44 +261,44 @@ class UsersManagementController extends AbstractController
         return $this->file($tempFile, 'users.xlsx');
     }
 
-  /**
-   * @throws RandomException
-   */
+    /**
+     * @throws RandomException
+     */
     #[Route('/dashboard/add', name: 'dashboard_add_admin')]
     #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
     public function addUsers(Request $request): Response
     {
-      // Call the getSettings method of GetSettings class to retrieve the data
+        // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings();
 
-      // Get the current logged-in user (admin)
-      /** @var User $currentUser */
+        // Get the current logged-in user (admin)
+        /** @var User $currentUser */
         $currentUser = $this->getUser();
 
         $newUser = new User();
         $userAddDTO = new UserAddDTO($this->userPasswordHasher, $this->entityManager, $newUser);
 
-      // Create & handle form
+        // Create & handle form
         $form = $this->createForm(UserAddType::class, $userAddDTO);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-          // Convert DTO → Entity data before creation
+            // Convert DTO → Entity data before creation
             $userAddDTO->createUser($newUser);
 
-          // Flash message
+            // Flash message
             $this->addFlash(
                 'success_admin',
                 $this->translator->trans('addedNewUser', [
-                '%uuid%' => $newUser->getUuid(),
+                    '%uuid%' => $newUser->getUuid(),
                 ], 'controllers')
             );
 
             $eventMetaData = [
-              'ip' => $request->getClientIp(),
-              'user_agent' => $request->headers->get('User-Agent'),
-              'userAddedBy' => $newUser->getUuid(),
-              'by' => $currentUser->getUuid(),
+                'ip' => $request->getClientIp(),
+                'user_agent' => $request->headers->get('User-Agent'),
+                'userAddedBy' => $newUser->getUuid(),
+                'by' => $currentUser->getUuid(),
             ];
 
             $this->eventActions->saveEvent(
@@ -302,30 +312,39 @@ class UsersManagementController extends AbstractController
         }
 
         return $this->render('dashboard/actions/add.html.twig', [
-        'form' => $form->createView(),
-        'userAddDTO' => $userAddDTO,
-        'data' => $data,
-        'current_user' => $currentUser,
-        'context' => FirewallType::DASHBOARD->value,
+            'form' => $form->createView(),
+            'userAddDTO' => $userAddDTO,
+            'data' => $data,
+            'current_user' => $currentUser,
+            'context' => FirewallType::DASHBOARD->value,
         ]);
     }
 
-  /**
-   * Deletes Users from the Portal, encrypts the data before delete and saves it
-   */
-  /**
-   * @throws \JsonException
-   */
+    /**
+     * Deletes Users from the Portal, encrypts the data before delete and saves it
+     */
+    /**
+     * @throws \JsonException
+     */
     #[Route('/dashboard/delete/{id:user<\d+>}', name: 'admin_user_delete', methods: ['POST'])]
     #[IsGranted(UserAuthenticationVoter::USERS_MANAGEMENT_WRITE)]
     public function deleteUsers(User $user, Request $request): Response
     {
-      /** @var User $currentUser */
+        /** @var User $currentUser */
         $currentUser = $this->getUser();
 
-      // Fetch user and external auths
-        $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $user->getId()]);
+        if (
+            !$this->isGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)
+            && (
+                in_array(AdminRoleType::ROLE_ADMIN->value, $user->getRoles())
+                || in_array(AdminRoleType::ROLE_SUPER_ADMIN->value, $user->getRoles())
+            )
+        ) {
+            throw $this->createAccessDeniedException();
+        }
 
+        // Fetch user and external auths
+        $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $user->getId()]);
         $getUserUuid = $user->getUuid();
 
         if ($user->getDeletedAt() !== null) {
@@ -337,7 +356,7 @@ class UsersManagementController extends AbstractController
         }
 
         $result = $this->userDeletionService->deleteUser($user, $userExternalAuths, $request, $currentUser);
-      // Handle the success or failure response
+        // Handle the success or failure response
         if (!$result['success']) {
             $this->addFlash('error', $result['message']);
             return $this->redirectToRoute('admin_page');
@@ -354,19 +373,19 @@ class UsersManagementController extends AbstractController
             )
         );
 
-      // Return to the last page where the user has (with searching filters)
+        // Return to the last page where the user has (with searching filters)
         $lastPage = $request->headers->get('referer', '/dashboard');
         return $this->redirect($lastPage);
     }
 
-  /**
-   * Handles the edit of the Users (Super-admin || Admin || User)
-   */
-  /**
-   * @throws TransportExceptionInterface
-   * @throws \DateMalformedStringException
-   * @throws \DateMalformedIntervalStringException
-   */
+    /**
+     * Handles the edit of the Users (Super-admin || Admin || User)
+     */
+    /**
+     * @throws TransportExceptionInterface
+     * @throws \DateMalformedStringException
+     * @throws \DateMalformedIntervalStringException
+     */
     #[Route('/dashboard/edit/{id:user<\d+>}', name: 'admin_user_edit')]
     #[IsGranted(AdminRoleType::ROLE_ADMIN->value)]
     public function editUsers(
@@ -375,20 +394,26 @@ class UsersManagementController extends AbstractController
         EntityManagerInterface $em,
         User $user
     ): Response {
-      // Call the getSettings method of GetSettings class to retrieve the data
+        // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings();
 
-      // Get the current logged-in user (admin)
-      /** @var User $currentUser */
+        // Get the current logged-in user (admin)
+        /** @var User $currentUser */
         $currentUser = $this->getUser();
         $canWrite = $this->isGranted(UserAuthenticationVoter::USERS_MANAGEMENT_WRITE);
 
-        if (!$user = $this->userRepository->find($id)) {
-            // Get the 'id' parameter from the route URL
-            $this->addFlash(
-                'error',
-                $this->translator->trans('userNotFound', [], 'controllers')
-            );
+        if (
+            $user->getId() !== $currentUser->getId()
+            && !$this->isGranted(UserAuthenticationVoter::USERS_MANAGEMENT_READ)
+        ) {
+            return $this->redirectToRoute('admin_page');
+        } elseif (
+            !$this->isGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)
+            && (
+                in_array(AdminRoleType::ROLE_ADMIN->value, $user->getRoles())
+                || in_array(AdminRoleType::ROLE_SUPER_ADMIN->value, $user->getRoles())
+            )
+        ) {
             return $this->redirectToRoute('admin_page');
         }
 
@@ -403,33 +428,33 @@ class UsersManagementController extends AbstractController
 
         $userUpdateDTO = new UserUpdateDTO($user);
 
-      // Set IDs and roles so blockBanSuperAdmin() works correctly
+        // Set IDs and roles so blockBanSuperAdmin() works correctly
         $userUpdateDTO->editingUserId = $user->getId();
         $userUpdateDTO->currentUserId = $currentUser->getId();
         $userUpdateDTO->roles = $user->getRoles();
 
-      // Determine if a admin is being edited
+        // Determine if a admin is being edited
         $isEditedUserAdmin = in_array(AdminRoleType::ROLE_ADMIN->value, $user->getRoles(), true) ||
-        in_array(AdminRoleType::ROLE_SUPER_ADMIN->value, $user->getRoles(), true);
+            in_array(AdminRoleType::ROLE_SUPER_ADMIN->value, $user->getRoles(), true);
         $isCurrentUserSuperAdmin = $this->isGranted(AdminRoleType::ROLE_SUPER_ADMIN->value);
         $isEditingSelf = $user->getId() === $currentUser->getId();
 
-      // Only allow permission editing if super admin editing another admin
+        // Only allow permission editing if super admin editing another admin
         $userUpdateDTO->editingAdmin = $isEditedUserAdmin && $isCurrentUserSuperAdmin && !$isEditingSelf;
 
-      // Create & handle form
+        // Create & handle form
         $form = $this->createForm(
             UserUpdateType::class,
             $userUpdateDTO,
             [
-            'disabled' => !$canWrite,
-            'edited_user' => $user
+                'disabled' => !$canWrite,
+                'edited_user' => $user
             ]
         );
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid() && $canWrite) {
-          // Use DTO method to map data back
+            // Use DTO method to map data back
             $userUpdateDTO->updateUser($user, $userUpdateDTO->editingAdmin);
 
             if ($userUpdateDTO->banned) {
@@ -457,10 +482,10 @@ class UsersManagementController extends AbstractController
                 AnalyticalEventType::USER_ACCOUNT_UPDATE_FROM_UI->value,
                 new DateTime(),
                 [
-                'ip' => $request->getClientIp(),
-                'user_agent' => $request->headers->get('User-Agent'),
-                'edited' => $user->getUuid(),
-                'by' => $currentUser->getUuid(),
+                    'ip' => $request->getClientIp(),
+                    'user_agent' => $request->headers->get('User-Agent'),
+                    'edited' => $user->getUuid(),
+                    'by' => $currentUser->getUuid(),
                 ]
             );
 
@@ -476,7 +501,7 @@ class UsersManagementController extends AbstractController
                 )
             );
 
-          // Return to the last page where the user has (with searching filters)
+            // Return to the last page where the user has (with searching filters)
             $lastPage = $request->headers->get('referer', '/dashboard');
             return $this->redirect($lastPage);
         }
@@ -485,7 +510,7 @@ class UsersManagementController extends AbstractController
         $formReset->handleRequest($request);
 
         if ($formReset->isSubmitted() && $formReset->isValid() && $canWrite) {
-          // get the both typed passwords by the admin
+            // get the both typed passwords by the admin
             $newPassword = $formReset->get('password')->getData();
             $confirmPassword = $formReset->get('confirmPassword')->getData();
 
@@ -497,24 +522,24 @@ class UsersManagementController extends AbstractController
                 return $this->redirectToRoute('admin_user_edit', ['id' => $user->getId()]);
             }
 
-          // Get the User Provider && ProviderId
+            // Get the User Provider && ProviderId
             $userExternalAuth = $this->userExternalAuthRepository->findOneBy(['user' => $user]);
 
-          // Hash the new password
+            // Hash the new password
             $hashedPassword = $passwordHasher->hashPassword($user, $newPassword);
             $user->setPassword($hashedPassword);
             $user->setForgotPasswordRequest(true);
             $em->flush();
 
             if ($user->getEmail()) {
-              // Send email for the user
+                // Send email for the user
                 $this->emailGenerator->sendResetPasswordEmailByAdmin($user, $newPassword);
 
                 $eventMetadata = [
-                'ip' => $request->getClientIp(),
-                'user_agent' => $request->headers->get('User-Agent'),
-                'edited ' => $user->getUuid(),
-                'by' => $currentUser->getUuid(),
+                    'ip' => $request->getClientIp(),
+                    'user_agent' => $request->headers->get('User-Agent'),
+                    'edited ' => $user->getUuid(),
+                    'by' => $currentUser->getUuid(),
                 ];
 
                 $this->eventActions->saveEvent(
@@ -535,32 +560,32 @@ class UsersManagementController extends AbstractController
 
                 $smsResendInterval = null;
                 if (is_array($data) && isset($data[SettingName::SMS_TIMER_RESEND->value]['value'])) {
-                      $smsResendInterval = $data[SettingName::SMS_TIMER_RESEND->value]['value'];
+                    $smsResendInterval = $data[SettingName::SMS_TIMER_RESEND->value]['value'];
                 }
 
                 if ($smsResendInterval === null) {
-                  // Fallback value if the setting is missing just for phpstan be happy
+                    // Fallback value if the setting is missing just for phpstan be happy
                     $smsResendInterval = 5;
                 }
 
                 $minInterval = new DateInterval('PT' . $smsResendInterval . 'M');
                 $currentTime = new DateTime();
 
-              // Retrieve the metadata from the latest event
+                // Retrieve the metadata from the latest event
                 $latestEventMetadata = $latestEvent instanceof Event ? $latestEvent->getEventMetadata() : [];
                 $lastResetAccountPasswordTime = isset($latestEventMetadata['lastResetAccountPasswordTime'])
-                ? new DateTime($latestEventMetadata['lastResetAccountPasswordTime'])
-                : null;
+                    ? new DateTime($latestEventMetadata['lastResetAccountPasswordTime'])
+                    : null;
                 $resetAttempts = $latestEventMetadata['resetAttempts'] ?? 0;
 
                 if (
                     (!$latestEvent || $resetAttempts < 3)
                     && (
-                    !$latestEvent
-                    || (
-                    $lastResetAccountPasswordTime instanceof DateTime
-                    && $lastResetAccountPasswordTime->add($minInterval) < $currentTime
-                    )
+                        !$latestEvent
+                        || (
+                            $lastResetAccountPasswordTime instanceof DateTime
+                            && $lastResetAccountPasswordTime->add($minInterval) < $currentTime
+                        )
                     )
                 ) {
                     $attempts = $resetAttempts + 1;
@@ -573,24 +598,24 @@ class UsersManagementController extends AbstractController
                     $smsResponse = $this->sendSMS->sendSmsNoValidation($user, $message);
 
                     if ($smsResponse !== '' && $smsResponse !== '0') {
-                            $this->addFlash(
-                                'success',
-                                $this->translator->trans('passwordSentSMS', [], 'controllers')
-                            );
+                        $this->addFlash(
+                            'success',
+                            $this->translator->trans('passwordSentSMS', [], 'controllers')
+                        );
 
-                            $eventMetadata = [
-                                'ip' => $request->getClientIp(),
-                                'edited' => $user->getUuid(),
-                                'by' => $currentUser->getUuid(),
-                                'resetAttempts' => $attempts,
-                                'lastResetAccountPasswordTime' => $currentTime->format('Y-m-d H:i:s'),
-                            ];
-                            $this->eventActions->saveEvent(
-                                $user,
-                                AnalyticalEventType::USER_ACCOUNT_UPDATE_PASSWORD_FROM_UI->value,
-                                new DateTime(),
-                                $eventMetadata
-                            );
+                        $eventMetadata = [
+                            'ip' => $request->getClientIp(),
+                            'edited' => $user->getUuid(),
+                            'by' => $currentUser->getUuid(),
+                            'resetAttempts' => $attempts,
+                            'lastResetAccountPasswordTime' => $currentTime->format('Y-m-d H:i:s'),
+                        ];
+                        $this->eventActions->saveEvent(
+                            $user,
+                            AnalyticalEventType::USER_ACCOUNT_UPDATE_PASSWORD_FROM_UI->value,
+                            new DateTime(),
+                            $eventMetadata
+                        );
                     } else {
                         $this->addFlash(
                             'error',
@@ -610,7 +635,7 @@ class UsersManagementController extends AbstractController
                 )
             );
 
-          // Return to the last page where the user has (with searching filters)
+            // Return to the last page where the user has (with searching filters)
             $lastPage = $request->headers->get('referer', '/dashboard');
             return $this->redirect($lastPage);
         }
@@ -628,39 +653,39 @@ class UsersManagementController extends AbstractController
         return $this->render(
             'dashboard/actions/edit.html.twig',
             [
-            'form' => $form->createView(),
-            'formReset' => $formReset->createView(),
-            'user' => $user,
-            'data' => $data,
-            'current_user' => $currentUser,
-            'context' => FirewallType::DASHBOARD->value,
-            'userUpdateDTO' => $userUpdateDTO,
-            'lastStartConnection' => $lastStartConnection,
-            'lastStopConnection' => $lastStopConnection,
+                'form' => $form->createView(),
+                'formReset' => $formReset->createView(),
+                'user' => $user,
+                'data' => $data,
+                'current_user' => $currentUser,
+                'context' => FirewallType::DASHBOARD->value,
+                'userUpdateDTO' => $userUpdateDTO,
+                'lastStartConnection' => $lastStartConnection,
+                'lastStopConnection' => $lastStopConnection,
             ]
         );
     }
 
-  /**
-   * Render a confirmation password form
-   */
-  /**
-   * @param string $type Type of action
-   */
+    /**
+     * Render a confirmation password form
+     */
+    /**
+     * @param string $type Type of action
+     */
     #[Route('/dashboard/confirm/{type}', name: 'admin_confirm_reset')]
     #[IsGranted(UserAuthenticationVoter::USERS_MANAGEMENT_WRITE)]
     public function confirmReset(string $type): Response
     {
-      // Call the getSettings method of GetSettings class to retrieve the data
+        // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings();
 
-      /** @var User $currentUser */
+        /** @var User $currentUser */
         $currentUser = $this->getUser();
 
         return $this->render('dashboard/actions/confirm.html.twig', [
-        'data' => $data,
-        'type' => $type,
-        'user' => $currentUser,
+            'data' => $data,
+            'type' => $type,
+            'user' => $currentUser,
         ]);
     }
 
@@ -686,14 +711,14 @@ class UsersManagementController extends AbstractController
 
         $userExternalAuths = $this->userExternalAuthRepository->findOneBy(['user' => $user]);
 
-      // Disable the current associated Profile
+        // Disable the current associated Profile
         $this->profileManager->disableProfiles(
             $user,
             UserRadiusProfileRevokeReason::TWO_FA_DISABLED_BY->value,
             true
         );
 
-      // Change user 2FA status
+        // Change user 2FA status
         $this->twoFAService->disable2FA($user);
         $this->twoFAService->event2FA(
             $request->getClientIp(),
@@ -737,7 +762,7 @@ class UsersManagementController extends AbstractController
     #[IsGranted('ROLE_SUPER_ADMIN')]
     public function giveAdminPermissions(Request $request, User $user): Response
     {
-      /** @var User $currentUser */
+        /** @var User $currentUser */
         $currentUser = $this->getUser();
 
         $user->setRoles([AdminRoleType::ROLE_ADMIN->value]);
@@ -746,11 +771,11 @@ class UsersManagementController extends AbstractController
         $this->entityManager->flush();
 
         $eventMetaData = [
-        'ip' => $request->getClientIp(),
-        'user_agent' => $request->headers->get('User-Agent'),
-        'platform' => PlatformMode::LIVE->value,
-        'giveAdminPermissionsTo' => $user->getUuid(),
-        'by' => $currentUser->getUuid(),
+            'ip' => $request->getClientIp(),
+            'user_agent' => $request->headers->get('User-Agent'),
+            'platform' => PlatformMode::LIVE->value,
+            'giveAdminPermissionsTo' => $user->getUuid(),
+            'by' => $currentUser->getUuid(),
         ];
 
         $this->eventActions->saveEvent(
@@ -767,7 +792,7 @@ class UsersManagementController extends AbstractController
     #[IsGranted('ROLE_SUPER_ADMIN')]
     public function removeAdminPermissions(Request $request, User $user): Response
     {
-      /** @var User $currentUser */
+        /** @var User $currentUser */
         $currentUser = $this->getUser();
 
         $user->setRoles(["ROLE_USER"]);
@@ -776,11 +801,11 @@ class UsersManagementController extends AbstractController
         $this->entityManager->flush();
 
         $eventMetaData = [
-        'ip' => $request->getClientIp(),
-        'user_agent' => $request->headers->get('User-Agent'),
-        'platform' => PlatformMode::LIVE->value,
-        'removeAdminPermissionsTo' => $user->getUuid(),
-        'by' => $currentUser->getUuid(),
+            'ip' => $request->getClientIp(),
+            'user_agent' => $request->headers->get('User-Agent'),
+            'platform' => PlatformMode::LIVE->value,
+            'removeAdminPermissionsTo' => $user->getUuid(),
+            'by' => $currentUser->getUuid(),
         ];
 
         $this->eventActions->saveEvent(
