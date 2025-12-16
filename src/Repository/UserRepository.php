@@ -244,16 +244,22 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         $qb->select('COUNT(u.id)')
         ->andWhere($qb->expr()->isNull('u.deletedAt')); // exclude deleted users
 
-      // Filter by role if counting only admins
+      // Filter by role if counting only admins (including super admins)
         if ($onlyAdmins) {
-            $qb->andWhere('u.roles LIKE :adminRole')
-            ->setParameter('adminRole', '%ROLE_ADMIN%');
+            $qb->andWhere(
+                $qb->expr()->orX(
+                    'u.roles LIKE :adminRole',
+                    'u.roles LIKE :superAdminRole'
+                )
+            )
+              ->setParameter('adminRole', '%ROLE_ADMIN%')
+              ->setParameter('superAdminRole', '%ROLE_SUPER_ADMIN%');
         } else {
           // Exclude admin & super admin when counting all other users
             $qb->andWhere('u.roles NOT LIKE :adminRole')
-            ->andWhere('u.roles NOT LIKE :superAdmin')
+            ->andWhere('u.roles NOT LIKE :superAdminRole')
             ->setParameter('adminRole', '%ROLE_ADMIN%')
-            ->setParameter('superAdmin', '%ROLE_SUPER_ADMIN%');
+            ->setParameter('superAdminRole', '%ROLE_SUPER_ADMIN%');
         }
 
       // Apply search term if provided
@@ -295,16 +301,22 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         ->andWhere($qb->expr()->isNull('u.deletedAt'))
         ->setParameter('verified', true);
 
+      // Filter by role if counting only admins (including super admins)
         if ($onlyAdmins) {
-          // Count only verified admins
-            $qb->andWhere('u.roles LIKE :adminRole')
-            ->setParameter('adminRole', '%ROLE_ADMIN%');
+            $qb->andWhere(
+                $qb->expr()->orX(
+                    'u.roles LIKE :adminRole',
+                    'u.roles LIKE :superAdminRole'
+                )
+            )
+              ->setParameter('adminRole', '%ROLE_ADMIN%')
+              ->setParameter('superAdminRole', '%ROLE_SUPER_ADMIN%');
         } else {
-          // Exclude admins
+          // Exclude admin & super admin when counting all other users
             $qb->andWhere('u.roles NOT LIKE :adminRole')
-            ->andWhere('u.roles NOT LIKE :superAdmin')
+            ->andWhere('u.roles NOT LIKE :superAdminRole')
             ->setParameter('adminRole', '%ROLE_ADMIN%')
-            ->setParameter('superAdmin', '%ROLE_SUPER_ADMIN%');
+            ->setParameter('superAdminRole', '%ROLE_SUPER_ADMIN%');
         }
 
         if ($searchTerm !== null) {
@@ -336,16 +348,22 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         ->andWhere('u.bannedAt IS NOT NULL')
         ->andWhere($qb->expr()->isNull('u.deletedAt'));
 
+      // Filter by role if counting only admins (including super admins)
         if ($onlyAdmins) {
-          // Count only banned admins
-            $qb->andWhere('u.roles LIKE :adminRole')
-            ->setParameter('adminRole', '%ROLE_ADMIN%');
+            $qb->andWhere(
+                $qb->expr()->orX(
+                    'u.roles LIKE :adminRole',
+                    'u.roles LIKE :superAdminRole'
+                )
+            )
+              ->setParameter('adminRole', '%ROLE_ADMIN%')
+              ->setParameter('superAdminRole', '%ROLE_SUPER_ADMIN%');
         } else {
-          // Exclude admins
+          // Exclude admin & super admin when counting all other users
             $qb->andWhere('u.roles NOT LIKE :adminRole')
-            ->andWhere('u.roles NOT LIKE :superAdmin')
+            ->andWhere('u.roles NOT LIKE :superAdminRole')
             ->setParameter('adminRole', '%ROLE_ADMIN%')
-            ->setParameter('superAdmin', '%ROLE_SUPER_ADMIN%');
+            ->setParameter('superAdminRole', '%ROLE_SUPER_ADMIN%');
         }
 
         if ($searchTerm !== null) {

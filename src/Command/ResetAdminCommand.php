@@ -54,7 +54,8 @@ class ResetAdminCommand extends Command
         if (!$input->getOption('yes')) {
             $helper = $this->getHelper('question');
             $question = new ConfirmationQuestion(
-                'This action will reset the super admin credentials to its default state without deleting any data. [y/N]',
+                'This action will reset the super admin credentials' .
+                'to its default state without deleting any data. [y/N]',
                 false
             );
           /** @var QuestionHelper $helper */

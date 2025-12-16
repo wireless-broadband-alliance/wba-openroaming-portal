@@ -23,6 +23,7 @@ use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 ;
+
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
@@ -96,10 +97,10 @@ readonly class InstallationService
     public function getStepperStatus(string $step): array
     {
         $status = [
-            InstallationWidgetStepsEnum::DATABASE->value => false,
-            InstallationWidgetStepsEnum::SETTINGS->value => false,
-            InstallationWidgetStepsEnum::ADMIN_CREDENTIALS->value => false,
-            InstallationWidgetStepsEnum::SUMMARY->value => false,
+        InstallationWidgetStepsEnum::DATABASE->value => false,
+        InstallationWidgetStepsEnum::SETTINGS->value => false,
+        InstallationWidgetStepsEnum::ADMIN_CREDENTIALS->value => false,
+        InstallationWidgetStepsEnum::SUMMARY->value => false,
         ];
 
         if ($step === InstallationStep::SETTINGS->value) {
@@ -119,10 +120,10 @@ readonly class InstallationService
     }
 
 
-    /**
-     * @throws RandomException
-     * @throws TransportExceptionInterface
-     */
+  /**
+   * @throws RandomException
+   * @throws TransportExceptionInterface
+   */
     public function sendAdminConfirmationCode(InstallationProgress $installationProgress): void
     {
         $verificationCode = random_int(100000, 999999);
@@ -133,31 +134,31 @@ readonly class InstallationService
 
         $emailTitle = $this->settingRepository->findOneBy(['name' => SettingName::PAGE_TITLE->value])->getValue();
         $contactEmail = $this->settingRepository->findOneBy([
-            'name' => SettingName::CONTACT_EMAIL->value,
+        'name' => SettingName::CONTACT_EMAIL->value,
         ])->getValue();
         $customerLogo = $this->settingRepository->findOneBy([
-            'name' => SettingName::CUSTOMER_LOGO->value,
+        'name' => SettingName::CUSTOMER_LOGO->value,
         ])->getValue();
         $projectDir = $this->parameterBag->get('kernel.project_dir');
         $logoPath = $projectDir . '/public' . $customerLogo;
 
         $email = new TemplatedEmail()
-            ->from(
-                new Address(
-                    $this->parameterBag->get('app.email_address'),
-                    $this->parameterBag->get('app.sender_name')
-                )
+        ->from(
+            new Address(
+                $this->parameterBag->get('app.email_address'),
+                $this->parameterBag->get('app.sender_name')
             )
-            ->to($installationProgress->getEmailAdmin())
-            ->subject($this->translator->trans('adminConfirmationEmail', [], 'InstallationService'))
-            ->htmlTemplate('email/installation_admin_code.html.twig')
-            ->context([
-                'uuid' => $installationProgress->getEmailAdmin(),
-                'emailTitle' => $emailTitle,
-                'contactEmail' => $contactEmail,
-                'code' => $verificationCode,
-            ])
-            ->embedFromPath($logoPath, 'logo_cid');
+        )
+        ->to($installationProgress->getEmailAdmin())
+        ->subject($this->translator->trans('adminConfirmationEmail', [], 'InstallationService'))
+        ->htmlTemplate('email/installation_admin_code.html.twig')
+        ->context([
+            'uuid' => $installationProgress->getEmailAdmin(),
+            'emailTitle' => $emailTitle,
+            'contactEmail' => $contactEmail,
+            'code' => $verificationCode,
+        ])
+        ->embedFromPath($logoPath, 'logo_cid');
 
         $this->mailer->send($email);
     }
@@ -172,31 +173,31 @@ readonly class InstallationService
 
         $emailTitle = $this->settingRepository->findOneBy(['name' => SettingName::PAGE_TITLE->value])->getValue();
         $contactEmail = $this->settingRepository->findOneBy([
-            'name' => SettingName::CONTACT_EMAIL->value,
+        'name' => SettingName::CONTACT_EMAIL->value,
         ])->getValue();
         $customerLogo = $this->settingRepository->findOneBy([
-            'name' => SettingName::CUSTOMER_LOGO->value,
+        'name' => SettingName::CUSTOMER_LOGO->value,
         ])->getValue();
         $projectDir = $this->parameterBag->get('kernel.project_dir');
         $logoPath = $projectDir . '/public' . $customerLogo;
 
         $email = new TemplatedEmail()
-            ->from(
-                new Address(
-                    $this->parameterBag->get('app.email_address'),
-                    $this->parameterBag->get('app.sender_name')
-                )
+        ->from(
+            new Address(
+                $this->parameterBag->get('app.email_address'),
+                $this->parameterBag->get('app.sender_name')
             )
-            ->to($user->getEmail())
-            ->subject($this->translator->trans('adminIdentityVerification', [], 'InstallationService'))
-            ->htmlTemplate('email/installation_entity_verification.html.twig')
-            ->context([
-                'uuid' => $user->getUuid(),
-                'emailTitle' => $emailTitle,
-                'contactEmail' => $contactEmail,
-                'code' => $verificationCode,
-            ])
-            ->embedFromPath($logoPath, 'logo_cid');
+        )
+        ->to($user->getEmail())
+        ->subject($this->translator->trans('adminIdentityVerification', [], 'InstallationService'))
+        ->htmlTemplate('email/installation_entity_verification.html.twig')
+        ->context([
+            'uuid' => $user->getUuid(),
+            'emailTitle' => $emailTitle,
+            'contactEmail' => $contactEmail,
+            'code' => $verificationCode,
+        ])
+        ->embedFromPath($logoPath, 'logo_cid');
 
         $this->mailer->send($email);
     }
@@ -256,10 +257,20 @@ readonly class InstallationService
 
     public function checkDatabaseSettings(InstallationProgress $installationProgress): bool
     {
-        if (!$this->envValueMatches(DataBaseSetupType::DATABASE_URL->value, $installationProgress->getDbOpenRoaming())) {
+        if (
+            !$this->envValueMatches(
+                DataBaseSetupType::DATABASE_URL->value,
+                $installationProgress->getDbOpenRoaming()
+            )
+        ) {
             return false;
         }
-        if (!$this->envValueMatches(DataBaseSetupType::DATABASE_FREERADIUS_URL->value, $installationProgress->getDbFreeradius())) {
+        if (
+            !$this->envValueMatches(
+                DataBaseSetupType::DATABASE_FREERADIUS_URL->value,
+                $installationProgress->getDbFreeradius()
+            )
+        ) {
             return false;
         }
         return true;
@@ -267,13 +278,28 @@ readonly class InstallationService
 
     public function checkSettingsValues(InstallationProgress $installationProgress): bool
     {
-        if (!$this->envValueMatches(SettingsConfigType::TRUSTED_PROXIES->value, implode(',', $installationProgress->getTrustedProxies()))) {
+        if (
+            !$this->envValueMatches(
+                SettingsConfigType::TRUSTED_PROXIES->value,
+                implode(',', $installationProgress->getTrustedProxies())
+            )
+        ) {
             return false;
         }
-        if (!$this->envValueMatches(SettingsConfigType::TURNSTILE_KEY->value, $installationProgress->getTurnstileKey())) {
+        if (
+            !$this->envValueMatches(
+                SettingsConfigType::TURNSTILE_KEY->value,
+                $installationProgress->getTurnstileKey()
+            )
+        ) {
             return false;
         }
-        if (!$this->envValueMatches(SettingsConfigType::TURNSTILE_SECRET->value, $installationProgress->getTurnstileSecret())) {
+        if (
+            !$this->envValueMatches(
+                SettingsConfigType::TURNSTILE_SECRET->value,
+                $installationProgress->getTurnstileSecret()
+            )
+        ) {
             return false;
         }
         if (
@@ -327,10 +353,10 @@ readonly class InstallationService
                 SettingsConfigType::TURNSTILE_SECRET->value
             );
             if ($lastCompleted->getJwtPassphrase() !== null) {
-                $this->databaseConnectionService->writeDatabaseUrlToEnv(
-                    $lastCompleted->getJwtPassphrase(),
-                    SettingsConfigType::JWT_PASSPHRASE->value
-                );
+                  $this->databaseConnectionService->writeDatabaseUrlToEnv(
+                      $lastCompleted->getJwtPassphrase(),
+                      SettingsConfigType::JWT_PASSPHRASE->value
+                  );
             }
 
             $adminUser = $this->userRepository->findSuperAdmin();
@@ -345,16 +371,32 @@ readonly class InstallationService
 
     public function commandToDataBase(InstallationProgress $installationProgress): string
     {
-        return 'scripts/update-db-env.sh "' . $installationProgress->getDbOpenRoaming() . '" "' . $installationProgress->getDbFreeradius() . '"';
+        return 'scripts/update-db-env.sh "' .
+        $installationProgress->getDbOpenRoaming() .
+        '" "' .
+        $installationProgress->getDbFreeradius() .
+        '"';
     }
 
     public function commandToSettings(InstallationProgress $installationProgress): string
     {
         if ($installationProgress->getJwtPassphrase() !== null) {
-            return 'scripts/update-settings-env.sh "' . $installationProgress->getJwtPassphrase() . '" "' . implode(',', $installationProgress->getTrustedProxies()) .
-                '" "' . $installationProgress->getTurnstileKey() . '" "' . $installationProgress->getTurnstileSecret() . '"';
+            return 'scripts/update-settings-env.sh "' .
+            $installationProgress->getJwtPassphrase() .
+            '" "' .
+            implode(',', $installationProgress->getTrustedProxies()) .
+            '" "' .
+            $installationProgress->getTurnstileKey() .
+            '" "' .
+            $installationProgress->getTurnstileSecret() .
+            '"';
         }
-        return 'scripts/update-settings-env.sh "" "' . implode(',', $installationProgress->getTrustedProxies()) .
-            '" "' . $installationProgress->getTurnstileKey() . '" "' . $installationProgress->getTurnstileSecret() . '"';
+        return 'scripts/update-settings-env.sh "" "' .
+        implode(',', $installationProgress->getTrustedProxies()) .
+        '" "' .
+        $installationProgress->getTurnstileKey() .
+        '" "' .
+        $installationProgress->getTurnstileSecret() .
+        '"';
     }
 }
