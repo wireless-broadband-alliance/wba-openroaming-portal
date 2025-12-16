@@ -5,7 +5,7 @@
 {% block container %}
   {# Content - Edit Users #}
   <h1 class="text-3xl font-bold text-gray-800 mb-8 border-b-2 border-gray-300 pb-2">{{ user.uuid }}</h1>
-  <twig:UserUpdateForm :userUpdateDTO="userUpdateDTO" :form="form">
+  <twig:UserUpdateForm :userUpdateDTO="userUpdateDTO" :form="form" :editedUser="user">
 
     {{ form_start(form) }}
     {{ form_errors(form) }}
@@ -121,11 +121,11 @@
 
       {% if
         is_granted('ROLE_SUPER_ADMIN')
-        and 'ROLE_ADMIN' in user.roles
-        and 'ROLE_SUPER_ADMIN' not in user.roles
+        and 'ROLE_ADMIN' in editedUser.roles
+        and 'ROLE_SUPER_ADMIN' not in editedUser.roles
       %}
         {# Permissions Section #}
-        <div class="lg:col-span-2 flex flex-col gap-4">
+        <div class="mt-4 lg:col-span-2 flex flex-col gap-4">
           <h2 class="text-xl sm:text-2xl font-semibold text-gray-800">
             {{ 'editPermissions'|trans({}, 'UserUpdateType') }}
           </h2>

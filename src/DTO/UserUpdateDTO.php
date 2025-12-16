@@ -4,7 +4,9 @@ namespace App\DTO;
 
 use App\Entity\User;
 use App\Enum\AdminPermissionsType;
+use App\Enum\AdminRoleType;
 use App\Enum\PermissionLevel;
+use DateTime;
 use DateTimeInterface;
 use libphonenumber\PhoneNumber;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -32,6 +34,15 @@ class UserUpdateDTO
 
     public bool $isVerified = false;
     public bool $banned = false;
+
+  /** ID of the user being edited */
+    public ?int $editingUserId = null;
+
+  /** ID of the currently logged-in user */
+    public ?int $currentUserId = null;
+
+  /** Roles of the user being edited */
+    public ?array $roles = null;
 
   /** Used by the form */
     public bool $editingAdmin = false;
@@ -63,7 +74,6 @@ class UserUpdateDTO
         $this->phoneNumber = $user->getPhoneNumber();
         $this->isVerified = $user->isVerified();
         $this->banned = $user->getBannedAt() instanceof DateTimeInterface;
-        $this->editingAdmin = in_array('ROLE_SUPER_ADMIN', $user->getRoles(), true);
 
       // Load existing permissions into PermissionLevel fields
         foreach ($user->getPermissions() as $permission) {
@@ -92,6 +102,11 @@ class UserUpdateDTO
         $user->setLastName($this->lastName);
         $user->setPhoneNumber($this->phoneNumber);
         $user->setIsVerified($this->isVerified);
+        if ($this->banned) {
+            $user->setBannedAt(new DateTime());
+        } else {
+            $user->setBannedAt(null);
+        }
 
         if ($updatePermissions) {
             $permissions = array_map(
@@ -100,6 +115,21 @@ class UserUpdateDTO
             );
             $user->setPermissions($permissions);
         }
+    }
+
+    public function blockBanSuperAdmin(): bool
+    {
+      // Current user cannot ban themselves
+        if ($this->editingUserId === $this->currentUserId) {
+            return false;
+        }
+
+      // Super admin cannot ban themselves
+        if (in_array(AdminRoleType::ROLE_SUPER_ADMIN->value, $this->roles ?? [], true)) {
+            return false;
+        }
+
+        return true;
     }
 
     private function getAdminPermissions(): array
