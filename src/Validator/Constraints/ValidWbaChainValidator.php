@@ -15,7 +15,7 @@ class ValidWbaChainValidator extends ConstraintValidator
     /**
      * WBA root SHA-256 fingerprints (from https://wballiance.com/openroaming/pki-repository/)
      */
-    private const array WBA_ROOTS_SHA256 = [
+    private const WBA_ROOTS_SHA256 = [
         // signed by wba-policy0
         'C62494336C88718F99CBBC7A7670489656B827DBB67A4FB4320757043A2C3918',
         // signed by wba-policy0a
@@ -30,7 +30,7 @@ class ValidWbaChainValidator extends ConstraintValidator
      * WBA-related identifiers used to recognize organization names, CNs, and OUs
      * if fingerprint verification does not match.
      */
-    private const array POSSIBLE_INDICATORS = [
+    private const POSSIBLE_INDICATORS = [
         'WIRELESS BROADBAND ALLIANCE',
         'WBA',
         'OPENROAMING',
