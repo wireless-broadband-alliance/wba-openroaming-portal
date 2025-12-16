@@ -401,13 +401,19 @@ class UsersManagementController extends AbstractController
             return $this->redirectToRoute('admin_page');
         }
 
-      // Prepare DTO
         $userUpdateDTO = new UserUpdateDTO($user);
-        $initialBannedAt = $user->getBannedAt();
-        $isEditedUserAdmin = in_array('ROLE_ADMIN', $user->getRoles(), true) ||
-        in_array('ROLE_SUPER_ADMIN', $user->getRoles(), true);
-        $isCurrentUserSuperAdmin = $this->isGranted('ROLE_SUPER_ADMIN');
+
+      // Set IDs and roles so blockBanSuperAdmin() works correctly
+        $userUpdateDTO->editingUserId = $user->getId();
+        $userUpdateDTO->currentUserId = $currentUser->getId();
+        $userUpdateDTO->roles = $user->getRoles();
+
+      // Determine if a admin is being edited
+        $isEditedUserAdmin = in_array(AdminRoleType::ROLE_ADMIN->value, $user->getRoles(), true) ||
+        in_array(AdminRoleType::ROLE_SUPER_ADMIN->value, $user->getRoles(), true);
+        $isCurrentUserSuperAdmin = $this->isGranted(AdminRoleType::ROLE_SUPER_ADMIN->value);
         $isEditingSelf = $user->getId() === $currentUser->getId();
+
       // Only allow permission editing if super admin editing another admin
         $userUpdateDTO->editingAdmin = $isEditedUserAdmin && $isCurrentUserSuperAdmin && !$isEditingSelf;
 
@@ -426,29 +432,22 @@ class UsersManagementController extends AbstractController
           // Use DTO method to map data back
             $userUpdateDTO->updateUser($user, $userUpdateDTO->editingAdmin);
 
-            if (!$userUpdateDTO->editingAdmin) {
-                if ($userUpdateDTO->banned && $initialBannedAt === null) {
-                    $user->setBannedAt(new DateTime());
-                    $this->profileManager->disableProfiles(
-                        $user,
-                        UserRadiusProfileRevokeReason::ADMIN_BANNED_USER->value,
-                        true
-                    );
-                }
+            if ($userUpdateDTO->banned) {
+                $this->profileManager->disableProfiles(
+                    $user,
+                    UserRadiusProfileRevokeReason::ADMIN_BANNED_USER->value,
+                    true
+                );
+            }
 
-                if (!$userUpdateDTO->banned) {
-                    $user->setBannedAt(null);
-                }
-
-                if ($userUpdateDTO->isVerified) {
-                    $this->profileManager->enableProfiles($user);
-                } else {
-                    $this->profileManager->disableProfiles(
-                        $user,
-                        UserRadiusProfileRevokeReason::ADMIN_REMOVED_USER_VERIFICATION->value,
-                        true
-                    );
-                }
+            if ($userUpdateDTO->isVerified) {
+                $this->profileManager->enableProfiles($user);
+            } else {
+                $this->profileManager->disableProfiles(
+                    $user,
+                    UserRadiusProfileRevokeReason::ADMIN_REMOVED_USER_VERIFICATION->value,
+                    true
+                );
             }
 
             $this->userRepository->save($user, true);

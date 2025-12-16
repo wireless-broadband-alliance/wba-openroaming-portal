@@ -133,7 +133,7 @@ class UserAddDTO
     }
 
   // Returns AdminPermissionsType strings based on selected levels
-    public function getAdminPermissions(): array
+    private function getAdminPermissions(): array
     {
         $mapping = [
         'userManagement' => 'USERS_MANAGEMENT',
