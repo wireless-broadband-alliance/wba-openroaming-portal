@@ -4,6 +4,7 @@ namespace App\Twig\Components;
 
 use App\DTO\UserUpdateDTO;
 use App\Form\UserUpdateType;
+use App\Security\Voter\UserAuthenticationVoter;
 use libphonenumber\NumberParseException;
 use libphonenumber\PhoneNumberUtil;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -37,7 +38,9 @@ final class UserUpdateForm extends AbstractController
     #[\Override]
     protected function instantiateForm(): FormInterface
     {
-        return $this->createForm(UserUpdateType::class, $this->userUpdateDTO);
+        $canWrite = $this->isGranted(UserAuthenticationVoter::USERS_MANAGEMENT_WRITE);
+
+        return $this->createForm(UserUpdateType::class, $this->userUpdateDTO, ['disabled' => !$canWrite]);
     }
 
     #[LiveAction]

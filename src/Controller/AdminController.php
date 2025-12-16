@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\DTO\CustomTypeDTO;
 use App\Entity\Setting;
 use App\Entity\User;
+use App\Enum\AdminRoleType;
 use App\Enum\AnalyticalEventType;
 use App\Enum\LanguageType;
 use App\Enum\SettingName;
@@ -14,6 +15,7 @@ use App\Form\RevokeProfilesType;
 use App\Repository\EventRepository;
 use App\Repository\SettingTranslationRepository;
 use App\Repository\UserRepository;
+use App\Security\Voter\UserAuthenticationVoter;
 use App\Service\EventActions;
 use App\Service\GetSettings;
 use App\Service\HtmlSanitizerService;
@@ -22,6 +24,7 @@ use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Bundle\SecurityBundle\Security\UserAuthenticator;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -53,7 +56,7 @@ class AdminController extends AbstractController
      * Dashboard Page Main Route
      */
     #[Route('/dashboard', name: 'admin_page')]
-    #[IsGranted('ROLE_ADMIN')]
+    #[IsGranted(AdminRoleType::ROLE_ADMIN->value)]
     public function dashboard(
         Request $request,
         #[MapQueryParameter] int $page = 1,
@@ -61,6 +64,14 @@ class AdminController extends AbstractController
         #[MapQueryParameter] string $order = 'desc',
         #[MapQueryParameter] ?int $count = 7
     ): Response {
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
+
+        // Redirect to User Profile
+        if (!$this->isGranted(UserAuthenticationVoter::USERS_MANAGEMENT_READ)) {
+            return $this->redirectToRoute('admin_user_edit', ['id' => $currentUser->getId()]);
+        }
+
         // Call the getSettings method of GetSettings class to retrieve the data
         /** @var array<string, array{value: string, description: string}> $data */
         $data = $this->getSettings->getSettings();
@@ -76,7 +87,6 @@ class AdminController extends AbstractController
         $totalUsers = count($users);
 
         $totalPages = ceil($totalUsers / $count);
-
         $offset = ($page - 1) * $count;
 
         $users = array_slice($users, $offset, $count);
@@ -194,8 +204,8 @@ class AdminController extends AbstractController
     {
         /** @var User $currentUser */
         $currentUser = $this->getUser();
-        // Regenerate the verification code for the admin to reset settings
 
+        // Regenerate the verification code for the admin to reset settings
         if (
             in_array($type, [
                 SettingType::SettingCustom->value,
@@ -214,7 +224,9 @@ class AdminController extends AbstractController
                 $currentUser,
                 AnalyticalEventType::SETTING_RESET_CODE_REQUEST->value
             );
+
             $timeIntervalInSeconds = 120;
+
             if ($this->verificationCodeGenerator->canResendCode($currentUser, $timeIntervalInSeconds)) {
                 $email = $this->verificationCodeGenerator->createEmailAdminPage(
                     $currentUser,
@@ -232,17 +244,17 @@ class AdminController extends AbstractController
                         'controllers'
                     )
                 );
+
                 return $this->redirectToRoute('admin_confirm_reset', ['type' => $type]);
             }
+
             $timeLeft = $this->verificationCodeGenerator->timeLeftToResendCode($timeIntervalInSeconds, $lastResend);
+
             $this->addFlash(
                 'error_admin',
-                $this->translator->trans(
-                    'errorAdminWait',
-                    ['%time%' => $timeLeft],
-                    'controllers'
-                )
+                $this->translator->trans('errorAdminWait', ['%time%' => $timeLeft], 'controllers')
             );
+
             return $this->redirectToRoute('admin_confirm_reset', ['type' => $type]);
         }
 
@@ -257,15 +269,17 @@ class AdminController extends AbstractController
         name: 'admin_dashboard_customize',
         defaults: ['language' => LanguageType::EN->value]
     )]
-    #[IsGranted('ROLE_ADMIN')]
+    #[IsGranted(UserAuthenticationVoter::LANDING_PAGE_CONFIG_READ)]
     public function customize(Request $request, EntityManagerInterface $em, string $language): Response
     {
         // Call the getSettings method of GetSettings class to retrieve the data
         /** @var array<string, array{value: string, description: string}> $data */
         $data = $this->getSettings->getSettings($language);
+
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
         $currentUser = $this->getUser();
+        $canWrite = $this->isGranted(UserAuthenticationVoter::LANDING_PAGE_CONFIG_WRITE);
 
         $settingsRepository = $em->getRepository(Setting::class);
         $settings = $settingsRepository->findAll();
@@ -278,11 +292,12 @@ class AdminController extends AbstractController
         // Create the form with the CustomType and pass the relevant settings
         $form = $this->createForm(CustomType::class, $customTypeDTO, [
             'settings' => $settingsTranslated,
+            'disabled' => !$canWrite,
         ]);
 
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
+        if ($form->isSubmitted() && $form->isValid() && $canWrite) {
             // Update the settings based on the form submission
             foreach ($settings as $setting) {
                 $settingName = $setting->getName();
@@ -399,9 +414,6 @@ class AdminController extends AbstractController
         EntityManagerInterface $em,
         int $id
     ): Response {
-
-
-
         return $this->render(
             'dashboard/actions/edit.html.twig',
             [

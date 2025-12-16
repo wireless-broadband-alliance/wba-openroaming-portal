@@ -3,7 +3,6 @@
 namespace App\Controller;
 
 use App\Entity\TextEditor;
-use App\Enum\LanguageType;
 use App\Enum\SettingName;
 use App\Enum\TextEditorName;
 use App\Enum\TextInputType;
@@ -26,10 +25,7 @@ class TOSController extends AbstractController
     ) {
     }
 
-    #[Route(
-        '/terms-conditions',
-        name: 'app_terms_conditions',
-    )]
+    #[Route('/terms-conditions', name: 'app_terms_conditions')]
     public function termsConditions(Request $request): RedirectResponse|Response
     {
         // Call the getSettings method of GetSettings class to retrieve the data
@@ -66,13 +62,9 @@ class TOSController extends AbstractController
         return $this->redirectToRoute('app_landing');
     }
 
-    #[Route(
-        '/privacy-policy',
-        name: 'app_privacy_policy',
-    )]
-    public function privacyPolicy(
-        Request $request,
-    ): RedirectResponse|Response {
+    #[Route('/privacy-policy', name: 'app_privacy_policy')]
+    public function privacyPolicy(Request $request): RedirectResponse|Response
+    {
         // Call the getSettings method of GetSettings class to retrieve the data
         $data = $this->getSettings->getSettings();
 
@@ -81,8 +73,8 @@ class TOSController extends AbstractController
         $privacyPolicyFormat = $this->settingRepository->findOneBy(['name' => SettingName::PRIVACY_POLICY->value]);
 
         if (
-            $privacyPolicyFormat &&
-            $privacyPolicyFormat->getValue() === TextInputType::TEXT_EDITOR->value
+            $privacyPolicyFormat
+            && $privacyPolicyFormat->getValue() === TextInputType::TEXT_EDITOR->value
         ) {
             $textEditor = $this->textEditorRepository->findTextEditor(TextEditorName::PRIVACY_POLICY->value, $language);
             $content = $textEditor instanceof TextEditor ? $textEditor->getContent() : '';
@@ -94,14 +86,12 @@ class TOSController extends AbstractController
         }
 
         if (
-            $privacyPolicyFormat &&
-            $privacyPolicyFormat->getValue() === TextInputType::LINK->value &&
-            $this->settingRepository->findOneBy(['name' => SettingName::PRIVACY_POLICY_LINK->value])
+            $privacyPolicyFormat
+            && $privacyPolicyFormat->getValue() === TextInputType::LINK->value
+            && $this->settingRepository->findOneBy(['name' => SettingName::PRIVACY_POLICY_LINK->value])
         ) {
             return $this->redirect(
-                $this->settingRepository->findOneBy(
-                    ['name' => SettingName::PRIVACY_POLICY_LINK->value]
-                )->getValue()
+                $this->settingRepository->findOneBy(['name' => SettingName::PRIVACY_POLICY_LINK->value])->getValue()
             );
         }
 
@@ -112,7 +102,6 @@ class TOSController extends AbstractController
     public function acceptTerms(Request $request): Response
     {
         $request->getSession()->set('termsAccepted', true);
-
 
         return new JsonResponse(['status' => 'ok', 'message' => 'Terms accepted']);
     }
@@ -129,6 +118,7 @@ class TOSController extends AbstractController
     public function getTermsStatus(Request $request): JsonResponse
     {
         $termsAccepted = $request->getSession()->get('termsAccepted', false);
+
         return new JsonResponse(['termsAccepted' => $termsAccepted]);
     }
 }

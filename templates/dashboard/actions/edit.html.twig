@@ -9,42 +9,43 @@
 
         {{ form_start(form) }}
         {{ form_errors(form) }}
+
         <div class="p-6 bg-white">
             <div class="mx-auto rounded-lg grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div class="relative">
-                <div class="flex items-center justify-between relative" data-controller="card">
-                  {{ form_label(form.uuid, 'uniqueIdentifier'|trans({}, 'edit'), {label_attr: {class: 'form-label'}}) }}
+                <div class="relative">
+                    <div class="flex items-center justify-between relative" data-controller="card">
+                        {{ form_label(form.uuid, 'uniqueIdentifier'|trans({}, 'edit'), {label_attr: {class: 'form-label'}}) }}
 
-                  {{ form_widget(form.uuid, {attr: {class: 'form-widget'}}) }}
+                        {{ form_widget(form.uuid, {attr: {class: 'form-widget'}}) }}
 
-                  <div class="">
-                    <img class="w-6 h-6 cursor-pointer ml-4"
-                            {{ stimulus_target('card', 'button') }}
-                            {{ stimulus_action('card', 'show_info', 'mouseover')|stimulus_action('card', 'hide_info', 'mouseout') }}
-                         src="{{ asset('resources/logos/info_icon.svg') }}"
-                         alt="Info icon"/>
+                        <div class="">
+                            <img class="w-6 h-6 cursor-pointer ml-4"
+                                    {{ stimulus_target('card', 'button') }}
+                                    {{ stimulus_action('card', 'show_info', 'mouseover')|stimulus_action('card', 'hide_info', 'mouseout') }}
+                                 src="{{ asset('resources/logos/info_icon.svg') }}"
+                                 alt="Info icon"/>
 
-                    {# Description #}
-                    <div class="absolute w-2/3 left-1/2 top-full transform -translate-x-1/2 -mt-11
+                            {# Description #}
+                            <div class="absolute w-2/3 left-1/2 top-full transform -translate-x-1/2 -mt-11
                         bg-indigo-400 rounded-lg p-2 text-white text-center hidden z-10"
-                         data-card-target="info">
-                      {{ 'UUID'|trans({}, 'edit') }}
+                                 data-card-target="info">
+                                {{ 'UUID'|trans({}, 'edit') }}
+                            </div>
+                        </div>
                     </div>
-                  </div>
+
+                    <div class="text-red-500 mt-1">
+                        {{ form_errors(form.uuid) }}
+                    </div>
                 </div>
 
-                <div class="text-red-500 mt-1">
-                  {{ form_errors(form.uuid) }}
+                <div class="relative">
+                    {{ form_label(form.firstName, 'firstName'|trans({}, 'edit'), {label_attr: {class: 'form-label'}}) }}
+                    {{ form_widget(form.firstName, {attr: {class: 'form-widget'}}) }}
+                    <div class="text-red-500 m-2">
+                        {{ form_errors(form.firstName) }}
+                    </div>
                 </div>
-              </div>
-
-              <div class="relative">
-                {{ form_label(form.firstName, 'firstName'|trans({}, 'edit'), {label_attr: {class: 'form-label'}}) }}
-                {{ form_widget(form.firstName, {attr: {class: 'form-widget'}}) }}
-                <div class="text-red-500 m-2">
-                    {{ form_errors(form.firstName) }}
-                </div>
-            </div>
 
                 <div class="relative">
                     {{ form_label(form.email, 'Email', {label_attr: {class: 'form-label'}}) }}
@@ -54,37 +55,37 @@
                     </div>
                 </div>
 
-            <div class="relative">
-                {{ form_label(form.lastName, 'lastName'|trans({}, 'edit'), {label_attr: {class: 'form-label'}}) }}
-                {{ form_widget(form.lastName, {attr: {class: 'form-widget'}}) }}
-                <div class="text-red-500 m-2">
-                    {{ form_errors(form.lastName) }}
+                <div class="relative">
+                    {{ form_label(form.lastName, 'lastName'|trans({}, 'edit'), {label_attr: {class: 'form-label'}}) }}
+                    {{ form_widget(form.lastName, {attr: {class: 'form-widget'}}) }}
+                    <div class="text-red-500 m-2">
+                        {{ form_errors(form.lastName) }}
+                    </div>
                 </div>
-            </div>
 
-            <div class="relative">
-                <div class="flex flex-row items-end space-x-4">
-                    {# Phone Number Input #}
-                    <div class="flex flex-col w-1/3">
-                        {{ form_label(form.phoneNumber, 'phoneNumber'|trans({}, 'edit'), {label_attr: {class: 'form-label'}}) }}
-                        {{ form_widget(form.phoneNumber.children.country, {
-                            attr: {
-                                class: 'form-widget',
-                                placeholder: 'phoneNumberPlaceOlder'|trans({}, 'edit'),
-                                autocomplete: 'tel',
-                            },
-                        }) }}
+                <div class="relative">
+                    <div class="flex flex-row items-end space-x-4">
+                        {# Phone Number Input #}
+                        <div class="flex flex-col w-1/3">
+                            {{ form_label(form.phoneNumber, 'phoneNumber'|trans({}, 'edit'), {label_attr: {class: 'form-label'}}) }}
+                            {{ form_widget(form.phoneNumber.children.country, {
+                                attr: {
+                                    class: 'form-widget',
+                                    placeholder: 'phoneNumberPlaceOlder'|trans({}, 'edit'),
+                                    autocomplete: 'tel',
+                                },
+                            }) }}
+                        </div>
+                        <div class="flex flex-col w-2/3">
+                            {{ form_widget(form.phoneNumber.children.number, {
+                                attr: {
+                                    class: 'form-widget',
+                                    placeholder: 'phoneNumberPlaceOlder'|trans({}, 'edit'),
+                                    autocomplete: 'tel',
+                                },
+                            }) }}
+                        </div>
                     </div>
-                    <div class="flex flex-col w-2/3">
-                        {{ form_widget(form.phoneNumber.children.number, {
-                            attr: {
-                                class: 'form-widget',
-                                placeholder: 'phoneNumberPlaceOlder'|trans({}, 'edit'),
-                                autocomplete: 'tel',
-                            },
-                        }) }}
-                    </div>
-                </div>
 
                     <div class="text-red-500 m-2">
                         {{ form_errors(form.phoneNumber) }}
@@ -118,17 +119,20 @@
                 </div>
             </div>
 
-            <div class="flex flex-row justify-end md:w-full mt-6">
-                <button type="submit" class="btn-primary">{{ 'applyChanges'|trans({}, 'edit') }}</button>
-            </div>
+            {% if is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::USERS_MANAGEMENT_WRITE')) %}
+                <div class="flex flex-row justify-end md:w-full mt-6">
+                    <button type="submit" class="btn-primary">{{ 'applyChanges'|trans({}, 'edit') }}</button>
+                </div>
+            {% endif %}
         </div>
+
         {{ form_rest(form) }}
         {{ form_end(form) }}
     </twig:UserUpdateForm>
 
     {# Content - Reset Password Users/Admin #}
     {# Check if the authenticated user is not the same as the user being edited (admin) #}
-    {% if app.user.id != user.id %}
+    {% if app.user.id != user.id and is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::USERS_MANAGEMENT_WRITE')) %}
         <h1 class="text-2xl font-semibold mt-6 mb-6">{{ 'resetPassword'|trans({}, 'edit') }}</h1>
         {{ form_start(formReset) }}
         {{ form_errors(formReset) }}
@@ -171,20 +175,23 @@
             </a>
 
             {% if not (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value) %}
-                <a href="{{ path('app_disable2FA', {context: context}) }}" class="btn-logout">{{ 'disable'|trans({}, 'edit') }}</a>
+                <a href="{{ path('app_disable2FA', {context: context}) }}"
+                   class="btn-logout">{{ 'disable'|trans({}, 'edit') }}</a>
             {% endif %}
         </div>
     {% else %}
-        {% if not (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value) %}
-            <h1 class="text-2xl font-semibold mt-6 mb-6">{{ 'TwoFAOptions'|trans({}, 'edit') }}</h1>
-            <div class="p-6 rounded-lg grid grid-cols-1 lg:grid-cols-2 lg:w-1/2 w-full bg-white justify-start gap-6">
-                <a
-                        href="{{ path('app_disable2FA_admin', {id: user.id}) }}"
-                        class="btn-logout"
-                        onclick="return confirm('Are you sure you to disable 2FA for this user?')">
-                    {{ 'disable'|trans({}, 'edit') }}
-                </a>
-            </div>
+        {% if is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::USERS_MANAGEMENT_WRITE')) %}
+            {% if not (user.twoFAtype == constant('App\\Enum\\UserTwoFactorAuthenticationStatus::DISABLED').value) %}
+                <h1 class="text-2xl font-semibold mt-6 mb-6">{{ 'TwoFAOptions'|trans({}, 'edit') }}</h1>
+                <div class="p-6 rounded-lg grid grid-cols-1 lg:grid-cols-2 lg:w-1/2 w-full bg-white justify-start gap-6">
+                    <a
+                            href="{{ path('app_disable2FA_admin', {id: user.id}) }}"
+                            class="btn-logout"
+                            onclick="return confirm('Are you sure you to disable 2FA for this user?')">
+                        {{ 'disable'|trans({}, 'edit') }}
+                    </a>
+                </div>
+            {% endif %}
         {% endif %}
     {% endif %}
 
