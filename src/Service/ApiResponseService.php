@@ -60,7 +60,7 @@ readonly class ApiResponseService
 
   /**
    * @return array<string, array{
-   *     responses: array<int|string, mixed>,
+   *     responses?: array<int|string, mixed>,
    *     isProtected?: bool,
    *     description?: string,
    *     requestBody?: array<string, mixed>
@@ -827,6 +827,153 @@ readonly class ApiResponseService
         ]
         ];
         $apiResponseV2 = [
+        'api_v2_twoFA_validate' => [
+            'description' => 'This endpoint validates a 2FA code (email, SMS, or TOTP). 
+    The client must send a valid JWT Bearer token in the Authorization header, 
+    along with the 2FA type and confirmation code in the request body. 
+    If the code is valid, 2FA is enabled for that method.',
+            'isProtected' => true,
+            'requestBody' => [
+                'type' => 'email or sms or topt',
+                'code' => '123456'
+            ],
+            'responses' => [
+                200 => [
+                    'default' => json_decode(
+                        '{
+                    "success": true,
+                    "data": {
+                        "message": "Two Factor authentication validated successfully!"
+                    }
+                }',
+                        true,
+                        512,
+                        JSON_THROW_ON_ERROR
+                    ),
+                ],
+                400 => [
+                    'Invalid JSON format',
+                    'Missing required body fields'
+                ],
+                401 => [
+                    'JWT Token is invalid!',
+                    'User account is not verified.'
+                ],
+                // phpcs:disable Generic.Files.LineLength.TooLong
+                403 => [
+                    'Invalid code',
+                    'User account is banned from the system.',
+                    "Your request cannot be processed at this time due to a pending action. If your account is active, re-login to complete the action.",
+                    'Unauthorized - You do not have permission to access this resource'
+                ],
+                // phpcs:enable
+                500 => [
+                    'Unexpected server error occurred'
+                ]
+            ]
+        ],
+        'api_v2_twoFA_enable' => [
+            'description' => 'Enables Two-Factor Authentication (2FA) for the authenticated user. 
+        Supports ("totp", "email", "sms"). Requires a valid JWT Bearer token.',
+            'isProtected' => true,
+            'responses' => [
+                200 => [
+                    'totp_example' => json_decode(
+                        '{
+                    "success": true,
+                    "data": {
+                        "message": "Two Factor TOTP Secret generated successfully",
+                        "totpId": "ABCDEF123456"
+                    }
+                  }',
+                        true,
+                        512,
+                        JSON_THROW_ON_ERROR
+                    ),
+                    'email_sms_example' => json_decode(
+                        '{
+                    "success": true,
+                    "data": {
+                        "message": "Two Factor Code sent to: user@example.com"
+                    }
+                }',
+                        true,
+                        512,
+                        JSON_THROW_ON_ERROR
+                    ),
+                ],
+                400 => [
+                    'description' => 'User does not have a valid email or phone to send the code.',
+                    'example' => json_decode(
+                        '{
+                    "message": "Code not sent, the user does not have a valid method."
+                }',
+                        true,
+                        512,
+                        JSON_THROW_ON_ERROR
+                    ),
+                ],
+                401 => [
+                    'description' => 'Invalid, missing or expired JWT token OR user is not verified.',
+                    'examples' => [
+                        'invalid_token' => json_decode(
+                            '{
+                        "message": "JWT Token is invalid!"
+                    }',
+                            true,
+                            512,
+                            JSON_THROW_ON_ERROR
+                        ),
+                        'user_not_verified' => json_decode(
+                            '{
+                        "message": "User account is not verified."
+                    }',
+                            true,
+                            512,
+                            JSON_THROW_ON_ERROR
+                        ),
+                    ]
+                ],
+                403 => [
+                    'description' => 'User is authenticated but not allowed to access the resource.',
+                    'examples' => [
+                        'not_authenticated' => json_decode(
+                            '{
+                        "message": "Unauthorized - You do not have permission to access this resource"
+                    }',
+                            true,
+                            512,
+                            JSON_THROW_ON_ERROR
+                        ),
+                        'user_banned' => json_decode(
+                            '{
+                        "message": "User account is banned from the system."
+                    }',
+                            true,
+                            512,
+                            JSON_THROW_ON_ERROR
+                        ),
+                      // phpcs:disable Generic.Files.LineLength.TooLong
+                        'pending_action' => json_decode(
+                            '{
+                        "message": "Your request cannot be processed at this time due to a pending action. If your account is active, re-login to complete the action."
+                    }',
+                            true,
+                            512,
+                            JSON_THROW_ON_ERROR
+                        ),
+                      // phpcs:enable
+                    ],
+                ],
+                500 => [
+                    'description' => 'Internal error while generating 2FA code or TOTP secret.',
+                    'examples' => [
+                        'db_error',
+                        'unexpected_error'
+                    ],
+                ],
+            ],
+        ],
         'api_v2_auth_refresh' => [
             'requestBody' => [
                 'current_token' => 'currentToken||RefreshToken',
@@ -872,11 +1019,9 @@ Both the jwt and the refresh token timestamps are in seconds.',
                 'uuid' => 'user-uuid-example',
                 'password' => 'user-password-example',
                 'turnstile_token' => 'valid_test_token',
-                'twoFACode' => '02YZR88R'
             ],
             'description' => 'This endpoint authenticates a user using their UUID, password, 
-        and a CAPTCHA token. Platform can require the authentication with Two-Factor, 
-        the twoFACode parameter will be asked based on the TWO_FACTOR_AUTH_STATUS setting.
+        and a CAPTCHA token.
         When the setting LOGIN_WITH_UUID_ONLY is enabled:
         The authentication process does not require a password. Instead, a success message is returned
         and the platform will send a login link via email or phone number.',
@@ -921,18 +1066,10 @@ Both the jwt and the refresh token timestamps are in seconds.',
                 400 => [
                     'CAPTCHA validation failed',
                     'Missing required fields: uuid, password or turnstile_token',
-                    'Missing required configuration setting: TWO_FACTOR_AUTH_STATUS',
                     'Invalid json format',
                     'Invalid user provided. Please verify the user data'
                 ],
                 401 => [
-                  // phpcs:disable Generic.Files.LineLength.TooLong
-                    'Two-Factor Authentication is active for this account. Please ensure you provide the correct authentication code.',
-                  // phpcs:enable
-                    'Two-Factor Authentication is ENFORCED FOR PORTAL accounts.',
-                  // phpcs:disable Generic.Files.LineLength.TooLong
-                    'Two-Factor Authentication it\'s required for authentication on the portal. Please visit DOMAIN to set up 2FA and secure your account.',
-                  // phpcs:enable
                     'Invalid credentials'
                 ],
                 403 => [
@@ -956,9 +1093,7 @@ Both the jwt and the refresh token timestamps are in seconds.',
             ],
             'description' => 'This endpoint authenticates a user using their SAML response. 
                 If the user is not found in the database, a new user will be created based on the SAML assertion. 
-                The response includes user details along with a JWT token if authentication is successful. 
-                Also if the platform requires authentication with Two-Factor, the twoFACode parameter will 
-                be asked based on the TWO_FACTOR_AUTH_STATUS setting.',
+                The response includes user details along with a JWT token if authentication is successful.',
             'responses' => [
                 200 => [
                     json_decode(
@@ -991,13 +1126,6 @@ Both the jwt and the refresh token timestamps are in seconds.',
                 401 => [
                     'Unable to validate SAML assertion',
                     'Authentication Failed',
-                  // phpcs:disable Generic.Files.LineLength.TooLong
-                    'Two-Factor Authentication is active for this account. Please ensure you provide the correct authentication code.',
-                  // phpcs:enable
-                    'Two-Factor Authentication is ENFORCED FOR PORTAL accounts.',
-                  // phpcs:disable Generic.Files.LineLength.TooLong
-                    'Two-Factor Authentication it\'s required for authentication on the portal. Please visit DOMAIN to set up 2FA and secure your account.'
-                  // phpcs:enable
                 ],
                 403 => [
                     'The provided IDP Entity is invalid or does not match the expected configuration.',
@@ -1014,12 +1142,10 @@ Both the jwt and the refresh token timestamps are in seconds.',
         'api_v2_auth_google' => [
             'requestBody' => [
                 'code' => '4/0AdKgLCxjQ74mKAg9vs_f7PuO99DR',
-                'twoFACode' => '02YZR88R'
             ],
             'description' => 'This endpoint authenticates a user using their Google account. 
                 A valid Google OAuth authorization code is required. If the user is successfully authenticated,
-                 user details and a JWT token will be returned. Also if the platform requires authentication with 
-                 Two-Factor, the twoFACode parameter will be asked based on the TWO_FACTOR_AUTH_STATUS setting.',
+                 user details and a JWT token will be returned.',
             'responses' => [
                 200 => [
                     json_decode(
@@ -1052,13 +1178,7 @@ Both the jwt and the refresh token timestamps are in seconds.',
                     'Invalid user provided. Please verify the user data',
                 ],
                 401 => [
-                  // phpcs:disable Generic.Files.LineLength.TooLong
-                    'Two-Factor Authentication is active for this account. Please ensure you provide the correct authentication code.',
-                  // phpcs:enable
-                    'Two-Factor Authentication is ENFORCED FOR PORTAL accounts.',
-                  // phpcs:disable Generic.Files.LineLength.TooLong
-                    'Two-Factor Authentication it\'s required for authentication on the portal. Please visit DOMAIN to set up 2FA and secure your account.',
-                  // phpcs:enable
+                    'Authentication Failed',
                 ],
                 403 => [
                     'User account is not verified!',
@@ -1074,12 +1194,10 @@ Both the jwt and the refresh token timestamps are in seconds.',
         'api_v2_auth_microsoft' => [
             'requestBody' => [
                 'code' => '0.AQk6Lf2I2XGhQkWlU8gBp0KmxeNn2KTcbsJh.8Qt3OeYCB4sQ2FHo',
-                'twoFACode' => '02YZR88R'
             ],
             'description' => 'This endpoint authenticates a user using their Microsoft account. 
                 A valid Microsoft OAuth authorization code is required. If the user is successfully authenticated, 
-                user details and a JWT token will be returned. Also if the platform requires authentication with 
-                Two-Factor, the twoFACode parameter will be asked based on the TWO_FACTOR_AUTH_STATUS setting.',
+                user details and a JWT token will be returned.',
             'responses' => [
                 200 => [
                     json_decode(
@@ -1112,13 +1230,7 @@ Both the jwt and the refresh token timestamps are in seconds.',
                     'Invalid user provided. Please verify the user data',
                 ],
                 401 => [
-                  // phpcs:disable Generic.Files.LineLength.TooLong
-                    'Two-Factor Authentication is active for this account. Please ensure you provide the correct authentication code.',
-                  // phpcs:enable
-                    'Two-Factor Authentication is ENFORCED FOR PORTAL accounts.',
-                  // phpcs:disable Generic.Files.LineLength.TooLong
-                    'Two-Factor Authentication it\'s required for authentication on the portal. Please visit DOMAIN to set up 2FA and secure your account.',
-                  // phpcs:enable
+                    'Authentication Failed',
                 ],
                 403 => [
                     'User account is not verified!',
@@ -1549,63 +1661,6 @@ configuration for the IOS App.</p></body></html>'
                 ]
             ]
         ],
-        'api_v2_twoFA_request' => [
-            'requestBody' => [
-                'uuid' => 'user-uuid-example',
-                'password' => 'user-password-example',
-                'turnstile_token' => 'valid_test_token'
-            ],
-            'description' => 'This endpoint provides Two-Factor Authentication code only for portal accounts.
-                 To be able to request a authentication code the account needs to have setup a 2fa with email or SMS.',
-            'responses' => [
-                200 => [
-                  // phpcs:disable Generic.Files.LineLength.TooLong
-                    json_decode(
-                        '{
-                              "success": true,
-                              "data": {
-                                "message": "Two-Factor authentication code successfully sent. You have X attempts remaining to request a new one."
-                              }
-                            }',
-                        false,
-                        512,
-                        JSON_THROW_ON_ERROR
-                    )
-                  // phpcs:enable
-                ],
-                400 => [
-                    'CAPTCHA validation failed',
-                    'Missing required fields: uuid, password or turnstile_token',
-                  // phpcs:disable Generic.Files.LineLength.TooLong
-                    'Missing required configuration setting: TWO_FACTOR_AUTH_RESEND_INTERVAL TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS',
-                  // phpcs:enable
-                    'Invalid json format',
-                    'Invalid credentials'
-                ],
-                401 => [
-                    'Invalid credentials',
-                    'Invalid credentials'
-                ],
-                403 => [
-                    'User account is not verified!',
-                    'User account is banned from the system!',
-                    'Invalid account type. Please only use email/phone number accounts from the portal',
-                  // phpcs:disable Generic.Files.LineLength.TooLong
-                    'Invalid Two-Factor Authentication configuration Please ensure that 2FA is set up using either email or SMS for this account',
-                    'The Two-Factor Authentication (2FA) configuration is incomplete. Please set up 2FA using either email or SMS',
-                    'Your request cannot be processed at this time due to a pending action. If your account is active, re-login to complete the action',
-                  // phpcs:enable
-                ],
-                429 => [
-                    'You need to wait %d seconds before asking for a new code.',
-                  // phpcs:disable Generic.Files.LineLength.TooLong
-                    'Too many attempts. You have exceeded the limit of %d attempts. Please wait %d minutes before trying again.',
-                    'Too many validation attempts. You have exceeded the limit of %d attempts. Please wait %d minute(s) before trying again.',
-                  // phpcs:enable
-                ]
-            ]
-
-        ],
         'api_v2_user_account_deletion' => [
             'requestBody' => [
                 'Portal Account' => [
@@ -1622,57 +1677,75 @@ configuration for the IOS App.</p></body></html>'
                 ],
 
             ],
-            'description' => 'This endpoint deletes the currently authenticated user account. 
+            'api_v2_user_account_deletion' => [
+                'requestBody' => [
+                    'Portal Account' => [
+                        'password' => 'user-password-example'
+                    ],
+                    'SAML Account' => [
+                        'SAMLResponse' => 'samlResponseExample'
+                    ],
+                    'Google Account' => [
+                        'code' => 'googleCodeExample'
+                    ],
+                    'Microsoft Account' => [
+                        'code' => 'microsoftCodeExample'
+                    ],
+
+                ],
+                'description' => 'This endpoint deletes the currently authenticated user account. 
                 Depending on the authentication method, the request body may require a password (Portal Account), 
                 a SAMLResponse (SAML), or an authorization code (Google/Microsoft). 
                 The request verifies the provided authentication details before performing the account deletion.',
-            'isProtected' => true,
-            'responses' => [
-                200 => [
-                    json_decode(
-                        '{
+                'isProtected' => true,
+                'responses' => [
+                    200 => [
+                        json_decode(
+                            '{
                               "success": true,
                               "data": {
                                 "message": "User with UUID \"test@example.com\" successfully deleted."
                               }
                             }',
-                        false,
-                        512,
-                        JSON_THROW_ON_ERROR
-                    )
-                ],
-                400 => [
-                    'Invalid data: Missing required fields.',
-                    'Invalid JSON format',
-                ],
-                401 => [
-                    'Invalid Request: JWT Token is invalid!',
-                    'Invalid credentials: The provided password is incorrect.',
-                    'Authentication Failed: Unable to validate SAML assertion.',
-                    'Authentication Failed: Invalid or expired authorization code.',
-                ],
-                403 => [
-                    'Unauthorized - You do not have permission to access this resource.',
-                    'Unauthorized: The SAML assertion email does not match the user account email.',
-                    'The configured IDP Entity ID does not match the expected value. Access denied.',
-                  // phpcs:disable Generic.Files.LineLength.TooLong
-                    'Invalid Two-Factor Authentication configuration. Please ensure that 2FA is set up using either email or SMS for this account.',
-                    'The Two-Factor Authentication (2FA) configuration is incomplete. Please set up 2FA using either email or SMS.',
-                  // phpcs:enable
-                    'Invalid account type. Please only use email/phone number accounts from the portal.',
-                ],
-                404 => [
-                    'Invalid Account: User account not found.',
-                    'Required data from the external service could not be located.',
-                ],
-                500 => [
-                    'An error occurred while deleting the user.',
-                    'An error occurred while communicating with an external service.',
-                    'An unexpected error occurred. Please try again later.',
+                            false,
+                            512,
+                            JSON_THROW_ON_ERROR
+                        )
+                    ],
+                    400 => [
+                        'Invalid data: Missing required fields.',
+                        'Invalid JSON format',
+                    ],
+                    401 => [
+                        'Invalid Request: JWT Token is invalid!',
+                        'Invalid credentials: The provided password is incorrect.',
+                        'Authentication Failed: Unable to validate SAML assertion.',
+                        'Authentication Failed: Invalid or expired authorization code.',
+                    ],
+                    403 => [
+                        'Unauthorized - You do not have permission to access this resource.',
+                        'Unauthorized: The SAML assertion email does not match the user account email.',
+                        'The configured IDP Entity ID does not match the expected value. Access denied.',
+                      // phpcs:disable Generic.Files.LineLength.TooLong
+                        'Invalid Two-Factor Authentication configuration. Please ensure that 2FA is set up using either email or SMS for this account.',
+                        'The Two-Factor Authentication (2FA) configuration is incomplete. Please set up 2FA using either email or SMS.',
+                      // phpcs:enable
+                        'Invalid account type. Please only use email/phone number accounts from the portal.',
+                    ],
+                    404 => [
+                        'Invalid Account: User account not found.',
+                        'Required data from the external service could not be located.',
+                    ],
+                    500 => [
+                        'An error occurred while deleting the user.',
+                        'An error occurred while communicating with an external service.',
+                        'An unexpected error occurred. Please try again later.',
+                    ]
                 ]
             ]
         ]
         ];
+
 
         if ($version === ApiVersion::API_V1->value) {
             return $apiResponseV1;

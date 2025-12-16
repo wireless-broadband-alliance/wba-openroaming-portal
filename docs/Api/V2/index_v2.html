@@ -217,8 +217,7 @@ if (!HTMLScriptElement.supports || !HTMLScriptElement.supports('importmap')) (fu
 
                                                                                         <div class="text-sm text-gray-600 italic">
                                     This endpoint authenticates a user using their UUID, password, 
-        and a CAPTCHA token. Platform can require the authentication with Two-Factor, 
-        the twoFACode parameter will be asked based on the TWO_FACTOR_AUTH_STATUS setting.
+        and a CAPTCHA token.
         When the setting LOGIN_WITH_UUID_ONLY is enabled:
         The authentication process does not require a password. Instead, a success message is returned
         and the platform will send a login link via email or phone number.
@@ -231,8 +230,7 @@ if (!HTMLScriptElement.supports || !HTMLScriptElement.supports('importmap')) (fu
                                             <pre>{
     "uuid": "user-uuid-example",
     "password": "user-password-example",
-    "turnstile_token": "valid_test_token",
-    "twoFACode": "02YZR88R"
+    "turnstile_token": "valid_test_token"
 }</pre>
                                         </div>
                                     </div>
@@ -404,34 +402,6 @@ if (!HTMLScriptElement.supports || !HTMLScriptElement.supports('importmap')) (fu
 
     <pre data-clipboard-target="code" class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
     "success": false,
-    "error": "Missing required configuration setting: TWO_FACTOR_AUTH_STATUS"
-}
-    </pre>
-</div>
-
-                                                </div>
-
-                                            
-                                                <div class="bg-gray-800 text-white rounded-lg p-4 text-sm font-mono overflow-x-auto my-2">
-                                                    <div data-controller="clipboard" class="relative group max-w-full">
-    <button type="button" title="Copy" aria-label="Copy code to clipboard" class="
-        absolute top-2 right-2
-        bg-indigo-600/90 hover:bg-indigo-700/95
-        text-white
-        p-2.5 rounded-lg
-        shadow-md
-        transition-colors duration-200 ease-in-out
-        focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400
-        flex items-center justify-center
-        w-9 h-9
-        z-10
-    " data-action="click-&gt;clipboard#copyToClipboard">
-    <svg viewBox="0 0 16 16" fill="currentColor" class="w-5 h-5" aria-hidden="true"><path fill-rule="evenodd" d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"></path></svg>
-</button>
-
-
-    <pre data-clipboard-target="code" class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
-    "success": false,
     "error": "Invalid json format"
 }
     </pre>
@@ -476,90 +446,6 @@ if (!HTMLScriptElement.supports || !HTMLScriptElement.supports('importmap')) (fu
                                             </p>
 
                                             
-                                            
-                                                <div class="bg-gray-800 text-white rounded-lg p-4 text-sm font-mono overflow-x-auto my-2">
-                                                    <div data-controller="clipboard" class="relative group max-w-full">
-    <button type="button" title="Copy" aria-label="Copy code to clipboard" class="
-        absolute top-2 right-2
-        bg-indigo-600/90 hover:bg-indigo-700/95
-        text-white
-        p-2.5 rounded-lg
-        shadow-md
-        transition-colors duration-200 ease-in-out
-        focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400
-        flex items-center justify-center
-        w-9 h-9
-        z-10
-    " data-action="click-&gt;clipboard#copyToClipboard">
-    <svg viewBox="0 0 16 16" fill="currentColor" class="w-5 h-5" aria-hidden="true"><path fill-rule="evenodd" d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"></path></svg>
-</button>
-
-
-    <pre data-clipboard-target="code" class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
-    "success": false,
-    "error": "Two-Factor Authentication is active for this account. Please ensure you provide the correct authentication code."
-}
-    </pre>
-</div>
-
-                                                </div>
-
-                                            
-                                                <div class="bg-gray-800 text-white rounded-lg p-4 text-sm font-mono overflow-x-auto my-2">
-                                                    <div data-controller="clipboard" class="relative group max-w-full">
-    <button type="button" title="Copy" aria-label="Copy code to clipboard" class="
-        absolute top-2 right-2
-        bg-indigo-600/90 hover:bg-indigo-700/95
-        text-white
-        p-2.5 rounded-lg
-        shadow-md
-        transition-colors duration-200 ease-in-out
-        focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400
-        flex items-center justify-center
-        w-9 h-9
-        z-10
-    " data-action="click-&gt;clipboard#copyToClipboard">
-    <svg viewBox="0 0 16 16" fill="currentColor" class="w-5 h-5" aria-hidden="true"><path fill-rule="evenodd" d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"></path></svg>
-</button>
-
-
-    <pre data-clipboard-target="code" class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
-    "success": false,
-    "error": "Two-Factor Authentication is ENFORCED FOR PORTAL accounts."
-}
-    </pre>
-</div>
-
-                                                </div>
-
-                                            
-                                                <div class="bg-gray-800 text-white rounded-lg p-4 text-sm font-mono overflow-x-auto my-2">
-                                                    <div data-controller="clipboard" class="relative group max-w-full">
-    <button type="button" title="Copy" aria-label="Copy code to clipboard" class="
-        absolute top-2 right-2
-        bg-indigo-600/90 hover:bg-indigo-700/95
-        text-white
-        p-2.5 rounded-lg
-        shadow-md
-        transition-colors duration-200 ease-in-out
-        focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400
-        flex items-center justify-center
-        w-9 h-9
-        z-10
-    " data-action="click-&gt;clipboard#copyToClipboard">
-    <svg viewBox="0 0 16 16" fill="currentColor" class="w-5 h-5" aria-hidden="true"><path fill-rule="evenodd" d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"></path></svg>
-</button>
-
-
-    <pre data-clipboard-target="code" class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
-    "success": false,
-    "error": "Two-Factor Authentication it's required for authentication on the portal. Please visit DOMAIN to set up 2FA and secure your account."
-}
-    </pre>
-</div>
-
-                                                </div>
-
                                             
                                                 <div class="bg-gray-800 text-white rounded-lg p-4 text-sm font-mono overflow-x-auto my-2">
                                                     <div data-controller="clipboard" class="relative group max-w-full">
@@ -767,9 +653,7 @@ if (!HTMLScriptElement.supports || !HTMLScriptElement.supports('importmap')) (fu
                                                                                         <div class="text-sm text-gray-600 italic">
                                     This endpoint authenticates a user using their SAML response. 
                 If the user is not found in the database, a new user will be created based on the SAML assertion. 
-                The response includes user details along with a JWT token if authentication is successful. 
-                Also if the platform requires authentication with Two-Factor, the twoFACode parameter will 
-                be asked based on the TWO_FACTOR_AUTH_STATUS setting.
+                The response includes user details along with a JWT token if authentication is successful.
                                 </div>
                             
                                                         
@@ -963,90 +847,6 @@ if (!HTMLScriptElement.supports || !HTMLScriptElement.supports('importmap')) (fu
     <pre data-clipboard-target="code" class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
     "success": false,
     "error": "Authentication Failed"
-}
-    </pre>
-</div>
-
-                                                </div>
-
-                                            
-                                                <div class="bg-gray-800 text-white rounded-lg p-4 text-sm font-mono overflow-x-auto my-2">
-                                                    <div data-controller="clipboard" class="relative group max-w-full">
-    <button type="button" title="Copy" aria-label="Copy code to clipboard" class="
-        absolute top-2 right-2
-        bg-indigo-600/90 hover:bg-indigo-700/95
-        text-white
-        p-2.5 rounded-lg
-        shadow-md
-        transition-colors duration-200 ease-in-out
-        focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400
-        flex items-center justify-center
-        w-9 h-9
-        z-10
-    " data-action="click-&gt;clipboard#copyToClipboard">
-    <svg viewBox="0 0 16 16" fill="currentColor" class="w-5 h-5" aria-hidden="true"><path fill-rule="evenodd" d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"></path></svg>
-</button>
-
-
-    <pre data-clipboard-target="code" class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
-    "success": false,
-    "error": "Two-Factor Authentication is active for this account. Please ensure you provide the correct authentication code."
-}
-    </pre>
-</div>
-
-                                                </div>
-
-                                            
-                                                <div class="bg-gray-800 text-white rounded-lg p-4 text-sm font-mono overflow-x-auto my-2">
-                                                    <div data-controller="clipboard" class="relative group max-w-full">
-    <button type="button" title="Copy" aria-label="Copy code to clipboard" class="
-        absolute top-2 right-2
-        bg-indigo-600/90 hover:bg-indigo-700/95
-        text-white
-        p-2.5 rounded-lg
-        shadow-md
-        transition-colors duration-200 ease-in-out
-        focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400
-        flex items-center justify-center
-        w-9 h-9
-        z-10
-    " data-action="click-&gt;clipboard#copyToClipboard">
-    <svg viewBox="0 0 16 16" fill="currentColor" class="w-5 h-5" aria-hidden="true"><path fill-rule="evenodd" d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"></path></svg>
-</button>
-
-
-    <pre data-clipboard-target="code" class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
-    "success": false,
-    "error": "Two-Factor Authentication is ENFORCED FOR PORTAL accounts."
-}
-    </pre>
-</div>
-
-                                                </div>
-
-                                            
-                                                <div class="bg-gray-800 text-white rounded-lg p-4 text-sm font-mono overflow-x-auto my-2">
-                                                    <div data-controller="clipboard" class="relative group max-w-full">
-    <button type="button" title="Copy" aria-label="Copy code to clipboard" class="
-        absolute top-2 right-2
-        bg-indigo-600/90 hover:bg-indigo-700/95
-        text-white
-        p-2.5 rounded-lg
-        shadow-md
-        transition-colors duration-200 ease-in-out
-        focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400
-        flex items-center justify-center
-        w-9 h-9
-        z-10
-    " data-action="click-&gt;clipboard#copyToClipboard">
-    <svg viewBox="0 0 16 16" fill="currentColor" class="w-5 h-5" aria-hidden="true"><path fill-rule="evenodd" d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"></path></svg>
-</button>
-
-
-    <pre data-clipboard-target="code" class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
-    "success": false,
-    "error": "Two-Factor Authentication it's required for authentication on the portal. Please visit DOMAIN to set up 2FA and secure your account."
 }
     </pre>
 </div>
@@ -1260,8 +1060,7 @@ if (!HTMLScriptElement.supports || !HTMLScriptElement.supports('importmap')) (fu
                                                                                         <div class="text-sm text-gray-600 italic">
                                     This endpoint authenticates a user using their Google account. 
                 A valid Google OAuth authorization code is required. If the user is successfully authenticated,
-                 user details and a JWT token will be returned. Also if the platform requires authentication with 
-                 Two-Factor, the twoFACode parameter will be asked based on the TWO_FACTOR_AUTH_STATUS setting.
+                 user details and a JWT token will be returned.
                                 </div>
                             
                                                         
@@ -1269,8 +1068,7 @@ if (!HTMLScriptElement.supports || !HTMLScriptElement.supports('importmap')) (fu
                                         <p class="text-sm font-semibold text-blue-600 mb-2">Request Body</p>
                                         <div class="bg-gray-100 text-gray-800 rounded-lg p-4 text-sm font-mono overflow-x-auto border border-gray-200">
                                             <pre>{
-    "code": "4\/0AdKgLCxjQ74mKAg9vs_f7PuO99DR",
-    "twoFACode": "02YZR88R"
+    "code": "4\/0AdKgLCxjQ74mKAg9vs_f7PuO99DR"
 }</pre>
                                         </div>
                                     </div>
@@ -1477,63 +1275,7 @@ if (!HTMLScriptElement.supports || !HTMLScriptElement.supports('importmap')) (fu
 
     <pre data-clipboard-target="code" class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
     "success": false,
-    "error": "Two-Factor Authentication is active for this account. Please ensure you provide the correct authentication code."
-}
-    </pre>
-</div>
-
-                                                </div>
-
-                                            
-                                                <div class="bg-gray-800 text-white rounded-lg p-4 text-sm font-mono overflow-x-auto my-2">
-                                                    <div data-controller="clipboard" class="relative group max-w-full">
-    <button type="button" title="Copy" aria-label="Copy code to clipboard" class="
-        absolute top-2 right-2
-        bg-indigo-600/90 hover:bg-indigo-700/95
-        text-white
-        p-2.5 rounded-lg
-        shadow-md
-        transition-colors duration-200 ease-in-out
-        focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400
-        flex items-center justify-center
-        w-9 h-9
-        z-10
-    " data-action="click-&gt;clipboard#copyToClipboard">
-    <svg viewBox="0 0 16 16" fill="currentColor" class="w-5 h-5" aria-hidden="true"><path fill-rule="evenodd" d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"></path></svg>
-</button>
-
-
-    <pre data-clipboard-target="code" class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
-    "success": false,
-    "error": "Two-Factor Authentication is ENFORCED FOR PORTAL accounts."
-}
-    </pre>
-</div>
-
-                                                </div>
-
-                                            
-                                                <div class="bg-gray-800 text-white rounded-lg p-4 text-sm font-mono overflow-x-auto my-2">
-                                                    <div data-controller="clipboard" class="relative group max-w-full">
-    <button type="button" title="Copy" aria-label="Copy code to clipboard" class="
-        absolute top-2 right-2
-        bg-indigo-600/90 hover:bg-indigo-700/95
-        text-white
-        p-2.5 rounded-lg
-        shadow-md
-        transition-colors duration-200 ease-in-out
-        focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400
-        flex items-center justify-center
-        w-9 h-9
-        z-10
-    " data-action="click-&gt;clipboard#copyToClipboard">
-    <svg viewBox="0 0 16 16" fill="currentColor" class="w-5 h-5" aria-hidden="true"><path fill-rule="evenodd" d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"></path></svg>
-</button>
-
-
-    <pre data-clipboard-target="code" class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
-    "success": false,
-    "error": "Two-Factor Authentication it's required for authentication on the portal. Please visit DOMAIN to set up 2FA and secure your account."
+    "error": "Authentication Failed"
 }
     </pre>
 </div>
@@ -1719,8 +1461,7 @@ if (!HTMLScriptElement.supports || !HTMLScriptElement.supports('importmap')) (fu
                                                                                         <div class="text-sm text-gray-600 italic">
                                     This endpoint authenticates a user using their Microsoft account. 
                 A valid Microsoft OAuth authorization code is required. If the user is successfully authenticated, 
-                user details and a JWT token will be returned. Also if the platform requires authentication with 
-                Two-Factor, the twoFACode parameter will be asked based on the TWO_FACTOR_AUTH_STATUS setting.
+                user details and a JWT token will be returned.
                                 </div>
                             
                                                         
@@ -1728,8 +1469,7 @@ if (!HTMLScriptElement.supports || !HTMLScriptElement.supports('importmap')) (fu
                                         <p class="text-sm font-semibold text-blue-600 mb-2">Request Body</p>
                                         <div class="bg-gray-100 text-gray-800 rounded-lg p-4 text-sm font-mono overflow-x-auto border border-gray-200">
                                             <pre>{
-    "code": "0.AQk6Lf2I2XGhQkWlU8gBp0KmxeNn2KTcbsJh.8Qt3OeYCB4sQ2FHo",
-    "twoFACode": "02YZR88R"
+    "code": "0.AQk6Lf2I2XGhQkWlU8gBp0KmxeNn2KTcbsJh.8Qt3OeYCB4sQ2FHo"
 }</pre>
                                         </div>
                                     </div>
@@ -1936,63 +1676,7 @@ if (!HTMLScriptElement.supports || !HTMLScriptElement.supports('importmap')) (fu
 
     <pre data-clipboard-target="code" class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
     "success": false,
-    "error": "Two-Factor Authentication is active for this account. Please ensure you provide the correct authentication code."
-}
-    </pre>
-</div>
-
-                                                </div>
-
-                                            
-                                                <div class="bg-gray-800 text-white rounded-lg p-4 text-sm font-mono overflow-x-auto my-2">
-                                                    <div data-controller="clipboard" class="relative group max-w-full">
-    <button type="button" title="Copy" aria-label="Copy code to clipboard" class="
-        absolute top-2 right-2
-        bg-indigo-600/90 hover:bg-indigo-700/95
-        text-white
-        p-2.5 rounded-lg
-        shadow-md
-        transition-colors duration-200 ease-in-out
-        focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400
-        flex items-center justify-center
-        w-9 h-9
-        z-10
-    " data-action="click-&gt;clipboard#copyToClipboard">
-    <svg viewBox="0 0 16 16" fill="currentColor" class="w-5 h-5" aria-hidden="true"><path fill-rule="evenodd" d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"></path></svg>
-</button>
-
-
-    <pre data-clipboard-target="code" class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
-    "success": false,
-    "error": "Two-Factor Authentication is ENFORCED FOR PORTAL accounts."
-}
-    </pre>
-</div>
-
-                                                </div>
-
-                                            
-                                                <div class="bg-gray-800 text-white rounded-lg p-4 text-sm font-mono overflow-x-auto my-2">
-                                                    <div data-controller="clipboard" class="relative group max-w-full">
-    <button type="button" title="Copy" aria-label="Copy code to clipboard" class="
-        absolute top-2 right-2
-        bg-indigo-600/90 hover:bg-indigo-700/95
-        text-white
-        p-2.5 rounded-lg
-        shadow-md
-        transition-colors duration-200 ease-in-out
-        focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400
-        flex items-center justify-center
-        w-9 h-9
-        z-10
-    " data-action="click-&gt;clipboard#copyToClipboard">
-    <svg viewBox="0 0 16 16" fill="currentColor" class="w-5 h-5" aria-hidden="true"><path fill-rule="evenodd" d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"></path></svg>
-</button>
-
-
-    <pre data-clipboard-target="code" class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
-    "success": false,
-    "error": "Two-Factor Authentication it's required for authentication on the portal. Please visit DOMAIN to set up 2FA and secure your account."
+    "error": "Authentication Failed"
 }
     </pre>
 </div>
@@ -4296,10 +3980,11 @@ Both the jwt and the refresh token timestamps are in seconds.
                                                         <div class="border border-gray-200 rounded-xl shadow-sm overflow-hidden">
                         <button type="button" class="w-full flex justify-between items-center px-6 py-4 bg-gray-50 hover:bg-gray-100 transition" onclick="document.getElementById(&#39;resp-5-1&#39;).classList.toggle(&#39;hidden&#39;)">
                             <div class="flex items-center gap-4">
+                                                                    <svg viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 text-yellow-600 fill-none stroke-current" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2m10-10V7a4 4 0 0 0-8 0v4z"></path></svg>
                                                                 <span class="text-xs font-semibold px-2 py-1 rounded bg-blue-100 text-blue-700">
                                     POST
                                 </span>
-                                <code class="text-sm text-gray-900 font-mono">/api/v2/twoFA/request</code>
+                                <code class="text-sm text-gray-900 font-mono">/api/v2/twoFA/{type}</code>
                             </div>
                             <svg class="w-5 h-5 text-gray-500 transform transition-transform group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
@@ -4309,18 +3994,408 @@ Both the jwt and the refresh token timestamps are in seconds.
                         <div id="resp-5-1" class="px-6 py-4 bg-white border-t border-gray-100 space-y-6 hidden">
 
                                                                                         <div class="text-sm text-gray-600 italic">
-                                    This endpoint provides Two-Factor Authentication code only for portal accounts.
-                 To be able to request a authentication code the account needs to have setup a 2fa with email or SMS.
+                                    Enables Two-Factor Authentication (2FA) for the authenticated user. 
+        Supports ("totp", "email", "sms"). Requires a valid JWT Bearer token.
                                 </div>
                             
-                                                        
+                                                                                        <div class="flex items-center gap-2 p-4 border-l-4 border-yellow-500 bg-yellow-50 text-yellow-800 text-sm rounded-md">
+                                    <svg viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 fill-current" aria-hidden="true"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012-0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path></svg>
+                                    <span>This endpoint requires a valid JWT authentication token.</span>
+                                </div>
+                            
+                                                                                                                        
+                                                                                                                                                                    <div>
+                                            <p class="text-sm font-semibold mb-2
+                                                    text-green-600
+                                            ">
+                                                HTTP 200
+                                            </p>
+
+                                            
+                                            
+                                                <div class="bg-gray-800 text-white rounded-lg p-4 text-sm font-mono overflow-x-auto my-2">
+                                                    <div data-controller="clipboard" class="relative group max-w-full">
+    <button type="button" title="Copy" aria-label="Copy code to clipboard" class="
+        absolute top-2 right-2
+        bg-indigo-600/90 hover:bg-indigo-700/95
+        text-white
+        p-2.5 rounded-lg
+        shadow-md
+        transition-colors duration-200 ease-in-out
+        focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400
+        flex items-center justify-center
+        w-9 h-9
+        z-10
+    " data-action="click-&gt;clipboard#copyToClipboard">
+    <svg viewBox="0 0 16 16" fill="currentColor" class="w-5 h-5" aria-hidden="true"><path fill-rule="evenodd" d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"></path></svg>
+</button>
+
+
+    <pre data-clipboard-target="code" class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
+    "success": true,
+    "data": {
+        "message": "Two Factor TOTP Secret generated successfully",
+        "totpId": "ABCDEF123456"
+    }
+}
+    </pre>
+</div>
+
+                                                </div>
+
+                                            
+                                                <div class="bg-gray-800 text-white rounded-lg p-4 text-sm font-mono overflow-x-auto my-2">
+                                                    <div data-controller="clipboard" class="relative group max-w-full">
+    <button type="button" title="Copy" aria-label="Copy code to clipboard" class="
+        absolute top-2 right-2
+        bg-indigo-600/90 hover:bg-indigo-700/95
+        text-white
+        p-2.5 rounded-lg
+        shadow-md
+        transition-colors duration-200 ease-in-out
+        focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400
+        flex items-center justify-center
+        w-9 h-9
+        z-10
+    " data-action="click-&gt;clipboard#copyToClipboard">
+    <svg viewBox="0 0 16 16" fill="currentColor" class="w-5 h-5" aria-hidden="true"><path fill-rule="evenodd" d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"></path></svg>
+</button>
+
+
+    <pre data-clipboard-target="code" class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
+    "success": true,
+    "data": {
+        "message": "Two Factor Code sent to: user@example.com"
+    }
+}
+    </pre>
+</div>
+
+                                                </div>
+
+                                                                                    </div>
+                                                                                                                                                <div>
+                                            <p class="text-sm font-semibold mb-2
+                                                    text-red-600
+                                            ">
+                                                HTTP 400
+                                            </p>
+
+                                                                                            <p class="text-sm text-gray-700 mb-2 italic">User does not have a valid email or phone to send the code.</p>
+                                            
+                                            
+                                                <div class="bg-gray-800 text-white rounded-lg p-4 text-sm font-mono overflow-x-auto my-2">
+                                                    <div data-controller="clipboard" class="relative group max-w-full">
+    <button type="button" title="Copy" aria-label="Copy code to clipboard" class="
+        absolute top-2 right-2
+        bg-indigo-600/90 hover:bg-indigo-700/95
+        text-white
+        p-2.5 rounded-lg
+        shadow-md
+        transition-colors duration-200 ease-in-out
+        focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400
+        flex items-center justify-center
+        w-9 h-9
+        z-10
+    " data-action="click-&gt;clipboard#copyToClipboard">
+    <svg viewBox="0 0 16 16" fill="currentColor" class="w-5 h-5" aria-hidden="true"><path fill-rule="evenodd" d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"></path></svg>
+</button>
+
+
+    <pre data-clipboard-target="code" class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
+    "success": false,
+    "error": "User does not have a valid email or phone to send the code."
+}
+    </pre>
+</div>
+
+                                                </div>
+
+                                            
+                                                <div class="bg-gray-800 text-white rounded-lg p-4 text-sm font-mono overflow-x-auto my-2">
+                                                    <div data-controller="clipboard" class="relative group max-w-full">
+    <button type="button" title="Copy" aria-label="Copy code to clipboard" class="
+        absolute top-2 right-2
+        bg-indigo-600/90 hover:bg-indigo-700/95
+        text-white
+        p-2.5 rounded-lg
+        shadow-md
+        transition-colors duration-200 ease-in-out
+        focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400
+        flex items-center justify-center
+        w-9 h-9
+        z-10
+    " data-action="click-&gt;clipboard#copyToClipboard">
+    <svg viewBox="0 0 16 16" fill="currentColor" class="w-5 h-5" aria-hidden="true"><path fill-rule="evenodd" d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"></path></svg>
+</button>
+
+
+    <pre data-clipboard-target="code" class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
+    "success": false,
+    "error": {
+        "message": "Code not sent, the user does not have a valid method."
+    }
+}
+    </pre>
+</div>
+
+                                                </div>
+
+                                                                                    </div>
+                                                                                                                                                <div>
+                                            <p class="text-sm font-semibold mb-2
+                                                    text-red-600
+                                            ">
+                                                HTTP 401
+                                            </p>
+
+                                                                                            <p class="text-sm text-gray-700 mb-2 italic">Invalid, missing or expired JWT token OR user is not verified.</p>
+                                            
+                                            
+                                                <div class="bg-gray-800 text-white rounded-lg p-4 text-sm font-mono overflow-x-auto my-2">
+                                                    <div data-controller="clipboard" class="relative group max-w-full">
+    <button type="button" title="Copy" aria-label="Copy code to clipboard" class="
+        absolute top-2 right-2
+        bg-indigo-600/90 hover:bg-indigo-700/95
+        text-white
+        p-2.5 rounded-lg
+        shadow-md
+        transition-colors duration-200 ease-in-out
+        focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400
+        flex items-center justify-center
+        w-9 h-9
+        z-10
+    " data-action="click-&gt;clipboard#copyToClipboard">
+    <svg viewBox="0 0 16 16" fill="currentColor" class="w-5 h-5" aria-hidden="true"><path fill-rule="evenodd" d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"></path></svg>
+</button>
+
+
+    <pre data-clipboard-target="code" class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
+    "success": false,
+    "error": "Invalid, missing or expired JWT token OR user is not verified."
+}
+    </pre>
+</div>
+
+                                                </div>
+
+                                            
+                                                <div class="bg-gray-800 text-white rounded-lg p-4 text-sm font-mono overflow-x-auto my-2">
+                                                    <div data-controller="clipboard" class="relative group max-w-full">
+    <button type="button" title="Copy" aria-label="Copy code to clipboard" class="
+        absolute top-2 right-2
+        bg-indigo-600/90 hover:bg-indigo-700/95
+        text-white
+        p-2.5 rounded-lg
+        shadow-md
+        transition-colors duration-200 ease-in-out
+        focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400
+        flex items-center justify-center
+        w-9 h-9
+        z-10
+    " data-action="click-&gt;clipboard#copyToClipboard">
+    <svg viewBox="0 0 16 16" fill="currentColor" class="w-5 h-5" aria-hidden="true"><path fill-rule="evenodd" d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"></path></svg>
+</button>
+
+
+    <pre data-clipboard-target="code" class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
+    "success": false,
+    "error": {
+        "invalid_token": {
+            "message": "JWT Token is invalid!"
+        },
+        "user_not_verified": {
+            "message": "User account is not verified."
+        }
+    }
+}
+    </pre>
+</div>
+
+                                                </div>
+
+                                                                                    </div>
+                                                                                                                                                <div>
+                                            <p class="text-sm font-semibold mb-2
+                                                    text-red-600
+                                            ">
+                                                HTTP 403
+                                            </p>
+
+                                                                                            <p class="text-sm text-gray-700 mb-2 italic">User is authenticated but not allowed to access the resource.</p>
+                                            
+                                            
+                                                <div class="bg-gray-800 text-white rounded-lg p-4 text-sm font-mono overflow-x-auto my-2">
+                                                    <div data-controller="clipboard" class="relative group max-w-full">
+    <button type="button" title="Copy" aria-label="Copy code to clipboard" class="
+        absolute top-2 right-2
+        bg-indigo-600/90 hover:bg-indigo-700/95
+        text-white
+        p-2.5 rounded-lg
+        shadow-md
+        transition-colors duration-200 ease-in-out
+        focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400
+        flex items-center justify-center
+        w-9 h-9
+        z-10
+    " data-action="click-&gt;clipboard#copyToClipboard">
+    <svg viewBox="0 0 16 16" fill="currentColor" class="w-5 h-5" aria-hidden="true"><path fill-rule="evenodd" d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"></path></svg>
+</button>
+
+
+    <pre data-clipboard-target="code" class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
+    "success": false,
+    "error": "User is authenticated but not allowed to access the resource."
+}
+    </pre>
+</div>
+
+                                                </div>
+
+                                            
+                                                <div class="bg-gray-800 text-white rounded-lg p-4 text-sm font-mono overflow-x-auto my-2">
+                                                    <div data-controller="clipboard" class="relative group max-w-full">
+    <button type="button" title="Copy" aria-label="Copy code to clipboard" class="
+        absolute top-2 right-2
+        bg-indigo-600/90 hover:bg-indigo-700/95
+        text-white
+        p-2.5 rounded-lg
+        shadow-md
+        transition-colors duration-200 ease-in-out
+        focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400
+        flex items-center justify-center
+        w-9 h-9
+        z-10
+    " data-action="click-&gt;clipboard#copyToClipboard">
+    <svg viewBox="0 0 16 16" fill="currentColor" class="w-5 h-5" aria-hidden="true"><path fill-rule="evenodd" d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"></path></svg>
+</button>
+
+
+    <pre data-clipboard-target="code" class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
+    "success": false,
+    "error": {
+        "not_authenticated": {
+            "message": "Unauthorized - You do not have permission to access this resource"
+        },
+        "user_banned": {
+            "message": "User account is banned from the system."
+        },
+        "pending_action": {
+            "message": "Your request cannot be processed at this time due to a pending action. If your account is active, re-login to complete the action."
+        }
+    }
+}
+    </pre>
+</div>
+
+                                                </div>
+
+                                                                                    </div>
+                                                                                                                                                <div>
+                                            <p class="text-sm font-semibold mb-2
+                                                    text-red-600
+                                            ">
+                                                HTTP 500
+                                            </p>
+
+                                                                                            <p class="text-sm text-gray-700 mb-2 italic">Internal error while generating 2FA code or TOTP secret.</p>
+                                            
+                                            
+                                                <div class="bg-gray-800 text-white rounded-lg p-4 text-sm font-mono overflow-x-auto my-2">
+                                                    <div data-controller="clipboard" class="relative group max-w-full">
+    <button type="button" title="Copy" aria-label="Copy code to clipboard" class="
+        absolute top-2 right-2
+        bg-indigo-600/90 hover:bg-indigo-700/95
+        text-white
+        p-2.5 rounded-lg
+        shadow-md
+        transition-colors duration-200 ease-in-out
+        focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400
+        flex items-center justify-center
+        w-9 h-9
+        z-10
+    " data-action="click-&gt;clipboard#copyToClipboard">
+    <svg viewBox="0 0 16 16" fill="currentColor" class="w-5 h-5" aria-hidden="true"><path fill-rule="evenodd" d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"></path></svg>
+</button>
+
+
+    <pre data-clipboard-target="code" class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
+    "success": false,
+    "message": "Internal error while generating 2FA code or TOTP secret."
+}
+    </pre>
+</div>
+
+                                                </div>
+
+                                            
+                                                <div class="bg-gray-800 text-white rounded-lg p-4 text-sm font-mono overflow-x-auto my-2">
+                                                    <div data-controller="clipboard" class="relative group max-w-full">
+    <button type="button" title="Copy" aria-label="Copy code to clipboard" class="
+        absolute top-2 right-2
+        bg-indigo-600/90 hover:bg-indigo-700/95
+        text-white
+        p-2.5 rounded-lg
+        shadow-md
+        transition-colors duration-200 ease-in-out
+        focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400
+        flex items-center justify-center
+        w-9 h-9
+        z-10
+    " data-action="click-&gt;clipboard#copyToClipboard">
+    <svg viewBox="0 0 16 16" fill="currentColor" class="w-5 h-5" aria-hidden="true"><path fill-rule="evenodd" d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"></path></svg>
+</button>
+
+
+    <pre data-clipboard-target="code" class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
+    "success": false,
+    "message": [
+        "db_error",
+        "unexpected_error"
+    ]
+}
+    </pre>
+</div>
+
+                                                </div>
+
+                                                                                    </div>
+                                                                                                                        </div>
+                    </div>
+                                                        <div class="border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+                        <button type="button" class="w-full flex justify-between items-center px-6 py-4 bg-gray-50 hover:bg-gray-100 transition" onclick="document.getElementById(&#39;resp-5-2&#39;).classList.toggle(&#39;hidden&#39;)">
+                            <div class="flex items-center gap-4">
+                                                                    <svg viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 text-yellow-600 fill-none stroke-current" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2m10-10V7a4 4 0 0 0-8 0v4z"></path></svg>
+                                                                <span class="text-xs font-semibold px-2 py-1 rounded bg-blue-100 text-blue-700">
+                                    POST
+                                </span>
+                                <code class="text-sm text-gray-900 font-mono">/api/v2/twoFA/validate</code>
+                            </div>
+                            <svg class="w-5 h-5 text-gray-500 transform transition-transform group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+
+                        <div id="resp-5-2" class="hidden px-6 py-4 bg-white border-t border-gray-100 space-y-6">
+
+                                                                                        <div class="text-sm text-gray-600 italic">
+                                    This endpoint validates a 2FA code (email, SMS, or TOTP). 
+    The client must send a valid JWT Bearer token in the Authorization header, 
+    along with the 2FA type and confirmation code in the request body. 
+    If the code is valid, 2FA is enabled for that method.
+                                </div>
+                            
+                                                                                        <div class="flex items-center gap-2 p-4 border-l-4 border-yellow-500 bg-yellow-50 text-yellow-800 text-sm rounded-md">
+                                    <svg viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 fill-current" aria-hidden="true"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012-0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path></svg>
+                                    <span>This endpoint requires a valid JWT authentication token.</span>
+                                </div>
+                            
                                                                                                                                 <div>
                                         <p class="text-sm font-semibold text-blue-600 mb-2">Request Body</p>
                                         <div class="bg-gray-100 text-gray-800 rounded-lg p-4 text-sm font-mono overflow-x-auto border border-gray-200">
                                             <pre>{
-    "uuid": "user-uuid-example",
-    "password": "user-password-example",
-    "turnstile_token": "valid_test_token"
+    "type": "email or sms or topt",
+    "code": "123456"
 }</pre>
                                         </div>
                                     </div>
@@ -4355,7 +4430,7 @@ Both the jwt and the refresh token timestamps are in seconds.
     <pre data-clipboard-target="code" class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
     "success": true,
     "data": {
-        "message": "Two-Factor authentication code successfully sent. You have X attempts remaining to request a new one."
+        "message": "Two Factor authentication validated successfully!"
     }
 }
     </pre>
@@ -4393,7 +4468,7 @@ Both the jwt and the refresh token timestamps are in seconds.
 
     <pre data-clipboard-target="code" class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
     "success": false,
-    "error": "CAPTCHA validation failed"
+    "error": "Invalid JSON format"
 }
     </pre>
 </div>
@@ -4421,91 +4496,7 @@ Both the jwt and the refresh token timestamps are in seconds.
 
     <pre data-clipboard-target="code" class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
     "success": false,
-    "error": "Missing required fields: uuid, password or turnstile_token"
-}
-    </pre>
-</div>
-
-                                                </div>
-
-                                            
-                                                <div class="bg-gray-800 text-white rounded-lg p-4 text-sm font-mono overflow-x-auto my-2">
-                                                    <div data-controller="clipboard" class="relative group max-w-full">
-    <button type="button" title="Copy" aria-label="Copy code to clipboard" class="
-        absolute top-2 right-2
-        bg-indigo-600/90 hover:bg-indigo-700/95
-        text-white
-        p-2.5 rounded-lg
-        shadow-md
-        transition-colors duration-200 ease-in-out
-        focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400
-        flex items-center justify-center
-        w-9 h-9
-        z-10
-    " data-action="click-&gt;clipboard#copyToClipboard">
-    <svg viewBox="0 0 16 16" fill="currentColor" class="w-5 h-5" aria-hidden="true"><path fill-rule="evenodd" d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"></path></svg>
-</button>
-
-
-    <pre data-clipboard-target="code" class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
-    "success": false,
-    "error": "Missing required configuration setting: TWO_FACTOR_AUTH_RESEND_INTERVAL TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS"
-}
-    </pre>
-</div>
-
-                                                </div>
-
-                                            
-                                                <div class="bg-gray-800 text-white rounded-lg p-4 text-sm font-mono overflow-x-auto my-2">
-                                                    <div data-controller="clipboard" class="relative group max-w-full">
-    <button type="button" title="Copy" aria-label="Copy code to clipboard" class="
-        absolute top-2 right-2
-        bg-indigo-600/90 hover:bg-indigo-700/95
-        text-white
-        p-2.5 rounded-lg
-        shadow-md
-        transition-colors duration-200 ease-in-out
-        focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400
-        flex items-center justify-center
-        w-9 h-9
-        z-10
-    " data-action="click-&gt;clipboard#copyToClipboard">
-    <svg viewBox="0 0 16 16" fill="currentColor" class="w-5 h-5" aria-hidden="true"><path fill-rule="evenodd" d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"></path></svg>
-</button>
-
-
-    <pre data-clipboard-target="code" class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
-    "success": false,
-    "error": "Invalid json format"
-}
-    </pre>
-</div>
-
-                                                </div>
-
-                                            
-                                                <div class="bg-gray-800 text-white rounded-lg p-4 text-sm font-mono overflow-x-auto my-2">
-                                                    <div data-controller="clipboard" class="relative group max-w-full">
-    <button type="button" title="Copy" aria-label="Copy code to clipboard" class="
-        absolute top-2 right-2
-        bg-indigo-600/90 hover:bg-indigo-700/95
-        text-white
-        p-2.5 rounded-lg
-        shadow-md
-        transition-colors duration-200 ease-in-out
-        focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400
-        flex items-center justify-center
-        w-9 h-9
-        z-10
-    " data-action="click-&gt;clipboard#copyToClipboard">
-    <svg viewBox="0 0 16 16" fill="currentColor" class="w-5 h-5" aria-hidden="true"><path fill-rule="evenodd" d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"></path></svg>
-</button>
-
-
-    <pre data-clipboard-target="code" class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
-    "success": false,
-    "error": "Invalid credentials"
+    "error": "Missing required body fields"
 }
     </pre>
 </div>
@@ -4542,7 +4533,7 @@ Both the jwt and the refresh token timestamps are in seconds.
 
     <pre data-clipboard-target="code" class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
     "success": false,
-    "error": "Invalid credentials"
+    "error": "JWT Token is invalid!"
 }
     </pre>
 </div>
@@ -4570,7 +4561,7 @@ Both the jwt and the refresh token timestamps are in seconds.
 
     <pre data-clipboard-target="code" class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
     "success": false,
-    "error": "Invalid credentials"
+    "error": "User account is not verified."
 }
     </pre>
 </div>
@@ -4607,7 +4598,7 @@ Both the jwt and the refresh token timestamps are in seconds.
 
     <pre data-clipboard-target="code" class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
     "success": false,
-    "error": "User account is not verified!"
+    "error": "Invalid code"
 }
     </pre>
 </div>
@@ -4635,7 +4626,7 @@ Both the jwt and the refresh token timestamps are in seconds.
 
     <pre data-clipboard-target="code" class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
     "success": false,
-    "error": "User account is banned from the system!"
+    "error": "User account is banned from the system."
 }
     </pre>
 </div>
@@ -4663,7 +4654,7 @@ Both the jwt and the refresh token timestamps are in seconds.
 
     <pre data-clipboard-target="code" class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
     "success": false,
-    "error": "Invalid account type. Please only use email\/phone number accounts from the portal"
+    "error": "Your request cannot be processed at this time due to a pending action. If your account is active, re-login to complete the action."
 }
     </pre>
 </div>
@@ -4691,63 +4682,7 @@ Both the jwt and the refresh token timestamps are in seconds.
 
     <pre data-clipboard-target="code" class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
     "success": false,
-    "error": "Invalid Two-Factor Authentication configuration Please ensure that 2FA is set up using either email or SMS for this account"
-}
-    </pre>
-</div>
-
-                                                </div>
-
-                                            
-                                                <div class="bg-gray-800 text-white rounded-lg p-4 text-sm font-mono overflow-x-auto my-2">
-                                                    <div data-controller="clipboard" class="relative group max-w-full">
-    <button type="button" title="Copy" aria-label="Copy code to clipboard" class="
-        absolute top-2 right-2
-        bg-indigo-600/90 hover:bg-indigo-700/95
-        text-white
-        p-2.5 rounded-lg
-        shadow-md
-        transition-colors duration-200 ease-in-out
-        focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400
-        flex items-center justify-center
-        w-9 h-9
-        z-10
-    " data-action="click-&gt;clipboard#copyToClipboard">
-    <svg viewBox="0 0 16 16" fill="currentColor" class="w-5 h-5" aria-hidden="true"><path fill-rule="evenodd" d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"></path></svg>
-</button>
-
-
-    <pre data-clipboard-target="code" class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
-    "success": false,
-    "error": "The Two-Factor Authentication (2FA) configuration is incomplete. Please set up 2FA using either email or SMS"
-}
-    </pre>
-</div>
-
-                                                </div>
-
-                                            
-                                                <div class="bg-gray-800 text-white rounded-lg p-4 text-sm font-mono overflow-x-auto my-2">
-                                                    <div data-controller="clipboard" class="relative group max-w-full">
-    <button type="button" title="Copy" aria-label="Copy code to clipboard" class="
-        absolute top-2 right-2
-        bg-indigo-600/90 hover:bg-indigo-700/95
-        text-white
-        p-2.5 rounded-lg
-        shadow-md
-        transition-colors duration-200 ease-in-out
-        focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400
-        flex items-center justify-center
-        w-9 h-9
-        z-10
-    " data-action="click-&gt;clipboard#copyToClipboard">
-    <svg viewBox="0 0 16 16" fill="currentColor" class="w-5 h-5" aria-hidden="true"><path fill-rule="evenodd" d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"></path></svg>
-</button>
-
-
-    <pre data-clipboard-target="code" class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
-    "success": false,
-    "error": "Your request cannot be processed at this time due to a pending action. If your account is active, re-login to complete the action"
+    "error": "Unauthorized - You do not have permission to access this resource"
 }
     </pre>
 </div>
@@ -4759,7 +4694,7 @@ Both the jwt and the refresh token timestamps are in seconds.
                                             <p class="text-sm font-semibold mb-2
                                                     text-red-600
                                             ">
-                                                HTTP 429
+                                                HTTP 500
                                             </p>
 
                                             
@@ -4784,63 +4719,7 @@ Both the jwt and the refresh token timestamps are in seconds.
 
     <pre data-clipboard-target="code" class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
     "success": false,
-    "error": "You need to wait %d seconds before asking for a new code."
-}
-    </pre>
-</div>
-
-                                                </div>
-
-                                            
-                                                <div class="bg-gray-800 text-white rounded-lg p-4 text-sm font-mono overflow-x-auto my-2">
-                                                    <div data-controller="clipboard" class="relative group max-w-full">
-    <button type="button" title="Copy" aria-label="Copy code to clipboard" class="
-        absolute top-2 right-2
-        bg-indigo-600/90 hover:bg-indigo-700/95
-        text-white
-        p-2.5 rounded-lg
-        shadow-md
-        transition-colors duration-200 ease-in-out
-        focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400
-        flex items-center justify-center
-        w-9 h-9
-        z-10
-    " data-action="click-&gt;clipboard#copyToClipboard">
-    <svg viewBox="0 0 16 16" fill="currentColor" class="w-5 h-5" aria-hidden="true"><path fill-rule="evenodd" d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"></path></svg>
-</button>
-
-
-    <pre data-clipboard-target="code" class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
-    "success": false,
-    "error": "Too many attempts. You have exceeded the limit of %d attempts. Please wait %d minutes before trying again."
-}
-    </pre>
-</div>
-
-                                                </div>
-
-                                            
-                                                <div class="bg-gray-800 text-white rounded-lg p-4 text-sm font-mono overflow-x-auto my-2">
-                                                    <div data-controller="clipboard" class="relative group max-w-full">
-    <button type="button" title="Copy" aria-label="Copy code to clipboard" class="
-        absolute top-2 right-2
-        bg-indigo-600/90 hover:bg-indigo-700/95
-        text-white
-        p-2.5 rounded-lg
-        shadow-md
-        transition-colors duration-200 ease-in-out
-        focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400
-        flex items-center justify-center
-        w-9 h-9
-        z-10
-    " data-action="click-&gt;clipboard#copyToClipboard">
-    <svg viewBox="0 0 16 16" fill="currentColor" class="w-5 h-5" aria-hidden="true"><path fill-rule="evenodd" d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"></path></svg>
-</button>
-
-
-    <pre data-clipboard-target="code" class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
-    "success": false,
-    "error": "Too many validation attempts. You have exceeded the limit of %d attempts. Please wait %d minute(s) before trying again."
+    "message": "Unexpected server error occurred"
 }
     </pre>
 </div>
@@ -5138,7 +5017,6 @@ Both the jwt and the refresh token timestamps are in seconds.
                                                         <div class="border border-gray-200 rounded-xl shadow-sm overflow-hidden">
                         <button type="button" class="w-full flex justify-between items-center px-6 py-4 bg-gray-50 hover:bg-gray-100 transition" onclick="document.getElementById(&#39;resp-7-1&#39;).classList.toggle(&#39;hidden&#39;)">
                             <div class="flex items-center gap-4">
-                                                                    <svg viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 text-yellow-600 fill-none stroke-current" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2m10-10V7a4 4 0 0 0-8 0v4z"></path></svg>
                                                                 <span class="text-xs font-semibold px-2 py-1 rounded bg-red-100 text-red-700">
                                     DELETE
                                 </span>
@@ -5151,18 +5029,8 @@ Both the jwt and the refresh token timestamps are in seconds.
 
                         <div id="resp-7-1" class="hidden px-6 py-4 bg-white border-t border-gray-100 space-y-6">
 
-                                                                                        <div class="text-sm text-gray-600 italic">
-                                    This endpoint deletes the currently authenticated user account. 
-                Depending on the authentication method, the request body may require a password (Portal Account), 
-                a SAMLResponse (SAML), or an authorization code (Google/Microsoft). 
-                The request verifies the provided authentication details before performing the account deletion.
-                                </div>
-                            
-                                                                                        <div class="flex items-center gap-2 p-4 border-l-4 border-yellow-500 bg-yellow-50 text-yellow-800 text-sm rounded-md">
-                                    <svg viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 fill-current" aria-hidden="true"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012-0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path></svg>
-                                    <span>This endpoint requires a valid JWT authentication token.</span>
-                                </div>
-                            
+                                                        
+                                                        
                                                                                             
                                                                                                     <div class="mt-6">
                                         <p class="text-sm font-semibold text-blue-600 mb-2">Raw SAML Payload</p>
@@ -5196,567 +5064,8 @@ Both the jwt and the refresh token timestamps are in seconds.
                                                                                                                         </div>
                                 
                             
-                                                                                                                                                                    <div>
-                                            <p class="text-sm font-semibold mb-2
-                                                    text-green-600
-                                            ">
-                                                HTTP 200
-                                            </p>
-
-                                            
-                                            
-                                                <div class="bg-gray-800 text-white rounded-lg p-4 text-sm font-mono overflow-x-auto my-2">
-                                                    <div data-controller="clipboard" class="relative group max-w-full">
-    <button type="button" title="Copy" aria-label="Copy code to clipboard" class="
-        absolute top-2 right-2
-        bg-indigo-600/90 hover:bg-indigo-700/95
-        text-white
-        p-2.5 rounded-lg
-        shadow-md
-        transition-colors duration-200 ease-in-out
-        focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400
-        flex items-center justify-center
-        w-9 h-9
-        z-10
-    " data-action="click-&gt;clipboard#copyToClipboard">
-    <svg viewBox="0 0 16 16" fill="currentColor" class="w-5 h-5" aria-hidden="true"><path fill-rule="evenodd" d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"></path></svg>
-</button>
-
-
-    <pre data-clipboard-target="code" class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
-    "success": true,
-    "data": {
-        "message": "User with UUID \"test@example.com\" successfully deleted."
-    }
-}
-    </pre>
-</div>
-
-                                                </div>
-
-                                                                                    </div>
-                                                                                                                                                <div>
-                                            <p class="text-sm font-semibold mb-2
-                                                    text-red-600
-                                            ">
-                                                HTTP 400
-                                            </p>
-
-                                            
-                                            
-                                                <div class="bg-gray-800 text-white rounded-lg p-4 text-sm font-mono overflow-x-auto my-2">
-                                                    <div data-controller="clipboard" class="relative group max-w-full">
-    <button type="button" title="Copy" aria-label="Copy code to clipboard" class="
-        absolute top-2 right-2
-        bg-indigo-600/90 hover:bg-indigo-700/95
-        text-white
-        p-2.5 rounded-lg
-        shadow-md
-        transition-colors duration-200 ease-in-out
-        focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400
-        flex items-center justify-center
-        w-9 h-9
-        z-10
-    " data-action="click-&gt;clipboard#copyToClipboard">
-    <svg viewBox="0 0 16 16" fill="currentColor" class="w-5 h-5" aria-hidden="true"><path fill-rule="evenodd" d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"></path></svg>
-</button>
-
-
-    <pre data-clipboard-target="code" class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
-    "success": false,
-    "error": "Invalid data: Missing required fields."
-}
-    </pre>
-</div>
-
-                                                </div>
-
-                                            
-                                                <div class="bg-gray-800 text-white rounded-lg p-4 text-sm font-mono overflow-x-auto my-2">
-                                                    <div data-controller="clipboard" class="relative group max-w-full">
-    <button type="button" title="Copy" aria-label="Copy code to clipboard" class="
-        absolute top-2 right-2
-        bg-indigo-600/90 hover:bg-indigo-700/95
-        text-white
-        p-2.5 rounded-lg
-        shadow-md
-        transition-colors duration-200 ease-in-out
-        focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400
-        flex items-center justify-center
-        w-9 h-9
-        z-10
-    " data-action="click-&gt;clipboard#copyToClipboard">
-    <svg viewBox="0 0 16 16" fill="currentColor" class="w-5 h-5" aria-hidden="true"><path fill-rule="evenodd" d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"></path></svg>
-</button>
-
-
-    <pre data-clipboard-target="code" class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
-    "success": false,
-    "error": "Invalid JSON format"
-}
-    </pre>
-</div>
-
-                                                </div>
-
-                                                                                    </div>
-                                                                                                                                                <div>
-                                            <p class="text-sm font-semibold mb-2
-                                                    text-red-600
-                                            ">
-                                                HTTP 401
-                                            </p>
-
-                                            
-                                            
-                                                <div class="bg-gray-800 text-white rounded-lg p-4 text-sm font-mono overflow-x-auto my-2">
-                                                    <div data-controller="clipboard" class="relative group max-w-full">
-    <button type="button" title="Copy" aria-label="Copy code to clipboard" class="
-        absolute top-2 right-2
-        bg-indigo-600/90 hover:bg-indigo-700/95
-        text-white
-        p-2.5 rounded-lg
-        shadow-md
-        transition-colors duration-200 ease-in-out
-        focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400
-        flex items-center justify-center
-        w-9 h-9
-        z-10
-    " data-action="click-&gt;clipboard#copyToClipboard">
-    <svg viewBox="0 0 16 16" fill="currentColor" class="w-5 h-5" aria-hidden="true"><path fill-rule="evenodd" d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"></path></svg>
-</button>
-
-
-    <pre data-clipboard-target="code" class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
-    "success": false,
-    "error": "Invalid Request: JWT Token is invalid!"
-}
-    </pre>
-</div>
-
-                                                </div>
-
-                                            
-                                                <div class="bg-gray-800 text-white rounded-lg p-4 text-sm font-mono overflow-x-auto my-2">
-                                                    <div data-controller="clipboard" class="relative group max-w-full">
-    <button type="button" title="Copy" aria-label="Copy code to clipboard" class="
-        absolute top-2 right-2
-        bg-indigo-600/90 hover:bg-indigo-700/95
-        text-white
-        p-2.5 rounded-lg
-        shadow-md
-        transition-colors duration-200 ease-in-out
-        focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400
-        flex items-center justify-center
-        w-9 h-9
-        z-10
-    " data-action="click-&gt;clipboard#copyToClipboard">
-    <svg viewBox="0 0 16 16" fill="currentColor" class="w-5 h-5" aria-hidden="true"><path fill-rule="evenodd" d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"></path></svg>
-</button>
-
-
-    <pre data-clipboard-target="code" class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
-    "success": false,
-    "error": "Invalid credentials: The provided password is incorrect."
-}
-    </pre>
-</div>
-
-                                                </div>
-
-                                            
-                                                <div class="bg-gray-800 text-white rounded-lg p-4 text-sm font-mono overflow-x-auto my-2">
-                                                    <div data-controller="clipboard" class="relative group max-w-full">
-    <button type="button" title="Copy" aria-label="Copy code to clipboard" class="
-        absolute top-2 right-2
-        bg-indigo-600/90 hover:bg-indigo-700/95
-        text-white
-        p-2.5 rounded-lg
-        shadow-md
-        transition-colors duration-200 ease-in-out
-        focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400
-        flex items-center justify-center
-        w-9 h-9
-        z-10
-    " data-action="click-&gt;clipboard#copyToClipboard">
-    <svg viewBox="0 0 16 16" fill="currentColor" class="w-5 h-5" aria-hidden="true"><path fill-rule="evenodd" d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"></path></svg>
-</button>
-
-
-    <pre data-clipboard-target="code" class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
-    "success": false,
-    "error": "Authentication Failed: Unable to validate SAML assertion."
-}
-    </pre>
-</div>
-
-                                                </div>
-
-                                            
-                                                <div class="bg-gray-800 text-white rounded-lg p-4 text-sm font-mono overflow-x-auto my-2">
-                                                    <div data-controller="clipboard" class="relative group max-w-full">
-    <button type="button" title="Copy" aria-label="Copy code to clipboard" class="
-        absolute top-2 right-2
-        bg-indigo-600/90 hover:bg-indigo-700/95
-        text-white
-        p-2.5 rounded-lg
-        shadow-md
-        transition-colors duration-200 ease-in-out
-        focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400
-        flex items-center justify-center
-        w-9 h-9
-        z-10
-    " data-action="click-&gt;clipboard#copyToClipboard">
-    <svg viewBox="0 0 16 16" fill="currentColor" class="w-5 h-5" aria-hidden="true"><path fill-rule="evenodd" d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"></path></svg>
-</button>
-
-
-    <pre data-clipboard-target="code" class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
-    "success": false,
-    "error": "Authentication Failed: Invalid or expired authorization code."
-}
-    </pre>
-</div>
-
-                                                </div>
-
-                                                                                    </div>
-                                                                                                                                                <div>
-                                            <p class="text-sm font-semibold mb-2
-                                                    text-red-600
-                                            ">
-                                                HTTP 403
-                                            </p>
-
-                                            
-                                            
-                                                <div class="bg-gray-800 text-white rounded-lg p-4 text-sm font-mono overflow-x-auto my-2">
-                                                    <div data-controller="clipboard" class="relative group max-w-full">
-    <button type="button" title="Copy" aria-label="Copy code to clipboard" class="
-        absolute top-2 right-2
-        bg-indigo-600/90 hover:bg-indigo-700/95
-        text-white
-        p-2.5 rounded-lg
-        shadow-md
-        transition-colors duration-200 ease-in-out
-        focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400
-        flex items-center justify-center
-        w-9 h-9
-        z-10
-    " data-action="click-&gt;clipboard#copyToClipboard">
-    <svg viewBox="0 0 16 16" fill="currentColor" class="w-5 h-5" aria-hidden="true"><path fill-rule="evenodd" d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"></path></svg>
-</button>
-
-
-    <pre data-clipboard-target="code" class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
-    "success": false,
-    "error": "Unauthorized - You do not have permission to access this resource."
-}
-    </pre>
-</div>
-
-                                                </div>
-
-                                            
-                                                <div class="bg-gray-800 text-white rounded-lg p-4 text-sm font-mono overflow-x-auto my-2">
-                                                    <div data-controller="clipboard" class="relative group max-w-full">
-    <button type="button" title="Copy" aria-label="Copy code to clipboard" class="
-        absolute top-2 right-2
-        bg-indigo-600/90 hover:bg-indigo-700/95
-        text-white
-        p-2.5 rounded-lg
-        shadow-md
-        transition-colors duration-200 ease-in-out
-        focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400
-        flex items-center justify-center
-        w-9 h-9
-        z-10
-    " data-action="click-&gt;clipboard#copyToClipboard">
-    <svg viewBox="0 0 16 16" fill="currentColor" class="w-5 h-5" aria-hidden="true"><path fill-rule="evenodd" d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"></path></svg>
-</button>
-
-
-    <pre data-clipboard-target="code" class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
-    "success": false,
-    "error": "Unauthorized: The SAML assertion email does not match the user account email."
-}
-    </pre>
-</div>
-
-                                                </div>
-
-                                            
-                                                <div class="bg-gray-800 text-white rounded-lg p-4 text-sm font-mono overflow-x-auto my-2">
-                                                    <div data-controller="clipboard" class="relative group max-w-full">
-    <button type="button" title="Copy" aria-label="Copy code to clipboard" class="
-        absolute top-2 right-2
-        bg-indigo-600/90 hover:bg-indigo-700/95
-        text-white
-        p-2.5 rounded-lg
-        shadow-md
-        transition-colors duration-200 ease-in-out
-        focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400
-        flex items-center justify-center
-        w-9 h-9
-        z-10
-    " data-action="click-&gt;clipboard#copyToClipboard">
-    <svg viewBox="0 0 16 16" fill="currentColor" class="w-5 h-5" aria-hidden="true"><path fill-rule="evenodd" d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"></path></svg>
-</button>
-
-
-    <pre data-clipboard-target="code" class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
-    "success": false,
-    "error": "The configured IDP Entity ID does not match the expected value. Access denied."
-}
-    </pre>
-</div>
-
-                                                </div>
-
-                                            
-                                                <div class="bg-gray-800 text-white rounded-lg p-4 text-sm font-mono overflow-x-auto my-2">
-                                                    <div data-controller="clipboard" class="relative group max-w-full">
-    <button type="button" title="Copy" aria-label="Copy code to clipboard" class="
-        absolute top-2 right-2
-        bg-indigo-600/90 hover:bg-indigo-700/95
-        text-white
-        p-2.5 rounded-lg
-        shadow-md
-        transition-colors duration-200 ease-in-out
-        focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400
-        flex items-center justify-center
-        w-9 h-9
-        z-10
-    " data-action="click-&gt;clipboard#copyToClipboard">
-    <svg viewBox="0 0 16 16" fill="currentColor" class="w-5 h-5" aria-hidden="true"><path fill-rule="evenodd" d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"></path></svg>
-</button>
-
-
-    <pre data-clipboard-target="code" class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
-    "success": false,
-    "error": "Invalid Two-Factor Authentication configuration. Please ensure that 2FA is set up using either email or SMS for this account."
-}
-    </pre>
-</div>
-
-                                                </div>
-
-                                            
-                                                <div class="bg-gray-800 text-white rounded-lg p-4 text-sm font-mono overflow-x-auto my-2">
-                                                    <div data-controller="clipboard" class="relative group max-w-full">
-    <button type="button" title="Copy" aria-label="Copy code to clipboard" class="
-        absolute top-2 right-2
-        bg-indigo-600/90 hover:bg-indigo-700/95
-        text-white
-        p-2.5 rounded-lg
-        shadow-md
-        transition-colors duration-200 ease-in-out
-        focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400
-        flex items-center justify-center
-        w-9 h-9
-        z-10
-    " data-action="click-&gt;clipboard#copyToClipboard">
-    <svg viewBox="0 0 16 16" fill="currentColor" class="w-5 h-5" aria-hidden="true"><path fill-rule="evenodd" d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"></path></svg>
-</button>
-
-
-    <pre data-clipboard-target="code" class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
-    "success": false,
-    "error": "The Two-Factor Authentication (2FA) configuration is incomplete. Please set up 2FA using either email or SMS."
-}
-    </pre>
-</div>
-
-                                                </div>
-
-                                            
-                                                <div class="bg-gray-800 text-white rounded-lg p-4 text-sm font-mono overflow-x-auto my-2">
-                                                    <div data-controller="clipboard" class="relative group max-w-full">
-    <button type="button" title="Copy" aria-label="Copy code to clipboard" class="
-        absolute top-2 right-2
-        bg-indigo-600/90 hover:bg-indigo-700/95
-        text-white
-        p-2.5 rounded-lg
-        shadow-md
-        transition-colors duration-200 ease-in-out
-        focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400
-        flex items-center justify-center
-        w-9 h-9
-        z-10
-    " data-action="click-&gt;clipboard#copyToClipboard">
-    <svg viewBox="0 0 16 16" fill="currentColor" class="w-5 h-5" aria-hidden="true"><path fill-rule="evenodd" d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"></path></svg>
-</button>
-
-
-    <pre data-clipboard-target="code" class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
-    "success": false,
-    "error": "Invalid account type. Please only use email\/phone number accounts from the portal."
-}
-    </pre>
-</div>
-
-                                                </div>
-
-                                                                                    </div>
-                                                                                                                                                <div>
-                                            <p class="text-sm font-semibold mb-2
-                                                    text-red-600
-                                            ">
-                                                HTTP 404
-                                            </p>
-
-                                            
-                                            
-                                                <div class="bg-gray-800 text-white rounded-lg p-4 text-sm font-mono overflow-x-auto my-2">
-                                                    <div data-controller="clipboard" class="relative group max-w-full">
-    <button type="button" title="Copy" aria-label="Copy code to clipboard" class="
-        absolute top-2 right-2
-        bg-indigo-600/90 hover:bg-indigo-700/95
-        text-white
-        p-2.5 rounded-lg
-        shadow-md
-        transition-colors duration-200 ease-in-out
-        focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400
-        flex items-center justify-center
-        w-9 h-9
-        z-10
-    " data-action="click-&gt;clipboard#copyToClipboard">
-    <svg viewBox="0 0 16 16" fill="currentColor" class="w-5 h-5" aria-hidden="true"><path fill-rule="evenodd" d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"></path></svg>
-</button>
-
-
-    <pre data-clipboard-target="code" class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
-    "success": false,
-    "error": "Invalid Account: User account not found."
-}
-    </pre>
-</div>
-
-                                                </div>
-
-                                            
-                                                <div class="bg-gray-800 text-white rounded-lg p-4 text-sm font-mono overflow-x-auto my-2">
-                                                    <div data-controller="clipboard" class="relative group max-w-full">
-    <button type="button" title="Copy" aria-label="Copy code to clipboard" class="
-        absolute top-2 right-2
-        bg-indigo-600/90 hover:bg-indigo-700/95
-        text-white
-        p-2.5 rounded-lg
-        shadow-md
-        transition-colors duration-200 ease-in-out
-        focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400
-        flex items-center justify-center
-        w-9 h-9
-        z-10
-    " data-action="click-&gt;clipboard#copyToClipboard">
-    <svg viewBox="0 0 16 16" fill="currentColor" class="w-5 h-5" aria-hidden="true"><path fill-rule="evenodd" d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"></path></svg>
-</button>
-
-
-    <pre data-clipboard-target="code" class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
-    "success": false,
-    "error": "Required data from the external service could not be located."
-}
-    </pre>
-</div>
-
-                                                </div>
-
-                                                                                    </div>
-                                                                                                                                                <div>
-                                            <p class="text-sm font-semibold mb-2
-                                                    text-red-600
-                                            ">
-                                                HTTP 500
-                                            </p>
-
-                                            
-                                            
-                                                <div class="bg-gray-800 text-white rounded-lg p-4 text-sm font-mono overflow-x-auto my-2">
-                                                    <div data-controller="clipboard" class="relative group max-w-full">
-    <button type="button" title="Copy" aria-label="Copy code to clipboard" class="
-        absolute top-2 right-2
-        bg-indigo-600/90 hover:bg-indigo-700/95
-        text-white
-        p-2.5 rounded-lg
-        shadow-md
-        transition-colors duration-200 ease-in-out
-        focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400
-        flex items-center justify-center
-        w-9 h-9
-        z-10
-    " data-action="click-&gt;clipboard#copyToClipboard">
-    <svg viewBox="0 0 16 16" fill="currentColor" class="w-5 h-5" aria-hidden="true"><path fill-rule="evenodd" d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"></path></svg>
-</button>
-
-
-    <pre data-clipboard-target="code" class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
-    "success": false,
-    "message": "An error occurred while deleting the user."
-}
-    </pre>
-</div>
-
-                                                </div>
-
-                                            
-                                                <div class="bg-gray-800 text-white rounded-lg p-4 text-sm font-mono overflow-x-auto my-2">
-                                                    <div data-controller="clipboard" class="relative group max-w-full">
-    <button type="button" title="Copy" aria-label="Copy code to clipboard" class="
-        absolute top-2 right-2
-        bg-indigo-600/90 hover:bg-indigo-700/95
-        text-white
-        p-2.5 rounded-lg
-        shadow-md
-        transition-colors duration-200 ease-in-out
-        focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400
-        flex items-center justify-center
-        w-9 h-9
-        z-10
-    " data-action="click-&gt;clipboard#copyToClipboard">
-    <svg viewBox="0 0 16 16" fill="currentColor" class="w-5 h-5" aria-hidden="true"><path fill-rule="evenodd" d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"></path></svg>
-</button>
-
-
-    <pre data-clipboard-target="code" class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
-    "success": false,
-    "message": "An error occurred while communicating with an external service."
-}
-    </pre>
-</div>
-
-                                                </div>
-
-                                            
-                                                <div class="bg-gray-800 text-white rounded-lg p-4 text-sm font-mono overflow-x-auto my-2">
-                                                    <div data-controller="clipboard" class="relative group max-w-full">
-    <button type="button" title="Copy" aria-label="Copy code to clipboard" class="
-        absolute top-2 right-2
-        bg-indigo-600/90 hover:bg-indigo-700/95
-        text-white
-        p-2.5 rounded-lg
-        shadow-md
-        transition-colors duration-200 ease-in-out
-        focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400
-        flex items-center justify-center
-        w-9 h-9
-        z-10
-    " data-action="click-&gt;clipboard#copyToClipboard">
-    <svg viewBox="0 0 16 16" fill="currentColor" class="w-5 h-5" aria-hidden="true"><path fill-rule="evenodd" d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"></path></svg>
-</button>
-
-
-    <pre data-clipboard-target="code" class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
-    "success": false,
-    "message": "An unexpected error occurred. Please try again later."
-}
-    </pre>
-</div>
-
-                                                </div>
-
-                                                                                    </div>
-                                                                                                                        </div>
+                                                                                        <p class="text-gray-400 italic">No responses documented.</p>
+                                                    </div>
                     </div>
                             </div>
         </div>
