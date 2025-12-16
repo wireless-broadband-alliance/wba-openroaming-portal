@@ -18,10 +18,10 @@
     <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">
     <link href="./index_v2_files/css2(1)" rel="stylesheet">
 
-            <link rel="stylesheet" href="./index_v2_files/app-mEuxOyU.css">
+            <link rel="stylesheet" href="./index_v2_files/app-lsVnQWz.css">
     
             
-<link rel="stylesheet" href="./index_v2_files/app-mEuxOyU.css">
+<link rel="stylesheet" href="./index_v2_files/app-lsVnQWz.css">
 <link rel="stylesheet" href="./index_v2_files/tom-select.default-EUMPfwl.css">
 <link rel="stylesheet" href="./index_v2_files/live.min-FOtfHpc.css">
 <link rel="stylesheet" href="./index_v2_files/quill.snow-DYvVjm1.css">
@@ -150,7 +150,7 @@ if (!HTMLScriptElement.supports || !HTMLScriptElement.supports('importmap')) (fu
 <link rel="modulepreload" href="http:///assets/controllers/os-tabs_controller-TtqvSnS.js">
 <link rel="modulepreload" href="http:///assets/vendor/tom-select/tom-select.index-TPK6we8.js">
 <link rel="modulepreload" href="http:///assets/vendor/quill/quill.index-AtX7VVK.js">
-<script type="module">import 'app';</script>    </head>
+<script type="module">import 'app';</script>    <style id="_goober"> @keyframes go2264125279{from{transform:scale(0) rotate(45deg);opacity:0;}to{transform:scale(1) rotate(45deg);opacity:1;}}@keyframes go3020080000{from{transform:scale(0);opacity:0;}to{transform:scale(1);opacity:1;}}@keyframes go463499852{from{transform:scale(0) rotate(90deg);opacity:0;}to{transform:scale(1) rotate(90deg);opacity:1;}}@keyframes go1268368563{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}@keyframes go1310225428{from{transform:scale(0) rotate(45deg);opacity:0;}to{transform:scale(1) rotate(45deg);opacity:1;}}@keyframes go651618207{0%{height:0;width:0;opacity:0;}40%{height:0;width:6px;opacity:1;}100%{opacity:1;height:10px;}}@keyframes go901347462{from{transform:scale(0.6);opacity:0.4;}to{transform:scale(1);opacity:1;}}.go4109123758{z-index:9999;}.go4109123758 > *{pointer-events:auto;}</style></head>
 
 <body>
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -2163,6 +2163,282 @@ if (!HTMLScriptElement.supports || !HTMLScriptElement.supports('importmap')) (fu
                                                         <div class="border border-gray-200 rounded-xl shadow-sm overflow-hidden">
                         <button type="button" class="w-full flex justify-between items-center px-6 py-4 bg-gray-50 hover:bg-gray-100 transition" onclick="document.getElementById(&#39;resp-1-5&#39;).classList.toggle(&#39;hidden&#39;)">
                             <div class="flex items-center gap-4">
+                                                                    <svg viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 text-yellow-600 fill-none stroke-current" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2m10-10V7a4 4 0 0 0-8 0v4z"></path></svg>
+                                                                <span class="text-xs font-semibold px-2 py-1 rounded bg-blue-100 text-blue-700">
+                                    POST
+                                </span>
+                                <code class="text-sm text-gray-900 font-mono">/api/v2/auth/refresh</code>
+                            </div>
+                            <svg class="w-5 h-5 text-gray-500 transform transition-transform group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+
+                        <div id="resp-1-5" class="px-6 py-4 bg-white border-t border-gray-100 space-y-6 hidden">
+
+                                                                                        <div class="text-sm text-gray-600 italic">
+                                    Refreshes the JWT token for an authenticated user.
+The client must send the current valid refresh token in the request body as "current_token".
+If the token is valid and not expired/revoked, a new access token and refresh token are returned.
+Both the jwt and the refresh token timestamps are in seconds.
+                                </div>
+                            
+                                                                                        <div class="flex items-center gap-2 p-4 border-l-4 border-yellow-500 bg-yellow-50 text-yellow-800 text-sm rounded-md">
+                                    <svg viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 fill-current" aria-hidden="true"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012-0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path></svg>
+                                    <span>This endpoint requires a valid JWT authentication token.</span>
+                                </div>
+                            
+                                                                                                                                <div>
+                                        <p class="text-sm font-semibold text-blue-600 mb-2">Request Body</p>
+                                        <div class="bg-gray-100 text-gray-800 rounded-lg p-4 text-sm font-mono overflow-x-auto border border-gray-200">
+                                            <pre>{
+    "current_token": "currentToken||RefreshToken"
+}</pre>
+                                        </div>
+                                    </div>
+                                                            
+                                                                                                                                                                    <div>
+                                            <p class="text-sm font-semibold mb-2
+                                                    text-green-600
+                                            ">
+                                                HTTP 200
+                                            </p>
+
+                                            
+                                            
+                                                <div class="bg-gray-800 text-white rounded-lg p-4 text-sm font-mono overflow-x-auto my-2">
+                                                    <div data-controller="clipboard" class="relative group max-w-full">
+    <button type="button" title="Copy" aria-label="Copy code to clipboard" class="
+        absolute top-2 right-2
+        bg-indigo-600/90 hover:bg-indigo-700/95
+        text-white
+        p-2.5 rounded-lg
+        shadow-md
+        transition-colors duration-200 ease-in-out
+        focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400
+        flex items-center justify-center
+        w-9 h-9
+        z-10
+    " data-action="click-&gt;clipboard#copyToClipboard">
+    <svg viewBox="0 0 16 16" fill="currentColor" class="w-5 h-5" aria-hidden="true"><path fill-rule="evenodd" d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"></path></svg>
+</button>
+
+
+    <pre data-clipboard-target="code" class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
+    "success": true,
+    "data": {
+        "access_token": "newAccessToken",
+        "refresh_token": "newRefreshToken",
+        "access_token_expires_in": 3600,
+        "refresh_token_expires_in": 2592000
+    }
+}
+    </pre>
+</div>
+
+                                                </div>
+
+                                                                                    </div>
+                                                                                                                                                <div>
+                                            <p class="text-sm font-semibold mb-2
+                                                    text-red-600
+                                            ">
+                                                HTTP 400
+                                            </p>
+
+                                            
+                                            
+                                                <div class="bg-gray-800 text-white rounded-lg p-4 text-sm font-mono overflow-x-auto my-2">
+                                                    <div data-controller="clipboard" class="relative group max-w-full">
+    <button type="button" title="Copy" aria-label="Copy code to clipboard" class="
+        absolute top-2 right-2
+        bg-indigo-600/90 hover:bg-indigo-700/95
+        text-white
+        p-2.5 rounded-lg
+        shadow-md
+        transition-colors duration-200 ease-in-out
+        focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400
+        flex items-center justify-center
+        w-9 h-9
+        z-10
+    " data-action="click-&gt;clipboard#copyToClipboard">
+    <svg viewBox="0 0 16 16" fill="currentColor" class="w-5 h-5" aria-hidden="true"><path fill-rule="evenodd" d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"></path></svg>
+</button>
+
+
+    <pre data-clipboard-target="code" class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
+    "success": false,
+    "error": "Missing or invalid request body"
+}
+    </pre>
+</div>
+
+                                                </div>
+
+                                            
+                                                <div class="bg-gray-800 text-white rounded-lg p-4 text-sm font-mono overflow-x-auto my-2">
+                                                    <div data-controller="clipboard" class="relative group max-w-full">
+    <button type="button" title="Copy" aria-label="Copy code to clipboard" class="
+        absolute top-2 right-2
+        bg-indigo-600/90 hover:bg-indigo-700/95
+        text-white
+        p-2.5 rounded-lg
+        shadow-md
+        transition-colors duration-200 ease-in-out
+        focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400
+        flex items-center justify-center
+        w-9 h-9
+        z-10
+    " data-action="click-&gt;clipboard#copyToClipboard">
+    <svg viewBox="0 0 16 16" fill="currentColor" class="w-5 h-5" aria-hidden="true"><path fill-rule="evenodd" d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"></path></svg>
+</button>
+
+
+    <pre data-clipboard-target="code" class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
+    "success": false,
+    "error": "current_token is required"
+}
+    </pre>
+</div>
+
+                                                </div>
+
+                                                                                    </div>
+                                                                                                                                                <div>
+                                            <p class="text-sm font-semibold mb-2
+                                                    text-red-600
+                                            ">
+                                                HTTP 401
+                                            </p>
+
+                                            
+                                            
+                                                <div class="bg-gray-800 text-white rounded-lg p-4 text-sm font-mono overflow-x-auto my-2">
+                                                    <div data-controller="clipboard" class="relative group max-w-full">
+    <button type="button" title="Copy" aria-label="Copy code to clipboard" class="
+        absolute top-2 right-2
+        bg-indigo-600/90 hover:bg-indigo-700/95
+        text-white
+        p-2.5 rounded-lg
+        shadow-md
+        transition-colors duration-200 ease-in-out
+        focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400
+        flex items-center justify-center
+        w-9 h-9
+        z-10
+    " data-action="click-&gt;clipboard#copyToClipboard">
+    <svg viewBox="0 0 16 16" fill="currentColor" class="w-5 h-5" aria-hidden="true"><path fill-rule="evenodd" d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"></path></svg>
+</button>
+
+
+    <pre data-clipboard-target="code" class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
+    "success": false,
+    "error": "Invalid or expired refresh token"
+}
+    </pre>
+</div>
+
+                                                </div>
+
+                                            
+                                                <div class="bg-gray-800 text-white rounded-lg p-4 text-sm font-mono overflow-x-auto my-2">
+                                                    <div data-controller="clipboard" class="relative group max-w-full">
+    <button type="button" title="Copy" aria-label="Copy code to clipboard" class="
+        absolute top-2 right-2
+        bg-indigo-600/90 hover:bg-indigo-700/95
+        text-white
+        p-2.5 rounded-lg
+        shadow-md
+        transition-colors duration-200 ease-in-out
+        focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400
+        flex items-center justify-center
+        w-9 h-9
+        z-10
+    " data-action="click-&gt;clipboard#copyToClipboard">
+    <svg viewBox="0 0 16 16" fill="currentColor" class="w-5 h-5" aria-hidden="true"><path fill-rule="evenodd" d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"></path></svg>
+</button>
+
+
+    <pre data-clipboard-target="code" class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
+    "success": false,
+    "error": "Invalid user associated with the token"
+}
+    </pre>
+</div>
+
+                                                </div>
+
+                                                                                    </div>
+                                                                                                                                                <div>
+                                            <p class="text-sm font-semibold mb-2
+                                                    text-red-600
+                                            ">
+                                                HTTP 500
+                                            </p>
+
+                                            
+                                            
+                                                <div class="bg-gray-800 text-white rounded-lg p-4 text-sm font-mono overflow-x-auto my-2">
+                                                    <div data-controller="clipboard" class="relative group max-w-full">
+    <button type="button" title="Copy" aria-label="Copy code to clipboard" class="
+        absolute top-2 right-2
+        bg-indigo-600/90 hover:bg-indigo-700/95
+        text-white
+        p-2.5 rounded-lg
+        shadow-md
+        transition-colors duration-200 ease-in-out
+        focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400
+        flex items-center justify-center
+        w-9 h-9
+        z-10
+    " data-action="click-&gt;clipboard#copyToClipboard">
+    <svg viewBox="0 0 16 16" fill="currentColor" class="w-5 h-5" aria-hidden="true"><path fill-rule="evenodd" d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"></path></svg>
+</button>
+
+
+    <pre data-clipboard-target="code" class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
+    "success": false,
+    "message": "Token generation failed"
+}
+    </pre>
+</div>
+
+                                                </div>
+
+                                            
+                                                <div class="bg-gray-800 text-white rounded-lg p-4 text-sm font-mono overflow-x-auto my-2">
+                                                    <div data-controller="clipboard" class="relative group max-w-full">
+    <button type="button" title="Copy" aria-label="Copy code to clipboard" class="
+        absolute top-2 right-2
+        bg-indigo-600/90 hover:bg-indigo-700/95
+        text-white
+        p-2.5 rounded-lg
+        shadow-md
+        transition-colors duration-200 ease-in-out
+        focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400
+        flex items-center justify-center
+        w-9 h-9
+        z-10
+    " data-action="click-&gt;clipboard#copyToClipboard">
+    <svg viewBox="0 0 16 16" fill="currentColor" class="w-5 h-5" aria-hidden="true"><path fill-rule="evenodd" d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"></path></svg>
+</button>
+
+
+    <pre data-clipboard-target="code" class="rounded bg-gray-800 text-white p-4 pt-12 font-mono overflow-x-auto max-w-full text-left">{
+    "success": false,
+    "message": "JWT key files are missing. Please ensure both private and public keys exist."
+}
+    </pre>
+</div>
+
+                                                </div>
+
+                                                                                    </div>
+                                                                                                                        </div>
+                    </div>
+                                                        <div class="border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+                        <button type="button" class="w-full flex justify-between items-center px-6 py-4 bg-gray-50 hover:bg-gray-100 transition" onclick="document.getElementById(&#39;resp-1-6&#39;).classList.toggle(&#39;hidden&#39;)">
+                            <div class="flex items-center gap-4">
                                                                 <span class="text-xs font-semibold px-2 py-1 rounded bg-blue-100 text-blue-700">
                                     POST
                                 </span>
@@ -2173,7 +2449,7 @@ if (!HTMLScriptElement.supports || !HTMLScriptElement.supports('importmap')) (fu
                             </svg>
                         </button>
 
-                        <div id="resp-1-5" class="px-6 py-4 bg-white border-t border-gray-100 space-y-6 hidden">
+                        <div id="resp-1-6" class="hidden px-6 py-4 bg-white border-t border-gray-100 space-y-6">
 
                                                                                         <div class="text-sm text-gray-600 italic">
                                     This endpoint registers a new user using their email and password, 
@@ -2358,7 +2634,7 @@ if (!HTMLScriptElement.supports || !HTMLScriptElement.supports('importmap')) (fu
                                                                                                                         </div>
                     </div>
                                                         <div class="border border-gray-200 rounded-xl shadow-sm overflow-hidden">
-                        <button type="button" class="w-full flex justify-between items-center px-6 py-4 bg-gray-50 hover:bg-gray-100 transition" onclick="document.getElementById(&#39;resp-1-6&#39;).classList.toggle(&#39;hidden&#39;)">
+                        <button type="button" class="w-full flex justify-between items-center px-6 py-4 bg-gray-50 hover:bg-gray-100 transition" onclick="document.getElementById(&#39;resp-1-7&#39;).classList.toggle(&#39;hidden&#39;)">
                             <div class="flex items-center gap-4">
                                                                 <span class="text-xs font-semibold px-2 py-1 rounded bg-blue-100 text-blue-700">
                                     POST
@@ -2370,7 +2646,7 @@ if (!HTMLScriptElement.supports || !HTMLScriptElement.supports('importmap')) (fu
                             </svg>
                         </button>
 
-                        <div id="resp-1-6" class="px-6 py-4 bg-white border-t border-gray-100 space-y-6 hidden">
+                        <div id="resp-1-7" class="hidden px-6 py-4 bg-white border-t border-gray-100 space-y-6">
 
                                                                                         <div class="text-sm text-gray-600 italic">
                                     This endpoint triggers a password reset for a local auth account. 
@@ -2553,7 +2829,7 @@ if (!HTMLScriptElement.supports || !HTMLScriptElement.supports('importmap')) (fu
                                                                                                                         </div>
                     </div>
                                                         <div class="border border-gray-200 rounded-xl shadow-sm overflow-hidden">
-                        <button type="button" class="w-full flex justify-between items-center px-6 py-4 bg-gray-50 hover:bg-gray-100 transition" onclick="document.getElementById(&#39;resp-1-7&#39;).classList.toggle(&#39;hidden&#39;)">
+                        <button type="button" class="w-full flex justify-between items-center px-6 py-4 bg-gray-50 hover:bg-gray-100 transition" onclick="document.getElementById(&#39;resp-1-8&#39;).classList.toggle(&#39;hidden&#39;)">
                             <div class="flex items-center gap-4">
                                                                 <span class="text-xs font-semibold px-2 py-1 rounded bg-blue-100 text-blue-700">
                                     POST
@@ -2565,7 +2841,7 @@ if (!HTMLScriptElement.supports || !HTMLScriptElement.supports('importmap')) (fu
                             </svg>
                         </button>
 
-                        <div id="resp-1-7" class="px-6 py-4 bg-white border-t border-gray-100 space-y-6 hidden">
+                        <div id="resp-1-8" class="hidden px-6 py-4 bg-white border-t border-gray-100 space-y-6">
 
                                                                                         <div class="text-sm text-gray-600 italic">
                                     This endpoint registers a new user using their phone number and validates the
@@ -2815,7 +3091,7 @@ if (!HTMLScriptElement.supports || !HTMLScriptElement.supports('importmap')) (fu
                                                                                                                         </div>
                     </div>
                                                         <div class="border border-gray-200 rounded-xl shadow-sm overflow-hidden">
-                        <button type="button" class="w-full flex justify-between items-center px-6 py-4 bg-gray-50 hover:bg-gray-100 transition" onclick="document.getElementById(&#39;resp-1-8&#39;).classList.toggle(&#39;hidden&#39;)">
+                        <button type="button" class="w-full flex justify-between items-center px-6 py-4 bg-gray-50 hover:bg-gray-100 transition" onclick="document.getElementById(&#39;resp-1-9&#39;).classList.toggle(&#39;hidden&#39;)">
                             <div class="flex items-center gap-4">
                                                                 <span class="text-xs font-semibold px-2 py-1 rounded bg-blue-100 text-blue-700">
                                     POST
@@ -2827,7 +3103,7 @@ if (!HTMLScriptElement.supports || !HTMLScriptElement.supports('importmap')) (fu
                             </svg>
                         </button>
 
-                        <div id="resp-1-8" class="px-6 py-4 bg-white border-t border-gray-100 space-y-6 hidden">
+                        <div id="resp-1-9" class="hidden px-6 py-4 bg-white border-t border-gray-100 space-y-6">
 
                                                                                         <div class="text-sm text-gray-600 italic">
                                     This endpoint sends an SMS with a new password and verification code if the user 
@@ -4030,7 +4306,7 @@ if (!HTMLScriptElement.supports || !HTMLScriptElement.supports('importmap')) (fu
                             </svg>
                         </button>
 
-                        <div id="resp-5-1" class="hidden px-6 py-4 bg-white border-t border-gray-100 space-y-6">
+                        <div id="resp-5-1" class="px-6 py-4 bg-white border-t border-gray-100 space-y-6 hidden">
 
                                                                                         <div class="text-sm text-gray-600 italic">
                                     This endpoint provides Two-Factor Authentication code only for portal accounts.
@@ -5722,5 +5998,4 @@ if (!HTMLScriptElement.supports || !HTMLScriptElement.supports('importmap')) (fu
 <div class="fixed bottom-4 left-4 p-2 bg-gray-200/50 backdrop-blur-md rounded-lg text-sm text-gray-700 hidden xl:block cursor-default z-50">
     Version 1.8.0
 </div>
-
 </body></html>

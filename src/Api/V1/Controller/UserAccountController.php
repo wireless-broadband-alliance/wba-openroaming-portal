@@ -230,7 +230,7 @@ class UserAccountController extends AbstractController
                     if (is_array($token) && $token['success'] === false) {
                         $errorMessage = $token['error'] ?? 'Unknown error';
                         $statusCode =
-                            $errorMessage === 'Invalid user provided. Please verify the user data.' ? 400 : 500;
+                            $errorMessage === 'Invalid user provided. Verify the user data.' ? 400 : 500;
 
                         return new BaseResponse($statusCode, null, $errorMessage)->toResponse();
                     }
