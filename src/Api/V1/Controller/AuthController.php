@@ -56,7 +56,7 @@ class AuthController extends AbstractController
         private readonly TOTPService $TOTPService,
         private readonly SettingRepository $settingRepository,
         private readonly AuthAPIResponseService $authAPIResponseService,
-        private readonly \OneLogin\Saml2\Auth $samlAuth,
+        private readonly Auth $samlAuth,
     ) {
     }
 

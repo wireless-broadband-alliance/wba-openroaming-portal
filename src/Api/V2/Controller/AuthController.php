@@ -14,7 +14,6 @@ use App\Enum\OperationMode;
 use App\Enum\SettingName;
 use App\Enum\SMSResponse;
 use App\Enum\UserProvider;
-use App\Enum\UserTwoFactorAuthenticationStatus;
 use App\Repository\RefreshJwtTokenRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
@@ -26,9 +25,6 @@ use App\Service\JWTTokenGenerator;
 use App\Service\MagicLinkService;
 use App\Service\SamlResolverService;
 use App\Service\SendSMS;
-use App\Service\TOTPService;
-use App\Service\TwoFAAPIService;
-use App\Service\TwoFAService;
 use App\Service\UserStatusChecker;
 use DateTime;
 use DateTimeImmutable;
@@ -67,7 +63,7 @@ class AuthController extends AbstractController
         private readonly EmailGenerator $emailGenerator,
         private readonly AuthAPIResponseService $authAPIResponseService,
         private readonly RefreshJwtTokenRepository $refreshJwtTokenRepository,
-        private readonly \OneLogin\Saml2\Auth $samlAuth,
+        private readonly Auth $samlAuth,
     ) {
     }
 
