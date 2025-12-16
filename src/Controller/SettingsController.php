@@ -424,7 +424,7 @@ class SettingsController extends AbstractController
                 $this->translator->trans('incorrectVerificationCode', [], 'controllers')
             );
         }
-        
+
         return $this->redirectToRoute('admin_confirm_reset', ['type' => $type]);
     }
 

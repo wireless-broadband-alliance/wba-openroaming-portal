@@ -16,7 +16,6 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
  */
 class SMSSettingsType extends AbstractType
 {
-
     private bool $disabled = true;
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {

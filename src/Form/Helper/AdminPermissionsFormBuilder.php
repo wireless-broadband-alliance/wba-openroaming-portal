@@ -9,13 +9,14 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
 readonly class AdminPermissionsFormBuilder
 {
-  public function __construct(
-      private TranslatorInterface $translator
-  ) {}
+    public function __construct(
+        private TranslatorInterface $translator
+    ) {
+    }
 
-  public function addPermissions(FormBuilderInterface $builder): void
-  {
-    $permissions = [
+    public function addPermissions(FormBuilderInterface $builder): void
+    {
+        $permissions = [
         'userManagement' => 'usersManagement',
         'platformStatus' => 'platformStatus',
         'landingPageConfig' => 'landingPageConfiguration',
@@ -29,19 +30,19 @@ readonly class AdminPermissionsFormBuilder
         'smsConfig' => 'SMSConfiguration',
         'portalStatistics' => 'portalStatistics',
         'connectivityStatistics' => 'connectivityStatistics',
-    ];
+        ];
 
-    foreach ($permissions as $field => $translationKey) {
-      $this->addPermissionField($builder, $field, $translationKey);
+        foreach ($permissions as $field => $translationKey) {
+            $this->addPermissionField($builder, $field, $translationKey);
+        }
     }
-  }
 
-  private function addPermissionField(
-      FormBuilderInterface $builder,
-      string $field,
-      string $translationKey
-  ): void {
-    $builder->add($field, ChoiceType::class, [
+    private function addPermissionField(
+        FormBuilderInterface $builder,
+        string $field,
+        string $translationKey
+    ): void {
+        $builder->add($field, ChoiceType::class, [
         'label' => $this->translator->trans($translationKey, [], 'UserAddType'),
         'expanded' => true,
         'multiple' => false,
@@ -50,6 +51,6 @@ readonly class AdminPermissionsFormBuilder
             $this->translator->trans('read', [], 'UserAddType') => PermissionLevel::READ,
             $this->translator->trans('write', [], 'UserAddType') => PermissionLevel::WRITE,
         ],
-    ]);
-  }
+        ]);
+    }
 }
