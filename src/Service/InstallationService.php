@@ -5,7 +5,6 @@ namespace App\Service;
 use App\DTO\InstallationProgressDTO;
 use App\Entity\InstallationProgress;
 use App\Entity\User;
-use App\Enum\AnalyticalEventType;
 use App\Enum\DataBaseSetupType;
 use App\Enum\InstallationStep;
 use App\Enum\InstallationWidgetStepsEnum;
@@ -21,9 +20,6 @@ use Doctrine\ORM\EntityManagerInterface;
 use Random\RandomException;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-
-;
-
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
