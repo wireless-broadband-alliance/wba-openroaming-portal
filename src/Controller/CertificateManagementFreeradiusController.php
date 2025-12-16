@@ -439,10 +439,10 @@ class CertificateManagementFreeradiusController extends AbstractController
 
         // Update the settings table with the new certs content
         $caContentParsed = $this->certificateCheckerService->parseCertificate(
-            $certificateSet['caFREERADIUS']['content']
+            $certificateSet[CertificateFileName::CA_PEM->value]['content']
         );
         $certContentParsed = $this->certificateCheckerService->parseCertificate(
-            $certificateSet['certFREERADIUS']['content']
+            $certificateSet[CertificateFileName::CERT_PEM->value]['content']
         );
         $this->certificateWriterUpdateService->updateFromParsedCertificates($caContentParsed, $certContentParsed);
 

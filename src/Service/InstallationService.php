@@ -331,7 +331,7 @@ readonly class InstallationService
                 );
             }
 
-            $adminUser = $this->userRepository->findAdmin();
+            $adminUser = $this->userRepository->findSuperAdmin();
             if ($adminUser instanceof User) {
                 $adminUser->setEmail($lastCompleted->getEmailAdmin());
                 $adminUser->setPassword($lastCompleted->getPasswordAdmin());

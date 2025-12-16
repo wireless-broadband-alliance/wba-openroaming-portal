@@ -560,8 +560,7 @@ class InstallationController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // TODO: change this function when super admin feature is added!!
-            $adminUser = $this->userRepository->findAdmin();
+            $adminUser = $this->userRepository->findSuperAdmin();
 
             $adminEmail = $adminConfigDTO->email;
             $adminPassword = $adminConfigDTO->password;
@@ -607,7 +606,7 @@ class InstallationController extends AbstractController
             if ($step === InstallationStep::SETTINGS->value) {
                 return $this->redirectToRoute('admin_dashboard_settings_certs_installation_settings');
             }
-            $admin = $this->userRepository->findAdmin();
+            $admin = $this->userRepository->findSuperAdmin();
             if ($admin instanceof User) {
                 if ($this->installationService->canSendCode(
                     AnalyticalEventType::INSTALLATION_ADMIN_CONFIRM_CODE_SENT->value,
@@ -690,7 +689,7 @@ class InstallationController extends AbstractController
             $code = $data["code"];
 
             if ($code === $lastInstallation->getConfirmCodeAdmin()) {
-                $adminUser = $this->userRepository->findAdmin();
+                $adminUser = $this->userRepository->findSuperAdmin();
                 $lastInstallation->setAdminConfirmation(true);
                 if ($adminUser instanceof User) {
                     $adminUser->setEmail($lastInstallation->getEmailAdmin());
