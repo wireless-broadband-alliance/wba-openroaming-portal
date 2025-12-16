@@ -45,6 +45,10 @@ valueCannotBeLessThanMinutes: 'Este valor não pode ser inferior a {{ limit }} m
 valueNotValidURL: 'Por favor insira um URL válido.'
 timerShouldNeverBeLessThan: 'O temporizador nunca deve ser inferior a 1.'
 profileLimitMessage: 'Por favor, selecione um valor entre 1 (mínimo, valor fixo) e {{ limit }} (máximo, determinado pelo número de dias restantes até o certificado expirar em {{ expiration_date }}).'
+domainBlacklisted: 'O domínio do email especificado encontra-se bloqueado.'
+invalidDomain: 'Domínio inválido.'
+domainNotWhitelisted: 'Domínio já definido nos domínios válidos.'
+domainNotBlacklisted: 'Domínio já definido nos domínios bloqueados.'
 accountTypeInvalid: 'Tipo de conta selecionado é inválido'
 invalidRole: 'Permissões selecionadas são inválidas'
 uniqueEmail: "Este endereço de email já está em uso."

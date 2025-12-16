@@ -64,9 +64,7 @@ readonly class TOTPService
             throw new InvalidArgumentException('TOTP code cannot be empty.');
         }
 
-        $totp = TOTP::create($secret);
-
         // communication with the app using the user secret code to verify the code introduced
-        return $totp->verify($code);
+        return TOTP::create($secret)->verify($code);
     }
 }

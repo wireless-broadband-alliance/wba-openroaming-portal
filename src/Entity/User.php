@@ -125,12 +125,19 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
     /** @phpstan-ignore-next-line */
     private Collection $oTPcodes;
 
+    /**
+     * @var Collection<int, RefreshJwtToken>
+     */
+    #[ORM\OneToMany(targetEntity: RefreshJwtToken::class, mappedBy: 'user')]
+    private Collection $refreshJwtTokens;
+
 
     public function __construct()
     {
         $this->userRadiusProfiles = new ArrayCollection();
         $this->userExternalAuths = new ArrayCollection();
         $this->event = new ArrayCollection();
+        $this->refreshJwtTokens = new ArrayCollection();
     }
 
     public function getTwoFAcodeIsActive(): ?bool
@@ -597,6 +604,34 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
     public function setDisabled(bool $isDisabled): static
     {
         $this->isDisabled = $isDisabled;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, RefreshJwtToken>
+     */
+    public function getRefreshJwtTokens(): Collection
+    {
+        return $this->refreshJwtTokens;
+    }
+
+    public function addRefreshJwtToken(RefreshJwtToken $refreshJwtToken): static
+    {
+        if (!$this->refreshJwtTokens->contains($refreshJwtToken)) {
+            $this->refreshJwtTokens->add($refreshJwtToken);
+            $refreshJwtToken->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeRefreshJwtToken(RefreshJwtToken $refreshJwtToken): static
+    {
+        // set the owning side to null (unless already changed)
+        if ($this->refreshJwtTokens->removeElement($refreshJwtToken) && $refreshJwtToken->getUser() === $this) {
+            $refreshJwtToken->setUser(null);
+        }
 
         return $this;
     }
