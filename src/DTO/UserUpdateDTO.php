@@ -102,7 +102,7 @@ class UserUpdateDTO
         }
     }
 
-    public function getAdminPermissions(): array
+    private function getAdminPermissions(): array
     {
         $permissions = [];
 
