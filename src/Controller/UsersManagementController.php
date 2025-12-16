@@ -402,27 +402,27 @@ class UsersManagementController extends AbstractController
         $currentUser = $this->getUser();
         $canWrite = $this->isGranted(UserAuthenticationVoter::USERS_MANAGEMENT_WRITE);
 
-      if ($user->getId() !== $currentUser->getId()) {
-        if (!$this->isGranted(UserAuthenticationVoter::USERS_MANAGEMENT_READ)) {
-          return $this->redirectToRoute('admin_page');
-        } elseif (
-            !$this->isGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)
-            && (
+        if ($user->getId() !== $currentUser->getId()) {
+            if (!$this->isGranted(UserAuthenticationVoter::USERS_MANAGEMENT_READ)) {
+                return $this->redirectToRoute('admin_page');
+            } elseif (
+                !$this->isGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)
+                && (
                 in_array(AdminRoleType::ROLE_ADMIN->value, $user->getRoles())
                 || in_array(AdminRoleType::ROLE_SUPER_ADMIN->value, $user->getRoles())
-            )
-        ) {
-          return $this->redirectToRoute('admin_page');
+                )
+            ) {
+                return $this->redirectToRoute('admin_page');
+            }
         }
-      }
 
-      if ($user->getDeletedAt() !== null) {
+        if ($user->getDeletedAt() !== null) {
             $this->addFlash(
                 'error',
                 $this->translator->trans('userAlreadyDeleted', [], 'controllers')
             );
 
-            return $this->redirectToRoute('admin_page');
+              return $this->redirectToRoute('admin_page');
         }
 
         $userUpdateDTO = new UserUpdateDTO($user);

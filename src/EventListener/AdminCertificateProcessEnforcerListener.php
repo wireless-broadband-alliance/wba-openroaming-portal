@@ -18,45 +18,45 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 #[AsEventListener(event: KernelEvents::REQUEST)]
 readonly class AdminCertificateProcessEnforcerListener
 {
-  public function __construct(
-      private Security $security,
-      private InstallationProgressRepository $installationProgressRepository,
-      private CertificateSetupProcessRepository $certificateSetupProcessRepository,
-      private UrlGeneratorInterface $urlGenerator,
-  ) {
-  }
-
-  public function __invoke(RequestEvent $event): void
-  {
-    if (!$event->isMainRequest()) {
-      return;
-    }
-
-    $request = $event->getRequest();
-    $session = $request->getSession();
-    $path = $request->getPathInfo();
-
-    $user = $this->security->getUser();
-
-    // Only admins with valid session flag
-    if (
-        !$user instanceof User ||
-        !$this->security->isGranted('ROLE_ADMIN') ||
-        !$session->has(SessionStatus::SYSTEM_RESET_REQUEST->value)
+    public function __construct(
+        private Security $security,
+        private InstallationProgressRepository $installationProgressRepository,
+        private CertificateSetupProcessRepository $certificateSetupProcessRepository,
+        private UrlGeneratorInterface $urlGenerator,
     ) {
-      return;
     }
 
-    // Only intercept certificate management routes
-    if (!str_starts_with($path, '/dashboard')) {
-      return;
-    }
+    public function __invoke(RequestEvent $event): void
+    {
+        if (!$event->isMainRequest()) {
+            return;
+        }
 
-    /**
-     * STRICT WHITELIST OF ALLOWED PAGES
-     * Supports exact matches and regex patterns
-     */
-    $allowedPatterns = [
+        $request = $event->getRequest();
+        $session = $request->getSession();
+        $path = $request->getPathInfo();
+
+        $user = $this->security->getUser();
+
+      // Only admins with valid session flag
+        if (
+            !$user instanceof User ||
+            !$this->security->isGranted('ROLE_ADMIN') ||
+            !$session->has(SessionStatus::SYSTEM_RESET_REQUEST->value)
+        ) {
+            return;
+        }
+
+      // Only intercept certificate management routes
+        if (!str_starts_with($path, '/dashboard')) {
+            return;
+        }
+
+      /**
+       * STRICT WHITELIST OF ALLOWED PAGES
+       * Supports exact matches and regex patterns
+       */
+        $allowedPatterns = [
       // Installation pages
         '#^/dashboard/settings/certificatesManagement/installation$#',
         '#^/dashboard/settings/certificatesManagement/installation/commands$#',
@@ -91,81 +91,81 @@ readonly class AdminCertificateProcessEnforcerListener
         '#^/dashboard/settings/certificatesManagement/freeradius/config$#',
         '#^/dashboard/settings/certificatesManagement/freeradius/test$#',
         '#^/dashboard/settings/certificatesManagement/freeradius/test/run$#',
-    ];
+        ];
 
-    // Check if current path is allowed
-    $allowed = false;
-    foreach ($allowedPatterns as $pattern) {
-      if (preg_match($pattern, $path)) {
-        $allowed = true;
-        break;
-      }
+      // Check if current path is allowed
+        $allowed = false;
+        foreach ($allowedPatterns as $pattern) {
+            if (preg_match($pattern, $path)) {
+                $allowed = true;
+                break;
+            }
+        }
+
+      // If path IS allowed → do nothing
+        if ($allowed) {
+            return;
+        }
+
+      // If NOT allowed → force process enforcement
+        $this->enforceProcess($event, $session);
     }
 
-    // If path IS allowed → do nothing
-    if ($allowed) {
-      return;
-    }
-
-    // If NOT allowed → force process enforcement
-    $this->enforceProcess($event, $session);
-  }
-
-  private function enforceProcess(RequestEvent $event, $session): void
-  {
-    // Check installation progress
-    $installation = $this->installationProgressRepository->findOneBy([
+    private function enforceProcess(RequestEvent $event, $session): void
+    {
+      // Check installation progress
+        $installation = $this->installationProgressRepository->findOneBy([
         'installationState' => ProcessStatusType::COMPLETED
-    ]);
+        ]);
 
-    if (!$installation) {
-      $session->set(
-          SessionStatus::SYSTEM_RESET_REQUEST->value,
-          'admin_dashboard_settings_certs_installation'
-      );
-      $this->redirectTo($event, 'admin_dashboard_settings_certs_installation');
-      return;
+        if (!$installation) {
+            $session->set(
+                SessionStatus::SYSTEM_RESET_REQUEST->value,
+                'admin_dashboard_settings_certs_installation'
+            );
+            $this->redirectTo($event, 'admin_dashboard_settings_certs_installation');
+            return;
+        }
+
+      // Check certificates progress
+        $certProcess = $this->certificateSetupProcessRepository->getLatestProcess();
+
+        if (!$certProcess) {
+            $session->set(
+                SessionStatus::SYSTEM_RESET_REQUEST->value,
+                'admin_dashboard_settings_certs_radsecproxy_upload'
+            );
+            $this->redirectTo($event, 'admin_dashboard_settings_certs_radsecproxy_upload');
+            return;
+        }
+
+      // Radsecproxy test required
+        if ($certProcess->getRadsecproxyTestResult() === null) {
+            $session->set(
+                SessionStatus::SYSTEM_RESET_REQUEST->value,
+                'admin_dashboard_settings_certs_radsecproxy_upload'
+            );
+            $this->redirectTo($event, 'admin_dashboard_settings_certs_radsecproxy_upload');
+            return;
+        }
+
+      // If radsec is OK → next step is freeradius
+        if ($certProcess->getRadsecproxyTestResult() === CertificateTestResult::PASSED) {
+            $session->set(
+                SessionStatus::SYSTEM_RESET_REQUEST->value,
+                'admin_dashboard_settings_certs_management_freeradius_selection'
+            );
+            $this->redirectTo($event, 'admin_dashboard_settings_certs_management_freeradius_selection');
+            return;
+        }
+
+      // Process fully complete
+        $session->remove(SessionStatus::SYSTEM_RESET_REQUEST->value);
     }
 
-    // Check certificates progress
-    $certProcess = $this->certificateSetupProcessRepository->getLatestProcess();
-
-    if (!$certProcess) {
-      $session->set(
-          SessionStatus::SYSTEM_RESET_REQUEST->value,
-          'admin_dashboard_settings_certs_radsecproxy_upload'
-      );
-      $this->redirectTo($event, 'admin_dashboard_settings_certs_radsecproxy_upload');
-      return;
+    private function redirectTo(RequestEvent $event, string $routeName): void
+    {
+        $url = $this->urlGenerator->generate($routeName);
+        $event->setResponse(new RedirectResponse($url));
     }
-
-    // Radsecproxy test required
-    if ($certProcess->getRadsecproxyTestResult() === null) {
-      $session->set(
-          SessionStatus::SYSTEM_RESET_REQUEST->value,
-          'admin_dashboard_settings_certs_radsecproxy_upload'
-      );
-      $this->redirectTo($event, 'admin_dashboard_settings_certs_radsecproxy_upload');
-      return;
-    }
-
-    // If radsec is OK → next step is freeradius
-    if ($certProcess->getRadsecproxyTestResult() === CertificateTestResult::PASSED) {
-      $session->set(
-          SessionStatus::SYSTEM_RESET_REQUEST->value,
-          'admin_dashboard_settings_certs_management_freeradius_selection'
-      );
-      $this->redirectTo($event, 'admin_dashboard_settings_certs_management_freeradius_selection');
-      return;
-    }
-
-    // Process fully complete
-    $session->remove(SessionStatus::SYSTEM_RESET_REQUEST->value);
-  }
-
-  private function redirectTo(RequestEvent $event, string $routeName): void
-  {
-    $url = $this->urlGenerator->generate($routeName);
-    $event->setResponse(new RedirectResponse($url));
-  }
 }
