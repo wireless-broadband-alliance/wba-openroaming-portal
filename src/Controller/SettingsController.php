@@ -26,6 +26,7 @@ use App\Form\AuthSettingsType;
 use App\Form\TermsType;
 use App\Form\TwoFASettingsType;
 use App\Repository\TextEditorRepository;
+use App\Security\Voter\UserAuthenticationVoter;
 use App\Service\CertificateCheckerService;
 use App\Service\EventActions;
 use App\Service\GetSettings;
