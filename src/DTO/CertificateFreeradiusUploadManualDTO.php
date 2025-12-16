@@ -23,79 +23,79 @@ use Symfony\Component\Validator\Constraints\NotBlank;
 )]
 class CertificateFreeradiusUploadManualDTO
 {
-  public array $notices = [];
+    public array $notices = [];
 
-  #[NotBlank(message: 'nullCA')]
-  #[Assert\File(
-      maxSize: '5M',
-      mimeTypes: [
+    #[NotBlank(message: 'nullCA')]
+    #[Assert\File(
+        maxSize: '5M',
+        mimeTypes: [
           'application/x-x509-ca-cert',
           'application/x-pem-file',
           'application/octet-stream',
           'text/plain',
-      ],
-      notFoundMessage: 'nullCA',
-      mimeTypesMessage: 'invalidFileTypeCA'
-  )]
-  #[CustomAssert\ValidPemCertificate]
-  #[CustomAssert\ValidRsaCertificate]
-  public ?UploadedFile $ca = null;
+        ],
+        notFoundMessage: 'nullCA',
+        mimeTypesMessage: 'invalidFileTypeCA'
+    )]
+    #[CustomAssert\ValidPemCertificate]
+    #[CustomAssert\ValidRsaCertificate]
+    public ?UploadedFile $ca = null;
 
-  #[NotBlank(message: 'nullCert')]
-  #[Assert\File(
-      maxSize: '5M',
-      mimeTypes: [
+    #[NotBlank(message: 'nullCert')]
+    #[Assert\File(
+        maxSize: '5M',
+        mimeTypes: [
           'application/x-pem-file',
           'application/octet-stream',
           'text/plain',
-      ],
-      notFoundMessage: 'nullCert',
-      mimeTypesMessage: 'invalidFileTypeCert'
-  )]
-  #[CustomAssert\ValidPemCertificate]
-  #[CustomAssert\ValidRsaCertificate]
-  #[CustomAssert\WarnIfNotEvCertificate]
-  #[CustomAssert\IsLetsEncryptCertificate]
-  public ?UploadedFile $cert = null;
+        ],
+        notFoundMessage: 'nullCert',
+        mimeTypesMessage: 'invalidFileTypeCert'
+    )]
+    #[CustomAssert\ValidPemCertificate]
+    #[CustomAssert\ValidRsaCertificate]
+    #[CustomAssert\WarnIfNotEvCertificate]
+    #[CustomAssert\IsLetsEncryptCertificate]
+    public ?UploadedFile $cert = null;
 
-  #[Assert\File(
-      maxSize: '5M',
-      mimeTypes: [
+    #[Assert\File(
+        maxSize: '5M',
+        mimeTypes: [
           'application/x-pem-file',
           'application/octet-stream',
           'text/plain',
-      ],
-      notFoundMessage: 'nullChain',
-      mimeTypesMessage: 'invalidFileTypeChain'
-  )]
-  #[CustomAssert\ValidPemCertificate]
-  #[CustomAssert\ValidRsaCertificate]
-  public ?UploadedFile $chain = null;
+        ],
+        notFoundMessage: 'nullChain',
+        mimeTypesMessage: 'invalidFileTypeChain'
+    )]
+    #[CustomAssert\ValidPemCertificate]
+    #[CustomAssert\ValidRsaCertificate]
+    public ?UploadedFile $chain = null;
 
-  #[Assert\File(
-      maxSize: '5M',
-      mimeTypes: [
+    #[Assert\File(
+        maxSize: '5M',
+        mimeTypes: [
           'application/x-pem-file',
           'application/octet-stream',
           'text/plain',
-      ],
-      notFoundMessage: 'nullFullChain',
-      mimeTypesMessage: 'invalidFileTypeFullChain'
-  )]
-  #[CustomAssert\ValidPemCertificate]
-  #[CustomAssert\ValidRsaCertificate]
-  public ?UploadedFile $fullChain = null;
+        ],
+        notFoundMessage: 'nullFullChain',
+        mimeTypesMessage: 'invalidFileTypeFullChain'
+    )]
+    #[CustomAssert\ValidPemCertificate]
+    #[CustomAssert\ValidRsaCertificate]
+    public ?UploadedFile $fullChain = null;
 
-  #[NotBlank(message: 'nullKey')]
-  #[Assert\File(
-      maxSize: '5M',
-      mimeTypes: [
+    #[NotBlank(message: 'nullKey')]
+    #[Assert\File(
+        maxSize: '5M',
+        mimeTypes: [
           'application/x-pem-file',
           'application/octet-stream',
           'text/plain',
-      ],
-      notFoundMessage: 'nullKey',
-      mimeTypesMessage: 'invalidFileTypeKey'
-  )]
-  public ?UploadedFile $privKey = null;
+        ],
+        notFoundMessage: 'nullKey',
+        mimeTypesMessage: 'invalidFileTypeKey'
+    )]
+    public ?UploadedFile $privKey = null;
 }

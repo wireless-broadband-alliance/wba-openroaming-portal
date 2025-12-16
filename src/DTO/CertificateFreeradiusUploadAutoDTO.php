@@ -11,25 +11,25 @@ use App\Validator\Constraints as CustomAssert;
 #[Uploadable]
 class CertificateFreeradiusUploadAutoDTO
 {
-  public array $notices = [];
+    public array $notices = [];
 
-  #[Assert\NotBlank(message: 'fieldCannotBeBlank')]
+    #[Assert\NotBlank(message: 'fieldCannotBeBlank')]
   // #[CustomAssert\ValidDomain]
-  public ?string $radiusDomain = null;
+    public ?string $radiusDomain = null;
 
-  #[NotBlank(message: 'nullCA')]
-  #[Assert\File(
-      maxSize: '5M',
-      mimeTypes: [
+    #[NotBlank(message: 'nullCA')]
+    #[Assert\File(
+        maxSize: '5M',
+        mimeTypes: [
           'application/x-x509-ca-cert',
           'application/x-pem-file',
           'application/octet-stream',
           'text/plain',
-      ],
-      notFoundMessage: 'nullCA',
-      mimeTypesMessage: 'invalidFileTypeCA'
-  )]
-  #[CustomAssert\ValidPemCertificate]
-  #[CustomAssert\ValidRsaCertificate]
-  public ?File $letsEncryptRootPemFile = null;
+        ],
+        notFoundMessage: 'nullCA',
+        mimeTypesMessage: 'invalidFileTypeCA'
+    )]
+    #[CustomAssert\ValidPemCertificate]
+    #[CustomAssert\ValidRsaCertificate]
+    public ?File $letsEncryptRootPemFile = null;
 }

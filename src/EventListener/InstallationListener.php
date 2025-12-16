@@ -52,7 +52,8 @@ readonly class InstallationListener
             }
             return;
         }
-        if ($user &&
+        if (
+            $user &&
             (
                 str_starts_with($path, '/dashboard/settings/certificatesManagement/freeradius/') ||
                 str_starts_with($path, '/dashboard/settings/certificatesManagement/radsecproxy/') ||

@@ -23,7 +23,8 @@ readonly class AdminCertificateProcessEnforcerListener
         private InstallationProgressRepository $installationProgressRepository,
         private CertificateSetupProcessRepository $certificateSetupProcessRepository,
         private UrlGeneratorInterface $urlGenerator,
-    ) {}
+    ) {
+    }
 
     public function __invoke(RequestEvent $event): void
     {

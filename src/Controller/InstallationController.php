@@ -608,9 +608,11 @@ class InstallationController extends AbstractController
             }
             $admin = $this->userRepository->findSuperAdmin();
             if ($admin instanceof User) {
-                if ($this->installationService->canSendCode(
-                    AnalyticalEventType::INSTALLATION_ADMIN_CONFIRM_CODE_SENT->value,
-                    $admin)
+                if (
+                    $this->installationService->canSendCode(
+                        AnalyticalEventType::INSTALLATION_ADMIN_CONFIRM_CODE_SENT->value,
+                        $admin
+                    )
                 ) {
                     $this->installationService->sendAdminConfirmationCode($lastInstallation);
                     $eventMetaData = [
@@ -988,7 +990,6 @@ class InstallationController extends AbstractController
         defaults: [
             'type' => InstallationType::INSTALLATION->value,
         ]
-
     )]
     #[IsGranted('ROLE_SUPER_ADMIN')]
     public function settingsCertificatesManagementInstallationVerifyIdentity(
@@ -1044,8 +1045,6 @@ class InstallationController extends AbstractController
                     return $this->redirectToRoute('admin_dashboard_settings_certs_installation');
                 }
                 return $this->redirectToRoute('admin_dashboard_settings_certs_radsecproxy_upload');
-
-
             }
             $this->addFlash(
                 'error',
@@ -1089,9 +1088,11 @@ class InstallationController extends AbstractController
         }
 
         if ($user instanceof User) {
-            if ($this->installationService->canSendCode(
-                $eventType,
-                $user)
+            if (
+                $this->installationService->canSendCode(
+                    $eventType,
+                    $user
+                )
             ) {
                 $this->installationService->sendAdminVerificationCode($user);
                 $eventMetaData = [
@@ -1186,7 +1187,6 @@ class InstallationController extends AbstractController
             $this->twoFAService->canResendCode($user, $eventType) &&
             $this->twoFAService->timeIntervalToResendCode($user, $eventType)
         ) {
-
             $this->installationService->sendAdminVerificationCode($user);
 
             $eventMetaData = [

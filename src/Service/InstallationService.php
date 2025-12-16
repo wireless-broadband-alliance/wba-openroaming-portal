@@ -20,7 +20,9 @@ use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Random\RandomException;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+
+;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
@@ -73,7 +75,8 @@ readonly class InstallationService
                     $installationProgress->getPasswordAdmin() &&
                     $installationProgress->getAdminConfirmation()
                 ) {
-                    if ($this->checkDatabaseSettings($installationProgress) &&
+                    if (
+                        $this->checkDatabaseSettings($installationProgress) &&
                         $this->checkSettingsValues($installationProgress)
                     ) {
                         $installationProgress->setInstallationState(ProcessStatusType::COMPLETED);
@@ -82,7 +85,6 @@ readonly class InstallationService
                         return InstallationStep::COMPLETED->value;
                     }
                     return InstallationStep::COMMAND->value;
-
                 }
                 return InstallationStep::ADMIN->value;
             }
@@ -254,7 +256,7 @@ readonly class InstallationService
 
     public function checkDatabaseSettings(InstallationProgress $installationProgress): bool
     {
-        if (!$this->envValueMatches(DataBaseSetupType::DATABASE_URL->value, $installationProgress->getDbOpenRoaming() )) {
+        if (!$this->envValueMatches(DataBaseSetupType::DATABASE_URL->value, $installationProgress->getDbOpenRoaming())) {
             return false;
         }
         if (!$this->envValueMatches(DataBaseSetupType::DATABASE_FREERADIUS_URL->value, $installationProgress->getDbFreeradius())) {
@@ -265,7 +267,7 @@ readonly class InstallationService
 
     public function checkSettingsValues(InstallationProgress $installationProgress): bool
     {
-        if (!$this->envValueMatches(SettingsConfigType::TRUSTED_PROXIES->value, implode(',', $installationProgress->getTrustedProxies()) )) {
+        if (!$this->envValueMatches(SettingsConfigType::TRUSTED_PROXIES->value, implode(',', $installationProgress->getTrustedProxies()))) {
             return false;
         }
         if (!$this->envValueMatches(SettingsConfigType::TURNSTILE_KEY->value, $installationProgress->getTurnstileKey())) {
@@ -343,13 +345,13 @@ readonly class InstallationService
 
     public function commandToDataBase(InstallationProgress $installationProgress): string
     {
-        return 'scripts/update-db-env.sh "'. $installationProgress->getDbOpenRoaming() . '" "' . $installationProgress->getDbFreeradius() . '"';
+        return 'scripts/update-db-env.sh "' . $installationProgress->getDbOpenRoaming() . '" "' . $installationProgress->getDbFreeradius() . '"';
     }
 
     public function commandToSettings(InstallationProgress $installationProgress): string
     {
         if ($installationProgress->getJwtPassphrase() !== null) {
-            return 'scripts/update-settings-env.sh "'. $installationProgress->getJwtPassphrase() . '" "' . implode(',', $installationProgress->getTrustedProxies()) .
+            return 'scripts/update-settings-env.sh "' . $installationProgress->getJwtPassphrase() . '" "' . implode(',', $installationProgress->getTrustedProxies()) .
                 '" "' . $installationProgress->getTurnstileKey() . '" "' . $installationProgress->getTurnstileSecret() . '"';
         }
         return 'scripts/update-settings-env.sh "" "' . implode(',', $installationProgress->getTrustedProxies()) .

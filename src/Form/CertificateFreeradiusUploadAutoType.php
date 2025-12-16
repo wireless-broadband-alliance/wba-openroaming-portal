@@ -11,9 +11,9 @@ use Vich\UploaderBundle\Form\Type\VichFileType;
 
 class CertificateFreeradiusUploadAutoType extends AbstractType
 {
-  public function buildForm(FormBuilderInterface $builder, array $options): void
-  {
-    $builder
+    public function buildForm(FormBuilderInterface $builder, array $options): void
+    {
+        $builder
         ->add('radiusDomain', TextType::class, [
             'label' => 'Radius Domain',
             'required' => true,
@@ -25,12 +25,12 @@ class CertificateFreeradiusUploadAutoType extends AbstractType
             'download_uri' => false,
             'asset_helper' => true,
         ]);
-  }
+    }
 
-  public function configureOptions(OptionsResolver $resolver): void
-  {
-    $resolver->setDefaults([
+    public function configureOptions(OptionsResolver $resolver): void
+    {
+        $resolver->setDefaults([
         'data_class' => CertificateFreeradiusUploadAutoDTO::class,
-    ]);
-  }
+        ]);
+    }
 }
