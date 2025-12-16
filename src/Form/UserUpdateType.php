@@ -26,8 +26,12 @@ class UserUpdateType extends AbstractType
     ) {
     }
 
+    private bool $disabled = true;
+
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
+        $this->disabled = $options['disabled'];
+
         // Fetch the setting from the database
         $regionsSetting = $this->settingRepository->findOneBy(
             ['name' => SettingName::DEFAULT_REGION_PHONE_INPUTS->value]
@@ -45,26 +49,32 @@ class UserUpdateType extends AbstractType
             ->add('uuid', TextType::class, [
                 'label' => 'UUID',
                 'required' => false,
+                'disabled' => $this->disabled,
             ])
             ->add('email', EmailType::class, [
                 'label' => 'Email',
                 'required' => false,
+                'disabled' => $this->disabled,
             ])
             ->add('firstName', TextType::class, [
                 'label' => $this->translator->trans('firstName', [], 'UserUpdateType'),
                 'required' => false,
+                'disabled' => $this->disabled,
             ])
             ->add('lastName', TextType::class, [
                 'label' => $this->translator->trans('lastName', [], 'UserUpdateType'),
                 'required' => false,
+                'disabled' => $this->disabled,
             ])
             ->add('banned', CheckboxType::class, [
                 'label' => $this->translator->trans('banned', [], 'UserUpdateType'),
                 'required' => false,
+                'disabled' => $this->disabled,
             ])
             ->add('isVerified', CheckboxType::class, [
                 'label' => $this->translator->trans('verification', [], 'UserUpdateType'),
                 'required' => false,
+                'disabled' => $this->disabled,
             ])
             ->add('phoneNumber', PhoneNumberType::class, [
                 'label' => $this->translator->trans('phoneNumber', [], 'UserUpdateType'),
@@ -74,6 +84,7 @@ class UserUpdateType extends AbstractType
                 'preferred_country_choices' => $regionInputs,
                 'country_display_emoji_flag' => true,
                 'required' => false,
+                'disabled' => $this->disabled,
                 'attr' => ['autocomplete' => 'tel'],
             ]);
 
@@ -83,10 +94,12 @@ class UserUpdateType extends AbstractType
                 ->add('banned', CheckboxType::class, [
                     'label' => $this->translator->trans('banned', [], 'UserUpdateType'),
                     'required' => false,
+                    'disabled' => $this->disabled,
                 ])
                 ->add('isVerified', CheckboxType::class, [
                     'label' => $this->translator->trans('verification', [], 'UserUpdateType'),
                     'required' => false,
+                    'disabled' => $this->disabled,
                 ]);
         }
     }
@@ -95,6 +108,7 @@ class UserUpdateType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => UserUpdateDTO::class,
+            'disabled' => true,
         ]);
     }
 }
