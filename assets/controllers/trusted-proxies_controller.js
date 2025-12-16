@@ -1,4 +1,4 @@
-import {Controller} from '@hotwired/stimulus';
+import { Controller } from '@hotwired/stimulus';
 
 // Cookie helpers
 function getCookie(name) {
@@ -77,7 +77,7 @@ export default class extends Controller {
       if (!prefs.rememberMe) return;
 
       const values = Array.from(this.collectionTarget.querySelectorAll('input')).map(
-          input => input.value
+        (input) => input.value
       );
 
       setCookie('trustedProxiesState', JSON.stringify(values));
@@ -98,7 +98,7 @@ export default class extends Controller {
       if (!saved) return;
 
       const values = JSON.parse(saved);
-      values.forEach(value => this._addInput(value));
+      values.forEach((value) => this._addInput(value));
     } catch (e) {
       console.error('Failed to restore trusted proxies state from cookie', e);
     }
