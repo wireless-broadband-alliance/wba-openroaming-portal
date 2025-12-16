@@ -26,7 +26,7 @@
                         >
                             <div class="flex items-center gap-4">
                                 {% if route.isProtected %}
-                                    <twig:ux:icon class="w-5 h-5 text-yellow-600" name="heroicons-outline:lock-closed"/>
+                                    <twig:ux:icon class="w-5 h-5 text-yellow-600 fill-none stroke-current" name="wba:lock-outline-closed"/>
                                 {% endif %}
                                 <span class="text-xs font-semibold px-2 py-1 rounded {{ methodColor[method] ?? 'bg-gray-100 text-gray-700' }}">
                                     {{ method }}

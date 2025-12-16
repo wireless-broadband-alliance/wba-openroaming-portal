@@ -1328,7 +1328,7 @@ readonly class ApiResponseService
                             '{
                               "success": true,
                               "data": {
-                                "message": "SMS User Account Registered Successfully. A verification code has been sent to your phone."
+                                "message": "Registration successful. Please check your email for further instructions."
                               }
                             }',
                             false,
@@ -1356,19 +1356,19 @@ readonly class ApiResponseService
                 password reset if the conditions are met.',
                 'responses' => [
                     200 => [
-                        // phpcs:disable Generic.Files.LineLength.TooLong
+                      // phpcs:disable Generic.Files.LineLength.TooLong
                         json_decode(
                             '{
-                                      "success": true,
-                                      "data": {
-                                        "success": "If the phone number exists, we have sent a new code to: Country Code: 351 National Number: 925544896."
-                                      }
-                                    }',
+                              "success": true,
+                              "data": {
+                                "message": "If the email address exists in our system, we have sent you a new one to: user@example.com"
+                              }
+                            }',
                             false,
                             512,
                             JSON_THROW_ON_ERROR
                         )
-                        // phpcs:enable
+                      // phpcs:enable
                     ],
                     400 => [
                         'Invalid email format.',

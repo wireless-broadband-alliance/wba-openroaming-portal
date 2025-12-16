@@ -33,33 +33,33 @@ yamllint:
 
 
 test-rector:
-  image: "$CI_REGISTRY_IMAGE:develop"
-  allow_failure: false
-  before_script:
-    - cp .env.sample .env
-    - COMPOSER_CACHE_DIR=composer-cache composer install
-  script:
-    - vendor/bin/rector process src --dry-run
-  stage: test
+    image: "$CI_REGISTRY_IMAGE:TestImage"
+    allow_failure: false
+    before_script:
+        - cp .env.sample .env
+        - COMPOSER_CACHE_DIR=composer-cache composer install
+    script:
+        - vendor/bin/rector process src --dry-run
+    stage: test
 
 test-twig:
-  image: "$CI_REGISTRY_IMAGE:develop"
-  allow_failure: false
-  before_script:
-    - cp .env.sample .env
-    - COMPOSER_CACHE_DIR=composer-cache composer install
-  script:
-    - vendor/bin/twig-cs-fixer lint ./templates
-  stage: test
+    image: "$CI_REGISTRY_IMAGE:TestImage"
+    allow_failure: false
+    before_script:
+        - cp .env.sample .env
+        - COMPOSER_CACHE_DIR=composer-cache composer install
+    script:
+        - vendor/bin/twig-cs-fixer lint ./templates
+    stage: test
 
 test-phpstan:
-  image: "$CI_REGISTRY_IMAGE:develop"
-  allow_failure: false
-  before_script:
-    - cp .env.sample .env
-    - COMPOSER_CACHE_DIR=composer-cache composer install
-  script:
-    - php -d memory_limit=4G vendor/bin/phpstan analyse .
+    image: "$CI_REGISTRY_IMAGE:TestImage"
+    allow_failure: false
+    before_script:
+        - cp .env.sample .env
+        - COMPOSER_CACHE_DIR=composer-cache composer install
+    script:
+        - php -d memory_limit=4G vendor/bin/phpstan analyse .
 
   stage: test
 
