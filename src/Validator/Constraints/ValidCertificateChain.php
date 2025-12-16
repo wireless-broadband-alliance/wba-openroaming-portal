@@ -12,7 +12,7 @@ class ValidCertificateChain extends Constraint
     public function __construct(
         public string $certField,
         public string $chainField,
-        array $groups = null,
+        ?array $groups = null,
         mixed $payload = null,
     ) {
         parent::__construct($groups, $payload);
@@ -21,11 +21,13 @@ class ValidCertificateChain extends Constraint
     /**
      * This ensures Symfony knows this is a **class-level constraint**.
      */
+    #[\Override]
     public function getTargets(): string
     {
         return self::CLASS_CONSTRAINT;
     }
 
+    #[\Override]
     public function validatedBy(): string
     {
         return static::class . 'Validator';

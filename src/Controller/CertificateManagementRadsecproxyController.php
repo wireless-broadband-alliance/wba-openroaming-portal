@@ -338,8 +338,8 @@ class CertificateManagementRadsecproxyController extends AbstractController
         );
 
         $basePath = $this->getParameter('kernel.project_dir') . '/var/certs/';
-        $clientCertPath = $clientCert ? $basePath . $clientCert->getFilePath() : null;
-        $keyCertPath = $keyCert ? $basePath . $keyCert->getFilePath() : null;
+        $clientCertPath = $clientCert instanceof \App\Entity\Certificate ? $basePath . $clientCert->getFilePath() : null;
+        $keyCertPath = $keyCert instanceof \App\Entity\Certificate ? $basePath . $keyCert->getFilePath() : null;
 
         // Validate certificate files exist
         if (!$clientCertPath || !$keyCertPath || !file_exists($clientCertPath) || !file_exists($keyCertPath)) {
@@ -414,7 +414,7 @@ class CertificateManagementRadsecproxyController extends AbstractController
                 $pem = openssl_x509_export($cert, $out) ? $out : null;
                 if ($pem) {
                     // Convert PEM to DER
-                    $der = base64_decode(preg_replace('#-----.*?-----#', '', $pem));
+                    $der = base64_decode(preg_replace('#-----.*?-----#', '', (string) $pem));
                     $hash = strtolower(hash('sha256', $der));
 
                     if (in_array($hash, $trustedHashes, true)) {

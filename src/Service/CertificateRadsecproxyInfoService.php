@@ -23,7 +23,7 @@ readonly class CertificateRadsecproxyInfoService
     {
         // Filter only RADSECPROXY certs
         $radsecproxyCerts = $process->getCertificates()->filter(
-            fn(Certificate $c) => str_contains($c->getType(), CertificateMachineType::RADSECPROXY->value)
+            fn(Certificate $c) => str_contains((string) $c->getType(), CertificateMachineType::RADSECPROXY->value)
         );
 
         if ($radsecproxyCerts->isEmpty()) {
@@ -41,9 +41,7 @@ readonly class CertificateRadsecproxyInfoService
         }
 
         // Build output array
-        return array_map(function ($cert) {
-            return $this->buildCertificateInfo($cert);
-        }, $latest);
+        return array_map($this->buildCertificateInfo(...), $latest);
     }
 
     private function buildCertificateInfo(Certificate $cert): array

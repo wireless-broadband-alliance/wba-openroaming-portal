@@ -13,6 +13,7 @@ class CertificateEvDetectorExtension extends AbstractExtension
     ) {
     }
 
+    #[\Override]
     public function getFunctions(): array
     {
         return [
@@ -27,7 +28,7 @@ class CertificateEvDetectorExtension extends AbstractExtension
     {
         $process = $this->certificateProcessCheckerService->getCurrentProcess();
 
-        if (!$process) {
+        if (!$process instanceof \App\Entity\CertificateSetupProcess) {
             return false;
         }
 

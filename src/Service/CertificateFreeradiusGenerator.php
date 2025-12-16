@@ -22,14 +22,12 @@ readonly class CertificateFreeradiusGenerator
     }
 
   /**
-   * Main entry point used by the controller.
-   * Choose between simulation or real Certbot at runtime.
-   *
-   * @param string $domain
-   * @param User $user
-   * @param bool|null $simulated Optional runtime override of simulation mode
-   * @return string[] Full paths of generated files
-   */
+     * Main entry point used by the controller.
+     * Choose between simulation or real Certbot at runtime.
+     *
+     * @param bool|null $simulated Optional runtime override of simulation mode
+     * @return string[] Full paths of generated files
+     */
     public function run(string $domain, User $user, ?bool $simulated = null): array
     {
         $useSimulation = $simulated ?? false;

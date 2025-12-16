@@ -26,7 +26,7 @@ readonly class CertificateFreeradiusInfoService
     {
         // Filter only FREERADIUS certs
         $freeradiusCerts = $process->getCertificates()->filter(
-            fn(Certificate $c) => str_contains($c->getType(), CertificateMachineType::FREERADIUS->value)
+            fn(Certificate $c) => str_contains((string) $c->getType(), CertificateMachineType::FREERADIUS->value)
         );
 
         if ($freeradiusCerts->isEmpty()) {
@@ -44,9 +44,7 @@ readonly class CertificateFreeradiusInfoService
         }
 
         // Build output array
-        return array_map(function ($cert) {
-            return $this->buildCertificateInfo($cert);
-        }, $latest);
+        return array_map($this->buildCertificateInfo(...), $latest);
     }
 
     private function buildCertificateInfo(Certificate $cert): array
@@ -100,7 +98,7 @@ readonly class CertificateFreeradiusInfoService
 
             foreach ($policies as $policy) {
                 foreach ($evOids as $oid) {
-                    if (str_contains($policy, $oid)) {
+                    if (str_contains((string) $policy, $oid)) {
                         return true;
                     }
                 }

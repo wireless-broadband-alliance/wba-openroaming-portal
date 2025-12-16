@@ -8,27 +8,24 @@ use Symfony\Component\Validator\Constraint;
 class PemKeyMatchesCertificate extends Constraint
 {
     public string $message = 'privateKeyDoesntMatchCertificate';
-    public string $certificateField;
-    public string $privateKeyField;
 
     public function __construct(
-        string $certificateField = 'client',
-        string $privateKeyField = 'key',
+        public string $certificateField = 'client',
+        public string $privateKeyField = 'key',
         array $options = [],
         ?string $groups = null,
         ?string $payload = null
     ) {
-        $this->certificateField = $certificateField;
-        $this->privateKeyField = $privateKeyField;
-
         parent::__construct($options, $groups, $payload);
     }
 
+    #[\Override]
     public function getTargets(): string
     {
         return self::CLASS_CONSTRAINT;
     }
 
+    #[\Override]
     public function validatedBy(): string
     {
         return static::class . 'Validator';

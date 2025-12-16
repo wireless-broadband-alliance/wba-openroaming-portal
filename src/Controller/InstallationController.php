@@ -69,6 +69,8 @@ class InstallationController extends AbstractController
         private readonly SettingRepository $settingRepository,
         private readonly EventRepository $eventRepository,
         private readonly CaptchaValidator $captchaValidator,
+        private readonly \Symfony\Component\HttpKernel\KernelInterface $kernel,
+        private readonly \Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface $userPasswordHasher,
     ) {
     }
 
@@ -361,8 +363,7 @@ class InstallationController extends AbstractController
     )]
     #[IsGranted('ROLE_SUPER_ADMIN')]
     public function settingsCertificatesManagementInstallationSettings(
-        Request $request,
-        KernelInterface $kernel
+        Request $request
     ): Response {
         $lastInstallation = $this->installationService->lastInstallation();
         if ($lastInstallation instanceof InstallationProgress) {
@@ -437,7 +438,7 @@ class InstallationController extends AbstractController
 
           // JWT Verification
             try {
-                $application = new Application($kernel);
+                $application = new Application($this->kernel);
                 $application->setAutoExit(false);
 
                 if ($settingsDTO->jwtPassphraseEnable) {
@@ -533,7 +534,6 @@ class InstallationController extends AbstractController
     #[IsGranted('ROLE_SUPER_ADMIN')]
     public function settingsCertificatesManagementInstallationAdmin(
         Request $request,
-        UserPasswordHasherInterface $userPasswordHasher,
     ): Response {
         $lastInstallation = $this->installationService->lastInstallation();
         if ($lastInstallation instanceof InstallationProgress) {
@@ -569,7 +569,7 @@ class InstallationController extends AbstractController
             $adminPassword = $adminConfigDTO->password;
 
             if ($adminUser instanceof User) {
-                $hashedPassword = $userPasswordHasher->hashPassword($adminUser, $adminPassword);
+                $hashedPassword = $this->userPasswordHasher->hashPassword($adminUser, $adminPassword);
                 $lastInstallation->setUpdatedAt(new DateTime());
                 $lastInstallation->setEmailAdmin($adminEmail);
                 $lastInstallation->setPasswordAdmin($hashedPassword);

@@ -41,7 +41,7 @@ readonly class FirstSystemResetRequestListener
         'installationState' => ProcessStatusType::COMPLETED
         ]);
 
-        if (!$completedInstallation) {
+        if (!$completedInstallation instanceof \App\Entity\InstallationProgress) {
             $session->set('2fa_verified_dashboard', true);
             $session->set(SessionStatus::SYSTEM_RESET_REQUEST->value, 'admin_dashboard_settings_certs_installation');
             $this->handleRedirect(
@@ -57,12 +57,12 @@ readonly class FirstSystemResetRequestListener
             return;
         }
 
-        if ($this->certificateSetupProcessRepository->getLatestCompletedProcess() !== null) {
+        if ($this->certificateSetupProcessRepository->getLatestCompletedProcess() instanceof \App\Entity\CertificateSetupProcess) {
             return;
         }
 
         $completedCertificates = $this->certificateSetupProcessRepository->getLatestProcess();
-        if (!$completedCertificates) {
+        if (!$completedCertificates instanceof \App\Entity\CertificateSetupProcess) {
             $session->set('2fa_verified_dashboard', true);
             $session->set(
                 SessionStatus::SYSTEM_RESET_REQUEST->value,
@@ -81,7 +81,7 @@ readonly class FirstSystemResetRequestListener
             return;
         }
 
-        if ($completedCertificates->getRadsecproxyTestResult() === null) {
+        if (!$completedCertificates->getRadsecproxyTestResult() instanceof \App\Enum\CertificateTestResult) {
             $session->set('2fa_verified_dashboard', true);
             $session->set(
                 SessionStatus::SYSTEM_RESET_REQUEST->value,

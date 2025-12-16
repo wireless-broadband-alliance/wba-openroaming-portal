@@ -63,7 +63,7 @@ class UserUpdateDTO
 
     public function __construct(?User $user = null)
     {
-        if (!$user) {
+        if (!$user instanceof \App\Entity\User) {
             return;
         }
 
@@ -123,13 +123,8 @@ class UserUpdateDTO
         if ($this->editingUserId === $this->currentUserId) {
             return false;
         }
-
-      // Super admin cannot ban themselves
-        if (in_array(AdminRoleType::ROLE_SUPER_ADMIN->value, $this->roles ?? [], true)) {
-            return false;
-        }
-
-        return true;
+        // Super admin cannot ban themselves
+        return !in_array(AdminRoleType::ROLE_SUPER_ADMIN->value, $this->roles ?? [], true);
     }
 
     private function getAdminPermissions(): array
@@ -148,7 +143,7 @@ class UserUpdateDTO
         return $permissions;
     }
 
-    private const PERMISSION_MAPPING = [
+    private const array PERMISSION_MAPPING = [
       'userManagement' => 'USERS_MANAGEMENT',
       'platformStatus' => 'PLATFORM_STATUS',
       'landingPageConfig' => 'LANDING_PAGE_CONFIG',

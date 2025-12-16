@@ -11,11 +11,14 @@ use Symfony\Component\Routing\Attribute\Route;
 
 class LanguageController extends AbstractController
 {
+    public function __construct(private readonly \Symfony\Component\HttpFoundation\Session\SessionInterface $session)
+    {
+    }
     #[Route('/change-language', name: 'app_change_language')]
-    public function changeLanguage(Request $request, SessionInterface $session): RedirectResponse
+    public function changeLanguage(Request $request): RedirectResponse
     {
         $locale = $request->query->get('locale', LanguageType::EN->value);
-        $session->set('_locale', $locale);
+        $this->session->set('_locale', $locale);
 
         // Safe fallback if the referer is broken
         $referer = $request->headers->get('referer') ?? $this->generateUrl('app_landing');

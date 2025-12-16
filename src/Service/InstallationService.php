@@ -261,15 +261,10 @@ readonly class InstallationService
         ) {
             return false;
         }
-        if (
-            !$this->envValueMatches(
-                DataBaseSetupType::DATABASE_FREERADIUS_URL->value,
-                $installationProgress->getDbFreeradius()
-            )
-        ) {
-            return false;
-        }
-        return true;
+        return $this->envValueMatches(
+            DataBaseSetupType::DATABASE_FREERADIUS_URL->value,
+            $installationProgress->getDbFreeradius()
+        );
     }
 
     public function checkSettingsValues(InstallationProgress $installationProgress): bool

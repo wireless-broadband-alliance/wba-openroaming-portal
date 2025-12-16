@@ -44,23 +44,23 @@ class RadiusAccounting
     /** @phpstan-ignore-next-line */
     private ?string $nasPortType = null;
 
-    #[ORM\Column(type: 'datetime', name: 'acctstarttime', nullable: true)]
+    #[ORM\Column(name: 'acctstarttime', type: 'datetime', nullable: true)]
     /** @phpstan-ignore-next-line */
     private ?DateTimeInterface $acctStartTime = null;
 
-    #[ORM\Column(type: 'datetime', name: 'acctupdatetime', nullable: true)]
+    #[ORM\Column(name: 'acctupdatetime', type: 'datetime', nullable: true)]
     /** @phpstan-ignore-next-line */
     private ?DateTimeInterface $acctUpdateTime = null;
 
-    #[ORM\Column(type: 'datetime', name: 'acctstoptime', nullable: true)]
+    #[ORM\Column(name: 'acctstoptime', type: 'datetime', nullable: true)]
     /** @phpstan-ignore-next-line */
     private ?DateTimeInterface $acctStopTime = null;
 
-    #[ORM\Column(type: 'integer', name: 'acctinterval', nullable: true)]
+    #[ORM\Column(name: 'acctinterval', type: 'integer', nullable: true)]
     /** @phpstan-ignore-next-line */
     private ?int $acctInterval = null;
 
-    #[ORM\Column(type: 'integer', name: 'acctsessiontime', nullable: true)]
+    #[ORM\Column(name: 'acctsessiontime', type: 'integer', nullable: true)]
     /** @phpstan-ignore-next-line */
     private ?int $acctSessionTime = null;
 

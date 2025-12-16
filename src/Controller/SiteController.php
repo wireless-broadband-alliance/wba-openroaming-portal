@@ -64,15 +64,16 @@ class SiteController extends AbstractController
         private readonly UserDeletionService $userDeletionService,
         private readonly EntityManagerInterface $entityManager,
         private readonly OSDetectionService $OSDetectionService,
+        private readonly \Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface $userPasswordEncoder,
+        private readonly \Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface $userAuthenticator,
+        private readonly \App\Security\LandingAuthenticator $authenticator,
+        private readonly \Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface $passwordHasher,
     ) {
     }
 
     #[Route('/', name: 'app_landing')]
     public function landing(
         Request $request,
-        UserPasswordHasherInterface $userPasswordEncoder,
-        UserAuthenticatorInterface $userAuthenticator,
-        LandingAuthenticator $authenticator,
         EntityManagerInterface $entityManager,
     ): Response {
         // Call the getSettings method of GetSettings class to retrieve the data
@@ -261,7 +262,7 @@ class SiteController extends AbstractController
 
                         $user->setEmail($user->getEmail());
                         $user->setCreatedAt(new DateTime());
-                        $user->setPassword($userPasswordEncoder->hashPassword($user, uniqid("", true)));
+                        $user->setPassword($this->userPasswordEncoder->hashPassword($user, uniqid("", true)));
                         $user->setUuid(str_replace('@', "-DEMO-" . uniqid("", true) . "-", $user->getEmail()));
                         $userAuths->setProvider(UserProvider::PORTAL_ACCOUNT->value);
                         $userAuths->setProviderId(UserProvider::EMAIL->value);
@@ -283,9 +284,9 @@ class SiteController extends AbstractController
                             $eventMetadata
                         );
 
-                        $userAuthenticator->authenticateUser(
+                        $this->userAuthenticator->authenticateUser(
                             $user,
-                            $authenticator,
+                            $this->authenticator,
                             $request
                         );
                     }
@@ -441,7 +442,6 @@ class SiteController extends AbstractController
     #[Route('/account/user', name: 'app_landing_account_user', methods: ['POST'])]
     public function accountUser(
         Request $request,
-        UserPasswordHasherInterface $passwordHasher,
     ): Response {
         /** @var User $user */
         $user = $this->getUser();
@@ -545,7 +545,7 @@ class SiteController extends AbstractController
                 return $this->redirectToRoute('app_landing');
             }
 
-            $user->setPassword($passwordHasher->hashPassword($user, $formPassword->get('newPassword')->getData()));
+            $user->setPassword($this->passwordHasher->hashPassword($user, $formPassword->get('newPassword')->getData()));
             $session = $request->getSession();
 
             // Check and kill the dashboard session if the admin is logged at both firewalls at the same time

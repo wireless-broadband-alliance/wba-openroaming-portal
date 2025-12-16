@@ -77,7 +77,7 @@ class UserAddDTO
             $this->firstName = $user->getFirstName();
             $this->lastName = $user->getLastName();
             $this->phoneNumber = $user->getPhoneNumber();
-            $this->accountType = $user->getPhoneNumber() ?
+            $this->accountType = $user->getPhoneNumber() instanceof \libphonenumber\PhoneNumber ?
             UserProvider::PHONE_NUMBER->value : UserProvider::EMAIL->value;
         }
     }
