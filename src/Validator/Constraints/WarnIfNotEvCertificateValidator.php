@@ -8,24 +8,24 @@ use Symfony\Component\Validator\ConstraintValidator;
 
 class WarnIfNotEvCertificateValidator extends ConstraintValidator
 {
-    public function validate($value, Constraint $constraint): void
+    public function validate(mixed $value, Constraint $constraint): void
     {
         if (!$value instanceof UploadedFile) {
             return; // skip if no file uploaded
         }
 
         $content = @file_get_contents($value->getPathname());
-        if (!$content) {
+        if ($content === false) {
             return;
         }
 
         $cert = @openssl_x509_read($content);
-        if (!$cert) {
+        if ($cert === false) {
             return;
         }
 
         $details = openssl_x509_parse($cert);
-        if (!$details) {
+        if ($details === false) {
             return;
         }
 
@@ -33,10 +33,10 @@ class WarnIfNotEvCertificateValidator extends ConstraintValidator
         $evOids = ['2.23.140.1.1']; // CA/Browser Forum EV OID
 
         $isEv = false;
+
         if (!empty($details['extensions']['certificatePolicies'])) {
             $policies = $details['extensions']['certificatePolicies'];
 
-            // Ensure $policies is always an array
             if (is_string($policies)) {
                 $policies = [$policies];
             }
@@ -53,8 +53,9 @@ class WarnIfNotEvCertificateValidator extends ConstraintValidator
 
         if (!$isEv) {
             // Non-blocking notice: safely add to DTO if available
-            $object = $this->context?->getObject(); // null-safe operator
-            if ($object && property_exists($object, 'notices') && is_array($object->notices)) {
+            $object = $this->context->getObject();
+
+            if ($object !== null && property_exists($object, 'notices') && is_array($object->notices)) {
                 $object->notices[] = 'CERTIFICATE_NOT_EV_WARNING';
             }
         }
