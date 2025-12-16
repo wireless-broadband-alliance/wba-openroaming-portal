@@ -271,7 +271,8 @@ class CertificateManagementFreeradiusController extends AbstractController
 
         try {
           // Generate certificates (simulated or real)
-            $generatedFiles = $this->certificateFreeradiusGenerator->run($domain, $user); // For debug add true on the end for simulation
+          // For debug add true on the end for simulation
+            $generatedFiles = $this->certificateFreeradiusGenerator->run($domain, $user);
             $isSimulation = true; // Add this tag for simulation flag
 
             foreach ($generatedFiles as $filepath) {
@@ -285,11 +286,24 @@ class CertificateManagementFreeradiusController extends AbstractController
 
               // Map filename to Freeradius enum
                 $fileEnum = match (true) {
-                      str_contains($filepath, CertificateFileName::PRIVATE_KEY_PEM->value) => CertificateFileName::PRIVATE_KEY_PEM,
-                      str_contains($filepath, CertificateFileName::FULL_CHAIN_PEM->value) => CertificateFileName::FULL_CHAIN_PEM,
-                      str_contains($filepath, CertificateFileName::CHAIN_PEM->value) => CertificateFileName::CHAIN_PEM,
-                      str_contains($filepath, CertificateFileName::CERT_PEM->value) => CertificateFileName::CERT_PEM,
-                      str_contains($filepath, CertificateFileName::CA_PEM->value) => CertificateFileName::CA_PEM,
+                      str_contains(
+                          $filepath,
+                          CertificateFileName::PRIVATE_KEY_PEM->value
+                      ) => CertificateFileName::PRIVATE_KEY_PEM,
+                      str_contains(
+                          $filepath,
+                          CertificateFileName::FULL_CHAIN_PEM->value
+                      ) => CertificateFileName::FULL_CHAIN_PEM,
+                      str_contains(
+                          $filepath,
+                          CertificateFileName::CHAIN_PEM->value
+                      ) => CertificateFileName::CHAIN_PEM,
+                      str_contains(
+                          $filepath,
+                          CertificateFileName::CERT_PEM->value
+                      ) => CertificateFileName::CERT_PEM,
+                      str_contains($filepath,
+                          CertificateFileName::CA_PEM->value) => CertificateFileName::CA_PEM,
                       default => null
                 };
 
@@ -445,7 +459,10 @@ class CertificateManagementFreeradiusController extends AbstractController
                 $certContentParsed = $this->certificateCheckerService->parseCertificate(
                     $certificateSet[CertificateFileName::CERT_PEM->value]['content']
                 );
-                $this->certificateWriterUpdateService->updateFromParsedCertificates($caContentParsed, $certContentParsed);
+                $this->certificateWriterUpdateService->updateFromParsedCertificates(
+                    $caContentParsed,
+                    $certContentParsed
+                );
 
                 $process->setFreeradiusConfigAppliedAt(new DateTimeImmutable());
                 $process->setUpdatedAt(new DateTimeImmutable());
@@ -604,96 +621,98 @@ class CertificateManagementFreeradiusController extends AbstractController
         }
 
         try {
-    //            $context = stream_context_create([
-    //                'ssl' => [
-    //                    'verify_peer' => false,
-    //                    'verify_peer_name' => false,
-    //                    'allow_self_signed' => false,
-    //                    'capture_peer_cert_chain' => true,
-    //                    'local_cert' => $paths['cert'],   // or $paths['cert']
-    //                    'local_pk'   => $paths['privkey'],
-    //                    'cafile'     => $paths['ca'],
-    //                    'crypto_method' => STREAM_CRYPTO_METHOD_TLS_CLIENT,
-    //                ]
-    //            ]);
-    //
-    //            $connection = @stream_socket_client(
-    //                "tls://{$remoteHost}:{$remotePort}",
-    //                $errno,
-    //                $errstr,
-    //                15,
-    //                STREAM_CLIENT_CONNECT,
-    //                $context
-    //            );
-    //
-    //            // If connection failed with a real error, handle it
-    //            if ($connection === false && ($errno !== 0 || $errstr !== '')) {
-    //                // TLS handshake failed
-    //                $this->certificateFreeradiusCommandsService->updateFreeradiusTestResult(
-    //                    $processEntity,
-    //                    CertificateTestResult::FAILED
-    //                );
-    //
-    //                return new JsonResponse([
-    //                    'status' => 'error',
-    //                    'message' => 'TLS Handshake Failed',
-    //                    'messageDetails' => "Failed to create socket: [$errno] $errstr",
-    //                    'details' => [
-    //                        'host' => $remoteHost,
-    //                        'port' => $remotePort,
-    //                        'error' => $errstr,
-    //                        'code' => $errno,
-    ////                        'basePath' => $basePath,
-    ////                        'clientCertPath' => $clientCertPath,
-    ////                        'keyCertPath' => $keyCertPath,
-    //                    ],
-    //                ], Response::HTTP_SERVICE_UNAVAILABLE);
-    //            }
-    //
-    //            // Extract peer certificate chain
-    //            $trustedHashes = array_map(static fn($e) => strtolower($e->value), TrustedWBAFingerprints::cases());
-    //            $params = stream_context_get_params($connection);
-    //            $chain = $params['options']['ssl']['peer_certificate_chain'] ?? [];
-    //
-    //            // Include the leaf certificate itself
-    //            $leafCert = $params['options']['ssl']['peer_certificate'] ?? null;
-    //            if ($leafCert) {
-    //                array_unshift($chain, $leafCert);
-    //            }
-    //
-    //            $validated = false;
-    //            foreach ($chain as $cert) {
-    //                $pem = openssl_x509_export($cert, $out) ? $out : null;
-    //                if ($pem) {
-    //                    // Convert PEM to DER
-    //                    $der = base64_decode(preg_replace('#-----.*?-----#', '', $pem));
-    //                    $hash = strtolower(hash('sha256', $der));
-    //
-    //                    if (in_array($hash, $trustedHashes, true)) {
-    //                        $validated = true;
-    //                        break;
-    //                    }
-    //                }
-    //            }
-    //
-    //            if ($validated === false) {
-    //                fclose($connection);
-    //
-    //                $this->certificateFreeradiusCommandsService->updateFreeradiusTestResult(
-    //                    $processEntity,
-    //                    CertificateTestResult::FAILED
-    //                );
-    //
-    //                return new JsonResponse([
-    //                    'status' => 'error',
-    //                    'message' => 'TLS handshake succeeded but certificate chain is NOT signed by a known WBA CA.',
-    //                ], Response::HTTP_FORBIDDEN);
-    //            }
+          //            $context = stream_context_create([
+          //                'ssl' => [
+          //                    'verify_peer' => false,
+          //                    'verify_peer_name' => false,
+          //                    'allow_self_signed' => false,
+          //                    'capture_peer_cert_chain' => true,
+          //                    'local_cert' => $paths['cert'],   // or $paths['cert']
+          //                    'local_pk'   => $paths['privkey'],
+          //                    'cafile'     => $paths['ca'],
+          //                    'crypto_method' => STREAM_CRYPTO_METHOD_TLS_CLIENT,
+          //                ]
+          //            ]);
+          //
+          //            $connection = @stream_socket_client(
+          //                "tls://{$remoteHost}:{$remotePort}",
+          //                $errno,
+          //                $errstr,
+          //                15,
+          //                STREAM_CLIENT_CONNECT,
+          //                $context
+          //            );
+          //
+          //            // If connection failed with a real error, handle it
+          //            if ($connection === false && ($errno !== 0 || $errstr !== '')) {
+          //                // TLS handshake failed
+          //                $this->certificateFreeradiusCommandsService->updateFreeradiusTestResult(
+          //                    $processEntity,
+          //                    CertificateTestResult::FAILED
+          //                );
+          //
+          //                return new JsonResponse([
+          //                    'status' => 'error',
+          //                    'message' => 'TLS Handshake Failed',
+          //                    'messageDetails' => "Failed to create socket: [$errno] $errstr",
+          //                    'details' => [
+          //                        'host' => $remoteHost,
+          //                        'port' => $remotePort,
+          //                        'error' => $errstr,
+          //                        'code' => $errno,
+          ////                        'basePath' => $basePath,
+          ////                        'clientCertPath' => $clientCertPath,
+          ////                        'keyCertPath' => $keyCertPath,
+          //                    ],
+          //                ], Response::HTTP_SERVICE_UNAVAILABLE);
+          //            }
+          //
+          //            // Extract peer certificate chain
+//                      $trustedHashes = array_map(static fn($e) => strtolower(
+//                          $e->value
+//                      ), TrustedWBAFingerprints::cases());
+          //            $params = stream_context_get_params($connection);
+          //            $chain = $params['options']['ssl']['peer_certificate_chain'] ?? [];
+          //
+          //            // Include the leaf certificate itself
+          //            $leafCert = $params['options']['ssl']['peer_certificate'] ?? null;
+          //            if ($leafCert) {
+          //                array_unshift($chain, $leafCert);
+          //            }
+          //
+          //            $validated = false;
+          //            foreach ($chain as $cert) {
+          //                $pem = openssl_x509_export($cert, $out) ? $out : null;
+          //                if ($pem) {
+          //                    // Convert PEM to DER
+          //                    $der = base64_decode(preg_replace('#-----.*?-----#', '', $pem));
+          //                    $hash = strtolower(hash('sha256', $der));
+          //
+          //                    if (in_array($hash, $trustedHashes, true)) {
+          //                        $validated = true;
+          //                        break;
+          //                    }
+          //                }
+          //            }
+          //
+          //            if ($validated === false) {
+          //                fclose($connection);
+          //
+          //                $this->certificateFreeradiusCommandsService->updateFreeradiusTestResult(
+          //                    $processEntity,
+          //                    CertificateTestResult::FAILED
+          //                );
+          //
+          //                return new JsonResponse([
+          //                    'status' => 'error',
+          //                    'message' => 'TLS handshake succeeded but certificate chain is NOT signed by WBA CA.',
+          //                ], Response::HTTP_FORBIDDEN);
+          //            }
 
           // Only close if it’s a valid resource
-    //            if (is_resource($connection)) {
-    //                fclose($connection);
-    //            }
+          //            if (is_resource($connection)) {
+          //                fclose($connection);
+          //            }
           // THIS IS OK [0] -> a non-false $connection OR errno=0 and errstr="" means TLS handshake succeeded
             $processEntity->setStatus(ProcessStatusType::COMPLETED);
             $processEntity->setFreeradiusTestResult(CertificateTestResult::PASSED);
