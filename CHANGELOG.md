@@ -10,7 +10,9 @@
       ```bash
       php bin/console doctrine:migrations:migrate
       ```
-
+- Added a new configuration page, to manage the black-listed domains used for registration and authentication with Google, Microsft and Simple Email/Password.
+- Added a new user role, Super Admin, to allow the management of the platform and the other admins.
+- Added new pages to configure the permissions of the platform admins.
 # Release V1.9.0
 
 - Increased the level of php-stan to the max level, for more fixes with security updates.
