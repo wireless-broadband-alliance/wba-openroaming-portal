@@ -173,11 +173,9 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         $qb->andWhere(
             $qb->expr()->orX(
                 'u.roles LIKE :admin',
-                'u.roles LIKE :superAdmin'
             )
         )
-        ->setParameter('admin', '%ROLE_ADMIN%')
-        ->setParameter('superAdmin', '%ROLE_SUPER_ADMIN%');
+        ->setParameter('admin', '%ROLE_ADMIN%');
 
       // Add filters based on verification status
         if ($filter === UserVerificationStatus::VERIFIED->value) {
@@ -248,12 +246,10 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         if ($onlyAdmins) {
             $qb->andWhere(
                 $qb->expr()->orX(
-                    'u.roles LIKE :adminRole',
-                    'u.roles LIKE :superAdminRole'
+                    'u.roles LIKE :adminRole'
                 )
             )
-              ->setParameter('adminRole', '%ROLE_ADMIN%')
-              ->setParameter('superAdminRole', '%ROLE_SUPER_ADMIN%');
+              ->setParameter('adminRole', '%ROLE_ADMIN%');
         } else {
           // Exclude admin & super admin when counting all other users
             $qb->andWhere('u.roles NOT LIKE :adminRole')
@@ -306,11 +302,9 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
             $qb->andWhere(
                 $qb->expr()->orX(
                     'u.roles LIKE :adminRole',
-                    'u.roles LIKE :superAdminRole'
                 )
             )
-              ->setParameter('adminRole', '%ROLE_ADMIN%')
-              ->setParameter('superAdminRole', '%ROLE_SUPER_ADMIN%');
+              ->setParameter('adminRole', '%ROLE_ADMIN%');
         } else {
           // Exclude admin & super admin when counting all other users
             $qb->andWhere('u.roles NOT LIKE :adminRole')
@@ -353,11 +347,9 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
             $qb->andWhere(
                 $qb->expr()->orX(
                     'u.roles LIKE :adminRole',
-                    'u.roles LIKE :superAdminRole'
                 )
             )
-              ->setParameter('adminRole', '%ROLE_ADMIN%')
-              ->setParameter('superAdminRole', '%ROLE_SUPER_ADMIN%');
+              ->setParameter('adminRole', '%ROLE_ADMIN%');
         } else {
           // Exclude admin & super admin when counting all other users
             $qb->andWhere('u.roles NOT LIKE :adminRole')

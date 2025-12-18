@@ -82,25 +82,6 @@
         </p>
     </td>
 
-    {# Roles #}
-    <td class="p-4 ">
-        <p class="font-semibold p-1">
-            {% if constant('App\\Enum\\AdminRoleType::ROLE_SUPER_ADMIN').value in user.roles %}
-                <span class="pill-warning">
-                    {{ 'superAdmin'|trans({}, '_user') }}
-                </span>
-            {% elseif constant('App\\Enum\\AdminRoleType::ROLE_ADMIN').value in user.roles %}
-                <span class="pill-success">
-                    {{ 'admin'|trans({}, '_user') }}
-                </span>
-            {% else %}
-                <span class="pill-error">
-                    {{ 'user'|trans({}, '_user') }}
-                </span>
-            {% endif %}
-        </p>
-    </td>
-
     {# Created At #}
     <td class="px-6 py-4 font-medium">
         {{ user.createdat|date('d/m/Y H:i') }}

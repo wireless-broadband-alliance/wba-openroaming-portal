@@ -144,10 +144,6 @@
                 {{ 'bannedAt'|trans({}, 'dashboard') }}
               </th>
 
-              <th scope="col" class="px-6 py-3">
-                {{ 'roles'|trans({}, 'dashboard') }}
-              </th>
-
               <th scope="col" class="flex items-center px-6 py-3">
                 <h1 class="mr-2">{{ 'createdAt'|trans({}, 'dashboard') }}</h1>
                 <a href="{{ path('admin_page', {...app.request.query.all, sort: 'createdAt', order: activeSort == 'createdAt' and activeOrder == 'asc' ? 'desc' : 'asc'}) }}"
