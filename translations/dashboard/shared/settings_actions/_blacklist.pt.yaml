@@ -1,0 +1,4 @@
+blockedDomains: 'Domínios Bloqueados'
+listOfBlockedDomains: 'Lista de domínios bloqueados na plataforma'
+example: 'exemplo.pt'
+addDomain: 'Adicionar Domínio'

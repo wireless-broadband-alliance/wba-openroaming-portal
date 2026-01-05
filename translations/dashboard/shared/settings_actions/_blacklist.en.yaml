@@ -1,0 +1,4 @@
+blockedDomains: 'Blocked Domains'
+listOfBlockedDomains: 'List of blocked domains on the platform'
+example: 'example.com'
+addDomain: 'Add Domain'
