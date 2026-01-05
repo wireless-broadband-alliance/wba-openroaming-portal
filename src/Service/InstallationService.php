@@ -90,13 +90,16 @@ readonly class InstallationService
         return InstallationStep::DATABASE->value;
     }
 
+    /**
+     * @return array<string, bool>
+     */
     public function getStepperStatus(string $step): array
     {
         $status = [
-        InstallationWidgetStepsEnum::DATABASE->value => false,
-        InstallationWidgetStepsEnum::SETTINGS->value => false,
-        InstallationWidgetStepsEnum::ADMIN_CREDENTIALS->value => false,
-        InstallationWidgetStepsEnum::SUMMARY->value => false,
+            InstallationWidgetStepsEnum::DATABASE->value => false,
+            InstallationWidgetStepsEnum::SETTINGS->value => false,
+            InstallationWidgetStepsEnum::ADMIN_CREDENTIALS->value => false,
+            InstallationWidgetStepsEnum::SUMMARY->value => false,
         ];
 
         if ($step === InstallationStep::SETTINGS->value) {
@@ -116,52 +119,52 @@ readonly class InstallationService
     }
 
 
-  /**
-   * @throws RandomException
-   * @throws TransportExceptionInterface
-   */
+    /**
+     * @throws RandomException
+     * @throws TransportExceptionInterface
+     */
     public function sendAdminConfirmationCode(InstallationProgress $installationProgress): void
     {
-        $verificationCode = random_int(100000, 999999);
+        $verificationCode = (string) random_int(100000, 999999);
         $installationProgress->setConfirmCodeAdmin($verificationCode);
-        $installationProgress->setUpdatedAt(new \DateTime());
+        $installationProgress->setUpdatedAt(new DateTime());
         $this->entityManager->persist($installationProgress);
         $this->entityManager->flush();
 
         $emailTitle = $this->settingRepository->findOneBy(['name' => SettingName::PAGE_TITLE->value])->getValue();
         $contactEmail = $this->settingRepository->findOneBy([
-        'name' => SettingName::CONTACT_EMAIL->value,
+            'name' => SettingName::CONTACT_EMAIL->value,
         ])->getValue();
         $customerLogo = $this->settingRepository->findOneBy([
-        'name' => SettingName::CUSTOMER_LOGO->value,
+            'name' => SettingName::CUSTOMER_LOGO->value,
         ])->getValue();
         $projectDir = $this->parameterBag->get('kernel.project_dir');
         $logoPath = $projectDir . '/public' . $customerLogo;
 
         $email = new TemplatedEmail()
-        ->from(
-            new Address(
-                $this->parameterBag->get('app.email_address'),
-                $this->parameterBag->get('app.sender_name')
+            ->from(
+                new Address(
+                    $this->parameterBag->get('app.email_address'),
+                    $this->parameterBag->get('app.sender_name')
+                )
             )
-        )
-        ->to($installationProgress->getEmailAdmin())
-        ->subject($this->translator->trans('adminConfirmationEmail', [], 'InstallationService'))
-        ->htmlTemplate('email/installation_admin_code.html.twig')
-        ->context([
-            'uuid' => $installationProgress->getEmailAdmin(),
-            'emailTitle' => $emailTitle,
-            'contactEmail' => $contactEmail,
-            'code' => $verificationCode,
-        ])
-        ->embedFromPath($logoPath, 'logo_cid');
+            ->to($installationProgress->getEmailAdmin())
+            ->subject($this->translator->trans('adminConfirmationEmail', [], 'InstallationService'))
+            ->htmlTemplate('email/installation_admin_code.html.twig')
+            ->context([
+                'uuid' => $installationProgress->getEmailAdmin(),
+                'emailTitle' => $emailTitle,
+                'contactEmail' => $contactEmail,
+                'code' => $verificationCode,
+            ])
+            ->embedFromPath($logoPath, 'logo_cid');
 
         $this->mailer->send($email);
     }
 
     public function sendAdminVerificationCode(User $user): void
     {
-        $verificationCode = random_int(100000, 999999);
+        $verificationCode = (string) random_int(100000, 999999);
         $user->setTwoFAcode($verificationCode);
         $user->setTwoFAcodeGeneratedAt(new DateTime());
         $this->entityManager->persist($user);
@@ -169,31 +172,31 @@ readonly class InstallationService
 
         $emailTitle = $this->settingRepository->findOneBy(['name' => SettingName::PAGE_TITLE->value])->getValue();
         $contactEmail = $this->settingRepository->findOneBy([
-        'name' => SettingName::CONTACT_EMAIL->value,
+            'name' => SettingName::CONTACT_EMAIL->value,
         ])->getValue();
         $customerLogo = $this->settingRepository->findOneBy([
-        'name' => SettingName::CUSTOMER_LOGO->value,
+            'name' => SettingName::CUSTOMER_LOGO->value,
         ])->getValue();
         $projectDir = $this->parameterBag->get('kernel.project_dir');
         $logoPath = $projectDir . '/public' . $customerLogo;
 
         $email = new TemplatedEmail()
-        ->from(
-            new Address(
-                $this->parameterBag->get('app.email_address'),
-                $this->parameterBag->get('app.sender_name')
+            ->from(
+                new Address(
+                    $this->parameterBag->get('app.email_address'),
+                    $this->parameterBag->get('app.sender_name')
+                )
             )
-        )
-        ->to($user->getEmail())
-        ->subject($this->translator->trans('adminIdentityVerification', [], 'InstallationService'))
-        ->htmlTemplate('email/installation_entity_verification.html.twig')
-        ->context([
-            'uuid' => $user->getUuid(),
-            'emailTitle' => $emailTitle,
-            'contactEmail' => $contactEmail,
-            'code' => $verificationCode,
-        ])
-        ->embedFromPath($logoPath, 'logo_cid');
+            ->to($user->getEmail())
+            ->subject($this->translator->trans('adminIdentityVerification', [], 'InstallationService'))
+            ->htmlTemplate('email/installation_entity_verification.html.twig')
+            ->context([
+                'uuid' => $user->getUuid(),
+                'emailTitle' => $emailTitle,
+                'contactEmail' => $contactEmail,
+                'code' => $verificationCode,
+            ])
+            ->embedFromPath($logoPath, 'logo_cid');
 
         $this->mailer->send($email);
     }
@@ -210,7 +213,7 @@ readonly class InstallationService
         $limitTime->modify('-' . $timeToResetAttempts . ' minutes');
         $attempts = $this->eventRepository->find2FACodeAttemptEvent(
             $user,
-            $nrAttempts,
+            (int) $nrAttempts,
             $limitTime,
             $eventType
         );
@@ -312,7 +315,7 @@ readonly class InstallationService
 
         $pattern = sprintf('/^%s="?(.*?)"?$/m', preg_quote($key, '/'));
 
-        if (preg_match($pattern, $envContent, $matches)) {
+        if (preg_match($pattern, (string) $envContent, $matches)) {
             return trim($matches[1], "\"' \r\n") === $expectedValue;
         }
 
@@ -344,10 +347,10 @@ readonly class InstallationService
                 SettingsConfigType::TURNSTILE_SECRET->value
             );
             if ($lastCompleted->getJwtPassphrase() !== null) {
-                  $this->databaseConnectionService->writeDatabaseUrlToEnv(
-                      $lastCompleted->getJwtPassphrase(),
-                      SettingsConfigType::JWT_PASSPHRASE->value
-                  );
+                $this->databaseConnectionService->writeDatabaseUrlToEnv(
+                    $lastCompleted->getJwtPassphrase(),
+                    SettingsConfigType::JWT_PASSPHRASE->value
+                );
             }
 
             $adminUser = $this->userRepository->findSuperAdmin();
@@ -363,31 +366,31 @@ readonly class InstallationService
     public function commandToDataBase(InstallationProgress $installationProgress): string
     {
         return 'scripts/update-db-env.sh "' .
-        $installationProgress->getDbOpenRoaming() .
-        '" "' .
-        $installationProgress->getDbFreeradius() .
-        '"';
+            $installationProgress->getDbOpenRoaming() .
+            '" "' .
+            $installationProgress->getDbFreeradius() .
+            '"';
     }
 
     public function commandToSettings(InstallationProgress $installationProgress): string
     {
         if ($installationProgress->getJwtPassphrase() !== null) {
             return 'scripts/update-settings-env.sh "' .
-            $installationProgress->getJwtPassphrase() .
-            '" "' .
+                $installationProgress->getJwtPassphrase() .
+                '" "' .
+                implode(',', $installationProgress->getTrustedProxies()) .
+                '" "' .
+                $installationProgress->getTurnstileKey() .
+                '" "' .
+                $installationProgress->getTurnstileSecret() .
+                '"';
+        }
+        return 'scripts/update-settings-env.sh "" "' .
             implode(',', $installationProgress->getTrustedProxies()) .
             '" "' .
             $installationProgress->getTurnstileKey() .
             '" "' .
             $installationProgress->getTurnstileSecret() .
             '"';
-        }
-        return 'scripts/update-settings-env.sh "" "' .
-        implode(',', $installationProgress->getTrustedProxies()) .
-        '" "' .
-        $installationProgress->getTurnstileKey() .
-        '" "' .
-        $installationProgress->getTurnstileSecret() .
-        '"';
     }
 }
