@@ -6,19 +6,21 @@ use App\Enum\LanguageType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Routing\Attribute\Route;
 
 class LanguageController extends AbstractController
 {
-    public function __construct(private readonly SessionInterface $session)
+    public function __construct(private readonly RequestStack $requestStack)
     {
     }
     #[Route('/change-language', name: 'app_change_language')]
     public function changeLanguage(Request $request): RedirectResponse
     {
         $locale = $request->query->get('locale', LanguageType::EN->value);
-        $this->session->set('_locale', $locale);
+        $session = $this->requestStack->getSession();
+        $session->set('_locale', $locale);
 
         // Safe fallback if the referer is broken
         $referer = $request->headers->get('referer') ?? $this->generateUrl('app_landing');
