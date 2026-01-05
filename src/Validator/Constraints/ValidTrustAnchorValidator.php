@@ -99,10 +99,12 @@ class ValidTrustAnchorValidator extends ConstraintValidator
             $matches
         );
 
-        /** @var string[] $matches [1] always exists from preg_match_all */
+        /** @var list<string> $certBodies */
+        $certBodies = $matches[1];
+
         return array_map(
-            static fn(string $data): string => "-----BEGIN CERTIFICATE-----$data-----END CERTIFICATE-----",
-            (array)$matches[1]
+            static fn(string $data): string => "-----BEGIN CERTIFICATE-----{$data}-----END CERTIFICATE-----",
+            $certBodies
         );
     }
 }
