@@ -89,7 +89,7 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
   /**
    * @return User[]
    */
-    public function findLDAPEnabledUsers()
+    public function findLDAPEnabledUsers(): array
     {
         return $this->createQueryBuilder('u')
         ->join('u.userExternalAuths', 'uea')
@@ -101,7 +101,7 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
     }
 
   /**
-   * @method array searchWithFilter(string $filter, ?string $searchTerm = null)
+   * @method array searchWithFilter(string string $filter, ?string $searchTerm = null)
    *
    * Searches for users based on provided filter and optional search term.
    *
