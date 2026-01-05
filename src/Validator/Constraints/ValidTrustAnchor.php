@@ -7,9 +7,9 @@ use Symfony\Component\Validator\Constraint;
 #[\Attribute(\Attribute::TARGET_CLASS)]
 class ValidTrustAnchor extends Constraint
 {
-    public string $invalidCertificateMessage = 'invalidCertificate';
-    public string $incompleteChainMessage    = 'incompleteChain';
-    public string $untrustedRootMessage      = 'untrustedRoot';
+    public string $invalidCertificateMessage = 'invalidCertificateType';
+    public string $incompleteChainMessage = 'incompleteChainMessage';
+    public string $untrustedRootMessage = 'untrustedRootMessage';
 
     public string $certField;
     public string $chainField;
@@ -22,9 +22,9 @@ class ValidTrustAnchor extends Constraint
         ?array $groups = null,
         mixed $payload = null
     ) {
-        $this->certField  = $certField;
+        $this->certField = $certField;
         $this->chainField = $chainField;
-        $this->rootField  = $rootField;
+        $this->rootField = $rootField;
 
         parent::__construct([], $groups, $payload);
     }
