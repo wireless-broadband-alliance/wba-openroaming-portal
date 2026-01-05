@@ -60,7 +60,8 @@ class ForgotPasswordController extends AbstractController
         private readonly TranslatorInterface $translator,
         private readonly EmailGenerator $emailGenerator,
         private readonly EntityManagerInterface $entityManager,
-        private readonly MagicLinkService $magicLinkService
+        private readonly MagicLinkService $magicLinkService,
+        private readonly UserPasswordHasherInterface $userPasswordHasher
     ) {
     }
 
@@ -536,7 +537,6 @@ class ForgotPasswordController extends AbstractController
     #[IsGranted('ROLE_USER')]
     public function forgotPasswordUserChecker(
         Request $request,
-        UserPasswordHasherInterface $userPasswordHasher,
         string $context
     ): Response {
         /** @var User|null $currentUser */
@@ -610,7 +610,7 @@ class ForgotPasswordController extends AbstractController
             }
 
             $currentUser->setPassword(
-                $userPasswordHasher->hashPassword(
+                $this->userPasswordHasher->hashPassword(
                     $currentUser,
                     $form->get('newPassword')->getData()
                 )

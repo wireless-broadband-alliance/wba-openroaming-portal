@@ -29,7 +29,6 @@ use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use libphonenumber\NumberParseException;
-use libphonenumber\PhoneNumber;
 use libphonenumber\PhoneNumberUtil;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Random\RandomException;
@@ -38,8 +37,8 @@ use Symfony\Component\Form\Exception\LogicException;
 use Symfony\Component\Form\Exception\RuntimeException;
 use Symfony\Component\HttpFoundation\Exception\SessionNotFoundException;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -75,6 +74,10 @@ class SecurityController extends AbstractController
         private readonly UserCreationService $userCreationService,
         private readonly TokenStorageInterface $tokenStorage,
         private readonly UserProviderDetectorResolverService $userProviderDetectorResolverService,
+        private readonly AuthenticationUtils $authenticationUtils,
+        private readonly UserPasswordHasherInterface $userPasswordHasher,
+        private readonly RequestStack $requestStack,
+        private readonly EventDispatcherInterface $eventDispatcher,
     ) {
     }
 
@@ -84,7 +87,6 @@ class SecurityController extends AbstractController
     #[Route('/login', name: 'app_login')]
     public function login(
         Request $request,
-        AuthenticationUtils $authenticationUtils
     ): Response {
         if ($this->isGranted('IS_AUTHENTICATED_FULLY')) {
             return $this->redirectToRoute('app_landing');
@@ -149,7 +151,7 @@ class SecurityController extends AbstractController
 
         $dto->requirePassword = true;
 
-        $session = $request->getSession();
+        $session = $this->requestStack->getSession();
         $lastMethod = $session->get('last_login_method');
 
         if ($lastMethod) {
@@ -160,7 +162,7 @@ class SecurityController extends AbstractController
         $form = $this->createForm(LoginType::class, $dto);
 
         // Get the login error if there is one
-        $error = $authenticationUtils->getLastAuthenticationError();
+        $error = $this->authenticationUtils->getLastAuthenticationError();
 
         // Show an error message if the login attempt fails
         if ($error instanceof AuthenticationException) {
@@ -183,8 +185,6 @@ class SecurityController extends AbstractController
     #[Route('/login/magic', name: 'app_login_magic')]
     public function loginMagic(
         Request $request,
-        UserPasswordHasherInterface $userPasswordHasher,
-        SessionInterface $session,
     ): Response {
         /** @var array<string, array{value: string, description: string}> $data */
         $data = $this->getSettings->getSettings();
@@ -263,7 +263,7 @@ class SecurityController extends AbstractController
                     $randomPassword = bin2hex(random_bytes(4));
 
                     // Hash the password
-                    $hashedPassword = $userPasswordHasher->hashPassword($user, $randomPassword);
+                    $hashedPassword = $this->userPasswordHasher->hashPassword($user, $randomPassword);
 
                     $user = $this->userCreationService->createUser(
                         $user,
@@ -357,6 +357,7 @@ class SecurityController extends AbstractController
                             $this->tokenStorage->setToken($token);
 
                             // Store the authentication token in the session
+                            $session = $this->requestStack->getSession();
                             $session->set('_security_main', serialize($token));
 
                             return $this->redirectToRoute('app_login_confirmation');
@@ -379,7 +380,7 @@ class SecurityController extends AbstractController
                     // Generate a random password
                     $randomPassword = bin2hex(random_bytes(4));
                     // Hash the password
-                    $hashedPassword = $userPasswordHasher->hashPassword($user, $randomPassword);
+                    $hashedPassword = $this->userPasswordHasher->hashPassword($user, $randomPassword);
 
                     $user->setUuid($phoneNumber);
                     $user->setPhoneNumber($loginChoiceDTO->phoneNumber);
@@ -422,6 +423,7 @@ class SecurityController extends AbstractController
                         $this->tokenStorage->setToken($token);
 
                         // Store the authentication token in the session
+                        $session = $this->requestStack->getSession();
                         $session->set('_security_main', serialize($token));
 
                         return $this->redirectToRoute('app_login_confirmation');
@@ -447,7 +449,7 @@ class SecurityController extends AbstractController
      * @throws NonUniqueResultException
      */
     #[Route('/dashboard/login', name: 'app_dashboard_login')]
-    public function dashboardLogin(Request $request, AuthenticationUtils $authenticationUtils): Response
+    public function dashboardLogin(Request $request): Response
     {
         if ($this->isGranted('IS_AUTHENTICATED_FULLY')) {
             return $this->redirectToRoute('admin_page');
@@ -466,7 +468,7 @@ class SecurityController extends AbstractController
             $lastUsername = $phoneNumber;
         } else {
             // Fallback to Symfony's AuthenticationUtils
-            $lastUsername = $authenticationUtils->getLastUsername();
+            $lastUsername = $this->authenticationUtils->getLastUsername();
         }
 
         // Create the DTO with injected default regions and required password for this login method
@@ -479,7 +481,7 @@ class SecurityController extends AbstractController
         $form = $this->createForm(LoginType::class, $dto);
 
         // Get the login error if there is one
-        $error = $authenticationUtils->getLastAuthenticationError();
+        $error = $this->authenticationUtils->getLastAuthenticationError();
 
         // Show an error message if the login attempt fails
         if ($error instanceof AuthenticationException) {
@@ -514,7 +516,7 @@ class SecurityController extends AbstractController
         $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $user]);
 
         // Check if the user is already verified
-        $session = $request->getSession();
+        $session = $this->requestStack->getSession();
         if (
             $userExternalAuths[0]->getProvider() !== UserProvider::PORTAL_ACCOUNT->value ||
             $session->has('session_verified')
@@ -527,7 +529,6 @@ class SecurityController extends AbstractController
 
         $form = $this->createForm(TwoFACode::class);
         $form->handleRequest($request);
-        $session = $request->getSession();
         if ($form->isSubmitted() && $form->isValid()) {
             /** @var array<string, mixed> $formData */
             $formData = $form->getData();
@@ -559,15 +560,12 @@ class SecurityController extends AbstractController
     #[Route('/login/magic/link', name: 'app_login_magic_link')]
     public function confirmAccountMagicLink(
         Request $request,
-        UserRepository $userRepository,
-        TokenStorageInterface $tokenStorage,
-        EventDispatcherInterface $eventDispatcher,
     ): Response {
         // Get the uuid and verification code from the URL query parameters
         $token = $request->query->get('token');
 
         // Get the user with the matching email, excluding admin users
-        $user = $userRepository->findOneBy(['twoFAcode' => $token]);
+        $user = $this->userRepository->findOneBy(['twoFAcode' => $token]);
 
         if ($user && $user->getTwoFAcodeIsActive() && $this->magicLinkService->linkValidity($user)) {
             try {
@@ -575,12 +573,12 @@ class SecurityController extends AbstractController
                 $token = new UsernamePasswordToken($user, FirewallType::LANDING->value, $user->getRoles());
 
                 // Set the token in the token storage
-                $tokenStorage->setToken($token);
+                $this->tokenStorage->setToken($token);
 
                 // Dispatch the login event
                 $event = new InteractiveLoginEvent($request, $token);
-                $eventDispatcher->dispatch($event);
-                $session = $request->getSession();
+                $this->eventDispatcher->dispatch($event);
+                $session = $this->requestStack->getSession();
 
                 if (!$user->isVerified()) {
                     $user->setIsVerified(true);
@@ -588,7 +586,7 @@ class SecurityController extends AbstractController
                 }
 
                 $user->setTwoFAcodeIsActive(false);
-                $userRepository->save($user, true);
+                $this->userRepository->save($user, true);
 
                 if (
                     $user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::EMAIL->value ||
@@ -636,17 +634,17 @@ class SecurityController extends AbstractController
     }
 
     #[Route(path: '/dashboard/logout', name: 'app_dashboard_logout')]
-    public function dashboardLogout(Request $request): Response
+    public function dashboardLogout(): Response
     {
-        $session = $request->getSession();
+        $session = $this->requestStack->getSession();
         $session->clear();
         return $this->redirectToRoute('app_dashboard_login');
     }
 
     #[Route(path: '/logout', name: 'app_logout')]
-    public function logout(Request $request): Response
+    public function logout(): Response
     {
-        $session = $request->getSession();
+        $session = $this->requestStack->getSession();
         $session->clear();
 
         return $this->redirectToRoute('app_landing');

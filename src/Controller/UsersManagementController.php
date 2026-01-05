@@ -68,6 +68,8 @@ class UsersManagementController extends AbstractController
         private readonly TranslatorInterface $translator,
         private readonly UserRadiusProfileRepository $radiusProfileRepository,
         private readonly EmailGenerator $emailGenerator,
+        private readonly UserPasswordHasherInterface $passwordHasher,
+        private readonly MailerInterface $mailer,
     ) {
     }
 
@@ -75,12 +77,11 @@ class UsersManagementController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function revokeUsers(
         Request $request,
-        UserRepository $userRepository,
         int $id
     ): Response {
         /** @var User $currentUser */
         $currentUser = $this->getUser();
-        $user = $userRepository->find($id);
+        $user = $this->userRepository->find($id);
         if (!$user) {
             $this->addFlash(
                 'error',
@@ -340,7 +341,6 @@ class UsersManagementController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function editUsers(
         Request $request,
-        UserPasswordHasherInterface $passwordHasher,
         EntityManagerInterface $em,
         int $id
     ): Response {
@@ -456,7 +456,7 @@ class UsersManagementController extends AbstractController
             $userExternalAuth = $this->userExternalAuthRepository->findOneBy(['user' => $user]);
 
             // Hash the new password
-            $hashedPassword = $passwordHasher->hashPassword($user, $newPassword);
+            $hashedPassword = $this->passwordHasher->hashPassword($user, $newPassword);
             $user->setPassword($hashedPassword);
             $user->setForgotPasswordRequest(true);
             $em->flush();
@@ -622,7 +622,6 @@ class UsersManagementController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function disabledBy2FA(
         Request $request,
-        MailerInterface $mailer,
         int $id,
     ): RedirectResponse {
         if (!$user = $this->userRepository->find($id)) {
@@ -653,7 +652,7 @@ class UsersManagementController extends AbstractController
         );
 
         if ($user->getEmail()) {
-            $mailer->send($this->verificationCodeEmailGenerator->createEmail2FADisabledBy($user));
+            $this->mailer->send($this->verificationCodeEmailGenerator->createEmail2FADisabledBy($user));
         } elseif (
             $user->getPhoneNumber() &&
             $userExternalAuths->getProviderId() === UserProvider::PHONE_NUMBER->value
