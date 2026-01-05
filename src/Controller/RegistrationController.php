@@ -25,8 +25,8 @@ use Psr\EventDispatcher\EventDispatcherInterface;
 use Random\RandomException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
@@ -62,7 +62,7 @@ class RegistrationController extends AbstractController
         private readonly TranslatorInterface $translator,
         private readonly MagicLinkService $magicLinkService,
         private readonly UserPasswordHasherInterface $userPasswordHasher,
-        private readonly SessionInterface $session,
+        private readonly RequestStack $requestStack,
         private readonly EventDispatcherInterface $eventDispatcher
     ) {
     }
@@ -271,7 +271,8 @@ class RegistrationController extends AbstractController
                 $this->tokenStorage->setToken($token);
 
                 // Store the authentication token in the session
-                $this->session->set('_security_main', serialize($token));
+                $session = $this->requestStack->getSession();
+                $session->set('_security_main', serialize($token));
 
                 // Redirect the user after successful registration
                 return $this->redirectToRoute('app_landing');
@@ -340,7 +341,8 @@ class RegistrationController extends AbstractController
                 // Update the verified status and save the user
                 $user->setIsVerified(true);
                 $this->userRepository->save($user, true);
-                $this->session->set('session_verified', true);
+                $session = $this->requestStack->getSession();
+                $session->set('session_verified', true);
 
                 // Defines the Event to the table
                 $eventMetadata = [
