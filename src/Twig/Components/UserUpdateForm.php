@@ -33,9 +33,9 @@ final class UserUpdateForm extends AbstractController
     #[LiveProp]
     public ?string $rawPhoneNumber = null;
 
-  /**
-   * @return FormInterface<mixed>
-   */
+    /**
+     * @return FormInterface<mixed>
+     */
     protected function instantiateForm(): FormInterface
     {
         $canWrite = $this->isGranted(UserAuthenticationVoter::USERS_MANAGEMENT_WRITE);
@@ -44,8 +44,8 @@ final class UserUpdateForm extends AbstractController
             UserUpdateType::class,
             $this->userUpdateDTO,
             [
-            'disabled' => !$canWrite,
-            'edited_user' => $this->editedUser,
+                'disabled' => !$canWrite,
+                'edited_user' => $this->editedUser,
             ]
         );
     }
@@ -53,7 +53,7 @@ final class UserUpdateForm extends AbstractController
     #[LiveAction]
     public function validate(): void
     {
-      // Handle phone parsing
+        // Handle phone parsing
         if (!in_array($this->rawPhoneNumber, [null, '', '0'], true)) {
             try {
                 $phoneUtil = PhoneNumberUtil::getInstance();
@@ -68,45 +68,47 @@ final class UserUpdateForm extends AbstractController
 
         $currentUser = $this->getUser();
         $isAdmin = $this->isGranted('ROLE_ADMIN');
-        $isEditingSelf = $currentUser && $this->editedUser
-        && $currentUser->getId() === $this->editedUser->getId();
+        $isEditingSelf =
+            $currentUser instanceof User
+            && $this->editedUser instanceof User
+            && $currentUser->getId() === $this->editedUser->getId();
 
-      // Base form data
+        // Base form data
         $data = [
-        'uuid' => $this->userUpdateDTO->uuid,
-        'email' => $this->userUpdateDTO->email,
-        'firstName' => $this->userUpdateDTO->firstName,
-        'lastName' => $this->userUpdateDTO->lastName,
-        'phoneNumber' => $this->userUpdateDTO->phoneNumber,
-        'isVerified' => $this->userUpdateDTO->isVerified,
-        'banned' => $this->userUpdateDTO->banned,
+            'uuid' => $this->userUpdateDTO->uuid,
+            'email' => $this->userUpdateDTO->email,
+            'firstName' => $this->userUpdateDTO->firstName,
+            'lastName' => $this->userUpdateDTO->lastName,
+            'phoneNumber' => $this->userUpdateDTO->phoneNumber,
+            'isVerified' => $this->userUpdateDTO->isVerified,
+            'banned' => $this->userUpdateDTO->banned,
         ];
 
-      // Submit permissions ONLY when allowed
+        // Submit permissions ONLY when allowed
         if ($isAdmin && !$isEditingSelf) {
             $data += [
-            'userManagement' => $this->userUpdateDTO->userManagement,
-            'platformStatus' => $this->userUpdateDTO->platformStatus,
-            'landingPageConfig' => $this->userUpdateDTO->landingPageConfig,
-            'userEngagement' => $this->userUpdateDTO->userEngagement,
-            'termsPolicies' => $this->userUpdateDTO->termsPolicies,
-            'cronSchedule' => $this->userUpdateDTO->cronSchedule,
-            'authenticationMethods' => $this->userUpdateDTO->authenticationMethods,
-            'twoFactorAuth' => $this->userUpdateDTO->twoFactorAuth,
-            'ldapSynchronization' => $this->userUpdateDTO->ldapSynchronization,
-            'radiusProfileConfig' => $this->userUpdateDTO->radiusProfileConfig,
-            'smsConfig' => $this->userUpdateDTO->smsConfig,
-            'portalStatistics' => $this->userUpdateDTO->portalStatistics,
-            'connectivityStatistics' => $this->userUpdateDTO->connectivityStatistics,
+                'userManagement' => $this->userUpdateDTO->userManagement,
+                'platformStatus' => $this->userUpdateDTO->platformStatus,
+                'landingPageConfig' => $this->userUpdateDTO->landingPageConfig,
+                'userEngagement' => $this->userUpdateDTO->userEngagement,
+                'termsPolicies' => $this->userUpdateDTO->termsPolicies,
+                'cronSchedule' => $this->userUpdateDTO->cronSchedule,
+                'authenticationMethods' => $this->userUpdateDTO->authenticationMethods,
+                'twoFactorAuth' => $this->userUpdateDTO->twoFactorAuth,
+                'ldapSynchronization' => $this->userUpdateDTO->ldapSynchronization,
+                'radiusProfileConfig' => $this->userUpdateDTO->radiusProfileConfig,
+                'smsConfig' => $this->userUpdateDTO->smsConfig,
+                'portalStatistics' => $this->userUpdateDTO->portalStatistics,
+                'connectivityStatistics' => $this->userUpdateDTO->connectivityStatistics,
             ];
         }
 
-      // Rebuild & submit form
+        // Rebuild & submit form
         $form = $this->createForm(
             UserUpdateType::class,
             $this->userUpdateDTO,
             [
-            'edited_user' => $this->editedUser,
+                'edited_user' => $this->editedUser,
             ]
         );
 
