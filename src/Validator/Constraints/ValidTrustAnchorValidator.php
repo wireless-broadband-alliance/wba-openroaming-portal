@@ -69,7 +69,11 @@ class ValidTrustAnchorValidator extends ConstraintValidator
         if ($rootPem) {
             $root = openssl_x509_parse($rootPem);
 
-            if (!is_array($root) || !isset($current['issuer'], $root['subject']) || $current['issuer'] !== $root['subject']) {
+            if (
+                !is_array($root)
+                || !isset($current['issuer'], $root['subject'])
+                || $current['issuer'] !== $root['subject']
+            ) {
                 $this->context->buildViolation($constraint->untrustedRootMessage)
                     ->atPath($constraint->rootField)
                     ->addViolation();
@@ -95,7 +99,7 @@ class ValidTrustAnchorValidator extends ConstraintValidator
             $matches
         );
 
-        /** @var string[] $matches[1] always exists from preg_match_all */
+        /** @var string[] $matches [1] always exists from preg_match_all */
         return array_map(
             static fn(string $data): string => "-----BEGIN CERTIFICATE-----$data-----END CERTIFICATE-----",
             (array)$matches[1]
