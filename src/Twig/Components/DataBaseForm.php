@@ -39,15 +39,6 @@ class DataBaseForm extends AbstractController
             $this->dbSetupDTO = new DbSetupDTO();
         }
 
-        // Rebuild form with DTO data
-        $form = $this->createForm(DbSetupType::class, $this->dbSetupDTO);
-
-        // Submit the form data to trigger validation
-        $form->submit([
-            'dbOpenRoaming' => $this->dbSetupDTO->dbOpenRoaming,
-            'dbFreeradius' => $this->dbSetupDTO->dbFreeradius,
-        ], false);
-
-        $this->form = $form;
+        $this->form = $this->createForm(DbSetupType::class, $this->dbSetupDTO);
     }
 }
