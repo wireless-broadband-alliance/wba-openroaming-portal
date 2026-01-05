@@ -108,7 +108,7 @@ class EventRepository extends ServiceEntityRepository
             ->setParameter('user', $user)
             ->setParameter('event_names', [
                 AnalyticalEventType::LOGIN_WITH_UUID_ONLY_LINK->value,
-                AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE->value
+                AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE->value,
             ])
             ->setParameter('datetime', $time)
             ->setMaxResults(1)
@@ -156,5 +156,20 @@ class EventRepository extends ServiceEntityRepository
             ->setParameter('emptyString', '')
             ->getQuery()
             ->getResult();
+    }
+
+    public function findEvent(User $user, string $eventType, ?DateTime $time): ?Event
+    {
+        return $this->createQueryBuilder('e')
+            ->andWhere('e.user = :user')
+            ->andWhere('e.event_name = :event_name')
+            ->andWhere('e.event_datetime >= :datetime')
+            ->setParameter('user', $user)
+            ->setParameter('event_name', $eventType)
+            ->setParameter('datetime', $time)
+            ->orderBy('e.event_datetime', 'DESC')
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
     }
 }
