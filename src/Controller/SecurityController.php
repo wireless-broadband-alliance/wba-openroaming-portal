@@ -29,7 +29,6 @@ use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use libphonenumber\NumberParseException;
-use libphonenumber\PhoneNumber;
 use libphonenumber\PhoneNumberUtil;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Random\RandomException;
@@ -38,8 +37,8 @@ use Symfony\Component\Form\Exception\LogicException;
 use Symfony\Component\Form\Exception\RuntimeException;
 use Symfony\Component\HttpFoundation\Exception\SessionNotFoundException;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -77,7 +76,7 @@ class SecurityController extends AbstractController
         private readonly UserProviderDetectorResolverService $userProviderDetectorResolverService,
         private readonly AuthenticationUtils $authenticationUtils,
         private readonly UserPasswordHasherInterface $userPasswordHasher,
-        private readonly SessionInterface $session,
+        private readonly RequestStack $requestStack,
         private readonly EventDispatcherInterface $eventDispatcher,
     ) {
     }
@@ -152,8 +151,8 @@ class SecurityController extends AbstractController
 
         $dto->requirePassword = true;
 
-        $request->getSession();
-        $lastMethod = $this->session->get('last_login_method');
+        $session = $this->requestStack->getSession();
+        $lastMethod = $session->get('last_login_method');
 
         if ($lastMethod) {
             $dto->loginMethod = $lastMethod;
@@ -358,7 +357,8 @@ class SecurityController extends AbstractController
                             $this->tokenStorage->setToken($token);
 
                             // Store the authentication token in the session
-                            $this->session->set('_security_main', serialize($token));
+                            $session = $this->requestStack->getSession();
+                            $session->set('_security_main', serialize($token));
 
                             return $this->redirectToRoute('app_login_confirmation');
                         } else {
@@ -423,7 +423,8 @@ class SecurityController extends AbstractController
                         $this->tokenStorage->setToken($token);
 
                         // Store the authentication token in the session
-                        $this->session->set('_security_main', serialize($token));
+                        $session = $this->requestStack->getSession();
+                        $session->set('_security_main', serialize($token));
 
                         return $this->redirectToRoute('app_login_confirmation');
                     } else {
@@ -515,10 +516,10 @@ class SecurityController extends AbstractController
         $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $user]);
 
         // Check if the user is already verified
-        $request->getSession();
+        $session = $this->requestStack->getSession();
         if (
             $userExternalAuths[0]->getProvider() !== UserProvider::PORTAL_ACCOUNT->value ||
-            $this->session->has('session_verified')
+            $session->has('session_verified')
         ) {
             return $this->redirectToRoute('app_landing');
         }
@@ -528,7 +529,6 @@ class SecurityController extends AbstractController
 
         $form = $this->createForm(TwoFACode::class);
         $form->handleRequest($request);
-        $request->getSession();
         if ($form->isSubmitted() && $form->isValid()) {
             /** @var array<string, mixed> $formData */
             $formData = $form->getData();
@@ -538,7 +538,7 @@ class SecurityController extends AbstractController
                 $user->setForgotPasswordRequest(false);
                 $this->entityManager->persist($user);
                 $this->entityManager->flush();
-                $this->session->set('session_verified', true);
+                $session->set('session_verified', true);
 
                 return $this->redirectToRoute('app_landing');
             }
@@ -578,7 +578,7 @@ class SecurityController extends AbstractController
                 // Dispatch the login event
                 $event = new InteractiveLoginEvent($request, $token);
                 $this->eventDispatcher->dispatch($event);
-                $session = $request->getSession();
+                $session = $this->requestStack->getSession();
 
                 if (!$user->isVerified()) {
                     $user->setIsVerified(true);
@@ -634,17 +634,17 @@ class SecurityController extends AbstractController
     }
 
     #[Route(path: '/dashboard/logout', name: 'app_dashboard_logout')]
-    public function dashboardLogout(Request $request): Response
+    public function dashboardLogout(): Response
     {
-        $session = $request->getSession();
+        $session = $this->requestStack->getSession();
         $session->clear();
         return $this->redirectToRoute('app_dashboard_login');
     }
 
     #[Route(path: '/logout', name: 'app_logout')]
-    public function logout(Request $request): Response
+    public function logout(): Response
     {
-        $session = $request->getSession();
+        $session = $this->requestStack->getSession();
         $session->clear();
 
         return $this->redirectToRoute('app_landing');
