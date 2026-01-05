@@ -54,13 +54,13 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
     /**
      * @var Collection<int, UserRadiusProfile>
      */
-    #[ORM\OneToMany(mappedBy: 'user', targetEntity: UserRadiusProfile::class)]
+    #[ORM\OneToMany(targetEntity: UserRadiusProfile::class, mappedBy: 'user')]
     private Collection $userRadiusProfiles;
 
     /**
      * @var Collection<int, UserExternalAuth>
      */
-    #[ORM\OneToMany(mappedBy: 'user', targetEntity: UserExternalAuth::class)]
+    #[ORM\OneToMany(targetEntity: UserExternalAuth::class, mappedBy: 'user')]
     private Collection $userExternalAuths;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
@@ -72,10 +72,10 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
     /**
      * @var Collection<int, Event>
      */
-    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Event::class, orphanRemoval: true)]
+    #[ORM\OneToMany(targetEntity: Event::class, mappedBy: 'user', orphanRemoval: true)]
     private Collection $event;
 
-    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Notification::class, orphanRemoval: true)]
+    #[ORM\OneToMany(targetEntity: Notification::class, mappedBy: 'user', orphanRemoval: true)]
     /** @phpstan-ignore-next-line */
     private Collection $notification;
 
@@ -113,7 +113,7 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
     /**
      * @var Collection<int, OTPcode>
      */
-    #[ORM\OneToMany(mappedBy: 'user', targetEntity: OTPcode::class, orphanRemoval: true)]
+    #[ORM\OneToMany(targetEntity: OTPcode::class, mappedBy: 'user', orphanRemoval: true)]
     /** @phpstan-ignore-next-line */
     private Collection $oTPcodes;
 
