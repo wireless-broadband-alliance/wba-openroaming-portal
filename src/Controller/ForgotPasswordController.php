@@ -61,7 +61,7 @@ class ForgotPasswordController extends AbstractController
         private readonly EmailGenerator $emailGenerator,
         private readonly EntityManagerInterface $entityManager,
         private readonly MagicLinkService $magicLinkService,
-        private readonly \Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface $userPasswordHasher
+        private readonly UserPasswordHasherInterface $userPasswordHasher
     ) {
     }
 

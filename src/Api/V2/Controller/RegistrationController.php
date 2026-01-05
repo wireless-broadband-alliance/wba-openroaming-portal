@@ -61,8 +61,8 @@ class RegistrationController extends AbstractController
         private readonly CaptchaValidator $captchaValidator,
         private readonly EmailGenerator $emailGenerator,
         private readonly ValidatorInterface $validator,
-        private readonly \Symfony\Component\Mailer\MailerInterface $mailer,
-        private readonly \libphonenumber\PhoneNumberUtil $phoneNumberUtil
+        private readonly MailerInterface $mailer,
+        private readonly PhoneNumberUtil $phoneNumberUtil
     ) {
     }
 

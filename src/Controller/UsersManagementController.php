@@ -72,8 +72,8 @@ class UsersManagementController extends AbstractController
         private readonly UserRadiusProfileRepository $radiusProfileRepository,
         private readonly EmailGenerator $emailGenerator,
         private readonly UserPasswordHasherInterface $userPasswordHasher,
-        private readonly \Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface $passwordHasher,
-        private readonly \Symfony\Component\Mailer\MailerInterface $mailer,
+        private readonly UserPasswordHasherInterface $passwordHasher,
+        private readonly MailerInterface $mailer,
     ) {
     }
 

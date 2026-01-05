@@ -815,7 +815,9 @@ class SettingsController extends AbstractController
 
         $certificatePath = $this->getParameter('kernel.project_dir') . '/signing-keys/cert.pem';
         $certificateLimitDate = strtotime(
-            (string)$this->certificateService->getCertificateExpirationDate($certificatePath)
+            (string)$this->certificateService->getCertificateExpirationDate(
+                $certificatePath
+            )
         );
         $realTime = time();
         $timeLeft = round(($certificateLimitDate - $realTime) / (86400)) - 1;

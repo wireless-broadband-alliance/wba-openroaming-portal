@@ -51,9 +51,9 @@ class ProfileController extends AbstractController
         private readonly TranslatorInterface $translator,
         private readonly CertificateProcessExtension $certificateProcessExtension,
         private readonly CertificateProcessCheckerService $certificateProcessCheckerService,
-        private readonly \App\RadiusDb\Repository\RadiusUserRepository $radiusUserRepository,
-        private readonly \App\Repository\UserRadiusProfileRepository $radiusProfileRepository,
-        private readonly \Symfony\Component\Routing\Generator\UrlGeneratorInterface $urlGenerator,
+        private readonly RadiusUserRepository $radiusUserRepository,
+        private readonly UserRadiusProfileRepository $radiusProfileRepository,
+        private readonly UrlGeneratorInterface $urlGenerator,
     ) {
     }
 
