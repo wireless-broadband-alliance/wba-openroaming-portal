@@ -2,6 +2,7 @@
 
 namespace App\Twig;
 
+use App\Entity\CertificateSetupProcess;
 use App\Service\CertificateProcessCheckerService;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFunction;
@@ -28,10 +29,10 @@ class CertificateEvDetectorExtension extends AbstractExtension
     {
         $process = $this->certificateProcessCheckerService->getCurrentProcess();
 
-        if (!$process instanceof \App\Entity\CertificateSetupProcess) {
+        if (!$process instanceof CertificateSetupProcess) {
             return false;
         }
 
-        return $process->isFreeradiusCertEV() ?? false;
+        return $process->isFreeradiusCertEV();
     }
 }
