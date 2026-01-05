@@ -7,7 +7,7 @@
                 {# Header with title and info icon #}
                 <div class="flex justify-between items-center">
                     <h1 class="text-base md:text-lg font-medium break-words">
-                        {{ 'Domínios Bloqueados' }}
+                        {{ 'blockedDomains'|trans({}, '_blacklist') }}
                     </h1>
                     <img class="w-5 h-5 cursor-pointer"
                             {{ stimulus_target('card', 'button') }}
@@ -19,7 +19,7 @@
                 {# Description #}
                 <div class="mt-2">
                     {{ include('/dashboard/shared/settings_actions/_description.html.twig', {
-                        description: 'Lista de domínios bloqueados na plataforma',
+                        description: 'listOfBlockedDomains'|trans({}, '_blacklist'),
                     }) }}
                 </div>
 
@@ -29,7 +29,7 @@
                             <div class="flex flex-col gap-y-1 w-full">
                                 {{ form_label(line.domain) }}
                                 <div class="w-full flex flex-row items-center space-x-4">
-                                    {{ form_widget(line.domain, {attr: {class: 'form-widget', placeholder: 'example.com'}}) }}
+                                    {{ form_widget(line.domain, {attr: {class: 'form-widget', placeholder: 'example'|trans({}, '_blacklist')}}) }}
 
                                     <div>
                                         {{ form_row(line.vars.button_delete, {attr: {class: 'px-3 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition'}}) }}
@@ -46,7 +46,7 @@
                     {% endfor %}
 
                     <div class="mt-6 flex flex-row justify-end">
-                        {{ form_widget(form.lines.vars.button_add, {label: 'Adicionar Domínio', attr: {class: 'mt-6 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition'}}) }}
+                        {{ form_widget(form.lines.vars.button_add, {label: 'addDomain'|trans({}, '_blacklist'), attr: {class: 'mt-6 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition'}}) }}
                     </div>
                 </div>
             </div>
