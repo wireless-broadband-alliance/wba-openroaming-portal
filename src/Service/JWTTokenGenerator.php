@@ -58,7 +58,7 @@ readonly class JWTTokenGenerator
         $customPayload = [
             'id' => $user->getId(),
             'uuid' => $user->getUuid(),
-            'password_identifier' => $this->generatePasswordNonce($user->getPassword()),
+            'nounce' => $this->generatePasswordNonce($user->getPassword()),
             'exp' => time() + (int)$this->parameterBag->get('app.jwt_expiration'),
         ];
 
