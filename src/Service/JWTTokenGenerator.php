@@ -58,8 +58,8 @@ readonly class JWTTokenGenerator
         $customPayload = [
             'id' => $user->getId(),
             'uuid' => $user->getUuid(),
-            'password_hash' => $user->getPassword(),
-            'exp' => time() + (int) $this->parameterBag->get('app.jwt_expiration'),
+            'password_identifier' => $this->generatePasswordNonce($user->getPassword()),
+            'exp' => time() + (int)$this->parameterBag->get('app.jwt_expiration'),
         ];
 
         return $this->jwtManager->createFromPayload($user, $customPayload);
@@ -79,25 +79,46 @@ readonly class JWTTokenGenerator
 
     public function isJWTTokenValid(string $token): bool
     {
-        // Decode the token using your helper
+        // Decode the JWT payload
         $decodedPayload = $this->decodeToken($token);
         if (!$decodedPayload) {
             return false;
         }
 
+        // Extract the UUID and derived password nonce from the token
         $uuid = $decodedPayload['uuid'] ?? null;
-        $tokenPasswordHash = $decodedPayload['password_hash'] ?? null;
+        $tokenNonce = $decodedPayload['password_identifier'] ?? null;
 
-        if (!$uuid || !$tokenPasswordHash) {
+        // Token must contain both UUID and nonce
+        if (!$uuid || !$tokenNonce) {
             return false;
         }
 
+        // Retrieve the user by UUID
         $user = $this->userRepository->findOneBy(['uuid' => $uuid]);
         if (!$user) {
             return false;
         }
 
-        // Validate password hash matches
-        return $user->getPassword() === $tokenPasswordHash;
+        // Recompute the expected nonce from the current password hash
+        $expectedNonce = $this->generatePasswordNonce($user->getPassword());
+
+        // Compare the token's nonce with the expected nonce securely
+        return hash_equals($expectedNonce, $tokenNonce);
+    }
+
+    private function generatePasswordNonce(string $passwordHash): string
+    {
+        // Server secret used to derive the nonce (must be different from the JWT secret)
+        $appSecret = (string) $this->parameterBag->get('kernel.secret');
+
+        // Apply HMAC to the password hash using the server secret
+        $hmac = hash_hmac('sha256', $passwordHash, $appSecret);
+
+        // Extract a portion of the HMAC result to avoid exposing the full hash
+        $partial = substr($hmac, 8, 32);
+
+        // Hash the substring to produce the final nonce
+        return hash('sha256', $partial);
     }
 }

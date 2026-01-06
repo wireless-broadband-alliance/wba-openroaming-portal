@@ -9,7 +9,6 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
 class AuthRefreshController extends AbstractController
 {
@@ -18,13 +17,11 @@ class AuthRefreshController extends AbstractController
         private readonly UserRepository $userRepository
     ) {
     }
-
-    /**
-     * Refresh JWT token statelessly.
-     */
+    
     #[Route('/auth/refresh', name: 'api_v2_auth_refresh', methods: ['POST'])]
     public function refreshToken(Request $request): JsonResponse
     {
+        // Decode request body
         $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
         $currentToken = $data['current_token'] ?? null;
 
@@ -32,35 +29,32 @@ class AuthRefreshController extends AbstractController
             return new BaseResponse(400, null, 'The current_token is required')->toResponse();
         }
 
-        // Decode current token
-        $decodedPayload = $this->jwtTokenGenerator->decodeToken($currentToken);
+        // Validate the token using the service method
+        if (!$this->jwtTokenGenerator->isJWTTokenValid($currentToken)) {
+            return new BaseResponse(401, null, 'Invalid token')->toResponse();
+        }
 
+        // Decode the payload to check expiration and extract UUID
+        $decodedPayload = $this->jwtTokenGenerator->decodeToken($currentToken);
         if (!$decodedPayload) {
             return new BaseResponse(401, null, 'Invalid token')->toResponse();
         }
 
-        // Validate expiration
+        // Check token expiration
         $exp = $decodedPayload['exp'] ?? null;
         if (!$exp || $exp < time()) {
             return new BaseResponse(401, null, 'Token has expired')->toResponse();
         }
 
-        // Find user by UUID from token payload
+        // Find the user by UUID
         $uuid = $decodedPayload['uuid'] ?? null;
-        $tokenPasswordHash = $decodedPayload['password_hash'] ?? null;
-
-        if (!$uuid || !$tokenPasswordHash) {
+        if (!$uuid) {
             return new BaseResponse(401, null, 'Invalid token payload')->toResponse();
         }
 
         $user = $this->userRepository->findOneBy(['uuid' => $uuid]);
         if (!$user) {
             return new BaseResponse(401, null, 'User not found')->toResponse();
-        }
-
-        // Check password hash
-        if ($user->getPassword() !== $tokenPasswordHash) {
-            return new BaseResponse(401, null, 'Invalid token payload')->toResponse();
         }
 
         // Generate new token
