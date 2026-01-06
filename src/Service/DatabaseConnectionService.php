@@ -171,14 +171,24 @@ readonly class DatabaseConnectionService
             parse_str($parts['query'], $query);
         }
 
+        $serverVersion = $query['serverVersion'] ?? null;
+        if (is_array($serverVersion)) {
+            $serverVersion = (string) reset($serverVersion);
+        }
+
+        $charset = $query['charset'] ?? null;
+        if (is_array($charset)) {
+            $charset = (string) reset($charset);
+        }
+
         return [
             'username' => isset($parts['user']) ? urldecode($parts['user']) : null,
             'password' => isset($parts['pass']) ? urldecode($parts['pass']) : null,
             'host' => $parts['host'] ?? null,
-            'port' => isset($parts['port']) ? (int)$parts['port'] : null,
+            'port' => isset($parts['port']) ? (int) $parts['port'] : null,
             'database' => isset($parts['path']) ? ltrim($parts['path'], '/') : null,
-            'serverVersion' => $query['serverVersion'] ?? null,
-            'charset' => $query['charset'] ?? null,
+            'serverVersion' => $serverVersion !== null ? (string) $serverVersion : null,
+            'charset' => $charset !== null ? (string) $charset : null,
         ];
     }
 }

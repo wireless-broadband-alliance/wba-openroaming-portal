@@ -69,8 +69,8 @@ class InstallationController extends AbstractController
         private readonly SettingRepository $settingRepository,
         private readonly EventRepository $eventRepository,
         private readonly CaptchaValidator $captchaValidator,
-        private readonly \Symfony\Component\HttpKernel\KernelInterface $kernel,
-        private readonly \Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface $userPasswordHasher,
+        private readonly KernelInterface $kernel,
+        private readonly UserPasswordHasherInterface $userPasswordHasher,
     ) {
     }
 
