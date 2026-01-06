@@ -17,7 +17,7 @@ class AuthRefreshController extends AbstractController
         private readonly UserRepository $userRepository
     ) {
     }
-    
+
     #[Route('/auth/refresh', name: 'api_v2_auth_refresh', methods: ['POST'])]
     public function refreshToken(Request $request): JsonResponse
     {
