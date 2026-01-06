@@ -350,6 +350,7 @@ check the `.env.sample`.
 - `JWT_SECRET_KEY`: The secret defined for the key.
 - `JWT_PUBLIC_KEY`: The public key location.
 - `JWT_PASSPHRASE`: The private key location.
+- `JWT_EXPIRATION`: The expiration date of the token.
 
 ### 🔧 Set up a CRON Job for automation commands
 
