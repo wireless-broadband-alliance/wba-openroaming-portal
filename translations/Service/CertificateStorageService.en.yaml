@@ -2,3 +2,4 @@ invalidPEMCertificate: 'Invalid PEM certificate.'
 unableParse: 'Unable to parse PEM certificate.'
 failedToReadFile: "Failed to read the uploaded file: %file%"
 uploadedFileNotFound: "Uploaded file not found: %file%"
+unableFingerprint: "Failed to compute the certificate fingerprint (SHA-1)."
