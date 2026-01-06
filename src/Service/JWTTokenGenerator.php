@@ -28,65 +28,73 @@ readonly class JWTTokenGenerator
         $projectDir = $this->kernel->getProjectDir();
 
         $this->publicKeyJwtPath = file_exists("$projectDir/config/jwt/public.pem")
-        ? "$projectDir/config/jwt/public.pem"
-        : $this->parameterBag->get('app.jwt_public_key');
+            ? "$projectDir/config/jwt/public.pem"
+            : $this->parameterBag->get('app.jwt_public_key');
 
         $this->privateKeyJwtPath = file_exists("$projectDir/config/jwt/private.pem")
-        ? "$projectDir/config/jwt/private.pem"
-        : $this->parameterBag->get('app.jwt_secret_key');
+            ? "$projectDir/config/jwt/private.pem"
+            : $this->parameterBag->get('app.jwt_secret_key');
     }
 
-  /**
-   * @return array{success: bool, error?: string, token?: string}
-   */
+    /**
+     * @return string|array{success: bool, error?: string, token?: string}
+     */
     public function generateToken(UserInterface $user): string|array
     {
         if (!$user instanceof User) {
             return [
-            'success' => false,
-            'error' => 'Invalid user provided. Verify the user data.',
+                'success' => false,
+                'error' => 'Invalid user provided. Verify the user data.',
             ];
         }
 
-      // Check if both private and public keys exist
         if (!file_exists($this->privateKeyJwtPath) || !file_exists($this->publicKeyJwtPath)) {
             return [
-            'success' => false,
-            'error' => 'JWT key files are missing. Please ensure both private and public keys exist.',
+                'success' => false,
+                'error' => 'JWT key files are missing. Please ensure both private and public keys exist.',
             ];
         }
 
         $customPayload = [
-        'password_hash' => $user->getPassword(),
+            'id' => $user->getId(),
+            'uuid' => $user->getUuid(),
+            'password_hash' => $user->getPassword(),
+            'exp' => time() + $this->parameterBag->get('app.jwt_expiration'),
         ];
 
-      // Generate the JWT token with the current_hashed_password
         return $this->jwtManager->createFromPayload($user, $customPayload);
+    }
+
+    public function decodeToken(string $token): ?array
+    {
+        try {
+            return $this->JWTEncoder->decode($token) ?: null;
+        } catch (JWTDecodeFailureException) {
+            return null;
+        }
     }
 
     public function isJWTTokenValid(string $token): bool
     {
-        try {
-            $decodedPayload = $this->JWTEncoder->decode($token);
-            if (!$decodedPayload) {
-                return false;
-            }
-
-            $uuid = $decodedPayload['uuid'] ?? null;
-            $tokenPasswordHash = $decodedPayload['password_hash'] ?? null;
-
-            if (!$uuid || !$tokenPasswordHash) {
-                return false;
-            }
-
-            $user = $this->userRepository->findOneBy(['uuid' => $uuid]);
-            if (!$user) {
-                return false;
-            }
-
-            return $user->getPassword() === $tokenPasswordHash;
-        } catch (JWTDecodeFailureException) {
+        // Decode the token using your helper
+        $decodedPayload = $this->decodeToken($token);
+        if (!$decodedPayload) {
             return false;
         }
+
+        $uuid = $decodedPayload['uuid'] ?? null;
+        $tokenPasswordHash = $decodedPayload['password_hash'] ?? null;
+
+        if (!$uuid || !$tokenPasswordHash) {
+            return false;
+        }
+
+        $user = $this->userRepository->findOneBy(['uuid' => $uuid]);
+        if (!$user) {
+            return false;
+        }
+
+        // Validate password hash matches
+        return $user->getPassword() === $tokenPasswordHash;
     }
 }
