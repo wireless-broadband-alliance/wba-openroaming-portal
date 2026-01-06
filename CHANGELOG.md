@@ -15,6 +15,7 @@
 - Added new pages to configure the permissions of the platform admins.
 # Release V1.9.0
 
+- Added a new configuration page, to manage the black-listed domains used for registration and authentication with Google, Microsft and Simple Email/Password.
 - Increased the level of php-stan to the max level, for more fixes with security updates.
 - Profile download instructions page.
 - New page dedicated for profile download steps and prepared for both translations implemented on the project.
@@ -62,7 +63,7 @@
     - This new command is configurable on the page `dashboard/settings/schedule` because he is also cron based.
 - New bundle installed `composer require symfony/lock` required for the command next execution only start when the
   current active ends.
-- Symfony version increase for maintained version (7.3.3), it bug fixes and security fixes until January 2026.
+- Symfony version increase for maintained version (7.4.3), it bug fixes and security fixes until November 2028.
 - NPM webpack-cli deprecations fixed to the latest stabled release (
   - (https://www.npmjs.com/package/webpack-cli/v/5.1.4)) compatible with "@symfony/webpack-encore": "^5.1.0".
 - New validation on the Admin Authentication Methods page to check whether the project has all required certificates.
