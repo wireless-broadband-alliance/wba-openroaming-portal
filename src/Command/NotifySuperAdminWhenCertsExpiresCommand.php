@@ -39,8 +39,8 @@ class NotifySuperAdminWhenCertsExpiresCommand extends Command
      * @throws Exception
      */
     public function notifySuperAdminWhenCertsExpires(
-        OutputInterface $output): void
-    {
+        OutputInterface $output
+    ): void {
         $certificatePath = $this->parameterBag->get('kernel.project_dir') . '/signing-keys/cert.pem';
         $certificateLimitDate = strtotime(
             (string)$this->certificateService->getCertificateExpirationDate($certificatePath)
@@ -54,28 +54,48 @@ class NotifySuperAdminWhenCertsExpiresCommand extends Command
                 $user = $this->userRepository->findSuperAdmin();
                 if ($user) {
                     if ($certLimitDate < 1) {
-                        $lastNotification = $this->notificationRepository->findLastNotificationByType($user, AnalyticalEventType::NOTIFY_ADMIN_EXPIRED_CERT->value);
+                        $lastNotification = $this
+                            ->notificationRepository
+                            ->findLastNotificationByType(
+                                $user,
+                                AnalyticalEventType::NOTIFY_ADMIN_EXPIRED_CERT->value
+                            );
                         $now = new DateTime();
                         $limit = $now->modify('-7 days');
                         if (!$lastNotification || $lastNotification->getLastNotification() < $limit) {
                             $this->emailGenerator->sendNotifyExpiredCertEmail($user);
-                            $this->notificationService->createNotification($user, AnalyticalEventType::NOTIFY_ADMIN_EXPIRED_CERT->value);
+                            $this->notificationService->createNotification(
+                                $user,
+                                AnalyticalEventType::NOTIFY_ADMIN_EXPIRED_CERT->value
+                            );
                         }
                     } elseif ($certLimitDate < 7) {
-                        $lastNotification = $this->notificationRepository->findLastNotificationByType($user, AnalyticalEventType::NOTIFY_ADMIN_EXPIRING_CERT_WEEK->value);
+                        $lastNotification = $this->notificationRepository->findLastNotificationByType(
+                            $user,
+                            AnalyticalEventType::NOTIFY_ADMIN_EXPIRING_CERT_WEEK->value
+                        );
                         $now = new DateTime();
                         $limitWeek = $now->modify('-7 days');
                         if (!$lastNotification || $lastNotification->getLastNotification() < $limitWeek) {
                             $this->emailGenerator->sendNotifyExpiresCertEmail($user, $certLimitDate);
-                            $this->notificationService->createNotification($user, AnalyticalEventType::NOTIFY_ADMIN_EXPIRING_CERT_WEEK->value);
+                            $this->notificationService->createNotification(
+                                $user,
+                                AnalyticalEventType::NOTIFY_ADMIN_EXPIRING_CERT_WEEK->value
+                            );
                         }
                     } else {
-                        $lastNotification = $this->notificationRepository->findLastNotificationByType($user, AnalyticalEventType::NOTIFY_ADMIN_EXPIRING_CERT_MONTH->value);
+                        $lastNotification = $this->notificationRepository->findLastNotificationByType(
+                            $user,
+                            AnalyticalEventType::NOTIFY_ADMIN_EXPIRING_CERT_MONTH->value
+                        );
                         $now = new DateTime();
                         $limitMonth = $now->modify('-30 days');
                         if (!$lastNotification || $lastNotification->getLastNotification() < $limitMonth) {
                             $this->emailGenerator->sendNotifyExpiresCertEmail($user, $certLimitDate);
-                            $this->notificationService->createNotification($user, AnalyticalEventType::NOTIFY_ADMIN_EXPIRING_CERT_MONTH->value);
+                            $this->notificationService->createNotification(
+                                $user,
+                                AnalyticalEventType::NOTIFY_ADMIN_EXPIRING_CERT_MONTH->value
+                            );
                         }
                     }
                 }
@@ -84,7 +104,6 @@ class NotifySuperAdminWhenCertsExpiresCommand extends Command
                     "Failed to notify the admin: " . $e->getMessage()
                 );
             }
-
         }
     }
 
