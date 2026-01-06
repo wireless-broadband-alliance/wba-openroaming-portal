@@ -8,6 +8,7 @@ use App\Repository\NotificationRepository;
 use App\Repository\UserRepository;
 use App\Service\CertificateCheckerService;
 use App\Service\EmailGenerator;
+use App\Service\NotificationService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
@@ -32,6 +33,7 @@ class NotifySuperAdminWhenCertsExpiresCommand extends Command
         private readonly UserRepository $userRepository,
         private readonly EntityManagerInterface $entityManager,
         private readonly NotificationRepository $notificationRepository,
+        private readonly NotificationService $notificationService,
     ) {
         parent::__construct();
     }
@@ -50,35 +52,33 @@ class NotifySuperAdminWhenCertsExpiresCommand extends Command
         $timeLeft = round(($certificateLimitDate - $realTime) / (86400)) - 1;
         $certLimitDate = ((int)$timeLeft);
 
-        if ($certLimitDate < 30) {
+        if ($certLimitDate < 31) {
             try {
                 $user = $this->userRepository->findSuperAdmin();
                 if ($user) {
-                    if ($certLimitDate < 0) {
+                    if ($certLimitDate < 1) {
                         $lastNotification = $this->notificationRepository->findLastNotificationByType($user, AnalyticalEventType::NOTIFY_ADMIN_EXPIRED_CERT->value);
                         $now = new DateTime();
-                        $limit = $now->modify('-5 days'); // TODO ask about this time interval!!
+                        $limit = $now->modify('-8 days');
                         if (!$lastNotification || $lastNotification->getLastNotification() < $limit) {
                             $this->emailGenerator->sendNotifyExpiredCertEmail($user, $certLimitDate);
-                            $notification = new Notification();
-                            $notification->setUser($user);
-                            $notification->setLastNotification(new DateTime());
-                            $notification->setType(AnalyticalEventType::NOTIFY_ADMIN_EXPIRED_CERT->value);
-                            $this->entityManager->persist($notification);
-                            $this->entityManager->flush();
+                            $this->notificationService->createNotification($user, AnalyticalEventType::NOTIFY_ADMIN_EXPIRED_CERT->value);
+                        }
+                    } elseif ($certLimitDate < 8) {
+                        $lastNotification = $this->notificationRepository->findLastNotificationByType($user, AnalyticalEventType::NOTIFY_ADMIN_EXPIRING_CERT_WEEK->value);
+                        $now = new DateTime();
+                        $limitWeek = $now->modify('-8 days');
+                        if (!$lastNotification || $lastNotification->getLastNotification() < $limitWeek) {
+                            $this->emailGenerator->sendNotifyExpiresCertEmail($user, $certLimitDate);
+                            $this->notificationService->createNotification($user, AnalyticalEventType::NOTIFY_ADMIN_EXPIRING_CERT_WEEK->value);
                         }
                     } else {
-                        $lastNotification = $this->notificationRepository->findLastNotificationByType($user, AnalyticalEventType::NOTIFY_ADMIN_EXPIRING_CERT->value);
+                        $lastNotification = $this->notificationRepository->findLastNotificationByType($user, AnalyticalEventType::NOTIFY_ADMIN_EXPIRING_CERT_MONTH->value);
                         $now = new DateTime();
-                        $limit = $now->modify('-31 days'); // TODO ask about this time interval!!
-                        if (!$lastNotification || $lastNotification->getLastNotification() < $limit) {
+                        $limitMonth = $now->modify('-31 days');
+                        if (!$lastNotification || $lastNotification->getLastNotification() < $limitMonth) {
                             $this->emailGenerator->sendNotifyExpiresCertEmail($user, $certLimitDate);
-                            $notification = new Notification();
-                            $notification->setUser($user);
-                            $notification->setLastNotification(new DateTime());
-                            $notification->setType(AnalyticalEventType::NOTIFY_ADMIN_EXPIRING_CERT->value);
-                            $this->entityManager->persist($notification);
-                            $this->entityManager->flush();
+                            $this->notificationService->createNotification($user, AnalyticalEventType::NOTIFY_ADMIN_EXPIRING_CERT_MONTH->value);
                         }
                     }
                 }

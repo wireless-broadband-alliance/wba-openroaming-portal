@@ -215,7 +215,7 @@ readonly class EmailGenerator
             )
             ->to($user->getEmail())
             ->subject($this->translator->trans('subject_password_reset_details', [], 'user_password_reset'))
-            ->htmlTemplate('email/user_password_reset.html.twig') //TODO work on this template
+            ->htmlTemplate('email/user_password_reset.html.twig')
             ->context([
                 'password' => $newPassword,
                 'supportTeam' => $supportTeam,
@@ -246,8 +246,8 @@ readonly class EmailGenerator
                 )
             )
             ->to($user->getEmail())
-            ->subject($this->translator->trans('subject_is_expiring', [], 'expirationProfiles'))
-            ->htmlTemplate('email/notify_admin_expiring.html.twig') //TODO work on this template
+            ->subject($this->translator->trans('subjectExpiring', [], 'notify_admin_expiring'))
+            ->htmlTemplate('email/notify_admin_expiring.html.twig')
             ->context([
                 'uuid' => $user->getEmail(),
                 'emailTitle' => $emailTitle,
@@ -275,7 +275,7 @@ readonly class EmailGenerator
                 )
             )
             ->to($user->getEmail())
-            ->subject($this->translator->trans('subject_is_expiring', [], 'expirationProfiles'))
+            ->subject($this->translator->trans('subjectExpired', [], 'notify_admin_expiring'))
             ->htmlTemplate('email/notify_admin_expired.html.twig')
             ->context([
                 'uuid' => $user->getEmail(),
@@ -284,7 +284,6 @@ readonly class EmailGenerator
                 'timeLeft' => $timeLeft,
             ])
             ->embedFromPath($logoPath, 'logo_cid');
-        dd($email);
         $this->mailer->send($email);
     }
 }
