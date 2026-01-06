@@ -59,12 +59,15 @@ readonly class JWTTokenGenerator
             'id' => $user->getId(),
             'uuid' => $user->getUuid(),
             'password_hash' => $user->getPassword(),
-            'exp' => time() + $this->parameterBag->get('app.jwt_expiration'),
+            'exp' => time() + (int) $this->parameterBag->get('app.jwt_expiration'),
         ];
 
         return $this->jwtManager->createFromPayload($user, $customPayload);
     }
 
+    /**
+     * @return array<string, mixed>|null
+     */
     public function decodeToken(string $token): ?array
     {
         try {
