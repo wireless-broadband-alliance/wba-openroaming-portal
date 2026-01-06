@@ -1,18 +1,8 @@
 # Changelog
 
-# Release V1.10.0
-
-- Installation Widget implementation (For first time project setup / for later use on the admin page configuration).
-- Certificate Management for the admin page (for radsecproxy/freeradius certificates)
-- Also for this release, it's required to run the new migrations to set up the new entity for the installation widget
-  details & the certificates (`InstalationWidget` & `Certificate`):
-  - Run the migrations with:
-    ```bash
-    php bin/console doctrine:migrations:migrate
-    ```
-- Added a new configuration page, to manage the black-listed domains used for registration and authentication with Google, Microsft and Simple Email/Password.
 # Release V1.9.0
 
+- Added a new configuration page, to manage the black-listed domains used for registration and authentication with Google, Microsft and Simple Email/Password.
 - Increased the level of php-stan to the max level, for more fixes with security updates.
 - Profile download instructions page.
 - New page dedicated for profile download steps and prepared for both translations implemented on the project.
@@ -60,7 +50,7 @@
   - This new command is configurable on the page `dashboard/settings/schedule` because he is also cron based.
 - New bundle installed `composer require symfony/lock` required for the command next execution only start when the
   current active ends.
-- Symfony version increase for maintained version (7.3.3), it bug fixes and security fixes until January 2026.
+- Symfony version increase for maintained version (7.4.3), it bug fixes and security fixes until November 2028.
 - NPM webpack-cli deprecations fixed to the latest stabled release (
   - (https://www.npmjs.com/package/webpack-cli/v/5.1.4)) compatible with "@symfony/webpack-encore": "^5.1.0".
 - New validation on the Admin Authentication Methods page to check whether the project has all required certificates.
