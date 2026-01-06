@@ -258,7 +258,7 @@ readonly class EmailGenerator
         $this->mailer->send($email);
     }
 
-    public function sendNotifyExpiredCertEmail(User $user, int $timeLeft): void
+    public function sendNotifyExpiredCertEmail(User $user): void
     {
         $emailTitle = $this->settingRepository->findOneBy(['name' => SettingName::PAGE_TITLE->value])->getValue();
         $contactEmail = $this->settingRepository->findOneBy(['name' => SettingName::CONTACT_EMAIL->value])->getValue();
@@ -281,7 +281,6 @@ readonly class EmailGenerator
                 'uuid' => $user->getEmail(),
                 'emailTitle' => $emailTitle,
                 'contactEmail' => $contactEmail,
-                'timeLeft' => $timeLeft,
             ])
             ->embedFromPath($logoPath, 'logo_cid');
         $this->mailer->send($email);

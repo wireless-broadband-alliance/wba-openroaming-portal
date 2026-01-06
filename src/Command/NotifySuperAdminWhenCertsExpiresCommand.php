@@ -2,7 +2,6 @@
 
 namespace App\Command;
 
-use App\Entity\Notification;
 use App\Enum\AnalyticalEventType;
 use App\Repository\NotificationRepository;
 use App\Repository\UserRepository;
@@ -10,7 +9,6 @@ use App\Service\CertificateCheckerService;
 use App\Service\EmailGenerator;
 use App\Service\NotificationService;
 use DateTime;
-use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -31,7 +29,6 @@ class NotifySuperAdminWhenCertsExpiresCommand extends Command
         private readonly ParameterBagInterface $parameterBag,
         private readonly EmailGenerator $emailGenerator,
         private readonly UserRepository $userRepository,
-        private readonly EntityManagerInterface $entityManager,
         private readonly NotificationRepository $notificationRepository,
         private readonly NotificationService $notificationService,
     ) {
@@ -59,15 +56,15 @@ class NotifySuperAdminWhenCertsExpiresCommand extends Command
                     if ($certLimitDate < 1) {
                         $lastNotification = $this->notificationRepository->findLastNotificationByType($user, AnalyticalEventType::NOTIFY_ADMIN_EXPIRED_CERT->value);
                         $now = new DateTime();
-                        $limit = $now->modify('-8 days');
+                        $limit = $now->modify('-7 days');
                         if (!$lastNotification || $lastNotification->getLastNotification() < $limit) {
-                            $this->emailGenerator->sendNotifyExpiredCertEmail($user, $certLimitDate);
+                            $this->emailGenerator->sendNotifyExpiredCertEmail($user);
                             $this->notificationService->createNotification($user, AnalyticalEventType::NOTIFY_ADMIN_EXPIRED_CERT->value);
                         }
-                    } elseif ($certLimitDate < 8) {
+                    } elseif ($certLimitDate < 7) {
                         $lastNotification = $this->notificationRepository->findLastNotificationByType($user, AnalyticalEventType::NOTIFY_ADMIN_EXPIRING_CERT_WEEK->value);
                         $now = new DateTime();
-                        $limitWeek = $now->modify('-8 days');
+                        $limitWeek = $now->modify('-7 days');
                         if (!$lastNotification || $lastNotification->getLastNotification() < $limitWeek) {
                             $this->emailGenerator->sendNotifyExpiresCertEmail($user, $certLimitDate);
                             $this->notificationService->createNotification($user, AnalyticalEventType::NOTIFY_ADMIN_EXPIRING_CERT_WEEK->value);
@@ -75,7 +72,7 @@ class NotifySuperAdminWhenCertsExpiresCommand extends Command
                     } else {
                         $lastNotification = $this->notificationRepository->findLastNotificationByType($user, AnalyticalEventType::NOTIFY_ADMIN_EXPIRING_CERT_MONTH->value);
                         $now = new DateTime();
-                        $limitMonth = $now->modify('-31 days');
+                        $limitMonth = $now->modify('-30 days');
                         if (!$lastNotification || $lastNotification->getLastNotification() < $limitMonth) {
                             $this->emailGenerator->sendNotifyExpiresCertEmail($user, $certLimitDate);
                             $this->notificationService->createNotification($user, AnalyticalEventType::NOTIFY_ADMIN_EXPIRING_CERT_MONTH->value);
