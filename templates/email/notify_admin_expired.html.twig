@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ 'subject_is_expired'|trans({}, 'notify_admin_expiring') }}</title>
+    <title>{{ 'subjectExpired'|trans({}, 'notify_admin_expiring') }}</title>
 </head>
-<body style="margin:0; padding:0; background-color:#F4F4F4; font-family:Arial, sans-serif; color:#0B1A58;">
+<body style="margin:0; padding:0; background-color:#F4F4F4; font-family:Arial,sans-serif; color:#0B1A58;">
 
 <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" bgcolor="#F4F4F4">
     <tr>
@@ -20,12 +20,12 @@
 
                 <tr>
                     <td align="center" style="padding:40px; font-size:16px; line-height:1.5; color:#0B1A58;">
-                        <h1 style="font-size:24px; font-weight:bold; margin:0 0 20px 0;">{{ 'header'|trans({}, 'notify_admin_expiring') }}</h1>
-                        <p style="margin:0 0 24px 0;">{{ 'expired_message'|trans({}, 'notify_admin_expiring')|raw }}</p>
-                        <a href="{{ absolute_url(path('app_landing')) ~ '?uuid=' ~ uuid|url_encode|url_encode }}"
-                           style="display:inline-block; padding:16px 24px; background-color:#7BBA29; color:#0B1A58; text-decoration:none; font-weight:bold; border-radius:10px; font-size:16px;">
-                            {{ 'new_profile'|trans({}, 'notify_admin_expiring') }}
-                        </a>
+                        <h1 style="font-size:24px; font-weight:bold; margin:0 0 20px 0;">{{ 'subjectExpired'|trans({}, 'notify_admin_expiring') }}</h1>
+                        <p style="margin:0 0 24px 0;">
+                            {{ 'certExpiredWarning'|trans({}, 'notify_admin_expiring')|raw }}
+                            <br/>
+                            {{ 'instructionsMessage'|trans({}, 'notify_admin_expiring')|raw }}
+                        </p>
                     </td>
                 </tr>
 
