@@ -232,7 +232,7 @@ readonly class InstallationService
         $dto->dbOpenRoamingUserName = $dbOpenRoamingPartials['username'];
         $dto->dbOpenRoamingPassword = $dbOpenRoamingPartials['password'];
         $dto->dbOpenRoamingIp = $dbOpenRoamingPartials['host'];
-        $dto->dbOpenRoamingPort = $dbOpenRoamingPartials['port'];
+        $dto->dbOpenRoamingPort = (string) $dbOpenRoamingPartials['port'];
 
         $dbFreeradiusPartials = $this->databaseConnectionService->parseDatabaseUrl(
             $installationProgress->getDbFreeradius()
@@ -240,7 +240,7 @@ readonly class InstallationService
         $dto->dbFreeradiusUserName = $dbFreeradiusPartials['username'];
         $dto->dbFreeradiusPassword = $dbFreeradiusPartials['password'];
         $dto->dbFreeradiusIp = $dbFreeradiusPartials['host'];
-        $dto->dbFreeradiusPort = $dbFreeradiusPartials['port'];
+        $dto->dbFreeradiusPort = (string) $dbFreeradiusPartials['port'];
 
         $dto->trustedProxies = implode(',', $installationProgress->getTrustedProxies());
         $dto->turnstileKey = $installationProgress->getTurnstileKey();
