@@ -15,14 +15,19 @@ class CapportController extends AbstractController
     public function __construct(private readonly SettingRepository $settingRepository)
     {
     }
-
     #[Route('/capport/json', name: 'api_v1_capport_json', methods: ['GET'])]
     public function capportJson(): JsonResponse
     {
         if (
-            $this->settingRepository->findOneBy(['name' => SettingName::CAPPORT_ENABLED->value])->getValue() !== 'true'
+            $this->settingRepository->findOneBy(
+                ['name' => SettingName::CAPPORT_ENABLED->value]
+            )->getValue() !== 'true'
         ) {
-            return new BaseResponse(Response::HTTP_BAD_REQUEST, null, 'CAPPORT is not enabled')->toResponse();
+            return new BaseResponse(
+                Response::HTTP_BAD_REQUEST,
+                null,
+                'CAPPORT is not enabled'
+            )->toResponse();
         }
         return new JsonResponse(
             [

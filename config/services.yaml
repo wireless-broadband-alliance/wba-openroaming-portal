@@ -20,8 +20,10 @@ parameters:
     app.saml_idp_x509_cert: '%env(SAML_IDP_X509_CERT)%'
     app.saml_sp_entity_id: '%env(SAML_SP_ENTITY_ID)%'
     app.saml_sp_acs_url: '%env(SAML_SP_ACS_URL)%'
+    # JWT Configuration
     app.jwt_secret_key: '%env(JWT_SECRET_KEY)%'
     app.jwt_public_key: '%env(JWT_PUBLIC_KEY)%'
+    app.jwt_expiration: '%env(JWT_EXPIRATION)%'
     # Metrics configuration
     app.metrics_enabled: '%env(bool:METRICS_ENABLED)%'
     app.metrics_allowed_ips: '%env(string:METRICS_ALLOWED_IPS)%'

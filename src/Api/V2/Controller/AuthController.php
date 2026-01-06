@@ -6,7 +6,6 @@ use App\Api\V2\BaseResponse;
 use App\Controller\GoogleController;
 use App\Controller\MicrosoftController;
 use App\Entity\Event;
-use App\Entity\RefreshJwtToken;
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
 use App\Enum\AnalyticalEventType;
@@ -14,7 +13,7 @@ use App\Enum\OperationMode;
 use App\Enum\SettingName;
 use App\Enum\SMSResponse;
 use App\Enum\UserProvider;
-use App\Repository\RefreshJwtTokenRepository;
+use App\Enum\UserTwoFactorAuthenticationStatus;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use App\Service\AuthAPIResponseService;
@@ -25,9 +24,11 @@ use App\Service\JWTTokenGenerator;
 use App\Service\MagicLinkService;
 use App\Service\SamlResolverService;
 use App\Service\SendSMS;
+use App\Service\TOTPService;
+use App\Service\TwoFAAPIService;
+use App\Service\TwoFAService;
 use App\Service\UserStatusChecker;
 use DateTime;
-use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use JsonException;
@@ -62,7 +63,9 @@ class AuthController extends AbstractController
         private readonly SendSMS $sendSMS,
         private readonly EmailGenerator $emailGenerator,
         private readonly AuthAPIResponseService $authAPIResponseService,
-        private readonly RefreshJwtTokenRepository $refreshJwtTokenRepository,
+        private readonly TwoFAAPIService $twoFAAPIService,
+        private readonly TwoFAService $twoFAService,
+        private readonly TOTPService $TOTPService
     ) {
     }
 
@@ -149,49 +152,81 @@ class AuthController extends AbstractController
             return $statusCheckerResponse->toResponse();
         }
 
-        if ($isLoginWithUUIDOnly === OperationMode::OFF->value) {
-            $now = new DateTimeImmutable();
+        $twoFAEnforcementResult = $this->twoFAAPIService->twoFAEnforcementChecker(
+            $user,
+            $request->attributes->get('_route')
+        );
 
-            // 1. Check for existing valid token
-            $existingTokenEntity = $this->refreshJwtTokenRepository->findOneBy([
-                'user' => $user,
-                'isRevoked' => false,
-            ]);
+        if ($twoFAEnforcementResult['missing_2fa_setting'] === true) {
+            // Return error response when 2fa is missing the TWO_FACTOR_AUTH_STATUS setting
+            return new BaseResponse(
+                400,
+                null,
+                $twoFAEnforcementResult['message']
+            )->toResponse();
+        }
 
-            if ($existingTokenEntity && !$existingTokenEntity->isExpired()) {
-                $accessToken = $existingTokenEntity->getAccessToken();
-            } else {
-                $jwt = $this->tokenGenerator->generateToken($user);
-                $accessToken = null;
-
-                if (is_array($jwt)) {
-                    if ($jwt['success'] === true && isset($jwt['token'])) {
-                        $accessToken = $jwt['token'];
-                    } else {
-                        $errorMessage = $jwt['error'] ?? 'Token generation failed.';
-                        $statusCode = $errorMessage === 'Invalid user provided. Verify the user data.' ? 400 : 500;
-                        return new BaseResponse($statusCode, null, $errorMessage)->toResponse();
-                    }
-                } else {
-                    $accessToken = $jwt;
-                }
-
-                $tokenEntity = $existingTokenEntity ?: new RefreshJwtToken();
-                $tokenEntity->setUser($user)
-                    ->setAccessToken($accessToken)
-                    ->setIsRevoked(false)
-                    ->setCreatedAt($now)
-                    ->setExpiredAt($now->modify('+30 day'));
-
-                $this->entityManager->persist($tokenEntity);
-                $this->entityManager->flush();
+        if ($twoFAEnforcementResult['canSkip2FA'] === false) {
+            if (empty($data['twoFACode'])) {
+                $errors[] = 'twoFACode';
             }
 
+            if ($errors !== []) {
+                return new BaseResponse(
+                    400,
+                    ['missing_fields' => $errors],
+                    'Invalid data: Missing required fields.'
+                )->toResponse();
+            }
+
+            // --- TOTP / OTP validation ---
+            if (
+                $user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::TOTP->value &&
+                (!$this->twoFAService->validateOTPCodes($user, $data['twoFACode']) &&
+                    !$this->TOTPService->verifyTOTP(
+                        $user->getTwoFAsecret(),
+                        $data['twoFACode']
+                    ))
+            ) {
+                return new BaseResponse(
+                    401,
+                    null,
+                    $twoFAEnforcementResult['message']
+                )->toResponse();
+            }
+
+            // --- Email/SMS / OTP validation ---
+            if ($isLoginWithUUIDOnly === OperationMode::ON->value) {
+                // If LOGIN_WITH_UUID_ONLY is ON, skip this entire 2FA validation for email/SMS accounts
+            } elseif (
+                !$this->twoFAService->validate2FACode($user, $data['twoFACode']) &&
+                !$this->twoFAService->validateOTPCodes($user, $data['twoFACode'])
+            ) {
+                return new BaseResponse(
+                    401,
+                    null,
+                    $twoFAEnforcementResult['message']
+                )->toResponse();
+            }
+        }
+
+        if ($isLoginWithUUIDOnly === OperationMode::OFF->value) {
+            // If the login with uuid is disabled generate JWT Token
+            $token = $this->tokenGenerator->generateToken($user);
+            if (is_array($token) && $token['success'] === false) {
+                $errorMessage = $token['error'] ?? 'Token generation failed.';
+                $statusCode = $errorMessage === 'Invalid user provided. Please verify the user data.' ? 400 : 500;
+
+                return new BaseResponse($statusCode, null, $errorMessage)->toResponse();
+            }
+
+            // Defines the Event to the table
             $eventMetaData = [
                 'user_agent' => $request->headers->get('User-Agent'),
                 'uuid' => $user->getUuid(),
                 'ip' => $request->getClientIp(),
             ];
+
             $this->eventActions->saveEvent(
                 $user,
                 AnalyticalEventType::AUTH_LOCAL_API->value,
@@ -201,11 +236,11 @@ class AuthController extends AbstractController
 
             // Prepare response data
             $responseData = $user->toApiResponse([
-                'token' => $accessToken,
+                'token' => $token,
             ]);
 
             // Return success response using BaseResponse
-            return new BaseResponse(200, $responseData)->toResponse();
+            return new BaseResponse(200, $responseData)->toResponse(); # Success Response
         }
 
         // If login with UUID is enabled, generate the SMS or email with the login link
@@ -362,6 +397,58 @@ class AuthController extends AbstractController
                 return $statusCheckerResponse->toResponse();
             }
 
+            $twoFAEnforcementResult = $this->twoFAAPIService->twoFAEnforcementChecker(
+                $user,
+                $request->attributes->get('_route')
+            );
+
+            if ($twoFAEnforcementResult['missing_2fa_setting'] === true) {
+                // Return error response when 2fa is missing the TWO_FACTOR_AUTH_STATUS setting
+                return new BaseResponse(
+                    400,
+                    null,
+                    $twoFAEnforcementResult['message']
+                )->toResponse();
+            }
+
+            if ($twoFAEnforcementResult['canSkip2FA'] === false) {
+                $twoFACode = (string)$request->request->get('twoFACode');
+                if ($twoFACode === '' || $twoFACode === '0') {
+                    return new BaseResponse(
+                        400,
+                        null,
+                        'Missing Two-Factor Authentication code'
+                    )->toResponse();
+                }
+                if ($user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::TOTP->value) {
+                    if (
+                        // Validation for OTPCodes -> 12 codes
+                        !$this->twoFAService->validateOTPCodes($user, $twoFACode) &&
+                        // Validation for TOTP codes -> Generated By the App
+                        !$this->TOTPService->verifyTOTP($user->getTwoFAsecret(), $twoFACode)
+                    ) {
+                        // Return error response only if both validations fail for APPS
+                        return new BaseResponse(
+                            401,
+                            null,
+                            $twoFAEnforcementResult['message']
+                        )->toResponse();
+                    }
+                } elseif (
+                    // Validation for 2FACode -> EMAIL/SMS
+                    !$this->twoFAService->validate2FACode($user, $twoFACode) &&
+                    // Validation for OTPCodes -> 12 codes
+                    !$this->twoFAService->validateOTPCodes($user, $twoFACode)
+                ) {
+                    // Return error response only if both validations fail
+                    return new BaseResponse(
+                        401,
+                        null,
+                        $twoFAEnforcementResult['message']
+                    )->toResponse();
+                }
+            }
+
             // Generate JWT Token and the success msg
             return $this->authAPIResponseService->handleSuccessfulAuth(
                 $request,
@@ -412,6 +499,61 @@ class AuthController extends AbstractController
             $statusCheckerResponse = $this->userStatusChecker->checkUserStatus($user);
             if ($statusCheckerResponse instanceof BaseResponse) {
                 return $statusCheckerResponse->toResponse();
+            }
+
+            $twoFAEnforcementResult = $this->twoFAAPIService->twoFAEnforcementChecker(
+                $user,
+                $request->attributes->get('_route')
+            );
+
+            if ($twoFAEnforcementResult['missing_2fa_setting'] === true) {
+                // Return error response when 2fa is missing the TWO_FACTOR_AUTH_STATUS setting
+                return new BaseResponse(
+                    400,
+                    null,
+                    $twoFAEnforcementResult['message']
+                )->toResponse();
+            }
+
+            if ($twoFAEnforcementResult['canSkip2FA'] === false) {
+                $errors = [];
+                if (empty($data['twoFACode'])) {
+                    $errors[] = 'twoFACode';
+                }
+                if ($errors !== []) {
+                    return new BaseResponse(
+                        400,
+                        ['missing_fields' => $errors],
+                        'Invalid data: Missing required fields.'
+                    )->toResponse();
+                }
+                if ($user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::TOTP->value) {
+                    if (
+                        // Validation for OTPCodes -> 12 codes
+                        !$this->twoFAService->validateOTPCodes($user, $data['twoFACode']) &&
+                        // Validation for TOTP codes -> Generated By the App
+                        !$this->TOTPService->verifyTOTP($user->getTwoFAsecret(), $data['twoFACode'])
+                    ) {
+                        // Return error response only if both validations fail for APPS
+                        return new BaseResponse(
+                            401,
+                            null,
+                            $twoFAEnforcementResult['message']
+                        )->toResponse();
+                    }
+                } elseif (
+                    // Validation for 2FACode -> EMAIL/SMS
+                    !$this->twoFAService->validate2FACode($user, $data['twoFACode']) &&
+                    // Validation for OTPCodes -> 12 codes
+                    !$this->twoFAService->validateOTPCodes($user, $data['twoFACode'])
+                ) {
+                    // Return error response only if both validations fail
+                    return new BaseResponse(
+                        401,
+                        null,
+                        $twoFAEnforcementResult['message']
+                    )->toResponse();
+                }
             }
 
             // Authenticate the user using a custom Google authentication function already on the project
@@ -467,6 +609,61 @@ class AuthController extends AbstractController
             $statusCheckerResponse = $this->userStatusChecker->checkUserStatus($user);
             if ($statusCheckerResponse instanceof BaseResponse) {
                 return $statusCheckerResponse->toResponse();
+            }
+
+            $twoFAEnforcementResult = $this->twoFAAPIService->twoFAEnforcementChecker(
+                $user,
+                $request->attributes->get('_route')
+            );
+
+            if ($twoFAEnforcementResult['missing_2fa_setting'] === true) {
+                // Return error response when 2fa is missing the TWO_FACTOR_AUTH_STATUS setting
+                return new BaseResponse(
+                    400,
+                    null,
+                    $twoFAEnforcementResult['message']
+                )->toResponse();
+            }
+
+            if ($twoFAEnforcementResult['canSkip2FA'] === false) {
+                $errors = [];
+                if (empty($data['twoFACode'])) {
+                    $errors[] = 'twoFACode';
+                }
+                if ($errors !== []) {
+                    return new BaseResponse(
+                        400,
+                        ['missing_fields' => $errors],
+                        'Invalid data: Missing required fields.'
+                    )->toResponse();
+                }
+                if ($user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::TOTP->value) {
+                    if (
+                        // Validation for OTPCodes -> 12 codes
+                        !$this->twoFAService->validateOTPCodes($user, $data['twoFACode']) &&
+                        // Validation for TOTP codes -> Generated By the App
+                        !$this->TOTPService->verifyTOTP($user->getTwoFAsecret(), $data['twoFACode'])
+                    ) {
+                        // Return error response only if both validations fail for APPS
+                        return new BaseResponse(
+                            401,
+                            null,
+                            $twoFAEnforcementResult['message']
+                        )->toResponse();
+                    }
+                } elseif (
+                    // Validation for 2FACode -> EMAIL/SMS
+                    !$this->twoFAService->validate2FACode($user, $data['twoFACode']) &&
+                    // Validation for OTPCodes -> 12 codes
+                    !$this->twoFAService->validateOTPCodes($user, $data['twoFACode'])
+                ) {
+                    // Return error response only if both validations fail
+                    return new BaseResponse(
+                        401,
+                        null,
+                        $twoFAEnforcementResult['message']
+                    )->toResponse();
+                }
             }
 
             // Authenticate the user using a custom Microsoft authentication function already on the project

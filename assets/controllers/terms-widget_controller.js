@@ -3,14 +3,14 @@ import { Controller } from '@hotwired/stimulus';
 export default class extends Controller {
     static targets = ['agreeTerms', 'confirmationModal', 'button'];
 
-    connect() {
-        fetch('/get-terms-status')
-            .then((res) => res.json())
-            .then((data) => {
-                this.updateTermsCheckbox(data.terms_accepted);
-                this.toggleSubmitButtons();
-            });
-    }
+  connect() {
+    fetch('/get-terms-status')
+      .then((res) => res.json())
+      .then((data) => {
+        this.updateTermsCheckbox(data.terms_accepted);
+        this.toggleSubmitButtons();
+      });
+  }
 
     showModal(event) {
         event.preventDefault();

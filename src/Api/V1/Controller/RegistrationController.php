@@ -57,7 +57,7 @@ class RegistrationController extends AbstractController
         private readonly CaptchaValidator $captchaValidator,
         private readonly EmailGenerator $emailGenerator,
         private readonly ValidatorInterface $validator,
-        private readonly \libphonenumber\PhoneNumberUtil $phoneNumberUtil,
+        private readonly PhoneNumberUtil $phoneNumberUtil,
     ) {
     }
 

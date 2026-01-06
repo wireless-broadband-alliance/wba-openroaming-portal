@@ -1,7 +1,7 @@
 import { Controller } from '@hotwired/stimulus';
 
 export default class extends Controller {
-    static targets = ['banner', 'bannerWrapper', 'modalCookie', 'consentForm', 'manageButton'];
+  static targets = ['banner', 'bannerWrapper', 'modalCookie', 'consentForm', 'manageButton'];
 
     connect() {
         // Initialize preferences without setting any cookies on the first page load
@@ -29,21 +29,21 @@ export default class extends Controller {
         this.toggleManageButton();
     }
 
-    hideBanner() {
-        if (this.hasBannerWrapperTarget) {
-            this.bannerWrapperTarget.remove();
-        }
-        this.toggleManageButton();
+  hideBanner() {
+    if (this.hasBannerWrapperTarget) {
+      this.bannerWrapperTarget.remove();
+    }
+    this.toggleManageButton();
+  }
+
+  toggleManageButton() {
+    if (!this.hasBannerWrapperTarget) {
+      this.manageButtonTarget.classList.remove('hidden');
+      return;
     }
 
-    toggleManageButton() {
-        if (!this.hasBannerWrapperTarget) {
-            this.manageButtonTarget.classList.remove('hidden');
-            return;
-        }
-
-        this.manageButtonTarget.classList.add('hidden');
-    }
+    this.manageButtonTarget.classList.add('hidden');
+  }
 
     showModal() {
         this.modalCookieTarget.classList.remove('hidden');

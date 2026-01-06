@@ -100,7 +100,7 @@ readonly class CertificateStorageService
         $certificate->setMetadata([
             'originalName' => $file->getClientOriginalName(),
             'mimeType' => $file->getClientMimeType(),
-            'size' => file_exists($path) ? $file->getSize() : null,
+            'size' => $file->getSize(),
         ]);
 
         // Extract fingerprint and validity
@@ -120,12 +120,28 @@ readonly class CertificateStorageService
 
     /**
      * Preprocess a PEM certificate file to extract fingerprint and validity dates.
+     *
+     * @return array{
+     *     fingerprint: string,
+     *     validFrom: \DateTimeImmutable|null,
+     *     validTo: \DateTimeImmutable|null
+     * }
      */
     private function extractCertificateData(UploadedFile $file): array
     {
         $content = file_get_contents($file->getPathname());
+        if ($content === false) {
+            throw new RuntimeException(
+                $this->translator->trans(
+                    'failedToReadFile',
+                    ['%file%' => $file->getClientOriginalName()],
+                    'CertificateStorageService'
+                )
+            );
+        }
+
         $certResource = @openssl_x509_read($content);
-        if (!$certResource) {
+        if ($certResource === false) {
             throw new RuntimeException(
                 $this->translator->trans(
                     'invalidPEMCertificate',
@@ -136,7 +152,7 @@ readonly class CertificateStorageService
         }
 
         $certInfo = openssl_x509_parse($certResource);
-        if (!$certInfo) {
+        if ($certInfo === false) {
             throw new RuntimeException(
                 $this->translator->trans(
                     'unableParse',
@@ -148,6 +164,15 @@ readonly class CertificateStorageService
 
         // Compute fingerprint (SHA1 hash of DER encoding)
         $fingerprint = openssl_x509_fingerprint($certResource, 'sha1');
+        if ($fingerprint === false) {
+            throw new RuntimeException(
+                $this->translator->trans(
+                    'unableFingerprint',
+                    [],
+                    'CertificateStorageService'
+                )
+            );
+        }
 
         $validFrom = isset($certInfo['validFrom_time_t'])
             ? new DateTimeImmutable()->setTimestamp((int)$certInfo['validFrom_time_t'])

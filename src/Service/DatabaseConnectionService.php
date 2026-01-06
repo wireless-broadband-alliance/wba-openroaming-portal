@@ -54,6 +54,10 @@ readonly class DatabaseConnectionService
 
         $envContent = file_get_contents($envPath);
 
+        if ($envContent === false) {
+            return false; // Ensures it's always a string for preg_replace/rtrim
+        }
+
         $newLine = '';
         $regex = '';
 
@@ -83,27 +87,39 @@ readonly class DatabaseConnectionService
             $newLine = sprintf('JWT_PASSPHRASE=%s', $url);
         }
 
-        // Tentamos substituir
+        if (!$regex) {
+            throw new InvalidArgumentException("Invalid environment type: $type");
+        }
+
         $updated = preg_replace($regex, $newLine, $envContent, -1, $count);
 
-        // Se $count === 0 significa que não existia → adicionamos ao final
+        // preg_replace can return null if something goes wrong, cast to string
+        if ($updated === null) {
+            return false;
+        }
+
         if ($count === 0) {
             $updated = rtrim($envContent) . "\n" . $newLine . "\n";
         } else {
-            // Caso contrário, só garantimos que termina com newline
-            $updated = rtrim((string) $updated) . "\n";
+            $updated = rtrim((string)$updated) . "\n";
         }
 
         return file_put_contents($envPath, $updated) !== false;
     }
 
+    /**
+     * @param string $scheme
+     * @return 'pdo_mysql'|'pdo_pgsql'|'pdo_sqlite'
+     *
+     * @throws InvalidArgumentException
+     */
     private function getDriverFromScheme(string $scheme): string
     {
         return match ($scheme) {
             'mysql' => 'pdo_mysql',
             'pgsql' => 'pdo_pgsql',
             'sqlite' => 'pdo_sqlite',
-            default => throw new \InvalidArgumentException("Unsupported database scheme: $scheme"),
+            default => throw new InvalidArgumentException("Unsupported database scheme: $scheme"),
         };
     }
 
@@ -128,6 +144,20 @@ readonly class DatabaseConnectionService
         );
     }
 
+    /**
+     * @param string $url
+     * @return array{
+     *   username: string|null,
+     *   password: string|null,
+     *   host: string|null,
+     *   port: int|null,
+     *   database: string|null,
+     *   serverVersion: string|null,
+     *   charset: string|null
+     * }
+     *
+     * @throws InvalidArgumentException
+     */
     public function parseDatabaseUrl(string $url): array
     {
         $parts = parse_url($url);
@@ -141,14 +171,24 @@ readonly class DatabaseConnectionService
             parse_str($parts['query'], $query);
         }
 
+        $serverVersion = $query['serverVersion'] ?? null;
+        if (is_array($serverVersion)) {
+            $serverVersion = (string) reset($serverVersion);
+        }
+
+        $charset = $query['charset'] ?? null;
+        if (is_array($charset)) {
+            $charset = (string) reset($charset);
+        }
+
         return [
             'username' => isset($parts['user']) ? urldecode($parts['user']) : null,
             'password' => isset($parts['pass']) ? urldecode($parts['pass']) : null,
             'host' => $parts['host'] ?? null,
-            'port' => $parts['port'] ?? null,
+            'port' => isset($parts['port']) ? (int) $parts['port'] : null,
             'database' => isset($parts['path']) ? ltrim($parts['path'], '/') : null,
-            'serverVersion' => $query['serverVersion'] ?? null,
-            'charset' => $query['charset'] ?? null,
+            'serverVersion' => $serverVersion !== null ? (string) $serverVersion : null,
+            'charset' => $charset !== null ? (string) $charset : null,
         ];
     }
 }
