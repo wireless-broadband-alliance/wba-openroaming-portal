@@ -4,30 +4,39 @@ declare(strict_types=1);
 
 use Rector\Config\RectorConfig;
 use Rector\Exception\Configuration\InvalidConfigurationException;
+use Rector\Symfony\CodeQuality\Rector\Class_\ControllerMethodInjectionToConstructorRector;
 use Rector\Symfony\Set\SymfonySetList;
 
 try {
-    // Todo: After PHPStan update to 2.0 change this to use the new composer based configuration
-    return RectorConfig::configure()
-        ->withPaths([
-            __DIR__ . '/assets',
-            __DIR__ . '/config',
-            __DIR__ . '/public',
-            __DIR__ . '/src',
-            __DIR__ . '/tests',
-        ])
-        // uncomment to reach your current PHP version
-        ->withPhpSets(php84: true)
-        ->withSets(
-            [
-                SymfonySetList::SYMFONY_64,
-                SymfonySetList::ANNOTATIONS_TO_ATTRIBUTES,
-                SymfonySetList::SYMFONY_CODE_QUALITY,
-                SymfonySetList::SYMFONY_CONSTRUCTOR_INJECTION
-            ]
-        )
-        ->withPreparedSets(deadCode: true, codeQuality: true)
-        ->withTypeCoverageLevel(0);
+  // Todo: After PHPStan update to 2.0 change this to use the new composer based configuration
+  return RectorConfig::configure()
+      ->withPaths([
+          __DIR__ . '/assets',
+          __DIR__ . '/config',
+          __DIR__ . '/public',
+          __DIR__ . '/src',
+          __DIR__ . '/tests',
+      ])
+
+      /** Skips construct injection to fix the problem with Auth() Saml Bundle
+       * Check for more details here
+       * https://symfony.com/doc/current/service_container/autowiring.html#public-and-reusable-bundles
+       */
+      ->withSkip([
+          ControllerMethodInjectionToConstructorRector::class,
+      ])
+      // uncomment to reach your current PHP version
+      ->withPhpSets(php84: true)
+      ->withSets(
+          [
+              SymfonySetList::SYMFONY_74,
+              SymfonySetList::ANNOTATIONS_TO_ATTRIBUTES,
+              SymfonySetList::SYMFONY_CODE_QUALITY,
+              SymfonySetList::SYMFONY_CONSTRUCTOR_INJECTION
+          ]
+      )
+      ->withPreparedSets(deadCode: true, codeQuality: true)
+      ->withTypeCoverageLevel(0);
 } catch (InvalidConfigurationException $e) {
-    exit($e->getMessage());
+  exit($e->getMessage());
 }
