@@ -69,6 +69,17 @@ readonly class CertificateCheckerService
         return $missingFiles;
     }
 
+    /**
+     * @return array{
+     *     subject: array<string, mixed>,
+     *     issuer: array<string, mixed>,
+     *     validFrom: string|null,
+     *     validTo: string|null,
+     *     fingerprintSHA1: string|bool,
+     *     fingerprintSHA256: string|bool,
+     *     extensions: array<string, mixed>
+     * }
+     */
     public function parseCertificate(string $pem): array
     {
         $certResource = openssl_x509_read($pem);
