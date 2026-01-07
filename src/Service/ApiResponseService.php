@@ -71,10 +71,9 @@ readonly class ApiResponseService
                     'description' => $responseData['description'] ?? null,
                     'requestBody' => $responseData['requestBody'] ?? null,
                 ];
-
             }
         }
-
+        dd($grouped);
         return $grouped;
     }
 
