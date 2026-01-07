@@ -13,25 +13,12 @@ readonly class ApiResponseService
     ) {
     }
 
-    /**
-     * @return array<string, array<int, array{
-     *     name: string,
-     *     path: string,
-     *     methods: string[],
-     *     responses: array<int|string, mixed>,
-     *     isProtected: bool,
-     *     description: string|null,
-     *     requestBody: array<string, mixed>|null
-     * }>>
-     * @throws \JsonException
-     */
     public function getRoutesByPrefix(ApiVersion $version): array
     {
         $routes = $this->router->getRouteCollection();
         $grouped = [];
         $responses = $this->getResponseMetadata($version);
 
-        // Map enum to prefix
         $prefixMap = [
             ApiVersion::API_V1->value => '/api/v1',
             ApiVersion::API_V2->value => '/api/v2',
@@ -43,37 +30,50 @@ readonly class ApiResponseService
         foreach ($routes as $name => $route) {
             $path = $route->getPath();
 
-            if ($path !== $prefix && str_starts_with($path, $prefix)) {
-                // Path relative to the API version
-                $relativePath = trim(str_replace($prefix, '', $path), '/');
+            // Only routes from this API version
+            if ($path === $prefix || !str_starts_with($path, $prefix)) {
+                continue;
+            }
 
-                // Group by the first segment after version
+            $responseData = null;
+            foreach ($responses as $doc) {
+                if (($doc['routePrefix'] ?? null) === $path) {
+                    $responseData = $doc;
+                    break;
+                }
+            }
+
+            // Skip undocumented routes
+            if ($responseData === null) {
+                continue;
+            }
+
+            /**
+             * Priority:
+             * 1. Explicit "section" in docs
+             * 2. First path segment after version
+             */
+            if (!empty($responseData['section'])) {
+                $groupKey = $responseData['section'];
+            } else {
+                $relativePath = trim(str_replace($prefix, '', $path), '/');
                 $segments = explode('/', $relativePath);
                 $groupKey = $segments[0] ?: 'general';
-
-                // Build response key like api_v3_auth_local from version + relative path
-                $responseKey = strtolower($version->value) . '_' . str_replace('/', '_', $relativePath);
-
-                // Make sure the response key exists
-                $responseData = $responses[$responseKey] ?? [
-                    'responses' => [],
-                    'isProtected' => false,
-                    'description' => null,
-                    'requestBody' => null,
-                ];
-
-                $grouped[$groupKey][] = [
-                    'name' => $name,
-                    'path' => $path,
-                    'methods' => $route->getMethods(),
-                    'responses' => $responseData['responses'],
-                    'isProtected' => $responseData['isProtected'] ?? false,
-                    'description' => $responseData['description'] ?? null,
-                    'requestBody' => $responseData['requestBody'] ?? null,
-                ];
             }
+
+            $grouped[$groupKey][] = [
+                'name' => $name,
+                'path' => $path,
+                'methods' => $route->getMethods(),
+                'responses' => $responseData['responses'] ?? [],
+                'isProtected' => $responseData['isProtected'] ?? false,
+                'description' => $responseData['description'] ?? null,
+                'requestBody' => $responseData['requestBody'] ?? null,
+            ];
         }
-        dd($grouped);
+
+        ksort($grouped);
+
         return $grouped;
     }
 
