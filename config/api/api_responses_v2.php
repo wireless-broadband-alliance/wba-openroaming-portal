@@ -3,6 +3,7 @@
 return [
     'api_v2_auth_refresh' => [
         'routePrefix' => '/api/v2/auth/refresh',
+        'section' => 'Auth',
         'requestBody' => [
             'current_token' => 'currentToken',
         ],
@@ -38,6 +39,7 @@ The client must send the current valid JWT in the request body as "current_token
     ],
     'api_v2_auth_local' => [
         'routePrefix' => '/api/v2/auth/local',
+        'section' => 'Auth',
         'requestBody' => [
             'uuid' => 'user-uuid-example',
             'password' => 'user-password-example',
@@ -120,6 +122,7 @@ The client must send the current valid JWT in the request body as "current_token
     ],
     'api_v2_auth_saml' => [
         'routePrefix' => '/api/v2/auth/saml',
+        'section' => 'Auth',
         'requestBody' => [
             'SAML Account' => [
                 'SAMLResponse' => 'samlResponseExample'
@@ -184,6 +187,7 @@ The client must send the current valid JWT in the request body as "current_token
     ],
     'api_v2_auth_google' => [
         'routePrefix' => '/api/v2/auth/google',
+        'section' => 'Auth',
         'requestBody' => [
             'code' => '4/0AdKgLCxjQ74mKAg9vs_f7PuO99DR',
             'twoFACode' => '02YZR88R'
@@ -245,6 +249,7 @@ The client must send the current valid JWT in the request body as "current_token
     ],
     'api_v2_auth_microsoft' => [
         'routePrefix' => '/api/v2/auth/microsoft',
+        'section' => 'Auth',
         'requestBody' => [
             'code' => '0.AQk6Lf2I2XGhQkWlU8gBp0KmxeNn2KTcbsJh.8Qt3OeYCB4sQ2FHo',
             'twoFACode' => '02YZR88R'
@@ -307,6 +312,7 @@ The client must send the current valid JWT in the request body as "current_token
     ],
     'api_v2_capport_json' => [
         'routePrefix' => '/api/v2/capport/json',
+        'section' => 'Config',
         'requestBody' => [],
         'description' => 'Returns JSON metadata for the Captive Portal (CAPPORT) configuration.',
         'responses' => [
@@ -329,6 +335,7 @@ The client must send the current valid JWT in the request body as "current_token
     ],
     'api_v2_config_settings' => [
         'routePrefix' => '/api/v2/config',
+        'section' => 'Config',
         'description' => 'This endpoint returns public values from the Setting entity and environment 
                 variables categorized by platform and provider.',
         'requestBody' => [],
@@ -381,6 +388,7 @@ The client must send the current valid JWT in the request body as "current_token
     ],
     'api_v2_get_current_user' => [
         'routePrefix' => '/api/v2/user',
+        'section' => 'User',
         'requestBody' => [],
         'description' => 'This endpoint returns the details of the currently authenticated user.',
         'isProtected' => true,
@@ -428,6 +436,7 @@ The client must send the current valid JWT in the request body as "current_token
     ],
     'api_v2_config_profile_android' => [
         'routePrefix' => '/api/v2/config/profile/android',
+        'section' => 'Config',
         'requestBody' => [
             'public_key' => '-----BEGIN PUBLIC KEY-----\\n<RSA_PUBLIC_KEY>\\n-----END PUBLIC KEY-----'
         ],
@@ -478,6 +487,7 @@ The client must send the current valid JWT in the request body as "current_token
     ],
     'api_v2_config_profile_ios' => [
         'routePrefix' => '/api/v2/config/profile/ios',
+        'section' => 'Config',
         'requestBody' => [
             'public_key' => '-----BEGIN PUBLIC KEY-----\\n<RSA_PUBLIC_KEY>\\n-----END PUBLIC KEY-----'
         ],
@@ -531,6 +541,7 @@ The client must send the current valid JWT in the request body as "current_token
     ],
     'api_v2_auth_local_register' => [
         'routePrefix' => '/api/v2/config/local/register',
+        'section' => 'Auth',
         'requestBody' => [
             'email' => 'user@example.com',
             'password' => 'strongpassword',
@@ -567,6 +578,7 @@ The client must send the current valid JWT in the request body as "current_token
     ],
     'api_v2_auth_local_reset' => [
         'routePrefix' => '/api/v2/config/local/reset',
+        'section' => 'Auth',
         'requestBody' => [
             'email' => 'user@example.com',
             'turnstile_token' => 'valid_test_token'
@@ -601,6 +613,7 @@ The client must send the current valid JWT in the request body as "current_token
     ],
     'api_v2_auth_sms_register' => [
         'routePrefix' => '/api/v2/config/sms/register',
+        'section' => 'Auth',
         'requestBody' => [
             'country_code' => 'PT',
             'phone_number' => '1234567890',
@@ -641,6 +654,7 @@ The client must send the current valid JWT in the request body as "current_token
     ],
     'api_v2_auth_sms_reset' => [
         'routePrefix' => '/api/v2/config/sms/reset',
+        'section' => 'Auth',
         'requestBody' => [
             'country_code' => 'PT',
             'phone_number' => '1234567890',
@@ -679,6 +693,7 @@ The client must send the current valid JWT in the request body as "current_token
     ],
     'api_v2_turnstile_html_android' => [
         'routePrefix' => '/api/v2/turnstile/android',
+        'section' => 'Config',
         'requestBody' => [
             'success' => true,
             'data' => '<html><body><h1>Turnstile Configuration</h1><p>This is the required HTML 
@@ -707,6 +722,7 @@ configuration for the Android App.</p></body></html>'
     ],
     'api_v2_turnstile_html_ios' => [
         'routePrefix' => '/api/v2/turnstile/ios',
+        'section' => 'Config',
         'requestBody' => [
             'success' => true,
             'data' => '<html><body><h1>Turnstile Configuration</h1><p>This is the required HTML 
@@ -735,6 +751,7 @@ configuration for the IOS App.</p></body></html>'
     ],
     'api_v2_twoFA_request' => [
         'routePrefix' => '/api/v2/twoFA/request',
+        'section' => 'TwoFactor',
         'requestBody' => [
             'uuid' => 'user-uuid-example',
             'password' => 'user-password-example',
@@ -792,6 +809,7 @@ configuration for the IOS App.</p></body></html>'
     ],
     'api_v2_user_account_deletion' => [
         'routePrefix' => '/api/v2/userAccount/deletion',
+        'section' => 'User',
         'requestBody' => [
             'Portal Account' => [
                 'password' => 'user-password-example'

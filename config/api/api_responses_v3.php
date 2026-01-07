@@ -3,6 +3,7 @@
 return [
     'api_v3_twoFA_validate' => [
         'routePrefix' => '/api/v3/twoFA/validate',
+        'section' => 'TwoFactor',
         'description' => 'This endpoint validates a 2FA code (email, SMS, or TOTP). 
     The client must send a valid JWT Bearer token in the Authorization header, 
     along with the 2FA type and confirmation code in the request body. 
@@ -49,6 +50,7 @@ return [
     ],
     'api_v3_twoFA_enable' => [
         'routePrefix' => '/api/v3/twoFA/{type}',
+        'section' => 'TwoFactor',
         'description' => 'Enables Two-Factor Authentication (2FA) for the authenticated user. 
         Supports ("totp", "email", "sms"). Requires a valid JWT Bearer token.',
         'isProtected' => true,
@@ -152,6 +154,7 @@ return [
     ],
     'api_v3_auth_refresh' => [
         'routePrefix' => '/api/v3/auth/refresh',
+        'section' => 'Auth',
         'requestBody' => [
             'current_token' => 'currentToken',
         ],
@@ -187,6 +190,7 @@ The client must send the current valid JWT in the request body as "current_token
     ],
     'api_v3_auth_local' => [
         'routePrefix' => '/api/v3/auth/local',
+        'section' => 'Auth',
         'requestBody' => [
             'uuid' => 'user-uuid-example',
             'password' => 'user-password-example',
@@ -269,6 +273,7 @@ The client must send the current valid JWT in the request body as "current_token
     ],
     'api_v3_auth_saml' => [
         'routePrefix' => '/api/v3/auth/saml',
+        'section' => 'Auth',
         'requestBody' => [
             'SAML Account' => [
                 'SAMLResponse' => 'samlResponseExample'
@@ -333,6 +338,7 @@ The client must send the current valid JWT in the request body as "current_token
     ],
     'api_v3_auth_google' => [
         'routePrefix' => '/api/v3/auth/google',
+        'section' => 'Auth',
         'requestBody' => [
             'code' => '4/0AdKgLCxjQ74mKAg9vs_f7PuO99DR',
             'twoFACode' => '02YZR88R'
@@ -394,6 +400,7 @@ The client must send the current valid JWT in the request body as "current_token
     ],
     'api_v3_auth_microsoft' => [
         'routePrefix' => '/api/v3/auth/microsoft',
+        'section' => 'Auth',
         'requestBody' => [
             'code' => '0.AQk6Lf2I2XGhQkWlU8gBp0KmxeNn2KTcbsJh.8Qt3OeYCB4sQ2FHo',
             'twoFACode' => '02YZR88R'
@@ -456,6 +463,7 @@ The client must send the current valid JWT in the request body as "current_token
     ],
     'api_v3_capport_json' => [
         'routePrefix' => '/api/v3/capport/json',
+        'section' => 'Config',
         'requestBody' => [],
         'description' => 'Returns JSON metadata for the Captive Portal (CAPPORT) configuration.',
         'responses' => [
@@ -478,6 +486,7 @@ The client must send the current valid JWT in the request body as "current_token
     ],
     'api_v3_config_settings' => [
         'routePrefix' => '/api/v3/config',
+        'section' => 'Config',
         'description' => 'This endpoint returns public values from the Setting entity and environment 
                 variables categorized by platform and provider.',
         'requestBody' => [],
@@ -530,6 +539,7 @@ The client must send the current valid JWT in the request body as "current_token
     ],
     'api_v3_get_current_user' => [
         'routePrefix' => '/api/v3/user',
+        'section' => 'User',
         'requestBody' => [],
         'description' => 'This endpoint returns the details of the currently authenticated user.',
         'isProtected' => true,
@@ -577,6 +587,7 @@ The client must send the current valid JWT in the request body as "current_token
     ],
     'api_v3_config_profile_android' => [
         'routePrefix' => '/api/v3/config/profile/android',
+        'section' => 'Config',
         'requestBody' => [
             'public_key' => '-----BEGIN PUBLIC KEY-----\\n<RSA_PUBLIC_KEY>\\n-----END PUBLIC KEY-----'
         ],
@@ -627,6 +638,7 @@ The client must send the current valid JWT in the request body as "current_token
     ],
     'api_v3_config_profile_ios' => [
         'routePrefix' => '/api/v3/config/profile/ios',
+        'section' => 'Config',
         'requestBody' => [
             'public_key' => '-----BEGIN PUBLIC KEY-----\\n<RSA_PUBLIC_KEY>\\n-----END PUBLIC KEY-----'
         ],
@@ -680,6 +692,7 @@ The client must send the current valid JWT in the request body as "current_token
     ],
     'api_v3_auth_local_register' => [
         'routePrefix' => '/api/v3/auth/local/register',
+        'section' => 'Auth',
         'requestBody' => [
             'email' => 'user@example.com',
             'password' => 'strongpassword',
@@ -716,6 +729,7 @@ The client must send the current valid JWT in the request body as "current_token
     ],
     'api_v3_auth_local_reset' => [
         'routePrefix' => '/api/v3/config/local/reset',
+        'section' => 'Auth',
         'requestBody' => [
             'email' => 'user@example.com',
             'turnstile_token' => 'valid_test_token'
@@ -750,6 +764,7 @@ The client must send the current valid JWT in the request body as "current_token
     ],
     'api_v3_auth_sms_register' => [
         'routePrefix' => '/api/v3/auth/sms/register',
+        'section' => 'Auth',
         'requestBody' => [
             'country_code' => 'PT',
             'phone_number' => '1234567890',
@@ -790,6 +805,7 @@ The client must send the current valid JWT in the request body as "current_token
     ],
     'api_v3_auth_sms_reset' => [
         'routePrefix' => '/api/v3/auth/sms/reset',
+        'section' => 'Auth',
         'requestBody' => [
             'country_code' => 'PT',
             'phone_number' => '1234567890',
@@ -828,6 +844,7 @@ The client must send the current valid JWT in the request body as "current_token
     ],
     'api_v3_turnstile_html_android' => [
         'routePrefix' => '/api/v3/turnstile/android',
+        'section' => 'Config',
         'requestBody' => [
             'success' => true,
             'data' => '<html><body><h1>Turnstile Configuration</h1><p>This is the required HTML 
@@ -856,6 +873,7 @@ configuration for the Android App.</p></body></html>'
     ],
     'api_v3_turnstile_html_ios' => [
         'routePrefix' => '/api/v3/turnstile/ios',
+        'section' => 'Config',
         'requestBody' => [
             'success' => true,
             'data' => '<html><body><h1>Turnstile Configuration</h1><p>This is the required HTML 
@@ -884,6 +902,7 @@ configuration for the IOS App.</p></body></html>'
     ],
     'api_v3_user_account_deletion' => [
         'routePrefix' => '/api/v3/userAccount/deletion',
+        'section' => 'User',
         'requestBody' => [
             'Portal Account' => [
                 'password' => 'user-password-example'

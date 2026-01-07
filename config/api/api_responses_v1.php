@@ -3,6 +3,7 @@
 return [
     'api_v1_auth_local' => [
         'routePrefix' => '/api/v1/auth/local',
+        'section' => 'Auth',
         'requestBody' => [
             'uuid' => 'user-uuid-example',
             'password' => 'user-password-example',
@@ -70,6 +71,7 @@ return [
     ],
     'api_v1_auth_saml' => [
         'routePrefix' => '/api/v1/auth/saml',
+        'section' => 'Auth',
         'requestBody' => [
             'SAML Account' => [
                 'SAMLResponse' => 'samlResponseExample'
@@ -134,6 +136,7 @@ return [
     ],
     'api_v1_auth_google' => [
         'routePrefix' => '/api/v1/auth/google',
+        'section' => 'Auth',
         'requestBody' => [
             'code' => '4/0AdKgLCxjQ74mKAg9vs_f7PuO99DR',
             'twoFACode' => '02YZR88R'
@@ -195,6 +198,7 @@ return [
     ],
     'api_v1_auth_microsoft' => [
         'routePrefix' => '/api/v1/auth/microsoft',
+        'section' => 'Auth',
         'requestBody' => [
             'code' => '0.AQk6Lf2I2XGhQkWlU8gBp0KmxeNn2KTcbsJh.8Qt3OeYCB4sQ2FHo',
             'twoFACode' => '02YZR88R'
@@ -257,6 +261,7 @@ return [
     ],
     'api_v1_capport_json' => [
         'routePrefix' => '/api/v1/capport/json',
+        'section' => 'Config',
         'requestBody' => [],
         'description' => 'Returns JSON metadata for the Captive Portal (CAPPORT) configuration.',
         'responses' => [
@@ -279,6 +284,7 @@ return [
     ],
     'api_v1_config_settings' => [
         'routePrefix' => '/api/v1/config',
+        'section' => 'Config',
         'description' => 'This endpoint returns public values from the Setting entity and environment 
                 variables categorized by platform and provider.',
         'requestBody' => [],
@@ -331,6 +337,7 @@ return [
     ],
     'api_v1_get_current_user' => [
         'routePrefix' => '/api/v1/user',
+        'section' => 'User',
         'requestBody' => [],
         'description' => 'This endpoint returns the details of the currently authenticated user.',
         'isProtected' => true,
@@ -378,6 +385,7 @@ return [
     ],
     'api_v1_config_profile_android' => [
         'routePrefix' => '/api/v1/config/profile/android',
+        'section' => 'Config',
         'requestBody' => [
             'public_key' => '-----BEGIN PUBLIC KEY-----\\n<RSA_PUBLIC_KEY>\\n-----END PUBLIC KEY-----'
         ],
@@ -427,6 +435,7 @@ return [
     ],
     'api_v1_config_profile_ios' => [
         'routePrefix' => '/api/v1/config/profile/ios',
+        'section' => 'Config',
         'requestBody' => [
             'public_key' => '-----BEGIN PUBLIC KEY-----\\n<RSA_PUBLIC_KEY>\\n-----END PUBLIC KEY-----'
         ],
@@ -479,6 +488,7 @@ return [
     ],
     'api_v1_auth_local_register' => [
         'routePrefix' => '/api/v1/auth/local/register',
+        'section' => 'Auth',
         'requestBody' => [
             'email' => 'user@example.com',
             'password' => 'strongpassword',
@@ -515,6 +525,7 @@ return [
     ],
     'api_v1_auth_local_reset' => [
         'routePrefix' => '/api/v1/auth/local/reset',
+        'section' => 'Auth',
         'requestBody' => [
             'email' => 'test@example.com',
             'turnstile_token' => 'valid_test_token'
@@ -549,6 +560,7 @@ return [
     ],
     'api_v1_auth_sms_register' => [
         'routePrefix' => '/api/v1/auth/sms/register',
+        'section' => 'Auth',
         'requestBody' => [
             'country_code' => 'PT',
             'phone_number' => '1234567890',
@@ -589,6 +601,7 @@ return [
     ],
     'api_v1_auth_sms_reset' => [
         'routePrefix' => '/api/v1/auth/sms/reset',
+        'section' => 'Auth',
         'requestBody' => [
             'country_code' => 'PT',
             'phone_number' => '1234567890',
@@ -627,6 +640,7 @@ return [
     ],
     'api_v1_turnstile_html_android' => [
         'routePrefix' => '/api/v1/turnstile/android',
+        'section' => 'Config',
         'requestBody' => [],
         'description' => 'This endpoint serves the public HTML configuration required for the Android App 
                 to integrate with the Turnstile feature.',
@@ -651,6 +665,7 @@ return [
     ],
     'api_v1_twoFA_request' => [
         'routePrefix' => '/api/v1/twoFA/request',
+        'section' => 'TwoFactor',
         'requestBody' => [
             'uuid' => 'user-uuid-example',
             'password' => 'user-password-example',
@@ -707,6 +722,7 @@ return [
     ],
     'api_v1_user_account_deletion' => [
         'routePrefix' => '/api/v1/userAccount/deletion',
+        'section' => 'User',
         'requestBody' => [
             'Portal Account' => [
                 'password' => 'user-password-example'
