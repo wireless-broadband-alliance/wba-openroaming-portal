@@ -15,12 +15,17 @@ readonly class CertificateFreeradiusInfoService
     }
 
     /**
-     * Returns the latest Freeradius certificate of each type:
-     * - CA
-     * - CERT
-     * - CHAIN
-     * - FULL_CHAIN
-     * - PRIVATE_KEY
+     * @return array<string, array{
+     *     name: string,
+     *     type: CertificateMachineType|string|bool,
+     *     content: string|null|bool,
+     *     metadata: array<string, mixed>,
+     *     fingerprintSHA1: string|null,
+     *     validFrom: \DateTimeInterface|null,
+     *     validTo: \DateTimeInterface|null,
+     *     parsedSubject: array<string, mixed>|null,
+     *     parsedIssuer: array<string, mixed>|null
+     * }>
      */
     public function getLatestCertificatesSet(CertificateSetupProcess $process): array
     {
@@ -47,6 +52,19 @@ readonly class CertificateFreeradiusInfoService
         return array_map($this->buildCertificateInfo(...), $latest);
     }
 
+    /**
+     * @return array{
+     *     name: string,
+     *     type: CertificateMachineType|string|bool,
+     *     content: string|null|bool,
+     *     metadata: array<string, mixed>,
+     *     fingerprintSHA1: string|null,
+     *     validFrom: \DateTimeInterface|null,
+     *     validTo: \DateTimeInterface|null,
+     *     parsedSubject: array<string, mixed>|null,
+     *     parsedIssuer: array<string, mixed>|null
+     * }
+     */
     private function buildCertificateInfo(Certificate $cert): array
     {
         $relativePath = $cert->getFilePath();
