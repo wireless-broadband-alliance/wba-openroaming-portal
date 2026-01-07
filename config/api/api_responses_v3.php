@@ -1,7 +1,157 @@
 <?php
 
 return [
+    'api_v3_twoFA_validate' => [
+        'routePrefix' => '/api/v3/twoFA/validate',
+        'description' => 'This endpoint validates a 2FA code (email, SMS, or TOTP). 
+    The client must send a valid JWT Bearer token in the Authorization header, 
+    along with the 2FA type and confirmation code in the request body. 
+    If the code is valid, 2FA is enabled for that method.',
+        'isProtected' => true,
+        'requestBody' => [
+            'type' => 'email or sms or topt',
+            'code' => '123456'
+        ],
+        'responses' => [
+            200 => [
+                'default' => json_decode(
+                    '{
+                    "success": true,
+                    "data": {
+                        "message": "Two Factor authentication validated successfully!"
+                    }
+                }',
+                    true,
+                    512,
+                    JSON_THROW_ON_ERROR
+                ),
+            ],
+            400 => [
+                'Invalid JSON format',
+                'Missing required body fields'
+            ],
+            401 => [
+                'JWT Token is invalid!',
+                'User account is not verified.'
+            ],
+            // phpcs:disable Generic.Files.LineLength.TooLong
+            403 => [
+                'Invalid code',
+                'User account is banned from the system.',
+                "Your request cannot be processed at this time due to a pending action. If your account is active, re-login to complete the action.",
+                'Unauthorized - You do not have permission to access this resource'
+            ],
+            // phpcs:enable
+            500 => [
+                'Unexpected server error occurred'
+            ]
+        ]
+    ],
+    'api_v3_twoFA_enable' => [
+        'routePrefix' => '/api/v3/twoFA/{type}',
+        'description' => 'Enables Two-Factor Authentication (2FA) for the authenticated user. 
+        Supports ("totp", "email", "sms"). Requires a valid JWT Bearer token.',
+        'isProtected' => true,
+        'responses' => [
+            200 => [
+                'totp_example' => json_decode(
+                    '{
+                    "success": true,
+                    "data": {
+                        "message": "Two Factor TOTP Secret generated successfully",
+                        "totpId": "ABCDEF123456"
+                    }
+                  }',
+                    true,
+                    512,
+                    JSON_THROW_ON_ERROR
+                ),
+                'email_sms_example' => json_decode(
+                    '{
+                    "success": true,
+                    "data": {
+                        "message": "Two Factor Code sent to: user@example.com"
+                    }
+                }',
+                    true,
+                    512,
+                    JSON_THROW_ON_ERROR
+                ),
+            ],
+            400 => [
+                'description' => 'User does not have a valid email or phone to send the code.',
+                'example' => json_decode(
+                    '{
+                    "message": "Code not sent, the user does not have a valid method."
+                }',
+                    true,
+                    512,
+                    JSON_THROW_ON_ERROR
+                ),
+            ],
+            401 => [
+                'description' => 'Invalid, missing or expired JWT token OR user is not verified.',
+                'examples' => [
+                    'invalid_token' => json_decode(
+                        '{
+                        "message": "JWT Token is invalid!"
+                    }',
+                        true,
+                        512,
+                        JSON_THROW_ON_ERROR
+                    ),
+                    'user_not_verified' => json_decode(
+                        '{
+                        "message": "User account is not verified."
+                    }',
+                        true,
+                        512,
+                        JSON_THROW_ON_ERROR
+                    ),
+                ]
+            ],
+            403 => [
+                'description' => 'User is authenticated but not allowed to access the resource.',
+                'examples' => [
+                    'not_authenticated' => json_decode(
+                        '{
+                        "message": "Unauthorized - You do not have permission to access this resource"
+                    }',
+                        true,
+                        512,
+                        JSON_THROW_ON_ERROR
+                    ),
+                    'user_banned' => json_decode(
+                        '{
+                        "message": "User account is banned from the system."
+                    }',
+                        true,
+                        512,
+                        JSON_THROW_ON_ERROR
+                    ),
+                    // phpcs:disable Generic.Files.LineLength.TooLong
+                    'pending_action' => json_decode(
+                        '{
+                        "message": "Your request cannot be processed at this time due to a pending action. If your account is active, re-login to complete the action."
+                    }',
+                        true,
+                        512,
+                        JSON_THROW_ON_ERROR
+                    ),
+                    // phpcs:enable
+                ],
+            ],
+            500 => [
+                'description' => 'Internal error while generating 2FA code or TOTP secret.',
+                'examples' => [
+                    'db_error',
+                    'unexpected_error'
+                ],
+            ],
+        ],
+    ],
     'api_v3_auth_refresh' => [
+        'routePrefix' => '/api/v3/auth/refresh',
         'requestBody' => [
             'current_token' => 'currentToken',
         ],
@@ -36,6 +186,7 @@ The client must send the current valid JWT in the request body as "current_token
         ],
     ],
     'api_v3_auth_local' => [
+        'routePrefix' => '/api/v3/auth/local',
         'requestBody' => [
             'uuid' => 'user-uuid-example',
             'password' => 'user-password-example',
@@ -117,6 +268,7 @@ The client must send the current valid JWT in the request body as "current_token
         ],
     ],
     'api_v3_auth_saml' => [
+        'routePrefix' => '/api/v3/auth/saml',
         'requestBody' => [
             'SAML Account' => [
                 'SAMLResponse' => 'samlResponseExample'
@@ -180,6 +332,7 @@ The client must send the current valid JWT in the request body as "current_token
         ],
     ],
     'api_v3_auth_google' => [
+        'routePrefix' => '/api/v3/auth/google',
         'requestBody' => [
             'code' => '4/0AdKgLCxjQ74mKAg9vs_f7PuO99DR',
             'twoFACode' => '02YZR88R'
@@ -240,6 +393,7 @@ The client must send the current valid JWT in the request body as "current_token
         ],
     ],
     'api_v3_auth_microsoft' => [
+        'routePrefix' => '/api/v3/auth/microsoft',
         'requestBody' => [
             'code' => '0.AQk6Lf2I2XGhQkWlU8gBp0KmxeNn2KTcbsJh.8Qt3OeYCB4sQ2FHo',
             'twoFACode' => '02YZR88R'
@@ -301,6 +455,7 @@ The client must send the current valid JWT in the request body as "current_token
 
     ],
     'api_v3_capport_json' => [
+        'routePrefix' => '/api/v3/capport/json',
         'requestBody' => [],
         'description' => 'Returns JSON metadata for the Captive Portal (CAPPORT) configuration.',
         'responses' => [
@@ -322,6 +477,7 @@ The client must send the current valid JWT in the request body as "current_token
         ]
     ],
     'api_v3_config_settings' => [
+        'routePrefix' => '/api/v3/config',
         'description' => 'This endpoint returns public values from the Setting entity and environment 
                 variables categorized by platform and provider.',
         'requestBody' => [],
@@ -373,6 +529,7 @@ The client must send the current valid JWT in the request body as "current_token
         ]
     ],
     'api_v3_get_current_user' => [
+        'routePrefix' => '/api/v3/user',
         'requestBody' => [],
         'description' => 'This endpoint returns the details of the currently authenticated user.',
         'isProtected' => true,
@@ -419,6 +576,7 @@ The client must send the current valid JWT in the request body as "current_token
         ]
     ],
     'api_v3_config_profile_android' => [
+        'routePrefix' => '/api/v3/config/profile/android',
         'requestBody' => [
             'public_key' => '-----BEGIN PUBLIC KEY-----\\n<RSA_PUBLIC_KEY>\\n-----END PUBLIC KEY-----'
         ],
@@ -468,6 +626,7 @@ The client must send the current valid JWT in the request body as "current_token
         ]
     ],
     'api_v3_config_profile_ios' => [
+        'routePrefix' => '/api/v3/config/profile/ios',
         'requestBody' => [
             'public_key' => '-----BEGIN PUBLIC KEY-----\\n<RSA_PUBLIC_KEY>\\n-----END PUBLIC KEY-----'
         ],
@@ -520,6 +679,7 @@ The client must send the current valid JWT in the request body as "current_token
         ]
     ],
     'api_v3_auth_local_register' => [
+        'routePrefix' => '/api/v3/auth/local/register',
         'requestBody' => [
             'email' => 'user@example.com',
             'password' => 'strongpassword',
@@ -555,6 +715,7 @@ The client must send the current valid JWT in the request body as "current_token
         ]
     ],
     'api_v3_auth_local_reset' => [
+        'routePrefix' => '/api/v3/config/local/reset',
         'requestBody' => [
             'email' => 'user@example.com',
             'turnstile_token' => 'valid_test_token'
@@ -588,6 +749,7 @@ The client must send the current valid JWT in the request body as "current_token
         ]
     ],
     'api_v3_auth_sms_register' => [
+        'routePrefix' => '/api/v3/auth/sms/register',
         'requestBody' => [
             'country_code' => 'PT',
             'phone_number' => '1234567890',
@@ -627,6 +789,7 @@ The client must send the current valid JWT in the request body as "current_token
         ]
     ],
     'api_v3_auth_sms_reset' => [
+        'routePrefix' => '/api/v3/auth/sms/reset',
         'requestBody' => [
             'country_code' => 'PT',
             'phone_number' => '1234567890',
@@ -664,6 +827,7 @@ The client must send the current valid JWT in the request body as "current_token
 
     ],
     'api_v3_turnstile_html_android' => [
+        'routePrefix' => '/api/v3/turnstile/android',
         'requestBody' => [
             'success' => true,
             'data' => '<html><body><h1>Turnstile Configuration</h1><p>This is the required HTML 
@@ -691,6 +855,7 @@ configuration for the Android App.</p></body></html>'
         ]
     ],
     'api_v3_turnstile_html_ios' => [
+        'routePrefix' => '/api/v3/turnstile/ios',
         'requestBody' => [
             'success' => true,
             'data' => '<html><body><h1>Turnstile Configuration</h1><p>This is the required HTML 
@@ -717,64 +882,8 @@ configuration for the IOS App.</p></body></html>'
             ]
         ]
     ],
-    'api_v3_twoFA_request' => [
-        'requestBody' => [
-            'uuid' => 'user-uuid-example',
-            'password' => 'user-password-example',
-            'turnstile_token' => 'valid_test_token'
-        ],
-        'description' => 'This endpoint provides Two-Factor Authentication code only for portal accounts.
-                 To be able to request a authentication code the account needs to have setup a 2fa with email or SMS.',
-        'responses' => [
-            200 => [
-                // phpcs:disable Generic.Files.LineLength.TooLong
-                json_decode(
-                    '{
-                              "success": true,
-                              "data": {
-                                "message": "Two-Factor authentication code successfully sent. You have X attempts remaining to request a new one."
-                              }
-                            }',
-                    false,
-                    512,
-                    JSON_THROW_ON_ERROR
-                )
-                // phpcs:enable
-            ],
-            400 => [
-                'CAPTCHA validation failed',
-                'Missing required fields: uuid, password or turnstile_token',
-                // phpcs:disable Generic.Files.LineLength.TooLong
-                'Missing required configuration setting: TWO_FACTOR_AUTH_RESEND_INTERVAL TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS',
-                // phpcs:enable
-                'Invalid json format',
-                'Invalid credentials'
-            ],
-            401 => [
-                'Invalid credentials',
-                'Invalid credentials'
-            ],
-            403 => [
-                'User account is not verified!',
-                'User account is banned from the system!',
-                'Invalid account type. Please only use email/phone number accounts from the portal',
-                // phpcs:disable Generic.Files.LineLength.TooLong
-                'Invalid Two-Factor Authentication configuration Please ensure that 2FA is set up using either email or SMS for this account',
-                'The Two-Factor Authentication (2FA) configuration is incomplete. Please set up 2FA using either email or SMS',
-                'Your request cannot be processed at this time due to a pending action. If your account is active, re-login to complete the action',
-                // phpcs:enable
-            ],
-            429 => [
-                'You need to wait %d seconds before asking for a new code.',
-                // phpcs:disable Generic.Files.LineLength.TooLong
-                'Too many attempts. You have exceeded the limit of %d attempts. Please wait %d minutes before trying again.',
-                'Too many validation attempts. You have exceeded the limit of %d attempts. Please wait %d minute(s) before trying again.',
-                // phpcs:enable
-            ]
-        ]
-
-    ],
     'api_v3_user_account_deletion' => [
+        'routePrefix' => '/api/v3/userAccount/deletion',
         'requestBody' => [
             'Portal Account' => [
                 'password' => 'user-password-example'
