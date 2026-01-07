@@ -34,7 +34,6 @@ class ProfileController extends AbstractController
         private readonly EventActions $eventActions,
         private readonly TokenStorageInterface $tokenStorage,
         private readonly JWTTokenGenerator $JWTTokenGenerator,
-        private readonly UserStatusChecker $userStatusChecker,
         private readonly UserRadiusProfileRepository $userRadiusProfileRepository,
         private readonly RadiusUserRepository $radiusUserRepository,
         private readonly UserExternalAuthRepository $userExternalAuthRepository,
@@ -68,8 +67,6 @@ class ProfileController extends AbstractController
         if (!$this->JWTTokenGenerator->isJWTTokenValid($jwtTokenString)) {
             return new BaseResponse(401, null, 'JWT Token is invalid!')->toResponse();
         }
-
-        $statusCheckerResponse = $this->userStatusChecker->checkUserStatus($currentUser);
 
         $errors = [];
         // Check for missing fields and add them to the array errors
@@ -201,8 +198,6 @@ class ProfileController extends AbstractController
         if (!$this->JWTTokenGenerator->isJWTTokenValid($jwtTokenString)) {
             return new BaseResponse(401, null, 'JWT Token is invalid!')->toResponse();
         }
-
-        $statusCheckerResponse = $this->userStatusChecker->checkUserStatus($currentUser);
 
         $errors = [];
         // Check for missing fields and add them to the array errors
