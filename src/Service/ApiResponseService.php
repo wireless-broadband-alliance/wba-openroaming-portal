@@ -832,8 +832,7 @@ readonly class ApiResponseService
                     'current_token' => 'currentToken',
                 ],
                 'description' => 'Refreshes the JWT token for an authenticated user.
-The client must send the current valid JWT in the request body as "current_token".
-The JWT expiration is in seconds.',
+The client must send the current valid JWT in the request body as "current_token".',
                 'isProtected' => true,
                 'responses' => [
                     200 => [
@@ -854,9 +853,7 @@ The JWT expiration is in seconds.',
                         'The current_token is required'
                     ],
                     401 => [
-                        'Invalid or expired JWT token',
-                        'User not found',
-                        'Token invalidated due to password change'
+                        'Invalid token',
                     ],
                     500 => [
                         'Token generation failed',
