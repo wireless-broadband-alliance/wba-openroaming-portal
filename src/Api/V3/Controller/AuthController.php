@@ -147,10 +147,6 @@ class AuthController extends AbstractController
             return new BaseResponse(401, null, 'Invalid credentials')->toResponse(); # Unauthorized Request Response
         }
 
-        $statusCheckerResponse = $this->userStatusChecker->checkUserStatus($user);
-        if ($statusCheckerResponse instanceof BaseResponse) {
-            return $statusCheckerResponse->toResponse();
-        }
 
         $twoFAEnforcementResult = $this->twoFAAPIService->twoFAEnforcementChecker(
             $user,
@@ -399,10 +395,6 @@ class AuthController extends AbstractController
                 $this->entityManager->flush();
             }
 
-            $statusCheckerResponse = $this->userStatusChecker->checkUserStatus($user);
-            if ($statusCheckerResponse instanceof BaseResponse) {
-                return $statusCheckerResponse->toResponse();
-            }
 
             $twoFAEnforcementResult = $this->twoFAAPIService->twoFAEnforcementChecker(
                 $user,
@@ -503,10 +495,6 @@ class AuthController extends AbstractController
                 )->toResponse();
             }
 
-            $statusCheckerResponse = $this->userStatusChecker->checkUserStatus($user);
-            if ($statusCheckerResponse instanceof BaseResponse) {
-                return $statusCheckerResponse->toResponse();
-            }
 
             $twoFAEnforcementResult = $this->twoFAAPIService->twoFAEnforcementChecker(
                 $user,
@@ -613,10 +601,6 @@ class AuthController extends AbstractController
                 )->toResponse();
             }
 
-            $statusCheckerResponse = $this->userStatusChecker->checkUserStatus($user);
-            if ($statusCheckerResponse instanceof BaseResponse) {
-                return $statusCheckerResponse->toResponse();
-            }
 
             $twoFAEnforcementResult = $this->twoFAAPIService->twoFAEnforcementChecker(
                 $user,
