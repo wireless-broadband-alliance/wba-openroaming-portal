@@ -2,7 +2,7 @@
 
 # Release V1.9.0
 
-- Added a new configuration page, to manage the black-listed domains used for registration and authentication with Google, Microsft and Simple Email/Password.
+- Added a new configuration page, to manage the black-listed domains used for registration and authentication with Google, Microsoft and Simple Email/Password.
 - Increased the level of php-stan to the max level, for more fixes with security updates.
 - New endpoint for API V2 only - New endpoint for jwt token refresh for apps.
 - Profile download instructions page.
