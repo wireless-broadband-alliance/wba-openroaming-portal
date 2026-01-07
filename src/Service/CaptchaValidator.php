@@ -105,6 +105,9 @@ readonly class CaptchaValidator
         }
     }
 
+    /**
+     * @return array{success: false, error: string}|array{success: true}
+     */
     public function validateCredentials(string $secretKey): array
     {
         try {
