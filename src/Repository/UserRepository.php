@@ -114,6 +114,55 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
      *
      * @return User[]
      */
+    public function searchWithFilter(
+        string $filter,
+        ?string $sort,
+        ?string $order,
+        ?string $searchTerm = null
+    ): array {
+        $qb = $this->createQueryBuilder('u');
+
+        $qb->where('u.roles NOT LIKE :admin')
+            ->andWhere('u.roles NOT LIKE :superAdmin')
+            ->setParameter('admin', '%ROLE_ADMIN%')
+            ->setParameter('superAdmin', '%ROLE_SUPER_ADMIN%');
+
+
+        // Add filters based on verification status
+        if ($filter === UserVerificationStatus::VERIFIED->value) {
+            $qb->andWhere('u.isVerified = :Verified')
+                ->setParameter(UserVerificationStatus::VERIFIED->value, true);
+        } elseif ($filter === UserVerificationStatus::BANNED->value) {
+            $qb->andWhere('u.bannedAt IS NOT NULL');
+        }
+
+        // Exclude deleted users
+        $qb->andWhere($qb->expr()->isNull('u.deletedAt'));
+
+        $qb->leftJoin('u.userExternalAuths', 'ua');
+
+        // Apply the search term, if provided
+        if ($searchTerm) {
+            $qb->andWhere(
+                $qb->expr()->orX(
+                    'u.uuid LIKE :searchTerm',
+                    'u.email LIKE :searchTerm',
+                    'u.first_name LIKE :searchTerm',
+                    'u.last_name LIKE :searchTerm',
+                )
+            )->setParameter('searchTerm', '%' . $searchTerm . '%');
+        }
+
+        $field = $sort === 'uuid' ? 'u.uuid' : 'u.createdAt';
+        // Order by creation date (newest first)
+        return $qb->orderBy($field, $order)
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * @return array<int, User>
+     */
     public function searchAdminUsers(
         string $filter,
         ?string $sort,
