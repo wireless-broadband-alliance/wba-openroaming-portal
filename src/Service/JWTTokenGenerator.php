@@ -87,7 +87,7 @@ readonly class JWTTokenGenerator
 
         // Extract the UUID and derived password nonce from the token
         $uuid = $decodedPayload['uuid'] ?? null;
-        $tokenNonce = $decodedPayload['password_identifier'] ?? null;
+        $tokenNonce = $decodedPayload['nounce'] ?? null;
 
         // Token must contain both UUID and nonce
         if (!$uuid || !$tokenNonce) {
