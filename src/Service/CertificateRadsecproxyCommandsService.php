@@ -16,55 +16,63 @@ readonly class CertificateRadsecproxyCommandsService
         private TranslatorInterface $translator,
         private EntityManagerInterface $entityManager,
     ) {
-      // Local path where RADSecProxy expects the certs
+        // Local path where RADSecProxy expects the certs
         $this->certDir = '~/wba-openroaming-connector/hybrid/configs/radsecproxy/certs/';
     }
 
-  /**
-   * Generate the shell commands to update RADSecProxy certificates.
-   * @param array $certificateSet Array of certificates already fetched from the controller
-   */
+    /**
+     * Generate the shell commands to update RADSecProxy certificates.
+     * @param array<int, array{name: string, content?: string}> $certificateSet
+     *
+     * @return array<int, array{description: string, command: string}>
+     */
     public function getRenewCommands(array $certificateSet): array
     {
         if ($certificateSet === []) {
             return [
-            [
-              'description' => $this->translator->trans(
-                  'no_active_process',
-                  domain: 'CertificateRadsecCommandsService'
-              ),
-              'command' => '# No action required.',
-            ],
+                [
+                    'description' => $this->translator->trans(
+                        'no_active_process',
+                        domain: 'CertificateRadsecCommandsService'
+                    ),
+                    'command' => '# No action required.',
+                ],
             ];
         }
 
         return $this->generateCommands($certificateSet);
     }
 
+
+    /**
+     * @param array<int, array{name: string, content?: string}> $certificates
+     *
+     * @return array<int, array{description: string, command: string}>
+     */
     private function generateCommands(array $certificates): array
     {
         $commands = [];
 
-      // Remove old certificate files
+        // Remove old certificate files
         $commands[] = [
-        'description' => $this->translator->trans(
-            'remove_old_files',
-            domain: 'CertificateRadsecCommandsService'
-        ),
-        'command' => sprintf(
-            'rm -f %sclient.pem %skey.pem',
-            $this->certDir,
-            $this->certDir
-        ),
+            'description' => $this->translator->trans(
+                'remove_old_files',
+                domain: 'CertificateRadsecCommandsService'
+            ),
+            'command' => sprintf(
+                'rm -f %sclient.pem %skey.pem',
+                $this->certDir,
+                $this->certDir
+            ),
         ];
 
-      // Map Radsecproxy certificate enum to filenames
+        // Map Radsecproxy certificate enum to filenames
         $radsecFileMap = [
-        CertificateFileName::CLIENT_PEM->value => CertificateFileName::CLIENT_PEM_FILE->value,
-        CertificateFileName::KEY_PEM->value => CertificateFileName::KEY_PEM_FILE->value,
+            CertificateFileName::CLIENT_PEM->value => CertificateFileName::CLIENT_PEM_FILE->value,
+            CertificateFileName::KEY_PEM->value => CertificateFileName::KEY_PEM_FILE->value,
         ];
 
-      // Write new certificates
+        // Write new certificates
         foreach ($certificates as $cert) {
             $content = $cert['content'] ?? null;
             if (!$content) {
@@ -73,57 +81,57 @@ readonly class CertificateRadsecproxyCommandsService
 
             $content = str_replace("'", "'\"'\"'", $content);
 
-          // $cert['name'] is either 'Client' or 'Key'
+            // $cert['name'] is either 'Client' or 'Key'
             $targetFile = $radsecFileMap[$cert['name']] ?? null;
 
-          // Skip unknown certificate types
+            // Skip unknown certificate types
             if ($targetFile === null) {
                 continue;
             }
 
             $commands[] = [
-            'description' => $this->translator->trans(
-                'write_cert_file',
-                ['%filename%' => $targetFile],
-                'CertificateRadsecCommandsService'
-            ),
-              'command' => sprintf("echo '%s' > %s%s", $content, $this->certDir, $targetFile),
+                'description' => $this->translator->trans(
+                    'write_cert_file',
+                    ['%filename%' => $targetFile],
+                    'CertificateRadsecCommandsService'
+                ),
+                'command' => sprintf("echo '%s' > %s%s", $content, $this->certDir, $targetFile),
             ];
         }
 
-      // Rebuild and restart container with new certs
+        // Rebuild and restart container with new certs
         $commands[] = [
-        'description' => $this->translator->trans(
-            'rebuild_and_start_container',
-            domain: 'CertificateRadsecCommandsService'
-        ),
-        'command' => 'docker compose up -d --build radsecproxy',
+            'description' => $this->translator->trans(
+                'rebuild_and_start_container',
+                domain: 'CertificateRadsecCommandsService'
+            ),
+            'command' => 'docker compose up -d --build radsecproxy',
         ];
 
-      // Verify container status
+        // Verify container status
         $commands[] = [
-        'description' => $this->translator->trans(
-            'verify_container',
-            domain: 'CertificateRadsecCommandsService'
-        ),
-        'command' => 'docker compose ps radsecproxy',
+            'description' => $this->translator->trans(
+                'verify_container',
+                domain: 'CertificateRadsecCommandsService'
+            ),
+            'command' => 'docker compose ps radsecproxy',
         ];
 
-      // Display last logs
+        // Display last logs
         $commands[] = [
-        'description' => $this->translator->trans(
-            'check_logs',
-            domain: 'CertificateRadsecCommandsService'
-        ),
-        'command' => 'docker compose logs --tail=50 radsecproxy',
+            'description' => $this->translator->trans(
+                'check_logs',
+                domain: 'CertificateRadsecCommandsService'
+            ),
+            'command' => 'docker compose logs --tail=50 radsecproxy',
         ];
 
         return $commands;
     }
 
-  /**
-   * Persist the test result to the database
-   */
+    /**
+     * Persist the test result to the database
+     */
     public function updateRadsecproxyTestResult(
         CertificateSetupProcess $process,
         CertificateTestResult $result
