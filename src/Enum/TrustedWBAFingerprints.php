@@ -11,6 +11,9 @@ enum TrustedWBAFingerprints: string
     case OPENROAMING_POLICY_C7_CA = 'f0f56abf511f40c9b0931efdf983e53a1bca2bd27d8e8f021ae6b283f53f2843';
     case OPENROAMING_CISCO_POLICY_CA = '493670caabfa00055e579915382c83eae3a3a9bbd1d8ad95767275a6b2cd008f';
 
+    /**
+     * @return string[]
+     */
     public static function all(): array
     {
         return array_map(static fn($c) => $c->value, self::cases());
