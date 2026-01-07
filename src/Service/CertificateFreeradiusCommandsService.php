@@ -21,9 +21,16 @@ readonly class CertificateFreeradiusCommandsService
         $this->certDir = '~/wba-openroaming-connector/hybrid/configs/freeradius/certs/';
     }
 
-  /**
-   * Generate the shell commands to update Freeradius certificates.
-   */
+    /**
+     * @param array<string, array{
+     *     content?: string|null
+     * }> $certificateSet
+     *
+     * @return list<array{
+     *     description: string,
+     *     command: string
+     * }>
+     */
     public function getRenewCommands(array $certificateSet): array
     {
         if ($certificateSet === []) {
@@ -41,6 +48,16 @@ readonly class CertificateFreeradiusCommandsService
         return $this->generateCommands($certificateSet);
     }
 
+    /**
+     * @param array<string, array{
+     *     content?: string|null
+     * }> $certificates
+     *
+     * @return list<array{
+     *     description: string,
+     *     command: string
+     * }>
+     */
     private function generateCommands(array $certificates): array
     {
         $commands = [];
