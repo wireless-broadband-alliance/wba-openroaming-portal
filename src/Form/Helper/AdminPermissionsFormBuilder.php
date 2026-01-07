@@ -14,6 +14,9 @@ readonly class AdminPermissionsFormBuilder
     ) {
     }
 
+    /**
+     * @param FormBuilderInterface<mixed> $builder
+     */
     public function addPermissions(FormBuilderInterface $builder): void
     {
         $permissions = [
@@ -37,6 +40,9 @@ readonly class AdminPermissionsFormBuilder
         }
     }
 
+    /**
+     * @param FormBuilderInterface<mixed> $builder
+     */
     private function addPermissionField(
         FormBuilderInterface $builder,
         string $field,
