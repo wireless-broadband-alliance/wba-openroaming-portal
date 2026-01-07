@@ -5,11 +5,9 @@
 - Installation Widget implementation (For first time project setup / for later use on the admin page configuration).
 - Certificate Management for the admin page (for radsecproxy/freeradius certificates)
 - Added a new configuration page, to manage the black-listed domains used for registration and authentication with
-  Google, Microsft and Simple Email/Password.
+  Google, Microsoft and Simple Email/Password.
 - Added a new user role, Super Admin, to allow the management of the platform and the other admins.
 - Added new pages to configure the permissions of the platform admins.
-- Added a new configuration page, to manage the black-listed domains used for registration and authentication with
-  Google, Microsft and Simple Email/Password.
 - Increased the level of php-stan to the max level, for more fixes with security updates.
 - New endpoint for API V2 only - New endpoint for jwt token refresh for apps.
 - Profile download instructions page.
