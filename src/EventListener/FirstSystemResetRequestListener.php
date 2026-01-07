@@ -10,6 +10,8 @@ use App\Enum\SessionStatus;
 use App\Repository\CertificateSetupProcessRepository;
 use App\Repository\InstallationProgressRepository;
 use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\HttpFoundation\Session\Flash\FlashBagInterface;
+use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -142,7 +144,13 @@ readonly class FirstSystemResetRequestListener
         $session->set(SessionStatus::INSTALLATION_VERIFICATION->value, true);
         $session->set(SessionStatus::CERTIFICATE_STARTED->value, true);
         $session->set(SessionStatus::CERTIFICATE_VERIFICATION->value, true);
-        $session->getFlashBag()->add('success', $flashMessage);
+        if ($session instanceof Session) {
+            $session->getFlashBag()->add('success', $flashMessage);
+        } else {
+            /** @var FlashBagInterface $flashBag */
+            $flashBag = $event->getRequest()->getSession()->getBag('flashes');
+            $flashBag->add('success', $flashMessage);
+        }
 
         $url = $this->urlGenerator->generate($routeName);
         $response = new RedirectResponse($url);
