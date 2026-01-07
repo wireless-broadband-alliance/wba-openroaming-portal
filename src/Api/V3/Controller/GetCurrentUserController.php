@@ -57,9 +57,6 @@ class GetCurrentUserController extends AbstractController
             }
 
             $statusCheckerResponse = $this->userStatusChecker->checkUserStatus($currentUser);
-            if ($statusCheckerResponse instanceof BaseResponse) {
-                return $statusCheckerResponse->toResponse();
-            }
 
             // Utilize the toApiResponse method to generate the response content
             $content = $currentUser->toApiResponse([
