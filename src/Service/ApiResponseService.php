@@ -35,13 +35,7 @@ readonly class ApiResponseService
                 continue;
             }
 
-            $responseData = null;
-            foreach ($responses as $doc) {
-                if (($doc['routePrefix'] ?? null) === $path) {
-                    $responseData = $doc;
-                    break;
-                }
-            }
+            $responseData = array_find($responses, fn($doc) => ($doc['routePrefix'] ?? null) === $path);
 
             // Skip undocumented routes
             if ($responseData === null) {
