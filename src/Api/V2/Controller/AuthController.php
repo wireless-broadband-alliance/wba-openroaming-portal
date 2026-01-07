@@ -181,33 +181,40 @@ class AuthController extends AbstractController
             }
 
             // --- TOTP / OTP validation ---
-            if (
-                $user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::TOTP->value &&
-                (!$this->twoFAService->validateOTPCodes($user, $data['twoFACode']) &&
-                    !$this->TOTPService->verifyTOTP(
-                        $user->getTwoFAsecret(),
-                        $data['twoFACode']
-                    ))
-            ) {
-                return new BaseResponse(
-                    401,
-                    null,
-                    $twoFAEnforcementResult['message']
-                )->toResponse();
-            }
+            if ($user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::TOTP->value) {
+                $isValidBackupCode = $this->twoFAService->validateOTPCodes(
+                    $user,
+                    $data['twoFACode']
+                );
+                $isValidTotpCode = $this->TOTPService->verifyTOTP(
+                    $user->getTwoFAsecret(),
+                    $data['twoFACode']
+                );
 
-            // --- Email/SMS / OTP validation ---
-            if ($isLoginWithUUIDOnly === OperationMode::ON->value) {
-                // If LOGIN_WITH_UUID_ONLY is ON, skip this entire 2FA validation for email/SMS accounts
-            } elseif (
-                !$this->twoFAService->validate2FACode($user, $data['twoFACode']) &&
-                !$this->twoFAService->validateOTPCodes($user, $data['twoFACode'])
-            ) {
-                return new BaseResponse(
-                    401,
-                    null,
-                    $twoFAEnforcementResult['message']
-                )->toResponse();
+                if (!$isValidBackupCode && !$isValidTotpCode) {
+                    return new BaseResponse(
+                        401,
+                        null,
+                        $twoFAEnforcementResult['message']
+                    )->toResponse();
+                }
+            } else { // --- Email/SMS / OTP validation ---
+                $isValidBackupCode = $this->twoFAService->validateOTPCodes(
+                    $user,
+                    $data['twoFACode']
+                );
+                $isValid2FACode = $this->twoFAService->validate2FACode(
+                    $user,
+                    $data['twoFACode']
+                );
+
+                if (!$isValidBackupCode && !$isValid2FACode) {
+                    return new BaseResponse(
+                        401,
+                        null,
+                        $twoFAEnforcementResult['message']
+                    )->toResponse();
+                }
             }
         }
 
