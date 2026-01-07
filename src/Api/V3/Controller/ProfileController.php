@@ -38,7 +38,8 @@ class ProfileController extends AbstractController
         private readonly RadiusUserRepository $radiusUserRepository,
         private readonly UserExternalAuthRepository $userExternalAuthRepository,
         private readonly ExpirationProfileService $expirationProfileService,
-        private readonly RsaEncryptionService $rsaEncryptionService
+        private readonly RsaEncryptionService $rsaEncryptionService,
+        private readonly UserStatusChecker $userStatusChecker
     ) {
     }
 
@@ -66,6 +67,11 @@ class ProfileController extends AbstractController
 
         if (!$this->JWTTokenGenerator->isJWTTokenValid($jwtTokenString)) {
             return new BaseResponse(401, null, 'JWT Token is invalid!')->toResponse();
+        }
+
+        $statusCheckerResponse = $this->userStatusChecker->checkUserStatus($currentUser);
+        if ($statusCheckerResponse instanceof BaseResponse) {
+            return $statusCheckerResponse->toResponse();
         }
 
         $errors = [];
