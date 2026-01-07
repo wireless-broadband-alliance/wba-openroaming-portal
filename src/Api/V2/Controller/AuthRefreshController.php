@@ -43,18 +43,18 @@ class AuthRefreshController extends AbstractController
         // Check token expiration
         $exp = $decodedPayload['exp'] ?? null;
         if (!$exp || $exp < time()) {
-            return new BaseResponse(401, null, 'Token has expired')->toResponse();
+            return new BaseResponse(401, null, 'Invalid token')->toResponse();
         }
 
         // Find the user by UUID
         $uuid = $decodedPayload['uuid'] ?? null;
         if (!$uuid) {
-            return new BaseResponse(401, null, 'Invalid token payload')->toResponse();
+            return new BaseResponse(401, null, 'Invalid token')->toResponse();
         }
 
         $user = $this->userRepository->findOneBy(['uuid' => $uuid]);
         if (!$user) {
-            return new BaseResponse(401, null, 'User not found')->toResponse();
+            return new BaseResponse(401, null, 'Invalid token')->toResponse();
         }
 
         // Generate new token
