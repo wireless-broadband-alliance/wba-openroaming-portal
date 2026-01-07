@@ -8,6 +8,9 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Vich\UploaderBundle\Form\Type\VichFileType;
 
+/**
+ * @extends AbstractType<CertificateRadSecUploadDTO>
+ */
 class CertificateRadsecUploadType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
