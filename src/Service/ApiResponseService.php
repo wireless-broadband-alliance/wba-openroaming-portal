@@ -827,6 +827,40 @@ readonly class ApiResponseService
             ]
         ];
         $apiResponseV2 = [
+            'api_v2_auth_refresh' => [
+                'requestBody' => [
+                    'current_token' => 'currentToken',
+                ],
+                'description' => 'Refreshes the JWT token for an authenticated user.
+The client must send the current valid JWT in the request body as "current_token".',
+                'isProtected' => true,
+                'responses' => [
+                    200 => [
+                        'default' => json_decode(
+                            '{
+                    "success": true,
+                    "data": {
+                        "auth_token": "newAuthToken"
+                    }
+                }',
+                            true,
+                            512,
+                            JSON_THROW_ON_ERROR
+                        ),
+                    ],
+                    400 => [
+                        'Missing or invalid request body',
+                        'The current_token is required'
+                    ],
+                    401 => [
+                        'Invalid token',
+                    ],
+                    500 => [
+                        'Token generation failed',
+                        'JWT key files are missing. Please ensure both private and public keys exist.'
+                    ]
+                ],
+            ],
             'api_v2_auth_local' => [
                 'requestBody' => [
                     'uuid' => 'user-uuid-example',
@@ -1307,7 +1341,8 @@ readonly class ApiResponseService
                     ],
                     500 => [
                         'Failed to encrypt the password',
-                        'Encryption succeeded but no encrypted data was returned.'                    ]
+                        'Encryption succeeded but no encrypted data was returned.'
+                    ]
                 ]
             ],
             'api_v2_auth_local_register' => [
@@ -1356,7 +1391,7 @@ readonly class ApiResponseService
                 password reset if the conditions are met.',
                 'responses' => [
                     200 => [
-                      // phpcs:disable Generic.Files.LineLength.TooLong
+                        // phpcs:disable Generic.Files.LineLength.TooLong
                         json_decode(
                             '{
                               "success": true,
@@ -1368,7 +1403,7 @@ readonly class ApiResponseService
                             512,
                             JSON_THROW_ON_ERROR
                         )
-                      // phpcs:enable
+                        // phpcs:enable
                     ],
                     400 => [
                         'Invalid email format.',

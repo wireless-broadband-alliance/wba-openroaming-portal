@@ -117,7 +117,6 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
     /** @phpstan-ignore-next-line */
     private Collection $oTPcodes;
 
-
     public function __construct()
     {
         $this->userRadiusProfiles = new ArrayCollection();
