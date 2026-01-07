@@ -772,7 +772,6 @@ configuration for the IOS App.</p></body></html>'
                 // phpcs:enable
             ]
         ]
-
     ],
     'api_v2_user_account_deletion' => [
         'requestBody' => [
