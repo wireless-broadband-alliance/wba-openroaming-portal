@@ -70,9 +70,6 @@ class ProfileController extends AbstractController
         }
 
         $statusCheckerResponse = $this->userStatusChecker->checkUserStatus($currentUser);
-        if ($statusCheckerResponse instanceof BaseResponse) {
-            return $statusCheckerResponse->toResponse();
-        }
 
         $errors = [];
         // Check for missing fields and add them to the array errors
@@ -206,9 +203,6 @@ class ProfileController extends AbstractController
         }
 
         $statusCheckerResponse = $this->userStatusChecker->checkUserStatus($currentUser);
-        if ($statusCheckerResponse instanceof BaseResponse) {
-            return $statusCheckerResponse->toResponse();
-        }
 
         $errors = [];
         // Check for missing fields and add them to the array errors
