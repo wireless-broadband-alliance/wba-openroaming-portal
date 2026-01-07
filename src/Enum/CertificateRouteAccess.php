@@ -48,6 +48,9 @@ enum CertificateRouteAccess: string
         };
     }
 
+    /**
+     * @return list<CertificateRouteAccess>
+     */
     public static function orderedStages(): array
     {
         return [

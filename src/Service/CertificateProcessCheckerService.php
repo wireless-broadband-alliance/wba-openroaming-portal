@@ -16,17 +16,25 @@ readonly class CertificateProcessCheckerService
     ) {
     }
 
-  /**
-   * Get the currently in-progress certificate process (if any)
-   */
+    /**
+     * Get the currently in-progress certificate process (if any)
+     */
     public function getCurrentProcess(): ?CertificateSetupProcess
     {
         return $this->certificateSetupProcessRepository->getLatestProcess();
     }
 
-  /**
-   * Returns the stages and their completion status plus the process entity
-   */
+    /**
+     * Returns the stages and their completion status plus the process entity
+     * @return array{
+     *     active: false,
+     *     stages: array<string, bool>
+     * }|array{
+     *     active: true,
+     *     stages: array<string, bool>,
+     *     process: CertificateSetupProcess
+     * }
+     */
     public function getProcessState(): array
     {
         $process = $this->getCurrentProcess();
@@ -37,8 +45,8 @@ readonly class CertificateProcessCheckerService
             $process->getStatus() === ProcessStatusType::COMPLETED
         ) {
             return [
-            'active' => false,
-            'stages' => [],
+                'active' => false,
+                'stages' => [],
             ];
         }
 
@@ -46,41 +54,42 @@ readonly class CertificateProcessCheckerService
         foreach (CertificateRouteAccess::orderedStages() as $stage) {
             $stages[$stage->value] = match ($stage) {
                 CertificateRouteAccess::RADSECPROXY_UPLOAD =>
-                $process->getRadsecproxyFormCompletedAt() instanceof DateTimeImmutable,
+                    $process->getRadsecproxyFormCompletedAt() instanceof DateTimeImmutable,
 
                 CertificateRouteAccess::RADSECPROXY_CONFIG =>
-                $process->getRadsecproxyConfigAppliedAt() instanceof DateTimeImmutable,
+                    $process->getRadsecproxyConfigAppliedAt() instanceof DateTimeImmutable,
 
                 CertificateRouteAccess::RADSECPROXY_TEST =>
-                $process->getRadsecproxyTestResult() === CertificateTestResult::PASSED,
+                    $process->getRadsecproxyTestResult() === CertificateTestResult::PASSED,
 
                 CertificateRouteAccess::FREERADIUS_SELECTION =>
-                $process->getFreeradiusFormCompletedAt() instanceof DateTimeImmutable,
+                    $process->getFreeradiusFormCompletedAt() instanceof DateTimeImmutable,
 
                 CertificateRouteAccess::FREERADIUS_UPLOAD =>
-                $process->getFreeradiusFormCompletedAt() instanceof DateTimeImmutable,
+                    $process->getFreeradiusFormCompletedAt() instanceof DateTimeImmutable,
 
                 CertificateRouteAccess::FREERADIUS_AUTO_RENEW =>
-                $process->getFreeradiusFormCompletedAt() instanceof DateTimeImmutable,
+                    $process->getFreeradiusFormCompletedAt() instanceof DateTimeImmutable,
 
                 CertificateRouteAccess::FREERADIUS_CONFIG =>
-                $process->getFreeradiusConfigAppliedAt() instanceof DateTimeImmutable,
+                    $process->getFreeradiusConfigAppliedAt() instanceof DateTimeImmutable,
 
                 CertificateRouteAccess::FREERADIUS_TEST =>
-                $process->getFreeradiusTestResult() === CertificateTestResult::PASSED,
+                    $process->getFreeradiusTestResult() === CertificateTestResult::PASSED,
             };
         }
 
         return [
-        'active' => true,
-        'stages' => $stages,
-        'process' => $process,
+            'active' => true,
+            'stages' => $stages,
+            'process' => $process,
         ];
     }
 
-  /**
-   * Get Symfony route of first incomplete stage
-   */
+    /**
+     * Get Symfony route of first incomplete stage
+     * @param array<string, bool> $stages
+     */
     public function getNextRequiredRoute(array $stages): ?string
     {
         foreach (CertificateRouteAccess::orderedStages() as $stage) {
@@ -92,13 +101,15 @@ readonly class CertificateProcessCheckerService
         return null;
     }
 
-  /**
-   * Get the first incomplete stage (enum)
-   */
+    /**
+     * Get the first incomplete stage (enum)
+     */
     public function getProcessCurrentStage(): ?CertificateRouteAccess
     {
         $state = $this->getProcessState();
-        $stages = $state['stages'] ?? [];
+
+        /** @var array<string, bool> $stages */
+        $stages = $state['stages'];
 
         return array_find(
             CertificateRouteAccess::orderedStages(),
@@ -106,9 +117,9 @@ readonly class CertificateProcessCheckerService
         );
     }
 
-  /**
-   * Returns index of a stage inside orderedStages()
-   */
+    /**
+     * Returns index of a stage inside orderedStages()
+     */
     public function indexOf(CertificateRouteAccess $stage): int
     {
         $ordered = CertificateRouteAccess::orderedStages();
