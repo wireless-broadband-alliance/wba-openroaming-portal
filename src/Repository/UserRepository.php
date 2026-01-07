@@ -100,68 +100,20 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         ->getResult();
     }
 
-  /**
-   * @method array searchWithFilter(string string $filter, ?string $searchTerm = null)
-   *
-   * Searches for users based on provided filter and optional search term.
-   *
-   * Filters out users with roles matching 'ROLE_ADMIN'.
-   * Applies additional filtering based on verification status.
-   * Filters out users who have a non-null deletedAt value.
-   * Joins the SAML provider data if applicable.
-   * Supports partial matching for UUID, email, first name, last name, or SAML provider name using a search term.
-   *
-   * @param string $filter The filter criterion (e.g., verified, banned).
-   * @param string|null $searchTerm An optional partial search term to match user attributes or SAML provider name.
-   *
-   * @return User[] A list of matched users, ordered by creation date in descending order.
-   */
-    public function searchWithFilter(
-        string $filter,
-        ?string $sort,
-        ?string $order,
-        ?string $searchTerm = null
-    ): array {
-        $qb = $this->createQueryBuilder('u');
-
-        $qb->where('u.roles NOT LIKE :admin')
-        ->andWhere('u.roles NOT LIKE :superAdmin')
-        ->setParameter('admin', '%ROLE_ADMIN%')
-        ->setParameter('superAdmin', '%ROLE_SUPER_ADMIN%');
-
-
-      // Add filters based on verification status
-        if ($filter === UserVerificationStatus::VERIFIED->value) {
-            $qb->andWhere('u.isVerified = :Verified')
-            ->setParameter(UserVerificationStatus::VERIFIED->value, true);
-        } elseif ($filter === UserVerificationStatus::BANNED->value) {
-            $qb->andWhere('u.bannedAt IS NOT NULL');
-        }
-
-      // Exclude deleted users
-        $qb->andWhere($qb->expr()->isNull('u.deletedAt'));
-
-        $qb->leftJoin('u.userExternalAuths', 'ua');
-
-      // Apply the search term, if provided
-        if ($searchTerm) {
-            $qb->andWhere(
-                $qb->expr()->orX(
-                    'u.uuid LIKE :searchTerm',
-                    'u.email LIKE :searchTerm',
-                    'u.first_name LIKE :searchTerm',
-                    'u.last_name LIKE :searchTerm',
-                )
-            )->setParameter('searchTerm', '%' . $searchTerm . '%');
-        }
-
-        $field = $sort === 'uuid' ? 'u.uuid' : 'u.createdAt';
-      // Order by creation date (newest first)
-        return $qb->orderBy($field, $order)
-        ->getQuery()
-        ->getResult();
-    }
-
+    /**
+     * Searches for users based on provided filter and optional search term.
+     *
+     * Filters out admin/super admin roles.
+     * Applies verification / banned filters.
+     * Excludes soft-deleted users.
+     *
+     * @param string      $filter
+     * @param string|null $sort
+     * @param string|null $order
+     * @param string|null $searchTerm
+     *
+     * @return User[]
+     */
     public function searchAdminUsers(
         string $filter,
         ?string $sort,
