@@ -27,7 +27,7 @@ class ApiController extends AbstractController
     #[Route('/api/v1', name: 'api_v1_docs')]
     public function versionOne(): Response
     {
-        $routes = $this->apiResponseService->getRoutesByPrefix(ApiVersion::API_V1->value);
+        $routes = $this->apiResponseService->getRoutesByPrefix(ApiVersion::API_V1);
         $commonMessages = $this->apiResponseService->getCommonResponses();
 
         $settings = [
@@ -55,7 +55,7 @@ class ApiController extends AbstractController
     #[Route('/api/v2', name: 'api_v2_docs')]
     public function versionTwo(): Response
     {
-        $routes = $this->apiResponseService->getRoutesByPrefix(ApiVersion::API_V2->value);
+        $routes = $this->apiResponseService->getRoutesByPrefix(ApiVersion::API_V2);
         $commonMessages = $this->apiResponseService->getCommonResponses();
 
         $settings = [
@@ -83,7 +83,8 @@ class ApiController extends AbstractController
     #[Route('/api/v3', name: 'api_v3_docs')]
     public function versionTree(): Response
     {
-        $routes = $this->apiResponseService->getRoutesByPrefix(ApiVersion::API_V3->value);
+        $routes = $this->apiResponseService->getRoutesByPrefix(ApiVersion::API_V3);
+        dd($routes);
         $commonMessages = $this->apiResponseService->getCommonResponses();
 
         $settings = [

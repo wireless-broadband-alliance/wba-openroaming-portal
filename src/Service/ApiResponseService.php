@@ -33,34 +33,47 @@ readonly class ApiResponseService
 
         // Map enum to prefix
         $prefixMap = [
-            ApiVersion::API_V1 => '/api/v1',
-            ApiVersion::API_V2 => '/api/v2',
-            ApiVersion::API_V3 => '/api/v3',
+            ApiVersion::API_V1->value => '/api/v1',
+            ApiVersion::API_V2->value => '/api/v2',
+            ApiVersion::API_V3->value => '/api/v3',
         ];
 
-        $prefix = $prefixMap[$version];
+        $prefix = $prefixMap[$version->value];
 
         foreach ($routes as $name => $route) {
             $path = $route->getPath();
 
             if ($path !== $prefix && str_starts_with($path, $prefix)) {
+                // Path relative to the API version
                 $relativePath = trim(str_replace($prefix, '', $path), '/');
+
+                // Group by the first segment after version
                 $segments = explode('/', $relativePath);
                 $groupKey = $segments[0] ?: 'general';
+
+                // Build response key like api_v3_auth_local from version + relative path
+                $responseKey = strtolower($version->value) . '_' . str_replace('/', '_', $relativePath);
+
+                // Make sure the response key exists
+                $responseData = $responses[$responseKey] ?? [
+                    'responses' => [],
+                    'isProtected' => false,
+                    'description' => null,
+                    'requestBody' => null,
+                ];
 
                 $grouped[$groupKey][] = [
                     'name' => $name,
                     'path' => $path,
                     'methods' => $route->getMethods(),
-                    'responses' => $responses[$name]['responses'] ?? [],
-                    'isProtected' => $responses[$name]['isProtected'] ?? false,
-                    'description' => $responses[$name]['description'] ?? null,
-                    'requestBody' => $responses[$name]['requestBody'] ?? null,
+                    'responses' => $responseData['responses'],
+                    'isProtected' => $responseData['isProtected'] ?? false,
+                    'description' => $responseData['description'] ?? null,
+                    'requestBody' => $responseData['requestBody'] ?? null,
                 ];
+
             }
         }
-
-        ksort($grouped);
 
         return $grouped;
     }
@@ -77,16 +90,16 @@ readonly class ApiResponseService
     private function getResponseMetadata(ApiVersion $version): array
     {
         $configFiles = [
-            ApiVersion::API_V1 => __DIR__ . '/../../config/api/api_responses_v1.php',
-            ApiVersion::API_V2 => __DIR__ . '/../../config/api/api_responses_v2.php',
-            ApiVersion::API_V3 => __DIR__ . '/../../config/api/api_responses_v3.php',
+            ApiVersion::API_V1->value => __DIR__ . '/../../config/api/api_responses_v1.php',
+            ApiVersion::API_V2->value => __DIR__ . '/../../config/api/api_responses_v2.php',
+            ApiVersion::API_V3->value => __DIR__ . '/../../config/api/api_responses_v3.php',
         ];
 
-        if (!isset($configFiles[$version])) {
+        if (!isset($configFiles[$version->value])) {
             throw new InvalidArgumentException(sprintf('Unknown API version: %s', $version->value));
         }
 
-        return require $configFiles[$version];
+        return require $configFiles[$version->value];
     }
 
     /**

@@ -18,7 +18,6 @@ use App\Service\ExpirationProfileService;
 use App\Service\JWTTokenGenerator;
 use App\Service\RsaEncryptionService;
 use App\Service\UserStatusChecker;
-use App\Twig\CertificateProcessExtension;
 use DateTime;
 use Random\RandomException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -40,8 +39,7 @@ class ProfileController extends AbstractController
         private readonly RadiusUserRepository $radiusUserRepository,
         private readonly UserExternalAuthRepository $userExternalAuthRepository,
         private readonly ExpirationProfileService $expirationProfileService,
-        private readonly RsaEncryptionService $rsaEncryptionService,
-        private readonly CertificateProcessExtension $certificateProcessExtension
+        private readonly RsaEncryptionService $rsaEncryptionService
     ) {
     }
 
@@ -51,14 +49,6 @@ class ProfileController extends AbstractController
     #[Route('/config/profile/android', name: 'api_v3_config_profile_android', methods: ['POST'])]
     public function getProfileAndroid(Request $request): JsonResponse
     {
-        // Block if process is aborted
-        if ($this->certificateProcessExtension->isCertificateAborted()) {
-            return new JsonResponse([
-                'status' => 'error',
-                'message' => 'The certificates configured in the portal have been aborted and are not valid.'
-            ], \Symfony\Component\HttpFoundation\Response::HTTP_FORBIDDEN);
-        }
-
         try {
             $dataRequest = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
         } catch (\JsonException) {
@@ -109,8 +99,8 @@ class ProfileController extends AbstractController
             $androidLimit = 32;
             $realmSize = strlen($this->getSettingValueRaw(SettingName::RADIUS_REALM_NAME->value)) + 1;
             $username = $this->generateToken($androidLimit - $realmSize) . "@" . $this->getSettingValueRaw(
-                SettingName::RADIUS_REALM_NAME->value
-            );
+                    SettingName::RADIUS_REALM_NAME->value
+                );
             $token = $this->generateToken($androidLimit - $realmSize);
             $radiusProfile->setUser($currentUser);
             $radiusProfile->setRadiusToken($token);
@@ -195,14 +185,6 @@ class ProfileController extends AbstractController
     #[Route('/config/profile/ios', name: 'api_v3_config_profile_ios', methods: ['POST'])]
     public function getProfileIos(Request $request): JsonResponse
     {
-        // Block if process is aborted
-        if ($this->certificateProcessExtension->isCertificateAborted()) {
-            return new JsonResponse([
-                'status' => 'error',
-                'message' => 'The certificates configured in the portal have been aborted and are not valid.'
-            ], \Symfony\Component\HttpFoundation\Response::HTTP_FORBIDDEN);
-        }
-
         try {
             $dataRequest = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
         } catch (\JsonException) {
@@ -253,8 +235,8 @@ class ProfileController extends AbstractController
             $androidLimit = 32;
             $realmSize = strlen($this->getSettingValueRaw(SettingName::RADIUS_REALM_NAME->value)) + 1;
             $username = $this->generateToken($androidLimit - $realmSize) . "@" . $this->getSettingValueRaw(
-                SettingName::RADIUS_REALM_NAME->value
-            );
+                    SettingName::RADIUS_REALM_NAME->value
+                );
             $token = $this->generateToken($androidLimit - $realmSize);
             $radiusProfile->setUser($currentUser);
             $radiusProfile->setRadiusToken($token);
@@ -308,8 +290,8 @@ class ProfileController extends AbstractController
 
         $data = [
             'payloadIdentifier' => 'com.apple.wifi.managed.' . $this->getSettingValueRaw(
-                SettingName::PAYLOAD_IDENTIFIER->value
-            ) . '-2',
+                    SettingName::PAYLOAD_IDENTIFIER->value
+                ) . '-2',
             'payloadType' => 'com.apple.wifi.managed',
             'payloadUUID' => $this->getSettingValueRaw(SettingName::PAYLOAD_IDENTIFIER->value) . '-1',
             'domainName' => $this->getSettingValueRaw(SettingName::DOMAIN_NAME->value),
