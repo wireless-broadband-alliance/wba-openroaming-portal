@@ -6,4 +6,5 @@ enum ApiVersion: string
 {
     case API_V1 = 'API_V1';
     case API_V2 = 'API_V2';
+    case API_V3 = 'API_V3';
 }

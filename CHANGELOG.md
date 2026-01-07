@@ -69,14 +69,10 @@
 As part of our ongoing improvements and rework of the API endpoints, **API v1 and v2 are now officially deprecated**.
 These versions will no longer receive updates, and clients are strongly encouraged to migrate to **API v3**.
 
-* **Reason:** Several endpoints in v1 and v2 have been reworked for improved security, performance, and consistency with
-  the new API design.
-* **Release of deprecation:** April 16, 2025
+* **Release of deprecation:** ⚠️⚠️⚠️⚠️ date of release ⚠️⚠️⚠️⚠️⚠️⚠️
 * **Grace period:** v1 and v2 will continue to function temporarily, but **all users must migrate within 6 months from
   the next update release**.
 
-  > ⚠️ Note: This 6-month period starts from the release of this update. Since the tracking for the API V1 was not
-  specified previously.
 
 ### Recommended Action
 
