@@ -84,7 +84,6 @@ class ApiController extends AbstractController
     public function versionTree(): Response
     {
         $routes = $this->apiResponseService->getRoutesByPrefix(ApiVersion::API_V3);
-        dd($routes);
         $commonMessages = $this->apiResponseService->getCommonResponses();
 
         $settings = [
