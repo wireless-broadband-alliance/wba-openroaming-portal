@@ -13,6 +13,17 @@ readonly class ApiResponseService
     ) {
     }
 
+    /**
+     * @return array<string, list<array{
+     *     name: string,
+     *     path: string,
+     *     methods: string[],
+     *     responses: array<int|string, mixed>,
+     *     isProtected: bool,
+     *     description: string|null,
+     *     requestBody: array<string, mixed>|null
+     * }>>
+     */
     public function getRoutesByPrefix(ApiVersion $version): array
     {
         $routes = $this->router->getRouteCollection();
@@ -35,7 +46,10 @@ readonly class ApiResponseService
                 continue;
             }
 
-            $responseData = array_find($responses, fn($doc) => ($doc['routePrefix'] ?? null) === $path);
+            $responseData = array_find(
+                $responses,
+                fn(array $doc): bool => $doc['routePrefix'] === $path
+            );
 
             // Skip undocumented routes
             if ($responseData === null) {
@@ -59,7 +73,7 @@ readonly class ApiResponseService
                 'name' => $name,
                 'path' => $path,
                 'methods' => $route->getMethods(),
-                'responses' => $responseData['responses'] ?? [],
+                'responses' => $responseData['responses'],
                 'isProtected' => $responseData['isProtected'] ?? false,
                 'description' => $responseData['description'] ?? null,
                 'requestBody' => $responseData['requestBody'] ?? null,
@@ -73,6 +87,8 @@ readonly class ApiResponseService
 
     /**
      * @return array<string, array{
+     *     routePrefix: string,
+     *     section?: string,
      *     responses: array<int|string, mixed>,
      *     isProtected?: bool,
      *     description?: string,
@@ -87,10 +103,6 @@ readonly class ApiResponseService
             ApiVersion::API_V2->value => __DIR__ . '/../../config/api/api_responses_v2.php',
             ApiVersion::API_V3->value => __DIR__ . '/../../config/api/api_responses_v3.php',
         ];
-
-        if (!isset($configFiles[$version->value])) {
-            throw new InvalidArgumentException(sprintf('Unknown API version: %s', $version->value));
-        }
 
         return require $configFiles[$version->value];
     }
