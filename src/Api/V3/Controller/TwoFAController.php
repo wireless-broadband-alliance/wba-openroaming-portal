@@ -66,9 +66,6 @@ class TwoFAController extends AbstractController
             }
 
             $statusCheckerResponse = $this->userStatusChecker->checkUserStatus($currentUser);
-            if ($statusCheckerResponse instanceof BaseResponse) {
-                return $statusCheckerResponse->toResponse();
-            }
 
             // Only manually update the 2fa totp if the user checks it
             if ($type === 'totp') {
@@ -166,9 +163,6 @@ class TwoFAController extends AbstractController
             }
 
             $statusCheckerResponse = $this->userStatusChecker->checkUserStatus($currentUser);
-            if ($statusCheckerResponse instanceof BaseResponse) {
-                return $statusCheckerResponse->toResponse();
-            }
 
             if (
                 ($data['type'] === 'email' || $data['type'] === 'sms') &&

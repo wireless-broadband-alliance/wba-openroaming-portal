@@ -81,9 +81,6 @@ class UserAccountController extends AbstractController
             }
 
             $statusCheckerResponse = $this->userStatusChecker->checkUserStatus($currentUser);
-            if ($statusCheckerResponse instanceof BaseResponse) {
-                return $statusCheckerResponse->toResponse();
-            }
 
             foreach ($currentUser->getUserExternalAuths() as $externalAuth) {
                 if ($externalAuth->getProvider() === UserProvider::PORTAL_ACCOUNT->value) {
