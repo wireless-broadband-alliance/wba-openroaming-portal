@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}{{ settings.PAGE_TITLE }} - API V1 Documentation{% endblock %}
+{% block title %}{{ settings.PAGE_TITLE }} - API V3 Documentation{% endblock %}
 
 {% block body %}
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -11,28 +11,16 @@
                      alt="Logo"/>
             {% endif %}
             <div class="flex flex-col items-center space-y-4 mt-10">
-                <h1 class="text-4xl font-extrabold text-indigo-700 mb-2">{{ settings.PAGE_TITLE }} - API V1 Documentation</h1>
+                <h1 class="text-4xl font-extrabold text-indigo-700 mb-2">{{ settings.PAGE_TITLE }} - API V3 Documentation</h1>
                 <p class="text-center max-w-2xl text-gray-600 text-lg">
-                    Explore our RESTful API version 1 with detailed endpoints and response messages for easy integration.
+                    Explore our RESTful API version 3 with detailed endpoints and response messages for easy integration.
                 </p>
             </div>
         </div>
 
         {# API VERSION SELECTOR #}
-        <div class="flex justify-end mb-4">
+        <div class="flex justify-end mb-6">
             {{ include('api/shared/partials/_drop_down_api_selection.html.twig') }}
-        </div>
-
-        {# Deprecated API Version #}
-        <div class="flex items-center p-4 border-l-4 gap-2 border-yellow-500 bg-yellow-50 text-yellow-800 text-sm rounded-md mb-4">
-            <twig:ux:icon class="w-5 h-5 fill-current" name="wba:info" />
-            <span>This version of the API has been deprecated and is no longer supported. Please upgrade to the latest version for continued access and security updates.
-                <br>
-            Click
-                <a href="{{ path('api_v3_docs') }}"
-                   class="font-bold underline text-primary">here</a>
-                to switch to api v3 documentation
-            </span>
         </div>
 
         <section class="mb-16">
