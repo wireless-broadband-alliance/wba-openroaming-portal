@@ -49,6 +49,7 @@ class NotifySuperAdminWhenCertsExpiresCommand extends Command
         $timeLeft = round(($certificateLimitDate - $realTime) / (86400)) - 1;
         $certLimitDate = ((int)$timeLeft);
 
+        // TODO: review this notifications date, use the standards!!!!!
         if ($certLimitDate < 31) {
             try {
                 $user = $this->userRepository->findSuperAdmin();
