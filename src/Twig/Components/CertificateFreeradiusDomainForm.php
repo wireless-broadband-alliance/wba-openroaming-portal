@@ -18,17 +18,17 @@ final class CertificateFreeradiusDomainForm extends AbstractController
     use DefaultActionTrait;
 
     #[LiveProp]
-    public CertificateFreeradiusDomainDTO|null $data = null;
+    public CertificateFreeradiusDomainDTO|null $certificateFreeradiusDomainDTO = null;
 
     /**
      * @return FormInterface<mixed>
      */
     protected function instantiateForm(): FormInterface
     {
-        if (!$this->data) {
-            $this->data = new CertificateFreeradiusDomainDTO();
+        if (!$this->certificateFreeradiusDomainDTO) {
+            $this->certificateFreeradiusDomainDTO = new CertificateFreeradiusDomainDTO();
         }
 
-        return $this->createForm(CertificateFreeradiusDomainType::class, $this->data);
+        return $this->createForm(CertificateFreeradiusDomainType::class, $this->certificateFreeradiusDomainDTO);
     }
 }
