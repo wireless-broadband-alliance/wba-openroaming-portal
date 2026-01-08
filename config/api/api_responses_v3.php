@@ -53,7 +53,6 @@ return [
         'section' => 'TwoFactor',
         'description' => 'Enables Two-Factor Authentication (2FA) for the authenticated user. 
         Supports ("totp", "email", "sms"). Requires a valid JWT Bearer token.',
-        'isProtected' => true,
         'responses' => [
             200 => [
                 'totp_example' => json_decode(
