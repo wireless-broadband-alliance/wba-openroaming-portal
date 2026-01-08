@@ -57,7 +57,7 @@ class CertificateManagementController extends AbstractController
             $certificateDate = $lastCompletedCertificate->getUpdatedAt();
         }
 
-        $processState = $this->certificateProcessCheckerService->getProcessState();
+        $processState = $this->certificateProcessCheckerService->getProcessState(true);
         $process = $processState['process'] ?? null;
 
         $certificateSetRadsecproxy = $this->certificateRadsecproxyInfoService->getLatestCertificatesSet($process);
