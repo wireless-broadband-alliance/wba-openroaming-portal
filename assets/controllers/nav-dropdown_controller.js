@@ -1,8 +1,8 @@
-import {Controller} from '@hotwired/stimulus';
+import { Controller } from '@hotwired/stimulus';
 
 export default class extends Controller {
     static targets = ['button', 'container'];
-    static values = {toggleSelected: {type: Boolean, default: true}};
+    static values = { toggleSelected: { type: Boolean, default: true } };
 
     toggle() {
         this.containerTarget.classList.toggle('hidden');
@@ -21,7 +21,7 @@ export default class extends Controller {
             }
         }
 
-        toggleHeader()
+        toggleHeader();
         {
             this.containerTarget.classList.toggle('hidden');
         }

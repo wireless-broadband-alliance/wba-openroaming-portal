@@ -21,7 +21,6 @@ class IsLetsEncryptCertificateValidator extends ConstraintValidator
 
     /**
      * @param UploadedFile|null $value
-     * @param Constraint $constraint
      */
     public function validate(mixed $value, Constraint $constraint): void
     {
@@ -53,13 +52,7 @@ class IsLetsEncryptCertificateValidator extends ConstraintValidator
             $issuerDict
         ));
 
-        $isLetsEncrypt = false;
-        foreach ($this->knownIssuers as $issuerName) {
-            if (stripos($issuerString, $issuerName) !== false) {
-                $isLetsEncrypt = true;
-                break;
-            }
-        }
+        $isLetsEncrypt = array_any($this->knownIssuers, fn($issuerName) => stripos($issuerString, (string) $issuerName) !== false);
 
         // If certificate **is** from Let's Encrypt → add notice warning
         if ($isLetsEncrypt && $this->context->getObject() instanceof CertificateFreeradiusUploadManualDTO) {

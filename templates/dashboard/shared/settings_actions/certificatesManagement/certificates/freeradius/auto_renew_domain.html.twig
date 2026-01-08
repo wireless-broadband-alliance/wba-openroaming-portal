@@ -24,14 +24,14 @@
                 {{ form_label(
                     form.domain,
                     'domain.label'|trans({}, 'upload_freeradius'),
-                    { label_attr: { class: 'font-semibold' } }
+                    {label_attr: {class: 'font-semibold'}},
                 ) }}
 
                 {{ form_widget(form.domain, {
                     attr: {
                         class: 'form-widget',
-                        placeholder: 'Example.com'
-                    }
+                        placeholder: 'Example.com',
+                    },
                 }) }}
 
                 <div class="text-red-500 text-sm ml-1">

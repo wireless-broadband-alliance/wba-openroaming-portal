@@ -1,4 +1,4 @@
-import {Controller} from '@hotwired/stimulus';
+import { Controller } from '@hotwired/stimulus';
 
 export default class extends Controller {
     static targets = ['card', 'content', 'toggleAllButton'];
@@ -43,6 +43,8 @@ export default class extends Controller {
             : collapsedText;
 
         // Rotate main button icon
-        this.toggleAllButtonTarget.querySelector('svg').classList.toggle('rotate-180', this.openAll);
+        this.toggleAllButtonTarget
+            .querySelector('svg')
+            .classList.toggle('rotate-180', this.openAll);
     }
 }

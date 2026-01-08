@@ -87,7 +87,7 @@ readonly class DatabaseConnectionService
             $newLine = sprintf('JWT_PASSPHRASE=%s', $url);
         }
 
-        if (!$regex) {
+        if ($regex === '' || $regex === '0') {
             throw new InvalidArgumentException("Invalid environment type: $type");
         }
 
@@ -98,20 +98,13 @@ readonly class DatabaseConnectionService
             return false;
         }
 
-        if ($count === 0) {
-            $updated = rtrim($envContent) . "\n" . $newLine . "\n";
-        } else {
-            $updated = rtrim((string)$updated) . "\n";
-        }
+        $updated = $count === 0 ? rtrim($envContent) . "\n" . $newLine . "\n" : rtrim((string)$updated) . "\n";
 
         return file_put_contents($envPath, $updated) !== false;
     }
 
     /**
-     * @param string $scheme
      * @return 'pdo_mysql'|'pdo_pgsql'|'pdo_sqlite'
-     *
-     * @throws InvalidArgumentException
      */
     private function getDriverFromScheme(string $scheme): string
     {
@@ -145,7 +138,6 @@ readonly class DatabaseConnectionService
     }
 
     /**
-     * @param string $url
      * @return array{
      *   username: string|null,
      *   password: string|null,
@@ -185,10 +177,10 @@ readonly class DatabaseConnectionService
             'username' => isset($parts['user']) ? urldecode($parts['user']) : null,
             'password' => isset($parts['pass']) ? urldecode($parts['pass']) : null,
             'host' => $parts['host'] ?? null,
-            'port' => isset($parts['port']) ? (int) $parts['port'] : null,
+            'port' => $parts['port'] ?? null,
             'database' => isset($parts['path']) ? ltrim($parts['path'], '/') : null,
-            'serverVersion' => $serverVersion !== null ? (string) $serverVersion : null,
-            'charset' => $charset !== null ? (string) $charset : null,
+            'serverVersion' => $serverVersion ?? null,
+            'charset' => $charset ?? null,
         ];
     }
 }

@@ -54,6 +54,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
 class SecurityController extends AbstractController
 {
+    public $session;
     /**
      * SiteController constructor.
      * @param UserRepository $userRepository The repository for accessing user data.
@@ -516,7 +517,7 @@ class SecurityController extends AbstractController
         $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $user]);
 
         // Check if the user is already verified
-        $session = $this->requestStack->getSession();
+        $this->requestStack->getSession();
         if (
             $userExternalAuths[0]->getProvider() !== UserProvider::PORTAL_ACCOUNT->value ||
             $this->session->has('session_verified')

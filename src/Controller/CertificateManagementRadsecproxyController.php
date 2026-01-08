@@ -415,7 +415,7 @@ class CertificateManagementRadsecproxyController extends AbstractController
                 $pem = openssl_x509_export($cert, $out) ? $out : null;
                 if ($pem) {
                     // Convert PEM to DER
-                    $der = base64_decode(preg_replace('#-----.*?-----#', '', (string) $pem));
+                    $der = base64_decode((string) preg_replace('#-----.*?-----#', '', (string) $pem));
                     $hash = strtolower(hash('sha256', $der));
 
                     if (in_array($hash, $trustedHashes, true)) {

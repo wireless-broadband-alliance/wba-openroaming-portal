@@ -25,7 +25,7 @@ final class CertificateFreeradiusDomainForm extends AbstractController
      */
     protected function instantiateForm(): FormInterface
     {
-        if (!$this->certificateFreeradiusDomainDTO) {
+        if (!$this->certificateFreeradiusDomainDTO instanceof CertificateFreeradiusDomainDTO) {
             $this->certificateFreeradiusDomainDTO = new CertificateFreeradiusDomainDTO();
         }
 
