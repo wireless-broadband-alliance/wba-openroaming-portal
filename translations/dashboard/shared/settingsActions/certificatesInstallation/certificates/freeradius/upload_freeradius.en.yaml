@@ -28,5 +28,9 @@ privKey:
     label: "Private Key (.pem)"
     description: "Upload the private key associated with your certificate."
 
+domain:
+    label: "FreeRADIUS Domain"
+    description: "Enter the domain name that will be configured in the certificates."
+
 submit_upload: "Upload Certificates"
 submit_generate: "Generate Certificates"

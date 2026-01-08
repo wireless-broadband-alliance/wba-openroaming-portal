@@ -28,5 +28,9 @@ privKey:
     label: "Chave Privada (.pem)"
     description: "Envie a chave privada associada ao seu certificado."
 
+domain:
+    label: "Domínio FreeRADIUS"
+    description: "Introduza o nome de domínio que será configurado nos certificados."
+
 submit_upload: "Enviar Certificados"
 submit_generate: "Gerar Certificados"

@@ -12,4 +12,5 @@ enum SessionStatus: string
     case CERTIFICATE_STARTED = 'session_certificate_started';
     case INSTALLATION_VERIFICATION = 'installation_verification';
     case CERTIFICATE_VERIFICATION = 'certificate_verification';
+    case FREERADIUS_SETUP_PROCESS_TYPE = 'freeradiusSetupProcessType';
 }

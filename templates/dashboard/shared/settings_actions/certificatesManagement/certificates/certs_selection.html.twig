@@ -1,76 +1,73 @@
 {% extends 'dashboard/shared/settings_actions/certificatesManagement/certificates/base.html.twig' %}
 
 {% block certificates_content %}
-  {{ include('dashboard/shared/settings_actions/certificatesManagement/partials/_abort_certs.html.twig') }}
+    {{ include('dashboard/shared/settings_actions/certificatesManagement/partials/_abort_certs.html.twig') }}
 
-  {# Toast Success Warning about Radsecproxy config #}
-  <div class="toast-success-dashboard mt-4">
-    <div class="flex flex-col space-y-2">
+    {# Toast Success Warning about Radsecproxy config #}
+    <div class="toast-success-dashboard mt-4">
+        <div class="flex flex-col space-y-2">
 
-      {# Title #}
-      <p class="font-semibold text-base sm:text-lg">
-        {{ 'radsecproxy_process.completed'|trans({}, 'upload_freeradius') }}
-      </p>
+            {# Title #}
+            <p class="font-semibold text-base sm:text-lg">
+                {{ 'radsecproxy_process.completed'|trans({}, 'upload_freeradius') }}
+            </p>
 
-      {# Description #}
-      <div class="text-sm sm:text-base">
-        <p>
-          {{ 'radsecproxy_process.finished_steps'|trans({}, 'upload_freeradius') }}
-        </p>
-        <p>
-          {{ 'radsecproxy_process.next_phase'|trans({}, 'upload_freeradius') }}
-          <span class="font-semibold">
+            {# Description #}
+            <div class="text-sm sm:text-base">
+                <p>
+                    {{ 'radsecproxy_process.finished_steps'|trans({}, 'upload_freeradius') }}
+                </p>
+                <p>
+                    {{ 'radsecproxy_process.next_phase'|trans({}, 'upload_freeradius') }}
+                    <span class="font-semibold">
                     {{ 'radsecproxy_process.details'|trans({}, 'upload_freeradius') }}
                 </span>
-        </p>
-      </div>
+                </p>
+            </div>
+        </div>
     </div>
-  </div>
 
-  {# Certs Selection - Manual or Auto #}
-  <div class="w-full px-4 py-8 space-y-12">
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+    {# Certs Selection - Manual or Auto #}
+    <div class="w-full px-4 py-8 space-y-12">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
 
-      {# Manual Setup #}
-      <a href="{{ path('admin_dashboard_settings_certs_freeradius_upload') }}"
-         class="group flex flex-col items-center text-center bg-white shadow-md rounded-2xl p-6 sm:p-8 border border-gray-200
+            {# Manual Setup #}
+            <a href="{{ path('admin_dashboard_settings_certs_freeradius_upload') }}"
+               class="group flex flex-col items-center text-center bg-white shadow-md rounded-2xl p-6 sm:p-8 border border-gray-200
                   transition-all hover:shadow-lg hover:-translate-y-1">
 
-        <h2 class="text-lg sm:text-xl md:text-2xl font-bold mb-4 sm:mb-6 transition-colors group-hover:text-primary">
-          {{ 'manualTitle'|trans({}, 'certs_selection') }}
-        </h2>
+                <h2 class="text-lg sm:text-xl md:text-2xl font-bold mb-4 sm:mb-6 transition-colors group-hover:text-primary">
+                    {{ 'manualTitle'|trans({}, 'certs_selection') }}
+                </h2>
 
-        <twig:ux:icon name="wba:cloud-upload"
-                      class="w-8 h-8 sm:w-10 sm:h-10 text-gray-600 transition-colors group-hover:text-primary mb-4 sm:mb-6"/>
+                <twig:ux:icon name="wba:cloud-upload"
+                              class="w-8 h-8 sm:w-10 sm:h-10 text-gray-600 transition-colors group-hover:text-primary mb-4 sm:mb-6"/>
 
-        <div class="mt-auto pt-2 sm:pt-3 font-semibold
+                <div class="mt-auto pt-2 sm:pt-3 font-semibold
                         text-sm sm:text-base md:text-lg text-gray-700
                         transition-colors group-hover:text-primary group-hover:underline">
-          {{ 'manualSubtitle'|trans({}, 'certs_selection') }}
-        </div>
-      </a>
+                    {{ 'manualSubtitle'|trans({}, 'certs_selection') }}
+                </div>
+            </a>
 
-      {# Auto Generation Lets Encrypt as POST form #}
-      <form method="post" action="{{ path('admin_dashboard_settings_certs_freeradius_auto_renew') }}"
-            onsubmit="return confirm('{{ 'confirmAutoRenew'|trans({}, 'certs_selection')|e('js') }}')">
-        <button type="submit"
-                class="group flex flex-col items-center text-center bg-white shadow-md rounded-2xl p-6 sm:p-8 border border-gray-200
-                 transition-all hover:shadow-lg hover:-translate-y-1 w-full">
+            {# Auto Generation Lets Encrypt #}
+            <a href="{{ path('admin_dashboard_settings_certs_freeradius_auto_renew_domain') }}"
+               class="group flex flex-col items-center text-center bg-white shadow-md rounded-2xl p-6 sm:p-8 border border-gray-200
+                  transition-all hover:shadow-lg hover:-translate-y-1">
 
-          <h2 class="text-lg sm:text-xl md:text-2xl font-bold mb-4 sm:mb-6 transition-colors group-hover:text-primary">
-            {{ 'autoTitle'|trans({}, 'certs_selection') }}
-          </h2>
+                <h2 class="text-lg sm:text-xl md:text-2xl font-bold mb-4 sm:mb-6 transition-colors group-hover:text-primary">
+                    {{ 'autoTitle'|trans({}, 'certs_selection') }}
+                </h2>
 
-          <twig:ux:icon name="wba:autorenew-rounded"
-                        class="w-8 h-8 sm:w-10 sm:h-10 text-gray-600 transition-colors group-hover:text-primary mb-4 sm:mb-6"/>
+                <twig:ux:icon name="wba:autorenew-rounded"
+                              class="w-8 h-8 sm:w-10 sm:h-10 text-gray-600 transition-colors group-hover:text-primary mb-4 sm:mb-6"/>
 
-          <div class="mt-auto pt-2 sm:pt-3 font-semibold
+                <div class="mt-auto pt-2 sm:pt-3 font-semibold
                 text-sm sm:text-base md:text-lg text-gray-700
                 transition-colors group-hover:text-primary group-hover:underline">
-            {{ 'autoSubtitle'|trans({}, 'certs_selection') }}
-          </div>
-        </button>
-      </form>
+                    {{ 'autoSubtitle'|trans({}, 'certs_selection') }}
+                </div>
+            </a>
+        </div>
     </div>
-  </div>
 {% endblock %}

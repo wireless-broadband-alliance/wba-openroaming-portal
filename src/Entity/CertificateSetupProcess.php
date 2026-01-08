@@ -54,6 +54,9 @@ class CertificateSetupProcess
     #[ORM\Column(type: 'boolean', options: ['default' => false])]
     private bool $isFreeradiusCertEV = false;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $freeradiusDomainName = null;
+
     public function __construct()
     {
         $this->certificates = new ArrayCollection();
@@ -215,6 +218,18 @@ class CertificateSetupProcess
     public function setIsFreeradiusCertEV(bool $isFreeradiusCertEV): static
     {
         $this->isFreeradiusCertEV = $isFreeradiusCertEV;
+
+        return $this;
+    }
+
+    public function getFreeradiusDomainName(): ?string
+    {
+        return $this->freeradiusDomainName;
+    }
+
+    public function setFreeradiusDomainName(?string $freeradiusDomainName): static
+    {
+        $this->freeradiusDomainName = $freeradiusDomainName;
 
         return $this;
     }

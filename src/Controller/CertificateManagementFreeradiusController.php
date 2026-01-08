@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\DTO\CertificateFreeradiusDomainDTO;
 use App\DTO\CertificateFreeradiusUploadManualDTO;
 use App\Entity\CertificateSetupProcess;
 use App\Entity\User;
@@ -14,6 +15,7 @@ use App\Enum\CertificateTestResult;
 use App\Enum\FirewallType;
 use App\Enum\ProcessStatusType;
 use App\Enum\SessionStatus;
+use App\Form\CertificateFreeradiusDomainType;
 use App\Form\CertificateFreeradiusUploadManualType;
 use App\Form\SimpleSubmitFormType;
 use App\Service\CertificateCheckerService;
@@ -86,6 +88,13 @@ class CertificateManagementFreeradiusController extends AbstractController
         }
 
         $data = $this->getSettings->getSettings();
+
+        // Prepare session for freeradius stepper detection
+        $session = $request->getSession();
+        $session->set(
+            SessionStatus::FREERADIUS_SETUP_PROCESS_TYPE->value,
+            AnalyticalEventType::CERTIFICATE_SETUP_PROCESS_FREERAEDIUS_UPLOAD_MANUAL->value,
+        );
 
         // Prepare DTO
         $certificateUploadDTO = new CertificateFreeradiusUploadManualDTO();
@@ -222,9 +231,93 @@ class CertificateManagementFreeradiusController extends AbstractController
     }
 
     #[Route(
+        '/dashboard/settings/certificatesManagement/freeradius/autoRenewDomain',
+        name: 'admin_dashboard_settings_certs_freeradius_auto_renew_domain',
+    )]
+    #[IsGranted('ROLE_SUPER_ADMIN')]
+    public function settingsCertificatesManagementFreeradiusAutoRenewDomain(
+        Request $request
+    ): Response {
+        // Get current process state
+        $processState = $this->certificateProcessCheckerService->getProcessState();
+
+        // If there's no active process
+        if (!$processState['active']) {
+            $this->addFlash(
+                'error',
+                $this->translator->trans(
+                    'noActiveProcess',
+                    [],
+                    'CertificateProcessCheckerService'
+                )
+            );
+            return $this->redirectToRoute('admin_dashboard_settings_certs_radsecproxy_upload');
+        }
+
+        $data = $this->getSettings->getSettings();
+
+        // Prepare session for freeradius stepper detection
+        $session = $request->getSession();
+        $session->set(
+            SessionStatus::FREERADIUS_SETUP_PROCESS_TYPE->value,
+            AnalyticalEventType::CERTIFICATE_SETUP_PROCESS_FREERAEDIUS_UPLOAD_AUTO_DOMAIN->value,
+        );
+
+        // Prepare DTO
+        $certificateFreeradiusDomainDTO = new CertificateFreeradiusDomainDTO();
+
+        // Create & handle form
+        $form = $this->createForm(CertificateFreeradiusDomainType::class, $certificateFreeradiusDomainDTO);
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $process = $this->certificateProcessCheckerService->getCurrentProcess();
+            // In case there's not active process
+            if (!$process instanceof CertificateSetupProcess) {
+                $this->addFlash(
+                    'error',
+                    $this->translator->trans('noActiveProcess', [], 'CertificateProcessCheckerService')
+                );
+                return $this->redirectToRoute('admin_dashboard_settings_certs_radsecproxy_upload');
+            }
+
+            $process->setFreeradiusDomainName($certificateFreeradiusDomainDTO->domain);
+            $process->setFreeradiusFormCompletedAt(new DateTimeImmutable());
+            $process->setFreeradiusConfigAppliedAt(null);
+            $process->setUpdatedAt(new DateTimeImmutable());
+
+            $this->entityManager->persist($process);
+            $this->entityManager->flush();
+
+            /** @var User $user */
+            $user = $this->getUser();
+            $this->eventActions->saveEvent(
+                $user,
+                AnalyticalEventType::CERTIFICATE_SETUP_PROCESS_FREERAEDIUS_UPLOAD_AUTO_DOMAIN->value,
+                new DateTime(),
+                [
+                    'ip' => $request->getClientIp(),
+                    'user_agent' => $request->headers->get('User-Agent'),
+                    'by' => $user->getUuid(),
+                ]
+            );
+
+            return $this->redirectToRoute('admin_dashboard_settings_certs_freeradius_auto_renew');
+        }
+
+        return $this->render(
+            'dashboard/shared/settings_actions/certificatesManagement/certificates/freeradius/auto_renew_domain.html.twig',
+            [
+                'data' => $data,
+                'certificateFreeradiusDomainDTO' => $certificateFreeradiusDomainDTO,
+                'form' => $form->createView(),
+                'context' => FirewallType::DASHBOARD->value,
+            ]
+        );
+    }
+
+    #[Route(
         '/dashboard/settings/certificatesManagement/freeradius/autoRenew',
         name: 'admin_dashboard_settings_certs_freeradius_auto_renew',
-        methods: ['POST']
     )]
     #[IsGranted('ROLE_SUPER_ADMIN')]
     public function settingsCertificatesManagementFreeradiusAutoRenew(
@@ -260,7 +353,7 @@ class CertificateManagementFreeradiusController extends AbstractController
         }
 
         // Extract the domain from the project
-        $domain = $request->getHost();
+        $domain = $process->getFreeradiusDomainName();
         if (!$this->domainService->isValidDomain($domain)) {
             $this->addFlash('error', $this->translator->trans('notValidDomainOrIP', [
                 '%domain%' => $domain,
@@ -272,7 +365,7 @@ class CertificateManagementFreeradiusController extends AbstractController
         try {
             // Generate certificates (simulated or real)
             // For debug add true on the end for simulation
-            $generatedFiles = $this->certificateFreeradiusGenerator->run($domain, $user);
+            $generatedFiles = $this->certificateFreeradiusGenerator->run($domain, $user, true);
             $isSimulation = true; // Add this tag for simulation flag
 
             foreach ($generatedFiles as $filepath) {
@@ -318,7 +411,7 @@ class CertificateManagementFreeradiusController extends AbstractController
 
                 // Determine if it’s a private key storeUploadedFile function
                 // Add this "|| $isSimulation;" for simulation testing
-                $isPrivateKey = $fileEnum === CertificateFileName::PRIVATE_KEY_PEM;
+                $isPrivateKey = $fileEnum === CertificateFileName::PRIVATE_KEY_PEM || $isSimulation;
 
                 $this->certificateStorageService->storeUploadedFile(
                     $uploadedFile,
