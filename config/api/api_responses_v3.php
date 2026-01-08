@@ -51,6 +51,11 @@ return [
     'api_v3_twoFA_enable' => [
         'routePrefix' => '/api/v3/twoFA/{type}',
         'section' => 'TwoFactor',
+        'requestBody' => [
+            'uuid' => 'user-uuid-example',
+            'password' => 'user-password-example',
+            'turnstile_token' => 'valid_test_token',
+        ],
         'description' => 'Enables Two-Factor Authentication (2FA) for the authenticated user. 
         Supports ("totp", "email", "sms"). Requires a valid JWT Bearer token.',
         'isProtected' => true,
