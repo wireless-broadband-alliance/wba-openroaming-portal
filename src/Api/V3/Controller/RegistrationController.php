@@ -727,8 +727,7 @@ class RegistrationController extends AbstractController
 
                     // Send SMS
                     $message = "Your account password is: "
-                    . $randomPassword . "%0A" . "Verification code is: "
-                    . $user->getTwoFAcode();
+                    . $randomPassword;
 
                     $result = $this->sendSMSService->sendSmsNoValidation($user, $message);
 
