@@ -55,9 +55,9 @@ class TwoFAController extends AbstractController
             return new BaseResponse(400, null, 'Invalid JSON format')->toResponse(); # Bad Request Response
         }
 
-        $turnstileSetting = $this->settingRepository->findOneBy(
-            ['name' => SettingName::TURNSTILE_CHECKER->value]
-        )->getValue();
+        $turnstileSetting = $this->settingRepository->findOneBy([
+            'name' => SettingName::TURNSTILE_CHECKER->value
+        ])->getValue();
         if (!$turnstileSetting) {
             throw new \RuntimeException('Missing settings: TURNSTILE_CHECKER not found');
         }
@@ -143,9 +143,9 @@ class TwoFAController extends AbstractController
         }
 
         // Fetch and validate settings with fallback defaults
-        $timeToResendIntervalValue = $this->settingRepository->findOneBy(
-            ['name' => SettingName::TWO_FACTOR_AUTH_RESEND_INTERVAL->value]
-        );
+        $timeToResendIntervalValue = $this->settingRepository->findOneBy([
+            'name' => SettingName::TWO_FACTOR_AUTH_RESEND_INTERVAL->value
+        ]);
         $timeToResendIntervalValue = $timeToResendIntervalValue ? (int)$timeToResendIntervalValue->getValue() : 30;
         $nrAttemptsValue = $this->settingRepository->findOneBy([
             'name' => SettingName::TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE->value,

@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Api\V2\Controller;
+namespace App\Api\V3\Controller;
 
-use App\Api\V2\BaseResponse;
+use App\Api\V3\BaseResponse;
 use App\Controller\GoogleController;
 use App\Controller\MicrosoftController;
 use App\Entity\Event;
@@ -77,7 +77,7 @@ class AuthController extends AbstractController
      * @throws TransportExceptionInterface
      * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
      */
-    #[Route('/auth/local', name: 'api_v2_auth_local', methods: ['POST'])]
+    #[Route('/auth/local', name: 'api_v3_auth_local', methods: ['POST'])]
     public function authLocal(Request $request): JsonResponse
     {
         try {
@@ -147,10 +147,6 @@ class AuthController extends AbstractController
             return new BaseResponse(401, null, 'Invalid credentials')->toResponse(); # Unauthorized Request Response
         }
 
-        $statusCheckerResponse = $this->userStatusChecker->checkUserStatus($user);
-        if ($statusCheckerResponse instanceof BaseResponse) {
-            return $statusCheckerResponse->toResponse();
-        }
 
         $twoFAEnforcementResult = $this->twoFAAPIService->twoFAEnforcementChecker(
             $user,
@@ -314,7 +310,7 @@ class AuthController extends AbstractController
         )->toResponse();
     }
 
-    #[Route('/auth/saml', name: 'api_v2_auth_saml', methods: ['POST'])]
+    #[Route('/auth/saml', name: 'api_v3_auth_saml', methods: ['POST'])]
     public function authSaml(Request $request, Auth $samlAuth): JsonResponse
     {
         // Get SAML Response
@@ -399,10 +395,6 @@ class AuthController extends AbstractController
                 $this->entityManager->flush();
             }
 
-            $statusCheckerResponse = $this->userStatusChecker->checkUserStatus($user);
-            if ($statusCheckerResponse instanceof BaseResponse) {
-                return $statusCheckerResponse->toResponse();
-            }
 
             $twoFAEnforcementResult = $this->twoFAAPIService->twoFAEnforcementChecker(
                 $user,
@@ -471,7 +463,7 @@ class AuthController extends AbstractController
         }
     }
 
-    #[Route('/auth/google', name: 'api_v2_auth_google', methods: ['POST'])]
+    #[Route('/auth/google', name: 'api_v3_auth_google', methods: ['POST'])]
     public function authGoogle(Request $request): JsonResponse
     {
         try {
@@ -503,10 +495,6 @@ class AuthController extends AbstractController
                 )->toResponse();
             }
 
-            $statusCheckerResponse = $this->userStatusChecker->checkUserStatus($user);
-            if ($statusCheckerResponse instanceof BaseResponse) {
-                return $statusCheckerResponse->toResponse();
-            }
 
             $twoFAEnforcementResult = $this->twoFAAPIService->twoFAEnforcementChecker(
                 $user,
@@ -581,7 +569,7 @@ class AuthController extends AbstractController
         }
     }
 
-    #[Route('/auth/microsoft', name: 'api_v2_auth_microsoft', methods: ['POST'])]
+    #[Route('/auth/microsoft', name: 'api_v3_auth_microsoft', methods: ['POST'])]
     public function authMicrosoft(Request $request): JsonResponse
     {
         try {
@@ -613,10 +601,6 @@ class AuthController extends AbstractController
                 )->toResponse();
             }
 
-            $statusCheckerResponse = $this->userStatusChecker->checkUserStatus($user);
-            if ($statusCheckerResponse instanceof BaseResponse) {
-                return $statusCheckerResponse->toResponse();
-            }
 
             $twoFAEnforcementResult = $this->twoFAAPIService->twoFAEnforcementChecker(
                 $user,
