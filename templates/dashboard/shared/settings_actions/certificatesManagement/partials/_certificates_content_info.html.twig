@@ -21,7 +21,7 @@
     </button>
 </div>
 <div class="p-2">
-    <h1 class="text-xl md:text-xl font-semibold">{{ 'radsecproxyLabel'|trans({}, '_certificate_management') }}</h1>
+    <h1 class="text-xl md:text-xl font-semibold">{{ 'freeradiusLabel'|trans({}, '_certificate_management') }}</h1>
 </div>
 {% for cert in certificateSet %}
 
@@ -62,9 +62,33 @@
                     <p class="font-medium text-gray-800">{{ cert.validFrom ? cert.validFrom|date('Y-m-d H:i:s') : 'N/A' }}</p>
                 </div>
 
+                {% set now = date() %}
+                {% set diffDays = cert.validTo ? now.diff(cert.validTo).days : null %}
+
+                {% set status = 'valid' %}
+
+                {% if cert.validTo %}
+                    {% if cert.validTo < now %}
+                        {% set status = 'expired' %}
+                    {% elseif diffDays <= 30 %}
+                        {% set status = 'warning' %}
+                    {% endif %}
+                {% endif %}
+
                 <div>
                     <p class="text-gray-500 text-xs">{{ 'validTo'|trans({}, 'config_freeradius') }}</p>
-                    <p class="font-medium text-gray-800">{{ cert.validTo ? cert.validTo|date('Y-m-d H:i:s') : 'N/A' }}</p>
+                    <p class="
+                        font-medium
+                        {% if status == 'expired' %}
+                            text-red-600
+                        {% elseif status == 'warning' %}
+                            text-yellow-500
+                        {% else %}
+                            text-gray-800
+                        {% endif %}
+                    ">
+                        {{ cert.validTo ? cert.validTo|date('Y-m-d H:i:s') : 'N/A' }}
+                    </p>
                 </div>
 
                 <div>
@@ -82,7 +106,7 @@
     {% endif %}
 {% endfor %}
 <div class="p-2">
-    <h1 class="text-xl md:text-xl font-semibold">{{ 'freeradiusLabel'|trans({}, '_certificate_management') }}</h1>
+    <h1 class="text-xl md:text-xl font-semibold">{{ 'radsecproxyLabel'|trans({}, '_certificate_management') }}</h1>
 </div>
 {% for cert in certificateSet %}
 
@@ -123,9 +147,33 @@
                         <p class="font-medium text-gray-800">{{ cert.validFrom ? cert.validFrom|date('Y-m-d H:i:s') : 'N/A' }}</p>
                     </div>
 
+                    {% set now = date() %}
+                    {% set diffDays = cert.validTo ? now.diff(cert.validTo).days : null %}
+
+                    {% set status = 'valid' %}
+
+                    {% if cert.validTo %}
+                        {% if cert.validTo < now %}
+                            {% set status = 'expired' %}
+                        {% elseif diffDays <= 30 %}
+                            {% set status = 'warning' %}
+                        {% endif %}
+                    {% endif %}
+
                     <div>
                         <p class="text-gray-500 text-xs">{{ 'validTo'|trans({}, 'config_freeradius') }}</p>
-                        <p class="font-medium text-gray-800">{{ cert.validTo ? cert.validTo|date('Y-m-d H:i:s') : 'N/A' }}</p>
+                        <p class="
+                        font-medium
+                        {% if status == 'expired' %}
+                            text-red-600
+                        {% elseif status == 'warning' %}
+                            text-yellow-500
+                        {% else %}
+                            text-gray-800
+                        {% endif %}
+                    ">
+                            {{ cert.validTo ? cert.validTo|date('Y-m-d H:i:s') : 'N/A' }}
+                        </p>
                     </div>
 
                     <div>
