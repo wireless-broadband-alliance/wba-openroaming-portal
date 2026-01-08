@@ -41,8 +41,8 @@ readonly class CertificateProcessCheckerService
 
         if (
             !$process ||
-            $process->getStatus() === ProcessStatusType::ABORTED ||
-            $process->getStatus() === ProcessStatusType::COMPLETED
+            $process->getStatus() === ProcessStatusType::ABORTED //||
+            //$process->getStatus() === ProcessStatusType::COMPLETED
         ) {
             return [
                 'active' => false,
