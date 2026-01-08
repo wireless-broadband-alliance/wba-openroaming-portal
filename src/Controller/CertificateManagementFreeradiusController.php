@@ -305,7 +305,8 @@ class CertificateManagementFreeradiusController extends AbstractController
         }
 
         return $this->render(
-            'dashboard/shared/settings_actions/certificatesManagement/certificates/freeradius/auto_renew_domain.html.twig',
+            'dashboard/shared/settings_actions/certificatesManagement
+            /certificates/freeradius/auto_renew_domain.html.twig',
             [
                 'data' => $data,
                 'certificateFreeradiusDomainDTO' => $certificateFreeradiusDomainDTO,
