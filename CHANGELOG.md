@@ -8,6 +8,12 @@
   Google, Microsoft and Simple Email/Password.
 - Added a new user role, Super Admin, to allow the management of the platform and the other admins.
 - Added new pages to configure the permissions of the platform admins.
+- It's required to run the new migrations this will set up the new entities for the installation widget
+    details & the certificates management (`InstalationWidget`, `Certificate` & `CertificateSetupProcess`)
+    - Run the migrations with:
+      ```bash
+      php bin/console doctrine:migrations:migrate
+      ```
 
 # Release V1.9.0
 
@@ -65,12 +71,10 @@
 - New validation on the Admin Authentication Methods page to check whether the project has all required certificates.
 - It's required to run the new migrations to set up the new entity for the translations (
   `SettingTranslation`), and the new setting for the login with uuid (`LOGIN_WITH_UUID_ONLY`).
-    - Also, the new migrations will set up the new entity for the installation widget
-      details & the certificates management (`InstalationWidget` & `Certificate`)
-        - Run the migrations with:
-          ```bash
-          php bin/console doctrine:migrations:migrate
-          ```
+    - Run the migrations with:
+      ```bash
+      php bin/console doctrine:migrations:migrate
+      ```
 
 ## API Deprecation Notice
 
