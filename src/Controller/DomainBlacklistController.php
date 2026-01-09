@@ -75,7 +75,7 @@ class DomainBlacklistController extends AbstractController
 
                     // Skip duplicates
                     $exist = $this->domainBlacklistRepository->findOneBy(['pattern' => $pattern, 'type' => $type]);
-                    if ($exist) {
+                    if ($exist instanceof DomainBlacklist) {
                         continue;
                     }
 
@@ -118,7 +118,7 @@ class DomainBlacklistController extends AbstractController
                 );
             }
 
-            if (!empty($invalidDomains)) {
+            if ($invalidDomains !== []) {
                 $this->addFlash(
                     'error_admin',
                     $this->translator->trans(
@@ -158,7 +158,6 @@ class DomainBlacklistController extends AbstractController
     /**
      * Parses a domain input string into pattern + type
      *
-     * @param string $input
      * @return array{0: string, 1: DomainMatchType}
      */
     private function parseDomainInput(string $input): array

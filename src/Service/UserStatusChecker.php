@@ -106,7 +106,7 @@ readonly class UserStatusChecker
         // Check whitelist (if defined)
         $validDomains = trim((string)$validDomainsSetting->getValue());
         if ($validDomains !== '') {
-            $validDomainsList = array_map('trim', explode(',', $validDomains));
+            $validDomainsList = array_map(trim(...), explode(',', $validDomains));
             if (!in_array($domain, $validDomainsList, true)) {
                 return false;
             }
@@ -126,10 +126,8 @@ readonly class UserStatusChecker
                 return false;
             }
 
-            if ($type === DomainMatchType::SUBDOMAIN) {
-                if ($domain === $pattern || str_ends_with($domain, '.' . $pattern)) {
-                    return false;
-                }
+            if ($type === DomainMatchType::SUBDOMAIN && ($domain === $pattern || str_ends_with($domain, '.' . $pattern))) {
+                return false;
             }
         }
 

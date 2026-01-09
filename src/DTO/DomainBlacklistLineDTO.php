@@ -20,7 +20,7 @@ class DomainBlacklistLineDTO
 
     public function __construct(?DomainBlacklist $entity = null)
     {
-        if ($entity) {
+        if ($entity instanceof DomainBlacklist) {
             $this->id = $entity->getId();
 
             $this->input = match ($entity->getType()) {

@@ -29,7 +29,7 @@ class DomainBlacklistDTO
     {
         $result = [];
 
-        foreach ($this->lines as $key => $line) {
+        foreach ($this->lines as $line) {
             if ($line->id !== null) {
                 $entity = array_find(
                     $domainBlacklistDB,
