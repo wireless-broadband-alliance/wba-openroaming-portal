@@ -7,6 +7,7 @@ use App\Api\V2\BaseResponse as BaseResponseV2;
 use App\Api\V3\BaseResponse as BaseResponseV3;
 use App\Entity\DomainBlacklist;
 use App\Entity\User;
+use App\Enum\DomainMatchType;
 use App\Enum\SettingName;
 use App\Enum\UserProvider;
 use App\Repository\DomainBlacklistRepository;
@@ -79,48 +80,61 @@ readonly class UserStatusChecker
 
     public function isValidEmail(string $email, string $providerName): bool
     {
-        if ($providerName === UserProvider::MICROSOFT_ACCOUNT->value) {
-            // Retrieve the valid domains setting from the database
-            $validDomainsSetting = $this->settingRepository->findOneBy([
-                'name' => SettingName::VALID_DOMAINS_MICROSOFT_LOGIN->value
-            ]);
-        } elseif ($providerName === UserProvider::GOOGLE_ACCOUNT->value) {
-            // Retrieve the valid domains setting from the database
-            $validDomainsSetting = $this->settingRepository->findOneBy([
-                'name' => SettingName::VALID_DOMAINS_GOOGLE_LOGIN->value
-            ]);
-        } else {
-            // If providerName doesn't match any valid providers, throw an exception
-            throw new RuntimeException($this->translator->trans('invalidProviderName', [], 'UserStatusChecker'));
-        }
+        // Determine which valid domains setting to use
+        $settingName = match ($providerName) {
+            UserProvider::MICROSOFT_ACCOUNT->value => SettingName::VALID_DOMAINS_MICROSOFT_LOGIN->value,
+            UserProvider::GOOGLE_ACCOUNT->value => SettingName::VALID_DOMAINS_GOOGLE_LOGIN->value,
+            default => throw new RuntimeException(
+                $this->translator->trans('invalidProviderName', [], 'UserStatusChecker')
+            ),
+        };
 
-        // Throw an exception if the setting is not found
+        $validDomainsSetting = $this->settingRepository->findOneBy(['name' => $settingName]);
+
         if ($validDomainsSetting === null) {
-            throw new RuntimeException($this->translator->trans('validDomainsNotFound', [], 'UserStatusChecker'));
+            throw new RuntimeException(
+                $this->translator->trans('validDomainsNotFound', [], 'UserStatusChecker')
+            );
         }
 
-        // Extract the domain from the email
-        $emailParts = explode('@', $email);
-        $domain = end($emailParts);
+        // Extract domain from email
+        if (!str_contains($email, '@')) {
+            return false; // invalid email format
+        }
+        [, $domain] = explode('@', strtolower($email), 2);
 
-        // If the valid domains setting is empty, allow all domains
-        $validDomains = $validDomainsSetting->getValue();
-
-        // Validate whitelist
-        if (!empty($validDomains)) {
-            // Split the valid domains into an array and trim whitespace
-            $validDomains = explode(',', $validDomains);
-            $validDomains = array_map(trim(...), $validDomains);
-
-            // Check if the domain is in the list of valid domains
-            if (!in_array($domain, $validDomains, true)) {
+        // Check whitelist (if defined)
+        $validDomains = trim((string)$validDomainsSetting->getValue());
+        if ($validDomains !== '') {
+            $validDomainsList = array_map(trim(...), explode(',', $validDomains));
+            if (!in_array($domain, $validDomainsList, true)) {
                 return false;
             }
         }
 
-        return array_all(
-            $this->domainBlacklistRepository->findAll(),
-            fn($domainDB) => $domainDB->getDomain() !== $domain
-        );
+        // Check blacklist
+        foreach ($this->domainBlacklistRepository->findAll() as $domainDB) {
+            $pattern = $domainDB->getPattern();
+            $type = $domainDB->getType();
+
+            if ($type === DomainMatchType::WILDCARD) {
+                // Block everything
+                return false;
+            }
+
+            if ($type === DomainMatchType::EXACT && $domain === $pattern) {
+                return false;
+            }
+
+            if (
+                $type === DomainMatchType::SUBDOMAIN &&
+                ($domain === $pattern || str_ends_with($domain, '.' . $pattern))
+            ) {
+                return false;
+            }
+        }
+
+        // Passed both whitelist and blacklist
+        return true;
     }
 }

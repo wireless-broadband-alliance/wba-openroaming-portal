@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Enum\DomainMatchType;
 use App\Repository\DomainBlacklistRepository;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -15,21 +16,36 @@ class DomainBlacklist
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $domain = null;
+    private string $pattern;
+
+    #[ORM\Column(length: 32, enumType: DomainMatchType::class)]
+    private DomainMatchType $type; // exact | subdomain | wildcard
 
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getDomain(): ?string
+    public function getPattern(): string
     {
-        return $this->domain;
+        return $this->pattern;
     }
 
-    public function setDomain(string $domain): static
+    public function setPattern(string $pattern): static
     {
-        $this->domain = $domain;
+        $this->pattern = strtolower($pattern);
+
+        return $this;
+    }
+
+    public function getType(): DomainMatchType
+    {
+        return $this->type;
+    }
+
+    public function setType(DomainMatchType $type): static
+    {
+        $this->type = $type;
 
         return $this;
     }

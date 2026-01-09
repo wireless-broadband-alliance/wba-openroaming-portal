@@ -167,3 +167,5 @@ createJwtPair: 'Gere um novo par de chaves JWT.'
 installationStartedSuccessfully: 'Verificação concluída com sucesso.'
 systemResetRequestStarted: 'Pedido de Restauro do Sistema iniciado. Certifique-se de completar cuidadosamente cada passo do processo de configuração.'
 notValidDomainOrIP: 'O domínio "%domain%" não é válido ou não resolve para um endereço IP.'
+invalidDomainPattern: "Padrão de domínio inválido: %domain%"
+invalidDomainPatternList: "Os seguintes padrões de domínio são inválidos: %domains%"

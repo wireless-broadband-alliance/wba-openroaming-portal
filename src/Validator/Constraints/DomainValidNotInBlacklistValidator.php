@@ -2,6 +2,7 @@
 
 namespace App\Validator\Constraints;
 
+use App\Enum\DomainMatchType;
 use App\Repository\DomainBlacklistRepository;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
@@ -18,20 +19,46 @@ class DomainValidNotInBlacklistValidator extends ConstraintValidator
             return;
         }
 
-        // skip empty values (let NotBlank handle those)
         if ($value === null || $value === '') {
             return;
         }
 
-        // Split the valid domains into an array and trim whitespace
-        $validDomains = explode(',', (string) $value);
-        $validDomains = array_map(trim(...), $validDomains);
+        // Split the input by commas (in case multiple emails/domains)
+        $inputs = array_map(trim(...), explode(',', (string)$value));
 
-        // Validate Blacklist domains
         foreach ($this->domainBlacklistRepository->findAll() as $domainDB) {
-            if (in_array($domainDB->getDomain(), $validDomains, true)) {
-                $this->context->buildViolation($constraint->message)->addViolation();
-                return;
+            $pattern = strtolower($domainDB->getPattern());
+            $type = $domainDB->getType();
+
+            foreach ($inputs as $input) {
+                $input = strtolower($input);
+
+                // Extract domain part if it's an email
+                if (str_contains($input, '@')) {
+                    [$local, $domain] = explode('@', $input, 2);
+                } else {
+                    $domain = $input;
+                }
+
+                if ($type === DomainMatchType::WILDCARD) {
+                    // Block everything
+                    $this->context->buildViolation($constraint->message)->addViolation();
+                    return;
+                }
+
+                if ($type === DomainMatchType::EXACT && $domain === $pattern) {
+                    $this->context->buildViolation($constraint->message)->addViolation();
+                    return;
+                }
+
+                // Block subdomains: domain matches exactly or ends with ".pattern"
+                if (
+                    $type === DomainMatchType::SUBDOMAIN
+                    && ($domain === $pattern || str_ends_with($domain, '.' . $pattern))
+                ) {
+                    $this->context->buildViolation($constraint->message)->addViolation();
+                    return;
+                }
             }
         }
     }

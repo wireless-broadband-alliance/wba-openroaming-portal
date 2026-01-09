@@ -169,3 +169,5 @@ createJwtPair: 'Generate a new jwt key pair '
 installationStartedSuccessfully: 'Verification completed successfully.'
 systemResetRequestStarted: 'System Reset Request started. Make sure to carefully complete each step of the configuration process.'
 notValidDomainOrIP: 'The domain "%domain%" is not valid or does not resolve to an IP address.'
+invalidDomainPattern: "Invalid domain pattern: %domain%"
+invalidDomainPatternList: "The following domain patterns are invalid: %domains%"

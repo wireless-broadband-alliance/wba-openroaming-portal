@@ -78,3 +78,4 @@ notValidWbaChainRadsec: 'O certificado não é assinado pela root confiável da 
 invalidCertificateChain: "O certificado carregado não pertence à chain.pem fornecida."
 incompleteChainMessage: 'A chain de certificados não chega a uma autoridade de confiança.'
 untrustedRootMessage: 'A autoridade de confiança fornecida não é confiável.'
+invalidDomainPattern: 'O domínio não é válido. Utilize um domínio exato (exemplo.com), um subdomínio curinga (*.exemplo.com) ou * para todos os domínios.'
