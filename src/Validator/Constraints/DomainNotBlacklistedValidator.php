@@ -25,7 +25,7 @@ class DomainNotBlacklistedValidator extends ConstraintValidator
             return;
         }
 
-        $domain = strtolower(trim($value));
+        $domain = strtolower(trim((string)$value));
 
         foreach ($this->domainBlacklistRepository->findAll() as $domainDB) {
             $pattern = $domainDB->getPattern();
@@ -44,11 +44,12 @@ class DomainNotBlacklistedValidator extends ConstraintValidator
             }
 
             // SUBDOMAIN match
-            if ($type === DomainMatchType::SUBDOMAIN) {
-                if ($domain === $pattern || str_ends_with($domain, '.' . $pattern)) {
-                    $this->context->buildViolation($constraint->message)->addViolation();
-                    return;
-                }
+            if (
+                $type === DomainMatchType::SUBDOMAIN &&
+                ($domain === $pattern || str_ends_with($domain, '.' . $pattern))
+            ) {
+                $this->context->buildViolation($constraint->message)->addViolation();
+                return;
             }
         }
     }
