@@ -109,7 +109,7 @@ class DomainBlacklistController extends AbstractController
             $importCount = count($importedDomains);
             if ($importCount > 0) {
                 $this->addFlash(
-                    'success_admin',
+                    'success',
                     $this->translator->trans(
                         'domainBlacklistConfigurationAppliedSuccessfully',
                         [],
@@ -120,7 +120,7 @@ class DomainBlacklistController extends AbstractController
 
             if ($invalidDomains !== []) {
                 $this->addFlash(
-                    'error_admin',
+                    'error',
                     $this->translator->trans(
                         'invalidDomainPatternList',
                         ['%domains%' => implode(', ', $invalidDomains)],
