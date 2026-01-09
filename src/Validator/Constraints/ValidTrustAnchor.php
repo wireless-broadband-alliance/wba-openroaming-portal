@@ -11,24 +11,20 @@ class ValidTrustAnchor extends Constraint
     public string $incompleteChainMessage = 'incompleteChainMessage';
     public string $untrustedRootMessage = 'untrustedRootMessage';
 
-    public string $certField;
-    public string $chainField;
-    public string $rootField;
-
     public function __construct(
-        string $certField,
-        string $chainField,
-        string $rootField,
+        public string $certField,
+        public string $chainField,
+        public string $rootField,
         ?array $groups = null,
         mixed $payload = null
     ) {
-        $this->certField = $certField;
-        $this->chainField = $chainField;
-        $this->rootField = $rootField;
-
-        parent::__construct([], $groups, $payload);
+        parent::__construct(
+            groups: $groups,
+            payload: $payload
+        );
     }
 
+    #[\Override]
     public function getTargets(): string
     {
         return self::CLASS_CONSTRAINT;
