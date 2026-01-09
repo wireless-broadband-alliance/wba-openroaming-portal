@@ -52,8 +52,10 @@ class DomainValidNotInBlacklistValidator extends ConstraintValidator
                 }
 
                 // Block subdomains: domain matches exactly or ends with ".pattern"
-                if ($type === DomainMatchType::SUBDOMAIN
-                    && ($domain === $pattern || str_ends_with($domain, '.' . $pattern))) {
+                if (
+                    $type === DomainMatchType::SUBDOMAIN
+                    && ($domain === $pattern || str_ends_with($domain, '.' . $pattern))
+                ) {
                     $this->context->buildViolation($constraint->message)->addViolation();
                     return;
                 }

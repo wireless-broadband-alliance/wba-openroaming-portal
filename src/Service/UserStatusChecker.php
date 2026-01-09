@@ -126,8 +126,10 @@ readonly class UserStatusChecker
                 return false;
             }
 
-            if ($type === DomainMatchType::SUBDOMAIN &&
-                ($domain === $pattern || str_ends_with($domain, '.' . $pattern))) {
+            if (
+                $type === DomainMatchType::SUBDOMAIN &&
+                ($domain === $pattern || str_ends_with($domain, '.' . $pattern))
+            ) {
                 return false;
             }
         }
