@@ -24,7 +24,7 @@ class DomainValidNotInBlacklistValidator extends ConstraintValidator
         }
 
         // Split the input by commas (in case multiple emails/domains)
-        $inputs = array_map(trim(...), explode(',', (string) $value));
+        $inputs = array_map(trim(...), explode(',', (string)$value));
 
         foreach ($this->domainBlacklistRepository->findAll() as $domainDB) {
             $pattern = strtolower($domainDB->getPattern());
@@ -52,7 +52,8 @@ class DomainValidNotInBlacklistValidator extends ConstraintValidator
                 }
 
                 // Block subdomains: domain matches exactly or ends with ".pattern"
-                if ($type === DomainMatchType::SUBDOMAIN && ($domain === $pattern || str_ends_with($domain, '.' . $pattern))) {
+                if ($type === DomainMatchType::SUBDOMAIN
+                    && ($domain === $pattern || str_ends_with($domain, '.' . $pattern))) {
                     $this->context->buildViolation($constraint->message)->addViolation();
                     return;
                 }
