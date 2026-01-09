@@ -49,4 +49,3 @@ class DomainBlacklist
         return $this;
     }
 }
-

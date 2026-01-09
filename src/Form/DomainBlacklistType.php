@@ -53,7 +53,8 @@ class DomainBlacklistType extends AbstractType
                     mimeTypes: [
                         'text/plain',
                         'text/csv',
-                    ], mimeTypesMessage: $this->translator->trans('invalidFileType', [], 'DomainBlacklistType')
+                    ],
+                    mimeTypesMessage: $this->translator->trans('invalidFileType', [], 'DomainBlacklistType')
                 ),
             ],
         ]);
