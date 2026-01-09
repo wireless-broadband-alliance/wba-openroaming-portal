@@ -1,7 +1,13 @@
 <twig:DomainBlacklistForm :dto="formDTO" :form="form">
     <div>
         {{ form_start(form) }}
-
+        <div class="mt-4 mb-4 p-4 border rounded-md bg-gray-50 flex items-center gap-4">
+            <label for="importFile" class="font-medium text-gray-700">{{ 'importDomains'|trans({}, '_blacklist') }}</label>
+            {{ form_widget(form.importFile, {attr: {class: 'form-input'}}) }}
+            <button type="submit" class="mt-6 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition">
+                {{ 'import'|trans({}, '_blacklist') }}
+            </button>
+        </div>
         <div class="grid gap-4 lg:grid-cols-2 xl:grid-cols-3 p-2 z-0 mt-4">
             <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full" {{ stimulus_controller('card') }}>
                 {# Header with title and info icon #}

@@ -6,6 +6,7 @@ use App\DTO\DomainBlacklistDTO;
 use App\Entity\DomainBlacklist;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
+use App\Enum\DomainMatchType;
 use App\Form\DomainBlacklistType;
 use App\Repository\DomainBlacklistRepository;
 use App\Service\EventActions;
@@ -26,12 +27,13 @@ class DomainBlacklistController extends AbstractController
         private readonly GetSettings $getSettings,
         private readonly EntityManagerInterface $entityManager,
         private readonly EventActions $eventActions,
+        private readonly DomainBlacklistRepository $domainBlacklistRepository,
     ) {
     }
 
     #[Route('/dashboard/settings/blacklist', name: 'admin_dashboard_settings_blacklist')]
     #[IsGranted('ROLE_ADMIN')]
-    public function edit(Request $request, DomainBlacklistRepository $domainBlacklistRepository): Response
+    public function edit(Request $request): Response
     {
         // Call the getSettings method of GetSettings class to retrieve the data
         /** @var array<string, array{value: string, description: string}> $data */
@@ -40,7 +42,7 @@ class DomainBlacklistController extends AbstractController
         /** @var User $currentUser */
         $currentUser = $this->getUser();
 
-        $domainBlacklistDB = $domainBlacklistRepository->findAll();
+        $domainBlacklistDB = $this->domainBlacklistRepository->findAll();
 
         // Initialize DTO from settings
         $dto = new DomainBlacklistDTO($domainBlacklistDB);
@@ -50,7 +52,42 @@ class DomainBlacklistController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // Save updated settings
+            $importedDomains = [];
+            $invalidDomains = [];
+
+            // Handle import file
+            $importFile = $form->get('importFile')->getData();
+            if ($importFile) {
+                $lines = file($importFile->getPathname(), FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+                foreach ($lines as $line) {
+                    $line = trim($line);
+                    if ($line === '') {
+                        continue;
+                    }
+
+                    // Validate domain pattern
+                    if (!preg_match('/^(\*|\*\.[a-z0-9.-]+\.[a-z]{2,}|[a-z0-9.-]+\.[a-z]{2,})$/i', $line)) {
+                        $invalidDomains[] = $line;
+                        continue;
+                    }
+
+                    [$pattern, $type] = $this->parseDomainInput($line);
+
+                    // Skip duplicates
+                    $exist = $this->domainBlacklistRepository->findOneBy(['pattern' => $pattern, 'type' => $type]);
+                    if ($exist) {
+                        continue;
+                    }
+
+                    $domain = new DomainBlacklist();
+                    $domain->setPattern($pattern)->setType($type);
+
+                    $this->entityManager->persist($domain);
+                    $importedDomains[] = $domain;
+                }
+            }
+
+            // Handle manual edits (lines)
             $blacklist = $dto->toEntities($domainBlacklistDB);
 
             // Add/Update the other ones
@@ -58,17 +95,39 @@ class DomainBlacklistController extends AbstractController
                 $this->entityManager->persist($domain);
             }
 
-            // Delete the delete ones
+            // Remove deleted domains
             foreach ($domainBlacklistDB as $domainDB) {
-                $result =
-                    array_find($blacklist, fn(DomainBlacklist $domain) => $domain->getId() === $domainDB->getId());
-
+                $result = array_find($blacklist, fn(DomainBlacklist $d) => $d->getId() === $domainDB->getId());
                 if (is_null($result)) {
                     $this->entityManager->remove($domainDB);
                 }
             }
 
             $this->entityManager->flush();
+
+            // Flash messages
+            $importCount = count($importedDomains);
+            if ($importCount > 0) {
+                $this->addFlash(
+                    'success_admin',
+                    $this->translator->trans(
+                        'domainBlacklistConfigurationAppliedSuccessfully',
+                        [],
+                        'controllers'
+                    ) . " + {$importCount} domains imported"
+                );
+            }
+
+            if (!empty($invalidDomains)) {
+                $this->addFlash(
+                    'error_admin',
+                    $this->translator->trans(
+                        'invalidDomainPatternList',
+                        ['%domains%' => implode(', ', $invalidDomains)],
+                        'controllers'
+                    )
+                );
+            }
 
             // Log the event
             $this->eventActions->saveEvent(
@@ -82,10 +141,6 @@ class DomainBlacklistController extends AbstractController
                 ]
             );
 
-            $this->addFlash(
-                'success_admin',
-                $this->translator->trans('domainBlacklistConfigurationAppliedSuccessfully', [], 'controllers')
-            );
             return $this->redirectToRoute('admin_dashboard_settings_blacklist');
         }
 
@@ -94,5 +149,26 @@ class DomainBlacklistController extends AbstractController
             'formDTO' => $dto,
             'data' => $data,
         ]);
+    }
+
+    /**
+     * Parses a domain input string into pattern + type
+     *
+     * @param string $input
+     * @return array{0: string, 1: DomainMatchType}
+     */
+    private function parseDomainInput(string $input): array
+    {
+        $input = strtolower(trim($input));
+
+        if ($input === '*') {
+            return ['*', DomainMatchType::WILDCARD];
+        }
+
+        if (str_starts_with($input, '*.')) {
+            return [substr($input, 2), DomainMatchType::SUBDOMAIN];
+        }
+
+        return [$input, DomainMatchType::EXACT];
     }
 }

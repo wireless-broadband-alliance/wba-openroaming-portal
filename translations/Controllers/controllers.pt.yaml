@@ -128,3 +128,5 @@ loginVerificationCodeSent: 'Enviámos um código de verificação de início de 
 loginSuccessfully: 'Login efetuado com sucesso'
 invalidLogin: 'O seu link de login é inválido ou expirou. Solicite um novo link de login para continuar.'
 domainBlacklistConfigurationAppliedSuccessfully: 'Uma nova configuração de Domínios Bloqueados foi aplicada com sucesso.'
+invalidDomainPattern: "Padrão de domínio inválido: %domain%"
+invalidDomainPatternList: "Os seguintes padrões de domínio são inválidos: %domains%"

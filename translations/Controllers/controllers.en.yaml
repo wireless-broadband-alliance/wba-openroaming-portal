@@ -130,3 +130,5 @@ invalidLogin: 'Your login link is invalid or has expired. Please request a new l
 passwordSentSMS: 'A new account password has been sent to your phone number via SMS.'
 passwordNotSentSMS: 'We were unable to send the new password to your phone number. Please try again.'
 domainBlacklistConfigurationAppliedSuccessfully: 'New Domain Blacklist configuration have been applied successfully.'
+invalidDomainPattern: "Invalid domain pattern: %domain%"
+invalidDomainPatternList: "The following domain patterns are invalid: %domains%"
