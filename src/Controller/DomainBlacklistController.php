@@ -141,6 +141,10 @@ class DomainBlacklistController extends AbstractController
                 ]
             );
 
+            $this->addFlash(
+                'success_admin',
+                $this->translator->trans('domainBlacklistConfigurationAppliedSuccessfully', [], 'controllers')
+            );
             return $this->redirectToRoute('admin_dashboard_settings_blacklist');
         }
 
