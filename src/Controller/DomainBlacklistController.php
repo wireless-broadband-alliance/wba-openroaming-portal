@@ -58,7 +58,7 @@ class DomainBlacklistController extends AbstractController
             // Handle import file
             $importFile = $form->get('importFile')->getData();
             if ($importFile) {
-                $lines = file($importFile->getPathname(), FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+                $lines = @file($importFile->getPathname(), FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) ?: [];
                 foreach ($lines as $line) {
                     $line = trim($line);
                     if ($line === '') {
