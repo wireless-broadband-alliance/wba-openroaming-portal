@@ -20,7 +20,7 @@ class DomainBlacklistLineType extends AbstractType
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
-        $builder->add('domain', TextType::class, [
+        $builder->add('input', TextType::class, [
             'label' => $this->translator->trans('domain', [], 'DomainBlacklistLineType'),
             'required' => true,
         ]);

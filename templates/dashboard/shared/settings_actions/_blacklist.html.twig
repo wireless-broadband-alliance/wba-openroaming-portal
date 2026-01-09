@@ -27,19 +27,19 @@
                     {% for line in form.lines %}
                         <div class="flex flex-row w-full justify-start items-end">
                             <div class="flex flex-col gap-y-1 w-full">
-                                {{ form_label(line.domain) }}
+                                {{ form_label(line.input) }}
                                 <div class="w-full flex flex-row items-center space-x-4">
-                                    {{ form_widget(line.domain, {attr: {class: 'form-widget', placeholder: 'example'|trans({}, '_blacklist')}}) }}
+                                    {{ form_widget(line.input, {attr: {class: 'form-widget', placeholder: 'example'|trans({}, '_blacklist')}}) }}
 
                                     <div>
                                         {{ form_row(line.vars.button_delete, {attr: {class: 'px-3 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition'}}) }}
                                     </div>
                                 </div>
 
-                                {{ form_help(line.domain) }}
+                                {{ form_help(line.input) }}
 
                                 <div class="mt-2 -mb-2 text-center text-red-500 text-base">
-                                    {{ form_errors(line.domain) }}
+                                    {{ form_errors(line.input) }}
                                 </div>
                             </div>
                         </div>

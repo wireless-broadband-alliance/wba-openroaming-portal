@@ -9,15 +9,15 @@ class DomainBlacklistDTO
 {
     /** @var DomainBlacklistLineDTO[] */
     #[Assert\Valid]
-    public array $lines;
+    public array $lines = [];
 
     /**
      * @param DomainBlacklist[] $domainBlacklists
      */
     public function __construct(array $domainBlacklists = [])
     {
-        foreach ($domainBlacklists as $domainBlacklist) {
-            $this->lines[$domainBlacklist->getId()] = new DomainBlacklistLineDTO($domainBlacklist);
+        foreach ($domainBlacklists as $entity) {
+            $this->lines[$entity->getId()] = new DomainBlacklistLineDTO($entity);
         }
     }
 
@@ -25,24 +25,24 @@ class DomainBlacklistDTO
      * @param DomainBlacklist[] $domainBlacklistDB
      * @return DomainBlacklist[]
      */
-    public function toDomainBlacklist(array $domainBlacklistDB): array
+    public function toEntities(array $domainBlacklistDB): array
     {
-        $blacklist = [];
+        $result = [];
 
         foreach ($this->lines as $key => $line) {
-            if (is_null($line->id)) {
-                $domain = new DomainBlacklist();
+            if ($line->id !== null) {
+                $entity = array_find(
+                    $domainBlacklistDB,
+                    fn (DomainBlacklist $d) => $d->getId() === $line->id
+                ) ?? new DomainBlacklist();
             } else {
-                $domain = array_find($domainBlacklistDB, fn(DomainBlacklist $domain) => $domain->getId() === $key);
-                if (is_null($domain)) {
-                    $domain = new DomainBlacklist();
-                }
+                $entity = new DomainBlacklist();
             }
 
-            $domain->setDomain($line->domain);
-            $blacklist[] = $domain;
+            $line->applyToEntity($entity);
+            $result[] = $entity;
         }
 
-        return $blacklist;
+        return $result;
     }
 }

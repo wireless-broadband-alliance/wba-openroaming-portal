@@ -51,7 +51,7 @@ class DomainBlacklistController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             // Save updated settings
-            $blacklist = $dto->toDomainBlacklist($domainBlacklistDB);
+            $blacklist = $dto->toEntities($domainBlacklistDB);
 
             // Add/Update the other ones
             foreach ($blacklist as $domain) {
