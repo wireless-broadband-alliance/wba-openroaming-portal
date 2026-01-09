@@ -1,60 +1,64 @@
 <twig:DomainBlacklistForm :dto="formDTO" :form="form">
     <div>
         {{ form_start(form) }}
-        <div class="mt-4 mb-4 p-4 border rounded-md bg-gray-50 flex items-center gap-4">
-            <label for="importFile" class="font-medium text-gray-700">{{ 'importDomains'|trans({}, '_blacklist') }}</label>
-            {{ form_widget(form.importFile, {attr: {class: 'form-input'}}) }}
-            <button type="submit" class="mt-6 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition">
-                {{ 'import'|trans({}, '_blacklist') }}
-            </button>
+        {# Import Section #}
+        <div class="mt-4 mb-6 p-6 border rounded-lg bg-gray-50 shadow-sm flex flex-col md:flex-row md:items-center gap-4 z-0">
+            <div class="flex-1">
+                <label for="importFile" class="font-medium text-gray-700 block mb-2">
+                    {{ 'importDomains'|trans({}, '_blacklist') }}
+                </label>
+                {{ form_widget(form.importFile, {attr: {class: 'form-input w-full'}}) }}
+                {{ form_errors(form.importFile) }}
+            </div>
+            <div class="mt-4 md:mt-0">
+                <button type="submit"
+                        class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition">
+                    {{ 'import'|trans({}, '_blacklist') }}
+                </button>
+            </div>
         </div>
-        <div class="grid gap-4 lg:grid-cols-2 xl:grid-cols-3 p-2 z-0 mt-4">
-            <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full" {{ stimulus_controller('card') }}>
-                {# Header with title and info icon #}
-                <div class="flex justify-between items-center">
-                    <h1 class="text-base md:text-lg font-medium break-words">
-                        {{ 'blockedDomains'|trans({}, '_blacklist') }}
-                    </h1>
-                    <img class="w-5 h-5 cursor-pointer"
-                            {{ stimulus_target('card', 'button') }}
-                            {{ stimulus_action('card', 'show_info', 'mouseover')|stimulus_action('card', 'hide_info', 'mouseout') }}
-                         src="{{ asset('resources/logos/info_icon.svg') }}"
-                         alt="info_icon"/>
-                </div>
 
-                {# Description #}
-                <div class="mt-2">
-                    {{ include('/dashboard/shared/settings_actions/_description.html.twig', {
-                        description: 'listOfBlockedDomains'|trans({}, '_blacklist'),
-                    }) }}
-                </div>
+        {# Manual Domain List - Responsive Grid #}
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-lg font-semibold text-gray-800">
+                <h2 class="text-lg font-semibold text-gray-800">
+                    {{ 'blockedDomains'|trans({}, '_blacklist') }}
+                </h2>
+                <img class="w-5 h-5 cursor-pointer"
+                        {{ stimulus_target('card', 'button') }}
+                        {{ stimulus_action('card', 'show_info', 'mouseover')|stimulus_action('card', 'hide_info', 'mouseout') }}
+                     src="{{ asset('resources/logos/info_icon.svg') }}"
+                     alt="info_icon"/>
+            </div>
 
-                <div class="mt-4 w-full space-y-3">
-                    {% for line in form.lines %}
-                        <div class="flex flex-row w-full justify-start items-end">
-                            <div class="flex flex-col gap-y-1 w-full">
-                                {{ form_label(line.input) }}
-                                <div class="w-full flex flex-row items-center space-x-4">
-                                    {{ form_widget(line.input, {attr: {class: 'form-widget', placeholder: 'example'|trans({}, '_blacklist')}}) }}
+            <div class="mb-4 text-gray-600 text-sm">
+                {{ include('/dashboard/shared/settings_actions/_description.html.twig', {
+                    description: 'listOfBlockedDomains'|trans({}, '_blacklist'),
+                }) }}
+            </div>
 
-                                    <div>
-                                        {{ form_row(line.vars.button_delete, {attr: {class: 'px-3 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition'}}) }}
-                                    </div>
-                                </div>
-
-                                {{ form_help(line.input) }}
-
-                                <div class="mt-2 -mb-2 text-center text-red-500 text-base">
-                                    {{ form_errors(line.input) }}
-                                </div>
-                            </div>
+            <div class="grid gap-4 sm:grid-cols-1 lg:grid-cols-3">
+                {% for line in form.lines %}
+                    <div class="flex flex-col p-2 rounded-md hover:shadow-sm transition">
+                        {{ form_label(line.input) }}
+                        <div class="flex flex-row items-center gap-2">
+                            {{ form_widget(line.input, {attr: {class: 'form-widget w-full', placeholder: 'example'|trans({}, '_blacklist')}}) }}
+                            {{ form_row(line.vars.button_delete, {attr: {class: 'px-3 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition flex-shrink-0'}}) }}
                         </div>
-                    {% endfor %}
-
-                    <div class="mt-6 flex flex-row justify-end">
-                        {{ form_widget(form.lines.vars.button_add, {label: 'addDomain'|trans({}, '_blacklist'), attr: {class: 'mt-6 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition'}}) }}
+                        {{ form_help(line.input) }}
+                        <div class="text-red-500 text-sm">
+                            {{ form_errors(line.input) }}
+                        </div>
                     </div>
-                </div>
+                {% endfor %}
+            </div>
+
+            <div class="mt-6 flex justify-end">
+                {{ form_widget(form.lines.vars.button_add, {
+                    label: 'addDomain'|trans({}, '_blacklist'),
+                    attr: {class: 'px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition'}
+                }) }}
             </div>
         </div>
 
