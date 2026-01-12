@@ -38,6 +38,9 @@ class DomainBlacklist
     #[ORM\Column(length: 32, enumType: DomainOrigin::class)]
     private ?DomainOrigin $origin = null;
 
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $lastSeenAt = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -87,6 +90,18 @@ class DomainBlacklist
     public function setOrigin(DomainOrigin $origin): static
     {
         $this->origin = $origin;
+
+        return $this;
+    }
+
+    public function getLastSeenAt(): ?\DateTimeImmutable
+    {
+        return $this->lastSeenAt;
+    }
+
+    public function setLastSeenAt(?\DateTimeImmutable $lastSeenAt): static
+    {
+        $this->lastSeenAt = $lastSeenAt;
 
         return $this;
     }
