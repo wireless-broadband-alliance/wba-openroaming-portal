@@ -12,6 +12,7 @@ use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
@@ -54,15 +55,24 @@ class ImportTemporaryDomainsCommand extends Command
         // Mark all LINK domains as potentially stale
         $this->domainBlacklistRepository->markAllAsStale(DomainOrigin::LINK);
 
-        // Process each source
         foreach (self::SOURCES as $url) {
             $response = $this->httpClient->request('GET', $url);
             $content = $response->getContent();
 
-            foreach ($this->domainService->extract($content) as $rawDomain) {
+            // Extract domains first to know the total for the progress bar
+            $domains = iterator_to_array($this->domainService->extract($content));
+            $total = count($domains);
+
+            $output->writeln("<info>Importing domains from: {$url} ({$total} domains)</info>");
+            $progressBar = new ProgressBar($output, $total);
+            $progressBar->start();
+
+            foreach ($domains as $rawDomain) {
                 $domain = $this->domainService->normalize($rawDomain);
 
+                // Skip invalid or empty domains
                 if ($domain === '' || !$this->domainService->isValidDomain($domain)) {
+                    $progressBar->advance();
                     continue;
                 }
 
@@ -84,20 +94,26 @@ class ImportTemporaryDomainsCommand extends Command
                     }
                     $this->entityManager->clear();
                 }
+
+                $progressBar->advance();
             }
+
+            // Finish the progress bar for this source
+            $progressBar->finish();
+            $output->writeln(''); // newline after progress bar
         }
 
-        // Final flush
+        // Final flush after all sources
         try {
             $this->entityManager->flush();
         } catch (UniqueConstraintViolationException) {
             // Ignore duplicates
         }
 
-        // Sweep: remove domains no longer in the list
-        $this->domainBlacklistRepository->deleteStale(DomainOrigin::LINK);
+        // Sweep stale domains (not present in this run)
+        $deleted = $this->domainBlacklistRepository->deleteStale(DomainOrigin::LINK);
 
-        $output->writeln("<info>Imported {$count} domains. Removed stale domains automatically.</info>");
+        $output->writeln("<info>Imported {$count} domains. Removed {$deleted} stale domains.</info>");
 
         return Command::SUCCESS;
     }
