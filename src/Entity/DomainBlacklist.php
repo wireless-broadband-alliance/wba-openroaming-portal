@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Enum\DomainMatchType;
+use App\Enum\DomainOrigin;
 use App\Repository\DomainBlacklistRepository;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -20,6 +21,12 @@ class DomainBlacklist
 
     #[ORM\Column(length: 32, enumType: DomainMatchType::class)]
     private DomainMatchType $type; // exact | subdomain | wildcard
+
+    #[ORM\Column]
+    private ?\DateTime $createdAt = null;
+
+    #[ORM\Column(length: 32, enumType: DomainOrigin::class)]
+    private ?string $origin = null;
 
     public function getId(): ?int
     {
@@ -46,6 +53,30 @@ class DomainBlacklist
     public function setType(DomainMatchType $type): static
     {
         $this->type = $type;
+
+        return $this;
+    }
+
+    public function getCreatedAt(): ?\DateTime
+    {
+        return $this->createdAt;
+    }
+
+    public function setCreatedAt(\DateTime $createdAt): static
+    {
+        $this->createdAt = $createdAt;
+
+        return $this;
+    }
+
+    public function getOrigin(): ?string
+    {
+        return $this->origin;
+    }
+
+    public function setOrigin(string $origin): static
+    {
+        $this->origin = $origin;
 
         return $this;
     }
