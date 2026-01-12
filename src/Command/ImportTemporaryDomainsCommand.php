@@ -27,6 +27,8 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 )]
 class ImportTemporaryDomainsCommand extends Command
 {
+    private int $batchSize = 500;
+
     public function __construct(
         private readonly HttpClientInterface $httpClient,
         private readonly EntityManagerInterface $entityManager,
@@ -47,7 +49,7 @@ class ImportTemporaryDomainsCommand extends Command
     {
         $runAt = new DateTimeImmutable();
         $count = 0;
-        $batchSize = 500;
+        $batchSize = $this->batchSize;
 
         // Mark all LINK domains as potentially stale
         $this->domainBlacklistRepository->markAllAsStale(DomainOrigin::LINK);
@@ -59,11 +61,17 @@ class ImportTemporaryDomainsCommand extends Command
             $url = $source->getUrl();
             $response = $this->httpClient->request('GET', $url);
 
-            $output->writeln("<info>Importing domains from: {$url}</info>");
-            $progressBar = new ProgressBar($output);
+            // Convert iterator to array to know total
+            $domains = iterator_to_array($this->domainService->extract($response->getContent()));
+            $total = count($domains);
+
+            $output->writeln("<info>Importing {$total} domains from: {$url}</info>");
+
+            $progressBar = new ProgressBar($output, $total);
+            $progressBar->setFormat(' %current%/%max% [%bar%] %percent:3s%% ');
             $progressBar->start();
 
-            foreach ($this->domainService->extract($response->getContent()) as $rawDomain) {
+            foreach ($domains as $rawDomain) {
                 $domain = $this->domainService->normalize($rawDomain);
 
                 if ($domain === '' || !$this->domainService->isValidDomain($domain)) {
@@ -71,21 +79,22 @@ class ImportTemporaryDomainsCommand extends Command
                     continue;
                 }
 
-                // Use DQL bulk update instead of loading each entity
+                // Check if domain already exists
                 $existing = $this->domainBlacklistRepository->findOneBy([
                     'pattern' => $domain,
                 ]);
 
                 if ($existing) {
                     if ($existing->getOrigin() === DomainOrigin::MANUAL) {
+                        // Skip domains manually added by admin
                         $progressBar->advance();
                         continue;
                     }
-
-                    // Existing LINK domain
+                    // Update lastSeenAt for existing LINK domain
                     $existing->setLastSeenAt($runAt);
+                    $this->entityManager->persist($existing);
                 } else {
-                    // New LINK domain
+                    // Create new LINK domain
                     $entity = new DomainBlacklist();
                     $entity->setPattern($domain)
                         ->setType(DomainMatchType::EXACT)
@@ -98,6 +107,7 @@ class ImportTemporaryDomainsCommand extends Command
 
                 $count++;
 
+                // Flush in batches
                 if ($count % $batchSize === 0) {
                     $this->entityManager->flush();
                     $this->entityManager->clear();
@@ -107,15 +117,14 @@ class ImportTemporaryDomainsCommand extends Command
             }
 
             $progressBar->finish();
-            $output->writeln('');
+            $output->writeln(''); // newline after progress bar
         }
 
-        // Final flush
+        // Final flush for any remaining domains
         $this->entityManager->flush();
 
-        // Delete stale domains
+        // Delete stale LINK domains
         $deleted = $this->domainBlacklistRepository->deleteStale(DomainOrigin::LINK);
-
 
         $output->writeln("<info>Imported {$count} domains. Removed {$deleted} stale domains.</info>");
 
