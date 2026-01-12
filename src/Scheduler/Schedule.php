@@ -51,9 +51,18 @@ readonly class Schedule implements ScheduleProviderInterface
                 )
             )
 
+            // By default, daily at 03:00
             ->add(
                 RecurringMessage::cron(
                     $this->getRequiredSetting(SettingName::FREERADIUS_LAST_CONNECTION_CRON->value),
+                    new RunCommandMessage('backup:freeradiusLastConnection')
+                )
+            )
+
+            // By default, daily at 04:00
+            ->add(
+                RecurringMessage::cron(
+                    $this->getRequiredSetting(SettingName::DOMAIN_BLACKLIST_IMPORT_CRON->value),
                     new RunCommandMessage('backup:freeradiusLastConnection')
                 )
             );

@@ -31,7 +31,7 @@
             </div>
         </div>
 
-        <div class="grid gap-4 lg:grid-cols-2 xl:grid-cols-4 p-2 z-0 mt-4">
+        <div class="grid gap-4 lg:grid-cols-2 xl:grid-cols-3 p-2 z-0 mt-4">
             {{ include('dashboard/shared/settings_actions/schedule/card.html.twig', {
                 label: 'deleteUnconfirmedAccount'|trans({}, 'schedule'),
                 description: 'deleteUnconfirmedAccountDescription'|trans({}, 'schedule'),
@@ -54,6 +54,12 @@
                 label: 'freeradiusSynchronization'|trans({}, 'schedule'),
                 description: 'freeradiusSynchronizationDescription'|trans({}, 'schedule'),
                 field: form.freeradius_last_connection_cron,
+            }) }}
+
+            {{ include('dashboard/shared/settings_actions/schedule/card.html.twig', {
+                label: 'domainBlacklistImport'|trans({}, 'schedule'),
+                description: 'domainBlacklistImportDescription'|trans({}, 'schedule'),
+                field: form.domain_blacklist_import_cron,
             }) }}
         </div>
 
