@@ -9,7 +9,6 @@ use App\Repository\DomainBlacklistRepository;
 use App\Repository\DomainSourceRepository;
 use App\Service\DomainService;
 use DateTimeImmutable;
-use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -50,28 +49,23 @@ class ImportTemporaryDomainsCommand extends Command
     {
         $runAt = new DateTimeImmutable();
         $count = 0;
+        $batchSize = 500;
 
         // Mark all LINK domains as potentially stale
         $this->domainBlacklistRepository->markAllAsStale(DomainOrigin::LINK);
 
-        // Fetch all active sources from DB
+        // Fetch all active sources
         $activeSources = $this->domainSourceRepository->findActiveSources();
 
         foreach ($activeSources as $source) {
             $url = $source->getUrl();
-
             $response = $this->httpClient->request('GET', $url);
-            $content = $response->getContent();
 
-            // Extract domains first to know total for progress bar
-            $domains = iterator_to_array($this->domainService->extract($content));
-            $total = count($domains);
-
-            $output->writeln("<info>Importing {$total} domains from: {$url}</info>");
-            $progressBar = new ProgressBar($output, $total);
+            $output->writeln("<info>Importing domains from: {$url}</info>");
+            $progressBar = new ProgressBar($output);
             $progressBar->start();
 
-            foreach ($domains as $rawDomain) {
+            foreach ($this->domainService->extract($response->getContent()) as $rawDomain) {
                 $domain = $this->domainService->normalize($rawDomain);
 
                 if ($domain === '' || !$this->domainService->isValidDomain($domain)) {
@@ -79,22 +73,33 @@ class ImportTemporaryDomainsCommand extends Command
                     continue;
                 }
 
-                $entity = new DomainBlacklist();
-                $entity->setPattern($domain)
-                    ->setType(DomainMatchType::EXACT)
-                    ->setOrigin(DomainOrigin::LINK)
-                    ->setCreatedAt($runAt)
-                    ->setLastSeenAt($runAt);
+                // Use DQL bulk update instead of loading each entity
+                $qb = $this->entityManager->createQueryBuilder();
+                $existing = $qb->select('d')
+                    ->from(DomainBlacklist::class, 'd')
+                    ->where('d.pattern = :pattern')
+                    ->andWhere('d.origin = :origin')
+                    ->setParameter('pattern', $domain)
+                    ->setParameter('origin', DomainOrigin::LINK)
+                    ->getQuery()
+                    ->getOneOrNullResult();
 
-                $this->entityManager->persist($entity);
+                if ($existing) {
+                    $existing->setLastSeenAt($runAt);
+                } else {
+                    $entity = new DomainBlacklist();
+                    $entity->setPattern($domain)
+                        ->setType(DomainMatchType::EXACT)
+                        ->setOrigin(DomainOrigin::LINK)
+                        ->setCreatedAt($runAt)
+                        ->setLastSeenAt($runAt);
+                    $this->entityManager->persist($entity);
+                }
+
                 $count++;
 
-                if ($count % $this->batchSize === 0) {
-                    try {
-                        $this->entityManager->flush();
-                    } catch (UniqueConstraintViolationException) {
-                        // Ignore duplicates
-                    }
+                if ($count % $batchSize === 0) {
+                    $this->entityManager->flush();
                     $this->entityManager->clear();
                 }
 
@@ -102,18 +107,15 @@ class ImportTemporaryDomainsCommand extends Command
             }
 
             $progressBar->finish();
-            $output->writeln(''); // newline after progress bar
+            $output->writeln('');
         }
 
         // Final flush
-        try {
-            $this->entityManager->flush();
-        } catch (UniqueConstraintViolationException) {
-            // Ignore duplicates
-        }
+        $this->entityManager->flush();
 
-        // Remove stale domains not present in this run
+        // Delete stale domains
         $deleted = $this->domainBlacklistRepository->deleteStale(DomainOrigin::LINK);
+
 
         $output->writeln("<info>Imported {$count} domains. Removed {$deleted} stale domains.</info>");
 

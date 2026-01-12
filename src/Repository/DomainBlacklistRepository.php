@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Entity\DomainBlacklist;
 use App\Enum\DomainOrigin;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -12,8 +13,9 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class DomainBlacklistRepository extends ServiceEntityRepository
 {
-    public function __construct(ManagerRegistry $registry)
-    {
+    public function __construct(
+        ManagerRegistry $registry
+    ) {
         parent::__construct($registry, DomainBlacklist::class);
     }
 
@@ -34,8 +36,10 @@ class DomainBlacklistRepository extends ServiceEntityRepository
         return $this->createQueryBuilder('d')
             ->delete()
             ->where('d.origin = :origin')
+            ->andWhere('d.origin != :manual')
             ->andWhere('d.lastSeenAt IS NULL')
             ->setParameter('origin', $origin)
+            ->setParameter('manual', DomainOrigin::MANUAL)
             ->getQuery()
             ->execute();
     }
