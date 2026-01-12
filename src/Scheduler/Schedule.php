@@ -63,7 +63,7 @@ readonly class Schedule implements ScheduleProviderInterface
             ->add(
                 RecurringMessage::cron(
                     $this->getRequiredSetting(SettingName::DOMAIN_BLACKLIST_IMPORT_CRON->value),
-                    new RunCommandMessage('backup:freeradiusLastConnection')
+                    new RunCommandMessage('import:temporary-domains')
                 )
             );
     }
