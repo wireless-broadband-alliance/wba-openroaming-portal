@@ -2,23 +2,59 @@
 
 namespace App\Service;
 
-class DomainService
+readonly class DomainService
 {
-    // Validate domain names and check if they resolve to an IP address
-    // Validation comes from here: https://www.php.net/manual/en/function.dns-get-record.php
-    /**
-     * Check whether a given domain name is syntactically valid and resolvable.
-     *
-     * @param non-empty-string $domain
-     */
+    public function normalize(string $domain): string
+    {
+        $domain = strtolower(trim($domain));
+
+        // IDN → ASCII (safe)
+        $ascii = idn_to_ascii(
+            $domain,
+            IDNA_DEFAULT,
+            INTL_IDNA_VARIANT_UTS46
+        );
+
+        return $ascii ?: $domain;
+    }
+
     public function isValidDomain(string $domain): bool
     {
-        if (!filter_var($domain, FILTER_VALIDATE_DOMAIN, FILTER_FLAG_HOSTNAME)) {
-            return false;
+        return (bool) filter_var(
+            $domain,
+            FILTER_VALIDATE_DOMAIN,
+            FILTER_FLAG_HOSTNAME
+        );
+    }
+
+    /**
+     * @return iterable<string>
+     */
+    public function extract(string $content): iterable
+    {
+        // Try JSON
+        try {
+            $data = json_decode($content, true, flags: JSON_THROW_ON_ERROR);
+
+            if (is_array($data)) {
+                foreach ($data as $value) {
+                    if (is_string($value)) {
+                        yield $value;
+                    }
+                }
+                return;
+            }
+        } catch (\JsonException) {
+            // Not JSON
         }
 
-        $dnsRecords = @dns_get_record($domain, DNS_A + DNS_AAAA);
+        // Plain text
+        foreach (preg_split('/\r\n|\r|\n/', $content) as $line) {
+            $line = trim($line);
 
-        return $dnsRecords !== false && $dnsRecords !== [];
+            if ($line !== '') {
+                yield $line;
+            }
+        }
     }
 }

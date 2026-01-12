@@ -8,6 +8,16 @@ use App\Repository\DomainBlacklistRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: DomainBlacklistRepository::class)]
+#[ORM\Table(
+    name: 'DomainBlacklist',
+    uniqueConstraints: [
+        new ORM\UniqueConstraint(
+            name: 'uniq_domain_pattern',
+            columns: ['pattern']
+        )
+    ]
+)
+]
 class DomainBlacklist
 {
     #[ORM\Id]
@@ -23,7 +33,7 @@ class DomainBlacklist
     private DomainMatchType $type; // exact | subdomain | wildcard
 
     #[ORM\Column]
-    private ?\DateTime $createdAt = null;
+    private ?\DateTimeImmutable $createdAt = null;
 
     #[ORM\Column(length: 32, enumType: DomainOrigin::class)]
     private ?DomainOrigin $origin = null;
@@ -57,12 +67,12 @@ class DomainBlacklist
         return $this;
     }
 
-    public function getCreatedAt(): ?\DateTime
+    public function getCreatedAt(): ?\DateTimeImmutable
     {
         return $this->createdAt;
     }
 
-    public function setCreatedAt(\DateTime $createdAt): static
+    public function setCreatedAt(\DateTimeImmutable $createdAt): static
     {
         $this->createdAt = $createdAt;
 
