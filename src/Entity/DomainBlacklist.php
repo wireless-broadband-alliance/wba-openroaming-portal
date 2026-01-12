@@ -26,7 +26,7 @@ class DomainBlacklist
     private ?\DateTime $createdAt = null;
 
     #[ORM\Column(length: 32, enumType: DomainOrigin::class)]
-    private ?string $origin = null;
+    private ?DomainOrigin $origin = null;
 
     public function getId(): ?int
     {
@@ -69,12 +69,12 @@ class DomainBlacklist
         return $this;
     }
 
-    public function getOrigin(): ?string
+    public function getOrigin(): ?DomainOrigin
     {
         return $this->origin;
     }
 
-    public function setOrigin(string $origin): static
+    public function setOrigin(DomainOrigin $origin): static
     {
         $this->origin = $origin;
 
