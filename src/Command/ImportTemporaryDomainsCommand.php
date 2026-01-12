@@ -74,25 +74,27 @@ class ImportTemporaryDomainsCommand extends Command
                 }
 
                 // Use DQL bulk update instead of loading each entity
-                $qb = $this->entityManager->createQueryBuilder();
-                $existing = $qb->select('d')
-                    ->from(DomainBlacklist::class, 'd')
-                    ->where('d.pattern = :pattern')
-                    ->andWhere('d.origin = :origin')
-                    ->setParameter('pattern', $domain)
-                    ->setParameter('origin', DomainOrigin::LINK)
-                    ->getQuery()
-                    ->getOneOrNullResult();
+                $existing = $this->domainBlacklistRepository->findOneBy([
+                    'pattern' => $domain,
+                ]);
 
                 if ($existing) {
+                    if ($existing->getOrigin() === DomainOrigin::MANUAL) {
+                        $progressBar->advance();
+                        continue;
+                    }
+
+                    // Existing LINK domain
                     $existing->setLastSeenAt($runAt);
                 } else {
+                    // New LINK domain
                     $entity = new DomainBlacklist();
                     $entity->setPattern($domain)
                         ->setType(DomainMatchType::EXACT)
                         ->setOrigin(DomainOrigin::LINK)
                         ->setCreatedAt($runAt)
                         ->setLastSeenAt($runAt);
+
                     $this->entityManager->persist($entity);
                 }
 
