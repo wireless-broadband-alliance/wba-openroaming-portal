@@ -1,0 +1,32 @@
+{# Table Content #}
+<tr>
+
+    {# Domain pattern #}
+    <td class="p-4 -ml-4">
+        {% if domain.pattern is not null %}
+            {{ domain.pattern }}
+        {% else %}
+            <span class="font-semibold p-1 pill-error">{{ 'noInformation'|trans({}, '_blacklist') }}
+</span>
+        {% endif %}
+    </td>
+
+    {# Created At #}
+    <td class="px-6 py-4 font-medium">
+        {{ domain.createdat|date('d/m/Y H:i') }}
+    </td>
+
+    {# Last Seen At #}
+    <td class="px-6 py-4 font-medium">
+        {{ domain.lastSeenAt|date('d/m/Y H:i') }}
+    </td>
+
+    {# Actions Buttons #}
+    <td class="px-10 py-4 text-right">
+        {# Items Button Dropdown #}
+        <a href="{{ path('admin_dashboard_settings_blacklist', {id: domain.id}) }}"
+           class="flex flex-row items-center px-2 py-2 duration-100 p-2 cursor-pointer hover:text-lightGreen">
+            <twig:ux:icon name="wba:trash" class="w-5 mr-3 fill-none stroke-current"/>
+        </a>
+    </td>
+</tr>

@@ -7,6 +7,7 @@ use App\Entity\DomainBlacklist;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Enum\DomainMatchType;
+use App\Enum\OperationMode;
 use App\Form\DomainBlacklistType;
 use App\Repository\DomainBlacklistRepository;
 use App\Service\EventActions;
@@ -16,6 +17,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -33,8 +35,19 @@ class DomainBlacklistController extends AbstractController
 
     #[Route('/dashboard/settings/blacklist', name: 'admin_dashboard_settings_blacklist')]
     #[IsGranted('ROLE_ADMIN')]
-    public function edit(Request $request): Response
+    public function edit(
+        Request $request,
+        #[MapQueryParameter] int $page = 1,
+        #[MapQueryParameter] string $sort = 'createdAt',
+        #[MapQueryParameter] string $order = 'desc',
+        #[MapQueryParameter] ?int $count = 7
+    ): Response
     {
+
+        $searchTerm = $request->query->get('u');
+
+        $filter = $request->query->get('filter', 'all');
+
         // Call the getSettings method of GetSettings class to retrieve the data
         /** @var array<string, array{value: string, description: string}> $data */
         $data = $this->getSettings->getSettings();
@@ -148,10 +161,22 @@ class DomainBlacklistController extends AbstractController
             return $this->redirectToRoute('admin_dashboard_settings_blacklist');
         }
 
+        $domainBlacklist = $this->domainBlacklistRepository->searchWithFilter($filter, $order, $searchTerm);
+
         return $this->render('dashboard/shared/settings_actions.html.twig', [
             'form' => $form->createView(),
             'formDTO' => $dto,
             'data' => $data,
+            'allDomainsCount' => count($domainBlacklistDB),
+            'verifiedUsersCount' => 0,
+            'bannedUsersCount' => 0,
+            'export_users' => OperationMode::OFF->value,
+            'activeFilter' => null,
+            'activeSort' => $sort,
+            'activeOrder' => $order,
+            'domains' => $domainBlacklist,
+            'searchTerm' => '',
+            'totalPages' => 0,
         ]);
     }
 

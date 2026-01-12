@@ -43,4 +43,30 @@ class DomainBlacklistRepository extends ServiceEntityRepository
             ->getQuery()
             ->execute();
     }
+
+    public function searchWithFilter(string $filter, ?string $order, ?string $searchTerm = null): array
+    {
+        $qb = $this->createQueryBuilder('d');
+
+
+        // Apply the search term, if provided
+        if ($searchTerm) {
+            $qb->andWhere('d.pattern LIKE :searchTerm')
+            ->setParameter('searchTerm', '%' . $searchTerm . '%');
+        }
+
+        $field = 'd.createdAt';
+
+        if ($filter === 'pattern') {
+            $field = 'd.pattern';
+        } if ($filter === 'createdAt') {
+            $field = 'd.createdAt';
+        } if ($filter === 'lastSeenAt') {
+            $field = 'd.lastSeenAt';
+    }
+        // Order by creation date (newest first)
+        return $qb->orderBy($field, $order)
+            ->getQuery()
+            ->getResult();
+    }
 }
