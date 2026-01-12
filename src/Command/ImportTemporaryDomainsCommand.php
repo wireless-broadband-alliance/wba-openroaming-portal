@@ -6,6 +6,7 @@ use App\Entity\DomainBlacklist;
 use App\Enum\DomainMatchType;
 use App\Enum\DomainOrigin;
 use App\Repository\DomainBlacklistRepository;
+use App\Repository\DomainSourceRepository;
 use App\Service\DomainService;
 use DateTimeImmutable;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
@@ -27,15 +28,14 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 )]
 class ImportTemporaryDomainsCommand extends Command
 {
-    private const array SOURCES = [
-        'https://raw.githubusercontent.com/nfacha/temporary-email-list/master/list.txt',
-    ];
+    private int $batchSize = 500;
 
     public function __construct(
         private readonly HttpClientInterface $httpClient,
         private readonly EntityManagerInterface $entityManager,
         private readonly DomainService $domainService,
         private readonly DomainBlacklistRepository $domainBlacklistRepository,
+        private readonly DomainSourceRepository $domainSourceRepository,
     ) {
         parent::__construct();
     }
@@ -49,28 +49,31 @@ class ImportTemporaryDomainsCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $runAt = new DateTimeImmutable();
-        $batchSize = 500;
         $count = 0;
 
         // Mark all LINK domains as potentially stale
         $this->domainBlacklistRepository->markAllAsStale(DomainOrigin::LINK);
 
-        foreach (self::SOURCES as $url) {
+        // Fetch all active sources from DB
+        $activeSources = $this->domainSourceRepository->findActiveSources();
+
+        foreach ($activeSources as $source) {
+            $url = $source->getUrl();
+
             $response = $this->httpClient->request('GET', $url);
             $content = $response->getContent();
 
-            // Extract domains first to know the total for the progress bar
+            // Extract domains first to know total for progress bar
             $domains = iterator_to_array($this->domainService->extract($content));
             $total = count($domains);
 
-            $output->writeln("<info>Importing domains from: {$url} ({$total} domains)</info>");
+            $output->writeln("<info>Importing {$total} domains from: {$url}</info>");
             $progressBar = new ProgressBar($output, $total);
             $progressBar->start();
 
             foreach ($domains as $rawDomain) {
                 $domain = $this->domainService->normalize($rawDomain);
 
-                // Skip invalid or empty domains
                 if ($domain === '' || !$this->domainService->isValidDomain($domain)) {
                     $progressBar->advance();
                     continue;
@@ -86,7 +89,7 @@ class ImportTemporaryDomainsCommand extends Command
                 $this->entityManager->persist($entity);
                 $count++;
 
-                if ($count % $batchSize === 0) {
+                if ($count % $this->batchSize === 0) {
                     try {
                         $this->entityManager->flush();
                     } catch (UniqueConstraintViolationException) {
@@ -98,19 +101,18 @@ class ImportTemporaryDomainsCommand extends Command
                 $progressBar->advance();
             }
 
-            // Finish the progress bar for this source
             $progressBar->finish();
             $output->writeln(''); // newline after progress bar
         }
 
-        // Final flush after all sources
+        // Final flush
         try {
             $this->entityManager->flush();
         } catch (UniqueConstraintViolationException) {
             // Ignore duplicates
         }
 
-        // Sweep stale domains (not present in this run)
+        // Remove stale domains not present in this run
         $deleted = $this->domainBlacklistRepository->deleteStale(DomainOrigin::LINK);
 
         $output->writeln("<info>Imported {$count} domains. Removed {$deleted} stale domains.</info>");
