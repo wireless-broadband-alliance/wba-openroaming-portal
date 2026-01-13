@@ -1,17 +1,44 @@
 {% import 'dashboard/shared/_sort_arrow.html.twig' as sharedSort %}
 
 {# Domains Blacklist table #}
-<div class="bg-white rounded-lg shadow p-6">
+<div class="pt-5 pb-1 text-left space-y-3 rounded-xl bg-white">
     <div class="w-full">
         <div class="sm:w-auto px-5 py-4">
             <div class="flex flex-col sm:flex-row justify-between items-center space-y-6 sm:space-y-0 sm:space-x-4">
 
                 {# Left Search Filters #}
                 <div class="flex items-center space-x-6">
-                    <a
+                    <a href="{{ path('admin_dashboard_settings_blacklist', {filter: 'all', u: app.request.query.get('d')}) }}"
                             class="flex flex-row group hover:border-b-2 hover:border-y-veryDarkButton transition-all duration-100 {% if app.request.query.get('filter') == null or app.request.query.get('filter') == 'all' %}border-b-2 border-y-veryDarkButton transition-all{% endif %}">
                         <h1 class="px-2">
                             {{ 'all'|trans({}, '_blacklist') }}
+                        </h1>
+                        <div class="w-auto h-6 mb-1 px-2 bg-veryLightGreen group-hover:bg-veryDarkButton rounded-md group-hover:text-white text-center transition-all duration-100">
+                            {{ allDomainsCount }}
+                        </div>
+                    </a>
+                    <a href="{{ path('admin_dashboard_settings_blacklist', {filter: 'exact', u: app.request.query.get('d')}) }}"
+                            class="flex flex-row group hover:border-b-2 hover:border-y-veryDarkButton transition-all duration-100 {% if app.request.query.get('filter') == null or app.request.query.get('filter') == 'exact' %}border-b-2 border-y-veryDarkButton transition-all{% endif %}">
+                        <h1 class="px-2">
+                            {{ 'exact'|trans({}, '_blacklist') }}
+                        </h1>
+                        <div class="w-auto h-6 mb-1 px-2 bg-veryLightGreen group-hover:bg-veryDarkButton rounded-md group-hover:text-white text-center transition-all duration-100">
+                            {{ allDomainsCount }}
+                        </div>
+                    </a>
+                    <a href="{{ path('admin_dashboard_settings_blacklist', {filter: 'subdomain', u: app.request.query.get('d')}) }}"
+                            class="flex flex-row group hover:border-b-2 hover:border-y-veryDarkButton transition-all duration-100 {% if app.request.query.get('filter') == null or app.request.query.get('filter') == 'subdomain' %}border-b-2 border-y-veryDarkButton transition-all{% endif %}">
+                        <h1 class="px-2">
+                            {{ 'subdomain'|trans({}, '_blacklist') }}
+                        </h1>
+                        <div class="w-auto h-6 mb-1 px-2 bg-veryLightGreen group-hover:bg-veryDarkButton rounded-md group-hover:text-white text-center transition-all duration-100">
+                            {{ allDomainsCount }}
+                        </div>
+                    </a>
+                    <a href="{{ path('admin_dashboard_settings_blacklist', {filter: 'wildcard', u: app.request.query.get('d')}) }}"
+                            class="flex flex-row group hover:border-b-2 hover:border-y-veryDarkButton transition-all duration-100 {% if app.request.query.get('filter') == null or app.request.query.get('filter') == 'wildcard' %}border-b-2 border-y-veryDarkButton transition-all{% endif %}">
+                        <h1 class="px-2">
+                            {{ 'wildcard'|trans({}, '_blacklist') }}
                         </h1>
                         <div class="w-auto h-6 mb-1 px-2 bg-veryLightGreen group-hover:bg-veryDarkButton rounded-md group-hover:text-white text-center transition-all duration-100">
                             {{ allDomainsCount }}

@@ -48,7 +48,6 @@ class DomainBlacklistRepository extends ServiceEntityRepository
     {
         $qb = $this->createQueryBuilder('d');
 
-
         // Apply the search term, if provided
         if ($searchTerm) {
             $qb->andWhere('d.pattern LIKE :searchTerm')
@@ -58,6 +57,16 @@ class DomainBlacklistRepository extends ServiceEntityRepository
         $qb->andWhere('d.origin NOT LIKE :deleted')
             ->setParameter('deleted', DomainOrigin::DELETED);
 
+        if ($filter === 'exact') {
+            $qb->andWhere('d.type LIKE :exact')
+            ->setParameter('exact', DomainMatchType::EXACT);
+        } if ($filter === 'subdomain') {
+            $qb->andWhere('d.type LIKE :subdomain')
+            ->setParameter('subdomain', DomainMatchType::SUBDOMAIN);
+        } if ($filter === 'wildcard') {
+            $qb->andWhere('d.type LIKE :wildcard')
+                ->setParameter('wildcard', DomainMatchType::WILDCARD);
+    }
 
         if ($sort === 'pattern') {
             $field = 'd.pattern';
