@@ -14,6 +14,7 @@ use App\Form\DomainBlacklistImportType;
 use App\Form\DomainBlacklistLineType;
 use App\Form\DomainBlacklistType;
 use App\Repository\DomainBlacklistRepository;
+use App\Repository\DomainSourceRepository;
 use App\Service\EventActions;
 use App\Service\GetSettings;
 use DateTime;
@@ -34,156 +35,178 @@ class DomainBlacklistController extends AbstractController
         private readonly EntityManagerInterface $entityManager,
         private readonly EventActions $eventActions,
         private readonly DomainBlacklistRepository $domainBlacklistRepository,
+        private readonly DomainSourceRepository $domainSourceRepository,
     ) {
     }
 
     #[Route('/dashboard/settings/blacklist', name: 'admin_dashboard_settings_blacklist')]
     #[IsGranted('ROLE_ADMIN')]
-    public function edit(
+    public function domainsManagement(
         Request $request,
         #[MapQueryParameter] int $page = 1,
         #[MapQueryParameter] string $sort = 'createdAt',
         #[MapQueryParameter] string $order = 'desc',
         #[MapQueryParameter] ?int $count = 7
-    ): Response
-    {
-
+    ): Response {
         $searchTerm = $request->query->get('u');
-
         $filter = $request->query->get('filter', 'all');
 
         // Call the getSettings method of GetSettings class to retrieve the data
         /** @var array<string, array{value: string, description: string}> $data */
         $data = $this->getSettings->getSettings();
 
-        /** @var User $currentUser */
-        $currentUser = $this->getUser();
+//        /** @var User $currentUser */
+//        $currentUser = $this->getUser();
+//
+//        // Initialize DTO from settings
+//        $domainBlacklistDB = [];
+//        $dto = new DomainBlacklistDTO($domainBlacklistDB);
+//
+//        // Create form bound to DTO
+//        $form = $this->createForm(DomainBlacklistType::class, $dto);
+//        $form->handleRequest($request);
+//
+//        if ($form->isSubmitted() && $form->isValid()) {
+//            $importedDomains = [];
+//            $invalidDomains = [];
+//
+//            // Handle import file
+//            $importFile = $form->get('importFile')->getData();
+//            if ($importFile) {
+//                $lines = @file($importFile->getPathname(), FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) ?: [];
+//                foreach ($lines as $line) {
+//                    $line = trim($line);
+//                    if ($line === '') {
+//                        continue;
+//                    }
+//
+//                    // Validate domain pattern
+//                    if (!preg_match('/^(\*|\*\.[a-z0-9.-]+\.[a-z]{2,}|[a-z0-9.-]+\.[a-z]{2,})$/i', $line)) {
+//                        $invalidDomains[] = $line;
+//                        continue;
+//                    }
+//
+//                    [$pattern, $type] = $this->parseDomainInput($line);
+//
+//                    // Skip duplicates
+//                    $exist = $this->domainBlacklistRepository->findOneBy(['pattern' => $pattern, 'type' => $type]);
+//                    if ($exist instanceof DomainBlacklist) {
+//                        continue;
+//                    }
+//
+//                    $domain = new DomainBlacklist();
+//                    $domain->setPattern($pattern)->setType($type);
+//
+//                    $this->entityManager->persist($domain);
+//                    $importedDomains[] = $domain;
+//                }
+//            }
+//
+//            // Handle manual edits (lines)
+//            $blacklist = $dto->toEntities($domainBlacklistDB);
+//
+//            // Add/Update the other ones
+//            foreach ($blacklist as $domain) {
+//                $this->entityManager->persist($domain);
+//            }
+//
+//            $this->entityManager->flush();
+//
+//            // Flash messages
+//            $importCount = count($importedDomains);
+//            if ($importCount > 0) {
+//                $this->addFlash(
+//                    'success_admin',
+//                    $this->translator->trans(
+//                        'domainBlacklistConfigurationAppliedSuccessfully',
+//                        [],
+//                        'controllers'
+//                    ) . " + {$importCount} domains imported"
+//                );
+//            }
+//
+//            if ($invalidDomains !== []) {
+//                $this->addFlash(
+//                    'error_admin',
+//                    $this->translator->trans(
+//                        'invalidDomainPatternList',
+//                        ['%domains%' => implode(', ', $invalidDomains)],
+//                        'controllers'
+//                    )
+//                );
+//            }
+//
+//            // Log the event
+//            $this->eventActions->saveEvent(
+//                $currentUser,
+//                AnalyticalEventType::SETTING_DOMAIN_BLACKLIST_REQUEST->value,
+//                new DateTime(),
+//                [
+//                    'ip' => $request->getClientIp(),
+//                    'user_agent' => $request->headers->get('User-Agent'),
+//                    'uuid' => $currentUser->getUuid(),
+//                ]
+//            );
+//
+//            $this->addFlash(
+//                'success_admin',
+//                $this->translator->trans('domainBlacklistConfigurationAppliedSuccessfully', [], 'controllers')
+//            );
+//            return $this->redirectToRoute('admin_dashboard_settings_blacklist');
+//        }
 
-        $domainBlacklistDB = [];
+        // Domains Blacklist
+        $domainBlacklist = $this->domainBlacklistRepository->searchWithFilter(
+            $filter,
+            $sort,
+            $order,
+            $searchTerm
+        );
+        $totalBlacklistDomains = count($domainBlacklist);
+        $totalBlacklistPages = (int)ceil($totalBlacklistDomains / $count);
+        $blacklistOffset = ($page - 1) * $count;
+        $domainBlacklistPag = array_slice(
+            $domainBlacklist,
+            $blacklistOffset,
+            $count
+        );
 
-        // Initialize DTO from settings
-        $dto = new DomainBlacklistDTO($domainBlacklistDB);
-/*
-        // Create form bound to DTO
-        $form = $this->createForm(DomainBlacklistType::class, $dto);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $importedDomains = [];
-            $invalidDomains = [];
-
-            // Handle import file
-            $importFile = $form->get('importFile')->getData();
-            if ($importFile) {
-                $lines = @file($importFile->getPathname(), FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) ?: [];
-                foreach ($lines as $line) {
-                    $line = trim($line);
-                    if ($line === '') {
-                        continue;
-                    }
-
-                    // Validate domain pattern
-                    if (!preg_match('/^(\*|\*\.[a-z0-9.-]+\.[a-z]{2,}|[a-z0-9.-]+\.[a-z]{2,})$/i', $line)) {
-                        $invalidDomains[] = $line;
-                        continue;
-                    }
-
-                    [$pattern, $type] = $this->parseDomainInput($line);
-
-                    // Skip duplicates
-                    $exist = $this->domainBlacklistRepository->findOneBy(['pattern' => $pattern, 'type' => $type]);
-                    if ($exist instanceof DomainBlacklist) {
-                        continue;
-                    }
-
-                    $domain = new DomainBlacklist();
-                    $domain->setPattern($pattern)->setType($type);
-
-                    $this->entityManager->persist($domain);
-                    $importedDomains[] = $domain;
-                }
-            }
-
-            // Handle manual edits (lines)
-            $blacklist = $dto->toEntities($domainBlacklistDB);
-
-            // Add/Update the other ones
-            foreach ($blacklist as $domain) {
-                $this->entityManager->persist($domain);
-            }
-
-            $this->entityManager->flush();
-
-            // Flash messages
-            $importCount = count($importedDomains);
-            if ($importCount > 0) {
-                $this->addFlash(
-                    'success_admin',
-                    $this->translator->trans(
-                        'domainBlacklistConfigurationAppliedSuccessfully',
-                        [],
-                        'controllers'
-                    ) . " + {$importCount} domains imported"
-                );
-            }
-
-            if ($invalidDomains !== []) {
-                $this->addFlash(
-                    'error_admin',
-                    $this->translator->trans(
-                        'invalidDomainPatternList',
-                        ['%domains%' => implode(', ', $invalidDomains)],
-                        'controllers'
-                    )
-                );
-            }
-
-            // Log the event
-            $this->eventActions->saveEvent(
-                $currentUser,
-                AnalyticalEventType::SETTING_DOMAIN_BLACKLIST_REQUEST->value,
-                new DateTime(),
-                [
-                    'ip' => $request->getClientIp(),
-                    'user_agent' => $request->headers->get('User-Agent'),
-                    'uuid' => $currentUser->getUuid(),
-                ]
-            );
-
-            $this->addFlash(
-                'success_admin',
-                $this->translator->trans('domainBlacklistConfigurationAppliedSuccessfully', [], 'controllers')
-            );
-            return $this->redirectToRoute('admin_dashboard_settings_blacklist');
-        }
-
-*/
-        $domainBlacklist = $this->domainBlacklistRepository->searchWithFilter($filter, $sort, $order, $searchTerm);
-
-
-        // Perform pagination manually
-        $totalDomains = count($domainBlacklist);
-
-        $totalPages = ceil($totalDomains / $count);
-
-        $offset = ($page - 1) * $count;
-
-        $domainBlacklistPag = array_slice($domainBlacklist, $offset, $count);
-
+        // Domains Sources
+        $domainSources = $this->domainSourceRepository->findAll();
+        $totalDomainSources = count($domainSources);
+        $totalSourcePages = (int)ceil($totalDomainSources / $count);
+        $sourceOffset = ($page - 1) * $count;
+        $domainSourcesPag = array_slice(
+            $domainSources,
+            $sourceOffset,
+            $count
+        );
 
         return $this->render('dashboard/shared/settings_actions.html.twig', [
-            'formDTO' => $dto,
+            // Settings
+            // 'formDTO' => $dto,
             'data' => $data,
-            'allDomainsCount' => count($domainBlacklist),
-            'export_users' => OperationMode::OFF->value,
-            'activeFilter' => null,
+
+            // Blacklist
+            'domains' => $domainBlacklistPag,
+            'allDomainsCount' => $totalBlacklistDomains,
+            'totalBlacklistPages' => $totalBlacklistPages,
+
+            // Sources
+            'domainsSources' => $domainSourcesPag,
+            'allSourcesCount' => $totalDomainSources,
+            'totalSourcePages' => $totalSourcePages,
+
+            // UI state
+            'activeFilter' => $filter,
             'activeSort' => $sort,
             'activeOrder' => $order,
-            'domains' => $domainBlacklistPag,
             'searchTerm' => $searchTerm,
-            'totalPages' => $totalPages,
             'currentPage' => $page,
             'count' => $count,
+
+            // Other
+            'export_users' => OperationMode::OFF->value,
         ]);
     }
 
@@ -193,7 +216,6 @@ class DomainBlacklistController extends AbstractController
         int $id,
         Request $request,
     ): Response {
-
         // Fetch user and external auths
         $domain = $this->domainBlacklistRepository->find($id);
         if (!$domain) {

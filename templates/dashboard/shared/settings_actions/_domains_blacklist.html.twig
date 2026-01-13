@@ -129,7 +129,12 @@
         {# Users Table Pagination #}
         <div class="m-8">
             <hr class="w-full h-0.5 bg-gray-300/50 border-0 border-gray-300/50 rounded">
-            {{ include('dashboard/shared/pagination/_pagination_users.html.twig', {label: 'domainsPerPage'|trans({}, '_blacklist'), route: 'admin_dashboard_settings_blacklist', occurrencies: allDomainsCount}) }}
+            {{ include('dashboard/shared/pagination/_pagination_users.html.twig', {
+                label: 'domainsPerPage'|trans({}, '_blacklist'),
+                route: 'admin_dashboard_settings_blacklist',
+                occurrencies: allDomainsCount,
+                totalPages: totalBlacklistPages }
+            ) }}
         </div>
     </div>
 </div>
