@@ -198,11 +198,17 @@ class DomainBlacklistController extends AbstractController
         );
 
         // Domains Sources
-        $domainSources = $this->domainSourceRepository->findAll();
+        $domainSources = $this->domainSourceRepository->searchWithFilter(
+            $filter,
+            $sort,
+            $order,
+            $searchTerm,
+        );
+
         $totalDomainSources = count($domainSources);
         $totalSourcePages = (int)ceil($totalDomainSources / $count);
         $sourceOffset = ($page - 1) * $count;
-        $domainSourcesPag = array_slice(
+        $domainSourcePag = array_slice(
             $domainSources,
             $sourceOffset,
             $count
@@ -221,7 +227,7 @@ class DomainBlacklistController extends AbstractController
             'totalBlacklistPages' => $totalBlacklistPages,
 
             // Sources
-            'domainsSources' => $domainSourcesPag,
+            'domainsSource' => $domainSourcePag,
             'allSourcesCount' => $totalDomainSources,
             'totalSourcePages' => $totalSourcePages,
 

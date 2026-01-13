@@ -134,7 +134,7 @@
                     </thead>
                     <tbody>
                     {% for domain in domains %}
-                        {{ include('dashboard/shared/_domains.html.twig', {domain: domain}) }}
+                        {{ include('dashboard/shared/_domainsBlacklist.html.twig', {domain: domain}) }}
                     {% else %}
                         <tr>
                             <td colspan="7">
