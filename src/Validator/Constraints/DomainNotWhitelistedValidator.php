@@ -24,7 +24,6 @@ class DomainNotWhitelistedValidator extends ConstraintValidator
             return;
         }
 
-
         // Retrieve the valid domains setting from the database
         $validDomainsMicrosoft = $this->settingRepository->findOneBy([
             'name' => SettingName::VALID_DOMAINS_MICROSOFT_LOGIN->value

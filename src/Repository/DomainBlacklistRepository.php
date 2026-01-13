@@ -3,9 +3,9 @@
 namespace App\Repository;
 
 use App\Entity\DomainBlacklist;
+use App\Enum\DomainMatchType;
 use App\Enum\DomainOrigin;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -52,21 +52,57 @@ class DomainBlacklistRepository extends ServiceEntityRepository
         // Apply the search term, if provided
         if ($searchTerm) {
             $qb->andWhere('d.pattern LIKE :searchTerm')
-            ->setParameter('searchTerm', '%' . $searchTerm . '%');
+                ->setParameter('searchTerm', '%' . $searchTerm . '%');
         }
 
         $field = 'd.createdAt';
 
         if ($filter === 'pattern') {
             $field = 'd.pattern';
-        } if ($filter === 'createdAt') {
+        }
+        if ($filter === 'createdAt') {
             $field = 'd.createdAt';
-        } if ($filter === 'lastSeenAt') {
+        }
+        if ($filter === 'lastSeenAt') {
             $field = 'd.lastSeenAt';
-    }
+        }
         // Order by creation date (newest first)
         return $qb->orderBy($field, $order)
             ->getQuery()
             ->getResult();
+    }
+
+    public function matchesAnyDomain(array $domains): bool
+    {
+        return array_any($domains, fn($domain) => $this->isDomainBlacklisted($domain));
+    }
+
+    public function isDomainBlacklisted(string $domain): bool
+    {
+        $domain = strtolower(trim($domain));
+
+        $qb = $this->createQueryBuilder('d');
+
+        $qb
+            // WILDCARD → blocks everything
+            ->where('d.type = :wildcard')
+
+            // EXACT match
+            ->orWhere('d.type = :exact AND d.pattern = :domain')
+
+            // SUBDOMAIN match
+            ->orWhere(
+                'd.type = :subdomain AND (
+                :domain = d.pattern
+                OR :domain LIKE CONCAT(\'%.\', d.pattern)
+            )'
+            )
+            ->setParameter('wildcard', DomainMatchType::WILDCARD)
+            ->setParameter('exact', DomainMatchType::EXACT)
+            ->setParameter('subdomain', DomainMatchType::SUBDOMAIN)
+            ->setParameter('domain', $domain)
+            ->setMaxResults(1);
+
+        return (bool)$qb->getQuery()->getOneOrNullResult();
     }
 }
