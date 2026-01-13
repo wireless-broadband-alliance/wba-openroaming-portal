@@ -1,4 +1,5 @@
-blockedDomains: 'Domínios Bloqueados'
+domainsBlacklist: "Domínios na Lista Negra"
+domainsSource: "Fontes de Domínios"
 listOfBlockedDomains: 'Lista de domínios bloqueados na plataforma'
 example: 'example.com'
 addDomain: 'Adicionar Domínio'
