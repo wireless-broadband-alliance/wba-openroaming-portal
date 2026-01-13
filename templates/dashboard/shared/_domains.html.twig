@@ -11,6 +11,18 @@
         {% endif %}
     </td>
 
+    <td class="px-6 py-4 font-medium">
+        {% if domain.type == constant('App\\Enum\\DomainMatchType::EXACT') %}
+            {{ 'exact'|trans({}, '_blacklist') }}
+        {% elseif domain.type == constant('App\\Enum\\DomainMatchType::SUBDOMAIN') %}
+            {{ 'subdomain'|trans({}, '_blacklist') }}
+        {% elseif domain.type == constant('App\\Enum\\DomainMatchType::WILDCARD') %}
+            {{ 'wildcard'|trans({}, '_blacklist') }}
+        {% else %}
+            {{ 'noData'|trans({}, '_blacklist') }}
+        {% endif %}
+    </td>
+
     {# Created At #}
     <td class="px-6 py-4 font-medium">
         {{ domain.createdat|date('d/m/Y H:i') }}

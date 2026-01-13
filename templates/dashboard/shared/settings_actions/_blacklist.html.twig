@@ -69,6 +69,18 @@
                                 <th scope="col" class="p-4 pl-8">
                                     <div class="flex items-center gap-2">
                                         <span class="font-semibold whitespace-nowrap">
+                                            {{ 'type'|trans({}, '_blacklist') }}
+                                        </span>
+                                        <a href="{{ path('admin_dashboard_settings_blacklist', {...app.request.query.all, sort: 'type', order: activeSort == 'type' and activeOrder == 'asc' ? 'desc' : 'asc'}) }}"
+                                           class="p-1 hover:shadow-md rounded-lg cursor-pointer">
+                                            {{ sharedSort.sortArrow('type', activeSort, activeOrder) }}
+                                        </a>
+                                    </div>
+                                </th>
+
+                                <th scope="col" class="p-4 pl-8">
+                                    <div class="flex items-center gap-2">
+                                        <span class="font-semibold whitespace-nowrap">
                                             {{ 'createdAt'|trans({}, '_blacklist') }}
                                         </span>
                                         <a href="{{ path('admin_dashboard_settings_blacklist', {...app.request.query.all, sort: 'createdAt', order: activeSort == 'createdAt' and activeOrder == 'asc' ? 'desc' : 'asc'}) }}"
