@@ -33,7 +33,6 @@ class DomainBlacklistController extends AbstractController
         private readonly TranslatorInterface $translator,
         private readonly GetSettings $getSettings,
         private readonly EntityManagerInterface $entityManager,
-        private readonly EventActions $eventActions,
         private readonly DomainBlacklistRepository $domainBlacklistRepository,
         private readonly DomainSourceRepository $domainSourceRepository,
     ) {
@@ -184,7 +183,6 @@ class DomainBlacklistController extends AbstractController
 
         return $this->render('dashboard/shared/settings_actions.html.twig', [
             // Settings
-            // 'formDTO' => $dto,
             'data' => $data,
 
             // Blacklist
@@ -212,7 +210,7 @@ class DomainBlacklistController extends AbstractController
 
     #[Route('/dashboard/settings/blacklist/delete/{id<\d+>}', name: 'admin_dashboard_blacklist_delete_domain', methods: ['GET'])]
     #[IsGranted('ROLE_ADMIN')]
-    public function deleteUsers(
+    public function deleteDomains(
         int $id,
         Request $request,
     ): Response {
