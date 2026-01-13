@@ -119,4 +119,32 @@ class DomainBlacklistRepository extends ServiceEntityRepository
 
         return (bool)$qb->getQuery()->getOneOrNullResult();
     }
+
+    public function countDomains(string $type, string $filter, string $sort, ?string $order, ?string $searchTerm = null): int
+    {
+        $qb = $this->createQueryBuilder('d');
+        $qb->select('COUNT(d.id)');
+
+        // Apply the search term, if provided
+        if ($searchTerm) {
+            $qb->andWhere('d.pattern LIKE :searchTerm')
+                ->setParameter('searchTerm', '%' . $searchTerm . '%');
+        }
+
+        $qb->andWhere('d.origin NOT LIKE :deleted')
+            ->setParameter('deleted', DomainOrigin::DELETED);
+
+        if ($type === 'exact') {
+            $qb->andWhere('d.type LIKE :exact')
+                ->setParameter('exact', DomainMatchType::EXACT);
+        } if ($type === 'subdomain') {
+        $qb->andWhere('d.type LIKE :subdomain')
+            ->setParameter('subdomain', DomainMatchType::SUBDOMAIN);
+        } if ($type === 'wildcard') {
+            $qb->andWhere('d.type LIKE :wildcard')
+                ->setParameter('wildcard', DomainMatchType::WILDCARD);
+        }
+
+        return (int) $qb->getQuery()->getSingleScalarResult();
+    }
 }

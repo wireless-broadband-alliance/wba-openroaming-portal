@@ -161,7 +161,34 @@ class DomainBlacklistController extends AbstractController
             $order,
             $searchTerm
         );
-        $totalBlacklistDomains = count($domainBlacklist);
+        $totalBlacklistDomains = $this->domainBlacklistRepository->countDomains(
+            'all',
+            $filter,
+            $sort,
+            $order,
+            $searchTerm
+        );
+        $countExactDomains = $this->domainBlacklistRepository->countDomains(
+            DomainMatchType::EXACT->value,
+            $filter,
+            $sort,
+            $order,
+            $searchTerm
+        );
+        $countSubdomainDomains = $this->domainBlacklistRepository->countDomains(
+            DomainMatchType::SUBDOMAIN->value,
+            $filter,
+            $sort,
+            $order,
+            $searchTerm
+        );
+        $countWildcardDomains = $this->domainBlacklistRepository->countDomains(
+            DomainMatchType::WILDCARD->value,
+            $filter,
+            $sort,
+            $order,
+            $searchTerm
+        );
         $totalBlacklistPages = (int)ceil($totalBlacklistDomains / $count);
         $blacklistOffset = ($page - 1) * $count;
         $domainBlacklistPag = array_slice(
@@ -188,6 +215,9 @@ class DomainBlacklistController extends AbstractController
             // Blacklist
             'domains' => $domainBlacklistPag,
             'allDomainsCount' => $totalBlacklistDomains,
+            'exactDomainsCount' => $countExactDomains,
+            'subdomainDomainsCount' => $countSubdomainDomains,
+            'wildcardDomainsCount' => $countWildcardDomains,
             'totalBlacklistPages' => $totalBlacklistPages,
 
             // Sources
@@ -196,9 +226,9 @@ class DomainBlacklistController extends AbstractController
             'totalSourcePages' => $totalSourcePages,
 
             // UI state
-            'activeFilter' => $filter,
-            'activeSort' => $sort,
-            'activeOrder' => $order,
+            'activeFilterDomains' => $filter,
+            'activeSortDomains' => $sort,
+            'activeOrderDomains' => $order,
             'searchTerm' => $searchTerm,
             'currentPage' => $page,
             'count' => $count,
