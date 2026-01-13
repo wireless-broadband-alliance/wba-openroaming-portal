@@ -5,7 +5,6 @@ namespace App\Service;
 use App\Api\V1\BaseResponse as BaseResponseV1;
 use App\Api\V2\BaseResponse as BaseResponseV2;
 use App\Api\V3\BaseResponse as BaseResponseV3;
-use App\Entity\DomainBlacklist;
 use App\Entity\User;
 use App\Enum\DomainMatchType;
 use App\Enum\SettingName;
@@ -78,63 +77,47 @@ readonly class UserStatusChecker
         return false;
     }
 
-    public function isValidEmail(string $email, string $providerName): bool
+    public function isValidEmail(string $email, ?string $providerName = null): bool
     {
-        // Determine which valid domains setting to use
-        $settingName = match ($providerName) {
-            UserProvider::MICROSOFT_ACCOUNT->value => SettingName::VALID_DOMAINS_MICROSOFT_LOGIN->value,
-            UserProvider::GOOGLE_ACCOUNT->value => SettingName::VALID_DOMAINS_GOOGLE_LOGIN->value,
-            default => throw new RuntimeException(
-                $this->translator->trans('invalidProviderName', [], 'UserStatusChecker')
-            ),
-        };
-
-        $validDomainsSetting = $this->settingRepository->findOneBy(['name' => $settingName]);
-
-        if ($validDomainsSetting === null) {
-            throw new RuntimeException(
-                $this->translator->trans('validDomainsNotFound', [], 'UserStatusChecker')
-            );
-        }
-
         // Extract domain from email
         if (!str_contains($email, '@')) {
-            return false; // invalid email format
+            return false; // invalid email
         }
+
         [, $domain] = explode('@', strtolower($email), 2);
 
-        // Check whitelist (if defined)
-        $validDomains = trim((string)$validDomainsSetting->getValue());
-        if ($validDomains !== '') {
-            $validDomainsList = array_map(trim(...), explode(',', $validDomains));
-            if (!in_array($domain, $validDomainsList, true)) {
+        // Check whitelist only if providerName is provided
+        if ($providerName !== null) {
+            $settingName = match ($providerName) {
+                UserProvider::MICROSOFT_ACCOUNT->value => SettingName::VALID_DOMAINS_MICROSOFT_LOGIN->value,
+                UserProvider::GOOGLE_ACCOUNT->value => SettingName::VALID_DOMAINS_GOOGLE_LOGIN->value,
+                default => throw new RuntimeException(
+                    $this->translator->trans('invalidProviderName', [], 'UserStatusChecker')
+                ),
+            };
+
+            $validDomainsSetting = $this->settingRepository->findOneBy(['name' => $settingName]);
+
+            if ($validDomainsSetting === null) {
+                throw new RuntimeException(
+                    $this->translator->trans('validDomainsNotFound', [], 'UserStatusChecker')
+                );
+            }
+
+            $validDomainsList = array_filter(
+                array_map('trim', explode(',', (string)$validDomainsSetting->getValue()))
+            );
+
+            if ($validDomainsList !== [] && !in_array($domain, $validDomainsList, true)) {
                 return false;
             }
         }
 
-        // Check blacklist
-        foreach ($this->domainBlacklistRepository->findAll() as $domainDB) {
-            $pattern = $domainDB->getPattern();
-            $type = $domainDB->getType();
-
-            if ($type === DomainMatchType::WILDCARD) {
-                // Block everything
-                return false;
-            }
-
-            if ($type === DomainMatchType::EXACT && $domain === $pattern) {
-                return false;
-            }
-
-            if (
-                $type === DomainMatchType::SUBDOMAIN &&
-                ($domain === $pattern || str_ends_with($domain, '.' . $pattern))
-            ) {
-                return false;
-            }
+        // Always check the blacklist
+        if ($this->domainBlacklistRepository->isDomainBlacklisted($domain)) {
+            return false;
         }
 
-        // Passed both whitelist and blacklist
         return true;
     }
 }

@@ -134,6 +134,15 @@ class AuthController extends AbstractController
             return $statusCheckerResponse->toResponse();
         }
 
+        // Check if the email is valid
+        if (!$this->userStatusChecker->isValidEmail($user->getEmail())) {
+            return new BaseResponse(
+                403,
+                null,
+                'Your email domain is not allowed to use this platform.'
+            )->toResponse();
+        }
+
         $twoFAEnforcementResult = $this->twoFAAPIService->twoFAEnforcementChecker(
             $user,
             $request->attributes->get('_route')
