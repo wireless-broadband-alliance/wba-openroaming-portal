@@ -54,6 +54,15 @@ class DomainBlacklistController extends AbstractController
         /** @var array<string, array{value: string, description: string}> $data */
         $data = $this->getSettings->getSettings();
 
+        $domainDTO = new DomainBlacklistLineDTO();
+
+        $domainForm = $this->createForm(DomainBlacklistLineType::class, $domainDTO);
+        $domainForm->handleRequest($request);
+
+        if ($domainForm->isSubmitted() && $domainForm->isValid()) {
+            // todo safe new domain in the bd
+        }
+
 //        /** @var User $currentUser */
 //        $currentUser = $this->getUser();
 //
