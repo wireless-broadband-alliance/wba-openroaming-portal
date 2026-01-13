@@ -55,7 +55,7 @@ class DomainBlacklistController extends AbstractController
         /** @var User $currentUser */
         $currentUser = $this->getUser();
 
-        $domainBlacklistDB = $this->domainBlacklistRepository->findAll();
+        $domainBlacklistDB = [];
 
         // Initialize DTO from settings
         $dto = new DomainBlacklistDTO($domainBlacklistDB);
@@ -161,22 +161,35 @@ class DomainBlacklistController extends AbstractController
             return $this->redirectToRoute('admin_dashboard_settings_blacklist');
         }
 
-        $domainBlacklist = $this->domainBlacklistRepository->searchWithFilter($filter, $order, $searchTerm);
+
+        $domainBlacklist = $this->domainBlacklistRepository->searchWithFilter($filter, $sort, $order, $searchTerm);
+
+
+        // Perform pagination manually
+        $totalDomains = count($domainBlacklist);
+
+        $totalPages = ceil($totalDomains / $count);
+
+        $offset = ($page - 1) * $count;
+
+        $domainBlacklistPag = array_slice($domainBlacklist, $offset, $count);
+
 
         return $this->render('dashboard/shared/settings_actions.html.twig', [
             'form' => $form->createView(),
             'formDTO' => $dto,
             'data' => $data,
-            'allDomainsCount' => count($domainBlacklistDB),
-            'verifiedUsersCount' => 0,
-            'bannedUsersCount' => 0,
+            'allDomainsCount' => count($domainBlacklist),
             'export_users' => OperationMode::OFF->value,
             'activeFilter' => null,
             'activeSort' => $sort,
             'activeOrder' => $order,
-            'domains' => $domainBlacklist,
-            'searchTerm' => '',
-            'totalPages' => 0,
+            'domains' => $domainBlacklistPag,
+            'searchTerm' => $searchTerm,
+            'totalPages' => $totalPages,
+            'currentPage' => $page,
+            'count' => $count,
+
         ]);
     }
 

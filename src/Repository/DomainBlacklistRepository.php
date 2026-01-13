@@ -44,7 +44,7 @@ class DomainBlacklistRepository extends ServiceEntityRepository
             ->execute();
     }
 
-    public function searchWithFilter(string $filter, ?string $order, ?string $searchTerm = null): array
+    public function searchWithFilter(string $filter, string $sort, ?string $order, ?string $searchTerm = null): array
     {
         $qb = $this->createQueryBuilder('d');
 
@@ -55,17 +55,20 @@ class DomainBlacklistRepository extends ServiceEntityRepository
                 ->setParameter('searchTerm', '%' . $searchTerm . '%');
         }
 
-        $field = 'd.createdAt';
+        $field = '';
 
-        if ($filter === 'pattern') {
+        if ($sort === 'pattern') {
             $field = 'd.pattern';
         }
-        if ($filter === 'createdAt') {
+        if ($sort === 'createdAt') {
             $field = 'd.createdAt';
         }
-        if ($filter === 'lastSeenAt') {
+        if ($sort === 'lastSeenAt') {
             $field = 'd.lastSeenAt';
+        } if ($sort === '') {
+            $field = 'd.createdAt';
         }
+
         // Order by creation date (newest first)
         return $qb->orderBy($field, $order)
             ->getQuery()
