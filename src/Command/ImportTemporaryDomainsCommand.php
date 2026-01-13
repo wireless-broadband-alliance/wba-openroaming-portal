@@ -3,6 +3,7 @@
 namespace App\Command;
 
 use App\Entity\DomainBlacklist;
+use App\Entity\DomainSource;
 use App\Enum\DomainMatchType;
 use App\Enum\DomainOrigin;
 use App\Repository\DomainBlacklistRepository;
@@ -85,7 +86,9 @@ class ImportTemporaryDomainsCommand extends Command
                 ]);
 
                 if ($existing) {
-                    if ($existing->getOrigin() === DomainOrigin::MANUAL) {
+                    if ($existing->getOrigin() === DomainOrigin::MANUAL ||
+                        $existing->getSource() === DomainOrigin::DELETED
+                    ) {
                         // Skip domains manually added by admin
                         $progressBar->advance();
                         continue;
