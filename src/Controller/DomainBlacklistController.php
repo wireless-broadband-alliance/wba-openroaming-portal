@@ -193,6 +193,41 @@ class DomainBlacklistController extends AbstractController
         ]);
     }
 
+    #[Route('/dashboard/settings/blacklist/delete/{id<\d+>}', name: 'admin_dashboard_blacklist_delete_domain', methods: ['GET'])]
+    #[IsGranted('ROLE_ADMIN')]
+    public function deleteUsers(
+        int $id,
+        Request $request,
+    ): Response {
+
+        // Fetch user and external auths
+        $domain = $this->domainBlacklistRepository->find($id);
+        if (!$domain) {
+            throw $this->createNotFoundException(
+                $this->translator->trans('domainNotFound', [], 'controllers')
+            );
+        }
+
+
+        $this->entityManager->remove($domain);
+        $this->entityManager->flush();
+
+        $this->addFlash(
+            'success_admin',
+            $this->translator->trans(
+                'domainDeleted',
+                [
+                    '%domain%' => $domain->getPattern()
+                ],
+                'controllers'
+            )
+        );
+
+        // Return to the last page where the user has (with searching filters)
+        $lastPage = $request->headers->get('referer', '/dashboard');
+        return $this->redirect($lastPage);
+    }
+
     /**
      * Parses a domain input string into pattern + type
      *

@@ -132,3 +132,5 @@ passwordNotSentSMS: 'We were unable to send the new password to your phone numbe
 domainBlacklistConfigurationAppliedSuccessfully: 'New Domain Blacklist configuration have been applied successfully.'
 invalidDomainPattern: "Invalid domain pattern: %domain%"
 invalidDomainPatternList: "The following domain patterns are invalid: %domains%"
+domainNotFound: 'Domain not found'
+domainDeleted: 'Domain "%domain%" deleted successfully.'

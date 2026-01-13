@@ -130,3 +130,5 @@ invalidLogin: 'O seu link de login é inválido ou expirou. Solicite um novo lin
 domainBlacklistConfigurationAppliedSuccessfully: 'Uma nova configuração de Domínios Bloqueados foi aplicada com sucesso.'
 invalidDomainPattern: "Padrão de domínio inválido: %domain%"
 invalidDomainPatternList: "Os seguintes padrões de domínio são inválidos: %domains%"
+domainNotFound: 'Domínio não encontrado.'
+domainDeleted: 'O Domínio "%domain%" eliminado com sucesso.'

@@ -6,7 +6,7 @@
         {% if domain.pattern is not null %}
             {{ domain.pattern }}
         {% else %}
-            <span class="font-semibold p-1 pill-error">{{ 'noInformation'|trans({}, '_blacklist') }}
+            <span class="font-semibold p-1 pill-error">{{ 'noInformation'|trans({}, '_user') }}
 </span>
         {% endif %}
     </td>
@@ -24,7 +24,7 @@
     {# Actions Buttons #}
     <td class="px-10 py-4 text-right">
         {# Items Button Dropdown #}
-        <a href="{{ path('admin_dashboard_settings_blacklist', {id: domain.id}) }}"
+        <a href="{{ path('admin_dashboard_blacklist_delete_domain', {id: domain.id}) }}"
            class="flex flex-row items-center px-2 py-2 duration-100 p-2 cursor-pointer hover:text-lightGreen">
             <twig:ux:icon name="wba:trash" class="w-5 mr-3 fill-none stroke-current"/>
         </a>
