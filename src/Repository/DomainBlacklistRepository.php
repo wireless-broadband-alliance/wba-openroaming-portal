@@ -55,7 +55,9 @@ class DomainBlacklistRepository extends ServiceEntityRepository
                 ->setParameter('searchTerm', '%' . $searchTerm . '%');
         }
 
-        $field = '';
+        $qb->andWhere('d.origin NOT LIKE :deleted')
+            ->setParameter('deleted', DomainOrigin::DELETED);
+
 
         if ($sort === 'pattern') {
             $field = 'd.pattern';

@@ -8,6 +8,7 @@ use App\Entity\DomainBlacklist;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Enum\DomainMatchType;
+use App\Enum\DomainOrigin;
 use App\Enum\OperationMode;
 use App\Form\DomainBlacklistImportType;
 use App\Form\DomainBlacklistLineType;
@@ -201,8 +202,9 @@ class DomainBlacklistController extends AbstractController
             );
         }
 
+        $domain->setOrigin(DomainOrigin::DELETED);
 
-        $this->entityManager->remove($domain);
+        $this->entityManager->persist($domain);
         $this->entityManager->flush();
 
         $this->addFlash(
