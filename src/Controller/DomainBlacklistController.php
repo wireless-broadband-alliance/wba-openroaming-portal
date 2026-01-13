@@ -3,11 +3,14 @@
 namespace App\Controller;
 
 use App\DTO\DomainBlacklistDTO;
+use App\DTO\DomainBlacklistLineDTO;
 use App\Entity\DomainBlacklist;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Enum\DomainMatchType;
 use App\Enum\OperationMode;
+use App\Form\DomainBlacklistImportType;
+use App\Form\DomainBlacklistLineType;
 use App\Form\DomainBlacklistType;
 use App\Repository\DomainBlacklistRepository;
 use App\Service\EventActions;
@@ -59,7 +62,7 @@ class DomainBlacklistController extends AbstractController
 
         // Initialize DTO from settings
         $dto = new DomainBlacklistDTO($domainBlacklistDB);
-
+/*
         // Create form bound to DTO
         $form = $this->createForm(DomainBlacklistType::class, $dto);
         $form->handleRequest($request);
@@ -108,14 +111,6 @@ class DomainBlacklistController extends AbstractController
                 $this->entityManager->persist($domain);
             }
 
-            // Remove deleted domains
-            foreach ($domainBlacklistDB as $domainDB) {
-                $result = array_find($blacklist, fn(DomainBlacklist $d) => $d->getId() === $domainDB->getId());
-                if (is_null($result)) {
-                    $this->entityManager->remove($domainDB);
-                }
-            }
-
             $this->entityManager->flush();
 
             // Flash messages
@@ -161,7 +156,7 @@ class DomainBlacklistController extends AbstractController
             return $this->redirectToRoute('admin_dashboard_settings_blacklist');
         }
 
-
+*/
         $domainBlacklist = $this->domainBlacklistRepository->searchWithFilter($filter, $sort, $order, $searchTerm);
 
 
@@ -176,7 +171,6 @@ class DomainBlacklistController extends AbstractController
 
 
         return $this->render('dashboard/shared/settings_actions.html.twig', [
-            'form' => $form->createView(),
             'formDTO' => $dto,
             'data' => $data,
             'allDomainsCount' => count($domainBlacklist),
@@ -189,7 +183,6 @@ class DomainBlacklistController extends AbstractController
             'totalPages' => $totalPages,
             'currentPage' => $page,
             'count' => $count,
-
         ]);
     }
 
