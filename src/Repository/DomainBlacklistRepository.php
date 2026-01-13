@@ -59,13 +59,13 @@ class DomainBlacklistRepository extends ServiceEntityRepository
 
         if ($sort === 'pattern') {
             $field = 'd.pattern';
-        }
-        if ($sort === 'createdAt') {
+        } elseif ($sort === 'createdAt') {
             $field = 'd.createdAt';
-        }
-        if ($sort === 'lastSeenAt') {
+        } elseif ($sort === 'lastSeenAt') {
             $field = 'd.lastSeenAt';
-        } if ($sort === '') {
+        } elseif ($sort === 'type') {
+            $field = 'd.type';
+        } else {
             $field = 'd.createdAt';
         }
 
