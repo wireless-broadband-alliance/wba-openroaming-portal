@@ -65,22 +65,12 @@ export default class extends Controller {
     }
 
     activateToggle(button) {
-        button.classList.add(
-            'bg-white',
-            'text-black',
-            'font-semibold',
-            'shadow-md'
-        );
+        button.classList.add('bg-white', 'text-black', 'font-semibold', 'shadow-md');
         button.classList.remove('text-gray-700');
     }
 
     deactivateToggle(button) {
-        button.classList.remove(
-            'bg-white',
-            'text-black',
-            'font-semibold',
-            'shadow-md'
-        );
+        button.classList.remove('bg-white', 'text-black', 'font-semibold', 'shadow-md');
         button.classList.add('text-gray-700');
     }
 }
