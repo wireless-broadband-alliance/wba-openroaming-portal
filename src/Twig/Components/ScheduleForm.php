@@ -43,6 +43,9 @@ final class ScheduleForm extends AbstractController
     public bool|null $freeradiusLastConnectionWarning = null;
 
     #[LiveProp]
+    public bool|null $domainBlackListImportCronWarning = null;
+
+    #[LiveProp]
     public bool|null $default_use_advanced_mode = false;
 
     public function __construct(
@@ -86,6 +89,10 @@ final class ScheduleForm extends AbstractController
 
             $this->scheduleDTO->ldap_sync_cron->advanced =
                 $this->scheduleDTO->ldap_sync_cron->toCronExpression(false, $this->cronHelper);
+            $this->scheduleDTO->freeradius_last_connection_cron->advanced =
+                $this->scheduleDTO->freeradius_last_connection_cron->toCronExpression(false, $this->cronHelper);
+            $this->scheduleDTO->domain_blacklist_import_cron->advanced =
+                $this->scheduleDTO->domain_blacklist_import_cron->toCronExpression(false, $this->cronHelper);
         } else {
             // Switching to simple mode → recreate DTOs from cron expression values
             $this->scheduleDTO->delete_unconfirmed_users_cron =
@@ -118,6 +125,14 @@ final class ScheduleForm extends AbstractController
                     $this->settingRepository,
                     $this->cronHelper,
                     $this->scheduleDTO->freeradius_last_connection_cron->advanced
+                );
+
+            $this->scheduleDTO->domain_blacklist_import_cron =
+                new ScheduleSettingDTO(
+                    SettingName::DOMAIN_BLACKLIST_IMPORT_CRON->value,
+                    $this->settingRepository,
+                    $this->cronHelper,
+                    $this->scheduleDTO->domain_blacklist_import_cron->advanced
                 );
         }
 

@@ -375,7 +375,7 @@ class UsersManagementController extends AbstractController
             )
         );
 
-        // Return to the last page where the user has (with searching filters)
+        // Return to the last page where the user was (with searching filters)
         $lastPage = $request->headers->get('referer', '/dashboard');
         return $this->redirect($lastPage);
     }
@@ -501,7 +501,7 @@ class UsersManagementController extends AbstractController
                 )
             );
 
-            // Return to the last page where the user has (with searching filters)
+            // Return to the last page where the user was (with searching filters)
             $lastPage = $request->headers->get('referer', '/dashboard');
             return $this->redirect($lastPage);
         }
@@ -635,7 +635,7 @@ class UsersManagementController extends AbstractController
                 )
             );
 
-            // Return to the last page where the user has (with searching filters)
+            // Return to the last page where the user was (with searching filters)
             $lastPage = $request->headers->get('referer', '/dashboard');
             return $this->redirect($lastPage);
         }

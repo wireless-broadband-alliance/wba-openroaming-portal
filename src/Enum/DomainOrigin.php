@@ -1,0 +1,11 @@
+<?php
+
+namespace App\Enum;
+
+enum DomainOrigin: string
+{
+    case LINK = 'link';
+    case MANUAL = 'manual';
+    case UNKNOWN = 'unknown';
+    case DELETED = 'deleted';
+}

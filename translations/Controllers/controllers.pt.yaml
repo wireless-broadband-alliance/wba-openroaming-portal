@@ -169,3 +169,11 @@ systemResetRequestStarted: 'Pedido de Restauro do Sistema iniciado. Certifique-s
 notValidDomainOrIP: 'O domínio "%domain%" não é válido ou não resolve para um endereço IP.'
 invalidDomainPattern: "Padrão de domínio inválido: %domain%"
 invalidDomainPatternList: "Os seguintes padrões de domínio são inválidos: %domains%"
+domainNotFound: 'Domínio não encontrado.'
+domainDeleted: 'O Domínio "%domain%" eliminado com sucesso.'
+domainAdded: 'O Domínio "%domain%" adicionado com sucesso.'
+domainSourceNotFound: 'Fonte de Domínio não encontrada.'
+domainSourceDeleted: 'Fonte de Domínio "%domain%" eliminada com sucesso.'
+domainSourceActivated: 'Fonte de Domínio "%domain%" ativada com sucesso.'
+domainSourceDeactivated: 'Fonte de Domínio "%domain%" desativada com sucesso.'
+sourceAdded: 'A Fonte "%source%" adicionado com sucesso.'

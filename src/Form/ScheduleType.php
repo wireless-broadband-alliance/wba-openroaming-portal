@@ -87,6 +87,18 @@ class ScheduleType extends AbstractType
                         'disabled' => $this->disabled,
                     ]);
                 }
+            )
+            ->addDependent(
+                'domain_blacklist_import_cron',
+                'use_advanced_mode',
+                function (DependentField $field, ?bool $use_advanced_mode): void {
+                    $field->add(ScheduleSettingType::class, [
+                        'label' => false,
+                        'required' => false,
+                        'use_advanced_mode' => $use_advanced_mode,
+                        'settingName' => SettingName::DOMAIN_BLACKLIST_IMPORT_CRON->value,
+                    ]);
+                }
             );
     }
 

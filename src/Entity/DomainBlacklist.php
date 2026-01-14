@@ -3,10 +3,20 @@
 namespace App\Entity;
 
 use App\Enum\DomainMatchType;
+use App\Enum\DomainOrigin;
 use App\Repository\DomainBlacklistRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: DomainBlacklistRepository::class)]
+#[ORM\Table(
+    uniqueConstraints: [
+        new ORM\UniqueConstraint(
+            name: 'uniq_domain_pattern',
+            columns: ['pattern']
+        )
+    ]
+)
+]
 class DomainBlacklist
 {
     #[ORM\Id]
@@ -20,6 +30,15 @@ class DomainBlacklist
 
     #[ORM\Column(length: 32, enumType: DomainMatchType::class)]
     private DomainMatchType $type; // exact | subdomain | wildcard
+
+    #[ORM\Column]
+    private ?\DateTimeImmutable $createdAt = null;
+
+    #[ORM\Column(length: 32, enumType: DomainOrigin::class)]
+    private ?DomainOrigin $origin = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $lastSeenAt = null;
 
     public function getId(): ?int
     {
@@ -46,6 +65,42 @@ class DomainBlacklist
     public function setType(DomainMatchType $type): static
     {
         $this->type = $type;
+
+        return $this;
+    }
+
+    public function getCreatedAt(): ?\DateTimeImmutable
+    {
+        return $this->createdAt;
+    }
+
+    public function setCreatedAt(\DateTimeImmutable $createdAt): static
+    {
+        $this->createdAt = $createdAt;
+
+        return $this;
+    }
+
+    public function getOrigin(): ?DomainOrigin
+    {
+        return $this->origin;
+    }
+
+    public function setOrigin(DomainOrigin $origin): static
+    {
+        $this->origin = $origin;
+
+        return $this;
+    }
+
+    public function getLastSeenAt(): ?\DateTimeImmutable
+    {
+        return $this->lastSeenAt;
+    }
+
+    public function setLastSeenAt(?\DateTimeImmutable $lastSeenAt): static
+    {
+        $this->lastSeenAt = $lastSeenAt;
 
         return $this;
     }

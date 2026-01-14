@@ -1,0 +1,46 @@
+<twig:DomainBlacklistForm :dto="domainDTO" :form="domainsForm">
+    {# Add Domain Blacklist Card #}
+    <div class="bg-white rounded-lg shadow p-4 sm:p-6 mb-6">
+
+        {# Header #}
+        <div class="mb-4">
+            <h2 class="text-base sm:text-lg font-semibold text-gray-800">
+                {{ 'addDomainManually'|trans({}, '_blacklist') }}
+            </h2>
+        </div>
+
+        {{ form_start(form, {attr: {class: 'w-full'}}) }}
+
+        {# Content #}
+        <div class="flex flex-col gap-3">
+
+            {# Input + Button #}
+            <div class="flex flex-col sm:flex-row gap-2">
+
+                {{ form_widget(form.input, {
+                    attr: {
+                        class: 'form-widget w-full',
+                        placeholder: 'example.com',
+                    },
+                }) }}
+
+                <button type="submit"
+                        class="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white rounded-md
+                               hover:bg-blue-700 transition whitespace-nowrap">
+                    {{ 'addDomain'|trans({}, '_blacklist') }}
+                </button>
+            </div>
+
+            {{ form_help(form.input) }}
+
+            {% if form_errors(form.input) %}
+                <div class="text-red-500 text-sm">
+                    {{ form_errors(form.input) }}
+                </div>
+            {% endif %}
+
+        </div>
+
+        {{ form_end(form) }}
+    </div>
+</twig:DomainBlacklistForm>

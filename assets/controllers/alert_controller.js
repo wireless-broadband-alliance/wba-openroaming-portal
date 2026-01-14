@@ -24,4 +24,15 @@ export default class extends Controller {
             this.formTarget.submit();
         }
     }
+
+    deleteDomainSource() {
+        // Read the confirmation message from the button
+        const message = this.buttonTarget.getAttribute('data-domain-confirm-delete');
+
+        // Show warning message
+        if (confirm(message)) {
+            // If confirmed, submit the form
+            this.formTarget.submit();
+        }
+    }
 }

@@ -72,3 +72,8 @@ src/Command/ResetRadiusMarcelinaSettingsCommand.php
 ###> DockerFileCleanedDev ###
 DockerfileCleanedDev
 ###< DockerFileCleanedDev ###
+
+###> config/reference this page breaks phpstan with warnings of compatability, because of the project image ###
+config/reference.php
+supervisord.pid
+###< config/reference ###

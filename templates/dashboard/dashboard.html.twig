@@ -42,38 +42,38 @@
     <div class="pt-5 pb-1 text-left space-y-3 rounded-xl bg-white">
         <div class="w-full">
             <div class="sm:w-auto px-5 py-4">
-                <div class="flex flex-col sm:flex-row justify-between items-center space-y-6 sm:space-y-0 sm:space-x-4">
+                <div class="flex flex-col lg:flex-row justify-between items-center space-y-6 lg:space-y-0 sm:space-x-4">
 
-          {# Left Search Filters #}
-          <div class="flex items-center space-x-6">
-            <a href="{{ path('admin_page', {filter: 'all', u: app.request.query.get('u')}) }}"
-               class="flex flex-row group hover:border-b-2 hover:border-y-veryDarkButton transition-all duration-100 {% if app.request.query.get('filter') == null or app.request.query.get('filter') == 'all' %}border-b-2 border-y-veryDarkButton transition-all{% endif %}">
-              <h1 class="px-2">
-                {{ 'all'|trans({}, 'dashboard') }}
-              </h1>
-              <div class="w-auto h-6 mb-1 px-2 bg-veryLightGreen group-hover:bg-veryDarkButton rounded-md group-hover:text-white text-center transition-all duration-100">
-                {{ allUsersCount }}
-              </div>
-            </a>
-            <a href="{{ path('admin_page', {filter: constant('App\\Enum\\UserVerificationStatus::VERIFIED').value, u: app.request.query.get('u')}) }}"
-               class="flex flex-row group hover:text-lightGreen hover:border-b-2 hover:border-y-lightGreen/50 transition-all duration-100 {% if app.request.query.get('filter') == constant('App\\Enum\\UserVerificationStatus::VERIFIED').value %}text-lightGreen border-b-2 border-y-lightGreen transition-all{% endif %}">
-              <h1 class="px-2">
-                {{ 'verified'|trans({}, 'dashboard') }}
-              </h1>
-              <div class="w-auto h-6 mb-1 px-2 bg-veryLightGreen group-hover:bg-lightGreen rounded-md group-hover:text-white text-center transition-all duration-100">
-                {{ verifiedUsersCount }}
-              </div>
-            </a>
-            <a href="{{ path('admin_page', {filter: constant('App\\Enum\\UserVerificationStatus::BANNED').value, u: app.request.query.get('u')}) }}"
-               class="flex flex-row group hover:text-red-400 hover:border-b-2 hover:border-y-red-400 transition-all duration-100 {% if app.request.query.get('filter') == constant('App\\Enum\\UserVerificationStatus::BANNED').value %}text-red-400 border-b-2 border-y-red-400 transition-all{% endif %}">
-              <h1 class="px-2">
-                {{ 'banned'|trans({}, 'dashboard') }}
-              </h1>
-              <div class="w-auto h-6 mb-1 px-2 bg-veryLightGreen group-hover:bg-red-400 rounded-md group-hover:text-white text-center transition-all duration-100">
-                {{ bannedUsersCount }}
-              </div>
-            </a>
-          </div>
+                    {# Left Search Filters #}
+                    <div class="flex flex-col md:flex-row sm:items-center gap-4 sm:gap-6">
+                        <a href="{{ path('admin_page', {filter: 'all', u: app.request.query.get('u')}) }}"
+                           class="flex flex-row group hover:border-b-2 hover:border-y-veryDarkButton transition-all duration-100 {% if app.request.query.get('filter') == null or app.request.query.get('filter') == 'all' %}border-b-2 border-y-veryDarkButton transition-all{% endif %}">
+                            <h1 class="px-2">
+                                {{ 'all'|trans({}, 'dashboard') }}
+                            </h1>
+                            <div class="w-auto h-6 mb-1 px-2 bg-veryLightGreen group-hover:bg-veryDarkButton rounded-md group-hover:text-white text-center transition-all duration-100">
+                                {{ allUsersCount }}
+                            </div>
+                        </a>
+                        <a href="{{ path('admin_page', {filter: constant('App\\Enum\\UserVerificationStatus::VERIFIED').value, u: app.request.query.get('u')}) }}"
+                           class="flex flex-row group hover:text-lightGreen hover:border-b-2 hover:border-y-lightGreen/50 transition-all duration-100 {% if app.request.query.get('filter') == constant('App\\Enum\\UserVerificationStatus::VERIFIED').value %}text-lightGreen border-b-2 border-y-lightGreen transition-all{% endif %}">
+                            <h1 class="px-2">
+                                {{ 'verified'|trans({}, 'dashboard') }}
+                            </h1>
+                            <div class="w-auto h-6 mb-1 px-2 bg-veryLightGreen group-hover:bg-lightGreen rounded-md group-hover:text-white text-center transition-all duration-100">
+                                {{ verifiedUsersCount }}
+                            </div>
+                        </a>
+                        <a href="{{ path('admin_page', {filter: constant('App\\Enum\\UserVerificationStatus::BANNED').value, u: app.request.query.get('u')}) }}"
+                           class="flex flex-row group hover:text-red-400 hover:border-b-2 hover:border-y-red-400 transition-all duration-100 {% if app.request.query.get('filter') == constant('App\\Enum\\UserVerificationStatus::BANNED').value %}text-red-400 border-b-2 border-y-red-400 transition-all{% endif %}">
+                            <h1 class="px-2">
+                                {{ 'banned'|trans({}, 'dashboard') }}
+                            </h1>
+                            <div class="w-auto h-6 mb-1 px-2 bg-veryLightGreen group-hover:bg-red-400 rounded-md group-hover:text-white text-center transition-all duration-100">
+                                {{ bannedUsersCount }}
+                            </div>
+                        </a>
+                    </div>
 
           {# Midle Search Bar #}
           <div class="w-full md:w-3/6">
@@ -186,11 +186,12 @@
         </div>
       </div>
 
-      {# Users Table Pagination #}
-      <div class="m-8">
-        <hr class="w-full h-0.5 bg-gray-300/50 border-0 border-gray-300/50 rounded">
-        {{ include('dashboard/shared/pagination/_pagination_users.html.twig', {label: 'usersPerPage'|trans({}, 'dashboard'), route: 'admin_page', occurrencies: allUsersCount}) }}
-      </div>
+            {# Users Table Pagination #}
+            <div class="m-8">
+                <hr class="w-full h-0.5 bg-gray-300/50 border-0 border-gray-300/50 rounded">
+                {{ include('dashboard/shared/pagination/_pagination_tables.html.twig', {label: 'usersPerPage'|trans({}, 'dashboard'), route: 'admin_page', occurrencies: allUsersCount}) }}
+            </div>
+        </div>
     </div>
   </div>
 {% endblock %}

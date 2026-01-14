@@ -65,6 +65,14 @@ readonly class Schedule implements ScheduleProviderInterface
                     '30 3 * * 0',
                     new RunCommandMessage('clear:uploaded-certs')
                 )
+            )
+
+            // By default, daily at 04:00
+            ->add(
+                RecurringMessage::cron(
+                    $this->getRequiredSetting(SettingName::DOMAIN_BLACKLIST_IMPORT_CRON->value),
+                    new RunCommandMessage('import:temporary-domains')
+                )
             );
     }
 

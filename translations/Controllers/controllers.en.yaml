@@ -171,3 +171,11 @@ systemResetRequestStarted: 'System Reset Request started. Make sure to carefully
 notValidDomainOrIP: 'The domain "%domain%" is not valid or does not resolve to an IP address.'
 invalidDomainPattern: "Invalid domain pattern: %domain%"
 invalidDomainPatternList: "The following domain patterns are invalid: %domains%"
+domainNotFound: 'Domain not found'
+domainDeleted: 'Domain "%domain%" deleted successfully.'
+domainAdded: 'Domain "%domain%" added successfully.'
+domainSourceNotFound: 'Domain Source not found'
+domainSourceDeleted: 'Domain Source "%domain%" deleted successfully.'
+domainSourceActivated: 'Domain source "%domain%" activated successfully.'
+domainSourceDeactivated: 'Domain source "%domain%" deactivated successfully.'
+sourceAdded: 'Source "%source%" added successfully.'

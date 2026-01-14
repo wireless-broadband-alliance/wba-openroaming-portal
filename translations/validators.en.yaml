@@ -79,3 +79,4 @@ invalidCertificateChain: "The uploaded certificate does not belong to the upload
 incompleteChainMessage: 'The certificate chain does not reach a trust anchor.'
 untrustedRootMessage: 'The trust anchor is not trusted.'
 invalidDomainPattern: 'The domain is not valid. Use an exact domain (example.com), a subdomain wildcard (*.example.com), or * for all domains.'
+invalidSource: 'Please enter a valid URL.'

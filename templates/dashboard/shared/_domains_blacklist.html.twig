@@ -1,0 +1,55 @@
+{# Table Content - DomainsBlacklisted #}
+<tr class="font-medium">
+
+    {# Domain pattern #}
+    <td class="p-4 pl-8">
+        {% if domain.pattern is not null %}
+            {{ domain.pattern }}
+        {% else %}
+            <span class="font-semibold p-1 pill-error">{{ 'noInformation'|trans({}, '_blacklist') }}</span>
+        {% endif %}
+    </td>
+
+    <td class="p-4 pl-8">
+        {% if domain.type == constant('App\\Enum\\DomainMatchType::EXACT') %}
+            {{ 'exact'|trans({}, '_blacklist') }}
+        {% elseif domain.type == constant('App\\Enum\\DomainMatchType::SUBDOMAIN') %}
+            {{ 'subdomain'|trans({}, '_blacklist') }}
+        {% elseif domain.type == constant('App\\Enum\\DomainMatchType::WILDCARD') %}
+            {{ 'wildcard'|trans({}, '_blacklist') }}
+        {% else %}
+            {{ 'noData'|trans({}, '_blacklist') }}
+        {% endif %}
+    </td>
+
+    {# Created At #}
+    <td class="p-4 pl-8">
+        {{ domain.createdat|date('d/m/Y H:i') }}
+    </td>
+
+    {# Last Seen At #}
+    <td class="p-4 pl-8">
+        {% if domain.lastSeenAt %}
+            <span>
+                    {{ domain.lastSeenAt|date('d/m/Y H:i') }}
+                </span>
+        {% else %}
+            <span class="pill-error">
+                    {{ 'noData'|trans({}, '_blacklist') }}
+                </span>
+        {% endif %}
+    </td>
+
+    {# Actions Buttons #}
+    <td class="p-4 pl-8 text-right">
+        <form method="post"
+              action="{{ path('admin_dashboard_blacklist_delete_domain', {id: domain.id}) }}">
+            <input type="hidden" name="_method" value="DELETE">
+
+            <button type="submit"
+                    class="flex flex-row items-center px-2 py-2 cursor-pointer hover:text-red-400">
+                <twig:ux:icon name="wba:trash" class="w-5 mr-3 fill-none stroke-current"/>
+            </button>
+        </form>
+    </td>
+</tr>
