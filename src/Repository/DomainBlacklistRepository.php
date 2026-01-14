@@ -44,6 +44,9 @@ class DomainBlacklistRepository extends ServiceEntityRepository
             ->execute();
     }
 
+    /**
+     * @return DomainBlacklist[]
+     */
     public function searchWithFilter(string $filter, string $sort, ?string $order, ?string $searchTerm = null): array
     {
         $qb = $this->createQueryBuilder('d');
@@ -86,6 +89,9 @@ class DomainBlacklistRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    /**
+     * @param string[] $domains
+     */
     public function matchesAnyDomain(array $domains): bool
     {
         return array_any($domains, fn($domain) => $this->isDomainBlacklisted($domain));
