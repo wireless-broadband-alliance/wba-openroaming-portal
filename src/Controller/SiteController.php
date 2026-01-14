@@ -295,13 +295,12 @@ class SiteController extends AbstractController
                         $request
                     );
 
-                    $session->set('session_verified', true);
-
                     if ($data[SettingName::USER_VERIFICATION->value]['value'] === OperationMode::ON->value) {
                         return $this->redirectToRoute('app_login_confirmation');
                     }
 
                     if ($data[SettingName::USER_VERIFICATION->value]['value'] === OperationMode::OFF->value) {
+                        $session->set('session_verified', true);
                         return $this->redirectToRoute('app_landing');
                     }
                 }
