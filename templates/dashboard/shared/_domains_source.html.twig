@@ -64,14 +64,15 @@
                             {{ stimulus_target('alert', 'form') }}>
                         <input type="hidden" name="_method" value="DELETE">
 
-                        <button type="button"
-                                class="flex items-center px-2 py-2 w-full hover:text-red-400"
-                                data-confirm-message="{{ 'confirm_delete_domain_source'|trans({}, '_blacklist') }}"
-                                {{ stimulus_action('alert', 'confirm') }}
+                        <a href="javascript:void(0)"
+                           class="flex flex-row items-center px-2 py-2 duration-100 cursor-pointer hover:text-red-400"
+                           data-domain-id="{{ domainsSource.id }}"
+                           data-domain-confirm-delete="{{ 'confirm_delete_domain_source'|trans({'%domain%': domainsSource.url}, '_blacklist') }}"
+                                {{ stimulus_action('alert', 'deleteDomainSource') }}
                                 {{ stimulus_target('alert', 'button') }}>
                             <twig:ux:icon name="wba:trash" class="w-5 mr-3 fill-none stroke-current"/>
                             {{ 'delete'|trans({}, '_blacklist') }}
-                        </button>
+                        </a>
                     </form>
                 </li>
             </ul>

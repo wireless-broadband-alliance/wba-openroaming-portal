@@ -290,7 +290,7 @@ class DomainBlacklistController extends AbstractController
 
     #[Route('/dashboard/settings/domain-blacklist/delete/{id<\d+>}',
         name: 'admin_dashboard_blacklist_delete_domain',
-        methods: ['GET'])]
+        methods: ['POST'])]
     #[IsGranted('ROLE_ADMIN')]
     public function deleteDomains(
         int $id,
@@ -327,7 +327,7 @@ class DomainBlacklistController extends AbstractController
 
     #[Route('/dashboard/settings/domain-source/delete/{id<\d+>}',
         name: 'admin_domain_source_delete',
-        methods: ['DELETE']
+        methods: ['POST']
     )]
     #[IsGranted('ROLE_ADMIN')]
     public function deleteDomainsSource(
@@ -341,8 +341,6 @@ class DomainBlacklistController extends AbstractController
                 $this->translator->trans('domainSourceNotFound', [], 'controllers')
             );
         }
-
-        $domainSource->setOrigin(DomainOrigin::DELETED);
 
         $this->entityManager->remove($domainSource);
         $this->entityManager->flush();

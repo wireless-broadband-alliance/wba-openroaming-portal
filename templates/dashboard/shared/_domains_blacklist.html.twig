@@ -42,10 +42,14 @@
 
     {# Actions Buttons #}
     <td class="p-4 pl-8 text-right">
-        {# Items Button Dropdown #}
-        <a href="{{ path('admin_dashboard_blacklist_delete_domain', {id: domain.id}) }}"
-           class="flex flex-row items-center px-2 py-2 duration-100 p-2 cursor-pointer hover:text-red-400">
-            <twig:ux:icon name="wba:trash" class="w-5 mr-3 fill-none stroke-current"/>
-        </a>
+        <form method="post"
+              action="{{ path('admin_dashboard_blacklist_delete_domain', { id: domain.id }) }}">
+            <input type="hidden" name="_method" value="DELETE">
+
+            <button type="submit"
+                    class="flex flex-row items-center px-2 py-2 cursor-pointer hover:text-red-400">
+                <twig:ux:icon name="wba:trash" class="w-5 mr-3 fill-none stroke-current"/>
+            </button>
+        </form>
     </td>
 </tr>
