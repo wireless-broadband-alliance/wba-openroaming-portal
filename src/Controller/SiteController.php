@@ -238,11 +238,12 @@ class SiteController extends AbstractController
                     if ($data[SettingName::TURNSTILE_CHECKER->value]['value'] === OperationMode::ON->value) {
                         $turnstileResponse = $request->request->get('cf-turnstile-response');
                         // Validate the Turnstile CAPTCHA
-                        if ((empty($turnstileResponse) && !$this->getUser())) {
+                        if (empty($turnstileResponse)) {
                             $this->addFlash(
                                 'error',
                                 $this->translator->trans('invalidCaptcha', [], 'landing')
                             );
+
                             return $this->redirectToRoute('app_landing');
                         }
                     }
@@ -251,53 +252,62 @@ class SiteController extends AbstractController
                             'error',
                             $this->translator->trans('selectOperatingSystem', [], 'controllers')
                         );
-                    } elseif (!$this->getUser() instanceof UserInterface) {
-                        $userAuths = new UserExternalAuth();
-                        $user = $formRegistrationDemo->getData();
-                        $user->setEmail($user->getEmail());
-                        $user->setCreatedAt(new DateTime());
-                        $user->setPassword(
-                            $this->userPasswordEncoder->hashPassword(
-                                $user,
-                                uniqid("", true)
-                            )
-                        );
-                        $user->setUuid(str_replace('@', "-DEMO-" . uniqid("", true) . "-", $user->getEmail()));
-                        $userAuths->setProvider(UserProvider::PORTAL_ACCOUNT->value);
-                        $userAuths->setProviderId(UserProvider::EMAIL->value);
-                        $userAuths->setUser($user);
-                        $entityManager->persist($user);
-                        $entityManager->persist($userAuths);
-                        // Defines the Event to the table
-                        $eventMetadata = [
-                            'ip' => $request->getClientIp(),
-                            'user_agent' => $request->headers->get('User-Agent'),
-                            'platform' => PlatformMode::DEMO->value,
-                            'uuid' => $user->getUuid(),
-                            'registrationType' => UserProvider::EMAIL->value,
-                        ];
-                        $this->eventActions->saveEvent(
+                    }
+
+                    $userAuths = new UserExternalAuth();
+                    /** @var User $user */
+                    $user = $formRegistrationDemo->getData();
+                    $user->setEmail($user->getEmail());
+                    $user->setCreatedAt(new DateTime());
+                    $user->setPassword(
+                        $this->userPasswordEncoder->hashPassword(
                             $user,
-                            AnalyticalEventType::USER_CREATION->value,
-                            new DateTime(),
-                            $eventMetadata
-                        );
+                            uniqid("", true)
+                        )
+                    );
+                    $user->setUuid(
+                        str_replace(
+                            '@',
+                            "-DEMO-" .
+                            uniqid("", true) .
+                            "-",
+                            $user->getEmail()
+                        )
+                    );
+                    $userAuths->setProvider(UserProvider::PORTAL_ACCOUNT->value);
+                    $userAuths->setProviderId(UserProvider::EMAIL->value);
+                    $userAuths->setUser($user);
+                    $entityManager->persist($user);
+                    $entityManager->persist($userAuths);
+                    // Defines the Event to the table
+                    $eventMetadata = [
+                        'ip' => $request->getClientIp(),
+                        'user_agent' => $request->headers->get('User-Agent'),
+                        'platform' => PlatformMode::DEMO->value,
+                        'uuid' => $user->getUuid(),
+                        'registrationType' => UserProvider::EMAIL->value,
+                    ];
+                    $this->eventActions->saveEvent(
+                        $user,
+                        AnalyticalEventType::USER_CREATION->value,
+                        new DateTime(),
+                        $eventMetadata
+                    );
 
-                        $this->userAuthenticator->authenticateUser(
-                            $user,
-                            $this->authenticator,
-                            $request
-                        );
+                    $this->userAuthenticator->authenticateUser(
+                        $user,
+                        $this->authenticator,
+                        $request
+                    );
 
-                        $session->set('session_verified', true);
+                    $session->set('session_verified', true);
 
-                        if ($data[SettingName::USER_VERIFICATION->value]['value'] === OperationMode::ON->value) {
-                            return $this->redirectToRoute('app_login_confirmation');
-                        }
+                    if ($data[SettingName::USER_VERIFICATION->value]['value'] === OperationMode::ON->value) {
+                        return $this->redirectToRoute('app_login_confirmation');
+                    }
 
-                        if ($data[SettingName::USER_VERIFICATION->value]['value'] === OperationMode::OFF->value) {
-                            return $this->redirectToRoute('app_landing');
-                        }
+                    if ($data[SettingName::USER_VERIFICATION->value]['value'] === OperationMode::OFF->value) {
+                        return $this->redirectToRoute('app_landing');
                     }
                 }
             }
@@ -316,7 +326,8 @@ class SiteController extends AbstractController
                         $payload['radio-os'] = $payload['detected-os'];
                     }
                 }
-                if ($payload['radio-os'] !== 'none' && $this->getUser() instanceof UserInterface) {
+
+                if ($payload['radio-os'] !== 'none') {
                     /**
                      * Overriding macOS to iOS due to the profiles being the same and there being no route for the macOS
                      * enum value, so the UI shows macOS but on the logic to generate the profile iOS is used instead
