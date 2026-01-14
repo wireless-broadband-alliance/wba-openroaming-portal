@@ -35,6 +35,7 @@ class DomainBlacklistController extends AbstractController
         private readonly EntityManagerInterface $entityManager,
         private readonly DomainBlacklistRepository $domainBlacklistRepository,
         private readonly DomainSourceRepository $domainSourceRepository,
+        private readonly EventActions $eventActions,
     ) {
     }
 
@@ -52,6 +53,10 @@ class DomainBlacklistController extends AbstractController
         $searchTerm = $request->query->get('u');
         $filter = $request->query->get('filter', 'all');
 
+        // Get the current logged-in user (admin)
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
+
         // Call the getSettings method of GetSettings class to retrieve the data
         /** @var array<string, array{value: string, description: string}> $data */
         $data = $this->getSettings->getSettings();
@@ -62,7 +67,32 @@ class DomainBlacklistController extends AbstractController
         $domainForm->handleRequest($request);
 
         if ($domainForm->isSubmitted() && $domainForm->isValid()) {
-            // todo safe new domain in the bd
+            $object = new DomainBlacklist();
+            $domainDTO->applyToEntity($object);
+            $this->entityManager->persist($object);
+            $this->entityManager->flush();
+
+            $this->eventActions->saveEvent(
+                $currentUser,
+                AnalyticalEventType::BLACKLIST_DOMAIN_ADDED->value,
+                new DateTime(),
+                [
+                    'ip' => $request->getClientIp(),
+                    'user_agent' => $request->headers->get('User-Agent'),
+                    'by' => $currentUser->getUuid(),
+                ]
+            );
+
+            $this->addFlash(
+                'success_admin',
+                $this->translator->trans(
+                    'domainAdded',
+                    [
+                        '%domain%' => $object->getPattern()
+                    ],
+                    'controllers'
+                )
+            );
         }
 
 //        /** @var User $currentUser */
@@ -251,6 +281,9 @@ class DomainBlacklistController extends AbstractController
 
             // Other
             'export_users' => OperationMode::OFF->value,
+
+            // Forms
+            'domainsForm' => $domainForm->createView(),
         ]);
     }
 
