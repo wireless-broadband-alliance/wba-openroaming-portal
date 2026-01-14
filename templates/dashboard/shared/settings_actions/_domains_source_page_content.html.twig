@@ -63,14 +63,6 @@
                         </div>
                     </form>
                 </div>
-
-                {% if export_users == constant('App\\Enum\\OperationMode::ON').value %}
-                    <div class="flex items-center space-x-6">
-                        <a href="{{ path('admin_user_export') }}" class="btn-primary">
-                            {{ 'exportEverything'|trans({}, 'dashboard') }}
-                        </a>
-                    </div>
-                {% endif %}
             </div>
         </div>
 
@@ -126,10 +118,10 @@
             </div>
         </div>
 
-        {# Users Table Pagination #}
+        {# Domains Source Table Pagination #}
         <div class="m-8">
             <hr class="w-full h-0.5 bg-gray-300/50 border-0 border-gray-300/50 rounded">
-            {{ include('dashboard/shared/pagination/_pagination_users.html.twig', {
+            {{ include('dashboard/shared/pagination/_pagination_tables.html.twig', {
                 label: 'domainsSourcePerPage'|trans({}, '_blacklist'),
                 route: 'admin_dashboard_settings_blacklist',
                 occurrencies: countDomainSources,
