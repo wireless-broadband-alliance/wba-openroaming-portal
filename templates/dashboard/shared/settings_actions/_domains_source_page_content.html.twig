@@ -82,7 +82,7 @@
                     <tr>
                         <th scope="col" class="flex items-center p-4 pl-8">
                             <h1 class="mr-2">Url</h1>
-                            <a href="{{ path('admin_dashboard_settings_blacklist', {...app.request.query.all, sort: 'url', order: activeSortDomainsSources == 'url' and activeOrderDomainsSources == 'asc' ? 'desc' : 'asc'}) }}"
+                            <a href="{{ path('admin_dashboard_settings_blacklist', {...app.request.query.all, sortDomainsSources: 'url', orderDomainsSources: activeSortDomainsSources == 'url' and activeOrderDomainsSources == 'asc' ? 'desc' : 'asc'}) }}"
                                class="p-1 hover:shadow-md rounded-lg cursor-pointer">
                                 {{ sharedSort.sortArrow('url', activeSortDomainsSources, activeOrderDomainsSources) }}
                             </a>
@@ -94,7 +94,7 @@
 
                         <th scope="col" class="flex items-center px-6 py-3">
                             <h1 class="mr-2">{{ 'createdAt'|trans({}, 'dashboard') }}</h1>
-                            <a href="{{ path('admin_dashboard_settings_blacklist', {...app.request.query.all, sort: 'createdAt', order: activeSortDomainsSources == 'createdAt' and activeOrderDomainsSources == 'asc' ? 'desc' : 'asc'}) }}"
+                            <a href="{{ path('admin_dashboard_settings_blacklist', {...app.request.query.all, sortDomainsSources: 'createdAt', orderDomainsSources: activeSortDomainsSources == 'createdAt' and activeOrderDomainsSources == 'asc' ? 'desc' : 'asc'}) }}"
                                class="p-1 hover:shadow-md rounded-lg cursor-pointer">
                                 {{ sharedSort.sortArrow('createdAt', activeSortDomainsSources, activeOrderDomainsSources) }}
                             </a>
@@ -114,13 +114,7 @@
                                 <div class="flex flex-row justify-center items-start mt-2">
                                     <div class="pill-error">
                                         {% if searchTerm %}
-                                            {{ 'noUsersFoundWith'|trans({}, 'dashboard') }} "{{ searchTerm }}"
-                                        {% elseif app.request.query.get('filter') == constant('App\\Enum\\UserVerificationStatus::VERIFIED') %}
-                                            {{ 'noVerifiedUsers'|trans({}, 'dashboard') }}
-                                        {% elseif app.request.query.get('filter') == constant('App\\Enum\\UserVerificationStatus::BANNED') %}
-                                            {{ 'noBannedUsers'|trans({}, 'dashboard') }}
-                                        {% else %}
-                                            {{ 'noUsers'|trans({}, 'dashboard') }}
+                                            {{ 'noDomainsSourcesFoundWith'|trans({}, '_blacklist') }} "{{ searchTerm }}"
                                         {% endif %}
                                     </div>
                                 </div>
