@@ -11,7 +11,7 @@
     </td>
 
     {# Domain Source Activation Verification #}
-    <td class="p-4 pl-8">
+    <td class="p-4">
         <p class="font-semibold p-1">
             {% if domainsSource.isActive is defined and domainsSource.isActive == 0 %}
                 <span class="pill-error">
@@ -26,7 +26,7 @@
     </td>
 
     {# Created At #}
-    <td class="p-4 pl-8">
+    <td class="p-4 pl-6">
         {{ domainsSource.createdAt|date('d/m/Y H:i') }}
     </td>
 
