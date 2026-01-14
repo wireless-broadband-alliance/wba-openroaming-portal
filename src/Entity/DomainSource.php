@@ -15,18 +15,16 @@ class DomainSource
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 255)]
-    private string $url;
-
     #[ORM\Column]
     private bool $active = true;
 
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
 
-    public function __construct(string $url, DomainOrigin $origin)
-    {
-        $this->url = $url;
+    public function __construct(
+        #[ORM\Column(length: 255)]
+        private string $url
+    ) {
         $this->createdAt = new \DateTimeImmutable();
     }
 
