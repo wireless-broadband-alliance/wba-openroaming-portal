@@ -30,3 +30,14 @@ addDomainManually: 'Add Domain Manually'
 addSourceManually: 'Add Source Manually'
 confirm_delete_domain_source: 'Are you sure you want to delete this domain source?'
 delete: 'Delete'
+domainsSourceWarningType: >
+    Only link-based imports are supported. The provided URL must point to a valid
+    <strong>.json</strong> or <strong>.txt</strong> file.
+    <br>
+    Example of a supported link:
+    <br>
+    <a href="https://raw.githubusercontent.com/nfacha/temporary-email-list/master/list.txt"
+       class="underline"
+       target="_blank" rel="noopener noreferrer">
+       https://raw.githubusercontent.com/nfacha/temporary-email-list/master/list.txt
+    </a>
