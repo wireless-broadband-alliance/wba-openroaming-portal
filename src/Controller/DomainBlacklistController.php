@@ -172,30 +172,18 @@ class DomainBlacklistController extends AbstractController
         );
         $totalBlacklistDomains = $this->domainBlacklistRepository->countDomains(
             'all',
-            $filter,
-            $sort,
-            $order,
             $searchTerm
         );
         $countExactDomains = $this->domainBlacklistRepository->countDomains(
             DomainMatchType::EXACT->value,
-            $filter,
-            $sort,
-            $order,
             $searchTerm
         );
         $countSubdomainDomains = $this->domainBlacklistRepository->countDomains(
             DomainMatchType::SUBDOMAIN->value,
-            $filter,
-            $sort,
-            $order,
             $searchTerm
         );
         $countWildcardDomains = $this->domainBlacklistRepository->countDomains(
             DomainMatchType::WILDCARD->value,
-            $filter,
-            $sort,
-            $order,
             $searchTerm
         );
         $totalBlacklistPages = (int)ceil($totalBlacklistDomains / $count);

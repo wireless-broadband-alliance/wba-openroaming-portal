@@ -120,7 +120,7 @@ class DomainBlacklistRepository extends ServiceEntityRepository
         return (bool)$qb->getQuery()->getOneOrNullResult();
     }
 
-    public function countDomains(string $type, string $filter, string $sort, ?string $order, ?string $searchTerm = null): int
+    public function countDomains(string $type, ?string $searchTerm = null): int
     {
         $qb = $this->createQueryBuilder('d');
         $qb->select('COUNT(d.id)');
