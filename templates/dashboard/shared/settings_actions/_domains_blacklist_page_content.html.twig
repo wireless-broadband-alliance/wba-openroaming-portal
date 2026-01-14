@@ -18,7 +18,7 @@
                         </div>
                     </a>
                     <a href="{{ path('admin_dashboard_settings_blacklist', {filter: 'exact', u: app.request.query.get('d')}) }}"
-                       class="flex flex-row group hover:border-b-2 hover:border-y-veryDarkButton transition-all duration-100 {% if app.request.query.get('filter') == null or app.request.query.get('filter') == 'exact' %}border-b-2 border-y-veryDarkButton transition-all{% endif %}">
+                       class="flex flex-row group hover:border-b-2 hover:border-y-veryDarkButton transition-all duration-100 {% if app.request.query.get('filter') == 'exact' %}border-b-2 border-y-veryDarkButton transition-all{% endif %}">
                         <h1 class="px-2">
                             {{ 'exact'|trans({}, '_blacklist') }}
                         </h1>
@@ -27,7 +27,7 @@
                         </div>
                     </a>
                     <a href="{{ path('admin_dashboard_settings_blacklist', {filter: 'subdomain', u: app.request.query.get('d')}) }}"
-                       class="flex flex-row group hover:border-b-2 hover:border-y-veryDarkButton transition-all duration-100 {% if app.request.query.get('filter') == null or app.request.query.get('filter') == 'subdomain' %}border-b-2 border-y-veryDarkButton transition-all{% endif %}">
+                       class="flex flex-row group hover:border-b-2 hover:border-y-veryDarkButton transition-all duration-100 {% if app.request.query.get('filter') == 'subdomain' %}border-b-2 border-y-veryDarkButton transition-all{% endif %}">
                         <h1 class="px-2">
                             {{ 'subdomain'|trans({}, '_blacklist') }}
                         </h1>
@@ -36,7 +36,7 @@
                         </div>
                     </a>
                     <a href="{{ path('admin_dashboard_settings_blacklist', {filter: 'wildcard', u: app.request.query.get('d')}) }}"
-                       class="flex flex-row group hover:border-b-2 hover:border-y-veryDarkButton transition-all duration-100 {% if app.request.query.get('filter') == null or app.request.query.get('filter') == 'wildcard' %}border-b-2 border-y-veryDarkButton transition-all{% endif %}">
+                       class="flex flex-row group hover:border-b-2 hover:border-y-veryDarkButton transition-all duration-100 {% if app.request.query.get('filter') == 'wildcard' %}border-b-2 border-y-veryDarkButton transition-all{% endif %}">
                         <h1 class="px-2">
                             {{ 'wildcard'|trans({}, '_blacklist') }}
                         </h1>
@@ -86,7 +86,7 @@
                                         <span class="font-semibold whitespace-nowrap">
                                             {{ 'pattern'|trans({}, '_blacklist') }}
                                         </span>
-                                <a href="{{ path('admin_dashboard_settings_blacklist', {...app.request.query.all, sort: 'pattern', order: activeSortDomainsBlacklist == 'pattern' and activeOrderDomainsBlacklist == 'asc' ? 'desc' : 'asc'}) }}"
+                                <a href="{{ path('admin_dashboard_settings_blacklist', {...app.request.query.all, sortDomainsBlacklist: 'pattern', orderDomainsBlacklist: activeSortDomainsBlacklist == 'pattern' and activeOrderDomainsBlacklist == 'asc' ? 'desc' : 'asc'}) }}"
                                    class="p-1 hover:shadow-md rounded-lg cursor-pointer">
                                     {{ sharedSort.sortArrow('pattern', activeSortDomainsBlacklist, activeOrderDomainsBlacklist) }}
                                 </a>
@@ -98,7 +98,7 @@
                                         <span class="font-semibold whitespace-nowrap">
                                             {{ 'type'|trans({}, '_blacklist') }}
                                         </span>
-                                <a href="{{ path('admin_dashboard_settings_blacklist', {...app.request.query.all, sort: 'type', order: activeSortDomainsBlacklist == 'type' and activeOrderDomainsBlacklist == 'asc' ? 'desc' : 'asc'}) }}"
+                                <a href="{{ path('admin_dashboard_settings_blacklist', {...app.request.query.all, sortDomainsBlacklist: 'type', orderDomainsBlacklist: activeSortDomainsBlacklist == 'type' and activeOrderDomainsBlacklist == 'asc' ? 'desc' : 'asc'}) }}"
                                    class="p-1 hover:shadow-md rounded-lg cursor-pointer">
                                     {{ sharedSort.sortArrow('type', activeSortDomainsBlacklist, activeOrderDomainsBlacklist) }}
                                 </a>
@@ -110,7 +110,7 @@
                                         <span class="font-semibold whitespace-nowrap">
                                             {{ 'createdAt'|trans({}, '_blacklist') }}
                                         </span>
-                                <a href="{{ path('admin_dashboard_settings_blacklist', {...app.request.query.all, sort: 'createdAt', order: activeSortDomainsBlacklist == 'createdAt' and activeOrderDomainsBlacklist == 'asc' ? 'desc' : 'asc'}) }}"
+                                <a href="{{ path('admin_dashboard_settings_blacklist', {...app.request.query.all, sortDomainsBlacklist: 'createdAt', orderDomainsBlacklist: activeSortDomainsBlacklist == 'createdAt' and activeOrderDomainsBlacklist == 'asc' ? 'desc' : 'asc'}) }}"
                                    class="p-1 hover:shadow-md rounded-lg cursor-pointer">
                                     {{ sharedSort.sortArrow('createdAt', activeSortDomainsBlacklist, activeOrderDomainsBlacklist) }}
                                 </a>
@@ -122,7 +122,7 @@
                                         <span class="font-semibold whitespace-nowrap">
                                             {{ 'lastSeenAt'|trans({}, '_blacklist') }}
                                         </span>
-                                <a href="{{ path('admin_dashboard_settings_blacklist', {...app.request.query.all, sort: 'lastSeenAt', order: activeSortDomainsBlacklist == 'lastSeenAt' and activeOrderDomainsBlacklist == 'asc' ? 'desc' : 'asc'}) }}"
+                                <a href="{{ path('admin_dashboard_settings_blacklist', {...app.request.query.all, sortDomainsBlacklist: 'lastSeenAt', orderDomainsBlacklist: activeSortDomainsBlacklist == 'lastSeenAt' and activeOrderDomainsBlacklist == 'asc' ? 'desc' : 'asc'}) }}"
                                    class="p-1 hover:shadow-md rounded-lg cursor-pointer">
                                     {{ sharedSort.sortArrow('lastSeenAt', activeSortDomainsBlacklist, activeOrderDomainsBlacklist) }}
                                 </a>
