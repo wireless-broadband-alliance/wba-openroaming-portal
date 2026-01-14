@@ -105,19 +105,14 @@ readonly class UserStatusChecker
             }
 
             $validDomainsList = array_filter(
-                array_map('trim', explode(',', (string)$validDomainsSetting->getValue()))
+                array_map(trim(...), explode(',', (string)$validDomainsSetting->getValue()))
             );
 
             if ($validDomainsList !== [] && !in_array($domain, $validDomainsList, true)) {
                 return false;
             }
         }
-
         // Always check the blacklist
-        if ($this->domainBlacklistRepository->isDomainBlacklisted($domain)) {
-            return false;
-        }
-
-        return true;
+        return !$this->domainBlacklistRepository->isDomainBlacklisted($domain);
     }
 }
