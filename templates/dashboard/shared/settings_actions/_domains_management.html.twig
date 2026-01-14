@@ -31,11 +31,11 @@
 
     {# Page 1 #}
     <div data-toggle-pages-target="page1">
-        {% include 'dashboard/shared/settings_actions/_domains_blacklist_page_content.html.twig' %}
+        {{ include('dashboard/shared/settings_actions/_domains_blacklist_page_content.html.twig') }}
     </div>
 
     {# Page 2 #}
     <div data-toggle-pages-target="page2" class="hidden">
-        {% include 'dashboard/shared/settings_actions/_domains_source_page_content.html.twig' %}
+        {{ include('dashboard/shared/settings_actions/_domains_source_page_content.html.twig') }}
     </div>
 </div>

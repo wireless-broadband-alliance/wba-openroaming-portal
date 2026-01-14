@@ -43,7 +43,7 @@
     {# Actions Buttons #}
     <td class="p-4 pl-8 text-right">
         <form method="post"
-              action="{{ path('admin_dashboard_blacklist_delete_domain', { id: domain.id }) }}">
+              action="{{ path('admin_dashboard_blacklist_delete_domain', {id: domain.id}) }}">
             <input type="hidden" name="_method" value="DELETE">
 
             <button type="submit"

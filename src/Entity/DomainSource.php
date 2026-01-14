@@ -2,7 +2,6 @@
 
 namespace App\Entity;
 
-use App\Enum\DomainOrigin;
 use App\Repository\DomainSourceRepository;
 use Doctrine\ORM\Mapping as ORM;
 

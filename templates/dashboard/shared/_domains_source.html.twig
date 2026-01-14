@@ -46,7 +46,7 @@
                 {# Toggle Source #}
                 <li>
                     <form method="post"
-                          action="{{ path('admin_domain_source_toggle', { id: domainsSource.id }) }}">
+                          action="{{ path('admin_domain_source_toggle', {id: domainsSource.id}) }}">
                         <button type="submit"
                                 class="flex items-center px-2 py-2 w-full hover:text-lightGreen">
                             <twig:ux:icon name="wba:toggle-outline" class="w-5 mr-3 fill-none stroke-current"/>
@@ -60,7 +60,7 @@
                 {# Delete #}
                 <li {{ stimulus_controller('alert') }}>
                     <form method="post"
-                          action="{{ path('admin_domain_source_delete', { id: domainsSource.id }) }}"
+                          action="{{ path('admin_domain_source_delete', {id: domainsSource.id}) }}"
                             {{ stimulus_target('alert', 'form') }}>
                         <input type="hidden" name="_method" value="DELETE">
 
