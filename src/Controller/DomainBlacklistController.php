@@ -37,7 +37,7 @@ class DomainBlacklistController extends AbstractController
     ) {
     }
 
-    #[Route('/dashboard/settings/blacklist', name: 'admin_dashboard_settings_blacklist')]
+    #[Route('/dashboard/settings/domains', name: 'admin_dashboard_settings_domains')]
     #[IsGranted('ROLE_ADMIN')]
     public function domainsManagement(
         Request $request,
@@ -192,7 +192,7 @@ class DomainBlacklistController extends AbstractController
 //                'success_admin',
 //                $this->translator->trans('domainBlacklistConfigurationAppliedSuccessfully', [], 'controllers')
 //            );
-//            return $this->redirectToRoute('admin_dashboard_settings_blacklist');
+//            return $this->redirectToRoute('admin_dashboard_settings_domains');
 //        }
 
         // Domains Blacklist
@@ -288,7 +288,9 @@ class DomainBlacklistController extends AbstractController
         ]);
     }
 
-    #[Route('/dashboard/settings/blacklist/delete/{id<\d+>}', name: 'admin_dashboard_blacklist_delete_domain', methods: ['GET'])]
+    #[Route('/dashboard/settings/domain-blacklist/delete/{id<\d+>}',
+        name: 'admin_dashboard_blacklist_delete_domain',
+        methods: ['GET'])]
     #[IsGranted('ROLE_ADMIN')]
     public function deleteDomains(
         int $id,
@@ -318,7 +320,82 @@ class DomainBlacklistController extends AbstractController
             )
         );
 
-        // Return to the last page where the user has (with searching filters)
+        // Return to the last page where the user was (with searching filters)
+        $lastPage = $request->headers->get('referer', '/dashboard');
+        return $this->redirect($lastPage);
+    }
+
+    #[Route('/dashboard/settings/domain-source/delete/{id<\d+>}',
+        name: 'admin_domain_source_delete',
+        methods: ['DELETE']
+    )]
+    #[IsGranted('ROLE_ADMIN')]
+    public function deleteDomainsSource(
+        int $id,
+        Request $request,
+    ): Response {
+        // Fetch user and external auths
+        $domainSource = $this->domainSourceRepository->find($id);
+        if (!$domainSource) {
+            throw $this->createNotFoundException(
+                $this->translator->trans('domainSourceNotFound', [], 'controllers')
+            );
+        }
+
+        $domainSource->setOrigin(DomainOrigin::DELETED);
+
+        $this->entityManager->remove($domainSource);
+        $this->entityManager->flush();
+
+        $this->addFlash(
+            'success_admin',
+            $this->translator->trans(
+                'domainSourceDeleted',
+                [
+                    '%domain%' => $domainSource->getUrl()
+                ],
+                'controllers'
+            )
+        );
+
+        // Return to the last page where the user was (with searching filters)
+        $lastPage = $request->headers->get('referer', '/dashboard');
+        return $this->redirect($lastPage);
+    }
+
+    #[Route('/dashboard/settings/domain-source/{id<\d+>}/toggle',
+        name: 'admin_domain_source_toggle',
+        methods: ['POST'])]
+    #[IsGranted('ROLE_ADMIN')]
+    public function toggleDomainSource(
+        int $id,
+        Request $request
+    ): Response {
+        // Fetch user and external auths
+        $domainSource = $this->domainSourceRepository->find($id);
+        if (!$domainSource) {
+            throw $this->createNotFoundException(
+                $this->translator->trans('domainSourceNotFound', [], 'controllers')
+            );
+        }
+
+        $domainSource->setActive(!$domainSource->isActive());
+        $this->entityManager->flush();
+
+        $isActive = $domainSource->isActive();
+
+        $this->addFlash(
+            'success_admin',
+            $this->translator->trans(
+                $isActive ? 'domainSourceActivated' : 'domainSourceDeactivated',
+                [
+                    '%domain%' => $domainSource->getUrl(),
+                ],
+                'controllers'
+            )
+        );
+
+        // Return to the last page where the user was (with searching filters)
         $lastPage = $request->headers->get('referer', '/dashboard');
         return $this->redirect($lastPage);
     }

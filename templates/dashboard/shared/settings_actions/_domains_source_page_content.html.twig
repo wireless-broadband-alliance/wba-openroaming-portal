@@ -8,7 +8,7 @@
 
                 {# Left Search Filters #}
                 <div class="flex items-center space-x-6">
-                    <a href="{{ path('admin_dashboard_settings_blacklist', {filter: 'all', u: app.request.query.get('u')}) }}"
+                    <a href="{{ path('admin_dashboard_settings_domains', {filter: 'all', u: app.request.query.get('u')}) }}"
                        class="flex flex-row group hover:border-b-2 hover:border-y-veryDarkButton transition-all duration-100 {% if app.request.query.get('filter') == null or app.request.query.get('filter') == 'all' %}border-b-2 border-y-veryDarkButton transition-all{% endif %}">
                         <h1 class="px-2">
                             {{ 'all'|trans({}, '_blacklist') }}
@@ -17,7 +17,7 @@
                             {{ countDomainSources }}
                         </div>
                     </a>
-                    <a href="{{ path('admin_dashboard_settings_blacklist', {filter: constant('App\\Enum\\DomainSourceStatus::ACTIVE').value, u: app.request.query.get('u')}) }}"
+                    <a href="{{ path('admin_dashboard_settings_domains', {filter: constant('App\\Enum\\DomainSourceStatus::ACTIVE').value, u: app.request.query.get('u')}) }}"
                        class="flex flex-row group hover:text-lightGreen hover:border-b-2 hover:border-y-lightGreen/50 transition-all duration-100 {% if app.request.query.get('filter') == constant('App\\Enum\\DomainSourceStatus::ACTIVE').value %}text-lightGreen border-b-2 border-y-lightGreen transition-all{% endif %}">
                         <h1 class="px-2">
                             {{ 'active'|trans({}, '_blacklist') }}
@@ -26,7 +26,7 @@
                             {{ countActiveDomainSources }}
                         </div>
                     </a>
-                    <a href="{{ path('admin_dashboard_settings_blacklist', {filter: constant('App\\Enum\\DomainSourceStatus::INACTIVE').value, u: app.request.query.get('u')}) }}"
+                    <a href="{{ path('admin_dashboard_settings_domains', {filter: constant('App\\Enum\\DomainSourceStatus::INACTIVE').value, u: app.request.query.get('u')}) }}"
                        class="flex flex-row group hover:text-red-400 hover:border-b-2 hover:border-y-red-400 transition-all duration-100 {% if app.request.query.get('filter') == constant('App\\Enum\\DomainSourceStatus::INACTIVE').value %}text-red-400 border-b-2 border-y-red-400 transition-all{% endif %}">
                         <h1 class="px-2">
                             {{ 'inactive'|trans({}, '_blacklist') }}
@@ -39,7 +39,7 @@
 
                 {# Midle Search Bar #}
                 <div class="w-full md:w-3/6">
-                    <form action="{{ path('admin_dashboard_settings_blacklist') }}" method="GET">
+                    <form action="{{ path('admin_dashboard_settings_domains') }}" method="GET">
 
                         <div class="flex flex-row items-center border rounded-md">
                             {# Search Icon #}
@@ -74,7 +74,7 @@
                     <tr>
                         <th scope="col" class="flex items-center p-4 pl-8">
                             <h1 class="mr-2">Url</h1>
-                            <a href="{{ path('admin_dashboard_settings_blacklist', {...app.request.query.all, sortDomainsSources: 'url', orderDomainsSources: activeSortDomainsSources == 'url' and activeOrderDomainsSources == 'asc' ? 'desc' : 'asc'}) }}"
+                            <a href="{{ path('admin_dashboard_settings_domains', {...app.request.query.all, sortDomainsSources: 'url', orderDomainsSources: activeSortDomainsSources == 'url' and activeOrderDomainsSources == 'asc' ? 'desc' : 'asc'}) }}"
                                class="p-1 hover:shadow-md rounded-lg cursor-pointer">
                                 {{ sharedSort.sortArrow('url', activeSortDomainsSources, activeOrderDomainsSources) }}
                             </a>
@@ -86,7 +86,7 @@
 
                         <th scope="col" class="flex items-center px-6 py-3">
                             <h1 class="mr-2">{{ 'createdAt'|trans({}, 'dashboard') }}</h1>
-                            <a href="{{ path('admin_dashboard_settings_blacklist', {...app.request.query.all, sortDomainsSources: 'createdAt', orderDomainsSources: activeSortDomainsSources == 'createdAt' and activeOrderDomainsSources == 'asc' ? 'desc' : 'asc'}) }}"
+                            <a href="{{ path('admin_dashboard_settings_domains', {...app.request.query.all, sortDomainsSources: 'createdAt', orderDomainsSources: activeSortDomainsSources == 'createdAt' and activeOrderDomainsSources == 'asc' ? 'desc' : 'asc'}) }}"
                                class="p-1 hover:shadow-md rounded-lg cursor-pointer">
                                 {{ sharedSort.sortArrow('createdAt', activeSortDomainsSources, activeOrderDomainsSources) }}
                             </a>
@@ -123,7 +123,7 @@
             <hr class="w-full h-0.5 bg-gray-300/50 border-0 border-gray-300/50 rounded">
             {{ include('dashboard/shared/pagination/_pagination_tables.html.twig', {
                 label: 'domainsSourcePerPage'|trans({}, '_blacklist'),
-                route: 'admin_dashboard_settings_blacklist',
+                route: 'admin_dashboard_settings_domains',
                 occurrencies: countDomainSources,
                 totalPages: totalSourcePages }
             ) }}
