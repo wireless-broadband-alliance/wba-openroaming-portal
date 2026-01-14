@@ -2,6 +2,8 @@
 
 namespace App\EventListener;
 
+use App\Entity\CertificateSetupProcess;
+use App\Entity\InstallationProgress;
 use App\Entity\User;
 use App\Enum\CertificateTestResult;
 use App\Enum\ProcessStatusType;
@@ -110,7 +112,7 @@ readonly class AdminCertificateProcessEnforcerListener
         'installationState' => ProcessStatusType::COMPLETED
         ]);
 
-        if (!$installation instanceof \App\Entity\InstallationProgress) {
+        if (!$installation instanceof InstallationProgress) {
             $session->set(
                 SessionStatus::SYSTEM_RESET_REQUEST->value,
                 'admin_dashboard_settings_certs_installation'
@@ -122,7 +124,7 @@ readonly class AdminCertificateProcessEnforcerListener
       // Check certificates progress
         $certProcess = $this->certificateSetupProcessRepository->getLatestProcess();
 
-        if (!$certProcess instanceof \App\Entity\CertificateSetupProcess) {
+        if (!$certProcess instanceof CertificateSetupProcess) {
             $session->set(
                 SessionStatus::SYSTEM_RESET_REQUEST->value,
                 'admin_dashboard_settings_certs_radsecproxy_upload'
@@ -132,7 +134,7 @@ readonly class AdminCertificateProcessEnforcerListener
         }
 
       // Radsecproxy test required
-        if (!$certProcess->getRadsecproxyTestResult() instanceof \App\Enum\CertificateTestResult) {
+        if (!$certProcess->getRadsecproxyTestResult() instanceof CertificateTestResult) {
             $session->set(
                 SessionStatus::SYSTEM_RESET_REQUEST->value,
                 'admin_dashboard_settings_certs_radsecproxy_upload'

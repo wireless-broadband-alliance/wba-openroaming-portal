@@ -3,6 +3,7 @@
 namespace App\EventListener;
 
 use App\Entity\CertificateSetupProcess;
+use App\Entity\InstallationProgress;
 use App\Entity\User;
 use App\Enum\CertificateTestResult;
 use App\Enum\ProcessStatusType;
@@ -44,7 +45,7 @@ readonly class FirstSystemResetRequestListener
             'installationState' => ProcessStatusType::COMPLETED
         ]);
 
-        if (!$completedInstallation instanceof \App\Entity\InstallationProgress) {
+        if (!$completedInstallation instanceof InstallationProgress) {
             $session->set('2fa_verified_dashboard', true);
             $session->set(SessionStatus::SYSTEM_RESET_REQUEST->value, 'admin_dashboard_settings_certs_installation');
             $this->handleRedirect(
