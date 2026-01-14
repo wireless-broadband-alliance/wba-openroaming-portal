@@ -14,6 +14,4 @@ class SourceBlacklistDTO
     public ?string $input = null;
 
     public ?int $id = null;
-
-
 }

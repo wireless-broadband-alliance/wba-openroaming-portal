@@ -30,5 +30,4 @@ class SourceBlacklistForm extends AbstractController
     {
         return $this->createForm(SourceBlacklistType::class, $this->dto);
     }
-
 }
