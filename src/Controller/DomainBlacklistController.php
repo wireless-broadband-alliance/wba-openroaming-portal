@@ -288,9 +288,11 @@ class DomainBlacklistController extends AbstractController
         ]);
     }
 
-    #[Route('/dashboard/settings/domain-blacklist/delete/{id<\d+>}',
+    #[Route(
+        '/dashboard/settings/domain-blacklist/delete/{id<\d+>}',
         name: 'admin_dashboard_blacklist_delete_domain',
-        methods: ['POST'])]
+        methods: ['POST']
+    )]
     #[IsGranted('ROLE_ADMIN')]
     public function deleteDomains(
         int $id,
@@ -325,7 +327,8 @@ class DomainBlacklistController extends AbstractController
         return $this->redirect($lastPage);
     }
 
-    #[Route('/dashboard/settings/domain-source/delete/{id<\d+>}',
+    #[Route(
+        '/dashboard/settings/domain-source/delete/{id<\d+>}',
         name: 'admin_domain_source_delete',
         methods: ['POST']
     )]
@@ -361,9 +364,11 @@ class DomainBlacklistController extends AbstractController
         return $this->redirect($lastPage);
     }
 
-    #[Route('/dashboard/settings/domain-source/{id<\d+>}/toggle',
+    #[Route(
+        '/dashboard/settings/domain-source/{id<\d+>}/toggle',
         name: 'admin_domain_source_toggle',
-        methods: ['POST'])]
+        methods: ['POST']
+    )]
     #[IsGranted('ROLE_ADMIN')]
     public function toggleDomainSource(
         int $id,

@@ -86,7 +86,8 @@ class ImportTemporaryDomainsCommand extends Command
                 ]);
 
                 if ($existing) {
-                    if ($existing->getOrigin() === DomainOrigin::MANUAL ||
+                    if (
+                        $existing->getOrigin() === DomainOrigin::MANUAL ||
                         $existing->getOrigin() === DomainOrigin::DELETED
                     ) {
                         // Skip domains manually added by admin

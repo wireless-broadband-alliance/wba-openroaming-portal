@@ -66,7 +66,7 @@ class DomainBlacklistRepository extends ServiceEntityRepository
         } if ($filter === 'wildcard') {
             $qb->andWhere('d.type LIKE :wildcard')
                 ->setParameter('wildcard', DomainMatchType::WILDCARD);
-    }
+        }
 
         if ($sort === 'pattern') {
             $field = 'd.pattern';
@@ -138,7 +138,7 @@ class DomainBlacklistRepository extends ServiceEntityRepository
             $qb->andWhere('d.type LIKE :exact')
                 ->setParameter('exact', DomainMatchType::EXACT);
         } if ($type === 'subdomain') {
-        $qb->andWhere('d.type LIKE :subdomain')
+            $qb->andWhere('d.type LIKE :subdomain')
             ->setParameter('subdomain', DomainMatchType::SUBDOMAIN);
         } if ($type === 'wildcard') {
             $qb->andWhere('d.type LIKE :wildcard')

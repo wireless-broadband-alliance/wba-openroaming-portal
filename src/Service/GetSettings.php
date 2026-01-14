@@ -318,7 +318,7 @@ readonly class GetSettings
                 SettingName::USERS_WHEN_PROFILE_EXPIRES_CRON->value => 'Define o agendamento para notificar os utilizadores quando o perfil estiver prestes a expirar',
                 SettingName::LDAP_SYNC_CRON->value => 'Define o agendamento para o comando automático de sincronização LDAP',
                 SettingName::FREERADIUS_LAST_CONNECTION_CRON->value => 'Define o agendamento para o servidor Freeradius e a última ligação do perfil do utilizador',
-                SettingName::DOMAIN_BLACKLIST_IMPORT_CRON->value =>'Define o agendamento (cron) para a execução da importação e sincronização dos domínios bloqueados.',
+                SettingName::DOMAIN_BLACKLIST_IMPORT_CRON->value => 'Define o agendamento (cron) para a execução da importação e sincronização dos domínios bloqueados.',
                 SettingName::CRON_ADVANCED_STATUS->value => 'Guarda o modo de estado anterior na página de configuração do cron (Simples/Avançado)'
             ]
         ];

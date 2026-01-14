@@ -10,7 +10,8 @@ class DomainNotBlacklistedValidator extends ConstraintValidator
 {
     public function __construct(
         private readonly DomainBlacklistRepository $domainBlacklistRepository
-    ) {}
+    ) {
+    }
 
     public function validate(mixed $value, Constraint $constraint): void
     {
