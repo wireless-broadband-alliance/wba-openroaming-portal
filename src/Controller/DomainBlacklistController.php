@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\DTO\DomainBlacklistDTO;
+use App\DTO\SourceBlacklistDTO;
 use App\Entity\DomainBlacklist;
 use App\Entity\DomainSource;
 use App\Entity\User;
@@ -11,6 +12,7 @@ use App\Enum\DomainMatchType;
 use App\Enum\DomainOrigin;
 use App\Enum\OperationMode;
 use App\Form\DomainBlacklistType;
+use App\Form\SourceBlacklistType;
 use App\Repository\DomainBlacklistRepository;
 use App\Repository\DomainSourceRepository;
 use App\Service\EventActions;
@@ -96,105 +98,38 @@ class DomainBlacklistController extends AbstractController
             );
         }
 
-//        /** @var User $currentUser */
-//        $currentUser = $this->getUser();
-//
-//        // Initialize DTO from settings
-//        $domainBlacklistDB = [];
-//        $dto = new DomainBlacklistDTO($domainBlacklistDB);
-//
-//        // Create form bound to DTO
-//        $form = $this->createForm(DomainBlacklistType::class, $dto);
-//        $form->handleRequest($request);
-//
-//        if ($form->isSubmitted() && $form->isValid()) {
-//            $importedDomains = [];
-//            $invalidDomains = [];
-//
-//            // Handle import file
-//            $importFile = $form->get('importFile')->getData();
-//            if ($importFile) {
-//                $lines = @file($importFile->getPathname(), FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) ?: [];
-//                foreach ($lines as $line) {
-//                    $line = trim($line);
-//                    if ($line === '') {
-//                        continue;
-//                    }
-//
-//                    // Validate domain pattern
-//                    if (!preg_match('/^(\*|\*\.[a-z0-9.-]+\.[a-z]{2,}|[a-z0-9.-]+\.[a-z]{2,})$/i', $line)) {
-//                        $invalidDomains[] = $line;
-//                        continue;
-//                    }
-//
-//                    [$pattern, $type] = $this->parseDomainInput($line);
-//
-//                    // Skip duplicates
-//                    $exist = $this->domainBlacklistRepository->findOneBy(['pattern' => $pattern, 'type' => $type]);
-//                    if ($exist instanceof DomainBlacklist) {
-//                        continue;
-//                    }
-//
-//                    $domain = new DomainBlacklist();
-//                    $domain->setPattern($pattern)->setType($type);
-//
-//                    $this->entityManager->persist($domain);
-//                    $importedDomains[] = $domain;
-//                }
-//            }
-//
-//            // Handle manual edits (lines)
-//            $blacklist = $dto->toEntities($domainBlacklistDB);
-//
-//            // Add/Update the other ones
-//            foreach ($blacklist as $domain) {
-//                $this->entityManager->persist($domain);
-//            }
-//
-//            $this->entityManager->flush();
-//
-//            // Flash messages
-//            $importCount = count($importedDomains);
-//            if ($importCount > 0) {
-//                $this->addFlash(
-//                    'success_admin',
-//                    $this->translator->trans(
-//                        'domainBlacklistConfigurationAppliedSuccessfully',
-//                        [],
-//                        'controllers'
-//                    ) . " + {$importCount} domains imported"
-//                );
-//            }
-//
-//            if ($invalidDomains !== []) {
-//                $this->addFlash(
-//                    'error_admin',
-//                    $this->translator->trans(
-//                        'invalidDomainPatternList',
-//                        ['%domains%' => implode(', ', $invalidDomains)],
-//                        'controllers'
-//                    )
-//                );
-//            }
-//
-//            // Log the event
-//            $this->eventActions->saveEvent(
-//                $currentUser,
-//                AnalyticalEventType::SETTING_DOMAIN_BLACKLIST_REQUEST->value,
-//                new DateTime(),
-//                [
-//                    'ip' => $request->getClientIp(),
-//                    'user_agent' => $request->headers->get('User-Agent'),
-//                    'uuid' => $currentUser->getUuid(),
-//                ]
-//            );
-//
-//            $this->addFlash(
-//                'success_admin',
-//                $this->translator->trans('domainBlacklistConfigurationAppliedSuccessfully', [], 'controllers')
-//            );
-//            return $this->redirectToRoute('admin_dashboard_settings_domains');
-//        }
+        $sourceDTO = new SourceBlacklistDTO();
+        $sourceForm = $this->createForm(SourceBlacklistType::class, $sourceDTO);
+        $sourceForm->handleRequest($request);
+
+        if ($sourceForm->isSubmitted() && $sourceForm->isValid()) {
+            $source = new DomainSource($sourceDTO->input);
+            $source->setActive(true);
+            $this->entityManager->persist($source);
+            $this->entityManager->flush();
+
+            $this->eventActions->saveEvent(
+                $currentUser,
+                AnalyticalEventType::BLACKLIST_SOURCE_ADDED->value,
+                new DateTime(),
+                [
+                    'ip' => $request->getClientIp(),
+                    'user_agent' => $request->headers->get('User-Agent'),
+                    'by' => $currentUser->getUuid(),
+                ]
+            );
+
+            $this->addFlash(
+                'success_admin',
+                $this->translator->trans(
+                    'sourceAdded',
+                    [
+                        '%source%' => $source->getUrl()
+                    ],
+                    'controllers'
+                )
+            );
+        }
 
         // Domains Blacklist
         $domainBlacklist = $this->domainBlacklistRepository->searchWithFilter(
@@ -283,9 +218,11 @@ class DomainBlacklistController extends AbstractController
             // Other
             'export_users' => OperationMode::OFF->value,
 
-            // Forms
+            // Forms & DTOs
             'domainsForm' => $domainForm->createView(),
             'domainDTO' => $domainDTO,
+            'sourceForm' => $sourceForm->createView(),
+            'sourceDTO' => $sourceDTO,
         ]);
     }
 
