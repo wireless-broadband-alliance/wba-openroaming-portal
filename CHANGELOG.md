@@ -14,6 +14,12 @@
       ```bash
       php bin/console doctrine:migrations:migrate
       ```
+- It's required to run the reset admin command to redefine administrator permissions for the new super admin feature
+    - Run the admin reset command:
+      ```bash
+      php bin/console reset:super-admin
+      ```
+
 
 # Release V1.9.0
 
