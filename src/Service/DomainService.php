@@ -20,7 +20,7 @@ readonly class DomainService
 
     public function isValidDomain(string $domain): bool
     {
-        return (bool) filter_var(
+        return (bool)filter_var(
             $domain,
             FILTER_VALIDATE_DOMAIN,
             FILTER_FLAG_HOSTNAME
@@ -49,9 +49,9 @@ readonly class DomainService
         }
 
         // Plain text
-        foreach (preg_split('/\r\n|\r|\n/', $content) as $line) {
+        $lines = preg_split('/\r\n|\r|\n/', $content) ?: [];
+        foreach ($lines as $line) {
             $line = trim($line);
-
             if ($line !== '') {
                 yield $line;
             }
