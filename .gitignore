@@ -79,4 +79,5 @@ src/Command/ResetRadiusMarcelinaSettingsCommand.php
 
 ###> config/reference this page breaks phpstan with warnings of compatability, because of the project image ###
 config/reference.php
+supervisord.pid
 ###< config/reference ###
