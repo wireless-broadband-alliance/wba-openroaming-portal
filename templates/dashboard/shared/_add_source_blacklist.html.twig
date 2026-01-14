@@ -19,7 +19,7 @@
             </h2>
         </div>
 
-        {{ form_start(form, { attr: { class: 'w-full' } }) }}
+        {{ form_start(form, {attr: {class: 'w-full'}}) }}
 
         {# Content #}
         <div class="flex flex-col gap-3">
@@ -30,8 +30,8 @@
                 {{ form_widget(form.input, {
                     attr: {
                         class: 'form-widget w-full',
-                        placeholder: 'www.example.com'
-                    }
+                        placeholder: 'www.example.com',
+                    },
                 }) }}
 
                 <button type="submit"
