@@ -1,52 +1,54 @@
 {% import 'dashboard/shared/_sort_arrow.html.twig' as sharedSort %}
 
+<twig:DomainBlacklistForm :dto="domainDTO" :form="domainsForm">
 {# Add Domain Blacklist Card #}
-<div class="bg-white rounded-lg shadow p-6 mb-6">
-    {# Header #}
-    <div class="flex justify-between items-center mb-4">
-        <h2 class="text-lg font-semibold text-gray-800">
-            {{ 'addDomainManually'|trans({}, '_blacklist') }}
-        </h2>
-    </div>
+    <div class="bg-white rounded-lg shadow p-6 mb-6">
+        {# Header #}
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-lg font-semibold text-gray-800">
+                {{ 'addDomainManually'|trans({}, '_blacklist') }}
+            </h2>
+        </div>
 
-    {# Description #}
-    <div class="mb-4 text-gray-600 text-sm">
-        {{ include('/dashboard/shared/settings_actions/_description.html.twig', {
-            description: 'addDomainDescription'|trans({}, '_blacklist'),
-        }) }}
-    </div>
+        {# Description #}
+        <div class="mb-4 text-gray-600 text-sm">
+            {{ include('/dashboard/shared/settings_actions/_description.html.twig', {
+                description: 'addDomainDescription'|trans({}, '_blacklist'),
+            }) }}
+        </div>
 
-    {{ form_start(domainsForm, { attr: { class: 'w-full' } }) }}
+        {{ form_start(form, { attr: { class: 'w-full' } }) }}
 
-    {# Content #}
-    <div class="grid gap-4 sm:grid-cols-1 lg:grid-cols-3">
-        <div class="flex flex-col p-2 rounded-md hover:shadow-sm transition">
-            {{ form_label(domainsForm.input) }}
+        {# Content #}
+        <div class="grid gap-4 sm:grid-cols-1 lg:grid-cols-3">
+            <div class="flex flex-col p-2 rounded-md hover:shadow-sm transition">
+                {{ form_label(form.input) }}
 
-            <div class="flex flex-row items-center gap-2">
-                {{ form_widget(domainsForm.input, {
-                    attr: {
-                        class: 'form-widget w-full',
-                        placeholder: 'example.com'
-                    }
-                }) }}
+                <div class="flex flex-row items-center gap-2">
+                    {{ form_widget(form.input, {
+                        attr: {
+                            class: 'form-widget w-full',
+                            placeholder: 'example.com'
+                        }
+                    }) }}
 
-                <button type="submit"
-                        class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition flex-shrink-0">
-                    {{ 'addDomain'|trans({}, '_blacklist') }}
-                </button>
-            </div>
+                    <button type="submit"
+                            class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition flex-shrink-0">
+                        {{ 'addDomain'|trans({}, '_blacklist') }}
+                    </button>
+                </div>
 
-            {{ form_help(domainsForm.input) }}
+                {{ form_help(form.input) }}
 
-            <div class="text-red-500 text-sm">
-                {{ form_errors(domainsForm.input) }}
+                <div class="text-red-500 text-sm">
+                    {{ form_errors(form.input) }}
+                </div>
             </div>
         </div>
-    </div>
 
-    {{ form_end(domainsForm) }}
-</div>
+        {{ form_end(form) }}
+    </div>
+</twig:DomainBlacklistForm>
 
 {# Domains Blacklist table #}
 <div class="pt-5 pb-1 text-left space-y-3 rounded-xl bg-white">

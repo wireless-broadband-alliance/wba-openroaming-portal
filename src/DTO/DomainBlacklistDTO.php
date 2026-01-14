@@ -3,46 +3,58 @@
 namespace App\DTO;
 
 use App\Entity\DomainBlacklist;
+use App\Enum\DomainMatchType;
 use Symfony\Component\Validator\Constraints as Assert;
 
 class DomainBlacklistDTO
 {
-    /** @var DomainBlacklistLineDTO[] */
-    #[Assert\Valid]
-    public array $lines = [];
+    #[Assert\NotBlank]
+    #[Assert\Length(max: 255)]
+    #[Assert\Regex(
+        pattern: '/^(\*|\*\.[a-z0-9.-]+\.[a-z]{2,}|[a-z0-9.-]+\.[a-z]{2,})$/i',
+        message: 'invalidDomainPattern'
+    )]
+    public ?string $input = null;
 
-    /**
-     * @param DomainBlacklist[] $domainBlacklists
-     */
-    public function __construct(array $domainBlacklists = [])
+    public ?int $id = null;
+
+    public function __construct(?DomainBlacklist $entity = null)
     {
-        foreach ($domainBlacklists as $entity) {
-            $this->lines[$entity->getId()] = new DomainBlacklistLineDTO($entity);
+        if ($entity instanceof DomainBlacklist) {
+            $this->id = $entity->getId();
+
+            $this->input = match ($entity->getType()) {
+                DomainMatchType::EXACT => $entity->getPattern(),
+                DomainMatchType::SUBDOMAIN => '*.' . $entity->getPattern(),
+                DomainMatchType::WILDCARD => '*',
+            };
         }
     }
 
-    /**
-     * @param DomainBlacklist[] $domainBlacklistDB
-     * @return DomainBlacklist[]
-     */
-    public function toEntities(array $domainBlacklistDB): array
+    public function applyToEntity(DomainBlacklist $entity): void
     {
-        $result = [];
+        [$pattern, $type] = $this->parseInput($this->input);
 
-        foreach ($this->lines as $line) {
-            if ($line->id !== null) {
-                $entity = array_find(
-                    $domainBlacklistDB,
-                    fn (DomainBlacklist $d) => $d->getId() === $line->id
-                ) ?? new DomainBlacklist();
-            } else {
-                $entity = new DomainBlacklist();
-            }
+        $entity
+            ->setPattern($pattern)
+            ->setType($type);
+    }
 
-            $line->applyToEntity($entity);
-            $result[] = $entity;
+    /**
+     * @return array{0: string, 1: DomainMatchType}
+     */
+    private function parseInput(string $input): array
+    {
+        $input = strtolower(trim($input));
+
+        if ($input === '*') {
+            return ['*', DomainMatchType::WILDCARD];
         }
 
-        return $result;
+        if (str_starts_with($input, '*.')) {
+            return [substr($input, 2), DomainMatchType::SUBDOMAIN];
+        }
+
+        return [$input, DomainMatchType::EXACT];
     }
 }

@@ -3,15 +3,12 @@
 namespace App\Controller;
 
 use App\DTO\DomainBlacklistDTO;
-use App\DTO\DomainBlacklistLineDTO;
 use App\Entity\DomainBlacklist;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Enum\DomainMatchType;
 use App\Enum\DomainOrigin;
 use App\Enum\OperationMode;
-use App\Form\DomainBlacklistImportType;
-use App\Form\DomainBlacklistLineType;
 use App\Form\DomainBlacklistType;
 use App\Repository\DomainBlacklistRepository;
 use App\Repository\DomainSourceRepository;
@@ -62,9 +59,9 @@ class DomainBlacklistController extends AbstractController
         /** @var array<string, array{value: string, description: string}> $data */
         $data = $this->getSettings->getSettings();
 
-        $domainDTO = new DomainBlacklistLineDTO();
+        $domainDTO = new DomainBlacklistDTO();
 
-        $domainForm = $this->createForm(DomainBlacklistLineType::class, $domainDTO);
+        $domainForm = $this->createForm(DomainBlacklistType::class, $domainDTO);
         $domainForm->handleRequest($request);
 
         if ($domainForm->isSubmitted() && $domainForm->isValid()) {
@@ -287,6 +284,7 @@ class DomainBlacklistController extends AbstractController
 
             // Forms
             'domainsForm' => $domainForm->createView(),
+            'domainDTO' => $domainDTO,
         ]);
     }
 
