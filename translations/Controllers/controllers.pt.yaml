@@ -133,3 +133,7 @@ invalidDomainPatternList: "Os seguintes padrões de domínio são inválidos: %d
 domainNotFound: 'Domínio não encontrado.'
 domainDeleted: 'O Domínio "%domain%" eliminado com sucesso.'
 domainAdded: 'O Domínio "%domain%" adicionado com sucesso.'
+domainSourceNotFound: 'Fonte de Domínio não encontrada.'
+domainSourceDeleted: 'Fonte de Domínio "%domain%" eliminada com sucesso.'
+domainSourceActivated: 'Fonte de Domínio "%domain%" ativada com sucesso.'
+domainSourceDeactivated: 'Fonte de Domínio "%domain%" desativada com sucesso.'

@@ -30,7 +30,7 @@
             'admin_dashboard_settings_LDAP',
             'admin_dashboard_settings_sms',
             'admin_dashboard_settings_two_fa',
-            'admin_dashboard_settings_blacklist',
+            'admin_dashboard_settings_domains',
         ] %}
         {% set portalStatisticsRoutes = [
             'admin_dashboard_statistics',
@@ -157,8 +157,8 @@
                         </a>
                     </li>
                     <li>
-                        <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300 {% if app.request.attributes.get('_route') == 'admin_dashboard_settings_blacklist' %}selected{% endif %}"
-                           href="{{ path('admin_dashboard_settings_blacklist') }}">
+                        <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300 {% if app.request.attributes.get('_route') == 'admin_dashboard_settings_domains' %}selected{% endif %}"
+                           href="{{ path('admin_dashboard_settings_domains') }}">
                             <twig:ux:icon name="wba:file-cross" class="w-5 mr-4 fill-none stroke-current"/>
                             {{ 'domainBlacklist'|trans({}, '_header_admin') }}
                         </a>
