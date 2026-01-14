@@ -73,4 +73,26 @@ class DomainSourceRepository extends ServiceEntityRepository
 
         return $qb->getQuery()->getResult();
     }
+
+    public function countSources(
+        ?string $searchTerm = null,
+        ?bool $active = null
+    ): int {
+        $qb = $this->createQueryBuilder('ds')
+            ->select('COUNT(ds.id)');
+
+        // Search by URL
+        if ($searchTerm !== null && $searchTerm !== '') {
+            $qb->andWhere('ds.url LIKE :searchTerm')
+                ->setParameter('searchTerm', '%' . $searchTerm . '%');
+        }
+
+        // Filter by active (true = active, false = inactive, null = all)
+        if ($active !== null) {
+            $qb->andWhere('ds.active = :active')
+                ->setParameter('active', $active);
+        }
+
+        return (int)$qb->getQuery()->getSingleScalarResult();
+    }
 }

@@ -43,8 +43,10 @@ class DomainBlacklistController extends AbstractController
     public function domainsManagement(
         Request $request,
         #[MapQueryParameter] int $page = 1,
-        #[MapQueryParameter] string $sort = 'createdAt',
-        #[MapQueryParameter] string $order = 'desc',
+        #[MapQueryParameter] string $sortDomainsBlacklist = 'createdAt',
+        #[MapQueryParameter] string $sortDomainsSources = 'createdAt',
+        #[MapQueryParameter] string $orderDomainsBlacklist = 'desc',
+        #[MapQueryParameter] string $orderDomainsSources = 'desc',
         #[MapQueryParameter] ?int $count = 7
     ): Response {
         $searchTerm = $request->query->get('u');
@@ -166,8 +168,8 @@ class DomainBlacklistController extends AbstractController
         // Domains Blacklist
         $domainBlacklist = $this->domainBlacklistRepository->searchWithFilter(
             $filter,
-            $sort,
-            $order,
+            $sortDomainsBlacklist,
+            $orderDomainsBlacklist,
             $searchTerm
         );
         $totalBlacklistDomains = $this->domainBlacklistRepository->countDomains(
@@ -197,11 +199,18 @@ class DomainBlacklistController extends AbstractController
         // Domains Sources
         $domainSources = $this->domainSourceRepository->searchWithFilter(
             $filter,
-            $sort,
-            $order,
+            $sortDomainsSources,
+            $orderDomainsSources,
             $searchTerm,
         );
-
+        $countActiveDomainSources = $this->domainSourceRepository->countSources(
+            $searchTerm,
+            true,
+        );
+        $countInactiveDomainSources = $this->domainSourceRepository->countSources(
+            $searchTerm,
+            false,
+        );
         $totalDomainSources = count($domainSources);
         $totalSourcePages = (int)ceil($totalDomainSources / $count);
         $sourceOffset = ($page - 1) * $count;
@@ -224,14 +233,18 @@ class DomainBlacklistController extends AbstractController
             'totalBlacklistPages' => $totalBlacklistPages,
 
             // Sources
-            'domainsSource' => $domainSourcePag,
-            'allSourcesCount' => $totalDomainSources,
+            'domainsSources' => $domainSourcePag,
+            'countDomainSources' => $totalDomainSources,
+            'countActiveDomainSources' => $countActiveDomainSources,
+            'countInactiveDomainSources' => $countInactiveDomainSources,
             'totalSourcePages' => $totalSourcePages,
 
             // UI state
             'activeFilterDomains' => $filter,
-            'activeSortDomains' => $sort,
-            'activeOrderDomains' => $order,
+            'activeSortDomainsBlacklist' => $sortDomainsBlacklist,
+            'activeSortDomainsSources' => $sortDomainsSources,
+            'activeOrderDomainsBlacklist' => $orderDomainsBlacklist,
+            'activeOrderDomainsSources' => $orderDomainsSources,
             'searchTerm' => $searchTerm,
             'currentPage' => $page,
             'count' => $count,

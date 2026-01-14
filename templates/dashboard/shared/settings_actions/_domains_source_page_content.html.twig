@@ -14,7 +14,7 @@
                             {{ 'all'|trans({}, '_blacklist') }}
                         </h1>
                         <div class="w-auto h-6 mb-1 px-2 bg-veryLightGreen group-hover:bg-veryDarkButton rounded-md group-hover:text-white text-center transition-all duration-100">
-                            {{ allSourcesCount }}
+                            {{ countDomainSources }}
                         </div>
                     </a>
                     <a href="{{ path('admin_dashboard_settings_blacklist', {filter: constant('App\\Enum\\DomainSourceStatus::ACTIVE').value, u: app.request.query.get('u')}) }}"
@@ -23,7 +23,7 @@
                             {{ 'active'|trans({}, '_blacklist') }}
                         </h1>
                         <div class="w-auto h-6 mb-1 px-2 bg-veryLightGreen group-hover:bg-lightGreen rounded-md group-hover:text-white text-center transition-all duration-100">
-                            {{ verifiedUsersCount }}
+                            {{ countActiveDomainSources }}
                         </div>
                     </a>
                     <a href="{{ path('admin_dashboard_settings_blacklist', {filter: constant('App\\Enum\\DomainSourceStatus::INACTIVE').value, u: app.request.query.get('u')}) }}"
@@ -32,7 +32,7 @@
                             {{ 'inactive'|trans({}, '_blacklist') }}
                         </h1>
                         <div class="w-auto h-6 mb-1 px-2 bg-veryLightGreen group-hover:bg-red-400 rounded-md group-hover:text-white text-center transition-all duration-100">
-                            {{ bannedUsersCount }}
+                            {{ countInactiveDomainSources }}
                         </div>
                     </a>
                 </div>
@@ -82,9 +82,9 @@
                     <tr>
                         <th scope="col" class="flex items-center p-4 pl-8">
                             <h1 class="mr-2">Url</h1>
-                            <a href="{{ path('admin_dashboard_settings_blacklist', {...app.request.query.all, sort: 'url', order: activeSort == 'url' and activeOrder == 'asc' ? 'desc' : 'asc'}) }}"
+                            <a href="{{ path('admin_dashboard_settings_blacklist', {...app.request.query.all, sort: 'url', order: activeSortDomainsSources == 'url' and activeOrderDomainsSources == 'asc' ? 'desc' : 'asc'}) }}"
                                class="p-1 hover:shadow-md rounded-lg cursor-pointer">
-                                {{ sharedSort.sortArrow('url', activeSort, activeOrder) }}
+                                {{ sharedSort.sortArrow('url', activeSortDomainsSources, activeOrderDomainsSources) }}
                             </a>
                         </th>
 
@@ -94,9 +94,9 @@
 
                         <th scope="col" class="flex items-center px-6 py-3">
                             <h1 class="mr-2">{{ 'createdAt'|trans({}, 'dashboard') }}</h1>
-                            <a href="{{ path('admin_dashboard_settings_blacklist', {...app.request.query.all, sort: 'createdAt', order: activeSort == 'createdAt' and activeOrder == 'asc' ? 'desc' : 'asc'}) }}"
+                            <a href="{{ path('admin_dashboard_settings_blacklist', {...app.request.query.all, sort: 'createdAt', order: activeSortDomainsSources == 'createdAt' and activeOrderDomainsSources == 'asc' ? 'desc' : 'asc'}) }}"
                                class="p-1 hover:shadow-md rounded-lg cursor-pointer">
-                                {{ sharedSort.sortArrow('createdAt', activeSort, activeOrder) }}
+                                {{ sharedSort.sortArrow('createdAt', activeSortDomainsSources, activeOrderDomainsSources) }}
                             </a>
                         </th>
 
@@ -107,7 +107,7 @@
                     </thead>
                     <tbody>
                     {% for domainsSource in domainsSources %}
-                        {{ include('dashboard/shared/_domainsSource.html.twig', {user: user}) }}
+                        {{ include('dashboard/shared/_domainsSource.html.twig', {domainsSource: domainsSource}) }}
                     {% else %}
                         <tr>
                             <td colspan="7">
@@ -138,7 +138,7 @@
             {{ include('dashboard/shared/pagination/_pagination_users.html.twig', {
                 label: 'domainsSourcePerPage'|trans({}, '_blacklist'),
                 route: 'admin_dashboard_settings_blacklist',
-                occurrencies: allSourcesCount,
+                occurrencies: countDomainSources,
                 totalPages: totalSourcePages }
             ) }}
         </div>
