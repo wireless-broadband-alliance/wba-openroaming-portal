@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\DTO\DomainBlacklistDTO;
 use App\Entity\DomainBlacklist;
+use App\Entity\DomainSource;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Enum\DomainMatchType;
@@ -300,7 +301,7 @@ class DomainBlacklistController extends AbstractController
     ): Response {
         // Fetch user and external auths
         $domain = $this->domainBlacklistRepository->find($id);
-        if (!$domain) {
+        if (!$domain instanceof DomainBlacklist) {
             throw $this->createNotFoundException(
                 $this->translator->trans('domainNotFound', [], 'controllers')
             );
@@ -339,7 +340,7 @@ class DomainBlacklistController extends AbstractController
     ): Response {
         // Fetch user and external auths
         $domainSource = $this->domainSourceRepository->find($id);
-        if (!$domainSource) {
+        if (!$domainSource instanceof DomainSource) {
             throw $this->createNotFoundException(
                 $this->translator->trans('domainSourceNotFound', [], 'controllers')
             );
@@ -376,7 +377,7 @@ class DomainBlacklistController extends AbstractController
     ): Response {
         // Fetch user and external auths
         $domainSource = $this->domainSourceRepository->find($id);
-        if (!$domainSource) {
+        if (!$domainSource instanceof DomainSource) {
             throw $this->createNotFoundException(
                 $this->translator->trans('domainSourceNotFound', [], 'controllers')
             );
@@ -401,25 +402,5 @@ class DomainBlacklistController extends AbstractController
         // Return to the last page where the user was (with searching filters)
         $lastPage = $request->headers->get('referer', '/dashboard');
         return $this->redirect($lastPage);
-    }
-
-    /**
-     * Parses a domain input string into pattern + type
-     *
-     * @return array{0: string, 1: DomainMatchType}
-     */
-    private function parseDomainInput(string $input): array
-    {
-        $input = strtolower(trim($input));
-
-        if ($input === '*') {
-            return ['*', DomainMatchType::WILDCARD];
-        }
-
-        if (str_starts_with($input, '*.')) {
-            return [substr($input, 2), DomainMatchType::SUBDOMAIN];
-        }
-
-        return [$input, DomainMatchType::EXACT];
     }
 }
