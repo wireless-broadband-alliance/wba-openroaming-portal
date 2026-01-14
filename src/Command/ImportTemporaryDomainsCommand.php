@@ -85,7 +85,7 @@ class ImportTemporaryDomainsCommand extends Command
                     'pattern' => $domain,
                 ]);
 
-                if ($existing) {
+                if ($existing instanceof DomainBlacklist) {
                     if (
                         $existing->getOrigin() === DomainOrigin::MANUAL ||
                         $existing->getOrigin() === DomainOrigin::DELETED
