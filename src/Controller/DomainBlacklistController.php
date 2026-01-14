@@ -18,6 +18,7 @@ use App\Repository\DomainSourceRepository;
 use App\Service\EventActions;
 use App\Service\GetSettings;
 use DateTime;
+use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -69,6 +70,8 @@ class DomainBlacklistController extends AbstractController
         if ($domainForm->isSubmitted() && $domainForm->isValid()) {
             $object = new DomainBlacklist();
             $domainDTO->applyToEntity($object);
+            $object->setCreatedAt(new DateTimeImmutable());
+            $object->setOrigin(DomainOrigin::MANUAL);
             $this->entityManager->persist($object);
             $this->entityManager->flush();
 
