@@ -7,6 +7,7 @@ use App\DTO\SourceBlacklistDTO;
 use App\Entity\DomainBlacklist;
 use App\Entity\DomainSource;
 use App\Entity\User;
+use App\Enum\AdminRoleType;
 use App\Enum\AnalyticalEventType;
 use App\Enum\DomainMatchType;
 use App\Enum\DomainOrigin;
@@ -41,7 +42,7 @@ class DomainBlacklistController extends AbstractController
     }
 
     #[Route('/dashboard/settings/domains', name: 'admin_dashboard_settings_domains')]
-    #[IsGranted('ROLE_ADMIN')]
+    #[IsGranted(AdminRoleType::ROLE_ADMIN->value)]
     public function domainsManagement(
         Request $request,
         #[MapQueryParameter] int $page = 1,
