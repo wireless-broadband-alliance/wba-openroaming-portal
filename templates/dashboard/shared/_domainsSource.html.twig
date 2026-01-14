@@ -31,16 +31,15 @@
     </td>
 
     {# Actions Buttons #}
-    <td class="px-10 py-4 text-right relative" {{ stimulus_controller('nav-submenu') }}>
-
-        <button type="button"
-                class="cursor-pointer p-2 rounded-lg hover:shadow duration-300"
-                {{ stimulus_action('nav-submenu', 'toggle') }}
+    <td class="px-10 py-4 text-right" {{ stimulus_controller('nav-submenu') }}>
+        {# Items Button Dropdown #}
+        <button type="button" class="cursor-pointer p-2 rounded-lg hover:shadow duration-300"
+                {{ stimulus_action('nav-submenu', 'toggle')|stimulus_action('nav-submenu', 'lost_focus', 'focusout') }}
                 {{ stimulus_target('nav-submenu', 'button') }}>
             <twig:ux:icon name="wba:menu-dots" class="w-5 h-5 fill-current"/>
         </button>
 
-        <div class="hidden bg-white divide-y divide-gray-100 rounded-lg shadow min-w-max absolute right-10 mt-2 z-20"
+        <div class="hidden bg-white divide-y divide-gray-100 rounded-lg shadow min-w-max absolute right-16 mt-2 z-16"
                 {{ stimulus_target('nav-submenu', 'container') }}>
             <ul class="p-2 text-gray-700 gap-y-2">
 
@@ -50,7 +49,7 @@
                           action="{{ path('admin_domain_source_toggle', { id: domainsSource.id }) }}">
                         <button type="submit"
                                 class="flex items-center px-2 py-2 w-full hover:text-lightGreen">
-                            <twig:ux:icon name="wba:toggle" class="w-5 mr-3"/>
+                            <twig:ux:icon name="wba:toggle-outline" class="w-5 mr-3 fill-none stroke-current"/>
                             {{ domainsSource.isActive()
                             ? 'deactivate'|trans({}, '_blacklist')
                             : 'activate'|trans({}, '_blacklist') }}
