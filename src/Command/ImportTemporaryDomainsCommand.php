@@ -177,7 +177,7 @@ class ImportTemporaryDomainsCommand extends Command
 
             // CSV: pick first column
             if (str_contains($line, ',')) {
-                $row = str_getcsv($line, escape: '\\');
+                $row = str_getcsv($line);
                 if (isset($row[0]) && ($row[0] !== '' && $row[0] !== '0')) {
                     yield $row[0];
                     continue;
