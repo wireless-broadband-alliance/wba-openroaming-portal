@@ -21,7 +21,7 @@ final class Version20251210163905 extends AbstractMigration
     {
         // this up() migration is auto-generated, please modify it to your needs
         $this->addSql('ALTER TABLE User ADD permissions JSON NOT NULL');
-        $this->addSql("UPDATE User SET permissions = '[]' WHERE permissions IS NULL");
+        $this->addSql("UPDATE User SET permissions = '[]' WHERE permissions IS 'null'");
     }
 
     public function down(Schema $schema): void
