@@ -27,7 +27,7 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 )]
 class ImportTemporaryDomainsCommand extends Command
 {
-    private int $batchSize = 500;
+    private int $batchSize = 1000;
 
     public function __construct(
         private readonly HttpClientInterface $httpClient,
