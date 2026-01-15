@@ -206,97 +206,105 @@ class TwoFAController extends AbstractController
             )->toResponse(); # Bad Request Response
         }
 
-        $token = $this->tokenStorage->getToken();
+        $errors = [];
+        // Check for missing fields and add them to the array errors
+        if (empty($data['uuid'])) {
+            $errors[] = 'uuid';
+        }
+        if (empty($data['password'])) {
+            $errors[] = 'password';
+        }
 
-        if ($token instanceof TokenInterface && $token->getUser() instanceof User) {
-            /** @var User $currentUser */
-            $currentUser = $token->getUser();
-            // This line is begin ignore because the getCredentials belongs to another service
-            /** @phpstan-ignore-next-line */
-            $jwtTokenString = $token->getCredentials();
-
-            if (!$this->JWTTokenGenerator->isJWTTokenValid($jwtTokenString)) {
-                return new BaseResponse(
-                    401,
-                    null,
-                    'JWT Token is invalid!'
-                )->toResponse();
-            }
-
-            $statusCheckerResponse = $this->userStatusChecker->checkUserStatus($currentUser);
-
-            if (
-                ($data['type'] === 'email' || $data['type'] === 'sms') &&
-                $data['code'] === $currentUser->getTwoFAcode()
-            ) {
-                if ($data['type'] === 'email') {
-                    $currentUser->setTwoFAtype(UserTwoFactorAuthenticationStatus::EMAIL->value);
-                }
-                if ($data['type'] === 'sms') {
-                    $currentUser->setTwoFAtype(UserTwoFactorAuthenticationStatus::SMS->value);
-                }
-                // Defines the Event to the table
-                $eventMetadata = [
-                    'ip' => $request->getClientIp(),
-                    'user_agent' => $request->headers->get('User-Agent'),
-                    'uuid' => $currentUser->getUuid(),
-                ];
-                $this->eventActions->saveEvent(
-                    $currentUser,
-                    AnalyticalEventType::ENABLE_LOCAL_2FA->value,
-                    new DateTime(),
-                    $eventMetadata
-                );
-
-                return new BaseResponse(
-                    200,
-                    [
-                        'message' => 'Two Factor authentication validated successfully!',
-                    ]
-                )->toResponse();
-            }
-
-            if (
-                $data['type'] === 'totp' && $this->TOTPService->verifyTOTP(
-                    $currentUser->getTwoFAsecret(),
-                    $data['code']
-                )
-            ) {
-                $currentUser->setTwoFAtype(UserTwoFactorAuthenticationStatus::TOTP->value);
-
-                // Defines the Event to the table
-                $eventMetadata = [
-                    'ip' => $request->getClientIp(),
-                    'user_agent' => $request->headers->get('User-Agent'),
-                    'uuid' => $currentUser->getUuid(),
-                ];
-                $this->eventActions->saveEvent(
-                    $currentUser,
-                    AnalyticalEventType::ENABLE_TOTP_2FA->value,
-                    new DateTime(),
-                    $eventMetadata
-                );
-
-                return new BaseResponse(
-                    200,
-                    [
-                        'message' => 'Two Factor authentication validated successfully!',
-                    ]
-                )->toResponse();
-            }
-
+        if ($errors !== []) {
             return new BaseResponse(
-                403,
-                null,
-                'Invalid code'
+                400,
+                ['missing_fields' => $errors],
+                'Invalid data: Missing required fields.'
             )->toResponse();
         }
 
-        // Handle the case where the user is not authenticated
+        // Check if user exists are valid
+        $user = $this->userRepository->findOneBy(['uuid' => $data['uuid']]);
+
+        if (!$user instanceof User) {
+            return new BaseResponse(401, null, 'Invalid credentials')->toResponse();
+            // Bad Request Response
+        }
+
+        if (!$this->userPasswordHasher->isPasswordValid($user, $data['password'])) {
+            return new BaseResponse(401, null, 'Invalid credentials')->toResponse(); # Unauthorized Request Response
+        }
+
+        $statusCheckerResponse = $this->userStatusChecker->checkUserStatus($user);
+        if ($statusCheckerResponse instanceof BaseResponse) {
+            return $statusCheckerResponse->toResponse();
+        }
+
+
+        if (
+            ($data['type'] === 'email' || $data['type'] === 'sms') &&
+            $data['code'] === $user->getTwoFAcode()
+        ) {
+            if ($data['type'] === 'email') {
+                $user->setTwoFAtype(UserTwoFactorAuthenticationStatus::EMAIL->value);
+            }
+            if ($data['type'] === 'sms') {
+                $user->setTwoFAtype(UserTwoFactorAuthenticationStatus::SMS->value);
+            }
+            // Defines the Event to the table
+            $eventMetadata = [
+                'ip' => $request->getClientIp(),
+                'user_agent' => $request->headers->get('User-Agent'),
+                'uuid' => $user->getUuid(),
+            ];
+            $this->eventActions->saveEvent(
+                $user,
+                AnalyticalEventType::ENABLE_LOCAL_2FA->value,
+                new DateTime(),
+                $eventMetadata
+            );
+
+            return new BaseResponse(
+                200,
+                [
+                    'message' => 'Two Factor authentication validated successfully!',
+                ]
+            )->toResponse();
+        }
+
+        if (
+            $data['type'] === 'totp' && $this->TOTPService->verifyTOTP(
+                $user->getTwoFAsecret(),
+                $data['code']
+            )
+        ) {
+            $user->setTwoFAtype(UserTwoFactorAuthenticationStatus::TOTP->value);
+
+            // Defines the Event to the table
+            $eventMetadata = [
+                'ip' => $request->getClientIp(),
+                'user_agent' => $request->headers->get('User-Agent'),
+                'uuid' => $user->getUuid(),
+            ];
+            $this->eventActions->saveEvent(
+                $user,
+                AnalyticalEventType::ENABLE_TOTP_2FA->value,
+                new DateTime(),
+                $eventMetadata
+            );
+
+            return new BaseResponse(
+                200,
+                [
+                    'message' => 'Two Factor authentication validated successfully!',
+                ]
+            )->toResponse();
+        }
+
         return new BaseResponse(
             403,
             null,
-            'Unauthorized - You do not have permission to access this resource'
-        )->toResponse(); // Bad Request Response
+            'Invalid code'
+        )->toResponse();
     }
 }

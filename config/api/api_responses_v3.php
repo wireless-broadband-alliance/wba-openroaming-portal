@@ -10,6 +10,8 @@ return [
     If the code is valid, 2FA is enabled for that method.',
         'isProtected' => true,
         'requestBody' => [
+            'uuid' => 'user-uuid-example',
+            'password' => 'user-password-example',
             'type' => 'email or sms or topt',
             'code' => '123456'
         ],
