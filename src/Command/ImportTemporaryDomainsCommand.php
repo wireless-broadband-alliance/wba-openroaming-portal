@@ -3,7 +3,6 @@
 namespace App\Command;
 
 use App\Entity\DomainBlacklist;
-use App\Entity\DomainSource;
 use App\Enum\DomainMatchType;
 use App\Enum\DomainOrigin;
 use App\Repository\DomainBlacklistRepository;
@@ -28,7 +27,7 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 )]
 class ImportTemporaryDomainsCommand extends Command
 {
-    private int $batchSize = 500;
+    private int $batchSize = 1000;
 
     public function __construct(
         private readonly HttpClientInterface $httpClient,
@@ -49,30 +48,32 @@ class ImportTemporaryDomainsCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $runAt = new DateTimeImmutable();
-        $count = 0;
-        $batchSize = $this->batchSize;
+        $processed = 0;
 
         // Mark all LINK domains as potentially stale
         $this->domainBlacklistRepository->markAllAsStale(DomainOrigin::LINK);
 
-        // Fetch all active sources
-        $activeSources = $this->domainSourceRepository->findActiveSources();
+        // Load existing LINK domains (pattern => true)
+        $existingPatterns = $this->domainBlacklistRepository->getAllPatternsByOrigin(DomainOrigin::LINK);
 
-        foreach ($activeSources as $source) {
+        // Temporary array to hold batch updates for lastSeenAt
+        $batchUpdates = [];
+
+        // Fetch active sources
+        $sources = $this->domainSourceRepository->findActiveSources();
+
+        foreach ($sources as $source) {
             $url = $source->getUrl();
+            $output->writeln("<info>Importing domains from: {$url}</info>");
+
             $response = $this->httpClient->request('GET', $url);
+            $content = $response->getContent();
 
-            // Convert iterator to array to know total
-            $domains = iterator_to_array($this->domainService->extract($response->getContent()));
-            $total = count($domains);
-
-            $output->writeln("<info>Importing {$total} domains from: {$url}</info>");
-
-            $progressBar = new ProgressBar($output, $total);
-            $progressBar->setFormat(' %current%/%max% [%bar%] %percent:3s%% ');
+            $progressBar = new ProgressBar($output);
+            $progressBar->setFormat(' %current% domains processed');
             $progressBar->start();
 
-            foreach ($domains as $rawDomain) {
+            foreach ($this->parseDomains($content) as $rawDomain) {
                 $domain = $this->domainService->normalize($rawDomain);
 
                 if ($domain === '' || !$this->domainService->isValidDomain($domain)) {
@@ -80,58 +81,109 @@ class ImportTemporaryDomainsCommand extends Command
                     continue;
                 }
 
-                // Check if domain already exists
-                $existing = $this->domainBlacklistRepository->findOneBy([
-                    'pattern' => $domain,
-                ]);
-
-                if ($existing instanceof DomainBlacklist) {
-                    if (
-                        $existing->getOrigin() === DomainOrigin::MANUAL ||
-                        $existing->getOrigin() === DomainOrigin::DELETED
-                    ) {
-                        // Skip domains manually added by admin
-                        $progressBar->advance();
-                        continue;
-                    }
-                    // Update lastSeenAt for existing LINK domain
-                    $existing->setLastSeenAt($runAt);
-                    $this->entityManager->persist($existing);
+                if (isset($existingPatterns[$domain])) {
+                    // Existing domain → collect for batch update
+                    $batchUpdates[] = $domain;
                 } else {
-                    // Create new LINK domain
+                    // New domain → persist normally
                     $entity = new DomainBlacklist();
-                    $entity->setPattern($domain)
+                    $entity
+                        ->setPattern($domain)
                         ->setType(DomainMatchType::EXACT)
                         ->setOrigin(DomainOrigin::LINK)
                         ->setCreatedAt($runAt)
                         ->setLastSeenAt($runAt);
 
                     $this->entityManager->persist($entity);
+                    $existingPatterns[$domain] = true;
                 }
 
-                $count++;
+                ++$processed;
 
                 // Flush in batches
-                if ($count % $batchSize === 0) {
-                    $this->entityManager->flush();
-                    $this->entityManager->clear();
+                if ($processed % $this->batchSize === 0) {
+                    $this->flushBatch($runAt, $batchUpdates);
                 }
 
                 $progressBar->advance();
             }
 
             $progressBar->finish();
-            $output->writeln(''); // newline after progress bar
+            $output->writeln('');
         }
 
-        // Final flush for any remaining domains
-        $this->entityManager->flush();
+        // Final flush
+        $this->flushBatch($runAt, $batchUpdates);
 
-        // Delete stale LINK domains
+        // Remove stale domains
         $deleted = $this->domainBlacklistRepository->deleteStale(DomainOrigin::LINK);
 
-        $output->writeln("<info>Imported {$count} domains. Removed {$deleted} stale domains.</info>");
+        $output->writeln(
+            "<info>Imported {$processed} domains. Removed {$deleted} stale domains.</info>"
+        );
 
         return Command::SUCCESS;
+    }
+
+    /**
+     * Flush persisted new domains and batch update existing ones
+     *
+     * @param string[] $batchUpdates Array of domain strings
+     */
+    private function flushBatch(DateTimeImmutable $runAt, array &$batchUpdates): void
+    {
+        $this->entityManager->flush();
+        $this->entityManager->clear();
+
+        if ($batchUpdates !== []) {
+            $this->domainBlacklistRepository->batchTouchLastSeen($batchUpdates, DomainOrigin::LINK, $runAt);
+            $batchUpdates = [];
+        }
+
+        gc_collect_cycles();
+    }
+
+    /**
+     * Parse content and return domains.
+     * Supports JSON array, CSV, TXT (one per line)
+     *
+     * @return iterable<string> Iterable of domain strings
+     */
+    private function parseDomains(string $content): iterable
+    {
+        $content = trim($content);
+
+        // Try JSON first
+        if (str_starts_with($content, '[')) {
+            $json = json_decode($content, true);
+            if (is_array($json)) {
+                foreach ($json as $domain) {
+                    yield (string)$domain;
+                }
+                return;
+            }
+        }
+
+        // Split lines
+        $lines = explode("\n", $content);
+
+        foreach ($lines as $line) {
+            $line = trim($line);
+            if ($line === '') {
+                continue;
+            }
+
+            // CSV: pick first column
+            if (str_contains($line, ',')) {
+                $row = str_getcsv($line, escape: '\\');
+                if (isset($row[0]) && ($row[0] !== '' && $row[0] !== '0')) {
+                    yield $row[0];
+                    continue;
+                }
+            }
+
+            // TXT fallback
+            yield $line;
+        }
     }
 }

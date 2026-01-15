@@ -32,7 +32,7 @@ confirm_delete_domain_source: 'Are you sure you want to delete this domain sourc
 delete: 'Delete'
 domainsSourceWarningType: >
     Only link-based imports are supported. The provided URL must point to a valid
-    <strong>.json</strong> or <strong>.txt</strong> file.
+    <strong>.json</strong>, <strong>.txt</strong> or <strong>.csv</strong> file.
     <br>
     Example of a supported link:
     <br>

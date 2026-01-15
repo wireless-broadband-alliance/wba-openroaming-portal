@@ -26,35 +26,4 @@ readonly class DomainService
             FILTER_FLAG_HOSTNAME
         );
     }
-
-    /**
-     * @return iterable<string>
-     */
-    public function extract(string $content): iterable
-    {
-        // Try JSON
-        try {
-            $data = json_decode($content, true, flags: JSON_THROW_ON_ERROR);
-
-            if (is_array($data)) {
-                foreach ($data as $value) {
-                    if (is_string($value)) {
-                        yield $value;
-                    }
-                }
-                return;
-            }
-        } catch (\JsonException) {
-            // Not JSON
-        }
-
-        // Plain text
-        $lines = preg_split('/\r\n|\r|\n/', $content) ?: [];
-        foreach ($lines as $line) {
-            $line = trim($line);
-            if ($line !== '') {
-                yield $line;
-            }
-        }
-    }
 }

@@ -37,8 +37,6 @@ class TwoFAController extends AbstractController
     public function __construct(
         private readonly UserStatusChecker $userStatusChecker,
         private readonly TwoFAService $twoFAService,
-        private readonly TokenStorageInterface $tokenStorage,
-        private readonly JWTTokenGenerator $JWTTokenGenerator,
         private readonly TOTPService $TOTPService,
         private readonly EntityManagerInterface $entityManager,
         private readonly EventActions $eventActions,
