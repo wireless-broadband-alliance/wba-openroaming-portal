@@ -10,6 +10,8 @@ return [
     If the code is valid, 2FA is enabled for that method.',
         'isProtected' => true,
         'requestBody' => [
+            'uuid' => 'user-uuid-example',
+            'password' => 'user-password-example',
             'type' => 'email or sms or topt',
             'code' => '123456'
         ],
@@ -732,7 +734,7 @@ The client must send the current valid JWT in the request body as "current_token
         ]
     ],
     'api_v3_auth_local_reset' => [
-        'routePrefix' => '/api/v3/config/local/reset',
+        'routePrefix' => '/api/v3/auth/local/reset',
         'section' => 'Auth',
         'requestBody' => [
             'email' => 'user@example.com',
