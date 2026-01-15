@@ -66,13 +66,14 @@ class ImportTemporaryDomainsCommand extends Command
             $url = $source->getUrl();
             $output->writeln("<info>Importing domains from: {$url}</info>");
 
-            $response = $this->httpClient->request('GET', $url, ['buffer' => false]);
+            $response = $this->httpClient->request('GET', $url);
+            $content = $response->getContent();
 
             $progressBar = new ProgressBar($output);
             $progressBar->setFormat(' %current% domains processed');
             $progressBar->start();
 
-            foreach ($this->domainService->extract($response->getContent(false)) as $rawDomain) {
+            foreach ($this->parseDomains($content) as $rawDomain) {
                 $domain = $this->domainService->normalize($rawDomain);
 
                 if ($domain === '' || !$this->domainService->isValidDomain($domain)) {
@@ -99,21 +100,20 @@ class ImportTemporaryDomainsCommand extends Command
 
                 ++$processed;
 
-                // Flush new domains in batches
+                // Flush in batches
                 if ($processed % $this->batchSize === 0) {
-                    $this->flushNewDomains($runAt, $batchUpdates);
+                    $this->flushBatch($runAt, $batchUpdates);
                 }
+
                 $progressBar->advance();
             }
 
             $progressBar->finish();
             $output->writeln('');
-
-            unset($response);
         }
 
-        // Final flush for any remaining domains
-        $this->flushNewDomains($runAt, $batchUpdates);
+        // Final flush
+        $this->flushBatch($runAt, $batchUpdates);
 
         // Remove stale domains
         $deleted = $this->domainBlacklistRepository->deleteStale(DomainOrigin::LINK);
@@ -125,21 +125,56 @@ class ImportTemporaryDomainsCommand extends Command
         return Command::SUCCESS;
     }
 
-    /**
-     * Flush new domains and batch update lastSeenAt for existing ones
-     */
-    private function flushNewDomains(DateTimeImmutable $runAt, array &$batchUpdates): void
+    private function flushBatch(DateTimeImmutable $runAt, array &$batchUpdates): void
     {
-        // Flush new persisted domains
         $this->entityManager->flush();
         $this->entityManager->clear();
 
-        // Batch update existing domains
         if ($batchUpdates !== []) {
             $this->domainBlacklistRepository->batchTouchLastSeen($batchUpdates, DomainOrigin::LINK, $runAt);
             $batchUpdates = [];
         }
 
         gc_collect_cycles();
+    }
+
+    /**
+     * Parse content and return domains.
+     * Supports JSON array, CSV, TXT (one per line)
+     */
+    private function parseDomains(string $content): iterable
+    {
+        $content = trim($content);
+
+        // Try JSON first
+        if (str_starts_with($content, '[')) {
+            $json = json_decode($content, true);
+            if (is_array($json)) {
+                foreach ($json as $domain) {
+                    yield (string)$domain;
+                }
+                return;
+            }
+        }
+
+        // Split lines
+        $lines = explode("\n", $content);
+
+        foreach ($lines as $line) {
+            $line = trim($line);
+            if ($line === '') continue;
+
+            // CSV: pick first column
+            if (str_contains($line, ',')) {
+                $row = str_getcsv($line);
+                if (!empty($row[0])) {
+                    yield $row[0];
+                    continue;
+                }
+            }
+
+            // TXT fallback
+            yield $line;
+        }
     }
 }
