@@ -128,7 +128,6 @@ class ImportTemporaryDomainsCommand extends Command
     /**
      * Flush persisted new domains and batch update existing ones
      *
-     * @param DateTimeImmutable $runAt
      * @param string[] $batchUpdates Array of domain strings
      */
     private function flushBatch(DateTimeImmutable $runAt, array &$batchUpdates): void
@@ -148,7 +147,6 @@ class ImportTemporaryDomainsCommand extends Command
      * Parse content and return domains.
      * Supports JSON array, CSV, TXT (one per line)
      *
-     * @param string $content
      * @return iterable<string> Iterable of domain strings
      */
     private function parseDomains(string $content): iterable
@@ -177,7 +175,7 @@ class ImportTemporaryDomainsCommand extends Command
 
             // CSV: pick first column
             if (str_contains($line, ',')) {
-                $row = str_getcsv($line);
+                $row = str_getcsv($line, escape: '\\');
                 if (isset($row[0]) && ($row[0] !== '' && $row[0] !== '0')) {
                     yield $row[0];
                     continue;
