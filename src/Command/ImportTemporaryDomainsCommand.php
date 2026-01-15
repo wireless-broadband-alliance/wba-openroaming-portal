@@ -162,7 +162,9 @@ class ImportTemporaryDomainsCommand extends Command
 
         foreach ($lines as $line) {
             $line = trim($line);
-            if ($line === '') continue;
+            if ($line === '') {
+                continue;
+            }
 
             // CSV: pick first column
             if (str_contains($line, ',')) {
