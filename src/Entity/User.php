@@ -38,7 +38,7 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
     /**
      * @var string[]
      */
-    #[ORM\Column]
+    #[ORM\Column(type: 'json')]
     private array $permissions = [];
 
 
