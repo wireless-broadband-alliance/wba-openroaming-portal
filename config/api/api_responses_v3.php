@@ -732,7 +732,7 @@ The client must send the current valid JWT in the request body as "current_token
         ]
     ],
     'api_v3_auth_local_reset' => [
-        'routePrefix' => '/api/v3/config/local/reset',
+        'routePrefix' => '/api/v3/auth/local/reset',
         'section' => 'Auth',
         'requestBody' => [
             'email' => 'user@example.com',
