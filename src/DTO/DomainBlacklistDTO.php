@@ -11,7 +11,7 @@ class DomainBlacklistDTO
     #[Assert\NotBlank]
     #[Assert\Length(max: 255)]
     #[Assert\Regex(
-        pattern: '/^(\*|\*\.[a-z0-9.-]+\.[a-z]{2,}|[a-z0-9.-]+\.[a-z]{2,})$/i',
+        pattern: '/^(\/.+\/[imsxuADU]*|\*|\*\.[a-z0-9.-]+\.[a-z]{2,}|[a-z0-9.-]+\.[a-z]{2,})$/i',
         message: 'invalidDomainPattern'
     )]
     public ?string $input = null;
