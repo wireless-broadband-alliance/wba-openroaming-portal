@@ -520,7 +520,7 @@ The client must send the current valid JWT in the request body as "current_token
         ]
     ],
     'api_v2_auth_local_register' => [
-        'routePrefix' => '/api/v2/config/local/register',
+        'routePrefix' => '/api/v2/auth/local/register',
         'section' => 'Auth',
         'requestBody' => [
             'email' => 'user@example.com',
@@ -555,7 +555,7 @@ The client must send the current valid JWT in the request body as "current_token
         ]
     ],
     'api_v2_auth_local_reset' => [
-        'routePrefix' => '/api/v2/config/local/reset',
+        'routePrefix' => '/api/v2/auth/local/reset',
         'section' => 'Auth',
         'requestBody' => [
             'email' => 'user@example.com',
@@ -588,7 +588,7 @@ The client must send the current valid JWT in the request body as "current_token
         ]
     ],
     'api_v2_auth_sms_register' => [
-        'routePrefix' => '/api/v2/config/sms/register',
+        'routePrefix' => '/api/v2/auth/sms/register',
         'section' => 'Auth',
         'requestBody' => [
             'country_code' => 'PT',
@@ -627,7 +627,7 @@ The client must send the current valid JWT in the request body as "current_token
         ]
     ],
     'api_v2_auth_sms_reset' => [
-        'routePrefix' => '/api/v2/config/sms/reset',
+        'routePrefix' => '/api/v2/auth/sms/reset',
         'section' => 'Auth',
         'requestBody' => [
             'country_code' => 'PT',

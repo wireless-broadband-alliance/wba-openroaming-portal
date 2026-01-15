@@ -57,10 +57,12 @@ readonly class TermsAcceptanceListener
             '/profile/android',
             '/profile/ios',
             '/profile/windows',
-            '/login/magic'
+            '/login/magic',
+            '/login/link',
+            '/forgot-password/link'
         ];
 
-        if (array_any($excludedPrefixes, fn($prefix) => str_starts_with($path, (string) $prefix))) {
+        if (array_any($excludedPrefixes, fn($prefix) => str_starts_with($path, (string)$prefix))) {
             return;
         }
 
