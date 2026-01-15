@@ -125,6 +125,12 @@ class ImportTemporaryDomainsCommand extends Command
         return Command::SUCCESS;
     }
 
+    /**
+     * Flush persisted new domains and batch update existing ones
+     *
+     * @param DateTimeImmutable $runAt
+     * @param string[] $batchUpdates Array of domain strings
+     */
     private function flushBatch(DateTimeImmutable $runAt, array &$batchUpdates): void
     {
         $this->entityManager->flush();
@@ -141,6 +147,9 @@ class ImportTemporaryDomainsCommand extends Command
     /**
      * Parse content and return domains.
      * Supports JSON array, CSV, TXT (one per line)
+     *
+     * @param string $content
+     * @return iterable<string> Iterable of domain strings
      */
     private function parseDomains(string $content): iterable
     {
