@@ -127,9 +127,6 @@ class ImportTemporaryDomainsCommand extends Command
 
     /**
      * Flush new domains and batch update lastSeenAt for existing ones
-     *
-     * @param DateTimeImmutable $runAt
-     * @param array $batchUpdates
      */
     private function flushNewDomains(DateTimeImmutable $runAt, array &$batchUpdates): void
     {
@@ -138,7 +135,7 @@ class ImportTemporaryDomainsCommand extends Command
         $this->entityManager->clear();
 
         // Batch update existing domains
-        if (!empty($batchUpdates)) {
+        if ($batchUpdates !== []) {
             $this->domainBlacklistRepository->batchTouchLastSeen($batchUpdates, DomainOrigin::LINK, $runAt);
             $batchUpdates = [];
         }

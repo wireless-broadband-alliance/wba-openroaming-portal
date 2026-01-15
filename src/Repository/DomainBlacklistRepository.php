@@ -76,7 +76,7 @@ class DomainBlacklistRepository extends ServiceEntityRepository
      */
     public function batchTouchLastSeen(array $patterns, DomainOrigin $origin, DateTimeImmutable $seenAt): int
     {
-        if (empty($patterns)) {
+        if ($patterns === []) {
             return 0;
         }
 
