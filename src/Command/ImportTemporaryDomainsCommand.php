@@ -3,7 +3,6 @@
 namespace App\Command;
 
 use App\Entity\DomainBlacklist;
-use App\Entity\DomainSource;
 use App\Enum\DomainMatchType;
 use App\Enum\DomainOrigin;
 use App\Repository\DomainBlacklistRepository;
@@ -49,30 +48,31 @@ class ImportTemporaryDomainsCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $runAt = new DateTimeImmutable();
-        $count = 0;
-        $batchSize = $this->batchSize;
+        $processed = 0;
 
         // Mark all LINK domains as potentially stale
         $this->domainBlacklistRepository->markAllAsStale(DomainOrigin::LINK);
 
-        // Fetch all active sources
-        $activeSources = $this->domainSourceRepository->findActiveSources();
+        // Load existing LINK domains (pattern => true)
+        $existingPatterns = $this->domainBlacklistRepository->getAllPatternsByOrigin(DomainOrigin::LINK);
 
-        foreach ($activeSources as $source) {
+        // Temporary array to hold batch updates for lastSeenAt
+        $batchUpdates = [];
+
+        // Fetch active sources
+        $sources = $this->domainSourceRepository->findActiveSources();
+
+        foreach ($sources as $source) {
             $url = $source->getUrl();
-            $response = $this->httpClient->request('GET', $url);
+            $output->writeln("<info>Importing domains from: {$url}</info>");
 
-            // Convert iterator to array to know total
-            $domains = iterator_to_array($this->domainService->extract($response->getContent()));
-            $total = count($domains);
+            $response = $this->httpClient->request('GET', $url, ['buffer' => false]);
 
-            $output->writeln("<info>Importing {$total} domains from: {$url}</info>");
-
-            $progressBar = new ProgressBar($output, $total);
-            $progressBar->setFormat(' %current%/%max% [%bar%] %percent:3s%% ');
+            $progressBar = new ProgressBar($output);
+            $progressBar->setFormat(' %current% domains processed');
             $progressBar->start();
 
-            foreach ($domains as $rawDomain) {
+            foreach ($this->domainService->extract($response->getContent(false)) as $rawDomain) {
                 $domain = $this->domainService->normalize($rawDomain);
 
                 if ($domain === '' || !$this->domainService->isValidDomain($domain)) {
@@ -80,58 +80,69 @@ class ImportTemporaryDomainsCommand extends Command
                     continue;
                 }
 
-                // Check if domain already exists
-                $existing = $this->domainBlacklistRepository->findOneBy([
-                    'pattern' => $domain,
-                ]);
-
-                if ($existing instanceof DomainBlacklist) {
-                    if (
-                        $existing->getOrigin() === DomainOrigin::MANUAL ||
-                        $existing->getOrigin() === DomainOrigin::DELETED
-                    ) {
-                        // Skip domains manually added by admin
-                        $progressBar->advance();
-                        continue;
-                    }
-                    // Update lastSeenAt for existing LINK domain
-                    $existing->setLastSeenAt($runAt);
-                    $this->entityManager->persist($existing);
+                if (isset($existingPatterns[$domain])) {
+                    // Existing domain → collect for batch update
+                    $batchUpdates[] = $domain;
                 } else {
-                    // Create new LINK domain
+                    // New domain → persist normally
                     $entity = new DomainBlacklist();
-                    $entity->setPattern($domain)
+                    $entity
+                        ->setPattern($domain)
                         ->setType(DomainMatchType::EXACT)
                         ->setOrigin(DomainOrigin::LINK)
                         ->setCreatedAt($runAt)
                         ->setLastSeenAt($runAt);
 
                     $this->entityManager->persist($entity);
+                    $existingPatterns[$domain] = true;
                 }
 
-                $count++;
+                ++$processed;
 
-                // Flush in batches
-                if ($count % $batchSize === 0) {
-                    $this->entityManager->flush();
-                    $this->entityManager->clear();
+                // Flush new domains in batches
+                if ($processed % $this->batchSize === 0) {
+                    $this->flushNewDomains($runAt, $batchUpdates);
                 }
-
                 $progressBar->advance();
             }
 
             $progressBar->finish();
-            $output->writeln(''); // newline after progress bar
+            $output->writeln('');
+
+            unset($response);
         }
 
         // Final flush for any remaining domains
-        $this->entityManager->flush();
+        $this->flushNewDomains($runAt, $batchUpdates);
 
-        // Delete stale LINK domains
+        // Remove stale domains
         $deleted = $this->domainBlacklistRepository->deleteStale(DomainOrigin::LINK);
 
-        $output->writeln("<info>Imported {$count} domains. Removed {$deleted} stale domains.</info>");
+        $output->writeln(
+            "<info>Imported {$processed} domains. Removed {$deleted} stale domains.</info>"
+        );
 
         return Command::SUCCESS;
+    }
+
+    /**
+     * Flush new domains and batch update lastSeenAt for existing ones
+     *
+     * @param DateTimeImmutable $runAt
+     * @param array $batchUpdates
+     */
+    private function flushNewDomains(DateTimeImmutable $runAt, array &$batchUpdates): void
+    {
+        // Flush new persisted domains
+        $this->entityManager->flush();
+        $this->entityManager->clear();
+
+        // Batch update existing domains
+        if (!empty($batchUpdates)) {
+            $this->domainBlacklistRepository->batchTouchLastSeen($batchUpdates, DomainOrigin::LINK, $runAt);
+            $batchUpdates = [];
+        }
+
+        gc_collect_cycles();
     }
 }

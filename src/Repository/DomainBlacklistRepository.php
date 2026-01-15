@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Entity\DomainBlacklist;
 use App\Enum\DomainMatchType;
 use App\Enum\DomainOrigin;
+use DateTimeImmutable;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -17,6 +18,30 @@ class DomainBlacklistRepository extends ServiceEntityRepository
         ManagerRegistry $registry
     ) {
         parent::__construct($registry, DomainBlacklist::class);
+    }
+
+    /**
+     * Returns all domain patterns for a given origin as a lookup map.
+     *
+     * @return array<string, true>
+     */
+    public function getAllPatternsByOrigin(DomainOrigin $origin): array
+    {
+        $qb = $this->createQueryBuilder('d')
+            ->select('d.pattern')
+            ->where('d.origin = :origin')
+            ->setParameter('origin', $origin);
+
+        $results = $qb->getQuery()->getScalarResult();
+
+        // Convert [['pattern' => 'example.com']] into ['example.com' => true]
+        $patterns = [];
+
+        foreach ($results as $row) {
+            $patterns[$row['pattern']] = true;
+        }
+
+        return $patterns;
     }
 
     public function markAllAsStale(DomainOrigin $origin): int
@@ -45,6 +70,29 @@ class DomainBlacklistRepository extends ServiceEntityRepository
     }
 
     /**
+     * Batch update lastSeenAt for multiple domains
+     *
+     * @param string[] $patterns
+     */
+    public function batchTouchLastSeen(array $patterns, DomainOrigin $origin, DateTimeImmutable $seenAt): int
+    {
+        if (empty($patterns)) {
+            return 0;
+        }
+
+        return $this->createQueryBuilder('d')
+            ->update()
+            ->set('d.lastSeenAt', ':seenAt')
+            ->where('d.origin = :origin')
+            ->andWhere('d.pattern IN (:patterns)')
+            ->setParameter('seenAt', $seenAt)
+            ->setParameter('origin', $origin->value)
+            ->setParameter('patterns', $patterns)
+            ->getQuery()
+            ->execute();
+    }
+
+    /**
      * @return DomainBlacklist[]
      */
     public function searchWithFilter(string $filter, string $sort, ?string $order, ?string $searchTerm = null): array
@@ -62,11 +110,13 @@ class DomainBlacklistRepository extends ServiceEntityRepository
 
         if ($filter === 'exact') {
             $qb->andWhere('d.type LIKE :exact')
-            ->setParameter('exact', DomainMatchType::EXACT);
-        } if ($filter === 'subdomain') {
+                ->setParameter('exact', DomainMatchType::EXACT);
+        }
+        if ($filter === 'subdomain') {
             $qb->andWhere('d.type LIKE :subdomain')
-            ->setParameter('subdomain', DomainMatchType::SUBDOMAIN);
-        } if ($filter === 'wildcard') {
+                ->setParameter('subdomain', DomainMatchType::SUBDOMAIN);
+        }
+        if ($filter === 'wildcard') {
             $qb->andWhere('d.type LIKE :wildcard')
                 ->setParameter('wildcard', DomainMatchType::WILDCARD);
         }
@@ -143,14 +193,16 @@ class DomainBlacklistRepository extends ServiceEntityRepository
         if ($type === 'exact') {
             $qb->andWhere('d.type LIKE :exact')
                 ->setParameter('exact', DomainMatchType::EXACT);
-        } if ($type === 'subdomain') {
+        }
+        if ($type === 'subdomain') {
             $qb->andWhere('d.type LIKE :subdomain')
-            ->setParameter('subdomain', DomainMatchType::SUBDOMAIN);
-        } if ($type === 'wildcard') {
+                ->setParameter('subdomain', DomainMatchType::SUBDOMAIN);
+        }
+        if ($type === 'wildcard') {
             $qb->andWhere('d.type LIKE :wildcard')
                 ->setParameter('wildcard', DomainMatchType::WILDCARD);
         }
 
-        return (int) $qb->getQuery()->getSingleScalarResult();
+        return (int)$qb->getQuery()->getSingleScalarResult();
     }
 }
