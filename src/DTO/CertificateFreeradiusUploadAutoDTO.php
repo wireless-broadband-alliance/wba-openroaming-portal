@@ -11,6 +11,10 @@ use App\Validator\Constraints as CustomAssert;
 #[Uploadable]
 class CertificateFreeradiusUploadAutoDTO
 {
+    /**
+     * Notices/Warnings generated during the upload
+     * @var list<string>
+     */
     public array $notices = [];
 
     #[Assert\NotBlank(message: 'fieldCannotBeBlank')]
