@@ -471,13 +471,8 @@ class InstallationController extends AbstractController
                     $privateKeyContent = file_get_contents($privateKeyPath);
                     $publicKeyContent = file_get_contents($publicKeyPath);
 
-                    if (is_string($privateKeyContent) && is_string($publicKeyContent)) {
-                        if (
-                            str_starts_with(trim($privateKeyContent), '-----BEGIN ENCRYPTED PRIVATE KEY-----') &&
-                            str_starts_with(trim($publicKeyContent), '-----BEGIN PUBLIC KEY-----')
-                        ) {
-                            $success = true;
-                        }
+                    if (is_string($privateKeyContent) && is_string($publicKeyContent) && (str_starts_with(trim($privateKeyContent), '-----BEGIN ENCRYPTED PRIVATE KEY-----') && str_starts_with(trim($publicKeyContent), '-----BEGIN PUBLIC KEY-----'))) {
+                        $success = true;
                     }
                 }
 

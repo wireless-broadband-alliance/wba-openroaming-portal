@@ -120,12 +120,6 @@ readonly class CertificateFreeradiusInfoService
             return false;
         }
 
-        foreach ((array)$policies as $policy) {
-            if (array_any($evOids, fn($oid) => str_contains((string)$policy, $oid))) {
-                return true;
-            }
-        }
-
-        return false;
+        return array_any((array)$policies, fn($policy) => array_any($evOids, fn($oid) => str_contains((string)$policy, (string) $oid)));
     }
 }
