@@ -109,7 +109,7 @@ readonly class AdminCertificateProcessEnforcerListener
         $this->enforceProcess($event, $session);
     }
 
-    private function enforceProcess(RequestEvent $event,SessionInterface $session): void
+    private function enforceProcess(RequestEvent $event, SessionInterface $session): void
     {
       // Check installation progress
         $installation = $this->installationProgressRepository->findOneBy([
