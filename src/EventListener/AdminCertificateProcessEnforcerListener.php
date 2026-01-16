@@ -13,6 +13,7 @@ use App\Repository\InstallationProgressRepository;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -94,7 +95,10 @@ readonly class AdminCertificateProcessEnforcerListener
         '#^/dashboard/settings/certificatesManagement/freeradius/test$#',
         '#^/dashboard/settings/certificatesManagement/freeradius/test/run$#',
         ];
-        $allowed = array_any($allowedPatterns, fn($pattern) => preg_match($pattern, $path));
+        $allowed = array_any(
+            $allowedPatterns,
+            fn (string $pattern): bool => preg_match($pattern, $path) === 1
+        );
 
       // If path IS allowed → do nothing
         if ($allowed) {
@@ -105,7 +109,7 @@ readonly class AdminCertificateProcessEnforcerListener
         $this->enforceProcess($event, $session);
     }
 
-    private function enforceProcess(RequestEvent $event, $session): void
+    private function enforceProcess(RequestEvent $event,SessionInterface $session): void
     {
       // Check installation progress
         $installation = $this->installationProgressRepository->findOneBy([

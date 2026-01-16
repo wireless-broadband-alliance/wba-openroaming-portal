@@ -87,7 +87,7 @@ readonly class DatabaseConnectionService
             $newLine = sprintf('JWT_PASSPHRASE=%s', $url);
         }
 
-        if ($regex === '' || $regex === '0') {
+        if ($regex === '') {
             throw new InvalidArgumentException("Invalid environment type: $type");
         }
 
