@@ -80,10 +80,6 @@ class ProfileController extends AbstractController
             return $this->redirectToRoute('app_landing');
         }
 
-        if ($this->certificateProcessExtension->isCertificateAborted()) {
-            return $this->redirectToRoute('app_landing');
-        }
-
         $session = $request->getSession();
         if ($this->twoFAService->twoFAisActive($user) && !$session->has('2fa_verified_landing')) {
             return $this->redirectToRoute('app_landing');
@@ -197,10 +193,6 @@ class ProfileController extends AbstractController
         }
 
         if ($this->twoFAService->isTwoFARequired($user)) {
-            return $this->redirectToRoute('app_landing');
-        }
-
-        if ($this->certificateProcessExtension->isCertificateAborted()) {
             return $this->redirectToRoute('app_landing');
         }
 
@@ -375,10 +367,6 @@ class ProfileController extends AbstractController
         }
 
         if ($this->twoFAService->isTwoFARequired($user)) {
-            return $this->redirectToRoute('app_landing');
-        }
-
-        if ($this->certificateProcessExtension->isCertificateAborted()) {
             return $this->redirectToRoute('app_landing');
         }
 
