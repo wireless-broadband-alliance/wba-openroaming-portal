@@ -471,12 +471,13 @@ class InstallationController extends AbstractController
                     $privateKeyContent = file_get_contents($privateKeyPath);
                     $publicKeyContent = file_get_contents($publicKeyPath);
 
-
-                    if (
-                        str_starts_with(trim($privateKeyContent), '-----BEGIN ENCRYPTED PRIVATE KEY-----') &&
-                        str_starts_with(trim($publicKeyContent), '-----BEGIN PUBLIC KEY-----')
-                    ) {
-                        $success = true;
+                    if (is_string($privateKeyContent) && is_string($publicKeyContent)) {
+                        if (
+                            str_starts_with(trim($privateKeyContent), '-----BEGIN ENCRYPTED PRIVATE KEY-----') &&
+                            str_starts_with(trim($publicKeyContent), '-----BEGIN PUBLIC KEY-----')
+                        ) {
+                            $success = true;
+                        }
                     }
                 }
 
@@ -690,6 +691,7 @@ class InstallationController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            /** @var array{code: string} $data */
             $data = $form->getData();
             $code = $data["code"];
 
@@ -1012,6 +1014,7 @@ class InstallationController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            /** @var array{code: string} $data */
             $data = $form->getData();
             $code = $data["code"];
 
@@ -1089,49 +1092,48 @@ class InstallationController extends AbstractController
             $eventType = AnalyticalEventType::CERTIFICATES_IDENTITY_VERIFIED_CODE->value;
         }
 
-        if ($user instanceof User) {
-            if (
-                $this->installationService->canSendCode(
-                    $eventType,
-                    $user
+        if (
+            $this->installationService->canSendCode(
+                $eventType,
+                $user
+            )
+        ) {
+            $this->installationService->sendAdminVerificationCode($user);
+            $eventMetaData = [
+            'platform' => PlatformMode::LIVE->value,
+            'user_agent' => $request->headers->get('User-Agent'),
+            'uuid' => $user->getUuid(),
+            'ip' => $request->getClientIp(),
+            ];
+            $this->eventActions->saveEvent(
+                $user,
+                $eventType,
+                new DateTime(),
+                $eventMetaData
+            );
+
+            $this->addFlash(
+                'success',
+                $this->translator->trans('codeSentSuccessfully', [], 'controllers')
+            );
+        } else {
+            $interval_minutes = $this->twoFAService->timeLeftToResendCode(
+                $user,
+                $eventType
+            );
+
+            $this->addFlash(
+                'error',
+                $this->translator->trans(
+                    'codeAlreadySent',
+                    [
+                    '%minutes%' => $interval_minutes,
+                    ],
+                    'controllers'
                 )
-            ) {
-                $this->installationService->sendAdminVerificationCode($user);
-                $eventMetaData = [
-                'platform' => PlatformMode::LIVE->value,
-                'user_agent' => $request->headers->get('User-Agent'),
-                'uuid' => $user->getUuid(),
-                'ip' => $request->getClientIp(),
-                ];
-                $this->eventActions->saveEvent(
-                    $user,
-                    $eventType,
-                    new DateTime(),
-                    $eventMetaData
-                );
-
-                $this->addFlash(
-                    'success',
-                    $this->translator->trans('codeSentSuccessfully', [], 'controllers')
-                );
-            } else {
-                $interval_minutes = $this->twoFAService->timeLeftToResendCode(
-                    $user,
-                    $eventType
-                );
-
-                $this->addFlash(
-                    'error',
-                    $this->translator->trans(
-                        'codeAlreadySent',
-                        [
-                        '%minutes%' => $interval_minutes,
-                        ],
-                        'controllers'
-                    )
-                );
-            }
+            );
         }
+
 
         return $this->redirectToRoute('admin_dashboard_settings_certs_installation_verify', [
         'type' => $type,
