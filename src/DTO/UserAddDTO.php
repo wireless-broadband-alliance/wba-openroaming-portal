@@ -78,14 +78,14 @@ class UserAddDTO
             $this->lastName = $user->getLastName();
             $this->phoneNumber = $user->getPhoneNumber();
             $this->accountType = $user->getPhoneNumber() instanceof \libphonenumber\PhoneNumber ?
-            UserProvider::PHONE_NUMBER->value : UserProvider::EMAIL->value;
+                UserProvider::PHONE_NUMBER->value : UserProvider::EMAIL->value;
         }
     }
 
-  /**
-   * Maps the DTO data back to the User entity
-   * @throws RandomException
-   */
+    /**
+     * Maps the DTO data back to the User entity
+     * @throws RandomException
+     */
     public function createUser(User $user): User
     {
         $userAuths = new UserExternalAuth();
@@ -113,18 +113,18 @@ class UserAddDTO
         $user->setTwoFAcodeIsActive(true);
         $user->setCreatedAt(new DateTime());
 
-      // Hash the password
+        // Hash the password
         $hashedPassword = $this->userPasswordHasher->hashPassword($user, $this->password);
         $user->setPassword($hashedPassword);
 
-      // Set permissions
+        // Set permissions
         $adminPermissions = $this->getAdminPermissions();
 
-      // Example ["USER_ENGAGEMENT_WRITE", ...]
+        // Example ["USER_ENGAGEMENT_WRITE", ...]
         $permissionsArray = array_map(static fn(AdminPermissionsType $p) => $p->value, $adminPermissions);
         $user->setPermissions($permissionsArray);
 
-      // Persist new user
+        // Persist new user
         $this->entityManager->persist($user);
         $this->entityManager->persist($userAuths);
         $this->entityManager->flush();
@@ -132,23 +132,26 @@ class UserAddDTO
         return $user;
     }
 
-  // Returns AdminPermissionsType strings based on selected levels
+    /**
+     * Returns AdminPermissionsType strings based on selected levels
+     * @return array<AdminPermissionsType>
+     */
     private function getAdminPermissions(): array
     {
         $mapping = [
-        'userManagement' => 'USERS_MANAGEMENT',
-        'platformStatus' => 'PLATFORM_STATUS',
-        'landingPageConfig' => 'LANDING_PAGE_CONFIG',
-        'userEngagement' => 'USER_ENGAGEMENT',
-        'termsPolicies' => 'TERMS_POLICIES',
-        'cronSchedule' => 'CRON_SCHEDULE',
-        'authenticationMethods' => 'AUTHENTICATION_METHODS',
-        'twoFactorAuth' => 'TWO_FACTOR_AUTH',
-        'ldapSynchronization' => 'LDAP_SYNCHRONIZATION',
-        'radiusProfileConfig' => 'RADIUS_PROFILE_CONFIG',
-        'smsConfig' => 'SMS_CONFIG',
-        'portalStatistics' => 'PORTAL_STATISTICS',
-        'connectivityStatistics' => 'CONNECTIVITY_STATISTICS',
+            'userManagement' => 'USERS_MANAGEMENT',
+            'platformStatus' => 'PLATFORM_STATUS',
+            'landingPageConfig' => 'LANDING_PAGE_CONFIG',
+            'userEngagement' => 'USER_ENGAGEMENT',
+            'termsPolicies' => 'TERMS_POLICIES',
+            'cronSchedule' => 'CRON_SCHEDULE',
+            'authenticationMethods' => 'AUTHENTICATION_METHODS',
+            'twoFactorAuth' => 'TWO_FACTOR_AUTH',
+            'ldapSynchronization' => 'LDAP_SYNCHRONIZATION',
+            'radiusProfileConfig' => 'RADIUS_PROFILE_CONFIG',
+            'smsConfig' => 'SMS_CONFIG',
+            'portalStatistics' => 'PORTAL_STATISTICS',
+            'connectivityStatistics' => 'CONNECTIVITY_STATISTICS',
         ];
 
         $permissions = [];
