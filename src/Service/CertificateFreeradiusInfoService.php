@@ -96,7 +96,7 @@ readonly class CertificateFreeradiusInfoService
         ];
     }
 
-    public function isEvCertificate(string $certificateContent): bool
+    public function isEvCertificate(bool|string $certificateContent): bool
     {
         $cert = @openssl_x509_read($certificateContent);
         if (!$cert) {

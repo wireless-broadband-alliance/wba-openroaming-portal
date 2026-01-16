@@ -412,7 +412,7 @@ class CertificateManagementFreeradiusController extends AbstractController
 
                 // Determine if it’s a private key storeUploadedFile function
                 // Add this "|| $isSimulation;" for simulation testing
-                $isPrivateKey = $fileEnum === CertificateFileName::PRIVATE_KEY_PEM || $isSimulation;
+                $isPrivateKey = $fileEnum === CertificateFileName::PRIVATE_KEY_PEM;
 
                 $this->certificateStorageService->storeUploadedFile(
                     $uploadedFile,
@@ -498,7 +498,22 @@ class CertificateManagementFreeradiusController extends AbstractController
 
         // Fetch any data/settings needed for the page
         $data = $this->getSettings->getSettings();
-        $commands = $this->certificateFreeradiusCommandsService->getRenewCommands($certificateSet);
+        $certificateSet = $this->certificateFreeradiusInfoService
+            ->getLatestCertificatesSet($process);
+
+        /** @var array<string, array{content?: string|null}> $renewCertificateSet */
+        $renewCertificateSet = [];
+
+        foreach ($certificateSet as $key => $certificate) {
+            $content = $certificate['content'] ?? null;
+
+            $renewCertificateSet[$key] = [
+                'content' => is_string($content) ? $content : null,
+            ];
+        }
+
+        $commands = $this->certificateFreeradiusCommandsService
+            ->getRenewCommands($renewCertificateSet);
 
         // Form handling
         $form = $this->createForm(SimpleSubmitFormType::class);
@@ -513,7 +528,23 @@ class CertificateManagementFreeradiusController extends AbstractController
             } elseif ($form->isValid()) {
                 $process = $this->certificateProcessCheckerService->getCurrentProcess();
                 // Update local certificates in "signing-keys"
-                $this->certificateWriterUpdateService->writeCertificates($certificateSet);
+                /** @var array<string, array{content: string}> $writeCertificateSet */
+                $writeCertificateSet = [];
+
+                foreach ($certificateSet as $key => $certificate) {
+                    $content = $certificate['content'] ?? null;
+
+                    if (!is_string($content)) {
+                        continue;
+                    }
+
+                    $writeCertificateSet[$key] = [
+                        'content' => $content,
+                    ];
+                }
+
+                $this->certificateWriterUpdateService
+                    ->writeCertificates($writeCertificateSet);
 
                 // Check if the uploaded cert is a EV
                 $certContent = $certificateSet['certFREERADIUS']['content'] ?? null;
@@ -559,9 +590,27 @@ class CertificateManagementFreeradiusController extends AbstractController
                 $certContentParsed = $this->certificateCheckerService->parseCertificate(
                     $certificateSet[CertificateFileName::CERT_PEM->value]['content']
                 );
+                $caParsed = $caContentParsed;
+                $fingerprint = $caParsed['fingerprintSHA1'];
+
+                if (!is_string($fingerprint)) {
+                    unset($caParsed['fingerprintSHA1']);
+                } else {
+                    $caParsed['fingerprintSHA1'] = $fingerprint;
+                }
+
+                $certParsed = $certContentParsed;
+                $fingerprint = $certParsed['fingerprintSHA1'];
+
+                if (!is_string($fingerprint)) {
+                    unset($certParsed['fingerprintSHA1']);
+                } else {
+                    $certParsed['fingerprintSHA1'] = $fingerprint;
+                }
+
                 $this->certificateWriterUpdateService->updateFromParsedCertificates(
-                    $caContentParsed,
-                    $certContentParsed
+                    $caParsed,
+                    $certParsed
                 );
 
                 $process->setFreeradiusConfigAppliedAt(new DateTimeImmutable());

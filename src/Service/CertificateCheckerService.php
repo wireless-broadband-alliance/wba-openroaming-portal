@@ -80,7 +80,7 @@ readonly class CertificateCheckerService
      *     extensions: array<string, mixed>
      * }
      */
-    public function parseCertificate(string $pem): array
+    public function parseCertificate(bool|string|null $pem): array
     {
         $certResource = openssl_x509_read($pem);
         if (!$certResource) {
