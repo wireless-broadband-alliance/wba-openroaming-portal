@@ -39,7 +39,7 @@ class AdminUserFixture extends Fixture
 
         //Create OTP Code
         $otpCode = new OTPcode();
-        $otpCode->setCode(123456);
+        $otpCode->setCode("123456");
         $otpCode->setCreatedAt(new DateTime());
         $otpCode->setUser($admin);
         $otpCode->setActive(true);
