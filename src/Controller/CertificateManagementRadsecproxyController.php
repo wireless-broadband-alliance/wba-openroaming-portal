@@ -183,7 +183,25 @@ class CertificateManagementRadsecproxyController extends AbstractController
 
         // Fetch any data/settings needed for the page
         $data = $this->getSettings->getSettings();
-        $commands = $this->certificateRadsecproxyCommandsService->getRenewCommands($certificateSet);
+        /** @var array<int, array{name: string, content?: string}> $renewCertificateSet */
+        $renewCertificateSet = [];
+
+        foreach ($certificateSet as $certificate) {
+            $content = $certificate['content'] ?? null;
+
+            $entry = [
+                'name' => $certificate['name'],
+            ];
+
+            if (is_string($content)) {
+                $entry['content'] = $content;
+            }
+
+            $renewCertificateSet[] = $entry;
+        }
+
+        $commands = $this->certificateRadsecproxyCommandsService
+            ->getRenewCommands($renewCertificateSet);
 
         // Form handling
         $form = $this->createForm(SimpleSubmitFormType::class);
@@ -401,6 +419,13 @@ class CertificateManagementRadsecproxyController extends AbstractController
 
             // Extract peer certificate chain
             $trustedHashes = array_map(static fn($e) => strtolower($e->value), TrustedWBAFingerprints::cases());
+
+            if ($connection === false) {
+                throw new \RuntimeException(
+                    sprintf('TLS connection failed (%d): %s', $errno, $errstr)
+                );
+            }
+
             $params = stream_context_get_params($connection);
             $chain = $params['options']['ssl']['peer_certificate_chain'] ?? [];
 
