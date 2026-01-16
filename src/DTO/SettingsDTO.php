@@ -7,6 +7,9 @@ use App\Validator\Constraints as CustomAssert;
 
 class SettingsDTO
 {
+    /**
+     * @var list<string>
+     */
     #[Assert\NotBlank(message: 'fieldNotBlank')]
     #[Assert\All([
         new CustomAssert\IpOrCidr()
