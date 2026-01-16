@@ -15,17 +15,15 @@ use Doctrine\Common\Collections\Collection;
 #[Vich\Uploadable]
 class Certificate
 {
-    public $certificates;
-
     public function __construct()
     {
         $this->createdAt = new DateTimeImmutable();
-        $this->certificates = new ArrayCollection();
     }
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    /** @phpstan-ignore-next-line */
     private ?int $id = null;
 
     #[ORM\Column(length: 100)]
@@ -44,7 +42,14 @@ class Certificate
     #[Vich\UploadableField(mapping: 'certificate_files', fileNameProperty: 'filePath')]
     private ?File $file = null;
 
-    #[ORM\Column(nullable: true)]
+    /**
+     * @var array{
+     *   originalName: string,
+     *   mimeType: string|null,
+     *   size: int|null
+     * }|null
+     */
+    #[ORM\Column(type: 'json', nullable: true)]
     private ?array $metadata = null;
 
     #[ORM\Column(length: 128, nullable: true)]
@@ -121,11 +126,25 @@ class Certificate
         return $this;
     }
 
+    /**
+     * @return array{
+     *   originalName: string,
+     *   mimeType: string|null,
+     *   size: int|null
+     * }|null
+     */
     public function getMetadata(): ?array
     {
         return $this->metadata;
     }
 
+    /**
+     * @param array{
+     *   originalName: string,
+     *   mimeType: string|null,
+     *   size: int|null
+     * }|null $metadata
+     */
     public function setMetadata(?array $metadata): static
     {
         $this->metadata = $metadata;
@@ -184,28 +203,6 @@ class Certificate
     public function setUpdatedAt(?\DateTimeImmutable $updatedAt): static
     {
         $this->updatedAt = $updatedAt;
-        return $this;
-    }
-
-    public function getCertificates(): Collection
-    {
-        return $this->certificates;
-    }
-
-    public function addCertificate(Certificate $certificate): static
-    {
-        if (!$this->certificates->contains($certificate)) {
-            $this->certificates->add($certificate);
-            $certificate->setSetupProcess($this);
-        }
-        return $this;
-    }
-
-    public function removeCertificate(Certificate $certificate): static
-    {
-        if ($this->certificates->removeElement($certificate) && $certificate->getSetupProcess() === $this) {
-            $certificate->setSetupProcess(null);
-        }
         return $this;
     }
 
