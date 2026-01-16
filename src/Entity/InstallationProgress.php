@@ -13,6 +13,7 @@ class InstallationProgress
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    /** @phpstan-ignore-next-line */
     private ?int $id = null;
 
     #[ORM\Column(nullable: true, enumType: ProcessStatusType::class)]
@@ -24,8 +25,11 @@ class InstallationProgress
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $dbFreeradius = null;
 
+    /**
+     * @var string[]|null
+     */
     #[ORM\Column(type: Types::JSON, nullable: true)]
-    private ?array $trustedProxies = [];
+    private ?array $trustedProxies = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $turnstileKey = null;
@@ -94,11 +98,17 @@ class InstallationProgress
         return $this;
     }
 
+    /**
+     * @return string[]|null
+     */
     public function getTrustedProxies(): ?array
     {
         return $this->trustedProxies;
     }
 
+    /**
+     * @param string[]|null $trustedProxies
+     */
     public function setTrustedProxies(?array $trustedProxies): static
     {
         $this->trustedProxies = $trustedProxies;
