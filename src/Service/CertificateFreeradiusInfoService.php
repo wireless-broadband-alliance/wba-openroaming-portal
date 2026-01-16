@@ -31,7 +31,7 @@ readonly class CertificateFreeradiusInfoService
     {
         // Filter only FREERADIUS certs
         $freeradiusCerts = $process->getCertificates()->filter(
-            fn(Certificate $c) => str_contains((string) $c->getType(), CertificateMachineType::FREERADIUS->value)
+            fn(Certificate $c) => str_contains((string)$c->getType(), CertificateMachineType::FREERADIUS->value)
         );
 
         if ($freeradiusCerts->isEmpty()) {
@@ -96,30 +96,33 @@ readonly class CertificateFreeradiusInfoService
         ];
     }
 
-    public function isEvCertificate(bool|string $certificateContent): bool
+    public function isEvCertificate(string|bool $certificateContent): bool
     {
+        if (!is_string($certificateContent) || $certificateContent === '') {
+            return false;
+        }
+
         $cert = @openssl_x509_read($certificateContent);
-        if (!$cert) {
+        if ($cert === false) {
             return false;
         }
 
         $details = openssl_x509_parse($cert);
-        if (!$details) {
+        if ($details === false) {
             return false;
         }
 
         // EV OID
         $evOids = ['2.23.140.1.1'];
 
-        if (!empty($details['extensions']['certificatePolicies'])) {
-            $policies = (array) $details['extensions']['certificatePolicies'];
+        $policies = $details['extensions']['certificatePolicies'] ?? null;
+        if ($policies === null) {
+            return false;
+        }
 
-            foreach ($policies as $policy) {
-                foreach ($evOids as $oid) {
-                    if (str_contains((string) $policy, $oid)) {
-                        return true;
-                    }
-                }
+        foreach ((array)$policies as $policy) {
+            if (array_any($evOids, fn($oid) => str_contains((string)$policy, $oid))) {
+                return true;
             }
         }
 
