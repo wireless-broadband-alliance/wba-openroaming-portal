@@ -165,10 +165,6 @@
                             {{ include('dashboard/shared/_sidebar_item.html.twig', {label: 'SMSConfiguration'|trans({}, '_header_admin'), route: 'admin_dashboard_settings_sms', icon: 'wba:sms'}) }}
                         {% endif %}
 
-                        {% if is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::SMS_CONFIG_READ')) %}
-                            {{ include('dashboard/shared/_sidebar_item.html.twig', {label: 'SMSConfiguration'|trans({}, '_header_admin'), route: 'admin_dashboard_settings_sms', icon: 'wba:sms'}) }}
-                        {% endif %}
-
                         {% if constant('App\\Enum\\AdminRoleType::ROLE_SUPER_ADMIN').value in app.user.roles %}
                             {{ include('dashboard/shared/_sidebar_item.html.twig', {label: 'domainBlacklist'|trans({}, '_header_admin'), route: 'admin_dashboard_settings_domains', icon: 'wba:file-cross'}) }}
                         {% endif %}
