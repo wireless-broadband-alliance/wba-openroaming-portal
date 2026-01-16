@@ -23,6 +23,10 @@ use Symfony\Component\Validator\Constraints\NotBlank;
 )]
 class CertificateFreeradiusUploadManualDTO
 {
+    /**
+     * Notices/Warnings generated during the upload
+     * @var list<string>
+     */
     public array $notices = [];
 
     #[NotBlank(message: 'nullCA')]
