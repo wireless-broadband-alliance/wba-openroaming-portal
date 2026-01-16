@@ -14,9 +14,9 @@ readonly class CertificateCheckerService
     ) {
     }
 
-  /**
-   * @throws Exception
-   */
+    /**
+     * @throws Exception
+     */
     public function getCertificateExpirationDate(string $certificatePath): ?string
     {
         if (!file_exists($certificatePath)) {
@@ -43,11 +43,11 @@ readonly class CertificateCheckerService
         return date('Y-m-d H:i:s', $certInfo['validTo_time_t']);
     }
 
-  /**
-   * Verify presence of required certificate files.
-   *
-   * @return string[] List of missing filenames
-   */
+    /**
+     * Verify presence of required certificate files.
+     *
+     * @return string[] List of missing filenames
+     */
     public function verifyCertificates(): array
     {
         $missingFiles = [];
@@ -75,32 +75,39 @@ readonly class CertificateCheckerService
      *     issuer: array<string, mixed>,
      *     validFrom: string|null,
      *     validTo: string|null,
-     *     fingerprintSHA1: string|bool,
-     *     fingerprintSHA256: string|bool,
+     *     fingerprintSHA1: string|false,
+     *     fingerprintSHA256: string|false,
      *     extensions: array<string, mixed>
      * }
      */
     public function parseCertificate(bool|string|null $pem): array
     {
+        if (!is_string($pem) || $pem === '') {
+            throw new RuntimeException('Invalid PEM certificate');
+        }
+
         $certResource = openssl_x509_read($pem);
-        if (!$certResource) {
+        if ($certResource === false) {
             throw new RuntimeException('Invalid PEM certificate');
         }
 
         $parsed = openssl_x509_parse($certResource);
-        if (!$parsed) {
+        if ($parsed === false) {
             throw new RuntimeException('Unable to parse certificate');
         }
 
-      // Extract fingerprint, validity, CN, issuer, SANs, etc.
         return [
-        'subject' => $parsed['subject'] ?? [],
-        'issuer' => $parsed['issuer'] ?? [],
-        'validFrom' => isset($parsed['validFrom_time_t']) ? date('c', $parsed['validFrom_time_t']) : null,
-        'validTo' => isset($parsed['validTo_time_t']) ? date('c', $parsed['validTo_time_t']) : null,
-        'fingerprintSHA1' => openssl_x509_fingerprint($certResource, 'sha1'),
-        'fingerprintSHA256' => openssl_x509_fingerprint($certResource, 'sha256'),
-        'extensions' => $parsed['extensions'] ?? [],
+            'subject' => $parsed['subject'] ?? [],
+            'issuer' => $parsed['issuer'] ?? [],
+            'validFrom' => isset($parsed['validFrom_time_t'])
+                ? date('c', $parsed['validFrom_time_t'])
+                : null,
+            'validTo' => isset($parsed['validTo_time_t'])
+                ? date('c', $parsed['validTo_time_t'])
+                : null,
+            'fingerprintSHA1' => openssl_x509_fingerprint($certResource, 'sha1'),
+            'fingerprintSHA256' => openssl_x509_fingerprint($certResource, 'sha256'),
+            'extensions' => $parsed['extensions'] ?? [],
         ];
     }
 }
