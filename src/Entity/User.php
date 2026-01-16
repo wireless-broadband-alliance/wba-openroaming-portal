@@ -41,8 +41,6 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
     #[ORM\Column(type: 'json')]
     private array $permissions = [];
 
-
-
     #[ORM\Column]
     private ?string $password = null;
 
@@ -265,11 +263,17 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
         return $this;
     }
 
+    /**
+     * @return string[]
+     */
     public function getPermissions(): array
     {
         return $this->permissions;
     }
 
+    /**
+     * @param string[] $permissions
+     */
     public function setPermissions(array $permissions): void
     {
         $this->permissions = $permissions;
