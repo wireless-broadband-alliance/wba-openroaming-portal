@@ -35,16 +35,20 @@ class UserUpdateDTO
     public bool $isVerified = false;
     public bool $banned = false;
 
-  /** ID of the user being edited */
+    /** ID of the user being edited */
     public ?int $editingUserId = null;
 
-  /** ID of the currently logged-in user */
+    /** ID of the currently logged-in user */
     public ?int $currentUserId = null;
 
-  /** Roles of the user being edited */
+    /** Roles of the user being edited
+     *
+     * @var array<string>|null
+     *
+     * */
     public ?array $roles = null;
 
-  /** Used by the form */
+    /** Used by the form */
     public bool $editingAdmin = false;
 
     public PermissionLevel $userManagement = PermissionLevel::NONE;
@@ -63,7 +67,7 @@ class UserUpdateDTO
 
     public function __construct(?User $user = null)
     {
-        if (!$user instanceof \App\Entity\User) {
+        if (!$user instanceof User) {
             return;
         }
 
@@ -75,7 +79,7 @@ class UserUpdateDTO
         $this->isVerified = $user->isVerified();
         $this->banned = $user->getBannedAt() instanceof DateTimeInterface;
 
-      // Load existing permissions into PermissionLevel fields
+        // Load existing permissions into PermissionLevel fields
         foreach ($user->getPermissions() as $permission) {
             $this->hydratePermission($permission);
         }
@@ -119,7 +123,7 @@ class UserUpdateDTO
 
     public function blockBanSuperAdmin(): bool
     {
-      // Current user cannot ban themselves
+        // Current user cannot ban themselves
         if ($this->editingUserId === $this->currentUserId) {
             return false;
         }
@@ -127,6 +131,9 @@ class UserUpdateDTO
         return !in_array(AdminRoleType::ROLE_SUPER_ADMIN->value, $this->roles ?? [], true);
     }
 
+    /**
+     * @return array<AdminPermissionsType>
+     */
     private function getAdminPermissions(): array
     {
         $permissions = [];
@@ -143,19 +150,22 @@ class UserUpdateDTO
         return $permissions;
     }
 
+    /**
+     * @return array<string, string>
+     */
     private const array PERMISSION_MAPPING = [
-      'userManagement' => 'USERS_MANAGEMENT',
-      'platformStatus' => 'PLATFORM_STATUS',
-      'landingPageConfig' => 'LANDING_PAGE_CONFIG',
-      'userEngagement' => 'USER_ENGAGEMENT',
-      'termsPolicies' => 'TERMS_POLICIES',
-      'cronSchedule' => 'CRON_SCHEDULE',
-      'authenticationMethods' => 'AUTHENTICATION_METHODS',
-      'twoFactorAuth' => 'TWO_FACTOR_AUTH',
-      'ldapSynchronization' => 'LDAP_SYNCHRONIZATION',
-      'radiusProfileConfig' => 'RADIUS_PROFILE_CONFIG',
-      'smsConfig' => 'SMS_CONFIG',
-      'portalStatistics' => 'PORTAL_STATISTICS',
-      'connectivityStatistics' => 'CONNECTIVITY_STATISTICS',
+        'userManagement' => 'USERS_MANAGEMENT',
+        'platformStatus' => 'PLATFORM_STATUS',
+        'landingPageConfig' => 'LANDING_PAGE_CONFIG',
+        'userEngagement' => 'USER_ENGAGEMENT',
+        'termsPolicies' => 'TERMS_POLICIES',
+        'cronSchedule' => 'CRON_SCHEDULE',
+        'authenticationMethods' => 'AUTHENTICATION_METHODS',
+        'twoFactorAuth' => 'TWO_FACTOR_AUTH',
+        'ldapSynchronization' => 'LDAP_SYNCHRONIZATION',
+        'radiusProfileConfig' => 'RADIUS_PROFILE_CONFIG',
+        'smsConfig' => 'SMS_CONFIG',
+        'portalStatistics' => 'PORTAL_STATISTICS',
+        'connectivityStatistics' => 'CONNECTIVITY_STATISTICS',
     ];
 }
