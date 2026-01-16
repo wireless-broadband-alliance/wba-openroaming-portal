@@ -54,7 +54,6 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
 class SecurityController extends AbstractController
 {
-    public $session;
     /**
      * SiteController constructor.
      * @param UserRepository $userRepository The repository for accessing user data.
@@ -517,10 +516,10 @@ class SecurityController extends AbstractController
         $userExternalAuths = $this->userExternalAuthRepository->findBy(['user' => $user]);
 
         // Check if the user is already verified
-        $this->requestStack->getSession();
+        $session = $this->requestStack->getSession();
         if (
             $userExternalAuths[0]->getProvider() !== UserProvider::PORTAL_ACCOUNT->value ||
-            $this->session->has('session_verified')
+            $session->has('session_verified')
         ) {
             return $this->redirectToRoute('app_landing');
         }
@@ -539,7 +538,7 @@ class SecurityController extends AbstractController
                 $user->setForgotPasswordRequest(false);
                 $this->entityManager->persist($user);
                 $this->entityManager->flush();
-                $this->session->set('session_verified', true);
+                $session->set('session_verified', true);
 
                 return $this->redirectToRoute('app_landing');
             }
@@ -583,7 +582,7 @@ class SecurityController extends AbstractController
 
                 if (!$user->isVerified()) {
                     $user->setIsVerified(true);
-                    $this->session->set('session_verified', true);
+                    $session->set('session_verified', true);
                 }
 
                 $user->setTwoFAcodeIsActive(false);
@@ -593,7 +592,7 @@ class SecurityController extends AbstractController
                     $user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::EMAIL->value ||
                     $user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::SMS->value
                 ) {
-                    $this->session->set('2fa_verified_' . FirewallType::LANDING->value, true);
+                    $session->set('2fa_verified_' . FirewallType::LANDING->value, true);
                 }
 
                 // Defines the Event to the table
