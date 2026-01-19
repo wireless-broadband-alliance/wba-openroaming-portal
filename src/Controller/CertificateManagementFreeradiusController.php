@@ -366,7 +366,7 @@ class CertificateManagementFreeradiusController extends AbstractController
         try {
             // Generate certificates (simulated or real)
             // For debug add true on the end for simulation
-            $generatedFiles = $this->certificateFreeradiusGenerator->run($domain, $user, true);
+            $generatedFiles = $this->certificateFreeradiusGenerator->run($domain, $user);
             $isSimulation = true; // Add this tag for simulation flag
 
             foreach ($generatedFiles as $filepath) {

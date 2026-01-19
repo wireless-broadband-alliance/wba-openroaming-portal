@@ -43,31 +43,35 @@ readonly class InstallationListener
         if ($user && $user->getEmail() === DefaultUser::ADMIN->value) {
             return;
         }
-        if ($user && str_starts_with($path, '/dashboard/settings/certificatesManagement/installation')) {
-            if (!$session->get(SessionStatus::INSTALLATION_VERIFICATION->value)) {
-                $url = $this->router->generate('admin_dashboard_settings_certs_installation_verify_send_code', [
-                    'type' => InstallationType::INSTALLATION->value
-                ]);
-                $event->setResponse(new RedirectResponse($url));
+
+        if (!$session->get(SessionStatus::SYSTEM_RESET_REQUEST->value)) {
+            if ($user && str_starts_with($path, '/dashboard/settings/certificatesManagement/installation')) {
+                if (!$session->get(SessionStatus::INSTALLATION_VERIFICATION->value)) {
+                    $url = $this->router->generate('admin_dashboard_settings_certs_installation_verify_send_code', [
+                        'type' => InstallationType::INSTALLATION->value
+                    ]);
+                    $event->setResponse(new RedirectResponse($url));
+                }
+                return;
             }
-            return;
-        }
-        if (
-            $user &&
-            (
-                str_starts_with($path, '/dashboard/settings/certificatesManagement/freeradius/') ||
-                str_starts_with($path, '/dashboard/settings/certificatesManagement/radsecproxy/') ||
-                str_starts_with($path, '/dashboard/settings/certificatesManagement/certificates/')
-            )
-        ) {
-            if (!$session->get(SessionStatus::CERTIFICATE_VERIFICATION->value)) {
-                $url = $this->router->generate('admin_dashboard_settings_certs_installation_verify_send_code', [
-                    'type' => InstallationType::CERTIFICATES->value,
-                ]);
-                $event->setResponse(new RedirectResponse($url));
+            if (
+                $user &&
+                (
+                    str_starts_with($path, '/dashboard/settings/certificatesManagement/freeradius/') ||
+                    str_starts_with($path, '/dashboard/settings/certificatesManagement/radsecproxy/') ||
+                    str_starts_with($path, '/dashboard/settings/certificatesManagement/certificates/')
+                )
+            ) {
+                if (!$session->get(SessionStatus::CERTIFICATE_VERIFICATION->value)) {
+                    $url = $this->router->generate('admin_dashboard_settings_certs_installation_verify_send_code', [
+                        'type' => InstallationType::CERTIFICATES->value,
+                    ]);
+                    $event->setResponse(new RedirectResponse($url));
+                }
+                return;
             }
-            return;
         }
+
         if ($session->get(SessionStatus::INSTALLATION_VERIFICATION->value)) {
             $session->set(SessionStatus::INSTALLATION_VERIFICATION->value, false);
         }
