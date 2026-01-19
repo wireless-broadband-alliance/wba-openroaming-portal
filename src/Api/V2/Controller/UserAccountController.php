@@ -51,7 +51,7 @@ class UserAccountController extends AbstractController
      * @throws Error
      * @throws JsonException
      */
-    #[Route('/userAccount/deletion', name: 'api_v2_user_account_deletion', methods: ['DELETE'])]
+    #[Route('/userAccount/deletion', name: 'api_v2_user_account_deletion', methods: ['POST'])]
     public function userAccountDeletion(Request $request, Auth $samlAuth): JsonResponse
     {
         $token = $this->tokenStorage->getToken();
@@ -232,7 +232,7 @@ class UserAccountController extends AbstractController
                     if (is_array($token) && $token['success'] === false) {
                         $errorMessage = $token['error'] ?? 'Unknown error';
                         $statusCode =
-                            $errorMessage === 'Invalid user provided. Please verify the user data.' ? 400 : 500;
+                            $errorMessage === 'Invalid user provided. Verify the user data.' ? 400 : 500;
 
                         return new BaseResponse($statusCode, null, $errorMessage)->toResponse();
                     }
@@ -275,7 +275,7 @@ class UserAccountController extends AbstractController
                     if (is_array($token) && $token['success'] === false) {
                         $errorMessage = $token['error'] ?? 'Unknown error';
                         $statusCode =
-                            $errorMessage === 'Invalid user provided. Please verify the user data.' ? 400 : 500;
+                            $errorMessage === 'Invalid user provided. Verify the user data.' ? 400 : 500;
 
                         return new BaseResponse($statusCode, null, $errorMessage)->toResponse();
                     }

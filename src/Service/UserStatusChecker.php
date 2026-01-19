@@ -2,10 +2,10 @@
 
 namespace App\Service;
 
-use App\Api\V1\BaseResponse;
+use App\Api\V1\BaseResponse as BaseResponseV1;
 use App\Api\V2\BaseResponse as BaseResponseV2;
+use App\Api\V3\BaseResponse as BaseResponseV3;
 use App\Entity\User;
-use App\Enum\ApiVersion;
 use App\Enum\SettingName;
 use App\Enum\UserProvider;
 use App\Repository\SettingRepository;
@@ -24,69 +24,36 @@ readonly class UserStatusChecker
     }
 
     public function checkUserStatus(
-        User $user,
-        string $APIVersion = ApiVersion::API_V1->value
-    ): BaseResponse|BaseResponseV2|null {
-        if ($APIVersion === ApiVersion::API_V1->value) {
-            if (!$user->isVerified()) {
-                return new BaseResponse(
-                    401,
-                    null,
-                    'User account is not verified.'
-                );
-            }
-
-            if ($user->getBannedAt() instanceof DateTimeInterface) {
-                return
-                    new BaseResponse(
-                        403,
-                        null,
-                        'User account is banned from the system.'
-                    );
-            }
-
-            // Checks if the user has a "forgot_password_request", if yes, send an error with the authentication
-            if ($this->userRepository->findOneBy(['id' => $user->getId(), 'forgot_password_request' => true])) {
-                return
-                    new BaseResponse(
-                        403,
-                        null,
-                        'Your request cannot be processed at this time due to a pending action.' .
-                        ' If your account is active, re-login to complete the action.'
-                    );
-            }
-
-            return null;
-        } else {
-            if (!$user->isVerified()) {
-                return new BaseResponseV2(
-                    401,
-                    null,
-                    'User account is not verified.'
-                );
-            }
-
-            if ($user->getBannedAt() instanceof DateTimeInterface) {
-                return
-                    new BaseResponseV2(
-                        403,
-                        null,
-                        'User account is banned from the system.'
-                    );
-            }
-
-            // Checks if the user has a "forgot_password_request", if yes, send an error with the authentication
-            if ($this->userRepository->findOneBy(['id' => $user->getId(), 'forgot_password_request' => true])) {
-                return
-                    new BaseResponseV2(
-                        403,
-                        null,
-                        'Your request cannot be processed at this time due to a pending action.' .
-                        ' If your account is active, re-login to complete the action.'
-                    );
-            }
-            return null;
+        User $user
+    ): BaseResponseV1|BaseResponseV2|BaseResponseV3|null {
+        if (!$user->isVerified()) {
+            return new BaseResponseV3(
+                401,
+                null,
+                'User account is not verified.'
+            );
         }
+
+        if ($user->getBannedAt() instanceof DateTimeInterface) {
+            return
+                new BaseResponseV3(
+                    403,
+                    null,
+                    'User account is banned from the system.'
+                );
+        }
+
+        // Checks if the user has a "forgot_password_request", if yes, send an error with the authentication
+        if ($this->userRepository->findOneBy(['id' => $user->getId(), 'forgot_password_request' => true])) {
+            return
+                new BaseResponseV3(
+                    403,
+                    null,
+                    'Your request cannot be processed at this time due to a pending action.' .
+                    ' If your account is active, re-login to complete the action.'
+                );
+        }
+        return null;
     }
 
     public function portalAccountType(User $user): false|string

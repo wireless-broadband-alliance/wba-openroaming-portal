@@ -72,10 +72,17 @@ improve user authentication and management processes, with integrated CAPTCHA va
     - This content is specifically designed for use in the public Android Turnstile functionality.
     - Includes placeholder elements for Android-specific app setup.
 
-## Two-Factor Authentication Code Request
+## Two-Factor Authentication
 
-- **Retrieves the Current User Two-Factor Authentication Code**
-  - Returns a 2FA code depending on the user account type (SMS/EMAIL) only for portal accounts.
+* **Two-Factor Authentication code request**
+
+    * Requests a new 2FA code or TOTP secret for portal accounts.
+    * Supports Email, SMS, and TOTP authentication methods.
+
+* **Two-Factor Authentication code validation**
+
+    * Validates the submitted 2FA code (Email, SMS, or TOTP).
+    * Enables the selected two-factor authentication method for the user.
   
 ## User
 

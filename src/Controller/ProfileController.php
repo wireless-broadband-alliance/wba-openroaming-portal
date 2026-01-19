@@ -46,7 +46,10 @@ class ProfileController extends AbstractController
         private readonly UserExternalAuthRepository $userExternalAuthRepository,
         private readonly ExpirationProfileService $expirationProfileService,
         private readonly TwoFAService $twoFAService,
-        private readonly TranslatorInterface $translator
+        private readonly TranslatorInterface $translator,
+        private readonly RadiusUserRepository $radiusUserRepository,
+        private readonly UserRadiusProfileRepository $radiusProfileRepository,
+        private readonly UrlGeneratorInterface $urlGenerator
     ) {
     }
 
@@ -56,8 +59,6 @@ class ProfileController extends AbstractController
     #[Route('/profile/android', name: 'profile_android')]
     #[IsGranted("ROLE_USER")]
     public function profileAndroid(
-        RadiusUserRepository $radiusUserRepository,
-        UserRadiusProfileRepository $radiusProfileRepository,
         Request $request
     ): Response {
         if (!file_exists('/var/www/openroaming/signing-keys/ca.pem')) {
@@ -85,8 +86,8 @@ class ProfileController extends AbstractController
 
         $radiusUser = $this->createOrUpdateRadiusUser(
             $user,
-            $radiusUserRepository,
-            $radiusProfileRepository,
+            $this->radiusUserRepository,
+            $this->radiusProfileRepository,
             $this->settingRepository->findOneBy(['name' => SettingName::RADIUS_REALM_NAME->value])->getValue()
         );
 
@@ -174,8 +175,6 @@ class ProfileController extends AbstractController
     #[Route('/profile/ios.mobileconfig', name: 'profile_ios')]
     #[IsGranted("ROLE_USER")]
     public function profileIos(
-        RadiusUserRepository $radiusUserRepository,
-        UserRadiusProfileRepository $radiusProfileRepository,
         Request $request
     ): Response {
         /** @var User $user */
@@ -198,8 +197,8 @@ class ProfileController extends AbstractController
 
         $radiusUser = $this->createOrUpdateRadiusUser(
             $user,
-            $radiusUserRepository,
-            $radiusProfileRepository,
+            $this->radiusUserRepository,
+            $this->radiusProfileRepository,
             $this->settingRepository->findOneBy(['name' => SettingName::RADIUS_REALM_NAME->value])->getValue()
         );
 
@@ -331,9 +330,6 @@ class ProfileController extends AbstractController
     #[Route('/profile/windows', name: 'profile_windows')]
     #[IsGranted("ROLE_USER")]
     public function profileWindows(
-        RadiusUserRepository $radiusUserRepository,
-        UrlGeneratorInterface $urlGenerator,
-        UserRadiusProfileRepository $radiusProfileRepository,
         Request $request
     ): Response {
         /** @var User $user */
@@ -354,8 +350,8 @@ class ProfileController extends AbstractController
 
         $radiusUser = $this->createOrUpdateRadiusUser(
             $user,
-            $radiusUserRepository,
-            $radiusProfileRepository,
+            $this->radiusUserRepository,
+            $this->radiusProfileRepository,
             $this->settingRepository->findOneBy(['name' => SettingName::RADIUS_REALM_NAME->value])->getValue()
         );
         $profile = file_get_contents('../profile_templates/windows/template.xml');
@@ -439,7 +435,7 @@ class ProfileController extends AbstractController
         );
 
         return $this->redirect(
-            'ms-settings:wifi-provisioning?uri=' . $urlGenerator->generate(
+            'ms-settings:wifi-provisioning?uri=' . $this->urlGenerator->generate(
                 'profile_windows_serve',
                 ['uuid' => $uuid],
                 UrlGeneratorInterface::ABSOLUTE_URL

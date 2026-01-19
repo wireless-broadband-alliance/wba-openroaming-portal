@@ -3,17 +3,18 @@
 # Release V1.9.0
 
 - Increased the level of php-stan to the max level, for more fixes with security updates.
+- New endpoint for API V2 only - New endpoint for jwt token refresh for apps.
 - Profile download instructions page.
 - New page dedicated for profile download steps and prepared for both translations implemented on the project.
 - Added new screenshots for each case (PT/EN) and for each operating system.
 - Landing page UI rework for authenticated users.
 - Improve landing page by centralizing the display content for better notice and for mobile user focused.
 - Installation of a new text editor open-source alternative for free commercial use.
-  - Remove TinyMice text editor bundle from the project because it's not valid for commercial use.
-  - Fix and rework customization page to also have this custom editor for (page_tile, page_description &
-    additional_label).
+    - Remove TinyMice text editor bundle from the project because it's not valid for commercial use.
+    - Fix and rework customization page to also have this custom editor for (page_tile, page_description &
+      additional_label).
 - New checker on the `GetSettings` service to also verify if there is any missing or duplicated setting on the DB.
-  - More Project optimizations reduce the amount of number of queries made in most of the pages.
+    - More Project optimizations reduce the amount of number of queries made in most of the pages.
 - Password toggle reveal implementation for inputs.
 - New UI design for email templates.
 - Responsive Translations (Available: EN & PT-PT) - Administrator can just add new configurations for YAML
@@ -28,7 +29,7 @@
   for new users account creation.
 - Rework landing/dashboard authentications because of the new feature - DTO Implementation to improve code optimization
   and add a new login method selector emails || phoneNumber authentication.
-  - Fix minor bugs & conflicts with the new DTO and authentication form.
+    - Fix minor bugs & conflicts with the new DTO and authentication form.
 - Add a new eventSubscriber to avoid the admin of hard changing the DB value `USER_VERIFICATION` setting to `OFF`, when
   the `PLATFORM_MODE` setting is `ON`.
     - When that happens, it could brake the user account registration system for email & phoneNumbers on the landing
@@ -46,7 +47,7 @@
 - New command for freeradius profile connection of each user, now the `UserRadiusProfile` entity saves the start/end
   connection of the user profiles when the freeradius server gets a new request. (For later graphics generations and
   user details)
-  - This new command is configurable on the page `dashboard/settings/schedule` because he is also cron based.
+    - This new command is configurable on the page `dashboard/settings/schedule` because he is also cron based.
 - New bundle installed `composer require symfony/lock` required for the command next execution only start when the
   current active ends.
 - Symfony version increase for maintained version (7.3.3), it bug fixes and security fixes until January 2026.
@@ -59,7 +60,31 @@
       ```bash
       php bin/console doctrine:migrations:migrate
       ```
-      
+
+## API Deprecation Notice
+
+### Deprecation of API v1 and v2
+
+As part of our ongoing improvements and rework of the API endpoints, **API v1 and v2 are now officially deprecated**.
+These versions will no longer receive updates, and clients are strongly encouraged to migrate to **API v3**.
+
+* **Release of deprecation:** ⚠️⚠️⚠️⚠️ date of release ⚠️⚠️⚠️⚠️⚠️⚠️
+* **Grace period:** v1 and v2 will continue to function temporarily, but **all users must migrate within 6 months from
+  the next update release**.
+
+
+### Recommended Action
+
+* Review your current integration with API v1/v2.
+* Update your calls to use the new v3 endpoints.
+* Ensure that any authentication, payload structure, or request/response handling matches the v3 specification.
+
+### Important
+
+Please follow the steps outlined in [UPGRADE.md](docs/UPGRADE.md) and review the **changelog** to ensure a smooth
+transition.  
+Failure to migrate before the end of the grace period may result in **loss of access to deprecated endpoints**.
+
 # Release V1.8.1
 
 - Removed duplicated field relative to the user account verification (Account Verification & User
@@ -87,7 +112,7 @@ php bin/console doctrine:migrations:migrate
 - Rework Automation commands to use an official symfony bundle of automation commands.
 
 > **Note**: If you are using automated CRON's from our previous guide, it's recommended you use the official symfony
-> bundle from this release. For reference, the command that takes care of the operation inside of the container web is
+> bundle from this release. For reference, the command that takes care of the operation inside the container web is
 > this one:
 
 ```

@@ -25,8 +25,8 @@ use Psr\EventDispatcher\EventDispatcherInterface;
 use Random\RandomException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
@@ -60,7 +60,10 @@ class RegistrationController extends AbstractController
         private readonly EmailGenerator $emailGenerator,
         private readonly UserCreationService $userCreationService,
         private readonly TranslatorInterface $translator,
-        private readonly MagicLinkService $magicLinkService
+        private readonly MagicLinkService $magicLinkService,
+        private readonly UserPasswordHasherInterface $userPasswordHasher,
+        private readonly RequestStack $requestStack,
+        private readonly EventDispatcherInterface $eventDispatcher
     ) {
     }
 
@@ -75,7 +78,6 @@ class RegistrationController extends AbstractController
     #[Route('/register', name: 'app_register')]
     public function register(
         Request $request,
-        UserPasswordHasherInterface $userPasswordHasher,
     ): Response {
         // Call the getSettings method of GetSettings class to retrieve the data
         /** @var array<string, array{value: string, description: string}> $data */
@@ -137,7 +139,7 @@ class RegistrationController extends AbstractController
                 $randomPassword = bin2hex(random_bytes(4));
 
                 // Hash the password
-                $hashedPassword = $userPasswordHasher->hashPassword($user, $randomPassword);
+                $hashedPassword = $this->userPasswordHasher->hashPassword($user, $randomPassword);
 
                 $user = $this->userCreationService->setEmail($form->get('email')->getData(), $user);
                 $user = $this->userCreationService->createUser(
@@ -180,8 +182,6 @@ class RegistrationController extends AbstractController
     #[Route('/register/sms', name: 'app_register_sms')]
     public function registerSMS(
         Request $request,
-        UserPasswordHasherInterface $userPasswordHasher,
-        SessionInterface $session
     ): Response {
         // Call the getSettings method of GetSettings class to retrieve the data
         /** @var array<string, array{value: string, description: string}> $data */
@@ -243,7 +243,7 @@ class RegistrationController extends AbstractController
                 $randomPassword = bin2hex(random_bytes(4));
 
                 // Hash the password
-                $hashedPassword = $userPasswordHasher->hashPassword($user, $randomPassword);
+                $hashedPassword = $this->userPasswordHasher->hashPassword($user, $randomPassword);
 
                 $user = $this->userCreationService->setPhoneNumber($user);
                 $user = $this->userCreationService->createUser(
@@ -271,6 +271,7 @@ class RegistrationController extends AbstractController
                 $this->tokenStorage->setToken($token);
 
                 // Store the authentication token in the session
+                $session = $this->requestStack->getSession();
                 $session->set('_security_main', serialize($token));
 
                 // Redirect the user after successful registration
@@ -293,16 +294,13 @@ class RegistrationController extends AbstractController
     #[Route('/login/link', name: 'app_confirm_account')]
     public function confirmAccount(
         Request $request,
-        UserRepository $userRepository,
-        TokenStorageInterface $tokenStorage,
-        EventDispatcherInterface $eventDispatcher,
     ): Response {
         // Get the email and verification code from the URL query parameters
         $uuid = $request->query->get('uuid');
         $verificationCode = $request->query->get('twoFaCode');
 
         // Get the user with the matching email, excluding admin users
-        $user = $userRepository->findOneByUUIDExcludingAdmin($uuid);
+        $user = $this->userRepository->findOneByUUIDExcludingAdmin($uuid);
 
         // Check if the user has been previously verified
         if ($user && $user->isVerified() && !$user->isForgotPasswordRequest()) {
@@ -334,16 +332,16 @@ class RegistrationController extends AbstractController
                 $token = new UsernamePasswordToken($user, 'main', $user->getRoles());
 
                 // Set the token in the token storage
-                $tokenStorage->setToken($token);
+                $this->tokenStorage->setToken($token);
 
                 // Dispatch the login event
                 $event = new InteractiveLoginEvent($request, $token);
-                $eventDispatcher->dispatch($event);
+                $this->eventDispatcher->dispatch($event);
 
                 // Update the verified status and save the user
                 $user->setIsVerified(true);
-                $userRepository->save($user, true);
-                $session = $request->getSession();
+                $this->userRepository->save($user, true);
+                $session = $this->requestStack->getSession();
                 $session->set('session_verified', true);
 
                 // Defines the Event to the table

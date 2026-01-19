@@ -1,0 +1,677 @@
+<?php
+
+namespace App\Api\V3\Controller;
+
+use App\Api\V3\BaseResponse;
+use App\Controller\GoogleController;
+use App\Controller\MicrosoftController;
+use App\Entity\Event;
+use App\Entity\User;
+use App\Entity\UserExternalAuth;
+use App\Enum\AnalyticalEventType;
+use App\Enum\OperationMode;
+use App\Enum\SettingName;
+use App\Enum\SMSResponse;
+use App\Enum\UserProvider;
+use App\Enum\UserTwoFactorAuthenticationStatus;
+use App\Repository\SettingRepository;
+use App\Repository\UserRepository;
+use App\Service\AuthAPIResponseService;
+use App\Service\CaptchaValidator;
+use App\Service\EmailGenerator;
+use App\Service\EventActions;
+use App\Service\JWTTokenGenerator;
+use App\Service\MagicLinkService;
+use App\Service\SamlResolverService;
+use App\Service\SendSMS;
+use App\Service\TOTPService;
+use App\Service\TwoFAAPIService;
+use App\Service\TwoFAService;
+use App\Service\UserStatusChecker;
+use DateTime;
+use Doctrine\ORM\EntityManagerInterface;
+use Exception;
+use JsonException;
+use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
+use OneLogin\Saml2\Auth;
+use RuntimeException;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
+
+class AuthController extends AbstractController
+{
+    public function __construct(
+        private readonly UserRepository $userRepository,
+        private readonly UserPasswordHasherInterface $passwordHasher,
+        private readonly jwtTokenGenerator $tokenGenerator,
+        private readonly CaptchaValidator $captchaValidator,
+        private readonly EntityManagerInterface $entityManager,
+        private readonly GoogleController $googleController,
+        private readonly MicrosoftController $microsoftController,
+        private readonly SamlResolverService $samlResolverService,
+        private readonly UserStatusChecker $userStatusChecker,
+        private readonly EventActions $eventActions,
+        private readonly SettingRepository $settingRepository,
+        private readonly MagicLinkService $magicLinkService,
+        private readonly SendSMS $sendSMS,
+        private readonly EmailGenerator $emailGenerator,
+        private readonly AuthAPIResponseService $authAPIResponseService,
+        private readonly TwoFAAPIService $twoFAAPIService,
+        private readonly TwoFAService $twoFAService,
+        private readonly TOTPService $TOTPService
+    ) {
+    }
+
+    /**
+     * @throws ClientExceptionInterface
+     * @throws RedirectionExceptionInterface
+     * @throws ServerExceptionInterface
+     * @throws Exception
+     * @throws TransportExceptionInterface
+     * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
+     */
+    #[Route('/auth/local', name: 'api_v3_auth_local', methods: ['POST'])]
+    public function authLocal(Request $request): JsonResponse
+    {
+        try {
+            $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
+        } catch (JsonException) {
+            return new BaseResponse(400, null, 'Invalid JSON format')->toResponse(); # Bad Request Response
+        }
+
+        $turnstileSetting = $this->settingRepository->findOneBy([
+            'name' => SettingName::TURNSTILE_CHECKER->value
+        ])->getValue();
+        if (!$turnstileSetting) {
+            throw new RuntimeException('Missing settings: TURNSTILE_CHECKER not found');
+        }
+
+        if ($turnstileSetting === OperationMode::ON->value) {
+            if (!isset($data['turnstile_token'])) {
+                return new BaseResponse(
+                    400,
+                    null,
+                    'CAPTCHA validation failed'
+                )->toResponse(); # Bad Request Response
+            }
+
+            $turnstileValidation = $this->captchaValidator->validate(
+                $data['turnstile_token'],
+                $request->getClientIp()
+            );
+
+            if (!$turnstileValidation['success']) {
+                $errorMessage = $turnstileValidation['error'] ?? 'CAPTCHA validation failed';
+
+                return new BaseResponse(400, null, $errorMessage)->toResponse();
+            }
+        }
+
+        $errors = [];
+        // Check for missing fields and add them to the array errors
+        if (empty($data['uuid'])) {
+            $errors[] = 'uuid';
+        }
+
+        $isLoginWithUUIDOnly = $this->settingRepository->findOneBy([
+            'name' => SettingName::LOGIN_WITH_UUID_ONLY->value
+        ])->getValue();
+        if ($isLoginWithUUIDOnly === OperationMode::OFF->value && empty($data['password'])) {
+            $errors[] = 'password';
+        }
+
+        if ($errors !== []) {
+            return new BaseResponse(
+                400,
+                ['missing_fields' => $errors],
+                'Invalid data: Missing required fields.'
+            )->toResponse();
+        }
+
+        // Check if user exists are valid
+        $user = $this->userRepository->findOneBy(['uuid' => $data['uuid']]);
+
+        if (!$user instanceof User) {
+            return new BaseResponse(401, null, 'Invalid credentials')->toResponse();
+            // Bad Request Response
+        }
+
+        if (!$this->passwordHasher->isPasswordValid($user, $data['password'])) {
+            return new BaseResponse(401, null, 'Invalid credentials')->toResponse(); # Unauthorized Request Response
+        }
+
+
+        $twoFAEnforcementResult = $this->twoFAAPIService->twoFAEnforcementChecker(
+            $user,
+            $request->attributes->get('_route')
+        );
+
+        if ($twoFAEnforcementResult['missing_2fa_setting'] === true) {
+            // Return error response when 2fa is missing the TWO_FACTOR_AUTH_STATUS setting
+            return new BaseResponse(
+                400,
+                null,
+                $twoFAEnforcementResult['message']
+            )->toResponse();
+        }
+
+        if ($twoFAEnforcementResult['canSkip2FA'] === false) {
+            if (empty($data['twoFACode'])) {
+                $errors[] = 'twoFACode';
+            }
+
+            if ($errors !== []) {
+                return new BaseResponse(
+                    400,
+                    ['missing_fields' => $errors],
+                    'Invalid data: Missing required fields.'
+                )->toResponse();
+            }
+
+            // --- TOTP / OTP validation ---
+            if ($user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::TOTP->value) {
+                $isValidBackupCode = $this->twoFAService->validateOTPCodes(
+                    $user,
+                    $data['twoFACode']
+                );
+                $isValidTotpCode = $this->TOTPService->verifyTOTP(
+                    $user->getTwoFAsecret(),
+                    $data['twoFACode']
+                );
+
+                if (!$isValidBackupCode && !$isValidTotpCode) {
+                    return new BaseResponse(
+                        401,
+                        null,
+                        $twoFAEnforcementResult['message']
+                    )->toResponse();
+                }
+            } else { // --- Email/SMS / OTP validation ---
+                $isValidBackupCode = $this->twoFAService->validateOTPCodes(
+                    $user,
+                    $data['twoFACode']
+                );
+                $isValid2FACode = $this->twoFAService->validate2FACode(
+                    $user,
+                    $data['twoFACode']
+                );
+
+                if (!$isValidBackupCode && !$isValid2FACode) {
+                    return new BaseResponse(
+                        401,
+                        null,
+                        $twoFAEnforcementResult['message']
+                    )->toResponse();
+                }
+            }
+        }
+
+        if ($isLoginWithUUIDOnly === OperationMode::OFF->value) {
+            // If the login with uuid is disabled generate JWT Token
+            $token = $this->tokenGenerator->generateToken($user);
+            if (is_array($token) && $token['success'] === false) {
+                $errorMessage = $token['error'] ?? 'Token generation failed.';
+                $statusCode = $errorMessage === 'Invalid user provided. Please verify the user data.' ? 400 : 500;
+
+                return new BaseResponse($statusCode, null, $errorMessage)->toResponse();
+            }
+
+            // Defines the Event to the table
+            $eventMetaData = [
+                'user_agent' => $request->headers->get('User-Agent'),
+                'uuid' => $user->getUuid(),
+                'ip' => $request->getClientIp(),
+            ];
+
+            $this->eventActions->saveEvent(
+                $user,
+                AnalyticalEventType::AUTH_LOCAL_API->value,
+                new DateTime(),
+                $eventMetaData
+            );
+
+            // Prepare response data
+            $responseData = $user->toApiResponse([
+                'token' => $token,
+            ]);
+
+            // Return success response using BaseResponse
+            return new BaseResponse(200, $responseData)->toResponse(); # Success Response
+        }
+
+        // If login with UUID is enabled, generate the SMS or email with the login link
+        $event = $this->magicLinkService->canSendLink($user);
+        if (!($event instanceof Event)) {
+            $providerId = $user->getUserExternalAuths()[0]->getProviderId();
+            if ($providerId === UserProvider::EMAIL->value) {
+                $this->emailGenerator->sendRegistrationEmail($user);
+                $this->addFlash(
+                    'success',
+                    'A login link has been sent to your email address.'
+                );
+            } else {
+                $link = $this->magicLinkService->magicToken($user);
+                $message = "Welcome to OpenRoaming! Click the link to confirm and login with your account: $link";
+
+                $smsResponse = $this->sendSMS->sendSmsNoValidation($user, $message);
+
+                if ($smsResponse === SMSResponse::SMS_SUCCESS_LINK->value) {
+                    $this->addFlash(
+                        'success',
+                        'We have sent a login link to your phone number. Please check your SMS messages to continue.'
+                    );
+                } elseif ($smsResponse === SMSResponse::SMS_SUCCESS_CODE->value) {
+                    $this->addFlash(
+                        'success',
+                        'We have sent a login verification code to your phone number. 
+                        Please check your SMS messages to continue.'
+                    );
+                } else {
+                    $this->addFlash(
+                        'error',
+                        'We were unable to send the login link to your phone number. Please try again.'
+                    );
+                }
+            }
+        } else {
+            $timeIntervalToResendCode = $this->settingRepository->findOneBy(
+                ['name' => 'TWO_FACTOR_AUTH_RESEND_INTERVAL']
+            )->getValue();
+            $message = $this->magicLinkService->timeToResend($timeIntervalToResendCode, $event);
+
+            return new BaseResponse(
+                429,
+                ['message' => $message]
+            )->toResponse();
+        }
+
+        $eventMetaData = [
+            'user_agent' => $request->headers->get('User-Agent'),
+            'uuid' => $user->getUuid(),
+            'ip' => $request->getClientIp(),
+        ];
+        $this->eventActions->saveEvent(
+            $user,
+            AnalyticalEventType::LOGIN_WITH_UUID_ONLY_LINK->value,
+            new DateTime(),
+            $eventMetaData
+        );
+
+        return new BaseResponse(
+            200,
+            ['message' => 'Authentication request sent. Please check your email or phone for the login link.']
+        )->toResponse();
+    }
+
+    #[Route('/auth/saml', name: 'api_v3_auth_saml', methods: ['POST'])]
+    public function authSaml(Request $request, Auth $samlAuth): JsonResponse
+    {
+        // Get SAML Response
+        $samlResponseRaw = $request->request->get('SAMLResponse');
+
+        if (!is_string($samlResponseRaw) || $samlResponseRaw === '') {
+            return new BaseResponse(400, null, 'SAML Response not found')->toResponse();
+        }
+
+        $samlResponseBase64 = $samlResponseRaw;
+
+        $samlResponseData = $this->samlResolverService->decodeSamlResponse(
+            $samlResponseBase64,
+            $this->getParameter('app.saml_idp_entity_id')
+        );
+        $idpCertificate = $samlResponseData['certificate'];
+
+        // Compare certificates
+        if ($this->getParameter('app.saml_idp_x509_cert') !== $idpCertificate) {
+            return new BaseResponse(
+                403,
+                null,
+                'The configured certificate does not match the expected value. Access denied.'
+            )->toResponse();
+        }
+
+        try {
+            // Load and validate the SAML response
+            $samlAuth->processResponse();
+
+            // Handle errors from the SAML process
+            if ($samlAuth->getErrors()) {
+                return new BaseResponse(
+                    401,
+                    null,
+                    'Unable to validate SAML assertion',
+                )->toResponse(); // Unauthorized
+            }
+
+            // Ensure the authentication was successful
+            if (!$samlAuth->isAuthenticated()) {
+                return new BaseResponse(
+                    401,
+                    null,
+                    'Authentication Failed'
+                )->toResponse(); // Unauthorized
+            }
+
+            $sAMAccountName = $samlAuth->getNameId();
+            $attributes = $samlAuth->getAttributes();
+
+            // Extract the necessary attributes
+            $uuid = $attributes['samlUuid'][0] ?? null;
+            $email = $attributes['urn:oid:1.2.840.113549.1.9.1'][0] ?? null;
+            $firstName = $attributes['urn:oid:2.5.4.42'][0] ?? null;
+            $lastName = $attributes['urn:oid:2.5.4.4'][0] ?? null;
+
+            // Retrieve or create user based on SAML attributes
+            $user = $this->userRepository->findOneBy(['uuid' => $uuid]);
+
+            if (!$user) {
+                // User does not exist, create a new user
+                $user = new User();
+                $user->setEmail($email);
+                $user->setFirstName($firstName);
+                $user->setLastName($lastName);
+                $user->setPassword('notused');
+                $user->setUuid($uuid);
+                $user->setIsVerified(true);
+                $user->setRoles([]);
+
+                // Persist the new user
+                $this->entityManager->persist($user);
+
+                // Create and persist the UserExternalAuth entity
+                $userAuth = new UserExternalAuth();
+                $userAuth->setUser($user)
+                    ->setProvider(UserProvider::SAML->value)
+                    ->setProviderId($sAMAccountName);
+
+                $this->entityManager->persist($userAuth);
+                $this->entityManager->flush();
+            }
+
+
+            $twoFAEnforcementResult = $this->twoFAAPIService->twoFAEnforcementChecker(
+                $user,
+                $request->attributes->get('_route')
+            );
+
+            if ($twoFAEnforcementResult['missing_2fa_setting'] === true) {
+                // Return error response when 2fa is missing the TWO_FACTOR_AUTH_STATUS setting
+                return new BaseResponse(
+                    400,
+                    null,
+                    $twoFAEnforcementResult['message']
+                )->toResponse();
+            }
+
+            if ($twoFAEnforcementResult['canSkip2FA'] === false) {
+                $twoFACode = (string)$request->request->get('twoFACode');
+                if ($twoFACode === '' || $twoFACode === '0') {
+                    return new BaseResponse(
+                        400,
+                        null,
+                        'Missing Two-Factor Authentication code'
+                    )->toResponse();
+                }
+                if ($user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::TOTP->value) {
+                    if (
+                        // Validation for OTPCodes -> 12 codes
+                        !$this->twoFAService->validateOTPCodes($user, $twoFACode) &&
+                        // Validation for TOTP codes -> Generated By the App
+                        !$this->TOTPService->verifyTOTP($user->getTwoFAsecret(), $twoFACode)
+                    ) {
+                        // Return error response only if both validations fail for APPS
+                        return new BaseResponse(
+                            401,
+                            null,
+                            $twoFAEnforcementResult['message']
+                        )->toResponse();
+                    }
+                } elseif (
+                    // Validation for 2FACode -> EMAIL/SMS
+                    !$this->twoFAService->validate2FACode($user, $twoFACode) &&
+                    // Validation for OTPCodes -> 12 codes
+                    !$this->twoFAService->validateOTPCodes($user, $twoFACode)
+                ) {
+                    // Return error response only if both validations fail
+                    return new BaseResponse(
+                        401,
+                        null,
+                        $twoFAEnforcementResult['message']
+                    )->toResponse();
+                }
+            }
+
+            // Generate JWT Token and the success msg
+            return $this->authAPIResponseService->handleSuccessfulAuth(
+                $request,
+                $user,
+                AnalyticalEventType::AUTH_SAML_API->value
+            );
+        } catch (Exception) {
+            return new BaseResponse(
+                500,
+                null,
+                'SAML processing error',
+            )->toResponse(); // Internal Server Error
+        }
+    }
+
+    #[Route('/auth/google', name: 'api_v3_auth_google', methods: ['POST'])]
+    public function authGoogle(Request $request): JsonResponse
+    {
+        try {
+            $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
+        } catch (JsonException) {
+            return new BaseResponse(400, null, 'Invalid JSON format')->toResponse();
+        }
+
+        if (!isset($data['code'])) {
+            return new BaseResponse(400, null, 'Missing authorization code!')->toResponse();
+        }
+
+        try {
+            $user = $this->googleController->fetchUserFromGoogle($data['code']);
+            if (!$user instanceof User) {
+                return new BaseResponse(
+                    400,
+                    null,
+                    'This code is not associated with a google account.'
+                )->toResponse();
+            }
+
+            // Check if the email is valid
+            if (!$this->userStatusChecker->isValidEmail($user->getEmail(), UserProvider::GOOGLE_ACCOUNT->value)) {
+                return new BaseResponse(
+                    403,
+                    null,
+                    'Your email domain is not allowed to use this platform.'
+                )->toResponse();
+            }
+
+
+            $twoFAEnforcementResult = $this->twoFAAPIService->twoFAEnforcementChecker(
+                $user,
+                $request->attributes->get('_route')
+            );
+
+            if ($twoFAEnforcementResult['missing_2fa_setting'] === true) {
+                // Return error response when 2fa is missing the TWO_FACTOR_AUTH_STATUS setting
+                return new BaseResponse(
+                    400,
+                    null,
+                    $twoFAEnforcementResult['message']
+                )->toResponse();
+            }
+
+            if ($twoFAEnforcementResult['canSkip2FA'] === false) {
+                $errors = [];
+                if (empty($data['twoFACode'])) {
+                    $errors[] = 'twoFACode';
+                }
+                if ($errors !== []) {
+                    return new BaseResponse(
+                        400,
+                        ['missing_fields' => $errors],
+                        'Invalid data: Missing required fields.'
+                    )->toResponse();
+                }
+                if ($user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::TOTP->value) {
+                    if (
+                        // Validation for OTPCodes -> 12 codes
+                        !$this->twoFAService->validateOTPCodes($user, $data['twoFACode']) &&
+                        // Validation for TOTP codes -> Generated By the App
+                        !$this->TOTPService->verifyTOTP($user->getTwoFAsecret(), $data['twoFACode'])
+                    ) {
+                        // Return error response only if both validations fail for APPS
+                        return new BaseResponse(
+                            401,
+                            null,
+                            $twoFAEnforcementResult['message']
+                        )->toResponse();
+                    }
+                } elseif (
+                    // Validation for 2FACode -> EMAIL/SMS
+                    !$this->twoFAService->validate2FACode($user, $data['twoFACode']) &&
+                    // Validation for OTPCodes -> 12 codes
+                    !$this->twoFAService->validateOTPCodes($user, $data['twoFACode'])
+                ) {
+                    // Return error response only if both validations fail
+                    return new BaseResponse(
+                        401,
+                        null,
+                        $twoFAEnforcementResult['message']
+                    )->toResponse();
+                }
+            }
+
+            // Authenticate the user using a custom Google authentication function already on the project
+            $this->googleController->authenticateUserGoogle($user);
+
+            // Generate JWT Token and the success msg
+            return $this->authAPIResponseService->handleSuccessfulAuth(
+                $request,
+                $user,
+                AnalyticalEventType::AUTH_GOOGLE_API->value
+            );
+        } catch (IdentityProviderException) {
+            // Handle OAuth identity provider-specific errors
+            return new BaseResponse(500, null, 'Authentication failed')->toResponse();
+        } catch (Exception) {
+            // Handle any other general errors
+            return new BaseResponse(500, null, 'An error occurred')->toResponse();
+        }
+    }
+
+    #[Route('/auth/microsoft', name: 'api_v3_auth_microsoft', methods: ['POST'])]
+    public function authMicrosoft(Request $request): JsonResponse
+    {
+        try {
+            $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
+        } catch (JsonException) {
+            return new BaseResponse(400, null, 'Invalid JSON format')->toResponse();
+        }
+
+        if (!isset($data['code'])) {
+            return new BaseResponse(400, null, 'Missing authorization code!')->toResponse();
+        }
+
+        try {
+            $user = $this->microsoftController->fetchUserFromMicrosoft($data['code']);
+            if (!$user instanceof User) {
+                return new BaseResponse(
+                    400,
+                    null,
+                    'This code is not associated with a microsoft account.'
+                )->toResponse();
+            }
+
+            // Check if the email is valid
+            if (!$this->userStatusChecker->isValidEmail($user->getEmail(), UserProvider::MICROSOFT_ACCOUNT->value)) {
+                return new BaseResponse(
+                    403,
+                    null,
+                    'Your email domain is not allowed to use this platform.'
+                )->toResponse();
+            }
+
+
+            $twoFAEnforcementResult = $this->twoFAAPIService->twoFAEnforcementChecker(
+                $user,
+                $request->attributes->get('_route')
+            );
+
+            if ($twoFAEnforcementResult['missing_2fa_setting'] === true) {
+                // Return error response when 2fa is missing the TWO_FACTOR_AUTH_STATUS setting
+                return new BaseResponse(
+                    400,
+                    null,
+                    $twoFAEnforcementResult['message']
+                )->toResponse();
+            }
+
+            if ($twoFAEnforcementResult['canSkip2FA'] === false) {
+                $errors = [];
+                if (empty($data['twoFACode'])) {
+                    $errors[] = 'twoFACode';
+                }
+                if ($errors !== []) {
+                    return new BaseResponse(
+                        400,
+                        ['missing_fields' => $errors],
+                        'Invalid data: Missing required fields.'
+                    )->toResponse();
+                }
+                if ($user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::TOTP->value) {
+                    if (
+                        // Validation for OTPCodes -> 12 codes
+                        !$this->twoFAService->validateOTPCodes($user, $data['twoFACode']) &&
+                        // Validation for TOTP codes -> Generated By the App
+                        !$this->TOTPService->verifyTOTP($user->getTwoFAsecret(), $data['twoFACode'])
+                    ) {
+                        // Return error response only if both validations fail for APPS
+                        return new BaseResponse(
+                            401,
+                            null,
+                            $twoFAEnforcementResult['message']
+                        )->toResponse();
+                    }
+                } elseif (
+                    // Validation for 2FACode -> EMAIL/SMS
+                    !$this->twoFAService->validate2FACode($user, $data['twoFACode']) &&
+                    // Validation for OTPCodes -> 12 codes
+                    !$this->twoFAService->validateOTPCodes($user, $data['twoFACode'])
+                ) {
+                    // Return error response only if both validations fail
+                    return new BaseResponse(
+                        401,
+                        null,
+                        $twoFAEnforcementResult['message']
+                    )->toResponse();
+                }
+            }
+
+            // Authenticate the user using a custom Microsoft authentication function already on the project
+            $this->microsoftController->authenticateUserMicrosoft($user);
+
+            // Generate JWT Token and the success msg
+            return $this->authAPIResponseService->handleSuccessfulAuth(
+                $request,
+                $user,
+                AnalyticalEventType::AUTH_MICROSOFT_API->value
+            );
+        } catch (IdentityProviderException) {
+            // Handle OAuth identity provider-specific errors
+            return new BaseResponse(500, null, 'Authentication failed')->toResponse();
+        } catch (Exception) {
+            // Handle any other general errors
+            return new BaseResponse(500, null, 'An error occurred')->toResponse();
+        }
+    }
+}

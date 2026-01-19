@@ -2,7 +2,7 @@
 
 namespace App\Api\V2\Controller;
 
-use App\Api\V1\BaseResponse;
+use App\Api\V2\BaseResponse;
 use App\Enum\OperationMode;
 use App\Enum\SettingName;
 use App\Enum\TextInputType;
