@@ -2,7 +2,10 @@
 
 namespace App\Service;
 
+use App\Entity\CertificateSetupProcess;
 use App\Enum\CertificateFileName;
+use App\Enum\CertificateTestResult;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 readonly class CertificateFreeradiusCommandsService
@@ -11,6 +14,7 @@ readonly class CertificateFreeradiusCommandsService
 
     public function __construct(
         private TranslatorInterface $translator,
+        private EntityManagerInterface $entityManager,
     ) {
         // Absolute path to the resolver
         $this->certDir = '~/wba-openroaming-connector/hybrid/configs/freeradius/certs/';
@@ -138,5 +142,17 @@ readonly class CertificateFreeradiusCommandsService
             'command' => 'docker compose logs --tail=50 freeradius',
         ];
         return $commands;
+    }
+
+    /**
+     * Persist the test result to the database
+     */
+    public function updateFreeradiusTestResult(
+        CertificateSetupProcess $process,
+        CertificateTestResult $result
+    ): void {
+        $process->setFreeradiusTestResult($result);
+        $this->entityManager->persist($process);
+        $this->entityManager->flush();
     }
 }

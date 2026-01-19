@@ -41,7 +41,7 @@ readonly class AdminCertificateProcessEnforcerListener
 
         $user = $this->security->getUser();
 
-      // Only admins with valid session flag
+        // Only admins with valid session flag
         if (
             !$user instanceof User ||
             !$this->security->isGranted('ROLE_ADMIN') ||
@@ -50,70 +50,73 @@ readonly class AdminCertificateProcessEnforcerListener
             return;
         }
 
-      // Only intercept certificate management routes
+        // Only intercept certificate management routes
         if (!str_starts_with($path, '/dashboard')) {
             return;
         }
 
-      /**
-       * STRICT WHITELIST OF ALLOWED PAGES
-       * Supports exact matches and regex patterns
-       */
+        /**
+         * STRICT WHITELIST OF ALLOWED PAGES
+         * Supports exact matches and regex patterns
+         */
         $allowedPatterns = [
-      // Installation pages
-        '#^/dashboard/settings/certificatesManagement/installation$#',
-        '#^/dashboard/settings/certificatesManagement/installation/commands$#',
-        '#^/dashboard/settings/certificatesManagement/installation/settings$#',
-        '#^/dashboard/settings/certificatesManagement/installation/admin$#',
-        '#^/dashboard/settings/certificatesManagement/installation/admin/sendCode$#',
-        '#^/dashboard/settings/certificatesManagement/installation/admin/confirmation$#',
-        '#^/dashboard/settings/certificatesManagement/installation/admin/confirmation/resend$#',
-        '#^/dashboard/settings/certificatesManagement/installation/summary$#',
-        '#^/dashboard/settings/certificatesManagement/installation/abortProcess$#',
+            // Installation pages
+            '#^/dashboard/settings/certificatesManagement/installation$#',
+            '#^/dashboard/settings/certificatesManagement/installation/commands$#',
+            '#^/dashboard/settings/certificatesManagement/installation/settings$#',
+            '#^/dashboard/settings/certificatesManagement/installation/admin$#',
+            '#^/dashboard/settings/certificatesManagement/installation/admin/sendCode$#',
+            '#^/dashboard/settings/certificatesManagement/installation/admin/confirmation$#',
+            '#^/dashboard/settings/certificatesManagement/installation/admin/confirmation/resend$#',
+            '#^/dashboard/settings/certificatesManagement/installation/summary$#',
+            '#^/dashboard/settings/certificatesManagement/installation/abortProcess$#',
 
-      // Verify identity (installation | certificates)
-        '#^/dashboard/settings/certificatesManagement/verifyIdentity/(installation|certificates)$#',
-        '#^/dashboard/settings/certificatesManagement/verifyIdentity/(installation|certificates)/code$#',
-        '#^/dashboard/settings/certificatesManagement/verifyIdentity/(installation|certificates)/resend$#',
+            // Verify identity (installation | certificates)
+            '#^/dashboard/settings/certificatesManagement/verifyIdentity/(installation|certificates)$#',
+            '#^/dashboard/settings/certificatesManagement/verifyIdentity/(installation|certificates)/code$#',
+            '#^/dashboard/settings/certificatesManagement/verifyIdentity/(installation|certificates)/resend$#',
 
-      // Certificates reset abort
-        '#^/dashboard/settings/certificatesManagement/certificates/abort$#',
+            // Certificates reset abort
+            '#^/dashboard/settings/certificatesManagement/certificates/abort$#',
 
-      // Radsecproxy steps
-        '#^/dashboard/settings/certificatesManagement/radsecproxy/upload$#',
-        '#^/dashboard/settings/certificatesManagement/radsecproxy/config$#',
-        '#^/dashboard/settings/certificatesManagement/radsecproxy/test$#',
-        '#^/dashboard/settings/certificatesManagement/radsecproxy/test/run$#',
+            // Radsecproxy steps
+            '#^/dashboard/settings/certificatesManagement/radsecproxy/upload$#',
+            '#^/dashboard/settings/certificatesManagement/radsecproxy/config$#',
+            '#^/dashboard/settings/certificatesManagement/radsecproxy/test$#',
+            '#^/dashboard/settings/certificatesManagement/radsecproxy/test/run$#',
 
-      // Freeradius Certificates Management Selection
-        '#^/dashboard/settings/certificatesManagement/freeradius/selection#',
+            // Freeradius Certificates Management Selection
+            '#^/dashboard/settings/certificatesManagement/freeradius/selection#',
 
-      // Freeradius steps
-        '#^/dashboard/settings/certificatesManagement/freeradius/autoRenew$#',
-        '#^/dashboard/settings/certificatesManagement/freeradius/upload$#',
-        '#^/dashboard/settings/certificatesManagement/freeradius/config$#',
-        '#^/dashboard/settings/certificatesManagement/freeradius/test$#',
-        '#^/dashboard/settings/certificatesManagement/freeradius/test/run$#',
+            // Freeradius steps
+                // Auto Generation Lets Encrypt
+            '#^/dashboard/settings/certificatesManagement/freeradius/autoRenew$#',
+            '#^/dashboard/settings/certificatesManagement/freeradius/autoRenewDomain#',
+                // Manual Upload
+            '#^/dashboard/settings/certificatesManagement/freeradius/upload$#',
+            '#^/dashboard/settings/certificatesManagement/freeradius/config$#',
+            '#^/dashboard/settings/certificatesManagement/freeradius/test$#',
+            '#^/dashboard/settings/certificatesManagement/freeradius/test/run$#',
         ];
         $allowed = array_any(
             $allowedPatterns,
-            fn (string $pattern): bool => preg_match($pattern, $path) === 1
+            fn(string $pattern): bool => preg_match($pattern, $path) === 1
         );
 
-      // If path IS allowed → do nothing
+        // If path IS allowed → do nothing
         if ($allowed) {
             return;
         }
 
-      // If NOT allowed → force process enforcement
+        // If NOT allowed → force process enforcement
         $this->enforceProcess($event, $session);
     }
 
     private function enforceProcess(RequestEvent $event, SessionInterface $session): void
     {
-      // Check installation progress
+        // Check installation progress
         $installation = $this->installationProgressRepository->findOneBy([
-        'installationState' => ProcessStatusType::COMPLETED
+            'installationState' => ProcessStatusType::COMPLETED
         ]);
 
         if (!$installation instanceof InstallationProgress) {
@@ -125,7 +128,7 @@ readonly class AdminCertificateProcessEnforcerListener
             return;
         }
 
-      // Check certificates progress
+        // Check certificates progress
         $certProcess = $this->certificateSetupProcessRepository->getLatestProcess();
 
         if (!$certProcess instanceof CertificateSetupProcess) {
@@ -137,7 +140,7 @@ readonly class AdminCertificateProcessEnforcerListener
             return;
         }
 
-      // Radsecproxy test required
+        // Radsecproxy test required
         if (!$certProcess->getRadsecproxyTestResult() instanceof CertificateTestResult) {
             $session->set(
                 SessionStatus::SYSTEM_RESET_REQUEST->value,
@@ -147,7 +150,7 @@ readonly class AdminCertificateProcessEnforcerListener
             return;
         }
 
-      // If radsec is OK → next step is freeradius
+        // If radsec is OK → next step is freeradius
         if ($certProcess->getRadsecproxyTestResult() === CertificateTestResult::PASSED) {
             $session->set(
                 SessionStatus::SYSTEM_RESET_REQUEST->value,
@@ -157,7 +160,7 @@ readonly class AdminCertificateProcessEnforcerListener
             return;
         }
 
-      // Process fully complete
+        // Process fully complete
         $session->remove(SessionStatus::SYSTEM_RESET_REQUEST->value);
     }
 
