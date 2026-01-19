@@ -1,5 +1,5 @@
 manualTitle: "Manual Configuration"
 manualSubtitle: "Upload your own certificates manually"
-autoTitle: "Automatic Configuration"
+letsEncryptTitle: "Let’s Encrypt Configuration"
 autoSubtitle: "The platform automatically generates a pair of Let’s Encrypt certificates for you"
 confirmAutoRenew: "Are you sure you want to let the platform generate Let's Encrypt certificates?"

@@ -58,6 +58,19 @@ class CertificateSetupProcess
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $freeradiusDomainName = null;
 
+    #[ORM\Column(type: 'boolean', options: ['default' => false])]
+    private bool $isFreeradiusCloudflare = false;
+
+    public function isFreeradiusCloudflare(): bool
+    {
+        return $this->isFreeradiusCloudflare;
+    }
+
+    public function setIsFreeradiusCloudflare(bool $isFreeradiusCloudflare): void
+    {
+        $this->isFreeradiusCloudflare = $isFreeradiusCloudflare;
+    }
+
     public function __construct()
     {
         $this->certificates = new ArrayCollection();
