@@ -35,20 +35,26 @@ readonly class CertificateProcessCheckerService
      *     process: CertificateSetupProcess
      * }
      */
-    public function getProcessState(): array
+    public function getProcessState(?bool $info = false): array
     {
         $process = $this->getCurrentProcess();
 
-        if (
-            !$process ||
-            $process->getStatus() === ProcessStatusType::ABORTED ||
-            $process->getStatus() === ProcessStatusType::COMPLETED
-        ) {
+        if ($info && (!$process ||
+                $process->getStatus() === ProcessStatusType::ABORTED)) {
             return [
                 'active' => false,
                 'stages' => [],
             ];
         }
+        if (!$info && (!$process ||
+                $process->getStatus() === ProcessStatusType::ABORTED ||
+                $process->getStatus() === ProcessStatusType::COMPLETED)) {
+                return [
+                    'active' => false,
+                    'stages' => [],
+                ];
+            }
+
 
         $stages = [];
         foreach (CertificateRouteAccess::orderedStages() as $stage) {

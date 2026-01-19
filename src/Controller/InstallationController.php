@@ -27,6 +27,8 @@ use App\Repository\InstallationProgressRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use App\Service\CaptchaValidator;
+use App\Service\CertificateFreeradiusInfoService;
+use App\Service\CertificateProcessCheckerService;
 use App\Service\DatabaseConnectionService;
 use App\Service\EventActions;
 use App\Service\GetSettings;

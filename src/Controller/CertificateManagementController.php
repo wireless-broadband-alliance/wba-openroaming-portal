@@ -12,7 +12,9 @@ use App\Enum\ProcessStatusType;
 use App\Enum\SessionStatus;
 use App\Repository\CertificateSetupProcessRepository;
 use App\Repository\InstallationProgressRepository;
+use App\Service\CertificateFreeradiusInfoService;
 use App\Service\CertificateProcessCheckerService;
+use App\Service\CertificateRadsecproxyInfoService;
 use App\Service\EventActions;
 use App\Service\GetSettings;
 use App\Service\InstallationService;
@@ -37,6 +39,8 @@ class CertificateManagementController extends AbstractController
         private readonly CertificateSetupProcessRepository $certificateSetupProcessRepository,
         private readonly EventActions $eventActions,
         private readonly InstallationService $installationService,
+        private readonly CertificateFreeradiusInfoService $certificateFreeradiusInfoService,
+        private readonly CertificateRadsecproxyInfoService $certificateRadsecproxyInfoService,
     ) {
     }
 
@@ -53,10 +57,22 @@ class CertificateManagementController extends AbstractController
             $certificateDate = $lastCompletedCertificate->getUpdatedAt();
         }
 
+        $processState = $this->certificateProcessCheckerService->getProcessState(true);
+        $process = $processState['process'] ?? null;
+
+        $certificateSetRadsecproxy = $this->certificateRadsecproxyInfoService->getLatestCertificatesSet($process);
+
+        $certificateSetFreeradius = $this->certificateFreeradiusInfoService->getLatestCertificatesSet($process);
+
+        $certificateSet = array_merge($certificateSetRadsecproxy, $certificateSetFreeradius);
+
+
+
       // Default render
         return $this->render('dashboard/shared/settings_actions.html.twig', [
         'data' => $this->getSettings->getSettings(),
         'lastCompletedInstallation' => $installationDate ?? null,
+        'certificateSet' => $certificateSet ?? null,
         'lastCompletedCertificates' => $certificateDate ?? null,
         ]);
     }
