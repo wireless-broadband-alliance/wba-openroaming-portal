@@ -111,7 +111,7 @@ class InstallationController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-          /** @var User $user */
+            /** @var User $user */
             $user = $this->getUser();
 
             $openRoamingDb = $this->databaseConnectionService->buildDatabaseUrl(
@@ -175,9 +175,9 @@ class InstallationController extends AbstractController
                     AnalyticalEventType::SYSTEM_RESET_REQUEST_IN_PROGRESS->value,
                     new DateTime(),
                     [
-                    'ip' => $request->getClientIp(),
-                    'user_agent' => $request->headers->get('User-Agent'),
-                    'by' => $user->getUuid(),
+                        'ip' => $request->getClientIp(),
+                        'user_agent' => $request->headers->get('User-Agent'),
+                        'by' => $user->getUuid(),
                     ]
                 );
             }
@@ -200,9 +200,9 @@ class InstallationController extends AbstractController
                 AnalyticalEventType::INSTALLATION_DATABASE_CONFIG->value,
                 new DateTime(),
                 [
-                'ip' => $request->getClientIp(),
-                'user_agent' => $request->headers->get('User-Agent'),
-                'by' => $user->getUuid(),
+                    'ip' => $request->getClientIp(),
+                    'user_agent' => $request->headers->get('User-Agent'),
+                    'by' => $user->getUuid(),
                 ]
             );
 
@@ -221,10 +221,10 @@ class InstallationController extends AbstractController
         return $this->render(
             'dashboard/shared/settings_actions/certificatesManagement/installation/data_base.html.twig',
             [
-            'data' => $data,
-            'form' => $form->createView(),
-            'formDTO' => $dbDTO,
-            'stages' => $this->installationService->getStepperStatus($step)
+                'data' => $data,
+                'form' => $form->createView(),
+                'formDTO' => $dbDTO,
+                'stages' => $this->installationService->getStepperStatus($step)
             ]
         );
     }
@@ -274,7 +274,7 @@ class InstallationController extends AbstractController
                 return $this->redirectToRoute('admin_dashboard_settings_certs_installation_summary');
             }
 
-          /** @var User $user */
+            /** @var User $user */
             $user = $this->getUser();
 
             $this->eventActions->saveEvent(
@@ -282,9 +282,9 @@ class InstallationController extends AbstractController
                 AnalyticalEventType::INSTALLATION_COMMAND_CONFIG->value,
                 new DateTime(),
                 [
-                'ip' => $request->getClientIp(),
-                'user_agent' => $request->headers->get('User-Agent'),
-                'by' => $user->getUuid(),
+                    'ip' => $request->getClientIp(),
+                    'user_agent' => $request->headers->get('User-Agent'),
+                    'by' => $user->getUuid(),
                 ]
             );
 
@@ -299,35 +299,35 @@ class InstallationController extends AbstractController
             return $this->redirectToRoute('admin_dashboard_settings_certs_installation_command');
         }
 
-      /* TODO: in case the user can't run the command add the "chmod +x scripts/update-db-env.sh"
-      command to give to the file permissions to run (Test with Marcelo)
-      */
+        /* TODO: in case the user can't run the command add the "chmod +x scripts/update-db-env.sh"
+        command to give to the file permissions to run (Test with Marcelo)
+        */
 
         $commands = [
-        [
-            'description' => $this->translator->trans(
-                'writeDbSettingsEnv',
-                [],
-                'controllers'
-            ),
-            'command' => $this->installationService->commandToDataBase($lastInstallation),
-        ],
-        [
-            'description' => $this->translator->trans(
-                'writeSettingsEnv',
-                [],
-                'controllers'
-            ),
-            'command' => $this->installationService->commandToSettings($lastInstallation),
-        ],
-        [
-            'description' => $this->translator->trans(
-                'createJwtPair',
-                [],
-                'controllers'
-            ),
-            'command' => 'php bin/console lexik:jwt:generate-keypair --overwrite',
-        ]
+            [
+                'description' => $this->translator->trans(
+                    'writeDbSettingsEnv',
+                    [],
+                    'controllers'
+                ),
+                'command' => $this->installationService->commandToDataBase($lastInstallation),
+            ],
+            [
+                'description' => $this->translator->trans(
+                    'writeSettingsEnv',
+                    [],
+                    'controllers'
+                ),
+                'command' => $this->installationService->commandToSettings($lastInstallation),
+            ],
+            [
+                'description' => $this->translator->trans(
+                    'createJwtPair',
+                    [],
+                    'controllers'
+                ),
+                'command' => 'php bin/console lexik:jwt:generate-keypair --overwrite',
+            ]
         ];
 
         $this->addFlash(
@@ -343,20 +343,20 @@ class InstallationController extends AbstractController
             'dashboard/shared/settings_actions/certificatesManagement/'
             . 'installation/manualInstallation/manual_installation.html.twig',
             [
-              'data' => $data,
-              'stages' => $this->installationService->getStepperStatus($step),
-              'commands' => $commands,
-              'form' => $form->createView(),
+                'data' => $data,
+                'stages' => $this->installationService->getStepperStatus($step),
+                'commands' => $commands,
+                'form' => $form->createView(),
             ]
         );
     }
 
 
-  /**
-   * @throws HttpException
-   * @throws LogicException
-   * @throws \Exception
-   */
+    /**
+     * @throws HttpException
+     * @throws LogicException
+     * @throws \Exception
+     */
     #[Route(
         '/dashboard/settings/certificatesManagement/installation/settings',
         name: 'admin_dashboard_settings_certs_installation_settings'
@@ -436,21 +436,21 @@ class InstallationController extends AbstractController
                 return $this->redirectToRoute('admin_dashboard_settings_certs_installation_command');
             }
 
-          // JWT Verification
+            // JWT Verification
             try {
                 $application = new Application($this->kernel);
                 $application->setAutoExit(false);
 
                 if ($settingsDTO->jwtPassphraseEnable) {
                     $input = new ArrayInput([
-                    'command' => 'lexik:jwt:generate-keypair',
-                    '--overwrite' => true,
-                    '--passphrase' => $settingsDTO->jwtPassphrase,
+                        'command' => 'lexik:jwt:generate-keypair',
+                        '--overwrite' => true,
+                        '--passphrase' => $settingsDTO->jwtPassphrase,
                     ]);
                 } else {
                     $input = new ArrayInput([
-                    'command' => 'lexik:jwt:generate-keypair',
-                    '--overwrite' => true,
+                        'command' => 'lexik:jwt:generate-keypair',
+                        '--overwrite' => true,
                     ]);
                 }
 
@@ -460,7 +460,7 @@ class InstallationController extends AbstractController
                 }
 
                 $application->run($input, $output);
-              // $result = $output->fetch();
+                // $result = $output->fetch();
 
                 $privateKeyPath = $this->getParameter('kernel.project_dir') . '/config/jwt/private.pem';
                 $publicKeyPath = $this->getParameter('kernel.project_dir') . '/config/jwt/public.pem';
@@ -475,9 +475,9 @@ class InstallationController extends AbstractController
                         is_string($privateKeyContent) &&
                         is_string($publicKeyContent) &&
                         (str_starts_with(
-                            trim($privateKeyContent),
-                            '-----BEGIN ENCRYPTED PRIVATE KEY-----'
-                        ) &&
+                                trim($privateKeyContent),
+                                '-----BEGIN ENCRYPTED PRIVATE KEY-----'
+                            ) &&
                             str_starts_with(
                                 trim($publicKeyContent),
                                 '-----BEGIN PUBLIC KEY-----'
@@ -488,7 +488,7 @@ class InstallationController extends AbstractController
                     }
                 }
 
-              /** @var User $user */
+                /** @var User $user */
                 $user = $this->getUser();
 
                 $this->eventActions->saveEvent(
@@ -496,18 +496,18 @@ class InstallationController extends AbstractController
                     AnalyticalEventType::INSTALLATION_SETTINGS_CONFIG->value,
                     new DateTime(),
                     [
-                    'ip' => $request->getClientIp(),
-                    'user_agent' => $request->headers->get('User-Agent'),
-                    'by' => $user->getUuid(),
+                        'ip' => $request->getClientIp(),
+                        'user_agent' => $request->headers->get('User-Agent'),
+                        'by' => $user->getUuid(),
                     ]
                 );
 
                 if ($success) {
-                      $this->addFlash(
-                          'success',
-                          $this->translator->trans('jwtSuccessfully', [], 'controllers')
-                      );
-                      return $this->redirectToRoute('admin_dashboard_settings_certs_installation_admin');
+                    $this->addFlash(
+                        'success',
+                        $this->translator->trans('jwtSuccessfully', [], 'controllers')
+                    );
+                    return $this->redirectToRoute('admin_dashboard_settings_certs_installation_admin');
                 }
                 $this->addFlash(
                     'error',
@@ -527,10 +527,10 @@ class InstallationController extends AbstractController
         return $this->render(
             'dashboard/shared/settings_actions/certificatesManagement/installation/settings.html.twig',
             [
-            'data' => $data,
-            'form' => $form->createView(),
-            'formDTO' => $settingsDTO,
-            'stages' => $this->installationService->getStepperStatus($step)
+                'data' => $data,
+                'form' => $form->createView(),
+                'formDTO' => $settingsDTO,
+                'stages' => $this->installationService->getStepperStatus($step)
             ]
         );
     }
@@ -592,10 +592,10 @@ class InstallationController extends AbstractController
         return $this->render(
             'dashboard/shared/settings_actions/certificatesManagement/installation/admin.html.twig',
             [
-            'data' => $data,
-            'form' => $form->createView(),
-            'formDTO' => $adminConfigDTO,
-            'stages' => $this->installationService->getStepperStatus($step)
+                'data' => $data,
+                'form' => $form->createView(),
+                'formDTO' => $adminConfigDTO,
+                'stages' => $this->installationService->getStepperStatus($step)
             ]
         );
     }
@@ -627,10 +627,10 @@ class InstallationController extends AbstractController
                 ) {
                     $this->installationService->sendAdminConfirmationCode($lastInstallation);
                     $eventMetaData = [
-                    'platform' => PlatformMode::LIVE->value,
-                    'user_agent' => $request->headers->get('User-Agent'),
-                    'uuid' => $admin->getUuid(),
-                    'ip' => $request->getClientIp(),
+                        'platform' => PlatformMode::LIVE->value,
+                        'user_agent' => $request->headers->get('User-Agent'),
+                        'uuid' => $admin->getUuid(),
+                        'ip' => $request->getClientIp(),
                     ];
                     $this->eventActions->saveEvent(
                         $admin,
@@ -654,7 +654,7 @@ class InstallationController extends AbstractController
                         $this->translator->trans(
                             'codeAlreadySent',
                             [
-                            '%minutes%' => $interval_minutes,
+                                '%minutes%' => $interval_minutes,
                             ],
                             'controllers'
                         )
@@ -718,7 +718,7 @@ class InstallationController extends AbstractController
                 $session = $request->getSession();
                 $session->set(SessionStatus::INSTALLATION_VERIFICATION->value, true);
 
-              /** @var User $user */
+                /** @var User $user */
                 $user = $this->getUser();
 
                 $this->eventActions->saveEvent(
@@ -726,9 +726,9 @@ class InstallationController extends AbstractController
                     AnalyticalEventType::INSTALLATION_ADMIN_CONFIG->value,
                     new DateTime(),
                     [
-                    'ip' => $request->getClientIp(),
-                    'user_agent' => $request->headers->get('User-Agent'),
-                    'by' => $user->getUuid(),
+                        'ip' => $request->getClientIp(),
+                        'user_agent' => $request->headers->get('User-Agent'),
+                        'by' => $user->getUuid(),
                     ]
                 );
 
@@ -748,9 +748,9 @@ class InstallationController extends AbstractController
         return $this->render(
             'dashboard/shared/settings_actions/certificatesManagement/installation/confirm_admin.html.twig',
             [
-            'data' => $data,
-            'form' => $form->createView(),
-            'stages' => $this->installationService->getStepperStatus($step)
+                'data' => $data,
+                'form' => $form->createView(),
+                'stages' => $this->installationService->getStepperStatus($step)
             ]
         );
     }
@@ -788,9 +788,9 @@ class InstallationController extends AbstractController
         return $this->render(
             'dashboard/shared/settings_actions/certificatesManagement/installation/summary.html.twig',
             [
-            'data' => $data,
-            'Installation' => $installationDTO,
-            'stages' => $this->installationService->getStepperStatus($step)
+                'data' => $data,
+                'Installation' => $installationDTO,
+                'stages' => $this->installationService->getStepperStatus($step)
             ]
         );
     }
@@ -804,7 +804,7 @@ class InstallationController extends AbstractController
     public function abortProcess(Request $request): RedirectResponse
     {
         $lastInstallation = $this->installationService->lastInstallation();
-      // If there's no active installation process
+        // If there's no active installation process
         if (!$lastInstallation instanceof InstallationProgress) {
             $this->addFlash(
                 'error',
@@ -818,7 +818,7 @@ class InstallationController extends AbstractController
             return $this->redirectToRoute('admin_dashboard_settings_certs_installation');
         }
 
-      // Check if installation is in a state that can be aborted
+        // Check if installation is in a state that can be aborted
         if ($lastInstallation->getInstallationState() !== ProcessStatusType::IN_PROGRESS) {
             $this->addFlash(
                 'error',
@@ -832,17 +832,17 @@ class InstallationController extends AbstractController
             return $this->redirectToRoute('admin_dashboard_settings_certs_installation');
         }
 
-      // Abort the process
+        // Abort the process
         $lastInstallation->setInstallationState(ProcessStatusType::ABORTED);
         $lastInstallation->setUpdatedAt(new DateTime());
 
         $this->entityManager->persist($lastInstallation);
         $this->entityManager->flush();
 
-      // Reset the system to the last valid installation config
+        // Reset the system to the last valid installation config
         $this->installationService->resetToLastInstallation();
 
-      /** @var User $user */
+        /** @var User $user */
         $user = $this->getUser();
 
         $this->eventActions->saveEvent(
@@ -850,9 +850,9 @@ class InstallationController extends AbstractController
             AnalyticalEventType::INSTALLATION_CONFIG_ABORTED->value,
             new DateTime(),
             [
-            'ip' => $request->getClientIp(),
-            'user_agent' => $request->headers->get('User-Agent'),
-            'by' => $user->getUuid(),
+                'ip' => $request->getClientIp(),
+                'user_agent' => $request->headers->get('User-Agent'),
+                'by' => $user->getUuid(),
             ]
         );
 
@@ -868,11 +868,11 @@ class InstallationController extends AbstractController
         return $this->redirectToRoute('admin_dashboard_settings_certs_installation');
     }
 
-  /**
-   * @throws \DateMalformedStringException
-   * @throws RandomException
-   * @throws TransportExceptionInterface
-   */
+    /**
+     * @throws \DateMalformedStringException
+     * @throws RandomException
+     * @throws TransportExceptionInterface
+     */
     #[Route(
         '/dashboard/settings/certificatesManagement/installation/admin/confirmation/resend',
         name: 'admin_dashboard_settings_certs_installation_admin_confirmation_resend',
@@ -880,7 +880,7 @@ class InstallationController extends AbstractController
     #[IsGranted('ROLE_SUPER_ADMIN')]
     public function resendCode(Request $request): RedirectResponse
     {
-      /** @var User $user */
+        /** @var User $user */
         $user = $this->getUser();
 
         if (!$this->isGranted('IS_AUTHENTICATED_FULLY')) {
@@ -890,7 +890,7 @@ class InstallationController extends AbstractController
             );
             return $this->redirectToRoute('app_landing');
         }
-      // Handle access restrictions based on the context
+        // Handle access restrictions based on the context
         $timeToResetAttempts = (int)$this->settingRepository->findOneBy(
             ['name' => SettingName::TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS->value]
         )->getValue();
@@ -913,10 +913,10 @@ class InstallationController extends AbstractController
             if ($lastInstallation instanceof InstallationProgress) {
                 $this->installationService->sendAdminConfirmationCode($lastInstallation);
                 $eventMetaData = [
-                'platform' => PlatformMode::LIVE->value,
-                'user_agent' => $request->headers->get('User-Agent'),
-                'uuid' => $user->getUuid(),
-                'ip' => $request->getClientIp(),
+                    'platform' => PlatformMode::LIVE->value,
+                    'user_agent' => $request->headers->get('User-Agent'),
+                    'uuid' => $user->getUuid(),
+                    'ip' => $request->getClientIp(),
                 ];
                 $this->eventActions->saveEvent(
                     $user,
@@ -936,7 +936,7 @@ class InstallationController extends AbstractController
                     $this->translator->trans(
                         'codeResentSuccessfully',
                         [
-                        '%attempts%' => $attemptsLeft
+                            '%attempts%' => $attemptsLeft
                         ],
                         'controllers'
                     )
@@ -948,15 +948,15 @@ class InstallationController extends AbstractController
                 $eventType
             );
             $now = new DateTime();
-          // Suppose $lastAttemptTime is DateTimeInterface
+            // Suppose $lastAttemptTime is DateTimeInterface
             $lastAttemptTime = $lastEvent instanceof Event
-            ? $lastEvent->getEventDatetime()
-            : new DateTime(); // fallback
+                ? $lastEvent->getEventDatetime()
+                : new DateTime(); // fallback
 
-          // Ensure $limitTime is a DateTime instance
+            // Ensure $limitTime is a DateTime instance
             $limitTime = $lastAttemptTime instanceof DateTime
-            ? clone $lastAttemptTime
-            : new DateTime($lastAttemptTime->format('Y-m-d H:i:s')); // convert interface to DateTime
+                ? clone $lastAttemptTime
+                : new DateTime($lastAttemptTime->format('Y-m-d H:i:s')); // convert interface to DateTime
             if (!$this->twoFAService->canResendCode($user, $eventType)) {
                 $limitTime->modify('+' . $timeToResetAttempts . ' minutes');
                 $interval = date_diff($now, $limitTime);
@@ -997,10 +997,10 @@ class InstallationController extends AbstractController
         '/dashboard/settings/certificatesManagement/verifyIdentity/{type}',
         name: 'admin_dashboard_settings_certs_installation_verify',
         requirements: [
-          'type' => 'installation|certificates'
+            'type' => 'installation|certificates'
         ],
         defaults: [
-          'type' => InstallationType::INSTALLATION->value,
+            'type' => InstallationType::INSTALLATION->value,
         ]
     )]
     #[IsGranted('ROLE_SUPER_ADMIN')]
@@ -1008,7 +1008,7 @@ class InstallationController extends AbstractController
         Request $request,
         string $type
     ): RedirectResponse|Response {
-      /** @var User $user */
+        /** @var User $user */
         $user = $this->getUser();
 
         if ($type === InstallationType::INSTALLATION->value) {
@@ -1033,10 +1033,10 @@ class InstallationController extends AbstractController
                     $session->set(SessionStatus::CERTIFICATE_VERIFICATION->value, true);
                 }
                 $eventMetaData = [
-                'platform' => PlatformMode::LIVE->value,
-                'user_agent' => $request->headers->get('User-Agent'),
-                'uuid' => $user->getUuid(),
-                'ip' => $request->getClientIp(),
+                    'platform' => PlatformMode::LIVE->value,
+                    'user_agent' => $request->headers->get('User-Agent'),
+                    'uuid' => $user->getUuid(),
+                    'ip' => $request->getClientIp(),
                 ];
                 $this->eventActions->saveEvent(
                     $user,
@@ -1054,7 +1054,7 @@ class InstallationController extends AbstractController
                 );
 
                 if ($type === InstallationType::INSTALLATION->value) {
-                      return $this->redirectToRoute('admin_dashboard_settings_certs_installation');
+                    return $this->redirectToRoute('admin_dashboard_settings_certs_installation');
                 }
                 return $this->redirectToRoute('admin_dashboard_settings_certs_radsecproxy_upload');
             }
@@ -1068,9 +1068,9 @@ class InstallationController extends AbstractController
         return $this->render(
             'dashboard/shared/settings_actions/certificatesManagement/partials/confirm_identity.html.twig',
             [
-            'data' => $data,
-            'form' => $form->createView(),
-            'type' => $type,
+                'data' => $data,
+                'form' => $form->createView(),
+                'type' => $type,
             ]
         );
     }
@@ -1079,10 +1079,10 @@ class InstallationController extends AbstractController
         '/dashboard/settings/certificatesManagement/verifyIdentity/{type}/code',
         name: 'admin_dashboard_settings_certs_installation_verify_send_code',
         requirements: [
-          'type' => 'installation|certificates'
+            'type' => 'installation|certificates'
         ],
         defaults: [
-          'type' => InstallationType::INSTALLATION->value,
+            'type' => InstallationType::INSTALLATION->value,
         ]
     )]
     #[IsGranted('ROLE_SUPER_ADMIN')]
@@ -1090,7 +1090,7 @@ class InstallationController extends AbstractController
         Request $request,
         string $type
     ): RedirectResponse|Response {
-      /** @var User $user */
+        /** @var User $user */
         $user = $this->getUser();
 
         if ($type === InstallationType::INSTALLATION->value) {
@@ -1107,10 +1107,10 @@ class InstallationController extends AbstractController
         ) {
             $this->installationService->sendAdminVerificationCode($user);
             $eventMetaData = [
-            'platform' => PlatformMode::LIVE->value,
-            'user_agent' => $request->headers->get('User-Agent'),
-            'uuid' => $user->getUuid(),
-            'ip' => $request->getClientIp(),
+                'platform' => PlatformMode::LIVE->value,
+                'user_agent' => $request->headers->get('User-Agent'),
+                'uuid' => $user->getUuid(),
+                'ip' => $request->getClientIp(),
             ];
             $this->eventActions->saveEvent(
                 $user,
@@ -1134,7 +1134,7 @@ class InstallationController extends AbstractController
                 $this->translator->trans(
                     'codeAlreadySent',
                     [
-                    '%minutes%' => $interval_minutes,
+                        '%minutes%' => $interval_minutes,
                     ],
                     'controllers'
                 )
@@ -1143,29 +1143,29 @@ class InstallationController extends AbstractController
 
 
         return $this->redirectToRoute('admin_dashboard_settings_certs_installation_verify', [
-        'type' => $type,
+            'type' => $type,
         ]);
     }
 
-  /**
-   * @throws \DateMalformedStringException
-   * @throws RandomException
-   * @throws TransportExceptionInterface
-   */
+    /**
+     * @throws \DateMalformedStringException
+     * @throws RandomException
+     * @throws TransportExceptionInterface
+     */
     #[Route(
         '/dashboard/settings/certificatesManagement/verifyIdentity/{type}/resend',
         name: 'admin_dashboard_settings_certs_installation_verify_resend_code',
         requirements: [
-          'type' => 'installation|certificates'
+            'type' => 'installation|certificates'
         ],
         defaults: [
-          'type' => InstallationType::INSTALLATION->value,
+            'type' => InstallationType::INSTALLATION->value,
         ]
     )]
     #[IsGranted('ROLE_SUPER_ADMIN')]
     public function entityVerificationResendCode(Request $request, string $type): RedirectResponse
     {
-      /** @var User $user */
+        /** @var User $user */
         $user = $this->getUser();
 
         if (!$this->isGranted('IS_AUTHENTICATED_FULLY')) {
@@ -1175,7 +1175,7 @@ class InstallationController extends AbstractController
             );
             return $this->redirectToRoute('app_landing');
         }
-      // Handle access restrictions based on the context
+        // Handle access restrictions based on the context
         $timeToResetAttempts = (int)$this->settingRepository->findOneBy(
             ['name' => SettingName::TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS->value]
         )->getValue();
@@ -1200,10 +1200,10 @@ class InstallationController extends AbstractController
             $this->installationService->sendAdminVerificationCode($user);
 
             $eventMetaData = [
-            'platform' => PlatformMode::LIVE->value,
-            'user_agent' => $request->headers->get('User-Agent'),
-            'uuid' => $user->getUuid(),
-            'ip' => $request->getClientIp(),
+                'platform' => PlatformMode::LIVE->value,
+                'user_agent' => $request->headers->get('User-Agent'),
+                'uuid' => $user->getUuid(),
+                'ip' => $request->getClientIp(),
             ];
             $this->eventActions->saveEvent(
                 $user,
@@ -1223,7 +1223,7 @@ class InstallationController extends AbstractController
                 $this->translator->trans(
                     'codeResentSuccessfully',
                     [
-                    '%attempts%' => $attemptsLeft
+                        '%attempts%' => $attemptsLeft
                     ],
                     'controllers'
                 )
@@ -1234,15 +1234,15 @@ class InstallationController extends AbstractController
                 $eventType
             );
             $now = new DateTime();
-          // Suppose $lastAttemptTime is DateTimeInterface
+            // Suppose $lastAttemptTime is DateTimeInterface
             $lastAttemptTime = $lastEvent instanceof Event
-            ? $lastEvent->getEventDatetime()
-            : new DateTime(); // fallback
+                ? $lastEvent->getEventDatetime()
+                : new DateTime(); // fallback
 
-          // Ensure $limitTime is a DateTime instance
+            // Ensure $limitTime is a DateTime instance
             $limitTime = $lastAttemptTime instanceof DateTime
-            ? clone $lastAttemptTime
-            : new DateTime($lastAttemptTime->format('Y-m-d H:i:s')); // convert interface to DateTime
+                ? clone $lastAttemptTime
+                : new DateTime($lastAttemptTime->format('Y-m-d H:i:s')); // convert interface to DateTime
             if (!$this->twoFAService->canResendCode($user, $eventType)) {
                 $limitTime->modify('+' . $timeToResetAttempts . ' minutes');
                 $interval = date_diff($now, $limitTime);
@@ -1277,7 +1277,7 @@ class InstallationController extends AbstractController
             }
         }
         return $this->redirectToRoute('admin_dashboard_settings_certs_installation_verify', [
-        'type' => $type
+            'type' => $type
         ]);
     }
 }
