@@ -18,7 +18,7 @@ services:
       - ./self-signed-ssl/ssl.crt:/etc/nginx/ssl/ssl.crt:ro
       - ./self-signed-ssl/ssl.key:/etc/nginx/ssl/ssl.key:ro
     ports:
-      - "88:80"
+      - "80:80"
       - "443:443"
   mysql:
     image: mysql:8.0

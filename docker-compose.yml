@@ -17,7 +17,7 @@ services:
       - ./service-config/php-fpm/www.conf:/usr/local/etc/php-fpm.d/www.conf:ro
       - ./config/jwt/:/var/www/openroaming/config/jwt/
     ports:
-      - "88:80"
+      - "80:80"
   mysql:
     image: mysql:8.0
     environment:
