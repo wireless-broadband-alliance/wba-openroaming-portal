@@ -147,7 +147,7 @@ freeradiusTestPassed: 'Handshake TLS realizado com sucesso usando o conjunto de 
 configAlreadyApplied: 'Está configuração já está aplicada! Não podes re-submeter o mesmo formulário.'
 certificateProcessAborted: "Este processo foi abortado com sucesso. Por favor, não se esqueça de reconfigurar todo o processo corretamente!"
 not_ev_warning: "Estes certificados não são EV's válidos. A geração do perfil OpenRoaming para Windows irá falhar por causa disso, mas podes progredir se assim o desejares."
-cert_uploaded_are_lets_encrypt_warning: "Os certificados carregados são emitidos pela Let's Encrypt. A geração do perfil OpenRoaming para Windows irá falhar por causa disso, mas podes progredir se assim o desejares."
+cert_uploaded_are_lets_encrypt_warning: "Os certificados carregados foram emitidos pela Let's Encrypt, que não suporta certificados EV. A geração do perfil OpenRoaming para Windows 10 irá falhar devido a isto, mas pode prosseguir se desejar."
 cert_generated_are_lets_encrypt_warning: "Os certificados gerados são emitidos pela Let's Encrypt. A geração do perfil OpenRoaming para Windows irá falhar por causa disso, mas podes progredir se assim o desejares."
 freeradius_is_not_ev_cert_warning: 'A opção de descarregar perfis OpenRoaming para Windows está desativada porque não é suportada com a configuração atual.'
 cannotReturnToPreviousPhase: 'Já não pode aceder a esta etapa porque já foi concluída.'
