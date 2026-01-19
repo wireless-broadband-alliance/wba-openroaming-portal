@@ -10,9 +10,10 @@ use Doctrine\Persistence\ManagerRegistry;
  * @extends ServiceEntityRepository<Setting>
  *
  * @method Setting|null find($id, $lockMode = null, $lockVersion = null)
- * @method Setting|null findOneBy(array $criteria, array $orderBy = null)
+ * @method Setting|null findOneBy(array <string, mixed> $criteria, array<string, string>|null $orderBy = null)
  * @method Setting[]    findAll()
- * @method Setting[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * phpcs:ignore Generic.Files.LineLength.TooLong
+ * @method Setting[]    findBy(array <string, mixed> $criteria, array<string, string>|null $orderBy = null, $limit = null, $offset = null)
  */
 class SettingRepository extends ServiceEntityRepository
 {
@@ -63,15 +64,13 @@ class SettingRepository extends ServiceEntityRepository
     //    }
 
     /**
-     * Find all settings except those specified by name
+     * @return Setting[]
      */
-    public function findAllIn(array $includedNames): array
+    public function findAllNames(): array
     {
-        $qb = $this->createQueryBuilder('u')
-            ->where('u.name IN (:includeNames)')
-            ->setParameter('includeNames', $includedNames);
-
-
-        return $qb->getQuery()->getResult();
+        return $this->createQueryBuilder('s')
+            ->select('s.name')
+            ->getQuery()
+            ->getSingleColumnResult();
     }
 }

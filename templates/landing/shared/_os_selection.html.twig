@@ -1,0 +1,80 @@
+<div class="{{ data.os.selected == constant('App\\Enum\\OSType::NONE').value ? '' : 'hidden' }} mt-14" {{ stimulus_target('visibility', 'first') }}>
+    <p>{{ 'os_selection.choose_os'|trans({}, 'landing') }}</p>
+
+    <div class="grid gap-4 auto-rows-max grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 mt-16 mb-6">
+        {% for key, item in data.os.items %}
+            <div>
+                <input type="radio" id="radio-os-{{ key }}" name="radio-os"
+                       value="{{ key }}" class="hidden peer"/>
+
+                <label for="radio-os-{{ key }}"
+                       class="hover:bg-gray-300 inline-flex items-center justify-center w-full px-6 py-4 rounded-lg bg-[#B4B4B4] bg-opacity-40 cursor-pointer peer-checked:bg-[#7DB928]">
+
+                    <twig:ux:icon name="wba:{{ key|lower }}" class="w-8 fill-current"/>
+                </label>
+
+                <p class="text-center mt-2 text-[#656565] text-xs sm:text-sm md:text-base font-light">
+                    {{ key == constant('App\\Enum\\OSType::IOS').value or key == constant('App\\Enum\\OSType::MACOS').value
+                    ? 'os_selection.macos_or_ios'|trans({}, 'landing')
+                    : key }}
+                </p>
+            </div>
+        {% endfor %}
+    </div>
+
+    {# Download profile button #}
+    <div class="flex flex-col items-center gap-2">
+        <div>
+            <button type="submit" class="ml-auto w-[250px] btn-primary py-2">
+                {{ 'os_selection.download_install'|trans({}, 'landing') }}
+            </button>
+        </div>
+        <div>
+            <p class="text-sm text-gray-600">
+                {{ 'os_selection.download_hint'|trans({
+                    '%link%': '<a href="' ~ path('app_instructions') ~ '" class="font-bold underline">' ~ 'os_selection.instructions_link_text'|trans({}, 'landing') ~ '</a>',
+                }, 'landing')|raw }}
+            </p>
+        </div>
+    </div>
+</div>
+
+<input type="hidden" id="detected-os" name="detected-os" value="{{ data.os.selected }}"/>
+
+{% if data.os.selected != constant('App\\Enum\\OSType::NONE').value %}
+    <div class="mt-10" {{ stimulus_target('visibility', 'second') }}>
+
+        {# Profile selector #}
+        <div class="w-full rounded shadow-lg bg-[#F9F9F9] px-6 py-8 flex flex-col md:flex-row items-center md:justify-between text-[#3F474D] space-y-6 md:space-y-0 md:space-x-6">
+
+            <div class="flex flex-row items-center justify-start space-x-6">
+                <twig:ux:icon name="wba:{{ data.os.selected|lower }}" class="w-8 fill-current"/>
+                <span class="font-medium text-sm sm:text-base md:text-lg">
+            {{ 'os_selection.device_identified'|trans({'%os%': data.os.selected}, 'landing') }}
+        </span>
+            </div>
+
+            <div class="flex flex-col items-center gap-2">
+                <div>
+                    <button type="submit" class="w-full md:w-[250px] btn-primary py-2 text-sm sm:text-base md:text-lg">
+                        {{ 'os_selection.download_install'|trans({}, 'landing') }}
+                    </button>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-600">
+                        {{ 'os_selection.download_hint'|trans({
+                            '%link%': '<a href="' ~ path('app_instructions') ~ '" class="font-bold underline">' ~ 'os_selection.instructions_link_text'|trans({}, 'landing') ~ '</a>',
+                        }, 'landing')|raw }}
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <p class="mt-4 mb-10 text-xs sm:text-sm md:text-base">
+            {{ 'os_selection.is_wrong'|trans({}, 'landing') }}
+            <button type="button" class="text-primary font-semibold underline text-xs sm:text-sm md:text-base" {{ stimulus_action('visibility', 'toggle') }}>
+                {{ 'os_selection.click_to_select'|trans({}, 'landing') }}
+            </button>
+        </p>
+    </div>
+{% endif %}

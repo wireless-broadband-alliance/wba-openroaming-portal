@@ -2,26 +2,32 @@
 
 namespace App\Service;
 
-use App\Api\V1\BaseResponse;
+use App\Api\V1\BaseResponse as BaseResponseV1;
+use App\Api\V2\BaseResponse as BaseResponseV2;
+use App\Api\V3\BaseResponse as BaseResponseV3;
 use App\Entity\User;
+use App\Enum\SettingName;
 use App\Enum\UserProvider;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use DateTimeInterface;
 use RuntimeException;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 readonly class UserStatusChecker
 {
     public function __construct(
         private UserRepository $userRepository,
-        private SettingRepository $settingRepository
+        private SettingRepository $settingRepository,
+        private TranslatorInterface $translator
     ) {
     }
 
-    public function checkUserStatus(User $user): ?BaseResponse
-    {
+    public function checkUserStatus(
+        User $user
+    ): BaseResponseV1|BaseResponseV2|BaseResponseV3|null {
         if (!$user->isVerified()) {
-            return new BaseResponse(
+            return new BaseResponseV3(
                 401,
                 null,
                 'User account is not verified.'
@@ -30,7 +36,7 @@ readonly class UserStatusChecker
 
         if ($user->getBannedAt() instanceof DateTimeInterface) {
             return
-                new BaseResponse(
+                new BaseResponseV3(
                     403,
                     null,
                     'User account is banned from the system.'
@@ -40,14 +46,13 @@ readonly class UserStatusChecker
         // Checks if the user has a "forgot_password_request", if yes, send an error with the authentication
         if ($this->userRepository->findOneBy(['id' => $user->getId(), 'forgot_password_request' => true])) {
             return
-                new BaseResponse(
+                new BaseResponseV3(
                     403,
                     null,
                     'Your request cannot be processed at this time due to a pending action.' .
                     ' If your account is active, re-login to complete the action.'
                 );
         }
-
         return null;
     }
 
@@ -73,18 +78,22 @@ readonly class UserStatusChecker
     {
         if ($providerName === UserProvider::MICROSOFT_ACCOUNT->value) {
             // Retrieve the valid domains setting from the database
-            $validDomainsSetting = $this->settingRepository->findOneBy(['name' => 'VALID_DOMAINS_MICROSOFT_LOGIN']);
+            $validDomainsSetting = $this->settingRepository->findOneBy([
+                'name' => SettingName::VALID_DOMAINS_MICROSOFT_LOGIN->value
+            ]);
         } elseif ($providerName === UserProvider::GOOGLE_ACCOUNT->value) {
             // Retrieve the valid domains setting from the database
-            $validDomainsSetting = $this->settingRepository->findOneBy(['name' => 'VALID_DOMAINS_GOOGLE_LOGIN']);
+            $validDomainsSetting = $this->settingRepository->findOneBy([
+                'name' => SettingName::VALID_DOMAINS_GOOGLE_LOGIN->value
+            ]);
         } else {
             // If providerName doesn't match any valid providers, throw an exception
-            throw new RuntimeException('Invalid provider name provided.');
+            throw new RuntimeException($this->translator->trans('invalidProviderName', [], 'UserStatusChecker'));
         }
 
         // Throw an exception if the setting is not found
         if ($validDomainsSetting === null) {
-            throw new RuntimeException("Valid domains setting not found for the provider: $providerName");
+            throw new RuntimeException($this->translator->trans('validDomainsNotFound', [], 'UserStatusChecker'));
         }
 
         // If the valid domains setting is empty, allow all domains
@@ -95,7 +104,7 @@ readonly class UserStatusChecker
 
         // Split the valid domains into an array and trim whitespace
         $validDomains = explode(',', $validDomains);
-        $validDomains = array_map('trim', $validDomains);
+        $validDomains = array_map(trim(...), $validDomains);
 
         // Extract the domain from the email
         $emailParts = explode('@', $email);

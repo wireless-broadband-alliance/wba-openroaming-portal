@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Entity\Event;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
+use DateTime;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\Persistence\ManagerRegistry;
@@ -13,9 +14,10 @@ use Doctrine\Persistence\ManagerRegistry;
  * @extends ServiceEntityRepository<Event>
  *
  * @method Event|null find($id, $lockMode = null, $lockVersion = null)
- * @method Event|null findOneBy(array $criteria, array $orderBy = null)
+ * @method Event|null findOneBy(array<string, mixed> $criteria, array<string, string>|null $orderBy = null)
  * @method Event[]    findAll()
- * @method Event[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * phpcs:ignore Generic.Files.LineLength.TooLong
+ * @method Event[]    findBy(array<string, mixed> $criteria, array<string, string>|null $orderBy = null, ?int $limit = null, ?int $offset = null)
  */
 class EventRepository extends ServiceEntityRepository
 {
@@ -80,10 +82,9 @@ class EventRepository extends ServiceEntityRepository
 
     /**
      * Find the $maxResults number of 'TWO_FA_CODE_SENDED' events for the given user.
-     *
-     * @throws NonUniqueResultException
+     * @return Event[] Returns an array of Event objects
      */
-    public function find2FACodeAttemptEvent(User $user, int $maxResults, \DateTime $time, string $eventType): ?array
+    public function find2FACodeAttemptEvent(User $user, int $maxResults, DateTime $time, string $eventType): array
     {
         return $this->createQueryBuilder('e')
             ->andWhere('e.user = :user')
@@ -98,13 +99,30 @@ class EventRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    public function findLastLinkSent(User $user, \DateTime $time): ?Event
+    {
+        return $this->createQueryBuilder('e')
+            ->andWhere('e.user = :user')
+            ->andWhere('e.event_name IN (:event_names)')
+            ->andWhere('e.event_datetime >= :datetime')
+            ->setParameter('user', $user)
+            ->setParameter('event_names', [
+                AnalyticalEventType::LOGIN_WITH_UUID_ONLY_LINK->value,
+                AnalyticalEventType::LOGIN_WITH_UUID_ONLY_CODE->value
+            ])
+            ->setParameter('datetime', $time)
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
     /**
      * Find the latest '$eventLog' from AnalyticalEventType Enum for the given user.
      *
      * @param $eventLog // from ENUM AnalyticalEventType
      * @throws NonUniqueResultException
      */
-    public function findLatestRequestAttemptEvent(User $user, $eventLog): ?Event
+    public function findLatestRequestAttemptEvent(User $user, string $eventLog): ?Event
     {
         return $this->createQueryBuilder('e')
             ->andWhere('e.user = :user')

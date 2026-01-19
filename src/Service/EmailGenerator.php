@@ -1,0 +1,229 @@
+<?php
+
+namespace App\Service;
+
+use App\Entity\User;
+use App\Enum\FirewallType;
+use App\Enum\OperationMode;
+use App\Enum\SettingName;
+use App\Repository\SettingRepository;
+use Symfony\Bridge\Twig\Mime\TemplatedEmail;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Address;
+use Symfony\Component\Mime\Email;
+use Symfony\Contracts\Translation\TranslatorInterface;
+
+readonly class EmailGenerator
+{
+    public function __construct(
+        private ParameterBagInterface $parameterBag,
+        private MailerInterface $mailer,
+        private SettingRepository $settingRepository,
+        private MagicLinkService $magicLinkService,
+        private TranslatorInterface $translator
+    ) {
+    }
+
+    /**
+     * @throws TransportExceptionInterface
+     */
+    public function sendRegistrationEmail(User $user, ?string $password = null): void
+    {
+        $supportTeam = $this->settingRepository->findOneBy(
+            ['name' => SettingName::PAGE_TITLE->value]
+        )->getValue();
+        $contactEmail = $this->settingRepository->findOneBy(
+            ['name' => SettingName::CONTACT_EMAIL->value]
+        )->getValue();
+        $loginWithUUID = $this->settingRepository->findOneBy(
+            ['name' => SettingName::LOGIN_WITH_UUID_ONLY->value]
+        )->getValue();
+        $customerLogo = $this->settingRepository->findOneBy(
+            ['name' => SettingName::CUSTOMER_LOGO->value]
+        )->getValue();
+        $projectDir = $this->parameterBag->get('kernel.project_dir');
+        $logoPath = $projectDir . '/public' . $customerLogo;
+
+        if ($loginWithUUID === OperationMode::ON->value) {
+            $magicURL = $this->magicLinkService->magicToken($user);
+            // Send email to the user with the verification link for authentications
+            $email = new TemplatedEmail()
+                ->from(
+                    new Address(
+                        $this->parameterBag->get('app.email_address'),
+                        $this->parameterBag->get('app.sender_name')
+                    )
+                )
+                ->to($user->getEmail())
+                ->subject($this->translator->trans('subject_registration_details', [], 'user_registration_login_uuid'))
+                ->htmlTemplate('email/user_registration_login_uuid.html.twig')
+                ->context([
+                    'uuid' => $user->getEmail(),
+                    'supportTeam' => $supportTeam,
+                    'contactEmail' => $contactEmail,
+                    'magicURL' => $magicURL,
+                ])
+                ->embedFromPath($logoPath, 'logo_cid');
+        } else {
+            // Send email to the user with the verification code
+            $email = new TemplatedEmail()
+                ->from(
+                    new Address(
+                        $this->parameterBag->get('app.email_address'),
+                        $this->parameterBag->get('app.sender_name')
+                    )
+                )
+                ->to($user->getEmail())
+                ->subject($this->translator->trans('subject_registration_details', [], 'user_registration'))
+                ->htmlTemplate('email/user_registration.html.twig')
+                ->context([
+                    'uuid' => $user->getEmail(),
+                    'supportTeam' => $supportTeam,
+                    'contactEmail' => $contactEmail,
+                    'twoFaCode' => $user->getTwoFAcode(),
+                    'password' => $password,
+                ])
+                ->embedFromPath($logoPath, 'logo_cid');
+        }
+
+        $this->mailer->send($email);
+    }
+
+    /**
+     * @throws TransportExceptionInterface
+     */
+    public function sendNotifyExpiresProfileEmail(User $user, int $timeLeft): void
+    {
+        $emailTitle = $this->settingRepository->findOneBy(['name' => SettingName::PAGE_TITLE->value])->getValue();
+        $contactEmail = $this->settingRepository->findOneBy(['name' => SettingName::CONTACT_EMAIL->value])->getValue();
+        $customerLogo = $this->settingRepository->findOneBy(['name' => SettingName::CUSTOMER_LOGO->value])->getValue();
+        $projectDir = $this->parameterBag->get('kernel.project_dir');
+        $logoPath = $projectDir . '/public' . $customerLogo;
+
+        // Send email to the user with the verification code
+        $email = new TemplatedEmail()
+            ->from(
+                new Address(
+                    $this->parameterBag->get('app.email_address'),
+                    $this->parameterBag->get('app.sender_name')
+                )
+            )
+            ->to($user->getEmail())
+            ->subject($this->translator->trans('subject_is_expiring', [], 'expirationProfiles'))
+            ->htmlTemplate('email/expiresProfile.html.twig')
+            ->context([
+                'uuid' => $user->getEmail(),
+                'emailTitle' => $emailTitle,
+                'contactEmail' => $contactEmail,
+                'timeLeft' => $timeLeft,
+            ])
+            ->embedFromPath($logoPath, 'logo_cid');
+        $this->mailer->send($email);
+    }
+
+    /**
+     * @throws TransportExceptionInterface
+     */
+    public function sendNotifyExpiredProfile(User $user): void
+    {
+        $supportTeam = $this->settingRepository->findOneBy(['name' => SettingName::PAGE_TITLE->value])->getValue();
+        $contactEmail = $this->settingRepository->findOneBy(['name' => SettingName::CONTACT_EMAIL->value])->getValue();
+        $customerLogo = $this->settingRepository->findOneBy(['name' => SettingName::CUSTOMER_LOGO->value])->getValue();
+        $projectDir = $this->parameterBag->get('kernel.project_dir');
+        $logoPath = $projectDir . '/public' . $customerLogo;
+
+        // Send email to the user with the verification code
+        $email = new TemplatedEmail()
+            ->from(
+                new Address(
+                    $this->parameterBag->get('app.email_address'),
+                    $this->parameterBag->get('app.sender_name')
+                )
+            )
+            ->to($user->getEmail())
+            ->subject($this->translator->trans('subject_is_expired', [], 'expirationProfiles'))
+            ->htmlTemplate('email/expiredProfile.html.twig')
+            ->context([
+                'uuid' => $user->getEmail(),
+                'contactEmail' => $contactEmail,
+                'emailTitle' => $supportTeam,
+                'supportTeam' => $supportTeam,
+            ])
+            ->embedFromPath($logoPath, 'logo_cid');
+
+        $this->mailer->send($email);
+    }
+
+    /**
+     * @throws TransportExceptionInterface
+     */
+    public function sendForgotPasswordEmail(User $user): void
+    {
+        $emailTitle = $this->settingRepository->findOneBy(['name' => SettingName::PAGE_TITLE->value])->getValue();
+        $contactEmail = $this->settingRepository->findOneBy(['name' => SettingName::CONTACT_EMAIL->value])->getValue();
+        $customerLogo = $this->settingRepository->findOneBy(['name' => SettingName::CUSTOMER_LOGO->value])->getValue();
+        $projectDir = $this->parameterBag->get('kernel.project_dir');
+        $logoPath = $projectDir . '/public' . $customerLogo;
+
+        $email = new TemplatedEmail()
+            ->from(
+                new Address(
+                    $this->parameterBag->get('app.email_address'),
+                    $this->parameterBag->get('app.sender_name')
+                )
+            )
+            ->to($user->getEmail())
+            ->subject(
+                $this->translator->trans(
+                    'subject_forgot_password',
+                    [],
+                    'user_forgot_password_request'
+                )
+            )
+            ->htmlTemplate('email/user_forgot_password_request.html.twig')
+            ->context([
+                'forgotPasswordUser' => true,
+                'uuid' => $user->getUuid(),
+                'emailTitle' => $emailTitle,
+                'contactEmail' => $contactEmail,
+                'verificationCode' => $user->getTwoFAcode(),
+                'context' => FirewallType::LANDING->value,
+            ])
+            ->embedFromPath($logoPath, 'logo_cid');
+
+        $this->mailer->send($email);
+    }
+
+    /**
+     * @throws TransportExceptionInterface
+     */
+    public function sendResetPasswordEmailByAdmin(User $user, string $newPassword): void
+    {
+        $supportTeam = $this->settingRepository->findOneBy(['name' => SettingName::PAGE_TITLE->value])->getValue();
+        $contactEmail = $this->settingRepository->findOneBy(['name' => SettingName::CONTACT_EMAIL->value])->getValue();
+        $customerLogo = $this->settingRepository->findOneBy(['name' => SettingName::CUSTOMER_LOGO->value])->getValue();
+        $projectDir = $this->parameterBag->get('kernel.project_dir');
+        $logoPath = $projectDir . '/public' . $customerLogo;
+
+        $email = new TemplatedEmail()
+            ->from(
+                new Address(
+                    $this->parameterBag->get('app.email_address'),
+                    $this->parameterBag->get('app.sender_name')
+                )
+            )
+            ->to($user->getEmail())
+            ->subject($this->translator->trans('subject_password_reset_details', [], 'user_password_reset'))
+            ->htmlTemplate('email/user_password_reset.html.twig')
+            ->context([
+                'password' => $newPassword,
+                'supportTeam' => $supportTeam,
+                'contactEmail' => $contactEmail,
+            ])
+            ->embedFromPath($logoPath, 'logo_cid');
+
+        $this->mailer->send($email);
+    }
+}

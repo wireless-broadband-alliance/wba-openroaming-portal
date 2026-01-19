@@ -1,0 +1,4 @@
+publicKeyMissing: 'A chave pública está em falta. Por favor, adicione a chave "pgp_public_key/public_key.asc"'
+publicKeyEmpty: 'A chave pública está vazia. Por favor, forneça o conteúdo válido da chave.'
+userSuccessfullyDeleted: 'Os dados do utilizador foram eliminados e encriptados com sucesso.'
+encryptionFailed: 'A encriptação com a chave pública PGP falhou.'

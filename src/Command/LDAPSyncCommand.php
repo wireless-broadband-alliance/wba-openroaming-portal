@@ -2,6 +2,8 @@
 
 namespace App\Command;
 
+use App\Entity\User;
+use App\Enum\SettingName;
 use App\Enum\UserProvider;
 use App\Enum\UserRadiusProfileRevokeReason;
 use App\Repository\SettingRepository;
@@ -13,6 +15,7 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use LDAP\Result;
 
 #[AsCommand(
     name: 'ldap:sync',
@@ -36,7 +39,11 @@ class LDAPSyncCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
-        if ($this->settingRepository->findOneBy(['name' => 'SYNC_LDAP_ENABLED'])->getValue() === 'false') {
+        if (
+            $this->settingRepository->findOneBy([
+                'name' => SettingName::SYNC_LDAP_ENABLED->value
+            ])->getValue() === 'false'
+        ) {
             $io->writeln('LDAP sync is disabled');
             return Command::SUCCESS;
         }
@@ -61,8 +68,8 @@ class LDAPSyncCommand extends Command
                     }
 
                     $userAccountControl = $ldapUser['userAccountControl'][0];
-                    $passwordExpired = ($userAccountControl & 0x800000) == 0x800000;
-                    $userLocked = ($userAccountControl & 0x000002) == 0x000002;
+                    $passwordExpired = ($userAccountControl & 0x800000) === 0x800000;
+                    $userLocked = ($userAccountControl & 0x000002) === 0x000002;
 
                     if ($userLocked) {
                         $io->writeln('User ' . $providerId . ' is locked in LDAP, disabling');
@@ -87,11 +94,18 @@ class LDAPSyncCommand extends Command
         return Command::SUCCESS;
     }
 
-    private function fetchUserFromLDAP(string $identifier)
+    /**
+     * @return array<int|string, mixed>|null
+     */
+    private function fetchUserFromLDAP(string $identifier): ?array
     {
-        $ldapServer = $this->settingRepository->findOneBy(['name' => 'SYNC_LDAP_SERVER'])->getValue();
-        $ldapUsername = $this->settingRepository->findOneBy(['name' => 'SYNC_LDAP_BIND_USER_DN'])->getValue();
-        $ldapPassword = $this->settingRepository->findOneBy(['name' => 'SYNC_LDAP_BIND_USER_PASSWORD'])->getValue();
+        $ldapServer = $this->settingRepository->findOneBy(['name' => SettingName::SYNC_LDAP_SERVER->value])->getValue();
+        $ldapUsername = $this->settingRepository->findOneBy([
+            'name' => SettingName::SYNC_LDAP_BIND_USER_DN->value
+        ])->getValue();
+        $ldapPassword = $this->settingRepository->findOneBy([
+            'name' => SettingName::SYNC_LDAP_BIND_USER_PASSWORD->value
+        ])->getValue();
         $ldapConnection = ldap_connect($ldapServer) or die("Could not connect to LDAP server.");
         ldap_set_option($ldapConnection, LDAP_OPT_DEREF, LDAP_DEREF_ALWAYS);
         ldap_set_option($ldapConnection, LDAP_OPT_PROTOCOL_VERSION, 3);
@@ -102,26 +116,33 @@ class LDAPSyncCommand extends Command
         $searchFilter = str_replace(
             "@ID",
             $identifier,
-            $this->settingRepository->findOneBy(['name' => 'SYNC_LDAP_SEARCH_FILTER'])->getValue()
-        );
-        $searchBaseDN = $this->settingRepository->findOneBy(['name' => 'SYNC_LDAP_SEARCH_BASE_DN'])->getValue();
-        $searchResult = ldap_search(
-            $ldapConnection,
-            $searchBaseDN,
-            $searchFilter,
+            $this->settingRepository->findOneBy(['name' => SettingName::SYNC_LDAP_SEARCH_FILTER->value])->getValue()
         );
 
+        $searchBaseDN = $this->settingRepository->findOneBy([
+            'name' => SettingName::SYNC_LDAP_SEARCH_BASE_DN->value
+        ])->getValue();
+
+        $searchResult = ldap_search($ldapConnection, $searchBaseDN, $searchFilter);
+        if ($searchResult === false) {
+            ldap_unbind($ldapConnection);
+            return null;
+        }
+
+        /** @var Result $searchResult */
         $entry = ldap_first_entry($ldapConnection, $searchResult);
         if (!$entry) {
             ldap_unbind($ldapConnection);
             return null;
         }
+
         $attrs = ldap_get_attributes($ldapConnection, $entry);
         ldap_unbind($ldapConnection);
+
         return $attrs;
     }
 
-    private function enableProfiles($user): void
+    private function enableProfiles(User $user): void
     {
         $this->profileManager->enableProfiles($user);
     }

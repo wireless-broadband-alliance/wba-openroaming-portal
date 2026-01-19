@@ -1,0 +1,134 @@
+<?php
+
+namespace App\Controller;
+
+use App\Entity\TextEditor;
+use App\Enum\LanguageType;
+use App\Enum\SettingName;
+use App\Enum\TextEditorName;
+use App\Enum\TextInputType;
+use App\Repository\SettingRepository;
+use App\Repository\TextEditorRepository;
+use App\Service\GetSettings;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Attribute\Route;
+
+class TOSController extends AbstractController
+{
+    public function __construct(
+        private readonly GetSettings $getSettings,
+        private readonly SettingRepository $settingRepository,
+        private readonly TextEditorRepository $textEditorRepository,
+    ) {
+    }
+
+    #[Route(
+        '/terms-conditions',
+        name: 'app_terms_conditions',
+    )]
+    public function termsConditions(Request $request): RedirectResponse|Response
+    {
+        // Call the getSettings method of GetSettings class to retrieve the data
+        $data = $this->getSettings->getSettings();
+        $tosFormat = $this->settingRepository->findOneBy(['name' => SettingName::TOS->value]);
+
+        $language = $request->getLocale();
+
+        if (
+            $tosFormat &&
+            $tosFormat->getValue() === TextInputType::TEXT_EDITOR->value
+        ) {
+            $textEditor = $this->textEditorRepository->findTextEditor(TextEditorName::TOS->value, $language);
+            $content = $textEditor instanceof \App\Entity\TextEditor ? $textEditor->getContent() : '';
+
+            return $this->render('landing/shared/tos/_tos.html.twig', [
+                'content' => $content,
+                'data' => $data,
+            ]);
+        }
+
+        if (
+            $tosFormat &&
+            $tosFormat->getValue() === TextInputType::LINK->value &&
+            $this->settingRepository->findOneBy(['name' => SettingName::TOS_LINK->value])
+        ) {
+            return $this->redirect(
+                $this->settingRepository->findOneBy(
+                    ['name' => SettingName::TOS_LINK->value]
+                )->getValue()
+            );
+        }
+
+        return $this->redirectToRoute('app_landing');
+    }
+
+    #[Route(
+        '/privacy-policy',
+        name: 'app_privacy_policy',
+    )]
+    public function privacyPolicy(
+        Request $request,
+    ): RedirectResponse|Response {
+        // Call the getSettings method of GetSettings class to retrieve the data
+        $data = $this->getSettings->getSettings();
+
+        $language = $request->getLocale();
+
+        $privacyPolicyFormat = $this->settingRepository->findOneBy(['name' => SettingName::PRIVACY_POLICY->value]);
+
+        if (
+            $privacyPolicyFormat &&
+            $privacyPolicyFormat->getValue() === TextInputType::TEXT_EDITOR->value
+        ) {
+            $textEditor = $this->textEditorRepository->findTextEditor(TextEditorName::PRIVACY_POLICY->value, $language);
+            $content = $textEditor instanceof TextEditor ? $textEditor->getContent() : '';
+
+            return $this->render('landing/shared/tos/_privacy_policy.html.twig', [
+                'content' => $content,
+                'data' => $data,
+            ]);
+        }
+
+        if (
+            $privacyPolicyFormat &&
+            $privacyPolicyFormat->getValue() === TextInputType::LINK->value &&
+            $this->settingRepository->findOneBy(['name' => SettingName::PRIVACY_POLICY_LINK->value])
+        ) {
+            return $this->redirect(
+                $this->settingRepository->findOneBy(
+                    ['name' => SettingName::PRIVACY_POLICY_LINK->value]
+                )->getValue()
+            );
+        }
+
+        return $this->redirectToRoute('app_landing');
+    }
+
+    #[Route('/accept-terms', name: 'accept_terms', methods: ['POST'])]
+    public function acceptTerms(Request $request): Response
+    {
+        $request->getSession()->set('termsAccepted', true);
+
+
+        return new JsonResponse(['status' => 'ok', 'message' => 'Terms accepted']);
+    }
+
+    #[Route('/reject-terms', name: 'reject_terms', methods: ['POST'])]
+    public function rejectTerms(Request $request): Response
+    {
+        $request->getSession()->set('termsAccepted', false);
+
+        return new JsonResponse(['status' => 'ok', 'message' => 'Rejected terms']);
+    }
+
+    #[Route('/get-terms-status', name: 'get_terms_status', methods: ['GET'])]
+    public function getTermsStatus(Request $request): JsonResponse
+    {
+        $termsAccepted = $request->getSession()->get('termsAccepted', false);
+        return new JsonResponse(['termsAccepted' => $termsAccepted]);
+    }
+}

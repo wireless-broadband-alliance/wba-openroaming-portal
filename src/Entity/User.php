@@ -9,6 +9,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use libphonenumber\PhoneNumber;
+use LogicException;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -22,11 +23,15 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    /** @phpstan-ignore-next-line */
     private ?int $id = null;
 
     #[ORM\Column(length: 180, unique: true)]
     private ?string $uuid = null;
 
+    /**
+     * @var string[]
+     */
     #[ORM\Column]
     private array $roles = [];
 
@@ -46,14 +51,17 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $last_name = null;
 
-    #[ORM\OneToMany(mappedBy: 'user', targetEntity: UserRadiusProfile::class)]
+    /**
+     * @var Collection<int, UserRadiusProfile>
+     */
+    #[ORM\OneToMany(targetEntity: UserRadiusProfile::class, mappedBy: 'user')]
     private Collection $userRadiusProfiles;
 
-    #[ORM\OneToMany(mappedBy: 'user', targetEntity: UserExternalAuth::class)]
+    /**
+     * @var Collection<int, UserExternalAuth>
+     */
+    #[ORM\OneToMany(targetEntity: UserExternalAuth::class, mappedBy: 'user')]
     private Collection $userExternalAuths;
-
-    #[ORM\Column(length: 20, nullable: true)]
-    private ?string $verificationCode = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $createdAt = null;
@@ -61,10 +69,14 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $bannedAt = null;
 
-    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Event::class, orphanRemoval: true)]
+    /**
+     * @var Collection<int, Event>
+     */
+    #[ORM\OneToMany(targetEntity: Event::class, mappedBy: 'user', orphanRemoval: true)]
     private Collection $event;
 
-    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Notification::class, orphanRemoval: true)]
+    #[ORM\OneToMany(targetEntity: Notification::class, mappedBy: 'user', orphanRemoval: true)]
+    /** @phpstan-ignore-next-line */
     private Collection $notification;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
@@ -80,6 +92,7 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
     private ?DeletedUserData $deletedUserData = null;
 
     #[ORM\Column]
+    /** @phpstan-ignore-next-line */
     private ?bool $isDisabled = false;
 
     #[ORM\Column(length: 255, nullable: true)]
@@ -88,7 +101,7 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
     #[ORM\Column(length: 255)]
     private int $twoFAtype = 0;
 
-    #[ORM\Column(length: 10, nullable: true)]
+    #[ORM\Column(length: 64, nullable: true)]
     private ?string $twoFAcode = null;
 
     #[ORM\Column(type: 'boolean', options: ['default' => false])]
@@ -100,9 +113,9 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
     /**
      * @var Collection<int, OTPcode>
      */
-    #[ORM\OneToMany(mappedBy: 'user', targetEntity: OTPcode::class, orphanRemoval: true)]
+    #[ORM\OneToMany(targetEntity: OTPcode::class, mappedBy: 'user', orphanRemoval: true)]
+    /** @phpstan-ignore-next-line */
     private Collection $oTPcodes;
-
 
     public function __construct()
     {
@@ -184,10 +197,7 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
     {
         // set the owning side to null (unless already changed)
         if (
-            $this->oTPcodes->removeElement($oTPcode) &&
-            ($this->oTPcodes->removeElement($oTPcode) &&
-                ($this->oTPcodes->removeElement($oTPcode) &&
-                    ($this->oTPcodes->removeElement($oTPcode))))
+            $this->oTPcodes->removeElement($oTPcode)
         ) {
             $this->oTPcodes->removeElement($oTPcode);
         }
@@ -218,7 +228,11 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
      */
     public function getUserIdentifier(): string
     {
-        return (string)$this->uuid;
+        if (in_array($this->uuid, [null, '', '0'], true)) {
+            throw new LogicException('User UUID cannot be empty.');
+        }
+
+        return $this->uuid;
     }
 
     /**
@@ -233,6 +247,9 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
         return array_unique($roles);
     }
 
+    /**
+     * @param string[] $roles
+     */
     public function setRoles(array $roles): self
     {
         $this->roles = $roles;
@@ -301,6 +318,9 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
         return $this;
     }
 
+    /**
+     * @param array<string, string[]> $attributes
+     */
     public function setSamlAttributes(array $attributes): void
     {
         $this->uuid = $attributes['samlUuid'][0];
@@ -393,18 +413,6 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
         return $this;
     }
 
-    public function getVerificationCode(): ?string
-    {
-        return $this->verificationCode;
-    }
-
-    public function setVerificationCode(?string $verificationCode): self
-    {
-        $this->verificationCode = $verificationCode;
-
-        return $this;
-    }
-
     public function getCreatedAt(): ?\DateTimeInterface
     {
         return $this->createdAt;
@@ -465,6 +473,9 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
         return $this;
     }
 
+    /**
+     * @return Collection<int, Notification>
+     */
     public function getNotification(): Collection
     {
         return $this->notification;
@@ -472,7 +483,9 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
 
     public function addNotification(Notification $notification): static
     {
+        /** @phpstan-ignore-next-line */
         if (!$this->event->contains($notification)) {
+            /** @phpstan-ignore-next-line */
             $this->event->add($notification);
             $notification->setUser($this);
         }
@@ -532,6 +545,10 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
         return $this;
     }
 
+    /**
+     * @param array<string, mixed> $additionalData
+     * @return array<string, mixed>
+     */
     public function toApiResponse(array $additionalData = []): array
     {
         $userExternalAuths = $this->getUserExternalAuths()->map(

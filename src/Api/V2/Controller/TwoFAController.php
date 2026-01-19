@@ -6,6 +6,7 @@ use App\Api\V2\BaseResponse;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Enum\OperationMode;
+use App\Enum\SettingName;
 use App\Enum\UserTwoFactorAuthenticationStatus;
 use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
@@ -54,7 +55,9 @@ class TwoFAController extends AbstractController
             return new BaseResponse(400, null, 'Invalid JSON format')->toResponse(); # Bad Request Response
         }
 
-        $turnstileSetting = $this->settingRepository->findOneBy(['name' => 'TURNSTILE_CHECKER'])->getValue();
+        $turnstileSetting = $this->settingRepository->findOneBy([
+            'name' => SettingName::TURNSTILE_CHECKER->value
+        ])->getValue();
         if (!$turnstileSetting) {
             throw new \RuntimeException('Missing settings: TURNSTILE_CHECKER not found');
         }
@@ -118,8 +121,7 @@ class TwoFAController extends AbstractController
         }
 
         if (
-            $user->getTwoFAtype() !== UserTwoFactorAuthenticationStatus::EMAIL->value &&
-            $user->getTwoFAtype() !== UserTwoFactorAuthenticationStatus::SMS->value
+            $user->getTwoFAtype() === UserTwoFactorAuthenticationStatus::DISABLED->value
         ) {
             return new BaseResponse(
                 403,
@@ -130,7 +132,6 @@ class TwoFAController extends AbstractController
         }
 
         if (
-            $user->getTwoFAtype() !== UserTwoFactorAuthenticationStatus::DISABLED->value &&
             $user->getOTPcodes()->isEmpty()
         ) {
             return new BaseResponse(
@@ -142,14 +143,16 @@ class TwoFAController extends AbstractController
         }
 
         // Fetch and validate settings with fallback defaults
-        $timeToResendIntervalValue = $this->settingRepository->findOneBy(['name' => 'TWO_FACTOR_AUTH_RESEND_INTERVAL']);
+        $timeToResendIntervalValue = $this->settingRepository->findOneBy([
+            'name' => SettingName::TWO_FACTOR_AUTH_RESEND_INTERVAL->value
+        ]);
         $timeToResendIntervalValue = $timeToResendIntervalValue ? (int)$timeToResendIntervalValue->getValue() : 30;
         $nrAttemptsValue = $this->settingRepository->findOneBy([
-            'name' => 'TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE',
+            'name' => SettingName::TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE->value,
         ]);
         $nrAttemptsValue = $nrAttemptsValue ? (int)$nrAttemptsValue->getValue() : 3;
         $timeToResetAttemptsValue = $this->settingRepository->findOneBy(
-            ['name' => 'TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS']
+            ['name' => SettingName::TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS->value]
         );
         $timeToResetAttemptsValue = $timeToResetAttemptsValue ? (int)$timeToResetAttemptsValue->getValue() : 60;
 

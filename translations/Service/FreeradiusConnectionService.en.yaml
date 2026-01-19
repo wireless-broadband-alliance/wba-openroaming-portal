@@ -1,0 +1,3 @@
+invalidConnectionType: 'Invalid connection type.'
+freeRADIUSConnectionSuccessfully: 'FreeRADIUS DB connection - Successfully connected.'
+FreeRADIUSConnectionFailed: 'FreeRADIUS DB connection failed: Failed to connect to the database. Please check your connection details on the .env configuration.'

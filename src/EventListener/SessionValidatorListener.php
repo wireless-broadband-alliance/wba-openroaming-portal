@@ -5,14 +5,12 @@ namespace App\EventListener;
 use App\Entity\User;
 use App\Enum\FirewallType;
 use App\Enum\UserTwoFactorAuthenticationStatus;
-use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use App\Service\GetSettings;
 use App\Service\TwoFAService;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
@@ -23,7 +21,6 @@ readonly class SessionValidatorListener
         private TokenStorageInterface $tokenStorage,
         private RouterInterface $router,
         private UserRepository $userRepository,
-        private SettingRepository $settingRepository,
         private GetSettings $getSettings,
         private TwoFAService $twoFAService,
     ) {
@@ -32,10 +29,15 @@ readonly class SessionValidatorListener
     #[AsEventListener(event: KernelEvents::REQUEST)]
     public function onKernelRequest(RequestEvent $event): void
     {
-        $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $this->getSettings->getSettings();
         $request = $event->getRequest();
         $session = $request->getSession();
         $path = $request->getPathInfo();
+
+        // Allow the user to still be able to change the language
+        if ($request->attributes->get('_route') === 'app_change_language') {
+            return;
+        }
 
         // Check if the user is authenticated
         $token = $this->tokenStorage->getToken();
@@ -46,6 +48,7 @@ readonly class SessionValidatorListener
         /** @var User $userToken */
         $userToken = $token->getUser();
 
+        // Note: ALl the following route should be ignored in case the user has a request already before 2FA
         $url = [
             '/dashboard/login',
             '/dashboard/verify2FA',
@@ -66,17 +69,14 @@ readonly class SessionValidatorListener
             '/dashboard/disable2FA/resend',
             '/dashboard/enable2FA/resend',
             '/dashboard/validate2FA/resend',
+            '/dashboard/forgot-password/checker'
         ];
 
-        if (str_starts_with($path, '/dashboard')) {
+        $user = $this->userRepository->find($userToken->getId());
+        if ($user && str_starts_with($path, '/dashboard')) {
             // Make an exception to ignore the '/dashboard/login' route
             if (in_array($path, $url)) {
                 return;
-            }
-
-            $user = $this->userRepository->find($userToken->getId());
-            if (!$user) {
-                throw new AccessDeniedHttpException('Access denied.');
             }
 
             // Check if the 2FA process is completed

@@ -1,0 +1,18 @@
+title: 'Account Deletion'
+toast_warning: 'You are on the page to permanently delete your account. This action cannot be undone, and all your data will be irreversibly erased.'
+account_deletion_process: 'Account Deletion Process'
+deletion_description: >
+    To proceed with account deletion, please enter your <strong class="text-red-600">current password</strong>.
+    If you’ve forgotten it, you can check your <strong class="text-blue-600">registration email or sms</strong> or reset it using the password recovery option.
+    To reset your password, go to <strong class="text-blue-600">"/forgot-password/email or /forgot-password/sms "</strong> —
+    <strong class="text-red-600">you must not be logged in</strong> to do this.
+
+password_label: 'Password'
+password_placeholder: 'Enter your password'
+confirm_label: 'I confirm that I want to permanently delete my account, and I understand this action cannot be undone.'
+code_label: 'Code'
+code_placeholder: 'Enter your code'
+submit_button: 'Submit'
+resend_code_button: 'Resend code'
+deletion_description_code: >
+    To proceed with account deletion, please enter the <strong class="text-red-600">code</strong> sent to you.

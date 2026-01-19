@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Enum\ApiVersion;
+use App\Enum\SettingName;
 use App\Repository\SettingRepository;
 use App\Service\ApiResponseService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -17,24 +18,30 @@ class ApiController extends AbstractController
     ) {
     }
 
+    #[Route('/api', name: 'api_docs')]
+    public function redirectToLatestAPIVersion(): Response
+    {
+        return $this->redirectToRoute('api_v3_docs');
+    }
+
     #[Route('/api/v1', name: 'api_v1_docs')]
     public function versionOne(): Response
     {
-        $routes = $this->apiResponseService->getRoutesByPrefix(ApiVersion::API_V1->value);
+        $routes = $this->apiResponseService->getRoutesByPrefix(ApiVersion::API_V1);
         $commonMessages = $this->apiResponseService->getCommonResponses();
 
         $settings = [
-            'PAGE_TITLE' => $this->settingRepository->findOneBy(
-                ['name' => 'PAGE_TITLE']
+            SettingName::PAGE_TITLE->value => $this->settingRepository->findOneBy(
+                ['name' => SettingName::PAGE_TITLE->value]
             )->getValue(),
-            'CUSTOMER_LOGO_ENABLED' => $this->settingRepository->findOneBy(
-                ['name' => 'CUSTOMER_LOGO_ENABLED']
+            SettingName::CUSTOMER_LOGO_ENABLED->value => $this->settingRepository->findOneBy(
+                ['name' => SettingName::CUSTOMER_LOGO_ENABLED->value]
             )->getValue(),
-            'CUSTOMER_LOGO' => $this->settingRepository->findOneBy(
-                ['name' => 'CUSTOMER_LOGO']
+            SettingName::CUSTOMER_LOGO->value => $this->settingRepository->findOneBy(
+                ['name' => SettingName::CUSTOMER_LOGO->value]
             )->getValue(),
-            'OPENROAMING_LOGO' => $this->settingRepository->findOneBy(
-                ['name' => 'OPENROAMING_LOGO']
+            SettingName::OPENROAMING_LOGO->value => $this->settingRepository->findOneBy(
+                ['name' => SettingName::OPENROAMING_LOGO->value]
             )->getValue(),
         ];
 
@@ -48,25 +55,53 @@ class ApiController extends AbstractController
     #[Route('/api/v2', name: 'api_v2_docs')]
     public function versionTwo(): Response
     {
-        $routes = $this->apiResponseService->getRoutesByPrefix(ApiVersion::API_V2->value);
+        $routes = $this->apiResponseService->getRoutesByPrefix(ApiVersion::API_V2);
         $commonMessages = $this->apiResponseService->getCommonResponses();
 
         $settings = [
-            'PAGE_TITLE' => $this->settingRepository->findOneBy(
-                ['name' => 'PAGE_TITLE']
+            SettingName::PAGE_TITLE->value => $this->settingRepository->findOneBy(
+                ['name' => SettingName::PAGE_TITLE->value]
             )->getValue(),
-            'CUSTOMER_LOGO_ENABLED' => $this->settingRepository->findOneBy(
-                ['name' => 'CUSTOMER_LOGO_ENABLED']
+            SettingName::CUSTOMER_LOGO_ENABLED->value => $this->settingRepository->findOneBy(
+                ['name' => SettingName::CUSTOMER_LOGO_ENABLED->value]
             )->getValue(),
-            'CUSTOMER_LOGO' => $this->settingRepository->findOneBy(
-                ['name' => 'CUSTOMER_LOGO']
+            SettingName::CUSTOMER_LOGO->value => $this->settingRepository->findOneBy(
+                ['name' => SettingName::CUSTOMER_LOGO->value]
             )->getValue(),
-            'OPENROAMING_LOGO' => $this->settingRepository->findOneBy(
-                ['name' => 'OPENROAMING_LOGO']
+            SettingName::OPENROAMING_LOGO->value => $this->settingRepository->findOneBy(
+                ['name' => SettingName::OPENROAMING_LOGO->value]
             )->getValue(),
         ];
 
         return $this->render('api/version_two.html.twig', [
+            'routes' => $routes,
+            'commonMessages' => $commonMessages,
+            'settings' => $settings,
+        ]);
+    }
+
+    #[Route('/api/v3', name: 'api_v3_docs')]
+    public function versionTree(): Response
+    {
+        $routes = $this->apiResponseService->getRoutesByPrefix(ApiVersion::API_V3);
+        $commonMessages = $this->apiResponseService->getCommonResponses();
+
+        $settings = [
+            SettingName::PAGE_TITLE->value => $this->settingRepository->findOneBy(
+                ['name' => SettingName::PAGE_TITLE->value]
+            )->getValue(),
+            SettingName::CUSTOMER_LOGO_ENABLED->value => $this->settingRepository->findOneBy(
+                ['name' => SettingName::CUSTOMER_LOGO_ENABLED->value]
+            )->getValue(),
+            SettingName::CUSTOMER_LOGO->value => $this->settingRepository->findOneBy(
+                ['name' => SettingName::CUSTOMER_LOGO->value]
+            )->getValue(),
+            SettingName::OPENROAMING_LOGO->value => $this->settingRepository->findOneBy(
+                ['name' => SettingName::OPENROAMING_LOGO->value]
+            )->getValue(),
+        ];
+
+        return $this->render('api/version_tree.html.twig', [
             'routes' => $routes,
             'commonMessages' => $commonMessages,
             'settings' => $settings,

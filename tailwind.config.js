@@ -13,7 +13,7 @@ module.exports = {
                 gray: {
                     100: '#F5F5F5',
                 },
-                primary: '#7BBA29',
+                primary: '#8AB742',
                 veryDarkPurple: '#594B60',
                 veryDarkButton: '#232B35',
                 lightGreen: '#57a475',

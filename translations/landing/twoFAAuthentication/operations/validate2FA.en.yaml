@@ -1,0 +1,7 @@
+title: 'Two-Factor Authentication - Method Validation'
+logoAlt: 'Customer Logo'
+heading: 'Two-Factor Authentication - Method Validation'
+description: 'To validate the use of two-factor authentication please enter the code sent to you.'
+placeholder: 'Enter your Code'
+submit: 'Submit'
+resend: 'Resend code'

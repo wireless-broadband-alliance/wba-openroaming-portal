@@ -8,30 +8,46 @@ use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\Length;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
+/**
+ * @extends AbstractType<User>
+ */
 class ResetPasswordType extends AbstractType
 {
+    public function __construct(
+        private readonly TranslatorInterface $translator
+    ) {
+    }
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
             ->add('password', PasswordType::class, [
-                'label' => 'New Password',
+                'label' => $this->translator->trans('newPassword', [], 'ResetPasswordType'),
+                'toggle' => true,
+                'hidden_label' => null,
+                'visible_label' => null,
                 'attr' => [
                     'mapped' => false,
-                    'placeholder' => 'Enter New password',
+                    'placeholder' => $this->translator->trans('enterNewPassword', [], 'ResetPasswordType'),
                 ],
                 'constraints' => [
                     new Length([
                         'min' => 7,
-                        'minMessage' => ' This field cannot be shorter than {{ limit }} characters',
-                    ])
+                        'max' => 128,
+                        'minMessage' => $this->translator->trans('fieldCannotBeShorterThan', [], 'ResetPasswordType'),
+                        'maxMessage' => $this->translator->trans('fieldCannotBeLongerThan', [], 'ResetPasswordType'),
+                    ]),
                 ],
             ])
             ->add('confirmPassword', PasswordType::class, [
-                'label' => 'Confirm New Password',
+                'label' => $this->translator->trans('confirmNewPassword', [], 'ResetPasswordType'),
+                'toggle' => true,
+                'hidden_label' => null,
+                'visible_label' => null,
                 'mapped' => false,
                 'attr' => [
-                    'placeholder' => 'Enter the confirmation',
+                    'placeholder' => $this->translator->trans('enterTheConfirmation', [], 'ResetPasswordType'),
                 ],
             ]);
     }

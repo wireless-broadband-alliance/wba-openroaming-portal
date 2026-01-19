@@ -122,9 +122,17 @@ environment.
 These steps will enhance the portal's security and enable key features required for its full functionality 
 (Cron Commands, Microsoft login, Google Login, SAML login and GeoLite2).
 
-### Set up a CRON Job for automation commands
+### 🔧 Set up a CRON Job for automation commands
 
-For detailed steps on how to set up CRONS, please refer to the [Cron Configuration Guide](../docs/CRONGUI.md)
+For reference, all the previous documentation related to the **CRONGUI.md** was discontinued. Now the framework
+handles all this automation, and the supervisor configuration takes cares of the process. If you want to run the
+configuration command by yourself, you can run the following command:
+
+```bash
+php bin/console messenger:consume scheduler_default -vv
+```
+
+Also, all this setup is configured on the following file: `src/Schedule.php`
 
 ### Google Authenticator Credentials
 

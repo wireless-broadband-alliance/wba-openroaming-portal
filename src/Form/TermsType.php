@@ -2,30 +2,37 @@
 
 namespace App\Form;
 
+use App\Enum\SettingName;
+use App\Enum\TextEditorName;
 use App\Service\GetSettings;
-use EmilePerron\TinymceBundle\Form\Type\TinymceType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
+/**
+ * @extends AbstractType<null>
+ */
 class TermsType extends AbstractType
 {
-    public function __construct(private readonly GetSettings $getSettings)
-    {
+    public function __construct(
+        private readonly GetSettings $getSettings,
+        private readonly TranslatorInterface $translator
+    ) {
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $allowedSettings = [
-            'TOS' => ChoiceType::class,
-            'PRIVACY_POLICY' => ChoiceType::class,
-            'TOS_LINK' => TextType::class,
-            'PRIVACY_POLICY_LINK' => TextType::class,
-            'TOS_EDITOR' => TinymceType::class,
-            'PRIVACY_POLICY_EDITOR' => TinymceType::class,
+            SettingName::TOS->value => ChoiceType::class,
+            SettingName::PRIVACY_POLICY->value => ChoiceType::class,
+            SettingName::TOS_LINK->value => TextType::class,
+            SettingName::PRIVACY_POLICY_LINK->value => TextType::class,
+            TextEditorName::TOS_EDITOR->value => QuillType::class,
+            TextEditorName::PRIVACY_POLICY_EDITOR->value => QuillType::class,
         ];
 
         foreach ($allowedSettings as $settingName => $formFieldType) {
@@ -38,9 +45,10 @@ class TermsType extends AbstractType
                     'attr' => [
                         'autocomplete' => 'off',
                     ],
+                    'required' => false,
                     'constraints' => [
                         new Assert\Url([
-                            'message' => 'The value {{ value }} is not a valid URL.',
+                            'message' => $this->translator->trans('valueNotValid', [], 'CapportType'),
                             'protocols' => ['http', 'https'],
                             'requireTld' => true,
                         ]),
@@ -52,7 +60,7 @@ class TermsType extends AbstractType
                     'LINK' => 'LINK',
                     'TEXT_EDITOR' => 'TEXT_EDITOR',
                 ];
-                $formFieldOptions['placeholder'] = 'Select an option';
+                $formFieldOptions['placeholder'] = $this->translator->trans('selectOption', [], 'CapportType');
             }
             // Get the corresponding Setting entity and set its value
             foreach ($options['settings'] as $setting) {

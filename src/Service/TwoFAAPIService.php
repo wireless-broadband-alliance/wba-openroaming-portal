@@ -2,10 +2,13 @@
 
 namespace App\Service;
 
+use App\Entity\OTPcode;
 use App\Entity\User;
+use App\Enum\SettingName;
 use App\Enum\TwoFAType;
 use App\Enum\UserTwoFactorAuthenticationStatus;
 use App\Repository\SettingRepository;
+use Doctrine\Common\Collections\Collection;
 
 readonly class TwoFAAPIService
 {
@@ -15,9 +18,20 @@ readonly class TwoFAAPIService
     ) {
     }
 
+    /**
+     * Checks the enforcement status of 2FA for a given user and endpoint.
+     *
+     * @return array{
+     *     canSkip2FA: bool,
+     *     missing_2fa_setting: bool,
+     *     message: string,
+     *     details?: array<string, mixed>,
+     *     twoFAType?: string
+     * }
+     */
     public function twoFAEnforcementChecker(User $user, string $endpointName): array
     {
-        $status2FA = $this->settingRepository->findOneBy(['name' => 'TWO_FACTOR_AUTH_STATUS']);
+        $status2FA = $this->settingRepository->findOneBy(['name' => SettingName::TWO_FACTOR_AUTH_STATUS->value]);
 
         // If $status2FA is null or not found, return an error message
         if (!$status2FA) {
@@ -51,7 +65,8 @@ readonly class TwoFAAPIService
             return [
                 'canSkip2FA' => true,
                 'missing_2fa_setting' => false,
-                '2FAType' => $twoFAValue
+                'message' => 'Two-Factor Authentication is not enforced, flow allowed.',
+                'twoFAType' => $twoFAValue
             ];
         }
 
@@ -75,7 +90,7 @@ readonly class TwoFAAPIService
                     'missing_2fa_setting' => false,
                     'message' => 'Two-Factor Authentication it\'s required for authentication on the portal. ' .
                         'Please visit ' . $_SERVER['HTTP_HOST'] . ' to set up 2FA and secure your account.',
-                    '2FAType' => $twoFAValue,
+                    'twoFAType' => $twoFAValue,
                 ];
             }
 
@@ -87,7 +102,7 @@ readonly class TwoFAAPIService
                         'message' => 'Two-Factor Authentication is active for this account.' .
                             ' Please ensure you provide the correct authentication code.',
                         'details' => $user2FACurrentState,
-                        '2FAType' => $twoFAValue
+                        'twoFAType' => $twoFAValue
                     ];
                 }
 
@@ -97,7 +112,7 @@ readonly class TwoFAAPIService
                     'missing_2fa_setting' => false,
                     'message' => 'Two-Factor Authentication it\'s required for authentication on the portal. ' .
                         'Please visit ' . $_SERVER['HTTP_HOST'] . ' to set up 2FA and secure your account.',
-                    '2FAType' => $twoFAValue,
+                    'twoFAType' => $twoFAValue,
                 ];
             }
 
@@ -117,7 +132,7 @@ readonly class TwoFAAPIService
                     'message' => 'Two-Factor Authentication is active for this account.' .
                         ' Please ensure you provide the correct authentication code.',
                     'details' => $user2FACurrentState,
-                    '2FAType' => $twoFAValue
+                    'twoFAType' => $twoFAValue
                 ];
             }
 
@@ -125,7 +140,8 @@ readonly class TwoFAAPIService
             return [
                 'canSkip2FA' => true,
                 'missing_2fa_setting' => false,
-                '2FAType' => $twoFAValue
+                'message' => 'Two-Factor Authentication is not enforced, flow allowed.',
+                'twoFAType' => $twoFAValue
             ];
         }
 
@@ -137,7 +153,7 @@ readonly class TwoFAAPIService
                     'message' => 'Two-Factor Authentication is active for this account.' .
                         ' Please ensure you provide the correct authentication code.',
                     'details' => $user2FACurrentState,
-                    '2FAType' => $twoFAValue
+                    'twoFAType' => $twoFAValue
                 ];
             }
 
@@ -146,7 +162,7 @@ readonly class TwoFAAPIService
                 'missing_2fa_setting' => false,
                 'message' => 'Two-Factor Authentication it\'s required for authentication on the portal. Please visit '
                     . $_SERVER['HTTP_HOST'] . ' to set up 2FA and secure your account.',
-                '2FAType' => $twoFAValue,
+                'twoFAType' => $twoFAValue,
             ];
         }
 
@@ -158,6 +174,18 @@ readonly class TwoFAAPIService
         ];
     }
 
+    /**
+     * Returns the 2FA configuration of the user.
+     *
+     * @return array{
+     *     type?: int,
+     *     isActive: bool,
+     *     secret?: string|null,
+     *     code?: string|null,
+     *     otpCodes?: Collection<int, OTPcode>,
+     *     message?: string
+     * }
+     */
     private function twoFAUserConfiguration(User $user): array
     {
         // Check if the user's 2FA is active

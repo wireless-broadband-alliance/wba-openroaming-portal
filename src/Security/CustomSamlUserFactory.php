@@ -9,10 +9,11 @@ namespace App\Security;
 use ApiPlatform\Metadata\UrlGeneratorInterface;
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
+use App\Enum\PlatformMode;
+use App\Enum\SettingName;
 use App\Enum\UserProvider;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
-use App\Service\GetSettings;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Nbgrp\OneloginSamlBundle\Security\User\SamlUserFactoryInterface;
@@ -23,6 +24,7 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 use function is_string;
 
@@ -30,17 +32,19 @@ class CustomSamlUserFactory implements SamlUserFactoryInterface
 {
     /**
      * Default attribute mapping.
+     * @var array<string, int|string|list<string>>
      */
     private readonly array $attribute_mapping;
+
     private readonly SessionInterface $session;
 
     public function __construct(
         private readonly UserRepository $userRepository,
         private readonly EntityManagerInterface $entityManager,
-        private readonly GetSettings $getSettings,
-        private readonly SettingRepository $settingRepository,
         private readonly UrlGeneratorInterface $urlGenerator,
         RequestStack $requestStack,
+        private readonly TranslatorInterface $translator,
+        private readonly SettingRepository $settingRepository
     ) {
         $this->session = $requestStack->getSession();
         $this->attribute_mapping = [
@@ -55,18 +59,18 @@ class CustomSamlUserFactory implements SamlUserFactoryInterface
     }
 
     /**
+     * @param array<string, array<int, string>> $attributes
      * @throws ReflectionException
      * @throws \Exception
      */
     public function createUser(string $identifier, array $attributes): UserInterface
     {
         // Call the getSettings method of GetSettings class to retrieve the data
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $platformModeStatus = $this->settingRepository->findOneBy(['name' => SettingName::PLATFORM_MODE]);
 
-        if ($data['PLATFORM_MODE']['value'] === true) {
+        if ($platformModeStatus->getValue() === PlatformMode::DEMO->value) {
             throw new RuntimeException(
-                "Get Away. 
-            It's impossible to use this authentication method in demo mode"
+                $this->translator->trans('impossibleUseThisAuthenticationMethodInDemoMode', [], 'Security')
             );
         }
 
@@ -81,7 +85,7 @@ class CustomSamlUserFactory implements SamlUserFactoryInterface
                 /** @phpstan-ignore-next-line */ // To avoid conflicts with RECTOR
                 $this->session->getFlashBag()->add(
                     'error',
-                    'This account is disabled. Please contact support.'
+                    $this->translator->trans('accountDisabled', [], 'Security')
                 );
                 $redirect = new RedirectResponse($this->urlGenerator->generate('app_landing'));
                 $redirect->send();
@@ -145,16 +149,23 @@ class CustomSamlUserFactory implements SamlUserFactoryInterface
         return $user;
     }
 
+    /**
+     * @param array<string, array<int, string>> $attributes
+     */
     private function getAttributeValue(array $attributes, string $attribute): mixed
     {
         $isArrayValue = str_ends_with($attribute, '[]');
         $attribute = $isArrayValue ? substr($attribute, 0, -2) : $attribute;
 
         if (!\array_key_exists($attribute, $attributes)) {
-            throw new RuntimeException('Attribute "' . $attribute . '" not found in SAML data.');
+            throw new RuntimeException($this->translator->trans(
+                'attributeNotFoundSAMLData',
+                ['%attribute%' => $attribute],
+                'Security'
+            ));
         }
 
-        $attributeValue = (array)$attributes[$attribute];
+        $attributeValue = $attributes[$attribute];
         if (!$isArrayValue) {
             /** @psalm-suppress MixedAssignment */
             $attributeValue = reset($attributeValue);

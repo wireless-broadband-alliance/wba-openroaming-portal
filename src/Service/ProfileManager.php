@@ -3,6 +3,7 @@
 namespace App\Service;
 
 use App\Entity\User;
+use App\Entity\UserRadiusProfile;
 use App\Enum\UserRadiusProfileStatus;
 use App\RadiusDb\Entity\RadiusUser;
 use App\RadiusDb\Repository\RadiusUserRepository;
@@ -97,6 +98,9 @@ readonly class ProfileManager
         $this->radiusUserRepository->flush();
     }
 
+    /**
+     * @return UserRadiusProfile[]
+     */
     public function getActiveProfilesByUser(User $user): array
     {
         return $this->userRadiusProfileRepository->findBy([

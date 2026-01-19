@@ -10,6 +10,7 @@ use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use App\Service\EscapeSpreadSheet;
 use App\Service\EventActions;
+use App\Service\FreeradiusConnectionService;
 use App\Service\GetSettings;
 use App\Service\Statistics;
 use DateTime;
@@ -19,23 +20,26 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
+use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class FreeradiusController extends AbstractController
 {
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
         private readonly GetSettings $getSettings,
-        private readonly UserRepository $userRepository,
-        private readonly SettingRepository $settingRepository,
         private readonly ParameterBagInterface $parameterBag,
         private readonly EventActions $eventActions,
         private readonly RadiusAuthsRepository $radiusAuthsRepository,
-        private readonly RadiusAccountingRepository $radiusAccountingRepository
+        private readonly RadiusAccountingRepository $radiusAccountingRepository,
+        private readonly TranslatorInterface $translator,
+        private readonly FreeradiusConnectionService $freeradiusConnectionService
     ) {
     }
 
@@ -54,7 +58,16 @@ class FreeradiusController extends AbstractController
         #[MapQueryParameter] int $page = 1,
         #[MapQueryParameter] ?int $count = 5
     ): Response {
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        $result = $this->freeradiusConnectionService->checkConnection();
+        if ($result['success'] === false) {
+            throw new ServiceUnavailableHttpException(
+                null,
+                'FreeRADIUS DB connection failed: ' . $result['message']
+            );
+        }
+
+        /** @var array<string, array{value: string, description: string}> $data */
+        $data = $this->getSettings->getSettings();
 
         $user = $this->getUser();
         $export_freeradius_statistics = $this->parameterBag->get('app.export_freeradius_statistics');
@@ -74,7 +87,11 @@ class FreeradiusController extends AbstractController
         if ($interval->days > 365) {
             $this->addFlash(
                 'error_admin',
-                'Maximum date range is 1 year'
+                $this->translator->trans(
+                    'maximumDateRange1Year',
+                    [],
+                    'controllers'
+                )
             );
 
             return $this->redirectToRoute('admin_dashboard_statistics_freeradius');
@@ -86,6 +103,7 @@ class FreeradiusController extends AbstractController
             $this->radiusAuthsRepository,
             $this->radiusAccountingRepository
         );
+
         $fetchChartAuthenticationsFreeradius = $statisticsService
             ->fetchChartAuthenticationsFreeradius($startDate, $endDate);
         $fetchChartRealmsFreeradius = $statisticsService->fetchChartRealmsFreeradius($startDate, $endDate);
@@ -105,7 +123,11 @@ class FreeradiusController extends AbstractController
         if ($memory_diff > 134217728) {
             $this->addFlash(
                 'error_admin',
-                'Maximum date range is 1 year'
+                $this->translator->trans(
+                    'maximumDateRange1Year',
+                    [],
+                    'controllers'
+                )
             );
 
             return $this->redirectToRoute('admin_dashboard_statistics_freeradius');
@@ -176,7 +198,7 @@ class FreeradiusController extends AbstractController
         $offset = ($page - 1) * $count;
         $fetchChartApUsage = array_slice($fetchChartApUsage, $offset, $count);
 
-        return $this->render('admin/freeradius_statistics.html.twig', [
+        return $this->render('dashboard/statistics/freeradius_statistics.html.twig', [
             'user' => $user,
             'data' => $data,
             'current_user' => $user,
@@ -305,23 +327,11 @@ class FreeradiusController extends AbstractController
             ];
         }
 
-        // Prepare the realm Usage data for Excel
-        $realmUsageData = [];
-        foreach ($fetchChartRealmsFreeradius as $session_date) {
-            $realm = $fetchChartRealmsFreeradius[0]['realm'] ?? 0;
-            $totalCount = $fetchChartRealmsFreeradius[0]['count'] ?? 0;
-
-            $realmUsageData[] = [
-                'realm' => $realm,
-                'total_count' => $totalCount,
-            ];
-        }
-
         // Prepare the AP Usage data for Excel
         $apUsageData = [];
         foreach (array_keys($fetchChartApUsage) as $index) {
-            $apName = $fetchChartApUsage[$index]['ap'] ?? 0;
-            $apUsage = $fetchChartApUsage[$index]['count'] ?? 0;
+            $apName = $fetchChartApUsage[$index]['ap'];
+            $apUsage = $fetchChartApUsage[$index]['count'];
             $apUsageData[] = [
                 'ap_Name' => $apName,
                 'ap_Usage' => $apUsage,

@@ -2,7 +2,9 @@
 
 namespace App\Repository;
 
+use App\Entity\User;
 use App\Entity\UserRadiusProfile;
+use App\Enum\UserRadiusProfileStatus;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -10,9 +12,10 @@ use Doctrine\Persistence\ManagerRegistry;
  * @extends ServiceEntityRepository<UserRadiusProfile>
  *
  * @method UserRadiusProfile|null find($id, $lockMode = null, $lockVersion = null)
- * @method UserRadiusProfile|null findOneBy(array $criteria, array $orderBy = null)
+ * phpcs:ignore Generic.Files.LineLength.TooLong
+ * @method UserRadiusProfile[]    findBy(array<string, mixed> $criteria, array<string, string>|null $orderBy = null, ?int $limit = null, ?int $offset = null)
  * @method UserRadiusProfile[]    findAll()
- * @method UserRadiusProfile[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @method UserRadiusProfile|null findOneBy(array<string, mixed> $criteria, array<string, string>|null $orderBy = null)
  */
 class UserRadiusProfileRepository extends ServiceEntityRepository
 {
@@ -63,4 +66,29 @@ class UserRadiusProfileRepository extends ServiceEntityRepository
 //            ->getOneOrNullResult()
 //        ;
 //    }
+
+    /**
+     * Returns all active UserRadiusProfile entities
+     *
+     * @return UserRadiusProfile[]
+     */
+    public function findRadiusUserAndConnectionTimes(): array
+    {
+        return $this->createQueryBuilder('u')
+            ->where('u.status = :active')
+            ->setParameter('active', UserRadiusProfileStatus::ACTIVE->value)
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function findUserLastConnection(User $user): ?UserRadiusProfile
+    {
+        return $this->createQueryBuilder('u')
+            ->where('u.user = :user')
+            ->setParameter('user', $user)
+            ->orderBy('u.lastConnectionStopAt', 'DESC')
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
 }

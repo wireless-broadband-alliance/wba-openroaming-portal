@@ -135,12 +135,16 @@ All the present items can be customizable:
 
 ### Settings Management
 
-- **Platform Status**
+- **Platform Status (Live/Demo)**
+- **API Status**
 - **Landing Page Configuration**
 - **Terms and Policies**
+- **Schedule Automation for CRON's**
 - **Radius Configuration**
 - **Authentication Methods**
 - **Two Factor Authenticator**
+- **LDAP Synchronization**
+- **Profile Radius Configuration**
 - **User Engagement**
 - **SMS Configuration**
 
@@ -174,7 +178,7 @@ purpose, required inputs, and expected outputs.
 Additionally, the documentation shows the necessary security measures,
 such as CAPTCHA validation, that are integrated to protect user data and ensure secure interactions with the API.
 
-Please refer to the [API documentation](docs/api/index.html) for detailed usage instructions and examples.
+Please refer to the [API documentation](docs/Api/V2/index_v2.html) for detailed usage instructions and examples.
 
 Follow this link for more information on API documentation: [Api Guide](docs/APIGUI.md)
 
@@ -346,10 +350,19 @@ check the `.env.sample`.
 - `JWT_SECRET_KEY`: The secret defined for the key.
 - `JWT_PUBLIC_KEY`: The public key location.
 - `JWT_PASSPHRASE`: The private key location.
+- `JWT_EXPIRATION`: The expiration date of the token.
 
 ### 🔧 Set up a CRON Job for automation commands
 
-For detailed steps on how to set up CRONS, please refer to the [Cron Configuration Guide](docs/CRONGUI.md)
+For reference, all the previous documentation related to the **CRONGUI.md** was discontinued. Now the framework
+handles all this automation, and the supervisor configuration takes cares of the process. If you want to run the
+configuration command by yourself, you can run the following command:
+
+```bash
+php bin/console messenger:consume scheduler_default -vv
+```
+
+Also, all this setup is configured on the following file: `src/Schedule.php`
 
 ## 🔑 Admin Page Access Page
 
@@ -425,50 +438,60 @@ certificate. **Connection errors** can happen if the right SHA1 hash is not prov
 27. `AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED`: Enable or disable Login (email) authentication method.
 28. `AUTH_METHOD_LOGIN_TRADITIONAL_LABEL`: The label for Login (email) authentication button on the login page.
 29. `AUTH_METHOD_LOGIN_TRADITIONAL_DESCRIPTION`: The description for Login (email) authentication on the login page.
-30. `AUTH_METHOD_SMS_REGISTER_ENABLED`: Enable or disable Login (SMS) authentication method.
-31. `AUTH_METHOD_SMS_REGISTER_LABEL`: The label for Login (SMS) authentication button on the login page.
-32. `AUTH_METHOD_SMS_REGISTER_DESCRIPTION`: The description for Login (SMS) authentication on the login page.
+30. `LOGIN_WITH_UUID_ONLY`: Enabled or disabled only UUID authentication, this method sends a confirmation code instead
+    of the tradicional uuid & password.
+31. `AUTH_METHOD_SMS_REGISTER_ENABLED`: Enable or disable Login (SMS) authentication method.
+32. `AUTH_METHOD_SMS_REGISTER_LABEL`: The label for Login (SMS) authentication button on the login page.
+33. `AUTH_METHOD_SMS_REGISTER_DESCRIPTION`: The description for Login (SMS) authentication on the login page.
 
-33. `TWO_FACTOR_AUTH_STATUS`: The status of two-factor authentication when users log in to the platform.
-34. `TWO_FACTOR_AUTH_APP_LABEL`: Platform identifier in two factor application
-35. `TWO_FACTOR_AUTH_APP_ISSUER`: Issuer identifier in two factor application
-36. `TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME`: Local two-factor authentication code expiration time
-37. `TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE`: Number of attempts to request resending of the two-factor
+34. `TWO_FACTOR_AUTH_STATUS`: The status of two-factor authentication when users log in to the platform.
+35. `TWO_FACTOR_AUTH_APP_LABEL`: Platform identifier in two-factor application
+36. `TWO_FACTOR_AUTH_APP_ISSUER`: Issuer identifier in two-factor application
+37. `TWO_FACTOR_AUTH_CODE_EXPIRATION_TIME`: Local two-factor authentication code expiration time
+38. `TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE`: Number of attempts to request resending of the two-factor
     authentication code
-38. `TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS`: Time in minutes to reset attempts to send two-factor
+39. `TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS`: Time in minutes to reset attempts to send two-factor
     authentication code
-39. `TWO_FACTOR_AUTH_RESEND_INTERVAL`: Time interval in seconds to request a new two-factor authentication code
+40. `TWO_FACTOR_AUTH_RESEND_INTERVAL`: Time interval in seconds to request a new two-factor authentication code
 
-40. `SYNC_LDAP_ENABLED`: Enable or disable synchronization with LDAP.
-41. `SYNC_LDAP_SERVER`: The LDAP server's URL.
-42. `SYNC_LDAP_BIND_USER_DN`: The Distinguished Name (DN) used to bind to the LDAP server.
-43. `SYNC_LDAP_BIND_USER_PASSWORD`: The password for the bind user on the LDAP server.
-44. `SYNC_LDAP_SEARCH_BASE_DN`: The base DN used when searching the LDAP directory.
-45. `SYNC_LDAP_SEARCH_FILTER`: The filter used when searching the LDAP directory.
+41. `SYNC_LDAP_ENABLED`: Enable or disable synchronization with LDAP.
+42. `SYNC_LDAP_SERVER`: The LDAP server's URL.
+43. `SYNC_LDAP_BIND_USER_DN`: The Distinguished Name (DN) used to bind to the LDAP server.
+44. `SYNC_LDAP_BIND_USER_PASSWORD`: The password for the bind user on the LDAP server.
+45. `SYNC_LDAP_SEARCH_BASE_DN`: The base DN used when searching the LDAP directory.
+46. `SYNC_LDAP_SEARCH_FILTER`: The filter used when searching the LDAP directory.
     The placeholder `@ID` is replaced with the user's ID.
 
-46. `PROFILES_ENCRYPTION_TYPE_IOS_ONLY`: Type of encryption defined for the creation of the profiles, for iOS only.
-47. `CAPPORT_ENABLED`: Enable or disable Capport DHCP configuration.
-48. `CAPPORT_PORTAL_URL`: Domain that is from the entity hosting the service.
-49. `CAPPORT_VENUE_INFO_URL`: Domain where the user is redirected after clicking the DHCP notification.
-50. `SMS_USERNAME`: Budget SMS Username.
-51. `SMS_USER_ID`: Budget SMS User ID.
-52. `SMS_HANDLE`: Budget SMS Handle hash.
-53. `SMS_FROM`: Entity sending the SMS for the users.
-54. `SMS_TIMER_RESEND`: Timer in minutes to make the user wait to resend a new SMS.
+47. `PROFILES_ENCRYPTION_TYPE_IOS_ONLY`: Type of encryption defined for the creation of the profiles, for iOS only.
+48. `CAPPORT_ENABLED`: Enable or disable Capport DHCP configuration.
+49. `CAPPORT_PORTAL_URL`: Domain that is from the entity hosting the service.
+50. `CAPPORT_VENUE_INFO_URL`: Domain where the user is redirected after clicking the DHCP notification.
+51. `SMS_USERNAME`: Budget SMS Username.
+52. `SMS_USER_ID`: Budget SMS User ID.
+53. `SMS_HANDLE`: Budget SMS Handle hash.
+54. `SMS_FROM`: Entity sending the SMS for the users.
+55. `SMS_TIMER_RESEND`: Timer in minutes to make the user wait to resend a new SMS.
 
-55. `EMAIL_TIMER_RESEND`: Time in minutes to make the user wait to resend a new EMAIL for reset password request.
-56. `LINK_VALIDITY`: Time in minutes a link stays active before it expires.
+56. `EMAIL_TIMER_RESEND`: Time in minutes to make the user wait to resend a new EMAIL for reset password request.
+57. `LINK_VALIDITY`: Time in minutes a link stays active before it expires.
 
-57. `TOS_LINK`: Term's and Conditions URL.
-58. `PRIVACY_POLICY_LINK`: Privacy and Policy URL.
-59. `USER_DELETE_TIME`: Time in hours to delete the unverified user.
-60. `TIME_INTERVAL_NOTIFICATION`: Time in days to resend the notification when the profile is about to expire.
-61. `PROFILE_LIMIT_DATE_SAML`: Time in days to disable profiles for SAML users with login.
-62. `PROFILE_LIMIT_DATE_GOOGLE`: Time in days to disable profiles for users with GOOGLE login.
-63. `PROFILE_LIMIT_DATE_MICROSOFT`: Time in days to disable profiles for users with MICROSOFT login.
-64. `PROFILE_LIMIT_DATE_EMAIL`: Time in days to disable profiles for users with EMAIL login.
-65. `PROFILE_LIMIT_DATE_SMS`: Time in days to disable profiles for users with SMS login.
+58. `TOS_LINK`: Term's and Conditions URL.
+59. `PRIVACY_POLICY_LINK`: Privacy and Policy URL.
+60. `USER_DELETE_TIME`: Time in hours to delete the unverified user.
+61. `TIME_INTERVAL_NOTIFICATION`: Time in days to resend the notification when the profile is about to expire.
+62. `PROFILE_LIMIT_DATE_SAML`: Time in days to disable profiles for SAML users with login.
+63. `PROFILE_LIMIT_DATE_GOOGLE`: Time in days to disable profiles for users with GOOGLE login.
+64. `PROFILE_LIMIT_DATE_MICROSOFT`: Time in days to disable profiles for users with MICROSOFT login.
+65. `PROFILE_LIMIT_DATE_EMAIL`: Time in days to disable profiles for users with EMAIL login.
+66. `PROFILE_LIMIT_DATE_SMS`: Time in days to disable profiles for users with SMS login.
+67. `TIME_STAMP_FREERADIUS_CRON`: Tracks the last run (UNIX epoch) of the backup:freeradiusLastConnection command.
+    Internal use only, not shown in UI.
+68. `DELETE_UNCONFIRMED_USERS_CRON`: Defines the schedule to delete unconfirmed users from the portal.
+69. `USERS_WHEN_PROFILE_EXPIRES_CRON`: Defines the schedule to notify the users when their profile to expire.
+70. `LDAP_SYNC_CRON`: Defines the schedule for LDAP synchronization automation command.
+71. `FREERADIUS_LAST_CONNECTION_CRON`: Defines the schedule for Freeradius server & the user profile
+        last connection.
+72. `CRON_ADVANCED_STATUS`:  Saves the previous status mode on the schedule cron configuration page (Simple/Advanced)
 
 #### With these environment variables, you can configure and customize various aspects of the project, such as database connections, SAML settings, login methods, and more.
 
@@ -483,7 +506,8 @@ The portal exposes metrics for monitoring using Prometheus. The metrics are avai
 ### Available Metrics
 
 - **Users**: Total users, verified users, and banned users
-- **Authentication Providers**: Users by provider (Portal Account, SAML Account, Google Account, Microsoft Account) and portal users by type (Email, Phone Number)
+- **Authentication Providers**: Users by provider (Portal Account, SAML Account, Google Account, Microsoft Account) and
+  portal users by type (Email, Phone Number)
 - **Radius Profiles**: Profiles by status, total profiles, and total radius users from the radius database
 
 ### Configuration

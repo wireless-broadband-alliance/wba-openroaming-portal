@@ -3,6 +3,7 @@
 namespace App\Command;
 
 use App\Entity\Setting;
+use App\Enum\SettingName;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -49,18 +50,18 @@ class ResetRadiusSettingsCommand extends Command
         }
 
         $settings = [
-            ['name' => 'RADIUS_REALM_NAME', 'value' => 'EditMe'],
-            ['name' => 'DISPLAY_NAME', 'value' => 'EditMe'],
-            ['name' => 'PAYLOAD_IDENTIFIER', 'value' => '887FAE2A-F051-4CC9-99BB-8DFD66F553A9'],
-            ['name' => 'OPERATOR_NAME', 'value' => 'EditMe'],
-            ['name' => 'DOMAIN_NAME', 'value' => 'EditMe'],
-            ['name' => 'RADIUS_TLS_NAME', 'value' => 'EditMe'],
-            ['name' => 'NAI_REALM', 'value' => 'EditMe'],
+            ['name' => SettingName::RADIUS_REALM_NAME->value, 'value' => 'EditMe'],
+            ['name' => SettingName::DISPLAY_NAME->value, 'value' => 'EditMe'],
+            ['name' => SettingName::PAYLOAD_IDENTIFIER->value, 'value' => '887FAE2A-F051-4CC9-99BB-8DFD66F553A9'],
+            ['name' => SettingName::OPERATOR_NAME->value, 'value' => 'EditMe'],
+            ['name' => SettingName::DOMAIN_NAME->value, 'value' => 'EditMe'],
+            ['name' => SettingName::RADIUS_TLS_NAME->value, 'value' => 'EditMe'],
+            ['name' => SettingName::NAI_REALM->value, 'value' => 'EditMe'],
             [
-                'name' => 'RADIUS_TRUSTED_ROOT_CA_SHA1_HASH',
+                'name' => SettingName::RADIUS_TRUSTED_ROOT_CA_SHA1_HASH->value,
                 'value' => 'ca bd 2a 79 a1 07 6a 31 f2 1d 25 36 35 cb 03 9d 43 29 a5 e8'
             ],
-            ['name' => 'PROFILES_ENCRYPTION_TYPE_IOS_ONLY', 'value' => 'WPA2'],
+            ['name' => SettingName::PROFILES_ENCRYPTION_TYPE_IOS_ONLY->value, 'value' => 'WPA2'],
         ];
 
 

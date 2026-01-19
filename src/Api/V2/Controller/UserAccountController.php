@@ -51,7 +51,7 @@ class UserAccountController extends AbstractController
      * @throws Error
      * @throws JsonException
      */
-    #[Route('/userAccount/deletion', name: 'api_v2_user_account_deletion', methods: ['DELETE'])]
+    #[Route('/userAccount/deletion', name: 'api_v2_user_account_deletion', methods: ['POST'])]
     public function userAccountDeletion(Request $request, Auth $samlAuth): JsonResponse
     {
         $token = $this->tokenStorage->getToken();
@@ -127,26 +127,21 @@ class UserAccountController extends AbstractController
                 if ($externalAuth->getProvider() === UserProvider::SAML->value) {
                     // Get SAML Response
                     $samlResponseBase64 = $request->request->get('SAMLResponse');
-                    if (!$samlResponseBase64) {
+
+                    if (!is_string($samlResponseBase64) || trim($samlResponseBase64) === '') {
                         return new BaseResponse(
                             400,
                             null,
-                            'SAML Response not found'
+                            'SAML Response not found or invalid'
                         )->toResponse();
                     }
 
-                    $samlResponseData = $this->samlResolverService->decodeSamlResponse($samlResponseBase64);
-                    $idpEntityId = $samlResponseData['idp_entity_id'];
+                    $samlResponseData = $this->samlResolverService->decodeSamlResponse(
+                        $samlResponseBase64,
+                        $this->getParameter('app.saml_idp_entity_id')
+                    );
+
                     $idpCertificate = $samlResponseData['certificate'];
-
-                    // Compare entity IDs
-                    if ($this->getParameter('app.saml_idp_entity_id') !== $idpEntityId) {
-                        return new BaseResponse(
-                            403,
-                            null,
-                            'The configured IDP Entity ID does not match the expected value. Access denied.'
-                        )->toResponse();
-                    }
 
                     // Compare certificates
                     if ($this->getParameter('app.saml_idp_x509_cert') !== $idpCertificate) {
@@ -234,10 +229,12 @@ class UserAccountController extends AbstractController
 
                     // Generate JWT Token
                     $token = $this->tokenGenerator->generateToken($currentUser);
-                    if (is_array($token) && isset($token['success']) && $token['success'] === false) {
-                        $statusCode = $token['error'] ===
-                        'Invalid user provided. Please verify the user data.' ? 400 : 500;
-                        return new BaseResponse($statusCode, null, $token['error'])->toResponse();
+                    if (is_array($token) && $token['success'] === false) {
+                        $errorMessage = $token['error'] ?? 'Unknown error';
+                        $statusCode =
+                            $errorMessage === 'Invalid user provided. Verify the user data.' ? 400 : 500;
+
+                        return new BaseResponse($statusCode, null, $errorMessage)->toResponse();
                     }
                 }
 
@@ -275,10 +272,12 @@ class UserAccountController extends AbstractController
 
                     // Generate JWT Token
                     $token = $this->tokenGenerator->generateToken($currentUser);
-                    if (is_array($token) && isset($token['success']) && $token['success'] === false) {
-                        $statusCode = $token['error'] ===
-                        'Invalid user provided. Please verify the user data.' ? 400 : 500;
-                        return new BaseResponse($statusCode, null, $token['error'])->toResponse();
+                    if (is_array($token) && $token['success'] === false) {
+                        $errorMessage = $token['error'] ?? 'Unknown error';
+                        $statusCode =
+                            $errorMessage === 'Invalid user provided. Verify the user data.' ? 400 : 500;
+
+                        return new BaseResponse($statusCode, null, $errorMessage)->toResponse();
                     }
                 }
             }

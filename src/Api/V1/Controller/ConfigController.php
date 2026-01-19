@@ -4,6 +4,7 @@ namespace App\Api\V1\Controller;
 
 use App\Api\V1\BaseResponse;
 use App\Enum\OperationMode;
+use App\Enum\SettingName;
 use App\Enum\TextInputType;
 use App\Repository\SettingRepository;
 use Exception;
@@ -38,36 +39,53 @@ class ConfigController extends AbstractController
         return new BaseResponse(200, $settings)->toResponse();
     }
 
+    /**
+     * @return array<string, array<string, mixed>>
+     */
     private function getSettings(): array
     {
         $data['platform'] = [
-            'PLATFORM_MODE' => $this->getSettingValueRaw('PLATFORM_MODE'),
-            'USER_VERIFICATION' => $this->getSettingValueConverted('USER_VERIFICATION'),
-            'TURNSTILE_CHECKER' => $this->getSettingValueConverted('TURNSTILE_CHECKER'),
-            'CONTACT_EMAIL' => $this->getSettingValueRaw('CONTACT_EMAIL'),
-            'TOS' => $this->resolveTosValue(),
-            'PRIVACY_POLICY' => $this->resolvePrivacyPolicyValue(),
-            'TWO_FACTOR_AUTH_STATUS' => $this->getSettingValueRaw('TWO_FACTOR_AUTH_STATUS'),
+            SettingName::PLATFORM_MODE->value => $this->getSettingValueRaw(
+                SettingName::PLATFORM_MODE->value
+            ),
+            SettingName::USER_VERIFICATION->value => $this->getSettingValueConverted(
+                SettingName::USER_VERIFICATION->value
+            ),
+            SettingName::TURNSTILE_CHECKER->value => $this->getSettingValueConverted(
+                SettingName::TURNSTILE_CHECKER->value
+            ),
+            SettingName::CONTACT_EMAIL->value => $this->getSettingValueRaw(SettingName::CONTACT_EMAIL->value),
+            SettingName::TOS->value => $this->resolveTosValue(),
+            SettingName::PRIVACY_POLICY->value => $this->resolvePrivacyPolicyValue(),
+            SettingName::TWO_FACTOR_AUTH_STATUS->value => $this->getSettingValueRaw(
+                SettingName::TWO_FACTOR_AUTH_STATUS->value
+            ),
         ];
 
         $data['auth'] = [
-            'AUTH_METHOD_SAML_ENABLED' => $this->getSettingValueConverted('AUTH_METHOD_SAML_ENABLED'),
-            'AUTH_METHOD_GOOGLE_LOGIN_ENABLED' => $this->getSettingValueConverted(
-                'AUTH_METHOD_GOOGLE_LOGIN_ENABLED'
+            SettingName::AUTH_METHOD_SAML_ENABLED->value => $this->getSettingValueConverted(
+                SettingName::AUTH_METHOD_SAML_ENABLED->value
             ),
-            'AUTH_METHOD_MICROSOFT_LOGIN_ENABLED' => $this->getSettingValueConverted(
-                'AUTH_METHOD_MICROSOFT_LOGIN_ENABLED'
+            SettingName::AUTH_METHOD_GOOGLE_LOGIN_ENABLED->value => $this->getSettingValueConverted(
+                SettingName::AUTH_METHOD_GOOGLE_LOGIN_ENABLED->value
             ),
-            'AUTH_METHOD_REGISTER_ENABLED' => $this->getSettingValueConverted('AUTH_METHOD_REGISTER_ENABLED'),
-            'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED' => $this->getSettingValueConverted(
-                'AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED'
+            SettingName::AUTH_METHOD_MICROSOFT_LOGIN_ENABLED->value => $this->getSettingValueConverted(
+                SettingName::AUTH_METHOD_MICROSOFT_LOGIN_ENABLED->value
             ),
-            'AUTH_METHOD_SMS_REGISTER_ENABLED' => $this->getSettingValueConverted('AUTH_METHOD_SMS_REGISTER_ENABLED')
+            SettingName::AUTH_METHOD_REGISTER_ENABLED->value => $this->getSettingValueConverted(
+                SettingName::AUTH_METHOD_REGISTER_ENABLED->value
+            ),
+            SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED->value => $this->getSettingValueConverted(
+                SettingName::AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED->value
+            ),
+            SettingName::AUTH_METHOD_SMS_REGISTER_ENABLED->value => $this->getSettingValueConverted(
+                SettingName::AUTH_METHOD_SMS_REGISTER_ENABLED->value
+            )
         ];
 
         if (
             array_key_exists('TURNSTILE_KEY', $_ENV) && $this->getSettingValueRaw(
-                'TURNSTILE_CHECKER'
+                SettingName::TURNSTILE_CHECKER->value
             ) === OperationMode::ON->value
         ) {
             $data['turnstile'] = [
@@ -77,7 +95,7 @@ class ConfigController extends AbstractController
 
         if (
             $this->areEnvKeysAvailable(['GOOGLE_CLIENT_ID']) &&
-            $this->getSettingValueRaw('AUTH_METHOD_GOOGLE_LOGIN_ENABLED') === 'true'
+            $this->getSettingValueRaw(SettingName::AUTH_METHOD_GOOGLE_LOGIN_ENABLED->value) === 'true'
         ) {
             $data['google'] = [
                 'GOOGLE_CLIENT_ID' => $this->parameterBag->get('app.google_client_id'),
@@ -86,7 +104,7 @@ class ConfigController extends AbstractController
 
         if (
             $this->areEnvKeysAvailable(['MICROSOFT_CLIENT_ID']) &&
-            $this->getSettingValueRaw('AUTH_METHOD_MICROSOFT_LOGIN_ENABLED') === 'true'
+            $this->getSettingValueRaw(SettingName::AUTH_METHOD_MICROSOFT_LOGIN_ENABLED->value) === 'true'
         ) {
             $data['microsoft'] = [
                 'MICROSOFT_CLIENT_ID' => $this->parameterBag->get('app.microsoft_client_id'),
@@ -97,7 +115,7 @@ class ConfigController extends AbstractController
             $this->areEnvKeysAvailable(
                 ['SAML_IDP_ENTITY_ID', 'SAML_IDP_SSO_URL', 'SAML_IDP_X509_CERT', 'SAML_SP_ENTITY_ID']
             ) &&
-            $this->getSettingValueRaw('AUTH_METHOD_SAML_ENABLED') === 'true'
+            $this->getSettingValueRaw(SettingName::AUTH_METHOD_SAML_ENABLED->value) === 'true'
         ) {
             $data['saml'] = [
                 'SAML_IDP_ENTITY_ID' => $this->parameterBag->get('app.saml_idp_entity_id'),
@@ -122,19 +140,22 @@ class ConfigController extends AbstractController
         return $setting && $this->convertToBoolean($setting->getValue());
     }
 
-    protected function convertToBoolean($value): bool
+    protected function convertToBoolean(string $value): bool
     {
         $trueValues = ['ON', 'TRUE', '1', 1, true];
         $falseValues = ['OFF', 'FALSE', '0', 0, false];
-        if (in_array(strtoupper((string)$value), $trueValues, true)) {
+        if (in_array(strtoupper($value), $trueValues, true)) {
             return true;
         }
-        if (in_array(strtoupper((string)$value), $falseValues, true)) {
+        if (in_array(strtoupper($value), $falseValues, true)) {
             return false;
         }
         return (bool)$value;
     }
 
+    /**
+     * @param array<string> $keys
+     */
     protected function areEnvKeysAvailable(array $keys): bool
     {
         return array_all($keys, static fn($key) => array_key_exists($key, $_ENV));
@@ -142,8 +163,8 @@ class ConfigController extends AbstractController
 
     protected function resolveTosValue(): string
     {
-        $tosType = $this->getSettingValueRaw('TOS');
-        $tosLink = $this->getSettingValueRaw('TOS_LINK');
+        $tosType = $this->getSettingValueRaw(SettingName::TOS->value);
+        $tosLink = $this->getSettingValueRaw(SettingName::TOS_LINK->value);
 
         if ($tosType === TextInputType::LINK->value) {
             return $tosLink;
@@ -162,8 +183,8 @@ class ConfigController extends AbstractController
 
     protected function resolvePrivacyPolicyValue(): string
     {
-        $privacyPolicyType = $this->getSettingValueRaw('PRIVACY_POLICY');
-        $privacyPolicyLink = $this->getSettingValueRaw('PRIVACY_POLICY_LINK');
+        $privacyPolicyType = $this->getSettingValueRaw(SettingName::PRIVACY_POLICY->value);
+        $privacyPolicyLink = $this->getSettingValueRaw(SettingName::PRIVACY_POLICY_LINK->value);
 
         if ($privacyPolicyType === TextInputType::LINK->value) {
             return $privacyPolicyLink;

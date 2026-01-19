@@ -1,7 +1,7 @@
-import { Controller } from "@hotwired/stimulus";
+import { Controller } from '@hotwired/stimulus';
 
 export default class extends Controller {
-    static targets = ["first", "second"];
+    static targets = ['first', 'second'];
     static values = {
         isOpened: Boolean,
     };
@@ -10,11 +10,17 @@ export default class extends Controller {
         super.connect();
 
         if (this.hasFirstTarget) {
-            console.log("%c Visibility - Detected for " + this.firstTarget.name, "background: green; color: black");
+            console.log(
+                '%c Visibility - Detected for ' + this.firstTarget.name,
+                'background: green; color: black'
+            );
         }
 
         if (this.hasSecondTarget) {
-            console.log("%c Visibility - Detected for " + this.secondTarget.name, "background: green; color: black");
+            console.log(
+                '%c Visibility - Detected for ' + this.secondTarget.name,
+                'background: green; color: black'
+            );
         }
     }
 
@@ -22,11 +28,11 @@ export default class extends Controller {
         this.isOpenedValue = !this.isOpenedValue;
 
         if (this.isOpenedValue) {
-            this.firstTarget.classList.remove("hidden");
-            this.secondTarget.classList.add("hidden");
+            this.firstTarget.classList.remove('hidden');
+            this.secondTarget.classList.add('hidden');
         } else {
-            this.firstTarget.classList.add("hidden");
-            this.secondTarget.classList.remove("hidden");
+            this.firstTarget.classList.add('hidden');
+            this.secondTarget.classList.remove('hidden');
         }
     }
 }

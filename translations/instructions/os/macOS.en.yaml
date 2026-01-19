@@ -1,0 +1,17 @@
+introduction: "To securely access OpenRoaming networks, please follow the next steps"
+item1:
+    description: "Open the link attached in your email"
+item2:
+    description: "Enter your details"
+item3:
+    description: "Tap “Download and Install”"
+item4:
+    description: "Open your settings and tap “Profile Downloaded”"
+item5:
+    description: "Check the profile details and install it"
+item6:
+    description: "Enter your password to allow the installation"
+item7:
+    description: "After that the profile will be installed and you should be able to connected it with"
+item8:
+    description: "Now access the wifi-settings to connect with the profile"

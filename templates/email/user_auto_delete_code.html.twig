@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="{{ app.request.locale }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ 'subject'|trans({}, 'user_auto_delete_code') }}</title>
+</head>
+<body style="margin:0; padding:0; background-color:#F4F4F4; font-family:Arial,sans-serif; color:#0B1A58;">
+
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" bgcolor="#F4F4F4">
+    <tr>
+        <td align="center">
+            <table role="presentation" width="600" cellspacing="0" cellpadding="0" border="0" bgcolor="#ffffff" style="margin:0 auto;">
+
+                <tr>
+                    <td bgcolor="#0B1A58" align="center" style="padding:40px;">
+                        <img src="cid:logo_cid" alt="Customer Logo" style="max-width:300px; height:auto; display:block;" />
+                    </td>
+                </tr>
+
+                <tr>
+                    <td align="center" style="padding:40px; font-size:16px; line-height:1.5; color:#0B1A58;">
+                        <h1 style="font-size:24px; font-weight:bold; margin:0 0 20px 0;">{{ 'subject'|trans({}, 'user_auto_delete_code') }}</h1>
+                        <p style="color:red; font-weight:bold; margin:0 0 16px 0;">{{ 'warning'|trans({}, 'user_auto_delete_code') }}</p>
+                        <p style="margin:0 0 24px 0;">{{ 'auto_deletion_message'|trans({}, 'user_auto_delete_code') }}</p>
+                        <h1 style="font-size:24px; font-weight:bold; margin:0 0 24px 0;">{{ code }}</h1>
+                        <p style="margin:0 0 16px 0;">
+                            {{ 'valid_for_message'|trans({'%seconds%': secondsLeft}, 'user_auto_delete_code')|raw }}
+                            <br/>
+                            {{ 'confidential_message'|trans({}, 'user_auto_delete_code')|raw }}
+                        </p>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td bgcolor="#E6E6E6" align="center" style="padding:20px; font-size:14px; color:#1A202C;">
+                        <p style="margin:0 0 10px 0;">
+                            {{ 'footer.support_team'|trans({}, 'user_auto_delete_code') }}
+                            <a href="mailto:{{ contactEmail }}" style="color:#0B1A58; font-weight:bold; text-decoration:none;">{{ contactEmail }}</a>
+                        </p>
+                        <p style="margin:0;">
+                            <strong style="color:#0B1A58;">{{ 'footer.thank_you'|trans({}, 'user_auto_delete_code') }}</strong><br/>
+                            {{ 'footer.team'|trans({'%supportTeam%': supportTeam}, 'user_auto_delete_code') }}
+                        </p>
+                    </td>
+                </tr>
+
+            </table>
+        </td>
+    </tr>
+</table>
+
+</body>
+</html>

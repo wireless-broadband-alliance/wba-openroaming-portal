@@ -2,13 +2,15 @@
 
 namespace App\Service;
 
+use App\Enum\SettingName;
 use App\Repository\SettingRepository;
+use InvalidArgumentException;
 use OTPHP\TOTP;
 
-class TOTPService
+readonly class TOTPService
 {
     public function __construct(
-        private readonly SettingRepository $settingRepository,
+        private SettingRepository $settingRepository,
     ) {
     }
 
@@ -23,17 +25,45 @@ class TOTPService
 
     public function generateTOTP(string $secret): string
     {
-        // Create an identifier code to communicate with the app
+        if ($secret === '' || $secret === '0') {
+            throw new InvalidArgumentException('TOTP secret cannot be empty.');
+        }
+
+        $labelSetting = $this->settingRepository->findOneBy([
+            'name' => SettingName::TWO_FACTOR_AUTH_APP_LABEL->value
+        ]);
+        $issuerSetting = $this->settingRepository->findOneBy([
+            'name' => SettingName::TWO_FACTOR_AUTH_APP_ISSUER->value
+        ]);
+
+        $label = $labelSetting?->getValue();
+        $issuer = $issuerSetting?->getValue();
+
+        if (empty($label)) {
+            throw new InvalidArgumentException('TOTP label cannot be empty.');
+        }
+
+        if (empty($issuer)) {
+            throw new InvalidArgumentException('TOTP issuer cannot be empty.');
+        }
+
         $totp = TOTP::create($secret);
-        // Identifier labels in the communication
-        $totp->setLabel($this->settingRepository->findOneBy(['name' => 'TWO_FACTOR_AUTH_APP_LABEL'])->getValue());
-        $totp->setIssuer($this->settingRepository->findOneBy(['name' => 'TWO_FACTOR_AUTH_APP_ISSUER'])->getValue());
+        $totp->setLabel($label);
+        $totp->setIssuer($issuer);
 
         return $totp->getProvisioningUri(); // URI for QR Code
     }
 
     public function verifyTOTP(string $secret, string $code): bool
     {
+        if ($secret === '' || $secret === '0') {
+            throw new InvalidArgumentException('TOTP secret cannot be empty.');
+        }
+
+        if ($code === '' || $code === '0') {
+            throw new InvalidArgumentException('TOTP code cannot be empty.');
+        }
+
         // communication with the app using the user secret code to verify the code introduced
         return TOTP::create($secret)->verify($code);
     }

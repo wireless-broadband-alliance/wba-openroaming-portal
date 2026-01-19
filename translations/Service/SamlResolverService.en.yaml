@@ -1,0 +1,7 @@
+failedDecodeSAMLResponse: 'Failed to decode SAMLResponse.'
+audienceNotFoundSAMLResponse: 'Audience identifier (Audience) not found in the SAMLResponse.'
+certificateNotFoundSAMLResponse: 'Certificate not found in the SAMLResponse.'
+errorOccurredWhileProcessingSAMLResponse: 'An error occurred while processing the SAMLResponse: %message%'
+multipleIssuerSAMLResponse: "Multiple Issuer elements found in the SAML Response."
+multipleAssertionIssuerSAMLResponse: "Multiple Issuer elements found in the SAML Assertion."
+invalidIssuerSAMLResponse: "Invalid issuer in the Assertion/Response (expected '%expected%', got '%got%')."

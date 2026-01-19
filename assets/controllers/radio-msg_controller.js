@@ -1,7 +1,7 @@
-import { Controller } from "@hotwired/stimulus";
+import { Controller } from '@hotwired/stimulus';
 
 export default class extends Controller {
-    static targets = ["on", "msg"];
+    static targets = ['on', 'msg'];
 
     connect() {
         super.connect();
@@ -14,10 +14,10 @@ export default class extends Controller {
     }
 
     display() {
-        this.msgTarget.classList.remove("hidden");
+        this.msgTarget.classList.remove('hidden');
     }
 
     hide() {
-        this.msgTarget.classList.add("hidden");
+        this.msgTarget.classList.add('hidden');
     }
 }

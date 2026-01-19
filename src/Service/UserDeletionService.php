@@ -4,6 +4,7 @@ namespace App\Service;
 
 use App\Entity\DeletedUserData;
 use App\Entity\User;
+use App\Entity\UserExternalAuth;
 use App\Enum\AnalyticalEventType;
 use App\Enum\UserRadiusProfileRevokeReason;
 use App\Enum\UserVerificationStatus;
@@ -11,6 +12,7 @@ use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use libphonenumber\PhoneNumber;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 readonly class UserDeletionService
 {
@@ -19,11 +21,20 @@ readonly class UserDeletionService
         private EventActions $eventActions,
         private EntityManagerInterface $entityManager,
         private PgpEncryptionService $encryptionService,
+        private TranslatorInterface $translator,
     ) {
     }
 
+    /**
+     * @param UserExternalAuth[] $userExternalAuths Array of external auth objects
+     * @return array<string, mixed>
+     * @throws \JsonException
+     */
     public function deleteUser(User $user, array $userExternalAuths, Request $request, User $currentUser): array
     {
+        $deletedUserUuid = $user->getUuid();
+        $deletedUserByUuid = $currentUser->getUuid();
+
         $phoneNumber = null;
         if ($user->getPhoneNumber() instanceof PhoneNumber) {
             $phoneNumber = "+" .
@@ -59,22 +70,37 @@ readonly class UserDeletionService
 
         $pgpEncryptedData = $this->encryptionService->encrypt($jsonDataCombined);
 
-        if ($pgpEncryptedData[0] === UserVerificationStatus::MISSING_PUBLIC_KEY_CONTENT->value) {
-            return ['success' => false, 'message' => 'Public key is missing. Please provide one.'];
+        // Make sure encryption returned a string
+        if (!is_string($pgpEncryptedData) || ($pgpEncryptedData === '' || $pgpEncryptedData === '0')) {
+            return [
+                'success' => false,
+                'message' => $this->translator->trans('encryptionFailed', [], 'UserDeletionService'),
+            ];
         }
 
-        if ($pgpEncryptedData[0] === UserVerificationStatus::EMPTY_PUBLIC_KEY_CONTENT->value) {
-            return ['success' => false, 'message' => 'Public key is empty. Please provide valid key content.'];
+        // Check for special error signals returned by the service
+        if ($pgpEncryptedData === UserVerificationStatus::MISSING_PUBLIC_KEY_CONTENT->value) {
+            return [
+                'success' => false,
+                'message' => $this->translator->trans('publicKeyMissing', [], 'UserDeletionService'),
+            ];
+        }
+
+        if ($pgpEncryptedData === UserVerificationStatus::EMPTY_PUBLIC_KEY_CONTENT->value) {
+            return [
+                'success' => false,
+                'message' => $this->translator->trans('publicKeyEmpty', [], 'UserDeletionService'),
+            ];
         }
 
         $deletedUserDataEntity = new DeletedUserData();
         $deletedUserDataEntity->setPgpEncryptedJsonFile($pgpEncryptedData);
         $deletedUserDataEntity->setUser($user);
 
-        $user->setUuid($user->getId());
+        $user->setUuid((string) $user->getId());
         $user->setEmail(null);
         $user->setPhoneNumber(null);
-        $user->setPassword($user->getId());
+        $user->setPassword((string) $user->getId());
         $user->setFirstName(null);
         $user->setLastName(null);
         $user->setDeletedAt(new DateTime());
@@ -94,8 +120,8 @@ readonly class UserDeletionService
         $this->entityManager->flush();
 
         $eventMetadata = [
-            'uuid' => $user->getUuid(),
-            'deletedBy' => $currentUser->getUuid(),
+            'uuid' => $deletedUserUuid,
+            'deletedBy' => $deletedUserByUuid,
             'ip' => $request->getClientIp(),
         ];
         $this->eventActions->saveEvent(
@@ -107,7 +133,7 @@ readonly class UserDeletionService
 
         return [
             'success' => true,
-            'message' => 'User data successfully deleted and encrypted.'
+            'message' => $this->translator->trans('userSuccessfullyDeleted', [], 'UserDeletionService')
         ];
     }
 }

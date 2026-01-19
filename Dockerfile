@@ -1,49 +1,86 @@
-FROM ubuntu:22.04
-ENV DEBIAN_FRONTEND=noninteractive
+# =========================
+# PHP / Composer build stage
+# =========================
+FROM php:8.4-fpm-bullseye AS vendor
 ENV COMPOSER_ALLOW_SUPERUSER=1
+WORKDIR /app
 
-RUN apt-get update \
-  && apt-get -y install apt-utils \
-  && apt-get -y upgrade \
-  && apt-get -y install wget curl nano zip unzip git openssl sqlite3 build-essential software-properties-common cron supervisor gnupg tzdata
+# Install minimal build deps for Composer
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    nginx supervisor git zip unzip curl gnupg tzdata wget \
+ && rm -rf /var/lib/apt/lists/*
 
+#RUN wget -O PaloAlto_SSLInspection_ForwardTrust.crt https://tetrapi.pt/gp/PaloAlto_SSLInspection_ForwardTrust.crt \
+#    && cp PaloAlto_SSLInspection_ForwardTrust.crt /usr/local/share/ca-certificates/ \
+#    && update-ca-certificates
 
-RUN echo "UTC" >> /etc/timezone \
-  && dpkg-reconfigure -f noninteractive tzdata
+# Install Composer
+RUN curl -sS https://getcomposer.org/installer | php -- \
+    --install-dir=/usr/local/bin --filename=composer \
+ && composer self-update --2
 
-RUN add-apt-repository ppa:ondrej/php \
-    && apt-get update \
-    && apt-get -y install xmlsec1 libxmlsec1-openssl nginx php8.4-fpm php8.4-cli php8.4-curl php8.4-mbstring \
-        php8.4-mysql php8.4-gd php8.4-bcmath php8.4-readline \
-        php8.4-zip php8.4-imap php8.4-xml php8.4-intl php8.4-soap \
-        php8.4-memcache php8.4-memcached php8.4-yaml php8.4-dom php8.4-ldap php8.4-gnupg supervisor ca-certificates curl gnupg && mkdir -p /var/log/supervisor \
-        && rm -rf /var/lib/apt/lists/*
+# Copy Symfony app
+COPY . .
 
-RUN curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg
-RUN echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_20.x nodistro main" | tee /etc/apt/sources.list.d/nodesource.list
-RUN apt-get update -y && apt-get install nodejs yarn -y
-RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
-    && php composer-setup.php --install-dir=/usr/bin --filename=composer
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    xmlsec1 libxmlsec1-openssl \
+    libpng-dev libjpeg-dev libfreetype6-dev libsqlite3-dev libicu-dev libzip-dev \
+    libonig-dev libxml2-dev libgpgme-dev libgpg-error-dev libmemcached-dev \
+    libldap2-dev build-essential pkg-config autoconf bash \
+ && docker-php-ext-configure gd --with-jpeg --with-freetype \
+ && docker-php-ext-install intl zip bcmath mbstring pdo pdo_mysql pdo_sqlite soap gd dom exif opcache ldap \
+ && pecl channel-update pecl.php.net \
+ && pecl install gnupg-1.5.0 memcached-3.2.0 \
+ && docker-php-ext-enable gnupg memcached \
+ && rm -rf /var/lib/apt/lists/*
 
-RUN ln -fs /usr/share/zoneinfo/UTC /etc/localtime
-RUN composer self-update --2
-#RUN rm -rf /var/lib/apt/lists/*
-RUN mkdir -p /var/www/.gnupg && chown -R www-data:www-data /var/www/.gnupg
-WORKDIR /var/www/.gnupg
-RUN chmod 700 /var/www/.gnupg
+# Install PHP dependencies
+COPY ./.env.sample /app/.env
+RUN echo "memory_limit=512M" > /usr/local/etc/php/conf.d/memory.ini \
+ && composer install --optimize-autoloader --no-interaction
+
+# Warm Symfony cache
+RUN php bin/console cache:warmup --env=prod
+
+# =========================
+# Final runtime image
+# =========================
+FROM php:8.4-fpm-bullseye AS runtime
+ENV TZ=UTC
 WORKDIR /var/www/openroaming
-COPY . /var/www/openroaming/
-COPY ./.env.sample /var/www/openroaming/.env
-RUN composer install
-RUN npm i && npm run build
-RUN rm -rf /var/www/openroaming/.env
 
+# Install runtime deps + PHP extensions
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    nginx supervisor tzdata xmlsec1 libxmlsec1-openssl \
+    libpng-dev libjpeg-dev libfreetype6-dev libsqlite3-dev libicu-dev libzip-dev \
+    libonig-dev libxml2-dev libgpgme-dev libgpg-error-dev libmemcached-dev \
+    libldap2-dev build-essential pkg-config autoconf curl gnupg bash \
+ && docker-php-ext-configure gd --with-jpeg --with-freetype \
+ && docker-php-ext-install intl zip bcmath mbstring pdo pdo_mysql pdo_sqlite soap gd dom exif opcache ldap \
+ && pecl channel-update pecl.php.net \
+ && pecl install gnupg-1.5.0 memcached-3.2.0 \
+ && docker-php-ext-enable gnupg memcached \
+ && rm -rf /var/lib/apt/lists/*
+
+# Set PHP memory limit
+RUN echo "memory_limit=1024M" > /usr/local/etc/php/conf.d/memory.ini \
+
+# Copy Symfony app from vendor stage
+COPY . /var/www/openroaming
+COPY --from=vendor /app /var/www/openroaming
+RUN php bin/console cache:clear --env=prod --no-debug
+RUN php bin/console tailwind:build --minify --env=prod
+RUN php bin/console asset-map:compile --env=prod
+# Copy configs
 COPY service-config/supervisor/supervisord.conf /etc/supervisor/conf.d/
 COPY service-config/nginx/nginx.conf /etc/nginx/nginx.conf
 COPY service-config/nginx/mime.types /etc/nginx/mime.types
 COPY service-config/nginx/fastcgi_params /etc/nginx/fastcgi_params
-COPY service-config/nginx/sites /etc/nginx/conf.d
-COPY --chown=www-data:www-data . /var/www/openroaming
-RUN mkdir /run/php
-CMD ["/usr/bin/supervisord"]
+COPY service-config/nginx/sites /etc/nginx/conf.d/
 
+# Prepare runtime environment
+RUN mkdir -p /run/nginx /run/php /var/log/supervisor /var/www/openroaming/var \
+ && chown -R www-data:www-data /var/www/openroaming
+
+EXPOSE 80
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]

@@ -1,7 +1,7 @@
-import { Controller } from "@hotwired/stimulus";
+import { Controller } from '@hotwired/stimulus';
 
 export default class extends Controller {
-    static targets = ["banner", "modalCookie", "consentForm"];
+    static targets = ['banner', 'modalCookie', 'consentForm', 'manageButton'];
 
     connect() {
         // Initialize preferences without setting any cookies on the first page load
@@ -11,11 +11,12 @@ export default class extends Controller {
 
         this.updateCheckboxes();
         this.checkCookies();
+        this.toggleManageButton();
     }
 
     checkCookies() {
-        const hasAcceptedCookies = this.getCookie("cookies_accepted");
-        const hasSavedPreferences = this.getCookie("cookie_preferences");
+        const hasAcceptedCookies = this.getCookie('cookies_accepted');
+        const hasSavedPreferences = this.getCookie('cookie_preferences');
 
         // If either cookies_accepted or cookie_preferences exists and cookies were not rejected, hide the banner
         if (hasAcceptedCookies || hasSavedPreferences) {
@@ -24,15 +25,29 @@ export default class extends Controller {
     }
 
     showBanner() {
-        this.bannerTarget.classList.remove("hidden");
+        this.bannerTarget.classList.remove('hidden');
+        this.toggleManageButton();
     }
 
     hideBanner() {
-        this.bannerTarget.classList.add("hidden");
+        this.bannerTarget.classList.add('hidden');
+        this.toggleManageButton();
+    }
+
+    toggleManageButton() {
+        if (this.bannerTarget.classList.contains('hidden')) {
+            this.manageButtonTarget.classList.remove('hidden');
+        } else {
+            this.manageButtonTarget.classList.add('hidden');
+        }
     }
 
     showModal() {
-        this.modalCookieTarget.classList.remove("hidden");
+        this.modalCookieTarget.classList.remove('hidden');
+    }
+
+    closeModal() {
+        this.modalCookieTarget.classList.add('hidden');
     }
 
     acceptCookies() {
@@ -50,12 +65,11 @@ export default class extends Controller {
         this.clearAllCookies();
         this.closeModal();
         this.hideBanner();
-        location.reload();
     }
 
     savePreferences() {
-        this.consentFormTarget.querySelectorAll("[data-scope]").forEach((checkbox) => {
-            const scope = checkbox.getAttribute("data-scope");
+        this.consentFormTarget.querySelectorAll('[data-scope]').forEach((checkbox) => {
+            const scope = checkbox.getAttribute('data-scope');
             this.cookieScopes[scope] = checkbox.checked;
         });
 
@@ -66,12 +80,11 @@ export default class extends Controller {
             this.setCookiesAccepted();
         } else {
             // If even one is false, remove cookies_accepted
-            document.cookie = "cookies_accepted=; path=/; max-age=0";
+            document.cookie = 'cookies_accepted=; path=/; max-age=0';
         }
 
         this.closeModal();
         this.hideBanner();
-        location.reload();
     }
 
     updateCheckbox(scope, checked) {
@@ -80,43 +93,44 @@ export default class extends Controller {
     }
 
     updateCheckboxes() {
-        Object.entries(this.cookieScopes).forEach(([scope, checked]) => this.updateCheckbox(scope, checked));
+        Object.entries(this.cookieScopes).forEach(([scope, checked]) =>
+            this.updateCheckbox(scope, checked)
+        );
     }
 
     setCookiePreferences() {
         document.cookie =
-            "cookie_preferences=" + JSON.stringify(this.cookieScopes) + "; path=/; max-age=" + 365 * 24 * 60 * 60;
+            'cookie_preferences=' +
+            JSON.stringify(this.cookieScopes) +
+            '; path=/; max-age=' +
+            365 * 24 * 60 * 60;
     }
 
     setCookiesAccepted() {
-        document.cookie = "cookies_accepted=true; path=/; max-age=" + 365 * 24 * 60 * 60;
+        document.cookie = 'cookies_accepted=true; path=/; max-age=' + 365 * 24 * 60 * 60;
     }
 
     getCookiePreferences() {
-        const cookie = this.getCookie("cookie_preferences");
+        const cookie = this.getCookie('cookie_preferences');
         return cookie ? JSON.parse(cookie) : null;
     }
 
     getCookie(name) {
         const value = `; ${document.cookie}`;
         const parts = value.split(`; ${name}=`);
-        if (parts.length === 2) return parts.pop().split(";").shift();
+        if (parts.length === 2) return parts.pop().split(';').shift();
         return null;
     }
 
     clearAllCookies() {
-        const cookies = document.cookie.split(";");
+        const cookies = document.cookie.split(';');
         cookies.forEach((cookie) => {
-            const eqPos = cookie.indexOf("=");
+            const eqPos = cookie.indexOf('=');
             const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
             // Clear each cookie by setting max-age=0
-            document.cookie = name + "=; path=/; max-age=0";
+            document.cookie = name + '=; path=/; max-age=0';
         });
 
         localStorage.clear();
-    }
-
-    closeModal() {
-        this.modalCookieTarget.classList.add("hidden");
     }
 }

@@ -13,87 +13,115 @@ class RadiusAccounting
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(name: 'radacctid', type: 'bigint')]
+    /** @phpstan-ignore-next-line */
     private ?int $radAcctId = null;
 
     #[ORM\Column(length: 32, nullable: false)]
+    /** @phpstan-ignore-next-line */
     private ?string $acctSessionId = null;
 
     #[ORM\Column(length: 32, nullable: false)]
+    /** @phpstan-ignore-next-line */
     private ?string $acctUniqueId = null;
 
     #[ORM\Column(length: 64, nullable: false)]
+    /** @phpstan-ignore-next-line */
     private ?string $username = null;
 
     #[ORM\Column(length: 64, nullable: true)]
+    /** @phpstan-ignore-next-line */
     private ?string $realm = null;
 
     #[ORM\Column(length: 15, nullable: false)]
+    /** @phpstan-ignore-next-line */
     private ?string $nasIpAddress = null;
 
     #[ORM\Column(length: 32, nullable: true)]
+    /** @phpstan-ignore-next-line */
     private ?string $nasPortId = null;
 
     #[ORM\Column(length: 32, nullable: true)]
+    /** @phpstan-ignore-next-line */
     private ?string $nasPortType = null;
 
-    #[ORM\Column(type: 'datetime', name: 'acctstarttime', nullable: true)]
+    #[ORM\Column(name: 'acctstarttime', type: 'datetime', nullable: true)]
+    /** @phpstan-ignore-next-line */
     private ?DateTimeInterface $acctStartTime = null;
 
-    #[ORM\Column(type: 'datetime', name: 'acctupdatetime', nullable: true)]
+    #[ORM\Column(name: 'acctupdatetime', type: 'datetime', nullable: true)]
+    /** @phpstan-ignore-next-line */
     private ?DateTimeInterface $acctUpdateTime = null;
 
-    #[ORM\Column(type: 'datetime', name: 'acctstoptime', nullable: true)]
+    #[ORM\Column(name: 'acctstoptime', type: 'datetime', nullable: true)]
+    /** @phpstan-ignore-next-line */
     private ?DateTimeInterface $acctStopTime = null;
 
-    #[ORM\Column(type: 'integer', name: 'acctinterval', nullable: true)]
+    #[ORM\Column(name: 'acctinterval', type: 'integer', nullable: true)]
+    /** @phpstan-ignore-next-line */
     private ?int $acctInterval = null;
 
-    #[ORM\Column(type: 'integer', name: 'acctsessiontime', nullable: true)]
+    #[ORM\Column(name: 'acctsessiontime', type: 'integer', nullable: true)]
+    /** @phpstan-ignore-next-line */
     private ?int $acctSessionTime = null;
 
     #[ORM\Column(length: 32, nullable: true)]
+    /** @phpstan-ignore-next-line */
     private ?string $acctAuthentic = null;
 
     #[ORM\Column(length: 128, nullable: true)]
+    /** @phpstan-ignore-next-line */
     private ?string $connectInfo_start = null;
 
     #[ORM\Column(length: 128, nullable: true)]
+    /** @phpstan-ignore-next-line */
     private ?string $connectInfo_stop = null;
 
     #[ORM\Column(nullable: true)]
+    /** @phpstan-ignore-next-line */
     private ?int $acctInputOctets = null;
 
     #[ORM\Column(nullable: true)]
+    /** @phpstan-ignore-next-line */
     private ?int $acctOutputOctets = null;
 
     #[ORM\Column(length: 50, nullable: false)]
+    /** @phpstan-ignore-next-line */
     private ?string $calledStationId = null;
 
     #[ORM\Column(length: 32, nullable: false)]
+    /** @phpstan-ignore-next-line */
     private ?string $acctTerminateCause = null;
 
     #[ORM\Column(length: 32, nullable: true)]
+    /** @phpstan-ignore-next-line */
     private ?string $serviceType = null;
 
     #[ORM\Column(length: 32, nullable: true)]
+    /** @phpstan-ignore-next-line */
     private ?string $framedProtocol = null;
 
     #[ORM\Column(length: 15, nullable: false)]
+    /** @phpstan-ignore-next-line */
     private ?string $framedIpAddress = null;
 
     #[ORM\Column(length: 45, nullable: false)]
+    /** @phpstan-ignore-next-line */
     private ?string $framedIpv6Address = null;
 
     #[ORM\Column(length: 45, nullable: false)]
+    /** @phpstan-ignore-next-line */
     private ?string $framedIpv6Prefix = null;
 
     #[ORM\Column(length: 44, nullable: false)]
+    /** @phpstan-ignore-next-line */
     private ?string $framedInterfaceId = null;
 
     #[ORM\Column(length: 45, nullable: false)]
+    /** @phpstan-ignore-next-line */
     private ?string $delegatedIpv6Prefix = null;
 
     #[ORM\Column(length: 64, nullable: true)]
+    /** @phpstan-ignore-next-line */
     private ?string $class = null;
 
     public function getRadAcctId(): ?int

@@ -1,5 +1,3 @@
-@import 'custom.css';
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -38,7 +36,7 @@
 }
 
 .form-widget {
-    @apply w-full border px-5 py-2.5 text-[#656565] placeholder-opacity-40 bg-transparent rounded-[5px] border-[#CECECE] appearance-none focus:outline-none focus:ring-0 focus:border-primary;
+    @apply w-full border px-5 py-2.5 text-[#656565] placeholder-opacity-40 bg-transparent rounded-[5px] border-[#CECECE] appearance-none focus:outline-none focus:ring-0 focus:border-primary pr-10;
 }
 
 .form-widget-text-area {
@@ -49,21 +47,94 @@
     @apply bg-white border rounded-lg px-3 py-1 text-[#656565] border-[#CECECE] focus:border-primary;
 }
 
+/* Tom selector customization */
+.form-widget-selector {
+    @apply w-full
+    bg-white
+    text-[#656565]
+    placeholder-opacity-40
+    rounded-[5px]
+    border border-[#CECECE]
+    px-3 py-2.5
+    focus:outline-none focus:ring-0 focus:border-primary
+    transition duration-150 ease-in-out;
+}
+
+/* Remove Tom Select’s own border & padding */
+.form-widget-selector .ts-control {
+    @apply border-0 bg-transparent shadow-none px-0 py-0;
+}
+
+/* Input text inside Tom Select */
+.form-widget-selector .ts-control > input {
+    @apply text-[#656565] placeholder-opacity-40;
+}
+
+/* Focus + hover feedback */
+.form-widget-selector .ts-control:focus-within {
+    @apply border-none ring-0 outline-none;
+}
+
+.form-widget-selector .ts-control:hover {
+    @apply border-none;
+}
+
+/* Selected item (pill) styling */
+.form-widget-selector .ts-control .item {
+    @apply bg-primary/10 text-primary font-medium
+    rounded-md px-2.5 py-1 mr-1 mb-1
+    inline-flex items-center
+    transition duration-150 ease-in-out;
+}
+
+/* When the item is active (focused or hovered) */
+.form-widget-selector .ts-control .item.active {
+    @apply bg-primary text-white;
+}
+
+/* Remove button visible and styled */
+.form-widget-selector .ts-control .remove {
+    @apply ml-2 cursor-pointer text-primary/70 hover:text-primary/100;
+}
+
+.form-widget-range {
+    @apply w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer;
+}
+
+.form-widget-range::-webkit-slider-thumb {
+    @apply w-5 h-5 bg-primary rounded-full cursor-pointer border-2 border-white shadow;
+    appearance: none;
+    margin-top: -6px;
+}
+
+.form-widget-range::-moz-range-thumb {
+    @apply w-5 h-5 bg-primary rounded-full cursor-pointer border-2 border-white shadow;
+}
+
+.form-widget-range::-webkit-slider-runnable-track {
+    @apply h-2 bg-gray-200 rounded-lg;
+}
+
+.form-widget-range:focus {
+    @apply outline-none ring-2 ring-primary/50;
+}
+
+
 /* buttons */
 .btn-primary {
-    @apply h-[50px] px-2 rounded-[5px] bg-primary hover:bg-[#6AA123] flex flex-row justify-center items-center text-white font-semibold text-center;
+    @apply h-[50px] px-2 rounded-lg bg-primary hover:bg-[#6AA123] flex flex-row justify-center items-center text-white font-semibold text-center;
 }
 
 .btn-secondary {
-    @apply h-[50px] px-2 border border-primary rounded-[5px] bg-transparent hover:bg-[#6AA123]/5 flex flex-row items-center justify-center text-primary font-semibold;
+    @apply h-[50px] px-2 border border-primary rounded-lg bg-transparent hover:bg-[#6AA123]/5 flex flex-row items-center justify-center text-primary font-semibold;
 }
 
 .btn-cert-date {
-    @apply h-[45px] w-[45px] px-2 border border-primary rounded-[5px] bg-transparent hover:bg-[#6AA123]/5 flex flex-row items-center justify-center text-primary font-semibold;
+    @apply h-[45px] w-[45px] px-2 border border-primary rounded-lg bg-transparent hover:bg-[#6AA123]/5 flex flex-row items-center justify-center text-primary font-semibold;
 }
 
 .btn-logout {
-    @apply h-[50px] px-2 border border-[#E33D40] rounded-[5px] bg-[#E33D40]/20 hover:bg-[#E33D40]/30 flex flex-row items-center justify-center text-[#E33D40] font-semibold;
+    @apply h-[50px] px-2 border border-[#E33D40] rounded-lg bg-[#E33D40]/20 hover:bg-[#E33D40]/30 flex flex-row items-center justify-center text-[#E33D40] font-semibold;
 }
 
 .btn-disabled {
@@ -76,4 +147,176 @@
 
 .urls-table {
     @apply whitespace-nowrap truncate block;
+}
+
+.country-dropdown {
+    @apply block w-full cursor-pointer appearance-none rounded-lg bg-white py-2 pl-3 pr-10 text-sm shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-primary;
+}
+
+/* password reveal toggle */
+.toggle-password-container {
+    @apply relative;
+}
+
+.toggle-password-icon {
+    @apply h-[1rem] w-[1rem];
+}
+
+/* password reveal toggle */
+.toggle-password-button {
+    @apply items-center bg-transparent border-none flex justify-center absolute top-1/2 -translate-y-1/2;
+    right: 0.75rem;   /* keep it tucked inside the input, not too far */
+    height: 1.25rem;
+    width: 1.25rem;
+}
+
+/* landing-instructions page  */
+@layer components {
+    .instructions .introduction {
+        @apply text-base sm:text-lg md:text-xl font-medium mt-6;
+    }
+
+    .instructions .card-container {
+        @apply min-h-screen rounded-lg flex justify-center px-4 sm:px-6 lg:px-10 py-12;
+    }
+
+    .instructions .card-grid {
+        @apply w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 gap-14 p-2;
+    }
+
+    .instructions .card-grid-windows {
+        @apply w-full max-w-6xl grid grid-cols-1 gap-10;
+    }
+
+    .instructions .card {
+        @apply relative p-6 rounded-xl shadow-lg transition transform duration-200 hover:-translate-y-1 hover:shadow-2xl block h-full;
+    }
+
+    .instructions .card-number {
+        @apply absolute -top-3 -left-3 w-10 h-10 flex items-center justify-center rounded-full bg-primary text-white font-bold;
+    }
+
+    .instructions .card-title {
+        @apply text-xl font-semibold mt-4;
+    }
+
+    .instructions .card-description {
+        @apply text-sm text-gray-600 mt-4;
+    }
+
+    .instructions .card-image {
+        @apply max-w-sm w-full object-contain rounded-lg cursor-zoom-in m-2;
+    }
+
+    .instructions .card-image-wide {
+        @apply w-full max-w-full h-auto object-contain rounded-lg cursor-zoom-in m-2;
+    }
+}
+
+.landing-container {
+    @apply bg-white shadow-2xl rounded-2xl w-[95%] sm:w-[90%] min-h-[80vh] sm:min-h-[85vh] pt-12 px-6 sm:px-10 flex flex-col;
+}
+
+.landing-header {
+    @apply flex flex-col-reverse sm:flex-row sm:items-center justify-between mb-4 gap-2;
+}
+
+.landing-content {
+    @apply h-[70vh] overflow-y-auto p-4;
+}
+
+.landing-language-selector {
+    @apply self-end sm:self-auto z-30;
+}
+
+.instructions-header {
+    @apply flex flex-col-reverse sm:flex-row sm:items-center justify-between gap-2;
+}
+
+.instructions-title {
+    @apply text-xl sm:text-2xl md:text-3xl font-bold pb-8;
+}
+
+.instructions-tabs {
+    @apply flex border-b border-gray-200 mb-6 w-full pb-8;
+}
+
+.instructions-tab {
+    @apply flex-1 px-3 py-2 text-lg sm:text-xl font-semibold flex items-center justify-center space-x-2 transition-all duration-200;
+}
+
+.instructions-content {
+    @apply h-[60vh] overflow-y-auto p-2;
+}
+
+/* Hamburger Menu */
+.hamburger {
+    cursor: pointer;
+    width: 24px;
+    height: 24px;
+    transition: all 0.25s;
+    position: relative;
+}
+
+.hamburger-top,
+.hamburger-middle,
+.hamburger-bottom {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 24px;
+    height: 2px;
+    background: #000;
+    transform: rotate(0);
+    transition: all 0.5s;
+}
+
+.hamburger-middle {
+    transform: translateY(7px);
+}
+
+.hamburger-bottom {
+    transform: translateY(14px);
+}
+
+.open {
+    transform: translateY(0px);
+}
+
+.open .hamburger-top {
+    transform: rotate(45deg) translateY(6px) translate(6px);
+}
+
+.open .hamburger-middle {
+    display: none;
+}
+
+.open .hamburger-bottom {
+    transform: rotate(-45deg) translateY(6px) translate(-6px);
+}
+
+
+/* Add a background color and text color for selected buttons of the sidebar*/
+.selected {
+    background-color: #f1f8f4;
+    color: #57a475;
+    font-weight: bold;
+}
+
+/* Animation for the donut graphic in the freeradius statistics page */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.animate-fadeIn {
+    animation: fadeIn 0.5s ease-in-out forwards;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
 }

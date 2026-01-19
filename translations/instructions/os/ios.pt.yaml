@@ -1,0 +1,23 @@
+introduction: "Para aceder em segurança às redes OpenRoaming, siga os seguintes passos"
+item1:
+    description: "Abra a ligação enviada no seu e-mail"
+item2:
+    description: "Selecione o método de autenticação que pretende utilizar e aceite os termos e condições"
+item3:
+    description: "Introduza os seus dados"
+item4:
+    description: "Toque em “Transferir e Instalar”"
+item5:
+    description: "Depois de terminar, toque em “OK” e saia das Definições"
+item6:
+    description: "Nas Definições, toque em “Perfil Transferido”"
+item7:
+    description: "Toque em “Instalar” no canto superior direito"
+item8:
+    description: "Introduza o seu código"
+item9:
+    description: "Toque em “Instalar”"
+item10:
+    description: "Depois de terminar, toque em “OK” e saia das Definições"
+item11:
+    description: "Se estiver ligado a alguma rede, desligue o Wi-Fi e volte a ligá-lo. A rede aparecerá como “OpenRoaming”"

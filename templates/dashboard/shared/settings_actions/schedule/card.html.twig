@@ -1,0 +1,69 @@
+<div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full" {{ stimulus_controller('card') }}>
+    {# Header with title and info icon #}
+    <div class="flex justify-between items-center">
+        <h1 class="text-base md:text-lg font-medium break-words">
+            {{ label }}
+        </h1>
+        <img class="w-5 h-5 cursor-pointer"
+                {{ stimulus_target('card', 'button') }}
+                {{ stimulus_action('card', 'show_info', 'mouseover')|stimulus_action('card', 'hide_info', 'mouseout') }}
+             src="{{ asset('resources/logos/info_icon.svg') }}"
+             alt="info_icon"/>
+    </div>
+
+    {# Description #}
+    <div class="mt-2">
+        {{ include('/dashboard/shared/settings_actions/_description.html.twig', {
+            description: description,
+        }) }}
+    </div>
+
+    <div class="{{ 'hidden' in field.advanced.vars.attr.class ? 'hidden' : '' }}">
+        {{ include('dashboard/shared/settings_actions/schedule/subcard.html.twig', {
+            field: field.advanced,
+            field_label: 'advancedMode'|trans({}, 'schedule'),
+            description: 'advancedModeDescription'|trans({}, 'schedule'),
+        }) }}
+    </div>
+
+    <div class="{{ 'hidden' in field.day_of_week.vars.attr.class ? 'hidden' : '' }}">
+        {{ include('dashboard/shared/settings_actions/schedule/subcard.html.twig', {
+            field: field.day_of_week,
+            frequency_field: field.day_of_week_frequency,
+            field_label: 'dayWeek'|trans({}, 'schedule'),
+            frequency_label: 'frequencyDayWeek'|trans({}, 'schedule'),
+            description: 'dayWeekDescription'|trans({}, 'schedule'),
+            frequency_description: 'frequencyDayWeekDescription'|trans({}, 'schedule'),
+        }) }}
+    </div>
+
+    <div class="{{ 'hidden' in field.day_of_month.vars.attr.class ? 'hidden' : '' }}">
+        {{ include('dashboard/shared/settings_actions/schedule/subcard.html.twig', {
+            field: field.day_of_month,
+            frequency_field: field.day_of_month_frequency,
+            field_label: 'dayMonth'|trans({}, 'schedule'),
+            frequency_label: 'frequencyDayMonth'|trans({}, 'schedule'),
+            description: 'dayMonthDescription'|trans({}, 'schedule'),
+            frequency_description: 'frequencyDayMonthDescription'|trans({}, 'schedule'),
+        }) }}
+    </div>
+
+    <div class="{{ 'hidden' in field.months_of_the_year.vars.attr.class ? 'hidden' : '' }}">
+        {{ include('dashboard/shared/settings_actions/schedule/subcard.html.twig', {
+            field: field.months_of_the_year,
+            frequency_field: field.months_of_the_year_frequency,
+            field_label: 'monthsYear'|trans({}, 'schedule'),
+            frequency_label: 'frequencyMonthsYear'|trans({}, 'schedule'),
+            description: 'monthsYearDescription'|trans({}, 'schedule'),
+            frequency_description: 'frequencyMonthsYearDescription'|trans({}, 'schedule'),
+        }) }}
+    </div>
+
+    <div class="{{ 'hidden' in field.time.vars.attr.class ? 'hidden' : '' }}">
+        {{ include('dashboard/shared/settings_actions/schedule/subcard.html.twig', {
+            field: field.time,
+            field_label: 'executionTime'|trans({}, 'schedule'),
+            description: 'executionTimeDescription'|trans({}, 'schedule'),
+        }) }}
+    </div>
+</div>

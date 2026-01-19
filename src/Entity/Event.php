@@ -13,6 +13,7 @@ class Event
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    /** @phpstan-ignore-next-line */
     private ?int $id = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
@@ -21,6 +22,7 @@ class Event
     #[ORM\Column(length: 255)]
     private ?string $event_name = null;
 
+    /** @var array<string, mixed>|null */
     #[ORM\Column(type: Types::JSON)]
     private ?array $event_metadata = null;
 
@@ -57,11 +59,17 @@ class Event
         return $this;
     }
 
+    /**
+     * @return array<string, mixed>|null
+     */
     public function getEventMetadata(): ?array
     {
         return $this->event_metadata;
     }
 
+    /**
+     * @param array<string, mixed> $event_metadata
+     */
     public function setEventMetadata(array $event_metadata): static
     {
         $this->event_metadata = $event_metadata;

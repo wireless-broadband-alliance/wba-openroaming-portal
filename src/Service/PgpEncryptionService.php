@@ -9,6 +9,9 @@ use RuntimeException;
 
 class PgpEncryptionService
 {
+    /**
+     * @return bool|string|array{0: string, 1: string}
+     */
     public function encrypt(string $data): bool|array|string
     {
         $publicKeyPath = "/var/www/openroaming/pgp_public_key/public_key.asc";
@@ -23,7 +26,7 @@ class PgpEncryptionService
             ];
         }
 
-        if ($publicKeyContent === '' || $publicKeyContent === '0' || $publicKeyContent === false) {
+        if (in_array($publicKeyContent, ['', '0', false], true)) {
             return [
                 UserVerificationStatus::EMPTY_PUBLIC_KEY_CONTENT->value,
                 'The file does not exist or is not located in the correct path!
@@ -36,6 +39,10 @@ class PgpEncryptionService
 
             // Try importing the public key
             $importResult = $gpg->import($publicKeyContent);
+
+            if (!is_array($importResult) || !isset($importResult['fingerprint'])) {
+                throw new RuntimeException('Failed to import the PGP public key.');
+            }
 
             // Get errors
             $gpg->seterrormode(gnupg::ERROR_EXCEPTION);

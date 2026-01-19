@@ -7,25 +7,52 @@ use Lexik\Bundle\JWTAuthenticationBundle\Event\JWTExpiredEvent;
 use Lexik\Bundle\JWTAuthenticationBundle\Event\JWTInvalidEvent;
 use Lexik\Bundle\JWTAuthenticationBundle\Event\JWTNotFoundEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class JWTExceptionListener implements EventSubscriberInterface
 {
+    /** @var string[] */
+    private array $excludeRoutes = [
+        'api_v1_auth_saml',
+        'api_v2_auth_saml',
+        'api_v1_auth_google',
+        'api_v2_auth_google',
+        'api_v1_auth_microsoft',
+        'api_v2_auth_microsoft',
+    ];
+
+    public function __construct(
+        private readonly TranslatorInterface $translator,
+    ) {
+    }
     public static function getSubscribedEvents(): array
     {
         return [
-            'lexik_jwt_authentication.on_jwt_not_found' => 'onJWTNotFound',
-            'lexik_jwt_authentication.on_jwt_invalid' => 'onJWTInvalid',
-            'lexik_jwt_authentication.on_jwt_expired' => 'onJWTExpired',
+            // Higher number = higher priority, executed first
+            'lexik_jwt_authentication.on_jwt_not_found' => ['onJWTNotFound', 0],
+            'lexik_jwt_authentication.on_jwt_invalid'   => ['onJWTInvalid', 0],
+            'lexik_jwt_authentication.on_jwt_expired'   => ['onJWTExpired', 0],
         ];
     }
 
     public function onJWTNotFound(JWTNotFoundEvent $event): void
     {
+        $request = $event->getRequest();
+        $route = $request->attributes->get('_route');
+
+        if (in_array($route, $this->excludeRoutes, true)) {
+            return;
+        }
+
         $response =
             new BaseResponse(
                 401,
                 null,
-                'JWT Token not found!'
+                $this->translator->trans(
+                    'JWTTokenNotFound',
+                    [],
+                    'eventListener'
+                )
             );
         $event->setResponse($response->toResponse());
     }
@@ -36,7 +63,11 @@ class JWTExceptionListener implements EventSubscriberInterface
             new BaseResponse(
                 403,
                 null,
-                'JWT Token is invalid!'
+                $this->translator->trans(
+                    'JWTTokenIsInvalid',
+                    [],
+                    'eventListener'
+                )
             );
         $event->setResponse($response->toResponse());
     }
@@ -48,7 +79,11 @@ class JWTExceptionListener implements EventSubscriberInterface
             new BaseResponse(
                 401,
                 null,
-                'JWT Token is expired!'
+                $this->translator->trans(
+                    'JWTTokenIsExpired',
+                    [],
+                    'eventListener'
+                )
             );
         $event->setResponse($response->toResponse());
     }

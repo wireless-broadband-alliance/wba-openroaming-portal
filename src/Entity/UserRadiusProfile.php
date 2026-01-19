@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\UserRadiusProfileRepository;
+use DateTimeInterface;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -12,6 +13,7 @@ class UserRadiusProfile
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    /** @phpstan-ignore-next-line */
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'userRadiusProfiles')]
@@ -35,6 +37,12 @@ class UserRadiusProfile
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $revoked_reason = null;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?DateTimeInterface $lastConnectionStartAt = null;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?DateTimeInterface $lastConnectionStopAt = null;
 
     public function getId(): ?int
     {
@@ -122,6 +130,28 @@ class UserRadiusProfile
     {
         $this->revoked_reason = $revoked_reason;
 
+        return $this;
+    }
+
+    public function getLastConnectionStartAt(): ?\DateTimeInterface
+    {
+        return $this->lastConnectionStartAt;
+    }
+
+    public function setLastConnectionStartAt(?\DateTimeInterface $lastConnectionStartAt): self
+    {
+        $this->lastConnectionStartAt = $lastConnectionStartAt;
+        return $this;
+    }
+
+    public function getLastConnectionStopAt(): ?\DateTimeInterface
+    {
+        return $this->lastConnectionStopAt;
+    }
+
+    public function setLastConnectionStopAt(?\DateTimeInterface $lastConnectionStopAt): self
+    {
+        $this->lastConnectionStopAt = $lastConnectionStopAt;
         return $this;
     }
 }

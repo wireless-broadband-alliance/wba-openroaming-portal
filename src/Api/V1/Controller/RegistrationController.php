@@ -9,6 +9,8 @@ use App\Entity\UserExternalAuth;
 use App\Enum\AnalyticalEventType;
 use App\Enum\OperationMode;
 use App\Enum\PlatformMode;
+use App\Enum\SettingName;
+use App\Enum\SMSResponse;
 use App\Enum\UserProvider;
 use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
@@ -16,8 +18,7 @@ use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
 use App\Service\CaptchaValidator;
 use App\Service\EventActions;
-use App\Service\GetSettings;
-use App\Service\RegistrationEmailGenerator;
+use App\Service\EmailGenerator;
 use App\Service\SendSMS;
 use DateInterval;
 use DateTime;
@@ -29,14 +30,10 @@ use libphonenumber\NumberParseException;
 use libphonenumber\PhoneNumberFormat;
 use libphonenumber\PhoneNumberUtil;
 use Random\RandomException;
-use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
-use Symfony\Component\Mailer\MailerInterface;
-use Symfony\Component\Mime\Address;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -54,14 +51,13 @@ class RegistrationController extends AbstractController
         private readonly EventRepository $eventRepository,
         private readonly EntityManagerInterface $entityManager,
         private readonly EventActions $eventActions,
-        private readonly ParameterBagInterface $parameterBag,
         private readonly SendSMS $sendSMSService,
-        private readonly GetSettings $getSettings,
         private readonly SettingRepository $settingRepository,
         private readonly UserPasswordHasherInterface $userPasswordHasher,
         private readonly CaptchaValidator $captchaValidator,
-        private readonly RegistrationEmailGenerator $emailGenerator,
-        private readonly ValidatorInterface $validator
+        private readonly EmailGenerator $emailGenerator,
+        private readonly ValidatorInterface $validator,
+        private readonly PhoneNumberUtil $phoneNumberUtil,
     ) {
     }
 
@@ -77,7 +73,6 @@ class RegistrationController extends AbstractController
     #[Route('/auth/local/register', name: 'api_v1_auth_local_register', methods: ['POST'])]
     public function localRegister(
         Request $request,
-        UserPasswordHasherInterface $userPasswordHasher,
     ): JsonResponse {
         try {
             $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
@@ -85,7 +80,9 @@ class RegistrationController extends AbstractController
             return new BaseResponse(400, null, 'Invalid JSON format')->toResponse(); // Invalid Json
         }
 
-        $turnstileSetting = $this->settingRepository->findOneBy(['name' => 'TURNSTILE_CHECKER'])->getValue();
+        $turnstileSetting = $this->settingRepository->findOneBy([
+            'name' => SettingName::TURNSTILE_CHECKER->value
+        ])->getValue();
         if (!$turnstileSetting) {
             throw new \RuntimeException('Missing settings: TURNSTILE_CHECKER not found');
         }
@@ -142,13 +139,15 @@ class RegistrationController extends AbstractController
         $user = new User();
         $user->setUuid($data['email']);
         $user->setEmail($data['email']);
-        $hashedPassword = $userPasswordHasher->hashPassword($user, $data['password']);
+        $hashedPassword = $this->userPasswordHasher->hashPassword($user, $data['password']);
         $user->setPassword($hashedPassword);
         $user->setIsVerified(false);
-        $user->setVerificationCode(random_int(100000, 999999));
+        $user->setCreatedAt(new DateTime());
+        $user->setTwoFAcode((string)random_int(100000, 999999));
+        $user->setTwoFACodeGeneratedAt(new DateTime());
+        $user->setTwoFAcodeIsActive(true);
         $user->setFirstName($data['first_name'] ?? null);
         $user->setLastName($data['last_name'] ?? null);
-        $user->setCreatedAt(new DateTime());
 
         $userExternalAuth = new UserExternalAuth();
         $userExternalAuth->setUser($user);
@@ -192,8 +191,6 @@ class RegistrationController extends AbstractController
      */
     #[Route('/auth/local/reset', name: 'api_v1_auth_local_reset', methods: ['POST'])]
     public function localReset(
-        UserPasswordHasherInterface $userPasswordHasher,
-        MailerInterface $mailer,
         Request $request,
     ): JsonResponse {
         try {
@@ -214,7 +211,9 @@ class RegistrationController extends AbstractController
             )->toResponse();
         }
 
-        $turnstileSetting = $this->settingRepository->findOneBy(['name' => 'TURNSTILE_CHECKER'])->getValue();
+        $turnstileSetting = $this->settingRepository->findOneBy([
+            'name' => SettingName::TURNSTILE_CHECKER->value
+        ])->getValue();
         if (!$turnstileSetting) {
             throw new \RuntimeException('Missing settings: TURNSTILE_CHECKER not found');
         }
@@ -277,7 +276,10 @@ class RegistrationController extends AbstractController
                     $user,
                     AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST->value
                 );
-                $minInterval = new DateInterval('PT2M');
+                $emailTimerResend = $this->settingRepository->findOneBy(
+                    ['name' => SettingName::EMAIL_TIMER_RESEND->value]
+                )->getValue();
+                $minInterval = new DateInterval('PT' . $emailTimerResend . 'M');
                 $currentTime = new DateTime();
                 $latestEventMetadata = $latestEvent instanceof Event ? $latestEvent->getEventMetadata() : [];
                 $lastVerificationCodeTime = isset($latestEventMetadata['lastVerificationCodeTime'])
@@ -311,35 +313,14 @@ class RegistrationController extends AbstractController
                     $this->eventRepository->save($latestEvent, true);
 
                     $randomPassword = bin2hex(random_bytes(4));
-                    $hashedPassword = $userPasswordHasher->hashPassword($user, $randomPassword);
+                    $hashedPassword = $this->userPasswordHasher->hashPassword($user, $randomPassword);
                     $user->setPassword($hashedPassword);
                     $user->setForgotPasswordRequest(true);
                     $this->entityManager->persist($user);
                     $this->entityManager->flush();
 
-                    $email = new TemplatedEmail()
-                        ->from(
-                            new Address(
-                                $this->parameterBag->get('app.email_address'),
-                                $this->parameterBag->get('app.sender_name')
-                            )
-                        )
-                        ->to($user->getEmail())
-                        ->subject('Reset Your OpenRoaming Password')
-                        ->htmlTemplate('email/user_forgot_password_request.html.twig')
-                        ->context([
-                            'password' => $randomPassword,
-                            'forgotPasswordUser' => true,
-                            'uuid' => $user->getUuid(),
-                            'currentPassword' => $randomPassword,
-                            'verificationCode' => $user->getVerificationCode(),
-                            'emailTitle' => $this->settingRepository->findOneBy(['name' => 'PAGE_TITLE'])->getValue(),
-                            'contactEmail' => $this->settingRepository->findOneBy(
-                                ['name' => 'CONTACT_EMAIL']
-                            )->getValue()
-                        ]);
-
-                    $mailer->send($email);
+                    // Send email for the user
+                    $this->emailGenerator->sendForgotPasswordEmail($user);
 
                     // Defines the Event to the table
                     $eventMetadata = [
@@ -382,7 +363,6 @@ class RegistrationController extends AbstractController
                 'If the email address exists in our system, we have sent you a new one to: %s',
                 $data['email']
             ),
-            null,
         )->toResponse(); // Not Found User doesn't exist request
     }
 
@@ -396,9 +376,7 @@ class RegistrationController extends AbstractController
      */
     #[Route('/auth/sms/register', name: 'api_v1_auth_sms_register', methods: ['POST'])]
     public function smsRegister(
-        Request $request,
-        UserPasswordHasherInterface $userPasswordHasher,
-        PhoneNumberUtil $phoneNumberUtil
+        Request $request
     ): JsonResponse {
         try {
             $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
@@ -406,7 +384,9 @@ class RegistrationController extends AbstractController
             return new BaseResponse(400, null, 'Invalid JSON format')->toResponse();
         }
 
-        $turnstileSetting = $this->settingRepository->findOneBy(['name' => 'TURNSTILE_CHECKER'])->getValue();
+        $turnstileSetting = $this->settingRepository->findOneBy([
+            'name' => SettingName::TURNSTILE_CHECKER->value
+        ])->getValue();
         if (!$turnstileSetting) {
             throw new \RuntimeException('Missing settings: TURNSTILE_CHECKER not found');
         }
@@ -448,11 +428,11 @@ class RegistrationController extends AbstractController
 
         // Validate phone number with country code
         try {
-            $parsedPhoneNumber = $phoneNumberUtil->parse(
+            $parsedPhoneNumber = $this->phoneNumberUtil->parse(
                 $data['phone_number'],
                 strtoupper((string)$data['country_code'])
             );
-            if ($parsedPhoneNumber && !$phoneNumberUtil->isValidNumber($parsedPhoneNumber)) {
+            if (!$this->phoneNumberUtil->isValidNumber($parsedPhoneNumber)) {
                 return new BaseResponse(
                     400,
                     null,
@@ -468,7 +448,7 @@ class RegistrationController extends AbstractController
         }
 
         // Check for existing user with the same phone number
-        $formattedPhoneNumber = $phoneNumberUtil->format($parsedPhoneNumber, PhoneNumberFormat::E164);
+        $formattedPhoneNumber = $this->phoneNumberUtil->format($parsedPhoneNumber, PhoneNumberFormat::E164);
         if ($this->userRepository->findOneBy(['uuid' => $formattedPhoneNumber])) {
             return new BaseResponse(200, [
                 'message' => 'SMS User Account Registered Successfully.' .
@@ -480,13 +460,15 @@ class RegistrationController extends AbstractController
         $user = new User();
         $user->setUuid($formattedPhoneNumber);  // Store formatted phone number in UUID field
         $user->setPhoneNumber($parsedPhoneNumber);  // Set the PhoneNumber object directly
-        $hashedPassword = $userPasswordHasher->hashPassword($user, $data['password']);
+        $hashedPassword = $this->userPasswordHasher->hashPassword($user, $data['password']);
         $user->setPassword($hashedPassword);
         $user->setIsVerified(false);
-        $user->setVerificationCode(random_int(100000, 999999));
+        $user->setCreatedAt(new DateTime());
+        $user->setTwoFAcode((string)random_int(100000, 999999));
+        $user->setTwoFACodeGeneratedAt(new DateTime());
+        $user->setTwoFAcodeIsActive(true);
         $user->setFirstName($data['first_name'] ?? null);
         $user->setLastName($data['last_name'] ?? null);
-        $user->setCreatedAt(new DateTime());
 
         $userExternalAuth = new UserExternalAuth();
         $userExternalAuth->setUser($user);
@@ -516,24 +498,24 @@ class RegistrationController extends AbstractController
         try {
             $message = "Your account password is: "
                 . $data['password'] . "%0A" . "Verification code is: "
-                . $user->getVerificationCode();
-            $result = $this->sendSMSService->sendSms($user->getPhoneNumber(), $message);
+                . $user->getTwoFAcode();
+            $result = $this->sendSMSService->sendSmsNoValidation($user, $message);
 
-            if ($result) {
-                return new BaseResponse(
-                    200,
-                    [
-                        'message' =>
-                            'SMS User Account Registered Successfully. A verification code has been sent to your phone.'
-                    ]
-                )->toResponse();
+            if ($result === SMSResponse::SMS_SUCCESS_LINK->value) {
+                $messageAPI = 'SMS User Account Registered Successfully. A link has been sent to your phone.';
+            } else {
+                $messageAPI = 'SMS User Account Registered Successfully. 
+                A verification code has been sent to your phone.';
             }
+            return new BaseResponse(
+                200,
+                [
+                    'message' => $messageAPI,
+                ]
+            )->toResponse();
         } catch (\RuntimeException) {
             return new BaseResponse(500, null, 'Failed to send SMS')->toResponse(); // Internal Server Error
         }
-
-        // Return fallback response
-        return new BaseResponse(500, null, 'User registered but SMS could not be sent.')->toResponse();
     }
 
 
@@ -547,15 +529,16 @@ class RegistrationController extends AbstractController
      */
     #[Route('/auth/sms/reset', name: 'api_v1_auth_sms_reset', methods: ['POST'])]
     public function smsReset(
-        Request $request,
-        PhoneNumberUtil $phoneNumberUtil
+        Request $request
     ): JsonResponse {
         try {
             $dataRequest = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
         } catch (\JsonException) {
             return new BaseResponse(400, null, 'Invalid JSON format')->toResponse(); // Invalid Json
         }
-        $turnstileSetting = $this->settingRepository->findOneBy(['name' => 'TURNSTILE_CHECKER'])->getValue();
+        $turnstileSetting = $this->settingRepository->findOneBy([
+            'name' => SettingName::TURNSTILE_CHECKER->value
+        ])->getValue();
         if (!$turnstileSetting) {
             throw new \RuntimeException('Missing settings: TURNSTILE_CHECKER not found');
         }
@@ -594,11 +577,11 @@ class RegistrationController extends AbstractController
 
         // Validate phone number with country code
         try {
-            $parsedPhoneNumber = $phoneNumberUtil->parse(
+            $parsedPhoneNumber = $this->phoneNumberUtil->parse(
                 $dataRequest['phone_number'],
                 strtoupper((string)$dataRequest['country_code'])
             );
-            if ($parsedPhoneNumber && !$phoneNumberUtil->isValidNumber($parsedPhoneNumber)) {
+            if (!$this->phoneNumberUtil->isValidNumber($parsedPhoneNumber)) {
                 return new BaseResponse(
                     400,
                     null,
@@ -614,7 +597,7 @@ class RegistrationController extends AbstractController
         }
 
         // Check for existing user with the same phone number
-        $formattedPhoneNumber = $phoneNumberUtil->format($parsedPhoneNumber, PhoneNumberFormat::E164);
+        $formattedPhoneNumber = $this->phoneNumberUtil->format($parsedPhoneNumber, PhoneNumberFormat::E164);
         $user = $this->userRepository->findOneBy(['uuid' => $formattedPhoneNumber]);
         if ($user) {
             if ($user->getBannedAt()) {
@@ -640,8 +623,6 @@ class RegistrationController extends AbstractController
                 }
             }
 
-            $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
-
             if ($hasValidPortalAccount) {
                 try {
                     $randomPassword = bin2hex(random_bytes(4));
@@ -649,7 +630,9 @@ class RegistrationController extends AbstractController
 
                     // Retrieve the latest SMS attempt event for the user
                     $latestEvent = $this->eventRepository->findLatestSmsAttemptEvent($user);
-                    $smsResendInterval = $data['SMS_TIMER_RESEND']['value']; // Interval in minutes
+                    $smsResendInterval = $this->settingRepository->findOneBy(
+                        ['name' => SettingName::SMS_TIMER_RESEND->value] // Interval in minutes
+                    )?->getValue();
                     $minInterval = new DateInterval('PT' . $smsResendInterval . 'M');
                     $maxAttempts = 3;
                     $currentTime = new DateTime();
@@ -721,10 +704,10 @@ class RegistrationController extends AbstractController
                     $message = sprintf(
                         "Your account password is: %s\n Verification code is: %s",
                         $randomPassword,
-                        $user->getVerificationCode()
+                        $user->getTwoFAcode()
                     );
 
-                    $result = $this->sendSMSService->sendSms($user->getPhoneNumber(), $message);
+                    $result = $this->sendSMSService->sendSmsNoValidation($user, $message);
 
                     // Defines the Event to the table
                     $eventMetadata = [
@@ -740,7 +723,7 @@ class RegistrationController extends AbstractController
                         $eventMetadata
                     );
 
-                    if ($result) {
+                    if ($result !== '' && $result !== '0') {
                         return new BaseResponse(200, [
                             'success' => sprintf(
                                 'If the phone number exists,' .
@@ -764,7 +747,6 @@ class RegistrationController extends AbstractController
         return new BaseResponse(
             200,
             sprintf('If the phone number exists, we have sent you a new code to: %s', $dataRequest['phone_number']),
-            null,
         )->toResponse();
     }
 }

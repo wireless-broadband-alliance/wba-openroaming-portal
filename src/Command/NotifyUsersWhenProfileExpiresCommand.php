@@ -4,6 +4,7 @@ namespace App\Command;
 
 use App\Entity\Notification;
 use App\Enum\NotificationType;
+use App\Enum\SettingName;
 use App\Enum\UserProvider;
 use App\Enum\UserRadiusProfileRevokeReason;
 use App\Repository\NotificationRepository;
@@ -12,7 +13,7 @@ use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRadiusProfileRepository;
 use App\Service\ExpirationProfileService;
 use App\Service\ProfileManager;
-use App\Service\RegistrationEmailGenerator;
+use App\Service\EmailGenerator;
 use App\Service\SendSMS;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
@@ -39,7 +40,7 @@ class NotifyUsersWhenProfileExpiresCommand extends Command
         private readonly ProfileManager $profileManager,
         private readonly UserExternalAuthRepository $userExternalAuthRepository,
         private readonly UserRadiusProfileRepository $userRadiusProfileRepository,
-        private readonly RegistrationEmailGenerator $registrationEmailGenerator,
+        private readonly EmailGenerator $emailGenerator,
         private readonly ExpirationProfileService $expirationProfileService,
         private readonly SettingRepository $settingRepository,
         private readonly NotificationRepository $notificationRepository,
@@ -59,7 +60,9 @@ class NotifyUsersWhenProfileExpiresCommand extends Command
     public function notifyUsersWhenProfileExpires(OutputInterface $output): void
     {
         $userRadiusProfiles = $this->userRadiusProfileRepository->findAll();
-        $notificationResendInterval = $this->settingRepository->findOneBy(['name' => 'TIME_INTERVAL_NOTIFICATION']);
+        $notificationResendInterval = $this->settingRepository->findOneBy([
+            'name' => SettingName::TIME_INTERVAL_NOTIFICATION->value
+        ]);
 
         foreach ($userRadiusProfiles as $userRadiusProfile) {
             $user = $userRadiusProfile->getUser();
@@ -118,7 +121,7 @@ class NotifyUsersWhenProfileExpiresCommand extends Command
                 try {
                     // Priority: Send Email Notification
                     if ($user->getEmail()) { // For Google/Portal/Microsoft future accounts - any account with an email
-                        $this->registrationEmailGenerator->sendNotifyExpiresProfileEmail(
+                        $this->emailGenerator->sendNotifyExpiresProfileEmail(
                             $user,
                             $timeLeftDays + 1
                         );
@@ -142,8 +145,8 @@ class NotifyUsersWhenProfileExpiresCommand extends Command
                             $user->getPhoneNumber() &&
                             $externalAuth->getProviderId() === UserProvider::PHONE_NUMBER->value
                         ) {
-                            $this->sendSMS->sendSms(
-                                $user->getPhoneNumber(),
+                            $this->sendSMS->sendSmsNoValidation(
+                                $user,
                                 'Your OpenRoaming profile will expire in ' . ($timeLeftDays + 1) . ' days.'
                             );
                             $output->writeln("SMS sent to user ID {$user->getId()}");
@@ -172,7 +175,7 @@ class NotifyUsersWhenProfileExpiresCommand extends Command
                     UserRadiusProfileRevokeReason::PROFILE_EXPIRED->value,
                     true
                 );
-                $this->registrationEmailGenerator->sendNotifyExpiredProfile($user);
+                $this->emailGenerator->sendNotifyExpiredProfile($user);
                 $this->entityManager->persist($userRadiusProfile);
                 $this->entityManager->flush();
             }

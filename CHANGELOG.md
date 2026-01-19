@@ -1,14 +1,132 @@
 # Changelog
 
+# Release V1.9.0
+
+- Increased the level of php-stan to the max level, for more fixes with security updates.
+- New endpoint for API V2 only - New endpoint for jwt token refresh for apps.
+- Profile download instructions page.
+- New page dedicated for profile download steps and prepared for both translations implemented on the project.
+- Added new screenshots for each case (PT/EN) and for each operating system.
+- Landing page UI rework for authenticated users.
+- Improve landing page by centralizing the display content for better notice and for mobile user focused.
+- Installation of a new text editor open-source alternative for free commercial use.
+    - Remove TinyMice text editor bundle from the project because it's not valid for commercial use.
+    - Fix and rework customization page to also have this custom editor for (page_tile, page_description &
+      additional_label).
+- New checker on the `GetSettings` service to also verify if there is any missing or duplicated setting on the DB.
+    - More Project optimizations reduce the amount of number of queries made in most of the pages.
+- Password toggle reveal implementation for inputs.
+- New UI design for email templates.
+- Responsive Translations (Available: EN & PT-PT) - Administrator can just add new configurations for YAML
+  files in the translations folder, and the page auto-detects the added language.
+- New Listener to auto-detection of the user language.
+- Session token to auto-detect the new required `_locale`.
+- Optimized the `GetSettings` service to significantly reduce the loading process, improving application performance by
+  minimizing redundant data processing and database queries.
+- Renamed some enums to singular form to follow symfony guidelines for enum classes.
+- New feature - Now the admin can configure the landing login authentication, instead of being the traditional (
+  email/password), it sends a verification link, for both cases (emails || phoneNumbers), to reduce the amount of steps
+  for new users account creation.
+- Rework landing/dashboard authentications because of the new feature - DTO Implementation to improve code optimization
+  and add a new login method selector emails || phoneNumber authentication.
+    - Fix minor bugs & conflicts with the new DTO and authentication form.
+- Add a new eventSubscriber to avoid the admin of hard changing the DB value `USER_VERIFICATION` setting to `OFF`, when
+  the `PLATFORM_MODE` setting is `ON`.
+    - When that happens, it could brake the user account registration system for email & phoneNumbers on the landing
+      page.
+- **Fix bug 500** on `/dashboard/statistics/freeradius` in case the connection details are invalid and the portal can
+  reach
+  the server, added a new JSON error message for details.
+- **Fix bug 500** on `/metrics` in case the configuration env details are disabled or missing. Added a new JSON error
+  message for details.
+- Fix bug with returns with admin reset password, the problem was related with the previous firewall configuration
+  implementation where no context has returned.
+- Update `/dashboard/edit/{id}` to use DTO's and live components for validation.
+- New info icon about uuid explanation when admin is editing a user. Check the following page `/dashboard/edit/{id}` for
+  more details.
+- New command for freeradius profile connection of each user, now the `UserRadiusProfile` entity saves the start/end
+  connection of the user profiles when the freeradius server gets a new request. (For later graphics generations and
+  user details)
+    - This new command is configurable on the page `dashboard/settings/schedule` because he is also cron based.
+- New bundle installed `composer require symfony/lock` required for the command next execution only start when the
+  current active ends.
+- Symfony version increase for maintained version (7.3.3), it bug fixes and security fixes until January 2026.
+- NPM webpack-cli deprecations fixed to the latest stabled release (
+    - (https://www.npmjs.com/package/webpack-cli/v/5.1.4)) compatible with "@symfony/webpack-encore": "^5.1.0".
+- New validation on the Admin Authentication Methods page to check whether the project has all required certificates.
+- Also for this release, it's required to run the new migrations to set up the new entity for the translations (
+  `SettingTranslation`). And the new setting for the login with uuid (`LOGIN_WITH_UUID_ONLY`):
+    - Run the migrations with:
+      ```bash
+      php bin/console doctrine:migrations:migrate
+      ```
+
+## API Deprecation Notice
+
+### Deprecation of API v1 and v2
+
+As part of our ongoing improvements and rework of the API endpoints, **API v1 and v2 are now officially deprecated**.
+These versions will no longer receive updates, and clients are strongly encouraged to migrate to **API v3**.
+
+* **Date of deprecation:** 2026-06-19 (or the first release after this date)
+* **Grace period:** v1 and v2 will continue to function temporarily, but **all users must migrate within 6 months from 2026-01-19**.
+* **The first release after this date of deprecation will fully remove v1 and v2 code and routes**
+
+
+### Recommended Action
+
+* Review your current integration with API v1/v2.
+* Update your calls to use the new v3 endpoints.
+* Ensure that any authentication, payload structure, or request/response handling matches the v3 specification.
+
+### Important
+
+Please follow the steps outlined in [UPGRADE.md](docs/UPGRADE.md) and review the **changelog** to ensure a smooth
+transition.  
+Failure to migrate before the end of the grace period may result in **loss of access to deprecated endpoints**.
+
+# Release V1.8.1
+
+- Removed duplicated field relative to the user account verification (Account Verification & User
+  2FA Configuration).
+
+> **Important**: In this release, the field **verificationCode** was eliminated.
+> If you are upgrading from version 1.8.0 or lower, and your portal or database still has the
+> **verificationCode** field, please ensure any necessary data migrations are handled when upgrading to version 1.8.0.
+> - This change is part of an optimization process to improve the handling of the user account confirmation on the
+    portal,
+    and other confirmation methods.
+
+- Also for this release, it's required to run the new migrations to set up the new settings and the new update on the
+  `User Entity`:
+  Run the migrations with:
+
+```bash
+php bin/console doctrine:migrations:migrate
+```
+
 # Release V1.8.0
 
+- New UI section on the dashboard for Schedule Automation. This page is responsible for management of the automation
+  commands time schedule.
+- Rework Automation commands to use an official symfony bundle of automation commands.
+
+> **Note**: If you are using automated CRON's from our previous guide, it's recommended you use the official symfony
+> bundle from this release. For reference, the command that takes care of the operation inside the container web is
+> this one:
+
+```
+php:bin/console messenger:consume scheduler_default -vv
+```
+
 - Update API for version 2, fix bug for iOS App's with invalid format for profile generation endpoint.
-- Prometheus Implementation
+- Prometheus Implementation.
 - Fix bug with registration links, use could use them to re-log in to the portal at any time, can only be used once.
-- Fix bug with account deletion, the admin was able to access the page using the url. The admin cannot delete his own account.
+- Fix bug with account deletion, the admin was able to access the page using the url. The admin cannot delete his own
+  account.
 - Fix bug on the pagination page with the table `Access Points Usage` on the `dashboard/statistics/freeradius` page (Add
   new custom display of results per page).
-- Fix bug about when the user session should be restored. Only when the firewall "landing".
+- Fix bug about when the user session should be restored. Only when the firewall "landing."
 - Invalidate session on the dashboard in case the admin changes is password on the landing firewall.
 - Fix bug with return detector for expired links on registration email, now it returns to the login page with the input
   pre-fielded.
@@ -23,9 +141,18 @@
   proceeding.
 - New Setting for time configuration of email resend on the `ForgotPasswordRequest`, present on the Authentications
   methods page (EMAIL_TIMER_RESEND).
-- New Setting for time configuration of an email link validly. This same time reflect for link present on the
-  `ForgotPasswordRequest` & on the  `RegistrationWithEmail` (LINK_VALIDITY)
-- Also for this release, it's required to run the new migrations to set up the new settings:
+- New Setting for time configuration of an email link validly. These same times reflect for link present on the
+  `ForgotPasswordRequest` & on the  `RegistrationWithEmail` (LINK_VALIDITY).
+
+> **Important**: In this release, the field **verificationCode** was eliminated.
+> If you are upgrading from version 1.7.3 or lower, and your portal or database still has the
+> **verificationCode** field, please ensure any necessary data migrations are handled when upgrading to version 1.8.0.
+> - This change is part of an optimization process to improve the handling of the user account confirmation on the
+    portal,
+    and other confirmation methods.
+
+- Also for this release, it's required to run the new migrations to set up the new settings and the new update on the
+  `User Entity`:
   Run the migrations with:
 
 ```bash

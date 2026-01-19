@@ -1,7 +1,7 @@
-import { Controller } from "@hotwired/stimulus";
+import { Controller } from '@hotwired/stimulus';
 
 export default class extends Controller {
-    static targets = ["input", "button"];
+    static targets = ['input', 'button'];
     static values = {
         profileLimitDate: Number,
     };

@@ -19,6 +19,16 @@ security:
                 user_class: 'App\Entity\User'
                 default_roles: ['ROLE_USER']
     firewalls:
+        auth_v1:
+            pattern: ^/api/v1/auth
+            stateless: true
+            security: false
+
+        auth_v2:
+            pattern: ^/api/v2/auth
+            stateless: true
+            security: false
+
         api:
             pattern: ^/api/
             stateless: true
@@ -88,6 +98,7 @@ security:
     access_control:
         - { path: ^/saml/(metadata|login|acs), roles: PUBLIC_ACCESS }
         - { path: ^/api/v1/user, roles: IS_AUTHENTICATED_FULLY }
+        - { path: ^/api/v2/user, roles: IS_AUTHENTICATED_FULLY }
 when@test:
     security:
         password_hashers:

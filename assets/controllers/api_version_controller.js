@@ -1,7 +1,7 @@
-import { Controller } from "@hotwired/stimulus";
+import { Controller } from '@hotwired/stimulus';
 
 export default class extends Controller {
-    static targets = ["input", "list", "item"];
+    static targets = ['input', 'list', 'item'];
 
     connect() {
         this.hideList();
@@ -11,7 +11,7 @@ export default class extends Controller {
         const searchTerm = this.inputTarget.value.toLowerCase();
         this.itemTargets.forEach((item) => {
             const text = item.innerText.toLowerCase();
-            item.style.display = text.includes(searchTerm) ? "" : "none";
+            item.style.display = text.includes(searchTerm) ? '' : 'none';
         });
     }
 
@@ -25,10 +25,10 @@ export default class extends Controller {
     }
 
     showList() {
-        this.listTarget.classList.remove("hidden");
+        this.listTarget.classList.remove('hidden');
     }
 
     hideList() {
-        this.listTarget.classList.add("hidden");
+        this.listTarget.classList.add('hidden');
     }
 }

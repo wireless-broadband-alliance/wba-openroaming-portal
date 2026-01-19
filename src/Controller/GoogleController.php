@@ -7,6 +7,7 @@ use App\Entity\UserExternalAuth;
 use App\Enum\AnalyticalEventType;
 use App\Enum\FirewallType;
 use App\Enum\PlatformMode;
+use App\Enum\SettingName;
 use App\Enum\UserProvider;
 use App\Repository\SettingRepository;
 use App\Repository\UserExternalAuthRepository;
@@ -15,6 +16,7 @@ use App\Service\EventActions;
 use App\Service\GetSettings;
 use App\Service\UserStatusChecker;
 use DateTime;
+use DateTimeInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use GuzzleHttp\Exception\GuzzleException;
@@ -33,10 +35,8 @@ use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
-/**
- *
- */
 class GoogleController extends AbstractController
 {
     public function __construct(
@@ -51,22 +51,42 @@ class GoogleController extends AbstractController
         private readonly UserRepository $userRepository,
         private readonly UserStatusChecker $userStatusChecker,
         private readonly UserExternalAuthRepository $userExternalAuthRepository,
+        private readonly TranslatorInterface $translator,
         private readonly CsrfTokenManagerInterface $csrfTokenManager,
         private readonly SettingRepository $settingRepository,
     ) {
     }
 
+    /**
+     * @throws Exception
+     */
     #[Route('/connect/google', name: 'connect_google')]
     public function connect(Request $request): RedirectResponse
     {
         // Call the getSettings method of GetSettings class to retrieve the data
-        $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
+        /** @var array<string, array{value: string, description: string}> $data */
+        $data = $this->getSettings->getSettings();
 
         // Check if the user clicked on the 'sms' variable present only on the SMS authentication buttons
-        if ($data['PLATFORM_MODE']['value'] === true) {
+        if ($data[SettingName::PLATFORM_MODE->value]['value'] === PlatformMode::DEMO->value) {
             $this->addFlash(
                 'error',
-                'The portal is in Demo mode - it is not possible to use this verification method.'
+                $this->translator->trans(
+                    'portalInDemoMode',
+                    [],
+                    'controllers'
+                )
+            );
+            return $this->redirectToRoute('app_landing');
+        }
+        if ($data[SettingName::AUTH_METHOD_GOOGLE_LOGIN_ENABLED->value]['value'] === "false") {
+            $this->addFlash(
+                'error',
+                $this->translator->trans(
+                    'authenticationMethodNotEnabled',
+                    [],
+                    'controllers'
+                )
             );
             return $this->redirectToRoute('app_landing');
         }
@@ -98,10 +118,15 @@ class GoogleController extends AbstractController
         $client = $this->clientRegistry->getClient('google');
 
         $code = $request->query->get('code');
+        // For testing and api debugging pls check this dd($code);
         if ($code === null) {
             $this->addFlash(
                 'error',
-                'Authentication process cancelled.'
+                $this->translator->trans(
+                    'authenticationProcessCancelled',
+                    [],
+                    'controllers'
+                )
             );
             return $this->redirectToRoute('app_landing');
         }
@@ -118,6 +143,7 @@ class GoogleController extends AbstractController
         ]);
 
         // Retrieve the user ID and email from the resource owner
+        /** @phpstan-ignore-next-line */
         $resourceOwner = $client->fetchUserFromToken($accessToken);
         /** @phpstan-ignore-next-line */
         $googleUserId = $resourceOwner->getId();
@@ -132,7 +158,11 @@ class GoogleController extends AbstractController
         if (!$this->userStatusChecker->isValidEmail($email, UserProvider::GOOGLE_ACCOUNT->value)) {
             $this->addFlash(
                 'error',
-                'Sorry! Your email domain is not allowed to use this platform'
+                $this->translator->trans(
+                    'emailDomainNotAllowed',
+                    [],
+                    'controllers'
+                )
             );
             return $this->redirectToRoute('app_landing');
         }
@@ -146,10 +176,14 @@ class GoogleController extends AbstractController
         }
 
         // Check if the user is banned
-        if ($user->getBannedAt() instanceof \DateTimeInterface) {
+        if ($user->getBannedAt() instanceof DateTimeInterface) {
             $this->addFlash(
                 'error',
-                'Your account is banned. Please, for more information contact our support.'
+                $this->translator->trans(
+                    'accountBanned',
+                    [],
+                    'controllers'
+                )
             );
             return $this->redirectToRoute('app_landing');
         }
@@ -197,8 +231,11 @@ class GoogleController extends AbstractController
 
             $this->addFlash(
                 'error',
-                'Email is already in use but is associated with a different provider!
-                 Please use the original one.'
+                $this->translator->trans(
+                    'emailIsAlreadyInUse',
+                    [],
+                    'controllers'
+                )
             );
 
             return null;
@@ -273,10 +310,10 @@ class GoogleController extends AbstractController
             $eventDispatcher->dispatch(new InteractiveLoginEvent($request, $token));
 
             // Defines the Event to the table
-            $data = $this->getSettings->getSettings($this->userRepository, $this->settingRepository);
-            $platformMode = $data['PLATFORM_MODE']['value'] ? PlatformMode::DEMO->value : PlatformMode::LIVE->value;
             $eventMetadata = [
-                'platform' => $platformMode,
+                'platform' => $this->settingRepository->findOneBy(
+                    ['name' => SettingName::PLATFORM_MODE->value]
+                )->getValue(),
                 'ip' => $_SERVER['REMOTE_ADDR'],
                 'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? 'Unknown',
                 'uuid' => $user->getUuid(),
@@ -292,7 +329,7 @@ class GoogleController extends AbstractController
             $this->entityManager->flush();
         } catch (AuthenticationException $exception) {
             // Handle authentication failure
-            $errorMessage = 'Authentication Failed:'
+            $errorMessage = $this->translator->trans('authenticationFailed', [], 'controllers')
                 . $exception->getMessage();
             $this->addFlash('error', $errorMessage);
             $this->redirectToRoute('app_landing');
@@ -302,7 +339,7 @@ class GoogleController extends AbstractController
 
     /**
      * @throws IdentityProviderException
-     * @throws Exception
+     * @throws Exception|GuzzleException
      */
     public function fetchUserFromGoogle(string $code): ?User
     {
@@ -314,6 +351,7 @@ class GoogleController extends AbstractController
         ]);
 
         // Fetch user info from Google
+        /** @phpstan-ignore-next-line */
         $resourceOwner = $client->fetchUserFromToken($accessToken);
         $googleUserId = $resourceOwner->getId();
         /** @phpstan-ignore-next-line */
