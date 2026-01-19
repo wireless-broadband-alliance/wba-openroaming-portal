@@ -149,8 +149,8 @@ freeradiusTestPassed: 'TLS handshake OK using WBA CA bundle'  # TODO update this
 configAlreadyApplied: 'Configuration is been already applied. You can not re-submit this form.'
 certificateProcessAborted: "This process was aborted successfully. Please don't forget to re-configure all the process once again correctly!"
 not_ev_warning: "These certificates are not valid EV's. OpenRoaming profile generation for Windows will fail because of this, but you can proceed if you wish."
-cert_uploaded_are_lets_encrypt_warning: "The uploaded certificate are issued by Let's Encrypt. OpenRoaming profile generation for Windows will fail because of this, but you can proceed if you wish."
-cert_generated_are_lets_encrypt_warning: "The generated certificate are issued by Let's Encrypt. OpenRoaming profile generation for Windows will fail because of this, but you can proceed if you wish."
+cert_uploaded_are_lets_encrypt_warning: "The uploaded certificate are issued by Let's Encrypt, which does not support EV certificates. OpenRoaming profile generation for Windows 10 will fail because of this, but you can proceed if you wish."
+cert_generated_are_lets_encrypt_warning: "The generated certificate are issued by Let's Encrypt. OpenRoaming profile generation for Windows 10 will fail because of this, but you can proceed if you wish."
 freeradius_is_not_ev_cert_warning: 'The option to download Windows OpenRoaming profiles is disabled because it is not supported with the current configuration.'
 cannotReturnToPreviousPhase: 'You can no longer access this stage because it has already been completed.'
 cannotAccessStageYet: "You cannot access this stage yet because previous steps are incomplete."
