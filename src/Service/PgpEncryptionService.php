@@ -79,10 +79,8 @@ class PgpEncryptionService
             return $encrypted;
         } catch (Exception $e) {
             // Return full debug info
-            throw new RuntimeException(
-                'GnuPG operation failed: ' . $e->getMessage() .
-                ' | Trace: ' . $e->getTraceAsString()
-            );
+            throw new RuntimeException('GnuPG operation failed: ' . $e->getMessage() .
+            ' | Trace: ' . $e->getTraceAsString(), $e->getCode(), $e);
         }
     }
 }
