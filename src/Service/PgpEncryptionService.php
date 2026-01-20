@@ -22,7 +22,7 @@ class PgpEncryptionService
         if (!file_exists($publicKeyPath)) {
             return [
                 UserVerificationStatus::MISSING_PUBLIC_KEY_CONTENT->value,
-                "Public key file not found at $publicKeyPath"
+                "Public key file not found"
             ];
         }
 
@@ -30,7 +30,7 @@ class PgpEncryptionService
         if (in_array($publicKeyContent, ['', '0', false], true)) {
             return [
                 UserVerificationStatus::EMPTY_PUBLIC_KEY_CONTENT->value,
-                "Public key file at $publicKeyPath is empty"
+                "Public key file is empty"
             ];
         }
 
