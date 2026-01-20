@@ -56,7 +56,7 @@ class FreeradiusController extends AbstractController
         #[MapQueryParameter] int $page = 1,
         #[MapQueryParameter] ?int $count = 5
     ): Response {
-        $result = $this->freeradiusConnectionService->checkConnection();
+        $result = $this->freeradiusConnectionService->checkDBConnection();
         if ($result['success'] === false) {
             throw new ServiceUnavailableHttpException(
                 null,

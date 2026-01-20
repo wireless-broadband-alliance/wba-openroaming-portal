@@ -17,6 +17,7 @@ use App\Enum\FirewallType;
 use App\Enum\ProcessStatusType;
 use App\Enum\SessionStatus;
 use App\Enum\TrustedWBAFingerprints;
+use App\Exception\FreeradiusTestException;
 use App\Form\CertificateFreeradiusDomainType;
 use App\Form\CertificateFreeradiusUploadManualType;
 use App\Form\CloudflareType;
@@ -30,6 +31,7 @@ use App\Service\CertificateStorageService;
 use App\Service\CertificateWriterUpdateService;
 use App\Service\DomainService;
 use App\Service\EventActions;
+use App\Service\FreeradiusTestOrchestrator;
 use App\Service\GetSettings;
 use DateTime;
 use DateTimeImmutable;
@@ -63,6 +65,7 @@ class CertificateManagementFreeradiusController extends AbstractController
         private readonly EventActions $eventActions,
         private readonly CertificateFreeradiusGenerator $certificateFreeradiusGenerator,
         private readonly DomainService $domainService,
+        private readonly FreeradiusTestOrchestrator $freeradiusTestOrchestrator,
     ) {
     }
 
@@ -770,133 +773,14 @@ class CertificateManagementFreeradiusController extends AbstractController
         }
 
         try {
-            $context = stream_context_create([
-                'ssl' => [
-                    'verify_peer' => false,
-                    'verify_peer_name' => false,
-                    'allow_self_signed' => false,
-                    'capture_peer_cert_chain' => true,
-                    'local_cert' => $paths['cert'],   // or $paths['cert']
-                    'local_pk' => $paths['privkey'],
-                    'cafile' => $paths['ca'],
-                    'crypto_method' => STREAM_CRYPTO_METHOD_TLS_CLIENT,
-                ],
-            ]);
-
-            $connection = @stream_socket_client(
-                "tls://{$remoteHost}:{$remotePort}",
-                $errno,
-                $errstr,
-                15,
-                STREAM_CLIENT_CONNECT,
-                $context
+            // Calls the Orchestrator to run the test
+            $this->freeradiusTestOrchestrator->run(
+                $processEntity,
+                $remoteHost,
+                $remotePort,
+                $paths,
+                $request
             );
-
-            // If connection failed with a real error, handle it
-            if ($connection === false && ($errno !== 0 || $errstr !== '')) {
-                // TLS handshake failed
-                $this->certificateFreeradiusCommandsService->updateFreeradiusTestResult(
-                    $processEntity,
-                    CertificateTestResult::FAILED
-                );
-
-                return new JsonResponse([
-                    'status' => 'error',
-                    'message' => 'TLS Handshake Failed',
-                    'messageDetails' => "Failed to create socket: [$errno] $errstr",
-                    'details' => [
-                        'host' => $remoteHost,
-                        'port' => $remotePort,
-                        'error' => $errstr,
-                        'code' => $errno,
-                        'basePath' => $basePath,
-                    ],
-                ], Response::HTTP_SERVICE_UNAVAILABLE);
-            }
-
-            // Extract peer certificate chain
-            $trustedHashes = array_map(static fn($e) => strtolower(
-                $e->value
-            ), TrustedWBAFingerprints::cases());
-            $params = stream_context_get_params($connection);
-            $chain = $params['options']['ssl']['peer_certificate_chain'] ?? [];
-
-            // Include the leaf certificate itself
-            $leafCert = $params['options']['ssl']['peer_certificate'] ?? null;
-            if ($leafCert) {
-                array_unshift($chain, $leafCert);
-            }
-
-            $validated = false;
-            foreach ($chain as $cert) {
-                $pem = openssl_x509_export($cert, $out) ? $out : null;
-                if ($pem) {
-                    // Convert PEM to DER
-                    $der = base64_decode(preg_replace('#-----.*?-----#', '', $pem));
-                    $hash = strtolower(hash('sha256', $der));
-
-                    if (in_array($hash, $trustedHashes, true)) {
-                        $validated = true;
-                        break;
-                    }
-                }
-            }
-
-            if ($validated === false) {
-                fclose($connection);
-
-                $this->certificateFreeradiusCommandsService->updateFreeradiusTestResult(
-                    $processEntity,
-                    CertificateTestResult::FAILED
-                );
-
-                return new JsonResponse([
-                    'status' => 'error',
-                    'message' => 'TLS handshake succeeded but certificate chain is NOT signed by WBA CA.',
-                ], Response::HTTP_FORBIDDEN);
-            }
-
-            // Only close if it’s a valid resource
-            if (is_resource($connection)) {
-                fclose($connection);
-            }
-            // THIS IS OK [0] -> a non-false $connection OR errno=0 and errstr="" means TLS handshake succeeded
-            $processEntity->setStatus(ProcessStatusType::COMPLETED);
-            $processEntity->setFreeradiusTestResult(CertificateTestResult::PASSED);
-            $this->entityManager->persist($processEntity);
-            $this->entityManager->flush();
-
-            /** @var User $user */
-            $user = $this->getUser();
-            $this->eventActions->saveEvent(
-                $user,
-                AnalyticalEventType::CERTIFICATE_SETUP_PROCESS_FREERAEDIUS_TEST->value,
-                new DateTime(),
-                [
-                    'ip' => $request->getClientIp(),
-                    'user_agent' => $request->headers->get('User-Agent'),
-                    'by' => $user->getUuid(),
-                ]
-            );
-
-            $session = $request->getSession();
-            if ($session->has(SessionStatus::SYSTEM_RESET_REQUEST->value)) {
-                $this->eventActions->saveEvent(
-                    $user,
-                    AnalyticalEventType::SYSTEM_RESET_REQUEST_COMPLETED->value,
-                    new DateTime(),
-                    [
-                        'ip' => $request->getClientIp(),
-                        'user_agent' => $request->headers->get('User-Agent'),
-                        'by' => $user->getUuid(),
-                    ]
-                );
-
-                // Clear all the sessions requests in case the system_reset is completed
-                $session->remove(SessionStatus::SYSTEM_RESET_REQUEST->value);
-                $session->remove(SessionStatus::INSTALLATION_STARTED->value);
-                $session->remove(SessionStatus::CERTIFICATE_STARTED->value);
-            }
 
             return new JsonResponse([
                 'status' => 'success',
@@ -904,10 +788,11 @@ class CertificateManagementFreeradiusController extends AbstractController
                     'freeradiusTestPassed',
                     [],
                     'controllers'
-                ),
+                )
             ]);
-        } catch (Throwable $e) {
-            // Update DB when test fails
+
+        } catch (FreeradiusTestException $exception) {
+            // Marca o processo como falhado
             $processEntity->setStatus(ProcessStatusType::IN_PROGRESS);
             $processEntity->setFreeradiusTestResult(CertificateTestResult::FAILED);
             $this->entityManager->persist($processEntity);
@@ -915,8 +800,19 @@ class CertificateManagementFreeradiusController extends AbstractController
 
             return new JsonResponse([
                 'status' => 'error',
-                'message' => $e->getMessage(),
-            ], Response::HTTP_SERVICE_UNAVAILABLE);
+                'message' => $exception->getMessage(),
+                'details' => $exception->getContext()
+            ], 503);
+        } catch (Throwable $exception) {
+            $processEntity->setStatus(ProcessStatusType::IN_PROGRESS);
+            $processEntity->setFreeradiusTestResult(CertificateTestResult::FAILED);
+            $this->entityManager->persist($processEntity);
+            $this->entityManager->flush();
+
+            return new JsonResponse([
+                'status' => 'error',
+                'message' => $exception->getMessage()
+            ], 503);
         }
     }
 

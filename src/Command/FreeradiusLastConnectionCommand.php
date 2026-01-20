@@ -48,7 +48,7 @@ class FreeradiusLastConnectionCommand extends Command
         $output->writeln('<comment>Starting Freeradius backup at ' . date('Y-m-d H:i:s') . '</comment>');
 
         // Check FreeRadius DB connection
-        $result = $this->freeradiusConnectionService->checkConnection();
+        $result = $this->freeradiusConnectionService->checkDBConnection();
         if ($result['success'] === false) {
             $output->writeln('<error>' . $result['message'] . '</error>');
 
