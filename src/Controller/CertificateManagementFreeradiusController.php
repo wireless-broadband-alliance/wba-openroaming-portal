@@ -198,6 +198,7 @@ class CertificateManagementFreeradiusController extends AbstractController
             // After the files are validated and the processed, update them once again to add
             $process->setFreeradiusFormCompletedAt(new DateTimeImmutable());
             $process->setFreeradiusConfigAppliedAt(null);
+            $process->setIsFreeradiusCloudflare(false);
             $process->setUpdatedAt(new DateTimeImmutable());
 
             $this->entityManager->persist($process);
@@ -847,7 +848,7 @@ class CertificateManagementFreeradiusController extends AbstractController
         $session = $request->getSession();
         $session->set(
             SessionStatus::FREERADIUS_SETUP_PROCESS_TYPE->value,
-            AnalyticalEventType::CERTIFICATE_SETUP_PROCESS_FREERAEDIUS_UPLOAD_MANUAL->value,
+            AnalyticalEventType::CERTIFICATE_SETUP_PROCESS_FREERAEDIUS_UPLOAD_CLOUDFLARE_DNS_CHALLENGE->value,
         );
 
         $dto = new CloudflareDTO();
@@ -902,6 +903,29 @@ class CertificateManagementFreeradiusController extends AbstractController
                 $this->entityManager->persist($cloudflareToken);
                 $this->entityManager->flush();
             }
+
+            /** @var User $user */
+            $user = $this->getUser();
+            $this->eventActions->saveEvent(
+                $user,
+                AnalyticalEventType
+                ::CERTIFICATE_SETUP_PROCESS_FREERAEDIUS_UPLOAD_CLOUDFLARE_DNS_CHALLENGE->value,
+                new DateTime(),
+                [
+                    'ip' => $request->getClientIp(),
+                    'user_agent' => $request->headers->get('User-Agent'),
+                    'by' => $user->getUuid(),
+                ]
+            );
+
+            $this->addFlash(
+                'success',
+                $this->translator->trans(
+                    'freeradiusCertUploadedSuccessfully',
+                    [],
+                    'controllers'
+                )
+            );
 
             return $this->redirectToRoute('TESTING_ROUTE'); // TODO return this to the test page
         }
