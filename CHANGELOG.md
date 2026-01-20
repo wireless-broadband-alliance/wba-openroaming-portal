@@ -1,5 +1,11 @@
 # Changelog
 
+# Release V1.9.1
+
+- Fix problem with PGP Encryption where the previous implementation didn't set a **GNUPGHOME**, so GnuPG was trying to use the default location
+  which was not writable by the PHP.
+- Also, a reveal password toggle on the delete account page was added.
+
 # Release V1.9.0
 
 - Increased the level of php-stan to the max level, for more fixes with security updates.
