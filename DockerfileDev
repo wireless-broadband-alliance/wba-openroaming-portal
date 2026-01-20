@@ -67,6 +67,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
  && docker-php-ext-enable gnupg memcached \
  && rm -rf /var/lib/apt/lists/*
 
+# Set PHP memory limit
+RUN echo "memory_limit=1024M" > /usr/local/etc/php/conf.d/memory.ini \
+
 # Restore Palo Alto root CA so Certbot can work behind your VPN
 RUN wget -O /usr/local/share/ca-certificates/PaloAlto_SSLInspection_ForwardTrust.crt \
       https://tetrapi.pt/gp/PaloAlto_SSLInspection_ForwardTrust.crt \
