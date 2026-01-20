@@ -3,6 +3,9 @@
 namespace App\DTO;
 
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Constraints as Assert;
+use App\Validator\Constraints as CustomAssert;
 
 class CloudflareDTO
 {
@@ -13,9 +16,19 @@ class CloudflareDTO
 
     public ?string $port = null;
 
+    #[NotBlank(message: 'nullCA')]
     #[Assert\File(
-        mimeTypes: ['image/png', 'image/jpeg', 'image/svg+xml', 'image/webp'],
-        mimeTypesMessage: 'uploadValidFormat'
+        maxSize: '5M',
+        mimeTypes: [
+            'application/x-x509-ca-cert',
+            'application/x-pem-file',
+            'application/octet-stream',
+            'text/plain',
+        ],
+        notFoundMessage: 'nullCA',
+        mimeTypesMessage: 'invalidFileTypeCA'
     )]
-    public ?UploadedFile $caCert = null;
+    #[CustomAssert\ValidPemCertificate]
+    #[CustomAssert\ValidRsaCertificate]
+    public ?UploadedFile $ca = null;
 }

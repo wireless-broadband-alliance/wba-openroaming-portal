@@ -6,6 +6,7 @@ namespace App\Controller;
 
 use App\DTO\CertificateFreeradiusDomainDTO;
 use App\DTO\CertificateFreeradiusUploadManualDTO;
+use App\DTO\CloudflareDTO;
 use App\Entity\CertificateSetupProcess;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
@@ -18,6 +19,7 @@ use App\Enum\SessionStatus;
 use App\Enum\TrustedWBAFingerprints;
 use App\Form\CertificateFreeradiusDomainType;
 use App\Form\CertificateFreeradiusUploadManualType;
+use App\Form\CloudflareType;
 use App\Form\SimpleSubmitFormType;
 use App\Service\CertificateCheckerService;
 use App\Service\CertificateFreeradiusCommandsService;
@@ -778,7 +780,7 @@ class CertificateManagementFreeradiusController extends AbstractController
                     'local_pk' => $paths['privkey'],
                     'cafile' => $paths['ca'],
                     'crypto_method' => STREAM_CRYPTO_METHOD_TLS_CLIENT,
-                ]
+                ],
             ]);
 
             $connection = @stream_socket_client(
@@ -916,5 +918,52 @@ class CertificateManagementFreeradiusController extends AbstractController
                 'message' => $e->getMessage(),
             ], Response::HTTP_SERVICE_UNAVAILABLE);
         }
+    }
+
+    #[Route(
+        '/dashboard/settings/certificatesManagement/freeradius/cloudflare/dnsChallenge',
+        name: 'admin_dashboard_settings_certs_freeradius_cloudflare_dnsChallenge',
+    )]
+    #[IsGranted('ROLE_SUPER_ADMIN')]
+    public function cloudflareDNSChallenge(Request $request): Response
+    {
+        // Get current process state
+        $processState = $this->certificateProcessCheckerService->getProcessState();
+
+        // If there's no active process
+        if (!$processState['active']) {
+            $this->addFlash(
+                'error',
+                $this->translator->trans(
+                    'noActiveProcess',
+                    [],
+                    'CertificateProcessCheckerService'
+                )
+            );
+            return $this->redirectToRoute('admin_dashboard_settings_certs_radsecproxy_upload');
+        }
+
+        $data = $this->getSettings->getSettings();
+
+        // Prepare session for freeradius stepper detection
+        $session = $request->getSession();
+        $session->set(
+            SessionStatus::FREERADIUS_SETUP_PROCESS_TYPE->value,
+            AnalyticalEventType::CERTIFICATE_SETUP_PROCESS_FREERAEDIUS_UPLOAD_MANUAL->value,
+        );
+
+        $dto = new CloudflareDTO();
+        $form = $this->createForm(CloudflareType::class, $dto);
+        $form->handleRequest($request);
+
+        return $this->render(
+            'dashboard/shared/settings_actions/certificatesManagement/certificates/freeradius/dnsChallenge/dns_challenge.html.twig',
+            [
+                'data' => $data,
+                'cloudflareDTO' => $dto,
+                'form' => $form->createView(),
+                'context' => FirewallType::DASHBOARD->value,
+            ]
+        );
     }
 }

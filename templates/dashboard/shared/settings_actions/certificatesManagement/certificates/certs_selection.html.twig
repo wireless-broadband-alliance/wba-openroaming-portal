@@ -70,8 +70,8 @@
             {{ include(
                 'dashboard/shared/settings_actions/certificatesManagement/partials/_cert_option_card.html.twig',
                 {
-                    type: 'button',
-                    route: null,
+                    type: 'link',
+                    route: 'admin_dashboard_settings_certs_freeradius_cloudflare_dnsChallenge',
                     title: 'CloudflareDNSTitle',
                     subtitle: 'CloudflareDNSSubtitle',
                     icon: 'wba:cloud-upload',

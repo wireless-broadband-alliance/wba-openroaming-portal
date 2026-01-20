@@ -22,7 +22,7 @@ class CloudflareType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('$caCert', VichFileType::class, [
+            ->add('ca', VichFileType::class, [
                 'label' => 'CA (.pem)',
                 'required' => true,
                 'allow_delete' => false,

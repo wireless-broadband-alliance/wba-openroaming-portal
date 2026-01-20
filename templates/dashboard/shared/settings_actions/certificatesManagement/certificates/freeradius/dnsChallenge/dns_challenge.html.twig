@@ -1,0 +1,55 @@
+{% extends 'dashboard/shared/settings_actions/certificatesManagement/certificates/freeradius/base.html.twig' %}
+
+{% block freeradius_content %}
+    {{ form_start(form, {attr: {enctype: 'multipart/form-data'}}) }}
+
+    {# Return to selection freeradius certs #}
+    {{ include('dashboard/shared/settings_actions/certificatesManagement/partials/_return_selection_freeradius.html.twig') }}
+
+    {# Form Upload #}
+    <div class="border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+        <div class="bg-gray-50 px-6 py-4 border-b border-gray-200 flex items-center gap-2">
+            <twig:ux:icon class="w-5 h-5 text-primary" name="wba:upload-rounded"/>
+            <h5 class="text-lg font-semibold text-gray-800">
+                {{ 'title_upload'|trans({}, 'upload_freeradius') }}
+            </h5>
+        </div>
+
+        <div class="px-6 py-6 bg-white space-y-6">
+
+            <div class="space-y-2">
+                <p class="text-sm font-medium text-gray-700">
+                    {{ 'ca.description'|trans({}, 'upload_freeradius') }}
+                </p>
+
+                {{ form_label(form.ca, 'ca.label'|trans({}, 'upload_freeradius'), {label_attr: {class: 'font-semibold'}}) }}
+                {{ form_widget(form.ca, {attr: {class: 'form-widget-upload'}}) }}
+
+                <div class="text-red-500 text-sm ml-1">
+                    {{ form_errors(form.ca) }}
+                </div>
+            </div>
+
+            <div class="space-y-2">
+                <p class="text-sm font-medium text-gray-700">
+                    {{ 'ca.description'|trans({}, 'upload_freeradius') }}
+                </p>
+
+                {{ form_label(form.host, 'ca.label'|trans({}, 'upload_freeradius'), {label_attr: {class: 'font-semibold'}}) }}
+                {{ form_widget(form.host, {attr: {class: 'form-widget-text'}}) }}
+
+                <div class="text-red-500 text-sm ml-1">
+                    {{ form_errors(form.host) }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="flex justify-end pt-4">
+        <button class="px-6 py-2.5 rounded-lg bg-primary text-white shadow-sm hover:bg-primary-dark transition">
+            {{ 'submit_upload'|trans({}, 'upload_freeradius') }}
+        </button>
+    </div>
+
+    {{ form_end(form) }}
+{% endblock %}

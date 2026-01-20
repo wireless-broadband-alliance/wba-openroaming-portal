@@ -97,6 +97,9 @@ readonly class AdminCertificateProcessEnforcerListener
             '#^/dashboard/settings/certificatesManagement/freeradius/config$#',
             '#^/dashboard/settings/certificatesManagement/freeradius/test$#',
             '#^/dashboard/settings/certificatesManagement/freeradius/test/run$#',
+
+                // Cloudflare
+            '#^/dashboard/settings/certificatesManagement/freeradius/cloudflare/dnsChallenge$#'
         ];
         $allowed = array_any(
             $allowedPatterns,
