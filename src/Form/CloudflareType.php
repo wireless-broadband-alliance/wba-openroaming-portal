@@ -3,7 +3,7 @@
 namespace App\Form;
 
 use App\DTO\CloudflareDTO;
-use App\Service\GetSettings;
+use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -36,7 +36,7 @@ class CloudflareType extends AbstractType
                 'label' => $this->translator->trans('tokenLabel', [], 'CloudflareType'),
                 'required' => true,
             ])
-            ->add('port', TextType::class, [
+            ->add('port', IntegerType::class, [
                 'label' => $this->translator->trans('portLabel', [], 'CloudflareType'),
                 'required' => true,
             ]);

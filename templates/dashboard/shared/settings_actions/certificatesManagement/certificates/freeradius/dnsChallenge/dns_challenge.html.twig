@@ -1,6 +1,7 @@
 {% extends 'dashboard/shared/settings_actions/certificatesManagement/certificates/freeradius/base.html.twig' %}
 
 {% block freeradius_content %}
+<twig:CloudflareForm :cloudflareDTO="cloudflareDTO">
     {{ form_start(form, {attr: {enctype: 'multipart/form-data'}}) }}
 
     {# Return to selection freeradius certs #}
@@ -11,16 +12,16 @@
         <div class="bg-gray-50 px-6 py-4 border-b border-gray-200 flex items-center gap-2">
             <twig:ux:icon class="w-5 h-5 text-primary" name="wba:upload-rounded"/>
             <h5 class="text-lg font-semibold text-gray-800">
-                {{ 'title_upload'|trans({}, 'upload_freeradius') }}
+                {{ 'titleUpload'|trans({}, 'dns_challenge') }}
             </h5>
         </div>
 
         <div class="px-6 py-6 bg-white space-y-6">
 
             <div class="space-y-2">
-                {{ form_label(form.ca, 'ca.label'|trans({}, 'upload_freeradius'), {label_attr: {class: 'font-semibold'}}) }}
+                {{ form_label(form.ca, 'caLabel'|trans({}, 'dns_challenge'), {label_attr: {class: 'font-semibold'}}) }}
                 <p class="text-sm font-medium text-gray-700">
-                    {{ 'ca.description'|trans({}, 'upload_freeradius') }}
+                    {{ 'caDescription'|trans({}, 'dns_challenge') }}
                 </p>
                 {{ form_widget(form.ca, {attr: {class: 'form-widget-upload'}}) }}
 
@@ -30,9 +31,9 @@
             </div>
 
             <div class="space-y-2">
-                {{ form_label(form.host, 'ca.label'|trans({}, 'upload_freeradius'), {label_attr: {class: 'font-semibold'}}) }}
+                {{ form_label(form.host, 'hostLabel'|trans({}, 'dns_challenge'), {label_attr: {class: 'font-semibold'}}) }}
                 <p class="text-sm font-medium text-gray-700">
-                    {{ 'ca.description'|trans({}, 'upload_freeradius') }}
+                    {{ 'hostDescription'|trans({}, 'dns_challenge') }}
                 </p>
                 {{ form_widget(form.host, {attr: {class: 'form-widget'}}) }}
 
@@ -42,9 +43,9 @@
             </div>
 
             <div class="space-y-2">
-                {{ form_label(form.token, 'ca.label'|trans({}, 'upload_freeradius'), {label_attr: {class: 'font-semibold'}}) }}
+                {{ form_label(form.token, 'tokenLabel'|trans({}, 'dns_challenge'), {label_attr: {class: 'font-semibold'}}) }}
                 <p class="text-sm font-medium text-gray-700">
-                    {{ 'ca.description'|trans({}, 'upload_freeradius') }}
+                    {{ 'tokenDescription'|trans({}, 'dns_challenge') }}
                 </p>
                 {{ form_widget(form.token, {attr: {class: 'form-widget'}}) }}
 
@@ -54,9 +55,9 @@
             </div>
 
             <div class="space-y-2">
-                {{ form_label(form.port, 'ca.label'|trans({}, 'upload_freeradius'), {label_attr: {class: 'font-semibold'}}) }}
+                {{ form_label(form.port, 'portLabel'|trans({}, 'dns_challenge'), {label_attr: {class: 'font-semibold'}}) }}
                 <p class="text-sm font-medium text-gray-700">
-                    {{ 'ca.description'|trans({}, 'upload_freeradius') }}
+                    {{ 'portDescription'|trans({}, 'dns_challenge') }}
                 </p>
                 {{ form_widget(form.port, {attr: {class: 'form-widget'}}) }}
 
@@ -69,9 +70,10 @@
 
     <div class="flex justify-end pt-4">
         <button class="px-6 py-2.5 rounded-lg bg-primary text-white shadow-sm hover:bg-primary-dark transition">
-            {{ 'submit_upload'|trans({}, 'upload_freeradius') }}
+            {{ 'submitUpload'|trans({}, 'dns_challenge') }}
         </button>
     </div>
 
     {{ form_end(form) }}
+</twig:CloudflareForm>
 {% endblock %}

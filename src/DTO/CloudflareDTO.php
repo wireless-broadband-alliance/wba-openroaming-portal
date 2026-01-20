@@ -10,11 +10,38 @@ use App\Validator\Constraints as CustomAssert;
 class CloudflareDTO
 {
 
+    /**
+     * Notices/Warnings generated during the upload
+     * @var list<string>
+     */
+    public array $notices = [];
+
+    #[NotBlank(message: 'fieldCannotBeBlank')]
+    #[Assert\Length(
+        max: 255,
+        maxMessage: 'maxCharacters'
+    )]
+    #[Assert\Regex(
+        pattern: '/^[a-zA-Z0-9.-]+$/',
+        message: 'invalidFormat'
+    )]
     public ?string $host = null;
 
+    #[NotBlank(message: 'fieldCannotBeBlank')]
+    #[Assert\Length(
+        min: 20,
+        max: 255,
+        minMessage: 'minCharacters',
+        maxMessage: 'maxCharacters'
+    )]
     public ?string $token = null;
 
-    public ?string $port = null;
+    #[NotBlank(message: 'fieldCannotBeBlank')]
+    #[Assert\Type(
+        type: 'integer',
+        message: 'invalidFormat'
+    )]
+    public ?int $port = null;
 
     #[NotBlank(message: 'nullCA')]
     #[Assert\File(

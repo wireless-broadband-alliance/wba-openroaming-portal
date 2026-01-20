@@ -8,6 +8,7 @@ use App\DTO\CertificateFreeradiusDomainDTO;
 use App\DTO\CertificateFreeradiusUploadManualDTO;
 use App\DTO\CloudflareDTO;
 use App\Entity\CertificateSetupProcess;
+use App\Entity\CloudflareTokens;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Enum\CertificateFileName;
@@ -852,6 +853,57 @@ class CertificateManagementFreeradiusController extends AbstractController
         $form = $this->createForm(CloudflareType::class, $dto);
         $form->handleRequest($request);
 
+        if ($form->isSubmitted() && $form->isValid()) {
+
+            $process = $this->certificateProcessCheckerService->getCurrentProcess();
+            // In case there's not active process
+            if (!$process instanceof CertificateSetupProcess) {
+                $this->addFlash(
+                    'error',
+                    $this->translator->trans('noActiveProcess', [], 'CertificateProcessCheckerService')
+                );
+                return $this->redirectToRoute('admin_dashboard_settings_certs_radsecproxy_upload');
+            }
+
+            // Check if the uploaded cert is a EV
+            if (in_array('CERTIFICATE_NOT_EV_WARNING', $dto->notices, true)) {
+                $process->setIsFreeradiusCertEV(false);
+                $this->addFlash(
+                    'warning',
+                    $this->translator->trans('not_ev_warning', [], 'controllers')
+                );
+            } else {
+                $process->setIsFreeradiusCertEV(true);
+            }
+
+            if ($dto->ca instanceof UploadedFile) {
+                // Save on the tmp folder the uploaded certificates after the validation
+                $this->certificateStorageService->storeUploadedFile(
+                    $dto->ca,
+                    CertificateFileName::CA_PEM->value,
+                    CertificateMachineType::FREERADIUS->value,
+                    $process,
+                    true
+                );
+            }
+
+            $certificateSetupProcess = $this->certificateProcessCheckerService->getCurrentProcess();
+
+            if ($certificateSetupProcess instanceof CertificateSetupProcess) {
+                $certificateSetupProcess->setRemoteHost($dto->host);
+                $certificateSetupProcess->setFreeradiusFormCompletedAt(new DateTimeImmutable());
+                $certificateSetupProcess->setFreeradiusConfigAppliedAt(new DateTimeImmutable());
+                $cloudflareToken = new CloudflareTokens();
+                $cloudflareToken->setCreatedAt(new DateTimeImmutable());
+                $cloudflareToken->setToken($dto->token);
+                $this->entityManager->persist($certificateSetupProcess);
+                $this->entityManager->persist($cloudflareToken);
+                $this->entityManager->flush();
+            }
+
+            return $this->redirectToRoute('TESTING_ROUTE'); // TODO return this to the test page
+        }
+
         return $this->render(
             'dashboard/shared/settings_actions/certificatesManagement/certificates/freeradius/dnsChallenge/dns_challenge.html.twig',
             [
@@ -859,6 +911,8 @@ class CertificateManagementFreeradiusController extends AbstractController
                 'cloudflareDTO' => $dto,
                 'form' => $form->createView(),
                 'context' => FirewallType::DASHBOARD->value,
+                'processState' => $processState,
+                'process' => $processState['process'],
             ]
         );
     }
