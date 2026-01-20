@@ -66,7 +66,7 @@ class CertificateManagementRadsecproxyController extends AbstractController
                 ->getNextRequiredRoute($processState['stages']);
 
             // If the required next step is NOT this page, redirect
-            if ($nextRoute !== $request->attributes->get('_route')) {
+            if ($nextRoute && $nextRoute !== $request->attributes->get('_route')) {
                 $this->addFlash(
                     'error',
                     $this->translator->trans('pendingActiveProcess', [], 'CertificateProcessCheckerService')
