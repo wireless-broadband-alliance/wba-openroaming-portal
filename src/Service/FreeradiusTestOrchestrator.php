@@ -10,6 +10,7 @@ use App\Enum\ProcessStatusType;
 use App\Enum\SessionStatus;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
+use RuntimeException;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -39,6 +40,7 @@ final readonly class FreeradiusTestOrchestrator
             $remoteHost,
             $remotePort,
             $paths['cert'],
+            $paths['fullchain'],
             $paths['privkey'],
             $paths['ca']
         );

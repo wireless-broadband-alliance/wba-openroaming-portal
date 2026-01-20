@@ -32,6 +32,7 @@ use App\Service\CertificateStorageService;
 use App\Service\CertificateWriterUpdateService;
 use App\Service\DomainService;
 use App\Service\EventActions;
+use App\Service\FreeradiusConnectionService;
 use App\Service\FreeradiusTestOrchestrator;
 use App\Service\GetSettings;
 use DateTime;
@@ -67,6 +68,7 @@ class CertificateManagementFreeradiusController extends AbstractController
         private readonly CertificateFreeradiusGenerator $certificateFreeradiusGenerator,
         private readonly DomainService $domainService,
         private readonly FreeradiusTestOrchestrator $freeradiusTestOrchestrator,
+        private readonly FreeradiusConnectionService $freeradiusConnectionService,
     ) {
     }
 
@@ -706,7 +708,6 @@ class CertificateManagementFreeradiusController extends AbstractController
         name: 'admin_dashboard_settings_certs_freeradius_test_run',
         methods: ['POST']
     )]
-    #[IsGranted('ROLE_SUPER_ADMIN')]
     public function runFreeradiusTest(Request $request): JsonResponse
     {
         $processEntity = $this->certificateProcessCheckerService->getCurrentProcess();
@@ -793,7 +794,7 @@ class CertificateManagementFreeradiusController extends AbstractController
             ]);
 
         } catch (FreeradiusTestException $exception) {
-            // Marca o processo como falhado
+            // Set the process as failed
             $processEntity->setStatus(ProcessStatusType::IN_PROGRESS);
             $processEntity->setFreeradiusTestResult(CertificateTestResult::FAILED);
             $this->entityManager->persist($processEntity);

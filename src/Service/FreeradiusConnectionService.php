@@ -65,53 +65,104 @@ readonly class FreeradiusConnectionService
         string $host,
         int $port,
         string $cert,
+        string $fullchain,
         string $privKey,
         string $ca
     ): array {
+        // Validate TLS files early (fail fast)
+        foreach (
+            [
+                'cert' => $cert,
+                'fullchain' => $fullchain,
+                'privKey' => $privKey,
+                'ca' => $ca,
+            ] as $name => $path
+        ) {
+            if (!file_exists($path)) {
+                throw new RuntimeException("TLS {$name} file not found: {$path}");
+            }
+            if (!is_readable($path)) {
+                throw new RuntimeException("TLS {$name} file not readable: {$path}");
+            }
+            if (filesize($path) === 0) {
+                throw new RuntimeException("TLS {$name} file is empty: {$path}");
+            }
+        }
+
+        // Create stream context (ONLY ONCE)
         $context = stream_context_create([
             'ssl' => [
                 'verify_peer' => false,
                 'verify_peer_name' => false,
-                'allow_self_signed' => false,
+                'allow_self_signed' => true,
                 'capture_peer_cert_chain' => true,
                 'local_cert' => $cert,
                 'local_pk' => $privKey,
                 'cafile' => $ca,
-                'crypto_method' => STREAM_CRYPTO_METHOD_TLS_CLIENT,
-            ]
+                'crypto_method' => STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT
+                    | STREAM_CRYPTO_METHOD_TLSv1_3_CLIENT,
+            ],
         ]);
 
-        $connection = @stream_socket_client(
-            "tls://{$host}:{$port}",
-            $errno,
-            $errstr,
-            15,
-            STREAM_CLIENT_CONNECT,
-            $context
-        );
-
-        if ($connection === false && ($errno !== 0 || $errstr !== '')) {
-            throw FreeradiusTestException::tlsHandshakeFailed($host, $port, $errno, $errstr);
+        if (!is_resource($context)) {
+            throw new RuntimeException('Failed to create TLS stream context');
         }
 
+        try {
+            $connection = stream_socket_client(
+                "tls://{$host}:{$port}",
+                $errno,
+                $errstr,
+                15,
+                STREAM_CLIENT_CONNECT,
+                $context
+            );
+        } catch (Throwable $e) {
+            // Collect OpenSSL error stack
+            $opensslErrors = [];
+            while ($err = openssl_error_string()) {
+                $opensslErrors[] = $err;
+            }
+
+            throw FreeradiusTestException::tlsHandshakeFailed(
+                $host,
+                $port,
+                $errno ?? 0,
+                ($errstr ?: $e->getMessage()) .
+                (!empty($opensslErrors) ? ' | OpenSSL errors: ' . implode(' ; ', $opensslErrors) : '')
+            );
+        }
+
+        // The ONLY real failure condition
+        if ($connection === false) {
+            throw FreeradiusTestException::tlsHandshakeFailed(
+                $host,
+                $port,
+                $errno ?? 0,
+                $errstr ?? ''
+            );
+        }
+
+        // Extract peer certificates
         $params = stream_context_get_params($connection);
+
         $chain = $params['options']['ssl']['peer_certificate_chain'] ?? [];
         $leaf = $params['options']['ssl']['peer_certificate'] ?? null;
 
-        if ($leaf) {
+        if ($leaf !== null) {
             array_unshift($chain, $leaf);
         }
 
         return [
             'connection' => $connection,
-            'chain' => $chain
+            'chain' => $chain,
         ];
     }
 
     public function validate(array $serverChain, array $localSigningKeys): void
     {
         // Gets the current hashes from the server certificates
-        $localHashes = array_map(static function($path) {
+        $localHashes = array_map(static function ($path) {
             $pem = file_get_contents($path);
             $der = base64_decode(preg_replace('#-----.*?-----#', '', $pem));
             return strtolower(hash('sha256', $der));

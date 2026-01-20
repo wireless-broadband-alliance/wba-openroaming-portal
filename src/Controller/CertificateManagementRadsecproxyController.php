@@ -301,7 +301,6 @@ class CertificateManagementRadsecproxyController extends AbstractController
         name: 'admin_dashboard_settings_certs_radsecproxy_test_run',
         methods: ['POST']
     )]
-    #[IsGranted('ROLE_SUPER_ADMIN')]
     public function runRadsecproxyTest(Request $request): JsonResponse
     {
         $processEntity = $this->certificateProcessCheckerService->getCurrentProcess();
