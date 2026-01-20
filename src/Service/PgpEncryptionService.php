@@ -61,10 +61,7 @@ class PgpEncryptionService
             // Step 5: Still no fingerprint? Throw detailed debug info
             if (!$fingerprint) {
                 throw new RuntimeException(
-                    'Failed to import or locate PGP key. Import result: ' . json_encode(
-                        $importResult,
-                        JSON_THROW_ON_ERROR
-                    ) . '. Key content (first 100 chars): ' . substr($publicKeyContent, 0, 100)
+                    'Failed to import or locate PGP key.'
                 );
             }
 
@@ -73,7 +70,7 @@ class PgpEncryptionService
             $encrypted = $gpg->encrypt($data);
 
             if (!$encrypted) {
-                throw new RuntimeException('Encryption failed for unknown reasons. Fingerprint: ' . $fingerprint);
+                throw new RuntimeException('Encryption failed for unknown reasons.');
             }
 
             return $encrypted;
