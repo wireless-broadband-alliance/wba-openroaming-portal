@@ -16,6 +16,7 @@ use App\Service\GetSettings;
 use App\Service\TwoFAService;
 use App\Service\UserDeletionService;
 use DateTime;
+use Doctrine\ORM\Exception\ORMException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -39,6 +40,7 @@ class UserAccountDeletionController extends AbstractController
 
     /**
      * @throws \JsonException
+     * @throws ORMException
      */
     #[Route('/landing/userAccount/deletion/local', name: 'app_user_account_deletion_local')]
     #[IsGranted('ROLE_USER')]

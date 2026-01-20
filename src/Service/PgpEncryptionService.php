@@ -3,58 +3,86 @@
 namespace App\Service;
 
 use App\Enum\UserVerificationStatus;
-use Exception;
 use gnupg;
 use RuntimeException;
+use Exception;
 
 class PgpEncryptionService
 {
     /**
+     * Encrypts data using the PGP public key
+     *
      * @return bool|string|array{0: string, 1: string}
      */
     public function encrypt(string $data): bool|array|string
     {
         $publicKeyPath = "/var/www/openroaming/pgp_public_key/public_key.asc";
 
-        if (file_exists($publicKeyPath)) {
-            $publicKeyContent = file_get_contents($publicKeyPath);
-        } else {
+        // Step 1: Check file exists
+        if (!file_exists($publicKeyPath)) {
             return [
                 UserVerificationStatus::MISSING_PUBLIC_KEY_CONTENT->value,
-                'The file does not exist or is not located in the correct path!
-            Make sure to define a public key in pgp_public_key/public_key.asc'
+                "Public key file not found at $publicKeyPath"
             ];
         }
 
+        $publicKeyContent = file_get_contents($publicKeyPath);
         if (in_array($publicKeyContent, ['', '0', false], true)) {
             return [
                 UserVerificationStatus::EMPTY_PUBLIC_KEY_CONTENT->value,
-                'The file does not exist or is not located in the correct path!
-            Make sure to define a public key in pgp_public_key/public_key.asc'
+                "Public key file at $publicKeyPath is empty"
             ];
         }
 
         try {
-            $gpg = new gnupg();
-
-            // Try importing the public key
-            $importResult = $gpg->import($publicKeyContent);
-
-            if (!is_array($importResult) || !isset($importResult['fingerprint'])) {
-                throw new RuntimeException('Failed to import the PGP public key.');
+            // Step 2: Set a writable GNUPGHOME for PHP process
+            $gnupgHome = '/tmp/gnupg_home';
+            if (!is_dir($gnupgHome) && !mkdir($gnupgHome, 0700, true) && !is_dir($gnupgHome)) {
+                throw new RuntimeException(sprintf('Directory "%s" was not created', $gnupgHome));
             }
+            putenv("GNUPGHOME=$gnupgHome");
 
-            // Get errors
+            $gpg = new gnupg();
             $gpg->seterrormode(gnupg::ERROR_EXCEPTION);
 
-            // Extract fingerprint to encrypt
-            $fingerprint = $importResult['fingerprint'];
+            // Step 3: Try importing the key
+            $importResult = $gpg->import($publicKeyContent);
 
-            $gpg->addencryptKey($fingerprint);
-            return $gpg->encrypt($data);
+            $fingerprint = $importResult['fingerprint'] ?? null;
+
+            // Step 4: If fingerprint is null, try to find key already in keyring
+            if (!$fingerprint) {
+                $existingKeys = $gpg->keyinfo($publicKeyContent);
+                if (!empty($existingKeys) && isset($existingKeys[0]['subkeys'][0]['fingerprint'])) {
+                    $fingerprint = $existingKeys[0]['subkeys'][0]['fingerprint'];
+                }
+            }
+
+            // Step 5: Still no fingerprint? Throw detailed debug info
+            if (!$fingerprint) {
+                throw new RuntimeException(
+                    'Failed to import or locate PGP key. Import result: ' . json_encode(
+                        $importResult,
+                        JSON_THROW_ON_ERROR
+                    ) . '. Key content (first 100 chars): ' . substr($publicKeyContent, 0, 100)
+                );
+            }
+
+            // Step 6: Add key and encrypt
+            $gpg->addencryptkey($fingerprint);
+            $encrypted = $gpg->encrypt($data);
+
+            if (!$encrypted) {
+                throw new RuntimeException('Encryption failed for unknown reasons. Fingerprint: ' . $fingerprint);
+            }
+
+            return $encrypted;
         } catch (Exception $e) {
-            // Catch any exceptions and display the message for debugging
-            throw new RuntimeException('GnuPG operation failed: ' . $e->getMessage(), $e->getCode(), $e);
+            // Return full debug info
+            throw new RuntimeException(
+                'GnuPG operation failed: ' . $e->getMessage() .
+                ' | Trace: ' . $e->getTraceAsString()
+            );
         }
     }
 }
