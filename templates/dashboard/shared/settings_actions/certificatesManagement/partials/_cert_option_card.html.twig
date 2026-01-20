@@ -1,21 +1,50 @@
-<a href="{{ path(route) }}"
-   class="group flex flex-col items-center text-center bg-white shadow-md rounded-2xl p-6 sm:p-8 border border-gray-200
-          transition-all hover:shadow-lg hover:-translate-y-1">
-
-    <h2 class="text-lg sm:text-xl md:text-2xl font-bold mb-4 sm:mb-6
-               transition-colors group-hover:text-primary">
-        {{ title|trans({}, translation_domain) }}
-    </h2>
-
-    <twig:ux:icon
-            name="{{ icon }}"
-            class="w-8 h-8 sm:w-10 sm:h-10 text-gray-600
-               transition-colors group-hover:text-primary mb-4 sm:mb-6"
-    />
-
-    <div class="mt-auto pt-2 sm:pt-3 font-semibold
-               text-sm sm:text-base md:text-lg text-gray-700
-               transition-colors group-hover:text-primary group-hover:underline">
-        {{ subtitle|trans({}, translation_domain) }}
-    </div>
-</a>
+{% if type == 'button' %}
+    <button
+            type="button"
+            {% if action is defined %}
+                data-action="{{ action }}"
+            {% endif %}
+            class="group w-full flex flex-col items-center text-center
+               bg-white shadow-md rounded-2xl p-6 sm:p-8
+               border border-gray-200
+               transition-all hover:shadow-lg hover:-translate-y-1"
+    >
+        <h2 class="text-lg sm:text-xl md:text-2xl font-bold mb-4 sm:mb-6
+                   transition-colors group-hover:text-primary">
+            {{ title|trans({}, translation_domain) }}
+        </h2>
+        <twig:ux:icon
+                name="{{ icon }}"
+                class="w-8 h-8 sm:w-10 sm:h-10 text-gray-600
+                   transition-colors group-hover:text-primary mb-4 sm:mb-6"
+        />
+        <div class="mt-auto pt-2 sm:pt-3 font-semibold
+                    text-sm sm:text-base md:text-lg text-gray-700
+                    transition-colors group-hover:text-primary group-hover:underline">
+            {{ subtitle|trans({}, translation_domain) }}
+        </div>
+    </button>
+{% elseif type == 'link' %}
+    <a
+            href="{{ path(route) }}"
+            class="group flex flex-col items-center text-center
+               bg-white shadow-md rounded-2xl p-6 sm:p-8
+               border border-gray-200
+               transition-all hover:shadow-lg hover:-translate-y-1"
+    >
+        <h2 class="text-lg sm:text-xl md:text-2xl font-bold mb-4 sm:mb-6
+                   transition-colors group-hover:text-primary">
+            {{ title|trans({}, translation_domain) }}
+        </h2>
+        <twig:ux:icon
+                name="{{ icon }}"
+                class="w-8 h-8 sm:w-10 sm:h-10 text-gray-600
+                   transition-colors group-hover:text-primary mb-4 sm:mb-6"
+        />
+        <div class="mt-auto pt-2 sm:pt-3 font-semibold
+                    text-sm sm:text-base md:text-lg text-gray-700
+                    transition-colors group-hover:text-primary group-hover:underline">
+            {{ subtitle|trans({}, translation_domain) }}
+        </div>
+    </a>
+{% endif %}
