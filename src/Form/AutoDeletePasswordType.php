@@ -25,15 +25,22 @@ class AutoDeletePasswordType extends AbstractType
         $builder
             ->add('password', PasswordType::class, [
                 'label' => 'Password',
+                'toggle' => true,
+                'hidden_label' => null,
+                'visible_label' => null,
                 'required' => true,
+                'attr' => [
+                    'placeholder' => $this->translator->trans('EnterPassword', [], 'LoginFormType'),
+                    'data-live-ignore' => 'true',
+                ],
             ])
             ->add('confirm', CheckboxType::class, [
                 'required' => true,
                 'mapped' => false,
                 'constraints' => [
-                    new IsTrue([
-                        'message' => $this->translator->trans('confirmDeletingYourAccount', [], 'AutoDeleteType'),
-                    ]),
+                    new IsTrue(
+                        message: $this->translator->trans('confirmDeletingYourAccount', [], 'AutoDeleteType')
+                    ),
                 ],
             ]);
     }
