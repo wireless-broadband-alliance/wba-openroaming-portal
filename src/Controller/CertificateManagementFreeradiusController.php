@@ -893,6 +893,7 @@ class CertificateManagementFreeradiusController extends AbstractController
                 $certificateSetupProcess->setRemoteHost($dto->host);
                 $certificateSetupProcess->setFreeradiusFormCompletedAt(new DateTimeImmutable());
                 $certificateSetupProcess->setFreeradiusConfigAppliedAt(new DateTimeImmutable());
+                $certificateSetupProcess->setIsFreeradiusCloudflare(true);
                 $cloudflareToken = new CloudflareTokens();
                 $cloudflareToken->setCreatedAt(new DateTimeImmutable());
                 $cloudflareToken->setToken($dto->token);
