@@ -25,7 +25,7 @@ class FreeradiusTestException extends RuntimeException
     public static function tlsHandshakeFailed(string $host, int $port, int $errno, string $errstr): self
     {
         return new self(
-            "TLS Handshake failed with {$host}:{$port}",
+            "TLS Handshake failed with {$host}:{$port} | {$errstr}",
             [
                 'host' => $host,
                 'port' => $port,
@@ -36,10 +36,48 @@ class FreeradiusTestException extends RuntimeException
     }
 
     // Factory method: untrusted certificate
-    public static function untrustedCertificate(): self
+    public static function untrustedCertificate(?string $customMessage = null): self
     {
         return new self(
-            "TLS handshake succeeded but certificate chain is NOT trusted",
+            $customMessage ?? "TLS handshake succeeded but certificate chain is NOT trusted",
+            []
+        );
+    }
+
+    public static function certificateExpired(string $subject, string $expiryDate, ?string $customMessage = null): self
+    {
+        return new self(
+            $customMessage ?? "Certificate expired for {$subject} since {$expiryDate}",
+            [
+                'subject' => $subject,
+                'expiryDate' => $expiryDate,
+            ]
+        );
+    }
+
+    public static function certificateNotYetValid(string $subject, string $validFrom, ?string $customMessage = null): self
+    {
+        return new self(
+            $customMessage ?? "Certificate for {$subject} is not yet valid. Valid from {$validFrom}",
+            [
+                'subject' => $subject,
+                'validFrom' => $validFrom,
+            ]
+        );
+    }
+
+    public static function noCertificateProvided(?string $customMessage = null): self
+    {
+        return new self(
+            $customMessage ?? "Server did not provide any certificate",
+            []
+        );
+    }
+
+    public static function invalidCertificateChain(?string $customMessage = null): self
+    {
+        return new self(
+            $customMessage ?? "Certificate chain is invalid or incomplete",
             []
         );
     }

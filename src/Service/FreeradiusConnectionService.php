@@ -6,8 +6,8 @@ use App\Exception\FreeradiusTestException;
 use Doctrine\DBAL\Connection;
 use Doctrine\Persistence\ManagerRegistry;
 use RuntimeException;
-use Throwable;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Throwable;
 
 readonly class FreeradiusConnectionService
 {
@@ -117,29 +117,36 @@ readonly class FreeradiusConnectionService
                 STREAM_CLIENT_CONNECT,
                 $context
             );
+
+            if ($connection === false) {
+                $opensslErrors = [];
+                while ($err = openssl_error_string()) {
+                    $opensslErrors[] = $err;
+                }
+                $details = ($errstr ?: 'Unknown error') .
+                    (!empty($opensslErrors) ? ' | OpenSSL errors: ' . implode(' ; ', $opensslErrors) : '');
+                
+                throw FreeradiusTestException::tlsHandshakeFailed($host, $port, $errno ?: 0, $details);
+            }
         } catch (Throwable $e) {
+            if ($e instanceof FreeradiusTestException) {
+                throw $e;
+            }
+
             // Collect OpenSSL error stack
             $opensslErrors = [];
             while ($err = openssl_error_string()) {
                 $opensslErrors[] = $err;
             }
 
-            throw FreeradiusTestException::tlsHandshakeFailed(
-                $host,
-                $port,
-                $errno ?? 0,
-                ($errstr ?: $e->getMessage()) .
-                (!empty($opensslErrors) ? ' | OpenSSL errors: ' . implode(' ; ', $opensslErrors) : '')
-            );
-        }
+            $details = ($errstr ?: $e->getMessage()) .
+                (!empty($opensslErrors) ? ' | OpenSSL errors: ' . implode(' ; ', $opensslErrors) : '');
 
-        // The ONLY real failure condition
-        if ($connection === false) {
             throw FreeradiusTestException::tlsHandshakeFailed(
                 $host,
                 $port,
                 $errno ?? 0,
-                $errstr ?? ''
+                $details
             );
         }
 
@@ -161,6 +168,10 @@ readonly class FreeradiusConnectionService
 
     public function validate(array $serverChain, array $localSigningKeys): void
     {
+        if (empty($serverChain)) {
+            throw FreeradiusTestException::noCertificateProvided("The server did not provide any certificate during the handshake.");
+        }
+
         // Gets the current hashes from the server certificates
         $localHashes = array_map(static function ($path) {
             $pem = file_get_contents($path);
@@ -168,9 +179,40 @@ readonly class FreeradiusConnectionService
             return strtolower(hash('sha256', $der));
         }, $localSigningKeys);
 
-        // Checks if the certs from the server are the same from the portal
+        $now = time();
         $validated = false;
-        foreach ($serverChain as $cert) {
+
+        foreach ($serverChain as $index => $cert) {
+            // Parse certificate details
+            $certInfo = openssl_x509_parse($cert);
+            if ($certInfo !== false) {
+                $subject = $certInfo['name'] ?? 'Unknown';
+                $validTo = $certInfo['validTo_time_t'] ?? 0;
+                $validFrom = $certInfo['validFrom_time_t'] ?? 0;
+
+                if ($now > $validTo) {
+                    $expiryDate = date('Y-m-d H:i:s', $validTo);
+                    throw FreeradiusTestException::certificateExpired(
+                        $subject,
+                        $expiryDate,
+                        "Certificate expired for {$subject} since {$expiryDate}."
+                    );
+                }
+
+                if ($now < $validFrom) {
+                    $validFromDate = date('Y-m-d H:i:s', $validFrom);
+                    throw FreeradiusTestException::certificateNotYetValid(
+                        $subject,
+                        $validFromDate,
+                        "Certificate for {$subject} is not yet valid. Valid from {$validFromDate}."
+                    );
+                }
+            } elseif ($index === 0) {
+                // If the leaf certificate cannot be parsed, the chain is definitely invalid
+                throw FreeradiusTestException::invalidCertificateChain("The certificate chain provided by the server is invalid or incomplete.");
+            }
+
+            // Trust match logic
             $pem = openssl_x509_export($cert, $out) ? $out : null;
             if (!$pem) {
                 continue;
@@ -186,7 +228,7 @@ readonly class FreeradiusConnectionService
         }
 
         if (!$validated) {
-            throw FreeradiusTestException::untrustedCertificate();
+            throw FreeradiusTestException::untrustedCertificate("The TLS handshake was successful, but the certificate chain presented by the server is not trusted by our CA bundle.");
         }
     }
 }
