@@ -108,8 +108,11 @@ readonly class FreeradiusConnectionService
             throw new RuntimeException('Failed to create TLS stream context');
         }
 
+//nuke the buffer
+        while (openssl_error_string() !== false);
+
         try {
-            $connection = stream_socket_client(
+            $connection = @stream_socket_client(
                 "tls://{$host}:{$port}",
                 $errno,
                 $errstr,
@@ -123,7 +126,13 @@ readonly class FreeradiusConnectionService
                 while ($err = openssl_error_string()) {
                     $opensslErrors[] = $err;
                 }
-                $details = ($errstr ?: 'Unknown error') .
+                
+                // Filter out misleading success if the connection failed
+                if (trim($errstr) === 'SSL: success' || empty(trim($errstr))) {
+                    $errstr = 'TLS connection failed';
+                }
+
+                $details = $errstr .
                     (!empty($opensslErrors) ? ' | OpenSSL errors: ' . implode(' ; ', $opensslErrors) : '');
                 
                 throw FreeradiusTestException::tlsHandshakeFailed($host, $port, $errno ?: 0, $details);
@@ -133,13 +142,17 @@ readonly class FreeradiusConnectionService
                 throw $e;
             }
 
-            // Collect OpenSSL error stack
+
             $opensslErrors = [];
             while ($err = openssl_error_string()) {
                 $opensslErrors[] = $err;
             }
 
-            $details = ($errstr ?: $e->getMessage()) .
+            if (trim($errstr) === 'SSL: success' || empty(trim($errstr))) {
+                $errstr = $e->getMessage();
+            }
+
+            $details = $errstr .
                 (!empty($opensslErrors) ? ' | OpenSSL errors: ' . implode(' ; ', $opensslErrors) : '');
 
             throw FreeradiusTestException::tlsHandshakeFailed(
