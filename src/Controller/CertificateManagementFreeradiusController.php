@@ -39,6 +39,7 @@ use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use JsonException;
+use Random\RandomException;
 use RuntimeException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -380,8 +381,7 @@ class CertificateManagementFreeradiusController extends AbstractController
         try {
             // Generate certificates (simulated or real)
             // For debug add true on the end for simulation
-            $generatedFiles = $this->certificateFreeradiusGenerator->run($domain, $user);
-            $isSimulation = true; // Add this tag for simulation flag
+            $generatedFiles = $this->certificateFreeradiusGenerator->run($domain, $user);// Add this tag for simulation flag
 
             foreach ($generatedFiles as $filepath) {
                 $uploadedFile = new UploadedFile(
@@ -507,8 +507,6 @@ class CertificateManagementFreeradiusController extends AbstractController
             return $this->redirectToRoute('admin_dashboard_settings_certs_radsecproxy_upload');
         }
 
-        // Return last uploaded certificates from the previous step and reads the contents
-        $certificateSet = $this->certificateFreeradiusInfoService->getLatestCertificatesSet($process);
 
         // Fetch any data/settings needed for the page
         $data = $this->getSettings->getSettings();
@@ -829,7 +827,7 @@ class CertificateManagementFreeradiusController extends AbstractController
      * @throws ServerExceptionInterface
      * @throws RedirectionExceptionInterface
      * @throws DecodingExceptionInterface
-     * @throws ClientExceptionInterface
+     * @throws ClientExceptionInterface|RandomException
      */
     #[Route(
         '/dashboard/settings/certificatesManagement/freeradius/cloudflare/dnsChallenge',
