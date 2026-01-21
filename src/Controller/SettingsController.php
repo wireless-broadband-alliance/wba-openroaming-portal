@@ -424,7 +424,7 @@ class SettingsController extends AbstractController
             }
         } else {
             $this->addFlash(
-                'error_admin',
+                'error',
                 $this->translator->trans('incorrectVerificationCode', [], 'controllers')
             );
         }

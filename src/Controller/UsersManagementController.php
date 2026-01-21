@@ -290,7 +290,7 @@ class UsersManagementController extends AbstractController
 
             // Flash message
             $this->addFlash(
-                'success_admin',
+                'success',
                 $this->translator->trans('addedNewUser', [
                     '%uuid%' => $newUser->getUuid(),
                 ], 'controllers')
