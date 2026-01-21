@@ -4,6 +4,7 @@ namespace App\Service;
 
 use App\Entity\User;
 use App\Enum\CertificateFileName;
+use Random\RandomException;
 use RuntimeException;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Filesystem\Filesystem;
@@ -143,5 +144,80 @@ readonly class CertificateFreeradiusGenerator
 
             $filesystem->copy($filepath, "$this->certTargetDir/$filename", true);
         }
+    }
+
+    /**
+     * Generate certificates using Certbot + Cloudflare DNS-01 challenge.
+     * Does NOT affect existing webroot-based logic.
+     *
+     * @return string[] Full paths of generated cert files
+     * @throws RandomException
+     */
+    public function generateCertificatesWithCloudflareDns(
+        string $domain,
+        User $user,
+        string $cloudflareToken
+    ): array {
+
+
+        $credFile = sys_get_temp_dir() . '/cf_' . bin2hex(random_bytes(8)) . '.ini';
+
+        file_put_contents(
+            $credFile,
+            "dns_cloudflare_api_token = $cloudflareToken\n"
+        );
+        chmod($credFile, 0600);
+
+        //dd($user->getEmail(), $cloudflareToken, $domain);
+
+        try {
+            $command = [
+                'certbot',
+                'certonly',
+                '--dns-cloudflare',
+                '--dns-cloudflare-credentials',
+                $credFile,
+                '-d',
+                $domain,
+                '--key-type',
+                'rsa',
+                '--rsa-key-size',
+                '2048',
+                '--non-interactive',
+                '--agree-tos',
+                '--email',
+                'ortestes123@gmail.com',
+                '--config-dir', $this->certTargetDir . '/config',
+                '--work-dir',   $this->certTargetDir . '/work',
+                '--logs-dir',   $this->certTargetDir . '/logs',
+            ];
+
+            $process = new Process($command);
+            $process->setTimeout(300);
+            $process->mustRun();
+        } finally {
+            @unlink($credFile);
+        }
+
+        $liveDir = $this->certTargetDir . "/config/live/$domain";
+
+        if (!is_dir($liveDir)) {
+            throw new RuntimeException("Certbot did not create expected directory: $liveDir");
+        }
+
+        $files = [
+            CertificateFileName::CERT_PEM_FILE->value,
+            CertificateFileName::CHAIN_PEM_FILE->value,
+            CertificateFileName::FULL_CHAIN_PEM_FILE->value,
+            CertificateFileName::PRIVATE_KEY_PEM_FILE->value,
+        ];
+
+        return array_map(static function ($f) use ($liveDir) {
+            $fullPath = "$liveDir/$f";
+            if (!file_exists($fullPath)) {
+                throw new RuntimeException("Missing Certbot output file: $fullPath");
+            }
+            return $fullPath;
+        }, $files);
     }
 }

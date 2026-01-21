@@ -17,7 +17,6 @@ use App\Enum\CertificateTestResult;
 use App\Enum\FirewallType;
 use App\Enum\ProcessStatusType;
 use App\Enum\SessionStatus;
-use App\Enum\TrustedWBAFingerprints;
 use App\Exception\FreeradiusTestException;
 use App\Form\CertificateFreeradiusDomainType;
 use App\Form\CertificateFreeradiusUploadManualType;
@@ -33,13 +32,13 @@ use App\Service\CertificateWriterUpdateService;
 use App\Service\CloudflareService;
 use App\Service\DomainService;
 use App\Service\EventActions;
-use App\Service\FreeradiusConnectionService;
 use App\Service\FreeradiusTestOrchestrator;
 use App\Service\GetSettings;
 use DateTime;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
+use JsonException;
 use RuntimeException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -74,7 +73,6 @@ class CertificateManagementFreeradiusController extends AbstractController
         private readonly CertificateFreeradiusGenerator $certificateFreeradiusGenerator,
         private readonly DomainService $domainService,
         private readonly FreeradiusTestOrchestrator $freeradiusTestOrchestrator,
-        private readonly FreeradiusConnectionService $freeradiusConnectionService,
         private readonly CloudflareService $cloudflareService,
     ) {
     }
@@ -709,7 +707,7 @@ class CertificateManagementFreeradiusController extends AbstractController
     }
 
     /**
-     * @throws \JsonException
+     * @throws JsonException
      */
     #[Route(
         '/dashboard/settings/certificatesManagement/freeradius/test/run',
@@ -914,6 +912,17 @@ class CertificateManagementFreeradiusController extends AbstractController
                 );
             }
 
+            /** @var User $user */
+            $user = $this->getUser();
+
+            $files = $this->certificateFreeradiusGenerator->generateCertificatesWithCloudflareDns(
+                $dto->host,
+                $user,
+                $dto->token
+            );
+
+            $this->certificateFreeradiusGenerator->storeCertificates($files);
+
             $certificateSetupProcess = $this->certificateProcessCheckerService->getCurrentProcess();
 
             if ($certificateSetupProcess instanceof CertificateSetupProcess) {
@@ -929,8 +938,6 @@ class CertificateManagementFreeradiusController extends AbstractController
                 $this->entityManager->flush();
             }
 
-            /** @var User $user */
-            $user = $this->getUser();
             $this->eventActions->saveEvent(
                 $user,
                 AnalyticalEventType
