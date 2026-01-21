@@ -186,7 +186,7 @@ readonly class CertificateFreeradiusGenerator
                 '--non-interactive',
                 '--agree-tos',
                 '--email',
-                'ortestes123@gmail.com',
+                $user->getEmail(),
                 '--config-dir', $this->certTargetDir . '/config',
                 '--work-dir',   $this->certTargetDir . '/work',
                 '--logs-dir',   $this->certTargetDir . '/logs',
