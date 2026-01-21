@@ -892,7 +892,7 @@ class CertificateManagementFreeradiusController extends AbstractController
             $certificateSetupProcess = $this->certificateProcessCheckerService->getCurrentProcess();
 
             if ($certificateSetupProcess instanceof CertificateSetupProcess) {
-                $certificateSetupProcess->setRemoteHost($dto->host);
+                $certificateSetupProcess->setFreeradiusDomainName($dto->host);
                 $certificateSetupProcess->setFreeradiusFormCompletedAt(new DateTimeImmutable());
                 $certificateSetupProcess->setFreeradiusConfigAppliedAt(new DateTimeImmutable());
                 $certificateSetupProcess->setIsFreeradiusCloudflare(true);
