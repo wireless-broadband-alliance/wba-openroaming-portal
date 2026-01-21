@@ -118,6 +118,69 @@ readonly class CertificateStorageService
         return $certificate;
     }
 
+    public function storeGeneratedFile(
+        string $sourcePath,
+        string $name,
+        string $type,
+        CertificateSetupProcess $process,
+        bool $isAKey = false
+    ): Certificate {
+        if (!file_exists($sourcePath)) {
+            throw new RuntimeException(
+                $this->translator->trans(
+                    'generatedFileNotFound',
+                    ['%file%' => $sourcePath],
+                    'CertificateStorageService'
+                )
+            );
+        }
+
+        $content = file_get_contents($sourcePath);
+        if ($content === false) {
+            throw new RuntimeException(
+                $this->translator->trans(
+                    'failedToReadFile',
+                    ['%file%' => $sourcePath],
+                    'CertificateStorageService'
+                )
+            );
+        }
+
+        $tmpFile = new UploadedFile(
+            $sourcePath,
+            basename($sourcePath),
+            mime_content_type($sourcePath) ?: 'application/x-pem-file',
+            null,
+            true
+        );
+
+        $certificate = new Certificate();
+        $certificate->setName($name);
+        $certificate->setType($type);
+        $certificate->setCreatedAt(new DateTimeImmutable());
+        $certificate->setFile($tmpFile);
+        $certificate->setSetupProcess($process);
+
+        $certificate->setMetadata([
+            'originalName' => basename($sourcePath),
+            'mimeType' => mime_content_type($sourcePath),
+            'size' => filesize($sourcePath),
+            'source' => 'certbot',
+        ]);
+
+        if (!$isAKey) {
+            $certData = $this->extractCertificateData($tmpFile);
+            $certificate->setFingerprint($certData['fingerprint']);
+            $certificate->setValidFrom($certData['validFrom']);
+            $certificate->setValidTo($certData['validTo']);
+        }
+
+        $this->entityManager->persist($certificate);
+        $this->entityManager->flush();
+
+        return $certificate;
+    }
+
     /**
      * Preprocess a PEM certificate file to extract fingerprint and validity dates.
      *

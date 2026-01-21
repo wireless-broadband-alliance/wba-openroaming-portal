@@ -4,6 +4,7 @@ namespace App\Service;
 
 use App\Entity\User;
 use App\Enum\CertificateFileName;
+use App\Enum\CertificateMachineType;
 use Random\RandomException;
 use RuntimeException;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -16,7 +17,9 @@ readonly class CertificateFreeradiusGenerator
     private string $certTargetDir;
 
     public function __construct(
-        private ParameterBagInterface $parameterBag
+        private ParameterBagInterface $parameterBag,
+        private CertificateStorageService $certificateStorageService,
+        private CertificateProcessCheckerService $certificateProcessCheckerService,
     ) {
         $projectDir = $this->parameterBag->get('kernel.project_dir');
         $this->certTargetDir = $projectDir . '/var/certs';
@@ -204,6 +207,36 @@ readonly class CertificateFreeradiusGenerator
         if (!is_dir($liveDir)) {
             throw new RuntimeException("Certbot did not create expected directory: $liveDir");
         }
+        $setupProcess = $this->certificateProcessCheckerService->getCurrentProcess();
+
+        $this->certificateStorageService->storeGeneratedFile(
+            "$liveDir/cert.pem",
+            CertificateFileName::CERT_PEM_FILE->value,
+            CertificateMachineType::FREERADIUS->value,
+            $setupProcess
+        );
+
+        $this->certificateStorageService->storeGeneratedFile(
+            "$liveDir/chain.pem",
+            CertificateFileName::CHAIN_PEM_FILE->value,
+            CertificateMachineType::FREERADIUS->value,
+            $setupProcess
+        );
+
+        $this->certificateStorageService->storeGeneratedFile(
+            "$liveDir/fullchain.pem",
+            CertificateFileName::FULL_CHAIN_PEM_FILE->value,
+            CertificateMachineType::FREERADIUS->value,
+            $setupProcess
+        );
+
+        $this->certificateStorageService->storeGeneratedFile(
+            "$liveDir/privkey.pem",
+            CertificateFileName::PRIVATE_KEY_PEM_FILE->value,
+            CertificateMachineType::FREERADIUS->value,
+            $setupProcess,
+            true // is private key
+        );
 
         $files = [
             CertificateFileName::CERT_PEM_FILE->value,
