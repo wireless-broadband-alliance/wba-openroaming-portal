@@ -88,7 +88,7 @@ class DomainBlacklistController extends AbstractController
             );
 
             $this->addFlash(
-                'success_admin',
+                'success',
                 $this->translator->trans(
                     'domainAdded',
                     [
@@ -121,7 +121,7 @@ class DomainBlacklistController extends AbstractController
             );
 
             $this->addFlash(
-                'success_admin',
+                'success',
                 $this->translator->trans(
                     'sourceAdded',
                     [
@@ -251,7 +251,7 @@ class DomainBlacklistController extends AbstractController
         $this->entityManager->flush();
 
         $this->addFlash(
-            'success_admin',
+            'success',
             $this->translator->trans(
                 'domainDeleted',
                 [
@@ -288,7 +288,7 @@ class DomainBlacklistController extends AbstractController
         $this->entityManager->flush();
 
         $this->addFlash(
-            'success_admin',
+            'success',
             $this->translator->trans(
                 'domainSourceDeleted',
                 [
@@ -327,7 +327,7 @@ class DomainBlacklistController extends AbstractController
         $isActive = $domainSource->isActive();
 
         $this->addFlash(
-            'success_admin',
+            'success',
             $this->translator->trans(
                 $isActive ? 'domainSourceActivated' : 'domainSourceDeactivated',
                 [
