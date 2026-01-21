@@ -30,6 +30,7 @@ use App\Service\CertificateFreeradiusInfoService;
 use App\Service\CertificateProcessCheckerService;
 use App\Service\CertificateStorageService;
 use App\Service\CertificateWriterUpdateService;
+use App\Service\CloudflareService;
 use App\Service\DomainService;
 use App\Service\EventActions;
 use App\Service\FreeradiusConnectionService;
@@ -49,6 +50,11 @@ use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Throwable;
 
@@ -69,6 +75,7 @@ class CertificateManagementFreeradiusController extends AbstractController
         private readonly DomainService $domainService,
         private readonly FreeradiusTestOrchestrator $freeradiusTestOrchestrator,
         private readonly FreeradiusConnectionService $freeradiusConnectionService,
+        private readonly CloudflareService $cloudflareService,
     ) {
     }
 
@@ -819,6 +826,13 @@ class CertificateManagementFreeradiusController extends AbstractController
         }
     }
 
+    /**
+     * @throws TransportExceptionInterface
+     * @throws ServerExceptionInterface
+     * @throws RedirectionExceptionInterface
+     * @throws DecodingExceptionInterface
+     * @throws ClientExceptionInterface
+     */
     #[Route(
         '/dashboard/settings/certificatesManagement/freeradius/cloudflare/dnsChallenge',
         name: 'admin_dashboard_settings_certs_freeradius_cloudflare_dnsChallenge',
@@ -876,6 +890,17 @@ class CertificateManagementFreeradiusController extends AbstractController
                 );
             } else {
                 $process->setIsFreeradiusCertEV(true);
+            }
+
+            if (!$this->cloudflareService->validate($dto)) {
+                $this->addFlash(
+                    'error',
+                    $this->translator->trans(
+                        'cloudflareTokenNotMatchesHost',
+                        ['%host%' => $dto->host],
+                        'controllers')
+                );
+                return $this->redirectToRoute('admin_dashboard_settings_certs_freeradius_cloudflare_dnsChallenge');
             }
 
             if ($dto->ca instanceof UploadedFile) {
