@@ -29,7 +29,7 @@ class DomainBlacklist
     private string $pattern;
 
     #[ORM\Column(length: 1, enumType: DomainMatchType::class)]
-    private DomainMatchType $type; // exact = 1 | subdomain = 2 | wildcard = 3
+    private DomainMatchType $type; // exact = 0 | subdomain = 1 | wildcard = 2
 
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
