@@ -1,10 +1,60 @@
-<div id="loading-overlay" class="hidden fixed inset-0 bg-white bg-opacity-70 flex items-center justify-center z-50">
-    <div class="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-blue-500"></div>
-    <span class="ml-4 font-semibold text-blue-600">{{ 'loading'|trans({}, '_blacklist') }}...</span>
+<div id="loading-overlay"
+     class="hidden fixed inset-0 z-50 flex flex-col items-center justify-center bg-white/80"
+>
+    <div class="relative w-24 h-24 flex items-center justify-center">
+        <svg class="absolute inset-0 w-full h-full"
+             viewBox="0 0 100 100"
+        >
+            <circle
+                    cx="50"
+                    cy="50"
+                    r="45"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="6"
+                    stroke-linecap="round"
+                    class="text-primary"
+                    stroke-dasharray="1 212"
+                    stroke-dashoffset="0"
+            >
+                <animate
+                        attributeName="stroke-dasharray"
+                        values="1 212; 70 212; 1 212"
+                        keyTimes="0; 0.5; 1"
+                        dur="1.6s"
+                        calcMode="spline"
+                        keySplines="0.4 0 0.2 1; 0.4 0 0.2 1"
+                        repeatCount="indefinite"></animate>
+
+                <animate
+                        attributeName="stroke-dashoffset"
+                        values="0; -106; -212"
+                        keyTimes="0; 0.5; 1"
+                        dur="1.6s"
+                        calcMode="spline"
+                        keySplines="0.4 0 0.2 1; 0.4 0 0.2 1"
+                        repeatCount="indefinite"></animate>
+            </circle>
+        </svg>
+        <img
+                src="{{ asset('resources/logos/openroaming-loading-logo.svg') }}"
+                alt="Loading"
+                class="w-14 h-14"
+        />
+    </div>
+
+    <span class="mt-4 text-sm font-medium text-gray-700 flex">
+        {{ 'loading'|trans({}, '_blacklist') }}
+        <span class="ml-1 flex">
+            <span class="animate-pulse">.</span>
+            <span class="animate-pulse [animation-delay:200ms]">.</span>
+            <span class="animate-pulse [animation-delay:400ms]">.</span>
+        </span>
+    </span>
 </div>
 
 <script>
-    window.addEventListener('beforeunload', function() {
-        document.getElementById('loading-overlay').classList.remove('hidden');
+    window.addEventListener('beforeunload', function () {
+        document.getElementById('loading-overlay')?.classList.remove('hidden');
     });
 </script>
