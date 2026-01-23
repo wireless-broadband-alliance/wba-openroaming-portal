@@ -442,6 +442,21 @@ class DomainBlacklistController extends AbstractController
                     'controllers'
                 )
             );
+
+            /** @var User $currentUser */
+            $currentUser = $this->getUser();
+
+            $eventMetadata = [
+                'ip' => $request->getClientIp(),
+                'user_agent' => $request->headers->get('User-Agent'),
+                'uuid' => $currentUser->getUuid(),
+            ];
+            $this->eventActions->saveEvent(
+                $currentUser,
+                AnalyticalEventType::BLACKLIST_SOURCES_MANUAL_REFRESH_ALL->value,
+                new DateTime(),
+                $eventMetadata
+            );
         }
 
         // Return to the last page where the user was (with searching filters)
@@ -510,6 +525,22 @@ class DomainBlacklistController extends AbstractController
                     ['%domain%' => $domainSource->getUrl()],
                     'controllers'
                 )
+            );
+
+            /** @var User $currentUser */
+            $currentUser = $this->getUser();
+
+            $eventMetadata = [
+                'ip' => $request->getClientIp(),
+                'user_agent' => $request->headers->get('User-Agent'),
+                'uuid' => $currentUser->getUuid(),
+                'source' => $domainSource->getUrl(),
+            ];
+            $this->eventActions->saveEvent(
+                $currentUser,
+                AnalyticalEventType::BLACKLIST_SOURCES_MANUAL_REFRESH->value,
+                new DateTime(),
+                $eventMetadata
             );
         }
 
