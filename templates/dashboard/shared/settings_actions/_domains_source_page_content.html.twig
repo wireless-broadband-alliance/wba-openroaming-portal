@@ -65,6 +65,12 @@
                         </div>
                     </form>
                 </div>
+
+                <div class="flex items-center space-x-6">
+                    <a href="{{ path('admin_domain_source_refresh_all') }}" class="btn-primary">
+                        {{ 'refresh'|trans({}, '_blacklist') }}
+                    </a>
+                </div>
             </div>
         </div>
 

@@ -141,3 +141,5 @@ sourceAdded: 'A Fonte "%source%" adicionado com sucesso.'
 domainSourceRefreshed: 'A fonte de domínios "%domain%" foi atualizada com sucesso.'
 domainSourceRefreshFailed: 'Falha ao atualizar a fonte de domínios "%domain%".'
 domainSourceInactive: "Esta fonte de domínios está inativa e não pode ser atualizada."
+allDomainSourceRefreshed: "As fontes de domínios foram atualizadas com sucesso."
+domainSourceRefreshAllFailed: "Falha ao atualizar as fontes de domínios."
