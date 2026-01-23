@@ -264,7 +264,7 @@ class DomainBlacklistController extends AbstractController
             )
         );
 
-        /** @var $currentUser User */
+        /** @var User $currentUser  */
         $currentUser = $this->getUser();
 
         $this->eventActions->saveEvent(
@@ -318,7 +318,7 @@ class DomainBlacklistController extends AbstractController
             )
         );
 
-        /** @var $currentUser User */
+        /** @var User $currentUser  */
         $currentUser = $this->getUser();
 
         $this->eventActions->saveEvent(

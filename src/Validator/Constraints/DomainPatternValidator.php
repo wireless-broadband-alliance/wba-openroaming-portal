@@ -60,13 +60,7 @@ class DomainPatternValidator extends ConstraintValidator
             return false;
         }
 
-        // ensure regex compiles
-        set_error_handler(static function (): void {
-        });
-        $isValid = @preg_match($value, '') !== false;
-        restore_error_handler();
-
-        return $isValid;
+        return @preg_match($value, '') !== false;
     }
 
     private function isValidDomain(string $domain): bool
