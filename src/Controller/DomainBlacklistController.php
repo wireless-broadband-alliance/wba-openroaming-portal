@@ -446,7 +446,11 @@ class DomainBlacklistController extends AbstractController
         if ($exitCode !== 0) {
             $this->addFlash(
                 'error_admin',
-                $this->translator->trans('domainSourceRefreshFailed', [], 'controllers')
+                $this->translator->trans(
+                    'domainSourceRefreshFailed',
+                    ['%domain%' => $domainSource->getUrl()],
+                    'controllers'
+                )
             );
         } else {
             $this->addFlash(
