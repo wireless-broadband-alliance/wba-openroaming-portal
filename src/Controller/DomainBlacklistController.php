@@ -20,10 +20,14 @@ use App\Service\GetSettings;
 use DateTime;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Console\Input\ArrayInput;
+use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
+use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -260,6 +264,22 @@ class DomainBlacklistController extends AbstractController
             )
         );
 
+        /** @var $currentUser User */
+        $currentUser = $this->getUser();
+
+        $this->eventActions->saveEvent(
+            $currentUser,
+            AnalyticalEventType::BLACKLIST_DOMAIN_REMOVED->value,
+            new DateTime(),
+            [
+                'ip' => $request->getClientIp(),
+                'user_agent' => $request->headers->get('User-Agent'),
+                'by' => $currentUser->getUuid(),
+                'domain-removed' => $domain->getPattern(),
+            ]
+        );
+
+
         // Return to the last page where the user was (with searching filters)
         $lastPage = $request->headers->get('referer', '/dashboard');
         return $this->redirect($lastPage);
@@ -283,6 +303,7 @@ class DomainBlacklistController extends AbstractController
             );
         }
 
+        $domainSourceData = $domainSource->getUrl();
         $this->entityManager->remove($domainSource);
         $this->entityManager->flush();
 
@@ -295,6 +316,21 @@ class DomainBlacklistController extends AbstractController
                 ],
                 'controllers'
             )
+        );
+
+        /** @var $currentUser User */
+        $currentUser = $this->getUser();
+
+        $this->eventActions->saveEvent(
+            $currentUser,
+            AnalyticalEventType::BLACKLIST_SOURCE_REMOVED->value,
+            new DateTime(),
+            [
+                'ip' => $request->getClientIp(),
+                'user_agent' => $request->headers->get('User-Agent'),
+                'by' => $currentUser->getUuid(),
+                'domain-source-removed' => $domainSourceData,
+            ]
         );
 
         // Return to the last page where the user was (with searching filters)
@@ -320,21 +356,108 @@ class DomainBlacklistController extends AbstractController
             );
         }
 
+        // Toggle state
         $domainSource->setActive(!$domainSource->isActive());
         $this->entityManager->flush();
 
         $isActive = $domainSource->isActive();
 
+        // Flash message
         $this->addFlash(
             'success_admin',
             $this->translator->trans(
                 $isActive ? 'domainSourceActivated' : 'domainSourceDeactivated',
-                [
-                    '%domain%' => $domainSource->getUrl(),
-                ],
+                ['%domain%' => $domainSource->getUrl()],
                 'controllers'
             )
         );
+
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
+
+        // Pick correct event type
+        $eventType = $isActive
+            ? AnalyticalEventType::BLACKLIST_SOURCE_ACTIVATED
+            : AnalyticalEventType::BLACKLIST_SOURCE_DEACTIVATED;
+
+        // Save event
+        $this->eventActions->saveEvent(
+            $currentUser,
+            $eventType->value,
+            new DateTime(),
+            [
+                'ip' => $request->getClientIp(),
+                'user_agent' => $request->headers->get('User-Agent'),
+                'by' => $currentUser->getUuid(),
+                'domain_source_url' => $domainSource->getUrl(),
+                'active' => $isActive,
+            ]
+        );
+
+        return $this->redirect(
+            $request->headers->get('referer', '/dashboard')
+        );
+    }
+
+    /**
+     * @throws \Exception
+     */
+    #[Route(
+        '/dashboard/settings/domain-source/{id<\d+>}/refresh',
+        name: 'admin_domain_source_refresh',
+        methods: ['POST']
+    )]
+    #[IsGranted('ROLE_ADMIN')]
+    public function refreshDomainSource(
+        int $id,
+        Request $request,
+        KernelInterface $kernel
+    ): Response {
+        $domainSource = $this->domainSourceRepository->find($id);
+        if (!$domainSource instanceof DomainSource) {
+            throw $this->createNotFoundException(
+                $this->translator->trans('domainSourceNotFound', [], 'controllers')
+            );
+        }
+
+        if (!$domainSource->isActive()) {
+            $this->addFlash(
+                'warning_admin',
+                $this->translator->trans('domainSourceInactive', [], 'controllers')
+            );
+
+            // Return to the last page where the user was (with searching filters)
+            $lastPage = $request->headers->get('referer', '/dashboard');
+            return $this->redirect($lastPage);
+        }
+
+        $application = new Application($kernel);
+        $application->setAutoExit(false);
+
+        $input = new ArrayInput([
+            'command' => 'import:temporary-domains',
+            '--source' => $id,
+        ]);
+
+        $output = new BufferedOutput();
+
+        $exitCode = $application->run($input, $output);
+
+        if ($exitCode !== 0) {
+            $this->addFlash(
+                'error_admin',
+                $this->translator->trans('domainSourceRefreshFailed', [], 'controllers')
+            );
+        } else {
+            $this->addFlash(
+                'success_admin',
+                $this->translator->trans(
+                    'domainSourceRefreshed',
+                    ['%domain%' => $domainSource->getUrl()],
+                    'controllers'
+                )
+            );
+        }
 
         // Return to the last page where the user was (with searching filters)
         $lastPage = $request->headers->get('referer', '/dashboard');
