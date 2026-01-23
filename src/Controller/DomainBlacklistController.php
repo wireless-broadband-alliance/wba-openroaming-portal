@@ -403,6 +403,56 @@ class DomainBlacklistController extends AbstractController
      * @throws \Exception
      */
     #[Route(
+        '/dashboard/settings/domain-source/refresh',
+        name: 'admin_domain_source_refresh_all',
+        methods: ['GET']
+    )]
+    #[IsGranted('ROLE_ADMIN')]
+    public function refreshAllDomainSource(
+        Request $request,
+        KernelInterface $kernel
+    ): Response {
+
+        $application = new Application($kernel);
+        $application->setAutoExit(false);
+
+        $input = new ArrayInput([
+            'command' => 'import:temporary-domains',
+        ]);
+
+        $output = new BufferedOutput();
+
+        $exitCode = $application->run($input, $output);
+
+        if ($exitCode !== 0) {
+            $this->addFlash(
+                'error_admin',
+                $this->translator->trans(
+                    'domainSourceRefreshAllFailed',
+                    [],
+                    'controllers'
+                )
+            );
+        } else {
+            $this->addFlash(
+                'success_admin',
+                $this->translator->trans(
+                    'allDomainSourceRefreshed',
+                    [],
+                    'controllers'
+                )
+            );
+        }
+
+        // Return to the last page where the user was (with searching filters)
+        $lastPage = $request->headers->get('referer', '/dashboard');
+        return $this->redirect($lastPage);
+    }
+
+    /**
+     * @throws \Exception
+     */
+    #[Route(
         '/dashboard/settings/domain-source/{id<\d+>}/refresh',
         name: 'admin_domain_source_refresh',
         methods: ['POST']
