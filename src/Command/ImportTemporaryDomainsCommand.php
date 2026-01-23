@@ -3,6 +3,7 @@
 namespace App\Command;
 
 use App\Entity\DomainBlacklist;
+use App\Entity\DomainSource;
 use App\Enum\DomainMatchType;
 use App\Enum\DomainOrigin;
 use App\Repository\DomainBlacklistRepository;
@@ -14,6 +15,7 @@ use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
@@ -23,7 +25,8 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 #[AsCommand(
     name: 'import:temporary-domains',
-    description: 'Imports temporary domains from public lists and syncs the blacklist'
+    description: 'Imports temporary domains from public lists and syncs the blacklist.'
+    . ' Use --source=ID to refresh a single source.'
 )]
 class ImportTemporaryDomainsCommand extends Command
 {
@@ -37,6 +40,17 @@ class ImportTemporaryDomainsCommand extends Command
         private readonly DomainSourceRepository $domainSourceRepository,
     ) {
         parent::__construct();
+    }
+
+    protected function configure(): void
+    {
+        $this
+            ->addOption(
+                'source',
+                null,
+                InputOption::VALUE_OPTIONAL,
+                'ID of the domain source to import'
+            );
     }
 
     /**
@@ -60,7 +74,18 @@ class ImportTemporaryDomainsCommand extends Command
         $batchUpdates = [];
 
         // Fetch active sources
-        $sources = $this->domainSourceRepository->findActiveSources();
+        $sourceId = $input->getOption('source');
+
+        if ($sourceId) {
+            $source = $this->domainSourceRepository->find($sourceId);
+            if (!$source instanceof DomainSource) {
+                $output->writeln("<error>Domain source with ID {$sourceId} not found.</error>");
+                return Command::FAILURE;
+            }
+            $sources = [$source];
+        } else {
+            $sources = $this->domainSourceRepository->findActiveSources();
+        }
 
         foreach ($sources as $source) {
             $url = $source->getUrl();
