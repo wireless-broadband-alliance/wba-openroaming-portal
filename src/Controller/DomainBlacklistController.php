@@ -20,6 +20,7 @@ use App\Service\GetSettings;
 use DateTime;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Exception\ORMException;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Console\Input\ArrayInput;
@@ -446,13 +447,16 @@ class DomainBlacklistController extends AbstractController
             /** @var User $currentUser */
             $currentUser = $this->getUser();
 
+            /** @var User $user */
+            $user = $this->entityManager->getReference(User::class, $currentUser->getId());
+
             $eventMetadata = [
                 'ip' => $request->getClientIp(),
                 'user_agent' => $request->headers->get('User-Agent'),
                 'uuid' => $currentUser->getUuid(),
             ];
             $this->eventActions->saveEvent(
-                $currentUser,
+                $user,
                 AnalyticalEventType::BLACKLIST_SOURCES_MANUAL_REFRESH_ALL->value,
                 new DateTime(),
                 $eventMetadata
@@ -466,6 +470,7 @@ class DomainBlacklistController extends AbstractController
 
     /**
      * @throws \Exception
+     * @throws ORMException
      */
     #[Route(
         '/dashboard/settings/domain-source/{id<\d+>}/refresh',
@@ -530,6 +535,9 @@ class DomainBlacklistController extends AbstractController
             /** @var User $currentUser */
             $currentUser = $this->getUser();
 
+            /** @var User $user */
+            $user = $this->entityManager->getReference(User::class, $currentUser->getId());
+
             $eventMetadata = [
                 'ip' => $request->getClientIp(),
                 'user_agent' => $request->headers->get('User-Agent'),
@@ -537,7 +545,7 @@ class DomainBlacklistController extends AbstractController
                 'source' => $domainSource->getUrl(),
             ];
             $this->eventActions->saveEvent(
-                $currentUser,
+                $user,
                 AnalyticalEventType::BLACKLIST_SOURCES_MANUAL_REFRESH->value,
                 new DateTime(),
                 $eventMetadata
