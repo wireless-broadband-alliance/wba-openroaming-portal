@@ -4,8 +4,8 @@ namespace App\Enum;
 
 enum DomainOrigin: string
 {
-    case LINK = 'link';
-    case MANUAL = 'manual';
-    case UNKNOWN = 'unknown';
-    case DELETED = 'deleted';
+    case LINK = '0';
+    case MANUAL = '1';
+    case UNKNOWN = '2';
+    case DELETED = '3';
 }
