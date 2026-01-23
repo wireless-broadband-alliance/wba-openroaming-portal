@@ -61,7 +61,7 @@ class DomainPatternValidator extends ConstraintValidator
         }
 
         // ensure regex compiles
-        set_error_handler(static function () {
+        set_error_handler(static function (): void {
         });
         $isValid = @preg_match($value, '') !== false;
         restore_error_handler();
@@ -109,12 +109,7 @@ class DomainPatternValidator extends ConstraintValidator
         if (!preg_match('/^[a-z0-9-]+$/', $label)) {
             return false;
         }
-
         // no leading / trailing hyphen
-        if ($label[0] === '-' || str_ends_with($label, '-')) {
-            return false;
-        }
-
-        return true;
+        return $label[0] !== '-' && !str_ends_with($label, '-');
     }
 }
