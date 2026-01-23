@@ -46,9 +46,12 @@
                 {# Refresh Source #}
                 <li>
                     <form method="post"
-                          action="{{ path('admin_domain_source_refresh', {id: domainsSource.id}) }}">
+                          action="{{ path('admin_domain_source_refresh', {id: domainsSource.id}) }}"
+                          data-controller="loading"
+                          data-action="submit->loading#show">
                         <button type="submit"
-                                class="flex items-center px-2 py-2 w-full hover:text-blue-500">
+                                class="flex items-center px-2 py-2 w-full hover:text-blue-500"
+                                data-loading-target="button">
                             <twig:ux:icon name="wba:refresh-outline" class="w-5 mr-3 fill-none stroke-current"/>
                             {{ 'refresh'|trans({}, '_blacklist') }}
                         </button>
@@ -92,7 +95,6 @@
                         </a>
                     </form>
                 </li>
-
             </ul>
         </div>
     </td>

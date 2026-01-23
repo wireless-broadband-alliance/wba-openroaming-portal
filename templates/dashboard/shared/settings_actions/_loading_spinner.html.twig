@@ -1,0 +1,10 @@
+<div id="loading-overlay" class="hidden fixed inset-0 bg-white bg-opacity-70 flex items-center justify-center z-50">
+    <div class="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-blue-500"></div>
+    <span class="ml-4 font-semibold text-blue-600">{{ 'loading'|trans({}, '_blacklist') }}...</span>
+</div>
+
+<script>
+    window.addEventListener('beforeunload', function() {
+        document.getElementById('loading-overlay').classList.remove('hidden');
+    });
+</script>
