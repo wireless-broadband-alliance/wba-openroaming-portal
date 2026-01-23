@@ -44,9 +44,8 @@
     </div>
 
     <span class="mt-4 text-sm font-medium text-gray-700 flex">
-        {{ 'loading'|trans({}, '_blacklist') }}
         <span class="ml-1 flex">
-            <span class="animate-pulse">.</span>
+            <span class="animate-pulse">{{ 'loading'|trans({}, '_blacklist') }}.</span>
             <span class="animate-pulse [animation-delay:200ms]">.</span>
             <span class="animate-pulse [animation-delay:400ms]">.</span>
         </span>
