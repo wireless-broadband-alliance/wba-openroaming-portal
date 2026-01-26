@@ -175,11 +175,15 @@ readonly class CertificateFreeradiusGenerator
             $command = [
                 'certbot',
                 'certonly',
+                '--staging',
                 '--dns-cloudflare',
                 '--dns-cloudflare-credentials',
                 $credFile,
                 '-d',
                 $domain,
+                '--cert-name',
+                $domain,
+                '--force-renewal',
                 '--key-type',
                 'rsa',
                 '--rsa-key-size',
@@ -202,23 +206,6 @@ readonly class CertificateFreeradiusGenerator
 
         $liveDir = $this->certTargetDir . "/config/live/$domain";
 
-        $archiveDir = $this->certTargetDir . "/config/archive/$domain";
-
-        $matches = glob("$archiveDir/cert*.pem");
-        if (!$matches) {
-            throw new RuntimeException("No certificates found in archive");
-        }
-
-        natsort($matches);
-        $latestCert = basename(end($matches)); // ex: cert6.pem
-        $index = preg_replace('/\D/', '', $latestCert);
-
-        $files = [
-            'cert'      => "$archiveDir/cert$index.pem",
-            'chain'     => "$archiveDir/chain$index.pem",
-            'fullchain' => "$archiveDir/fullchain$index.pem",
-            'privkey'   => "$archiveDir/privkey$index.pem",
-        ];
 
         if (!is_dir($liveDir)) {
             throw new RuntimeException("Certbot did not create expected directory: $liveDir");
@@ -226,28 +213,28 @@ readonly class CertificateFreeradiusGenerator
         $setupProcess = $this->certificateProcessCheckerService->getCurrentProcess();
 
         $this->certificateStorageService->storeGeneratedFile(
-            $files['cert'],
+            "$liveDir/cert.pem",
             CertificateFileName::CERT_PEM_FILE->value,
             CertificateMachineType::FREERADIUS->value,
             $setupProcess
         );
 
         $this->certificateStorageService->storeGeneratedFile(
-            $files['chain'],
+            "$liveDir/chain.pem",
             CertificateFileName::CHAIN_PEM_FILE->value,
             CertificateMachineType::FREERADIUS->value,
             $setupProcess
         );
 
         $this->certificateStorageService->storeGeneratedFile(
-            $files['fullchain'],
+            "$liveDir/fullchain.pem",
             CertificateFileName::FULL_CHAIN_PEM_FILE->value,
             CertificateMachineType::FREERADIUS->value,
             $setupProcess
         );
 
         $this->certificateStorageService->storeGeneratedFile(
-            $files['privkey'],
+            "$liveDir/privkey.pem",
             CertificateFileName::PRIVATE_KEY_PEM_FILE->value,
             CertificateMachineType::FREERADIUS->value,
             $setupProcess,
