@@ -1,11 +1,9 @@
 # Changelog
 
-# Release V1.10.0
+# Release V1.11.0
 
 - Installation Widget implementation (For first time project setup / for later use on the admin page configuration).
 - Certificate Management for the admin page (for radsecproxy/freeradius certificates)
-- Added a new configuration page, to manage the black-listed domains used for registration and authentication with
-  Google, Microsoft and Simple Email/Password.
 - Added a new user role, Super Admin, to allow the management of the platform and the other admins.
 - Added new pages to configure the permissions of the platform admins.
 - It's required to run the new migrations this will set up the new entities for the installation widget
@@ -20,6 +18,18 @@
       php bin/console reset:super-admin
       ```
 
+# Release V1.10.0
+
+- Added a new configuration page, to manage the black-listed domains used for registration and authentication with
+  Google, Microsoft and Simple Email/Password.
+- Added a new validator for each authentication method or registration to block blacklisted domains
+- New loading screen for long time requests (example, refresh domains)
+- It's required to run the new migrations this will set up the new entities for the new domains & sources page (`DomainsBlacklist`, `DomainsSource`)
+    - Run the migrations with:
+      ```bash
+      php bin/console doctrine:migrations:migrate
+      ```
+      
 # Release V1.9.1
 
 - Fix problem with PGP Encryption where the previous implementation didn't set a **GNUPGHOME**, so GnuPG was trying to use the default location
