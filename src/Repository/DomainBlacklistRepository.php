@@ -190,15 +190,15 @@ class DomainBlacklistRepository extends ServiceEntityRepository
         $qb->andWhere('d.origin NOT LIKE :deleted')
             ->setParameter('deleted', DomainOrigin::DELETED);
 
-        if ($type === 'exact') {
+        if ($type === DomainMatchType::EXACT->value) {
             $qb->andWhere('d.type LIKE :exact')
                 ->setParameter('exact', DomainMatchType::EXACT);
         }
-        if ($type === 'subdomain') {
+        if ($type === DomainMatchType::SUBDOMAIN->value) {
             $qb->andWhere('d.type LIKE :subdomain')
                 ->setParameter('subdomain', DomainMatchType::SUBDOMAIN);
         }
-        if ($type === 'wildcard') {
+        if ($type === DomainMatchType::WILDCARD->value) {
             $qb->andWhere('d.type LIKE :wildcard')
                 ->setParameter('wildcard', DomainMatchType::WILDCARD);
         }
