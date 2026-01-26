@@ -179,4 +179,9 @@ domainSourceDeleted: 'Domain Source "%domain%" deleted successfully.'
 domainSourceActivated: 'Domain source "%domain%" activated successfully.'
 domainSourceDeactivated: 'Domain source "%domain%" deactivated successfully.'
 sourceAdded: 'Source "%source%" added successfully.'
+domainSourceRefreshed: 'Domain source "%domain%" was refreshed successfully.'
+domainSourceRefreshFailed: 'Failed to refresh domain source "%domain%".'
+domainSourceInactive: "This domain source is inactive and cannot be refreshed."
+allDomainSourceRefreshed: "Domains sources was refreshed successfully."
+domainSourceRefreshAllFailed: "Failed to refresh domains sources."
 cloudflareTokenNotMatchesHost: 'The Cloudflare token does not have permissions for the host %host%'

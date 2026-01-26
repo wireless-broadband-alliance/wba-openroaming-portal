@@ -43,13 +43,30 @@
                 {{ stimulus_target('nav-submenu', 'container') }}>
             <ul class="p-2 text-gray-700 gap-y-2">
 
+                {# Refresh Source #}
+                <li>
+                    <form method="post"
+                          action="{{ path('admin_domain_source_refresh', {id: domainsSource.id}) }}">
+                        <button type="submit"
+                                class="flex items-center px-2 py-2 w-full hover:text-blue-500">
+                            <twig:ux:icon name="wba:refresh-outline" class="w-5 mr-3 fill-none stroke-current"/>
+                            {{ 'refresh'|trans({}, '_blacklist') }}
+                        </button>
+                    </form>
+                </li>
+
                 {# Toggle Source #}
                 <li>
                     <form method="post"
                           action="{{ path('admin_domain_source_toggle', {id: domainsSource.id}) }}">
                         <button type="submit"
-                                class="flex items-center px-2 py-2 w-full hover:text-lightGreen">
-                            <twig:ux:icon name="wba:toggle-outline" class="w-5 mr-3 fill-none stroke-current"/>
+                                class="flex items-center px-2 py-2 w-full
+                       {{ domainsSource.isActive()
+                                ? 'hover:text-red-500'
+                                : 'hover:text-green-500' }}">
+                            <twig:ux:icon name="wba:toggle-outline"
+                                          class="w-5 mr-3 fill-none stroke-current"/>
+
                             {{ domainsSource.isActive()
                             ? 'deactivate'|trans({}, '_blacklist')
                             : 'activate'|trans({}, '_blacklist') }}

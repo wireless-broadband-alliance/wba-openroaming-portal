@@ -177,4 +177,9 @@ domainSourceDeleted: 'Fonte de Domínio "%domain%" eliminada com sucesso.'
 domainSourceActivated: 'Fonte de Domínio "%domain%" ativada com sucesso.'
 domainSourceDeactivated: 'Fonte de Domínio "%domain%" desativada com sucesso.'
 sourceAdded: 'A Fonte "%source%" adicionado com sucesso.'
+domainSourceRefreshed: 'A fonte de domínios "%domain%" foi atualizada com sucesso.'
+domainSourceRefreshFailed: 'Falha ao atualizar a fonte de domínios "%domain%".'
+domainSourceInactive: "Esta fonte de domínios está inativa e não pode ser atualizada."
+allDomainSourceRefreshed: "As fontes de domínios foram atualizadas com sucesso."
+domainSourceRefreshAllFailed: "Falha ao atualizar as fontes de domínios."
 cloudflareTokenNotMatchesHost: 'O token da Cloudflare não tem permissões para o host %host%'

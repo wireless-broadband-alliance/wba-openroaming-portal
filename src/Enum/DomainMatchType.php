@@ -4,7 +4,7 @@ namespace App\Enum;
 
 enum DomainMatchType: string
 {
-    case EXACT = 'exact';
-    case SUBDOMAIN = 'subdomain';
-    case WILDCARD = 'wildcard';
+    case EXACT = '0';
+    case SUBDOMAIN = '1';
+    case WILDCARD = '2';
 }

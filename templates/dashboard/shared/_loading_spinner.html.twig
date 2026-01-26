@@ -1,0 +1,70 @@
+<div id="loading-overlay"
+     class="hidden fixed inset-0 z-50 flex flex-col items-center justify-center bg-white/80"
+>
+    <div class="relative w-24 h-24 flex items-center justify-center">
+        <svg class="absolute inset-0 w-full h-full"
+             viewBox="0 0 100 100"
+        >
+            <circle
+                    cx="50"
+                    cy="50"
+                    r="45"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="6"
+                    stroke-linecap="round"
+                    class="text-primary"
+                    stroke-dasharray="1 212"
+                    stroke-dashoffset="0"
+            >
+                <animate
+                        attributeName="stroke-dasharray"
+                        values="1 212; 70 212; 1 212"
+                        keyTimes="0; 0.5; 1"
+                        dur="1.6s"
+                        calcMode="spline"
+                        keySplines="0.4 0 0.2 1; 0.4 0 0.2 1"
+                        repeatCount="indefinite"></animate>
+
+                <animate
+                        attributeName="stroke-dashoffset"
+                        values="0; -106; -212"
+                        keyTimes="0; 0.5; 1"
+                        dur="1.6s"
+                        calcMode="spline"
+                        keySplines="0.4 0 0.2 1; 0.4 0 0.2 1"
+                        repeatCount="indefinite"></animate>
+            </circle>
+        </svg>
+        <img
+                src="{{ asset('resources/logos/openroaming-loading-logo.svg') }}"
+                alt="Loading"
+                class="w-14 h-14"
+        />
+    </div>
+
+    <span class="mt-4 text-sm font-medium text-gray-700 flex">
+        <span class="ml-1 flex">
+            <span class="animate-pulse">{{ 'loading'|trans({}, '_blacklist') }}.</span>
+            <span class="animate-pulse [animation-delay:200ms]">.</span>
+            <span class="animate-pulse [animation-delay:400ms]">.</span>
+        </span>
+    </span>
+</div>
+
+<script>
+    document.addEventListener('click', (e) => {
+        const link = e.target.closest('a[href]');
+        if (!link) return;
+        if (link.target === '_blank') return;
+        if (link.hasAttribute('download')) return;
+
+        document.getElementById('loading-overlay')
+                ?.classList.remove('hidden');
+    });
+
+    document.addEventListener('submit', () => {
+        document.getElementById('loading-overlay')
+                ?.classList.remove('hidden');
+    });
+</script>

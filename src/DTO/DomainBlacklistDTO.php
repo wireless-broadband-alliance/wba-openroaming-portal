@@ -5,15 +5,13 @@ namespace App\DTO;
 use App\Entity\DomainBlacklist;
 use App\Enum\DomainMatchType;
 use Symfony\Component\Validator\Constraints as Assert;
+use App\Validator\Constraints as CustomAssert;
 
 class DomainBlacklistDTO
 {
     #[Assert\NotBlank]
     #[Assert\Length(max: 255)]
-    #[Assert\Regex(
-        pattern: '/^(\/.+\/[imsxuADU]*|\*|\*\.[a-z0-9.-]+\.[a-z]{2,}|[a-z0-9.-]+\.[a-z]{2,})$/i',
-        message: 'invalidDomainPattern'
-    )]
+    #[CustomAssert\DomainPattern]
     public ?string $input = null;
 
     public ?int $id = null;
