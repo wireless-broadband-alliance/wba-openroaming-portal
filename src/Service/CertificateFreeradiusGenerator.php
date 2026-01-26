@@ -145,6 +145,8 @@ readonly class CertificateFreeradiusGenerator
                 continue;
             }
 
+            dd($filepath, file_exists($filepath));
+
             $filesystem->copy($filepath, "$this->certTargetDir/$filename", true);
         }
     }
@@ -204,36 +206,40 @@ readonly class CertificateFreeradiusGenerator
             @unlink($credFile);
         }
 
-        $liveDir = $this->certTargetDir . "/config/live/$domain";
+        $liveBase = $this->certTargetDir . "/config/live";
+        $dirs = glob($liveBase . '/' . $domain . '*', GLOB_ONLYDIR);
 
-
-        if (!is_dir($liveDir)) {
-            throw new RuntimeException("Certbot did not create expected directory: $liveDir");
+        if (!$dirs) {
+            throw new RuntimeException("Nenhuma pasta de certificados encontrada para $domain"); // todo translations
         }
+
+        usort($dirs, fn($a, $b) => filemtime($b) <=> filemtime($a));
+        $liveDir = $dirs[0];
+
         $setupProcess = $this->certificateProcessCheckerService->getCurrentProcess();
 
-        $this->certificateStorageService->storeGeneratedFile(
+        $certCert = $this->certificateStorageService->storeGeneratedFile(
             "$liveDir/cert.pem",
             CertificateFileName::CERT_PEM_FILE->value,
             CertificateMachineType::FREERADIUS->value,
             $setupProcess
         );
 
-        $this->certificateStorageService->storeGeneratedFile(
+        $chainCert = $this->certificateStorageService->storeGeneratedFile(
             "$liveDir/chain.pem",
             CertificateFileName::CHAIN_PEM_FILE->value,
             CertificateMachineType::FREERADIUS->value,
             $setupProcess
         );
 
-        $this->certificateStorageService->storeGeneratedFile(
+        $fullChainCert = $this->certificateStorageService->storeGeneratedFile(
             "$liveDir/fullchain.pem",
             CertificateFileName::FULL_CHAIN_PEM_FILE->value,
             CertificateMachineType::FREERADIUS->value,
             $setupProcess
         );
 
-        $this->certificateStorageService->storeGeneratedFile(
+        $privkeyCert = $this->certificateStorageService->storeGeneratedFile(
             "$liveDir/privkey.pem",
             CertificateFileName::PRIVATE_KEY_PEM_FILE->value,
             CertificateMachineType::FREERADIUS->value,
@@ -242,18 +248,15 @@ readonly class CertificateFreeradiusGenerator
         );
 
         $files = [
-            CertificateFileName::CERT_PEM_FILE->value,
-            CertificateFileName::CHAIN_PEM_FILE->value,
-            CertificateFileName::FULL_CHAIN_PEM_FILE->value,
-            CertificateFileName::PRIVATE_KEY_PEM_FILE->value,
+            $certCert->getFilePath(),
+            $chainCert->getFilePath(),
+            $fullChainCert->getFilePath(),
+            $privkeyCert->getFilePath(),
         ];
 
-        return array_map(static function ($f) use ($liveDir) {
-            $fullPath = "$liveDir/$f";
-            if (!file_exists($fullPath)) {
-                throw new RuntimeException("Missing Certbot output file: $fullPath");
-            }
-            return $fullPath;
-        }, $files);
+        return array_map(
+            fn ($f) => $this->certTargetDir. '/' . $f,
+            $files
+        );
     }
 }
