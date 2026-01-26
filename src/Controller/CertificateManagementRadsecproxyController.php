@@ -14,17 +14,19 @@ use App\Enum\CertificateFileName;
 use App\Enum\CertificateMachineType;
 use App\Enum\CertificateTestResult;
 use App\Enum\FirewallType;
-use App\Enum\ProcessStatusType;
+use App\Enum\SessionStatus;
 use App\Enum\TrustedWBAFingerprints;
 use App\Form\CertificateRadsecUploadType;
 use App\Form\SimpleSubmitFormType;
 use App\Repository\CertificateRepository;
+use App\Repository\InstallationProgressRepository;
 use App\Service\CertificateRadsecproxyCommandsService;
 use App\Service\CertificateProcessCheckerService;
 use App\Service\CertificateRadsecproxyInfoService;
 use App\Service\CertificateStorageService;
 use App\Service\EventActions;
 use App\Service\GetSettings;
+use App\Service\InstallationService;
 use DateTime;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
@@ -50,6 +52,8 @@ class CertificateManagementRadsecproxyController extends AbstractController
         private readonly CertificateRepository $certificateRepository,
         private readonly CertificateRadsecproxyInfoService $certificateRadsecproxyInfoService,
         private readonly EventActions $eventActions,
+        private readonly InstallationService $installationService,
+        private readonly InstallationProgressRepository $installationProgressRepository,
     ) {
     }
 
@@ -263,10 +267,23 @@ class CertificateManagementRadsecproxyController extends AbstractController
         name: 'admin_dashboard_settings_certs_radsecproxy_test'
     )]
     #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
-    public function settingsCertificatesManagementRadsecproxyTest(): Response
+    public function settingsCertificatesManagementRadsecproxyTest(
+        Request $request
+    ): Response
     {
         // Get current process state
         $processState = $this->certificateProcessCheckerService->getProcessState();
+
+        // Default fallback
+        $host = $processState['process']->getRemoteHost();
+        $session = $request->getSession();
+        if ($session->has(SessionStatus::SYSTEM_RESET_REQUEST->value)) {
+            $lastInstallation = $this->installationProgressRepository->getLast();
+            if ($lastInstallation) {
+                $installationDTO = $this->installationService->fillDto($lastInstallation);
+                $host = $installationDTO->dbFreeradiusIp;
+            }
+        }
 
         // If no active process, redirect to the first stage or fallback
         if (!$processState['active']) {
@@ -290,6 +307,7 @@ class CertificateManagementRadsecproxyController extends AbstractController
                 'data' => $data,
                 'processState' => $processState,
                 'process' => $processState['process'],
+                'host' => $host,
             ]
         );
     }
