@@ -1,58 +1,77 @@
-<div id="loading-overlay"
-     class="hidden fixed inset-0 z-50 flex flex-col items-center justify-center bg-white/80"
+<div
+        id="loading-overlay"
+        data-controller="loading"
+        class="
+        hidden fixed inset-0 z-50
+        flex items-center justify-center
+        bg-white/80
+    "
 >
-    <div class="relative w-24 h-24 flex items-center justify-center">
-        <svg class="absolute inset-0 w-full h-full"
-             viewBox="0 0 100 100"
-        >
-            <circle
-                    cx="50"
-                    cy="50"
-                    r="45"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="6"
-                    stroke-linecap="round"
-                    class="text-primary"
-                    stroke-dasharray="1 212"
-                    stroke-dashoffset="0"
+    {# Full-screen flex container #}
+    <div class="flex flex-col items-center justify-center w-full h-full gap-8">
+        {# Animated Circle + Logo #}
+        <div class="relative flex items-center justify-center">
+            {# Animated Circle #}
+            <svg
+                    class="w-[25vw] h-[25vw] min-w-[150px] min-h-[150px] max-w-[400px] max-h-[400px]"
+                    viewBox="0 0 100 100"
             >
-                <animate
-                        attributeName="stroke-dasharray"
-                        values="1 212; 70 212; 1 212"
-                        keyTimes="0; 0.5; 1"
-                        dur="1.6s"
-                        calcMode="spline"
-                        keySplines="0.4 0 0.2 1; 0.4 0 0.2 1"
-                        repeatCount="indefinite"></animate>
+                <circle
+                        cx="50"
+                        cy="50"
+                        r="45"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="6"
+                        stroke-linecap="round"
+                        class="text-primary"
+                        stroke-dasharray="1 212"
+                        stroke-dashoffset="0"
+                >
+                    <animate
+                            attributeName="stroke-dasharray"
+                            values="1 212; 70 212; 1 212"
+                            keyTimes="0; 0.5; 1"
+                            dur="1.6s"
+                            calcMode="spline"
+                            keySplines="0.4 0 0.2 1; 0.4 0 0.2 1"
+                            repeatCount="indefinite"
+                    ></animate>
 
-                <animate
-                        attributeName="stroke-dashoffset"
-                        values="0; -106; -212"
-                        keyTimes="0; 0.5; 1"
-                        dur="1.6s"
-                        calcMode="spline"
-                        keySplines="0.4 0 0.2 1; 0.4 0 0.2 1"
-                        repeatCount="indefinite"></animate>
-            </circle>
-        </svg>
-        <img
-                src="{{ asset('resources/logos/openroaming-loading-logo.svg') }}"
-                alt="Loading"
-                class="w-14 h-14"
-        />
-    </div>
+                    <animate
+                            attributeName="stroke-dashoffset"
+                            values="0; -106; -212"
+                            keyTimes="0; 0.5; 1"
+                            dur="1.6s"
+                            calcMode="spline"
+                            keySplines="0.4 0 0.2 1; 0.4 0 0.2 1"
+                            repeatCount="indefinite"
+                    ></animate>
+                </circle>
+            </svg>
 
-    <span class="mt-4 text-sm font-medium text-gray-700 flex">
-        <span class="ml-1 flex">
-            <span class="animate-pulse">{{ 'loading'|trans({}, '_blacklist') }}.</span>
-            <span class="animate-pulse [animation-delay:200ms]">.</span>
-            <span class="animate-pulse [animation-delay:400ms]">.</span>
+            {# Logo centered over circle #}
+            <img
+                    src="{{ asset('resources/logos/openroaming-loading-logo.svg') }}"
+                    alt="Loading"
+                    class="absolute w-[12vw] h-[12vw] min-w-[80px] min-h-[80px] max-w-[200px] max-h-[200px]"
+            />
+        </div>
+
+        {# Loading text #}
+        <span class="font-medium text-gray-700 text-2xl md:text-3xl lg:text-4xl xl:text-5xl flex items-center">
+            {{ 'loading'|trans({}, '_blacklist') }}
+            <span class="flex ml-2">
+                <span class="animate-pulse [animation-delay:0s]">.</span>
+                <span class="animate-pulse [animation-delay:0.3s]">.</span>
+                <span class="animate-pulse [animation-delay:0.6s]">.</span>
+            </span>
         </span>
-    </span>
+    </div>
 </div>
 
 <script>
+    // Show overlay when links or forms are triggered
     document.addEventListener('click', (e) => {
         const link = e.target.closest('a[href]');
         if (!link) return;

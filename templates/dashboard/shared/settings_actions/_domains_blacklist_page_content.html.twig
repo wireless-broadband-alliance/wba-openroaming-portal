@@ -144,6 +144,8 @@
                                     <div class="pill-error">
                                         {% if searchTerm %}
                                             {{ 'noDomainsFoundWith'|trans({}, '_blacklist') }} "{{ searchTerm }}"
+                                        {% else %}
+                                            {{ 'noDomainsFound'|trans({}, '_blacklist') }}
                                         {% endif %}
                                     </div>
                                 </div>
