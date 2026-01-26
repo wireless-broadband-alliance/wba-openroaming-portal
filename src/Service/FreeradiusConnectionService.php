@@ -81,7 +81,9 @@ readonly class FreeradiusConnectionService
 
         // Build radsecclient command
         $cmd = sprintf(
-            'radclient -x %s:%d auth testing123 -c %s -k %s -a %s 2>&1',
+            'echo %s | radsecclient -x %s:%d auth ' .
+            '-c %s -k %s -a %s 2>&1',
+            escapeshellarg("User-Name = \"test\"\nUser-Password = \"testing123\""),
             escapeshellarg($host),
             $port,
             escapeshellarg($cert),
