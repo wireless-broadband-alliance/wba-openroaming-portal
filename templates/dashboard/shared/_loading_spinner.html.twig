@@ -53,7 +53,18 @@
 </div>
 
 <script>
-    window.addEventListener('beforeunload', function () {
-        document.getElementById('loading-overlay')?.classList.remove('hidden');
+    document.addEventListener('click', (e) => {
+        const link = e.target.closest('a[href]');
+        if (!link) return;
+        if (link.target === '_blank') return;
+        if (link.hasAttribute('download')) return;
+
+        document.getElementById('loading-overlay')
+                ?.classList.remove('hidden');
+    });
+
+    document.addEventListener('submit', () => {
+        document.getElementById('loading-overlay')
+                ?.classList.remove('hidden');
     });
 </script>
