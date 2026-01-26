@@ -21,6 +21,7 @@ use App\Enum\SessionStatus;
 use App\Exception\FreeradiusTestException;
 use App\Form\CertificateFreeradiusDomainType;
 use App\Form\CertificateFreeradiusUploadManualType;
+use App\Form\CertificatesFreeradiusPasteType;
 use App\Form\CloudflareType;
 use App\Form\SimpleSubmitFormType;
 use App\Service\CertificateCheckerService;
@@ -382,7 +383,10 @@ class CertificateManagementFreeradiusController extends AbstractController
         try {
             // Generate certificates (simulated or real)
             // For debug add true on the end for simulation
-            $generatedFiles = $this->certificateFreeradiusGenerator->run($domain, $user);// Add this tag for simulation flag
+            $generatedFiles = $this->certificateFreeradiusGenerator->run(
+                $domain,
+                $user
+            );// Add this tag for simulation flag
 
             foreach ($generatedFiles as $filepath) {
                 $uploadedFile = new UploadedFile(
@@ -489,8 +493,9 @@ class CertificateManagementFreeradiusController extends AbstractController
         name: 'admin_dashboard_settings_certs_freeradius_config'
     )]
     #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
-    public function settingsCertificatesManagementFreeradiusConfig(Request $request): Response
-    {
+    public function settingsCertificatesManagementFreeradiusConfig(
+        Request $request
+    ): Response {
         // Get current process state
         $processState = $this->certificateProcessCheckerService->getProcessState();
         $process = $processState['process'] ?? null;
@@ -674,8 +679,9 @@ class CertificateManagementFreeradiusController extends AbstractController
         name: 'admin_dashboard_settings_certs_freeradius_test'
     )]
     #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
-    public function settingsCertificatesManagementFreeradiusTest(): Response
-    {
+    public function settingsCertificatesManagementFreeradiusTest(
+        Request $request
+    ): Response {
         // Get current process state
         $processState = $this->certificateProcessCheckerService->getProcessState();
 
@@ -694,6 +700,13 @@ class CertificateManagementFreeradiusController extends AbstractController
 
         // Fetch settings/data needed for the page
         $data = $this->getSettings->getSettings();
+
+        $form = $this->createForm(CertificatesFreeradiusPasteType::class);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            dd('die pls');
+        }
 
         return $this->render(
             'dashboard/shared/settings_actions/certificatesManagement/certificates/freeradius/test.html.twig',
@@ -797,7 +810,6 @@ class CertificateManagementFreeradiusController extends AbstractController
                     'controllers'
                 )
             ]);
-
         } catch (FreeradiusTestException $exception) {
             // Set the process as failed
             $processEntity->setStatus(ProcessStatusType::IN_PROGRESS);
@@ -867,7 +879,6 @@ class CertificateManagementFreeradiusController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-
             $process = $this->certificateProcessCheckerService->getCurrentProcess();
             // In case there's not active process
             if (!$process instanceof CertificateSetupProcess) {
@@ -895,7 +906,8 @@ class CertificateManagementFreeradiusController extends AbstractController
                     $this->translator->trans(
                         'cloudflareTokenNotMatchesHost',
                         ['%host%' => $dto->host],
-                        'controllers')
+                        'controllers'
+                    )
                 );
                 return $this->redirectToRoute('admin_dashboard_settings_certs_freeradius_cloudflare_dnsChallenge');
             }

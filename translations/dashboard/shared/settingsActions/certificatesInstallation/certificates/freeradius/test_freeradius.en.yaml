@@ -14,3 +14,9 @@ timeOut: 'Timeout (seconds)'
 test_not_done: 'Test not done yet'
 test_passed: 'Last Test Passed'
 test_failed: 'Last Test Failed'
+manual_test_warning: >
+    Automatic testing is not possible at this step.
+    
+    For security reasons, the machine running FreeRADIUS is isolated and does not have Internet access.
+    
+    Because of this, this step must be completed manually by copying the certificate contents.

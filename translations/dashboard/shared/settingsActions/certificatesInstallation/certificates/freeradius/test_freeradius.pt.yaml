@@ -14,3 +14,10 @@ timeOut: 'Tempo limite (segundos)'
 test_not_done: 'Nenhum teste realizado no momento'
 test_passed: 'Último Test Aprovado'
 test_failed: 'Último Teste Reprovado'
+manual_test_warning: >
+    O teste automático não é possível nesta etapa.
+    
+    Por motivos de segurança, a máquina onde o FreeRADIUS está instalado é uma máquina isolada e sem acesso à Internet.
+    
+    Por essa razão, este passo deve ser realizado manualmente, através da cópia do conteúdo dos certificados.
+
