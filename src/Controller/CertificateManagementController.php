@@ -7,6 +7,7 @@ namespace App\Controller;
 use App\Entity\CertificateSetupProcess;
 use App\Entity\InstallationProgress;
 use App\Entity\User;
+use App\Enum\AdminRoleType;
 use App\Enum\AnalyticalEventType;
 use App\Enum\ProcessStatusType;
 use App\Enum\SessionStatus;
@@ -45,7 +46,7 @@ class CertificateManagementController extends AbstractController
     }
 
     #[Route('/dashboard/settings/certificatesManagement', name: 'admin_dashboard_settings_certs_management')]
-    #[IsGranted('ROLE_SUPER_ADMIN')]
+    #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
     public function settingsCertificatesManagement(): Response
     {
         $lastCompletedInstallation = $this->installationProgressRepository->getLastCompleted();
@@ -81,7 +82,7 @@ class CertificateManagementController extends AbstractController
         '/dashboard/settings/certificatesManagement/freeradius/selection',
         name: 'admin_dashboard_settings_certs_management_freeradius_selection'
     )]
-    #[IsGranted('ROLE_SUPER_ADMIN')]
+    #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
     public function settingsCertificatesManagementSelection(): Response
     {
       // Get current process state
@@ -113,7 +114,7 @@ class CertificateManagementController extends AbstractController
         name: 'admin_dashboard_settings_certs_management_certificates_abort',
         methods: ['POST']
     )]
-    #[IsGranted('ROLE_SUPER_ADMIN')]
+    #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
     public function settingsCertificatesManagementCertificatesAbort(
         Request $request
     ): Response {
@@ -165,7 +166,7 @@ class CertificateManagementController extends AbstractController
         name: 'admin_dashboard_settings_certs_management_system_reset',
         methods: ['POST']
     )]
-    #[IsGranted('ROLE_SUPER_ADMIN')]
+    #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
     public function settingsCertificatesManagementSystemReset(Request $request): Response
     {
       /** @var User $user */

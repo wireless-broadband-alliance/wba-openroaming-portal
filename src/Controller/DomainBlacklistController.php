@@ -47,7 +47,7 @@ class DomainBlacklistController extends AbstractController
     }
 
     #[Route('/dashboard/settings/domains', name: 'admin_dashboard_settings_domains')]
-    #[IsGranted(AdminRoleType::ROLE_ADMIN->value)]
+    #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
     public function domainsManagement(
         Request $request,
         #[MapQueryParameter] int $page = 1,
@@ -237,7 +237,7 @@ class DomainBlacklistController extends AbstractController
         name: 'admin_dashboard_blacklist_delete_domain',
         methods: ['POST']
     )]
-    #[IsGranted('ROLE_ADMIN')]
+    #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
     public function deleteDomains(
         int $id,
         Request $request,
@@ -292,7 +292,7 @@ class DomainBlacklistController extends AbstractController
         name: 'admin_domain_source_delete',
         methods: ['POST']
     )]
-    #[IsGranted('ROLE_ADMIN')]
+    #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
     public function deleteDomainsSource(
         int $id,
         Request $request,
@@ -345,7 +345,7 @@ class DomainBlacklistController extends AbstractController
         name: 'admin_domain_source_toggle',
         methods: ['POST']
     )]
-    #[IsGranted('ROLE_ADMIN')]
+    #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
     public function toggleDomainSource(
         int $id,
         Request $request
@@ -409,7 +409,7 @@ class DomainBlacklistController extends AbstractController
         name: 'admin_domain_source_refresh_all',
         methods: ['GET']
     )]
-    #[IsGranted('ROLE_ADMIN')]
+    #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
     public function refreshAllDomainSource(
         Request $request,
         KernelInterface $kernel
@@ -478,7 +478,7 @@ class DomainBlacklistController extends AbstractController
         name: 'admin_domain_source_refresh',
         methods: ['POST']
     )]
-    #[IsGranted('ROLE_ADMIN')]
+    #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
     public function refreshDomainSource(
         int $id,
         Request $request,

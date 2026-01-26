@@ -12,6 +12,7 @@ use App\DTO\TwoFASettingsDTO;
 use App\Entity\Setting;
 use App\Entity\TextEditor;
 use App\Entity\User;
+use App\Enum\AdminRoleType;
 use App\Enum\AnalyticalEventType;
 use App\Enum\LanguageType;
 use App\Enum\SettingName;
@@ -66,7 +67,7 @@ class SettingsController extends AbstractController
      * @param string $type Type of action
      */
     #[Route('/dashboard/confirm-checker/{type}', name: 'admin_confirm_checker')]
-    #[IsGranted('ROLE_ADMIN')]
+    #[IsGranted(AdminRoleType::ROLE_ADMIN->value)]
     public function checkSettings(Request $request, string $type): Response
     {
         // Get the entered code from the form
@@ -788,7 +789,7 @@ class SettingsController extends AbstractController
         name: 'admin_dashboard_settings_auth',
         defaults: ['language' => LanguageType::EN->value]
     )]
-    #[IsGranted('ROLE_ADMIN')]
+    #[IsGranted(AdminRoleType::ROLE_ADMIN->value)]
     public function settingsAuths(
         Request $request,
         string $language

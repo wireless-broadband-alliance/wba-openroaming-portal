@@ -8,6 +8,7 @@ use App\DTO\SettingsDTO;
 use App\Entity\Event;
 use App\Entity\InstallationProgress;
 use App\Entity\User;
+use App\Enum\AdminRoleType;
 use App\Enum\AnalyticalEventType;
 use App\Enum\DataBaseSetupType;
 use App\Enum\InstallationStep;
@@ -80,7 +81,7 @@ class InstallationController extends AbstractController
         '/dashboard/settings/certificatesManagement/installation',
         name: 'admin_dashboard_settings_certs_installation'
     )]
-    #[IsGranted('ROLE_SUPER_ADMIN')]
+    #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
     public function settingsCertificatesManagementInstallation(
         Request $request,
     ): Response {
@@ -235,7 +236,7 @@ class InstallationController extends AbstractController
         '/dashboard/settings/certificatesManagement/installation/commands',
         name: 'admin_dashboard_settings_certs_installation_command',
     )]
-    #[IsGranted('ROLE_SUPER_ADMIN')]
+    #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
     public function settingsCertificatesManagementInstallationDatabaseCommand(
         Request $request,
     ): Response {
@@ -363,7 +364,7 @@ class InstallationController extends AbstractController
         '/dashboard/settings/certificatesManagement/installation/settings',
         name: 'admin_dashboard_settings_certs_installation_settings'
     )]
-    #[IsGranted('ROLE_SUPER_ADMIN')]
+    #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
     public function settingsCertificatesManagementInstallationSettings(
         Request $request
     ): Response {
@@ -541,7 +542,7 @@ class InstallationController extends AbstractController
         '/dashboard/settings/certificatesManagement/installation/admin',
         name: 'admin_dashboard_settings_certs_installation_admin'
     )]
-    #[IsGranted('ROLE_SUPER_ADMIN')]
+    #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
     public function settingsCertificatesManagementInstallationAdmin(
         Request $request,
     ): Response {
@@ -606,7 +607,7 @@ class InstallationController extends AbstractController
         '/dashboard/settings/certificatesManagement/installation/admin/sendCode',
         name: 'admin_dashboard_settings_certs_installation_admin_sendCode'
     )]
-    #[IsGranted('ROLE_SUPER_ADMIN')]
+    #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
     public function sendCode(
         Request $request,
     ): RedirectResponse {
@@ -674,7 +675,7 @@ class InstallationController extends AbstractController
         '/dashboard/settings/certificatesManagement/installation/admin/confirmation',
         name: 'admin_dashboard_settings_certs_installation_admin_confirmation'
     )]
-    #[IsGranted('ROLE_SUPER_ADMIN')]
+    #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
     public function settingsCertificatesManagementInstallationAdminConfirmation(
         Request $request,
     ): RedirectResponse|Response {
@@ -761,7 +762,7 @@ class InstallationController extends AbstractController
         '/dashboard/settings/certificatesManagement/installation/summary',
         name: 'admin_dashboard_settings_certs_installation_summary'
     )]
-    #[IsGranted('ROLE_SUPER_ADMIN')]
+    #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
     public function installationSummary(): RedirectResponse|Response
     {
         $lastInstallation = $this->installationProgressRepository->getLast();
@@ -802,7 +803,7 @@ class InstallationController extends AbstractController
         name: 'admin_dashboard_settings_certs_installation_abortProcess',
         methods: ['POST']
     )]
-    #[IsGranted('ROLE_SUPER_ADMIN')]
+    #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
     public function abortProcess(Request $request): RedirectResponse
     {
         $lastInstallation = $this->installationService->lastInstallation();
@@ -879,7 +880,7 @@ class InstallationController extends AbstractController
         '/dashboard/settings/certificatesManagement/installation/admin/confirmation/resend',
         name: 'admin_dashboard_settings_certs_installation_admin_confirmation_resend',
     )]
-    #[IsGranted('ROLE_SUPER_ADMIN')]
+    #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
     public function resendCode(Request $request): RedirectResponse
     {
         /** @var User $user */
@@ -1005,7 +1006,7 @@ class InstallationController extends AbstractController
             'type' => InstallationType::INSTALLATION->value,
         ]
     )]
-    #[IsGranted('ROLE_SUPER_ADMIN')]
+    #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
     public function settingsCertificatesManagementInstallationVerifyIdentity(
         Request $request,
         string $type
@@ -1087,7 +1088,7 @@ class InstallationController extends AbstractController
             'type' => InstallationType::INSTALLATION->value,
         ]
     )]
-    #[IsGranted('ROLE_SUPER_ADMIN')]
+    #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
     public function settingsCertificatesManagementInstallationVerifyIdentitySendCode(
         Request $request,
         string $type
@@ -1164,7 +1165,7 @@ class InstallationController extends AbstractController
             'type' => InstallationType::INSTALLATION->value,
         ]
     )]
-    #[IsGranted('ROLE_SUPER_ADMIN')]
+    #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
     public function entityVerificationResendCode(Request $request, string $type): RedirectResponse
     {
         /** @var User $user */

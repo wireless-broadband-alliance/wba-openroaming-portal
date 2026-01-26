@@ -127,7 +127,7 @@ class AdminController extends AbstractController
     }
 
     #[Route('/dashboard/admins', name: 'admins_management')]
-    #[IsGranted('ROLE_SUPER_ADMIN')]
+    #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
     public function adminRolesManagement(
         Request $request,
         #[MapQueryParameter] int $page = 1,
@@ -199,7 +199,7 @@ class AdminController extends AbstractController
      * @throws TransportExceptionInterface
      */
     #[Route('/dashboard/regenerate/{type}', name: 'app_dashboard_regenerate_code_admin')]
-    #[IsGranted('ROLE_ADMIN')]
+    #[IsGranted(AdminRoleType::ROLE_ADMIN->value)]
     public function regenerateCode(string $type, Request $request): RedirectResponse
     {
         /** @var User $currentUser */

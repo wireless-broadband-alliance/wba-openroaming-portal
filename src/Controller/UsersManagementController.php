@@ -694,7 +694,7 @@ class UsersManagementController extends AbstractController
      * @throws TransportExceptionInterface
      */
     #[Route('/dashboard/disable2FA/{id<\d+>}', name: 'app_disable2FA_admin')]
-    #[IsGranted('ROLE_ADMIN')]
+    #[IsGranted(AdminRoleType::ROLE_ADMIN->value)]
     public function disabledBy2FA(
         Request $request,
         int $id,
@@ -758,7 +758,7 @@ class UsersManagementController extends AbstractController
     }
 
     #[Route('/dashboard/adminPermissionsAdd/{id:user<\d+>}', name: 'admin_add_permissions')]
-    #[IsGranted('ROLE_SUPER_ADMIN')]
+    #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
     public function giveAdminPermissions(Request $request, User $user): Response
     {
         /** @var User $currentUser */
@@ -788,7 +788,7 @@ class UsersManagementController extends AbstractController
     }
 
     #[Route('/dashboard/adminPermissionsRemove/{id:user<\d+>}', name: 'admin_remove_permissions')]
-    #[IsGranted('ROLE_SUPER_ADMIN')]
+    #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
     public function removeAdminPermissions(Request $request, User $user): Response
     {
         /** @var User $currentUser */

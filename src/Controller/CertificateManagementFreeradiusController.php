@@ -10,6 +10,7 @@ use App\DTO\CloudflareDTO;
 use App\Entity\CertificateSetupProcess;
 use App\Entity\CloudflareTokens;
 use App\Entity\User;
+use App\Enum\AdminRoleType;
 use App\Enum\AnalyticalEventType;
 use App\Enum\CertificateFileName;
 use App\Enum\CertificateMachineType;
@@ -82,7 +83,7 @@ class CertificateManagementFreeradiusController extends AbstractController
         '/dashboard/settings/certificatesManagement/freeradius/upload',
         name: 'admin_dashboard_settings_certs_freeradius_upload'
     )]
-    #[IsGranted('ROLE_SUPER_ADMIN')]
+    #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
     public function settingsCertificatesManagementFreeradiusUpload(
         Request $request
     ): Response {
@@ -250,7 +251,7 @@ class CertificateManagementFreeradiusController extends AbstractController
         '/dashboard/settings/certificatesManagement/freeradius/autoRenewDomain',
         name: 'admin_dashboard_settings_certs_freeradius_auto_renew_domain',
     )]
-    #[IsGranted('ROLE_SUPER_ADMIN')]
+    #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
     public function settingsCertificatesManagementFreeradiusAutoRenewDomain(
         Request $request
     ): Response {
@@ -335,7 +336,7 @@ class CertificateManagementFreeradiusController extends AbstractController
         '/dashboard/settings/certificatesManagement/freeradius/autoRenew',
         name: 'admin_dashboard_settings_certs_freeradius_auto_renew',
     )]
-    #[IsGranted('ROLE_SUPER_ADMIN')]
+    #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
     public function settingsCertificatesManagementFreeradiusAutoRenew(
         Request $request
     ): Response {
@@ -487,7 +488,7 @@ class CertificateManagementFreeradiusController extends AbstractController
         '/dashboard/settings/certificatesManagement/freeradius/config',
         name: 'admin_dashboard_settings_certs_freeradius_config'
     )]
-    #[IsGranted('ROLE_SUPER_ADMIN')]
+    #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
     public function settingsCertificatesManagementFreeradiusConfig(Request $request): Response
     {
         // Get current process state
@@ -672,7 +673,7 @@ class CertificateManagementFreeradiusController extends AbstractController
         '/dashboard/settings/certificatesManagement/freeradius/test',
         name: 'admin_dashboard_settings_certs_freeradius_test'
     )]
-    #[IsGranted('ROLE_SUPER_ADMIN')]
+    #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
     public function settingsCertificatesManagementFreeradiusTest(): Response
     {
         // Get current process state
@@ -833,7 +834,7 @@ class CertificateManagementFreeradiusController extends AbstractController
         '/dashboard/settings/certificatesManagement/freeradius/cloudflare/dnsChallenge',
         name: 'admin_dashboard_settings_certs_freeradius_cloudflare_dnsChallenge',
     )]
-    #[IsGranted('ROLE_SUPER_ADMIN')]
+    #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
     public function cloudflareDNSChallenge(Request $request): Response
     {
         // Get current process state
