@@ -428,7 +428,7 @@ class DomainBlacklistController extends AbstractController
 
         if ($exitCode !== 0) {
             $this->addFlash(
-                'error_admin',
+                'error',
                 $this->translator->trans(
                     'domainSourceRefreshAllFailed',
                     [],
@@ -437,7 +437,7 @@ class DomainBlacklistController extends AbstractController
             );
         } else {
             $this->addFlash(
-                'success_admin',
+                'success',
                 $this->translator->trans(
                     'allDomainSourceRefreshed',
                     [],
@@ -493,7 +493,7 @@ class DomainBlacklistController extends AbstractController
 
         if (!$domainSource->isActive()) {
             $this->addFlash(
-                'warning_admin',
+                'warning',
                 $this->translator->trans('domainSourceInactive', [], 'controllers')
             );
 
@@ -516,7 +516,7 @@ class DomainBlacklistController extends AbstractController
 
         if ($exitCode !== 0) {
             $this->addFlash(
-                'error_admin',
+                'error',
                 $this->translator->trans(
                     'domainSourceRefreshFailed',
                     ['%domain%' => $domainSource->getUrl()],
@@ -525,7 +525,7 @@ class DomainBlacklistController extends AbstractController
             );
         } else {
             $this->addFlash(
-                'success_admin',
+                'success',
                 $this->translator->trans(
                     'domainSourceRefreshed',
                     ['%domain%' => $domainSource->getUrl()],
