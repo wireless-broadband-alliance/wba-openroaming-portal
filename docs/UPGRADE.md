@@ -97,6 +97,7 @@ Upgrading your system requires caution and preparation. Follow these general gui
 | 1.8.0 or lower  | N/A                  | 1.8.1          | Run `php bin/console doctrine:migrations:migrate` to apply optimizations & remove deprecated `verificationCode` field. |
 | 1.8.1           | N/A                  | 1.9.0          | Run `php bin/console doctrine:migrations:migrate` to apply optimizations.                                              |
 | 1.9.0           | N/A                  | 1.9.1          | Just small fix, doesn't have any command to be executed.                                                               |
+| 1.9.1           | N/A                  | 1.10.0         | Run `php bin/console doctrine:migrations:migrate` to apply optimizations & new changes.                                |
 
 Use this table to determine the exact upgrade steps based on your current version.
 

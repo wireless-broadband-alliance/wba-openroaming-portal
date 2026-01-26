@@ -1,5 +1,19 @@
 # Changelog
 
+
+
+# Release V1.10.0
+
+- Added a new configuration page, to manage the black-listed domains used for registration and authentication with
+  Google, Microsoft and Simple Email/Password.
+- Added a new validator for each authentication method or registration to block blacklisted domains
+- New loading screen for long time requests (example, refresh domains)
+- It's required to run the new migrations this will set up the new entities for the new domains & sources page (`DomainsBlacklist`, `DomainsSource`)
+    - Run the migrations with:
+      ```bash
+      php bin/console doctrine:migrations:migrate
+      ```
+      
 # Release V1.9.1
 
 - Fix problem with PGP Encryption where the previous implementation didn't set a **GNUPGHOME**, so GnuPG was trying to use the default location
