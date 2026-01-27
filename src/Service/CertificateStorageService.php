@@ -135,21 +135,23 @@ readonly class CertificateStorageService
             );
         }
 
-        $content = file_get_contents($sourcePath);
-        if ($content === false) {
-            throw new RuntimeException(
-                $this->translator->trans(
-                    'failedToReadFile',
-                    ['%file%' => $sourcePath],
-                    'CertificateStorageService'
-                )
-            );
+        $realSource = realpath($sourcePath);
+        if ($realSource === false || !file_exists($realSource)) {
+            throw new RuntimeException("Cannot resolve real certificate file: $sourcePath");
         }
 
+        $content = file_get_contents($realSource);
+        if ($content === false || trim($content) === '') {
+            throw new RuntimeException("Certificate file is empty: $realSource");
+        }
+
+        $tmpPath = tempnam(sys_get_temp_dir(), 'cert_');
+        file_put_contents($tmpPath, $content);
+
         $tmpFile = new UploadedFile(
-            $sourcePath,
+            $tmpPath,
             basename($sourcePath),
-            mime_content_type($sourcePath) ?: 'application/x-pem-file',
+            'application/x-pem-file',
             null,
             true
         );
