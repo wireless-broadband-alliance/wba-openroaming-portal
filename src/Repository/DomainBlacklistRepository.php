@@ -150,9 +150,8 @@ class DomainBlacklistRepository extends ServiceEntityRepository
         $qb = $this->createQueryBuilder('d');
 
         $qb
-
             // EXACT match
-            ->orWhere('d.type = :exact AND d.pattern = :domain')
+            ->where('d.type = :exact AND d.pattern = :domain')
 
             // SUBDOMAIN match
             ->orWhere(
