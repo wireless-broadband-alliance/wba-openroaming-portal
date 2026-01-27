@@ -768,32 +768,6 @@ class CertificateManagementFreeradiusController extends AbstractController
     )]
     public function runFreeradiusTest(Request $request): JsonResponse
     {
-
-
-        // Decode request payload
-        $payload = json_decode(
-            $request->getContent() ?: '{}',
-            true,
-            512,
-            JSON_THROW_ON_ERROR
-        );
-
-        $remoteHost = $payload['remote_host'] ?? '192.168.1.139';
-        $remotePort = $payload['remote_port'] ?? 1812;
-
-        if (!$remoteHost) {
-            return new JsonResponse([
-                'status' => 'error',
-                'message' => $this->translator->trans(
-                    'missingRequiredForFreeradiusTest',
-                    [],
-                    'controllers'
-                ),
-            ], Response::HTTP_BAD_REQUEST);
-        }
-
-
-
         try {
             // Calls the Orchestrator to run the test
             $this->freeradiusTestOrchestrator->run(
