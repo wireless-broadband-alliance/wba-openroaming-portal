@@ -17,7 +17,7 @@ use Symfony\Component\HttpFoundation\Request;
 final readonly class FreeradiusTestOrchestrator
 {
     public function __construct(
-        private FreeradiusConnectionService $freeradiusConnectionService,
+        private FreeradiusCertificateValidatorService $freeradiusCertificateValidatorService,
         private EntityManagerInterface $entityManager,
         private EventActions $eventActions,
         private Security $security
@@ -25,28 +25,17 @@ final readonly class FreeradiusTestOrchestrator
     }
 
     public function run(
-        CertificateSetupProcess $process,
-        string $remoteHost,
-        int $remotePort,
-        array $paths,
         Request $request,
+        CertificateSetupProcess $process,
+        array $paths,
+        string $userPem,
     ): void {
         // Get the User
         /** @var User $user */
         $user = $this->security->getUser();
 
-        // TLS Connection
-        $result = $this->freeradiusConnectionService->connectToServer(
-            $remoteHost,
-            $remotePort,
-            $paths['cert'],
-            $paths['fullchain'],
-            $paths['privkey'],
-            $paths['ca']
-        );
-
-        // Validates if the chain belongs to the server
-        $this->freeradiusConnectionService->validate($result['chain'], $paths);
+        // Validate certificates (single responsibility)
+        $this->freeradiusCertificateValidatorService->validate($userPem, $paths);
 
         $this->eventActions->saveEvent(
             $user,

@@ -1,0 +1,5 @@
+certificate_expired: "O certificado para {{ subject }} expirou em {{ expiryDate }}"
+certificate_not_yet_valid: "O certificado para {{ subject }} ainda não é válido. Válido a partir de {{ validFrom }}"
+no_certificate_provided: "O servidor não forneceu qualquer certificado"
+invalid_certificate_chain: "A cadeia de certificados é inválida ou está incompleta"
+generic: "Ocorreu um erro ao validar o certificado do FreeRADIUS"

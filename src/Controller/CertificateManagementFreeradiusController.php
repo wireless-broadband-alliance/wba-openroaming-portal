@@ -739,10 +739,47 @@ class CertificateManagementFreeradiusController extends AbstractController
 
             if (!empty($missing)) {
                 $missingFiles = implode(', ', array_keys($missing));
-                throw new RuntimeException(sprintf(
-                    'Missing certificate files: %s',
-                    $missingFiles
-                ));
+                throw new RuntimeException(
+                    sprintf(
+                        'Missing certificate files: %s',
+                        $missingFiles
+                    )
+                );
+            }
+
+            try {
+                // Calls the Orchestrator to run the test
+                $this->freeradiusTestOrchestrator->run(
+                    $request,
+                    $processEntity,
+                    $paths,
+                    $form->getData()['certificates'] ?? ''
+                );
+
+                $this->addFlash(
+                    'success',
+                    $this->translator->trans(
+                        'freeradiusTestPassed',
+                        [],
+                        'controllers'
+                    )
+                );
+            } catch (FreeradiusTestException $exception) {
+                // Set the process as failed
+                $processEntity->setStatus(ProcessStatusType::IN_PROGRESS);
+                $processEntity->setFreeradiusTestResult(CertificateTestResult::FAILED);
+                $this->entityManager->persist($processEntity);
+                $this->entityManager->flush();
+
+                // Flash translated exception message
+                $this->addFlash(
+                    'error',
+                    $this->translator->trans(
+                        $exception->getMessage(),
+                        $exception->getContext(),
+                        'FreeradiusTestException'
+                    )
+                );
             }
         }
 
@@ -755,60 +792,6 @@ class CertificateManagementFreeradiusController extends AbstractController
                 'form' => $form->createView(),
             ]
         );
-    }
-
-
-    /**
-     * @throws JsonException
-     */
-    #[Route(
-        '/dashboard/settings/certificatesManagement/freeradius/test/run',
-        name: 'admin_dashboard_settings_certs_freeradius_test_run',
-        methods: ['POST']
-    )]
-    public function runFreeradiusTest(Request $request): JsonResponse
-    {
-        try {
-            // Calls the Orchestrator to run the test
-            $this->freeradiusTestOrchestrator->run(
-                $processEntity,
-                $remoteHost,
-                $remotePort,
-                $paths,
-                $request
-            );
-
-            return new JsonResponse([
-                'status' => 'success',
-                'message' => $this->translator->trans(
-                    'freeradiusTestPassed',
-                    [],
-                    'controllers'
-                )
-            ]);
-        } catch (FreeradiusTestException $exception) {
-            // Set the process as failed
-            $processEntity->setStatus(ProcessStatusType::IN_PROGRESS);
-            $processEntity->setFreeradiusTestResult(CertificateTestResult::FAILED);
-            $this->entityManager->persist($processEntity);
-            $this->entityManager->flush();
-
-            return new JsonResponse([
-                'status' => 'error',
-                'message' => $exception->getMessage(),
-                'details' => $exception->getContext()
-            ], 503);
-        } catch (Throwable $exception) {
-            $processEntity->setStatus(ProcessStatusType::IN_PROGRESS);
-            $processEntity->setFreeradiusTestResult(CertificateTestResult::FAILED);
-            $this->entityManager->persist($processEntity);
-            $this->entityManager->flush();
-
-            return new JsonResponse([
-                'status' => 'error',
-                'message' => $exception->getMessage()
-            ], 503);
-        }
     }
 
     /**

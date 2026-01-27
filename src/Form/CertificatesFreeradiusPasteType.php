@@ -10,8 +10,8 @@ class CertificatesFreeradiusPasteType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
-        $builder->add('content', TextareaType::class, [
-            'label' => 'Paste certificates content',
+        $builder->add('certificates', TextareaType::class, [
+            'label' => 'Paste the certificates content',
             'required' => false,
             'attr' => [
                 'rows' => 25,

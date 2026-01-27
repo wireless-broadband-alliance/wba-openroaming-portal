@@ -64,14 +64,14 @@
                         </p>
                         <label>
                             <div class="space-y-2">
-                                {{ form_widget(form.content, {
+                                {{ form_widget(form.certificates, {
                                     attr: {
                                         class: 'form-widget block w-full rounded-md border-gray-200 p-3 font-mono text-sm resize-y shadow-sm focus:ring-2 focus:ring-primary/30 focus:border-primary',
                                         placeholder: 'paste_certificates_placeholder'|trans({}, 'test_freeradius'),
                                         rows: 14
                                     }
                                 }) }}
-                                {{ form_errors(form.content) }}
+                                {{ form_errors(form.certificates) }}
                             </div>
                         </label>
                     </div>
