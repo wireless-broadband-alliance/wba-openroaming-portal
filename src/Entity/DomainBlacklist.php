@@ -25,7 +25,7 @@ class DomainBlacklist
     /** @phpstan-ignore-next-line */
     private ?int $id = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(type: 'text')]
     private string $pattern;
 
     #[ORM\Column(length: 1, enumType: DomainMatchType::class)]
