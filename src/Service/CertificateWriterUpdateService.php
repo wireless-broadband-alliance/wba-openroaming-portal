@@ -19,7 +19,7 @@ readonly class CertificateWriterUpdateService
         private SettingRepository $settingRepository
     ) {
         $this->signingKeysPath = $this->kernel->getProjectDir(
-        ) . DIRECTORY_SEPARATOR . 'signing-keys' . DIRECTORY_SEPARATOR;
+            ) . DIRECTORY_SEPARATOR . 'signing-keys' . DIRECTORY_SEPARATOR;
     }
 
     /**
@@ -30,11 +30,11 @@ readonly class CertificateWriterUpdateService
     public function writeCertificates(array $certificateSet): void
     {
         $map = [
-            'caFREERADIUS' => CertificateFileName::CA_PEM_FILE->value,
-            'certFREERADIUS' => CertificateFileName::CERT_PEM_FILE->value,
-            'chainFREERADIUS' => CertificateFileName::CHAIN_PEM_FILE->value,
-            'full_chainFREERADIUS' => CertificateFileName::FULL_CHAIN_PEM_FILE->value,
-            'private_keyFREERADIUS' => CertificateFileName::PRIVATE_KEY_PEM_FILE->value,
+            CertificateFileName::CA_PEM->value => CertificateFileName::CA_PEM_FILE->value,
+            CertificateFileName::CERT_PEM->value => CertificateFileName::CERT_PEM_FILE->value,
+            CertificateFileName::CHAIN_PEM->value => CertificateFileName::CHAIN_PEM_FILE->value,
+            CertificateFileName::FULL_CHAIN_PEM->value => CertificateFileName::FULL_CHAIN_PEM_FILE->value,
+            CertificateFileName::PRIVATE_KEY_PEM->value => CertificateFileName::PRIVATE_KEY_PEM_FILE->value,
         ];
 
         if (
