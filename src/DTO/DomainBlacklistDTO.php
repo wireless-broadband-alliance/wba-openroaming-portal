@@ -24,7 +24,6 @@ class DomainBlacklistDTO
             $this->input = match ($entity->getType()) {
                 DomainMatchType::EXACT => $entity->getPattern(),
                 DomainMatchType::SUBDOMAIN => '*.' . $entity->getPattern(),
-                DomainMatchType::WILDCARD => '*',
             };
         }
     }
@@ -44,10 +43,6 @@ class DomainBlacklistDTO
     private function parseInput(string $input): array
     {
         $input = strtolower(trim($input));
-
-        if ($input === '*') {
-            return ['*', DomainMatchType::WILDCARD];
-        }
 
         if (str_starts_with($input, '*.')) {
             return [substr($input, 2), DomainMatchType::SUBDOMAIN];

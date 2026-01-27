@@ -116,10 +116,6 @@ class DomainBlacklistRepository extends ServiceEntityRepository
             $qb->andWhere('d.type LIKE :subdomain')
                 ->setParameter('subdomain', DomainMatchType::SUBDOMAIN);
         }
-        if ($filter === 'wildcard') {
-            $qb->andWhere('d.type LIKE :wildcard')
-                ->setParameter('wildcard', DomainMatchType::WILDCARD);
-        }
 
         if ($sort === 'pattern') {
             $field = 'd.pattern';
@@ -154,8 +150,6 @@ class DomainBlacklistRepository extends ServiceEntityRepository
         $qb = $this->createQueryBuilder('d');
 
         $qb
-            // WILDCARD → blocks everything
-            ->where('d.type = :wildcard')
 
             // EXACT match
             ->orWhere('d.type = :exact AND d.pattern = :domain')
@@ -167,7 +161,6 @@ class DomainBlacklistRepository extends ServiceEntityRepository
                 OR :domain LIKE CONCAT(\'%.\', d.pattern)
             )'
             )
-            ->setParameter('wildcard', DomainMatchType::WILDCARD)
             ->setParameter('exact', DomainMatchType::EXACT)
             ->setParameter('subdomain', DomainMatchType::SUBDOMAIN)
             ->setParameter('domain', $domain)
@@ -197,10 +190,6 @@ class DomainBlacklistRepository extends ServiceEntityRepository
         if ($type === DomainMatchType::SUBDOMAIN->value) {
             $qb->andWhere('d.type LIKE :subdomain')
                 ->setParameter('subdomain', DomainMatchType::SUBDOMAIN);
-        }
-        if ($type === DomainMatchType::WILDCARD->value) {
-            $qb->andWhere('d.type LIKE :wildcard')
-                ->setParameter('wildcard', DomainMatchType::WILDCARD);
         }
 
         return (int)$qb->getQuery()->getSingleScalarResult();

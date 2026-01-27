@@ -155,10 +155,6 @@ class DomainBlacklistController extends AbstractController
             DomainMatchType::SUBDOMAIN->value,
             $searchTerm
         );
-        $countWildcardDomains = $this->domainBlacklistRepository->countDomains(
-            DomainMatchType::WILDCARD->value,
-            $searchTerm
-        );
         $totalBlacklistPages = (int)ceil($totalBlacklistDomains / $count);
         $blacklistOffset = ($page - 1) * $count;
         $domainBlacklistPag = array_slice(
@@ -200,7 +196,6 @@ class DomainBlacklistController extends AbstractController
             'allDomainsCount' => $totalBlacklistDomains,
             'exactDomainsCount' => $countExactDomains,
             'subdomainDomainsCount' => $countSubdomainDomains,
-            'wildcardDomainsCount' => $countWildcardDomains,
             'totalBlacklistPages' => $totalBlacklistPages,
 
             // Sources

@@ -15,8 +15,6 @@
             {{ 'exact'|trans({}, '_blacklist') }}
         {% elseif domain.type == constant('App\\Enum\\DomainMatchType::SUBDOMAIN') %}
             {{ 'subdomain'|trans({}, '_blacklist') }}
-        {% elseif domain.type == constant('App\\Enum\\DomainMatchType::WILDCARD') %}
-            {{ 'wildcard'|trans({}, '_blacklist') }}
         {% else %}
             {{ 'noData'|trans({}, '_blacklist') }}
         {% endif %}
