@@ -21,3 +21,21 @@ manual_test_warning: >
     
     Por essa razão, este passo deve ser realizado manualmente, através da cópia do conteúdo dos certificados.
 
+manual_command_title: "Execute este comando no servidor FreeRADIUS"
+
+manual_command_hint: >
+    Este comando apresenta todos os certificados e a chave privada necessários.
+    Copia todo o resultado e cola-o na caixa de texto.
+
+paste_certificates_label: "Colar conteúdo dos certificados"
+paste_certificates_placeholder: |
+    Cola aqui o resultado completo do comando.
+    
+    O conteúdo deve incluir:
+    - Certificado da CA (ca.pem)
+    - Certificado do servidor (cert.pem)
+    - Cadeia de certificados (chain.pem / fullchain.pem)
+    - Chave privada (privkey.pem)
+    
+    Certifique-se de que o conteúdo começa com:
+    -----BEGIN CERTIFICATE-----

@@ -15,7 +15,12 @@
             </h5>
         </div>
 
-        <div class="p-6 space-y-6 text-gray-700" data-controller="test-certificates">
+        {{ form_start(form, {
+            attr: {
+                'data-controller': 'test-certificates'
+            }
+        }) }}
+        <div class="p-6 space-y-6 text-gray-700">
             <div class="text-center space-y-3 pt-4">
                 <twig:ux:icon name="wba:shield-check" class="w-14 h-14 mx-auto text-primary"/>
                 <h3 class="text-gray-900 text-xl font-semibold"
@@ -29,13 +34,6 @@
 
             {# Content #}
             <div class="p-6 mt-6">
-                {# Optional Badge for Manual Step #}
-                <div class="mb-4">
-                <span class="inline-block bg-yellow-100 text-yellow-800 text-xs font-medium px-2 py-1 rounded-full">
-                    {{ 'manual_step'|trans({}, 'test_freeradius') }}
-                </span>
-                </div>
-
                 {# Grid: Command + Textarea #}
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
                     {# Cat Command Block #}
@@ -45,7 +43,7 @@
                         </p>
                         <div class="relative rounded-md overflow-hidden">
                             <pre class="copyable-code relative rounded bg-gray-800 text-white p-4 font-mono overflow-x-auto whitespace-pre-wrap"
-                                 data-clipboard-target="code">cd signing-keys/ && cat ca.pem cert.pem chain.pem fullchain.pem privkey.pem</pre>
+                                 data-clipboard-target="code">cd /etc/freeradius/3.0/certs/ && cat ca.pem cert.pem chain.pem fullchain.pem privkey.pem</pre>
                             <button type="button"
                                     class="absolute top-2 right-2 flex items-center justify-center p-1.5 rounded-md bg-gray-700 hover:bg-gray-600 focus:ring-2 focus:ring-primary/50 transition"
                                     title="{{ 'copyCommand.title'|trans({}, 'config_radsec') }}"
@@ -61,17 +59,20 @@
 
                     {# Textarea for Certificates #}
                     <div class="space-y-2">
-                        <label class="block text-sm font-medium text-gray-700">
+                        <p class="block text-sm font-medium text-gray-700 pb-2">
                             {{ 'paste_certificates_label'|trans({}, 'test_freeradius') }}
-                        </label>
-
+                        </p>
                         <label>
-                        <textarea
-                                name="certificates_content"
-                                rows="14"
-                                class="form-widget block w-full rounded-md border-gray-200 p-3 font-mono text-sm resize-y shadow-sm focus:ring-2 focus:ring-primary/30 focus:border-primary"
-                                placeholder="{{ 'paste_certificates_placeholder'|trans({}, 'test_freeradius') }}"
-                        ></textarea>
+                            <div class="space-y-2">
+                                {{ form_widget(form.content, {
+                                    attr: {
+                                        class: 'form-widget block w-full rounded-md border-gray-200 p-3 font-mono text-sm resize-y shadow-sm focus:ring-2 focus:ring-primary/30 focus:border-primary',
+                                        placeholder: 'paste_certificates_placeholder'|trans({}, 'test_freeradius'),
+                                        rows: 14
+                                    }
+                                }) }}
+                                {{ form_errors(form.content) }}
+                            </div>
                         </label>
                     </div>
                 </div>
@@ -97,36 +98,13 @@
             <div class="mt-4 hidden" data-test-certificates-target="resultMessage"></div>
 
             <div class="flex flex-col items-center gap-6 w-full">
-                {# Status #}
-                <div class="text-sm flex items-center gap-2 justify-center">
-                    {% if process.getFreeradiusTestResult() == constant('App\\Enum\\CertificateTestResult::PASSED') %}
-                        <twig:ux:icon name="wba:check-circle-rounded" class="w-5 h-5 text-primary fill-current"/>
-                        <span class="text-primary font-medium">
-                {{ 'test_passed'|trans({}, 'test_freeradius') }}
-            </span>
-                    {% elseif process.getFreeradiusTestResult() == constant('App\\Enum\\CertificateTestResult::FAILED') %}
-                        <twig:ux:icon name="wba:cross-circle-rounded" class="w-5 h-5 text-red-500"/>
-                        <span class="text-red-500">
-                {{ 'test_failed'|trans({}, 'test_freeradius') }}
-            </span>
-                    {% else %}
-                        <twig:ux:icon name="wba:cross-circle-rounded" class="w-5 h-5 text-gray-400"/>
-                        <span class="text-gray-500">
-                {{ 'test_not_done'|trans({}, 'test_freeradius') }}
-            </span>
-                    {% endif %}
-                </div>
-
                 {# Action Buttons #}
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-3 items-end">
                     {# Run Test #}
                     <button
-                            type="button"
+                            type="submit"
                             class="px-6 py-3 bg-primary text-white font-medium rounded-lg shadow hover:bg-primary-dark
                    focus:ring-2 focus:ring-primary/50 transition flex items-center gap-2 w-full md:w-auto justify-center"
-                            data-action="click->test-certificates#runTest"
-                            data-test-certificates-target="testButton"
-                            data-url="{{ path('admin_dashboard_settings_certs_freeradius_test_run') }}"
                     >
                         <twig:ux:icon name="wba:shield-check" class="w-5 h-5"/>
                         <span data-test-certificates-target="buttonLabel">
@@ -156,5 +134,6 @@
                 </div>
             </div>
         </div>
+        {{ form_end(form) }}
     </div>
 {% endblock %}

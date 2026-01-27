@@ -20,3 +20,22 @@ manual_test_warning: >
     For security reasons, the machine running FreeRADIUS is isolated and does not have Internet access.
     
     Because of this, this step must be completed manually by copying the certificate contents.
+
+manual_command_title: "Run this command on your FreeRADIUS server"
+
+manual_command_hint: >
+    This command outputs all required certificates and private keys.
+    Copy the full output and paste it into the textarea field.
+
+paste_certificates_label: "Paste certificates output"
+paste_certificates_placeholder: |
+    Paste here the full output of the command.
+    
+    The content must include:
+    - CA certificate (ca.pem)
+    - Server certificate (cert.pem)
+    - Certificate chain (chain.pem / fullchain.pem)
+    - Private key (privkey.pem)
+    
+    Make sure the output starts with:
+    -----BEGIN CERTIFICATE-----

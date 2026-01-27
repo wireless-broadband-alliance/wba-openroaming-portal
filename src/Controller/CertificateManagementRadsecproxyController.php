@@ -275,7 +275,6 @@ class CertificateManagementRadsecproxyController extends AbstractController
         $processState = $this->certificateProcessCheckerService->getProcessState();
 
         // Default fallback
-        $host = $processState['process']->getRemoteHost();
         $session = $request->getSession();
         if ($session->has(SessionStatus::SYSTEM_RESET_REQUEST->value)) {
             $lastInstallation = $this->installationProgressRepository->getLast();
@@ -307,7 +306,7 @@ class CertificateManagementRadsecproxyController extends AbstractController
                 'data' => $data,
                 'processState' => $processState,
                 'process' => $processState['process'],
-                'host' => $host,
+                'host' => $host ?? null,
             ]
         );
     }
@@ -344,7 +343,7 @@ class CertificateManagementRadsecproxyController extends AbstractController
             JSON_THROW_ON_ERROR
         );
 
-        $remoteHost = $payload['remote_host'] ?? $processEntity->getRemoteHost();
+        $remoteHost = $payload['remote_host'];
         $remotePort = isset($payload['remote_port']) ? (int)$payload['remote_port'] : 2083;
 
         if (!$remoteHost) {
@@ -359,7 +358,6 @@ class CertificateManagementRadsecproxyController extends AbstractController
         }
 
         // Everytime the user tries a new test it will save the used credentials
-        $processEntity->setRemoteHost($remoteHost);
         $processEntity->setUpdatedAt(new DateTimeImmutable());
         $this->entityManager->persist($processEntity);
         $this->entityManager->flush();

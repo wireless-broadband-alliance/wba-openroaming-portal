@@ -15,7 +15,7 @@ class CertificatesFreeradiusPasteType extends AbstractType
             'required' => false,
             'attr' => [
                 'rows' => 25,
-                'placeholder' => "Paste here the output of:\n\ncat /path/to/certs/*",
+                'placeholder' => "Paste here the output",
             ],
         ]);
     }

@@ -705,7 +705,39 @@ class CertificateManagementFreeradiusController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            dd('die pls');
+            $processEntity = $this->certificateProcessCheckerService->getCurrentProcess();
+
+            // Ensure an active process exists
+            if (!$processEntity instanceof CertificateSetupProcess) {
+
+            }
+
+            // Everytime the user tries a new test it will save the used credentials
+            $processEntity->setUpdatedAt(new DateTimeImmutable());
+            $this->entityManager->persist($processEntity);
+            $this->entityManager->flush();
+
+            // Build known signing-keys paths
+            $basePath = $this->getParameter('kernel.project_dir') . '/signing-keys/';
+
+            $paths = [
+                'ca' => $basePath . CertificateFileName::CA_PEM_FILE->value,
+                'cert' => $basePath . CertificateFileName::CERT_PEM_FILE->value,
+                'chain' => $basePath . CertificateFileName::CHAIN_PEM_FILE->value,
+                'fullchain' => $basePath . CertificateFileName::FULL_CHAIN_PEM_FILE->value,
+                'privkey' => $basePath . CertificateFileName::PRIVATE_KEY_PEM_FILE->value,
+            ];
+
+            // Validate all exist
+            $missing = array_filter($paths, static fn($path) => !file_exists($path));
+
+            if ($missing !== []) {
+                return new JsonResponse([
+                    'status' => 'error',
+                    'message' => 'Missing certificate files',
+                    'missing_files' => $missing,
+                ], Response::HTTP_BAD_REQUEST);
+            }
         }
 
         return $this->render(
@@ -714,9 +746,11 @@ class CertificateManagementFreeradiusController extends AbstractController
                 'data' => $data,
                 'processState' => $processState,
                 'process' => $processState['process'],
+                'form' => $form->createView(),
             ]
         );
     }
+
 
     /**
      * @throws JsonException
@@ -728,19 +762,7 @@ class CertificateManagementFreeradiusController extends AbstractController
     )]
     public function runFreeradiusTest(Request $request): JsonResponse
     {
-        $processEntity = $this->certificateProcessCheckerService->getCurrentProcess();
 
-        // Ensure an active process exists
-        if (!$processEntity instanceof CertificateSetupProcess) {
-            return new JsonResponse([
-                'status' => 'error',
-                'message' => $this->translator->trans(
-                    'noActiveProcess',
-                    [],
-                    'CertificateProcessCheckerService'
-                ),
-            ], Response::HTTP_BAD_REQUEST);
-        }
 
         // Decode request payload
         $payload = json_decode(
@@ -750,7 +772,7 @@ class CertificateManagementFreeradiusController extends AbstractController
             JSON_THROW_ON_ERROR
         );
 
-        $remoteHost = $payload['remote_host'] ?? $processEntity->getRemoteHost();
+        $remoteHost = $payload['remote_host'] ?? '192.168.1.139';
         $remotePort = $payload['remote_port'] ?? 1812;
 
         if (!$remoteHost) {
@@ -764,33 +786,7 @@ class CertificateManagementFreeradiusController extends AbstractController
             ], Response::HTTP_BAD_REQUEST);
         }
 
-        // Everytime the user tries a new test it will save the used credentials
-        $processEntity->setRemoteHost($remoteHost);
-        $processEntity->setUpdatedAt(new DateTimeImmutable());
-        $this->entityManager->persist($processEntity);
-        $this->entityManager->flush();
 
-        // Build known signing-keys paths
-        $basePath = $this->getParameter('kernel.project_dir') . '/signing-keys/';
-
-        $paths = [
-            'ca' => $basePath . CertificateFileName::CA_PEM_FILE->value,
-            'cert' => $basePath . CertificateFileName::CERT_PEM_FILE->value,
-            'chain' => $basePath . CertificateFileName::CHAIN_PEM_FILE->value,
-            'fullchain' => $basePath . CertificateFileName::FULL_CHAIN_PEM_FILE->value,
-            'privkey' => $basePath . CertificateFileName::PRIVATE_KEY_PEM_FILE->value,
-        ];
-
-        // Validate all exist
-        $missing = array_filter($paths, static fn($path) => !file_exists($path));
-
-        if ($missing !== []) {
-            return new JsonResponse([
-                'status' => 'error',
-                'message' => 'Missing certificate files',
-                'missing_files' => $missing,
-            ], Response::HTTP_BAD_REQUEST);
-        }
 
         try {
             // Calls the Orchestrator to run the test

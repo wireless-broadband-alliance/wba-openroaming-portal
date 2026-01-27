@@ -49,9 +49,6 @@ class CertificateSetupProcess
     #[ORM\OneToMany(targetEntity: Certificate::class, mappedBy: 'setupProcess', cascade: ['persist', 'remove'])]
     private Collection $certificates;
 
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $remoteHost = null;
-
     #[ORM\Column(type: 'boolean', options: ['default' => false])]
     private bool $isFreeradiusCertEV = false;
 
@@ -209,18 +206,6 @@ class CertificateSetupProcess
         if ($this->certificates->removeElement($certificate)) {
             $certificate->setSetupProcess(null);
         }
-        return $this;
-    }
-
-    public function getRemoteHost(): ?string
-    {
-        return $this->remoteHost;
-    }
-
-    public function setRemoteHost(?string $remoteHost): static
-    {
-        $this->remoteHost = $remoteHost;
-
         return $this;
     }
 
