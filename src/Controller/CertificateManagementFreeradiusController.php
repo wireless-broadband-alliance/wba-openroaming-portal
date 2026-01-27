@@ -966,7 +966,7 @@ class CertificateManagementFreeradiusController extends AbstractController
                 )
             );
 
-            return $this->redirectToRoute('TESTING_ROUTE'); // TODO return this to the test page
+            return $this->redirectToRoute('admin_dashboard_settings_certs_freeradius_test_run');
         }
 
         return $this->render(

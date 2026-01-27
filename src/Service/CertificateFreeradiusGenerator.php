@@ -145,8 +145,6 @@ readonly class CertificateFreeradiusGenerator
                 continue;
             }
 
-            dd($filepath, file_exists($filepath));
-
             $filesystem->copy($filepath, "$this->certTargetDir/$filename", true);
         }
     }
@@ -210,7 +208,7 @@ readonly class CertificateFreeradiusGenerator
         $dirs = glob($liveBase . '/' . $domain . '*', GLOB_ONLYDIR);
 
         if (!$dirs) {
-            throw new RuntimeException("Nenhuma pasta de certificados encontrada para $domain"); // todo translations
+            throw new RuntimeException("No certificate folder was found for $domain.");
         }
 
         usort($dirs, fn($a, $b) => filemtime($b) <=> filemtime($a));
