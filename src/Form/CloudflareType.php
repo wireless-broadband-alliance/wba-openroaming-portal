@@ -35,10 +35,6 @@ class CloudflareType extends AbstractType
             ->add('token', TextType::class, [
                 'label' => $this->translator->trans('tokenLabel', [], 'CloudflareType'),
                 'required' => true,
-            ])
-            ->add('port', IntegerType::class, [
-                'label' => $this->translator->trans('portLabel', [], 'CloudflareType'),
-                'required' => true,
             ]);
     }
     public function configureOptions(OptionsResolver $resolver): void

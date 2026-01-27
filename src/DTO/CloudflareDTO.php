@@ -36,13 +36,6 @@ class CloudflareDTO
     )]
     public ?string $token = null;
 
-    #[NotBlank(message: 'fieldCannotBeBlank')]
-    #[Assert\Type(
-        type: 'integer',
-        message: 'invalidFormat'
-    )]
-    public ?int $port = null;
-
     #[NotBlank(message: 'nullCA')]
     #[Assert\File(
         maxSize: '5M',

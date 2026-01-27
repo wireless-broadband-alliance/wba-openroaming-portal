@@ -928,20 +928,18 @@ class CertificateManagementFreeradiusController extends AbstractController
             /** @var User $user */
             $user = $this->getUser();
 
-            $files = $this->certificateFreeradiusGenerator->generateCertificatesWithCloudflareDns(
+            $this->certificateFreeradiusGenerator->generateCertificatesWithCloudflareDns(
                 $dto->host,
                 $user,
                 $dto->token
             );
-
-            $this->certificateFreeradiusGenerator->storeCertificates($files);
 
             $certificateSetupProcess = $this->certificateProcessCheckerService->getCurrentProcess();
 
             if ($certificateSetupProcess instanceof CertificateSetupProcess) {
                 $certificateSetupProcess->setFreeradiusDomainName($dto->host);
                 $certificateSetupProcess->setFreeradiusFormCompletedAt(new DateTimeImmutable());
-                $certificateSetupProcess->setFreeradiusConfigAppliedAt(new DateTimeImmutable());
+                $certificateSetupProcess->setFreeradiusConfigAppliedAt(null);
                 $certificateSetupProcess->setIsFreeradiusCloudflare(true);
                 $cloudflareToken = new CloudflareTokens();
                 $cloudflareToken->setCreatedAt(new DateTimeImmutable());
@@ -972,7 +970,7 @@ class CertificateManagementFreeradiusController extends AbstractController
                 )
             );
 
-            return $this->redirectToRoute('admin_dashboard_settings_certs_freeradius_test_run');
+            return $this->redirectToRoute('admin_dashboard_settings_certs_freeradius_config');
         }
 
         return $this->render(

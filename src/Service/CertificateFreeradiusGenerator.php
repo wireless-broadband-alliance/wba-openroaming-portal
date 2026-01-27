@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use App\Entity\CertificateSetupProcess;
 use App\Entity\User;
 use App\Enum\CertificateFileName;
 use App\Enum\CertificateMachineType;
@@ -11,6 +12,7 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Process\Exception\ProcessFailedException;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 readonly class CertificateFreeradiusGenerator
 {
@@ -20,6 +22,7 @@ readonly class CertificateFreeradiusGenerator
         private ParameterBagInterface $parameterBag,
         private CertificateStorageService $certificateStorageService,
         private CertificateProcessCheckerService $certificateProcessCheckerService,
+        private TranslatorInterface $translator,
     ) {
         $projectDir = $this->parameterBag->get('kernel.project_dir');
         $this->certTargetDir = $projectDir . '/var/certs';
@@ -216,30 +219,41 @@ readonly class CertificateFreeradiusGenerator
 
         $setupProcess = $this->certificateProcessCheckerService->getCurrentProcess();
 
+        // Ensure an active process exists
+        if (!$setupProcess instanceof CertificateSetupProcess) {
+            throw new RuntimeException(
+                $this->translator->trans(
+                    'noActiveProcess',
+                    [],
+                    'CertificateProcessCheckerService'
+                )
+            );
+        }
+
         $certCert = $this->certificateStorageService->storeGeneratedFile(
-            "$liveDir/cert.pem",
-            CertificateFileName::CERT_PEM_FILE->value,
+            "$liveDir/" . CertificateFileName::CERT_PEM_FILE->value,
+            CertificateFileName::CERT_PEM->value,
             CertificateMachineType::FREERADIUS->value,
             $setupProcess
         );
 
         $chainCert = $this->certificateStorageService->storeGeneratedFile(
-            "$liveDir/chain.pem",
-            CertificateFileName::CHAIN_PEM_FILE->value,
+            "$liveDir/" . CertificateFileName::CHAIN_PEM_FILE->value,
+            CertificateFileName::CHAIN_PEM->value,
             CertificateMachineType::FREERADIUS->value,
             $setupProcess
         );
 
         $fullChainCert = $this->certificateStorageService->storeGeneratedFile(
-            "$liveDir/fullchain.pem",
-            CertificateFileName::FULL_CHAIN_PEM_FILE->value,
+            "$liveDir/" . CertificateFileName::FULL_CHAIN_PEM_FILE->value,
+            CertificateFileName::FULL_CHAIN_PEM->value,
             CertificateMachineType::FREERADIUS->value,
             $setupProcess
         );
 
         $privkeyCert = $this->certificateStorageService->storeGeneratedFile(
-            "$liveDir/privkey.pem",
-            CertificateFileName::PRIVATE_KEY_PEM_FILE->value,
+            "$liveDir/" . certificateFileName::PRIVATE_KEY_PEM_FILE->value,
+            CertificateFileName::PRIVATE_KEY_PEM->value,
             CertificateMachineType::FREERADIUS->value,
             $setupProcess,
             true // is private key

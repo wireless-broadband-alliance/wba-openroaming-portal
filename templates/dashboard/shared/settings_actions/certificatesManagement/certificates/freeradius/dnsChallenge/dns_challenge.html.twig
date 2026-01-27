@@ -53,18 +53,6 @@
                     {{ form_errors(form.token) }}
                 </div>
             </div>
-
-            <div class="space-y-2">
-                {{ form_label(form.port, 'portLabel'|trans({}, 'dns_challenge'), {label_attr: {class: 'font-semibold'}}) }}
-                <p class="text-sm font-medium text-gray-700">
-                    {{ 'portDescription'|trans({}, 'dns_challenge') }}
-                </p>
-                {{ form_widget(form.port, {attr: {class: 'form-widget'}}) }}
-
-                <div class="text-red-500 text-sm ml-1">
-                    {{ form_errors(form.port) }}
-                </div>
-            </div>
         </div>
     </div>
 
