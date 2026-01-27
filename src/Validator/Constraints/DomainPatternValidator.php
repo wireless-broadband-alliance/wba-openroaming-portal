@@ -82,14 +82,23 @@ class DomainPatternValidator extends ConstraintValidator
             return false;
         }
 
-        if (array_any($labels, fn($label) => !$this->isValidLabel($label))) {
+        $tld = array_pop($labels);
+
+        // TLD rules
+        if (!ctype_alpha($tld) || strlen($tld) < 2) {
             return false;
         }
 
-        // TLD rules
-        $tld = end($labels);
+        foreach ($labels as $label) {
+            if ($label === '*') {
+                continue; // wildcard allowed
+            }
+            if (!$this->isValidLabel($label)) {
+                return false;
+            }
+        }
 
-        return ctype_alpha($tld) && strlen($tld) >= 2;
+        return true;
     }
 
     private function isValidLabel(string $label): bool

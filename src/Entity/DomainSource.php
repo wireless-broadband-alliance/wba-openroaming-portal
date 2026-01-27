@@ -22,7 +22,7 @@ class DomainSource
     private ?\DateTimeImmutable $createdAt = null;
 
     public function __construct(
-        #[ORM\Column(length: 255)]
+        #[ORM\Column(type: 'text')]
         private string $url
     ) {
         $this->createdAt = new \DateTimeImmutable();

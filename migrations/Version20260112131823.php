@@ -20,7 +20,7 @@ final class Version20260112131823 extends AbstractMigration
     public function up(Schema $schema): void
     {
         // this up() migration is auto-generated, please modify it to your needs
-        $this->addSql('CREATE TABLE DomainSource (id INT AUTO_INCREMENT NOT NULL, url VARCHAR(255) NOT NULL, active TINYINT NOT NULL, createdAt DATETIME NOT NULL, PRIMARY KEY (id)) DEFAULT CHARACTER SET utf8mb4');
+        $this->addSql('CREATE TABLE DomainSource (id INT AUTO_INCREMENT NOT NULL, url LONGTEXT NOT NULL, active TINYINT NOT NULL, createdAt DATETIME NOT NULL, PRIMARY KEY (id)) DEFAULT CHARACTER SET utf8mb4');
     }
 
     public function down(Schema $schema): void
