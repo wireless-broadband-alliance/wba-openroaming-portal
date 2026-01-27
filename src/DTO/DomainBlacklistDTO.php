@@ -10,7 +10,7 @@ use App\Validator\Constraints as CustomAssert;
 class DomainBlacklistDTO
 {
     #[Assert\NotBlank]
-    #[Assert\Length(max: 4096, maxMessage: 'maxCharacters')]
+    #[Assert\Length(max: 255, maxMessage: 'maxCharacters')]
     #[CustomAssert\DomainPattern]
     public ?string $input = null;
 
