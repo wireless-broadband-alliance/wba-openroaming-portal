@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Entity\DomainSource;
 use App\Enum\DomainMatchType;
 use App\Enum\DomainOrigin;
+use App\Enum\DomainSourceStatus;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -40,7 +41,7 @@ class DomainSourceRepository extends ServiceEntityRepository
      * @return DomainSource[]
      */
     public function searchWithFilter(
-        string $filter = 'all',
+        string $filter = DomainSourceStatus::ALL->value,
         string $sort = 'createdAt',
         string $order = 'desc',
         ?string $searchTerm = null,
@@ -54,10 +55,10 @@ class DomainSourceRepository extends ServiceEntityRepository
         }
 
         // Filter by active status
-        if ($filter === 'active') {
+        if ($filter === DomainSourceStatus::ACTIVE->value) {
             $qb->andWhere('d.active = :active')
                 ->setParameter('active', true);
-        } elseif ($filter === 'inactive') {
+        } elseif ($filter === DomainSourceStatus::INACTIVE->value) {
             $qb->andWhere('d.active = :active')
                 ->setParameter('active', false);
         }
