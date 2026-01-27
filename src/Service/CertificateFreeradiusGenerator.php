@@ -252,7 +252,7 @@ readonly class CertificateFreeradiusGenerator
         );
 
         $privkeyCert = $this->certificateStorageService->storeGeneratedFile(
-            "$liveDir/" . certificateFileName::PRIVATE_KEY_PEM_FILE->value,
+            "$liveDir/" . CertificateFileName::PRIVATE_KEY_PEM_FILE->value,
             CertificateFileName::PRIVATE_KEY_PEM->value,
             CertificateMachineType::FREERADIUS->value,
             $setupProcess,

@@ -7,6 +7,7 @@
         'admin_dashboard_settings_certs_freeradius_upload',
         'admin_dashboard_settings_certs_freeradius_auto_renew',
         'admin_dashboard_settings_certs_freeradius_auto_renew_domain',
+        'admin_dashboard_settings_certs_freeradius_cloudflare_dnsChallenge'
     ],
     },
     {
@@ -54,11 +55,13 @@
             {% set completed = stages[step.id] ?? false %}
             {% set previousCompleted = index == 0 or (steps[index - 1].id in stages and stages[steps[index - 1].id]) %}
 
-            {# 🔹 Compute stepRoute dynamically #}
+            {# Compute stepRoute dynamically #}
             {% set stepRoute = step.routes[0] %}
             {% if step.id == 'freeradius_upload' %}
                 {% if setupProcessType == constant('App\\Enum\\AnalyticalEventType::CERTIFICATE_SETUP_PROCESS_FREERAEDIUS_UPLOAD_AUTO_DOMAIN').value %}
                     {% set stepRoute = 'admin_dashboard_settings_certs_freeradius_auto_renew_domain' %}
+                {% elseif setupProcessType == constant('App\\Enum\\AnalyticalEventType::CERTIFICATE_SETUP_PROCESS_FREERAEDIUS_UPLOAD_CLOUDFLARE_DNS_CHALLENGE').value %}
+                    {% set stepRoute = 'admin_dashboard_settings_certs_freeradius_cloudflare_dnsChallenge' %}
                 {% else %}
                     {% set stepRoute = 'admin_dashboard_settings_certs_freeradius_upload' %}
                 {% endif %}
@@ -68,8 +71,8 @@
                 <div class="
                     flex items-center justify-center w-10 h-10 rounded-full border-2 z-10 font-semibold
                     transition-all duration-300 text-center
-                    {% if completed %} bg-primary border-primary text-white
-                    {% elseif active %} bg-white border-primary text-primary step-active
+                    {% if active %} bg-white border-primary text-primary step-active
+                    {% elseif completed %} bg-primary border-primary text-white
                     {% else %} bg-white border-gray-300 text-gray-400 {% endif %}
                 ">
                     {% if previousCompleted %}
