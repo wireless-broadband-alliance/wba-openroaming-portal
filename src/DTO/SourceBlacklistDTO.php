@@ -7,7 +7,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 class SourceBlacklistDTO
 {
     #[Assert\NotBlank]
-    #[Assert\Length(max: 255, maxMessage: 'maxCharacters')]
+    #[Assert\Length(max: 4096, maxMessage: 'maxCharacters')]
     #[Assert\Url(
         message: 'invalidSource'
     )]
