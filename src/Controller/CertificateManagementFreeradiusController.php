@@ -709,7 +709,13 @@ class CertificateManagementFreeradiusController extends AbstractController
 
             // Ensure an active process exists
             if (!$processEntity instanceof CertificateSetupProcess) {
-
+                throw new RuntimeException(
+                    $this->translator->trans(
+                        'noActiveProcess',
+                        [],
+                        'CertificateProcessCheckerService'
+                    )
+                );
             }
 
             // Everytime the user tries a new test it will save the used credentials
@@ -731,12 +737,12 @@ class CertificateManagementFreeradiusController extends AbstractController
             // Validate all exist
             $missing = array_filter($paths, static fn($path) => !file_exists($path));
 
-            if ($missing !== []) {
-                return new JsonResponse([
-                    'status' => 'error',
-                    'message' => 'Missing certificate files',
-                    'missing_files' => $missing,
-                ], Response::HTTP_BAD_REQUEST);
+            if (!empty($missing)) {
+                $missingFiles = implode(', ', array_keys($missing));
+                throw new RuntimeException(sprintf(
+                    'Missing certificate files: %s',
+                    $missingFiles
+                ));
             }
         }
 

@@ -30,6 +30,7 @@ use App\Service\InstallationService;
 use DateTime;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
+use RuntimeException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -437,7 +438,7 @@ class CertificateManagementRadsecproxyController extends AbstractController
             $trustedHashes = array_map(static fn($e) => strtolower($e->value), TrustedWBAFingerprints::cases());
 
             if ($connection === false) {
-                throw new \RuntimeException(
+                throw new RuntimeException(
                     sprintf('TLS connection failed (%d): %s', $errno, $errstr)
                 );
             }
