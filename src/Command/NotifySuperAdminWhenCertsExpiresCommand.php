@@ -85,8 +85,7 @@ class NotifySuperAdminWhenCertsExpiresCommand extends Command
                                 AnalyticalEventType::NOTIFY_ADMIN_EXPIRING_CERT_ONE_DAY->value
                             );
                         }
-                    }
-                    elseif ($certLimitDate < 3) {
+                    } elseif ($certLimitDate < 3) {
                         $lastNotification = $this->notificationRepository->findLastNotificationByType(
                             $user,
                             AnalyticalEventType::NOTIFY_ADMIN_EXPIRING_CERT_THREE_DAYS->value
@@ -100,8 +99,7 @@ class NotifySuperAdminWhenCertsExpiresCommand extends Command
                                 AnalyticalEventType::NOTIFY_ADMIN_EXPIRING_CERT_THREE_DAYS->value
                             );
                         }
-                    }
-                    elseif ($certLimitDate < 7) {
+                    } elseif ($certLimitDate < 7) {
                         $lastNotification = $this->notificationRepository->findLastNotificationByType(
                             $user,
                             AnalyticalEventType::NOTIFY_ADMIN_EXPIRING_CERT_WEEK->value
@@ -115,8 +113,7 @@ class NotifySuperAdminWhenCertsExpiresCommand extends Command
                                 AnalyticalEventType::NOTIFY_ADMIN_EXPIRING_CERT_WEEK->value
                             );
                         }
-                    }
-                    elseif ($certLimitDate < 30) {
+                    } elseif ($certLimitDate < 30) {
                         $lastNotification = $this->notificationRepository->findLastNotificationByType(
                             $user,
                             AnalyticalEventType::NOTIFY_ADMIN_EXPIRING_CERT_MONTH->value
@@ -130,8 +127,7 @@ class NotifySuperAdminWhenCertsExpiresCommand extends Command
                                 AnalyticalEventType::NOTIFY_ADMIN_EXPIRING_CERT_MONTH->value
                             );
                         }
-                    }
-                    elseif ($certLimitDate < 60) {
+                    } elseif ($certLimitDate < 60) {
                         $lastNotification = $this->notificationRepository->findLastNotificationByType(
                             $user,
                             AnalyticalEventType::NOTIFY_ADMIN_EXPIRING_CERT_TWO_MONTHS->value
@@ -145,8 +141,7 @@ class NotifySuperAdminWhenCertsExpiresCommand extends Command
                                 AnalyticalEventType::NOTIFY_ADMIN_EXPIRING_CERT_TWO_MONTHS->value
                             );
                         }
-                    }
-                    elseif ($certLimitDate < 90) {
+                    } elseif ($certLimitDate < 90) {
                         $lastNotification = $this->notificationRepository->findLastNotificationByType(
                             $user,
                             AnalyticalEventType::NOTIFY_ADMIN_EXPIRING_CERT_THREE_MONTHS->value
@@ -161,7 +156,6 @@ class NotifySuperAdminWhenCertsExpiresCommand extends Command
                             );
                         }
                     }
-
                 }
             } catch (TransportExceptionInterface $e) {
                 $output->writeln(
