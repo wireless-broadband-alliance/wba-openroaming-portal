@@ -36,6 +36,8 @@ class NotifySuperAdminWhenCertsExpiresCommand extends Command
     }
 
     /**
+     * @param OutputInterface $output
+     * @throws /DateMalformedStringException
      * @throws Exception
      */
     public function notifySuperAdminWhenCertsExpires(
@@ -49,12 +51,11 @@ class NotifySuperAdminWhenCertsExpiresCommand extends Command
         $timeLeft = round(($certificateLimitDate - $realTime) / (86400)) - 1;
         $certLimitDate = ((int)$timeLeft);
 
-        // TODO: review this notifications date, use the standards!!!!!
-        if ($certLimitDate < 31) {
+        if ($certLimitDate < 91) {
             try {
                 $user = $this->userRepository->findSuperAdmin();
                 if ($user) {
-                    if ($certLimitDate < 1) {
+                    if ($certLimitDate < 0) {
                         $lastNotification = $this
                             ->notificationRepository
                             ->findLastNotificationByType(
@@ -70,7 +71,37 @@ class NotifySuperAdminWhenCertsExpiresCommand extends Command
                                 AnalyticalEventType::NOTIFY_ADMIN_EXPIRED_CERT->value
                             );
                         }
-                    } elseif ($certLimitDate < 7) {
+                    } elseif ($certLimitDate < 1) {
+                        $lastNotification = $this->notificationRepository->findLastNotificationByType(
+                            $user,
+                            AnalyticalEventType::NOTIFY_ADMIN_EXPIRING_CERT_ONE_DAY->value
+                        );
+                        $now = new DateTime();
+                        $limitTreeDays = $now->modify('-1 days');
+                        if (!$lastNotification || $lastNotification->getLastNotification() < $limitTreeDays) {
+                            $this->emailGenerator->sendNotifyExpiresCertEmail($user, $certLimitDate);
+                            $this->notificationService->createNotification(
+                                $user,
+                                AnalyticalEventType::NOTIFY_ADMIN_EXPIRING_CERT_ONE_DAY->value
+                            );
+                        }
+                    }
+                    elseif ($certLimitDate < 3) {
+                        $lastNotification = $this->notificationRepository->findLastNotificationByType(
+                            $user,
+                            AnalyticalEventType::NOTIFY_ADMIN_EXPIRING_CERT_THREE_DAYS->value
+                        );
+                        $now = new DateTime();
+                        $limitTreeDays = $now->modify('-3 days');
+                        if (!$lastNotification || $lastNotification->getLastNotification() < $limitTreeDays) {
+                            $this->emailGenerator->sendNotifyExpiresCertEmail($user, $certLimitDate);
+                            $this->notificationService->createNotification(
+                                $user,
+                                AnalyticalEventType::NOTIFY_ADMIN_EXPIRING_CERT_THREE_DAYS->value
+                            );
+                        }
+                    }
+                    elseif ($certLimitDate < 7) {
                         $lastNotification = $this->notificationRepository->findLastNotificationByType(
                             $user,
                             AnalyticalEventType::NOTIFY_ADMIN_EXPIRING_CERT_WEEK->value
@@ -84,7 +115,8 @@ class NotifySuperAdminWhenCertsExpiresCommand extends Command
                                 AnalyticalEventType::NOTIFY_ADMIN_EXPIRING_CERT_WEEK->value
                             );
                         }
-                    } else {
+                    }
+                    elseif ($certLimitDate < 30) {
                         $lastNotification = $this->notificationRepository->findLastNotificationByType(
                             $user,
                             AnalyticalEventType::NOTIFY_ADMIN_EXPIRING_CERT_MONTH->value
@@ -99,6 +131,37 @@ class NotifySuperAdminWhenCertsExpiresCommand extends Command
                             );
                         }
                     }
+                    elseif ($certLimitDate < 60) {
+                        $lastNotification = $this->notificationRepository->findLastNotificationByType(
+                            $user,
+                            AnalyticalEventType::NOTIFY_ADMIN_EXPIRING_CERT_TWO_MONTHS->value
+                        );
+                        $now = new DateTime();
+                        $limitMonth = $now->modify('-60 days');
+                        if (!$lastNotification || $lastNotification->getLastNotification() < $limitMonth) {
+                            $this->emailGenerator->sendNotifyExpiresCertEmail($user, $certLimitDate);
+                            $this->notificationService->createNotification(
+                                $user,
+                                AnalyticalEventType::NOTIFY_ADMIN_EXPIRING_CERT_TWO_MONTHS->value
+                            );
+                        }
+                    }
+                    elseif ($certLimitDate < 90) {
+                        $lastNotification = $this->notificationRepository->findLastNotificationByType(
+                            $user,
+                            AnalyticalEventType::NOTIFY_ADMIN_EXPIRING_CERT_THREE_MONTHS->value
+                        );
+                        $now = new DateTime();
+                        $limitMonth = $now->modify('-90 days');
+                        if (!$lastNotification || $lastNotification->getLastNotification() < $limitMonth) {
+                            $this->emailGenerator->sendNotifyExpiresCertEmail($user, $certLimitDate);
+                            $this->notificationService->createNotification(
+                                $user,
+                                AnalyticalEventType::NOTIFY_ADMIN_EXPIRING_CERT_THREE_MONTHS->value
+                            );
+                        }
+                    }
+
                 }
             } catch (TransportExceptionInterface $e) {
                 $output->writeln(
