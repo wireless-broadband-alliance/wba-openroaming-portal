@@ -57,7 +57,7 @@ class DomainBlacklistController extends AbstractController
         #[MapQueryParameter] ?int $count = 7
     ): Response {
         $searchTerm = $request->query->get('u');
-        $filter = $request->query->get('filter', 'all');
+        $filter = (int)$request->query->get('filter', 2);
 
         // Get the current logged-in user (admin)
         /** @var User $currentUser */

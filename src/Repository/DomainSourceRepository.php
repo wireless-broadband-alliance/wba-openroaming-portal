@@ -41,7 +41,7 @@ class DomainSourceRepository extends ServiceEntityRepository
      * @return DomainSource[]
      */
     public function searchWithFilter(
-        string $filter = DomainSourceStatus::ALL->value,
+        int $filter = DomainSourceStatus::ALL->value,
         string $sort = 'createdAt',
         string $order = 'desc',
         ?string $searchTerm = null,
@@ -53,6 +53,8 @@ class DomainSourceRepository extends ServiceEntityRepository
             $qb->andWhere('d.url LIKE :searchTerm')
                 ->setParameter('searchTerm', '%' . $searchTerm . '%');
         }
+
+        //dd($filter === DomainSourceStatus::ACTIVE->value);
 
         // Filter by active status
         if ($filter === DomainSourceStatus::ACTIVE->value) {
