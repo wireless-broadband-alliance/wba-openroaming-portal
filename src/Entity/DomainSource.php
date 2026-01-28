@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Enum\DomainMatchType;
 use App\Repository\DomainSourceRepository;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -17,6 +18,9 @@ class DomainSource
 
     #[ORM\Column]
     private bool $active = true;
+
+    #[ORM\Column]
+    private DomainMatchType $domainMatchType;
 
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
@@ -58,5 +62,16 @@ class DomainSource
     public function getCreatedAt(): ?\DateTimeImmutable
     {
         return $this->createdAt;
+    }
+
+    public function getDomainMatchType(): DomainMatchType
+    {
+        return $this->domainMatchType;
+    }
+
+    public function setDomainMatchType(DomainMatchType $domainMatchType): static
+    {
+        $this->domainMatchType = $domainMatchType;
+        return $this;
     }
 }

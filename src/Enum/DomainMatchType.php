@@ -2,8 +2,8 @@
 
 namespace App\Enum;
 
-enum DomainMatchType: string
+enum DomainMatchType: int
 {
-    case EXACT = '0';
-    case SUBDOMAIN = '1';
+    case EXACT = 0;
+    case SUBDOMAIN = 1;
 }

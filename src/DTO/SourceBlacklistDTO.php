@@ -2,6 +2,7 @@
 
 namespace App\DTO;
 
+use App\Enum\DomainMatchType;
 use Symfony\Component\Validator\Constraints as Assert;
 
 class SourceBlacklistDTO
@@ -12,6 +13,9 @@ class SourceBlacklistDTO
         message: 'invalidSource'
     )]
     public ?string $input = null;
+
+    #[Assert\NotBlank]
+    public ?DomainMatchType $matchType = null;
 
     public ?int $id = null;
 }

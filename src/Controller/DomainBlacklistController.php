@@ -110,6 +110,7 @@ class DomainBlacklistController extends AbstractController
         if ($sourceForm->isSubmitted() && $sourceForm->isValid()) {
             $source = new DomainSource($sourceDTO->input);
             $source->setActive(true);
+            $source->setDomainMatchType($sourceDTO->matchType);
             $this->entityManager->persist($source);
             $this->entityManager->flush();
 
