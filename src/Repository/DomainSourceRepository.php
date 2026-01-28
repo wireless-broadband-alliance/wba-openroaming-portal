@@ -54,8 +54,6 @@ class DomainSourceRepository extends ServiceEntityRepository
                 ->setParameter('searchTerm', '%' . $searchTerm . '%');
         }
 
-        //dd($filter === DomainSourceStatus::ACTIVE->value);
-
         // Filter by active status
         if ($filter === DomainSourceStatus::ACTIVE->value) {
             $qb->andWhere('d.active = :active')
