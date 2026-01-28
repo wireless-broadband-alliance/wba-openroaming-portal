@@ -143,7 +143,8 @@ missingRequiredForFreeradiusTest: 'É necessário especificar o remote_host e a 
 freeradiusCertUploadedSuccessfully: 'Certificados Freeradius carregados com sucesso!'
 freeradiusCertGeneratedSuccessfully: 'Certificados Freeradius gerados com sucesso para o teu domínio atualmente: "%domain%"!'
 freeradiusConfigAppliedSuccessfully: 'Configuração do Freeradius aplicada com sucesso!'
-freeradiusTestPassed: 'Handshake TLS realizado com sucesso usando o conjunto de CA da WBA.' # TODO update this translation with the real bundles
+freeradiusTestPassed: 'Handshake TLS realizado com sucesso usando o %caBundle%.'
+pendingProcessCertsCompleted: 'Conclua o teste de todos os certificados antes de terminar o processo'
 configAlreadyApplied: 'Está configuração já está aplicada! Não podes re-submeter o mesmo formulário.'
 certificateProcessAborted: "Este processo foi abortado com sucesso. Por favor, não se esqueça de reconfigurar todo o processo corretamente!"
 not_ev_warning: "Estes certificados não são EV's válidos. A geração do perfil OpenRoaming para Windows irá falhar por causa disso, mas podes progredir se assim o desejares."
@@ -154,8 +155,8 @@ cannotReturnToPreviousPhase: 'Já não pode aceder a esta etapa porque já foi c
 cannotAccessStageYet: "Não pode aceder a esta etapa porque as etapas anteriores não estão concluídas."
 captchaValidationFailed: 'A validação captcha falhou.'
 pfx:
-  success: "Windows PFX foi criado com sucesso!"
-  failure: "Falha ao gerar o ficheiro Windows PFX por favor confirma se esta a inserir EV's válidos!"
+    success: "Windows PFX foi criado com sucesso!"
+    failure: "Falha ao gerar o ficheiro Windows PFX por favor confirma se esta a inserir EV's válidos!"
 envPermissionDenied: 'O ficheiro . env não tem permissões de escrita. Por favor utilize os seguintes comandos.'
 writeDbSettingsEnv: 'Escreva as novas configurações da base de dados no ficheiro .env'
 dbSettingsApplied: 'Configurações da base de dados aplicadas com sucesso.'

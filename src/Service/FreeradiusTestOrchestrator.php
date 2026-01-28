@@ -68,7 +68,7 @@ final readonly class FreeradiusTestOrchestrator
         }
 
         // Update DB results
-        $process->setStatus(ProcessStatusType::COMPLETED);
+        $process->setStatus(ProcessStatusType::IN_PROGRESS);
         $process->setFreeradiusTestResult(CertificateTestResult::PASSED);
         $this->entityManager->persist($process);
         $this->entityManager->flush();

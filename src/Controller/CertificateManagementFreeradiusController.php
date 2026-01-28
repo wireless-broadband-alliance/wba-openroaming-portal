@@ -204,6 +204,7 @@ class CertificateManagementFreeradiusController extends AbstractController
             // After the files are validated and the processed, update them once again to add
             $process->setFreeradiusFormCompletedAt(new DateTimeImmutable());
             $process->setFreeradiusConfigAppliedAt(null);
+            $process->setFreeradiusTestResult(null);
             $process->setIsFreeradiusCloudflare(false);
             $process->setUpdatedAt(new DateTimeImmutable());
 
@@ -299,6 +300,7 @@ class CertificateManagementFreeradiusController extends AbstractController
             $process->setFreeradiusDomainName($certificateFreeradiusDomainDTO->domain);
             $process->setFreeradiusFormCompletedAt(new DateTimeImmutable());
             $process->setFreeradiusConfigAppliedAt(null);
+            $process->setFreeradiusTestResult(null);
             $process->setUpdatedAt(new DateTimeImmutable());
 
             $this->entityManager->persist($process);
@@ -630,6 +632,7 @@ class CertificateManagementFreeradiusController extends AbstractController
                 );
 
                 $process->setFreeradiusConfigAppliedAt(new DateTimeImmutable());
+                $process->setFreeradiusDomainName($certParsed['subject']['CN']);
                 $process->setUpdatedAt(new DateTimeImmutable());
 
                 $this->entityManager->persist($process);
@@ -696,26 +699,25 @@ class CertificateManagementFreeradiusController extends AbstractController
             return $this->redirectToRoute('admin_dashboard_settings_certs_radsecproxy_upload');
         }
 
+        $processEntity = $this->certificateProcessCheckerService->getCurrentProcess();
+
+        // Ensure an active process exists
+        if (!$processEntity instanceof CertificateSetupProcess) {
+            throw new RuntimeException(
+                $this->translator->trans(
+                    'noActiveProcess',
+                    [],
+                    'CertificateProcessCheckerService'
+                )
+            );
+        }
+
         // Fetch settings/data needed for the page
         $data = $this->getSettings->getSettings();
 
         $form = $this->createForm(CertificatesFreeradiusPasteType::class);
         $form->handleRequest($request);
-
         if ($form->isSubmitted() && $form->isValid()) {
-            $processEntity = $this->certificateProcessCheckerService->getCurrentProcess();
-
-            // Ensure an active process exists
-            if (!$processEntity instanceof CertificateSetupProcess) {
-                throw new RuntimeException(
-                    $this->translator->trans(
-                        'noActiveProcess',
-                        [],
-                        'CertificateProcessCheckerService'
-                    )
-                );
-            }
-
             // Everytime the user tries a new test it will save the used credentials
             $processEntity->setUpdatedAt(new DateTimeImmutable());
             $this->entityManager->persist($processEntity);
@@ -754,11 +756,14 @@ class CertificateManagementFreeradiusController extends AbstractController
                     $form->getData()['certificates'] ?? ''
                 );
 
+                // Flash success with translation
                 $this->addFlash(
                     'success',
                     $this->translator->trans(
                         'freeradiusTestPassed',
-                        [],
+                        [
+                            '%caBundle%' => 'WBA CA bundle',
+                        ],
                         'controllers'
                     )
                 );
@@ -781,6 +786,26 @@ class CertificateManagementFreeradiusController extends AbstractController
             }
         }
 
+        $formFinishProcess = $this->createForm(SimpleSubmitFormType::class);
+        $formFinishProcess->handleRequest($request);
+        if ($formFinishProcess->isSubmitted()) {
+            if ($processEntity->getFreeradiusTestResult() === ProcessStatusType::IN_PROGRESS) {
+                $this->addFlash(
+                    'error',
+                    $this->translator->trans('pendingProcessCertsCompleted', [], 'controllers')
+                );
+            } elseif ($formFinishProcess->isValid()) {
+                $processEntity->setStatus(ProcessStatusType::COMPLETED);
+                $this->entityManager->persist($processEntity);
+                $this->entityManager->flush();
+
+                // Redirect to the next stage automatically
+                return $this->redirectToRoute(
+                    'admin_dashboard_settings_certs_management',
+                );
+            }
+        }
+
         return $this->render(
             'dashboard/shared/settings_actions/certificatesManagement/certificates/freeradius/test.html.twig',
             [
@@ -788,6 +813,7 @@ class CertificateManagementFreeradiusController extends AbstractController
                 'processState' => $processState,
                 'process' => $processState['process'],
                 'form' => $form->createView(),
+                'formFinishProcess' => $formFinishProcess->createView(),
             ]
         );
     }
@@ -866,7 +892,9 @@ class CertificateManagementFreeradiusController extends AbstractController
                         'controllers'
                     )
                 );
-                return $this->redirectToRoute('admin_dashboard_settings_certs_freeradius_cloudflare_dnsChallenge');
+                return $this->redirectToRoute(
+                    'admin_dashboard_settings_certs_freeradius_cloudflare_dnsChallenge'
+                );
             }
 
             if ($dto->ca instanceof UploadedFile) {

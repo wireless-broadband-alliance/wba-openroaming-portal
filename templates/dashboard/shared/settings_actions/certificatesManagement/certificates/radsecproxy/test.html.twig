@@ -67,26 +67,6 @@
             <div class="mt-4 hidden" data-test-certificates-target="resultMessage"></div>
 
             <div class="flex flex-col items-center gap-6 w-full">
-                {# Status #}
-                <div class="text-sm flex items-center gap-2 justify-center">
-                    {% if process.getRadsecproxyTestResult() == constant('App\\Enum\\CertificateTestResult::PASSED') %}
-                        <twig:ux:icon name="wba:check-circle-rounded" class="w-5 h-5 text-primary fill-current"/>
-                        <span class="text-primary font-medium">
-                {{ 'test_passed'|trans({}, 'test_radsec') }}
-            </span>
-                    {% elseif process.getRadsecproxyTestResult() == constant('App\\Enum\\CertificateTestResult::FAILED') %}
-                        <twig:ux:icon name="wba:cross-circle-rounded" class="w-5 h-5 text-red-500"/>
-                        <span class="text-red-500">
-                {{ 'test_failed'|trans({}, 'test_radsec') }}
-            </span>
-                    {% else %}
-                        <twig:ux:icon name="wba:cross-circle-rounded" class="w-5 h-5 text-gray-400"/>
-                        <span class="text-gray-500">
-                {{ 'test_not_done'|trans({}, 'test_radsec') }}
-            </span>
-                    {% endif %}
-                </div>
-
                 {# Action Buttons #}
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-3 items-end">
                     {# Run Test #}
@@ -104,13 +84,12 @@
             </span>
                     </button>
                     {# Next Step #}
-                    <a
-                            {% if processState.stages.radsecproxy_test %}
-                                href="{{ path('admin_dashboard_settings_certs_management_freeradius_selection') }}"
-                                data-href-enabled="{{ path('admin_dashboard_settings_certs_management_freeradius_selection') }}"
-                            {% else %}
-                                data-href-enabled="{{ path('admin_dashboard_settings_certs_management_freeradius_selection') }}"
-                            {% endif %}
+                    <a {% if processState.stages.radsecproxy_test %}
+                        href="{{ path('admin_dashboard_settings_certs_management_freeradius_selection') }}"
+                        data-href-enabled="{{ path('admin_dashboard_settings_certs_management_freeradius_selection') }}"
+                    {% else %}
+                        data-href-enabled="{{ path('admin_dashboard_settings_certs_management_freeradius_selection') }}"
+                    {% endif %}
                             data-test-certificates-target="nextPageButton"
                             class="px-6 py-3 border border-gray-300 font-medium rounded-lg shadow-sm flex items-center gap-2
                        w-full md:w-auto justify-center

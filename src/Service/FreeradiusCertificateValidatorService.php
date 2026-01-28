@@ -24,7 +24,7 @@ final class FreeradiusCertificateValidatorService
 
         $this->compareCertificates($serverCerts, $userCerts);
         $this->validateDates($userCerts);
-        $this->validateChain($paths['fullchain'], $paths['ca']);
+        $this->validateChainFromUser($userPem, $paths['ca']);
     }
 
     // ---------------- PRIVATE HELPERS ----------------
@@ -91,15 +91,19 @@ final class FreeradiusCertificateValidatorService
         }
     }
 
-    private function validateChain(string $fullchainPath, string $caPath): void
+    private function validateChainFromUser(string $userPem, string $caPath): void
     {
+        $tmp = tempnam(sys_get_temp_dir(), 'cert_');
+        file_put_contents($tmp, $userPem);
+
         $cmd = sprintf(
             'openssl verify -CAfile %s %s 2>&1',
             escapeshellarg($caPath),
-            escapeshellarg($fullchainPath)
+            escapeshellarg($tmp)
         );
 
         exec($cmd, $output, $code);
+        unlink($tmp);
 
         if ($code !== 0) {
             throw FreeradiusTestException::invalidCertificateChain();

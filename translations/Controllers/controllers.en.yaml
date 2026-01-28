@@ -145,7 +145,8 @@ missingRequiredForFreeradiusTest: 'Remote_host and remote_port are required.'
 freeradiusCertUploadedSuccessfully: 'Freeradius certificates uploaded successfully!'
 freeradiusCertGeneratedSuccessfully: 'Freeradius certificates generated successfully for the current configured domain: "%domain%"!'
 freeradiusConfigAppliedSuccessfully: 'Freeradius configuration applied successfully!'
-freeradiusTestPassed: 'TLS handshake OK using WBA CA bundle'  # TODO update this translation with the real bundles
+freeradiusTestPassed: 'Handshake TLS tested successfully using the %caBundle%'
+pendingProcessCertsCompleted: 'Complete the test of all certificates before finishing the process'
 configAlreadyApplied: 'Configuration is been already applied. You can not re-submit this form.'
 certificateProcessAborted: "This process was aborted successfully. Please don't forget to re-configure all the process once again correctly!"
 not_ev_warning: "These certificates are not valid EV's. OpenRoaming profile generation for Windows will fail because of this, but you can proceed if you wish."
@@ -156,8 +157,8 @@ cannotReturnToPreviousPhase: 'You can no longer access this stage because it has
 cannotAccessStageYet: "You cannot access this stage yet because previous steps are incomplete."
 captchaValidationFailed: 'Captcha validation failed.'
 pfx:
-  success: "Windows PFX created successfully!"
-  failure: "Failed to generate Windows PFX please make sure you are submitting valid EV'S!"
+    success: "Windows PFX created successfully!"
+    failure: "Failed to generate Windows PFX please make sure you are submitting valid EV'S!"
 envPermissionDenied: 'The .env file does not have write permissions. Please use the following commands.'
 writeDbSettingsEnv: 'Write the new database settings in the .env file.'
 dbSettingsApplied: 'Database settings applied successfully.'
