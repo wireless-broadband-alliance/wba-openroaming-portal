@@ -30,11 +30,9 @@ class DomainBlacklistType extends AbstractType
             ->add('matchType', ChoiceType::class, [
                 'required' => true,
                 'choices' => DomainMatchType::cases(),
-                'choice_label' => function (DomainMatchType $type) {
-                    return match ($type) {
-                        DomainMatchType::EXACT => $this->translator->trans('exact', [], '_blacklist'),
-                        DomainMatchType::SUBDOMAIN => $this->translator->trans('subdomain', [], '_blacklist'),
-                    };
+                'choice_label' => fn(DomainMatchType $type) => match ($type) {
+                    DomainMatchType::EXACT => $this->translator->trans('exact', [], '_blacklist'),
+                    DomainMatchType::SUBDOMAIN => $this->translator->trans('subdomain', [], '_blacklist'),
                 },
                 'choice_value' => static fn(?DomainMatchType $type) => $type?->value,
                 'translation_domain' => '_blacklist',
