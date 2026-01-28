@@ -58,7 +58,7 @@ class DomainBlacklistController extends AbstractController
         #[MapQueryParameter] ?int $count = 7
     ): Response {
         $searchTerm = $request->query->get('u');
-        $filter = $request->query->get('filter', DomainSourceStatus::ALL->value);
+        $filter = $request->query->get('filter', (string) DomainSourceStatus::ALL->value);
 
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
@@ -167,7 +167,7 @@ class DomainBlacklistController extends AbstractController
 
         // Domains Sources
         $domainSources = $this->domainSourceRepository->searchWithFilter(
-            (int) $filter,
+            (int)$filter,
             $sortDomainsSources,
             $orderDomainsSources,
             $searchTerm,
@@ -262,7 +262,7 @@ class DomainBlacklistController extends AbstractController
             )
         );
 
-        /** @var User $currentUser  */
+        /** @var User $currentUser */
         $currentUser = $this->getUser();
 
         $this->eventActions->saveEvent(
@@ -316,7 +316,7 @@ class DomainBlacklistController extends AbstractController
             )
         );
 
-        /** @var User $currentUser  */
+        /** @var User $currentUser */
         $currentUser = $this->getUser();
 
         $this->eventActions->saveEvent(
@@ -410,7 +410,6 @@ class DomainBlacklistController extends AbstractController
         Request $request,
         KernelInterface $kernel
     ): Response {
-
         $application = new Application($kernel);
         $application->setAutoExit(false);
 
