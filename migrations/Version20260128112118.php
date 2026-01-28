@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20260112121631 extends AbstractMigration
+final class Version20260128112118 extends AbstractMigration
 {
     public function getDescription(): string
     {
@@ -20,12 +20,12 @@ final class Version20260112121631 extends AbstractMigration
     public function up(Schema $schema): void
     {
         // this up() migration is auto-generated, please modify it to your needs
-        $this->addSql('CREATE TABLE DomainBlacklist (id INT AUTO_INCREMENT NOT NULL, pattern LONGTEXT NOT NULL, type INT NOT NULL, createdAt DATETIME NOT NULL, origin INT NOT NULL, lastSeenAt DATETIME DEFAULT NULL, PRIMARY KEY (id)) DEFAULT CHARACTER SET utf8mb4');
+        $this->addSql('ALTER TABLE DomainSource ADD domainMatchType INT NOT NULL');
     }
 
     public function down(Schema $schema): void
     {
         // this down() migration is auto-generated, please modify it to your needs
-        $this->addSql('DROP TABLE DomainBlacklist');
+        $this->addSql('ALTER TABLE DomainSource DROP domainMatchType');
     }
 }

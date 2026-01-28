@@ -11,6 +11,7 @@ use App\Enum\AdminRoleType;
 use App\Enum\AnalyticalEventType;
 use App\Enum\DomainMatchType;
 use App\Enum\DomainOrigin;
+use App\Enum\DomainSourceStatus;
 use App\Enum\OperationMode;
 use App\Form\DomainBlacklistType;
 use App\Form\SourceBlacklistType;
@@ -58,7 +59,7 @@ class DomainBlacklistController extends AbstractController
         #[MapQueryParameter] ?int $count = 7
     ): Response {
         $searchTerm = $request->query->get('u');
-        $filter = $request->query->get('filter', 'all');
+        $filter = $request->query->get('filter', (string) DomainSourceStatus::ALL->value);
 
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
@@ -111,6 +112,7 @@ class DomainBlacklistController extends AbstractController
         if ($sourceForm->isSubmitted() && $sourceForm->isValid()) {
             $source = new DomainSource($sourceDTO->input);
             $source->setActive(true);
+            $source->setDomainMatchType($sourceDTO->matchType);
             $this->entityManager->persist($source);
             $this->entityManager->flush();
 
@@ -145,7 +147,7 @@ class DomainBlacklistController extends AbstractController
             $searchTerm
         );
         $totalBlacklistDomains = $this->domainBlacklistRepository->countDomains(
-            'all',
+            2,
             $searchTerm
         );
         $countExactDomains = $this->domainBlacklistRepository->countDomains(
@@ -166,7 +168,7 @@ class DomainBlacklistController extends AbstractController
 
         // Domains Sources
         $domainSources = $this->domainSourceRepository->searchWithFilter(
-            $filter,
+            (int)$filter,
             $sortDomainsSources,
             $orderDomainsSources,
             $searchTerm,
@@ -261,7 +263,7 @@ class DomainBlacklistController extends AbstractController
             )
         );
 
-        /** @var User $currentUser  */
+        /** @var User $currentUser */
         $currentUser = $this->getUser();
 
         $this->eventActions->saveEvent(
@@ -315,7 +317,7 @@ class DomainBlacklistController extends AbstractController
             )
         );
 
-        /** @var User $currentUser  */
+        /** @var User $currentUser */
         $currentUser = $this->getUser();
 
         $this->eventActions->saveEvent(
@@ -409,7 +411,6 @@ class DomainBlacklistController extends AbstractController
         Request $request,
         KernelInterface $kernel
     ): Response {
-
         $application = new Application($kernel);
         $application->setAutoExit(false);
 

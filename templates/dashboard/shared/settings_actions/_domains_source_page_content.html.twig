@@ -11,7 +11,7 @@
                 {# Left Search Filters #}
                 <div class="flex flex-col md:flex-row sm:items-center gap-4 sm:gap-6">
                     <a href="{{ path('admin_dashboard_settings_domains', {filter: constant('App\\Enum\\DomainSourceStatus::ALL').value, u: app.request.query.get('u')}) }}"
-                       class="flex flex-row group hover:border-b-2 hover:border-y-veryDarkButton transition-all duration-100 {% if app.request.query.get('filter') == null or app.request.query.get('filter') == 'all' %}border-b-2 border-y-veryDarkButton transition-all{% endif %}">
+                       class="flex flex-row group hover:border-b-2 hover:border-y-veryDarkButton transition-all duration-100 {% if app.request.query.get('filter') == null or app.request.query.get('filter') == constant('App\\Enum\\DomainSourceStatus::ALL').value %}border-b-2 border-y-veryDarkButton transition-all{% endif %}">
                         <h1 class="px-2">
                             {{ 'all'|trans({}, '_blacklist') }}
                         </h1>
@@ -86,6 +86,10 @@
                                class="p-1 hover:shadow-md rounded-lg cursor-pointer">
                                 {{ sharedSort.sortArrow('url', activeSortDomainsSources, activeOrderDomainsSources) }}
                             </a>
+                        </th>
+
+                        <th class="p-4 text-left">
+                            {{ 'type'|trans({}, '_blacklist') }}
                         </th>
 
                         <th scope="col" class="px-6 py-3 -ml-2">

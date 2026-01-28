@@ -24,13 +24,19 @@
         {# Content #}
         <div class="flex flex-col gap-3">
 
-            {# Input + Button #}
+            {# Input + Select + Button #}
             <div class="flex flex-col sm:flex-row gap-2">
 
                 {{ form_widget(form.input, {
                     attr: {
                         class: 'form-widget w-full',
                         placeholder: 'www.example.com',
+                    },
+                }) }}
+
+                {{ form_widget(form.matchType, {
+                    attr: {
+                        class: 'form-widget w-full sm:w-48',
                     },
                 }) }}
 

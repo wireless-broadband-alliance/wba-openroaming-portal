@@ -114,7 +114,7 @@ class ImportTemporaryDomainsCommand extends Command
                     $entity = new DomainBlacklist();
                     $entity
                         ->setPattern($domain)
-                        ->setType(DomainMatchType::EXACT)
+                        ->setType($source->getDomainMatchType())
                         ->setOrigin(DomainOrigin::LINK)
                         ->setCreatedAt($runAt)
                         ->setLastSeenAt($runAt);

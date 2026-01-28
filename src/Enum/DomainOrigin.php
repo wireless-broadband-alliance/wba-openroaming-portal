@@ -2,9 +2,9 @@
 
 namespace App\Enum;
 
-enum DomainOrigin: string
+enum DomainOrigin: int
 {
-    case LINK = '0';
-    case MANUAL = '1';
-    case DELETED = '2';
+    case LINK = 0;
+    case MANUAL = 1;
+    case DELETED = 2;
 }

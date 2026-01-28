@@ -35,13 +35,13 @@ class DomainSourceRepository extends ServiceEntityRepository
      * Search DomainSource with optional URL and active status filter
      *
      * @param string|null $searchTerm Filter by URL (optional)
-     * @param string $filter 'all', 'active' or 'inactive'
+     * @param int $filter '0 Inactive', '1 Active' or '2 All'
      * @param string $sort Sort field ('url' or 'createdAt')
      * @param string $order Sort order ('asc' or 'desc')
      * @return DomainSource[]
      */
     public function searchWithFilter(
-        string $filter = DomainSourceStatus::ALL->value,
+        int $filter = DomainSourceStatus::ALL->value,
         string $sort = 'createdAt',
         string $order = 'desc',
         ?string $searchTerm = null,
