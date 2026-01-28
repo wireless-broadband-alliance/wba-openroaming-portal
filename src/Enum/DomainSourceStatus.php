@@ -4,8 +4,9 @@ namespace App\Enum;
 
 enum DomainSourceStatus: int
 {
-    case INACTIVE = 0;
-    case ACTIVE = 1;
+    case ALL = 0;
+    case INACTIVE = 1;
+    case ACTIVE = 2;
 
-    case ALL = 2;
+
 }

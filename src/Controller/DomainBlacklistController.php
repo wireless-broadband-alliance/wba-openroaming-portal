@@ -10,6 +10,7 @@ use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Enum\DomainMatchType;
 use App\Enum\DomainOrigin;
+use App\Enum\DomainSourceStatus;
 use App\Enum\OperationMode;
 use App\Form\DomainBlacklistType;
 use App\Form\SourceBlacklistType;
@@ -57,7 +58,7 @@ class DomainBlacklistController extends AbstractController
         #[MapQueryParameter] ?int $count = 7
     ): Response {
         $searchTerm = $request->query->get('u');
-        $filter = $request->query->get('filter', 2);
+        $filter = $request->query->get('filter', DomainSourceStatus::ALL->value);
 
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
