@@ -145,7 +145,7 @@ class DomainBlacklistController extends AbstractController
             $searchTerm
         );
         $totalBlacklistDomains = $this->domainBlacklistRepository->countDomains(
-            'all',
+            2,
             $searchTerm
         );
         $countExactDomains = $this->domainBlacklistRepository->countDomains(
