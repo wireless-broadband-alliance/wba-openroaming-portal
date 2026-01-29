@@ -2,7 +2,7 @@
 
 namespace App\Twig\Components;
 
-use App\DTO\DomainBlacklistDTO;
+use App\DTO\DomainBlacklistAddDTO;
 use App\Form\DomainBlacklistType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormInterface;
@@ -20,10 +20,10 @@ final class DomainBlacklistForm extends AbstractController
     use LiveCollectionTrait;
 
     #[LiveProp(useSerializerForHydration: true)]
-    public DomainBlacklistDTO|null $dto = null;
+    public DomainBlacklistAddDTO|null $dto = null;
 
     /**
-     * @return FormInterface<DomainBlacklistDTO>
+     * @return FormInterface<DomainBlacklistAddDTO>
      */
     #[\Override]
     protected function instantiateForm(): FormInterface

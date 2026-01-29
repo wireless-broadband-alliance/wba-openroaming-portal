@@ -7,7 +7,7 @@ use App\Enum\DomainMatchType;
 use Symfony\Component\Validator\Constraints as Assert;
 use App\Validator\Constraints as CustomAssert;
 
-class DomainBlacklistDTO
+class DomainBlacklistAddDTO
 {
     #[Assert\NotBlank]
     #[Assert\Length(max: 255, maxMessage: 'maxCharacters')]

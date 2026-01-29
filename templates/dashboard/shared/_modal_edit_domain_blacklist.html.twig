@@ -1,0 +1,42 @@
+{# Modal for editing domains #}
+<div
+        data-controller="domain-blacklist"
+        data-domain-blacklist-target="modal"
+        class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+        data-action="click->domain-blacklist#close"
+>
+    <div
+            class="relative w-full max-w-lg max-h-[90vh] bg-white rounded-xl shadow-xl flex flex-col"
+            data-action="click->domain-blacklist#stop"
+            data-domain-blacklist-target="content"
+    >
+        <div class="flex justify-between items-center border-b px-6 py-4">
+            <h2 class="text-primary text-lg font-semibold">
+                {{ 'editDomain'|trans({}, '_blacklist') }}
+            </h2>
+            <button
+                    type="button"
+                    class="flex items-center gap-x-2 text-[#707070] hover:text-primary transition"
+                    data-action="domain-blacklist#close"
+            >
+                <span>{{ 'close'|trans({}, '_blacklist') }}</span>
+                <twig:ux:icon name="wba:cross" class="fill-current"/>
+            </button>
+        </div>
+
+        <div
+                class="flex-1 overflow-y-auto px-6 py-5"
+                data-domain-blacklist-target="content"
+        >
+            {{ form_start(form) }}
+            {{ form_row(form.input) }}
+            {{ form_row(form.matchType) }}
+            <div class="flex justify-end mt-4">
+                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                    {{ 'save'|trans({}, '_blacklist') }}
+                </button>
+            </div>
+            {{ form_end(form) }}
+        </div>
+    </div>
+</div>
