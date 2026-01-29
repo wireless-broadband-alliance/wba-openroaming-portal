@@ -13,7 +13,7 @@
     {# Match Type #}
     <td class="p-4">
         {% if domainsSource.domainMatchType is not null %}
-            <span class="font-semibold p-1 pill-success">
+            <span class="font-semibold p-1">
             {% if domainsSource.domainMatchType == constant('App\\Enum\\DomainMatchType::EXACT') %}
                 {{ 'exact'|trans({}, '_blacklist') }}
             {% elseif domainsSource.domainMatchType == constant('App\\Enum\\DomainMatchType::SUBDOMAIN') %}
