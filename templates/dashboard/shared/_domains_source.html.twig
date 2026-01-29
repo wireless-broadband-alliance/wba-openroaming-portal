@@ -10,25 +10,6 @@
         {% endif %}
     </td>
 
-    {# Match Type #}
-    <td class="p-4">
-        {% if domainsSource.domainMatchType is not null %}
-            <span class="font-semibold p-1">
-            {% if domainsSource.domainMatchType == constant('App\\Enum\\DomainMatchType::EXACT') %}
-                {{ 'exact'|trans({}, '_blacklist') }}
-            {% elseif domainsSource.domainMatchType == constant('App\\Enum\\DomainMatchType::SUBDOMAIN') %}
-                {{ 'subdomain'|trans({}, '_blacklist') }}
-            {% else %}
-                {{ 'noInformation'|trans({}, '_blacklist') }}
-            {% endif %}
-        </span>
-        {% else %}
-            <span class="font-semibold p-1 pill-error">
-                {{ 'noInformation'|trans({}, '_blacklist') }}
-            </span>
-        {% endif %}
-    </td>
-
     {# Domain Source Activation #}
     <td class="p-4">
         <p class="font-semibold p-1">
@@ -64,14 +45,16 @@
 
                 {# Refresh Source #}
                 <li>
-                    <form method="post"
-                          action="{{ path('admin_domain_source_refresh', {id: domainsSource.id}) }}">
-                        <button type="submit"
-                                class="flex items-center px-2 py-2 w-full hover:text-blue-500">
-                            <twig:ux:icon name="wba:refresh-outline" class="w-5 mr-3 fill-none stroke-current"/>
-                            {{ 'refresh'|trans({}, '_blacklist') }}
-                        </button>
-                    </form>
+                    {% if domainsSource.isActive is defined and domainsSource.isActive == 1 %}
+                        <form method="post"
+                              action="{{ path('admin_domain_source_refresh', {id: domainsSource.id}) }}">
+                            <button type="submit"
+                                    class="flex items-center px-2 py-2 w-full hover:text-blue-500">
+                                <twig:ux:icon name="wba:refresh-outline" class="w-5 mr-3 fill-none stroke-current"/>
+                                {{ 'refresh'|trans({}, '_blacklist') }}
+                            </button>
+                        </form>
+                    {% endif %}
                 </li>
 
                 {# Toggle Source #}

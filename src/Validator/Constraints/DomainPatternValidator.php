@@ -37,16 +37,33 @@ class DomainPatternValidator extends ConstraintValidator
 
         // Wildcard subdomain (*.example.com)
         if (str_starts_with($value, '*.')) {
-            if ($this->isValidDomain(substr($value, 2))) {
+            $domain = substr($value, 2);
+
+            $asciiDomain = idn_to_ascii(
+                $domain,
+                IDNA_DEFAULT,
+                INTL_IDNA_VARIANT_UTS46
+            );
+
+            if ($asciiDomain !== false && $this->isValidDomain($asciiDomain)) {
                 return;
             }
 
             $this->context->buildViolation($constraint->message)->addViolation();
             return;
         }
+        $asciiValue = idn_to_ascii(
+            $value,
+            IDNA_DEFAULT,
+            INTL_IDNA_VARIANT_UTS46
+        );
 
-        // Exact domain
-        if ($this->isValidDomain($value)) {
+        if ($asciiValue === false) {
+            $this->context->buildViolation($constraint->message)->addViolation();
+            return;
+        }
+
+        if ($this->isValidDomain($asciiValue)) {
             return;
         }
 
@@ -84,8 +101,11 @@ class DomainPatternValidator extends ConstraintValidator
 
         $tld = array_pop($labels);
 
-        // TLD rules
-        if (!ctype_alpha($tld) || strlen($tld) < 2) {
+        // TLD: letters OR punycode
+        if (
+            strlen($tld) < 2 ||
+            (!ctype_alpha($tld) && !str_starts_with($tld, 'xn--'))
+        ) {
             return false;
         }
 

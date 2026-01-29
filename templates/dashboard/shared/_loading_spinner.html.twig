@@ -93,8 +93,12 @@
 </div>
 
 <script>
-    // Add smooth entry animation
+    let loadingVisible = false;
+
     function showLoading() {
+        if (loadingVisible) return;
+        loadingVisible = true;
+
         const overlay = document.getElementById('loading-overlay');
         const content = document.getElementById('loading-content');
         const logo = document.getElementById('loading-logo');
@@ -111,17 +115,65 @@
         logo.classList.add('scale-100', 'opacity-100');
     }
 
-    // Show overlay when links or forms are triggered
+    function hideLoading() {
+        loadingVisible = false;
+
+        const overlay = document.getElementById('loading-overlay');
+        const content = document.getElementById('loading-content');
+        const logo = document.getElementById('loading-logo');
+
+        if (!overlay || !content || !logo) return;
+
+        overlay.classList.remove('opacity-100');
+        overlay.classList.add('opacity-0', 'pointer-events-none');
+
+        content.classList.remove('scale-100', 'translate-y-0');
+        content.classList.add('scale-95', 'translate-y-1');
+
+        logo.classList.remove('scale-100', 'opacity-100');
+        logo.classList.add('scale-75', 'opacity-0');
+    }
+
+    /**
+     * LINKS → real navigation only
+     */
     document.addEventListener('click', (e) => {
         const link = e.target.closest('a[href]');
         if (!link) return;
-        if (link.target === '_blank') return;
-        if (link.hasAttribute('download')) return;
+
+        if (
+                link.dataset.noLoader === 'true' ||
+                link.target === '_blank' ||
+                link.hasAttribute('download') ||
+                link.getAttribute('href') === '#' ||
+                link.getAttribute('href').startsWith('javascript:')
+        ) {
+            return;
+        }
+
+        // Ignore same-page hash navigation
+        const current = window.location.href.split('#')[0];
+        const target = link.href.split('#')[0];
+        if (current === target) return;
 
         showLoading();
     });
 
-    document.addEventListener('submit', () => {
+    /**
+     * FORMS → real submits only
+     */
+    document.addEventListener('submit', (e) => {
+        const form = e.target;
+
+        if (form.dataset.noLoader === 'true') return;
+
         showLoading();
+    });
+
+    /**
+     * Back / forward cache safety
+     */
+    window.addEventListener('pageshow', () => {
+        hideLoading();
     });
 </script>

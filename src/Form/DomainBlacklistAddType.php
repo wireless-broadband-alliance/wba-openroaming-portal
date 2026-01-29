@@ -2,7 +2,7 @@
 
 namespace App\Form;
 
-use App\DTO\DomainBlacklistDTO;
+use App\DTO\DomainBlacklistAddDTO;
 use App\Enum\DomainMatchType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -12,12 +12,13 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
- * @extends AbstractType<DomainBlacklistDTO>
+ * @extends AbstractType<DomainBlacklistAddDTO>
  */
-class DomainBlacklistType extends AbstractType
+class DomainBlacklistAddType extends AbstractType
 {
-    public function __construct(private readonly TranslatorInterface $translator)
-    {
+    public function __construct(
+        private readonly TranslatorInterface $translator
+    ) {
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
@@ -42,7 +43,7 @@ class DomainBlacklistType extends AbstractType
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'data_class' => DomainBlacklistDTO::class,
+            'data_class' => DomainBlacklistAddDTO::class,
         ]);
     }
 }

@@ -36,6 +36,9 @@ addDomainManually: 'Adicionar Domínio Manualmente'
 addSourceManually: 'Adicionar Fonte Manualmente'
 confirm_delete_domain_source: 'Tem a certeza de que pretende eliminar esta origem de domínio?'
 delete: 'Eliminar'
+editDomain: 'Editar Domínio'
+close: 'Fechar'
+save: 'Guardar'
 domainsSourceWarningType: >
     Apenas são suportadas importações através de link. O URL fornecido deve apontar
     para um ficheiro válido em formato <strong>.json</strong>, <strong>.txt</strong> ou <strong>.csv</strong>.

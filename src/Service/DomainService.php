@@ -2,6 +2,8 @@
 
 namespace App\Service;
 
+use App\Enum\DomainMatchType;
+
 readonly class DomainService
 {
     public function normalize(string $domain): string
@@ -25,5 +27,11 @@ readonly class DomainService
             FILTER_VALIDATE_DOMAIN,
             FILTER_FLAG_HOSTNAME
         );
+    }
+    public function detectMatchType(string $domain): DomainMatchType
+    {
+        return str_starts_with($domain, '*.')
+            ? DomainMatchType::SUBDOMAIN
+            : DomainMatchType::EXACT;
     }
 }

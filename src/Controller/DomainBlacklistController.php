@@ -2,7 +2,8 @@
 
 namespace App\Controller;
 
-use App\DTO\DomainBlacklistDTO;
+use App\DTO\DomainBlacklistAddDTO;
+use App\DTO\DomainBlacklistEditDTO;
 use App\DTO\SourceBlacklistDTO;
 use App\Entity\DomainBlacklist;
 use App\Entity\DomainSource;
@@ -13,7 +14,8 @@ use App\Enum\DomainMatchType;
 use App\Enum\DomainOrigin;
 use App\Enum\DomainSourceStatus;
 use App\Enum\OperationMode;
-use App\Form\DomainBlacklistType;
+use App\Form\DomainBlacklistAddType;
+use App\Form\DomainBlacklistEditType;
 use App\Form\SourceBlacklistType;
 use App\Repository\DomainBlacklistRepository;
 use App\Repository\DomainSourceRepository;
@@ -59,7 +61,7 @@ class DomainBlacklistController extends AbstractController
         #[MapQueryParameter] ?int $count = 7
     ): Response {
         $searchTerm = $request->query->get('u');
-        $filter = $request->query->get('filter', (string) DomainSourceStatus::ALL->value);
+        $filter = $request->query->get('filter', (string)DomainSourceStatus::ALL->value);
 
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
@@ -69,14 +71,14 @@ class DomainBlacklistController extends AbstractController
         /** @var array<string, array{value: string, description: string}> $data */
         $data = $this->getSettings->getSettings();
 
-        $domainDTO = new DomainBlacklistDTO();
+        $addDomainDTO = new DomainBlacklistAddDTO();
 
-        $domainForm = $this->createForm(DomainBlacklistType::class, $domainDTO);
-        $domainForm->handleRequest($request);
+        $addDomainForm = $this->createForm(DomainBlacklistAddType::class, $addDomainDTO);
+        $addDomainForm->handleRequest($request);
 
-        if ($domainForm->isSubmitted() && $domainForm->isValid()) {
+        if ($addDomainForm->isSubmitted() && $addDomainForm->isValid()) {
             $object = new DomainBlacklist();
-            $domainDTO->applyToEntity($object);
+            $addDomainDTO->applyToEntity($object);
             $object->setCreatedAt(new DateTimeImmutable());
             $object->setOrigin(DomainOrigin::MANUAL);
             $this->entityManager->persist($object);
@@ -112,7 +114,6 @@ class DomainBlacklistController extends AbstractController
         if ($sourceForm->isSubmitted() && $sourceForm->isValid()) {
             $source = new DomainSource($sourceDTO->input);
             $source->setActive(true);
-            $source->setDomainMatchType($sourceDTO->matchType);
             $this->entityManager->persist($source);
             $this->entityManager->flush();
 
@@ -222,10 +223,86 @@ class DomainBlacklistController extends AbstractController
             'export_users' => OperationMode::OFF->value,
 
             // Forms & DTOs
-            'domainsForm' => $domainForm->createView(),
-            'domainDTO' => $domainDTO,
+            'domainsForm' => $addDomainForm->createView(),
+            'domainDTO' => $addDomainDTO,
             'sourceForm' => $sourceForm->createView(),
             'sourceDTO' => $sourceDTO,
+        ]);
+    }
+
+    #[Route(
+        '/dashboard/settings/domains/edit/{id<\d+>}',
+        name: 'admin_dashboard_settings_edit_domains',
+    )]
+    #[IsGranted('ROLE_ADMIN')]
+    public function editDomain(
+        DomainBlacklist $domain,
+        Request $request
+    ): Response {
+        $oldDomainData = clone $domain;
+        $editDto = new DomainBlacklistEditDTO($domain);
+
+        $form = $this->createForm(DomainBlacklistEditType::class, $editDto, [
+            'action' => $this->generateUrl(
+                'admin_dashboard_settings_edit_domains',
+                ['id' => $domain->getId()]
+            ),
+        ]);
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $editDto->applyToEntity($domain);
+            $this->entityManager->flush();
+
+            $this->addFlash(
+                'success_admin',
+                $this->translator->trans(
+                    'domainEdited',
+                    ['%domain%' => $domain->getPattern()],
+                    'controllers'
+                )
+            );
+
+            /** @var User $currentUser */
+            $currentUser = $this->getUser();
+
+            $this->eventActions->saveEvent(
+                $currentUser,
+                AnalyticalEventType::BLACKLIST_DOMAIN_EDITED->value,
+                new DateTime(),
+                [
+                    'ip' => $request->getClientIp(),
+                    'user_agent' => $request->headers->get('User-Agent'),
+                    'by' => $currentUser->getUuid(),
+                    'domain-edited-before' => $oldDomainData->getPattern(),
+                    'domain-edited-after' => $domain->getPattern(),
+                ]
+            );
+
+            // If request is AJAX, return JSON instead of full page
+            if ($request->isXmlHttpRequest()) {
+                return $this->json([
+                    'success' => true,
+                    'id' => $domain->getId(),
+                    'pattern' => $domain->getPattern(),
+                    'type' => $domain->getType()->value,
+                    'message' => $this->translator->trans(
+                        'domainEdited',
+                        ['%domain%' => $domain->getPattern()],
+                        'controllers'
+                    ),
+                ]);
+            }
+
+            // Redirect to the main page
+            return $this->redirectToRoute('admin_dashboard_settings_domains');
+        }
+
+        // For GET request or invalid form submission
+        return $this->render('dashboard/shared/_edit_domains_blacklist.html.twig', [
+            'form' => $form->createView(),
+            'domain' => $domain,
         ]);
     }
 

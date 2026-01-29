@@ -36,6 +36,9 @@ addDomainManually: 'Add Domain Manually'
 addSourceManually: 'Add Source Manually'
 confirm_delete_domain_source: 'Are you sure you want to delete this domain source?'
 delete: 'Delete'
+editDomain: 'Edit Domain'
+close: 'Close'
+save: 'Save'
 domainsSourceWarningType: >
     Only link-based imports are supported. The provided URL must point to a valid
     <strong>.json</strong>, <strong>.txt</strong> or <strong>.csv</strong> file.
