@@ -1,10 +1,11 @@
 <div
         data-domain-blacklist-target="modal"
-        class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+        class="hidden p-4 fixed inset-0 bg-black/40 sm:bg-black/50 lg:bg-black/60 flex items-center justify-center z-50 transition-opacity duration-300"
         data-action="click->domain-blacklist#close"
 >
     <div
-            class="relative w-full max-w-lg max-h-[90vh] bg-white rounded-xl shadow-xl flex flex-col"
+            data-domain-blacklist-target="modalInner"
+            class="relative w-full sm:w-11/12 md:max-w-2xl lg:max-w-3xl xl:max-w-4xl max-h-[90vh] bg-white rounded-xl shadow-xl flex flex-col transform scale-95 opacity-0 transition-all duration-300"
             data-action="click->domain-blacklist#stop"
     >
         {# Header #}
@@ -25,9 +26,9 @@
         {# Form container #}
         <div
                 data-domain-blacklist-target="content"
-                class="flex-1 overflow-y-auto px-6 py-5"
+                class="flex-1 overflow-y-auto px-4 py-6 sm:px-6 md:px-8 lg:px-10"
         >
-            {# content is loaded dynamically with the domains-blacklisted stimulus controller #}
+            {# Form will be loaded dynamically via Stimulus #}
         </div>
     </div>
 </div>
