@@ -41,10 +41,13 @@ export default class extends Controller {
             </div>
         `;
 
-        const response = await fetch(`/dashboard/settings/domains/edit${domainId}`, {
+        const response = await fetch(`/dashboard/settings/domains/edit/${domainId}`, {
             headers: {'X-Requested-With': 'XMLHttpRequest'}
         });
 
-        this.contentTarget.innerHTML = await response.text();
+        const html = await response.text();
+        console.log('Response HTML:', html);
+
+        this.contentTarget.innerHTML = html;
     }
 }

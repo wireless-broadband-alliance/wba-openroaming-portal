@@ -3,7 +3,7 @@
 namespace App\Twig\Components;
 
 use App\DTO\DomainBlacklistAddDTO;
-use App\Form\DomainBlacklistType;
+use App\Form\DomainBlacklistAddType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormInterface;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
@@ -13,7 +13,7 @@ use Symfony\UX\LiveComponent\DefaultActionTrait;
 use Symfony\UX\LiveComponent\LiveCollectionTrait;
 
 #[AsLiveComponent]
-final class DomainBlacklistForm extends AbstractController
+final class DomainBlacklistAddForm extends AbstractController
 {
     use ComponentWithFormTrait;
     use DefaultActionTrait;
@@ -28,6 +28,6 @@ final class DomainBlacklistForm extends AbstractController
     #[\Override]
     protected function instantiateForm(): FormInterface
     {
-        return $this->createForm(DomainBlacklistType::class, $this->dto);
+        return $this->createForm(DomainBlacklistAddType::class, $this->dto);
     }
 }

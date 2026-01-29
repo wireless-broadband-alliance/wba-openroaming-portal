@@ -13,7 +13,8 @@ use App\Enum\DomainMatchType;
 use App\Enum\DomainOrigin;
 use App\Enum\DomainSourceStatus;
 use App\Enum\OperationMode;
-use App\Form\DomainBlacklistType;
+use App\Form\DomainBlacklistAddType;
+use App\Form\DomainBlacklistEditType;
 use App\Form\SourceBlacklistType;
 use App\Repository\DomainBlacklistRepository;
 use App\Repository\DomainSourceRepository;
@@ -57,6 +58,7 @@ class DomainBlacklistController extends AbstractController
         #[MapQueryParameter] string $orderDomainsBlacklist = 'desc',
         #[MapQueryParameter] string $orderDomainsSources = 'desc',
         #[MapQueryParameter] ?int $count = 7
+
     ): Response {
         $searchTerm = $request->query->get('u');
         $filter = $request->query->get('filter', (string)DomainSourceStatus::ALL->value);
@@ -71,7 +73,7 @@ class DomainBlacklistController extends AbstractController
 
         $addDomainDTO = new DomainBlacklistAddDTO();
 
-        $addDomainForm = $this->createForm(DomainBlacklistType::class, $addDomainDTO);
+        $addDomainForm = $this->createForm(DomainBlacklistAddType::class, $addDomainDTO);
         $addDomainForm->handleRequest($request);
 
         if ($addDomainForm->isSubmitted() && $addDomainForm->isValid()) {
@@ -230,9 +232,8 @@ class DomainBlacklistController extends AbstractController
     }
 
     #[Route(
-        '/dashboard/settings/domains/edit{id<\d+>}',
-        name: 'admin_dashboard_settings_domains_edit',
-        methods: ['GET', 'POST']
+        '/dashboard/settings/domains/edit/{id<\d+>}',
+        name: 'admin_dashboard_settings_edit_domains',
     )]
     #[IsGranted('ROLE_ADMIN')]
     public function editDomain(
@@ -241,9 +242,9 @@ class DomainBlacklistController extends AbstractController
     ): Response {
         $editDto = new DomainBlacklistEditDTO($domain);
 
-        $form = $this->createForm(DomainBlacklistType::class, $editDto, [
+        $form = $this->createForm(DomainBlacklistEditType::class, $editDto, [
             'action' => $this->generateUrl(
-                'admin_dashboard_settings_domains_edit',
+                'admin_dashboard_settings_edit_domains',
                 ['id' => $domain->getId()]
             ),
         ]);
@@ -262,12 +263,11 @@ class DomainBlacklistController extends AbstractController
             ]);
         }
 
-        return $this->render('dashboard/shared/_modal_edit_domain_blacklist.html.twig', [
+        return $this->render('dashboard/shared/_edit_domains_blacklist.html.twig', [
             'form' => $form->createView(),
             'domain' => $domain,
         ]);
     }
-
 
     #[Route(
         '/dashboard/settings/domain-blacklist/delete/{id<\d+>}',
