@@ -256,7 +256,7 @@ class DomainBlacklistController extends AbstractController
             $this->entityManager->flush();
 
             $this->addFlash(
-                'success_admin',
+                'success',
                 $this->translator->trans(
                     'domainEdited',
                     ['%domain%' => $domain->getPattern()],
