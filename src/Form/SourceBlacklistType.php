@@ -18,7 +18,6 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 class SourceBlacklistType extends AbstractType
 {
     public function __construct(
-        private readonly TranslatorInterface $translator
     ) {
     }
 
@@ -27,16 +26,6 @@ class SourceBlacklistType extends AbstractType
         $builder
             ->add('input', TextType::class, [
                 'required' => true,
-            ])
-            ->add('matchType', ChoiceType::class, [
-                'required' => true,
-                'choices' => DomainMatchType::cases(),
-                'choice_label' => fn(DomainMatchType $type) => match ($type) {
-                    DomainMatchType::EXACT => $this->translator->trans('exacts', [], '_blacklist'),
-                    DomainMatchType::SUBDOMAIN => $this->translator->trans('subdomains', [], '_blacklist'),
-                },
-                'choice_value' => static fn(?DomainMatchType $type) => $type?->value,
-                'translation_domain' => '_blacklist',
             ]);
     }
 

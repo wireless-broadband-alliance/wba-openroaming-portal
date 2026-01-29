@@ -10,25 +10,6 @@
         {% endif %}
     </td>
 
-    {# Match Type #}
-    <td class="p-4">
-        {% if domainsSource.domainMatchType is not null %}
-            <span class="font-semibold p-1">
-            {% if domainsSource.domainMatchType == constant('App\\Enum\\DomainMatchType::EXACT') %}
-                {{ 'exact'|trans({}, '_blacklist') }}
-            {% elseif domainsSource.domainMatchType == constant('App\\Enum\\DomainMatchType::SUBDOMAIN') %}
-                {{ 'subdomain'|trans({}, '_blacklist') }}
-            {% else %}
-                {{ 'noInformation'|trans({}, '_blacklist') }}
-            {% endif %}
-        </span>
-        {% else %}
-            <span class="font-semibold p-1 pill-error">
-                {{ 'noInformation'|trans({}, '_blacklist') }}
-            </span>
-        {% endif %}
-    </td>
-
     {# Domain Source Activation #}
     <td class="p-4">
         <p class="font-semibold p-1">
