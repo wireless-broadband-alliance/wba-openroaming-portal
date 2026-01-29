@@ -13,7 +13,6 @@ class DomainBlacklistEditDTO
     #[Assert\NotBlank]
     #[Assert\Length(max: 255, maxMessage: 'maxCharacters')]
     #[CustomAssert\DomainPattern]
-    #[CustomAssert\DomainListUrl]
     public ?string $input = null;
 
     #[Assert\NotBlank]
