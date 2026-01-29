@@ -7,6 +7,7 @@ use App\Enum\DomainMatchType;
 use App\Service\DomainDnsResolver;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
+use Symfony\Component\Validator\Exception\UnexpectedTypeException;
 
 class ResolvableDomainValidator extends ConstraintValidator
 {
@@ -17,6 +18,10 @@ class ResolvableDomainValidator extends ConstraintValidator
 
     public function validate(mixed $value, Constraint $constraint): void
     {
+        if (!$constraint instanceof ResolvableDomain) {
+            throw new UnexpectedTypeException($constraint, ResolvableDomain::class);
+        }
+
         if (!$value instanceof DomainBlacklistAddDTO) {
             return;
         }
@@ -25,6 +30,7 @@ class ResolvableDomainValidator extends ConstraintValidator
             return;
         }
 
+        // Ignore wildcards and regex patterns
         if ($value->input === '*' || str_starts_with($value->input, '/')) {
             return;
         }
