@@ -567,7 +567,7 @@ class DomainBlacklistController extends AbstractController
 
         if (!$domainSource->isActive()) {
             $this->addFlash(
-                'warning_admin',
+                'error_admin',
                 $this->translator->trans('domainSourceInactive', [], 'controllers')
             );
 
