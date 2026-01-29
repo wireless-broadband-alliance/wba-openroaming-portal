@@ -35,7 +35,7 @@ authenticatedUser: 'Atualmente está autenticado como {uuid}'
 os_selection:
     choose_os: 'Escolha o seu sistema operativo para que possa transferir e instalar o perfil:'
     macos_or_ios: 'macOS/iOS'
-    download_install: 'Transferir e Instalar Perfil'
+    download_install: 'Transferir Perfil Openroaming'
     download_hint: 'Se precisas de ajuda, segue as %link%.'
     instructions_link_text: 'instruções'
     device_identified: 'Dispositivo identificado como executando: %os%'
