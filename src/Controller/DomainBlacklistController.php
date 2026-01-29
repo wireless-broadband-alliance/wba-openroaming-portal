@@ -240,6 +240,7 @@ class DomainBlacklistController extends AbstractController
         DomainBlacklist $domain,
         Request $request
     ): Response {
+        $oldDomainData = clone $domain;
         $editDto = new DomainBlacklistEditDTO($domain);
 
         $form = $this->createForm(DomainBlacklistEditType::class, $editDto, [
@@ -255,14 +256,51 @@ class DomainBlacklistController extends AbstractController
             $editDto->applyToEntity($domain);
             $this->entityManager->flush();
 
-            return $this->json([
-                'success' => true,
-                'id' => $domain->getId(),
-                'pattern' => $domain->getPattern(),
-                'type' => $domain->getType()->value,
-            ]);
+            $this->addFlash(
+                'success_admin',
+                $this->translator->trans(
+                    'domainEdited',
+                    ['%domain%' => $domain->getPattern()],
+                    'controllers'
+                )
+            );
+
+            /** @var User $currentUser */
+            $currentUser = $this->getUser();
+
+            $this->eventActions->saveEvent(
+                $currentUser,
+                AnalyticalEventType::BLACKLIST_DOMAIN_EDITED->value,
+                new DateTime(),
+                [
+                    'ip' => $request->getClientIp(),
+                    'user_agent' => $request->headers->get('User-Agent'),
+                    'by' => $currentUser->getUuid(),
+                    'domain-edited-before' => $oldDomainData->getPattern(),
+                    'domain-edited-after' => $domain->getPattern(),
+                ]
+            );
+
+            // If request is AJAX, return JSON instead of full page
+            if ($request->isXmlHttpRequest()) {
+                return $this->json([
+                    'success' => true,
+                    'id' => $domain->getId(),
+                    'pattern' => $domain->getPattern(),
+                    'type' => $domain->getType()->value,
+                    'message' => $this->translator->trans(
+                        'domainEdited',
+                        ['%domain%' => $domain->getPattern()],
+                        'controllers'
+                    ),
+                ]);
+            }
+
+            // Redirect to the main page
+            return $this->redirectToRoute('admin_dashboard_settings_domains');
         }
 
+        // For GET request or invalid form submission
         return $this->render('dashboard/shared/_edit_domains_blacklist.html.twig', [
             'form' => $form->createView(),
             'domain' => $domain,

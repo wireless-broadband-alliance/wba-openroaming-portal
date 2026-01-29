@@ -111,6 +111,24 @@
         logo.classList.add('scale-100', 'opacity-100');
     }
 
+    function hideLoading() {
+        const overlay = document.getElementById('loading-overlay');
+        const content = document.getElementById('loading-content');
+        const logo = document.getElementById('loading-logo');
+
+        if (!overlay || !content || !logo) return;
+
+        // Animate out
+        overlay.classList.remove('opacity-100');
+        overlay.classList.add('opacity-0', 'pointer-events-none');
+
+        content.classList.remove('scale-100', 'translate-y-0');
+        content.classList.add('scale-95', 'translate-y-1');
+
+        logo.classList.remove('scale-100', 'opacity-100');
+        logo.classList.add('scale-75', 'opacity-0');
+    }
+
     // Show overlay when links or forms are triggered
     document.addEventListener('click', (e) => {
         const link = e.target.closest('a[href]');

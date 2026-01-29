@@ -59,7 +59,7 @@ export default class extends Controller {
 
     async loadForm(domainId) {
         if (!this.hasContentTarget) return;
-        
+
         try {
             const response = await fetch(`/dashboard/settings/domains/edit/${domainId}`, {
                 headers: {'X-Requested-With': 'XMLHttpRequest'}
@@ -69,10 +69,55 @@ export default class extends Controller {
 
             const html = await response.text();
             this.contentTarget.innerHTML = html;
+
+            // Attach submit handler for the loaded form
+            const form = this.contentTarget.querySelector('form');
+            if (form) {
+                form.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    showLoading();
+
+                    const formData = new FormData(form);
+                    const action = form.action;
+
+                    try {
+                        const res = await fetch(action, {
+                            method: form.method,
+                            body: formData,
+                            headers: {'X-Requested-With': 'XMLHttpRequest'}
+                        });
+
+                        const json = await res.json();
+
+                        if (json.success) {
+                            // Form submitted successfully → close modal
+                            this.close();
+
+                            // Optional: update the table row dynamically
+                            // Example: find row by data-id and update its text
+                            const row = document.querySelector(`tr[data-domain-id="${json.id}"]`);
+                            if (row) {
+                                row.querySelector('.pattern-cell').textContent = json.pattern;
+                                row.querySelector('.type-cell').textContent = json.type;
+                            }
+
+                            window.location.reload();
+                        } else {
+                            // If form returned HTML (validation errors), replace modal content
+                            const errorHtml = await res.text();
+                            this.contentTarget.innerHTML = errorHtml;
+
+                            hideLoading();
+                        }
+                    } catch (err) {
+                        console.error('Form submit error:', err);
+                    }
+                });
+            }
         } catch (err) {
             this.contentTarget.innerHTML = `
-                <div class="text-red-500 py-4 text-center">Failed to load form.</div>
-            `;
+            <div class="text-red-500 py-4 text-center">Failed to load form.</div>
+        `;
         }
     }
 }

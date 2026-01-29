@@ -134,6 +134,7 @@ invalidDomainPattern: "Invalid domain pattern: %domain%"
 invalidDomainPatternList: "The following domain patterns are invalid: %domains%"
 domainNotFound: 'Domain not found'
 domainDeleted: 'Domain "%domain%" deleted successfully.'
+domainEdited: 'Domain "%domain%" updated successfully.'
 domainAdded: 'Domain "%domain%" added successfully.'
 domainSourceNotFound: 'Domain Source not found'
 domainSourceDeleted: 'Domain Source "%domain%" deleted successfully.'
