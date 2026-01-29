@@ -7,6 +7,7 @@ use App\Enum\DomainMatchType;
 use Symfony\Component\Validator\Constraints as Assert;
 use App\Validator\Constraints as CustomAssert;
 
+#[CustomAssert\DomainPatternMatch]
 class DomainBlacklistDTO
 {
     #[Assert\NotBlank]
