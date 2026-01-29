@@ -1,4 +1,4 @@
-import {Controller} from '@hotwired/stimulus';
+import { Controller } from '@hotwired/stimulus';
 
 export default class extends Controller {
     static targets = ['modal', 'modalInner', 'content'];
@@ -61,7 +61,7 @@ export default class extends Controller {
         if (!this.hasContentTarget) return;
 
         const response = await fetch(`/dashboard/settings/domains/edit/${domainId}`, {
-            headers: {'X-Requested-With': 'XMLHttpRequest'},
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
         });
 
         if (!response.ok) throw new Error('Network error');
@@ -81,7 +81,7 @@ export default class extends Controller {
                 const res = await fetch(action, {
                     method: form.method,
                     body: formData,
-                    headers: {'X-Requested-With': 'XMLHttpRequest'},
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
                 });
 
                 const json = await res.json();
@@ -103,7 +103,6 @@ export default class extends Controller {
                     // If form returned HTML (validation errors), replace modal content
                     const errorHtml = await res.text();
                     this.contentTarget.innerHTML = errorHtml;
-
                 }
             });
         }
