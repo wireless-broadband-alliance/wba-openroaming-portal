@@ -1,4 +1,4 @@
-import {Controller} from '@hotwired/stimulus';
+import { Controller } from '@hotwired/stimulus';
 
 export default class extends Controller {
     static targets = ['modal', 'modalInner', 'content'];
@@ -62,7 +62,7 @@ export default class extends Controller {
 
         try {
             const response = await fetch(`/dashboard/settings/domains/edit/${domainId}`, {
-                headers: {'X-Requested-With': 'XMLHttpRequest'}
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
             });
 
             if (!response.ok) throw new Error('Network error');
@@ -84,7 +84,7 @@ export default class extends Controller {
                         const res = await fetch(action, {
                             method: form.method,
                             body: formData,
-                            headers: {'X-Requested-With': 'XMLHttpRequest'}
+                            headers: { 'X-Requested-With': 'XMLHttpRequest' },
                         });
 
                         const json = await res.json();
