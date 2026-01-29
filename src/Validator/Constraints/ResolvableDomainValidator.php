@@ -12,7 +12,8 @@ class ResolvableDomainValidator extends ConstraintValidator
 {
     public function __construct(
         private DomainDnsResolver $resolver
-    ) {}
+    ) {
+    }
 
     public function validate(mixed $value, Constraint $constraint): void
     {

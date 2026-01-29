@@ -58,7 +58,6 @@ class DomainBlacklistController extends AbstractController
         #[MapQueryParameter] string $orderDomainsBlacklist = 'desc',
         #[MapQueryParameter] string $orderDomainsSources = 'desc',
         #[MapQueryParameter] ?int $count = 7
-
     ): Response {
         $searchTerm = $request->query->get('u');
         $filter = $request->query->get('filter', (string)DomainSourceStatus::ALL->value);
