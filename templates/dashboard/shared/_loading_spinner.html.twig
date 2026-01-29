@@ -115,8 +115,18 @@
     document.addEventListener('click', (e) => {
         const link = e.target.closest('a[href]');
         if (!link) return;
-        if (link.target === '_blank') return;
-        if (link.hasAttribute('download')) return;
+
+        // Ignore JS-only / fake links
+        if (
+                link.getAttribute('href') === '#' ||
+                link.getAttribute('href') === '' ||
+                link.hasAttribute('onclick') ||
+                link.dataset.noLoader === 'true' ||
+                link.target === '_blank' ||
+                link.hasAttribute('download')
+        ) {
+            return;
+        }
 
         showLoading();
     });
