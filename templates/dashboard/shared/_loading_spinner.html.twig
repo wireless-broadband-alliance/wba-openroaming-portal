@@ -93,8 +93,12 @@
 </div>
 
 <script>
-    // Add smooth entry animation
+    let loadingVisible = false;
+
     function showLoading() {
+        if (loadingVisible) return;
+        loadingVisible = true;
+
         const overlay = document.getElementById('loading-overlay');
         const content = document.getElementById('loading-content');
         const logo = document.getElementById('loading-logo');
@@ -112,13 +116,14 @@
     }
 
     function hideLoading() {
+        loadingVisible = false;
+
         const overlay = document.getElementById('loading-overlay');
         const content = document.getElementById('loading-content');
         const logo = document.getElementById('loading-logo');
 
         if (!overlay || !content || !logo) return;
 
-        // Animate out
         overlay.classList.remove('opacity-100');
         overlay.classList.add('opacity-0', 'pointer-events-none');
 
@@ -129,27 +134,46 @@
         logo.classList.add('scale-75', 'opacity-0');
     }
 
-    // Show overlay when links or forms are triggered
+    /**
+     * LINKS → real navigation only
+     */
     document.addEventListener('click', (e) => {
         const link = e.target.closest('a[href]');
         if (!link) return;
 
-        // Ignore JS-only / fake links
         if (
-                link.getAttribute('href') === '#' ||
-                link.getAttribute('href') === '' ||
-                link.hasAttribute('onclick') ||
                 link.dataset.noLoader === 'true' ||
                 link.target === '_blank' ||
-                link.hasAttribute('download')
+                link.hasAttribute('download') ||
+                link.getAttribute('href') === '#' ||
+                link.getAttribute('href').startsWith('javascript:')
         ) {
             return;
         }
 
+        // Ignore same-page hash navigation
+        const current = window.location.href.split('#')[0];
+        const target = link.href.split('#')[0];
+        if (current === target) return;
+
         showLoading();
     });
 
-    document.addEventListener('submit', () => {
+    /**
+     * FORMS → real submits only
+     */
+    document.addEventListener('submit', (e) => {
+        const form = e.target;
+
+        if (form.dataset.noLoader === 'true') return;
+
         showLoading();
+    });
+
+    /**
+     * Back / forward cache safety
+     */
+    window.addEventListener('pageshow', () => {
+        hideLoading();
     });
 </script>
