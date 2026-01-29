@@ -2,8 +2,8 @@
 
 namespace App\DTO;
 
-use App\Enum\DomainMatchType;
 use Symfony\Component\Validator\Constraints as Assert;
+use App\Validator\Constraints as CustomAssert;
 
 class SourceBlacklistDTO
 {
@@ -12,6 +12,7 @@ class SourceBlacklistDTO
     #[Assert\Url(
         message: 'invalidSource'
     )]
+    #[CustomAssert\DomainListUrl]
     public ?string $input = null;
 
     public ?int $id = null;
