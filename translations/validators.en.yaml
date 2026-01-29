@@ -53,3 +53,4 @@ invalidDomainPattern: 'The domain is not valid. Use an exact domain (example.com
 invalidSource: 'Please enter a valid URL.'
 exact_no_wildcard: 'For exact matching, the domain must not contain wildcard characters (*).'
 subdomain_requires_wildcard: 'For subdomain matching, the domain must start with "*.".'
+domain_not_resolvable: 'The specified domain could not be resolved via DNS at the time of validation.'

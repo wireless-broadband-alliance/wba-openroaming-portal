@@ -8,7 +8,8 @@ use Symfony\Component\Validator\Constraints as Assert;
 use App\Validator\Constraints as CustomAssert;
 
 #[CustomAssert\DomainPatternMatch]
-class DomainBlacklistDTO
+#[CustomAssert\ResolvableDomain]
+class DomainBlacklistAddDTO
 {
     #[Assert\NotBlank]
     #[Assert\Length(max: 255, maxMessage: 'maxCharacters')]

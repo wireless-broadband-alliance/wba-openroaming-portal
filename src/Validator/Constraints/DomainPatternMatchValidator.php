@@ -2,7 +2,7 @@
 
 namespace App\Validator\Constraints;
 
-use App\DTO\DomainBlacklistDTO;
+use App\DTO\DomainBlacklistAddDTO;
 use App\Enum\DomainMatchType;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
@@ -11,7 +11,7 @@ class DomainPatternMatchValidator extends ConstraintValidator
 {
     public function validate(mixed $value, Constraint $constraint): void
     {
-        if (!$value instanceof DomainBlacklistDTO) {
+        if (!$value instanceof DomainBlacklistAddDTO) {
             return;
         }
 
