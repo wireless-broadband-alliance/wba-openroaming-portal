@@ -4,7 +4,6 @@ namespace App\Command;
 
 use App\Entity\DomainBlacklist;
 use App\Entity\DomainSource;
-use App\Enum\DomainMatchType;
 use App\Enum\DomainOrigin;
 use App\Repository\DomainBlacklistRepository;
 use App\Repository\DomainSourceRepository;
@@ -44,13 +43,12 @@ class ImportTemporaryDomainsCommand extends Command
 
     protected function configure(): void
     {
-        $this
-            ->addOption(
-                'source',
-                null,
-                InputOption::VALUE_OPTIONAL,
-                'ID of the domain source to import'
-            );
+        $this->addOption(
+            'source',
+            null,
+            InputOption::VALUE_OPTIONAL,
+            'ID of the domain source to import'
+        );
     }
 
     /**
@@ -58,23 +56,15 @@ class ImportTemporaryDomainsCommand extends Command
      * @throws ServerExceptionInterface
      * @throws RedirectionExceptionInterface
      * @throws ClientExceptionInterface
+     * @throws \JsonException
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $runAt = new DateTimeImmutable();
         $processed = 0;
 
-        // Mark all LINK domains as potentially stale
-        $this->domainBlacklistRepository->markAllAsStale(DomainOrigin::LINK);
-
-        // Load existing LINK domains (pattern => true)
-        $existingPatterns = $this->domainBlacklistRepository->getAllPatternsByOrigin(DomainOrigin::LINK);
-
-        // Temporary array to hold batch updates for lastSeenAt
-        $batchUpdates = [];
-
-        // Fetch active sources
         $sourceId = $input->getOption('source');
+        $deleteStale = true; // Only delete stale when running full import
 
         if ($sourceId) {
             $source = $this->domainSourceRepository->find($sourceId);
@@ -83,9 +73,17 @@ class ImportTemporaryDomainsCommand extends Command
                 return Command::FAILURE;
             }
             $sources = [$source];
+            $deleteStale = false; // Do NOT delete stale domains from other sources
         } else {
             $sources = $this->domainSourceRepository->findActiveSources();
+            // Mark all LINK domains as potentially stale
+            $this->domainBlacklistRepository->markAllAsStale(DomainOrigin::LINK);
         }
+
+        // Load all existing LINK domains (pattern => true)
+        $existingPatterns = $this->domainBlacklistRepository->getAllPatternsByOrigin(DomainOrigin::LINK);
+
+        $batchUpdates = [];
 
         foreach ($sources as $source) {
             $url = $source->getUrl();
@@ -107,10 +105,9 @@ class ImportTemporaryDomainsCommand extends Command
                 }
 
                 if (isset($existingPatterns[$domain])) {
-                    // Existing domain → collect for batch update
-                    $batchUpdates[] = $domain;
+                    $batchUpdates[] = $domain; // update lastSeenAt later
                 } else {
-                    // New domain → persist normally
+                    // Existing domain → collect for batch update
                     $entity = new DomainBlacklist();
                     $entity
                         ->setPattern($domain)
@@ -140,12 +137,13 @@ class ImportTemporaryDomainsCommand extends Command
         // Final flush
         $this->flushBatch($runAt, $batchUpdates);
 
-        // Remove stale domains
-        $deleted = $this->domainBlacklistRepository->deleteStale(DomainOrigin::LINK);
+        // Delete stale domains only if full import
+        $deleted = 0;
+        if ($deleteStale) {
+            $deleted = $this->domainBlacklistRepository->deleteStale(DomainOrigin::LINK);
+        }
 
-        $output->writeln(
-            "<info>Imported {$processed} domains. Removed {$deleted} stale domains.</info>"
-        );
+        $output->writeln("<info>Imported {$processed} domains. Removed {$deleted} stale domains.</info>");
 
         return Command::SUCCESS;
     }
@@ -169,10 +167,11 @@ class ImportTemporaryDomainsCommand extends Command
     }
 
     /**
-     * Parse content and return domains.
-     * Supports JSON array, CSV, TXT (one per line)
+     *  Parse content and return domains.
+     *  Supports JSON array, CSV, TXT (one per line)
      *
      * @return iterable<string> Iterable of domain strings
+     * @throws \JsonException
      */
     private function parseDomains(string $content): iterable
     {
@@ -180,7 +179,7 @@ class ImportTemporaryDomainsCommand extends Command
 
         // Try JSON first
         if (str_starts_with($content, '[')) {
-            $json = json_decode($content, true);
+            $json = json_decode($content, true, 512, JSON_THROW_ON_ERROR);
             if (is_array($json)) {
                 foreach ($json as $domain) {
                     yield (string)$domain;
@@ -190,9 +189,7 @@ class ImportTemporaryDomainsCommand extends Command
         }
 
         // Split lines
-        $lines = explode("\n", $content);
-
-        foreach ($lines as $line) {
+        foreach (explode("\n", $content) as $line) {
             $line = trim($line);
             if ($line === '') {
                 continue;
@@ -200,8 +197,8 @@ class ImportTemporaryDomainsCommand extends Command
 
             // CSV: pick first column
             if (str_contains($line, ',')) {
-                $row = str_getcsv($line, escape: '\\');
-                if (isset($row[0]) && ($row[0] !== '' && $row[0] !== '0')) {
+                $row = str_getcsv($line);
+                if (isset($row[0]) && $row[0] !== '' && $row[0] !== '0') {
                     yield $row[0];
                     continue;
                 }
