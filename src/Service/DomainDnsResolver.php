@@ -12,6 +12,6 @@ class DomainDnsResolver
             return false;
         }
 
-        return !($records === false || empty($records));
+        return $records !== false && $records !== [];
     }
 }
