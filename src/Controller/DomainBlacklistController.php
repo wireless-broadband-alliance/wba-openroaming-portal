@@ -234,7 +234,7 @@ class DomainBlacklistController extends AbstractController
         '/dashboard/settings/domains/edit/{id<\d+>}',
         name: 'admin_dashboard_settings_edit_domains',
     )]
-    #[IsGranted('ROLE_ADMIN')]
+    #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
     public function editDomain(
         DomainBlacklist $domain,
         Request $request
