@@ -48,7 +48,7 @@
             {# Delete #}
             <form
                     method="post"
-                    action="{{ path('admin_dashboard_blacklist_delete_domain', { id: domain.id }) }}"
+                    action="{{ path('admin_dashboard_blacklist_delete_domain', {id: domain.id}) }}"
             >
                 <input type="hidden" name="_method" value="DELETE">
                 <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ domain.id) }}">
