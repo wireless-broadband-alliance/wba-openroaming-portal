@@ -1,0 +1,33 @@
+<div
+        data-domain-blacklist-target="modal"
+        class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+        data-action="click->domain-blacklist#close"
+>
+    <div
+            class="relative w-full max-w-lg max-h-[90vh] bg-white rounded-xl shadow-xl flex flex-col"
+            data-action="click->domain-blacklist#stop"
+    >
+        {# Header #}
+        <div class="flex justify-between items-center border-b p-4">
+            <h2 class="text-primary text-lg font-semibold" data-domain-blacklist-target="title">
+                {{ 'editDomain'|trans({}, '_blacklist') }}
+            </h2>
+            <button
+                    type="button"
+                    class="flex items-center gap-x-2 text-[#707070] hover:text-primary transition"
+                    data-action="domain-blacklist#close"
+            >
+                <span>{{ 'close'|trans({}, '_blacklist') }}</span>
+                <twig:ux:icon name="wba:cross" class="fill-current"/>
+            </button>
+        </div>
+
+        {# Form container #}
+        <div
+                data-domain-blacklist-target="content"
+                class="flex-1 overflow-y-auto px-6 py-5"
+        >
+            {# content is loaded dynamically with the domains-blacklisted stimulus controller #}
+        </div>
+    </div>
+</div>

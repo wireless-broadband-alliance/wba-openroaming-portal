@@ -3,11 +3,7 @@
 
     {# Domain pattern #}
     <td class="p-4 pl-8">
-        {% if domain.pattern is not null %}
-            {{ domain.pattern }}
-        {% else %}
-            <span class="font-semibold p-1 pill-error">{{ 'noInformation'|trans({}, '_blacklist') }}</span>
-        {% endif %}
+        {{ domain.pattern ?? ('noInformation'|trans({}, '_blacklist')) }}
     </td>
 
     <td class="p-4 pl-8">
@@ -22,32 +18,49 @@
 
     {# Created At #}
     <td class="p-4 pl-8">
-        {{ domain.createdat|date('d/m/Y H:i') }}
+        {{ domain.createdAt|date('d/m/Y H:i') }}
     </td>
 
     {# Last Seen At #}
     <td class="p-4 pl-8">
         {% if domain.lastSeenAt %}
-            <span>
-                    {{ domain.lastSeenAt|date('d/m/Y H:i') }}
-                </span>
+            {{ domain.lastSeenAt|date('d/m/Y H:i') }}
         {% else %}
-            <span class="pill-error">
-                    {{ 'noData'|trans({}, '_blacklist') }}
-                </span>
+            <span class="pill-error">{{ 'noData'|trans({}, '_blacklist') }}</span>
         {% endif %}
     </td>
 
     {# Actions Buttons #}
     <td class="p-4 pl-8 text-right">
-        <form method="post"
-              action="{{ path('admin_dashboard_blacklist_delete_domain', {id: domain.id}) }}">
-            <input type="hidden" name="_method" value="DELETE">
+        <div class="flex justify-center gap-3">
 
-            <button type="submit"
-                    class="flex flex-row items-center px-2 py-2 cursor-pointer hover:text-red-400">
-                <twig:ux:icon name="wba:trash" class="w-5 mr-3 fill-none stroke-current"/>
+            {# Edit #}
+            <button
+                    type="button"
+                    class="flex items-center px-2 py-2 hover:text-primary"
+                    title="Edit"
+                    data-action="click->domain-blacklist#open"
+                    data-domain-blacklist-id-param="{{ domain.id }}"
+            >
+                <twig:ux:icon name="wba:pencil-edit" class="w-5 fill-none stroke-current"/>
             </button>
-        </form>
+
+            {# Delete #}
+            <form
+                    method="post"
+                    action="{{ path('admin_dashboard_blacklist_delete_domain', { id: domain.id }) }}"
+            >
+                <input type="hidden" name="_method" value="DELETE">
+                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ domain.id) }}">
+
+                <button
+                        type="submit"
+                        class="flex items-center px-2 py-2 hover:text-red-500"
+                        title="Delete"
+                >
+                    <twig:ux:icon name="wba:trash" class="w-5 fill-none stroke-current"/>
+                </button>
+            </form>
+        </div>
     </td>
 </tr>

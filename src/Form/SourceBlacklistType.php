@@ -2,7 +2,7 @@
 
 namespace App\Form;
 
-use App\DTO\DomainBlacklistDTO;
+use App\DTO\DomainBlacklistAddDTO;
 use App\DTO\SourceBlacklistDTO;
 use App\Enum\DomainMatchType;
 use Symfony\Component\Form\AbstractType;
