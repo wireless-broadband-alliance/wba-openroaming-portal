@@ -20,9 +20,6 @@ class DomainSource
     private bool $active = true;
 
     #[ORM\Column]
-    private DomainMatchType $domainMatchType;
-
-    #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
 
     public function __construct(

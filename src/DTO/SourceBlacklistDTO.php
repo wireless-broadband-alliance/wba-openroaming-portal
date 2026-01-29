@@ -14,8 +14,5 @@ class SourceBlacklistDTO
     )]
     public ?string $input = null;
 
-    #[Assert\NotBlank]
-    public ?DomainMatchType $matchType = null;
-
     public ?int $id = null;
 }
