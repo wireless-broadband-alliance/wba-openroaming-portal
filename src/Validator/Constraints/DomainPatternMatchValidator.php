@@ -19,7 +19,7 @@ class DomainPatternMatchValidator extends ConstraintValidator
             return;
         }
 
-        if ($value->input === null || $value->matchType === null) {
+        if ($value->input === null || !$value->matchType instanceof DomainMatchType) {
             return;
         }
 

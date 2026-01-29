@@ -11,7 +11,7 @@ use Symfony\Component\Validator\ConstraintValidator;
 class ResolvableDomainValidator extends ConstraintValidator
 {
     public function __construct(
-        private DomainDnsResolver $resolver
+        private readonly DomainDnsResolver $resolver
     ) {
     }
 
@@ -21,7 +21,7 @@ class ResolvableDomainValidator extends ConstraintValidator
             return;
         }
 
-        if ($value->input === null || $value->matchType === null) {
+        if ($value->input === null || !$value->matchType instanceof DomainMatchType) {
             return;
         }
 

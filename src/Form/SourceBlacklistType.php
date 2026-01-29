@@ -17,9 +17,6 @@ use Symfony\Contracts\Translation\TranslatorInterface;
  */
 class SourceBlacklistType extends AbstractType
 {
-    public function __construct()
-    {
-    }
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {

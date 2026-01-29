@@ -60,15 +60,4 @@ class DomainSource
     {
         return $this->createdAt;
     }
-
-    public function getDomainMatchType(): DomainMatchType
-    {
-        return $this->domainMatchType;
-    }
-
-    public function setDomainMatchType(DomainMatchType $domainMatchType): static
-    {
-        $this->domainMatchType = $domainMatchType;
-        return $this;
-    }
 }

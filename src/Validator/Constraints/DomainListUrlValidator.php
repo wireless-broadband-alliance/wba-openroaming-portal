@@ -53,8 +53,8 @@ class DomainListUrlValidator extends ConstraintValidator
             $content = substr($response->getContent(false), 0, 2000);
 
             $lines = array_filter(
-                array_map('trim', explode("\n", $content)),
-                static fn($line) => $line !== '' && !str_starts_with($line, '#')
+                array_map(trim(...), explode("\n", $content)),
+                static fn($line) => $line !== '' && !str_starts_with((string) $line, '#')
             );
 
             if ($lines === []) {
