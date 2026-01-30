@@ -41,20 +41,33 @@ class DomainListUrlValidator extends ConstraintValidator
                 return;
             }
 
-            $headers = $response->getHeaders(false);
-            $contentType = $headers['content-type'][0] ?? '';
+            // Read only a small chunk (performance)
+            $content = substr($response->getContent(false), 0, 3000);
+            $content = trim($content);
 
-            // Reject HTML pages (GitHub UI, etc.)
-            if (str_contains($contentType, 'text/html')) {
+            if ($content === '') {
                 $this->violation($constraint);
                 return;
             }
 
-            $content = substr($response->getContent(false), 0, 2000);
+            // Reject real HTML documents (GitHub UI, etc.)
+            if ($this->looksLikeHtmlDocument($content)) {
+                $this->violation($constraint);
+                return;
+            }
+
+            // JSON array
+            if ($this->looksLikeJsonArray($content)) {
+                return;
+            }
+
+            // TXT / CSV validation
+            $rawLines = preg_split('/\R/', $content);
+            $rawLines = is_array($rawLines) ? $rawLines : [];
 
             $lines = array_filter(
-                array_map(trim(...), explode("\n", $content)),
-                static fn($line) => $line !== '' && !str_starts_with((string) $line, '#')
+                array_map(trim(...), $rawLines),
+                static fn ($line) => $line !== '' && !str_starts_with((string) $line, '#')
             );
 
             if ($lines === []) {
@@ -65,17 +78,49 @@ class DomainListUrlValidator extends ConstraintValidator
             $validLines = 0;
 
             foreach ($lines as $line) {
-                if (preg_match('/^([a-z0-9-]+\.)+[a-z]{2,}$/i', $line)) {
+                if (
+                    $this->isDomain($line) ||
+                    $this->isCidr($line)
+                ) {
                     $validLines++;
                 }
             }
 
+            // Require some signal, not perfection
             if ($validLines < 3) {
                 $this->violation($constraint);
             }
         } catch (Throwable) {
             $this->violation($constraint);
         }
+    }
+
+    private function looksLikeHtmlDocument(string $content): bool
+    {
+        return preg_match('/<(html|head|body|script|title)[\s>]/i', $content) === 1;
+    }
+
+    private function looksLikeJsonArray(string $content): bool
+    {
+        if (!str_starts_with($content, '[')) {
+            return false;
+        }
+
+        $json = json_decode($content, true, 512, JSON_THROW_ON_ERROR);
+        return is_array($json);
+    }
+
+    private function isDomain(string $line): bool
+    {
+        return preg_match('/^([a-z0-9-]+\.)+[a-z]{2,}$/i', $line) === 1;
+    }
+
+    private function isCidr(string $line): bool
+    {
+        return preg_match(
+            '/^(?:\d{1,3}\.){3}\d{1,3}\/\d{1,2}$/',
+            $line
+        ) === 1;
     }
 
     private function violation(DomainListUrl $constraint): void
