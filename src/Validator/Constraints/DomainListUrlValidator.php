@@ -66,8 +66,8 @@ class DomainListUrlValidator extends ConstraintValidator
             $rawLines = is_array($rawLines) ? $rawLines : [];
 
             $lines = array_filter(
-                array_map('trim', $rawLines),
-                static fn ($line) => $line !== '' && !str_starts_with($line, '#')
+                array_map(trim(...), $rawLines),
+                static fn ($line) => $line !== '' && !str_starts_with((string) $line, '#')
             );
 
             if ($lines === []) {
