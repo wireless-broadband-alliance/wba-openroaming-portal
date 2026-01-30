@@ -8,6 +8,7 @@ use App\Enum\DomainOrigin;
 use App\Repository\DomainBlacklistRepository;
 use App\Repository\DomainSourceRepository;
 use App\Service\DomainService;
+use App\Validator\Constraints\ResolvableDomain;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -21,6 +22,8 @@ use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
+use App\Validator\Constraints\DomainPattern;
 
 #[AsCommand(
     name: 'import:temporary-domains',
@@ -37,6 +40,7 @@ class ImportTemporaryDomainsCommand extends Command
         private readonly DomainService $domainService,
         private readonly DomainBlacklistRepository $domainBlacklistRepository,
         private readonly DomainSourceRepository $domainSourceRepository,
+        private readonly ValidatorInterface $validator,
     ) {
         parent::__construct();
     }
@@ -100,6 +104,16 @@ class ImportTemporaryDomainsCommand extends Command
                 $domain = $this->domainService->normalize($rawDomain);
 
                 if ($domain === '' || !$this->domainService->isValidDomain($domain)) {
+                    $progressBar->advance();
+                    continue;
+                }
+
+                if (count($this->validator->validate($domain, new DomainPattern())) > 0) {
+                    $progressBar->advance();
+                    continue;
+                }
+
+                if (count($this->validator->validate($domain, new ResolvableDomain())) > 0) {
                     $progressBar->advance();
                     continue;
                 }
