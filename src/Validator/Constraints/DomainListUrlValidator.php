@@ -63,8 +63,8 @@ class DomainListUrlValidator extends ConstraintValidator
 
             // TXT / CSV validation
             $lines = array_filter(
-                array_map('trim', preg_split('/\R/', $content)),
-                static fn($line) => $line !== '' && !str_starts_with($line, '#')
+                array_map(trim(...), preg_split('/\R/', $content)),
+                static fn($line) => $line !== '' && !str_starts_with((string) $line, '#')
             );
 
             if ($lines === []) {
