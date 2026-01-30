@@ -115,9 +115,9 @@ class DomainListUrlValidator extends ConstraintValidator
     private function isCidr(string $line): bool
     {
         return preg_match(
-                '/^(?:\d{1,3}\.){3}\d{1,3}\/\d{1,2}$/',
-                $line
-            ) === 1;
+            '/^(?:\d{1,3}\.){3}\d{1,3}\/\d{1,2}$/',
+            $line
+        ) === 1;
     }
 
     private function violation(DomainListUrl $constraint): void
