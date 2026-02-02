@@ -57,7 +57,7 @@ class ResolvableDomainValidator extends ConstraintValidator
 
         if (!$this->resolver->resolver($ascii, $recordTypes)) {
             $this->context
-                ->buildViolation('The domain must have at least an A, MX, or SOA record.')
+                ->buildViolation($constraint->message)
                 ->atPath('input')
                 ->addViolation();
         }
