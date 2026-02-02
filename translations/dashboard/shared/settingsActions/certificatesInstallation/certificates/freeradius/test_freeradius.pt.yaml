@@ -16,9 +16,7 @@ test_passed: 'Último Test Aprovado'
 test_failed: 'Último Teste Reprovado'
 manual_test_warning: >
     O teste automático não é possível nesta etapa.
-    
     Por motivos de segurança, a máquina onde o FreeRADIUS está instalado é uma máquina isolada e sem acesso à Internet.
-    
     Por essa razão, este passo deve ser realizado manualmente, através da cópia do conteúdo dos certificados.
 
 manual_command_title: "Execute este comando no servidor FreeRADIUS"
@@ -30,12 +28,10 @@ manual_command_hint: >
 paste_certificates_label: "Colar conteúdo dos certificados"
 paste_certificates_placeholder: |
     Cola aqui o resultado completo do comando.
-    
     O conteúdo deve incluir:
     - Certificado da CA (ca.pem)
     - Certificado do servidor (cert.pem)
     - Cadeia de certificados (chain.pem / fullchain.pem)
     - Chave privada (privkey.pem)
-    
     Certifique-se de que o conteúdo começa com:
     -----BEGIN CERTIFICATE-----
