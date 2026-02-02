@@ -790,7 +790,7 @@ class CertificateManagementFreeradiusController extends AbstractController
         $formFinishProcess = $this->createForm(SimpleSubmitFormType::class);
         $formFinishProcess->handleRequest($request);
         if ($formFinishProcess->isSubmitted()) {
-            if ($processEntity->getFreeradiusTestResult() === ProcessStatusType::IN_PROGRESS) {
+            if ($processEntity->getStatus() === ProcessStatusType::IN_PROGRESS) {
                 $this->addFlash(
                     'error',
                     $this->translator->trans('pendingProcessCertsCompleted', [], 'controllers')
