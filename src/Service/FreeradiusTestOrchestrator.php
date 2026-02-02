@@ -25,10 +25,7 @@ final readonly class FreeradiusTestOrchestrator
     }
 
     /**
-     * @param Request $request
-     * @param CertificateSetupProcess $process
      * @param array{fullchain: string, ca: string} $paths
-     * @param string $userPem
      */
     public function run(
         Request $request,

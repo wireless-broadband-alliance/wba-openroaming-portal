@@ -60,7 +60,7 @@ final class FreeradiusCertificateValidatorService
 
         openssl_x509_export($res, $normalized);
 
-        return hash('sha256', $normalized);
+        return hash('sha256', (string) $normalized);
     }
 
     /**
