@@ -24,6 +24,9 @@ final readonly class FreeradiusTestOrchestrator
     ) {
     }
 
+    /**
+     * @param array<string> $paths
+     */
     public function run(
         Request $request,
         CertificateSetupProcess $process,
