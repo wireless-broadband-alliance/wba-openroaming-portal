@@ -8,7 +8,7 @@ final class FreeradiusCertificateValidatorService
 {
     /**
      * @param string $userPem Raw pasted PEM from user
-     * @param array $paths Signing-keys paths
+     * @param array{fullchain: string, ca: string} $paths Signing-keys paths
      */
     public function validate(string $userPem, array $paths): void
     {
@@ -18,9 +18,13 @@ final class FreeradiusCertificateValidatorService
             throw FreeradiusTestException::noCertificateProvided();
         }
 
-        $serverCerts = $this->extractCertificates(
-            file_get_contents($paths['fullchain'])
-        );
+        $fullchainPem = file_get_contents($paths['fullchain']);
+
+        if ($fullchainPem === false) {
+            throw FreeradiusTestException::invalidCertificateChain();
+        }
+
+        $serverCerts = $this->extractCertificates($fullchainPem);
 
         $this->compareCertificates($serverCerts, $userCerts);
         $this->validateDates($userCerts);
@@ -29,6 +33,9 @@ final class FreeradiusCertificateValidatorService
 
     // ---------------- PRIVATE HELPERS ----------------
 
+    /**
+     * @return list<string> PEM certificates
+     */
     private function extractCertificates(string $pem): array
     {
         preg_match_all(
@@ -39,7 +46,7 @@ final class FreeradiusCertificateValidatorService
 
         return array_map(
             static fn($c) => "-----BEGIN CERTIFICATE-----{$c}-----END CERTIFICATE-----",
-            $matches[1] ?? []
+            $matches[1]
         );
     }
 
@@ -53,9 +60,13 @@ final class FreeradiusCertificateValidatorService
 
         openssl_x509_export($res, $normalized);
 
-        return hash('sha256', (string) $normalized);
+        return hash('sha256', $normalized);
     }
 
+    /**
+     * @param list<string> $serverCerts
+     * @param list<string> $userCerts
+     */
     private function compareCertificates(array $serverCerts, array $userCerts): void
     {
         $serverFp = array_map($this->fingerprint(...), $serverCerts);
@@ -68,12 +79,19 @@ final class FreeradiusCertificateValidatorService
         }
     }
 
+    /**
+     * @param list<string> $certs
+     */
     private function validateDates(array $certs): void
     {
         $now = time();
 
         foreach ($certs as $pem) {
             $info = openssl_x509_parse($pem);
+
+            if ($info === false) {
+                throw FreeradiusTestException::invalidCertificateChain();
+            }
 
             if ($now < $info['validFrom_time_t']) {
                 throw FreeradiusTestException::certificateNotYetValid(
