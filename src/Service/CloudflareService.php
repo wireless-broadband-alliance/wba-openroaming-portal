@@ -12,10 +12,10 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 readonly class CloudflareService
 {
-
     public function __construct(
         private HttpClientInterface $httpClient
-    ) {}
+    ) {
+    }
 
     /**
      * @throws TransportExceptionInterface

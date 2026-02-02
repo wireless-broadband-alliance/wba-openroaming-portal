@@ -17,7 +17,6 @@ use Symfony\UX\LiveComponent\LiveCollectionTrait;
 #[AsLiveComponent]
 final class CloudflareForm extends AbstractController
 {
-
     use ComponentWithFormTrait;
     use DefaultActionTrait;
     use LiveCollectionTrait;

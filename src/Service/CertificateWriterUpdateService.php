@@ -19,7 +19,7 @@ readonly class CertificateWriterUpdateService
         private SettingRepository $settingRepository
     ) {
         $this->signingKeysPath = $this->kernel->getProjectDir(
-            ) . DIRECTORY_SEPARATOR . 'signing-keys' . DIRECTORY_SEPARATOR;
+        ) . DIRECTORY_SEPARATOR . 'signing-keys' . DIRECTORY_SEPARATOR;
     }
 
     /**

@@ -270,8 +270,7 @@ class CertificateManagementRadsecproxyController extends AbstractController
     #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
     public function settingsCertificatesManagementRadsecproxyTest(
         Request $request
-    ): Response
-    {
+    ): Response {
         // Get current process state
         $processState = $this->certificateProcessCheckerService->getProcessState();
 

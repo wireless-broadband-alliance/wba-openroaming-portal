@@ -13,7 +13,6 @@ use Vich\UploaderBundle\Form\Type\VichFileType;
 
 class CloudflareType extends AbstractType
 {
-
     public function __construct(
         private readonly TranslatorInterface $translator
     ) {

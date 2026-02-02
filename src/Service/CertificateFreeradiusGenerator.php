@@ -267,7 +267,7 @@ readonly class CertificateFreeradiusGenerator
         ];
 
         return array_map(
-            fn ($f) => $this->certTargetDir. '/' . $f,
+            fn ($f) => $this->certTargetDir . '/' . $f,
             $files
         );
     }
