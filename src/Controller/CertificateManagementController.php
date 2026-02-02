@@ -73,7 +73,7 @@ class CertificateManagementController extends AbstractController
         return $this->render('dashboard/shared/settings_actions.html.twig', [
         'data' => $this->getSettings->getSettings(),
         'lastCompletedInstallation' => $installationDate ?? null,
-        'certificateSet' => $certificateSet ?? null,
+        'certificateSet' => $certificateSet,
         'lastCompletedCertificates' => $certificateDate ?? null,
         ]);
     }
