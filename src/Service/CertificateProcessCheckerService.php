@@ -39,21 +39,25 @@ readonly class CertificateProcessCheckerService
     {
         $process = $this->getCurrentProcess();
 
-        if ($info && (!$process ||
-                $process->getStatus() === ProcessStatusType::ABORTED)) {
+        if (
+            $info && (!$process ||
+                $process->getStatus() === ProcessStatusType::ABORTED)
+        ) {
             return [
                 'active' => false,
                 'stages' => [],
             ];
         }
-        if (!$info && (!$process ||
+        if (
+            !$info && (!$process ||
                 $process->getStatus() === ProcessStatusType::ABORTED ||
-                $process->getStatus() === ProcessStatusType::COMPLETED)) {
+                $process->getStatus() === ProcessStatusType::COMPLETED)
+        ) {
                 return [
                     'active' => false,
                     'stages' => [],
                 ];
-            }
+        }
 
 
         $stages = [];

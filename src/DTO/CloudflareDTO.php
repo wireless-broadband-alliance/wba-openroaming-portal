@@ -9,7 +9,6 @@ use App\Validator\Constraints as CustomAssert;
 
 class CloudflareDTO
 {
-
     /**
      * Notices/Warnings generated during the upload
      * @var list<string>

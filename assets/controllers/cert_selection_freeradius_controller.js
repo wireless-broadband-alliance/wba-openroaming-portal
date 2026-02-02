@@ -1,10 +1,7 @@
-import {Controller} from '@hotwired/stimulus';
+import { Controller } from '@hotwired/stimulus';
 
 export default class extends Controller {
-    static targets = [
-        'initialOptions',
-        'letsEncryptOptions'
-    ];
+    static targets = ['initialOptions', 'letsEncryptOptions'];
 
     selectLetsEncrypt(event) {
         event.preventDefault();

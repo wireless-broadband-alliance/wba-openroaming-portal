@@ -7,17 +7,15 @@ use Throwable;
 
 class FreeradiusTestException extends RuntimeException
 {
-    private array $context;
     private string $translationDomain = 'FreeradiusTestException';
 
     public function __construct(
         string $messageKey,
-        array $context = [],
+        private readonly array $context = [],
         int $code = 0,
         ?Throwable $previous = null
     ) {
         parent::__construct($messageKey, $code, $previous);
-        $this->context = $context;
     }
 
     public function getContext(): array

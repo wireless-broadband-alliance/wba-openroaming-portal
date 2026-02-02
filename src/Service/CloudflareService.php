@@ -12,10 +12,10 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 readonly class CloudflareService
 {
-
     public function __construct(
         private HttpClientInterface $httpClient
-    ) {}
+    ) {
+    }
 
     /**
      * @throws TransportExceptionInterface
@@ -29,12 +29,7 @@ readonly class CloudflareService
         if (!$dto->token || !$dto->host) {
             return false;
         }
-
-        if (!$this->tokenHasAccessToHost($dto->token, $dto->host)) {
-            return false;
-        }
-
-        return true;
+        return $this->tokenHasAccessToHost($dto->token, $dto->host);
     }
 
     /**

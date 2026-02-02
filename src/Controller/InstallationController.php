@@ -478,9 +478,9 @@ class InstallationController extends AbstractController
                         is_string($privateKeyContent) &&
                         is_string($publicKeyContent) &&
                         (str_starts_with(
-                                trim($privateKeyContent),
-                                '-----BEGIN ENCRYPTED PRIVATE KEY-----'
-                            ) &&
+                            trim($privateKeyContent),
+                            '-----BEGIN ENCRYPTED PRIVATE KEY-----'
+                        ) &&
                             str_starts_with(
                                 trim($publicKeyContent),
                                 '-----BEGIN PUBLIC KEY-----'
