@@ -34,6 +34,8 @@ readonly class FreeradiusConnectionService
 
     /**
      * Check the FreeRADIUS database connection
+     *
+     * @return array{success: bool, message: string}
      */
     public function checkDBConnection(): array
     {
