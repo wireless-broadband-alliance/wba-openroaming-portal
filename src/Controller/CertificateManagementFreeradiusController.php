@@ -737,7 +737,7 @@ class CertificateManagementFreeradiusController extends AbstractController
             // Validate all exist
             $missing = array_filter($paths, static fn($path) => !file_exists($path));
 
-            if (!empty($missing)) {
+            if ($missing !== []) {
                 $missingFiles = implode(', ', array_keys($missing));
                 throw new RuntimeException(
                     sprintf(

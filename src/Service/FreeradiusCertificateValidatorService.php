@@ -53,13 +53,13 @@ final class FreeradiusCertificateValidatorService
 
         openssl_x509_export($res, $normalized);
 
-        return hash('sha256', $normalized);
+        return hash('sha256', (string) $normalized);
     }
 
     private function compareCertificates(array $serverCerts, array $userCerts): void
     {
-        $serverFp = array_map([$this, 'fingerprint'], $serverCerts);
-        $userFp = array_map([$this, 'fingerprint'], $userCerts);
+        $serverFp = array_map($this->fingerprint(...), $serverCerts);
+        $userFp = array_map($this->fingerprint(...), $userCerts);
 
         foreach ($serverFp as $fp) {
             if (!in_array($fp, $userFp, true)) {

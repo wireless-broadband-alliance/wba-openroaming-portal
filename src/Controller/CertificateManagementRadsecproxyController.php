@@ -7,6 +7,7 @@ namespace App\Controller;
 use App\DTO\CertificateRadSecUploadDTO;
 use App\Entity\Certificate;
 use App\Entity\CertificateSetupProcess;
+use App\Entity\InstallationProgress;
 use App\Entity\User;
 use App\Enum\AdminRoleType;
 use App\Enum\AnalyticalEventType;
@@ -278,7 +279,7 @@ class CertificateManagementRadsecproxyController extends AbstractController
         $session = $request->getSession();
         if ($session->has(SessionStatus::SYSTEM_RESET_REQUEST->value)) {
             $lastInstallation = $this->installationProgressRepository->getLast();
-            if ($lastInstallation) {
+            if ($lastInstallation instanceof InstallationProgress) {
                 $installationDTO = $this->installationService->fillDto($lastInstallation);
                 $host = $installationDTO->dbFreeradiusIp;
             }
