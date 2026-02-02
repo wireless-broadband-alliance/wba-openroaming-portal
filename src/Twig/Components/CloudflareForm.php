@@ -37,7 +37,7 @@ final class CloudflareForm extends AbstractController
     #[LiveAction]
     public function validate(): void
     {
-        if (!$this->cloudflareDTO instanceof DbSetupDTO) {
+        if (!$this->cloudflareDTO instanceof CloudflareDTO) {
             $this->cloudflareDTO = new CloudflareDTO();
         }
 
