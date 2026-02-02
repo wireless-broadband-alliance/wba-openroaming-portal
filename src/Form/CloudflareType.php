@@ -11,6 +11,9 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Vich\UploaderBundle\Form\Type\VichFileType;
 
+/**
+ * @extends AbstractType<CloudflareDTO>
+ */
 class CloudflareType extends AbstractType
 {
     public function __construct(
