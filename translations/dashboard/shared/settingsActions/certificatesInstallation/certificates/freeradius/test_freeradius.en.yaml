@@ -28,7 +28,7 @@ manual_command_hint: >
 paste_certificates_label: "Paste certificates output"
 paste_certificates_placeholder: |
     Paste here the full output of the command.
-    
+
     The content must include:
     - CA certificate (ca.pem)
     - Server certificate (cert.pem)
