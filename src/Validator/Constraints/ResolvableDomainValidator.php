@@ -42,15 +42,22 @@ class ResolvableDomainValidator extends ConstraintValidator
         }
 
         // Convert IDN → ASCII
-        $ascii = idn_to_ascii(
-            $domain,
-            IDNA_DEFAULT,
-            INTL_IDNA_VARIANT_UTS46
-        );
+        $ascii = idn_to_ascii($domain, IDNA_DEFAULT, INTL_IDNA_VARIANT_UTS46);
 
-        if ($ascii === false || !$this->resolver->resolver($ascii)) {
+        if ($ascii === false) {
             $this->context
                 ->buildViolation($constraint->message)
+                ->atPath('input')
+                ->addViolation();
+            return;
+        }
+
+        // Check for A, MX, and SOA records
+        $recordTypes = [DNS_A, DNS_MX, DNS_SOA];
+
+        if (!$this->resolver->resolver($ascii, $recordTypes)) {
+            $this->context
+                ->buildViolation('The domain must have at least an A, MX, or SOA record.')
                 ->atPath('input')
                 ->addViolation();
         }
