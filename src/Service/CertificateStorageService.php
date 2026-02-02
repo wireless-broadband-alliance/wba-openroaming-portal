@@ -163,11 +163,13 @@ readonly class CertificateStorageService
         $certificate->setFile($tmpFile);
         $certificate->setSetupProcess($process);
 
+        $mimeType = mime_content_type($sourcePath);
+        $size = filesize($sourcePath);
+
         $certificate->setMetadata([
             'originalName' => basename($sourcePath),
-            'mimeType' => mime_content_type($sourcePath),
-            'size' => filesize($sourcePath),
-            'source' => 'certbot',
+            'mimeType' => $mimeType !== false ? $mimeType : null,
+            'size' => $size !== false ? $size : null,
         ]);
 
         if (!$isAKey) {

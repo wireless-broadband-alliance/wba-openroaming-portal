@@ -142,10 +142,11 @@ class Certificate
      * @param array{
      *   originalName: string,
      *   mimeType: string|null,
-     *   size: int|null
+     *   size: int|null,
+     *   source?: 'certbot'|'upload'
      * }|null $metadata
      */
-    public function setMetadata(?array $metadata): static
+    public function setMetadata(?array $metadata): self
     {
         $this->metadata = $metadata;
         return $this;
