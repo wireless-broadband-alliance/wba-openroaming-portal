@@ -11,6 +11,7 @@ class FreeradiusTestException extends RuntimeException
 
     public function __construct(
         string $messageKey,
+        /** @var array<string, scalar> */
         private readonly array $context = [],
         int $code = 0,
         ?Throwable $previous = null
@@ -18,6 +19,9 @@ class FreeradiusTestException extends RuntimeException
         parent::__construct($messageKey, $code, $previous);
     }
 
+    /**
+     * @return array<string, scalar>
+     */
     public function getContext(): array
     {
         return $this->context;
@@ -27,7 +31,6 @@ class FreeradiusTestException extends RuntimeException
     {
         return $this->translationDomain;
     }
-
 
     public static function certificateExpired(string $subject, string $expiryDate): self
     {
@@ -66,6 +69,9 @@ class FreeradiusTestException extends RuntimeException
         return new self('certificate_mismatch');
     }
 
+    /**
+     * @param array<string, scalar> $context
+     */
     public static function generic(string $messageKey, array $context = []): self
     {
         return new self($messageKey, $context);
