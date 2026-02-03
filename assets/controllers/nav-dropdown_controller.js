@@ -24,7 +24,6 @@ export default class extends Controller {
         }
     }
 
-    // Example of a toggleHeader method, if you need it
     toggleHeader() {
         this.containerTarget.classList.toggle('hidden');
 

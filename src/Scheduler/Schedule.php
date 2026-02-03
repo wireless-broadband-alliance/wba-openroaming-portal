@@ -66,6 +66,13 @@ readonly class Schedule implements ScheduleProviderInterface
                     new RunCommandMessage('clear:uploaded-certs')
                 )
             )
+            // Executes once a week on Sunday at 04:00
+            ->add(
+                RecurringMessage::cron(
+                    '0 4 * * *',
+                    new RunCommandMessage('notify:superAdminWhenCertsExpires')
+                )
+            )
 
             // By default, daily at 04:00
             ->add(
