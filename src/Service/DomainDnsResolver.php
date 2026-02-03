@@ -29,6 +29,6 @@ class DomainDnsResolver
             return false;
         }
 
-        return !empty($records);
+        return $records !== [] && $records !== false;
     }
 }
