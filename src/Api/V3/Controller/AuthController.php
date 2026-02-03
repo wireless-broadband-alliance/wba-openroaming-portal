@@ -147,6 +147,19 @@ class AuthController extends AbstractController
             return new BaseResponse(401, null, 'Invalid credentials')->toResponse(); # Unauthorized Request Response
         }
 
+        $statusCheckerResponse = $this->userStatusChecker->checkUserStatus($user);
+        if ($statusCheckerResponse instanceof BaseResponse) {
+            return $statusCheckerResponse->toResponse();
+        }
+
+        // Check if the email is valid
+        if (!$this->userStatusChecker->isValidEmail($user->getEmail())) {
+            return new BaseResponse(
+                403,
+                null,
+                'Your email domain is not allowed to use this platform.'
+            )->toResponse();
+        }
 
         $twoFAEnforcementResult = $this->twoFAAPIService->twoFAEnforcementChecker(
             $user,
@@ -395,6 +408,10 @@ class AuthController extends AbstractController
                 $this->entityManager->flush();
             }
 
+            $statusCheckerResponse = $this->userStatusChecker->checkUserStatus($user);
+            if ($statusCheckerResponse instanceof BaseResponse) {
+                return $statusCheckerResponse->toResponse();
+            }
 
             $twoFAEnforcementResult = $this->twoFAAPIService->twoFAEnforcementChecker(
                 $user,
@@ -484,6 +501,11 @@ class AuthController extends AbstractController
                     null,
                     'This code is not associated with a google account.'
                 )->toResponse();
+            }
+
+            $statusCheckerResponse = $this->userStatusChecker->checkUserStatus($user);
+            if ($statusCheckerResponse instanceof BaseResponse) {
+                return $statusCheckerResponse->toResponse();
             }
 
             // Check if the email is valid

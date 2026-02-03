@@ -4,6 +4,7 @@ namespace App\DTO;
 
 use App\Enum\OperationMode;
 use App\Enum\SettingName;
+use App\Validator\Constraints\DomainNotBlacklisted;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
@@ -60,7 +61,7 @@ class AuthSettingsTypeDTO
     )]
     public ?string $authMethodGOOGLELoginDescription = null;
 
-
+    #[DomainNotBlacklisted]
     public ?string $validDomainsGOOGLELogin = null;
 
     #[Assert\Expression(
@@ -94,7 +95,7 @@ class AuthSettingsTypeDTO
     )]
     public ?string $authMethodMICROSOFTLoginDescription = null;
 
-
+    #[DomainNotBlacklisted]
     public ?string $validDomainsMICROSOFTLogin = null;
 
     #[Assert\Expression(

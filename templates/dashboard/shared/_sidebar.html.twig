@@ -30,6 +30,7 @@
             'admin_dashboard_settings_LDAP',
             'admin_dashboard_settings_sms',
             'admin_dashboard_settings_two_fa',
+            'admin_dashboard_settings_domains',
         ] %}
         {% set portalStatisticsRoutes = [
             'admin_dashboard_statistics',
@@ -41,11 +42,11 @@
             <div class="duration-300 rounded p-2 flex flex-row justify-between items-center cursor-pointer hover:shadow hover:text-lightGreen
                 {% if app.request.attributes.get('_route') in ['admin_page', 'admin_user_edit'] %}selected{% endif %}">
                 <div class="flex items-center space-x-2">
-                    <twig:ux:icon name="wba:user" class="w-5 mr-2 fill-none stroke-current" />
+                    <twig:ux:icon name="wba:user" class="w-5 mr-2 fill-none stroke-current"/>
                     {{ 'usersManagement'|trans({}, '_header_admin') }}
                 </div>
 
-                <twig:ux:icon name="wba:right" class="w-4 fill-none stroke-current" />
+                <twig:ux:icon name="wba:right" class="w-4 fill-none stroke-current"/>
             </div>
         </a>
 
@@ -59,7 +60,8 @@
                     {{ 'portalSettings'|trans({}, '_header_admin') }}
                 </div>
                 <twig:ux:icon name="wba:right"
-                              class="w-4 fill-none stroke-current transition ease-in {{ (app.request.attributes.get('_route') in portalSettingsRoutes) ? 'rotate-90' : '' }}" data-nav-submenu-target="icon"/>
+                              class="w-4 fill-none stroke-current transition ease-in {{ (app.request.attributes.get('_route') in portalSettingsRoutes) ? 'rotate-90' : '' }}"
+                              data-nav-submenu-target="icon"/>
             </button>
 
             <div class="py-2 mt-1 bg-lightGray rounded-md duration-300 shadow {{ (app.request.attributes.get('_route') in portalSettingsRoutes) ? '' : 'hidden' }}" {{ stimulus_target('nav-submenu', 'container') }}>
@@ -143,15 +145,22 @@
                     <li>
                         <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300 {% if app.request.attributes.get('_route') == 'admin_dashboard_settings_radius' %}selected{% endif %}"
                            href="{{ path('admin_dashboard_settings_radius') }}">
-                            <twig:ux:icon name="wba:file-space" class="w-5 mr-4 fill-none stroke-current" />
+                            <twig:ux:icon name="wba:file-space" class="w-5 mr-4 fill-none stroke-current"/>
                             {{ 'radiusProfileConfiguration'|trans({}, '_header_admin') }}
                         </a>
                     </li>
                     <li>
                         <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300 {% if app.request.attributes.get('_route') == 'admin_dashboard_settings_sms' %}selected{% endif %}"
                            href="{{ path('admin_dashboard_settings_sms') }}">
-                            <twig:ux:icon name="wba:sms" class="w-5 mr-4 fill-none stroke-current" />
+                            <twig:ux:icon name="wba:sms" class="w-5 mr-4 fill-none stroke-current"/>
                             {{ 'SMSConfiguration'|trans({}, '_header_admin') }}
+                        </a>
+                    </li>
+                    <li>
+                        <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300 {% if app.request.attributes.get('_route') == 'admin_dashboard_settings_domains' %}selected{% endif %}"
+                           href="{{ path('admin_dashboard_settings_domains') }}">
+                            <twig:ux:icon name="wba:file-cross" class="w-5 mr-4 fill-none stroke-current"/>
+                            {{ 'domainBlacklist'|trans({}, '_header_admin') }}
                         </a>
                     </li>
                 </ul>
@@ -178,7 +187,7 @@
                         {# SideBar Button - Portal Statistics - Button #}
                         <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300 {% if app.request.attributes.get('_route') == 'admin_dashboard_statistics' %}selected{% endif %}"
                            href="{{ path('admin_dashboard_statistics') }}">
-                            <twig:ux:icon name="wba:piechart" class="w-5 mr-4 fill-none stroke-current" />
+                            <twig:ux:icon name="wba:piechart" class="w-5 mr-4 fill-none stroke-current"/>
 
                             {{ 'portalStatistics'|trans({}, '_header_admin') }}
                         </a>
@@ -187,7 +196,7 @@
                         {# SideBar Button - Freeradius Statistics - Button #}
                         <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300 {% if app.request.attributes.get('_route') == 'admin_dashboard_statistics_freeradius' %}selected{% endif %}"
                            href="{{ path('admin_dashboard_statistics_freeradius') }}">
-                            <twig:ux:icon name="wba:hdd" class="w-5 mr-4 fill-none stroke-current" />
+                            <twig:ux:icon name="wba:hdd" class="w-5 mr-4 fill-none stroke-current"/>
                             {{ 'connectivityStatistics'|trans({}, '_header_admin') }}
                         </a>
                     </li>
@@ -239,13 +248,13 @@
                         <ul {{ stimulus_target('nav-dropdown', 'container') }}
                                 class="hidden mt-3 divide-y divide-gray-100 py-2 text-sm rounded-lg bg-white shadow">
                             <li class="flex items-center space-x-2 px-4 py-2 rounded cursor-pointer hover:text-lightGreen {{ app.request.locale == constant('App\\Enum\\LanguageType::EN').value ? 'selected' : '' }}">
-                                <twig:ux:icon class="w-4 h-4 rounded-full" name="wba:gb-flag" />
+                                <twig:ux:icon class="w-4 h-4 rounded-full" name="wba:gb-flag"/>
                                 <a href="{{ path('app_change_language', {locale: constant('App\\Enum\\LanguageType::EN').value}) }}">
                                     English
                                 </a>
                             </li>
                             <li class="flex items-center space-x-2 px-4 py-2 rounded cursor-pointer hover:text-lightGreen {{ app.request.locale == constant('App\\Enum\\LanguageType::PT').value ? 'selected' : '' }}">
-                                <twig:ux:icon class="w-4 h-4 rounded-full" name="wba:portugal-flag" />
+                                <twig:ux:icon class="w-4 h-4 rounded-full" name="wba:portugal-flag"/>
                                 <a href="{{ path('app_change_language', {locale: constant('App\\Enum\\LanguageType::PT').value}) }}">
                                     Portuguese
                                 </a>

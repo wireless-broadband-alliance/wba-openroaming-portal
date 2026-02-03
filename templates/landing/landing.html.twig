@@ -48,6 +48,10 @@
                 }) }}
             </div>
 
+            <div class="text-red-500 m-2">
+                {{ form_errors(registrationFormDemo.email) }}
+            </div>
+
             {# Turnstile Checker #}
             {% if data.TURNSTILE_CHECKER.value == constant('App\\Enum\\OperationMode::ON').value %}
                 <div class="ml-3 mt-5">

@@ -1,0 +1,179 @@
+<div
+        id="loading-overlay"
+        data-controller="loading"
+        class="
+        fixed inset-0 z-50
+        flex items-center justify-center
+        bg-white/80
+        opacity-0 pointer-events-none
+        transition-opacity duration-300 ease-out
+    "
+>
+    <div
+            id="loading-content"
+            class="
+            flex flex-col items-center justify-center
+            w-full h-full gap-5
+            scale-95 translate-y-1
+            transition-all duration-300 ease-out
+        "
+    >
+        <div class="flex flex-col items-center justify-center w-full h-full gap-5">
+            {# Animated Circle + Logo #}
+            <div class="relative flex items-center justify-center">
+                {# Static light gray circle #}
+                <svg
+                        class="w-[16vw] h-[16vw] min-w-[90px] min-h-[90px] max-w-[250px] max-h-[250px]"
+                        viewBox="0 0 100 100"
+                >
+                    <circle
+                            cx="50"
+                            cy="50"
+                            r="45"
+                            fill="none"
+                            stroke="#F3F4F6"
+                            stroke-width="2"
+                    ></circle>
+
+                    {# Animated green circle #}
+                    <circle
+                            cx="50"
+                            cy="50"
+                            r="45"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="4"
+                            stroke-linecap="round"
+                            class="text-primary"
+                            stroke-dasharray="1 212"
+                            stroke-dashoffset="0"
+                    >
+                        <animate
+                                attributeName="stroke-dasharray"
+                                values="1 212; 70 212; 1 212"
+                                keyTimes="0; 0.5; 1"
+                                dur="1.6s"
+                                calcMode="spline"
+                                keySplines="0.4 0 0.2 1; 0.4 0 0.2 1"
+                                repeatCount="indefinite"
+                        ></animate>
+
+                        <animate
+                                attributeName="stroke-dashoffset"
+                                values="0; -106; -212"
+                                keyTimes="0; 0.5; 1"
+                                dur="1.6s"
+                                calcMode="spline"
+                                keySplines="0.4 0 0.2 1; 0.4 0 0.2 1"
+                                repeatCount="indefinite"
+                        ></animate>
+                    </circle>
+                </svg>
+
+                {# Logo centered over circle #}
+                <img
+                        src="{{ asset('resources/logos/openroaming-loading-logo.svg') }}"
+                        alt="Loading"
+                        id="loading-logo"
+                        class="absolute w-[8vw] h-[8vw] min-w-[50px] min-h-[50px] max-w-[130px] max-h-[130px] scale-75 opacity-0 transition-all duration-[1000ms] ease-out"
+                />
+            </div>
+
+            {# Loading text #}
+            <span class="font-medium text-gray-500 text-lg md:text-xl lg:text-2xl flex items-center">
+                {{ 'loading'|trans({}, '_blacklist') }}
+                <span class="flex ml-2">
+                    <span class="animate-pulse [animation-delay:0s]">.</span>
+                    <span class="animate-pulse [animation-delay:0.3s]">.</span>
+                    <span class="animate-pulse [animation-delay:0.6s]">.</span>
+                </span>
+            </span>
+        </div>
+    </div>
+</div>
+
+<script>
+    let loadingVisible = false;
+
+    function showLoading() {
+        if (loadingVisible) return;
+        loadingVisible = true;
+
+        const overlay = document.getElementById('loading-overlay');
+        const content = document.getElementById('loading-content');
+        const logo = document.getElementById('loading-logo');
+
+        if (!overlay || !content || !logo) return;
+
+        overlay.classList.remove('opacity-0', 'pointer-events-none');
+        overlay.classList.add('opacity-100');
+
+        content.classList.remove('scale-95', 'translate-y-1');
+        content.classList.add('scale-100', 'translate-y-0');
+
+        logo.classList.remove('scale-75', 'opacity-0');
+        logo.classList.add('scale-100', 'opacity-100');
+    }
+
+    function hideLoading() {
+        loadingVisible = false;
+
+        const overlay = document.getElementById('loading-overlay');
+        const content = document.getElementById('loading-content');
+        const logo = document.getElementById('loading-logo');
+
+        if (!overlay || !content || !logo) return;
+
+        overlay.classList.remove('opacity-100');
+        overlay.classList.add('opacity-0', 'pointer-events-none');
+
+        content.classList.remove('scale-100', 'translate-y-0');
+        content.classList.add('scale-95', 'translate-y-1');
+
+        logo.classList.remove('scale-100', 'opacity-100');
+        logo.classList.add('scale-75', 'opacity-0');
+    }
+
+    /**
+     * LINKS → real navigation only
+     */
+    document.addEventListener('click', (e) => {
+        const link = e.target.closest('a[href]');
+        if (!link) return;
+
+        if (
+                link.dataset.noLoader === 'true' ||
+                link.target === '_blank' ||
+                link.hasAttribute('download') ||
+                link.getAttribute('href') === '#' ||
+                link.getAttribute('href').startsWith('javascript:')
+        ) {
+            return;
+        }
+
+        // Ignore same-page hash navigation
+        const current = window.location.href.split('#')[0];
+        const target = link.href.split('#')[0];
+        if (current === target) return;
+
+        showLoading();
+    });
+
+    /**
+     * FORMS → real submits only
+     */
+    document.addEventListener('submit', (e) => {
+        const form = e.target;
+
+        if (form.dataset.noLoader === 'true') return;
+
+        showLoading();
+    });
+
+    /**
+     * Back / forward cache safety
+     */
+    window.addEventListener('pageshow', () => {
+        hideLoading();
+    });
+</script>

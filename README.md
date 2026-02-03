@@ -492,6 +492,7 @@ certificate. **Connection errors** can happen if the right SHA1 hash is not prov
 71. `FREERADIUS_LAST_CONNECTION_CRON`: Defines the schedule for Freeradius server & the user profile
         last connection.
 72. `CRON_ADVANCED_STATUS`:  Saves the previous status mode on the schedule cron configuration page (Simple/Advanced)
+73. `DOMAIN_BLACKLIST_IMPORT_CRON`: Defines the schedule to import/refresh Blacklist of domains.
 
 #### With these environment variables, you can configure and customize various aspects of the project, such as database connections, SAML settings, login methods, and more.
 

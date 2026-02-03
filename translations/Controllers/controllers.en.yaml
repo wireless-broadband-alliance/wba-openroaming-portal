@@ -129,3 +129,20 @@ loginSuccessfully: 'Login successfully'
 invalidLogin: 'Your login link is invalid or has expired. Please request a new login link to continue.'
 passwordSentSMS: 'A new account password has been sent to your phone number via SMS.'
 passwordNotSentSMS: 'We were unable to send the new password to your phone number. Please try again.'
+domainBlacklistConfigurationAppliedSuccessfully: 'New Domain Blacklist configuration have been applied successfully.'
+invalidDomainPattern: "Invalid domain pattern: %domain%"
+invalidDomainPatternList: "The following domain patterns are invalid: %domains%"
+domainNotFound: 'Domain not found'
+domainDeleted: 'Domain "%domain%" deleted successfully.'
+domainEdited: 'Domain "%domain%" updated successfully.'
+domainAdded: 'Domain "%domain%" added successfully.'
+domainSourceNotFound: 'Domain Source not found'
+domainSourceDeleted: 'Domain Source "%domain%" deleted successfully.'
+domainSourceActivated: 'Domain source "%domain%" activated successfully.'
+domainSourceDeactivated: 'Domain source "%domain%" deactivated successfully.'
+sourceAdded: 'Source "%source%" added successfully.'
+domainSourceRefreshed: 'Domain source "%domain%" was refreshed successfully.'
+domainSourceRefreshFailed: 'Failed to refresh domain source "%domain%".'
+domainSourceInactive: "This domain source is inactive and cannot be refreshed."
+allDomainSourceRefreshed: "Domains sources was refreshed successfully."
+domainSourceRefreshAllFailed: "Failed to refresh domains sources."

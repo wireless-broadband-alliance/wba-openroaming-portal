@@ -34,7 +34,7 @@ authenticatedUser: 'You are currently authenticated as {uuid}'
 
 os_selection:
     choose_os: 'Choose your operating system, so you can download and install the profile:'
-    download_install: 'Download and Install Profile'
+    download_install: 'Download Openroaming Profile'
     macos_or_ios: 'macOS/iOS'
     download_hint: 'If you need help, follow the %link%.'
     instructions_link_text: 'instructions'

@@ -1,0 +1,23 @@
+{{ form_start(form) }}
+<div class="flex flex-col gap-4 sm:gap-6">
+
+    <div class="flex flex-col sm:flex-row gap-4 sm:gap-6">
+        {{ form_widget(form.input, {
+            attr: {
+                class: 'form-widget w-full',
+                placeholder: 'example.com',
+            },
+        }) }}
+
+        {{ form_widget(form.matchType, {
+            attr: {
+                class: 'form-widget w-full sm:w-48',
+            },
+        }) }}
+    </div>
+
+    <div class="flex justify-end mt-4">
+        <button type="submit" class="btn-primary">{{ 'save'|trans({}, '_blacklist') }}</button>
+    </div>
+</div>
+{{ form_end(form) }}

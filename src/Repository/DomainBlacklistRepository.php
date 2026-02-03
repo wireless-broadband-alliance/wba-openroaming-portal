@@ -1,0 +1,196 @@
+<?php
+
+namespace App\Repository;
+
+use App\Entity\DomainBlacklist;
+use App\Enum\DomainMatchType;
+use App\Enum\DomainOrigin;
+use DateTimeImmutable;
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\Persistence\ManagerRegistry;
+
+/**
+ * @extends ServiceEntityRepository<DomainBlacklist>
+ */
+class DomainBlacklistRepository extends ServiceEntityRepository
+{
+    public function __construct(
+        ManagerRegistry $registry
+    ) {
+        parent::__construct($registry, DomainBlacklist::class);
+    }
+
+    /**
+     * Returns all domain patterns for a given origin as a lookup map.
+     *
+     * @return array<string, true>
+     */
+    public function getAllPatternsByOrigin(DomainOrigin $origin): array
+    {
+        $qb = $this->createQueryBuilder('d')
+            ->select('d.pattern')
+            ->where('d.origin = :origin')
+            ->setParameter('origin', $origin);
+
+        $results = $qb->getQuery()->getScalarResult();
+
+        // Convert [['pattern' => 'example.com']] into ['example.com' => true]
+        $patterns = [];
+
+        foreach ($results as $row) {
+            $patterns[$row['pattern']] = true;
+        }
+
+        return $patterns;
+    }
+
+    public function markAllAsStale(DomainOrigin $origin): int
+    {
+        return $this->createQueryBuilder('d')
+            ->update()
+            ->set('d.lastSeenAt', ':null')
+            ->where('d.origin = :origin')
+            ->setParameter('origin', $origin)
+            ->setParameter('null', null)
+            ->getQuery()
+            ->execute();
+    }
+
+    public function deleteStale(DomainOrigin $origin): int
+    {
+        return $this->createQueryBuilder('d')
+            ->delete()
+            ->where('d.origin = :origin')
+            ->andWhere('d.origin != :manual')
+            ->andWhere('d.lastSeenAt IS NULL')
+            ->setParameter('origin', $origin)
+            ->setParameter('manual', DomainOrigin::MANUAL)
+            ->getQuery()
+            ->execute();
+    }
+
+    /**
+     * Batch update lastSeenAt for multiple domains
+     *
+     * @param string[] $patterns
+     */
+    public function batchTouchLastSeen(array $patterns, DomainOrigin $origin, DateTimeImmutable $seenAt): int
+    {
+        if ($patterns === []) {
+            return 0;
+        }
+
+        return $this->createQueryBuilder('d')
+            ->update()
+            ->set('d.lastSeenAt', ':seenAt')
+            ->where('d.origin = :origin')
+            ->andWhere('d.pattern IN (:patterns)')
+            ->setParameter('seenAt', $seenAt)
+            ->setParameter('origin', $origin->value)
+            ->setParameter('patterns', $patterns)
+            ->getQuery()
+            ->execute();
+    }
+
+    /**
+     * @return DomainBlacklist[]
+     */
+    public function searchWithFilter(string $filter, string $sort, ?string $order, ?string $searchTerm = null): array
+    {
+        $qb = $this->createQueryBuilder('d');
+
+        // Apply the search term, if provided
+        if ($searchTerm) {
+            $qb->andWhere('d.pattern LIKE :searchTerm')
+                ->setParameter('searchTerm', '%' . $searchTerm . '%');
+        }
+
+        $qb->andWhere('d.origin NOT LIKE :deleted')
+            ->setParameter('deleted', DomainOrigin::DELETED);
+
+        if ($filter === 'exact') {
+            $qb->andWhere('d.type LIKE :exact')
+                ->setParameter('exact', DomainMatchType::EXACT);
+        }
+        if ($filter === 'subdomain') {
+            $qb->andWhere('d.type LIKE :subdomain')
+                ->setParameter('subdomain', DomainMatchType::SUBDOMAIN);
+        }
+
+        if ($sort === 'pattern') {
+            $field = 'd.pattern';
+        } elseif ($sort === 'createdAt') {
+            $field = 'd.createdAt';
+        } elseif ($sort === 'lastSeenAt') {
+            $field = 'd.lastSeenAt';
+        } elseif ($sort === 'type') {
+            $field = 'd.type';
+        } else {
+            $field = 'd.createdAt';
+        }
+
+        // Order by creation date (newest first)
+        return $qb->orderBy($field, $order)
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * @param string[] $domains
+     */
+    public function matchesAnyDomain(array $domains): bool
+    {
+        return array_any($domains, fn($domain) => $this->isDomainBlacklisted($domain));
+    }
+
+    public function isDomainBlacklisted(string $domain): bool
+    {
+        $domain = strtolower(trim($domain));
+
+        $qb = $this->createQueryBuilder('d');
+
+        $qb
+            // EXACT match
+            ->where('d.type = :exact AND d.pattern = :domain')
+
+            // SUBDOMAIN match
+            ->orWhere(
+                'd.type = :subdomain AND (
+                :domain = d.pattern
+                OR :domain LIKE CONCAT(\'%.\', d.pattern)
+            )'
+            )
+            ->setParameter('exact', DomainMatchType::EXACT)
+            ->setParameter('subdomain', DomainMatchType::SUBDOMAIN)
+            ->setParameter('domain', $domain)
+            ->setMaxResults(1);
+
+        return (bool)$qb->getQuery()->getOneOrNullResult();
+    }
+
+    public function countDomains(int $type, ?string $searchTerm = null): int
+    {
+        $qb = $this->createQueryBuilder('d');
+        $qb->select('COUNT(d.id)');
+
+        // Apply the search term, if provided
+        if ($searchTerm) {
+            $qb->andWhere('d.pattern LIKE :searchTerm')
+                ->setParameter('searchTerm', '%' . $searchTerm . '%');
+        }
+
+        $qb->andWhere('d.origin NOT LIKE :deleted')
+            ->setParameter('deleted', DomainOrigin::DELETED);
+
+        if ($type === DomainMatchType::EXACT->value) {
+            $qb->andWhere('d.type LIKE :exact')
+                ->setParameter('exact', DomainMatchType::EXACT);
+        }
+        if ($type === DomainMatchType::SUBDOMAIN->value) {
+            $qb->andWhere('d.type LIKE :subdomain')
+                ->setParameter('subdomain', DomainMatchType::SUBDOMAIN);
+        }
+
+        return (int)$qb->getQuery()->getSingleScalarResult();
+    }
+}

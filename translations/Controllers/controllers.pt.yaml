@@ -127,3 +127,20 @@ unableSendLoginLink: 'Não foi possível enviar o link de login ou o código de 
 loginVerificationCodeSent: 'Enviámos um código de verificação de início de sessão para o seu número de telefone. Verifique as suas mensagens SMS para continuar.'
 loginSuccessfully: 'Login efetuado com sucesso'
 invalidLogin: 'O seu link de login é inválido ou expirou. Solicite um novo link de login para continuar.'
+domainBlacklistConfigurationAppliedSuccessfully: 'Uma nova configuração de Domínios Bloqueados foi aplicada com sucesso.'
+invalidDomainPattern: "Padrão de domínio inválido: %domain%"
+invalidDomainPatternList: "Os seguintes padrões de domínio são inválidos: %domains%"
+domainNotFound: 'Domínio não encontrado.'
+domainDeleted: 'O Domínio "%domain%" eliminado com sucesso.'
+domainAdded: 'O Domínio "%domain%" adicionado com sucesso.'
+domainEdited: 'O Domínio "%domain%" atualizado com sucesso.'
+domainSourceNotFound: 'Fonte de Domínio não encontrada.'
+domainSourceDeleted: 'Fonte de Domínio "%domain%" eliminada com sucesso.'
+domainSourceActivated: 'Fonte de Domínio "%domain%" ativada com sucesso.'
+domainSourceDeactivated: 'Fonte de Domínio "%domain%" desativada com sucesso.'
+sourceAdded: 'A Fonte "%source%" adicionado com sucesso.'
+domainSourceRefreshed: 'A fonte de domínios "%domain%" foi atualizada com sucesso.'
+domainSourceRefreshFailed: 'Falha ao atualizar a fonte de domínios "%domain%".'
+domainSourceInactive: "Esta fonte de domínios está inativa e não pode ser atualizada."
+allDomainSourceRefreshed: "As fontes de domínios foram atualizadas com sucesso."
+domainSourceRefreshAllFailed: "Falha ao atualizar as fontes de domínios."

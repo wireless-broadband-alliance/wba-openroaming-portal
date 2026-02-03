@@ -76,3 +76,12 @@ src/Command/ResetRadiusMarcelinaSettingsCommand.php
 /public/build/
 /node_modules/
 ###< symfony/asset-mapper ###
+
+###> config/reference this page breaks phpstan with warnings of compatability, because of the project image ###
+config/reference.php
+supervisord.pid
+###< config/reference ###
+
+###> DockerFileCleanedDev ###
+DockerfileCleanedDev
+###< DockerFileCleanedDev ###

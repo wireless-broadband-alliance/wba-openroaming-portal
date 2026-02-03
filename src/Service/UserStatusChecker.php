@@ -6,8 +6,10 @@ use App\Api\V1\BaseResponse as BaseResponseV1;
 use App\Api\V2\BaseResponse as BaseResponseV2;
 use App\Api\V3\BaseResponse as BaseResponseV3;
 use App\Entity\User;
+use App\Enum\DomainMatchType;
 use App\Enum\SettingName;
 use App\Enum\UserProvider;
+use App\Repository\DomainBlacklistRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use DateTimeInterface;
@@ -19,7 +21,8 @@ readonly class UserStatusChecker
     public function __construct(
         private UserRepository $userRepository,
         private SettingRepository $settingRepository,
-        private TranslatorInterface $translator
+        private TranslatorInterface $translator,
+        private DomainBlacklistRepository $domainBlacklistRepository,
     ) {
     }
 
@@ -74,43 +77,42 @@ readonly class UserStatusChecker
         return false;
     }
 
-    public function isValidEmail(string $email, string $providerName): bool
+    public function isValidEmail(string $email, ?string $providerName = null): bool
     {
-        if ($providerName === UserProvider::MICROSOFT_ACCOUNT->value) {
-            // Retrieve the valid domains setting from the database
-            $validDomainsSetting = $this->settingRepository->findOneBy([
-                'name' => SettingName::VALID_DOMAINS_MICROSOFT_LOGIN->value
-            ]);
-        } elseif ($providerName === UserProvider::GOOGLE_ACCOUNT->value) {
-            // Retrieve the valid domains setting from the database
-            $validDomainsSetting = $this->settingRepository->findOneBy([
-                'name' => SettingName::VALID_DOMAINS_GOOGLE_LOGIN->value
-            ]);
-        } else {
-            // If providerName doesn't match any valid providers, throw an exception
-            throw new RuntimeException($this->translator->trans('invalidProviderName', [], 'UserStatusChecker'));
+        // Extract domain from email
+        if (!str_contains($email, '@')) {
+            return false; // invalid email
         }
 
-        // Throw an exception if the setting is not found
-        if ($validDomainsSetting === null) {
-            throw new RuntimeException($this->translator->trans('validDomainsNotFound', [], 'UserStatusChecker'));
+        [, $domain] = explode('@', strtolower($email), 2);
+
+        // Check whitelist only if providerName is provided
+        if ($providerName !== null) {
+            $settingName = match ($providerName) {
+                UserProvider::MICROSOFT_ACCOUNT->value => SettingName::VALID_DOMAINS_MICROSOFT_LOGIN->value,
+                UserProvider::GOOGLE_ACCOUNT->value => SettingName::VALID_DOMAINS_GOOGLE_LOGIN->value,
+                default => throw new RuntimeException(
+                    $this->translator->trans('invalidProviderName', [], 'UserStatusChecker')
+                ),
+            };
+
+            $validDomainsSetting = $this->settingRepository->findOneBy(['name' => $settingName]);
+
+            if ($validDomainsSetting === null) {
+                throw new RuntimeException(
+                    $this->translator->trans('validDomainsNotFound', [], 'UserStatusChecker')
+                );
+            }
+
+            $validDomainsList = array_filter(
+                array_map(trim(...), explode(',', (string)$validDomainsSetting->getValue()))
+            );
+
+            if ($validDomainsList !== [] && !in_array($domain, $validDomainsList, true)) {
+                return false;
+            }
         }
-
-        // If the valid domains setting is empty, allow all domains
-        $validDomains = $validDomainsSetting->getValue();
-        if (empty($validDomains)) {
-            return true;
-        }
-
-        // Split the valid domains into an array and trim whitespace
-        $validDomains = explode(',', $validDomains);
-        $validDomains = array_map(trim(...), $validDomains);
-
-        // Extract the domain from the email
-        $emailParts = explode('@', $email);
-        $domain = end($emailParts);
-
-        // Check if the domain is in the list of valid domains
-        return in_array($domain, $validDomains, true);
+        // Always check the blacklist
+        return !$this->domainBlacklistRepository->isDomainBlacklisted($domain);
     }
 }

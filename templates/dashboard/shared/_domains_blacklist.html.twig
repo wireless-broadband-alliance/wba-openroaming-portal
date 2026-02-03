@@ -1,0 +1,66 @@
+{# Table Content - DomainsBlacklisted #}
+<tr class="font-medium">
+
+    {# Domain pattern #}
+    <td class="p-4 pl-8">
+        {{ domain.pattern ?? ('noInformation'|trans({}, '_blacklist')) }}
+    </td>
+
+    <td class="p-4 pl-8">
+        {% if domain.type == constant('App\\Enum\\DomainMatchType::EXACT') %}
+            {{ 'exact'|trans({}, '_blacklist') }}
+        {% elseif domain.type == constant('App\\Enum\\DomainMatchType::SUBDOMAIN') %}
+            {{ 'subdomain'|trans({}, '_blacklist') }}
+        {% else %}
+            {{ 'noData'|trans({}, '_blacklist') }}
+        {% endif %}
+    </td>
+
+    {# Created At #}
+    <td class="p-4 pl-8">
+        {{ domain.createdAt|date('d/m/Y H:i') }}
+    </td>
+
+    {# Last Seen At #}
+    <td class="p-4 pl-8">
+        {% if domain.lastSeenAt %}
+            {{ domain.lastSeenAt|date('d/m/Y H:i') }}
+        {% else %}
+            <span class="pill-error">{{ 'noData'|trans({}, '_blacklist') }}</span>
+        {% endif %}
+    </td>
+
+    {# Actions Buttons #}
+    <td class="p-4 pl-8 text-right">
+        <div class="flex justify-center gap-3">
+
+            {# Edit #}
+            <button
+                    type="button"
+                    class="flex items-center px-2 py-2 hover:text-primary"
+                    title="Edit"
+                    data-action="click->domain-blacklist#open"
+                    data-domain-blacklist-id-param="{{ domain.id }}"
+            >
+                <twig:ux:icon name="wba:pencil-edit" class="w-5 fill-none stroke-current"/>
+            </button>
+
+            {# Delete #}
+            <form
+                    method="post"
+                    action="{{ path('admin_dashboard_blacklist_delete_domain', {id: domain.id}) }}"
+            >
+                <input type="hidden" name="_method" value="DELETE">
+                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ domain.id) }}">
+
+                <button
+                        type="submit"
+                        class="flex items-center px-2 py-2 hover:text-red-500"
+                        title="Delete"
+                >
+                    <twig:ux:icon name="wba:trash" class="w-5 fill-none stroke-current"/>
+                </button>
+            </form>
+        </div>
+    </td>
+</tr>
