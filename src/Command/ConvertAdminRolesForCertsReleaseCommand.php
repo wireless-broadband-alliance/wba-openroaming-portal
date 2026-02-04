@@ -11,6 +11,7 @@ use Random\RandomException;
 use RuntimeException;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -42,13 +43,11 @@ class ConvertAdminRolesForCertsReleaseCommand extends Command
             ->addOption('yes', 'y', InputOption::VALUE_NONE, 'Automatically confirm the reset');
     }
 
-    /**
-     * @throws RandomException
-     */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         try {
             if (!$input->getOption('yes')) {
+                /** @var QuestionHelper $helper */
                 $helper = $this->getHelper('question');
                 $question = new ConfirmationQuestion(
                     'This action will convert the admin role to a super admin. Do you wish to proceed? [y/N]',
