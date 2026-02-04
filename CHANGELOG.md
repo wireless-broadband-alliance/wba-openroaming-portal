@@ -7,15 +7,18 @@
 - Added a new user role, Super Admin, to allow the management of the platform and the other admins.
 - Added new pages to configure the permissions of the platform admins.
 - It's required to run the new migrations this will set up the new entities for the installation widget
-    details & the certificates management (`InstalationWidget`, `Certificate` & `CertificateSetupProcess`)
+  details & the certificates management (`InstalationWidget`, `Certificate` & `CertificateSetupProcess`)
     - Run the migrations with:
       ```bash
       php bin/console doctrine:migrations:migrate
       ```
-- It's required to run the reset admin command to redefine administrator permissions for the new super admin feature. Please make sure you don't expose the portal to the internet during this process.
-    - Run the admin reset command:
+- **Required one-time action:** After upgrading, run
+  the [ConvertAdminRolesForCertsReleaseCommnand.php](src/Command/ConvertAdminRolesForCertsReleaseCommand.php) to migrate
+  existing administrator permissions to the new **Super Admin** role hierarchy.
+  This command should be executed **only once** and while the portal is **offline or restricted**.
+    - Run the command with:
       ```bash
-      php bin/console reset:super-admin
+      php bin/console reset:convert-admin-roles
       ```
 
 # Release V1.10.0
@@ -24,15 +27,17 @@
   Google, Microsoft and Simple Email/Password.
 - Added a new validator for each authentication method or registration to block blacklisted domains
 - New loading screen for long time requests (example, refresh domains)
-- It's required to run the new migrations this will set up the new entities for the new domains & sources page (`DomainsBlacklist`, `DomainsSource`)
+- It's required to run the new migrations this will set up the new entities for the new domains & sources page (
+  `DomainsBlacklist`, `DomainsSource`)
     - Run the migrations with:
       ```bash
       php bin/console doctrine:migrations:migrate
       ```
-      
+
 # Release V1.9.1
 
-- Fix problem with PGP Encryption where the previous implementation didn't set a **GNUPGHOME**, so GnuPG was trying to use the default location
+- Fix problem with PGP Encryption where the previous implementation didn't set a **GNUPGHOME**, so GnuPG was trying to
+  use the default location
   which was not writable by the PHP.
 - Also, a reveal password toggle on the delete account page was added.
 
@@ -86,7 +91,8 @@
     - This new command is configurable on the page `dashboard/settings/schedule` because he is also cron based.
 - New bundle installed `composer require symfony/lock` required for the command next execution only start when the
   current active ends.
-- Symfony version increase for maintained version (7.4.3), it bug fixes and security fixes with support until November 2028.
+- Symfony version increase for maintained version (7.4.3), it bug fixes and security fixes with support until November
+    2028.
 - NPM webpack-cli deprecations fixed to the latest stabled release (
     - (https://www.npmjs.com/package/webpack-cli/v/5.1.4)) compatible with "@symfony/webpack-encore": "^5.1.0".
 - New validation on the Admin Authentication Methods page to check whether the project has all required certificates.
@@ -105,9 +111,9 @@ As part of our ongoing improvements and rework of the API endpoints, **API v1 an
 These versions will no longer receive updates, and clients are strongly encouraged to migrate to **API v3**.
 
 * **Date of deprecation:** 2026-06-19 (or the first release after this date)
-* **Grace period:** v1 and v2 will continue to function temporarily, but **all users must migrate within 6 months from 2026-01-19**.
+* **Grace period:** v1 and v2 will continue to function temporarily, but **all users must migrate within 6 months from
+  2026-01-19**.
 * **The first release after this date of deprecation will fully remove v1 and v2 code and routes**
-
 
 ### Recommended Action
 
