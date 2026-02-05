@@ -958,8 +958,8 @@ class CertificateManagementFreeradiusController extends AbstractController
         }
 
         return $this->render(
-            'dashboard/shared/settings_actions/certificatesManagement/
-            certificates/freeradius/dnsChallenge/dns_challenge.html.twig',
+            'dashboard/shared/settings_actions/certificatesManagement/' .
+            'certificates/freeradius/dnsChallenge/dns_challenge.html.twig',
             [
                 'data' => $data,
                 'cloudflareDTO' => $dto,
