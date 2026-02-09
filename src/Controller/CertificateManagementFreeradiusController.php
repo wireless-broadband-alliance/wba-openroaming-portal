@@ -789,24 +789,17 @@ class CertificateManagementFreeradiusController extends AbstractController
 
         $formFinishProcess = $this->createForm(SimpleSubmitFormType::class);
         $formFinishProcess->handleRequest($request);
-        if ($formFinishProcess->isSubmitted()) {
-            if ($processEntity->getStatus() === ProcessStatusType::IN_PROGRESS) {
-                $this->addFlash(
-                    'error',
-                    $this->translator->trans('pendingProcessCertsCompleted', [], 'controllers')
-                );
-            } elseif ($formFinishProcess->isValid()) {
-                $session = $request->getSession();
-                $session->remove(SessionStatus::SYSTEM_RESET_REQUEST->value);
-                $processEntity->setStatus(ProcessStatusType::COMPLETED);
-                $this->entityManager->persist($processEntity);
-                $this->entityManager->flush();
+        if ($formFinishProcess->isSubmitted() && $formFinishProcess->isValid()) {
+            $session = $request->getSession();
+            $session->remove(SessionStatus::SYSTEM_RESET_REQUEST->value);
+            $processEntity->setStatus(ProcessStatusType::COMPLETED);
+            $this->entityManager->persist($processEntity);
+            $this->entityManager->flush();
 
-                // Redirect to the next stage automatically
-                return $this->redirectToRoute(
-                    'admin_dashboard_settings_certs_management',
-                );
-            }
+            // Redirect to the next stage automatically
+            return $this->redirectToRoute(
+                'admin_dashboard_settings_certs_management',
+            );
         }
 
         return $this->render(
