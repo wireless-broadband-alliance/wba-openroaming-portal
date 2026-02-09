@@ -9,7 +9,23 @@
             </h5>
         </div>
 
-        <div class="p-6 space-y-6 text-gray-700" data-controller="test-certificates">
+        <div
+                class="p-6 space-y-6 text-gray-700"
+                data-controller="test-certificates"
+
+                data-test-certificates-msg-missing-host-value="{{ 'errors.missing_host'|trans({}, 'test_radsec') }}"
+                data-test-certificates-msg-invalid-port-value="{{ 'errors.invalid_port'|trans({}, 'test_radsec') }}"
+                data-test-certificates-msg-unexpected-error-value="{{ 'errors.unexpected'|trans({}, 'test_radsec') }}"
+
+                data-test-certificates-label-testing-value="{{ 'labels.testing'|trans({}, 'test_radsec') }}"
+                data-test-certificates-label-test-certificates-value="{{ 'test_certificates'|trans({}, 'test_radsec') }}"
+
+                data-test-certificates-title-success-value="{{ 'results.success_title'|trans({}, 'test_radsec') }}"
+                data-test-certificates-title-error-value="{{ 'results.error_title'|trans({}, 'test_radsec') }}"
+
+                data-test-certificates-button-ok-value="{{ 'common.ok'|trans({}, 'test_radsec') }}"
+        >
+
             <div class="text-center space-y-3 pt-4">
                 <twig:ux:icon name="wba:shield-check" class="w-14 h-14 mx-auto text-primary"/>
                 <h3 class="text-gray-900 text-xl font-semibold"

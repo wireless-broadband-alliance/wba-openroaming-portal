@@ -1,16 +1,30 @@
 test_and_proceed: "Testar e Prosseguir"
 configuration_complete: "Configuração Concluída"
-instructions: "Execute o teste do servidor para confirmar que os certificados RadSecProxy foram instalados corretamente. Depois de concluído o teste, prossiga para configurar os certificados do FreeRADIUS."
-test_certificates: "Testar Certificados RadSecProxy"
-proceed_freeradius: "Prosseguir para Certificados FreeRADIUS"
-in_progress_title: "Teste em progresso..."
-in_progress_description: "A verificar a configuração dos certificados RadSecProxy no servidor. Por favor, aguarde."
-start_test_connection: "Tem a certeza de que deseja iniciar o teste de ligação?"
-host: 'Servidor'
-port: 'Porta'
-user: 'Utilizador'
-password: 'Palavra-passe'
-timeOut: 'Tempo limite (segundos)'
-test_not_done: 'Nenhum teste realizado no momento'
-test_passed: 'Último Test Aprovado'
-test_failed: 'Último Teste Reprovado'
+instructions: >
+    Execute o teste ao servidor para confirmar que os certificados do RadSecProxy
+    estão corretamente instalados. Após a conclusão do teste, prossiga para a
+    configuração dos certificados do FreeRADIUS.
+test_certificates: "Testar Certificados do RadSecProxy"
+proceed_freeradius: "Prosseguir para os Certificados do FreeRADIUS"
+in_progress_title: "Teste em curso..."
+in_progress_description: "A verificar a configuração dos certificados do RadSecProxy no servidor. Por favor aguarde."
+start_test_connection: "Tem a certeza de que pretende iniciar o teste de ligação?"
+host: "Host"
+port: "Porta"
+user: "Utilizador"
+password: "Palavra-passe"
+timeOut: "Tempo limite (segundos)"
+test_not_done: "Teste ainda não realizado"
+test_passed: "Último teste bem-sucedido"
+test_failed: "Último teste falhou"
+labels:
+    testing: "A testar..."
+errors:
+    missing_host: "Por favor indique um host remoto."
+    invalid_port: "Por favor indique uma porta válida."
+    unexpected: "Ocorreu um erro inesperado durante o teste."
+results:
+    success_title: "Teste Bem-Sucedido"
+    error_title: "Teste Falhou"
+common:
+    ok: "OK"
