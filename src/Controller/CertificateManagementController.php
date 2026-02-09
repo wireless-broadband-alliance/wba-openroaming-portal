@@ -57,12 +57,9 @@ class CertificateManagementController extends AbstractController
         if ($lastCompletedCertificate instanceof CertificateSetupProcess) {
             $certificateDate = $lastCompletedCertificate->getUpdatedAt();
         }
-
-        $processState = $this->certificateProcessCheckerService->getProcessState(true);
-        $process = $processState['active'] ?? null;
-        if ($process) {
-            $certificateSetRadsecproxy = $this->certificateRadsecproxyInfoService->getLatestCertificatesSet($process);
-            $certificateSetFreeradius = $this->certificateFreeradiusInfoService->getLatestCertificatesSet($process);
+        if ($lastCompletedCertificate) {
+            $certificateSetRadsecproxy = $this->certificateRadsecproxyInfoService->getLatestCertificatesSet($lastCompletedCertificate);
+            $certificateSetFreeradius = $this->certificateFreeradiusInfoService->getLatestCertificatesSet($lastCompletedCertificate);
             $certificateSet = array_merge($certificateSetRadsecproxy, $certificateSetFreeradius);
         }
 
