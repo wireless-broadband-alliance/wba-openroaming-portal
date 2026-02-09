@@ -104,9 +104,7 @@ export default class extends Controller {
     showResult(data) {
         const isSuccess = data.status === 'success';
         const color = isSuccess ? 'green' : 'red';
-        const title = isSuccess
-            ? this.titleSuccessValue
-            : this.titleErrorValue;
+        const title = isSuccess ? this.titleSuccessValue : this.titleErrorValue;
 
         const extraInfo = Object.entries(data)
             .filter(([key]) => !['status', 'message'].includes(key))
@@ -120,10 +118,7 @@ export default class extends Controller {
                     `;
                 }
 
-                const display =
-                    typeof value === 'object'
-                        ? JSON.stringify(value, null, 2)
-                        : value;
+                const display = typeof value === 'object' ? JSON.stringify(value, null, 2) : value;
 
                 return `
                     <p class="text-xs text-gray-600">
@@ -179,8 +174,7 @@ export default class extends Controller {
         );
 
         if (!this.nextPageButtonTarget.getAttribute('href')) {
-            this.nextPageButtonTarget.href =
-                this.nextPageButtonTarget.dataset.hrefEnabled;
+            this.nextPageButtonTarget.href = this.nextPageButtonTarget.dataset.hrefEnabled;
         }
     }
 
