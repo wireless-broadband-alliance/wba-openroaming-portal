@@ -9,6 +9,7 @@ use App\DTO\CertificateFreeradiusUploadManualDTO;
 use App\DTO\CloudflareDTO;
 use App\Entity\CertificateSetupProcess;
 use App\Entity\CloudflareTokens;
+use App\Entity\Setting;
 use App\Entity\User;
 use App\Enum\AdminRoleType;
 use App\Enum\AnalyticalEventType;
@@ -25,6 +26,7 @@ use App\Form\CertificateFreeradiusUploadManualType;
 use App\Form\CertificatesFreeradiusPasteType;
 use App\Form\CloudflareType;
 use App\Form\SimpleSubmitFormType;
+use App\Repository\SettingRepository;
 use App\Service\CertificateCheckerService;
 use App\Service\CertificateFreeradiusCommandsService;
 use App\Service\CertificateFreeradiusGenerator;
@@ -76,6 +78,7 @@ class CertificateManagementFreeradiusController extends AbstractController
         private readonly DomainService $domainService,
         private readonly FreeradiusTestOrchestrator $freeradiusTestOrchestrator,
         private readonly CloudflareService $cloudflareService,
+        private SettingRepository $settingRepository,
     ) {
     }
 
@@ -921,9 +924,17 @@ class CertificateManagementFreeradiusController extends AbstractController
                 $certificateSetupProcess->setFreeradiusFormCompletedAt(new DateTimeImmutable());
                 $certificateSetupProcess->setFreeradiusConfigAppliedAt(null);
                 $certificateSetupProcess->setIsFreeradiusCloudflare(true);
-                $data[SettingName::CLOUDFLARE_TOKEN->value]['value'] = $dto->token;
+                $setting = $this->settingRepository->findOneBy(['name' => SettingName::CLOUDFLARE_TOKEN->value]);
+                if ($setting) {
+                    $setting->setValue($dto->token);
+                } else {
+                    $setting = new Setting();
+                    $setting->setName(SettingName::CLOUDFLARE_TOKEN->value);
+                    $setting->setValue($dto->token);
+                    $this->entityManager->persist($setting);
+                }
                 $this->entityManager->persist($certificateSetupProcess);
-
+                $this->entityManager->persist($setting);
                 $this->entityManager->flush();
             }
 
