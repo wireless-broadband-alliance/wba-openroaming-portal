@@ -59,22 +59,20 @@ class CertificateManagementController extends AbstractController
         }
 
         $processState = $this->certificateProcessCheckerService->getProcessState(true);
-        $process = $processState['process'] ?? null;
-
-        $certificateSetRadsecproxy = $this->certificateRadsecproxyInfoService->getLatestCertificatesSet($process);
-
-        $certificateSetFreeradius = $this->certificateFreeradiusInfoService->getLatestCertificatesSet($process);
-
-        $certificateSet = array_merge($certificateSetRadsecproxy, $certificateSetFreeradius);
-
+        $process = $processState['active'] ?? null;
+        if ($process) {
+            $certificateSetRadsecproxy = $this->certificateRadsecproxyInfoService->getLatestCertificatesSet($process);
+            $certificateSetFreeradius = $this->certificateFreeradiusInfoService->getLatestCertificatesSet($process);
+            $certificateSet = array_merge($certificateSetRadsecproxy, $certificateSetFreeradius);
+        }
 
 
-      // Default render
+        // Default render
         return $this->render('dashboard/shared/settings_actions.html.twig', [
-        'data' => $this->getSettings->getSettings(),
-        'lastCompletedInstallation' => $installationDate ?? null,
-        'certificateSet' => $certificateSet,
-        'lastCompletedCertificates' => $certificateDate ?? null,
+            'data' => $this->getSettings->getSettings(),
+            'lastCompletedInstallation' => $installationDate ?? null,
+            'certificateSet' => $certificateSet ?? null,
+            'lastCompletedCertificates' => $certificateDate ?? null,
         ]);
     }
 
@@ -85,10 +83,10 @@ class CertificateManagementController extends AbstractController
     #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
     public function settingsCertificatesManagementSelection(): Response
     {
-      // Get current process state
+        // Get current process state
         $processState = $this->certificateProcessCheckerService->getProcessState();
 
-      // If there's no active process
+        // If there's no active process
         if (!$processState['active']) {
             $this->addFlash(
                 'error',
@@ -104,7 +102,7 @@ class CertificateManagementController extends AbstractController
         return $this->render(
             'dashboard/shared/settings_actions/certificatesManagement/certificates/certs_selection.html.twig',
             [
-            'data' => $this->getSettings->getSettings(),
+                'data' => $this->getSettings->getSettings(),
             ]
         );
     }
@@ -118,11 +116,11 @@ class CertificateManagementController extends AbstractController
     public function settingsCertificatesManagementCertificatesAbort(
         Request $request
     ): Response {
-      /** @var User $user */
+        /** @var User $user */
         $user = $this->getUser();
         $process = $this->certificateProcessCheckerService->getCurrentProcess();
 
-      // In case there's not active process
+        // In case there's not active process
         if (!$process instanceof CertificateSetupProcess) {
             $this->addFlash(
                 'error',
@@ -131,7 +129,7 @@ class CertificateManagementController extends AbstractController
             return $this->redirectToRoute('admin_dashboard_settings_certs_radsecproxy_upload');
         }
 
-      // Cancel the process and add a tag IN_COMPLETED
+        // Cancel the process and add a tag IN_COMPLETED
         $process->setStatus(ProcessStatusType::ABORTED);
         $process->setUpdatedAt(new DateTimeImmutable());
 
@@ -143,9 +141,9 @@ class CertificateManagementController extends AbstractController
             AnalyticalEventType::CERTIFICATE_SETUP_PROCESS_ABORTED->value,
             new DateTime(),
             [
-            'ip' => $request->getClientIp(),
-            'user_agent' => $request->headers->get('User-Agent'),
-            'by' => $user->getUuid(),
+                'ip' => $request->getClientIp(),
+                'user_agent' => $request->headers->get('User-Agent'),
+                'by' => $user->getUuid(),
             ]
         );
 
@@ -169,10 +167,10 @@ class CertificateManagementController extends AbstractController
     #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
     public function settingsCertificatesManagementSystemReset(Request $request): Response
     {
-      /** @var User $user */
+        /** @var User $user */
         $user = $this->getUser();
 
-      // Abort pending Installation process if exists
+        // Abort pending Installation process if exists
         $installationProcess = $this->installationProgressRepository->getLast();
         if (
             $installationProcess &&
@@ -182,11 +180,11 @@ class CertificateManagementController extends AbstractController
             $installationProcess->setUpdatedAt(new DateTime());
             $this->entityManager->persist($installationProcess);
 
-          // Reset system to last valid installation config
+            // Reset system to last valid installation config
             $this->installationService->resetToLastInstallation();
         }
 
-      // Abort pending Certificate process if exists
+        // Abort pending Certificate process if exists
         $certificateProcess = $this->certificateProcessCheckerService->getCurrentProcess();
         if ($certificateProcess instanceof \App\Entity\CertificateSetupProcess) {
             $certificateProcess->setStatus(ProcessStatusType::ABORTED);
@@ -196,7 +194,7 @@ class CertificateManagementController extends AbstractController
 
         $this->entityManager->flush();
 
-      // Set session to redirect the user
+        // Set session to redirect the user
         $session = $request->getSession();
         $session->set(SessionStatus::SYSTEM_RESET_REQUEST->value, 'admin_dashboard_settings_certs_installation');
 
@@ -205,9 +203,9 @@ class CertificateManagementController extends AbstractController
             AnalyticalEventType::SYSTEM_RESET_REQUEST_STARTED->value,
             new DateTime(),
             [
-            'ip' => $request->getClientIp(),
-            'user_agent' => $request->headers->get('User-Agent'),
-            'by' => $user->getUuid(),
+                'ip' => $request->getClientIp(),
+                'user_agent' => $request->headers->get('User-Agent'),
+                'by' => $user->getUuid(),
             ]
         );
 
