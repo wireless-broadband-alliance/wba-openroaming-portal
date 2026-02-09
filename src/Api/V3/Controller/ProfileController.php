@@ -209,7 +209,7 @@ class ProfileController extends AbstractController
                 Response::HTTP_FORBIDDEN
             );
         }
-        
+
         try {
             $dataRequest = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
         } catch (\JsonException) {
