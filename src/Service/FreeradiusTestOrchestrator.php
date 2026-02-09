@@ -65,7 +65,6 @@ final readonly class FreeradiusTestOrchestrator
             );
 
             // Clear all the sessions requests in case the system_reset is completed
-            $session->remove(SessionStatus::SYSTEM_RESET_REQUEST->value);
             $session->remove(SessionStatus::INSTALLATION_STARTED->value);
             $session->remove(SessionStatus::CERTIFICATE_STARTED->value);
         }

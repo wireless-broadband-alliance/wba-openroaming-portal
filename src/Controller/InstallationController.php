@@ -302,10 +302,6 @@ class InstallationController extends AbstractController
             return $this->redirectToRoute('admin_dashboard_settings_certs_installation_command');
         }
 
-        /* TODO: in case the user can't run the command add the "chmod +x scripts/update-db-env.sh"
-        command to give to the file permissions to run (Test with Marcelo)
-        */
-
         $commands = [
             [
                 'description' => $this->translator->trans(

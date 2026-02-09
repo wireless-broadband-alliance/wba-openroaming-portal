@@ -796,6 +796,8 @@ class CertificateManagementFreeradiusController extends AbstractController
                     $this->translator->trans('pendingProcessCertsCompleted', [], 'controllers')
                 );
             } elseif ($formFinishProcess->isValid()) {
+                $session = $request->getSession();
+                $session->remove(SessionStatus::SYSTEM_RESET_REQUEST->value);
                 $processEntity->setStatus(ProcessStatusType::COMPLETED);
                 $this->entityManager->persist($processEntity);
                 $this->entityManager->flush();

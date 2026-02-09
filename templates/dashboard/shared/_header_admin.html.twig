@@ -87,8 +87,7 @@
         <li class="px-4 py-2 mx-2 cursor-pointer hover:shadow hover:text-lightGreen duration-100 rounded">
           {# Logout Option #}
           <a href="{{ path('app_dashboard_logout') }}"
-             class="flex items-center space-x-2"
-             onclick="return confirm('{{ 'logoutMessage'|trans({}, '_header_admin') }}')">
+             class="flex items-center space-x-2">
             <twig:ux:icon name="wba:logout" class="w-7 pr-2 mr-2 fill-none stroke-current"/>
             {{ 'logout'|trans({}, '_header_admin') }}
           </a>

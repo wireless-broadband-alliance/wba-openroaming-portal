@@ -24,6 +24,7 @@ use Random\RandomException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
@@ -53,10 +54,13 @@ class ProfileController extends AbstractController
     {
         // Block if process is aborted
         if ($this->certificateProcessExtension->isCertificateAborted()) {
-            return new JsonResponse([
-                'status' => 'error',
-                'message' => 'The certificates configured in the portal have been aborted and are not valid.'
-            ], \Symfony\Component\HttpFoundation\Response::HTTP_FORBIDDEN);
+            return new JsonResponse(
+                [
+                    'status' => 'error',
+                    'message' => 'The certificates configured in the portal have been aborted and are no longer valid.'
+                ],
+                Response::HTTP_FORBIDDEN
+            );
         }
 
         try {
@@ -189,10 +193,13 @@ class ProfileController extends AbstractController
     {
         // Block if process is aborted
         if ($this->certificateProcessExtension->isCertificateAborted()) {
-            return new JsonResponse([
-                'status' => 'error',
-                'message' => 'The certificates configured in the portal have been aborted and are not valid.'
-            ], \Symfony\Component\HttpFoundation\Response::HTTP_FORBIDDEN);
+            return new JsonResponse(
+                [
+                    'status' => 'error',
+                    'message' => 'The certificates configured in the portal have been aborted and are no longer valid.'
+                ],
+                Response::HTTP_FORBIDDEN
+            );
         }
 
         try {
