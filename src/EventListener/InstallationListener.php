@@ -55,28 +55,25 @@ readonly class InstallationListener
                 return;
             }
             if (
-                $user &&
+                $user && !$session->get(SessionStatus::CERTIFICATE_VERIFICATION->value) &&
                 (
                     str_starts_with($path, '/dashboard/settings/certificatesManagement/freeradius/') ||
                     str_starts_with($path, '/dashboard/settings/certificatesManagement/radsecproxy/') ||
                     str_starts_with($path, '/dashboard/settings/certificatesManagement/certificates/')
                 )
             ) {
-                if (!$session->get(SessionStatus::CERTIFICATE_VERIFICATION->value)) {
-                    $url = $this->router->generate('admin_dashboard_settings_certs_installation_verify_send_code', [
-                        'type' => InstallationType::CERTIFICATES->value,
-                    ]);
-                    $event->setResponse(new RedirectResponse($url));
-                }
-                return;
+                $url = $this->router->generate('admin_dashboard_settings_certs_installation_verify_send_code', [
+                    'type' => InstallationType::CERTIFICATES->value,
+                ]);
+                $event->setResponse(new RedirectResponse($url));
             }
-        }
-
-        if ($session->get(SessionStatus::INSTALLATION_VERIFICATION->value)) {
-            $session->set(SessionStatus::INSTALLATION_VERIFICATION->value, false);
-        }
-        if ($session->get(SessionStatus::CERTIFICATE_VERIFICATION->value)) {
-            $session->set(SessionStatus::CERTIFICATE_VERIFICATION->value, false);
+        } else {
+            if ($session->get(SessionStatus::INSTALLATION_VERIFICATION->value)) {
+                $session->set(SessionStatus::INSTALLATION_VERIFICATION->value, false);
+            }
+            if ($session->get(SessionStatus::CERTIFICATE_VERIFICATION->value)) {
+                $session->set(SessionStatus::CERTIFICATE_VERIFICATION->value, false);
+            }
         }
     }
 }
