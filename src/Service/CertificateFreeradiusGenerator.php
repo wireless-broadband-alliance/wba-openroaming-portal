@@ -6,6 +6,7 @@ use App\Entity\CertificateSetupProcess;
 use App\Entity\User;
 use App\Enum\CertificateFileName;
 use App\Enum\CertificateMachineType;
+use DateTimeImmutable;
 use Random\RandomException;
 use RuntimeException;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -28,7 +29,7 @@ readonly class CertificateFreeradiusGenerator
         $this->certTargetDir = $projectDir . '/var/certs';
     }
 
-  /**
+    /**
      * Main entry point used by the controller.
      * Choose between simulation or real Certbot at runtime.
      *
@@ -40,44 +41,44 @@ readonly class CertificateFreeradiusGenerator
         $useSimulation = $simulated ?? false;
 
         $files = $useSimulation
-        ? $this->simulateCertificates()
-        : $this->generateCertificates($domain, $user);
+            ? $this->simulateCertificates()
+            : $this->generateCertificates($domain, $user);
 
-      // Store the resulting certs in var/certs/
+        // Store the resulting certs in var/certs/
         $this->storeCertificates($files, $useSimulation);
 
         return $files;
     }
 
-  /**
-   * Real certbot mode — returns full paths to generated files.
-   *
-   * @return string[] Full paths of cert files
-   */
+    /**
+     * Real certbot mode — returns full paths to generated files.
+     *
+     * @return string[] Full paths of cert files
+     */
     public function generateCertificates(string $domain, User $user): array
     {
         $command = [
-        'certbot',
-        'certonly',
-        '-d',
-        $domain,
-        '--key-type',
-        'rsa',
-        '--rsa-key-size',
-        '2048',
-        '--non-interactive',
-        '--agree-tos',
-        '--email',
-        $user->getEmail(),
-        '--webroot',
-        '-w',
-        '/var/www/openroaming/public',
-        '--config-dir',
-        '/etc/letsencrypt',
-        '--work-dir',
-        '/var/www/openroaming/var/certs/work',
-        '--logs-dir',
-        '/var/www/openroaming/var/certs/logs'
+            'certbot',
+            'certonly',
+            '-d',
+            $domain,
+            '--key-type',
+            'rsa',
+            '--rsa-key-size',
+            '2048',
+            '--non-interactive',
+            '--agree-tos',
+            '--email',
+            $user->getEmail(),
+            '--webroot',
+            '-w',
+            '/var/www/openroaming/public',
+            '--config-dir',
+            '/etc/letsencrypt',
+            '--work-dir',
+            '/var/www/openroaming/var/certs/work',
+            '--logs-dir',
+            '/var/www/openroaming/var/certs/logs'
         ];
 
         $process = new Process($command);
@@ -95,10 +96,10 @@ readonly class CertificateFreeradiusGenerator
         }
 
         $files = [
-        CertificateFileName::CERT_PEM_FILE->value,
-        CertificateFileName::CHAIN_PEM_FILE->value,
-        CertificateFileName::FULL_CHAIN_PEM_FILE->value,
-        CertificateFileName::PRIVATE_KEY_PEM_FILE->value
+            CertificateFileName::CERT_PEM_FILE->value,
+            CertificateFileName::CHAIN_PEM_FILE->value,
+            CertificateFileName::FULL_CHAIN_PEM_FILE->value,
+            CertificateFileName::PRIVATE_KEY_PEM_FILE->value
         ];
 
         return array_map(static function ($f) use ($liveDir) {
@@ -110,30 +111,30 @@ readonly class CertificateFreeradiusGenerator
         }, $files);
     }
 
-  /**
-   * Simulation mode — returns dummy files matching Certbot naming logic.
-   *
-   * @return string[] Full paths of simulated files
-   */
+    /**
+     * Simulation mode — returns dummy files matching Certbot naming logic.
+     *
+     * @return string[] Full paths of simulated files
+     */
     public function simulateCertificates(): array
     {
         $id = substr(uniqid('', true), 0, 13);
 
         return [
-        "$this->certTargetDir/" . CertificateFileName::CA_PEM->value . "-$id.txt",
-        "$this->certTargetDir/" . CertificateFileName::CERT_PEM->value . "-$id.txt",
-        "$this->certTargetDir/" . CertificateFileName::CHAIN_PEM->value . "-$id.txt",
-        "$this->certTargetDir/" . CertificateFileName::FULL_CHAIN_PEM->value . "-$id.txt",
-        "$this->certTargetDir/" . CertificateFileName::PRIVATE_KEY_PEM->value . "-$id.txt",
+            "$this->certTargetDir/" . CertificateFileName::CA_PEM->value . "-$id.txt",
+            "$this->certTargetDir/" . CertificateFileName::CERT_PEM->value . "-$id.txt",
+            "$this->certTargetDir/" . CertificateFileName::CHAIN_PEM->value . "-$id.txt",
+            "$this->certTargetDir/" . CertificateFileName::FULL_CHAIN_PEM->value . "-$id.txt",
+            "$this->certTargetDir/" . CertificateFileName::PRIVATE_KEY_PEM->value . "-$id.txt",
         ];
     }
 
-  /**
-   * Receives list of filenames and writes/copies real or dummy contents into var/certs.
-   *
-   * @param string[] $files
-   * @param bool $simulated Whether to use dummy content (true) or copy real certs (false)
-   */
+    /**
+     * Receives list of filenames and writes/copies real or dummy contents into var/certs.
+     *
+     * @param string[] $files
+     * @param bool $simulated Whether to use dummy content (true) or copy real certs (false)
+     */
     public function storeCertificates(array $files, bool $simulated = false): void
     {
         $filesystem = new Filesystem();
@@ -164,8 +165,6 @@ readonly class CertificateFreeradiusGenerator
         User $user,
         string $cloudflareToken
     ): array {
-
-
         $credFile = sys_get_temp_dir() . '/cf_' . bin2hex(random_bytes(8)) . '.ini';
 
         file_put_contents(
@@ -175,17 +174,19 @@ readonly class CertificateFreeradiusGenerator
         chmod($credFile, 0600);
 
         try {
+            $identifier = new DateTimeImmutable()->format('Ymd_His'); // e.g., 20260209_151230
+            $certName = $domain . '-' . $identifier;
+
             $command = [
                 'certbot',
                 'certonly',
-                '--staging',
                 '--dns-cloudflare',
                 '--dns-cloudflare-credentials',
                 $credFile,
                 '-d',
                 $domain,
                 '--cert-name',
-                $domain,
+                $certName, // <-- use timestamp identifier to avoid crashes with same folder/certs names
                 '--force-renewal',
                 '--key-type',
                 'rsa',
@@ -195,9 +196,12 @@ readonly class CertificateFreeradiusGenerator
                 '--agree-tos',
                 '--email',
                 $user->getEmail(),
-                '--config-dir', $this->certTargetDir . '/config',
-                '--work-dir',   $this->certTargetDir . '/work',
-                '--logs-dir',   $this->certTargetDir . '/logs',
+                '--config-dir',
+                $this->certTargetDir . '/config',
+                '--work-dir',
+                $this->certTargetDir . '/work',
+                '--logs-dir',
+                $this->certTargetDir . '/logs',
             ];
 
             $process = new Process($command);
@@ -214,7 +218,7 @@ readonly class CertificateFreeradiusGenerator
             throw new RuntimeException("No certificate folder was found for $domain.");
         }
 
-        usort($dirs, fn($a, $b) => filemtime($b) <=> filemtime($a));
+        usort($dirs, static fn($a, $b) => filemtime($b) <=> filemtime($a));
         $liveDir = $dirs[0];
 
         $setupProcess = $this->certificateProcessCheckerService->getCurrentProcess();
@@ -267,7 +271,7 @@ readonly class CertificateFreeradiusGenerator
         ];
 
         return array_map(
-            fn ($f) => $this->certTargetDir . '/' . $f,
+            fn($f) => $this->certTargetDir . '/' . $f,
             $files
         );
     }
