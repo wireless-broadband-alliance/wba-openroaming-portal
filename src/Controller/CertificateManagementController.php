@@ -58,8 +58,12 @@ class CertificateManagementController extends AbstractController
             $certificateDate = $lastCompletedCertificate->getUpdatedAt();
         }
         if ($lastCompletedCertificate) {
-            $certificateSetRadsecproxy = $this->certificateRadsecproxyInfoService->getLatestCertificatesSet($lastCompletedCertificate);
-            $certificateSetFreeradius = $this->certificateFreeradiusInfoService->getLatestCertificatesSet($lastCompletedCertificate);
+            $certificateSetRadsecproxy = $this->certificateRadsecproxyInfoService->getLatestCertificatesSet(
+                $lastCompletedCertificate
+            );
+            $certificateSetFreeradius = $this->certificateFreeradiusInfoService->getLatestCertificatesSet(
+                $lastCompletedCertificate
+            );
             $certificateSet = array_merge($certificateSetRadsecproxy, $certificateSetFreeradius);
         }
 
