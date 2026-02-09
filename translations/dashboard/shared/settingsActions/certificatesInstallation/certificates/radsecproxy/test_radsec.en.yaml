@@ -19,8 +19,8 @@ test_failed: "Last Test Failed"
 labels:
     testing: "Testing..."
 errors:
-    missing_host: "Please provide a remote host."
-    invalid_port: "Please provide a valid port."
+    missing_host: "Please provide the IP of the Resolver."
+    invalid_port: "Please provide the port of the Resolver."
     unexpected: "An unexpected error occurred while testing."
 results:
     success_title: "Test Successful"

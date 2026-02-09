@@ -20,8 +20,8 @@ test_failed: "Último teste falhou"
 labels:
     testing: "A testar..."
 errors:
-    missing_host: "Por favor indique um host remoto."
-    invalid_port: "Por favor indique uma porta válida."
+    missing_host: "Por favor indica o IP do Resolver."
+    invalid_port: "Por favor indica a porta do Resolver."
     unexpected: "Ocorreu um erro inesperado durante o teste."
 results:
     success_title: "Teste Bem-Sucedido"
