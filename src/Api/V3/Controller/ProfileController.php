@@ -18,11 +18,13 @@ use App\Service\ExpirationProfileService;
 use App\Service\JWTTokenGenerator;
 use App\Service\RsaEncryptionService;
 use App\Service\UserStatusChecker;
+use App\Twig\CertificateProcessExtension;
 use DateTime;
 use Random\RandomException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
@@ -39,7 +41,8 @@ class ProfileController extends AbstractController
         private readonly UserExternalAuthRepository $userExternalAuthRepository,
         private readonly ExpirationProfileService $expirationProfileService,
         private readonly RsaEncryptionService $rsaEncryptionService,
-        private readonly UserStatusChecker $userStatusChecker
+        private readonly UserStatusChecker $userStatusChecker,
+        private readonly CertificateProcessExtension $certificateProcessExtension
     ) {
     }
 
@@ -49,6 +52,17 @@ class ProfileController extends AbstractController
     #[Route('/config/profile/android', name: 'api_v3_config_profile_android', methods: ['POST'])]
     public function getProfileAndroid(Request $request): JsonResponse
     {
+        // Block if process is aborted
+        if ($this->certificateProcessExtension->isCertificateAborted()) {
+            return new JsonResponse(
+                [
+                    'status' => 'error',
+                    'message' => 'The certificates configured in the portal have been aborted and are no longer valid.'
+                ],
+                Response::HTTP_FORBIDDEN
+            );
+        }
+
         try {
             $dataRequest = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
         } catch (\JsonException) {
@@ -185,6 +199,17 @@ class ProfileController extends AbstractController
     #[Route('/config/profile/ios', name: 'api_v3_config_profile_ios', methods: ['POST'])]
     public function getProfileIos(Request $request): JsonResponse
     {
+        // Block if process is aborted
+        if ($this->certificateProcessExtension->isCertificateAborted()) {
+            return new JsonResponse(
+                [
+                    'status' => 'error',
+                    'message' => 'The certificates configured in the portal have been aborted and are no longer valid.'
+                ],
+                Response::HTTP_FORBIDDEN
+            );
+        }
+        
         try {
             $dataRequest = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
         } catch (\JsonException) {
