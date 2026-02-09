@@ -56,8 +56,7 @@ class CertificateManagementController extends AbstractController
         }
         if ($lastCompletedCertificate instanceof CertificateSetupProcess) {
             $certificateDate = $lastCompletedCertificate->getUpdatedAt();
-        }
-        if ($lastCompletedCertificate) {
+
             $certificateSetRadsecproxy = $this->certificateRadsecproxyInfoService->getLatestCertificatesSet(
                 $lastCompletedCertificate
             );
@@ -66,7 +65,6 @@ class CertificateManagementController extends AbstractController
             );
             $certificateSet = array_merge($certificateSetRadsecproxy, $certificateSetFreeradius);
         }
-
 
         // Default render
         return $this->render('dashboard/shared/settings_actions.html.twig', [
