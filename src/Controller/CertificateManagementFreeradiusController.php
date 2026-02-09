@@ -18,6 +18,7 @@ use App\Enum\CertificateTestResult;
 use App\Enum\FirewallType;
 use App\Enum\ProcessStatusType;
 use App\Enum\SessionStatus;
+use App\Enum\SettingName;
 use App\Exception\FreeradiusTestException;
 use App\Form\CertificateFreeradiusDomainType;
 use App\Form\CertificateFreeradiusUploadManualType;
@@ -927,11 +928,9 @@ class CertificateManagementFreeradiusController extends AbstractController
                 $certificateSetupProcess->setFreeradiusFormCompletedAt(new DateTimeImmutable());
                 $certificateSetupProcess->setFreeradiusConfigAppliedAt(null);
                 $certificateSetupProcess->setIsFreeradiusCloudflare(true);
-                $cloudflareToken = new CloudflareTokens();
-                $cloudflareToken->setCreatedAt(new DateTimeImmutable());
-                $cloudflareToken->setToken($dto->token);
+                $data[SettingName::CLOUDFLARE_TOKEN->value]['value'] = $dto->token;
                 $this->entityManager->persist($certificateSetupProcess);
-                $this->entityManager->persist($cloudflareToken);
+
                 $this->entityManager->flush();
             }
 
