@@ -23,7 +23,7 @@ the database.
 or, only for local usage and testing,
 
 ```bash
-- docker compose -f docker-compose.local.yml up -d
+- docker compose -f docker-compose-local.yml up -d
 ```
 
 3. **Check Containers Status**: After executing the previous command, ensure that all containers for each service are
@@ -207,12 +207,12 @@ You've successfully completed the installation process of the OpenRoaming Provis
 Now, it's time to access your fully set-up portal! 🌐
 
 To get started, open your favorite web browser and type the following address in the URL bar:
-http://YOUR_SERVER_IP:88
+http://YOUR_SERVER_IP:80
 
 Replace **YOUR_SERVER_IP** with your server's real IP address or domain name.
 If you are running the portal locally, you can
 use localhost for an IP address.
-And make sure to use **port 88**, it's the default port of the project.
+And make sure to use **port 80**, it's the default port of the project.
 
 If you encounter any issues or have any questions along the way, don't hesitate to check to the **Troubleshooting** section on this README or reach out to our support team for assistance.
 
