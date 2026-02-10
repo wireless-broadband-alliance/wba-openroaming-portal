@@ -11,6 +11,7 @@ use App\Enum\ProcessStatusType;
 use App\Enum\SessionStatus;
 use App\Repository\CertificateSetupProcessRepository;
 use App\Repository\InstallationProgressRepository;
+use App\Service\InstallationService;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\Session\Flash\FlashBagInterface;
 use Symfony\Component\HttpFoundation\Session\Session;
@@ -29,7 +30,8 @@ readonly class FirstSystemResetRequestListener
         private InstallationProgressRepository $installationProgressRepository,
         private CertificateSetupProcessRepository $certificateSetupProcessRepository,
         private UrlGeneratorInterface $urlGenerator,
-        private TranslatorInterface $translator
+        private TranslatorInterface $translator,
+        private InstallationService $installationService,
     ) {
     }
 
@@ -41,6 +43,8 @@ readonly class FirstSystemResetRequestListener
         if (!$user instanceof User || !$this->security->isGranted(AdminRoleType::ROLE_ADMIN->value, $user)) {
             return;
         }
+
+        $this->installationService->verifyEnvSettings();
 
         $completedInstallation = $this->installationProgressRepository->findOneBy([
             'installationState' => ProcessStatusType::COMPLETED

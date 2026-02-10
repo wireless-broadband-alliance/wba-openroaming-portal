@@ -3,9 +3,12 @@
 namespace App\Service;
 
 use App\DTO\InstallationProgressDTO;
+use App\Entity\CertificateSetupProcess;
 use App\Entity\InstallationProgress;
 use App\Entity\User;
 use App\Enum\DataBaseSetupType;
+use App\Enum\DefaultUser;
+use App\Enum\EnvSettingsNameType;
 use App\Enum\InstallationStep;
 use App\Enum\InstallationWidgetStepsEnum;
 use App\Enum\ProcessStatusType;
@@ -37,7 +40,55 @@ readonly class InstallationService
         private DatabaseConnectionService $databaseConnectionService,
         private TranslatorInterface $translator,
         private UserRepository $userRepository,
+        private CaptchaValidator $captchaValidator,
     ) {
+    }
+
+    public function verifyEnvSettings(): InstallationProgress
+    {
+        $installationProgress = new InstallationProgress();
+        $installationProgress->setInstallationState(ProcessStatusType::IN_PROGRESS);
+        $installationProgress->setCreatedAt(new DateTime());
+        $installationProgress->setUpdatedAt(new DateTime());
+        $databaseUrl = $_ENV[EnvSettingsNameType::DATABASE_URL->value];
+        if ($databaseUrl and $this->databaseConnectionService->testDatabaseConnection($databaseUrl)) {
+            $installationProgress->setDbOpenRoaming($databaseUrl);
+        }
+        $databaseFreeRadiusUrl = $_ENV[EnvSettingsNameType::DATABASE_FREERADIUS_URL->value];
+        if ($databaseFreeRadiusUrl
+           // and $this->databaseConnectionService->testDatabaseConnection($databaseFreeRadiusUrl)
+        ) {
+            $installationProgress->setDbFreeradius($databaseFreeRadiusUrl);
+        }
+        $trustedProxies = $_ENV[EnvSettingsNameType::TRUSTED_PROXIES->value];
+        $trustedProxiesArray = array_map('trim', explode(',', $trustedProxies));
+        if ($trustedProxies) {
+            $installationProgress->setTrustedProxies($trustedProxiesArray);
+        }
+        $turnatileKey = $_ENV[EnvSettingsNameType::TURNSTILE_KEY->value];
+        if ($turnatileKey) {
+            $installationProgress->setTurnstileKey($turnatileKey);
+        }
+        $turnstileSecret = $_ENV[EnvSettingsNameType::TURNSTILE_SECRET->value];
+        $captchaValidation = $this->captchaValidator->validateCredentials($turnstileSecret);
+        if ($turnstileSecret and $captchaValidation['success']) {
+            $installationProgress->setTurnstileSecret($turnstileSecret);
+        }
+        $jwtPassphrase = $_ENV[EnvSettingsNameType::JWT_PASSPHRASE->value];
+        if ($jwtPassphrase) {
+            $installationProgress->setJwtPassphrase($jwtPassphrase);
+        }
+        $superAdmin = $this->userRepository->findSuperAdmin();
+        if ($superAdmin) {
+            if ($superAdmin->getEmail() !== DefaultUser::ADMIN->value) {
+                $installationProgress->setEmailAdmin($superAdmin->getEmail());
+                $installationProgress->setPasswordAdmin($superAdmin->getPassword());
+                $installationProgress->setAdminConfirmation(true);
+            }
+        }
+        $this->entityManager->persist($installationProgress);
+        $this->entityManager->flush();
+        return $installationProgress;
     }
 
     public function lastInstallation(): ?InstallationProgress
