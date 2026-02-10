@@ -55,8 +55,7 @@ readonly class InstallationService
             $installationProgress->setDbOpenRoaming($databaseUrl);
         }
         $databaseFreeRadiusUrl = $_ENV[EnvSettingsNameType::DATABASE_FREERADIUS_URL->value];
-        if ($databaseFreeRadiusUrl
-           // and $this->databaseConnectionService->testDatabaseConnection($databaseFreeRadiusUrl)
+        if ($databaseFreeRadiusUrl and $this->databaseConnectionService->testDatabaseConnection($databaseFreeRadiusUrl)
         ) {
             $installationProgress->setDbFreeradius($databaseFreeRadiusUrl);
         }
