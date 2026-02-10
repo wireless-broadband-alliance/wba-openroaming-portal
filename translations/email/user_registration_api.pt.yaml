@@ -1,0 +1,34 @@
+subject_registration_details: 'Detalhes do seu registo OpenRoaming'
+
+title_welcome: 'Está quase ligado!'
+header_welcome: 'Bem-vindo ao OpenRoaming!'
+
+intro_new_user: >
+    Para configurar o acesso OpenRoaming, será encaminhado para a nossa página segura.
+    A partir daí, continuará automaticamente para a aplicação para concluir a instalação.
+
+new_user_steps:
+    confirm_account: >
+        Abra a aplicação e toque em
+        <strong style="color: #7BBA29;">“Continuar configuração”</strong>
+        para confirmar a sua conta.
+    download_profile: >
+        Após a confirmação, volte à aplicação e toque em
+        <strong>“Transferir e instalar o perfil”</strong>
+        para ativar o OpenRoaming no seu dispositivo.
+    password: >
+        A sua palavra-passe temporária é:
+        <strong style='color: #0045AD;'>%password%</strong>
+    enter_code: >
+        Se a aplicação solicitar um código de verificação, introduza:
+        <strong style='color: #0045AD;'>%twoFaCode%</strong>
+
+buttons:
+    download_and_install: 'Continuar para a applicação'
+    link_text: 'volte à aplicação'
+    download_text: 'transferir e instalar a rede OpenRoaming'
+
+footer:
+    support_team: 'Equipa de suporte:'
+    thank_you: 'Obrigado'
+    team: 'A equipa %supportTeam%'

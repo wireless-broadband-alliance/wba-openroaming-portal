@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="{{ app.request.locale }}">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>{{ 'subject_registration_details'|trans({}, 'user_registration_api') }}</title>
+</head>
+<body style="margin:0; padding:0; font-family: Arial, Helvetica, sans-serif; background-color:#F4F4F4;">
+
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#F4F4F4; margin:0; padding:0;">
+    <tr>
+        <td align="center">
+
+            <!-- Container -->
+            <table role="presentation" width="100%" cellspacing= "0" cellpadding="0" border="0" style="max-width:1100px; background-color:#FFFFFF; margin:0 auto;">
+                <tr>
+                    <td>
+
+                        <!-- Header -->
+                        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#0B1A58; text-align:center;">
+                            <tr>
+                                <td style="padding:40px 20px;">
+                                    <img src="cid:logo_cid" alt="Customer Logo" style="max-width:300px; height:auto; border:0;"/>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <!-- Content -->
+                        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="text-align:center; padding:40px 20px;">
+                            <tr>
+                                <td>
+                                    <h1 style="color:#0B1A58; font-size:28px; font-weight:bold; margin:0 0 30px 0; font-family: Arial, Helvetica, sans-serif;">
+                                        {{ 'header_welcome'|trans({}, 'user_registration_api') }}
+                                    </h1>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td style="padding-bottom:20px;">
+                                    <p style="font-size:18px; line-height:1.5; color:#0B1A58; margin:0; font-family: Arial, Helvetica, sans-serif;">
+                                        {{ 'intro_new_user'|trans({
+                                            '%link_text%': 'buttons.link_text'|trans({}, 'user_registration_api'),
+                                            '%download_text%': 'buttons.download_text'|trans({}, 'user_registration_api'),
+                                        }, 'user_registration_api')|raw }}
+                                    </p>
+                                </td>
+                            </tr>
+
+                            <!-- Button -->
+                            <tr>
+                                <td>
+                                    <a href="{{ absolute_url('/login/link') ~ '?uuid=' ~ uuid|url_encode ~ '&twoFaCode=' ~ twoFaCode|url_encode }}"
+                                       style="display:inline-block; width:90%; max-width:800px; padding:18px; background-color:#7BBA29; color:#0B1A58; font-size:18px; font-weight:bold; text-align:center; text-decoration:none; border-radius:10px; font-family: Arial, Helvetica, sans-serif;">
+                                        {{ 'buttons.download_and_install'|trans({}, 'user_registration_api') }}
+                                    </a>
+                                </td>
+                            </tr>
+
+                        </table>
+
+                        <!-- Footer -->
+                        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#E6E6E6; text-align:center; padding:20px;">
+                            <tr>
+                                <td>
+                                    <p style="margin:12px 0; font-size:14px; color:#1A202C; font-family: Arial, Helvetica, sans-serif;">
+                                        {{ 'footer.support_team'|trans({}, 'user_registration_api') }}
+                                        <a href="mailto:{{ contactEmail }}" style="color:#0B1A58; font-weight:bold; text-decoration:none;">{{ contactEmail }}</a>
+                                    </p>
+                                    <p style="margin:12px 0; font-size:14px; color:#1A202C; font-family: Arial, Helvetica, sans-serif;">
+                                        <strong style="color:#0B1A58;">{{ 'footer.thank_you'|trans({}, 'user_registration_api') }}</strong><br/>
+                                        {{ 'footer.team'|trans({'%supportTeam%': supportTeam}, 'user_registration_api') }}
+                                    </p>
+                                </td>
+                            </tr>
+                        </table>
+
+                    </td>
+                </tr>
+            </table>
+            <!-- End Container -->
+
+        </td>
+    </tr>
+</table>
+
+</body>
+</html>
