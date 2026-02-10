@@ -51,3 +51,12 @@ emailVerification:
     newCodeSentEmail: 'Enviamos um novo código para: %email%.'
     waitBeforeTryingAgain: 'Por favor, aguarde %time% minutos antes de tentar novamente.'
     accountSuccessfullyVerified: 'Sua conta foi verificada com sucesso.'
+
+finishSetupTitle: 'Conclua a configuração na aplicação'
+finishSetupExplanation: >
+    A autenticação foi realizada com sucesso.
+    Para concluir a configuração e instalar o perfil OpenRoaming,
+    regresse à aplicação.
+finishSetupNote: 'Se a aplicação não abrir automaticamente, utilize o botão abaixo.'
+openAppAndFinish: 'Abrir a aplicação e concluir configuração'
+continueOnWeb: 'Continuar no portal web'

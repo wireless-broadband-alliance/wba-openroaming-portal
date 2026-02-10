@@ -12,22 +12,38 @@
 
     {{ block('toast_messages') }}
 
-    <div class="mt-6 leading-7">
+    <div class="mt-6 leading-7 max-w-3xl">
         <p class="font-bold text-base sm:text-lg md:text-xl lg:text-2xl">
-            {{ 'downloadInstallProfiles'|trans({}, 'landing') }}
+            {{ 'finishSetupTitle'|trans({}, 'landing') }}
         </p>
-        <p class="mt-3 text-sm sm:text-base md:text-lg lg:text-xl">
-            {{ 'profilesExplanation'|trans({}, 'landing') }}
+
+        <p class="mt-3 text-sm sm:text-base md:text-lg text-[#212529] text-opacity-80">
+            {{ 'finishSetupExplanation'|trans({}, 'landing') }}
+        </p>
+
+        <p class="mt-4 text-sm text-[#212529] text-opacity-60">
+            {{ 'finishSetupNote'|trans({}, 'landing') }}
         </p>
     </div>
 
-    <div>
-        Content for this api return goes here
+    <div class="mt-8 flex flex-col sm:flex-row gap-4">
+        {# TODO ADD returnToAppUrl #}
+        <a
+                href="#"
+                class="w-full sm:w-[280px] btn-primary py-3 text-center"
+        >
+            {{ 'openAppAndFinish'|trans({}, 'landing') }}
+        </a>
+
+        {# Botão secundário: continuar no portal web #}
+        <a
+                href="{{ path('app_landing') }}"
+                class="w-full sm:w-[280px] btn-secondary py-3 text-center"
+        >
+            {{ 'continueOnWeb'|trans({}, 'landing') }}
+        </a>
     </div>
 
-    <div>
-        Make the return button here too
-    </div>
     <div class="my-[25px] divider"></div>
     <div {{ stimulus_controller('widget') }}>
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center w-full gap-4">
