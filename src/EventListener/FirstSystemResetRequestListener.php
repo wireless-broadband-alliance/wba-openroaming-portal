@@ -5,6 +5,7 @@ namespace App\EventListener;
 use App\Entity\CertificateSetupProcess;
 use App\Entity\InstallationProgress;
 use App\Entity\User;
+use App\Enum\AdminRoleType;
 use App\Enum\CertificateTestResult;
 use App\Enum\ProcessStatusType;
 use App\Enum\SessionStatus;
@@ -37,7 +38,7 @@ readonly class FirstSystemResetRequestListener
         $session = $event->getRequest()->getSession();
         $user = $event->getAuthenticationToken()->getUser();
 
-        if (!$user instanceof User || !$this->security->isGranted('ROLE_ADMIN', $user)) {
+        if (!$user instanceof User || !$this->security->isGranted(AdminRoleType::ROLE_ADMIN->value, $user)) {
             return;
         }
 
