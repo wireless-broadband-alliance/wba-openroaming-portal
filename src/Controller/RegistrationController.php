@@ -365,7 +365,7 @@ class RegistrationController extends AbstractController
                     $this->translator->trans('accountVerified', [], 'controllers')
                 );
 
-                return $this->redirectAfterConfirmation($uuid, $isApiSource);
+                return $this->redirectAfterConfirmation($isApiSource);
             } catch (CustomUserMessageAuthenticationException) {
                 $this->addFlash(
                     'error',
@@ -383,13 +383,10 @@ class RegistrationController extends AbstractController
         return $this->redirectToRoute('app_login');
     }
 
-    private function redirectAfterConfirmation(string $uuid, bool $isApiSource): Response
+    private function redirectAfterConfirmation(bool $isApiSource): Response
     {
         if ($isApiSource) {
-            return $this->redirectToRoute('app_api_landing', [
-                'source' => 'api',
-                'uuid' => $uuid,
-            ]);
+            return $this->redirectToRoute('app_api_landing');
         }
 
         return $this->redirectToRoute('app_landing');
