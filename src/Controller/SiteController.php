@@ -429,6 +429,12 @@ class SiteController extends AbstractController
         ]);
     }
 
+    #[Route('/app/continue', name: 'app_api_landing')]
+    public function appApiLanding(
+        Request $request,
+    ): Response {
+        dd('user is here good', $request);
+    }
 
     /**
      * Widget with data about the account of the user / upload new password
