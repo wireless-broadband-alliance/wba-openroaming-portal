@@ -170,9 +170,11 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         $qb->andWhere(
             $qb->expr()->orX(
                 'u.roles LIKE :admin',
+                'u.roles LIKE :superAdmin'
             )
         )
-            ->setParameter('admin', '%ROLE_ADMIN%');
+            ->setParameter('admin', '%ROLE_ADMIN%')
+            ->setParameter('superAdmin', '%ROLE_SUPER_ADMIN%');
 
         // Add filters based on verification status
         if ($filter === UserVerificationStatus::VERIFIED->value) {
