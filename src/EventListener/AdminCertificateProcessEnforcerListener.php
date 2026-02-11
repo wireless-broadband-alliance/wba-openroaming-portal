@@ -143,7 +143,10 @@ readonly class AdminCertificateProcessEnforcerListener
 
         if (!($this->certificateSetupProcessRepository->getLatestProcess() instanceof CertificateSetupProcess)) {
             $certProcess = $this->certificateProcessCheckerService->verifyCertificates();
-            if ($certProcess instanceof CertificateSetupProcess && $certProcess->getStatus() === ProcessStatusType::COMPLETED) {
+            if (
+                $certProcess instanceof CertificateSetupProcess &&
+                $certProcess->getStatus() === ProcessStatusType::COMPLETED
+            ) {
                 $this->redirectTo($event, 'admin_page');
                 return;
             }
@@ -172,7 +175,8 @@ readonly class AdminCertificateProcessEnforcerListener
             return;
         }
 
-        if (($certProcess->getRadsecproxyTestResult() === CertificateTestResult::PASSED)
+        if (
+            ($certProcess->getRadsecproxyTestResult() === CertificateTestResult::PASSED)
             && $certProcess->getFreeradiusTestResult() === CertificateTestResult::PASSED
         ) {
             $session->remove(SessionStatus::SYSTEM_RESET_REQUEST->value);

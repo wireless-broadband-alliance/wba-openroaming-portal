@@ -72,8 +72,10 @@ readonly class FirstSystemResetRequestListener
 
         if (!($this->certificateSetupProcessRepository->getLatestProcess() instanceof CertificateSetupProcess)) {
             $certProcess = $this->certificateProcessCheckerService->verifyCertificates();
-            if ($certProcess instanceof CertificateSetupProcess && $certProcess->getStatus(
-                ) === ProcessStatusType::COMPLETED) {
+            if (
+                $certProcess instanceof CertificateSetupProcess &&
+                $certProcess->getStatus() === ProcessStatusType::COMPLETED
+            ) {
                 $this->handleRedirect(
                     $event,
                     $session,

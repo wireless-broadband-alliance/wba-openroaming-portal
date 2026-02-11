@@ -198,8 +198,7 @@ readonly class CertificateProcessCheckerService
         string $path,
         string $certName,
         string $certType
-    ): void
-    {
+    ): void {
         $path = $this->parameterBag->get('kernel.project_dir') . $path;
         $uploadedFile = new UploadedFile(
             $path,
@@ -216,5 +215,4 @@ readonly class CertificateProcessCheckerService
             $certificateSetupProcess,
         );
     }
-
 }

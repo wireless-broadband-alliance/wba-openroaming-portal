@@ -10,5 +10,4 @@ enum EnvSettingsNameType: string
     case TURNSTILE_KEY  = 'TURNSTILE_KEY';
     case TURNSTILE_SECRET = 'TURNSTILE_SECRET';
     case JWT_PASSPHRASE = 'JWT_PASSPHRASE';
-
 }
