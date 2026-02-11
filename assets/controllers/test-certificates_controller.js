@@ -167,7 +167,6 @@ export default class extends Controller {
         `;
         }
 
-
         this.resultMessageTarget.classList.remove('hidden');
     }
 
