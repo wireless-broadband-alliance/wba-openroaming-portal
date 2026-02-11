@@ -9,7 +9,9 @@
 
         <div class="px-6 py-5 space-y-5 bg-white">
             {% for step in commands %}
-                {% set isSensitive = step.command matches '/key\\.pem/' %}
+                {% set isSensitive =
+                    step.command matches '/key\\.pem/'
+                    and not (step.command starts with 'rm ') %}
                 <div class="space-y-2 relative" data-controller="clipboard">
                     {# Step description #}
                     <p class="text-sm font-medium text-gray-700">
@@ -21,17 +23,17 @@
                             {# Toggle button #}
                             <button type="button"
                                     class="mt-1 mb-2 text-sm text-primary underline"
+                                    data-command-visibility-target="toggleButton"
+                                    data-show-text="{{ 'showSensitive'|trans({}, 'config_radsec') }}"
+                                    data-hide-text="{{ 'hideSensitive'|trans({}, 'config_radsec') }}"
                                     data-action="command-visibility#toggle">
                                 {{ 'showSensitive'|trans({}, 'config_radsec') }}
                             </button>
 
-                            {# Hidden Block (Blurred but copyable) #}
+                            {# Hidden Block (Blurred and NOT COPYABLE ) #}
                             <div data-command-visibility-target="hiddenBlock"
-                                 class="relative rounded bg-gray-800 text-gray-300 p-4 font-mono">
-                                {# Copy button #}
-                                <pre class="copyable-code relative rounded text-gray-300 blur-sm select-text overflow-x-auto"
-                                     data-clipboard-target="code">{{ step.command|raw }}</pre>
-                                {{ include('shared/_copy_button.html.twig') }}
+                                 class="relative rounded bg-gray-800 text-gray-300 p-4 font-mono pointer-events-none select-none">
+                                <pre class="relative rounded text-gray-300 blur-sm overflow-x-auto">{{ step.command|raw }}</pre>
                             </div>
 
                             {# Revealed Block #}
