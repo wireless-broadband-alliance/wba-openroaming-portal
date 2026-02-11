@@ -14,8 +14,6 @@ use App\Repository\InstallationProgressRepository;
 use App\Service\CertificateProcessCheckerService;
 use App\Service\InstallationService;
 use Symfony\Bundle\SecurityBundle\Security;
-use Symfony\Component\HttpFoundation\Session\Flash\FlashBagInterface;
-use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -72,11 +70,10 @@ readonly class FirstSystemResetRequestListener
             return;
         }
 
-        dd('die here pls 1');
         if (!($this->certificateSetupProcessRepository->getLatestProcess() instanceof CertificateSetupProcess)) {
             $certProcess = $this->certificateProcessCheckerService->verifyCertificates();
-            if ($certProcess instanceof CertificateSetupProcess && $certProcess->getStatus() === ProcessStatusType::COMPLETED) {
-                dd('die here pls 2');
+            if ($certProcess instanceof CertificateSetupProcess && $certProcess->getStatus(
+                ) === ProcessStatusType::COMPLETED) {
                 $this->handleRedirect(
                     $event,
                     $session,
@@ -115,7 +112,7 @@ readonly class FirstSystemResetRequestListener
             return;
         }
 
-        if (!$completedCertificates->getRadsecproxyTestResult() instanceof CertificateTestResult) {
+        if ($completedCertificates->getFreeradiusTestResult() !== CertificateTestResult::PASSED) {
             $session->set('2fa_verified_dashboard', true);
             $session->set(
                 SessionStatus::SYSTEM_RESET_REQUEST->value,
@@ -130,35 +127,6 @@ readonly class FirstSystemResetRequestListener
                     'eventListener'
                 ),
                 'admin_dashboard_settings_certs_radsecproxy_upload'
-            );
-            return;
-        }
-
-        if (($completedCertificates->getRadsecproxyTestResult() === CertificateTestResult::PASSED)
-            && $completedCertificates->getFreeradiusTestResult() === CertificateTestResult::PASSED
-        ) {
-            $session->remove(SessionStatus::SYSTEM_RESET_REQUEST->value);
-            return;
-        }
-
-        if (
-            ($completedCertificates->getRadsecproxyTestResult() === CertificateTestResult::PASSED)
-            && $completedCertificates->getFreeradiusTestResult() !== CertificateTestResult::PASSED
-        ) {
-            $session->set('2fa_verified_dashboard', true);
-            $session->set(
-                SessionStatus::SYSTEM_RESET_REQUEST->value,
-                'admin_dashboard_settings_certs_management_freeradius_selection'
-            );
-            $this->handleRedirect(
-                $event,
-                $session,
-                $this->translator->trans(
-                    'certificateProcessPending',
-                    [],
-                    'eventListener'
-                ),
-                'admin_dashboard_settings_certs_management_freeradius_selection'
             );
             return;
         }
@@ -182,13 +150,7 @@ readonly class FirstSystemResetRequestListener
         $session->set(SessionStatus::INSTALLATION_VERIFICATION->value, true);
         $session->set(SessionStatus::CERTIFICATE_STARTED->value, true);
         $session->set(SessionStatus::CERTIFICATE_VERIFICATION->value, true);
-        if ($session instanceof Session) {
-            $session->getFlashBag()->add('success', $flashMessage);
-        } else {
-            /** @var FlashBagInterface $flashBag */
-            $flashBag = $event->getRequest()->getSession()->getBag('flashes');
-            $flashBag->add('success', $flashMessage);
-        }
+        $session->getFlashBag()->add('success', $flashMessage);
 
         $url = $this->urlGenerator->generate($routeName);
         $response = new RedirectResponse($url);
