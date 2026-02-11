@@ -4,6 +4,8 @@ namespace App\Service;
 
 use App\Entity\CertificateSetupProcess;
 use App\Entity\InstallationProgress;
+use App\Enum\CertificateFileName;
+use App\Enum\CertificateMachineType;
 use App\Enum\ProcessStatusType;
 use App\Enum\CertificateRouteAccess;
 use App\Enum\CertificateTestResult;
@@ -12,6 +14,7 @@ use App\Repository\InstallationProgressRepository;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 readonly class CertificateProcessCheckerService
 {
@@ -21,6 +24,8 @@ readonly class CertificateProcessCheckerService
         private InstallationProgressRepository $installationProgressRepository,
         private InstallationService $installationService,
         private EntityManagerInterface $entityManager,
+        private ParameterBagInterface $parameterBag,
+        private CertificateStorageService $certificateStorageService,
     ) {
     }
 
@@ -157,7 +162,6 @@ readonly class CertificateProcessCheckerService
             $certificateSetupProcess->setFreeradiusTestResult(CertificateTestResult::PASSED);
             $certificateSetupProcess->setCreatedAt(new DateTimeImmutable());
             $certificateSetupProcess->setUpdatedAt(new DateTimeImmutable());
-
             $lastInstallation = $this->installationProgressRepository->getLast();
             if ($lastInstallation instanceof InstallationProgress) {
                 $installationDTO = $this->installationService->fillDto($lastInstallation);
@@ -166,9 +170,51 @@ readonly class CertificateProcessCheckerService
             }
             $this->entityManager->persist($certificateSetupProcess);
             $this->entityManager->flush();
+            $this->storeCert(
+                $certificateSetupProcess,
+                '/signing-keys/cert.pem',
+                CertificateFileName::CERT_PEM->value,
+                CertificateMachineType::FREERADIUS->value
+            );
+            $this->storeCert(
+                $certificateSetupProcess,
+                '/signing-keys/chain.pem',
+                CertificateFileName::CHAIN_PEM->value,
+                CertificateMachineType::FREERADIUS->value
+            );
+            $this->storeCert(
+                $certificateSetupProcess,
+                '/signing-keys/fullchain.pem',
+                CertificateFileName::FULL_CHAIN_PEM->value,
+                CertificateMachineType::FREERADIUS->value
+            );
             return $certificateSetupProcess;
         }
         return null;
+    }
+
+    private function storeCert(
+        CertificateSetupProcess $certificateSetupProcess,
+        string $path,
+        string $certName,
+        string $certType
+    ): void
+    {
+        $path = $this->parameterBag->get('kernel.project_dir') . $path;
+        $uploadedFile = new UploadedFile(
+            $path,
+            $certName,
+            'application/x-pem-file',
+            null,
+            true
+        );
+
+        $this->certificateStorageService->storeUploadedFile(
+            $uploadedFile,
+            $certName,
+            $certType,
+            $certificateSetupProcess,
+        );
     }
 
 }
