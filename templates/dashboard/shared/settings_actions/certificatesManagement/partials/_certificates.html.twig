@@ -1,9 +1,9 @@
 <a href="{{ path('admin_dashboard_settings_certs_radsecproxy_upload') }}"
-   onclick="return confirm('{{ 'confirmReinstall'|trans({}, '_certificates') }}')"
+   data-confirm="{{ 'confirmReinstall'|trans({}, '_certificates') }}"
    class="group flex flex-col items-center text-center bg-white shadow-md rounded-2xl p-8 border border-gray-200
-                  transition-all hover:shadow-lg hover:-translate-y-1">
+          transition-all hover:shadow-lg hover:-translate-y-1">
 
-    <h2 class="text-xl md:text-2xl font-bold mb-6 transition-colors group-hover:text-primary">
+<h2 class="text-xl md:text-2xl font-bold mb-6 transition-colors group-hover:text-primary">
         {{ 'tittleCert'|trans({}, '_certificates') }}
     </h2>
 
