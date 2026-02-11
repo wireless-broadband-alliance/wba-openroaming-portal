@@ -65,7 +65,7 @@ readonly class InstallationService
 
                 $trustedProxies = $this->parameterBag->get('app.trusted_proxies');
                 if ($trustedProxies) {
-                    $trustedProxiesArray = array_map('trim', explode(',', $trustedProxies));
+                    $trustedProxiesArray = array_map(trim(...), explode(',', $trustedProxies));
                     $installationProgress->setTrustedProxies($trustedProxiesArray);
 
                     $turnstileKey = $this->parameterBag->get('app.turnstile_key');
