@@ -236,8 +236,7 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         ?string $searchTerm = null,
         ?string $filter = null,
         bool $onlyAdmins = false // default false → counts all users
-    ): int
-    {
+    ): int {
         $qb = $this->createQueryBuilder('u');
         $qb->select('COUNT(u.id)')
             ->andWhere($qb->expr()->isNull('u.deletedAt')); // exclude deleted users
@@ -290,8 +289,7 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
     public function countVerifiedUsers(
         ?string $searchTerm = null,
         bool $onlyAdmins = false // default false → counts normal verified users
-    ): int
-    {
+    ): int {
         $qb = $this->createQueryBuilder('u');
         $qb->select('COUNT(u.id)')
             ->andWhere('u.isVerified = :verified')
@@ -337,8 +335,7 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
     public function countBannedUsers(
         ?string $searchTerm = null,
         bool $onlyAdmins = false // default false → counts normal banned users
-    ): int
-    {
+    ): int {
         $qb = $this->createQueryBuilder('u');
         $qb->select('COUNT(u.id)')
             ->andWhere('u.bannedAt IS NOT NULL')

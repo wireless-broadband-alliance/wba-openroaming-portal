@@ -56,7 +56,7 @@ final class FreeradiusCertificateValidatorService
     {
         try {
             // Convert warnings into exceptions temporarily
-            set_error_handler(static function ($severity, $message) {
+            set_error_handler(static function ($severity, $message): void {
                 throw new RuntimeException($message);
             });
 
@@ -70,7 +70,7 @@ final class FreeradiusCertificateValidatorService
 
             openssl_x509_export($res, $normalized);
 
-            return hash('sha256', $normalized);
+            return hash('sha256', (string) $normalized);
         } catch (Throwable) {
             restore_error_handler();
             throw FreeradiusTestException::invalidCertificateChain();

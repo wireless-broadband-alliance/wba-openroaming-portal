@@ -553,12 +553,9 @@ class CertificateManagementRadsecproxyController extends AbstractController
         name: 'admin_dashboard_settings_certs_radsecproxy_skipTest'
     )]
     #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
-    public function settingsCertificatesManagementRadsecproxySkipTest(
-        Request $request
-    ): Response
+    public function settingsCertificatesManagementRadsecproxySkipTest(): Response
     {
         $processEntity = $this->certificateProcessCheckerService->getCurrentProcess();
-
         // Ensure an active process exists
         if (!$processEntity instanceof CertificateSetupProcess) {
             return new JsonResponse([
@@ -570,11 +567,9 @@ class CertificateManagementRadsecproxyController extends AbstractController
                 ),
             ], Response::HTTP_BAD_REQUEST);
         }
-
         $processEntity->setRadsecproxyTestResult(CertificateTestResult::PASSED);
         $this->entityManager->persist($processEntity);
         $this->entityManager->flush();
-
         return $this->redirectToRoute('admin_dashboard_settings_certs_management_freeradius_selection');
     }
 }
