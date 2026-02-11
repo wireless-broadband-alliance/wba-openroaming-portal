@@ -1,5 +1,6 @@
-<form method="post" action="{{ path('admin_dashboard_settings_certs_management_system_reset') }}"
-      onsubmit="return confirm('{{ 'confirmReinstall'|trans({}, '_system_reset_request')|e('js') }}')"
+<form method="post"
+      action="{{ path('admin_dashboard_settings_certs_management_system_reset') }}"
+      data-confirm="{{ 'confirmReinstall'|trans({}, '_system_reset_request')|e('html_attr') }}"
       class="relative group flex flex-col items-center text-center bg-white shadow-md rounded-2xl p-8 border border-gray-200
              transition-all hover:shadow-lg hover:-translate-y-1 cursor-pointer">
 

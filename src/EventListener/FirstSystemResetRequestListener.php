@@ -5,11 +5,14 @@ namespace App\EventListener;
 use App\Entity\CertificateSetupProcess;
 use App\Entity\InstallationProgress;
 use App\Entity\User;
+use App\Enum\AdminRoleType;
 use App\Enum\CertificateTestResult;
 use App\Enum\ProcessStatusType;
 use App\Enum\SessionStatus;
 use App\Repository\CertificateSetupProcessRepository;
 use App\Repository\InstallationProgressRepository;
+use App\Service\CertificateProcessCheckerService;
+use App\Service\InstallationService;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\Session\Flash\FlashBagInterface;
 use Symfony\Component\HttpFoundation\Session\Session;
@@ -28,17 +31,25 @@ readonly class FirstSystemResetRequestListener
         private InstallationProgressRepository $installationProgressRepository,
         private CertificateSetupProcessRepository $certificateSetupProcessRepository,
         private UrlGeneratorInterface $urlGenerator,
-        private TranslatorInterface $translator
+        private TranslatorInterface $translator,
+        private InstallationService $installationService,
+        private CertificateProcessCheckerService $certificateProcessCheckerService,
     ) {
     }
 
+    /**
+     * @throws \Exception
+     */
     public function __invoke(InteractiveLoginEvent $event): void
     {
         $session = $event->getRequest()->getSession();
         $user = $event->getAuthenticationToken()->getUser();
 
-        if (!$user instanceof User || !$this->security->isGranted('ROLE_ADMIN', $user)) {
+        if (!$user instanceof User || !$this->security->isGranted(AdminRoleType::ROLE_ADMIN->value, $user)) {
             return;
+        }
+        if (!($this->installationProgressRepository->getLast() instanceof InstallationProgress)) {
+            $this->installationService->verifyEnvSettings();
         }
 
         $completedInstallation = $this->installationProgressRepository->findOneBy([
@@ -59,6 +70,26 @@ readonly class FirstSystemResetRequestListener
                 'admin_dashboard_settings_certs_installation'
             );
             return;
+        }
+
+        if (!($this->certificateSetupProcessRepository->getLatestProcess() instanceof CertificateSetupProcess)) {
+            $certProcess = $this->certificateProcessCheckerService->verifyCertificates();
+            if (
+                $certProcess instanceof CertificateSetupProcess &&
+                $certProcess->getStatus() === ProcessStatusType::COMPLETED
+            ) {
+                $this->handleRedirect(
+                    $event,
+                    $session,
+                    $this->translator->trans(
+                        'certificateProcessPending',
+                        [],
+                        'eventListener'
+                    ),
+                    'admin_page'
+                );
+                return;
+            }
         }
 
         if ($this->certificateSetupProcessRepository->getLatestCompletedProcess() instanceof CertificateSetupProcess) {
@@ -85,7 +116,7 @@ readonly class FirstSystemResetRequestListener
             return;
         }
 
-        if (!$completedCertificates->getRadsecproxyTestResult() instanceof CertificateTestResult) {
+        if ($completedCertificates->getFreeradiusTestResult() !== CertificateTestResult::PASSED) {
             $session->set('2fa_verified_dashboard', true);
             $session->set(
                 SessionStatus::SYSTEM_RESET_REQUEST->value,
@@ -100,28 +131,6 @@ readonly class FirstSystemResetRequestListener
                     'eventListener'
                 ),
                 'admin_dashboard_settings_certs_radsecproxy_upload'
-            );
-            return;
-        }
-
-        if (
-            ($completedCertificates->getRadsecproxyTestResult() === CertificateTestResult::PASSED)
-            && $completedCertificates->getFreeradiusTestResult() !== CertificateTestResult::PASSED
-        ) {
-            $session->set('2fa_verified_dashboard', true);
-            $session->set(
-                SessionStatus::SYSTEM_RESET_REQUEST->value,
-                'admin_dashboard_settings_certs_management_freeradius_selection'
-            );
-            $this->handleRedirect(
-                $event,
-                $session,
-                $this->translator->trans(
-                    'certificateProcessPending',
-                    [],
-                    'eventListener'
-                ),
-                'admin_dashboard_settings_certs_management_freeradius_selection'
             );
             return;
         }

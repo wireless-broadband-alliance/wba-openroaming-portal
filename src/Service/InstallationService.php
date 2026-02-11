@@ -3,9 +3,12 @@
 namespace App\Service;
 
 use App\DTO\InstallationProgressDTO;
+use App\Entity\CertificateSetupProcess;
 use App\Entity\InstallationProgress;
 use App\Entity\User;
 use App\Enum\DataBaseSetupType;
+use App\Enum\DefaultUser;
+use App\Enum\EnvSettingsNameType;
 use App\Enum\InstallationStep;
 use App\Enum\InstallationWidgetStepsEnum;
 use App\Enum\ProcessStatusType;
@@ -37,7 +40,71 @@ readonly class InstallationService
         private DatabaseConnectionService $databaseConnectionService,
         private TranslatorInterface $translator,
         private UserRepository $userRepository,
+        private CaptchaValidator $captchaValidator,
     ) {
+    }
+
+    public function verifyEnvSettings(): InstallationProgress
+    {
+        $installationProgress = new InstallationProgress();
+        $installationProgress->setInstallationState(ProcessStatusType::IN_PROGRESS);
+        $installationProgress->setCreatedAt(new DateTime());
+        $installationProgress->setUpdatedAt(new DateTime());
+
+        $databaseUrl = $this->parameterBag->get('app.database_url');
+        if (
+            $databaseUrl &&
+            $this->databaseConnectionService->testDatabaseConnection($databaseUrl)
+        ) {
+            $installationProgress->setDbOpenRoaming($databaseUrl);
+
+            $databaseFreeRadiusUrl = $this->parameterBag->get('app.database_freeradius_url');
+            if (
+                $databaseFreeRadiusUrl &&
+                $this->databaseConnectionService->testDatabaseConnection($databaseFreeRadiusUrl)
+            ) {
+                $installationProgress->setDbFreeradius($databaseFreeRadiusUrl);
+
+                $trustedProxies = $this->parameterBag->get('app.trusted_proxies');
+                if ($trustedProxies) {
+                    $trustedProxiesArray = array_map(trim(...), explode(',', $trustedProxies));
+                    $installationProgress->setTrustedProxies($trustedProxiesArray);
+
+                    $turnstileKey = $this->parameterBag->get('app.turnstile_key');
+                    if ($turnstileKey) {
+                        $installationProgress->setTurnstileKey($turnstileKey);
+
+                        $turnstileSecret = $this->parameterBag->get('app.turnstile_secret');
+                        $captchaValidation = $this->captchaValidator->validateCredentials($turnstileSecret);
+                        if ($turnstileSecret && $captchaValidation['success']) {
+                            $installationProgress->setTurnstileSecret($turnstileSecret);
+
+                            $jwtPassphrase = $this->parameterBag->get('app.jwt_passphrase');
+                            if ($jwtPassphrase) {
+                                $installationProgress->setJwtPassphrase($jwtPassphrase);
+
+                                $jwtPassphrase = $this->parameterBag->get('app.jwt_passphrase');
+                                if ($jwtPassphrase) {
+                                    $installationProgress->setJwtPassphrase($jwtPassphrase);
+
+                                    $superAdmin = $this->userRepository->findSuperAdmin();
+                                    if ($superAdmin && $superAdmin->getEmail() !== DefaultUser::ADMIN->value) {
+                                        $installationProgress->setEmailAdmin($superAdmin->getEmail());
+                                        $installationProgress->setPasswordAdmin($superAdmin->getPassword());
+                                        $installationProgress->setAdminConfirmation(true);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        $this->getStep($installationProgress);
+        $this->entityManager->persist($installationProgress);
+        $this->entityManager->flush();
+
+        return $installationProgress;
     }
 
     public function lastInstallation(): ?InstallationProgress
@@ -125,7 +192,7 @@ readonly class InstallationService
      */
     public function sendAdminConfirmationCode(InstallationProgress $installationProgress): void
     {
-        $verificationCode = (string) random_int(100000, 999999);
+        $verificationCode = (string)random_int(100000, 999999);
         $installationProgress->setConfirmCodeAdmin($verificationCode);
         $installationProgress->setUpdatedAt(new DateTime());
         $this->entityManager->persist($installationProgress);
@@ -164,7 +231,7 @@ readonly class InstallationService
 
     public function sendAdminVerificationCode(User $user): void
     {
-        $verificationCode = (string) random_int(100000, 999999);
+        $verificationCode = (string)random_int(100000, 999999);
         $user->setTwoFAcode($verificationCode);
         $user->setTwoFAcodeGeneratedAt(new DateTime());
         $this->entityManager->persist($user);
@@ -213,7 +280,7 @@ readonly class InstallationService
         $limitTime->modify('-' . $timeToResetAttempts . ' minutes');
         $attempts = $this->eventRepository->find2FACodeAttemptEvent(
             $user,
-            (int) $nrAttempts,
+            (int)$nrAttempts,
             $limitTime,
             $eventType
         );
@@ -232,7 +299,7 @@ readonly class InstallationService
         $dto->dbOpenRoamingUserName = $dbOpenRoamingPartials['username'];
         $dto->dbOpenRoamingPassword = $dbOpenRoamingPartials['password'];
         $dto->dbOpenRoamingIp = $dbOpenRoamingPartials['host'];
-        $dto->dbOpenRoamingPort = (string) $dbOpenRoamingPartials['port'];
+        $dto->dbOpenRoamingPort = (string)$dbOpenRoamingPartials['port'];
 
         $dbFreeradiusPartials = $this->databaseConnectionService->parseDatabaseUrl(
             $installationProgress->getDbFreeradius()
@@ -240,7 +307,7 @@ readonly class InstallationService
         $dto->dbFreeradiusUserName = $dbFreeradiusPartials['username'];
         $dto->dbFreeradiusPassword = $dbFreeradiusPartials['password'];
         $dto->dbFreeradiusIp = $dbFreeradiusPartials['host'];
-        $dto->dbFreeradiusPort = (string) $dbFreeradiusPartials['port'];
+        $dto->dbFreeradiusPort = (string)$dbFreeradiusPartials['port'];
 
         $dto->trustedProxies = implode(',', $installationProgress->getTrustedProxies());
         $dto->turnstileKey = $installationProgress->getTurnstileKey();
@@ -315,7 +382,7 @@ readonly class InstallationService
 
         $pattern = sprintf('/^%s="?(.*?)"?$/m', preg_quote($key, '/'));
 
-        if (preg_match($pattern, (string) $envContent, $matches)) {
+        if (preg_match($pattern, (string)$envContent, $matches)) {
             return trim($matches[1], "\"' \r\n") === $expectedValue;
         }
 
