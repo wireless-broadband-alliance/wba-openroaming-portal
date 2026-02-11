@@ -98,7 +98,7 @@ readonly class InstallationService
                 }
             }
         }
-
+        $this->getStep($installationProgress);
         $this->entityManager->persist($installationProgress);
         $this->entityManager->flush();
 
