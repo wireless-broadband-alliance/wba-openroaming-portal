@@ -52,14 +52,16 @@ readonly class InstallationService
         $installationProgress->setUpdatedAt(new DateTime());
 
         $databaseUrl = $this->parameterBag->get('app.database_url');
-        if ($databaseUrl
-            && $this->databaseConnectionService->testDatabaseConnection($databaseUrl)
+        if (
+            $databaseUrl &&
+            $this->databaseConnectionService->testDatabaseConnection($databaseUrl)
         ) {
             $installationProgress->setDbOpenRoaming($databaseUrl);
 
             $databaseFreeRadiusUrl = $this->parameterBag->get('app.database_freeradius_url');
-            if ($databaseFreeRadiusUrl
-                && $this->databaseConnectionService->testDatabaseConnection($databaseFreeRadiusUrl)
+            if (
+                $databaseFreeRadiusUrl &&
+                $this->databaseConnectionService->testDatabaseConnection($databaseFreeRadiusUrl)
             ) {
                 $installationProgress->setDbFreeradius($databaseFreeRadiusUrl);
 
