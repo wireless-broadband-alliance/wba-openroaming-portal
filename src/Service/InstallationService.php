@@ -56,42 +56,47 @@ readonly class InstallationService
             && $this->databaseConnectionService->testDatabaseConnection($databaseUrl)
         ) {
             $installationProgress->setDbOpenRoaming($databaseUrl);
-        }
 
-        $databaseFreeRadiusUrl = $this->parameterBag->get('app.database_freeradius_url');
-        if ($databaseFreeRadiusUrl
-            && $this->databaseConnectionService->testDatabaseConnection($databaseFreeRadiusUrl)
-        ) {
-            $installationProgress->setDbFreeradius($databaseFreeRadiusUrl);
-        }
+            $databaseFreeRadiusUrl = $this->parameterBag->get('app.database_freeradius_url');
+            if ($databaseFreeRadiusUrl
+                && $this->databaseConnectionService->testDatabaseConnection($databaseFreeRadiusUrl)
+            ) {
+                $installationProgress->setDbFreeradius($databaseFreeRadiusUrl);
 
-        $trustedProxies = $this->parameterBag->get('app.trusted_proxies');
-        if ($trustedProxies) {
-            $trustedProxiesArray = array_map('trim', explode(',', $trustedProxies));
-            $installationProgress->setTrustedProxies($trustedProxiesArray);
-        }
+                $trustedProxies = $this->parameterBag->get('app.trusted_proxies');
+                if ($trustedProxies) {
+                    $trustedProxiesArray = array_map('trim', explode(',', $trustedProxies));
+                    $installationProgress->setTrustedProxies($trustedProxiesArray);
 
-        $turnstileKey = $this->parameterBag->get('app.turnstile_key');
-        if ($turnstileKey) {
-            $installationProgress->setTurnstileKey($turnstileKey);
-        }
+                    $turnstileKey = $this->parameterBag->get('app.turnstile_key');
+                    if ($turnstileKey) {
+                        $installationProgress->setTurnstileKey($turnstileKey);
 
-        $turnstileSecret = $this->parameterBag->get('app.turnstile_secret');
-        $captchaValidation = $this->captchaValidator->validateCredentials($turnstileSecret);
-        if ($turnstileSecret && $captchaValidation['success']) {
-            $installationProgress->setTurnstileSecret($turnstileSecret);
-        }
+                        $turnstileSecret = $this->parameterBag->get('app.turnstile_secret');
+                        $captchaValidation = $this->captchaValidator->validateCredentials($turnstileSecret);
+                        if ($turnstileSecret && $captchaValidation['success']) {
+                            $installationProgress->setTurnstileSecret($turnstileSecret);
 
-        $jwtPassphrase = $this->parameterBag->get('app.jwt_passphrase');
-        if ($jwtPassphrase) {
-            $installationProgress->setJwtPassphrase($jwtPassphrase);
-        }
+                            $jwtPassphrase = $this->parameterBag->get('app.jwt_passphrase');
+                            if ($jwtPassphrase) {
+                                $installationProgress->setJwtPassphrase($jwtPassphrase);
 
-        $superAdmin = $this->userRepository->findSuperAdmin();
-        if ($superAdmin && $superAdmin->getEmail() !== DefaultUser::ADMIN->value) {
-            $installationProgress->setEmailAdmin($superAdmin->getEmail());
-            $installationProgress->setPasswordAdmin($superAdmin->getPassword());
-            $installationProgress->setAdminConfirmation(true);
+                                $jwtPassphrase = $this->parameterBag->get('app.jwt_passphrase');
+                                if ($jwtPassphrase) {
+                                    $installationProgress->setJwtPassphrase($jwtPassphrase);
+
+                                    $superAdmin = $this->userRepository->findSuperAdmin();
+                                    if ($superAdmin && $superAdmin->getEmail() !== DefaultUser::ADMIN->value) {
+                                        $installationProgress->setEmailAdmin($superAdmin->getEmail());
+                                        $installationProgress->setPasswordAdmin($superAdmin->getPassword());
+                                        $installationProgress->setAdminConfirmation(true);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         $this->entityManager->persist($installationProgress);

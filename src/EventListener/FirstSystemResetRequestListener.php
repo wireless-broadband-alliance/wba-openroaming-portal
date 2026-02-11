@@ -45,14 +45,12 @@ readonly class FirstSystemResetRequestListener
         $session = $event->getRequest()->getSession();
         $user = $event->getAuthenticationToken()->getUser();
 
-
         if (!$user instanceof User || !$this->security->isGranted(AdminRoleType::ROLE_ADMIN->value, $user)) {
             return;
         }
         if (!($this->installationProgressRepository->getLast() instanceof InstallationProgress)) {
             $this->installationService->verifyEnvSettings();
         }
-
 
         $completedInstallation = $this->installationProgressRepository->findOneBy([
             'installationState' => ProcessStatusType::COMPLETED
@@ -74,9 +72,11 @@ readonly class FirstSystemResetRequestListener
             return;
         }
 
+        dd('die here pls 1');
         if (!($this->certificateSetupProcessRepository->getLatestProcess() instanceof CertificateSetupProcess)) {
             $certProcess = $this->certificateProcessCheckerService->verifyCertificates();
             if ($certProcess instanceof CertificateSetupProcess && $certProcess->getStatus() === ProcessStatusType::COMPLETED) {
+                dd('die here pls 2');
                 $this->handleRedirect(
                     $event,
                     $session,

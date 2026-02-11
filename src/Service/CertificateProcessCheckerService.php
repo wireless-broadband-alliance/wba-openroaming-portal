@@ -61,10 +61,10 @@ readonly class CertificateProcessCheckerService
                 $process->getStatus() === ProcessStatusType::ABORTED ||
                 $process->getStatus() === ProcessStatusType::COMPLETED)
         ) {
-                return [
-                    'active' => false,
-                    'stages' => [],
-                ];
+            return [
+                'active' => false,
+                'stages' => [],
+            ];
         }
 
 
@@ -117,22 +117,6 @@ readonly class CertificateProcessCheckerService
         }
 
         return null;
-    }
-
-    /**
-     * Get the first incomplete stage (enum)
-     */
-    public function getProcessCurrentStage(): ?CertificateRouteAccess
-    {
-        $state = $this->getProcessState();
-
-        /** @var array<string, bool> $stages */
-        $stages = $state['stages'];
-
-        return array_find(
-            CertificateRouteAccess::orderedStages(),
-            fn($stage) => !($stages[$stage->value] ?? false)
-        );
     }
 
     /**
