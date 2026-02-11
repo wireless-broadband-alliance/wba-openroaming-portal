@@ -113,7 +113,7 @@
                         {% endif %}
 
                         {% if constant('App\\Enum\\AdminRoleType::ROLE_SUPER_ADMIN').value in app.user.roles %}
-                            {{ include('dashboard/shared/_sidebar_item.html.twig', {label: 'certsManagement'|trans({}, '_header_admin'), route: 'admin_dashboard_settings_certs_management', icon: 'wba:download'}) }}
+                            {{ include('dashboard/shared/_sidebar_item.html.twig', {label: 'certsManagement'|trans({}, '_header_admin'), route: 'admin_dashboard_settings_certs_management', icon: 'wba:certificate'}) }}
                         {% endif %}
                     </ul>
                 </div>
