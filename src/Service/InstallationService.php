@@ -51,19 +51,21 @@ readonly class InstallationService
         $installationProgress->setCreatedAt(new DateTime());
         $installationProgress->setUpdatedAt(new DateTime());
 
-        $databaseUrl = $this->parameterBag->get('env(DATABASE_URL)');
-        if ($databaseUrl && $this->databaseConnectionService->testDatabaseConnection($databaseUrl)) {
+        $databaseUrl = $this->parameterBag->get('app.database_url');
+        if ($databaseUrl
+            && $this->databaseConnectionService->testDatabaseConnection($databaseUrl)
+        ) {
             $installationProgress->setDbOpenRoaming($databaseUrl);
         }
 
-        $databaseFreeRadiusUrl = $this->parameterBag->get('env(DATABASE_FREERADIUS_URL)');
-        if ($databaseFreeRadiusUrl && $this->databaseConnectionService->testDatabaseConnection(
-                $databaseFreeRadiusUrl
-            )) {
+        $databaseFreeRadiusUrl = $this->parameterBag->get('app.database_freeradius_url');
+        if ($databaseFreeRadiusUrl
+            && $this->databaseConnectionService->testDatabaseConnection($databaseFreeRadiusUrl)
+        ) {
             $installationProgress->setDbFreeradius($databaseFreeRadiusUrl);
         }
 
-        $trustedProxies = $this->parameterBag->get('env(TRUSTED_PROXIES)');
+        $trustedProxies = $this->parameterBag->get('app.trusted_proxies');
         if ($trustedProxies) {
             $trustedProxiesArray = array_map('trim', explode(',', $trustedProxies));
             $installationProgress->setTrustedProxies($trustedProxiesArray);
@@ -80,7 +82,7 @@ readonly class InstallationService
             $installationProgress->setTurnstileSecret($turnstileSecret);
         }
 
-        $jwtPassphrase = $this->parameterBag->get('env(JWT_PASSPHRASE)');
+        $jwtPassphrase = $this->parameterBag->get('app.jwt_passphrase');
         if ($jwtPassphrase) {
             $installationProgress->setJwtPassphrase($jwtPassphrase);
         }

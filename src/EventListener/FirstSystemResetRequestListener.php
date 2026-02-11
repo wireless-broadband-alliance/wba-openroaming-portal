@@ -52,9 +52,7 @@ readonly class FirstSystemResetRequestListener
         if (!($this->installationProgressRepository->getLast() instanceof InstallationProgress)) {
             $this->installationService->verifyEnvSettings();
         }
-        if (!($this->certificateSetupProcessRepository->getLatestProcess() instanceof CertificateSetupProcess)) {
-            $this->certificateProcessCheckerService->verifyCertificates();
-        }
+
 
         $completedInstallation = $this->installationProgressRepository->findOneBy([
             'installationState' => ProcessStatusType::COMPLETED
@@ -74,6 +72,23 @@ readonly class FirstSystemResetRequestListener
                 'admin_dashboard_settings_certs_installation'
             );
             return;
+        }
+
+        if (!($this->certificateSetupProcessRepository->getLatestProcess() instanceof CertificateSetupProcess)) {
+            $certProcess = $this->certificateProcessCheckerService->verifyCertificates();
+            if ($certProcess instanceof CertificateSetupProcess && $certProcess->getStatus() === ProcessStatusType::COMPLETED) {
+                $this->handleRedirect(
+                    $event,
+                    $session,
+                    $this->translator->trans(
+                        'certificateProcessPending',
+                        [],
+                        'eventListener'
+                    ),
+                    'admin_page'
+                );
+                return;
+            }
         }
 
         if ($this->certificateSetupProcessRepository->getLatestCompletedProcess() instanceof CertificateSetupProcess) {

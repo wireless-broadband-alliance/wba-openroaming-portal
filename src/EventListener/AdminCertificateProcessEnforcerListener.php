@@ -141,6 +141,14 @@ readonly class AdminCertificateProcessEnforcerListener
             return;
         }
 
+        if (!($this->certificateSetupProcessRepository->getLatestProcess() instanceof CertificateSetupProcess)) {
+            $certProcess = $this->certificateProcessCheckerService->verifyCertificates();
+            if ($certProcess instanceof CertificateSetupProcess && $certProcess->getStatus() === ProcessStatusType::COMPLETED) {
+                $this->redirectTo($event, 'admin_page');
+                return;
+            }
+        }
+
         // Check certificates progress
         $certProcess = $this->certificateSetupProcessRepository->getLatestProcess();
 
