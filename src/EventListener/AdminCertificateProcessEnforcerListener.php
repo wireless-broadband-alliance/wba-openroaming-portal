@@ -10,6 +10,7 @@ use App\Enum\ProcessStatusType;
 use App\Enum\SessionStatus;
 use App\Repository\CertificateSetupProcessRepository;
 use App\Repository\InstallationProgressRepository;
+use App\Service\CertificateProcessCheckerService;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -26,6 +27,7 @@ readonly class AdminCertificateProcessEnforcerListener
         private InstallationProgressRepository $installationProgressRepository,
         private CertificateSetupProcessRepository $certificateSetupProcessRepository,
         private UrlGeneratorInterface $urlGenerator,
+        private CertificateProcessCheckerService $certificateProcessCheckerService,
     ) {
     }
 
@@ -115,12 +117,20 @@ readonly class AdminCertificateProcessEnforcerListener
         $this->enforceProcess($event, $session);
     }
 
+    /**
+     * @throws \Exception
+     */
     private function enforceProcess(RequestEvent $event, SessionInterface $session): void
     {
+
+        if (!($this->certificateSetupProcessRepository->getLatestProcess() instanceof CertificateSetupProcess)) {
+            $this->certificateProcessCheckerService->verifyCertificates();
+        }
         // Check installation progress
         $installation = $this->installationProgressRepository->findOneBy([
             'installationState' => ProcessStatusType::COMPLETED
         ]);
+
 
         if (!$installation instanceof InstallationProgress) {
             $session->set(
@@ -133,6 +143,7 @@ readonly class AdminCertificateProcessEnforcerListener
 
         // Check certificates progress
         $certProcess = $this->certificateSetupProcessRepository->getLatestProcess();
+
 
         if (!$certProcess instanceof CertificateSetupProcess) {
             $session->set(
@@ -150,6 +161,13 @@ readonly class AdminCertificateProcessEnforcerListener
                 'admin_dashboard_settings_certs_radsecproxy_upload'
             );
             $this->redirectTo($event, 'admin_dashboard_settings_certs_radsecproxy_upload');
+            return;
+        }
+
+        if (($certProcess->getRadsecproxyTestResult() === CertificateTestResult::PASSED)
+            && $certProcess->getFreeradiusTestResult() === CertificateTestResult::PASSED
+        ) {
+            $session->remove(SessionStatus::SYSTEM_RESET_REQUEST->value);
             return;
         }
 

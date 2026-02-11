@@ -5,12 +5,14 @@ namespace App\Service;
 use App\Enum\CertificateFileName;
 use Exception;
 use RuntimeException;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 readonly class CertificateCheckerService
 {
     public function __construct(
-        private TranslatorInterface $translator
+        private TranslatorInterface $translator,
+        private ParameterBagInterface $parameterBag,
     ) {
     }
 
@@ -109,5 +111,20 @@ readonly class CertificateCheckerService
             'fingerprintSHA256' => openssl_x509_fingerprint($certResource, 'sha256'),
             'extensions' => $parsed['extensions'] ?? [],
         ];
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function certificateLimitDate(string $path): ?int
+    {
+        $certificatePath = $this->parameterBag->get('kernel.project_dir') . $path;
+        $certificateLimitDate = strtotime(
+            (string)$this->getCertificateExpirationDate($certificatePath)
+        );
+        $realTime = time();
+        $timeLeft = round(($certificateLimitDate - $realTime) / (86400)) - 1;
+
+        return ((int)$timeLeft);
     }
 }
