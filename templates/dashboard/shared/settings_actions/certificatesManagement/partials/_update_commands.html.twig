@@ -9,7 +9,9 @@
 
         <div class="px-6 py-5 space-y-5 bg-white">
             {% for step in commands %}
-                {% set isSensitive = step.command matches '/key\\.pem/' %}
+                {% set isSensitive =
+                    step.command matches '/key\\.pem/'
+                    and not (step.command starts with 'rm ') %}
                 <div class="space-y-2 relative" data-controller="clipboard">
                     {# Step description #}
                     <p class="text-sm font-medium text-gray-700">
@@ -21,6 +23,9 @@
                             {# Toggle button #}
                             <button type="button"
                                     class="mt-1 mb-2 text-sm text-primary underline"
+                                    data-command-visibility-target="toggleButton"
+                                    data-show-text="{{ 'showSensitive'|trans({}, 'config_radsec') }}"
+                                    data-hide-text="{{ 'hideSensitive'|trans({}, 'config_radsec') }}"
                                     data-action="command-visibility#toggle">
                                 {{ 'showSensitive'|trans({}, 'config_radsec') }}
                             </button>
