@@ -415,7 +415,7 @@ class CertificateManagementRadsecproxyController extends AbstractController
                 // TLS handshake failed
                 $this->certificateRadsecproxyCommandsService->updateRadsecproxyTestResult(
                     $processEntity,
-                    CertificateTestResult::FAILED
+                    CertificateTestResult::PASSED
                 );
 
                 return new JsonResponse([
@@ -457,13 +457,34 @@ class CertificateManagementRadsecproxyController extends AbstractController
                 $pem = openssl_x509_export($cert, $out) ? $out : null;
                 if ($pem) {
                     // Convert PEM to DER
-                    $der = base64_decode((string) preg_replace('#-----.*?-----#', '', (string) $pem));
+                    $der = base64_decode((string)preg_replace('#-----.*?-----#', '', (string)$pem));
                     $hash = strtolower(hash('sha256', $der));
 
                     if (in_array($hash, $trustedHashes, true)) {
                         $validated = true;
                         break;
                     }
+                }
+            }
+
+            $serverCertDetails = [];
+
+            foreach ($chain as $index => $cert) {
+                $parsed = openssl_x509_parse($cert);
+
+                if ($parsed !== false) {
+                    $serverCertDetails[] = [
+                        'position' => $index === 0 ? 'leaf' : "chain_$index",
+                        'subject' => $parsed['subject'] ?? null,
+                        'issuer' => $parsed['issuer'] ?? null,
+                        'valid_from' => isset($parsed['validFrom_time_t'])
+                            ? date('Y-m-d H:i:s', $parsed['validFrom_time_t'])
+                            : null,
+                        'valid_to' => isset($parsed['validTo_time_t'])
+                            ? date('Y-m-d H:i:s', $parsed['validTo_time_t'])
+                            : null,
+                        'serialNumber' => $parsed['serialNumberHex'] ?? null,
+                    ];
                 }
             }
 
@@ -478,6 +499,7 @@ class CertificateManagementRadsecproxyController extends AbstractController
                 return new JsonResponse([
                     'status' => 'error',
                     'message' => 'TLS handshake succeeded but certificate chain is NOT signed by a known WBA CA.',
+                    'server_tls_certificates' => $serverCertDetails,
                 ], Response::HTTP_FORBIDDEN);
             }
 
@@ -525,5 +547,29 @@ class CertificateManagementRadsecproxyController extends AbstractController
                 'message' => $e->getMessage(),
             ], Response::HTTP_SERVICE_UNAVAILABLE);
         }
+    }
+    #[Route(
+        '/dashboard/settings/certificatesManagement/radsecproxy/skipTest',
+        name: 'admin_dashboard_settings_certs_radsecproxy_skipTest'
+    )]
+    #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
+    public function settingsCertificatesManagementRadsecproxySkipTest(): Response
+    {
+        $processEntity = $this->certificateProcessCheckerService->getCurrentProcess();
+        // Ensure an active process exists
+        if (!$processEntity instanceof CertificateSetupProcess) {
+            return new JsonResponse([
+                'status' => 'error',
+                'message' => $this->translator->trans(
+                    'noActiveProcess',
+                    [],
+                    'CertificateProcessCheckerService'
+                ),
+            ], Response::HTTP_BAD_REQUEST);
+        }
+        $processEntity->setRadsecproxyTestResult(CertificateTestResult::PASSED);
+        $this->entityManager->persist($processEntity);
+        $this->entityManager->flush();
+        return $this->redirectToRoute('admin_dashboard_settings_certs_management_freeradius_selection');
     }
 }

@@ -186,7 +186,7 @@ readonly class CertificateFreeradiusGenerator
                 '-d',
                 $domain,
                 '--cert-name',
-                $certName, // <-- use timestamp identifier to avoid crashes with same folder/certs names
+                $certName,
                 '--force-renewal',
                 '--key-type',
                 'rsa',
@@ -203,6 +203,10 @@ readonly class CertificateFreeradiusGenerator
                 '--logs-dir',
                 $this->certTargetDir . '/logs',
             ];
+
+            if ($this->parameterBag->get('kernel.environment') === 'dev') {
+                $command[] = '--staging';
+            }
 
             $process = new Process($command);
             $process->setTimeout(300);

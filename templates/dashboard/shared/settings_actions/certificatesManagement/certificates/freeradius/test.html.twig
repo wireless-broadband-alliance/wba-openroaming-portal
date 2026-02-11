@@ -43,7 +43,7 @@
                         </p>
                         <div class="relative rounded-md overflow-hidden">
                             <pre class="copyable-code relative rounded bg-gray-800 text-white p-4 font-mono overflow-x-auto whitespace-pre-wrap"
-                                 data-clipboard-target="code">cd /etc/freeradius/3.0/certs/ && cat ca.pem cert.pem chain.pem fullchain.pem privkey.pem</pre>
+                                 data-clipboard-target="code">docker exec -i hybrid-freeradius-1 sh -c "cd /etc/freeradius/3.0/certs/ && cat ca.pem cert.pem chain.pem fullchain.pem privkey.pem"</pre>
                             <button type="button"
                                     class="absolute top-2 right-2 flex items-center justify-center p-1.5 rounded-md bg-gray-700 hover:bg-gray-600 focus:ring-2 focus:ring-primary/50 transition"
                                     title="{{ 'copyCommand.title'|trans({}, 'config_radsec') }}"
@@ -97,6 +97,18 @@
             {# Result Message #}
             <div class="mt-4 hidden" data-test-certificates-target="resultMessage"></div>
 
+            {# Check if the test has been run #}
+            {% set freeradiusTestCompleted = process.freeradiusTestResult is not null %}
+            {% set freeradiusTestFailed = process.freeradiusTestResult is same as(constant('App\\Enum\\CertificateTestResult::FAILED')) %}
+
+            {# Show warning if the test failed #}
+            {% if freeradiusTestFailed %}
+                {{ include('shared/_toast.html.twig', {
+                    message: 'test_failed_warning'|trans({}, 'test_freeradius'),
+                    toast_type: 'toast-warning-dashboard',
+                }) }}
+            {% endif %}
+
             <div class="flex flex-col items-center gap-6 w-full">
                 {# Action Buttons #}
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-3 items-end">
@@ -116,18 +128,16 @@
                     {{ form_start(formFinishProcess) }}
                     {{ form_row(formFinishProcess._token) }}
 
-                    {% set freeradiusTestPassed = process.freeradiusTestResult is same as(constant('App\\Enum\\CertificateTestResult::PASSED')) %}
-
                     <button
                             type="submit"
                             class="px-6 py-3 border border-gray-300 font-medium rounded-lg shadow-sm flex items-center gap-2
-                                w-full md:w-auto justify-center
-                                {% if not freeradiusTestPassed %}
-                                    bg-gray-100 text-gray-400 cursor-not-allowed pointer-events-none
-                                {% else %}
-                                    bg-white text-gray-800 hover:bg-gray-50 focus:ring-2 focus:ring-primary/30 transition
-                                {% endif %}"
-                            {% if not freeradiusTestPassed %}
+                            w-full md:w-auto justify-center
+                            {% if not freeradiusTestCompleted %}
+                                bg-gray-100 text-gray-400 cursor-not-allowed pointer-events-none
+                            {% else %}
+                                bg-white text-gray-800 hover:bg-gray-50 focus:ring-2 focus:ring-primary/30 transition
+                            {% endif %}"
+                            {% if not freeradiusTestCompleted %}
                                 disabled
                                 title="{{ 'pendingProcessCertsCompleted'|trans({}, 'controllers') }}"
                             {% endif %}

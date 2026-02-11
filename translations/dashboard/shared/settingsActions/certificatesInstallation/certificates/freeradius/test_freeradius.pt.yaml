@@ -14,6 +14,7 @@ timeOut: 'Tempo limite (segundos)'
 test_not_done: 'Nenhum teste realizado no momento'
 test_passed: 'Último Test Aprovado'
 test_failed: 'Último Teste Reprovado'
+test_failed_warning: "O último teste falhou, mas ainda pode prosseguir com a configuração atual se desejar."
 manual_test_warning: >
     O teste automático não é possível nesta etapa.
     Por motivos de segurança, a máquina onde o FreeRADIUS está instalado é uma máquina isolada e sem acesso à Internet.

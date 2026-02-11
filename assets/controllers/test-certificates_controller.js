@@ -128,8 +128,8 @@ export default class extends Controller {
                 `;
             })
             .join('');
-
-        this.resultMessageTarget.innerHTML = `
+        if (isSuccess) {
+            this.resultMessageTarget.innerHTML = `
             <div class="mt-6 p-5 border border-${color}-300 rounded-xl bg-${color}-50 text-${color}-800 shadow-sm">
                 <h4 class="font-semibold text-lg text-center mb-1">
                     ${title}
@@ -140,18 +140,32 @@ export default class extends Controller {
                 </p>
 
                 ${extraInfo}
+            </div>
+        `;
+        } else {
+            this.resultMessageTarget.innerHTML = `
+            <div class="mt-6 p-5 border border-${color}-300 rounded-xl bg-${color}-50 text-${color}-800 shadow-sm">
+                <h4 class="font-semibold text-lg text-center mb-1">
+                    ${title}
+                </h4>
 
+                <p class="text-sm text-${color}-700 text-center mb-2">
+                    ${data.message}
+                </p>
+
+                ${extraInfo}
+                
                 <div class="mt-3 flex justify-center">
-                    <button
-                        type="button"
-                        class="px-4 py-2 text-sm font-medium bg-white border rounded-lg hover:bg-${color}-100 transition"
-                        data-action="click->test-certificates#dismissResult"
+                    <a
+                        href="/dashboard/settings/certificatesManagement/radsecproxy/skipTest"
+                        class="px-4 py-2 text-sm font-medium bg-white border rounded-lg hover:bg-${color}-100 transition inline-block text-center"
                     >
                         ${this.buttonOkValue}
-                    </button>
+                    </a>
                 </div>
             </div>
         `;
+        }
 
         this.resultMessageTarget.classList.remove('hidden');
     }
