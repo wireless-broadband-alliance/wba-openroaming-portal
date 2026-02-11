@@ -47,6 +47,7 @@ use Random\RandomException;
 use RuntimeException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Process\Exception\ProcessFailedException;
@@ -974,5 +975,35 @@ class CertificateManagementFreeradiusController extends AbstractController
                 'process' => $processState['process'],
             ]
         );
+    }
+
+    #[Route(
+        '/dashboard/settings/certificatesManagement/freeradius/skipTest',
+        name: 'admin_dashboard_settings_certs_freeradius_skipTest'
+    )]
+    #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
+    public function settingsCertificatesManagementFreeradiusSkipTest(
+        Request $request
+    ): Response
+    {
+        $processEntity = $this->certificateProcessCheckerService->getCurrentProcess();
+
+        // Ensure an active process exists
+        if (!$processEntity instanceof CertificateSetupProcess) {
+            return new JsonResponse([
+                'status' => 'error',
+                'message' => $this->translator->trans(
+                    'noActiveProcess',
+                    [],
+                    'CertificateProcessCheckerService'
+                ),
+            ], Response::HTTP_BAD_REQUEST);
+        }
+
+        $processEntity->setFreeradiusTestResult(CertificateTestResult::PASSED);
+        $this->entityManager->persist($processEntity);
+        $this->entityManager->flush();
+
+        return $this->redirectToRoute('admin_page');
     }
 }

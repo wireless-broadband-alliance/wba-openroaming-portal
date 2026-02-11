@@ -26,3 +26,4 @@ results:
     success_title: "Test Successful"
     error_title: "Test Failed"
 proceedWithoutTest: 'Proceed without test'
+proceedWithoutTestConfirm: 'Are you sure you want to proceed without taking the test?'
