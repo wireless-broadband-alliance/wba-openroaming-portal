@@ -3,6 +3,8 @@
 namespace App\Service;
 
 use App\Exception\FreeradiusTestException;
+use RuntimeException;
+use Throwable;
 
 final class FreeradiusCertificateValidatorService
 {
@@ -52,15 +54,27 @@ final class FreeradiusCertificateValidatorService
 
     private function fingerprint(string $pem): string
     {
-        $res = openssl_x509_read($pem);
+        try {
+            // Convert warnings into exceptions temporarily
+            set_error_handler(static function ($severity, $message) {
+                throw new RuntimeException($message);
+            });
 
-        if ($res === false) {
+            $res = openssl_x509_read($pem);
+
+            restore_error_handler();
+
+            if ($res === false) {
+                throw FreeradiusTestException::invalidCertificateChain();
+            }
+
+            openssl_x509_export($res, $normalized);
+
+            return hash('sha256', $normalized);
+        } catch (Throwable) {
+            restore_error_handler();
             throw FreeradiusTestException::invalidCertificateChain();
         }
-
-        openssl_x509_export($res, $normalized);
-
-        return hash('sha256', (string) $normalized);
     }
 
     /**

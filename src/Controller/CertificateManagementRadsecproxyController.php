@@ -493,7 +493,7 @@ class CertificateManagementRadsecproxyController extends AbstractController
 
                 $this->certificateRadsecproxyCommandsService->updateRadsecproxyTestResult(
                     $processEntity,
-                    CertificateTestResult::PASSED
+                    CertificateTestResult::FAILED
                 );
 
                 return new JsonResponse([

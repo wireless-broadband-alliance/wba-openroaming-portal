@@ -982,9 +982,7 @@ class CertificateManagementFreeradiusController extends AbstractController
         name: 'admin_dashboard_settings_certs_freeradius_skipTest'
     )]
     #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
-    public function settingsCertificatesManagementFreeradiusSkipTest(
-        Request $request
-    ): Response
+    public function settingsCertificatesManagementFreeradiusSkipTest(): Response
     {
         $processEntity = $this->certificateProcessCheckerService->getCurrentProcess();
 

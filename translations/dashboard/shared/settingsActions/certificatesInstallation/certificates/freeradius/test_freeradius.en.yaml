@@ -14,6 +14,7 @@ timeOut: 'Timeout (seconds)'
 test_not_done: 'Test not done yet'
 test_passed: 'Last Test Passed'
 test_failed: 'Last Test Failed'
+test_failed_warning: "The last test failed, but you can still proceed with the current configuration if you wish."
 manual_test_warning: >
     Automatic testing is not possible at this step.
     For security reasons, the machine running FreeRADIUS is isolated and does not have Internet access.
