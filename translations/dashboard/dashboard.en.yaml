@@ -23,5 +23,5 @@ addAdmin: 'Add Admin'
 locationError: 'Unable to determine the user location due to an error with the GeoLite2 database. Check the docs/geoLiteDB/GEOLITEGUI.md file for troubleshooting instructions.'
 missingFile: 'The required GeoLite2-City.mmdb file is missing. Ensure this file is included. Refer to the docs/geoLiteDB/GEOLITEGUI.md file for more details.'
 invalidDb: 'The GeoLite2-City.mmdb file is invalid. Verify the integrity of this file. Consult the docs/geoLiteDB/GEOLITEGUI.md file for further guidance.'
-abortedCertificatesWarning: 'The certificate configuration is incomplete or incorrect. Please complete the configuration process. Until the process is finished and valid, the options to download the profiles of the landing page is disabled.'
+abortedCertificatesWarning: 'The certificate configuration is incomplete or incorrect. Please complete the configuration process. Until the process is finished and valid, the option to download any profile from landing page is disabled.'
 freeradius_is_not_ev_cert_warning: "The uploaded FreeRADIUS certificates is not a valid EV's. Downloading OpenRoaming Windows 10 profiles is disabled because it is not supported."
