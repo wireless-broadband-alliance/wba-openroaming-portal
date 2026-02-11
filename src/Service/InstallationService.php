@@ -50,43 +50,51 @@ readonly class InstallationService
         $installationProgress->setInstallationState(ProcessStatusType::IN_PROGRESS);
         $installationProgress->setCreatedAt(new DateTime());
         $installationProgress->setUpdatedAt(new DateTime());
-        $databaseUrl = $_ENV[EnvSettingsNameType::DATABASE_URL->value];
-        if ($databaseUrl and $this->databaseConnectionService->testDatabaseConnection($databaseUrl)) {
+
+        $databaseUrl = $this->parameterBag->get('env(DATABASE_URL)');
+        if ($databaseUrl && $this->databaseConnectionService->testDatabaseConnection($databaseUrl)) {
             $installationProgress->setDbOpenRoaming($databaseUrl);
         }
-        $databaseFreeRadiusUrl = $_ENV[EnvSettingsNameType::DATABASE_FREERADIUS_URL->value];
-        if ($databaseFreeRadiusUrl and $this->databaseConnectionService->testDatabaseConnection($databaseFreeRadiusUrl)
-        ) {
+
+        $databaseFreeRadiusUrl = $this->parameterBag->get('env(DATABASE_FREERADIUS_URL)');
+        if ($databaseFreeRadiusUrl && $this->databaseConnectionService->testDatabaseConnection(
+                $databaseFreeRadiusUrl
+            )) {
             $installationProgress->setDbFreeradius($databaseFreeRadiusUrl);
         }
-        $trustedProxies = $_ENV[EnvSettingsNameType::TRUSTED_PROXIES->value];
-        $trustedProxiesArray = array_map('trim', explode(',', $trustedProxies));
+
+        $trustedProxies = $this->parameterBag->get('env(TRUSTED_PROXIES)');
         if ($trustedProxies) {
+            $trustedProxiesArray = array_map('trim', explode(',', $trustedProxies));
             $installationProgress->setTrustedProxies($trustedProxiesArray);
         }
-        $turnatileKey = $_ENV[EnvSettingsNameType::TURNSTILE_KEY->value];
-        if ($turnatileKey) {
-            $installationProgress->setTurnstileKey($turnatileKey);
+
+        $turnstileKey = $this->parameterBag->get('app.turnstile_key');
+        if ($turnstileKey) {
+            $installationProgress->setTurnstileKey($turnstileKey);
         }
-        $turnstileSecret = $_ENV[EnvSettingsNameType::TURNSTILE_SECRET->value];
+
+        $turnstileSecret = $this->parameterBag->get('app.turnstile_secret');
         $captchaValidation = $this->captchaValidator->validateCredentials($turnstileSecret);
-        if ($turnstileSecret and $captchaValidation['success']) {
+        if ($turnstileSecret && $captchaValidation['success']) {
             $installationProgress->setTurnstileSecret($turnstileSecret);
         }
-        $jwtPassphrase = $_ENV[EnvSettingsNameType::JWT_PASSPHRASE->value];
+
+        $jwtPassphrase = $this->parameterBag->get('env(JWT_PASSPHRASE)');
         if ($jwtPassphrase) {
             $installationProgress->setJwtPassphrase($jwtPassphrase);
         }
+
         $superAdmin = $this->userRepository->findSuperAdmin();
-        if ($superAdmin) {
-            if ($superAdmin->getEmail() !== DefaultUser::ADMIN->value) {
-                $installationProgress->setEmailAdmin($superAdmin->getEmail());
-                $installationProgress->setPasswordAdmin($superAdmin->getPassword());
-                $installationProgress->setAdminConfirmation(true);
-            }
+        if ($superAdmin && $superAdmin->getEmail() !== DefaultUser::ADMIN->value) {
+            $installationProgress->setEmailAdmin($superAdmin->getEmail());
+            $installationProgress->setPasswordAdmin($superAdmin->getPassword());
+            $installationProgress->setAdminConfirmation(true);
         }
+
         $this->entityManager->persist($installationProgress);
         $this->entityManager->flush();
+
         return $installationProgress;
     }
 
@@ -175,7 +183,7 @@ readonly class InstallationService
      */
     public function sendAdminConfirmationCode(InstallationProgress $installationProgress): void
     {
-        $verificationCode = (string) random_int(100000, 999999);
+        $verificationCode = (string)random_int(100000, 999999);
         $installationProgress->setConfirmCodeAdmin($verificationCode);
         $installationProgress->setUpdatedAt(new DateTime());
         $this->entityManager->persist($installationProgress);
@@ -214,7 +222,7 @@ readonly class InstallationService
 
     public function sendAdminVerificationCode(User $user): void
     {
-        $verificationCode = (string) random_int(100000, 999999);
+        $verificationCode = (string)random_int(100000, 999999);
         $user->setTwoFAcode($verificationCode);
         $user->setTwoFAcodeGeneratedAt(new DateTime());
         $this->entityManager->persist($user);
@@ -263,7 +271,7 @@ readonly class InstallationService
         $limitTime->modify('-' . $timeToResetAttempts . ' minutes');
         $attempts = $this->eventRepository->find2FACodeAttemptEvent(
             $user,
-            (int) $nrAttempts,
+            (int)$nrAttempts,
             $limitTime,
             $eventType
         );
@@ -282,7 +290,7 @@ readonly class InstallationService
         $dto->dbOpenRoamingUserName = $dbOpenRoamingPartials['username'];
         $dto->dbOpenRoamingPassword = $dbOpenRoamingPartials['password'];
         $dto->dbOpenRoamingIp = $dbOpenRoamingPartials['host'];
-        $dto->dbOpenRoamingPort = (string) $dbOpenRoamingPartials['port'];
+        $dto->dbOpenRoamingPort = (string)$dbOpenRoamingPartials['port'];
 
         $dbFreeradiusPartials = $this->databaseConnectionService->parseDatabaseUrl(
             $installationProgress->getDbFreeradius()
@@ -290,7 +298,7 @@ readonly class InstallationService
         $dto->dbFreeradiusUserName = $dbFreeradiusPartials['username'];
         $dto->dbFreeradiusPassword = $dbFreeradiusPartials['password'];
         $dto->dbFreeradiusIp = $dbFreeradiusPartials['host'];
-        $dto->dbFreeradiusPort = (string) $dbFreeradiusPartials['port'];
+        $dto->dbFreeradiusPort = (string)$dbFreeradiusPartials['port'];
 
         $dto->trustedProxies = implode(',', $installationProgress->getTrustedProxies());
         $dto->turnstileKey = $installationProgress->getTurnstileKey();
@@ -365,7 +373,7 @@ readonly class InstallationService
 
         $pattern = sprintf('/^%s="?(.*?)"?$/m', preg_quote($key, '/'));
 
-        if (preg_match($pattern, (string) $envContent, $matches)) {
+        if (preg_match($pattern, (string)$envContent, $matches)) {
             return trim($matches[1], "\"' \r\n") === $expectedValue;
         }
 
