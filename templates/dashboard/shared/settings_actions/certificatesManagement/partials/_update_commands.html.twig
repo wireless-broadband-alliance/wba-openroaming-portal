@@ -30,13 +30,10 @@
                                 {{ 'showSensitive'|trans({}, 'config_radsec') }}
                             </button>
 
-                            {# Hidden Block (Blurred but copyable) #}
+                            {# Hidden Block (Blurred and NOT COPYABLE ) #}
                             <div data-command-visibility-target="hiddenBlock"
-                                 class="relative rounded bg-gray-800 text-gray-300 p-4 font-mono">
-                                {# Copy button #}
-                                <pre class="copyable-code relative rounded text-gray-300 blur-sm select-text overflow-x-auto"
-                                     data-clipboard-target="code">{{ step.command|raw }}</pre>
-                                {{ include('shared/_copy_button.html.twig') }}
+                                 class="relative rounded bg-gray-800 text-gray-300 p-4 font-mono pointer-events-none select-none">
+                                <pre class="relative rounded text-gray-300 blur-sm overflow-x-auto">{{ step.command|raw }}</pre>
                             </div>
 
                             {# Revealed Block #}
