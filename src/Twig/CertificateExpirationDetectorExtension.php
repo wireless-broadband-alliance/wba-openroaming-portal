@@ -15,10 +15,11 @@ class CertificateExpirationDetectorExtension extends AbstractExtension
     ) {
     }
 
+    #[\Override]
     public function getFunctions(): array
     {
         return [
-            new TwigFunction('certStatusTag', [$this, 'getCertStatusTag']),
+            new TwigFunction('certStatusTag', $this->getCertStatusTag(...)),
         ];
     }
 
