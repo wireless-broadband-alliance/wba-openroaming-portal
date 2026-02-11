@@ -142,13 +142,12 @@ export default class extends Controller {
                 ${extraInfo}
 
                 <div class="mt-3 flex justify-center">
-                    <button
-                        type="button"
-                        class="px-4 py-2 text-sm font-medium bg-white border rounded-lg hover:bg-${color}-100 transition"
-                        data-action="click->test-certificates#dismissResult"
+                    <a
+                        href="/dashboard/settings/certificatesManagement/radsecproxy/skipTest"
+                        class="px-4 py-2 text-sm font-medium bg-white border rounded-lg hover:bg-${color}-100 transition inline-block text-center"
                     >
                         ${this.buttonOkValue}
-                    </button>
+                    </a>
                 </div>
             </div>
         `;

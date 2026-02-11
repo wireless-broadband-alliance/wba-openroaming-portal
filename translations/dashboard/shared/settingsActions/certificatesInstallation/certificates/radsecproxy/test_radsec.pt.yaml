@@ -26,5 +26,4 @@ errors:
 results:
     success_title: "Teste Bem-Sucedido"
     error_title: "Teste Falhou"
-common:
-    ok: "OK"
+proceedWithoutTest: 'Prosseguir sem o teste'

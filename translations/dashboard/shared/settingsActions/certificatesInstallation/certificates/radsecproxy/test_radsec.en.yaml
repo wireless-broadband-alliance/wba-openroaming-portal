@@ -25,5 +25,4 @@ errors:
 results:
     success_title: "Test Successful"
     error_title: "Test Failed"
-common:
-    ok: "OK"
+proceedWithoutTest: 'Proceed without test'
