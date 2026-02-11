@@ -3,16 +3,24 @@
 namespace App\Service;
 
 use App\Entity\CertificateSetupProcess;
+use App\Entity\InstallationProgress;
 use App\Enum\ProcessStatusType;
 use App\Enum\CertificateRouteAccess;
 use App\Enum\CertificateTestResult;
 use App\Repository\CertificateSetupProcessRepository;
+use App\Repository\InstallationProgressRepository;
 use DateTimeImmutable;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 readonly class CertificateProcessCheckerService
 {
     public function __construct(
         private CertificateSetupProcessRepository $certificateSetupProcessRepository,
+        private CertificateCheckerService $certificateService,
+        private InstallationProgressRepository $installationProgressRepository,
+        private InstallationService $installationService,
+        private EntityManagerInterface $entityManager,
     ) {
     }
 
@@ -140,4 +148,43 @@ readonly class CertificateProcessCheckerService
         }
         return -1;
     }
+
+    /**
+     * @throws \Exception
+     */
+    public function verifyCertificates(): ?CertificateSetupProcess
+    {
+        $certPemLimitDate = $this->certificateService->certificateLimitDate('/signing-keys/cert.pem');
+        $chainPemLimitDate = $this->certificateService->certificateLimitDate('/signing-keys/chain.pem');
+        $fullchainPemLimitDate = $this->certificateService->certificateLimitDate('/signing-keys/fullchain.pem');
+
+        if (
+            $certPemLimitDate > 0 &&
+            $chainPemLimitDate > 0 &&
+            $fullchainPemLimitDate > 0
+        ) {
+            $certificateSetupProcess = new CertificateSetupProcess();
+            $certificateSetupProcess->setStatus(ProcessStatusType::COMPLETED);
+            $certificateSetupProcess->setRadsecproxyFormCompletedAt(new DateTimeImmutable());
+            $certificateSetupProcess->setRadsecproxyConfigAppliedAt(new DateTimeImmutable());
+            $certificateSetupProcess->setRadsecproxyTestResult(CertificateTestResult::PASSED);
+            $certificateSetupProcess->setFreeradiusFormCompletedAt(new DateTimeImmutable());
+            $certificateSetupProcess->setFreeradiusConfigAppliedAt(new DateTimeImmutable());
+            $certificateSetupProcess->setFreeradiusTestResult(CertificateTestResult::PASSED);
+            $certificateSetupProcess->setCreatedAt(new DateTimeImmutable());
+            $certificateSetupProcess->setUpdatedAt(new DateTimeImmutable());
+
+            $lastInstallation = $this->installationProgressRepository->getLast();
+            if ($lastInstallation instanceof InstallationProgress) {
+                $installationDTO = $this->installationService->fillDto($lastInstallation);
+                $domain = $installationDTO->dbFreeradiusIp;
+                $certificateSetupProcess->setFreeradiusDomainName($domain);
+            }
+            $this->entityManager->persist($certificateSetupProcess);
+            $this->entityManager->flush();
+            return $certificateSetupProcess;
+        }
+        return null;
+    }
+
 }

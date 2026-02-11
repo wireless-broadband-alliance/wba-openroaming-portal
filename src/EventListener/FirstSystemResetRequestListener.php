@@ -11,6 +11,7 @@ use App\Enum\ProcessStatusType;
 use App\Enum\SessionStatus;
 use App\Repository\CertificateSetupProcessRepository;
 use App\Repository\InstallationProgressRepository;
+use App\Service\CertificateProcessCheckerService;
 use App\Service\InstallationService;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\Session\Flash\FlashBagInterface;
@@ -32,19 +33,28 @@ readonly class FirstSystemResetRequestListener
         private UrlGeneratorInterface $urlGenerator,
         private TranslatorInterface $translator,
         private InstallationService $installationService,
+        private CertificateProcessCheckerService $certificateProcessCheckerService,
     ) {
     }
 
+    /**
+     * @throws \Exception
+     */
     public function __invoke(InteractiveLoginEvent $event): void
     {
         $session = $event->getRequest()->getSession();
         $user = $event->getAuthenticationToken()->getUser();
 
+
         if (!$user instanceof User || !$this->security->isGranted(AdminRoleType::ROLE_ADMIN->value, $user)) {
             return;
         }
-
-        $this->installationService->verifyEnvSettings();
+        if (!($this->installationProgressRepository->getLast() instanceof InstallationProgress)) {
+            $this->installationService->verifyEnvSettings();
+        }
+        if (!($this->certificateSetupProcessRepository->getLatestProcess() instanceof CertificateSetupProcess)) {
+            $this->certificateProcessCheckerService->verifyCertificates();
+        }
 
         $completedInstallation = $this->installationProgressRepository->findOneBy([
             'installationState' => ProcessStatusType::COMPLETED
@@ -106,6 +116,13 @@ readonly class FirstSystemResetRequestListener
                 ),
                 'admin_dashboard_settings_certs_radsecproxy_upload'
             );
+            return;
+        }
+
+        if (($completedCertificates->getRadsecproxyTestResult() === CertificateTestResult::PASSED)
+            && $completedCertificates->getFreeradiusTestResult() === CertificateTestResult::PASSED
+        ) {
+            $session->remove(SessionStatus::SYSTEM_RESET_REQUEST->value);
             return;
         }
 
