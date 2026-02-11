@@ -22,13 +22,17 @@
                         <div data-controller="command-visibility" class="relative">
                             {# Toggle button #}
                             <button type="button"
-                                    class="mt-1 mb-2 text-sm text-primary underline"
+                                    class="mt-2 mb-3 inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium
+                                   text-primary border border-primary rounded-md
+                                   hover:bg-primary/10 focus:outline-none focus:ring-2 focus:ring-primary/50
+                                   transition"
                                     data-command-visibility-target="toggleButton"
                                     data-show-text="{{ 'showSensitive'|trans({}, 'config_radsec') }}"
                                     data-hide-text="{{ 'hideSensitive'|trans({}, 'config_radsec') }}"
                                     data-action="command-visibility#toggle">
                                 {{ 'showSensitive'|trans({}, 'config_radsec') }}
                             </button>
+
 
                             {# Hidden Block (Blurred and NOT COPYABLE ) #}
                             <div data-command-visibility-target="hiddenBlock"
