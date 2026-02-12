@@ -77,7 +77,7 @@ invalidCertificateType: 'O certificado não é do tipo RSA. Apenas certificados 
 notValidWbaChainRadsec: 'O certificado não é assinado pela root confiável da WBA.'
 invalidCertificateChain: "O certificado carregado não pertence à chain.pem fornecida."
 incompleteChainMessage: 'A chain de certificados não chega a uma autoridade de confiança.'
-untrustedRootMessage: 'A autoridade de confiança fornecida não é confiável.'
+untrustedRootMessage: 'O certificado raiz não é confiável. Podem faltar certificados intermédios ou estar cross-signed.'
 invalidDomainPattern: 'O domínio não é válido. Utilize um domínio exato (exemplo.com), um subdomínio curinga (*.exemplo.com) ou * para todos os domínios.'
 invalidSource: 'Por favor, insira um URL válido.'
 exact_no_wildcard: 'Para correspondência exata, o domínio não pode conter caracteres wildcard (*).'
