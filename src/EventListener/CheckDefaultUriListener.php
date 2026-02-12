@@ -42,7 +42,8 @@ readonly class CheckDefaultUriListener
             throw new HttpException(
                 500,
                 sprintf(
-                    'DEFAULT_URI is invalid in production. Found "%s", must be a real domain or IP accessible externally.',
+                    'DEFAULT_URI is invalid in production. ' .
+                    'Found "%s", must be a real domain or IP accessible externally.',
                     $defaultUri
                 )
             );
