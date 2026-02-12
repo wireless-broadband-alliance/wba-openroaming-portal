@@ -1,3 +1,4 @@
 title: 'Admin Identity Verification'
 installationDescription: 'To access the platform installation process, please confirm your identity.'
 certificatesDescription: 'To access the platform certificate renewal process, please confirm your identity.'
+enterPassword: 'Enter your Password'

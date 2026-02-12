@@ -47,7 +47,7 @@ readonly class InstallationListener
         if (!$session->get(SessionStatus::SYSTEM_RESET_REQUEST->value)) {
             if ($user && str_starts_with($path, '/dashboard/settings/certificatesManagement/installation')) {
                 if (!$session->get(SessionStatus::INSTALLATION_VERIFICATION->value)) {
-                    $url = $this->router->generate('admin_dashboard_settings_certs_installation_verify_send_code', [
+                    $url = $this->router->generate('admin_dashboard_settings_certs_installation_verify', [
                         'type' => InstallationType::INSTALLATION->value
                     ]);
                     $event->setResponse(new RedirectResponse($url));
@@ -62,7 +62,7 @@ readonly class InstallationListener
                     str_starts_with($path, '/dashboard/settings/certificatesManagement/certificates/')
                 )
             ) {
-                $url = $this->router->generate('admin_dashboard_settings_certs_installation_verify_send_code', [
+                $url = $this->router->generate('admin_dashboard_settings_certs_installation_verify', [
                     'type' => InstallationType::CERTIFICATES->value,
                 ]);
                 $event->setResponse(new RedirectResponse($url));

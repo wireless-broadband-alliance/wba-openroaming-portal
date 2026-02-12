@@ -23,6 +23,7 @@ use App\Form\DbSetupType;
 use App\Form\SettingsType;
 use App\Form\SimpleSubmitFormType;
 use App\Form\TwoFACode;
+use App\Form\VerifyPasswordType;
 use App\Repository\EventRepository;
 use App\Repository\InstallationProgressRepository;
 use App\Repository\SettingRepository;
@@ -74,6 +75,7 @@ class InstallationController extends AbstractController
         private readonly CaptchaValidator $captchaValidator,
         private readonly KernelInterface $kernel,
         private readonly UserPasswordHasherInterface $userPasswordHasher,
+        private readonly UserPasswordHasherInterface $passwordHasher,
     ) {
     }
 
@@ -1016,15 +1018,14 @@ class InstallationController extends AbstractController
             $eventType = AnalyticalEventType::CERTIFICATES_IDENTITY_VERIFIED_CODE->value;
         }
 
-        $form = $this->createForm(TwoFACode::class);
+        $form = $this->createForm(VerifyPasswordType::class);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            /** @var array{code: string} $data */
-            $data = $form->getData();
-            $code = $data["code"];
+            $password = $form->get('password')->getData();
 
-            if ($this->twoFAService->validate2FACode($user, $code)) {
+
+            if ($this->passwordHasher->isPasswordValid($user, $password)) {
                 $session = $request->getSession();
                 if ($type === InstallationType::INSTALLATION->value) {
                     $session->set(SessionStatus::INSTALLATION_VERIFICATION->value, true);
@@ -1059,7 +1060,7 @@ class InstallationController extends AbstractController
             }
             $this->addFlash(
                 'error',
-                $this->translator->trans('invalidCodeMessage', [], 'controllers')
+                $this->translator->trans('invalidPassword', [], 'controllers')
             );
         }
 
@@ -1074,209 +1075,4 @@ class InstallationController extends AbstractController
         );
     }
 
-    #[Route(
-        '/dashboard/settings/certificatesManagement/verifyIdentity/{type}/code',
-        name: 'admin_dashboard_settings_certs_installation_verify_send_code',
-        requirements: [
-            'type' => 'installation|certificates'
-        ],
-        defaults: [
-            'type' => InstallationType::INSTALLATION->value,
-        ]
-    )]
-    #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
-    public function settingsCertificatesManagementInstallationVerifyIdentitySendCode(
-        Request $request,
-        string $type
-    ): RedirectResponse|Response {
-        /** @var User $user */
-        $user = $this->getUser();
-
-        if ($type === InstallationType::INSTALLATION->value) {
-            $eventType = AnalyticalEventType::INSTALLATION_IDENTITY_VERIFIED_CODE->value;
-        } else {
-            $eventType = AnalyticalEventType::CERTIFICATES_IDENTITY_VERIFIED_CODE->value;
-        }
-
-        if (
-            $this->installationService->canSendCode(
-                $eventType,
-                $user
-            )
-        ) {
-            $this->installationService->sendAdminVerificationCode($user);
-            $eventMetaData = [
-                'platform' => PlatformMode::LIVE->value,
-                'user_agent' => $request->headers->get('User-Agent'),
-                'uuid' => $user->getUuid(),
-                'ip' => $request->getClientIp(),
-            ];
-            $this->eventActions->saveEvent(
-                $user,
-                $eventType,
-                new DateTime(),
-                $eventMetaData
-            );
-
-            $this->addFlash(
-                'success',
-                $this->translator->trans('codeSentSuccessfully', [], 'controllers')
-            );
-        } else {
-            $interval_minutes = $this->twoFAService->timeLeftToResendCode(
-                $user,
-                $eventType
-            );
-
-            $this->addFlash(
-                'error',
-                $this->translator->trans(
-                    'codeAlreadySent',
-                    [
-                        '%minutes%' => $interval_minutes,
-                    ],
-                    'controllers'
-                )
-            );
-        }
-
-
-        return $this->redirectToRoute('admin_dashboard_settings_certs_installation_verify', [
-            'type' => $type,
-        ]);
-    }
-
-    /**
-     * @throws \DateMalformedStringException
-     * @throws RandomException
-     * @throws TransportExceptionInterface
-     */
-    #[Route(
-        '/dashboard/settings/certificatesManagement/verifyIdentity/{type}/resend',
-        name: 'admin_dashboard_settings_certs_installation_verify_resend_code',
-        requirements: [
-            'type' => 'installation|certificates'
-        ],
-        defaults: [
-            'type' => InstallationType::INSTALLATION->value,
-        ]
-    )]
-    #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
-    public function entityVerificationResendCode(Request $request, string $type): RedirectResponse
-    {
-        /** @var User $user */
-        $user = $this->getUser();
-
-        if (!$this->isGranted('IS_AUTHENTICATED_FULLY')) {
-            $this->addFlash(
-                'error',
-                $this->translator->trans('onlyAccessThisPageLoggedIn', [], 'controllers')
-            );
-            return $this->redirectToRoute('app_landing');
-        }
-        // Handle access restrictions based on the context
-        $timeToResetAttempts = (int)$this->settingRepository->findOneBy(
-            ['name' => SettingName::TWO_FACTOR_AUTH_TIME_RESET_ATTEMPTS->value]
-        )->getValue();
-        $nrAttempts = (int)$this->settingRepository->findOneBy(
-            ['name' => SettingName::TWO_FACTOR_AUTH_ATTEMPTS_NUMBER_RESEND_CODE->value]
-        )->getValue();
-        $timeIntervalToResendCode = (int)$this->settingRepository->findOneBy(
-            ['name' => SettingName::TWO_FACTOR_AUTH_RESEND_INTERVAL->value]
-        )->getValue();
-        $limitTime = new DateTime();
-        $limitTime->modify('-' . $timeToResetAttempts . ' minutes');
-
-        if ($type === InstallationType::INSTALLATION->value) {
-            $eventType = AnalyticalEventType::INSTALLATION_IDENTITY_VERIFIED_RESEND_CODE->value;
-        } else {
-            $eventType = AnalyticalEventType::CERTIFICATES_IDENTITY_VERIFIED_RESEND_CODE->value;
-        }
-        if (
-            $this->twoFAService->canResendCode($user, $eventType) &&
-            $this->twoFAService->timeIntervalToResendCode($user, $eventType)
-        ) {
-            $this->installationService->sendAdminVerificationCode($user);
-
-            $eventMetaData = [
-                'platform' => PlatformMode::LIVE->value,
-                'user_agent' => $request->headers->get('User-Agent'),
-                'uuid' => $user->getUuid(),
-                'ip' => $request->getClientIp(),
-            ];
-            $this->eventActions->saveEvent(
-                $user,
-                $eventType,
-                new DateTime(),
-                $eventMetaData
-            );
-            $attempts = $this->eventRepository->find2FACodeAttemptEvent(
-                $user,
-                $nrAttempts,
-                $limitTime,
-                $eventType
-            );
-            $attemptsLeft = $nrAttempts - count($attempts);
-            $this->addFlash(
-                'success',
-                $this->translator->trans(
-                    'codeResentSuccessfully',
-                    [
-                        '%attempts%' => $attemptsLeft
-                    ],
-                    'controllers'
-                )
-            );
-        } else {
-            $lastEvent = $this->eventRepository->findLatest2FACodeAttemptEvent(
-                $user,
-                $eventType
-            );
-            $now = new DateTime();
-            // Suppose $lastAttemptTime is DateTimeInterface
-            $lastAttemptTime = $lastEvent instanceof Event
-                ? $lastEvent->getEventDatetime()
-                : new DateTime(); // fallback
-
-            // Ensure $limitTime is a DateTime instance
-            $limitTime = $lastAttemptTime instanceof DateTime
-                ? clone $lastAttemptTime
-                : new DateTime($lastAttemptTime->format('Y-m-d H:i:s')); // convert interface to DateTime
-            if (!$this->twoFAService->canResendCode($user, $eventType)) {
-                $limitTime->modify('+' . $timeToResetAttempts . ' minutes');
-                $interval = date_diff($now, $limitTime);
-                $interval_minutes = $interval->days * 1440;
-                $interval_minutes += $interval->h * 60;
-                $interval_minutes += $interval->i;
-
-                $this->addFlash(
-                    'error',
-                    $this->translator->trans(
-                        'attemptsExceeded',
-                        ['%minutes%' => $interval_minutes],
-                        'controllers'
-                    )
-                );
-            } else {
-                $limitTime->modify('+' . $timeIntervalToResendCode . ' seconds');
-                $interval = date_diff($now, $limitTime);
-                $interval_seconds = $interval->days * 1440;
-                $interval_seconds += $interval->h * 60;
-                $interval_seconds += $interval->i;
-                $interval_seconds += $interval->s;
-
-                $this->addFlash(
-                    'error',
-                    $this->translator->trans(
-                        'errorAdminWait',
-                        ['%time%' => $interval_seconds],
-                        'controllers'
-                    )
-                );
-            }
-        }
-        return $this->redirectToRoute('admin_dashboard_settings_certs_installation_verify', [
-            'type' => $type
-        ]);
-    }
 }
