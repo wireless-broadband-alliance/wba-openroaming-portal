@@ -2,70 +2,47 @@
 
 {% block title %}
     {{ 'adminPageWBA'|trans({}, '_header_admin') }}
-{% endblock %}
+{% endblock %}{% block installation_content %}
+    <div class="w-full max-w-xl mx-auto py-10 px-6">
 
-{% block installation_content %}
+        <div class="text-center">
+            <h1 class="text-3xl font-semibold">
+                {{ 'title'|trans({}, 'confirm_identity') }}
+            </h1>
 
-    <div class="mt-6">
-        <h1 class="text-2xl sm:text-3xl font-bold leading-tight">
-            {{ 'title'|trans({}, 'confirm_identity') }}
-        </h1>
-        <p class="mt-3 text-gray-600 text-base sm:text-lg">
-            {% if type == constant('App\\Enum\\AnalyticalEventType::INSTALLATION_IDENTITY_VERIFIED_RESEND_CODE').value %}
-                {{ 'installationDescription'|trans({}, 'confirm_identity') }}
-            {% else %}
-                {{ 'certificatesDescription'|trans({}, 'confirm_identity') }}
-            {% endif %}
-        </p>
-    </div>
-
-    <div class="my-6 divider-solid"></div>
-
-    {{ form_start(form, {attr: {autocomplete: 'off'}}) }}
-
-    <div class="w-full 2xl:w-1/2 bg-white rounded-md p-4">
-
-        {# --- Code Card --- #}
-        <div class="cert-upload-card col-span-1 sm:col-span-1 md:col-span-2 transition hover:shadow-lg hover:-translate-y-1 duration-200"
-                {{ stimulus_target('radio-card', 'card') }}
-                {{ stimulus_controller('card') }}>
-
-            <div class="block text-center text-lg mb-6">
-                <h2 class="text-lg sm:text-xl font-medium text-gray-700">
-                    {{ 'enterPassword'|trans({}, 'confirm_identity') }}
-                </h2>
-
-            </div>
-
-            <div class="mt-6 flex justify-center">
-                <div class="w-full sm:w-3/4 lg:w-2/3">
-                    {{ form_widget(form.password, {
-                        attr: {
-                            class: 'form-widget w-full text-center',
-                            placeholder: 'Password',
-                        },
-                    }) }}
-                </div>
-            </div>
-
-            <div class="mt-2 text-red-500 text-sm">
-                {{ form_errors(form.password) }}
-            </div>
-
+            <p class="mt-4 text-gray-600 text-base leading-relaxed">
+                {% if type == constant('App\\Enum\\AnalyticalEventType::INSTALLATION_IDENTITY_VERIFIED_RESEND_CODE').value %}
+                    {{ 'installationDescription'|trans({}, 'confirm_identity') }}
+                {% else %}
+                    {{ 'certificatesDescription'|trans({}, 'confirm_identity') }}
+                {% endif %}
+            </p>
         </div>
 
+        {{ form_start(form, { attr: { autocomplete: 'off', class: 'mt-10 space-y-6' } }) }}
+
+        <div class="max-w-md mx-auto">
+            {{ form_widget(form.password, {
+                attr: {
+                    class: 'form-widget w-full text-center text-lg py-3',
+                    placeholder: 'form.password_placeholder'|trans({}, 'login_landing')
+                },
+            }) }}
+
+            <div class="mt-2 text-red-500 text-sm text-center">
+                {{ form_errors(form.password) }}
+            </div>
+        </div>
+
+        <div class="flex justify-center pt-4">
+            <button type="submit"
+                    class="btn-primary min-w-[220px]">
+                {{ 'verify'|trans({}, 'confirm') }}
+            </button>
+        </div>
+
+        {{ form_row(form._token) }}
+        {{ form_end(form) }}
+
     </div>
-
-    <div class="mt-8 divider-solid"></div>
-
-    <div class="mt-6 flex flex-col sm:flex-row justify-end items-center gap-2">
-        <button type="submit"
-                class="btn-primary w-[200px]">
-            {{ 'verify'|trans({}, 'confirm') }}
-        </button>
-    </div>
-
-    {{ form_row(form._token) }}
-    {{ form_end(form) }}
-
 {% endblock %}

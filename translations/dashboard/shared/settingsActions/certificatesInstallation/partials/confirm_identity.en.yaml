@@ -1,4 +1,4 @@
-title: 'Admin Identity Verification'
-installationDescription: 'To access the platform installation process, please confirm your identity.'
-certificatesDescription: 'To access the platform certificate renewal process, please confirm your identity.'
-enterPassword: 'Enter your Password'
+title: 'Identity Verification'
+installationDescription: 'For security purposes, please verify your identity to continue with the platform setup.'
+certificatesDescription: 'For security purposes, please verify your identity to continue with the certificate renewal.'
+enterPassword: 'Please enter your password'
