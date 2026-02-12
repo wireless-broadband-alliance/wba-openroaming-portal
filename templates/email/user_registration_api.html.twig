@@ -20,9 +20,9 @@
 
                         <!-- Header -->
                         <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0"
-                               style="background-color:#0B1A58; text-align:center;">
+                               style="background-color:#0B1A58; text-align:center; padding:40px 20px;">
                             <tr>
-                                <td style="padding:40px 20px;">
+                                <td>
                                     <img src="cid:logo_cid" alt="Customer Logo"
                                          style="max-width:300px; height:auto; border:0;"/>
                                 </td>
@@ -31,7 +31,7 @@
 
                         <!-- Content -->
                         <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0"
-                               style="text-align:center; padding:40px 20px;">
+                               style="padding:40px 20px; text-align:center;">
                             <tr>
                                 <td>
                                     <h1 style="color:#0B1A58; font-size:28px; font-weight:bold; margin:0 0 30px 0; font-family: Arial, Helvetica, sans-serif;">
@@ -39,21 +39,12 @@
                                     </h1>
                                 </td>
                             </tr>
-
                             <tr>
-                                <td style="padding-bottom:20px;">
-                                    <p style="font-size:18px; line-height:1.5; color:#0B1A58; margin:0; font-family: Arial, Helvetica, sans-serif;">
-                                        {{ 'intro_new_user'|trans({
-                                            '%link_text%': 'buttons.link_text'|trans({}, 'user_registration_api'),
-                                            '%download_text%': 'buttons.download_text'|trans({}, 'user_registration_api'),
-                                        }, 'user_registration_api')|raw }}
+                                <td style="padding-bottom:30px;">
+                                    <p style="font-size:18px; line-height:1.5; color:#0B1A58; margin:0 0 15px 0; font-family: Arial, Helvetica, sans-serif;">
+                                        {{ 'intro_new_user'|trans({}, 'user_registration_api')|raw }}
                                     </p>
-                                </td>
-                            </tr>
 
-                            <!-- Button -->
-                            <tr>
-                                <td>
                                     <a href="{{ absolute_url(path('app_confirm_account')) ~
                                     '?uuid=' ~ uuid|url_encode ~
                                     '&twoFaCode=' ~ twoFaCode|url_encode ~
@@ -63,7 +54,6 @@
                                     </a>
                                 </td>
                             </tr>
-
                         </table>
 
                         <!-- Footer -->
