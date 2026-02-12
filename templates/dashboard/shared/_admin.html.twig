@@ -158,6 +158,7 @@
                             {{ form_end(formRevokeProfiles) }}
                         </form>
                     </li>
+                    {% if currentUser.id != user.id %}
                     <li>
                         <a href="{{ path('admin_remove_permissions', {id: user.id}) }}"
                            class="flex flex-row items-center px-2 py-2 duration-100 p-2 cursor-pointer hover:text-lightGreen">
@@ -165,6 +166,7 @@
                             {{ 'removeAdminPerm'|trans({}, '_user') }}
                         </a>
                     </li>
+                    {% endif %}
                 </ul>
             </div>
         </td>
