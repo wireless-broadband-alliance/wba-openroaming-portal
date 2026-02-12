@@ -151,6 +151,16 @@
             return;
         }
 
+        // Handle confirm attribute (custom way)
+        if (link.dataset.confirm) {
+            const confirmed = confirm(link.dataset.confirm);
+            if (!confirmed) {
+                e.preventDefault();
+                hideLoading(); // ensure loader stays hidden
+                return;
+            }
+        }
+
         // Ignore same-page hash navigation
         const current = window.location.href.split('#')[0];
         const target = link.href.split('#')[0];
@@ -166,6 +176,16 @@
         const form = e.target;
 
         if (form.dataset.noLoader === 'true') return;
+
+        // Handle confirm
+        if (form.dataset.confirm) {
+            const confirmed = confirm(form.dataset.confirm);
+            if (!confirmed) {
+                e.preventDefault();
+                hideLoading();
+                return;
+            }
+        }
 
         showLoading();
     });
