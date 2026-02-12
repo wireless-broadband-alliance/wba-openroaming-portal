@@ -54,9 +54,8 @@ emailVerification:
 
 finishSetupTitle: 'Finish your setup in the app'
 finishSetupExplanation: >
-    You have successfully signed in.
-    To complete the configuration and install your OpenRoaming profile,
-    please return to the app.
-finishSetupNote: 'If the app does not open automatically, use the button below.'
-openAppAndFinish: 'Open app & finish setup'
+    You are now signed in.
+    To install your secure OpenRoaming Wi-Fi profile, return to the mobile app and complete the final step.
+finishSetupNote: 'If the app does not open automatically, tap the button below.'
+openAppAndFinish: 'Open App to Install OpenRoaming Wi-Fi Profile'
 continueOnWeb: 'Continue on the web portal'

@@ -1,32 +1,21 @@
 subject_registration_details: 'Your OpenRoaming Registration Details'
 
-title_welcome: 'You’re almost connected!'
 header_welcome: 'Welcome to OpenRoaming!'
 
 intro_new_user: >
-    To set up OpenRoaming, you will be redirected to our secure landing page.
+    You're almost ready to connect automatically to secure OpenRoaming Wi-Fi worldwide.
+    To complete your setup, click the button below. You’ll be guided through a secure page to install your OpenRoaming Wi-Fi profile.
     From there, you will continue to the application to complete the installation.
+    This takes less than one minute.
 
-new_user_steps:
-    confirm_account: >
-        Open the app and tap
-        <strong style="color: #7BBA29;">“Continue Setup”</strong>
-        to confirm your account.
-    download_profile: >
-        Once confirmed, return to the app and tap
-        <strong>“Download and Install Profile”</strong>
-        to enable OpenRoaming on your device.
-    password: >
-        Your temporary password is:
-        <strong style='color: #0045AD;'>%password%</strong>
-    enter_code: >
-        If the app asks for a verification code, enter:
-        <strong style='color: #0045AD;'>%twoFaCode%</strong>
+benefit:
+    auto_connection: 'Automatic connection at OpenRoaming hotspots'
+    secure_auth: 'Secure, encrypted Wi-Fi authentication'
+    no_captive_portals: 'No captive portals'
+    no_repeated_logins: 'No repeated logins'
 
 buttons:
-    download_and_install: 'Continue to the application'
-    link_text: 'return to the app'
-    download_text: 'download and install the OpenRoaming network'
+    download_and_install: 'Continue and verify your account'
 
 footer:
     support_team: 'Support team:'

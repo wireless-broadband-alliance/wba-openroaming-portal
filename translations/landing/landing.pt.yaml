@@ -54,9 +54,8 @@ emailVerification:
 
 finishSetupTitle: 'Conclua a configuração na aplicação'
 finishSetupExplanation: >
-    A autenticação foi realizada com sucesso.
-    Para concluir a configuração e instalar o perfil OpenRoaming,
-    regresse à aplicação.
-finishSetupNote: 'Se a aplicação não abrir automaticamente, utilize o botão abaixo.'
-openAppAndFinish: 'Abrir a aplicação e concluir configuração'
+    Está agora autenticado.
+    Para instalar o seu perfil Wi-Fi seguro da OpenRoaming, volte à aplicação móvel e complete o passo final.
+finishSetupNote: 'Se a aplicação não abrir automaticamente, toque no botão abaixo.'
+openAppAndFinish: 'Abrir a aplicação para instalar o perfil OpenRoaming'
 continueOnWeb: 'Continuar no portal web'
