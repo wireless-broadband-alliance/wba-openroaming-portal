@@ -59,7 +59,9 @@ readonly class TermsAcceptanceListener
             '/profile/windows',
             '/login/magic',
             '/login/link',
-            '/forgot-password/link'
+            '/forgot-password/link',
+            '/saml/login',
+            '/app'
         ];
 
         if (array_any($excludedPrefixes, fn($prefix) => str_starts_with($path, (string)$prefix))) {

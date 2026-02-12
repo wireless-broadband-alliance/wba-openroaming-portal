@@ -429,6 +429,29 @@ class SiteController extends AbstractController
         ]);
     }
 
+    #[Route('/app/continue', name: 'app_api_landing')]
+    public function appApiLanding(): Response
+    {
+        // Call the getSettings method of GetSettings class to retrieve the data
+        /** @var array<string, array{value: string, description: string}> $data */
+        $data = $this->getSettings->getSettings();
+
+        /** @var User|null $currentUser */
+        $currentUser = $this->getUser();
+
+        // Prepare Forms before any action
+        $form = $this->createForm(AccountUserUpdateLandingType::class, $this->getUser());
+        $formPassword = $this->createForm(NewPasswordAccountType::class, $this->getUser());
+        $formRevokeProfiles = $this->createForm(RevokeProfilesType::class, $this->getUser());
+
+        return $this->render('landing/authUser/landing_api_auth_user.html.twig', [
+            'form' => $form->createView(),
+            'formPassword' => $formPassword->createView(),
+            'formRevokeProfiles' => $formRevokeProfiles->createView(),
+            'data' => $data,
+            'user' => $currentUser,
+        ]);
+    }
 
     /**
      * Widget with data about the account of the user / upload new password

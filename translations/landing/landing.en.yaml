@@ -51,3 +51,12 @@ emailVerification:
     newCodeSentEmail: 'We have sent you a new code to: %email%.'
     waitBeforeTryingAgain: 'Please wait %time% minutes before trying again.'
     accountSuccessfullyVerified: 'Your account is now successfully verified.'
+
+finishSetupTitle: 'Finish your setup in the app'
+finishSetupExplanation: >
+    You have successfully signed in.
+    To complete the configuration and install your OpenRoaming profile,
+    please return to the app.
+finishSetupNote: 'If the app does not open automatically, use the button below.'
+openAppAndFinish: 'Open app & finish setup'
+continueOnWeb: 'Continue on the web portal'

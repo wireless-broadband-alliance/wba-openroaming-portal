@@ -169,7 +169,7 @@ class RegistrationController extends AbstractController
         $this->entityManager->persist($userExternalAuth);
         $this->entityManager->flush();
 
-        $this->emailGenerator->sendRegistrationEmail($user, $data['password']);
+        $this->emailGenerator->sendRegistrationEmail($user, $data['password'], true);
 
         $eventMetaData = [
             'ip' => $request->getClientIp(),
