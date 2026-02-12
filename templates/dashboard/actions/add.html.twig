@@ -3,11 +3,9 @@
 {% block title %}Admin Page WBA{% endblock %}
 
 {% block container %}
-  <h1 class="text-3xl font-bold text-gray-800 mb-8 border-b-2 border-gray-300 pb-2">{{ 'addUser'|trans({}, 'dashboard') }}</h1>
-
   {{ form_start(form) }}
   {{ form_errors(form) }}
-  <div class="p-6 bg-white rounded-lg shadow-md">
+  <div class="p-6 bg-white">
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
       {# Account Type #}
