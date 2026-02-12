@@ -20,19 +20,20 @@ readonly class AdminPermissionsFormBuilder
     public function addPermissions(FormBuilderInterface $builder): void
     {
         $permissions = [
-        'userManagement' => 'usersManagement',
-        'platformStatus' => 'platformStatus',
-        'landingPageConfig' => 'landingPageConfiguration',
-        'userEngagement' => 'userEngagement',
-        'termsPolicies' => 'termsAndPolicies',
-        'cronSchedule' => 'scheduleAutomation',
-        'authenticationMethods' => 'authenticationMethods',
-        'twoFactorAuth' => 'twoFactorAuthenticator',
-        'ldapSynchronization' => 'LDAPSynchronization',
-        'radiusProfileConfig' => 'radiusProfileConfiguration',
-        'smsConfig' => 'SMSConfiguration',
-        'portalStatistics' => 'portalStatistics',
-        'connectivityStatistics' => 'connectivityStatistics',
+            'userManagement' => 'usersManagement',
+            'adminManagement' => 'adminManagement',
+            'platformStatus' => 'platformStatus',
+            'landingPageConfig' => 'landingPageConfiguration',
+            'userEngagement' => 'userEngagement',
+            'termsPolicies' => 'termsAndPolicies',
+            'cronSchedule' => 'scheduleAutomation',
+            'authenticationMethods' => 'authenticationMethods',
+            'twoFactorAuth' => 'twoFactorAuthenticator',
+            'ldapSynchronization' => 'LDAPSynchronization',
+            'radiusProfileConfig' => 'radiusProfileConfiguration',
+            'smsConfig' => 'SMSConfiguration',
+            'portalStatistics' => 'portalStatistics',
+            'connectivityStatistics' => 'connectivityStatistics',
         ];
 
         foreach ($permissions as $field => $translationKey) {

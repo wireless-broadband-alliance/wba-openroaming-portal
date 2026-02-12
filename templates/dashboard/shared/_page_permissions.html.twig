@@ -1,5 +1,6 @@
 {% set permissions = {
   userManagement: 'usersManagement',
+  adminManagement: 'adminManagement',
   platformStatus: 'platformStatus',
   landingPageConfig: 'landingPageConfiguration',
   userEngagement: 'userEngagement',
@@ -15,7 +16,8 @@
 } %}
 
 {% for field, labelKey in permissions %}
-  <div class="flex flex-col mb-6">
+    {% if not isEditingSelf %}
+        <div class="flex flex-col mb-6">
     {# Field label #}
     {{ form_label(attribute(form, field), labelKey|trans({}, 'UserAddType'), {label_attr: {class: 'form-label'}}) }}
 
@@ -43,4 +45,5 @@
     {# Errors #}
     <div class="text-red-500 mt-1">{{ form_errors(attribute(form, field)) }}</div>
   </div>
+    {% endif %}
 {% endfor %}

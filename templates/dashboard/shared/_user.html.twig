@@ -155,7 +155,9 @@
                             {{ form_end(formRevokeProfiles) }}
                         </form>
                     </li>
-                    {% if constant('App\\Enum\\AdminRoleType::ROLE_SUPER_ADMIN').value in app.user.roles %}
+                    {% if constant('App\\Enum\\AdminRoleType::ROLE_SUPER_ADMIN').value in app.user.roles or
+                        is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::ADMIN_MANAGEMENT_WRITE'))
+                    %}
                         <li>
                             <a href="{{ path('admin_add_permissions', {id: user.id}) }}"
                                class="flex flex-row items-center px-2 py-2 duration-100 p-2 cursor-pointer hover:text-lightGreen">
