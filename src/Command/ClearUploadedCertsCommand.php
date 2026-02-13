@@ -43,7 +43,7 @@ class ClearUploadedCertsCommand extends Command
             $certificates = $currentProcess->getCertificates();
             foreach ($certificates as $certificate) {
                 if ($certificate->getFilePath() !== null) {
-                    $inUseFiles[] = $certificate->getFilePath();
+                    $inUseFiles[] = realpath($certificate->getFilePath());
                 }
             }
         }
@@ -53,8 +53,9 @@ class ClearUploadedCertsCommand extends Command
 
         // 3. Delete files that are not part of the current process
         foreach ($finder as $file) {
-            if (!in_array($file->getFilename(), $inUseFiles, true)) {
-                $filesystem->remove($file->getRealPath());
+            $filePath = $file->getRealPath();
+            if ($filePath && !in_array($filePath, $inUseFiles, true)) {
+                $filesystem->remove($filePath);
                 $deletedCount++;
             }
         }
