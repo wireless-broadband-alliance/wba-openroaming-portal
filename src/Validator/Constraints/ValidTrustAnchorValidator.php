@@ -131,11 +131,13 @@ class ValidTrustAnchorValidator extends ConstraintValidator
     private function normalizePem(
         string $pem
     ): string {
-        if (!preg_match(
-            '/-----BEGIN CERTIFICATE-----(.*?)-----END CERTIFICATE-----/s',
-            $pem,
-            $match
-        )) {
+        if (
+            !preg_match(
+                '/-----BEGIN CERTIFICATE-----(.*?)-----END CERTIFICATE-----/s',
+                $pem,
+                $match
+            )
+        ) {
             throw new RuntimeException('Invalid PEM format');
         }
 

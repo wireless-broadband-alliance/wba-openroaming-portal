@@ -408,8 +408,9 @@ class UsersManagementController extends AbstractController
             if (!$this->isGranted(UserAuthenticationVoter::USERS_MANAGEMENT_READ)) {
                 throw $this->createAccessDeniedException();
             }
-            if (!$this->isGranted(AdminRoleType::ROLE_ADMIN->value)
-                ) {
+            if (
+                !$this->isGranted(AdminRoleType::ROLE_ADMIN->value)
+            ) {
                 throw $this->createAccessDeniedException();
             }
         }

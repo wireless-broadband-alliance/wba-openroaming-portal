@@ -1074,5 +1074,4 @@ class InstallationController extends AbstractController
             ]
         );
     }
-
 }
