@@ -766,8 +766,10 @@ class UsersManagementController extends AbstractController
             throw $this->createAccessDeniedException();
         }
 
-        if ($user->getId() !== $currentUser->getId() &&
-            !$this->isGranted(UserAuthenticationVoter::ADMIN_MANAGEMENT_WRITE)) {
+        if (
+            $user->getId() !== $currentUser->getId() &&
+            !$this->isGranted(UserAuthenticationVoter::ADMIN_MANAGEMENT_WRITE)
+        ) {
             throw $this->createAccessDeniedException();
         }
 
@@ -805,9 +807,11 @@ class UsersManagementController extends AbstractController
             throw $this->createAccessDeniedException();
         }
 
-        if ($user->getId() !== $currentUser->getId() && !$this->isGranted(
+        if (
+            $user->getId() !== $currentUser->getId() && !$this->isGranted(
                 UserAuthenticationVoter::ADMIN_MANAGEMENT_WRITE
-            )) {
+            )
+        ) {
             throw $this->createAccessDeniedException();
         }
 

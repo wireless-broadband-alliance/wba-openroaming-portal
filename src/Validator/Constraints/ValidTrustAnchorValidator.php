@@ -93,8 +93,10 @@ class ValidTrustAnchorValidator extends ConstraintValidator
                 continue;
             }
 
-            if ($this->verifySignature($current, $candidate) &&
-                $this->buildPathToTrustAnchor($candidate, $pool, $expectedRoot, $visited)) {
+            if (
+                $this->verifySignature($current, $candidate) &&
+                $this->buildPathToTrustAnchor($candidate, $pool, $expectedRoot, $visited)
+            ) {
                 return true;
             }
         }
