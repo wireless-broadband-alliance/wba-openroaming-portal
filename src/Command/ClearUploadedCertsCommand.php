@@ -2,6 +2,7 @@
 
 namespace App\Command;
 
+use App\Entity\CertificateSetupProcess;
 use App\Service\CertificateProcessCheckerService;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -38,7 +39,7 @@ class ClearUploadedCertsCommand extends Command
 
         // 2. Get the certificates for that process
         $inUseFiles = [];
-        if ($currentProcess instanceof \App\Entity\CertificateSetupProcess) {
+        if ($currentProcess instanceof CertificateSetupProcess) {
             $certificates = $currentProcess->getCertificates();
             foreach ($certificates as $certificate) {
                 if ($certificate->getFilePath() !== null) {
