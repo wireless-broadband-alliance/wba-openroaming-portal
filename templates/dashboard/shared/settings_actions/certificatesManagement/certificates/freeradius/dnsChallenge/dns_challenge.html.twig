@@ -17,19 +17,6 @@
         </div>
 
         <div class="px-6 py-6 bg-white space-y-6">
-
-            <div class="space-y-2">
-                {{ form_label(form.ca, 'caLabel'|trans({}, 'dns_challenge'), {label_attr: {class: 'font-semibold'}}) }}
-                <p class="text-sm font-medium text-gray-700">
-                    {{ 'caDescription'|trans({}, 'dns_challenge') }}
-                </p>
-                {{ form_widget(form.ca, {attr: {class: 'form-widget-upload'}}) }}
-
-                <div class="text-red-500 text-sm ml-1">
-                    {{ form_errors(form.ca) }}
-                </div>
-            </div>
-
             <div class="space-y-2">
                 {{ form_label(form.host, 'hostLabel'|trans({}, 'dns_challenge'), {label_attr: {class: 'font-semibold'}}) }}
                 <p class="text-sm font-medium text-gray-700">

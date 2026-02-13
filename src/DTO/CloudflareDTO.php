@@ -9,12 +9,6 @@ use App\Validator\Constraints as CustomAssert;
 
 class CloudflareDTO
 {
-    /**
-     * Notices/Warnings generated during the upload
-     * @var list<string>
-     */
-    public array $notices = [];
-
     #[NotBlank(message: 'fieldCannotBeBlank')]
     #[Assert\Length(
         max: 255,
@@ -34,20 +28,4 @@ class CloudflareDTO
         maxMessage: 'maxCharacters'
     )]
     public ?string $token = null;
-
-    #[NotBlank(message: 'nullCA')]
-    #[Assert\File(
-        maxSize: '5M',
-        mimeTypes: [
-            'application/x-x509-ca-cert',
-            'application/x-pem-file',
-            'application/octet-stream',
-            'text/plain',
-        ],
-        notFoundMessage: 'nullCA',
-        mimeTypesMessage: 'invalidFileTypeCA'
-    )]
-    #[CustomAssert\ValidPemCertificate]
-    #[CustomAssert\ValidRsaCertificate]
-    public ?UploadedFile $ca = null;
 }
