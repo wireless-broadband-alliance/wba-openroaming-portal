@@ -39,7 +39,7 @@ class ValidTrustAnchorValidator extends ConstraintValidator
             $this->extractPemCertificates($chainPem)
         );
 
-        if (empty($chainCerts)) {
+        if ($chainCerts === []) {
             $this->violate($constraint->invalidCertificateMessage, $constraint->chainField);
             return;
         }
@@ -93,10 +93,9 @@ class ValidTrustAnchorValidator extends ConstraintValidator
                 continue;
             }
 
-            if ($this->verifySignature($current, $candidate)) {
-                if ($this->buildPathToTrustAnchor($candidate, $pool, $expectedRoot, $visited)) {
-                    return true;
-                }
+            if ($this->verifySignature($current, $candidate) &&
+                $this->buildPathToTrustAnchor($candidate, $pool, $expectedRoot, $visited)) {
+                return true;
             }
         }
 
@@ -147,7 +146,7 @@ class ValidTrustAnchorValidator extends ConstraintValidator
     private function uniqueCerts(
         array $certs
     ): array {
-        return array_values(array_unique(array_map('trim', $certs)));
+        return array_values(array_unique(array_map(trim(...), $certs)));
     }
 
     /**

@@ -47,7 +47,7 @@ readonly class CloudflareService
         $host = strtolower(trim($host));
         $host = preg_replace('/^\*\./', '', $host);
 
-        $labels = explode('.', $host);
+        $labels = explode('.', (string) $host);
 
         while (count($labels) >= 2) {
             $candidate = implode('.', $labels);

@@ -421,7 +421,7 @@ class UsersManagementController extends AbstractController
                 $this->translator->trans('userAlreadyDeleted', [], 'controllers')
             );
 
-              return $this->redirectToRoute('admin_page');
+            return $this->redirectToRoute('admin_page');
         }
 
         $userUpdateDTO = new UserUpdateDTO($user);
@@ -766,10 +766,9 @@ class UsersManagementController extends AbstractController
             throw $this->createAccessDeniedException();
         }
 
-        if ($user->getId() !== $currentUser->getId()) {
-            if (!$this->isGranted(UserAuthenticationVoter::ADMIN_MANAGEMENT_WRITE)) {
-                throw $this->createAccessDeniedException();
-            }
+        if ($user->getId() !== $currentUser->getId() &&
+            !$this->isGranted(UserAuthenticationVoter::ADMIN_MANAGEMENT_WRITE)) {
+            throw $this->createAccessDeniedException();
         }
 
         $user->setRoles([AdminRoleType::ROLE_ADMIN->value]);
@@ -806,10 +805,10 @@ class UsersManagementController extends AbstractController
             throw $this->createAccessDeniedException();
         }
 
-        if ($user->getId() !== $currentUser->getId()) {
-            if (!$this->isGranted(UserAuthenticationVoter::ADMIN_MANAGEMENT_WRITE)) {
-                throw $this->createAccessDeniedException();
-            }
+        if ($user->getId() !== $currentUser->getId() && !$this->isGranted(
+                UserAuthenticationVoter::ADMIN_MANAGEMENT_WRITE
+            )) {
+            throw $this->createAccessDeniedException();
         }
 
         $user->setRoles(["ROLE_USER"]);
