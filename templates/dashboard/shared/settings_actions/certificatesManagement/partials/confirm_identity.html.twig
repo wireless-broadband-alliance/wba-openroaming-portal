@@ -19,13 +19,13 @@
             </p>
         </div>
 
-        {{ form_start(form, { attr: { autocomplete: 'off', class: 'mt-10 space-y-6' } }) }}
+        {{ form_start(form, {attr: {autocomplete: 'off', class: 'mt-10 space-y-6'}}) }}
 
         <div class="max-w-md mx-auto">
             {{ form_widget(form.password, {
                 attr: {
                     class: 'form-widget w-full text-center text-lg py-3',
-                    placeholder: 'form.password_placeholder'|trans({}, 'login_landing')
+                    placeholder: 'form.password_placeholder'|trans({}, 'login_landing'),
                 },
             }) }}
 
