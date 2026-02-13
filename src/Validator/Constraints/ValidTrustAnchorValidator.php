@@ -53,16 +53,25 @@ class ValidTrustAnchorValidator extends ConstraintValidator
 
         $pool = $this->uniqueCerts($pool);
 
-        if (!$this->buildPathToTrustAnchor($leaf, $pool, $rootPem)) {
+        $expectedRoot = is_string($rootPem) ? $rootPem : null;
+
+        if (!$this->buildPathToTrustAnchor($leaf, $pool, $expectedRoot)) {
             $this->violate(
-                $rootPem
+                $expectedRoot
                     ? $constraint->untrustedRootMessage
                     : $constraint->incompleteChainMessage,
-                $rootPem ? $constraint->rootField : $constraint->chainField
+                $expectedRoot ? $constraint->rootField : $constraint->chainField
             );
         }
     }
 
+    /**
+     * @param string $current
+     * @param string[] $pool Array of PEM certificates
+     * @param string|null $expectedRoot
+     * @param bool[] $visited array of fingerprints visited
+     * @return bool
+     */
     private function buildPathToTrustAnchor(
         string $current,
         array $pool,
@@ -145,9 +154,12 @@ class ValidTrustAnchorValidator extends ConstraintValidator
         return "-----BEGIN CERTIFICATE-----{$match[1]}-----END CERTIFICATE-----\n";
     }
 
-    private function uniqueCerts(
-        array $certs
-    ): array {
+    /**
+     * @param string[] $certs
+     * @return string[]
+     */
+    private function uniqueCerts(array $certs): array
+    {
         return array_values(array_unique(array_map(trim(...), $certs)));
     }
 
