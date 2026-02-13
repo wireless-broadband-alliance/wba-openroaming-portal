@@ -17,6 +17,9 @@ final class UserAuthenticationVoter extends Voter
     public const string USERS_MANAGEMENT_WRITE = 'USERS_MANAGEMENT_WRITE';
     public const string USERS_MANAGEMENT_READ = 'USERS_MANAGEMENT_READ';
 
+    public const string ADMIN_MANAGEMENT_WRITE = 'ADMIN_MANAGEMENT_WRITE';
+    public const string ADMIN_MANAGEMENT_READ = 'ADMIN_MANAGEMENT_READ';
+
     public const string PLATFORM_STATUS_WRITE = 'PLATFORM_STATUS_WRITE';
     public const string PLATFORM_STATUS_READ = 'PLATFORM_STATUS_READ';
     // Landing Page Configuration page
@@ -65,6 +68,9 @@ final class UserAuthenticationVoter extends Voter
             [
             self::USERS_MANAGEMENT_WRITE,
             self::USERS_MANAGEMENT_READ,
+
+            self::ADMIN_MANAGEMENT_WRITE,
+            self::ADMIN_MANAGEMENT_READ,
 
             self::PLATFORM_STATUS_WRITE,
             self::PLATFORM_STATUS_READ,
@@ -130,8 +136,18 @@ final class UserAuthenticationVoter extends Voter
             self::USERS_MANAGEMENT_WRITE =>
             $this->hasPermission($user, AdminPermissionsType::USERS_MANAGEMENT_WRITE),
             self::USERS_MANAGEMENT_READ =>
-            $this->hasPermission($user, AdminPermissionsType::USERS_MANAGEMENT_READ)
-            || $this->hasPermission($user, AdminPermissionsType::USERS_MANAGEMENT_WRITE),
+            $this->hasPermission($user, AdminPermissionsType::USERS_MANAGEMENT_READ) ||
+            $this->hasPermission($user, AdminPermissionsType::USERS_MANAGEMENT_WRITE),
+
+            self::ADMIN_MANAGEMENT_WRITE => $this->hasPermission(
+                $user,
+                AdminPermissionsType::ADMIN_MANAGEMENT_WRITE
+            ),
+            self::ADMIN_MANAGEMENT_READ => $this->hasPermission(
+                $user,
+                AdminPermissionsType::ADMIN_MANAGEMENT_READ
+            ) ||
+                $this->hasPermission($user, AdminPermissionsType::ADMIN_MANAGEMENT_WRITE),
 
             self::PLATFORM_STATUS_WRITE =>
             $this->hasPermission($user, AdminPermissionsType::PLATFORM_STATUS_WRITE),
@@ -262,6 +278,9 @@ final class UserAuthenticationVoter extends Voter
     {
         return
         $this->hasPermission($user, AdminPermissionsType::USERS_MANAGEMENT_WRITE)
-        || $this->hasPermission($user, AdminPermissionsType::USERS_MANAGEMENT_READ);
+        || $this->hasPermission($user, AdminPermissionsType::USERS_MANAGEMENT_READ)
+
+        || $this->hasPermission($user, AdminPermissionsType::ADMIN_MANAGEMENT_WRITE)
+        || $this->hasPermission($user, AdminPermissionsType::ADMIN_MANAGEMENT_READ);
     }
 }

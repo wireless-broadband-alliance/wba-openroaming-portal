@@ -145,16 +145,6 @@ class CertificateManagementFreeradiusController extends AbstractController
                 $process->setIsFreeradiusCertEV(true);
             }
 
-            if (in_array('CERTIFICATE_LETS_ENCRYPT_WARNING', $certificateUploadDTO->notices, true)) {
-                $process->setIsFreeradiusCertEV(false);
-                $this->addFlash(
-                    'warning',
-                    $this->translator->trans('cert_uploaded_are_lets_encrypt_warning', [], 'controllers')
-                );
-            } else {
-                $process->setIsFreeradiusCertEV(true);
-            }
-
             if ($certificateUploadDTO->ca instanceof UploadedFile) {
                 // Save on the tmp folder the uploaded certificates after the validation
                 $this->certificateStorageService->storeUploadedFile(
@@ -823,7 +813,6 @@ class CertificateManagementFreeradiusController extends AbstractController
      * @throws TransportExceptionInterface
      * @throws ServerExceptionInterface
      * @throws RedirectionExceptionInterface
-     * @throws DecodingExceptionInterface
      * @throws ClientExceptionInterface|RandomException
      */
     #[Route(
@@ -873,17 +862,6 @@ class CertificateManagementFreeradiusController extends AbstractController
                 return $this->redirectToRoute('admin_dashboard_settings_certs_radsecproxy_upload');
             }
 
-            // Check if the uploaded cert is a EV
-            if (in_array('CERTIFICATE_NOT_EV_WARNING', $dto->notices, true)) {
-                $process->setIsFreeradiusCertEV(false);
-                $this->addFlash(
-                    'warning',
-                    $this->translator->trans('not_ev_warning', [], 'controllers')
-                );
-            } else {
-                $process->setIsFreeradiusCertEV(true);
-            }
-
             if (!$this->cloudflareService->validate($dto)) {
                 $this->addFlash(
                     'error',
@@ -895,17 +873,6 @@ class CertificateManagementFreeradiusController extends AbstractController
                 );
                 return $this->redirectToRoute(
                     'admin_dashboard_settings_certs_freeradius_cloudflare_dnsChallenge'
-                );
-            }
-
-            if ($dto->ca instanceof UploadedFile) {
-                // Save on the tmp folder the uploaded certificates after the validation
-                $this->certificateStorageService->storeUploadedFile(
-                    $dto->ca,
-                    CertificateFileName::CA_PEM->value,
-                    CertificateMachineType::FREERADIUS->value,
-                    $process,
-                    true
                 );
             }
 

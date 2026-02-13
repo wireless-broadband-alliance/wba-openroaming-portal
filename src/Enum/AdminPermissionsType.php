@@ -7,6 +7,9 @@ enum AdminPermissionsType: string
     // Users Management page
     case USERS_MANAGEMENT_WRITE = 'USERS_MANAGEMENT_WRITE';
     case USERS_MANAGEMENT_READ = 'USERS_MANAGEMENT_READ';
+    // Admin Management page
+    case ADMIN_MANAGEMENT_WRITE = 'ADMIN_MANAGEMENT_WRITE';
+    case ADMIN_MANAGEMENT_READ = 'ADMIN_MANAGEMENT_READ';
     // Platform Status page
     case PLATFORM_STATUS_WRITE = 'PLATFORM_STATUS_WRITE';
     case PLATFORM_STATUS_READ = 'PLATFORM_STATUS_READ';

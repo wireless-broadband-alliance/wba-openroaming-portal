@@ -16,29 +16,17 @@ use Vich\UploaderBundle\Form\Type\VichFileType;
  */
 class CloudflareType extends AbstractType
 {
-    public function __construct(
-        private readonly TranslatorInterface $translator
-    ) {
-    }
-
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('ca', VichFileType::class, [
-                'label' => 'CA (.pem)',
-                'required' => true,
-                'allow_delete' => false,
-                'download_uri' => false,
-            ])
             ->add('host', TextType::class, [
-                'label' => $this->translator->trans('hostLabel', [], 'CloudflareType'),
                 'required' => true,
             ])
             ->add('token', TextType::class, [
-                'label' => $this->translator->trans('tokenLabel', [], 'CloudflareType'),
                 'required' => true,
             ]);
     }
+
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([

@@ -12,6 +12,7 @@ use App\Enum\AdminRoleType;
 use App\Enum\AnalyticalEventType;
 use App\Enum\FirewallType;
 use App\Enum\OperationMode;
+use App\Enum\PermissionLevel;
 use App\Enum\PlatformMode;
 use App\Enum\SettingName;
 use App\Enum\UserProvider;
@@ -340,7 +341,7 @@ class UsersManagementController extends AbstractController
             && (
                 in_array(AdminRoleType::ROLE_ADMIN->value, $user->getRoles())
                 || in_array(AdminRoleType::ROLE_SUPER_ADMIN->value, $user->getRoles())
-            )
+            ) && !$this->isGranted(UserAuthenticationVoter::ADMIN_MANAGEMENT_WRITE)
         ) {
             throw $this->createAccessDeniedException();
         }
@@ -405,15 +406,12 @@ class UsersManagementController extends AbstractController
 
         if ($user->getId() !== $currentUser->getId()) {
             if (!$this->isGranted(UserAuthenticationVoter::USERS_MANAGEMENT_READ)) {
-                return $this->redirectToRoute('admin_page');
-            } elseif (
-                !$this->isGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)
-                && (
-                in_array(AdminRoleType::ROLE_ADMIN->value, $user->getRoles())
-                || in_array(AdminRoleType::ROLE_SUPER_ADMIN->value, $user->getRoles())
-                )
+                throw $this->createAccessDeniedException();
+            }
+            if (
+                !$this->isGranted(AdminRoleType::ROLE_ADMIN->value)
             ) {
-                return $this->redirectToRoute('admin_page');
+                throw $this->createAccessDeniedException();
             }
         }
 
@@ -423,7 +421,7 @@ class UsersManagementController extends AbstractController
                 $this->translator->trans('userAlreadyDeleted', [], 'controllers')
             );
 
-              return $this->redirectToRoute('admin_page');
+            return $this->redirectToRoute('admin_page');
         }
 
         $userUpdateDTO = new UserUpdateDTO($user);
@@ -436,11 +434,10 @@ class UsersManagementController extends AbstractController
         // Determine if a admin is being edited
         $isEditedUserAdmin = in_array(AdminRoleType::ROLE_ADMIN->value, $user->getRoles(), true) ||
             in_array(AdminRoleType::ROLE_SUPER_ADMIN->value, $user->getRoles(), true);
-        $isCurrentUserSuperAdmin = $this->isGranted(AdminRoleType::ROLE_SUPER_ADMIN->value);
         $isEditingSelf = $user->getId() === $currentUser->getId();
 
         // Only allow permission editing if super admin editing another admin
-        $userUpdateDTO->editingAdmin = $isEditedUserAdmin && $isCurrentUserSuperAdmin && !$isEditingSelf;
+        $userUpdateDTO->editingAdmin = $isEditedUserAdmin && !$isEditingSelf;
 
         // Create & handle form
         $form = $this->createForm(
@@ -662,6 +659,7 @@ class UsersManagementController extends AbstractController
                 'userUpdateDTO' => $userUpdateDTO,
                 'lastStartConnection' => $lastStartConnection,
                 'lastStopConnection' => $lastStopConnection,
+                'isEditingSelf' => $isEditingSelf
             ]
         );
     }
@@ -758,11 +756,22 @@ class UsersManagementController extends AbstractController
     }
 
     #[Route('/dashboard/adminPermissionsAdd/{id:user<\d+>}', name: 'admin_add_permissions')]
-    #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
+    #[IsGranted(AdminRoleType::ROLE_ADMIN->value)]
     public function giveAdminPermissions(Request $request, User $user): Response
     {
         /** @var User $currentUser */
         $currentUser = $this->getUser();
+
+        if ($user->getId() === $currentUser->getId()) {
+            throw $this->createAccessDeniedException();
+        }
+
+        if (
+            $user->getId() !== $currentUser->getId() &&
+            !$this->isGranted(UserAuthenticationVoter::ADMIN_MANAGEMENT_WRITE)
+        ) {
+            throw $this->createAccessDeniedException();
+        }
 
         $user->setRoles([AdminRoleType::ROLE_ADMIN->value]);
 
@@ -788,11 +797,23 @@ class UsersManagementController extends AbstractController
     }
 
     #[Route('/dashboard/adminPermissionsRemove/{id:user<\d+>}', name: 'admin_remove_permissions')]
-    #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
+    #[IsGranted(AdminRoleType::ROLE_ADMIN->value)]
     public function removeAdminPermissions(Request $request, User $user): Response
     {
         /** @var User $currentUser */
         $currentUser = $this->getUser();
+
+        if ($user->getId() === $currentUser->getId()) {
+            throw $this->createAccessDeniedException();
+        }
+
+        if (
+            $user->getId() !== $currentUser->getId() && !$this->isGranted(
+                UserAuthenticationVoter::ADMIN_MANAGEMENT_WRITE
+            )
+        ) {
+            throw $this->createAccessDeniedException();
+        }
 
         $user->setRoles(["ROLE_USER"]);
         $user->setPermissions([]);

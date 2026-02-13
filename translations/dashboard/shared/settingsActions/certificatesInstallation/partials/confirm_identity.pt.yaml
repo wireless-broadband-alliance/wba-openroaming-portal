@@ -1,3 +1,4 @@
-title: 'Verificação de Identidade do Administrador'
-installationDescription: 'Para aceder ao processo de instalação da plataforma, confirme a sua identidade.'
-certificatesDescription: 'Para aceder ao processo de renovação de certificados, confirme a sua identidade.'
+title: 'Verificação de Identidade'
+installationDescription: 'Por motivos de segurança, confirme a sua identidade para continuar com a configuração da plataforma.'
+certificatesDescription: 'Por motivos de segurança, confirme a sua identidade para continuar com a renovação do certificado.'
+enterPassword: 'Introduza a sua palavra-passe'

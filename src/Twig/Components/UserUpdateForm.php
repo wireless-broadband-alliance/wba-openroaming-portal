@@ -33,6 +33,9 @@ final class UserUpdateForm extends AbstractController
     #[LiveProp]
     public ?string $rawPhoneNumber = null;
 
+    #[LiveProp]
+    public bool $isEditingSelf = false;
+
     /**
      * @return FormInterface<mixed>
      */

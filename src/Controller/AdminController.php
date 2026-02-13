@@ -127,7 +127,7 @@ class AdminController extends AbstractController
     }
 
     #[Route('/dashboard/admins', name: 'admins_management')]
-    #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
+    #[IsGranted(AdminRoleType::ROLE_ADMIN->value)]
     public function adminRolesManagement(
         Request $request,
         #[MapQueryParameter] int $page = 1,
@@ -170,7 +170,7 @@ class AdminController extends AbstractController
         /** @var User $user */
         $user = $this->getUser();
         return $this->render('dashboard/dashboard_admins.html.twig', [
-            'user' => $user,
+            'currentUser' => $user,
             'users' => $users,
             'currentPage' => $page,
             'totalPages' => $totalPages,

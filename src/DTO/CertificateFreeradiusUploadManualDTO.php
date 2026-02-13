@@ -59,7 +59,6 @@ class CertificateFreeradiusUploadManualDTO
     #[CustomAssert\ValidPemCertificate]
     #[CustomAssert\ValidRsaCertificate]
     #[CustomAssert\WarnIfNotEvCertificate]
-    #[CustomAssert\IsLetsEncryptCertificate]
     public ?UploadedFile $cert = null;
 
     #[Assert\File(

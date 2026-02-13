@@ -67,7 +67,7 @@
                             {{ include('dashboard/shared/_sidebar_item.html.twig', {label: 'users'|trans({}, '_header_admin'), route: 'admin_page', icon: 'wba:user'}) }}
                         {% endif %}
 
-                        {% if constant('App\\Enum\\AdminRoleType::ROLE_SUPER_ADMIN').value in app.user.roles %}
+                        {% if is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::ADMIN_MANAGEMENT_READ')) %}
                             {{ include('dashboard/shared/_sidebar_item.html.twig', {label: 'admin'|trans({}, '_header_admin'), route: 'admins_management', icon: 'wba:admin-management'}) }}
                         {% endif %}
                     </ul>
