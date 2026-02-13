@@ -66,11 +66,8 @@ class ValidTrustAnchorValidator extends ConstraintValidator
     }
 
     /**
-     * @param string $current
      * @param string[] $pool Array of PEM certificates
-     * @param string|null $expectedRoot
      * @param bool[] $visited array of fingerprints visited
-     * @return bool
      */
     private function buildPathToTrustAnchor(
         string $current,
