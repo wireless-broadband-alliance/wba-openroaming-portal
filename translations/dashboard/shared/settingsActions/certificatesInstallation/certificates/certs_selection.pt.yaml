@@ -5,5 +5,5 @@ autoSubtitle: "A plataforma gera e gere automaticamente certificados Let’s Enc
 confirmAutoRenew: "Tem a certeza de que pretende que a plataforma gere e faça a gestão automática de certificados Let’s Encrypt?"
 CloudflareDNSTitle: "Configuração do Desafio DNS da Cloudflare"
 CloudflareDNSSubtitle: "Utilize a Cloudflare DNS para validar e renovar automaticamente os seus certificados Let’s Encrypt"
-letsEncryptCertbotTitle: "Configuração Cloudflare com Certbot"
-letsEncryptCertbotSubtitle: "Utilize o Certbot com a Cloudflare DNS para validar e renovar automaticamente os seus certificados Let’s Encrypt"
+CloudflareHTTPTitle: "Configuração do Desafio HTTP da Cloudflare"
+CloudflareHTTPSubtitle: "Utilize o desafio HTTP da Cloudflare para gerar automaticamente os certificados no seu resolvedor e validá-los no portal."

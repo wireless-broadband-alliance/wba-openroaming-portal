@@ -702,6 +702,22 @@ class CertificateManagementFreeradiusController extends AbstractController
         );
     }
 
+    /**
+     * @throws TransportExceptionInterface
+     * @throws ServerExceptionInterface
+     * @throws RedirectionExceptionInterface
+     * @throws ClientExceptionInterface|RandomException
+     */
+    #[Route(
+        '/dashboard/settings/certificatesManagement/freeradius/cloudflare/httpChallenge',
+        name: 'admin_dashboard_settings_certs_freeradius_cloudflare_httpChallenge',
+    )]
+    #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
+    public function cloudflareHTTPChallenge(Request $request): Response
+    {
+        dd('route is here', $request);
+    }
+
     #[Route(
         '/dashboard/settings/certificatesManagement/freeradius/skipTest',
         name: 'admin_dashboard_settings_certs_freeradius_skipTest'
