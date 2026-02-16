@@ -16,18 +16,20 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\Filesystem\Filesystem;
 use Throwable;
 
 #[AsCommand(
-    name: 'reset:convert-admin-roles',
-    description: 'Convert Admin Roles and permissions to be a Super Admin, ' .
-    'required for the new feature with the role hierarchy system and dashboard pages access',
+    name: 'prepare-release:v1110',
+    description: 'Prepare for release v1.11.0: convert admin roles and update CA certificate path'
 )]
-class ConvertAdminRolesForCertsReleaseCommand extends Command
+class PrepareReleaseV1110Command extends Command
 {
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
         private readonly UserRepository $userRepository,
+        private readonly ParameterBagInterface $parameterBag,
     ) {
         parent::__construct();
     }
@@ -35,12 +37,8 @@ class ConvertAdminRolesForCertsReleaseCommand extends Command
     protected function configure(): void
     {
         $this
-            ->setName('reset:convert-admin-roles')
-            ->setDescription(
-                'Convert Admin Roles and permissions to be a Super Admin,' .
-                'required for the new feature with the role hierarchy system and dashboard pages access'
-            )
-            ->addOption('yes', 'y', InputOption::VALUE_NONE, 'Automatically confirm the reset');
+            ->setDescription('Prepare for release v1.11.0: convert admin roles and update CA certificate path')
+            ->addOption('yes', 'y', InputOption::VALUE_NONE, 'Automatically confirm the reset and CA update');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -50,7 +48,7 @@ class ConvertAdminRolesForCertsReleaseCommand extends Command
                 /** @var QuestionHelper $helper */
                 $helper = $this->getHelper('question');
                 $question = new ConfirmationQuestion(
-                    'This action will convert the admin role to a super admin. Do you wish to proceed? [y/N]',
+                    'This action will prepare v1.11.0 release: convert admin roles and update CA. Proceed? [y/N] ',
                     false
                 );
 
@@ -60,20 +58,25 @@ class ConvertAdminRolesForCertsReleaseCommand extends Command
                 }
             }
 
+            // Convert admin roles
             $this->resetAdminUser();
+            $output->writeln('<info>Admin roles updated for v1.11.0 release.</info>');
 
-            $output->writeln(
-                '<info>Success:</info> The admin roles have been configured for release 1.11.0.'
-            );
+            // Check CA certificate
+            $this->updateCaCertificate($output);
+
+            $output->writeln('<info>v1.11.0 release preparation complete.</info>');
 
             return Command::SUCCESS;
         } catch (Throwable $e) {
-            $output->writeln('<error>' . $e->getMessage() . '</error>');
+            $output->writeln('<error>Error: ' . $e->getMessage() . '</error>');
             return Command::FAILURE;
         }
     }
 
     /**
+     * Convert first admin user to super admin
+     *
      * @throws RandomException
      */
     protected function resetAdminUser(): void
@@ -93,5 +96,27 @@ class ConvertAdminRolesForCertsReleaseCommand extends Command
         $admin->setCreatedAt(new DateTime());
         $this->entityManager->persist($admin);
         $this->entityManager->flush();
+    }
+
+    /**
+     * Copy ca.pem from certificate folder to signing-keys/ca/ca.pem
+     */
+    protected function updateCaCertificate(OutputInterface $output): void
+    {
+        $filesystem = new Filesystem();
+        $projectDir = $this->parameterBag->get('kernel.project_dir');
+        $source = $projectDir . '/signing-keys/ca.pem';
+        $destinationDir = $projectDir . '/signing-keys/ca';
+        $destination = $destinationDir . '/ca.pem';
+
+        if (!file_exists($source)) {
+            $output->writeln('<comment>No ca.pem found in certificates folder, skipping update.</comment>');
+            return;
+        }
+
+        $filesystem->mkdir($destinationDir);
+        $filesystem->copy($source, $destination, true);
+
+        $output->writeln('<info>ca.pem located, updating location to signing-keys/ca/ca.pem</info>');
     }
 }

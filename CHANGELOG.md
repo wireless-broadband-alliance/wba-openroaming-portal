@@ -18,7 +18,7 @@
   This command should be executed **only once** and while the portal is **offline or restricted**.
     - Run the command with:
       ```bash
-      php bin/console reset:convert-admin-roles
+      php bin/console prepare-release:v1110
       ```
 
 # Release V1.10.0
