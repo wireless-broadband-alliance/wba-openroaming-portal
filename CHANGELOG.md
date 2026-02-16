@@ -13,7 +13,7 @@
       php bin/console doctrine:migrations:migrate
       ```
 - **Required one-time action:** After upgrading, run
-  the [ConvertAdminRolesForCertsReleaseCommnand.php](src/Command/ConvertAdminRolesForCertsReleaseCommand.php) to migrate
+  the [PrepareReleaseV1110Command.php](src/Command/PrepareReleaseV1110Command.php) to migrate
   existing administrator permissions to the new **Super Admin** role hierarchy.
   This command should be executed **only once** and while the portal is **offline or restricted**.
     - Run the command with:
