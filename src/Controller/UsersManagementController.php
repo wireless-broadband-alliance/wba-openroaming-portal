@@ -320,6 +320,7 @@ class UsersManagementController extends AbstractController
             'data' => $data,
             'current_user' => $currentUser,
             'context' => FirewallType::DASHBOARD->value,
+            'isEditingSelf' => false,
         ]);
     }
 
