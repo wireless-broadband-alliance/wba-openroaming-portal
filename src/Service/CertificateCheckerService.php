@@ -53,7 +53,7 @@ readonly class CertificateCheckerService
     public function verifyCertificates(): array
     {
         $missingFiles = [];
-        if (!file_exists('/var/www/openroaming/signing-keys/ca.pem')) {
+        if (!file_exists('/var/www/openroaming/signing-keys/ca/ca.pem')) {
             $missingFiles[] = CertificateFileName::CA_PEM_FILE->value;
         }
         if (!file_exists('/var/www/openroaming/signing-keys/cert.pem')) {

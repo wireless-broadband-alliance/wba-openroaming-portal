@@ -238,6 +238,17 @@ readonly class CertificateFreeradiusGenerator
             );
         }
 
+        // Get Current CA.PEM on the signing-keys
+        $staticCaPath = $this->parameterBag->get('kernel.project_dir') . '/signing-keys/ca/ca.pem';
+
+        // Copy/store the CA into var/certs as CertificateFileName::CA_PEM
+        $caCert = $this->certificateStorageService->storeGeneratedFile(
+            $staticCaPath,
+            CertificateFileName::CA_PEM->value,
+            CertificateMachineType::FREERADIUS->value,
+            $setupProcess
+        );
+
         $certCert = $this->certificateStorageService->storeGeneratedFile(
             "$liveDir/" . CertificateFileName::CERT_PEM_FILE->value,
             CertificateFileName::CERT_PEM->value,
@@ -268,6 +279,7 @@ readonly class CertificateFreeradiusGenerator
         );
 
         $files = [
+            $caCert->getFilePath(),
             $certCert->getFilePath(),
             $chainCert->getFilePath(),
             $fullChainCert->getFilePath(),

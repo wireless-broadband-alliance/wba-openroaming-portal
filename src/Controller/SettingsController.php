@@ -53,7 +53,7 @@ class SettingsController extends AbstractController
         private readonly GetSettings $getSettings,
         private readonly EntityManagerInterface $entityManager,
         private readonly TranslatorInterface $translator,
-        private readonly CertificateCheckerService $certificateService,
+        private readonly CertificateCheckerService $certificateCheckerService,
         private readonly TextEditorRepository $textEditorRepository,
         private readonly SettingsService $settingsService,
         private readonly HtmlSanitizerService $htmlSanitizerService,
@@ -794,7 +794,7 @@ class SettingsController extends AbstractController
         Request $request,
         string $language
     ): Response {
-        $missingFiles = $this->certificateService->verifyCertificates();
+        $missingFiles = $this->certificateCheckerService->verifyCertificates();
         if ($missingFiles !== []) {
             throw new HttpException(
                 424,
@@ -816,7 +816,7 @@ class SettingsController extends AbstractController
 
         $certificatePath = $this->getParameter('kernel.project_dir') . '/signing-keys/cert.pem';
         $certificateLimitDate = strtotime(
-            (string)$this->certificateService->getCertificateExpirationDate(
+            (string)$this->certificateCheckerService->getCertificateExpirationDate(
                 $certificatePath
             )
         );
