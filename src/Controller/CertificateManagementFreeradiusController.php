@@ -484,6 +484,7 @@ class CertificateManagementFreeradiusController extends AbstractController
             $this->entityManager->persist($processEntity);
             $this->entityManager->flush();
 
+            // TODO - Rework the way the certs are obtained on the request instead of checking for for the paths
             // Build known signing-keys paths
             $basePath = $this->getParameter('kernel.project_dir') . '/signing-keys/';
 
@@ -550,6 +551,7 @@ class CertificateManagementFreeradiusController extends AbstractController
         $formFinishProcess = $this->createForm(SimpleSubmitFormType::class);
         $formFinishProcess->handleRequest($request);
         if ($formFinishProcess->isSubmitted() && $formFinishProcess->isValid()) {
+            // TODO - In case the mode is http, make a new service to call and take the certs and insert them on the platform too
             $session = $request->getSession();
             $session->remove(SessionStatus::SYSTEM_RESET_REQUEST->value);
             $processEntity->setStatus(ProcessStatusType::COMPLETED);
