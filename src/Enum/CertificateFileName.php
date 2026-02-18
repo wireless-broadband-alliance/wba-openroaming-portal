@@ -15,7 +15,6 @@ enum CertificateFileName: string
     case FULL_CHAIN_PEM = 'Full Chain';
     case PRIVATE_KEY_PEM = 'Private Key';
 
-
     // Radsecproxy PEM
     case CLIENT_PEM_FILE = 'client.pem';
     case KEY_PEM_FILE = 'key.pem';

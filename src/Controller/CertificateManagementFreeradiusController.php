@@ -492,56 +492,106 @@ class CertificateManagementFreeradiusController extends AbstractController
             // Build known signing-keys paths
             $basePath = $this->getParameter('kernel.project_dir') . '/signing-keys/';
             $paths = [
-                'ca' => $basePath . 'ca/' . CertificateFileName::CA_PEM_FILE->value,
-                'cert' => $basePath . CertificateFileName::CERT_PEM_FILE->value,
-                'chain' => $basePath . CertificateFileName::CHAIN_PEM_FILE->value,
-                'fullchain' => $basePath . CertificateFileName::FULL_CHAIN_PEM_FILE->value,
-                'privkey' => $basePath . CertificateFileName::PRIVATE_KEY_PEM_FILE->value,
+                CertificateFileName::CA_PEM->value => $basePath . 'ca/' . CertificateFileName::CA_PEM_FILE->value,
+                CertificateFileName::CERT_PEM->value => $basePath . CertificateFileName::CERT_PEM_FILE->value,
+                CertificateFileName::CHAIN_PEM->value => $basePath . CertificateFileName::CHAIN_PEM_FILE->value,
+                CertificateFileName::FULL_CHAIN_PEM->value => $basePath . CertificateFileName::FULL_CHAIN_PEM_FILE->value,
+                CertificateFileName::PRIVATE_KEY_PEM->value => $basePath . CertificateFileName::PRIVATE_KEY_PEM_FILE->value,
             ];
 
             if ($mode === 'http_challenge') {
-                // Get the certificates from the request
+                // Extract PEM blocks
                 $pastedCertificates = $certificatesFreeradiusPasteDTO->certificates;
-                // Extract certificates from the pasted content
-                $rawExtracted = $this->freeradiusCertificateValidatorService->extractCertificates($pastedCertificates);
+                $rawExtracted = $this->freeradiusCertificateValidatorService
+                    ->extractCertificates($pastedCertificates);
 
-                // Map them to identifiers like the paths array
-                $keys = ['ca', 'cert', 'chain', 'fullchain', 'privkey'];
+                // Map to known identifiers
+                $map = [
+                    CertificateFileName::CA_PEM->value,
+                    CertificateFileName::CERT_PEM->value,
+                    CertificateFileName::CHAIN_PEM->value,
+                    CertificateFileName::FULL_CHAIN_PEM->value,
+                    CertificateFileName::PRIVATE_KEY_PEM->value,
+                ];
                 $extractCertificates = [];
 
-                foreach ($keys as $index => $key) {
-                    if (isset($rawExtracted[$index]) && is_string($rawExtracted[$index])) {
-                        $extractCertificates[$key] = trim($rawExtracted[$index]);
+                foreach ($map as $index => $key) {
+                    if (!isset($rawExtracted[$index])) {
+                        continue;
                     }
+
+                    $extractCertificates[$key] = trim($rawExtracted[$index]);
                 }
 
-                // Parse the CA and server cert from the extracted certificates
-                $caParsed = $this->certificateCheckerService->parseCertificate(
-                    $extractCertificates['ca'] ?? ''
-                );
-                $certParsed = $this->certificateCheckerService->parseCertificate(
-                    $extractCertificates['cert'] ?? ''
-                );
+                if (!isset(
+                    $extractCertificates[CertificateFileName::CA_PEM->value],
+                    $extractCertificates[CertificateFileName::CERT_PEM->value],
+                )) {
+                    throw new RuntimeException('Missing required certificates');
+                }
 
-                // Ensure fingerprintSHA1 exists or remove it
+                // Parse certificates (for metadata)
+                $caParsed = $this->certificateCheckerService
+                    ->parseCertificate($extractCertificates[CertificateFileName::CA_PEM->value]);
+
+                $certParsed = $this->certificateCheckerService
+                    ->parseCertificate($extractCertificates[CertificateFileName::CERT_PEM->value]);
+
                 if (!is_string($caParsed['fingerprintSHA1'] ?? null)) {
                     unset($caParsed['fingerprintSHA1']);
                 }
+
                 if (!is_string($certParsed['fingerprintSHA1'] ?? null)) {
                     unset($certParsed['fingerprintSHA1']);
                 }
 
-                // TODO MAKE LOGIC FOR TMP FOLDER HERE AND UPDATE THE DB "Certificates" & "CerficiatesSetupProcess"
+                /**
+                 * Convert PEM strings → UploadedFile objects to be saved on the tmp
+                 *
+                 */
+                foreach ($extractCertificates as $type => $pemContent) {
+                    // Creates fake temporally destination folder for VichUpload
+                    $tmpPath = tempnam(sys_get_temp_dir(), 'freeradius_');
 
+                    if ($tmpPath === false) {
+                        throw new RuntimeException('Unable to create temporary file');
+                    }
+
+                    file_put_contents($tmpPath, $pemContent);
+
+                    $uploadedFile = new UploadedFile(
+                        $tmpPath,
+                        $type . '.pem',
+                        'application/x-pem-file',
+                        null,
+                        true // mark as already moved
+                    );
+
+                    // Store them
+                    $this->certificateStorageService->storeUploadedFile(
+                        $uploadedFile,
+                        $type,
+                        CertificateMachineType::FREERADIUS->value,
+                        $processEntity,
+                        true
+                    );
+                }
+
+                // Update process entity
+                $processEntity->setFreeradiusFormCompletedAt(new DateTimeImmutable());
                 $processEntity->setFreeradiusConfigAppliedAt(new DateTimeImmutable());
-                $processEntity->setFreeradiusDomainName($certParsed['subject']['CN']);
+                $processEntity->setIsFreeradiusCertEV(false);
+                $processEntity->setIsFreeradiusCloudflare(true);
+                $processEntity->setFreeradiusTestResult(CertificateTestResult::PASSED);
+                $processEntity->setFreeradiusDomainName($certParsed['subject']['CN'] ?? null);
                 $processEntity->setUpdatedAt(new DateTimeImmutable());
 
-                $this->entityManager->persist($processEntity);
                 $this->entityManager->flush();
 
+                // Save the event
                 /** @var User $user */
                 $user = $this->getUser();
+
                 $this->eventActions->saveEvent(
                     $user,
                     AnalyticalEventType::CERTIFICATE_SETUP_PROCESS_FREERAEDIUS_CONFIG->value,
@@ -555,7 +605,7 @@ class CertificateManagementFreeradiusController extends AbstractController
 
                 $this->addFlash(
                     'success',
-                    $this->translator->trans('freeradiusConfigAppliedSuccessfully', [], 'controllers')
+                    $this->translator->trans('httpChallengeAppliedSuccessfully', [], 'controllers')
                 );
             } else {
                 // Validate all exist
@@ -616,7 +666,7 @@ class CertificateManagementFreeradiusController extends AbstractController
         if ($formFinishProcess->isSubmitted() && $formFinishProcess->isValid()) {
             // TODO - In case the mode is http, make a new service to call and take the certs and insert them on the platform too
             // Get the files from the tmp folder
-            // Update the certs tables
+            // Move them from the tmp to the signing_keys
             // Update the database/settings from parsed certificates, one of the stuff is update from the parsed certs
 //            $this->certificateWriterUpdateService->updateFromParsedCertificates(
 //                $caParsed,
@@ -666,10 +716,11 @@ class CertificateManagementFreeradiusController extends AbstractController
      * @throws RedirectionExceptionInterface
      * @throws ClientExceptionInterface|RandomException
      */
-    #[Route(
-        '/dashboard/settings/certificatesManagement/freeradius/cloudflare/dnsChallenge',
-        name: 'admin_dashboard_settings_certs_freeradius_cloudflare_dnsChallenge',
-    )]
+    #[
+        Route(
+            '/dashboard/settings/certificatesManagement/freeradius/cloudflare/dnsChallenge',
+            name: 'admin_dashboard_settings_certs_freeradius_cloudflare_dnsChallenge',
+        )]
     #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
     public function cloudflareDNSChallenge(Request $request): Response
     {
