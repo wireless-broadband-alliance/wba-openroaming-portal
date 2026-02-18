@@ -1,0 +1,11 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.tetrapi.or",
+      "sha256_cert_fingerprints":
+        ["42:C5:1A:7C:3E:8D:44:5D:C5:54:38:F9:5E:3B:7A:93:B4:68:87:2D:D5:90:10:E0:40:3C:90:ED:4D:B0:E5:9A"]
+    }
+  }
+]
