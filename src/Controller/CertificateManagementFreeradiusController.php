@@ -729,6 +729,7 @@ class CertificateManagementFreeradiusController extends AbstractController
         return $this->render(
             $template,
             [
+                'certificatesFreeradiusPasteDTO' => $certificatesFreeradiusPasteDTO,
                 'data' => $data,
                 'processState' => $processState,
                 'process' => $processState['process'],

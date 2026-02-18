@@ -18,6 +18,8 @@
             </h5>
         </div>
 
+        <twig:CertificatesFreeradiusPasteForm :certificatesFreeradiusPasteDTO="certificatesFreeradiusPasteDTO">
+
         {{ form_start(form, {
             attr: {
                 'data-controller': 'test-certificates',
@@ -106,8 +108,7 @@
             <div class="mt-4 hidden" data-test-certificates-target="resultMessage"></div>
 
             {# Check if the test has been run #}
-            {% set httpChallengeTestCompleted = process.freeradiusTestResult is not null %}
-            {% set httpChallengeTestFailed = process.freeradiusTestResult is same as(constant('App\\Enum\\CertificateTestResult::FAILED')) %}
+
 
             {# Show warning if the test failed #}
             {% if httpChallengeTestFailed %}
@@ -132,9 +133,12 @@
                     </span>
                     </button>
                     {{ form_end(form) }}
-
+        </twig:CertificatesFreeradiusPasteForm>
+        {% set httpChallengeTestCompleted = process.freeradiusTestResult is not null %}
+        {% set httpChallengeTestFailed = process.freeradiusTestResult is same as(constant('App\\Enum\\CertificateTestResult::FAILED')) %}
                     {{ form_start(formFinishProcess) }}
                     {{ form_row(formFinishProcess._token) }}
+
 
                     <button
                             type="submit"
