@@ -489,16 +489,6 @@ class CertificateManagementFreeradiusController extends AbstractController
             $this->entityManager->persist($processEntity);
             $this->entityManager->flush();
 
-            // Build known signing-keys paths
-            $basePath = $this->getParameter('kernel.project_dir') . '/signing-keys/';
-            $paths = [
-                CertificateFileName::CA_PEM->value => $basePath . 'ca/' . CertificateFileName::CA_PEM_FILE->value,
-                CertificateFileName::CERT_PEM->value => $basePath . CertificateFileName::CERT_PEM_FILE->value,
-                CertificateFileName::CHAIN_PEM->value => $basePath . CertificateFileName::CHAIN_PEM_FILE->value,
-                CertificateFileName::FULL_CHAIN_PEM->value => $basePath . CertificateFileName::FULL_CHAIN_PEM_FILE->value,
-                CertificateFileName::PRIVATE_KEY_PEM->value => $basePath . CertificateFileName::PRIVATE_KEY_PEM_FILE->value,
-            ];
-
             if ($mode === 'http_challenge') {
                 // Extract PEM blocks
                 $pastedCertificates = $certificatesFreeradiusPasteDTO->certificates;
@@ -609,6 +599,20 @@ class CertificateManagementFreeradiusController extends AbstractController
                 );
             } else {
                 // Validate all exist
+                $basePath = $this->getParameter('kernel.project_dir') . '/signing-keys/';
+                $paths = [
+                    CertificateFileName::CA_PEM->value =>
+                        $basePath . 'ca/' . CertificateFileName::CA_PEM_FILE->value,
+                    CertificateFileName::CERT_PEM->value =>
+                        $basePath . CertificateFileName::CERT_PEM_FILE->value,
+                    CertificateFileName::CHAIN_PEM->value =>
+                        $basePath . CertificateFileName::CHAIN_PEM_FILE->value,
+                    CertificateFileName::FULL_CHAIN_PEM->value =>
+                        $basePath . CertificateFileName::FULL_CHAIN_PEM_FILE->value,
+                    CertificateFileName::PRIVATE_KEY_PEM->value =>
+                        $basePath . CertificateFileName::PRIVATE_KEY_PEM_FILE->value,
+                ];
+
                 $missing = array_filter($paths, static fn($path) => !file_exists($path));
 
                 if ($missing !== []) {
@@ -664,25 +668,50 @@ class CertificateManagementFreeradiusController extends AbstractController
         $formFinishProcess = $this->createForm(SimpleSubmitFormType::class);
         $formFinishProcess->handleRequest($request);
         if ($formFinishProcess->isSubmitted() && $formFinishProcess->isValid()) {
-            // TODO - In case the mode is http, make a new service to call and take the certs and insert them on the platform too
-            // Get the files from the tmp folder
-            // Move them from the tmp to the signing_keys
-            // Update the database/settings from parsed certificates, one of the stuff is update from the parsed certs
-//            $this->certificateWriterUpdateService->updateFromParsedCertificates(
-//                $caParsed,
-//                $certParsed
-//            );
-
             $session = $request->getSession();
             $session->remove(SessionStatus::SYSTEM_RESET_REQUEST->value);
             $processEntity->setStatus(ProcessStatusType::COMPLETED);
             $this->entityManager->persist($processEntity);
             $this->entityManager->flush();
 
+            if ($mode === 'http_challenge') {
+                // Load the latest FREERADIUS certificates for this process
+                $latestCerts = $this->certificateFreeradiusInfoService->getLatestCertificatesSet($processEntity);
+                if (empty($latestCerts)) {
+                    throw new RuntimeException('No FREERADIUS certificates found for this process.');
+                }
+
+                // Prepare the certificate set to write
+                $certificateSet = [];
+                $caParsed = $certParsed = null;
+
+                foreach ($latestCerts as $type => $certInfo) {
+                    $content = $certInfo['content'] ?? null;
+                    if ($content === null) {
+                        continue;
+                    }
+
+                    $certificateSet[$type] = ['content' => $content];
+
+                    // Parse CA and CERT for metadata
+                    if ($type === CertificateFileName::CA_PEM->value) {
+                        $caParsed = $this->certificateCheckerService->parseCertificate($content);
+                    } elseif ($type === CertificateFileName::CERT_PEM->value) {
+                        $certParsed = $this->certificateCheckerService->parseCertificate($content);
+                    }
+                }
+
+                // Write to signing-keys folder
+                $this->certificateWriterUpdateService->writeCertificates($certificateSet);
+
+                // Update database/settings with parsed certificates
+                if ($caParsed && $certParsed) {
+                    $this->certificateWriterUpdateService->updateFromParsedCertificates($caParsed, $certParsed);
+                }
+            }
+
             // Redirect to the next stage automatically
-            return $this->redirectToRoute(
-                'admin_dashboard_settings_certs_management',
-            );
+            return $this->redirectToRoute('admin_dashboard_settings_certs_management');
         }
 
         $template = match ($mode) {
