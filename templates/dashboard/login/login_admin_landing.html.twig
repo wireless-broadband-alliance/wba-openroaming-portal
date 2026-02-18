@@ -174,7 +174,7 @@
 
             {% if data.AUTH_METHOD_GOOGLE_LOGIN_ENABLED.value == 'true' %}
                 <div class="w-full">
-                    <a href="{{ path('connect_google') }}"
+                    <a href="{{ path('connect_google', {type: constant('App\\Enum\\FirewallType::DASHBOARD').value}) }}"
                        class="terms-widget__link"
                        data-action="click->terms-widget#showModal">
                         <button {{ stimulus_target('terms-widget', 'button') }}
@@ -191,7 +191,7 @@
 
             {% if data.AUTH_METHOD_MICROSOFT_LOGIN_ENABLED.value == 'true' %}
                 <div class="w-full">
-                    <a href="{{ path('connect_microsoft') }}"
+                    <a href="{{ path('connect_microsoft', {type: constant('App\\Enum\\FirewallType::DASHBOARD').value}) }}"
                        class="terms-widget__link"
                        data-action="click->terms-widget#showModal">
                         <button {{ stimulus_target('terms-widget', 'button') }}

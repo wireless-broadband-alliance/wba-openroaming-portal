@@ -36,6 +36,7 @@ use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 class GoogleController extends AbstractController
 {
@@ -60,8 +61,8 @@ class GoogleController extends AbstractController
     /**
      * @throws Exception
      */
-    #[Route('/connect/google', name: 'connect_google')]
-    public function connect(Request $request): RedirectResponse
+    #[Route('{type}/connect/google', name: 'connect_google', defaults: ['type' => FirewallType::LANDING->value])]
+    public function connect(Request $request, string $type): RedirectResponse
     {
         // Call the getSettings method of GetSettings class to retrieve the data
         /** @var array<string, array{value: string, description: string}> $data */
@@ -94,12 +95,30 @@ class GoogleController extends AbstractController
         $previousLoggedID = $request->get('previousLoggedID');
 
         // Retrieve the "google" client
-        $client = $this->clientRegistry->getClient('google');
+        if ($type === FirewallType::DASHBOARD->value) {
+            $client = $this->clientRegistry->getClient('google_dashboard');
+        } else {
+            $client = $this->clientRegistry->getClient('google_landing');
+        }
+
 
         // Get authorization URL with a custom state including `previousLoggedID` if available
-        $state = $previousLoggedID ? ['previousLoggedID' => $previousLoggedID] : [];
+        $callbackRoute = match ($type) {
+            'dashboard' => 'dashboard_connect_google_check',
+            default => 'connect_google_check',
+        };
+
+        $state = [
+            'previousLoggedID' => $previousLoggedID,
+        ];
+
         $redirectUrl = $client->getOAuth2Provider()->getAuthorizationUrl([
             'state' => json_encode($state, JSON_THROW_ON_ERROR),
+            'redirect_uri' => $this->generateUrl(
+                $callbackRoute,
+                [],
+                UrlGeneratorInterface::ABSOLUTE_URL
+            ),
         ]);
 
         // Redirect the user to the authorization URL
@@ -111,11 +130,17 @@ class GoogleController extends AbstractController
      * @throws Exception
      * @throws GuzzleException
      */
-    #[Route('/connect/google/check', name: 'connect_google_check', methods: ['GET'])]
+    #[Route('/connect/google/check', name: 'connect_google_check',methods: ['GET'])]
+    #[Route('/dashboard/connect/google/check', name: 'dashboard_connect_google_check',methods: ['GET'])]
     public function connectCheck(Request $request): RedirectResponse
     {
         // Retrieve the "google" client
-        $client = $this->clientRegistry->getClient('google');
+        $routeName = $request->attributes->get('_route');
+
+        $client = match ($routeName) {
+            'dashboard_connect_google_check' => $this->clientRegistry->getClient('google_dashboard'),
+            default => $this->clientRegistry->getClient('google_landing'),
+        };
 
         $code = $request->query->get('code');
         // For testing and api debugging pls check this dd($code);
@@ -133,6 +158,7 @@ class GoogleController extends AbstractController
 
         // Retrieve the `state` parameter and decode it
         $state = $request->query->get('state');
+        $firewall = $stateParams['firewall'] ?? FirewallType::LANDING->value;
         $stateParams = $state !== null ? json_decode($state, true, 512, JSON_THROW_ON_ERROR) : [];
         $previousLoggedID = $stateParams['previousLoggedID'] ?? null;
 
@@ -199,9 +225,12 @@ class GoogleController extends AbstractController
         }
 
         // Authenticate the user
-        $this->authenticateUserGoogle($user);
+        $this->authenticateUserGoogle($user, $firewall);
 
         // Redirect the user to the landing page
+        if ($routeName === 'dashboard_connect_google_check') {
+            return $this->redirectToRoute('admin_page');
+        }
         return $this->redirectToRoute('app_landing');
     }
 
@@ -287,7 +316,7 @@ class GoogleController extends AbstractController
         return $user;
     }
 
-    public function authenticateUserGoogle(User $user): void
+    public function authenticateUserGoogle(User $user, string $type = FirewallType::LANDING->value): void
     {
         // Get the current request from the request stack
         $request = $this->requestStack->getCurrentRequest();
@@ -300,7 +329,7 @@ class GoogleController extends AbstractController
             $firewallName = $token instanceof TokenInterface ? $token->getFirewallName() : FirewallType::LANDING->value;
 
             // Create a new token with the authenticated user
-            $token = new UsernamePasswordToken($user, $firewallName, $user->getRoles());
+            $token = new UsernamePasswordToken($user, $type, $user->getRoles());
 
             // Set the new token in the token storage
             $this->tokenStorage->setToken($token);
