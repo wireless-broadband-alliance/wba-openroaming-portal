@@ -61,7 +61,8 @@ readonly class TermsAcceptanceListener
             '/login/link',
             '/forgot-password/link',
             '/saml/login',
-            '/app'
+            '/app',
+            '/.well-known/assetlinks.json'
         ];
 
         if (array_any($excludedPrefixes, fn($prefix) => str_starts_with($path, (string)$prefix))) {
