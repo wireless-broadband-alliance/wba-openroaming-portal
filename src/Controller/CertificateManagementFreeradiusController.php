@@ -531,11 +531,7 @@ class CertificateManagementFreeradiusController extends AbstractController
                     unset($certParsed['fingerprintSHA1']);
                 }
 
-                // Update the database/settings from parsed certificates
-                $this->certificateWriterUpdateService->updateFromParsedCertificates(
-                    $caParsed,
-                    $certParsed
-                );
+                // TODO MAKE LOGIC FOR TMP FOLDER HERE AND UPDATE THE DB "Certificates" & "CerficiatesSetupProcess"
 
                 $processEntity->setFreeradiusConfigAppliedAt(new DateTimeImmutable());
                 $processEntity->setFreeradiusDomainName($certParsed['subject']['CN']);
@@ -619,6 +615,14 @@ class CertificateManagementFreeradiusController extends AbstractController
         $formFinishProcess->handleRequest($request);
         if ($formFinishProcess->isSubmitted() && $formFinishProcess->isValid()) {
             // TODO - In case the mode is http, make a new service to call and take the certs and insert them on the platform too
+            // Get the files from the tmp folder
+            // Update the certs tables
+            // Update the database/settings from parsed certificates, one of the stuff is update from the parsed certs
+//            $this->certificateWriterUpdateService->updateFromParsedCertificates(
+//                $caParsed,
+//                $certParsed
+//            );
+
             $session = $request->getSession();
             $session->remove(SessionStatus::SYSTEM_RESET_REQUEST->value);
             $processEntity->setStatus(ProcessStatusType::COMPLETED);
