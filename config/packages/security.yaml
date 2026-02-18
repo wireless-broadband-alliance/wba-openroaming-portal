@@ -50,6 +50,14 @@ security:
             custom_authenticators:
                 - App\Security\DashboardAuthenticator
             entry_point: App\Security\DashboardAuthenticator
+            saml:
+                identifier_attribute: sAMAccountName
+                user_factory: saml_user_factory
+                persist_user: true
+                use_attribute_friendly_name: true
+                check_path: dashboard_saml_acs
+                login_path: dashboard_saml_login
+                default_target_path: admin_page
             # form_login:
             #    login_path: app_dashboard_login
             #    check_path: app_dashboard_login
