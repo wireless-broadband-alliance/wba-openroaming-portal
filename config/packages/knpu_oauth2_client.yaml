@@ -13,9 +13,15 @@ knpu_oauth2_client:
             redirect_route: dashboard_connect_google_check
             redirect_params: {}
 
-        microsoft:
+        microsoft_landing:
             type: microsoft
             client_id: '%env(resolve:MICROSOFT_CLIENT_ID)%'
             client_secret: '%env(resolve:MICROSOFT_CLIENT_SECRET)%'
             redirect_route: connect_microsoft_check
+            redirect_params: {}
+        microsoft_dashboard:
+            type: microsoft
+            client_id: '%env(resolve:MICROSOFT_CLIENT_ID)%'
+            client_secret: '%env(resolve:MICROSOFT_CLIENT_SECRET)%'
+            redirect_route: dashboard_connect_microsoft_check
             redirect_params: {}

@@ -158,7 +158,6 @@ class GoogleController extends AbstractController
 
         // Retrieve the `state` parameter and decode it
         $state = $request->query->get('state');
-        $firewall = $stateParams['firewall'] ?? FirewallType::LANDING->value;
         $stateParams = $state !== null ? json_decode($state, true, 512, JSON_THROW_ON_ERROR) : [];
         $previousLoggedID = $stateParams['previousLoggedID'] ?? null;
 
@@ -225,9 +224,8 @@ class GoogleController extends AbstractController
         }
 
         // Authenticate the user
-        $this->authenticateUserGoogle($user, $firewall);
+        $this->authenticateUserGoogle($user);
 
-        // Redirect the user to the landing page
         if ($routeName === 'dashboard_connect_google_check') {
             return $this->redirectToRoute('admin_page');
         }
@@ -316,7 +314,7 @@ class GoogleController extends AbstractController
         return $user;
     }
 
-    public function authenticateUserGoogle(User $user, string $type = FirewallType::LANDING->value): void
+    public function authenticateUserGoogle(User $user): void
     {
         // Get the current request from the request stack
         $request = $this->requestStack->getCurrentRequest();
@@ -329,7 +327,7 @@ class GoogleController extends AbstractController
             $firewallName = $token instanceof TokenInterface ? $token->getFirewallName() : FirewallType::LANDING->value;
 
             // Create a new token with the authenticated user
-            $token = new UsernamePasswordToken($user, $type, $user->getRoles());
+            $token = new UsernamePasswordToken($user, $firewallName, $user->getRoles());
 
             // Set the new token in the token storage
             $this->tokenStorage->setToken($token);
