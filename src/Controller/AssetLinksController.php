@@ -19,6 +19,7 @@ readonly class AssetLinksController
     {
         $projectDir = $this->kernel->getProjectDir();
         // TODO MAKE LOGIC TO UPDATE THE FILE CONTENT AND MAKE IT CUSTOM HERE -> .well-know/assetlinks.json
+        // Also make new role for the page customization
         $filePath = $projectDir . '/.well-know/assetlinks.json';
 
         if (!file_exists($filePath)) {
