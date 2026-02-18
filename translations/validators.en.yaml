@@ -84,3 +84,4 @@ exact_no_wildcard: 'For exact matching, the domain must not contain wildcard cha
 subdomain_requires_wildcard: 'For subdomain matching, the domain must start with "*.".'
 domain_not_resolvable: 'The specified domain could not be resolved via DNS at the time of validation.'
 invalidDomainListUrl: 'The provided URL must point to a raw domain list "(TXT, CSV or JSON)". Web pages and HTML content are not allowed.'
+certificate_bundle_required: 'You mus paste the certificate bundle to continue.'

@@ -1,6 +1,9 @@
 {% extends 'dashboard/shared/settings_actions/certificatesManagement/certificates/freeradius/base.html.twig' %}
 
 {% block freeradius_content %}
+    {# Return to selection freeradius certs #}
+    {{ include('dashboard/shared/settings_actions/certificatesManagement/partials/_return_selection_freeradius.html.twig') }}
+
     {# Manual Test Execution Warning #}
     {{ include('shared/_toast.html.twig', {
         message: 'manual_test_warning'|trans({}, 'http_challenge'),
@@ -74,7 +77,9 @@
                                         rows: 14,
                                     },
                                 }) }}
-                                {{ form_errors(form.certificates) }}
+                                <div class="mt-2 -mb-2 text-red-500 text-base">
+                                    {{ form_errors(form.certificates) }}
+                                </div>
                             </div>
                         </label>
                     </div>

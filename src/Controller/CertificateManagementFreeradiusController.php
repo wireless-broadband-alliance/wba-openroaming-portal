@@ -6,6 +6,7 @@ namespace App\Controller;
 
 use App\DTO\CertificateFreeradiusDomainDTO;
 use App\DTO\CertificateFreeradiusUploadManualDTO;
+use App\DTO\CertificatesFreeradiusPasteDTO;
 use App\DTO\CloudflareDTO;
 use App\Entity\CertificateSetupProcess;
 use App\Entity\CloudflareTokens;
@@ -37,6 +38,7 @@ use App\Service\CertificateWriterUpdateService;
 use App\Service\CloudflareService;
 use App\Service\DomainService;
 use App\Service\EventActions;
+use App\Service\FreeradiusCertificateValidatorService;
 use App\Service\FreeradiusTestOrchestrator;
 use App\Service\GetSettings;
 use DateTime;
@@ -80,6 +82,7 @@ class CertificateManagementFreeradiusController extends AbstractController
         private readonly FreeradiusTestOrchestrator $freeradiusTestOrchestrator,
         private readonly CloudflareService $cloudflareService,
         private readonly SettingRepository $settingRepository,
+        private readonly FreeradiusCertificateValidatorService $freeradiusCertificateValidatorService,
     ) {
     }
 
@@ -476,7 +479,9 @@ class CertificateManagementFreeradiusController extends AbstractController
         // Fetch settings/data needed for the page
         $data = $this->getSettings->getSettings();
 
-        $form = $this->createForm(CertificatesFreeradiusPasteType::class);
+        // Prepare DTO
+        $certificatesFreeradiusPasteDTO = new CertificatesFreeradiusPasteDTO();
+        $form = $this->createForm(CertificatesFreeradiusPasteType::class, $certificatesFreeradiusPasteDTO);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             // Everytime the user tries a new test it will save the used credentials
@@ -484,67 +489,74 @@ class CertificateManagementFreeradiusController extends AbstractController
             $this->entityManager->persist($processEntity);
             $this->entityManager->flush();
 
-            // TODO - Rework the way the certs are obtained on the request instead of checking for for the paths
-            // Build known signing-keys paths
-            $basePath = $this->getParameter('kernel.project_dir') . '/signing-keys/';
-
-            $paths = [
-                'ca' => $basePath . 'ca/' . CertificateFileName::CA_PEM_FILE->value,
-                'cert' => $basePath . CertificateFileName::CERT_PEM_FILE->value,
-                'chain' => $basePath . CertificateFileName::CHAIN_PEM_FILE->value,
-                'fullchain' => $basePath . CertificateFileName::FULL_CHAIN_PEM_FILE->value,
-                'privkey' => $basePath . CertificateFileName::PRIVATE_KEY_PEM_FILE->value,
-            ];
-
-            // Validate all exist
-            $missing = array_filter($paths, static fn($path) => !file_exists($path));
-
-            if ($missing !== []) {
-                $missingFiles = implode(', ', array_keys($missing));
-                throw new RuntimeException(
-                    sprintf(
-                        'Missing certificate files: %s',
-                        $missingFiles
-                    )
+            if ($mode === 'http_challenge') {
+                $pastedCertificates = $certificatesFreeradiusPasteDTO->certificates;
+                $extractCertificates = $this->freeradiusCertificateValidatorService->extractCertificates(
+                    $pastedCertificates
                 );
-            }
+                dd($pastedCertificates, $extractCertificates);
+            } else {
+                // Build known signing-keys paths
+                $basePath = $this->getParameter('kernel.project_dir') . '/signing-keys/';
 
-            try {
-                // Calls the Orchestrator to run the test
-                $this->freeradiusTestOrchestrator->run(
-                    $request,
-                    $processEntity,
-                    $paths,
-                    $form->getData()['certificates'] ?? ''
-                );
+                $paths = [
+                    'ca' => $basePath . 'ca/' . CertificateFileName::CA_PEM_FILE->value,
+                    'cert' => $basePath . CertificateFileName::CERT_PEM_FILE->value,
+                    'chain' => $basePath . CertificateFileName::CHAIN_PEM_FILE->value,
+                    'fullchain' => $basePath . CertificateFileName::FULL_CHAIN_PEM_FILE->value,
+                    'privkey' => $basePath . CertificateFileName::PRIVATE_KEY_PEM_FILE->value,
+                ];
 
-                // Flash success with translation
-                $this->addFlash(
-                    'success',
-                    $this->translator->trans(
-                        'freeradiusTestPassed',
-                        [
-                            '%caBundle%' => 'WBA CA bundle',
-                        ],
-                        'controllers'
-                    )
-                );
-            } catch (FreeradiusTestException $exception) {
-                // Set the process as failed
-                $processEntity->setStatus(ProcessStatusType::IN_PROGRESS);
-                $processEntity->setFreeradiusTestResult(CertificateTestResult::FAILED);
-                $this->entityManager->persist($processEntity);
-                $this->entityManager->flush();
+                // Validate all exist
+                $missing = array_filter($paths, static fn($path) => !file_exists($path));
 
-                // Flash translated exception message
-                $this->addFlash(
-                    'error',
-                    $this->translator->trans(
-                        $exception->getMessage(),
-                        $exception->getContext(),
-                        'FreeradiusTestException'
-                    )
-                );
+                if ($missing !== []) {
+                    $missingFiles = implode(', ', array_keys($missing));
+                    throw new RuntimeException(
+                        sprintf(
+                            'Missing certificate files: %s',
+                            $missingFiles
+                        )
+                    );
+                }
+
+                try {
+                    // Calls the Orchestrator to run the test
+                    $this->freeradiusTestOrchestrator->run(
+                        $request,
+                        $processEntity,
+                        $paths,
+                        $certificatesFreeradiusPasteDTO->certificates
+                    );
+
+                    // Flash success with translation
+                    $this->addFlash(
+                        'success',
+                        $this->translator->trans(
+                            'freeradiusTestPassed',
+                            [
+                                '%caBundle%' => 'WBA CA bundle',
+                            ],
+                            'controllers'
+                        )
+                    );
+                } catch (FreeradiusTestException $exception) {
+                    // Set the process as failed
+                    $processEntity->setStatus(ProcessStatusType::IN_PROGRESS);
+                    $processEntity->setFreeradiusTestResult(CertificateTestResult::FAILED);
+                    $this->entityManager->persist($processEntity);
+                    $this->entityManager->flush();
+
+                    // Flash translated exception message
+                    $this->addFlash(
+                        'error',
+                        $this->translator->trans(
+                            $exception->getMessage(),
+                            $exception->getContext(),
+                            'FreeradiusTestException'
+                        )
+                    );
+                }
             }
         }
 
@@ -584,6 +596,7 @@ class CertificateManagementFreeradiusController extends AbstractController
                 'process' => $processState['process'],
                 'form' => $form->createView(),
                 'formFinishProcess' => $formFinishProcess->createView(),
+                'mode' => $mode
             ]
         );
     }
