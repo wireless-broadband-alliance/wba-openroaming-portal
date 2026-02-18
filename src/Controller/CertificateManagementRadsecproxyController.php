@@ -276,13 +276,10 @@ class CertificateManagementRadsecproxyController extends AbstractController
         $processState = $this->certificateProcessCheckerService->getProcessState();
 
         // Default fallback
-        $session = $request->getSession();
-        if ($session->has(SessionStatus::SYSTEM_RESET_REQUEST->value)) {
-            $lastInstallation = $this->installationProgressRepository->getLast();
-            if ($lastInstallation instanceof InstallationProgress) {
-                $installationDTO = $this->installationService->fillDto($lastInstallation);
-                $host = $installationDTO->dbFreeradiusIp;
-            }
+        $lastInstallation = $this->installationProgressRepository->getLast();
+        if ($lastInstallation instanceof InstallationProgress) {
+            $installationDTO = $this->installationService->fillDto($lastInstallation);
+            $host = $installationDTO->dbFreeradiusIp;
         }
 
         // If no active process, redirect to the first stage or fallback
@@ -548,6 +545,7 @@ class CertificateManagementRadsecproxyController extends AbstractController
             ], Response::HTTP_SERVICE_UNAVAILABLE);
         }
     }
+
     #[Route(
         '/dashboard/settings/certificatesManagement/radsecproxy/skipTest',
         name: 'admin_dashboard_settings_certs_radsecproxy_skipTest'

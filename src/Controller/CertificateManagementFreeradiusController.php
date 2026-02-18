@@ -431,11 +431,18 @@ class CertificateManagementFreeradiusController extends AbstractController
 
     #[Route(
         '/dashboard/settings/certificatesManagement/freeradius/test',
-        name: 'admin_dashboard_settings_certs_freeradius_test'
+        name: 'admin_dashboard_settings_certs_freeradius_test',
+        defaults: ['mode' => 'freeradius']
+    )]
+    #[Route(
+        '/dashboard/settings/certificatesManagement/freeradius/cloudflare/httpChallenge',
+        name: 'admin_dashboard_settings_certs_freeradius_cloudflare_httpChallenge',
+        defaults: ['mode' => 'http_challenge']
     )]
     #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
     public function settingsCertificatesManagementFreeradiusTest(
-        Request $request
+        Request $request,
+        string $mode
     ): Response {
         // Get current process state
         $processState = $this->certificateProcessCheckerService->getProcessState();
@@ -555,8 +562,20 @@ class CertificateManagementFreeradiusController extends AbstractController
             );
         }
 
+        $template = match ($mode) {
+            'http_challenge' =>
+                'dashboard/shared/settings_actions/'
+                . 'certificatesManagement/certificates/'
+                . 'freeradius/httpChallenge/http_challenge.html.twig',
+
+            default =>
+                'dashboard/shared/settings_actions/'
+                . 'certificatesManagement/certificates/'
+                . 'freeradius/test.html.twig',
+        };
+
         return $this->render(
-            'dashboard/shared/settings_actions/certificatesManagement/certificates/freeradius/test.html.twig',
+            $template,
             [
                 'data' => $data,
                 'processState' => $processState,
@@ -700,22 +719,6 @@ class CertificateManagementFreeradiusController extends AbstractController
                 'process' => $processState['process'],
             ]
         );
-    }
-
-    /**
-     * @throws TransportExceptionInterface
-     * @throws ServerExceptionInterface
-     * @throws RedirectionExceptionInterface
-     * @throws ClientExceptionInterface|RandomException
-     */
-    #[Route(
-        '/dashboard/settings/certificatesManagement/freeradius/cloudflare/httpChallenge',
-        name: 'admin_dashboard_settings_certs_freeradius_cloudflare_httpChallenge',
-    )]
-    #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
-    public function cloudflareHTTPChallenge(Request $request): Response
-    {
-        dd('route is here', $request);
     }
 
     #[Route(
