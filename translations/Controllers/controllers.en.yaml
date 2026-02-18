@@ -187,4 +187,7 @@ domainSourceInactive: "This domain source is inactive and cannot be refreshed."
 allDomainSourceRefreshed: "Domains sources was refreshed successfully."
 domainSourceRefreshAllFailed: "Failed to refresh domains sources."
 cloudflareTokenNotMatchesHost: 'The Cloudflare token does not have permissions for the host %host%'
-httpChallengeAppliedSuccessfully: 'MAKE THIS MESSAGE WITH THE DETAILS'
+httpChallengeAppliedSuccessfully: >
+    Validation completed successfully.
+    The new certificates have been verified and prepared.
+    They will be applied to the system once you finish the configuration.

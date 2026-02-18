@@ -594,7 +594,7 @@ class CertificateManagementFreeradiusController extends AbstractController
 
                 $this->eventActions->saveEvent(
                     $user,
-                    AnalyticalEventType::CERTIFICATE_SETUP_PROCESS_FREERAEDIUS_CONFIG->value,
+                    AnalyticalEventType::CERTIFICATE_SETUP_PROCESS_FREERAEDIUS_UPLOAD_CLOUDFLARE_HTTP_CHALLENGE->value,
                     new DateTime(),
                     [
                         'ip' => $request->getClientIp(),
