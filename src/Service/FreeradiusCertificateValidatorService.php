@@ -38,7 +38,7 @@ final class FreeradiusCertificateValidatorService
     /**
      * @return list<string> PEM certificates
      */
-    private function extractCertificates(string $pem): array
+    public function extractCertificates(string $pem): array
     {
         preg_match_all(
             '/-----BEGIN CERTIFICATE-----(.*?)-----END CERTIFICATE-----/s',

@@ -84,3 +84,4 @@ exact_no_wildcard: 'Para correspondência exata, o domínio não pode conter car
 subdomain_requires_wildcard: 'Para correspondência por subdomínios, o domínio deve começar por "*.".'
 domain_not_resolvable: 'O domínio indicado não pôde ser resolvido por DNS no momento da validação.'
 invalidDomainListUrl: 'O URL fornecido tem de apontar para uma lista de domínios em formato bruto "(TXT, CSV ou JSON)". Páginas web ou conteúdo HTML não são permitidos.'
+certificate_bundle_required: 'É necessário colar o bundle dos certificados para continuar.'
