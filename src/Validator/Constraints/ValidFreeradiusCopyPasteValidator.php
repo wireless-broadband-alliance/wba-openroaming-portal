@@ -5,7 +5,7 @@ namespace App\Validator\Constraints;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 
-class ValidFreeradiusHTTPChallengeValidator extends ConstraintValidator
+class ValidFreeradiusCopyPasteValidator extends ConstraintValidator
 {
     public function validate($value, Constraint $constraint): void
     {

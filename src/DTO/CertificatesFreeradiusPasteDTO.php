@@ -9,6 +9,6 @@ class CertificatesFreeradiusPasteDTO
 {
     #[Assert\NotBlank(message: 'certificate_bundle_required')]
     #[Assert\Type('string')]
-    #[CustomAssert\ValidFreeradiusHTTPChallenge]
+    #[CustomAssert\ValidFreeradiusCopyPaste]
     public ?string $certificates = null;
 }
