@@ -712,7 +712,7 @@ class CertificateManagementFreeradiusController extends AbstractController
                     $normalizedCaParsed['fingerprintSHA1'] = $caParsed['fingerprintSHA1'];
                 }
                 if (isset($certParsed['fingerprintSHA1']) && is_string($certParsed['fingerprintSHA1'])) {
-                    $normalizedCertParsed['fingerprintSHA1'] = $caParsed['fingerprintSHA1'];
+                    $normalizedCertParsed['fingerprintSHA1'] = $certParsed['fingerprintSHA1'];
                 }
 
                 if ($normalizedCaParsed && $normalizedCertParsed) {
