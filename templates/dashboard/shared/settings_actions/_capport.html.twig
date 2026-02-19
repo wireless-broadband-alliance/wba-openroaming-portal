@@ -4,7 +4,6 @@
         :form="form">
 
     {{ form_start(form) }}
-    {{ form_widget(form._token) }}
 
     <div class="grid gap-4 lg:grid-cols-2 xl:grid-cols-3 p-2 z-0" {{ stimulus_controller('radio-card') }}>
 
@@ -31,6 +30,7 @@
                            name="{{ form.capportEnabled.vars.full_name }}"
                            value="true"
                            class="radio-input hidden"
+                            {% if form.capportEnabled.vars.disabled %} disabled="disabled" {% endif %}
                             {{ form.capportEnabled.vars.value == 'true' ? 'checked' : '' }}
                             {{ stimulus_action('radio', 'toggle')|stimulus_action('radio-card', 'unblock') }}
                             {{ stimulus_target('radio-card', 'on') }}>
@@ -50,6 +50,7 @@
                            name="{{ form.capportEnabled.vars.full_name }}"
                            value="false"
                            class="radio-input hidden"
+                            {% if form.capportEnabled.vars.disabled %} disabled="disabled" {% endif %}
                             {{ form.capportEnabled.vars.value == 'false' ? 'checked' : '' }}
                             {{ stimulus_action('radio', 'toggle')|stimulus_action('radio-card', 'block') }}
                             {{ stimulus_target('radio-card', 'off') }}>
@@ -130,6 +131,7 @@
 
     <div class="mt-6 divider-solid"></div>
 
+    {% if is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::USER_ENGAGEMENT_WRITE')) %}
     <div class="mt-6 flex flex-row w-full justify-end items-center gap-2">
         <a href="{{ path('app_dashboard_regenerate_code_admin', {type: 'settingCAPPORT'}) }}"
            data-confirm="{{ 'resetMessage'|trans({}, 'settings_actions_general')|e('html_attr') }}"
@@ -137,11 +139,13 @@
             {{ 'reset'|trans({}, 'settings_actions_general') }}
         </a>
 
-        <button type="submit" class="btn-primary"
-                onclick="return confirm('{{ 'saveChangesMessage'|trans({}, 'settings_actions_general') }}')">{{ 'saveChanges'|trans({}, 'settings_actions_general') }}
-        </button>
-    </div>
+            <button type="submit" class="btn-primary"
+                    onclick="return confirm('{{ 'saveChangesMessage'|trans({}, 'settings_actions_general') }}')">{{ 'saveChanges'|trans({}, 'settings_actions_general') }}
+            </button>
+        </div>
+    {% endif %}
 
+    {{ form_widget(form._token) }}
     {{ form_rest(form) }}
-    {{ form_end(form, {render_rest: false}) }}
+    {{ form_end(form) }}
 </twig:CapportSettingsForm>

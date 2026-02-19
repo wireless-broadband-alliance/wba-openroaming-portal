@@ -355,9 +355,8 @@ class ForgotPasswordController extends AbstractController
      * @throws RandomException
      */
     #[Route('/forgot-password/link', name: 'app_site_forgot_password_link')]
-    public function forgotPasswordLink(
-        Request $request,
-    ): Response {
+    public function forgotPasswordLink(Request $request): Response
+    {
         // Get the uuid and verification code from the URL query parameters
         $uuid = $request->query->get('uuid');
         $twoFaCode = $request->query->get('twoFaCode');
@@ -368,11 +367,7 @@ class ForgotPasswordController extends AbstractController
         if (!$user instanceof User) {
             $this->addFlash(
                 'error',
-                $this->translator->trans(
-                    'cannotAccessThisPageWithoutValidRequest',
-                    [],
-                    'controllers'
-                )
+                $this->translator->trans('cannotAccessThisPageWithoutValidRequest', [], 'controllers')
             );
 
             return $this->redirectToRoute('app_landing');
@@ -383,14 +378,8 @@ class ForgotPasswordController extends AbstractController
                 ['name' => SettingName::PLATFORM_MODE->value]
             )->getValue() !== PlatformMode::LIVE->value
         ) {
-            $this->addFlash(
-                'error',
-                $this->translator->trans(
-                    'portalInDemoMode',
-                    [],
-                    'controllers'
-                )
-            );
+            $this->addFlash('error', $this->translator->trans('portalInDemoMode', [], 'controllers'));
+
             return $this->redirectToRoute('app_landing');
         }
 
@@ -401,42 +390,25 @@ class ForgotPasswordController extends AbstractController
                     AnalyticalEventType::FORGOT_PASSWORD_EMAIL_REQUEST->value
                 )
             ) {
-                $this->addFlash(
-                    'error',
-                    $this->translator->trans(
-                        'invalidVerificationCodeLink',
-                        [],
-                        'controllers'
-                    )
-                );
+                $this->addFlash('error', $this->translator->trans('invalidVerificationCodeLink', [], 'controllers'));
+
                 return $this->redirectToRoute('app_landing');
             }
             // Create a token manually for the user
             $this->passwordResetRequestHandler->handle($user);
 
-            $this->addFlash(
-                'success',
-                $this->translator->trans(
-                    'passwordRequestAccepted',
-                    [],
-                    'controllers'
-                )
-            );
+            $this->addFlash('success', $this->translator->trans('passwordRequestAccepted', [], 'controllers'));
+
             if (in_array('ROLE_ADMIN', $user->getRoles(), true)) {
                 $session = $request->getSession();
                 $session->remove('_security_dashboard');
             }
+
             return $this->redirectToRoute('app_site_forgot_password_checker');
         }
 
-        $this->addFlash(
-            'error',
-            $this->translator->trans(
-                'invalidVerificationCodeLink',
-                [],
-                'controllers'
-            )
-        );
+        $this->addFlash('error', $this->translator->trans('invalidVerificationCodeLink', [], 'controllers'));
+
         return $this->redirectToRoute('app_landing');
     }
 
@@ -444,9 +416,8 @@ class ForgotPasswordController extends AbstractController
      * @throws RandomException
      */
     #[Route('/forgot-password/code', name: 'app_site_forgot_password_code')]
-    public function forgotPasswordCode(
-        Request $request,
-    ): Response {
+    public function forgotPasswordCode(Request $request): Response
+    {
         /** @var array<string, array{value: string, description: string}> $data */
         $data = $this->getSettings->getSettings();
 

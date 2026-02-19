@@ -5,6 +5,7 @@ namespace App\Twig\Components;
 use App\DTO\CapportSettingsDTO;
 use App\Enum\SettingName;
 use App\Form\CapportSettingsType;
+use App\Security\Voter\UserAuthenticationVoter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormInterface;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
@@ -34,7 +35,9 @@ final class CapportSettingsForm extends AbstractController
     #[\Override]
     protected function instantiateForm(): FormInterface
     {
-        return $this->createForm(CapportSettingsType::class, $this->capportSettingsDTO);
+        $canWrite = $this->isGranted(UserAuthenticationVoter::USER_ENGAGEMENT_WRITE);
+
+        return $this->createForm(CapportSettingsType::class, $this->capportSettingsDTO, ['disabled' => !$canWrite]);
     }
 
     #[LiveAction]

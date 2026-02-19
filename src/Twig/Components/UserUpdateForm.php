@@ -3,7 +3,9 @@
 namespace App\Twig\Components;
 
 use App\DTO\UserUpdateDTO;
+use App\Entity\User;
 use App\Form\UserUpdateType;
+use App\Security\Voter\UserAuthenticationVoter;
 use libphonenumber\NumberParseException;
 use libphonenumber\PhoneNumberUtil;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -23,28 +25,38 @@ final class UserUpdateForm extends AbstractController
     use LiveCollectionTrait;
 
     #[LiveProp]
-    public UserUpdateDTO|null $userUpdateDTO = null;
+    public ?UserUpdateDTO $userUpdateDTO = null;
 
-    /**
-     * Store the raw phone number string separately
-     */
     #[LiveProp]
-    public string|null $rawPhoneNumber = null;
+    public ?User $editedUser = null;
+
+    #[LiveProp]
+    public ?string $rawPhoneNumber = null;
+
+    #[LiveProp]
+    public bool $isEditingSelf = false;
 
     /**
      * @return FormInterface<mixed>
      */
-    #[\Override]
     protected function instantiateForm(): FormInterface
     {
-        return $this->createForm(UserUpdateType::class, $this->userUpdateDTO);
+        $canWrite = $this->isGranted(UserAuthenticationVoter::USERS_MANAGEMENT_WRITE);
+
+        return $this->createForm(
+            UserUpdateType::class,
+            $this->userUpdateDTO,
+            [
+                'disabled' => !$canWrite,
+                'edited_user' => $this->editedUser,
+            ]
+        );
     }
 
     #[LiveAction]
     public function validate(): void
     {
-
-        // Parse the raw phone number string into a PhoneNumber object
+        // Handle phone parsing
         if (!in_array($this->rawPhoneNumber, [null, '', '0'], true)) {
             try {
                 $phoneUtil = PhoneNumberUtil::getInstance();
@@ -56,11 +68,16 @@ final class UserUpdateForm extends AbstractController
                 $this->userUpdateDTO->phoneNumber = null;
             }
         }
-        // Rebuild the form with current DTO data
-        $form = $this->createForm(UserUpdateType::class, $this->userUpdateDTO);
 
-        // Submit the form data (simulate form submission) to trigger validation
-        $form->submit([
+        $currentUser = $this->getUser();
+        $isAdmin = $this->isGranted('ROLE_ADMIN');
+        $isEditingSelf =
+            $currentUser instanceof User
+            && $this->editedUser instanceof User
+            && $currentUser->getId() === $this->editedUser->getId();
+
+        // Base form data
+        $data = [
             'uuid' => $this->userUpdateDTO->uuid,
             'email' => $this->userUpdateDTO->email,
             'firstName' => $this->userUpdateDTO->firstName,
@@ -68,9 +85,38 @@ final class UserUpdateForm extends AbstractController
             'phoneNumber' => $this->userUpdateDTO->phoneNumber,
             'isVerified' => $this->userUpdateDTO->isVerified,
             'banned' => $this->userUpdateDTO->banned,
-        ], false);
+        ];
 
-        // Update form property with new form containing validation results
+        // Submit permissions ONLY when allowed
+        if ($isAdmin && !$isEditingSelf) {
+            $data += [
+                'userManagement' => $this->userUpdateDTO->userManagement,
+                'platformStatus' => $this->userUpdateDTO->platformStatus,
+                'landingPageConfig' => $this->userUpdateDTO->landingPageConfig,
+                'userEngagement' => $this->userUpdateDTO->userEngagement,
+                'termsPolicies' => $this->userUpdateDTO->termsPolicies,
+                'cronSchedule' => $this->userUpdateDTO->cronSchedule,
+                'authenticationMethods' => $this->userUpdateDTO->authenticationMethods,
+                'twoFactorAuth' => $this->userUpdateDTO->twoFactorAuth,
+                'ldapSynchronization' => $this->userUpdateDTO->ldapSynchronization,
+                'radiusProfileConfig' => $this->userUpdateDTO->radiusProfileConfig,
+                'smsConfig' => $this->userUpdateDTO->smsConfig,
+                'portalStatistics' => $this->userUpdateDTO->portalStatistics,
+                'connectivityStatistics' => $this->userUpdateDTO->connectivityStatistics,
+            ];
+        }
+
+        // Rebuild & submit form
+        $form = $this->createForm(
+            UserUpdateType::class,
+            $this->userUpdateDTO,
+            [
+                'edited_user' => $this->editedUser,
+            ]
+        );
+
+        $form->submit($data, false);
+
         $this->form = $form;
     }
 }

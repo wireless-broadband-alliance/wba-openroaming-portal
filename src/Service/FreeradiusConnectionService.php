@@ -2,11 +2,12 @@
 
 namespace App\Service;
 
+use App\Exception\FreeradiusTestException;
 use Doctrine\DBAL\Connection;
 use Doctrine\Persistence\ManagerRegistry;
 use RuntimeException;
-use Throwable;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Throwable;
 
 readonly class FreeradiusConnectionService
 {
@@ -19,11 +20,13 @@ readonly class FreeradiusConnectionService
         $connection = $doctrine->getConnection('freeradius');
 
         if (!$connection instanceof Connection) {
-            throw new RuntimeException($this->translator->trans(
-                'invalidConnectionType',
-                [],
-                'FreeradiusConnectionService'
-            ));
+            throw new RuntimeException(
+                $this->translator->trans(
+                    'invalidConnectionType',
+                    [],
+                    'FreeradiusConnectionService'
+                )
+            );
         }
 
         $this->freeradiusConnection = $connection;
@@ -34,7 +37,7 @@ readonly class FreeradiusConnectionService
      *
      * @return array{success: bool, message: string}
      */
-    public function checkConnection(): array
+    public function checkDBConnection(): array
     {
         try {
             $this->freeradiusConnection->executeQuery('SELECT 1');

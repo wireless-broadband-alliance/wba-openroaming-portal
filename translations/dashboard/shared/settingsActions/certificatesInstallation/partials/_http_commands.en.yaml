@@ -1,0 +1,29 @@
+# Step Titles
+stepInstallCertBot: 'Step 1 – Install Certbot'
+stepGenerateCertificates: 'Step 2 – Generate Certificates'
+stepCopyCertificates: 'Step 3 – Copy Certificates to FreeRADIUS'
+stepRestoreContainers: 'Step 4 – Restart Containers'
+
+# Step 1 – Install Certbot
+updatePackages: 'Update system packages'
+installSnap: 'Install Snap (required for Certbot on Ubuntu 24.04+)'
+refreshSnap: 'Install and refresh Snap core'
+installCertBot: 'Install Certbot if not already installed'
+installCertbotStep: 'Install Certbot using Snap'
+createLink: 'Create symbolic link so certbot command is available globally'
+verifyCertbot: 'Verify Certbot installation'
+
+# Step 2 – Generate Certificates
+goToProjectFolder: 'Change directory to project folder'
+hybridPath: 'Go to the Hybrid connector folder'
+composerDown: 'Stop and remove all containers'
+tlsGenerate: 'Generate SSL certificate with Certbot (standalone mode)'
+
+# Step 3 – Copy Certificates
+copyCertPem: 'Copy SSL certificate (cert.pem) to FreeRADIUS certs folder'
+copyChainPem: 'Copy certificate chain (chain.pem) to FreeRADIUS certs folder'
+copyFullChainPem: 'Copy fullchain.pem to FreeRADIUS certs folder'
+copyPrivKeyPem: 'Copy private key (privkey.pem) to FreeRADIUS certs folder'
+
+# Step 4 – Restore Containers
+composeUp: 'Start all Docker containers in detached mode'

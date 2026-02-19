@@ -1,0 +1,9 @@
+tittleCert: 'Certificados'
+tittleInstallation: 'Instalação'
+renewCertificates: 'Renovar Certificados'
+reinstallPlatform: 'Reinstalar Plataforma'
+lastCompletedCertificates: 'Última execução em: '
+confirmReinstall: "Tem a certeza que desejas reinstalar os certificados da plataforma? Este processo irá comprometer a configuração atual."
+expiration:
+    warning: "O seu certificado vai expirar em breve!"
+    expired: "O seu certificado expirou!"

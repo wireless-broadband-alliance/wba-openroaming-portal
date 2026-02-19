@@ -27,6 +27,11 @@ parameters:
     # Metrics configuration
     app.metrics_enabled: '%env(bool:METRICS_ENABLED)%'
     app.metrics_allowed_ips: '%env(string:METRICS_ALLOWED_IPS)%'
+    # DATABASES & other config details
+    app.database_url: '%env(resolve:DATABASE_URL)%'
+    app.database_freeradius_url: '%env(resolve:DATABASE_FREERADIUS_URL)%'
+    app.trusted_proxies: '%env(TRUSTED_PROXIES)%'
+    app.jwt_passphrase: '%env(JWT_PASSPHRASE)%'
 services:
     App\EventListener\LocaleListener:
         tags:
@@ -76,3 +81,7 @@ services:
 
 
     App\Service\PrometheusStorageService: ~
+
+    # Bind SessionInterface globally to the session from RequestStack
+    Symfony\Component\HttpFoundation\Session\SessionInterface:
+        factory: [ '@request_stack', 'getSession' ]

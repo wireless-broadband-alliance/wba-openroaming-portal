@@ -27,6 +27,7 @@
                        value="true"
                        class="radio-input hidden"
                         {{ form.syncLdapEnabled.vars.value == 'true' ? 'checked' : '' }}
+                        {% if form.syncLdapEnabled.vars.disabled %} disabled="disabled" {% endif %}
                         {{ stimulus_action('radio', 'toggle')|stimulus_action('radio-card', 'unblock') }}
                         {{ stimulus_target('radio-card', 'on') }}>
                 <div class="custom-radio pr-3 pt-1.5 {{ form.syncLdapEnabled.vars.value == 'true' ? '' : 'hidden' }}" {{ stimulus_target('radio', 'on') }}>
@@ -46,6 +47,7 @@
                        value="false"
                        class="radio-input hidden"
                         {{ form.syncLdapEnabled.vars.value == 'false' ? 'checked' : '' }}
+                        {% if form.syncLdapEnabled.vars.disabled %} disabled="disabled" {% endif %}
                         {{ stimulus_action('radio', 'toggle')|stimulus_action('radio-card', 'block') }}
                         {{ stimulus_target('radio-card', 'off') }}>
                 <div class="custom-radio pr-3 pt-1.5 {{ form.syncLdapEnabled.vars.value == 'false' ? '' : 'hidden' }}" {{ stimulus_target('radio', 'off') }}>
@@ -195,10 +197,19 @@
         {{ 'reset'|trans({}, 'settings_actions_general') }}
     </a>
 
-    <button type="submit" class="btn-primary">
-        {{ 'saveChanges'|trans({}, 'settings_actions_general') }}
-    </button>
-</div>
+{% if is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::LDAP_SYNCHRONIZATION_WRITE')) %}
+    <div class="mt-6 flex flex-row w-full justify-end items-center gap-2">
+        <a href="{{ path('app_dashboard_regenerate_code_admin', {type: 'settingLDAP'}) }}"
+           onclick="return confirm('{{ 'resetMessage'|trans({}, 'settings_actions_general') }}')"
+           class="text-sm hover:text-red-600 font-bold p-2 rounded-lg transition ease-in duration-300">
+            {{ 'reset'|trans({}, 'settings_actions_general') }}
+        </a>
+
+        <button type="submit" class="btn-primary">
+            {{ 'saveChanges'|trans({}, 'settings_actions_general') }}
+        </button>
+    </div>
+{% endif %}
 
 {{ form_rest(form) }}
 {{ form_end(form, {render_rest: false}) }}

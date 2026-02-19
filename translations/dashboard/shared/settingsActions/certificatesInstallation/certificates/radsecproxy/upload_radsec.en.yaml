@@ -1,0 +1,8 @@
+title: 'Upload your PEM files'
+client:
+    label: 'Client Certificate (.pem)'
+    description: "Upload a valid 'client.pem'"
+key:
+    label: 'Private Key (.pem)'
+    description: "Upload a valid 'key.pem'"
+submit: 'Upload Certificates'

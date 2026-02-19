@@ -15,9 +15,11 @@ use App\RadiusDb\Repository\RadiusUserRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRadiusProfileRepository;
+use App\Service\CertificateProcessCheckerService;
 use App\Service\EventActions;
 use App\Service\ExpirationProfileService;
 use App\Service\TwoFAService;
+use App\Twig\CertificateProcessExtension;
 use App\Utils\CacheUtils;
 use DateTime;
 use DateTimeInterface;
@@ -47,9 +49,11 @@ class ProfileController extends AbstractController
         private readonly ExpirationProfileService $expirationProfileService,
         private readonly TwoFAService $twoFAService,
         private readonly TranslatorInterface $translator,
+        private readonly CertificateProcessExtension $certificateProcessExtension,
+        private readonly CertificateProcessCheckerService $certificateProcessCheckerService,
         private readonly RadiusUserRepository $radiusUserRepository,
         private readonly UserRadiusProfileRepository $radiusProfileRepository,
-        private readonly UrlGeneratorInterface $urlGenerator
+        private readonly UrlGeneratorInterface $urlGenerator,
     ) {
     }
 
@@ -61,8 +65,8 @@ class ProfileController extends AbstractController
     public function profileAndroid(
         Request $request
     ): Response {
-        if (!file_exists('/var/www/openroaming/signing-keys/ca.pem')) {
-            throw new RuntimeException("CA.pem is missing");
+        if ($this->certificateProcessExtension->isCertificateAborted()) {
+            return $this->redirectToRoute('app_landing');
         }
 
         /** @var User $user */
@@ -130,7 +134,7 @@ class ProfileController extends AbstractController
             throw new RuntimeException('Failed to load Android template file');
         }
 
-        $ca = file_get_contents('../signing-keys/ca.pem');
+        $ca = file_get_contents('../signing-keys/ca/ca.pem');
         if ($ca === false) {
             throw new RuntimeException('Failed to load ca.pem file');
         }
@@ -177,6 +181,10 @@ class ProfileController extends AbstractController
     public function profileIos(
         Request $request
     ): Response {
+        if ($this->certificateProcessExtension->isCertificateAborted()) {
+            return $this->redirectToRoute('app_landing');
+        }
+
         /** @var User $user */
         $user = $this->getUser();
 
@@ -332,6 +340,25 @@ class ProfileController extends AbstractController
     public function profileWindows(
         Request $request
     ): Response {
+        if ($this->certificateProcessExtension->isCertificateAborted()) {
+            return $this->redirectToRoute('app_landing');
+        }
+
+        // Block Windows profile if FreeRADIUS cert is not EV
+        $currentProcess = $this->certificateProcessCheckerService->getCurrentProcess();
+        if ($currentProcess && !$currentProcess->isFreeradiusCertEV()) {
+            $this->addFlash(
+                'error',
+                $this->translator->trans(
+                    'freeradius_is_not_ev_cert_warning',
+                    [],
+                    'controllers'
+                )
+            );
+
+            return $this->redirectToRoute('app_landing');
+        }
+
         /** @var User $user */
         $user = $this->getUser();
 

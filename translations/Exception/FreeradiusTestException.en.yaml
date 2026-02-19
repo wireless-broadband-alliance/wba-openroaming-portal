@@ -1,0 +1,6 @@
+certificate_mismatch: "The certificate does not match the expected server certificate."
+certificate_expired: "Certificate expired for {{ subject }} since {{ expiryDate }}"
+certificate_not_yet_valid: "Certificate for {{ subject }} is not yet valid. Valid from {{ validFrom }}"
+no_certificate_provided: "Please insert the Resolver certificates for the test."
+invalid_certificate_chain: "Certificate chain is invalid or incomplete"
+generic: "An error occurred while validating the FreeRADIUS certificate"

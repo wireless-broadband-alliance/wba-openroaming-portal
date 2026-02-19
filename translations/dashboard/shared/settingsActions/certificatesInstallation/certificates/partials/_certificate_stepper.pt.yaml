@@ -1,0 +1,24 @@
+info_text_stepper_details: 'Tenha em atenção que pode usar os círculos numerados para navegar entre os passos concluídos. Só pode aceder aos passos que já foram completados.'
+step:
+  radsecproxy_upload:
+    title: 'Carregar certificados RadSecProxy'
+    description: 'arregue os seus certificados RadSecProxy para iniciar o processo.'
+  radsecproxy_config:
+    title: 'Aplicar configuração RadSecProxy'
+    description: 'Execute os comandos gerados para configurar o seu resolver.'
+  radsecproxy_test:
+    title: 'Testar Implementação'
+    description: 'A configuração dos certificados está quase concluída.'
+  freeradius_upload:
+    title: 'Configurar Certificados Freeradius'
+    description: 'Carregue os certificados ou indique o domínio para começar o processo.'
+  freeradius_config:
+    title: 'Aplicar configuração Freeradius'
+    description: 'Execute os comandos gerados para configurar o seu resolver.'
+  freeradius_test:
+    title: 'Testar Implementação'
+    description: 'A configuração dos certificados está quase concluída.'
+
+abort: 'Abortar Processo'
+leave: 'Sair da Configuração do Processo'
+confirm_abort: 'Tem a certeza que deseja cancelar o processo de configuração de certificados?'

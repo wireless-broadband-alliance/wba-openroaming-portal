@@ -1,0 +1,8 @@
+title: 'Carregar os seus ficheiros PEM'
+client:
+    label: 'Certificado do Cliente (.pem)'
+    description: "Carregue um ficheiro 'client.pem' válido"
+key:
+    label: 'Chave Privada (.pem)'
+    description: "Carregue um ficheiro 'key.pem' válido"
+submit: 'Carregar Certificados'
