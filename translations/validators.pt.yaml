@@ -85,3 +85,7 @@ subdomain_requires_wildcard: 'Para correspondência por subdomínios, o domínio
 domain_not_resolvable: 'O domínio indicado não pôde ser resolvido por DNS no momento da validação.'
 invalidDomainListUrl: 'O URL fornecido tem de apontar para uma lista de domínios em formato bruto "(TXT, CSV ou JSON)". Páginas web ou conteúdo HTML não são permitidos.'
 certificate_bundle_required: 'É necessário colar o bundle dos certificados para continuar.'
+freeradius_certificate:
+    invalid_bundle: 'O pacote de certificados é inválido ou não corresponde à chave privada.'
+    expired: 'O certificado expirou.'
+    mismatch_key: 'A chave privada não corresponde ao certificado.'

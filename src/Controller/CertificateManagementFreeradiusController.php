@@ -79,7 +79,6 @@ class CertificateManagementFreeradiusController extends AbstractController
         private readonly CertificateCheckerService $certificateCheckerService,
         private readonly EventActions $eventActions,
         private readonly CertificateFreeradiusGenerator $certificateFreeradiusGenerator,
-        private readonly DomainService $domainService,
         private readonly FreeradiusTestOrchestrator $freeradiusTestOrchestrator,
         private readonly CloudflareService $cloudflareService,
         private readonly SettingRepository $settingRepository,

@@ -85,3 +85,7 @@ subdomain_requires_wildcard: 'For subdomain matching, the domain must start with
 domain_not_resolvable: 'The specified domain could not be resolved via DNS at the time of validation.'
 invalidDomainListUrl: 'The provided URL must point to a raw domain list "(TXT, CSV or JSON)". Web pages and HTML content are not allowed.'
 certificate_bundle_required: 'You mus paste the certificate bundle to continue.'
+freeradius_certificate:
+    invalid_bundle: 'The certificate bundle is invalid or does not match the private key.'
+    expired: 'The certificate has expired.'
+    mismatch_key: 'The private key does not match the certificate.'
