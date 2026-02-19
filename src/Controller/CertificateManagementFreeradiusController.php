@@ -674,7 +674,7 @@ class CertificateManagementFreeradiusController extends AbstractController
             if ($mode === 'http_challenge') {
                 // Load the latest FREERADIUS certificates for this process
                 $latestCerts = $this->certificateFreeradiusInfoService->getLatestCertificatesSet($processEntity);
-                if (empty($latestCerts)) {
+                if ($latestCerts === []) {
                     throw new RuntimeException('No FREERADIUS certificates found for this process.');
                 }
 
@@ -706,21 +706,12 @@ class CertificateManagementFreeradiusController extends AbstractController
                 // Update database/settings with parsed certificates
                 // Remove invalid fingerprintSHA1 for CA && CERT
                 // Ensure fingerprintSHA1 is strictly a string
-                if (isset($caParsed['fingerprintSHA1'])) {
-                    if (!is_string($caParsed['fingerprintSHA1'])) {
-                        unset($caParsed['fingerprintSHA1']);
-                    } else {
-                        // cast to string explicitly for PHPStan
-                        $caParsed['fingerprintSHA1'] = (string)$caParsed['fingerprintSHA1'];
-                    }
+                if (isset($caParsed['fingerprintSHA1']) && !is_string($caParsed['fingerprintSHA1'])) {
+                    unset($caParsed['fingerprintSHA1']);
                 }
 
-                if (isset($certParsed['fingerprintSHA1'])) {
-                    if (!is_string($certParsed['fingerprintSHA1'])) {
-                        unset($certParsed['fingerprintSHA1']);
-                    } else {
-                        $certParsed['fingerprintSHA1'] = (string)$certParsed['fingerprintSHA1'];
-                    }
+                if (isset($certParsed['fingerprintSHA1']) && !is_string($certParsed['fingerprintSHA1'])) {
+                    unset($certParsed['fingerprintSHA1']);
                 }
 
                 if ($caParsed && $certParsed) {

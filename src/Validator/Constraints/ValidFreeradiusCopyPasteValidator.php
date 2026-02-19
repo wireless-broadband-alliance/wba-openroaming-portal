@@ -17,7 +17,7 @@ class ValidFreeradiusCopyPasteValidator extends ConstraintValidator
             return; // let NotBlank handle empty values
         }
 
-        $certs = preg_split("/(?=-----BEGIN )/", $value, -1, PREG_SPLIT_NO_EMPTY) ?: [];
+        $certs = preg_split("/(?=-----BEGIN )/", (string) $value, -1, PREG_SPLIT_NO_EMPTY) ?: [];
 
         $leafCert = null;
         $privateKey = null;
