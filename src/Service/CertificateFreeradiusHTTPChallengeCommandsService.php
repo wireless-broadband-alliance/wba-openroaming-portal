@@ -33,12 +33,10 @@ class CertificateFreeradiusHTTPChallengeCommandsService
             'certificate_copy' => [
                 'title' => 'Copy Certificates to FreeRADIUS',
                 'steps' => [
-                    "cp /etc/letsencrypt/live/{$domain}/cert.pem {$freeradiusCertPath}/server.pem",
-                    "cp /etc/letsencrypt/live/{$domain}/privkey.pem {$freeradiusCertPath}/server.key",
-                    "cp /etc/letsencrypt/live/{$domain}/chain.pem {$freeradiusCertPath}/ca.pem",
+                    "cp /etc/letsencrypt/live/{$domain}/cert.pem {$freeradiusCertPath}/cert.pem",
+                    "cp /etc/letsencrypt/live/{$domain}/chain.pem {$freeradiusCertPath}/chain.pem",
                     "cp /etc/letsencrypt/live/{$domain}/fullchain.pem {$freeradiusCertPath}/fullchain.pem",
-                    "chmod 600 {$freeradiusCertPath}/server.key",
-                    "chmod 644 {$freeradiusCertPath}/server.pem {$freeradiusCertPath}/ca.pem {$freeradiusCertPath}/fullchain.pem",
+                    "cp /etc/letsencrypt/live/{$domain}/privkey.pem {$freeradiusCertPath}/privkey.key",
                 ],
             ],
 
