@@ -707,16 +707,18 @@ class CertificateManagementFreeradiusController extends AbstractController
                 // Update database/settings with parsed certificates
                 // Remove invalid fingerprintSHA1 for CA && CERT
                 // Ensure fingerprintSHA1 is strictly a string
-                if (isset($caParsed['fingerprintSHA1']) && !is_string($caParsed['fingerprintSHA1'])) {
-                    unset($caParsed['fingerprintSHA1']);
+                $normalizedCaParsed = [];
+                $normalizedCertParsed = [];
+                if (isset($caParsed['fingerprintSHA1']) && is_string($caParsed['fingerprintSHA1'])) {
+                    $normalizedCaParsed['fingerprintSHA1'] = $caParsed['fingerprintSHA1'];
+                }
+                if (isset($certParsed['fingerprintSHA1']) && is_string($certParsed['fingerprintSHA1'])) {
+                    $normalizedCertParsed['fingerprintSHA1'] = $certParsed['fingerprintSHA1'];
                 }
 
-                if (isset($certParsed['fingerprintSHA1']) && !is_string($certParsed['fingerprintSHA1'])) {
-                    unset($certParsed['fingerprintSHA1']);
-                }
-
-                if ($caParsed && $certParsed) {
-                    $this->certificateWriterUpdateService->updateFromParsedCertificates($caParsed, $certParsed);
+                if ($normalizedCaParsed && $normalizedCertParsed) {
+                    $this->certificateWriterUpdateService
+                        ->updateFromParsedCertificates($normalizedCaParsed, $certParsed);
                 }
             }
 
