@@ -1,6 +1,9 @@
 {% extends 'dashboard/shared/settings_actions/certificatesManagement/certificates/freeradius/base.html.twig' %}
 
 {% block freeradius_content %}
+    {% set testCompleted = process.freeradiusTestResult is not null %}
+    {% set testFailed = process.freeradiusTestResult is same as(constant('App\\Enum\\CertificateTestResult::FAILED')) %}
+
     {# Return to selection freeradius certs #}
     {{ include('dashboard/shared/settings_actions/certificatesManagement/partials/_return_selection_freeradius.html.twig') }}
 
@@ -11,6 +14,8 @@
     }) }}
 
     <div class="border border-gray-200 rounded-xl shadow-sm overflow-hidden bg-white">
+
+        {# Header #}
         <div class="bg-gray-50 px-6 py-4 border-b border-gray-200 flex items-center gap-2">
             <twig:ux:icon class="w-5 h-5 text-primary" name="wba:test-tube-bold"/>
             <h5 class="text-lg font-semibold text-gray-800">
@@ -18,43 +23,40 @@
             </h5>
         </div>
 
-        <twig:CertificatesFreeradiusPasteForm :certificatesFreeradiusPasteDTO="certificatesFreeradiusPasteDTO">
-
+        {# Certificates Paste Form #}
         {{ form_start(form, {
-            attr: {
-                'data-controller': 'test-certificates',
-            },
+            attr: { 'data-controller': 'test-certificates' }
         }) }}
         <div class="p-6 space-y-6 text-gray-700">
             <div class="text-center space-y-3 pt-4">
                 <twig:ux:icon name="wba:shield-check" class="w-14 h-14 mx-auto text-primary"/>
-                <h3 class="text-gray-900 text-xl font-semibold"
-                >
+                <h3 class="text-gray-900 text-xl font-semibold">
                     {{ 'configuration_complete'|trans({}, 'http_challenge') }}
                 </h3>
                 <p class="text-gray-600">
                     {{ 'instructions'|trans({}, 'http_challenge') }}
                 </p>
             </div>
+
             {{ include(
                 'dashboard/shared/settings_actions/certificatesManagement/partials/_http_commands.html.twig',
-                {commands: commands},
+                {commands: commands}
             ) }}
-            {# Content #}
+
+            {# Grid: Command + Textarea #}
             <div class="p-6 mt-6">
-                {# Grid: Command + Textarea #}
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-                    {# Cat Command Block #}
+
+                    {# Command Block #}
                     <div class="space-y-2" data-controller="clipboard">
                         <p class="text-sm font-medium text-gray-700">
                             {{ 'manual_command_title'|trans({}, 'http_challenge') }}
                         </p>
-                        <p>
-                            TODO LATER THIS LIST OF COMMANDS 
-                        </p>
                         <div class="relative rounded-md overflow-hidden">
                             <pre class="copyable-code relative rounded bg-gray-800 text-white p-4 font-mono overflow-x-auto whitespace-pre-wrap"
-                                 data-clipboard-target="code">docker exec -i hybrid-freeradius-1 sh -c "cd /etc/freeradius/3.0/certs/ && cat ca.pem cert.pem chain.pem fullchain.pem privkey.pem"</pre>
+                                 data-clipboard-target="code">
+docker exec -i hybrid-freeradius-1 sh -c "cd /etc/freeradius/3.0/certs/ && cat ca.pem cert.pem chain.pem fullchain.pem privkey.pem"
+                            </pre>
                             <button type="button"
                                     class="absolute top-2 right-2 flex items-center justify-center p-1.5 rounded-md bg-gray-700 hover:bg-gray-600 focus:ring-2 focus:ring-primary/50 transition"
                                     title="{{ 'copyCommand.title'|trans({}, 'config_radsec') }}"
@@ -73,20 +75,16 @@
                         <p class="block text-sm font-medium text-gray-700 pb-2">
                             {{ 'paste_certificates_label'|trans({}, 'http_challenge') }}
                         </p>
-                        <label>
-                            <div class="space-y-2">
-                                {{ form_widget(form.certificates, {
-                                    attr: {
-                                        class: 'form-widget block w-full rounded-md border-gray-200 p-3 font-mono text-sm resize-y shadow-sm focus:ring-2 focus:ring-primary/30 focus:border-primary',
-                                        placeholder: 'paste_certificates_placeholder'|trans({}, 'http_challenge'),
-                                        rows: 14,
-                                    },
-                                }) }}
-                                <div class="mt-2 -mb-2 text-red-500 text-base">
-                                    {{ form_errors(form.certificates) }}
-                                </div>
-                            </div>
-                        </label>
+                        {{ form_widget(form.certificates, {
+                            attr: {
+                                class: 'form-widget block w-full rounded-md border-gray-200 p-3 font-mono text-sm resize-y shadow-sm focus:ring-2 focus:ring-primary/30 focus:border-primary',
+                                placeholder: 'paste_certificates_placeholder'|trans({}, 'http_challenge'),
+                                rows: 14,
+                            }
+                        }) }}
+                        <div class="mt-2 -mb-2 text-red-500 text-base">
+                            {{ form_errors(form.certificates) }}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -94,15 +92,11 @@
             {# Waiting Widget #}
             <div class="mt-6 hidden" data-test-certificates-target="waitingWidget">
                 <div class="flex items-center justify-center flex-col gap-4 bg-blue-50 border border-blue-200
-            rounded-lg p-6 text-blue-800 text-center animate-fade-in">
+                     rounded-lg p-6 text-blue-800 text-center animate-fade-in">
                     <div class="animate-spin h-8 w-8 border-4 border-blue-400 border-t-transparent rounded-full"></div>
                     <div>
-                        <p class="font-semibold text-blue-900">
-                            {{ 'in_progress_title'|trans({}, 'http_challenge') }}
-                        </p>
-                        <p class="text-sm text-blue-700">
-                            {{ 'in_progress_description'|trans({}, 'http_challenge') }}
-                        </p>
+                        <p class="font-semibold text-blue-900">{{ 'in_progress_title'|trans({}, 'http_challenge') }}</p>
+                        <p class="text-sm text-blue-700">{{ 'in_progress_description'|trans({}, 'http_challenge') }}</p>
                     </div>
                 </div>
             </div>
@@ -110,60 +104,42 @@
             {# Result Message #}
             <div class="mt-4 hidden" data-test-certificates-target="resultMessage"></div>
 
-            {# Check if the test has been run #}
-
-
             {# Show warning if the test failed #}
-            {% if httpChallengeTestFailed %}
+            {% if testFailed %}
                 {{ include('shared/_toast.html.twig', {
                     message: 'test_failed_warning'|trans({}, 'http_challenge'),
                     toast_type: 'toast-warning-dashboard',
                 }) }}
             {% endif %}
 
-            <div class="flex flex-col items-center gap-6 w-full">
-                {# Action Buttons #}
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-3 items-end">
-                    {# Run Test #}
-                    <button
-                            type="submit"
-                            class="px-6 py-3 bg-primary text-white font-medium rounded-lg shadow hover:bg-primary-dark
-                   focus:ring-2 focus:ring-primary/50 transition flex items-center gap-2 w-full md:w-auto justify-center"
-                    >
-                        <twig:ux:icon name="wba:shield-check" class="w-5 h-5"/>
-                        <span data-test-certificates-target="buttonLabel">
-                {{ 'test_certificates'|trans({}, 'http_challenge') }}
-                    </span>
-                    </button>
-                    {{ form_end(form) }}
-        </twig:CertificatesFreeradiusPasteForm>
-        {% set httpChallengeTestCompleted = process.freeradiusTestResult is not null %}
-        {% set httpChallengeTestFailed = process.freeradiusTestResult is same as(constant('App\\Enum\\CertificateTestResult::FAILED')) %}
-                    {{ form_start(formFinishProcess) }}
-                    {{ form_row(formFinishProcess._token) }}
-
-
-                    <button
-                            type="submit"
-                            class="px-6 py-3 border border-gray-300 font-medium rounded-lg shadow-sm flex items-center gap-2
-                            w-full md:w-auto justify-center
-                            {% if not httpChallengeTestCompleted %}
-                                bg-gray-100 text-gray-400 cursor-not-allowed pointer-events-none
-                            {% else %}
-                                bg-white text-gray-800 hover:bg-gray-50 focus:ring-2 focus:ring-primary/30 transition cursor-pointer
-                            {% endif %}"
-                            {% if not httpChallengeTestFailed %}
-                                disabled
-                                title="{{ 'pendingProcessCertsCompleted'|trans({}, 'controllers') }}"
-                            {% endif %}
-                    >
-                        <twig:ux:icon name="wba:right" class="w-5 h-5"/>
-                        {{ 'finish_configuration'|trans({}, 'http_challenge') }}
-                    </button>
-
-                    {{ form_end(formFinishProcess, {render_rest: false}) }}
-                </div>
+            {# Run Test Button #}
+            <div class="flex justify-center mt-6">
+                <button type="submit"
+                        class="px-6 py-3 bg-primary text-white font-medium rounded-lg shadow hover:bg-primary-dark
+                               focus:ring-2 focus:ring-primary/50 transition flex items-center gap-2">
+                    <twig:ux:icon name="wba:shield-check" class="w-5 h-5"/>
+                    {{ 'test_certificates'|trans({}, 'http_challenge') }}
+                </button>
             </div>
         </div>
+        {{ form_end(form) }}
+
+        {# Finish Configuration Form #}
+        {{ form_start(formFinishProcess) }}
+        {{ form_row(formFinishProcess._token) }}
+
+        <div class="flex justify-center pb-3">
+            <button type="submit"
+                    class="px-6 py-3 border border-gray-300 font-medium rounded-lg shadow-sm flex items-center gap-2
+               {% if not testCompleted %}
+                   bg-gray-100 text-gray-400 cursor-not-allowed pointer-events-none
+               {% else %}
+                   bg-white text-gray-800 hover:bg-gray-50 focus:ring-2 focus:ring-primary/30 transition cursor-pointer
+               {% endif %}">
+                <twig:ux:icon name="wba:right" class="w-5 h-5"/>
+                {{ 'finish_configuration'|trans({}, 'http_challenge') }}
+            </button>
+        </div>
+        {{ form_end(formFinishProcess, { render_rest: false }) }}
     </div>
 {% endblock %}
