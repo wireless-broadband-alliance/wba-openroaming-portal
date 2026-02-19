@@ -24,7 +24,12 @@ class CertificateFreeradiusHTTPChallengeCommandsService
                 'steps' => [
                     "cd {$this->projectRoot}",
                     'docker compose down',
-                    "certbot certonly --standalone -d {$domain} --key-type rsa --rsa-key-size 2048 --agree-tos -m {$email}",
+                    'certbot certonly --standalone '
+                    . "-d {$domain} "
+                    . '--key-type rsa '
+                    . '--rsa-key-size 2048 '
+                    . '--agree-tos '
+                    . "-m {$email}",
                 ],
             ],
 

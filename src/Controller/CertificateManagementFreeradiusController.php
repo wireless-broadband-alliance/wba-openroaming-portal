@@ -8,7 +8,6 @@ use App\DTO\CertificateFreeradiusUploadManualDTO;
 use App\DTO\CertificatesFreeradiusPasteDTO;
 use App\DTO\CloudflareDTO;
 use App\Entity\CertificateSetupProcess;
-use App\Entity\CloudflareTokens;
 use App\Entity\Setting;
 use App\Entity\User;
 use App\Enum\AdminRoleType;
@@ -78,7 +77,7 @@ class CertificateManagementFreeradiusController extends AbstractController
         private readonly CloudflareService $cloudflareService,
         private readonly SettingRepository $settingRepository,
         private readonly FreeradiusCertificateValidatorService $freeradiusCertificateValidatorService,
-        private readonly CertificateFreeradiusHTTPChallengeCommandsService $certificateFreeradiusHTTPChallengeCommandsService
+        private readonly CertificateFreeradiusHTTPChallengeCommandsService $httpChallengeCommands,
     ) {
     }
 
@@ -734,7 +733,7 @@ class CertificateManagementFreeradiusController extends AbstractController
         }
 
         $domain = $request->getHost();
-        $httpChallengeCommands = $this->certificateFreeradiusHTTPChallengeCommandsService->getCommands(
+        $httpChallengeCommands = $this->httpChallengeCommands->getCommands(
             $domain,
             $currentUser->getEmail()
         );
