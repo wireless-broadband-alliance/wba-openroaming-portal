@@ -30,8 +30,12 @@ class CustomType extends AbstractType
     ) {
     }
 
+    public bool $disabled = true;
+
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
+        $this->disabled = $options['disabled'];
+
         $allowedSettings = [
             SettingName::CUSTOMER_LOGO_ENABLED->value => ChoiceType::class,
             SettingName::CUSTOMER_LOGO->value => FileType::class,
@@ -91,6 +95,7 @@ class CustomType extends AbstractType
         foreach ($allowedSettings as $settingName => $config) {
             $formFieldOptions = [
                 'data' => null, // Set data to null for FileType fields
+                'disabled' => $this->disabled,
             ];
 
             if ($config === FileType::class) {
@@ -155,6 +160,7 @@ class CustomType extends AbstractType
         $resolver->setDefaults([
             'data_class' => CustomTypeDTO::class,
             'settings' => [],
+            'disabled' => true,
         ]);
     }
 }

@@ -1,0 +1,4 @@
+tittleInstallation: 'Instalação'
+reinstallPlatform: 'Reinstalar Plataforma'
+lastCompletedInstallation: 'Última execução em: '
+confirmInstallation: "Tem a certeza que desejas reinstalar a plataforma?"

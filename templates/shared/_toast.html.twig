@@ -1,0 +1,15 @@
+<div
+        {{ stimulus_controller('toast') }}
+        {{ stimulus_target('toast', 'toast') }}
+>
+    <div class="{{ toast_type }}">
+        <twig:ux:icon name="wba:info" class="w-5 h-5 inline mr-3 fill-current"/>
+
+        <span class="font-medium flex-1">{{ message }}</span>
+
+        {# Close button #}
+        <button class="ml-3" {{ stimulus_action('toast', 'close') }}>
+            <twig:ux:icon name="wba:cross-circle-rounded" class="w-5 h-auto fill-current"/>
+        </button>
+    </div>
+</div>

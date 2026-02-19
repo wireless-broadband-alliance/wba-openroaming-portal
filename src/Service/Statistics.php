@@ -105,7 +105,7 @@ readonly class Statistics
 
         // Fetch all users excluding admin
         /* @phpstan-ignore-next-line */
-        $users = $repository->findExcludingAdmin();
+        $users = $repository->findAll();
 
         $userCounts = [
             UserTwoFactorAuthenticationStatus::DISABLED->value => 0,
@@ -173,7 +173,7 @@ readonly class Statistics
 
         // Fetch all users excluding admin
         /* @phpstan-ignore-next-line */
-        $users = $repository->findExcludingAdmin();
+        $users = $repository->findAll();
 
         $userCounts = [
             UserProvider::SAML->value => 0,
@@ -275,7 +275,7 @@ readonly class Statistics
         $repository = $this->entityManager->getRepository(User::class);
 
         /* @phpstan-ignore-next-line */
-        $users = $repository->findExcludingAdmin();
+        $users = $repository->findAll();
 
         $userCounts = [
             UserVerificationStatus::VERIFIED->value => 0,

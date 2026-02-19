@@ -31,6 +31,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
@@ -62,8 +63,8 @@ class MicrosoftController extends AbstractController
     /**
      * @throws Exception
      */
-    #[Route('/connect/microsoft', name: 'connect_microsoft')]
-    public function connect(Request $request): RedirectResponse
+    #[Route('{type}/connect/microsoft', name: 'connect_microsoft', defaults: ['type' => FirewallType::LANDING->value])]
+    public function connect(Request $request, string $type): RedirectResponse
     {
         // Call the getSettings method of GetSettings class to retrieve the data
         /** @var array<string, array{value: string, description: string}> $data */
@@ -97,21 +98,31 @@ class MicrosoftController extends AbstractController
         $previousLoggedID = $request->get('previousLoggedID');
 
         // Retrieve the "microsoft" client
-        $client = $this->clientRegistry->getClient('microsoft');
+        if ($type === FirewallType::DASHBOARD->value) {
+            $client = $this->clientRegistry->getClient('microsoft_dashboard');
+        } else {
+            $client = $this->clientRegistry->getClient('microsoft_landing');
+        }
+
+        $callbackRoute = match ($type) {
+            'dashboard' => 'dashboard_connect_microsoft_check',
+            default => 'connect_microsoft_check',
+        };
 
         // Define the minimal required scopes
-        $options = [
-            'scope' => [
-                'wl.emails',
-                // 'wl.basic',
-                // 'wl.offline_access',
-                // 'wl.signin'
-            ],
-            'state' => json_encode(['previousLoggedID' => $previousLoggedID], JSON_THROW_ON_ERROR),
+        $state = [
+            'previousLoggedID' => $previousLoggedID,
         ];
 
         // Get the authorization URL with scopes
-        $redirectUrl = $client->getOAuth2Provider()->getAuthorizationUrl($options);
+        $redirectUrl = $client->getOAuth2Provider()->getAuthorizationUrl([
+            'state' => json_encode($state, JSON_THROW_ON_ERROR),
+            'redirect_uri' => $this->generateUrl(
+                $callbackRoute,
+                [],
+                UrlGeneratorInterface::ABSOLUTE_URL
+            ),
+        ]);
 
         // Redirect the user to the authorization URL
         return $this->redirect($redirectUrl);
@@ -123,10 +134,16 @@ class MicrosoftController extends AbstractController
      * @throws GuzzleException
      */
     #[Route('/connect/microsoft/check', name: 'connect_microsoft_check', methods: ['GET'])]
+    #[Route('/dashboard/connect/microsoft/check', name: 'dashboard_connect_microsoft_check', methods: ['GET'])]
     public function connectCheck(Request $request): RedirectResponse
     {
         // Retrieve the "microsoft" client
-        $client = $this->clientRegistry->getClient('microsoft');
+        $routeName = $request->attributes->get('_route');
+
+        $client = match ($routeName) {
+            'dashboard_connect_microsoft_check' => $this->clientRegistry->getClient('microsoft_dashboard'),
+            default => $this->clientRegistry->getClient('microsoft_landing'),
+        };
 
         $code = $request->query->get('code');
         if ($code === null) {
@@ -214,7 +231,10 @@ class MicrosoftController extends AbstractController
         // Authenticate the user
         $this->authenticateUserMicrosoft($user);
 
-        // Redirect the user to the landing page
+
+        if ($routeName === 'dashboard_connect_microsoft_check') {
+            return $this->redirectToRoute('admin_page');
+        }
         return $this->redirectToRoute('app_landing');
     }
 

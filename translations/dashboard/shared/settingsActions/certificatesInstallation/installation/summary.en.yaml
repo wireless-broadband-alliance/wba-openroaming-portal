@@ -1,0 +1,28 @@
+summaryTitle: 'Installation Details'
+summaryDescription: 'Review the configuration details before completing the installation.'
+finish: 'Finish Process'
+proceed: 'Proceed to Certificate Setup'
+installationState: 'Installation State'
+dbOpenRoamingUserName: 'OpenRoaming DataBase User Name'
+dbOpenRoamingPassword: 'OpenRoaming DataBase Password'
+dbOpenRoamingHost: 'OpenRoaming DataBase Host'
+dbOpenRoamingPort: 'OpenRoaming DataBase Port'
+dbFreeradiusUserName: 'Freeradius DataBase User Name'
+dbFreeradiusPassword: 'Freeradius DataBase Password'
+dbFreeradiusHost: 'Freeradius DataBase Host'
+dbFreeradiusPort: 'Freeradius DataBase Port'
+trustedProxies: 'Trusted Proxies:'
+turnstileKey: 'Turnstile Key'
+turnstileSecret: 'Turnstile Secret'
+emailAdmin: 'Email Admin'
+createdAt: 'Created At'
+updatedAt: 'Updated At'
+databaseOpenRoaming: 'OpenRoaming Database'
+databaseFreeradius: 'Freeradius Database'
+additionalSettings: 'Adicional Settings'
+title: "Installation Summary"
+description: "Review the configuration details of your installation."
+username: "Username"
+password: "Password"
+host: "Host"
+port: "Port"

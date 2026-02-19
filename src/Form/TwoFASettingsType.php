@@ -16,8 +16,12 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
  */
 class TwoFASettingsType extends AbstractType
 {
+    private bool $disabled = true;
+
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
+        $this->disabled = $options['disabled'];
+
         $builder
             ->add('twoFaStatus', ChoiceType::class, [
                 'choices' => [
@@ -26,24 +30,31 @@ class TwoFASettingsType extends AbstractType
                     TwoFAType::ENFORCED_FOR_ALL->value => TwoFAType::ENFORCED_FOR_ALL->value,
                 ],
                 'required' => false,
+                'disabled' => $this->disabled,
             ])
             ->add('twoFaAppLabel', TextType::class, [
                 'required' => false,
+                'disabled' => $this->disabled,
             ])
             ->add('twoFaAppIssuer', TextType::class, [
                 'required' => false,
+                'disabled' => $this->disabled,
             ])
             ->add('twoFaCodeExpirationTime', IntegerType::class, [
                 'required' => false,
+                'disabled' => $this->disabled,
             ])
             ->add('twoFaAttemptsNumberResendCode', IntegerType::class, [
                 'required' => false,
+                'disabled' => $this->disabled,
             ])
             ->add('twoFaTimeResetAttempts', IntegerType::class, [
                 'required' => false,
+                'disabled' => $this->disabled,
             ])
             ->add('twoFaResendInterval', IntegerType::class, [
                 'required' => false,
+                'disabled' => $this->disabled,
             ]);
     }
 
@@ -51,6 +62,7 @@ class TwoFASettingsType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => TwoFASettingsDTO::class,
+            'disabled' => true,
         ]);
     }
 }

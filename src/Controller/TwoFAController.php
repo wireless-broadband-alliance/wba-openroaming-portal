@@ -8,12 +8,12 @@ use App\Enum\AnalyticalEventType;
 use App\Enum\CodeVerificationType;
 use App\Enum\DefaultUser;
 use App\Enum\FirewallType;
+use App\Enum\SessionStatus;
 use App\Enum\SettingName;
 use App\Enum\UserTwoFactorAuthenticationStatus;
 use App\Form\TwoFACode;
 use App\Repository\EventRepository;
 use App\Repository\SettingRepository;
-use App\Repository\UserRepository;
 use App\Service\GetSettings;
 use App\Service\TOTPService;
 use App\Service\TwoFAService;
@@ -839,6 +839,15 @@ class TwoFAController extends AbstractController
                 $this->translator->trans('onlyAccessThisPageLoggedIn', [], 'controllers')
             );
             return $this->redirectToRoute('app_landing');
+        }
+        $session = $request->getSession();
+        $route = $session->get(SessionStatus::SYSTEM_RESET_REQUEST->value) ?? '';
+
+        if ($route && $session->get(SessionStatus::INSTALLATION_STARTED->value) === true) {
+            return $this->redirectToRoute($route);
+        }
+        if ($route && $session->get(SessionStatus::CERTIFICATE_STARTED->value) === true) {
+            return $this->redirectToRoute($route);
         }
 
         // Handle access restrictions based on the context

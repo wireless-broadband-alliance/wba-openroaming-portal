@@ -1,0 +1,21 @@
+warning:
+  rootCommand: "Execute os seguintes comandos como 'root' no terminal antes de começar no diretório do resolver do portal!"
+CARoot: "Root CA"
+serverCertificate: "Certificado do Servidor"
+certificateChain: "Chain do Certificado"
+fullChain: "FulL Chain do Certificado"
+privateKey: "Chave Privada"
+expandAll: "Expandir tudo"
+collapseAll: "Colapsar tudo"
+originalFilename: "Nome do ficheiro original"
+sha1Fingerprint: "Resumo SHA1"
+validFrom: "Válido desde"
+validTo: "Válido até"
+subject_cn: "CN do Sujeito"
+issuer_cn: "CN do Emissor"
+resolverCommands: 'Comandos do Resolver'
+localCommands: 'Comandos Locais'
+confirmFollowSteps: 'Tem a certeza de que pretende continuar para aplicar os certificados carregados anteriormente e a nova configuração no resolver?'
+configAlreadyApplied: 'Configuração ja foi aplicada!'
+submit: 'Confirmar Configuração'
+title: 'Comandos para atualização do Resolver'
