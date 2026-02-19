@@ -6,7 +6,7 @@
         {{ 'stepInstallCertBot'|trans({}, '_http_commands') }}
     </h3>
     <div class="space-y-2 relative" >
-        <ul class="list-decimal pl-6 space-y-4">
+        <ul class="list pl-6 space-y-4">
             <li class="text-sm font-semibold text-gray-800">
                 {{ 'installCertBot'|trans({}, '_http_commands') }}
                 <ul class="list-disc pl-6 mt-3 space-y-4">
@@ -108,9 +108,6 @@
                     </li>
                 </ul>
             </li>
-            <li class="text-sm font-semibold text-gray-800">
-                {{ 'goToProjectFolder'|trans({}, '_http_commands') }}
-            </li>
         </ul>
     </div>
     {# Genarete Certificates #}
@@ -121,7 +118,7 @@
     <div class="space-y-2 relative" >
         <ul class="list-disc pl-6 mt-3 space-y-4">
             <li class="text-sm font-medium text-gray-700">
-                {{ 'updatePackages'|trans({}, '_http_commands') }}
+                {{ 'hybridPath'|trans({}, '_http_commands') }}
                 <div class="relative mt-2" data-controller="clipboard">
                     <pre class="copyable-code relative rounded bg-gray-800 text-white p-4 font-mono overflow-x-auto"
                          data-clipboard-target="code">{{ commands.certificate_generation.steps[0]|raw }}</pre>
@@ -136,7 +133,7 @@
                 </div>
             </li>
             <li class="text-sm font-medium text-gray-700">
-                {{ 'updatePackages'|trans({}, '_http_commands') }}
+                {{ 'composerDown'|trans({}, '_http_commands') }}
                 <div class="relative mt-2" data-controller="clipboard">
                     <pre class="copyable-code relative rounded bg-gray-800 text-white p-4 font-mono overflow-x-auto"
                          data-clipboard-target="code">{{ commands.certificate_generation.steps[1]|raw }}</pre>
@@ -150,7 +147,7 @@
                 </div>
             </li>
             <li class="text-sm font-medium text-gray-700">
-                {{ 'installCertbotStep'|trans({}, '_http_commands') }}
+                {{ 'tlsGenerate'|trans({}, '_http_commands') }}
                 <div class="relative mt-2" data-controller="clipboard">
                     <pre class="copyable-code relative rounded bg-gray-800 text-white p-4 font-mono overflow-x-auto"
                          data-clipboard-target="code">{{ commands.certificate_generation.steps[2]|raw }}</pre>
@@ -172,7 +169,7 @@
     <div class="space-y-2 relative" >
         <ul class="list-disc pl-6 mt-3 space-y-4">
             <li class="text-sm font-medium text-gray-700">
-                {{ 'updatePackages'|trans({}, '_http_commands') }}
+                {{ 'copyCertPem'|trans({}, '_http_commands') }}
                 <div class="relative mt-2" data-controller="clipboard">
                     <pre class="copyable-code relative rounded bg-gray-800 text-white p-4 font-mono overflow-x-auto"
                          data-clipboard-target="code">{{ commands.certificate_copy.steps[0]|raw }}</pre>
@@ -187,7 +184,7 @@
                 </div>
             </li>
             <li class="text-sm font-medium text-gray-700">
-                {{ 'updatePackages'|trans({}, '_http_commands') }}
+                {{ 'copyChainPem'|trans({}, '_http_commands') }}
                 <div class="relative mt-2" data-controller="clipboard">
                     <pre class="copyable-code relative rounded bg-gray-800 text-white p-4 font-mono overflow-x-auto"
                          data-clipboard-target="code">{{ commands.certificate_copy.steps[1]|raw }}</pre>
@@ -201,7 +198,7 @@
                 </div>
             </li>
             <li class="text-sm font-medium text-gray-700">
-                {{ 'installCertbotStep'|trans({}, '_http_commands') }}
+                {{ 'copyFullChainPem'|trans({}, '_http_commands') }}
                 <div class="relative mt-2" data-controller="clipboard">
                     <pre class="copyable-code relative rounded bg-gray-800 text-white p-4 font-mono overflow-x-auto"
                          data-clipboard-target="code">{{ commands.certificate_copy.steps[2]|raw }}</pre>
@@ -215,7 +212,7 @@
                 </div>
             </li>
             <li class="text-sm font-medium text-gray-700">
-                {{ 'installCertbotStep'|trans({}, '_http_commands') }}
+                {{ 'copyPrivKeyPem'|trans({}, '_http_commands') }}
                 <div class="relative mt-2" data-controller="clipboard">
                     <pre class="copyable-code relative rounded bg-gray-800 text-white p-4 font-mono overflow-x-auto"
                          data-clipboard-target="code">{{ commands.certificate_copy.steps[3]|raw }}</pre>
@@ -237,7 +234,7 @@
     <div class="space-y-2 relative" >
         <ul class="list-disc pl-6 mt-3 space-y-4">
             <li class="text-sm font-medium text-gray-700">
-                {{ 'updatePackages'|trans({}, '_http_commands') }}
+                {{ 'composeUp'|trans({}, '_http_commands') }}
                 <div class="relative mt-2" data-controller="clipboard">
                     <pre class="copyable-code relative rounded bg-gray-800 text-white p-4 font-mono overflow-x-auto"
                          data-clipboard-target="code">{{ commands.container_restart.steps[0]|raw }}</pre>
