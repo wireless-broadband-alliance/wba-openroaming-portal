@@ -1,6 +1,5 @@
 <?php
 
-
 namespace App\Controller;
 
 use App\Entity\User;
@@ -20,10 +19,8 @@ use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-
 class SamlController extends AbstractController
 {
-
     public function __construct(
         private readonly TranslatorInterface $translator,
         private readonly ParameterBagInterface $parameterBag,

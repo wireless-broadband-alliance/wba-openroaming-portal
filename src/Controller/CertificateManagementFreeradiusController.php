@@ -513,10 +513,12 @@ class CertificateManagementFreeradiusController extends AbstractController
                     $extractCertificates[$key] = trim($rawExtracted[$index]);
                 }
 
-                if (!isset(
-                    $extractCertificates[CertificateFileName::CA_PEM->value],
-                    $extractCertificates[CertificateFileName::CERT_PEM->value],
-                )) {
+                if (
+                    !isset(
+                        $extractCertificates[CertificateFileName::CA_PEM->value],
+                        $extractCertificates[CertificateFileName::CERT_PEM->value],
+                    )
+                ) {
                     throw new RuntimeException('Missing required certificates');
                 }
 
@@ -710,7 +712,7 @@ class CertificateManagementFreeradiusController extends AbstractController
                         unset($caParsed['fingerprintSHA1']);
                     } else {
                         // cast to string explicitly for PHPStan
-                        $caParsed['fingerprintSHA1'] = (string) $caParsed['fingerprintSHA1'];
+                        $caParsed['fingerprintSHA1'] = (string)$caParsed['fingerprintSHA1'];
                     }
                 }
 
@@ -718,7 +720,7 @@ class CertificateManagementFreeradiusController extends AbstractController
                     if (!is_string($certParsed['fingerprintSHA1'])) {
                         unset($certParsed['fingerprintSHA1']);
                     } else {
-                        $certParsed['fingerprintSHA1'] = (string) $certParsed['fingerprintSHA1'];
+                        $certParsed['fingerprintSHA1'] = (string)$certParsed['fingerprintSHA1'];
                     }
                 }
 

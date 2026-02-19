@@ -130,8 +130,8 @@ class GoogleController extends AbstractController
      * @throws Exception
      * @throws GuzzleException
      */
-    #[Route('/connect/google/check', name: 'connect_google_check',methods: ['GET'])]
-    #[Route('/dashboard/connect/google/check', name: 'dashboard_connect_google_check',methods: ['GET'])]
+    #[Route('/connect/google/check', name: 'connect_google_check', methods: ['GET'])]
+    #[Route('/dashboard/connect/google/check', name: 'dashboard_connect_google_check', methods: ['GET'])]
     public function connectCheck(Request $request): RedirectResponse
     {
         // Retrieve the "google" client
