@@ -28,6 +28,7 @@ use App\Repository\EventRepository;
 use App\Repository\InstallationProgressRepository;
 use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
+use App\Security\Voter\UserAuthenticationVoter;
 use App\Service\CaptchaValidator;
 use App\Service\CertificateFreeradiusInfoService;
 use App\Service\CertificateProcessCheckerService;
@@ -83,7 +84,7 @@ class InstallationController extends AbstractController
         '/dashboard/settings/certificatesManagement/installation',
         name: 'admin_dashboard_settings_certs_installation'
     )]
-    #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
+    #[IsGranted(UserAuthenticationVoter::CERTIFICATES_MANAGEMENT_WRITE)]
     public function settingsCertificatesManagementInstallation(
         Request $request,
     ): Response {
@@ -238,7 +239,7 @@ class InstallationController extends AbstractController
         '/dashboard/settings/certificatesManagement/installation/commands',
         name: 'admin_dashboard_settings_certs_installation_command',
     )]
-    #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
+    #[IsGranted(UserAuthenticationVoter::CERTIFICATES_MANAGEMENT_WRITE)]
     public function settingsCertificatesManagementInstallationDatabaseCommand(
         Request $request,
     ): Response {
@@ -362,7 +363,7 @@ class InstallationController extends AbstractController
         '/dashboard/settings/certificatesManagement/installation/settings',
         name: 'admin_dashboard_settings_certs_installation_settings'
     )]
-    #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
+    #[IsGranted(UserAuthenticationVoter::CERTIFICATES_MANAGEMENT_WRITE)]
     public function settingsCertificatesManagementInstallationSettings(
         Request $request
     ): Response {
@@ -540,7 +541,7 @@ class InstallationController extends AbstractController
         '/dashboard/settings/certificatesManagement/installation/admin',
         name: 'admin_dashboard_settings_certs_installation_admin'
     )]
-    #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
+    #[IsGranted(UserAuthenticationVoter::CERTIFICATES_MANAGEMENT_WRITE)]
     public function settingsCertificatesManagementInstallationAdmin(
         Request $request,
     ): Response {
@@ -605,7 +606,7 @@ class InstallationController extends AbstractController
         '/dashboard/settings/certificatesManagement/installation/admin/sendCode',
         name: 'admin_dashboard_settings_certs_installation_admin_sendCode'
     )]
-    #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
+    #[IsGranted(UserAuthenticationVoter::CERTIFICATES_MANAGEMENT_WRITE)]
     public function sendCode(
         Request $request,
     ): RedirectResponse {
@@ -673,7 +674,7 @@ class InstallationController extends AbstractController
         '/dashboard/settings/certificatesManagement/installation/admin/confirmation',
         name: 'admin_dashboard_settings_certs_installation_admin_confirmation'
     )]
-    #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
+    #[IsGranted(UserAuthenticationVoter::CERTIFICATES_MANAGEMENT_WRITE)]
     public function settingsCertificatesManagementInstallationAdminConfirmation(
         Request $request,
     ): RedirectResponse|Response {
@@ -760,7 +761,7 @@ class InstallationController extends AbstractController
         '/dashboard/settings/certificatesManagement/installation/summary',
         name: 'admin_dashboard_settings_certs_installation_summary'
     )]
-    #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
+    #[IsGranted(UserAuthenticationVoter::CERTIFICATES_MANAGEMENT_WRITE)]
     public function installationSummary(): RedirectResponse|Response
     {
         $lastInstallation = $this->installationProgressRepository->getLast();
@@ -801,7 +802,7 @@ class InstallationController extends AbstractController
         name: 'admin_dashboard_settings_certs_installation_abortProcess',
         methods: ['POST']
     )]
-    #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
+    #[IsGranted(UserAuthenticationVoter::CERTIFICATES_MANAGEMENT_WRITE)]
     public function abortProcess(Request $request): RedirectResponse
     {
         $lastInstallation = $this->installationService->lastInstallation();
@@ -878,7 +879,7 @@ class InstallationController extends AbstractController
         '/dashboard/settings/certificatesManagement/installation/admin/confirmation/resend',
         name: 'admin_dashboard_settings_certs_installation_admin_confirmation_resend',
     )]
-    #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
+    #[IsGranted(UserAuthenticationVoter::CERTIFICATES_MANAGEMENT_WRITE)]
     public function resendCode(Request $request): RedirectResponse
     {
         /** @var User $user */
@@ -1004,7 +1005,7 @@ class InstallationController extends AbstractController
             'type' => InstallationType::INSTALLATION->value,
         ]
     )]
-    #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
+    #[IsGranted(UserAuthenticationVoter::CERTIFICATES_MANAGEMENT_WRITE)]
     public function settingsCertificatesManagementInstallationVerifyIdentity(
         Request $request,
         string $type

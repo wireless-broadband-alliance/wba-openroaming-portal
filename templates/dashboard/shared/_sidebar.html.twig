@@ -112,7 +112,7 @@
                             {{ include('dashboard/shared/_sidebar_item.html.twig', {label: 'scheduleAutomation'|trans({}, '_header_admin'), route: 'admin_dashboard_settings_schedule', icon: 'wba:schedule'}) }}
                         {% endif %}
 
-                        {% if constant('App\\Enum\\AdminRoleType::ROLE_SUPER_ADMIN').value in app.user.roles %}
+                        {% if is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::CERTIFICATES_MANAGEMENT_READ')) %}
                             {{ include('dashboard/shared/_sidebar_item.html.twig', {label: 'certsManagement'|trans({}, '_header_admin'), route: 'admin_dashboard_settings_certs_management', icon: 'wba:certificate'}) }}
                         {% endif %}
                     </ul>

@@ -27,6 +27,7 @@ readonly class AdminPermissionsFormBuilder
             'userEngagement' => 'userEngagement',
             'termsPolicies' => 'termsAndPolicies',
             'cronSchedule' => 'scheduleAutomation',
+            'certificatesManagement' => 'certificatesManagement',
             'authenticationMethods' => 'authenticationMethods',
             'twoFactorAuth' => 'twoFactorAuthenticator',
             'ldapSynchronization' => 'LDAPSynchronization',

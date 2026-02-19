@@ -25,6 +25,7 @@ use App\Form\CertificatesFreeradiusPasteType;
 use App\Form\CloudflareType;
 use App\Form\SimpleSubmitFormType;
 use App\Repository\SettingRepository;
+use App\Security\Voter\UserAuthenticationVoter;
 use App\Service\CertificateCheckerService;
 use App\Service\CertificateFreeradiusCommandsService;
 use App\Service\CertificateFreeradiusGenerator;
@@ -85,7 +86,7 @@ class CertificateManagementFreeradiusController extends AbstractController
         '/dashboard/settings/certificatesManagement/freeradius/upload',
         name: 'admin_dashboard_settings_certs_freeradius_upload'
     )]
-    #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
+    #[IsGranted(UserAuthenticationVoter::CERTIFICATES_MANAGEMENT_WRITE)]
     public function settingsCertificatesManagementFreeradiusUpload(
         Request $request
     ): Response {
@@ -244,7 +245,7 @@ class CertificateManagementFreeradiusController extends AbstractController
         '/dashboard/settings/certificatesManagement/freeradius/config',
         name: 'admin_dashboard_settings_certs_freeradius_config'
     )]
-    #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
+    #[IsGranted(UserAuthenticationVoter::CERTIFICATES_MANAGEMENT_WRITE)]
     public function settingsCertificatesManagementFreeradiusConfig(
         Request $request
     ): Response {
@@ -437,7 +438,7 @@ class CertificateManagementFreeradiusController extends AbstractController
         name: 'admin_dashboard_settings_certs_freeradius_cloudflare_httpChallenge',
         defaults: ['mode' => 'http_challenge']
     )]
-    #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
+    #[IsGranted(UserAuthenticationVoter::CERTIFICATES_MANAGEMENT_WRITE)]
     public function settingsCertificatesManagementFreeradiusTest(
         Request $request,
         string $mode
@@ -767,7 +768,7 @@ class CertificateManagementFreeradiusController extends AbstractController
             '/dashboard/settings/certificatesManagement/freeradius/cloudflare/dnsChallenge',
             name: 'admin_dashboard_settings_certs_freeradius_cloudflare_dnsChallenge',
         )]
-    #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
+    #[IsGranted(UserAuthenticationVoter::CERTIFICATES_MANAGEMENT_WRITE)]
     public function cloudflareDNSChallenge(Request $request): Response
     {
         // Get current process state
@@ -896,7 +897,7 @@ class CertificateManagementFreeradiusController extends AbstractController
         '/dashboard/settings/certificatesManagement/freeradius/skipTest',
         name: 'admin_dashboard_settings_certs_freeradius_skipTest'
     )]
-    #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
+    #[IsGranted(UserAuthenticationVoter::CERTIFICATES_MANAGEMENT_WRITE)]
     public function settingsCertificatesManagementFreeradiusSkipTest(): Response
     {
         $processEntity = $this->certificateProcessCheckerService->getCurrentProcess();

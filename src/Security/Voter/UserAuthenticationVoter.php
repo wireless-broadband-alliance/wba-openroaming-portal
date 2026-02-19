@@ -34,6 +34,9 @@ final class UserAuthenticationVoter extends Voter
     // CRON Schedule Automation page
     public const string CRON_SCHEDULE_WRITE = 'CRON_SCHEDULE_WRITE';
     public const string CRON_SCHEDULE_READ = 'CRON_SCHEDULE_READ';
+    // Certificates Management page
+    public const string CERTIFICATES_MANAGEMENT_WRITE = 'CERTIFICATES_MANAGEMENT_WRITE';
+    public const string CERTIFICATES_MANAGEMENT_READ = 'CERTIFICATES_MANAGEMENT_READ';
     // Authentication Methods page
     public const string AUTHENTICATION_METHODS_WRITE = 'AUTHENTICATION_METHODS_WRITE';
     public const string AUTHENTICATION_METHODS_READ = 'AUTHENTICATION_METHODS_READ';
@@ -86,6 +89,9 @@ final class UserAuthenticationVoter extends Voter
 
             self::CRON_SCHEDULE_WRITE,
             self::CRON_SCHEDULE_READ,
+
+            self::CERTIFICATES_MANAGEMENT_WRITE,
+            self::CERTIFICATES_MANAGEMENT_READ,
 
             self::AUTHENTICATION_METHODS_WRITE,
             self::AUTHENTICATION_METHODS_READ,
@@ -179,6 +185,11 @@ final class UserAuthenticationVoter extends Voter
             $this->hasPermission($user, AdminPermissionsType::CRON_SCHEDULE_READ)
             || $this->hasPermission($user, AdminPermissionsType::CRON_SCHEDULE_WRITE),
 
+            self::CERTIFICATES_MANAGEMENT_WRITE => $this->hasPermission($user, AdminPermissionsType::CERTIFICATES_MANAGEMENT_WRITE),
+            self::CERTIFICATES_MANAGEMENT_READ =>
+                $this->hasPermission($user,AdminPermissionsType::CERTIFICATES_MANAGEMENT_WRITE)
+                || $this->hasPermission($user, AdminPermissionsType::CERTIFICATES_MANAGEMENT_READ),
+
             self::AUTHENTICATION_METHODS_WRITE =>
             $this->hasPermission($user, AdminPermissionsType::AUTHENTICATION_METHODS_WRITE),
             self::AUTHENTICATION_METHODS_READ =>
@@ -245,7 +256,10 @@ final class UserAuthenticationVoter extends Voter
         || $this->hasPermission($user, AdminPermissionsType::TERMS_POLICIES_WRITE)
 
         || $this->hasPermission($user, AdminPermissionsType::CRON_SCHEDULE_READ)
-        || $this->hasPermission($user, AdminPermissionsType::CRON_SCHEDULE_WRITE);
+        || $this->hasPermission($user, AdminPermissionsType::CRON_SCHEDULE_WRITE)
+
+        || $this->hasPermission($user, AdminPermissionsType::CERTIFICATES_MANAGEMENT_READ)
+        || $this->hasPermission($user, AdminPermissionsType::CERTIFICATES_MANAGEMENT_WRITE);
     }
 
     private function hasUserAuthentication(User $user): bool

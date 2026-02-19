@@ -21,6 +21,7 @@ use App\Form\CertificateRadsecUploadType;
 use App\Form\SimpleSubmitFormType;
 use App\Repository\CertificateRepository;
 use App\Repository\InstallationProgressRepository;
+use App\Security\Voter\UserAuthenticationVoter;
 use App\Service\CertificateRadsecproxyCommandsService;
 use App\Service\CertificateProcessCheckerService;
 use App\Service\CertificateRadsecproxyInfoService;
@@ -63,7 +64,7 @@ class CertificateManagementRadsecproxyController extends AbstractController
         '/dashboard/settings/certificatesManagement/radsecproxy/upload',
         name: 'admin_dashboard_settings_certs_radsecproxy_upload'
     )]
-    #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
+    #[IsGranted(UserAuthenticationVoter::CERTIFICATES_MANAGEMENT_WRITE)]
     public function settingsCertificatesManagementRadsecproxyUpload(
         Request $request
     ): Response {
@@ -165,7 +166,7 @@ class CertificateManagementRadsecproxyController extends AbstractController
         '/dashboard/settings/certificatesManagement/radsecproxy/config',
         name: 'admin_dashboard_settings_certs_radsecproxy_config'
     )]
-    #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
+    #[IsGranted(UserAuthenticationVoter::CERTIFICATES_MANAGEMENT_WRITE)]
     public function settingsCertificatesManagementRadsecproxyConfig(Request $request): Response
     {
         // Get current process state
@@ -268,7 +269,7 @@ class CertificateManagementRadsecproxyController extends AbstractController
         '/dashboard/settings/certificatesManagement/radsecproxy/test',
         name: 'admin_dashboard_settings_certs_radsecproxy_test'
     )]
-    #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
+    #[IsGranted(UserAuthenticationVoter::CERTIFICATES_MANAGEMENT_WRITE)]
     public function settingsCertificatesManagementRadsecproxyTest(): Response
     {
         // Get current process state
@@ -549,7 +550,7 @@ class CertificateManagementRadsecproxyController extends AbstractController
         '/dashboard/settings/certificatesManagement/radsecproxy/skipTest',
         name: 'admin_dashboard_settings_certs_radsecproxy_skipTest'
     )]
-    #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
+    #[IsGranted(UserAuthenticationVoter::CERTIFICATES_MANAGEMENT_WRITE)]
     public function settingsCertificatesManagementRadsecproxySkipTest(): Response
     {
         $processEntity = $this->certificateProcessCheckerService->getCurrentProcess();
