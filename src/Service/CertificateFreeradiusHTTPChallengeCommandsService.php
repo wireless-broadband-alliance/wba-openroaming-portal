@@ -16,7 +16,7 @@ class CertificateFreeradiusHTTPChallengeCommandsService
     public function getCommands(string $domain, string $email): array
     {
         // Dynamically build the FreeRADIUS cert path based on domain
-        $freeradiusCertPath = $this->projectRoot . '/config/freeradius/certs/' . $domain;
+        $freeradiusCertPath = $this->projectRoot . '/config/freeradius/certs';
 
         return [
             'certificate_generation' => [
@@ -24,8 +24,6 @@ class CertificateFreeradiusHTTPChallengeCommandsService
                 'steps' => [
                     "cd {$this->projectRoot}",
                     'docker compose down',
-                    "mkdir -p {$freeradiusCertPath}",
-                    "cd {$freeradiusCertPath}",
                     "certbot certonly --standalone -d {$domain} --key-type rsa --rsa-key-size 2048 --agree-tos -m {$email}",
                 ],
             ],
@@ -43,7 +41,6 @@ class CertificateFreeradiusHTTPChallengeCommandsService
             'container_restart' => [
                 'title' => 'Restart Containers',
                 'steps' => [
-                    "cd {$this->projectRoot}",
                     'docker compose up -d',
                 ],
             ],
