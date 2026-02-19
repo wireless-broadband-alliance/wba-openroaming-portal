@@ -31,6 +31,7 @@ use App\Repository\SettingRepository;
 use App\Service\CertificateCheckerService;
 use App\Service\CertificateFreeradiusCommandsService;
 use App\Service\CertificateFreeradiusGenerator;
+use App\Service\CertificateFreeradiusHTTPChallengeCommandsService;
 use App\Service\CertificateFreeradiusInfoService;
 use App\Service\CertificateProcessCheckerService;
 use App\Service\CertificateStorageService;
@@ -83,6 +84,7 @@ class CertificateManagementFreeradiusController extends AbstractController
         private readonly CloudflareService $cloudflareService,
         private readonly SettingRepository $settingRepository,
         private readonly FreeradiusCertificateValidatorService $freeradiusCertificateValidatorService,
+        private readonly CertificateFreeradiusHTTPChallengeCommandsService $certificateFreeradiusHTTPChallengeCommandsService,
     ) {
     }
 
@@ -476,6 +478,10 @@ class CertificateManagementFreeradiusController extends AbstractController
             );
         }
 
+        // Save the event
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
+
         // Fetch settings/data needed for the page
         $data = $this->getSettings->getSettings();
 
@@ -578,18 +584,14 @@ class CertificateManagementFreeradiusController extends AbstractController
 
                 $this->entityManager->flush();
 
-                // Save the event
-                /** @var User $user */
-                $user = $this->getUser();
-
                 $this->eventActions->saveEvent(
-                    $user,
+                    $currentUser,
                     AnalyticalEventType::CERTIFICATE_SETUP_PROCESS_FREERAEDIUS_UPLOAD_CLOUDFLARE_HTTP_CHALLENGE->value,
                     new DateTime(),
                     [
                         'ip' => $request->getClientIp(),
                         'user_agent' => $request->headers->get('User-Agent'),
-                        'by' => $user->getUuid(),
+                        'by' => $currentUser->getUuid(),
                     ]
                 );
 
@@ -714,6 +716,12 @@ class CertificateManagementFreeradiusController extends AbstractController
             return $this->redirectToRoute('admin_dashboard_settings_certs_management');
         }
 
+        $domain = $request->getHost();
+        $httpChallengeCommands = $this->certificateFreeradiusHTTPChallengeCommandsService->getCommands(
+            $domain,
+            $currentUser->getEmail()
+        );
+
         $template = match ($mode) {
             'http_challenge' =>
                 'dashboard/shared/settings_actions/'
@@ -735,7 +743,8 @@ class CertificateManagementFreeradiusController extends AbstractController
                 'process' => $processState['process'],
                 'form' => $form->createView(),
                 'formFinishProcess' => $formFinishProcess->createView(),
-                'mode' => $mode
+                'mode' => $mode,
+                'commands' => $httpChallengeCommands,
             ]
         );
     }
