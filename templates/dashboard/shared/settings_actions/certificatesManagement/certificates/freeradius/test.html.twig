@@ -22,7 +22,7 @@
 
         {# Certificates Paste Form #}
         {{ form_start(form, {
-            attr: { 'data-controller': 'test-certificates' }
+            attr: {'data-controller': 'test-certificates'},
         }) }}
         <div class="p-6 space-y-6 text-gray-700">
             <div class="text-center space-y-3 pt-4">
@@ -72,7 +72,7 @@ docker exec -i hybrid-freeradius-1 sh -c "cd /etc/freeradius/3.0/certs/ && cat c
                                 class: 'form-widget block w-full rounded-md border-gray-200 p-3 font-mono text-sm resize-y shadow-sm focus:ring-2 focus:ring-primary/30 focus:border-primary',
                                 placeholder: 'paste_certificates_placeholder'|trans({}, 'test_freeradius'),
                                 rows: 14,
-                            }
+                            },
                         }) }}
                         <div class="mt-2 -mb-2 text-red-500 text-base">
                             {{ form_errors(form.certificates) }}
@@ -132,6 +132,6 @@ docker exec -i hybrid-freeradius-1 sh -c "cd /etc/freeradius/3.0/certs/ && cat c
                 {{ 'finish_configuration'|trans({}, 'test_freeradius') }}
             </button>
         </div>
-        {{ form_end(formFinishProcess, { render_rest: false }) }}
+        {{ form_end(formFinishProcess, {render_rest: false}) }}
     </div>
 {% endblock %}
