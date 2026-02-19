@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
-use App\DTO\CertificateFreeradiusDomainDTO;
 use App\DTO\CertificateFreeradiusUploadManualDTO;
 use App\DTO\CertificatesFreeradiusPasteDTO;
 use App\DTO\CloudflareDTO;
@@ -22,7 +21,6 @@ use App\Enum\ProcessStatusType;
 use App\Enum\SessionStatus;
 use App\Enum\SettingName;
 use App\Exception\FreeradiusTestException;
-use App\Form\CertificateFreeradiusDomainType;
 use App\Form\CertificateFreeradiusUploadManualType;
 use App\Form\CertificatesFreeradiusPasteType;
 use App\Form\CloudflareType;
@@ -37,7 +35,6 @@ use App\Service\CertificateProcessCheckerService;
 use App\Service\CertificateStorageService;
 use App\Service\CertificateWriterUpdateService;
 use App\Service\CloudflareService;
-use App\Service\DomainService;
 use App\Service\EventActions;
 use App\Service\FreeradiusCertificateValidatorService;
 use App\Service\FreeradiusTestOrchestrator;
@@ -45,7 +42,6 @@ use App\Service\GetSettings;
 use DateTime;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
-use Exception;
 use Random\RandomException;
 use RuntimeException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -58,7 +54,6 @@ use Symfony\Component\Process\Process;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
@@ -532,11 +527,11 @@ class CertificateManagementFreeradiusController extends AbstractController
                 $certParsed = $this->certificateCheckerService
                     ->parseCertificate($extractCertificates[CertificateFileName::CERT_PEM->value]);
 
-                if (!is_string($caParsed['fingerprintSHA1'] ?? null)) {
+                if (!is_string($caParsed['fingerprintSHA1'])) {
                     unset($caParsed['fingerprintSHA1']);
                 }
 
-                if (!is_string($certParsed['fingerprintSHA1'] ?? null)) {
+                if (!is_string($certParsed['fingerprintSHA1'])) {
                     unset($certParsed['fingerprintSHA1']);
                 }
 
@@ -688,7 +683,9 @@ class CertificateManagementFreeradiusController extends AbstractController
 
                 foreach ($latestCerts as $type => $certInfo) {
                     $content = $certInfo['content'] ?? null;
-                    if ($content === null) {
+
+                    // Skip null/false content
+                    if (!is_string($content)) {
                         continue;
                     }
 
@@ -706,6 +703,25 @@ class CertificateManagementFreeradiusController extends AbstractController
                 $this->certificateWriterUpdateService->writeCertificates($certificateSet);
 
                 // Update database/settings with parsed certificates
+                // Remove invalid fingerprintSHA1 for CA && CERT
+                // Ensure fingerprintSHA1 is strictly a string
+                if (isset($caParsed['fingerprintSHA1'])) {
+                    if (!is_string($caParsed['fingerprintSHA1'])) {
+                        unset($caParsed['fingerprintSHA1']);
+                    } else {
+                        // cast to string explicitly for PHPStan
+                        $caParsed['fingerprintSHA1'] = (string) $caParsed['fingerprintSHA1'];
+                    }
+                }
+
+                if (isset($certParsed['fingerprintSHA1'])) {
+                    if (!is_string($certParsed['fingerprintSHA1'])) {
+                        unset($certParsed['fingerprintSHA1']);
+                    } else {
+                        $certParsed['fingerprintSHA1'] = (string) $certParsed['fingerprintSHA1'];
+                    }
+                }
+
                 if ($caParsed && $certParsed) {
                     $this->certificateWriterUpdateService->updateFromParsedCertificates($caParsed, $certParsed);
                 }

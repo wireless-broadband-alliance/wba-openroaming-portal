@@ -11,7 +11,7 @@ final class FreeradiusCertificateValidatorService
 {
     /**
      * @param string $userPem Raw pasted PEM from user
-     * @param array{fullchain: string, ca: string} $paths Signing-keys paths
+     * @param array{'Full Chain': string, 'CA': string} $paths Signing-keys paths
      */
     public function validate(string $userPem, array $paths): void
     {

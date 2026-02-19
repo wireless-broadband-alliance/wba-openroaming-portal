@@ -7,9 +7,9 @@ use Symfony\Component\Validator\ConstraintValidator;
 
 class ValidFreeradiusCopyPasteValidator extends ConstraintValidator
 {
-    public function validate($value, Constraint $constraint): void
+    public function validate(mixed $value, Constraint $constraint): void
     {
-        if (!$constraint instanceof ValidFreeradiusHTTPChallenge) {
+        if (!$constraint instanceof ValidFreeradiusCopyPaste) {
             return;
         }
 
@@ -17,7 +17,7 @@ class ValidFreeradiusCopyPasteValidator extends ConstraintValidator
             return; // let NotBlank handle empty values
         }
 
-        $certs = preg_split("/(?=-----BEGIN )/", $value, -1, PREG_SPLIT_NO_EMPTY);
+        $certs = preg_split("/(?=-----BEGIN )/", $value, -1, PREG_SPLIT_NO_EMPTY) ?: [];
 
         $leafCert = null;
         $privateKey = null;
