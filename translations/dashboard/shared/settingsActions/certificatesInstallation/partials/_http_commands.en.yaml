@@ -1,20 +1,29 @@
-stepInstallCertBot: 'Step 1 - Install CertBot'
-stepGenerateCertificates: 'Step 2 - Store and Generate Certificates'
-stepCopyCertificates: 'Step 3 - Copy Certificates'
-stepRestoreContainers: 'Step 4 - Restore Containers'
-updatePackages: 'Update the System packages'
-installSnap: 'Install Snap (required to install Certbot on Ubuntu 24.04)'
-refreshSnap: 'Install end refresh Snap core'
-installCertBot: 'Install Certbot (If not already installed on the server)'
-installCertbotStep: 'Install Certbot'
-createLink: 'Create a symbolic link so the certbot command is available globally'
-verifyCertbot: 'Verify that certbot is correctly installed'
-goToProjectFolder: 'Go to the project folder'
-hybridPath: 'Go to the Hybrid folder'
-composerDown: 'Stops and removes all containers.'
-tlsGenerate: 'Creates an SSL certificate with Certbot (standalone mode).'
-copyCertPem: 'Copies the SSL certificate to the FreeRADIUS configuration directory.'
-copyChainPem: 'Copies the certificate chain to the FreeRADIUS certs directory.'
-copyFullChainPem: 'Copies the certificate fullchain to the FreeRADIUS certs directory.'
-copyPrivKeyPem: 'Copies the certificate privkey to the FreeRADIUS certs directory.'
-composeUp: 'Starts all services in detached mode.'
+# Step Titles
+stepInstallCertBot: 'Step 1 – Install Certbot'
+stepGenerateCertificates: 'Step 2 – Generate Certificates'
+stepCopyCertificates: 'Step 3 – Copy Certificates to FreeRADIUS'
+stepRestoreContainers: 'Step 4 – Restart Containers'
+
+# Step 1 – Install Certbot
+updatePackages: 'Update system packages'
+installSnap: 'Install Snap (required for Certbot on Ubuntu 24.04+)'
+refreshSnap: 'Install and refresh Snap core'
+installCertBot: 'Install Certbot if not already installed'
+installCertbotStep: 'Install Certbot using Snap'
+createLink: 'Create symbolic link so certbot command is available globally'
+verifyCertbot: 'Verify Certbot installation'
+
+# Step 2 – Generate Certificates
+goToProjectFolder: 'Change directory to project folder'
+hybridPath: 'Go to the Hybrid connector folder'
+composerDown: 'Stop and remove all containers'
+tlsGenerate: 'Generate SSL certificate with Certbot (standalone mode)'
+
+# Step 3 – Copy Certificates
+copyCertPem: 'Copy SSL certificate (cert.pem) to FreeRADIUS certs folder'
+copyChainPem: 'Copy certificate chain (chain.pem) to FreeRADIUS certs folder'
+copyFullChainPem: 'Copy fullchain.pem to FreeRADIUS certs folder'
+copyPrivKeyPem: 'Copy private key (privkey.pem) to FreeRADIUS certs folder'
+
+# Step 4 – Restore Containers
+composeUp: 'Start all Docker containers in detached mode'
