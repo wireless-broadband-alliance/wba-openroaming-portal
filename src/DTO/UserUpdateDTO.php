@@ -58,7 +58,7 @@ class UserUpdateDTO
     public PermissionLevel $userEngagement = PermissionLevel::NONE;
     public PermissionLevel $termsPolicies = PermissionLevel::NONE;
     public PermissionLevel $cronSchedule = PermissionLevel::NONE;
-    PUBLIC PermissionLevel $certificatesManagement = PermissionLevel::NONE;
+    public PermissionLevel $certificatesManagement = PermissionLevel::NONE;
     public PermissionLevel $authenticationMethods = PermissionLevel::NONE;
     public PermissionLevel $twoFactorAuth = PermissionLevel::NONE;
     public PermissionLevel $ldapSynchronization = PermissionLevel::NONE;

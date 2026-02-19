@@ -69,52 +69,52 @@ final class UserAuthenticationVoter extends Voter
         return in_array(
             $attribute,
             [
-            self::USERS_MANAGEMENT_WRITE,
-            self::USERS_MANAGEMENT_READ,
+                self::USERS_MANAGEMENT_WRITE,
+                self::USERS_MANAGEMENT_READ,
 
-            self::ADMIN_MANAGEMENT_WRITE,
-            self::ADMIN_MANAGEMENT_READ,
+                self::ADMIN_MANAGEMENT_WRITE,
+                self::ADMIN_MANAGEMENT_READ,
 
-            self::PLATFORM_STATUS_WRITE,
-            self::PLATFORM_STATUS_READ,
+                self::PLATFORM_STATUS_WRITE,
+                self::PLATFORM_STATUS_READ,
 
-            self::LANDING_PAGE_CONFIG_WRITE,
-            self::LANDING_PAGE_CONFIG_READ,
+                self::LANDING_PAGE_CONFIG_WRITE,
+                self::LANDING_PAGE_CONFIG_READ,
 
-            self::USER_ENGAGEMENT_WRITE,
-            self::USER_ENGAGEMENT_READ,
+                self::USER_ENGAGEMENT_WRITE,
+                self::USER_ENGAGEMENT_READ,
 
-            self::TERMS_POLICIES_WRITE,
-            self::TERMS_POLICIES_READ,
+                self::TERMS_POLICIES_WRITE,
+                self::TERMS_POLICIES_READ,
 
-            self::CRON_SCHEDULE_WRITE,
-            self::CRON_SCHEDULE_READ,
+                self::CRON_SCHEDULE_WRITE,
+                self::CRON_SCHEDULE_READ,
 
-            self::CERTIFICATES_MANAGEMENT_WRITE,
-            self::CERTIFICATES_MANAGEMENT_READ,
+                self::CERTIFICATES_MANAGEMENT_WRITE,
+                self::CERTIFICATES_MANAGEMENT_READ,
 
-            self::AUTHENTICATION_METHODS_WRITE,
-            self::AUTHENTICATION_METHODS_READ,
+                self::AUTHENTICATION_METHODS_WRITE,
+                self::AUTHENTICATION_METHODS_READ,
 
-            self::TWO_FACTOR_AUTH_WRITE,
-            self::TWO_FACTOR_AUTH_READ,
+                self::TWO_FACTOR_AUTH_WRITE,
+                self::TWO_FACTOR_AUTH_READ,
 
-            self::LDAP_SYNCHRONIZATION_WRITE,
-            self::LDAP_SYNCHRONIZATION_READ,
+                self::LDAP_SYNCHRONIZATION_WRITE,
+                self::LDAP_SYNCHRONIZATION_READ,
 
-            self::RADIUS_PROFILE_CONFIG_WRITE,
-            self::RADIUS_PROFILE_CONFIG_READ,
+                self::RADIUS_PROFILE_CONFIG_WRITE,
+                self::RADIUS_PROFILE_CONFIG_READ,
 
-            self::SMS_CONFIG_WRITE,
-            self::SMS_CONFIG_READ,
+                self::SMS_CONFIG_WRITE,
+                self::SMS_CONFIG_READ,
 
-            self::PORTAL_STATISTICS_READ,
-            self::CONNECTIVITY_STATISTICS_READ,
+                self::PORTAL_STATISTICS_READ,
+                self::CONNECTIVITY_STATISTICS_READ,
 
-            self::PORTAL_SETTINGS,
-            self::USER_AUTHENTICATION,
-            self::PORTAL_STATISTICS,
-            self::USER_MANAGEMENT,
+                self::PORTAL_SETTINGS,
+                self::USER_AUTHENTICATION,
+                self::PORTAL_STATISTICS,
+                self::USER_MANAGEMENT,
             ]
         );
     }
@@ -126,14 +126,14 @@ final class UserAuthenticationVoter extends Voter
         TokenInterface $token,
         ?Vote $vote = null
     ): bool {
-      /** @var ?User $user */
+        /** @var ?User $user */
         $user = $token->getUser();
 
         if (is_null($user)) {
             return false;
         }
 
-      // Super Admin has access to every page
+        // Super Admin has access to every page
         if (in_array('ROLE_SUPER_ADMIN', $user->getRoles())) {
             return true;
         }
@@ -142,8 +142,8 @@ final class UserAuthenticationVoter extends Voter
             self::USERS_MANAGEMENT_WRITE =>
             $this->hasPermission($user, AdminPermissionsType::USERS_MANAGEMENT_WRITE),
             self::USERS_MANAGEMENT_READ =>
-            $this->hasPermission($user, AdminPermissionsType::USERS_MANAGEMENT_READ) ||
-            $this->hasPermission($user, AdminPermissionsType::USERS_MANAGEMENT_WRITE),
+                $this->hasPermission($user, AdminPermissionsType::USERS_MANAGEMENT_READ) ||
+                $this->hasPermission($user, AdminPermissionsType::USERS_MANAGEMENT_WRITE),
 
             self::ADMIN_MANAGEMENT_WRITE => $this->hasPermission(
                 $user,
@@ -158,67 +158,70 @@ final class UserAuthenticationVoter extends Voter
             self::PLATFORM_STATUS_WRITE =>
             $this->hasPermission($user, AdminPermissionsType::PLATFORM_STATUS_WRITE),
             self::PLATFORM_STATUS_READ =>
-            $this->hasPermission($user, AdminPermissionsType::PLATFORM_STATUS_READ)
-            || $this->hasPermission($user, AdminPermissionsType::PLATFORM_STATUS_WRITE),
+                $this->hasPermission($user, AdminPermissionsType::PLATFORM_STATUS_READ)
+                || $this->hasPermission($user, AdminPermissionsType::PLATFORM_STATUS_WRITE),
 
             self::LANDING_PAGE_CONFIG_WRITE =>
             $this->hasPermission($user, AdminPermissionsType::LANDING_PAGE_CONFIG_WRITE),
             self::LANDING_PAGE_CONFIG_READ =>
-            $this->hasPermission($user, AdminPermissionsType::LANDING_PAGE_CONFIG_READ)
-            || $this->hasPermission($user, AdminPermissionsType::LANDING_PAGE_CONFIG_WRITE),
+                $this->hasPermission($user, AdminPermissionsType::LANDING_PAGE_CONFIG_READ)
+                || $this->hasPermission($user, AdminPermissionsType::LANDING_PAGE_CONFIG_WRITE),
 
             self::USER_ENGAGEMENT_WRITE =>
             $this->hasPermission($user, AdminPermissionsType::USER_ENGAGEMENT_WRITE),
             self::USER_ENGAGEMENT_READ =>
-            $this->hasPermission($user, AdminPermissionsType::USER_ENGAGEMENT_READ)
-            || $this->hasPermission($user, AdminPermissionsType::USER_ENGAGEMENT_WRITE),
+                $this->hasPermission($user, AdminPermissionsType::USER_ENGAGEMENT_READ)
+                || $this->hasPermission($user, AdminPermissionsType::USER_ENGAGEMENT_WRITE),
 
             self::TERMS_POLICIES_WRITE =>
             $this->hasPermission($user, AdminPermissionsType::TERMS_POLICIES_WRITE),
             self::TERMS_POLICIES_READ =>
-            $this->hasPermission($user, AdminPermissionsType::TERMS_POLICIES_READ)
-            || $this->hasPermission($user, AdminPermissionsType::TERMS_POLICIES_WRITE),
+                $this->hasPermission($user, AdminPermissionsType::TERMS_POLICIES_READ)
+                || $this->hasPermission($user, AdminPermissionsType::TERMS_POLICIES_WRITE),
 
             self::CRON_SCHEDULE_WRITE =>
             $this->hasPermission($user, AdminPermissionsType::CRON_SCHEDULE_WRITE),
             self::CRON_SCHEDULE_READ =>
-            $this->hasPermission($user, AdminPermissionsType::CRON_SCHEDULE_READ)
-            || $this->hasPermission($user, AdminPermissionsType::CRON_SCHEDULE_WRITE),
+                $this->hasPermission($user, AdminPermissionsType::CRON_SCHEDULE_READ)
+                || $this->hasPermission($user, AdminPermissionsType::CRON_SCHEDULE_WRITE),
 
-            self::CERTIFICATES_MANAGEMENT_WRITE => $this->hasPermission($user, AdminPermissionsType::CERTIFICATES_MANAGEMENT_WRITE),
+            self::CERTIFICATES_MANAGEMENT_WRITE => $this->hasPermission(
+                $user,
+                AdminPermissionsType::CERTIFICATES_MANAGEMENT_WRITE
+            ),
             self::CERTIFICATES_MANAGEMENT_READ =>
-                $this->hasPermission($user,AdminPermissionsType::CERTIFICATES_MANAGEMENT_WRITE)
+                $this->hasPermission($user, AdminPermissionsType::CERTIFICATES_MANAGEMENT_WRITE)
                 || $this->hasPermission($user, AdminPermissionsType::CERTIFICATES_MANAGEMENT_READ),
 
             self::AUTHENTICATION_METHODS_WRITE =>
             $this->hasPermission($user, AdminPermissionsType::AUTHENTICATION_METHODS_WRITE),
             self::AUTHENTICATION_METHODS_READ =>
-            $this->hasPermission($user, AdminPermissionsType::AUTHENTICATION_METHODS_READ)
-            || $this->hasPermission($user, AdminPermissionsType::AUTHENTICATION_METHODS_WRITE),
+                $this->hasPermission($user, AdminPermissionsType::AUTHENTICATION_METHODS_READ)
+                || $this->hasPermission($user, AdminPermissionsType::AUTHENTICATION_METHODS_WRITE),
 
             self::TWO_FACTOR_AUTH_WRITE =>
             $this->hasPermission($user, AdminPermissionsType::TWO_FACTOR_AUTH_WRITE),
             self::TWO_FACTOR_AUTH_READ =>
-            $this->hasPermission($user, AdminPermissionsType::TWO_FACTOR_AUTH_READ)
-            || $this->hasPermission($user, AdminPermissionsType::TWO_FACTOR_AUTH_WRITE),
+                $this->hasPermission($user, AdminPermissionsType::TWO_FACTOR_AUTH_READ)
+                || $this->hasPermission($user, AdminPermissionsType::TWO_FACTOR_AUTH_WRITE),
 
             self::LDAP_SYNCHRONIZATION_WRITE =>
             $this->hasPermission($user, AdminPermissionsType::LDAP_SYNCHRONIZATION_WRITE),
             self::LDAP_SYNCHRONIZATION_READ =>
-            $this->hasPermission($user, AdminPermissionsType::LDAP_SYNCHRONIZATION_READ)
-            || $this->hasPermission($user, AdminPermissionsType::LDAP_SYNCHRONIZATION_WRITE),
+                $this->hasPermission($user, AdminPermissionsType::LDAP_SYNCHRONIZATION_READ)
+                || $this->hasPermission($user, AdminPermissionsType::LDAP_SYNCHRONIZATION_WRITE),
 
             self::RADIUS_PROFILE_CONFIG_WRITE =>
             $this->hasPermission($user, AdminPermissionsType::RADIUS_PROFILE_CONFIG_WRITE),
             self::RADIUS_PROFILE_CONFIG_READ =>
-            $this->hasPermission($user, AdminPermissionsType::RADIUS_PROFILE_CONFIG_READ)
-            || $this->hasPermission($user, AdminPermissionsType::RADIUS_PROFILE_CONFIG_WRITE),
+                $this->hasPermission($user, AdminPermissionsType::RADIUS_PROFILE_CONFIG_READ)
+                || $this->hasPermission($user, AdminPermissionsType::RADIUS_PROFILE_CONFIG_WRITE),
 
             self::SMS_CONFIG_WRITE =>
             $this->hasPermission($user, AdminPermissionsType::SMS_CONFIG_WRITE),
             self::SMS_CONFIG_READ =>
-            $this->hasPermission($user, AdminPermissionsType::SMS_CONFIG_READ)
-            || $this->hasPermission($user, AdminPermissionsType::SMS_CONFIG_WRITE),
+                $this->hasPermission($user, AdminPermissionsType::SMS_CONFIG_READ)
+                || $this->hasPermission($user, AdminPermissionsType::SMS_CONFIG_WRITE),
 
             self::PORTAL_STATISTICS_READ =>
             $this->hasPermission($user, AdminPermissionsType::PORTAL_STATISTICS_READ),
@@ -243,58 +246,58 @@ final class UserAuthenticationVoter extends Voter
     private function hasPortalSettings(User $user): bool
     {
         return
-        $this->hasPermission($user, AdminPermissionsType::PLATFORM_STATUS_READ)
-        || $this->hasPermission($user, AdminPermissionsType::PLATFORM_STATUS_WRITE)
+            $this->hasPermission($user, AdminPermissionsType::PLATFORM_STATUS_READ)
+            || $this->hasPermission($user, AdminPermissionsType::PLATFORM_STATUS_WRITE)
 
-        || $this->hasPermission($user, AdminPermissionsType::LANDING_PAGE_CONFIG_READ)
-        || $this->hasPermission($user, AdminPermissionsType::LANDING_PAGE_CONFIG_WRITE)
+            || $this->hasPermission($user, AdminPermissionsType::LANDING_PAGE_CONFIG_READ)
+            || $this->hasPermission($user, AdminPermissionsType::LANDING_PAGE_CONFIG_WRITE)
 
-        || $this->hasPermission($user, AdminPermissionsType::USER_ENGAGEMENT_READ)
-        || $this->hasPermission($user, AdminPermissionsType::USER_ENGAGEMENT_WRITE)
+            || $this->hasPermission($user, AdminPermissionsType::USER_ENGAGEMENT_READ)
+            || $this->hasPermission($user, AdminPermissionsType::USER_ENGAGEMENT_WRITE)
 
-        || $this->hasPermission($user, AdminPermissionsType::TERMS_POLICIES_READ)
-        || $this->hasPermission($user, AdminPermissionsType::TERMS_POLICIES_WRITE)
+            || $this->hasPermission($user, AdminPermissionsType::TERMS_POLICIES_READ)
+            || $this->hasPermission($user, AdminPermissionsType::TERMS_POLICIES_WRITE)
 
-        || $this->hasPermission($user, AdminPermissionsType::CRON_SCHEDULE_READ)
-        || $this->hasPermission($user, AdminPermissionsType::CRON_SCHEDULE_WRITE)
+            || $this->hasPermission($user, AdminPermissionsType::CRON_SCHEDULE_READ)
+            || $this->hasPermission($user, AdminPermissionsType::CRON_SCHEDULE_WRITE)
 
-        || $this->hasPermission($user, AdminPermissionsType::CERTIFICATES_MANAGEMENT_READ)
-        || $this->hasPermission($user, AdminPermissionsType::CERTIFICATES_MANAGEMENT_WRITE);
+            || $this->hasPermission($user, AdminPermissionsType::CERTIFICATES_MANAGEMENT_READ)
+            || $this->hasPermission($user, AdminPermissionsType::CERTIFICATES_MANAGEMENT_WRITE);
     }
 
     private function hasUserAuthentication(User $user): bool
     {
         return
-        $this->hasPermission($user, AdminPermissionsType::AUTHENTICATION_METHODS_READ)
-        || $this->hasPermission($user, AdminPermissionsType::AUTHENTICATION_METHODS_WRITE)
+            $this->hasPermission($user, AdminPermissionsType::AUTHENTICATION_METHODS_READ)
+            || $this->hasPermission($user, AdminPermissionsType::AUTHENTICATION_METHODS_WRITE)
 
-        || $this->hasPermission($user, AdminPermissionsType::TWO_FACTOR_AUTH_READ)
-        || $this->hasPermission($user, AdminPermissionsType::TWO_FACTOR_AUTH_WRITE)
+            || $this->hasPermission($user, AdminPermissionsType::TWO_FACTOR_AUTH_READ)
+            || $this->hasPermission($user, AdminPermissionsType::TWO_FACTOR_AUTH_WRITE)
 
-        || $this->hasPermission($user, AdminPermissionsType::LDAP_SYNCHRONIZATION_READ)
-        || $this->hasPermission($user, AdminPermissionsType::LDAP_SYNCHRONIZATION_WRITE)
+            || $this->hasPermission($user, AdminPermissionsType::LDAP_SYNCHRONIZATION_READ)
+            || $this->hasPermission($user, AdminPermissionsType::LDAP_SYNCHRONIZATION_WRITE)
 
-        || $this->hasPermission($user, AdminPermissionsType::RADIUS_PROFILE_CONFIG_READ)
-        || $this->hasPermission($user, AdminPermissionsType::RADIUS_PROFILE_CONFIG_WRITE)
+            || $this->hasPermission($user, AdminPermissionsType::RADIUS_PROFILE_CONFIG_READ)
+            || $this->hasPermission($user, AdminPermissionsType::RADIUS_PROFILE_CONFIG_WRITE)
 
-        || $this->hasPermission($user, AdminPermissionsType::SMS_CONFIG_READ)
-        || $this->hasPermission($user, AdminPermissionsType::SMS_CONFIG_WRITE);
+            || $this->hasPermission($user, AdminPermissionsType::SMS_CONFIG_READ)
+            || $this->hasPermission($user, AdminPermissionsType::SMS_CONFIG_WRITE);
     }
 
     private function hasPortalStatistics(User $user): bool
     {
         return
-        $this->hasPermission($user, AdminPermissionsType::PORTAL_STATISTICS_READ)
-        || $this->hasPermission($user, AdminPermissionsType::CONNECTIVITY_STATISTICS_READ);
+            $this->hasPermission($user, AdminPermissionsType::PORTAL_STATISTICS_READ)
+            || $this->hasPermission($user, AdminPermissionsType::CONNECTIVITY_STATISTICS_READ);
     }
 
     private function hasUserManagement(User $user): bool
     {
         return
-        $this->hasPermission($user, AdminPermissionsType::USERS_MANAGEMENT_WRITE)
-        || $this->hasPermission($user, AdminPermissionsType::USERS_MANAGEMENT_READ)
+            $this->hasPermission($user, AdminPermissionsType::USERS_MANAGEMENT_WRITE)
+            || $this->hasPermission($user, AdminPermissionsType::USERS_MANAGEMENT_READ)
 
-        || $this->hasPermission($user, AdminPermissionsType::ADMIN_MANAGEMENT_WRITE)
-        || $this->hasPermission($user, AdminPermissionsType::ADMIN_MANAGEMENT_READ);
+            || $this->hasPermission($user, AdminPermissionsType::ADMIN_MANAGEMENT_WRITE)
+            || $this->hasPermission($user, AdminPermissionsType::ADMIN_MANAGEMENT_READ);
     }
 }
