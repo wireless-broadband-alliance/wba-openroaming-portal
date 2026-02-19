@@ -27,4 +27,3 @@ copyPrivKeyPem: 'Copiar a chave privada (privkey.pem) para a pasta de certificad
 
 # Step 4 – Restore Containers
 composeUp: 'Iniciar todos os contêineres Docker em modo destacado'
-
