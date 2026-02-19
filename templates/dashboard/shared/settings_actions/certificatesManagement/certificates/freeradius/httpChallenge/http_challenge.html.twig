@@ -36,7 +36,10 @@
                     {{ 'instructions'|trans({}, 'http_challenge') }}
                 </p>
             </div>
-
+            {{ include(
+                'dashboard/shared/settings_actions/certificatesManagement/partials/_http_commands.html.twig',
+                {commands: commands},
+            ) }}
             {# Content #}
             <div class="p-6 mt-6">
                 {# Grid: Command + Textarea #}
