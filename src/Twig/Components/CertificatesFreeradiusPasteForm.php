@@ -3,9 +3,7 @@
 namespace App\Twig\Components;
 
 use App\DTO\CertificatesFreeradiusPasteDTO;
-use App\DTO\DbSetupDTO;
 use App\Form\CertificatesFreeradiusPasteType;
-use App\Form\DbSetupType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormInterface;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
@@ -43,7 +41,7 @@ class CertificatesFreeradiusPasteForm extends AbstractController
     #[LiveAction]
     public function validate(): void
     {
-        if (!$this->certificatesFreeradiusPasteDTO instanceof DbSetupDTO) {
+        if (!$this->certificatesFreeradiusPasteDTO instanceof CertificatesFreeradiusPasteDTO) {
             $this->certificatesFreeradiusPasteDTO = new CertificatesFreeradiusPasteDTO();
         }
 
