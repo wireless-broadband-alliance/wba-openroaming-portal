@@ -79,7 +79,6 @@ class CertificateManagementFreeradiusController extends AbstractController
         private readonly CertificateCheckerService $certificateCheckerService,
         private readonly EventActions $eventActions,
         private readonly CertificateFreeradiusGenerator $certificateFreeradiusGenerator,
-        private readonly DomainService $domainService,
         private readonly FreeradiusTestOrchestrator $freeradiusTestOrchestrator,
         private readonly CloudflareService $cloudflareService,
         private readonly SettingRepository $settingRepository,
@@ -679,7 +678,7 @@ class CertificateManagementFreeradiusController extends AbstractController
             if ($mode === 'http_challenge') {
                 // Load the latest FREERADIUS certificates for this process
                 $latestCerts = $this->certificateFreeradiusInfoService->getLatestCertificatesSet($processEntity);
-                if (empty($latestCerts)) {
+                if ($latestCerts === []) {
                     throw new RuntimeException('No FREERADIUS certificates found for this process.');
                 }
 
