@@ -119,7 +119,8 @@
         </div>
       </div>
 
-      {% if is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::ADMIN_MANAGEMENT_WRITE'))
+      {% if is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::ADMIN_MANAGEMENT_WRITE')) and
+        userUpdateDTO.editingAdmin
       %}
         {# Permissions Section #}
         <div class="mt-4 lg:col-span-2 flex flex-col gap-4">

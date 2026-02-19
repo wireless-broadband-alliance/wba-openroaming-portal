@@ -25,7 +25,7 @@ final readonly class FreeradiusTestOrchestrator
     }
 
     /**
-     * @param array{fullchain: string, ca: string} $paths
+     * @param array{'Full Chain': string, 'CA': string} $paths Signing-keys paths
      */
     public function run(
         Request $request,

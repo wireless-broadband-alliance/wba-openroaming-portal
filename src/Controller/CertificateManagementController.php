@@ -13,6 +13,7 @@ use App\Enum\ProcessStatusType;
 use App\Enum\SessionStatus;
 use App\Repository\CertificateSetupProcessRepository;
 use App\Repository\InstallationProgressRepository;
+use App\Security\Voter\UserAuthenticationVoter;
 use App\Service\CertificateFreeradiusInfoService;
 use App\Service\CertificateProcessCheckerService;
 use App\Service\CertificateRadsecproxyInfoService;
@@ -46,7 +47,7 @@ class CertificateManagementController extends AbstractController
     }
 
     #[Route('/dashboard/settings/certificatesManagement', name: 'admin_dashboard_settings_certs_management')]
-    #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
+    #[IsGranted(UserAuthenticationVoter::CERTIFICATES_MANAGEMENT_READ)]
     public function settingsCertificatesManagement(): Response
     {
         $lastCompletedInstallation = $this->installationProgressRepository->getLastCompleted();
@@ -111,7 +112,7 @@ class CertificateManagementController extends AbstractController
         name: 'admin_dashboard_settings_certs_management_certificates_abort',
         methods: ['POST']
     )]
-    #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
+    #[IsGranted(UserAuthenticationVoter::CERTIFICATES_MANAGEMENT_WRITE)]
     public function settingsCertificatesManagementCertificatesAbort(
         Request $request
     ): Response {
@@ -163,7 +164,7 @@ class CertificateManagementController extends AbstractController
         name: 'admin_dashboard_settings_certs_management_system_reset',
         methods: ['POST']
     )]
-    #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
+    #[IsGranted(UserAuthenticationVoter::CERTIFICATES_MANAGEMENT_WRITE)]
     public function settingsCertificatesManagementSystemReset(Request $request): Response
     {
         /** @var User $user */

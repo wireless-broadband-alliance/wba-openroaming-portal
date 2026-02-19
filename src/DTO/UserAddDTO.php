@@ -54,6 +54,7 @@ class UserAddDTO
     public ?string $lastName = null;
 
     public PermissionLevel $userManagement = PermissionLevel::NONE;
+    public PermissionLevel $adminManagement = PermissionLevel::NONE;
     public PermissionLevel $platformStatus = PermissionLevel::NONE;
     public PermissionLevel $landingPageConfig = PermissionLevel::NONE;
     public PermissionLevel $userEngagement = PermissionLevel::NONE;
@@ -140,6 +141,7 @@ class UserAddDTO
     {
         $mapping = [
             'userManagement' => 'USERS_MANAGEMENT',
+            'adminManagement' => 'ADMIN_MANAGEMENT',
             'platformStatus' => 'PLATFORM_STATUS',
             'landingPageConfig' => 'LANDING_PAGE_CONFIG',
             'userEngagement' => 'USER_ENGAGEMENT',

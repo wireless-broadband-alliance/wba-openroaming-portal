@@ -185,3 +185,7 @@ domainSourceInactive: "Esta fonte de domínios está inativa e não pode ser atu
 allDomainSourceRefreshed: "As fontes de domínios foram atualizadas com sucesso."
 domainSourceRefreshAllFailed: "Falha ao atualizar as fontes de domínios."
 cloudflareTokenNotMatchesHost: 'O token da Cloudflare não tem permissões para o host %host%'
+httpChallengeAppliedSuccessfully: >
+    Validação concluída com sucesso.
+    Os novos certificados foram verificados e preparados.
+    Serão aplicados ao sistema após finalizar a configuração.

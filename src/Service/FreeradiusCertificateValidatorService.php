@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use App\Enum\CertificateFileName;
 use App\Exception\FreeradiusTestException;
 use RuntimeException;
 use Throwable;
@@ -10,7 +11,7 @@ final class FreeradiusCertificateValidatorService
 {
     /**
      * @param string $userPem Raw pasted PEM from user
-     * @param array{fullchain: string, ca: string} $paths Signing-keys paths
+     * @param array{'Full Chain': string, 'CA': string} $paths Signing-keys paths
      */
     public function validate(string $userPem, array $paths): void
     {
@@ -20,7 +21,7 @@ final class FreeradiusCertificateValidatorService
             throw FreeradiusTestException::noCertificateProvided();
         }
 
-        $fullchainPem = file_get_contents($paths['fullchain']);
+        $fullchainPem = file_get_contents($paths[CertificateFileName::FULL_CHAIN_PEM->value]);
 
         if ($fullchainPem === false) {
             throw FreeradiusTestException::invalidCertificateChain();
@@ -30,7 +31,7 @@ final class FreeradiusCertificateValidatorService
 
         $this->compareCertificates($serverCerts, $userCerts);
         $this->validateDates($userCerts);
-        $this->validateChainFromUser($userPem, $paths['ca']);
+        $this->validateChainFromUser($userPem, $paths[CertificateFileName::CA_PEM->value]);
     }
 
     // ---------------- PRIVATE HELPERS ----------------
@@ -38,7 +39,7 @@ final class FreeradiusCertificateValidatorService
     /**
      * @return list<string> PEM certificates
      */
-    private function extractCertificates(string $pem): array
+    public function extractCertificates(string $pem): array
     {
         preg_match_all(
             '/-----BEGIN CERTIFICATE-----(.*?)-----END CERTIFICATE-----/s',

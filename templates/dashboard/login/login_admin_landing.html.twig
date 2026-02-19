@@ -153,5 +153,60 @@
         {% endif %}
     {% endif %}
 
+    <div class="my-8 grid gap-4">
+        <div class="grid grid-cols-1 sm:gap-4 lg:gap-6 sm:[grid-template-columns:repeat(auto-fit,minmax(150px,1fr))] md:my-2 my-3">
+            {% if data.AUTH_METHOD_SAML_ENABLED.value == 'true' %}
+                <div class="w-full">
+                    <a href="{{ path('dashboard_saml_login') }}"
+                       class="terms-widget__link"
+                       data-action="click->terms-widget#showModal">
+                        <button {{ stimulus_target('terms-widget', 'button') }}
+                                type="button"
+                                class="w-full btn-primary">
+                            {{ data.AUTH_METHOD_SAML_LABEL.value }}
+                        </button>
+                    </a>
+                    <p class="text-xs md:my-1 my-2 text-center text-gray-600">
+                        {{ data.AUTH_METHOD_SAML_DESCRIPTION.value }}
+                    </p>
+                </div>
+            {% endif %}
+
+            {% if data.AUTH_METHOD_GOOGLE_LOGIN_ENABLED.value == 'true' %}
+                <div class="w-full">
+                    <a href="{{ path('connect_google', {type: constant('App\\Enum\\FirewallType::DASHBOARD').value}) }}"
+                       class="terms-widget__link"
+                       data-action="click->terms-widget#showModal">
+                        <button {{ stimulus_target('terms-widget', 'button') }}
+                                type="button"
+                                class="w-full btn-primary ">
+                            {{ data.AUTH_METHOD_GOOGLE_LOGIN_LABEL.value }}
+                        </button>
+                    </a>
+                    <p class="text-xs md:my-1 my-2 text-center text-gray-600">
+                        {{ data.AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION.value }}
+                    </p>
+                </div>
+            {% endif %}
+
+            {% if data.AUTH_METHOD_MICROSOFT_LOGIN_ENABLED.value == 'true' %}
+                <div class="w-full">
+                    <a href="{{ path('connect_microsoft', {type: constant('App\\Enum\\FirewallType::DASHBOARD').value}) }}"
+                       class="terms-widget__link"
+                       data-action="click->terms-widget#showModal">
+                        <button {{ stimulus_target('terms-widget', 'button') }}
+                                type="button"
+                                class="w-full btn-primary ">
+                            {{ data.AUTH_METHOD_MICROSOFT_LOGIN_LABEL.value }}
+                        </button>
+                    </a>
+                    <p class="text-xs md:my-1 my-2 text-center text-gray-600">
+                        {{ data.AUTH_METHOD_MICROSOFT_LOGIN_DESCRIPTION.value }}
+                    </p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
     {{ form_end(form, {render_rest: false}) }}
 {% endblock %}

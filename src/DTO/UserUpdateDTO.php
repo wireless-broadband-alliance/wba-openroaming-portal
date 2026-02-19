@@ -58,6 +58,7 @@ class UserUpdateDTO
     public PermissionLevel $userEngagement = PermissionLevel::NONE;
     public PermissionLevel $termsPolicies = PermissionLevel::NONE;
     public PermissionLevel $cronSchedule = PermissionLevel::NONE;
+    public PermissionLevel $certificatesManagement = PermissionLevel::NONE;
     public PermissionLevel $authenticationMethods = PermissionLevel::NONE;
     public PermissionLevel $twoFactorAuth = PermissionLevel::NONE;
     public PermissionLevel $ldapSynchronization = PermissionLevel::NONE;
@@ -162,6 +163,7 @@ class UserUpdateDTO
         'userEngagement' => 'USER_ENGAGEMENT',
         'termsPolicies' => 'TERMS_POLICIES',
         'cronSchedule' => 'CRON_SCHEDULE',
+        'certificatesManagement' => 'CERTIFICATES_MANAGEMENT',
         'authenticationMethods' => 'AUTHENTICATION_METHODS',
         'twoFactorAuth' => 'TWO_FACTOR_AUTH',
         'ldapSynchronization' => 'LDAP_SYNCHRONIZATION',

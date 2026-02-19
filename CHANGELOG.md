@@ -13,12 +13,12 @@
       php bin/console doctrine:migrations:migrate
       ```
 - **Required one-time action:** After upgrading, run
-  the [ConvertAdminRolesForCertsReleaseCommnand.php](src/Command/ConvertAdminRolesForCertsReleaseCommand.php) to migrate
+  the [PrepareReleaseV1110Command.php](src/Command/PrepareReleaseV1110Command.php) to migrate
   existing administrator permissions to the new **Super Admin** role hierarchy.
-  This command should be executed **only once** and while the portal is **offline or restricted**.
+  This command should be executed **only once** and while the portal is **offline or restricted**. Also this command change the ca.pem cert location (`/signing-keys/ca`)
     - Run the command with:
       ```bash
-      php bin/console reset:convert-admin-roles
+      php bin/console prepare-release:v1110
       ```
 
 # Release V1.10.0

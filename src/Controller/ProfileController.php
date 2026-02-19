@@ -134,7 +134,7 @@ class ProfileController extends AbstractController
             throw new RuntimeException('Failed to load Android template file');
         }
 
-        $ca = file_get_contents('../signing-keys/ca.pem');
+        $ca = file_get_contents('../signing-keys/ca/ca.pem');
         if ($ca === false) {
             throw new RuntimeException('Failed to load ca.pem file');
         }

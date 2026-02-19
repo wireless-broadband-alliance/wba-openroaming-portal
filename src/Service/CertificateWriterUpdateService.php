@@ -30,7 +30,7 @@ readonly class CertificateWriterUpdateService
     public function writeCertificates(array $certificateSet): void
     {
         $map = [
-            CertificateFileName::CA_PEM->value => CertificateFileName::CA_PEM_FILE->value,
+            CertificateFileName::CA_PEM->value => 'ca/' . CertificateFileName::CA_PEM_FILE->value,
             CertificateFileName::CERT_PEM->value => CertificateFileName::CERT_PEM_FILE->value,
             CertificateFileName::CHAIN_PEM->value => CertificateFileName::CHAIN_PEM_FILE->value,
             CertificateFileName::FULL_CHAIN_PEM->value => CertificateFileName::FULL_CHAIN_PEM_FILE->value,

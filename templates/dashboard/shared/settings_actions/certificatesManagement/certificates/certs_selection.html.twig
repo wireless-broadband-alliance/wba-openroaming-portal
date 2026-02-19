@@ -79,14 +79,14 @@
                 },
             ) }}
 
-            {# Lets Encrypt Certbot #}
+            {# Cloudflare HTTP #}
             {{ include(
                 'dashboard/shared/settings_actions/certificatesManagement/partials/_cert_option_card.html.twig',
                 {
-                    type: 'button',
-                    route: null,
-                    title: 'letsEncryptCertbotTitle',
-                    subtitle: 'letsEncryptCertbotSubtitle',
+                    type: 'link',
+                    route: 'admin_dashboard_settings_certs_freeradius_cloudflare_httpChallenge',
+                    title: 'CloudflareHTTPTitle',
+                    subtitle: 'CloudflareHTTPSubtitle',
                     icon: 'wba:cloud-upload',
                     translation_domain: 'certs_selection',
                 },
