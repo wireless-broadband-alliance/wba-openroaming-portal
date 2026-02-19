@@ -1,0 +1,52 @@
+test_and_proceed: "Generate Certificates and Continue"
+
+configuration_complete: "Ready to Generate Let's Encrypt Certificates"
+
+instructions: >
+    You must now generate the Let's Encrypt certificates directly on the FreeRADIUS machine using Certbot.
+    After running the required commands, copy the generated certificates bundle and paste them here to validate
+    and complete the configuration.
+
+test_certificates: "Validate Generated Certificates"
+
+finish_configuration: "Finish Certificate Setup"
+
+in_progress_title: "Validating certificates..."
+in_progress_description: "Checking that the generated certificates are valid and correctly formatted for FreeRADIUS."
+
+test_not_done: "Certificates have not been validated yet"
+test_passed: "Certificates validated successfully"
+test_failed: "Certificate validation failed"
+
+test_failed_warning: >
+    The validation failed. Please verify that the certificates were generated correctly
+    and that you pasted the full output. You may retry or proceed if you intentionally
+    want to keep this configuration.
+
+manual_test_warning: >
+    This step must be completed manually on the FreeRADIUS server.
+    For security reasons, certificate generation is performed locally using Certbot and Let's Encrypt.
+    Run the commands below on the FreeRADIUS machine to generate the certificates,
+    then copy their contents and paste them into this interface.
+
+manual_command_title: "Run these commands on the FreeRADIUS machine"
+
+manual_command_hint: >
+    These commands generate the Let's Encrypt certificates and output the required files.
+    After running them, copy the full output and paste it into the field on this page.
+
+paste_certificates_label: "Paste generated certificate bundle"
+
+paste_certificates_placeholder: |
+    Paste here the full output generated on the FreeRADIUS machine.
+
+    The content must include:
+    - CA certificate (ca.pem)
+    - Server certificate (cert.pem)
+    - Certificate chain (chain.pem / fullchain.pem)
+    - Private key (privkey.pem)
+
+    Make sure each section begins with:
+    -----BEGIN CERTIFICATE-----
+    or
+    -----BEGIN PRIVATE KEY-----

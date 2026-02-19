@@ -1,6 +1,25 @@
 # Changelog
 
+# Release V1.11.0
 
+- Installation Widget implementation (For first time project setup / for later use on the admin page configuration).
+- Certificate Management for the admin page (for radsecproxy/freeradius certificates)
+- Added a new user role, Super Admin, to allow the management of the platform and the other admins.
+- Added new pages to configure the permissions of the platform admins.
+- It's required to run the new migrations this will set up the new entities for the installation widget
+  details & the certificates management (`InstalationWidget`, `Certificate` & `CertificateSetupProcess`)
+    - Run the migrations with:
+      ```bash
+      php bin/console doctrine:migrations:migrate
+      ```
+- **Required one-time action:** After upgrading, run
+  the [PrepareReleaseV1110Command.php](src/Command/PrepareReleaseV1110Command.php) to migrate
+  existing administrator permissions to the new **Super Admin** role hierarchy.
+  This command should be executed **only once** and while the portal is **offline or restricted**. Also this command change the ca.pem cert location (`/signing-keys/ca`)
+    - Run the command with:
+      ```bash
+      php bin/console prepare-release:v1110
+      ```
 
 # Release V1.10.0
 
@@ -8,21 +27,22 @@
   Google, Microsoft and Simple Email/Password.
 - Added a new validator for each authentication method or registration to block blacklisted domains
 - New loading screen for long time requests (example, refresh domains)
-- It's required to run the new migrations this will set up the new entities for the new domains & sources page (`DomainsBlacklist`, `DomainsSource`)
+- It's required to run the new migrations this will set up the new entities for the new domains & sources page (
+  `DomainsBlacklist`, `DomainsSource`)
     - Run the migrations with:
       ```bash
       php bin/console doctrine:migrations:migrate
       ```
-      
+
 # Release V1.9.1
 
-- Fix problem with PGP Encryption where the previous implementation didn't set a **GNUPGHOME**, so GnuPG was trying to use the default location
+- Fix problem with PGP Encryption where the previous implementation didn't set a **GNUPGHOME**, so GnuPG was trying to
+  use the default location
   which was not writable by the PHP.
 - Also, a reveal password toggle on the delete account page was added.
 
 # Release V1.9.0
 
-- Added a new configuration page, to manage the black-listed domains used for registration and authentication with Google, Microsoft and Simple Email/Password.
 - Increased the level of php-stan to the max level, for more fixes with security updates.
 - New endpoint for API V2 only - New endpoint for jwt token refresh for apps.
 - Profile download instructions page.
@@ -53,8 +73,8 @@
     - Fix minor bugs & conflicts with the new DTO and authentication form.
 - Add a new eventSubscriber to avoid the admin of hard changing the DB value `USER_VERIFICATION` setting to `OFF`, when
   the `PLATFORM_MODE` setting is `ON`.
-  - When that happens, it could brake the user account registration system for email & phoneNumbers on the landing
-    page.
+    - When that happens, it could brake the user account registration system for email & phoneNumbers on the landing
+      page.
 - **Fix bug 500** on `/dashboard/statistics/freeradius` in case the connection details are invalid and the portal can
   reach
   the server, added a new JSON error message for details.
@@ -71,12 +91,13 @@
     - This new command is configurable on the page `dashboard/settings/schedule` because he is also cron based.
 - New bundle installed `composer require symfony/lock` required for the command next execution only start when the
   current active ends.
-- Symfony version increase for maintained version (7.4.3), it bug fixes and security fixes with support until November 2028.
+- Symfony version increase for maintained version (7.4.3), it bug fixes and security fixes with support until November
+    2028.
 - NPM webpack-cli deprecations fixed to the latest stabled release (
-  - (https://www.npmjs.com/package/webpack-cli/v/5.1.4)) compatible with "@symfony/webpack-encore": "^5.1.0".
+    - (https://www.npmjs.com/package/webpack-cli/v/5.1.4)) compatible with "@symfony/webpack-encore": "^5.1.0".
 - New validation on the Admin Authentication Methods page to check whether the project has all required certificates.
-- Also for this release, it's required to run the new migrations to set up the new entity for the translations (
-  `SettingTranslation`). And the new setting for the login with uuid (`LOGIN_WITH_UUID_ONLY`):
+- It's required to run the new migrations to set up the new entity for the translations (
+  `SettingTranslation`), and the new setting for the login with uuid (`LOGIN_WITH_UUID_ONLY`).
     - Run the migrations with:
       ```bash
       php bin/console doctrine:migrations:migrate
@@ -90,9 +111,9 @@ As part of our ongoing improvements and rework of the API endpoints, **API v1 an
 These versions will no longer receive updates, and clients are strongly encouraged to migrate to **API v3**.
 
 * **Date of deprecation:** 2026-06-19 (or the first release after this date)
-* **Grace period:** v1 and v2 will continue to function temporarily, but **all users must migrate within 6 months from 2026-01-19**.
+* **Grace period:** v1 and v2 will continue to function temporarily, but **all users must migrate within 6 months from
+  2026-01-19**.
 * **The first release after this date of deprecation will fully remove v1 and v2 code and routes**
-
 
 ### Recommended Action
 
@@ -209,10 +230,10 @@ php bin/console doctrine:migrations:migrate
 - Resolved an issue where editing a user account caused the ban action to also disable the account, which conflicted
   with the error messages in the landing page authenticator
 - Migrated from the deprecated to its actively maintained forks:
-  - [nbgrp/onelogin-saml-bundle](https://github.com/nbgrp/onelogin-saml-bundle) for ongoing support and updates.
-  - [tetrapi/onelogin-saml-bundle](https://github.com/tetrapi/onelogin-saml-bundle) as an alternative with additional
-    fixes for compatibility with Symfony 7.2.5 and deprecation warnings. `php-saml`
-    `onelogin-saml-bundle`
+    - [nbgrp/onelogin-saml-bundle](https://github.com/nbgrp/onelogin-saml-bundle) for ongoing support and updates.
+    - [tetrapi/onelogin-saml-bundle](https://github.com/tetrapi/onelogin-saml-bundle) as an alternative with additional
+      fixes for compatibility with Symfony 7.2.5 and deprecation warnings. `php-saml`
+      `onelogin-saml-bundle`
 
 - Fix validation for JWT tokens to prevent 500 errors during API authentication.
 - Added validation on the **Authentication Methods** page, to check if the provider is active before submitting the
@@ -235,17 +256,17 @@ php bin/console doctrine:migrations:migrate
 - New Setting for API Status (ON & OFF)
 - SideBar Admin UI changes
 - Two-Factor Authentication Implementation
-  - New endpoint for 2FA request codes
-  - Rework old endpoints authentication endpoint (local/google/saml/microsoft)to implement with 2FA
-  - New settings page **/dashboard/settings/twoFA**
-  - New implementation on landing page depending on the enforcement level
-    - NOT_ENFORCED
-    - ENFORCED_FOR_LOCAL
-    - ENFORCED_FOR_ALL
-  - New Two-factor authentication selection
-    - Email
-    - SMS
-    - TOTP (Google Authenticator && Microsoft Authenticator)
+    - New endpoint for 2FA request codes
+    - Rework old endpoints authentication endpoint (local/google/saml/microsoft)to implement with 2FA
+    - New settings page **/dashboard/settings/twoFA**
+    - New implementation on landing page depending on the enforcement level
+        - NOT_ENFORCED
+        - ENFORCED_FOR_LOCAL
+        - ENFORCED_FOR_ALL
+    - New Two-factor authentication selection
+        - Email
+        - SMS
+        - TOTP (Google Authenticator && Microsoft Authenticator)
 - Microsoft Login Implementation - New authentication provider / New endpoint
 
 > **Important**: In this release, the fields googleId, saml_identifier and Allocate Providers Command were eliminated.

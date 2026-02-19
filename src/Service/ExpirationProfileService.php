@@ -13,7 +13,7 @@ readonly class ExpirationProfileService
 {
     public function __construct(
         private SettingRepository $settingRepository,
-        private CertificateService $certificateService,
+        private CertificateCheckerService $certificateService,
     ) {
     }
 

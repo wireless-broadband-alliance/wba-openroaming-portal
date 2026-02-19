@@ -8,7 +8,7 @@
     <div class="grid gap-4 lg:grid-cols-2 p-2 z-0" {{ stimulus_controller('radio-card radio-msg') }}>
 
         {# PLATFORM_MODE #}
-        <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full" {{ stimulus_controller('radio card three-options_radio') }}>
+        <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full" {{ stimulus_controller('radio card') }}>
             <div class="flex flex-row justify-between">
                 <div class="text-base font-medium text-center break-normal md:break-all">
                     <h1 class="text-lg md:text-xl whitespace-nowrap">{{ 'platformMode'|trans({}, '_status') }}</h1>
@@ -27,6 +27,7 @@
                     <input type="radio" name="{{ form.platformMode.vars.full_name }}" id="onRadio"
                            value="Demo"
                            class="radio-input hidden" {{ form.platformMode.vars.data == 'Demo' ? 'checked' : '' }}
+                            {% if form.platformMode.vars.disabled %} disabled="disabled" {% endif %}
                             {{ stimulus_action('radio', 'toggle')|stimulus_action('radio-msg', 'hide')|stimulus_action('radio-card', 'unblock') }}
                             {{ stimulus_target('radio-msg', 'on') }} {{ stimulus_target('radio-card', 'on') }}>
                     <div class="custom-radio pr-3 pt-1.5 {{ form.platformMode.vars.data == 'Demo' ? '' : 'hidden' }}" {{ stimulus_target('radio', 'on') }}>
@@ -43,6 +44,7 @@
                     <input type="radio" name="{{ form.platformMode.vars.full_name }}" id="offRadio"
                            value="Live"
                            class="radio-input hidden" {{ form.platformMode.vars.data == 'Live' ? 'checked' : '' }}
+                            {% if form.platformMode.vars.disabled %} disabled="disabled" {% endif %}
                             {{ stimulus_action('radio', 'toggle')|stimulus_action('radio-msg', 'display')|stimulus_action('radio-card', 'block') }}>
                     <div class="custom-radio pr-3 pt-1.5 {{ form.platformMode.vars.data == 'Live' ? '' : 'hidden' }}" {{ stimulus_target('radio', 'off') }}>
                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10" viewBox="0 0 14 10" fill="none">
@@ -82,6 +84,7 @@
                     <input type="radio" name="{{ form.userVerification.vars.full_name }}" id="onRadioEmail"
                            value="ON"
                            class="radio-input hidden" {{ form.userVerification.vars.data == 'ON' ? 'checked' : '' }}
+                            {% if form.userVerification.vars.disabled %} disabled="disabled" {% endif %}
                             {{ stimulus_action('radio', 'toggle') }} {{ stimulus_target('radio-card', 'input') }}>
                     <div class="custom-radio pr-3 pt-1.5 {{ form.userVerification.vars.data == 'ON' ? '' : 'hidden' }}" {{ stimulus_target('radio', 'on') }}>
                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10" viewBox="0 0 14 10" fill="none">
@@ -97,6 +100,7 @@
                     <input type="radio" name="{{ form.userVerification.vars.full_name }}" id="offRadioEmail"
                            value="OFF"
                            class="radio-input hidden" {{ form.userVerification.vars.data == 'OFF' ? 'checked' : '' }}
+                            {% if form.userVerification.vars.disabled %} disabled="disabled" {% endif %}
                             {{ stimulus_action('radio', 'toggle') }} {{ stimulus_target('radio-card', 'input') }}>
                     <div class="custom-radio pr-3 pt-1.5 {{ form.userVerification.vars.data == 'OFF' ? '' : 'hidden' }}" {{ stimulus_target('radio', 'off') }}>
                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10" viewBox="0 0 14 10" fill="none">
@@ -136,6 +140,7 @@
                     <input type="radio" name="{{ form.turnstileChecker.vars.full_name }}" id="onRadioEmail"
                            value="ON"
                            class="radio-input hidden" {{ form.turnstileChecker.vars.data == 'ON' ? 'checked' : '' }}
+                            {% if form.turnstileChecker.vars.disabled %} disabled="disabled" {% endif %}
                             {{ stimulus_action('radio', 'toggle') }} {{ stimulus_target('radio-card', 'input') }}>
                     <div class="custom-radio pr-3 pt-1.5 {{ form.turnstileChecker.vars.data == 'ON' ? '' : 'hidden' }}" {{ stimulus_target('radio', 'on') }}>
                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10" viewBox="0 0 14 10" fill="none">
@@ -151,6 +156,7 @@
                     <input type="radio" name="{{ form.turnstileChecker.vars.full_name }}" id="offRadioEmail"
                            value="OFF"
                            class="radio-input hidden" {{ form.turnstileChecker.vars.data == 'OFF' ? 'checked' : '' }}
+                            {% if form.turnstileChecker.vars.disabled %} disabled="disabled" {% endif %}
                             {{ stimulus_action('radio', 'toggle') }} {{ stimulus_target('radio-card', 'input') }}>
                     <div class="custom-radio pr-3 pt-1.5 {{ form.turnstileChecker.vars.data == 'OFF' ? '' : 'hidden' }}" {{ stimulus_target('radio', 'off') }}>
                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10" viewBox="0 0 14 10" fill="none">
@@ -189,6 +195,7 @@
                     On
                     <input type="radio" name="{{ form.apiStatus.vars.full_name }}" id="onRadioEmail"
                            value="ON" class="radio-input hidden" {{ form.apiStatus.vars.data == 'ON' ? 'checked' : '' }}
+                            {% if form.apiStatus.vars.disabled %} disabled="disabled" {% endif %}
                             {{ stimulus_action('radio', 'toggle') }} {{ stimulus_target('radio-card', 'input') }}>
                     <div class="custom-radio pr-3 pt-1.5 {{ form.apiStatus.vars.data == 'ON' ? '' : 'hidden' }}" {{ stimulus_target('radio', 'on') }}>
                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10" viewBox="0 0 14 10" fill="none">
@@ -204,6 +211,7 @@
                     <input type="radio" name="{{ form.apiStatus.vars.full_name }}" id="offRadioEmail"
                            value="OFF"
                            class="radio-input hidden" {{ form.apiStatus.vars.data == 'OFF' ? 'checked' : '' }}
+                            {% if form.apiStatus.vars.disabled %} disabled="disabled" {% endif %}
                             {{ stimulus_action('radio', 'toggle') }} {{ stimulus_target('radio-card', 'input') }}>
                     <div class="custom-radio pr-3 pt-1.5 {{ form.apiStatus.vars.data == 'OFF' ? '' : 'hidden' }}" {{ stimulus_target('radio', 'off') }}>
                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10" viewBox="0 0 14 10" fill="none">
@@ -277,6 +285,7 @@
     </div>
     <div class="mt-6 divider-solid"></div>
 
+    {% if is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::PLATFORM_STATUS_WRITE')) %}
     <div class="mt-6 flex flex-row w-full justify-end items-center gap-2">
         <a href="{{ path('app_dashboard_regenerate_code_admin', {type: 'settingStatus'}) }}"
            data-confirm="{{ 'resetMessage'|trans({}, 'settings_actions_general')|e('html_attr') }}"
@@ -284,11 +293,12 @@
             {{ 'reset'|trans({}, 'settings_actions_general') }}
         </a>
 
-        <button type="submit" class="btn-primary"
-                onclick="return confirm('{{ 'saveChangesMessage'|trans({}, 'settings_actions_general') }}')">
-            {{ 'saveChanges'|trans({}, 'settings_actions_general') }}
-        </button>
-    </div>
+            <button type="submit" class="btn-primary"
+                    onclick="return confirm('{{ 'saveChangesMessage'|trans({}, 'settings_actions_general') }}')">
+                {{ 'saveChanges'|trans({}, 'settings_actions_general') }}
+            </button>
+        </div>
+    {% endif %}
 
     {{ form_rest(form) }}
     {{ form_end(form, {render_rest: false}) }}

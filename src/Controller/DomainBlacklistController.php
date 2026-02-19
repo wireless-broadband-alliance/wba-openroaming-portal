@@ -8,6 +8,7 @@ use App\DTO\SourceBlacklistDTO;
 use App\Entity\DomainBlacklist;
 use App\Entity\DomainSource;
 use App\Entity\User;
+use App\Enum\AdminRoleType;
 use App\Enum\AnalyticalEventType;
 use App\Enum\DomainMatchType;
 use App\Enum\DomainOrigin;
@@ -49,7 +50,7 @@ class DomainBlacklistController extends AbstractController
     }
 
     #[Route('/dashboard/settings/domains', name: 'admin_dashboard_settings_domains')]
-    #[IsGranted('ROLE_ADMIN')]
+    #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
     public function domainsManagement(
         Request $request,
         #[MapQueryParameter] int $page = 1,
@@ -95,7 +96,7 @@ class DomainBlacklistController extends AbstractController
             );
 
             $this->addFlash(
-                'success_admin',
+                'success',
                 $this->translator->trans(
                     'domainAdded',
                     [
@@ -128,7 +129,7 @@ class DomainBlacklistController extends AbstractController
             );
 
             $this->addFlash(
-                'success_admin',
+                'success',
                 $this->translator->trans(
                     'sourceAdded',
                     [
@@ -233,7 +234,7 @@ class DomainBlacklistController extends AbstractController
         '/dashboard/settings/domains/edit/{id<\d+>}',
         name: 'admin_dashboard_settings_edit_domains',
     )]
-    #[IsGranted('ROLE_ADMIN')]
+    #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
     public function editDomain(
         DomainBlacklist $domain,
         Request $request
@@ -255,7 +256,7 @@ class DomainBlacklistController extends AbstractController
             $this->entityManager->flush();
 
             $this->addFlash(
-                'success_admin',
+                'success',
                 $this->translator->trans(
                     'domainEdited',
                     ['%domain%' => $domain->getPattern()],
@@ -310,7 +311,7 @@ class DomainBlacklistController extends AbstractController
         name: 'admin_dashboard_blacklist_delete_domain',
         methods: ['POST']
     )]
-    #[IsGranted('ROLE_ADMIN')]
+    #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
     public function deleteDomains(
         int $id,
         Request $request,
@@ -329,7 +330,7 @@ class DomainBlacklistController extends AbstractController
         $this->entityManager->flush();
 
         $this->addFlash(
-            'success_admin',
+            'success',
             $this->translator->trans(
                 'domainDeleted',
                 [
@@ -365,7 +366,7 @@ class DomainBlacklistController extends AbstractController
         name: 'admin_domain_source_delete',
         methods: ['POST']
     )]
-    #[IsGranted('ROLE_ADMIN')]
+    #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
     public function deleteDomainsSource(
         int $id,
         Request $request,
@@ -383,7 +384,7 @@ class DomainBlacklistController extends AbstractController
         $this->entityManager->flush();
 
         $this->addFlash(
-            'success_admin',
+            'success',
             $this->translator->trans(
                 'domainSourceDeleted',
                 [
@@ -418,7 +419,7 @@ class DomainBlacklistController extends AbstractController
         name: 'admin_domain_source_toggle',
         methods: ['POST']
     )]
-    #[IsGranted('ROLE_ADMIN')]
+    #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
     public function toggleDomainSource(
         int $id,
         Request $request
@@ -439,7 +440,7 @@ class DomainBlacklistController extends AbstractController
 
         // Flash message
         $this->addFlash(
-            'success_admin',
+            'success',
             $this->translator->trans(
                 $isActive ? 'domainSourceActivated' : 'domainSourceDeactivated',
                 ['%domain%' => $domainSource->getUrl()],
@@ -482,7 +483,7 @@ class DomainBlacklistController extends AbstractController
         name: 'admin_domain_source_refresh_all',
         methods: ['GET']
     )]
-    #[IsGranted('ROLE_ADMIN')]
+    #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
     public function refreshAllDomainSource(
         Request $request,
         KernelInterface $kernel
@@ -500,7 +501,7 @@ class DomainBlacklistController extends AbstractController
 
         if ($exitCode !== 0) {
             $this->addFlash(
-                'error_admin',
+                'error',
                 $this->translator->trans(
                     'domainSourceRefreshAllFailed',
                     [],
@@ -509,7 +510,7 @@ class DomainBlacklistController extends AbstractController
             );
         } else {
             $this->addFlash(
-                'success_admin',
+                'success',
                 $this->translator->trans(
                     'allDomainSourceRefreshed',
                     [],
@@ -550,7 +551,7 @@ class DomainBlacklistController extends AbstractController
         name: 'admin_domain_source_refresh',
         methods: ['POST']
     )]
-    #[IsGranted('ROLE_ADMIN')]
+    #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
     public function refreshDomainSource(
         int $id,
         Request $request,
@@ -565,7 +566,7 @@ class DomainBlacklistController extends AbstractController
 
         if (!$domainSource->isActive()) {
             $this->addFlash(
-                'error_admin',
+                'warning',
                 $this->translator->trans('domainSourceInactive', [], 'controllers')
             );
 
@@ -588,7 +589,7 @@ class DomainBlacklistController extends AbstractController
 
         if ($exitCode !== 0) {
             $this->addFlash(
-                'error_admin',
+                'error',
                 $this->translator->trans(
                     'domainSourceRefreshFailed',
                     ['%domain%' => $domainSource->getUrl()],
@@ -597,7 +598,7 @@ class DomainBlacklistController extends AbstractController
             );
         } else {
             $this->addFlash(
-                'success_admin',
+                'success',
                 $this->translator->trans(
                     'domainSourceRefreshed',
                     ['%domain%' => $domainSource->getUrl()],

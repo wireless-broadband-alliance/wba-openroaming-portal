@@ -23,9 +23,9 @@ class TOSType extends AbstractType
             ->add('agreeTerms', CheckboxType::class, [
                 'mapped' => false,
                 'constraints' => [
-                    new IsTrue([
-                        'message' => $this->translator->trans('agreeTerms', [], 'LoginFormType'),
-                    ]),
+                    new IsTrue(
+                        message: $this->translator->trans('agreeTerms', [], 'LoginFormType'),
+                    ),
                 ],
                 'label' => $this->translator->trans('iAgreeTerms', [], 'LoginFormType'),
             ]);

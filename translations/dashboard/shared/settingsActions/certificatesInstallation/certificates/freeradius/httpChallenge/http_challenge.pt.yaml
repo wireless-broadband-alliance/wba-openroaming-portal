@@ -1,0 +1,52 @@
+test_and_proceed: "Gerar Certificados e Continuar"
+
+configuration_complete: "Pronto para Gerar Certificados Let's Encrypt"
+
+instructions: >
+    Deve agora gerar os certificados Let's Encrypt diretamente na máquina FreeRADIUS utilizando o Certbot.
+    Após executar os comandos necessários, copie o conjunto de certificados gerados e cole-os aqui para validar
+    e concluir a configuração.
+
+test_certificates: "Validar Certificados Gerados"
+
+finish_configuration: "Concluir Configuração dos Certificados"
+
+in_progress_title: "A validar certificados..."
+in_progress_description: "A verificar se os certificados gerados são válidos e estão corretamente formatados para o FreeRADIUS."
+
+test_not_done: "Os certificados ainda não foram validados"
+test_passed: "Certificados validados com sucesso"
+test_failed: "Falha na validação dos certificados"
+
+test_failed_warning: >
+    A validação falhou. Verifique se os certificados foram gerados corretamente
+    e se colou o conteúdo completo. Pode tentar novamente ou prosseguir caso
+    pretenda manter esta configuração.
+
+manual_test_warning: >
+    Este passo deve ser realizado manualmente no servidor FreeRADIUS.
+    Por razões de segurança, a geração dos certificados é efetuada localmente com o Certbot e o Let's Encrypt.
+    Execute os comandos abaixo na máquina FreeRADIUS para gerar os certificados
+    e, de seguida, copie o respetivo conteúdo e cole-o nesta interface.
+
+manual_command_title: "Execute estes comandos na máquina FreeRADIUS"
+
+manual_command_hint: >
+    Estes comandos geram os certificados Let's Encrypt e apresentam os ficheiros necessários.
+    Após a execução, copie o resultado completo e cole-o no campo desta página.
+
+paste_certificates_label: "Colar conjunto de certificados gerados"
+
+paste_certificates_placeholder: |
+    Cole aqui o resultado completo gerado na máquina FreeRADIUS.
+
+    O conteúdo deve incluir:
+    - Certificado da CA (ca.pem)
+    - Certificado do servidor (cert.pem)
+    - Cadeia de certificados (chain.pem / fullchain.pem)
+    - Chave privada (privkey.pem)
+
+    Certifique-se de que cada secção começa por:
+    -----BEGIN CERTIFICATE-----
+    ou
+    -----BEGIN PRIVATE KEY-----

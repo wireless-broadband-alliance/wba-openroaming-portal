@@ -1,123 +1,123 @@
 image: docker:latest
 services:
-    - docker:dind
+  - docker:dind
 stages:
-    - lint
-    - test
-    - build
-    - scan
+  - lint
+  - test
+  - build
+  - scan
 linting-psr12:
-    stage: lint
-    image: registry.gitlab.com/pipeline-components/php-codesniffer:latest
-    script:
-        - phpcs -s -p --colors --extensions=php --standard=PSR12 src/
+  stage: lint
+  image: registry.gitlab.com/pipeline-components/php-codesniffer:latest
+  script:
+    - phpcs -s -p --colors --extensions=php --standard=PSR12 src/
 
 php-security-checker:
-    stage: test
-    image: registry.gitlab.com/pipeline-components/php-security-checker:latest
-    script:
-        - cd ${COMPOSER_LOCATION:-.} && security-checker security:check composer.lock
+  stage: test
+  image: registry.gitlab.com/pipeline-components/php-security-checker:latest
+  script:
+    - cd ${COMPOSER_LOCATION:-.} && security-checker security:check composer.lock
 
 yamllint:
-    image: registry.gitlab.com/pipeline-components/yamllint:latest
-    allow_failure: false
-    script:
-        - yamllint -f colored -c yamllint.yaml .
-    rules:
-        - if: '$CI_COMMIT_BRANCH'
-          when: always
-        - if: '$CI_COMMIT_TAG'
-          when: never
-        - when: never
-    stage: lint
+  image: registry.gitlab.com/pipeline-components/yamllint:latest
+  allow_failure: false
+  script:
+    - yamllint -f colored -c yamllint.yaml .
+  rules:
+    - if: '$CI_COMMIT_BRANCH'
+      when: always
+    - if: '$CI_COMMIT_TAG'
+      when: never
+    - when: never
+  stage: lint
 
 
 test-rector:
-    image: "$CI_REGISTRY_IMAGE:TestImage"
-    allow_failure: false
-    before_script:
-        - cp .env.sample .env
-        - COMPOSER_CACHE_DIR=composer-cache composer install
-    script:
-        - vendor/bin/rector process src --dry-run
-    stage: test
+  image: "$CI_REGISTRY_IMAGE:TestImage"
+  allow_failure: false
+  before_script:
+    - cp .env.sample .env
+    - COMPOSER_CACHE_DIR=composer-cache composer install
+  script:
+    - vendor/bin/rector process src --dry-run
+  stage: test
 
 test-twig:
-    image: "$CI_REGISTRY_IMAGE:TestImage"
-    allow_failure: false
-    before_script:
-        - cp .env.sample .env
-        - COMPOSER_CACHE_DIR=composer-cache composer install
-    script:
-        - vendor/bin/twig-cs-fixer lint ./templates
-    stage: test
+  image: "$CI_REGISTRY_IMAGE:TestImage"
+  allow_failure: false
+  before_script:
+    - cp .env.sample .env
+    - COMPOSER_CACHE_DIR=composer-cache composer install
+  script:
+    - vendor/bin/twig-cs-fixer lint ./templates
+  stage: test
 
 test-phpstan:
-    image: "$CI_REGISTRY_IMAGE:TestImage"
-    allow_failure: false
-    before_script:
-        - cp .env.sample .env
-        - COMPOSER_CACHE_DIR=composer-cache composer install
-    script:
-        - php -d memory_limit=4G vendor/bin/phpstan analyse .
+  image: "$CI_REGISTRY_IMAGE:TestImage"
+  allow_failure: false
+  before_script:
+    - cp .env.sample .env
+    - COMPOSER_CACHE_DIR=composer-cache composer install
+  script:
+    - php -d memory_limit=4G vendor/bin/phpstan analyse .
 
-    stage: test
+  stage: test
 
 eslint:
-    image: node:latest
-    script:
-        - npm install
-        - npx eslint assets/controllers/
-    stage: test
+  image: node:latest
+  script:
+    - npm install
+    - npx eslint assets/controllers/
+  stage: test
 
 
 prettier:
-    image: node:latest
-    script:
-        - npm install
-        - npx prettier --check assets/controllers/
-    stage: test
+  image: node:latest
+  script:
+    - npm install
+    - npx prettier --check assets/controllers/
+  stage: test
 
 build_image:
-    stage: build
-    script:
-        - if [ -z "$CI_COMMIT_TAG" ]; then CI_COMMIT_TAG=$CI_COMMIT_SHORT_SHA; fi
-        - docker build --build-arg CICDVERSION=$CI_COMMIT_TAG -t $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME .
-        - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
-        - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
+  stage: build
+  script:
+    - if [ -z "$CI_COMMIT_TAG" ]; then CI_COMMIT_TAG=$CI_COMMIT_SHORT_SHA; fi
+    - docker build --build-arg CICDVERSION=$CI_COMMIT_TAG -t $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME .
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+    - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
 
 trivy-scan:
-    stage: scan
-    allow_failure: false
-    variables:
-        DOCKER_DRIVER: overlay2
-        TRIVY_NO_PROGRESS: "true"
-    before_script:
-        - export TRIVY_VERSION=$(wget -qO - "https://api.github.com/repos/aquasecurity/trivy/releases/latest" | grep '"tag_name":' | sed -E 's/.*"v([^"]+)".*/\1/')
-        - echo $TRIVY_VERSION
-        - wget --no-verbose https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz -O - | tar -zxvf -
-        # Login to Docker registry using GitLab credentials
-        - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
-    script:
-        - if [ -z "$CI_COMMIT_TAG" ]; then CI_COMMIT_TAG=$CI_COMMIT_SHORT_SHA; fi
-        - |
-            IMAGE="$CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME"
-            echo "Scanning Docker image: $IMAGE"
-            ./trivy image --exit-code 0 --severity HIGH,CRITICAL,MEDIUM --ignore-status will_not_fix,fix_deferred,fixed --format template --template "@contrib/gitlab.tpl" -o trivy-image-report.json "$IMAGE"
-            ./trivy image --exit-code 0 --severity HIGH,CRITICAL,MEDIUM --ignore-status will_not_fix,fix_deferred,fixed --format table "$IMAGE"
-        # Scan do Dockerfile
-        - echo "Scanning Dockerfile"
-        - ./trivy config --exit-code 0 --severity HIGH,CRITICAL,MEDIUM --format template --template "@contrib/gitlab.tpl" -o trivy-dockerfile-report.json ./Dockerfile
-        - ./trivy config --exit-code 0 --severity HIGH,CRITICAL,MEDIUM --format table ./Dockerfile
-    artifacts:
-        paths:
-            - trivy-image-report.json
-            - trivy-dockerfile-report.json
-        expire_in: 1 hour
-        reports:
-            container_scanning: trivy-image-report.json
+  stage: scan
+  allow_failure: false
+  variables:
+    DOCKER_DRIVER: overlay2
+    TRIVY_NO_PROGRESS: "true"
+  before_script:
+    - export TRIVY_VERSION=$(wget -qO - "https://api.github.com/repos/aquasecurity/trivy/releases/latest" | grep '"tag_name":' | sed -E 's/.*"v([^"]+)".*/\1/')
+    - echo $TRIVY_VERSION
+    - wget --no-verbose https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz -O - | tar -zxvf -
+    # Login to Docker registry using GitLab credentials
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
+  script:
+    - if [ -z "$CI_COMMIT_TAG" ]; then CI_COMMIT_TAG=$CI_COMMIT_SHORT_SHA; fi
+    - |
+      IMAGE="$CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME"
+      echo "Scanning Docker image: $IMAGE"
+      ./trivy image --exit-code 0 --severity HIGH,CRITICAL,MEDIUM --ignore-status will_not_fix,fix_deferred,fixed --format template --template "@contrib/gitlab.tpl" -o trivy-image-report.json "$IMAGE"
+      ./trivy image --exit-code 0 --severity HIGH,CRITICAL,MEDIUM --ignore-status will_not_fix,fix_deferred,fixed --format table "$IMAGE"
+    # Scan do Dockerfile
+    - echo "Scanning Dockerfile"
+    - ./trivy config --exit-code 0 --severity HIGH,CRITICAL,MEDIUM --format template --template "@contrib/gitlab.tpl" -o trivy-dockerfile-report.json ./Dockerfile
+    - ./trivy config --exit-code 0 --severity HIGH,CRITICAL,MEDIUM --format table ./Dockerfile
+  artifacts:
+    paths:
+      - trivy-image-report.json
+      - trivy-dockerfile-report.json
+    expire_in: 1 hour
+    reports:
+      container_scanning: trivy-image-report.json
 
 
 include:
-    - template: Security/Dependency-Scanning.gitlab-ci.yml
-    - template: Security/Secret-Detection.gitlab-ci.yml
+  - template: Security/Dependency-Scanning.gitlab-ci.yml
+  - template: Security/Secret-Detection.gitlab-ci.yml

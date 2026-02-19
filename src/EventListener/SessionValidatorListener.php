@@ -4,6 +4,7 @@ namespace App\EventListener;
 
 use App\Entity\User;
 use App\Enum\FirewallType;
+use App\Enum\SessionStatus;
 use App\Enum\UserTwoFactorAuthenticationStatus;
 use App\Repository\UserRepository;
 use App\Service\GetSettings;
@@ -42,6 +43,11 @@ readonly class SessionValidatorListener
         // Check if the user is authenticated
         $token = $this->tokenStorage->getToken();
         if (!$token || !$token->getUser()) {
+            return;
+        }
+
+        // If there is a system reset request in progress, skip all dashboard validation
+        if ($session->has(SessionStatus::SYSTEM_RESET_REQUEST->value)) {
             return;
         }
 

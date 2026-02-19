@@ -1,4 +1,7 @@
 security:
+    role_hierarchy:
+        ROLE_ADMIN: [ROLE_USER]
+        ROLE_SUPER_ADMIN: [ROLE_ADMIN, ROLE_USER, ROLE_ALLOWED_TO_SWITCH]
     # https://symfony.com/doc/current/security.html#registering-the-user-hashing-passwords
     password_hashers:
         Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
@@ -39,12 +42,22 @@ security:
             security: false
 
         dashboard:
-            pattern: ^/dashboard
+            pattern:
+                - ^/dashboard
+                - ^/_components
             lazy: true
             provider: admin_user_provider
             custom_authenticators:
                 - App\Security\DashboardAuthenticator
             entry_point: App\Security\DashboardAuthenticator
+            saml:
+                identifier_attribute: sAMAccountName
+                user_factory: saml_user_factory
+                persist_user: true
+                use_attribute_friendly_name: true
+                check_path: dashboard_saml_acs
+                login_path: dashboard_saml_login
+                default_target_path: admin_page
             # form_login:
             #    login_path: app_dashboard_login
             #    check_path: app_dashboard_login

@@ -16,8 +16,12 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
  */
 class PlatformStatusSettingsType extends AbstractType
 {
+    private bool $disabled = true;
+
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
+        $this->disabled = $options['disabled'];
+
         $builder
             ->add('platformMode', ChoiceType::class, [
                 'choices' => [
@@ -25,6 +29,7 @@ class PlatformStatusSettingsType extends AbstractType
                     PlatformMode::LIVE->value => PlatformMode::LIVE->value,
                 ],
                 'required' => false,
+                'disabled' => $this->disabled,
             ])
             ->add('userVerification', ChoiceType::class, [
                 'choices' => [
@@ -32,6 +37,7 @@ class PlatformStatusSettingsType extends AbstractType
                     OperationMode::OFF->value => OperationMode::OFF->value,
                 ],
                 'required' => false,
+                'disabled' => $this->disabled,
             ])
             ->add('turnstileChecker', ChoiceType::class, [
                 'choices' => [
@@ -39,6 +45,7 @@ class PlatformStatusSettingsType extends AbstractType
                     OperationMode::OFF->value => OperationMode::OFF->value,
                 ],
                 'required' => false,
+                'disabled' => $this->disabled,
             ])
             ->add('apiStatus', ChoiceType::class, [
                 'choices' => [
@@ -46,12 +53,15 @@ class PlatformStatusSettingsType extends AbstractType
                     OperationMode::OFF->value => OperationMode::OFF->value,
                 ],
                 'required' => false,
+                'disabled' => $this->disabled,
             ])
             ->add('userDeleteTime', IntegerType::class, [
                 'required' => false,
+                'disabled' => $this->disabled,
             ])
             ->add('timeIntervalNotification', IntegerType::class, [
                 'required' => false,
+                'disabled' => $this->disabled,
             ]);
     }
 
@@ -59,6 +69,7 @@ class PlatformStatusSettingsType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => PlatformStatusSettingsDTO::class,
+            'disabled' => true,
         ]);
     }
 }

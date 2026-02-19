@@ -13,7 +13,6 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
-use Symfony\Component\Mime\Email;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 readonly class EmailGenerator
@@ -229,6 +228,66 @@ readonly class EmailGenerator
             ])
             ->embedFromPath($logoPath, 'logo_cid');
 
+        $this->mailer->send($email);
+    }
+
+    /**
+     * @throws TransportExceptionInterface
+     */
+    public function sendNotifyExpiresCertEmail(User $user, int $timeLeft): void
+    {
+        $emailTitle = $this->settingRepository->findOneBy(['name' => SettingName::PAGE_TITLE->value])->getValue();
+        $contactEmail = $this->settingRepository->findOneBy(['name' => SettingName::CONTACT_EMAIL->value])->getValue();
+        $customerLogo = $this->settingRepository->findOneBy(['name' => SettingName::CUSTOMER_LOGO->value])->getValue();
+        $projectDir = $this->parameterBag->get('kernel.project_dir');
+        $logoPath = $projectDir . '/public' . $customerLogo;
+
+        // Send email to the user with the verification code
+        $email = new TemplatedEmail()
+            ->from(
+                new Address(
+                    $this->parameterBag->get('app.email_address'),
+                    $this->parameterBag->get('app.sender_name')
+                )
+            )
+            ->to($user->getEmail())
+            ->subject($this->translator->trans('subjectExpiring', [], 'notify_admin_expiring'))
+            ->htmlTemplate('email/notify_admin_expiring.html.twig')
+            ->context([
+                'uuid' => $user->getEmail(),
+                'emailTitle' => $emailTitle,
+                'contactEmail' => $contactEmail,
+                'timeLeft' => $timeLeft,
+            ])
+            ->embedFromPath($logoPath, 'logo_cid');
+        $this->mailer->send($email);
+    }
+
+    public function sendNotifyExpiredCertEmail(User $user): void
+    {
+        $emailTitle = $this->settingRepository->findOneBy(['name' => SettingName::PAGE_TITLE->value])->getValue();
+        $contactEmail = $this->settingRepository->findOneBy(['name' => SettingName::CONTACT_EMAIL->value])->getValue();
+        $customerLogo = $this->settingRepository->findOneBy(['name' => SettingName::CUSTOMER_LOGO->value])->getValue();
+        $projectDir = $this->parameterBag->get('kernel.project_dir');
+        $logoPath = $projectDir . '/public' . $customerLogo;
+
+        // Send email to the user with the verification code
+        $email = new TemplatedEmail()
+            ->from(
+                new Address(
+                    $this->parameterBag->get('app.email_address'),
+                    $this->parameterBag->get('app.sender_name')
+                )
+            )
+            ->to($user->getEmail())
+            ->subject($this->translator->trans('subjectExpired', [], 'notify_admin_expiring'))
+            ->htmlTemplate('email/notify_admin_expired.html.twig')
+            ->context([
+                'uuid' => $user->getEmail(),
+                'emailTitle' => $emailTitle,
+                'contactEmail' => $contactEmail,
+            ])
+            ->embedFromPath($logoPath, 'logo_cid');
         $this->mailer->send($email);
     }
 }

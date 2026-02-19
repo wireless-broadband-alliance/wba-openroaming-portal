@@ -30,7 +30,7 @@ readonly class TermsAcceptanceListener
 
         /** @var Session $session */
         $session = $request->getSession();
-        $termsAccepted = $session->get('termsAccepted', false);
+        $termsAccepted = $session->get('terms_accepted', false);
 
         // Skip if the current route is app_landing
         $currentRoute = $request->attributes->get('_route');

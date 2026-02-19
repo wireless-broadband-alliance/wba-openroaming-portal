@@ -4,9 +4,16 @@
 /.env.*.local
 /config/secrets/prod/prod.decrypt.private.php
 /public/bundles/
-/var/
 /vendor/
 ###< symfony/framework-bundle ###
+
+# Required var exceptions for certificate generations and management
+var/*
+!var/certs/
+# Except any .gitkeep file under var/certs or subfolders
+var/certs/*
+!var/certs/.gitkeep
+!var/certs/**/.gitkeep
 
 ###> phpunit/phpunit ###
 /phpunit.xml
@@ -21,27 +28,12 @@
 
 .idea/
 
-signing-keys/privkey.pem
-
-signing-keys/cert.pem
-
-signing-keys/windowsKey.pfx
-
-signing-keys/ca.pem
-
-signing-keys/chain.pem
-signing-keys/fullchain.pem
-
-.env.martelado
+signing-keys/*
 
 release-package/release.zip
 
 public/resources/uploaded/*
 !upload/.gitkeep
-
-assets/styles/randomRealmsColors.css
-
-DockerfileDev
 
 pgp_public_key/*
 !pgp_public_key/.gitkeep
@@ -76,6 +68,10 @@ src/Command/ResetRadiusMarcelinaSettingsCommand.php
 /public/build/
 /node_modules/
 ###< symfony/asset-mapper ###
+
+###> DockerFileCleanedDev ###
+DockerfileCleanedDev
+###< DockerFileCleanedDev ###
 
 ###> config/reference this page breaks phpstan with warnings of compatability, because of the project image ###
 config/reference.php

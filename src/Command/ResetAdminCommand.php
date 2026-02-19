@@ -4,6 +4,7 @@ namespace App\Command;
 
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
+use App\Enum\AdminRoleType;
 use App\Enum\AnalyticalEventType;
 use App\Enum\DefaultUser;
 use App\Enum\UserProvider;
@@ -22,8 +23,8 @@ use Symfony\Component\Console\Question\ConfirmationQuestion;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 #[AsCommand(
-    name: 'reset:admin',
-    description: 'Reset Admin Credentials',
+    name: 'reset:super-admin',
+    description: 'Reset Super Admin Credentials',
 )]
 class ResetAdminCommand extends Command
 {
@@ -39,31 +40,32 @@ class ResetAdminCommand extends Command
     protected function configure(): void
     {
         $this
-            ->setName('reset:admin')
-            ->setDescription('Reset Admin Credentials')
-            ->addOption('yes', 'y', InputOption::VALUE_NONE, 'Automatically confirm the reset');
+        ->setName('reset:super-admin')
+        ->setDescription('Reset Super Admin Credentials')
+        ->addOption('yes', 'y', InputOption::VALUE_NONE, 'Automatically confirm the reset');
     }
 
-    /**
-     * @throws RandomException
-     */
+  /**
+   * @throws RandomException
+   */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        // Check if the --yes option is provided (comes from a controller), then skip the confirmation prompt
+      // Check if the --yes option is provided (comes from a controller), then skip the confirmation prompt
         if (!$input->getOption('yes')) {
             $helper = $this->getHelper('question');
             $question = new ConfirmationQuestion(
-                'This action will reset the admin credentials to its default state without deleting any data. [y/N] ',
+                'This action will reset the super admin credentials' .
+                'to its default state without deleting any data. [y/N]',
                 false
             );
-            /** @var QuestionHelper $helper */
+          /** @var QuestionHelper $helper */
             if (!$helper->ask($input, $output, $question)) {
-                $output->writeln('Command aborted.');
-                return Command::SUCCESS;
+                  $output->writeln('Command aborted.');
+                  return Command::SUCCESS;
             }
         }
 
-        // Reset admin user credentials
+      // Reset admin user credentials
         $this->resetAdminUser();
 
         $output->writeln('<info>Success:</info> The admin credentials have been reset to its default state.');
@@ -71,19 +73,20 @@ class ResetAdminCommand extends Command
         return Command::SUCCESS;
     }
 
-    /**
-     * @throws RandomException
-     */
+  /**
+   * @throws RandomException
+   */
     protected function resetAdminUser(): void
     {
-        $admin = $this->userRepository->findAdmin();
+        $admin = $this->userRepository->findSuperAdmin();
 
         if (!$admin instanceof User) {
             $admin = new User();
             $admin->setUuid(DefaultUser::ADMIN->value);
             $admin->setEmail(DefaultUser::ADMIN->value);
             $admin->setPassword($this->userPasswordHashed->hashPassword($admin, 'gnimaornepo'));
-            $admin->setRoles(['ROLE_ADMIN']);
+            $admin->setRoles(['ROLE_SUPER_ADMIN']);
+            $admin->setPermissions([]);
             $admin->setIsVerified(true);
             $admin->setForgotPasswordRequest(true);
             $admin->setTwoFAcode((string)random_int(100000, 999999));
@@ -92,23 +95,23 @@ class ResetAdminCommand extends Command
             $admin->setCreatedAt(new DateTime());
             $this->entityManager->persist($admin);
 
-            // Create and set up the UserExternalAuth entity
+          // Create and set up the UserExternalAuth entity
             $userExternalAuth = new UserExternalAuth();
             $userExternalAuth->setUser($admin);
             $userExternalAuth->setProvider(UserProvider::PORTAL_ACCOUNT->value);
             $userExternalAuth->setProviderId(UserProvider::EMAIL->value);
             $this->entityManager->persist($userExternalAuth);
 
-            // Save the event Action using the service
+          // Save the event Action using the service
             $this->eventActions->saveEvent($admin, AnalyticalEventType::ADMIN_CREATION->value, new DateTime(), []);
             $this->eventActions->saveEvent($admin, AnalyticalEventType::ADMIN_VERIFICATION->value, new DateTime(), []);
         }
 
-        // Set password
-        $admin->setUuid(DefaultUser::ADMIN->value);
-        $admin->setEmail(DefaultUser::ADMIN->value);
-        $admin->setPassword($this->userPasswordHashed->hashPassword($admin, 'gnimaornepo'));
+      // Set password
         $admin->setForgotPasswordRequest(true);
+        $admin->setRoles(['ROLE_SUPER_ADMIN']);
+        $admin->setPermissions([]);
+        $admin->setPassword($this->userPasswordHashed->hashPassword($admin, 'gnimaornepo'));
 
         $this->entityManager->flush();
     }

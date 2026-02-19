@@ -83,7 +83,7 @@ readonly class MetricsService
         );
 
         try {
-            $totalUsers = $this->userRepository->countAllUsersExcludingAdmin();
+            $totalUsers = $this->userRepository->countUsers();
             $userGauge->set($totalUsers, ['state' => 'total']);
             $this->logger->info('Set total users metric: ' . $totalUsers);
 
