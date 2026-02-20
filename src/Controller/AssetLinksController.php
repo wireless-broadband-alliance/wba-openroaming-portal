@@ -31,6 +31,13 @@ readonly class AssetLinksController
 
         $content = file_get_contents($filePath);
 
+        if ($content === false) {
+            return new JsonResponse(
+                ['error' => 'Unable to read assetlinks.json'],
+                Response::HTTP_INTERNAL_SERVER_ERROR
+            );
+        }
+
         return new Response(
             $content,
             Response::HTTP_OK,
