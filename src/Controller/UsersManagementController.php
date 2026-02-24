@@ -73,7 +73,6 @@ class UsersManagementController extends AbstractController
         private readonly TranslatorInterface $translator,
         private readonly UserRadiusProfileRepository $radiusProfileRepository,
         private readonly EmailGenerator $emailGenerator,
-        private readonly UserPasswordHasherInterface $userPasswordHasher,
         private readonly UserPasswordHasherInterface $passwordHasher,
         private readonly MailerInterface $mailer,
         private readonly UserCreationService $userCreationService,
@@ -281,7 +280,7 @@ class UsersManagementController extends AbstractController
         $currentUser = $this->getUser();
 
         $newUser = new User();
-        $userAddDTO = new UserAddDTO($this->userPasswordHasher, $this->entityManager, $newUser);
+        $userAddDTO = new UserAddDTO();
 
         // Create & handle form
         $form = $this->createForm(UserAddType::class, $userAddDTO);

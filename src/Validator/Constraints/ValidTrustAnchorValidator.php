@@ -58,9 +58,10 @@ class ValidTrustAnchorValidator extends ConstraintValidator
         if ($rootPem) {
             $normalizedRoot = $this->normalizePem($rootPem);
 
-
             $pool[] = $normalizedRoot;
             $expectedRoot = $normalizedRoot;
+        } else {
+            $expectedRoot = null;
         }
 
         if (!$this->buildPathToTrustAnchor($leaf, $pool, $expectedRoot)) {
