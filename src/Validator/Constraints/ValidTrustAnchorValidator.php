@@ -35,6 +35,14 @@ class ValidTrustAnchorValidator extends ConstraintValidator
 
         $leaf = $this->normalizePem($leafPem);
 
+        if (!$leaf) {
+            $this->violate(
+                $constraint->invalidCertificateMessage,
+                $constraint->certField
+            );
+            return;
+        }
+
         $chainCerts = $this->uniqueCerts(
             $this->extractPemCertificates($chainPem)
         );
@@ -48,12 +56,19 @@ class ValidTrustAnchorValidator extends ConstraintValidator
         $pool = array_merge([$leaf], $chainCerts);
 
         if ($rootPem) {
-            $pool[] = $this->normalizePem($rootPem);
+            $normalizedRoot = $this->normalizePem($rootPem);
+
+            if (!$normalizedRoot) {
+                $this->violate(
+                    $constraint->invalidCertificateMessage,
+                    $constraint->rootField
+                );
+                return;
+            }
+
+            $pool[] = $normalizedRoot;
+            $expectedRoot = $normalizedRoot;
         }
-
-        $pool = $this->uniqueCerts($pool);
-
-        $expectedRoot = is_string($rootPem) ? $rootPem : null;
 
         if (!$this->buildPathToTrustAnchor($leaf, $pool, $expectedRoot)) {
             $this->violate(
@@ -137,7 +152,7 @@ class ValidTrustAnchorValidator extends ConstraintValidator
 
     private function normalizePem(
         string $pem
-    ): string {
+    ): ?string {
         if (
             !preg_match(
                 '/-----BEGIN CERTIFICATE-----(.*?)-----END CERTIFICATE-----/s',
@@ -145,7 +160,7 @@ class ValidTrustAnchorValidator extends ConstraintValidator
                 $match
             )
         ) {
-            throw new RuntimeException('Invalid PEM format');
+            return null;
         }
 
         return "-----BEGIN CERTIFICATE-----{$match[1]}-----END CERTIFICATE-----\n";
