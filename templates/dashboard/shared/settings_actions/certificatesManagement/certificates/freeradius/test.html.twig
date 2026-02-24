@@ -123,11 +123,7 @@ docker exec -i hybrid-freeradius-1 sh -c "cd /etc/freeradius/3.0/certs/ && cat c
         <div class="flex justify-center pb-3">
             <button type="submit"
                     class="px-6 py-3 border border-gray-300 font-medium rounded-lg shadow-sm flex items-center gap-2
-               {% if not testCompleted %}
-                   bg-gray-100 text-gray-400 cursor-not-allowed pointer-events-none
-               {% else %}
-                   bg-white text-gray-800 hover:bg-gray-50 focus:ring-2 focus:ring-primary/30 transition cursor-pointer
-               {% endif %}">
+                   bg-white text-gray-800 hover:bg-gray-50 focus:ring-2 focus:ring-primary/30 transition cursor-pointer">
                 <twig:ux:icon name="wba:right" class="w-5 h-5"/>
                 {{ 'finish_configuration'|trans({}, 'test_freeradius') }}
             </button>

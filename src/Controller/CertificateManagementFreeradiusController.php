@@ -10,7 +10,6 @@ use App\DTO\CloudflareDTO;
 use App\Entity\CertificateSetupProcess;
 use App\Entity\Setting;
 use App\Entity\User;
-use App\Enum\AdminRoleType;
 use App\Enum\AnalyticalEventType;
 use App\Enum\CertificateFileName;
 use App\Enum\CertificateMachineType;
@@ -46,7 +45,6 @@ use Random\RandomException;
 use RuntimeException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Process\Exception\ProcessFailedException;
@@ -724,8 +722,11 @@ class CertificateManagementFreeradiusController extends AbstractController
                 }
             } else {
                 // Update process entity
+                $processEntity->setFreeradiusFormCompletedAt(new DateTimeImmutable());
+                $processEntity->setFreeradiusConfigAppliedAt(new DateTimeImmutable());
                 $processEntity->setIsFreeradiusCertEV(false);
                 $processEntity->setIsFreeradiusCloudflare(true);
+
                 // Mark as PASSED and finish configuration
                 $processEntity->setFreeradiusTestResult(CertificateTestResult::PASSED);
                 $processEntity->setUpdatedAt(new DateTimeImmutable());
