@@ -23,6 +23,7 @@
             'admin_page',
             'admins_management',
             'admin_user_edit',
+            'dashboard_add_admin',
         ] %}
         {% set portalSettingsRoutes = [
             'admin_dashboard_settings_status',
@@ -64,11 +65,11 @@
                     <ul class="mx-2">
                         {# SideBar Button - User Management - Button #}
                         {% if is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::USERS_MANAGEMENT_READ')) %}
-                            {{ include('dashboard/shared/_sidebar_item.html.twig', {label: 'users'|trans({}, '_header_admin'), route: 'admin_page', icon: 'wba:user'}) }}
+                            {{ include('dashboard/shared/_sidebar_item.html.twig', {label: 'users'|trans({}, '_header_admin'), routes: ['admin_page'], icon: 'wba:user'}) }}
                         {% endif %}
 
                         {% if is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::ADMIN_MANAGEMENT_READ')) %}
-                            {{ include('dashboard/shared/_sidebar_item.html.twig', {label: 'admin'|trans({}, '_header_admin'), route: 'admins_management', icon: 'wba:admin-management'}) }}
+                            {{ include('dashboard/shared/_sidebar_item.html.twig', {label: 'admin'|trans({}, '_header_admin'), routes: ['admins_management', 'dashboard_add_admin'], icon: 'wba:admin-management'}) }}
                         {% endif %}
                     </ul>
                 </div>
@@ -93,27 +94,27 @@
                 <div class="py-2 mt-1 bg-lightGray rounded-md duration-300 shadow {{ (app.request.attributes.get('_route') in portalSettingsRoutes) ? '' : 'hidden' }}" {{ stimulus_target('nav-submenu', 'container') }}>
                     <ul class="mx-2">
                         {% if is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::PLATFORM_STATUS_READ')) %}
-                            {{ include('dashboard/shared/_sidebar_item.html.twig', {label: 'platformStatus'|trans({}, '_header_admin'), route: 'admin_dashboard_settings_status', icon: 'wba:barchart'}) }}
+                            {{ include('dashboard/shared/_sidebar_item.html.twig', {label: 'platformStatus'|trans({}, '_header_admin'), routes: ['admin_dashboard_settings_status'], icon: 'wba:barchart'}) }}
                         {% endif %}
 
                         {% if is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::LANDING_PAGE_CONFIG_READ')) %}
-                            {{ include('dashboard/shared/_sidebar_item.html.twig', {label: 'landingPageConfiguration'|trans({}, '_header_admin'), route: 'admin_dashboard_customize', icon: 'wba:pencil-edit'}) }}
+                            {{ include('dashboard/shared/_sidebar_item.html.twig', {label: 'landingPageConfiguration'|trans({}, '_header_admin'), routes: ['admin_dashboard_customize'], icon: 'wba:pencil-edit'}) }}
                         {% endif %}
 
                         {% if is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::USER_ENGAGEMENT_READ')) %}
-                            {{ include('dashboard/shared/_sidebar_item.html.twig', {label: 'userEngagement'|trans({}, '_header_admin'), route: 'admin_dashboard_settings_capport', icon: 'wba:wifi'}) }}
+                            {{ include('dashboard/shared/_sidebar_item.html.twig', {label: 'userEngagement'|trans({}, '_header_admin'), routes: ['admin_dashboard_settings_capport'], icon: 'wba:wifi'}) }}
                         {% endif %}
 
                         {% if is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::TERMS_POLICIES_READ')) %}
-                            {{ include('dashboard/shared/_sidebar_item.html.twig', {label: 'termsAndPolicies'|trans({}, '_header_admin'), route: 'admin_dashboard_settings_terms', icon: 'wba:file-check'}) }}
+                            {{ include('dashboard/shared/_sidebar_item.html.twig', {label: 'termsAndPolicies'|trans({}, '_header_admin'), routes: ['admin_dashboard_settings_terms'], icon: 'wba:file-check'}) }}
                         {% endif %}
 
                         {% if is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::CRON_SCHEDULE_READ')) %}
-                            {{ include('dashboard/shared/_sidebar_item.html.twig', {label: 'scheduleAutomation'|trans({}, '_header_admin'), route: 'admin_dashboard_settings_schedule', icon: 'wba:schedule'}) }}
+                            {{ include('dashboard/shared/_sidebar_item.html.twig', {label: 'scheduleAutomation'|trans({}, '_header_admin'), routes: ['admin_dashboard_settings_schedule'], icon: 'wba:schedule'}) }}
                         {% endif %}
 
                         {% if is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::CERTIFICATES_MANAGEMENT_READ')) %}
-                            {{ include('dashboard/shared/_sidebar_item.html.twig', {label: 'certsManagement'|trans({}, '_header_admin'), route: 'admin_dashboard_settings_certs_management', icon: 'wba:certificate'}) }}
+                            {{ include('dashboard/shared/_sidebar_item.html.twig', {label: 'certsManagement'|trans({}, '_header_admin'), routes:[ 'admin_dashboard_settings_certs_management'], icon: 'wba:certificate'}) }}
                         {% endif %}
                     </ul>
                 </div>
@@ -138,27 +139,27 @@
                 <div class="py-2 mt-1 bg-lightGray rounded-md duration-300 shadow {{ (app.request.attributes.get('_route') in userAuthenticationRoutes) ? '' : 'hidden' }}" {{ stimulus_target('nav-submenu', 'container') }}>
                     <ul class="mx-2">
                         {% if is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::AUTHENTICATION_METHODS_READ')) %}
-                            {{ include('dashboard/shared/_sidebar_item.html.twig', {label: 'authenticationMethods'|trans({}, '_header_admin'), route: 'admin_dashboard_settings_auth', icon: 'wba:at'}) }}
+                            {{ include('dashboard/shared/_sidebar_item.html.twig', {label: 'authenticationMethods'|trans({}, '_header_admin'), routes: ['admin_dashboard_settings_auth'], icon: 'wba:at'}) }}
                         {% endif %}
 
                         {% if is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::TWO_FACTOR_AUTH_READ')) %}
-                            {{ include('dashboard/shared/_sidebar_item.html.twig', {label: 'twoFactorAuthenticator'|trans({}, '_header_admin'), route: 'admin_dashboard_settings_two_fa', icon: 'wba:2fa'}) }}
+                            {{ include('dashboard/shared/_sidebar_item.html.twig', {label: 'twoFactorAuthenticator'|trans({}, '_header_admin'), routes: ['admin_dashboard_settings_two_fa'], icon: 'wba:2fa'}) }}
                         {% endif %}
 
                         {% if is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::LDAP_SYNCHRONIZATION_READ')) %}
-                            {{ include('dashboard/shared/_sidebar_item.html.twig', {label: 'LDAPSynchronization'|trans({}, '_header_admin'), route: 'admin_dashboard_settings_LDAP', icon: 'wba:sync'}) }}
+                            {{ include('dashboard/shared/_sidebar_item.html.twig', {label: 'LDAPSynchronization'|trans({}, '_header_admin'), routes: ['admin_dashboard_settings_LDAP'], icon: 'wba:sync'}) }}
                         {% endif %}
 
                         {% if is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::RADIUS_PROFILE_CONFIG_READ')) %}
-                            {{ include('dashboard/shared/_sidebar_item.html.twig', {label: 'radiusProfileConfiguration'|trans({}, '_header_admin'), route: 'admin_dashboard_settings_radius', icon: 'wba:file-space'}) }}
+                            {{ include('dashboard/shared/_sidebar_item.html.twig', {label: 'radiusProfileConfiguration'|trans({}, '_header_admin'), routes:[ 'admin_dashboard_settings_radius'], icon: 'wba:file-space'}) }}
                         {% endif %}
 
                         {% if is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::SMS_CONFIG_READ')) %}
-                            {{ include('dashboard/shared/_sidebar_item.html.twig', {label: 'SMSConfiguration'|trans({}, '_header_admin'), route: 'admin_dashboard_settings_sms', icon: 'wba:sms'}) }}
+                            {{ include('dashboard/shared/_sidebar_item.html.twig', {label: 'SMSConfiguration'|trans({}, '_header_admin'), routes: ['admin_dashboard_settings_sms'], icon: 'wba:sms'}) }}
                         {% endif %}
 
                         {% if constant('App\\Enum\\AdminRoleType::ROLE_SUPER_ADMIN').value in app.user.roles %}
-                            {{ include('dashboard/shared/_sidebar_item.html.twig', {label: 'domainBlacklist'|trans({}, '_header_admin'), route: 'admin_dashboard_settings_domains', icon: 'wba:file-cross'}) }}
+                            {{ include('dashboard/shared/_sidebar_item.html.twig', {label: 'domainBlacklist'|trans({}, '_header_admin'), routes: ['admin_dashboard_settings_domains'], icon: 'wba:file-cross'}) }}
                         {% endif %}
                     </ul>
                 </div>
@@ -184,12 +185,12 @@
                     <ul class="mx-2">
                         {# SideBar Button - Portal Statistics - Button #}
                         {% if is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::PORTAL_STATISTICS_READ')) %}
-                            {{ include('dashboard/shared/_sidebar_item.html.twig', {label: 'portalStatistics'|trans({}, '_header_admin'), route: 'admin_dashboard_statistics', icon: 'wba:piechart'}) }}
+                            {{ include('dashboard/shared/_sidebar_item.html.twig', {label: 'portalStatistics'|trans({}, '_header_admin'), routes: ['admin_dashboard_statistics'], icon: 'wba:piechart'}) }}
                         {% endif %}
 
                         {# SideBar Button - Freeradius Statistics - Button #}
                         {% if is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::CONNECTIVITY_STATISTICS_READ')) %}
-                            {{ include('dashboard/shared/_sidebar_item.html.twig', {label: 'connectivityStatistics'|trans({}, '_header_admin'), route: 'admin_dashboard_statistics_freeradius', icon: 'wba:hdd'}) }}
+                            {{ include('dashboard/shared/_sidebar_item.html.twig', {label: 'connectivityStatistics'|trans({}, '_header_admin'), routes: ['admin_dashboard_statistics_freeradius'], icon: 'wba:hdd'}) }}
                         {% endif %}
                     </ul>
                 </div>
