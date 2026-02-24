@@ -3,7 +3,6 @@
 {% block title %}Admin Page WBA{% endblock %}
 
 {% block container %}
-    <twig:UserAddForm :userAddDTO="userAddDTO" :form="form">
         {{ form_start(form) }}
         {{ form_errors(form) }}
         <div class="p-6 bg-white">
@@ -84,5 +83,4 @@
         </div>
         {{ form_rest(form) }}
         {{ form_end(form) }}
-    </twig:UserAddForm>
 {% endblock %}
