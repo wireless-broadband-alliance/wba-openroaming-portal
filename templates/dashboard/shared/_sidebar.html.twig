@@ -114,7 +114,7 @@
                         {% endif %}
 
                         {% if is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::CERTIFICATES_MANAGEMENT_READ')) %}
-                            {{ include('dashboard/shared/_sidebar_item.html.twig', {label: 'certsManagement'|trans({}, '_header_admin'), routes:[ 'admin_dashboard_settings_certs_management'], icon: 'wba:certificate'}) }}
+                            {{ include('dashboard/shared/_sidebar_item.html.twig', {label: 'certsManagement'|trans({}, '_header_admin'), routes: ['admin_dashboard_settings_certs_management'], icon: 'wba:certificate'}) }}
                         {% endif %}
                     </ul>
                 </div>
@@ -151,7 +151,7 @@
                         {% endif %}
 
                         {% if is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::RADIUS_PROFILE_CONFIG_READ')) %}
-                            {{ include('dashboard/shared/_sidebar_item.html.twig', {label: 'radiusProfileConfiguration'|trans({}, '_header_admin'), routes:[ 'admin_dashboard_settings_radius'], icon: 'wba:file-space'}) }}
+                            {{ include('dashboard/shared/_sidebar_item.html.twig', {label: 'radiusProfileConfiguration'|trans({}, '_header_admin'), routes: ['admin_dashboard_settings_radius'], icon: 'wba:file-space'}) }}
                         {% endif %}
 
                         {% if is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::SMS_CONFIG_READ')) %}

@@ -11,8 +11,6 @@
     >
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-
-
                 {# Account Type #}
                 <div class="relative lg:col-span-2">
                     {{ form_label(form.accountType, 'accountType'|trans({}, 'UserAddType'), {label_attr: {class: 'form-label'}}) }}
@@ -20,8 +18,8 @@
                         attr: {
                             class: 'form-widget',
                             'data-account-type-target': 'select',
-                            'data-action': 'change->account-type#toggle'
-                        }
+                            'data-action': 'change->account-type#toggle',
+                        },
                     }) }}
                 </div>
 
@@ -45,7 +43,6 @@
                     </div>
                     <div class="text-red-500 mt-1">{{ form_errors(form.phoneNumber) }}</div>
                 </div>
-
 
                 {# First Name #}
                 <div class="relative">
