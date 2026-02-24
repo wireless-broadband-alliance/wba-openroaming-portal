@@ -46,6 +46,9 @@ class CertificateManagementController extends AbstractController
     ) {
     }
 
+    /**
+     * @throws \DateMalformedStringException
+     */
     #[Route('/dashboard/settings/certificatesManagement', name: 'admin_dashboard_settings_certs_management')]
     #[IsGranted(UserAuthenticationVoter::CERTIFICATES_MANAGEMENT_READ)]
     public function settingsCertificatesManagement(): Response
@@ -57,13 +60,10 @@ class CertificateManagementController extends AbstractController
         }
         if ($lastCompletedCertificate instanceof CertificateSetupProcess) {
             $certificateDate = $lastCompletedCertificate->getUpdatedAt();
-
             $certificateSetRadsecproxy = $this->certificateRadsecproxyInfoService->getLatestCertificatesSet(
                 $lastCompletedCertificate
             );
-            $certificateSetFreeradius = $this->certificateFreeradiusInfoService->getLatestCertificatesSet(
-                $lastCompletedCertificate
-            );
+            $certificateSetFreeradius = $this->certificateFreeradiusInfoService->readCertificatesOnSigningKeys();
             $certificateSet = array_merge($certificateSetRadsecproxy, $certificateSetFreeradius);
         }
 

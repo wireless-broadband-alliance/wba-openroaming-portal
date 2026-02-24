@@ -3,7 +3,7 @@ tittleInstallation: 'Installation'
 renewCertificates: 'Renew Certificates'
 reinstallPlatform: 'Reinstall Platform'
 lastCompletedCertificates: 'Last execution at: '
-confirmReinstall: "Are you sure you want to reinstall the platform certificates? This process will compromise its current configuration."
+confirmReinstall: "Are you sure you want to reinstall the platform certificates? This process will overwrite its current configuration."
 expiration:
     warning: "Your certificate will expire soon!"
     expired: "Your certificate has expired!"

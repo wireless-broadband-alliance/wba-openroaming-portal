@@ -4,13 +4,18 @@ namespace App\Service;
 
 use App\Entity\CertificateSetupProcess;
 use App\Entity\Certificate;
+use App\Enum\CertificateFileName;
 use App\Enum\CertificateMachineType;
+use DateTimeImmutable;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\HttpKernel\KernelInterface;
 
 readonly class CertificateFreeradiusInfoService
 {
     public function __construct(
-        private ParameterBagInterface $parameterBag
+        private ParameterBagInterface $parameterBag,
+        private KernelInterface $kernel,
+        private CertificateCheckerService $certificateCheckerService
     ) {
     }
 
@@ -53,6 +58,71 @@ readonly class CertificateFreeradiusInfoService
     }
 
     /**
+     * @return array<'CA'|'Cert'|'Chain'|'Full Chain'|'Private Key', array{
+     *     name: 'CA'|'Cert'|'Chain'|'Full Chain'|'Private Key',
+     *     type: 'FREERADIUS',
+     *     content: string|null,
+     *     metadata: array{path: string, originalName: string},
+     *     fingerprintSHA1: string|false|null,
+     *     validFrom: \DateTimeImmutable|null,
+     *     validTo: \DateTimeImmutable|null,
+     *     parsedSubject: array<string, mixed>|null,
+     *     parsedIssuer: array<string, mixed>|null
+     * }>
+     * @throws \DateMalformedStringException
+     */
+    public function readCertificatesOnSigningKeys(): array
+    {
+        $signingKeysPath = $this->kernel->getProjectDir() . '/signing-keys/';
+
+        $filesMap = [
+            CertificateFileName::CA_PEM->value =>
+                $signingKeysPath . 'ca/' . CertificateFileName::CA_PEM_FILE->value,
+            CertificateFileName::CERT_PEM->value =>
+                $signingKeysPath . CertificateFileName::CERT_PEM_FILE->value,
+            CertificateFileName::CHAIN_PEM->value =>
+                $signingKeysPath . CertificateFileName::CHAIN_PEM_FILE->value,
+            CertificateFileName::FULL_CHAIN_PEM->value =>
+                $signingKeysPath . CertificateFileName::FULL_CHAIN_PEM_FILE->value,
+            CertificateFileName::PRIVATE_KEY_PEM->value =>
+                $signingKeysPath . CertificateFileName::PRIVATE_KEY_PEM_FILE->value,
+        ];
+
+        $certs = [];
+
+        foreach ($filesMap as $name => $filePath) {
+            if (!file_exists($filePath) || !is_file($filePath)) {
+                // Skip missing or invalid files
+                continue;
+            }
+
+            $content = file_get_contents($filePath) ?: null;
+            $parsed = null;
+
+            if ($content && $name !== CertificateFileName::PRIVATE_KEY_PEM->value) {
+                $parsed = $this->certificateCheckerService->parseCertificate($content);
+            }
+
+            $certs[$name] = [
+                'name' => $name,
+                'type' => CertificateMachineType::FREERADIUS->value,
+                'content' => $content,
+                'metadata' => [
+                    'path' => $filePath,
+                    'originalName' => basename($filePath),
+                ],
+                'fingerprintSHA1' => $parsed['fingerprintSHA1'] ?? ($content ? sha1($content) : null),
+                'validFrom' => isset($parsed['validFrom']) ? new DateTimeImmutable($parsed['validFrom']) : null,
+                'validTo' => isset($parsed['validTo']) ? new DateTimeImmutable($parsed['validTo']) : null,
+                'parsedSubject' => $parsed['subject'] ?? null,
+                'parsedIssuer' => $parsed['issuer'] ?? null,
+            ];
+        }
+
+        return $certs;
+    }
+
+    /**
      * @return array{
      *     name: string,
      *     type: CertificateMachineType|string|bool,
@@ -76,11 +146,8 @@ readonly class CertificateFreeradiusInfoService
 
         $parsed = null;
 
-        if ($content) {
-            $resource = @openssl_x509_read($content);
-            if ($resource) {
-                $parsed = openssl_x509_parse($resource);
-            }
+        if ($content && str_contains($content, '-----BEGIN CERTIFICATE-----')) {
+            $parsed = $this->certificateCheckerService->parseCertificate($content);
         }
 
         return [
@@ -122,7 +189,7 @@ readonly class CertificateFreeradiusInfoService
 
         return array_any(
             (array)$policies,
-            fn($policy) => array_any($evOids, fn($oid) => str_contains((string)$policy, (string) $oid))
+            fn($policy) => array_any($evOids, fn($oid) => str_contains((string)$policy, (string)$oid))
         );
     }
 }
