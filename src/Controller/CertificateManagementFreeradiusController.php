@@ -670,7 +670,8 @@ class CertificateManagementFreeradiusController extends AbstractController
             $this->entityManager->persist($processEntity);
             $this->entityManager->flush();
 
-            if ($mode === 'http_challenge' &&
+            if (
+                $mode === 'http_challenge' &&
                 $processEntity->getFreeradiusTestResult() === CertificateTestResult::PASSED
             ) {
                 // Load the latest FREERADIUS certificates for this process
