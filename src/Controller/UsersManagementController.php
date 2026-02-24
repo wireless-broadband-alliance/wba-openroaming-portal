@@ -33,6 +33,7 @@ use App\Service\GetSettings;
 use App\Service\ProfileManager;
 use App\Service\SendSMS;
 use App\Service\TwoFAService;
+use App\Service\UserCreationService;
 use App\Service\UserDeletionService;
 use App\Service\VerificationCodeEmailGenerator;
 use DateInterval;
@@ -75,6 +76,7 @@ class UsersManagementController extends AbstractController
         private readonly UserPasswordHasherInterface $userPasswordHasher,
         private readonly UserPasswordHasherInterface $passwordHasher,
         private readonly MailerInterface $mailer,
+        private readonly UserCreationService $userCreationService,
     ) {
     }
 
@@ -287,7 +289,7 @@ class UsersManagementController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             // Convert DTO → Entity data before creation
-            $userAddDTO->createUser($newUser);
+            $this->userCreationService->createAdminUser($userAddDTO);
 
             // Flash message
             $this->addFlash(
