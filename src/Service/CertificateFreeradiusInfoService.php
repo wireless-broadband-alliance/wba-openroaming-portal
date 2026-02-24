@@ -58,6 +58,17 @@ readonly class CertificateFreeradiusInfoService
     }
 
     /**
+     * @return array<'CA'|'Cert'|'Chain'|'Full Chain'|'Private Key', array{
+     *     name: 'CA'|'Cert'|'Chain'|'Full Chain'|'Private Key',
+     *     type: 'FREERADIUS',
+     *     content: string|null,
+     *     metadata: array{path: string, originalName: string},
+     *     fingerprintSHA1: string|false|null,
+     *     validFrom: \DateTimeImmutable|null,
+     *     validTo: \DateTimeImmutable|null,
+     *     parsedSubject: array<string, mixed>|null,
+     *     parsedIssuer: array<string, mixed>|null
+     * }>
      * @throws \DateMalformedStringException
      */
     public function readCertificatesOnSigningKeys(): array
