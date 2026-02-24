@@ -672,7 +672,9 @@ class CertificateManagementFreeradiusController extends AbstractController
             $this->entityManager->persist($processEntity);
             $this->entityManager->flush();
 
-            if ($mode === 'http_challenge') {
+            if ($mode === 'http_challenge' &&
+                $processEntity->getFreeradiusTestResult() === CertificateTestResult::PASSED
+            ) {
                 // Load the latest FREERADIUS certificates for this process
                 $latestCerts = $this->certificateFreeradiusInfoService->getLatestCertificatesSet($processEntity);
                 if ($latestCerts === []) {
@@ -720,6 +722,13 @@ class CertificateManagementFreeradiusController extends AbstractController
                     $this->certificateWriterUpdateService
                         ->updateFromParsedCertificates($normalizedCaParsed, $certParsed);
                 }
+            } else {
+                // Update process entity
+                $processEntity->setIsFreeradiusCertEV(false);
+                $processEntity->setIsFreeradiusCloudflare(true);
+                // Mark as PASSED and finish configuration
+                $processEntity->setFreeradiusTestResult(CertificateTestResult::PASSED);
+                $processEntity->setUpdatedAt(new DateTimeImmutable());
             }
 
             // Redirect to the next stage automatically
@@ -744,6 +753,8 @@ class CertificateManagementFreeradiusController extends AbstractController
                 . 'freeradius/test.html.twig',
         };
 
+        $allowSkipProcess = $this->certificateCheckerService->verifyCertificates();
+
         return $this->render(
             $template,
             [
@@ -755,6 +766,7 @@ class CertificateManagementFreeradiusController extends AbstractController
                 'formFinishProcess' => $formFinishProcess->createView(),
                 'mode' => $mode,
                 'commands' => $httpChallengeCommands,
+                'allowSkipProcess' => $allowSkipProcess,
             ]
         );
     }
@@ -893,33 +905,5 @@ class CertificateManagementFreeradiusController extends AbstractController
                 'process' => $processState['process'],
             ]
         );
-    }
-
-    #[Route(
-        '/dashboard/settings/certificatesManagement/freeradius/skipTest',
-        name: 'admin_dashboard_settings_certs_freeradius_skipTest'
-    )]
-    #[IsGranted(UserAuthenticationVoter::CERTIFICATES_MANAGEMENT_WRITE)]
-    public function settingsCertificatesManagementFreeradiusSkipTest(): Response
-    {
-        $processEntity = $this->certificateProcessCheckerService->getCurrentProcess();
-
-        // Ensure an active process exists
-        if (!$processEntity instanceof CertificateSetupProcess) {
-            return new JsonResponse([
-                'status' => 'error',
-                'message' => $this->translator->trans(
-                    'noActiveProcess',
-                    [],
-                    'CertificateProcessCheckerService'
-                ),
-            ], Response::HTTP_BAD_REQUEST);
-        }
-
-        $processEntity->setFreeradiusTestResult(CertificateTestResult::PASSED);
-        $this->entityManager->persist($processEntity);
-        $this->entityManager->flush();
-
-        return $this->redirectToRoute('admin_page');
     }
 }
