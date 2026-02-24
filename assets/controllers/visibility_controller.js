@@ -1,38 +1,23 @@
-import { Controller } from '@hotwired/stimulus';
+import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-    static targets = ['first', 'second'];
-    static values = {
-        isOpened: Boolean,
-    };
+    static targets = ["select", "item"]
 
     connect() {
-        super.connect();
-
-        if (this.hasFirstTarget) {
-            console.log(
-                '%c Visibility - Detected for ' + this.firstTarget.name,
-                'background: green; color: black'
-            );
-        }
-
-        if (this.hasSecondTarget) {
-            console.log(
-                '%c Visibility - Detected for ' + this.secondTarget.name,
-                'background: green; color: black'
-            );
-        }
+        this.update()
     }
 
-    toggle() {
-        this.isOpenedValue = !this.isOpenedValue;
+    update() {
+        const value = this.selectTarget.value
 
-        if (this.isOpenedValue) {
-            this.firstTarget.classList.remove('hidden');
-            this.secondTarget.classList.add('hidden');
-        } else {
-            this.firstTarget.classList.add('hidden');
-            this.secondTarget.classList.remove('hidden');
-        }
+        this.itemTargets.forEach((element) => {
+            const expectedValue = element.dataset.visibilityValue
+
+            if (expectedValue === value) {
+                element.classList.remove("hidden")
+            } else {
+                element.classList.add("hidden")
+            }
+        })
     }
 }

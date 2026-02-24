@@ -6,7 +6,7 @@
         {{ form_start(form) }}
         {{ form_errors(form) }}
     <div
-            data-controller="account-type"
+            data-controller="visibility"
             class="p-6 bg-white"
     >
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -17,21 +17,21 @@
                     {{ form_widget(form.accountType, {
                         attr: {
                             class: 'form-widget',
-                            'data-account-type-target': 'select',
-                            'data-action': 'change->account-type#toggle',
+                            'data-visibility-target': 'select',
+                            'data-action': 'change->visibility#update',
                         },
                     }) }}
                 </div>
 
                 {# Email #}
-                <div class="relative lg:col-span-2" data-account-type-target="email">
+                <div class="relative lg:col-span-2" data-visibility-target="item" data-visibility-value="Email">
                     {{ form_label(form.email, 'Email', {label_attr: {class: 'form-label'}}) }}
                     {{ form_widget(form.email, {attr: {class: 'form-widget'}}) }}
                     <div class="text-red-500 mt-1">{{ form_errors(form.email) }}</div>
                 </div>
 
                 {# Phone Number #}
-                <div class="relative lg:col-span-2" data-account-type-target="phone">
+                <div class="relative lg:col-span-2" data-visibility-target="item" data-visibility-value="Phone Number">
                     {{ form_label(form.phoneNumber, 'phoneNumber'|trans({}, 'UserAddType'), {label_attr: {class: 'form-label'}}) }}
                     <div class="flex flex-row gap-4 mt-1">
                         <div class="w-1/3">
