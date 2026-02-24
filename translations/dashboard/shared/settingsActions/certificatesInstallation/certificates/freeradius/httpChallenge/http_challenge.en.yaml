@@ -8,7 +8,7 @@ instructions: >
     and complete the configuration.
 
 test_certificates: "Validate Generated Certificates"
-
+skip_and_finish_configuration: "Skip & Finish Certificate Setup"
 finish_configuration: "Finish Certificate Setup"
 
 in_progress_title: "Validating certificates..."

@@ -11,6 +11,7 @@ use App\Enum\UserProvider;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use libphonenumber\PhoneNumber;
+use LogicException;
 use Misd\PhoneNumberBundle\Validator\Constraints\PhoneNumber as AssertPhoneNumber;
 use Random\RandomException;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -35,7 +36,6 @@ class UserAddDTO
     #[AssertPhoneNumber]
     public ?PhoneNumber $phoneNumber = null;
 
-    #[Assert\NotBlank(message: 'fieldCannotBeBlank')]
     #[Assert\Length(
         min: 8,
         max: 255,
@@ -60,6 +60,7 @@ class UserAddDTO
     public PermissionLevel $userEngagement = PermissionLevel::NONE;
     public PermissionLevel $termsPolicies = PermissionLevel::NONE;
     public PermissionLevel $cronSchedule = PermissionLevel::NONE;
+    public PermissionLevel $certificatesManagement = PermissionLevel::NONE;
     public PermissionLevel $authenticationMethods = PermissionLevel::NONE;
     public PermissionLevel $twoFactorAuth = PermissionLevel::NONE;
     public PermissionLevel $ldapSynchronization = PermissionLevel::NONE;
@@ -68,76 +69,11 @@ class UserAddDTO
     public PermissionLevel $portalStatistics = PermissionLevel::NONE;
     public PermissionLevel $connectivityStatistics = PermissionLevel::NONE;
 
-    public function __construct(
-        private readonly UserPasswordHasherInterface $userPasswordHasher,
-        private readonly EntityManagerInterface $entityManager,
-        ?User $user = null
-    ) {
-        if (!is_null($user)) {
-            $this->email = $user->getEmail();
-            $this->firstName = $user->getFirstName();
-            $this->lastName = $user->getLastName();
-            $this->phoneNumber = $user->getPhoneNumber();
-            $this->accountType = $user->getPhoneNumber() instanceof PhoneNumber ?
-                UserProvider::PHONE_NUMBER->value : UserProvider::EMAIL->value;
-        }
-    }
-
-    /**
-     * Maps the DTO data back to the User entity
-     * @throws RandomException
-     */
-    public function createUser(User $user): User
-    {
-        $userAuths = new UserExternalAuth();
-
-        if ($this->accountType === UserProvider::EMAIL->value && $this->email) {
-            $user->setEmail($this->email);
-            $user->setUuid($this->email);
-            $userAuths->setProvider(UserProvider::PORTAL_ACCOUNT->value);
-            $userAuths->setProviderId(UserProvider::EMAIL->value);
-            $userAuths->setUser($user);
-        } elseif ($this->accountType === UserProvider::PHONE_NUMBER->value && $this->phoneNumber) {
-            $user->setPhoneNumber($this->phoneNumber);
-            $user->setUuid('+' . $this->phoneNumber->getCountryCode() . $this->phoneNumber->getNationalNumber());
-            $userAuths->setProvider(UserProvider::PORTAL_ACCOUNT->value);
-            $userAuths->setProviderId(UserProvider::PHONE_NUMBER->value);
-            $userAuths->setUser($user);
-        }
-
-        $user->setRoles([AdminRoleType::ROLE_ADMIN->value]);
-        $user->setFirstName($this->firstName);
-        $user->setLastName($this->lastName);
-        $user->setForgotPasswordRequest(true);
-        $user->setTwoFAcode((string)random_int(100000, 999999));
-        $user->setTwoFAcodeGeneratedAt(new DateTime());
-        $user->setTwoFAcodeIsActive(true);
-        $user->setCreatedAt(new DateTime());
-
-        // Hash the password
-        $hashedPassword = $this->userPasswordHasher->hashPassword($user, $this->password);
-        $user->setPassword($hashedPassword);
-
-        // Set permissions
-        $adminPermissions = $this->getAdminPermissions();
-
-        // Example ["USER_ENGAGEMENT_WRITE", ...]
-        $permissionsArray = array_map(static fn(AdminPermissionsType $p) => $p->value, $adminPermissions);
-        $user->setPermissions($permissionsArray);
-
-        // Persist new user
-        $this->entityManager->persist($user);
-        $this->entityManager->persist($userAuths);
-        $this->entityManager->flush();
-
-        return $user;
-    }
-
     /**
      * Returns AdminPermissionsType strings based on selected levels
      * @return array<AdminPermissionsType>
      */
-    private function getAdminPermissions(): array
+    public function adminPermissions(): array
     {
         $mapping = [
             'userManagement' => 'USERS_MANAGEMENT',
