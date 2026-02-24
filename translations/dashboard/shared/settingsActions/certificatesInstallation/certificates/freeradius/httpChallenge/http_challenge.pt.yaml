@@ -8,7 +8,7 @@ instructions: >
     e concluir a configuração.
 
 test_certificates: "Validar Certificados Gerados"
-
+skip_and_finish_configuration: "Pular e concluir Configuração dos Certificados"
 finish_configuration: "Concluir Configuração dos Certificados"
 
 in_progress_title: "A validar certificados..."
