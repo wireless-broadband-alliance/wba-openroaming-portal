@@ -10,7 +10,6 @@ use App\DTO\CloudflareDTO;
 use App\Entity\CertificateSetupProcess;
 use App\Entity\Setting;
 use App\Entity\User;
-use App\Enum\AdminRoleType;
 use App\Enum\AnalyticalEventType;
 use App\Enum\CertificateFileName;
 use App\Enum\CertificateMachineType;
@@ -46,7 +45,6 @@ use Random\RandomException;
 use RuntimeException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Process\Exception\ProcessFailedException;
@@ -672,7 +670,10 @@ class CertificateManagementFreeradiusController extends AbstractController
             $this->entityManager->persist($processEntity);
             $this->entityManager->flush();
 
-            if ($mode === 'http_challenge') {
+            if (
+                $mode === 'http_challenge' &&
+                $processEntity->getFreeradiusTestResult() === CertificateTestResult::PASSED
+            ) {
                 // Load the latest FREERADIUS certificates for this process
                 $latestCerts = $this->certificateFreeradiusInfoService->getLatestCertificatesSet($processEntity);
                 if ($latestCerts === []) {
@@ -720,6 +721,16 @@ class CertificateManagementFreeradiusController extends AbstractController
                     $this->certificateWriterUpdateService
                         ->updateFromParsedCertificates($normalizedCaParsed, $certParsed);
                 }
+            } else {
+                // Update process entity
+                $processEntity->setFreeradiusFormCompletedAt(new DateTimeImmutable());
+                $processEntity->setFreeradiusConfigAppliedAt(new DateTimeImmutable());
+                $processEntity->setIsFreeradiusCertEV(false);
+                $processEntity->setIsFreeradiusCloudflare(true);
+
+                // Mark as PASSED and finish configuration
+                $processEntity->setFreeradiusTestResult(CertificateTestResult::PASSED);
+                $processEntity->setUpdatedAt(new DateTimeImmutable());
             }
 
             // Redirect to the next stage automatically
@@ -744,6 +755,8 @@ class CertificateManagementFreeradiusController extends AbstractController
                 . 'freeradius/test.html.twig',
         };
 
+        $allowSkipProcess = $this->certificateCheckerService->verifyCertificates();
+
         return $this->render(
             $template,
             [
@@ -755,6 +768,7 @@ class CertificateManagementFreeradiusController extends AbstractController
                 'formFinishProcess' => $formFinishProcess->createView(),
                 'mode' => $mode,
                 'commands' => $httpChallengeCommands,
+                'allowSkipProcess' => $allowSkipProcess,
             ]
         );
     }
@@ -893,33 +907,5 @@ class CertificateManagementFreeradiusController extends AbstractController
                 'process' => $processState['process'],
             ]
         );
-    }
-
-    #[Route(
-        '/dashboard/settings/certificatesManagement/freeradius/skipTest',
-        name: 'admin_dashboard_settings_certs_freeradius_skipTest'
-    )]
-    #[IsGranted(UserAuthenticationVoter::CERTIFICATES_MANAGEMENT_WRITE)]
-    public function settingsCertificatesManagementFreeradiusSkipTest(): Response
-    {
-        $processEntity = $this->certificateProcessCheckerService->getCurrentProcess();
-
-        // Ensure an active process exists
-        if (!$processEntity instanceof CertificateSetupProcess) {
-            return new JsonResponse([
-                'status' => 'error',
-                'message' => $this->translator->trans(
-                    'noActiveProcess',
-                    [],
-                    'CertificateProcessCheckerService'
-                ),
-            ], Response::HTTP_BAD_REQUEST);
-        }
-
-        $processEntity->setFreeradiusTestResult(CertificateTestResult::PASSED);
-        $this->entityManager->persist($processEntity);
-        $this->entityManager->flush();
-
-        return $this->redirectToRoute('admin_page');
     }
 }

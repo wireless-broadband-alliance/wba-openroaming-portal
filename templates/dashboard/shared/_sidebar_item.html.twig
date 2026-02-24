@@ -1,6 +1,6 @@
 <li>
-    <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300 {% if app.request.attributes.get('_route') == route %}selected{% endif %}"
-       href="{{ path(route) }}">
+    <a class="flex flex-row px-4 py-2 mt-2 text-sm font-semibold rounded-lg hover:text-lightGreen duration-300 {% if app.request.attributes.get('_route') in routes %}selected{% endif %}"
+       href="{{ path(routes[0]) }}">
         <twig:ux:icon name="{{ icon }}" class="w-5 mr-4 fill-none stroke-current"/>
         {{ label }}
     </a>
