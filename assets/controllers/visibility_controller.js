@@ -1,23 +1,23 @@
-import { Controller } from "@hotwired/stimulus"
+import { Controller } from '@hotwired/stimulus';
 
 export default class extends Controller {
-    static targets = ["select", "item"]
+    static targets = ['select', 'item'];
 
     connect() {
-        this.update()
+        this.update();
     }
 
     update() {
-        const value = this.selectTarget.value
+        const value = this.selectTarget.value;
 
         this.itemTargets.forEach((element) => {
-            const expectedValue = element.dataset.visibilityValue
+            const expectedValue = element.dataset.visibilityValue;
 
             if (expectedValue === value) {
-                element.classList.remove("hidden")
+                element.classList.remove('hidden');
             } else {
-                element.classList.add("hidden")
+                element.classList.add('hidden');
             }
-        })
+        });
     }
 }
