@@ -5,6 +5,7 @@ namespace App\Form;
 use App\DTO\UserUpdateDTO;
 use App\Entity\User;
 use App\Enum\SettingName;
+use App\Enum\UserProvider;
 use App\Form\Helper\AdminPermissionsFormBuilder;
 use App\Repository\SettingRepository;
 use libphonenumber\PhoneNumberFormat;
@@ -47,15 +48,12 @@ class UserUpdateType extends AbstractType
 
       /** @var UserUpdateDTO $dto */
         $dto = $options['data'];
+        /** @var User|null $editedUser */
+        $editedUser = $options['edited_user'];
 
         $builder
         ->add('uuid', TextType::class, [
             'label' => 'UUID',
-            'required' => false,
-            'disabled' => $this->disabled,
-        ])
-        ->add('email', EmailType::class, [
-            'label' => 'Email',
             'required' => false,
             'disabled' => $this->disabled,
         ])
@@ -68,18 +66,42 @@ class UserUpdateType extends AbstractType
             'label' => $this->translator->trans('lastName', [], 'UserUpdateType'),
             'required' => false,
             'disabled' => $this->disabled,
-        ])
-        ->add('phoneNumber', PhoneNumberType::class, [
-            'label' => $this->translator->trans('phoneNumber', [], 'UserUpdateType'),
-            'default_region' => $regionInputs[0],
-            'format' => PhoneNumberFormat::INTERNATIONAL,
-            'widget' => PhoneNumberType::WIDGET_COUNTRY_CHOICE,
-            'preferred_country_choices' => $regionInputs,
-            'country_display_emoji_flag' => true,
-            'required' => false,
-            'disabled' => $this->disabled,
-            'attr' => ['autocomplete' => 'tel'],
         ]);
+
+        if ($editedUser) {
+            $externalAuth = $editedUser->getUserExternalAuths()[0] ?? null;
+
+            if ($externalAuth && $externalAuth->getProvider() === UserProvider::PORTAL_ACCOUNT->value) {
+                if ($externalAuth && $externalAuth->getProviderId() === UserProvider::EMAIL->value) {
+                    $builder->add('email', EmailType::class, [
+                        'label' => 'Email',
+                        'required' => false,
+                        'disabled' => $this->disabled,
+                    ]);
+                }
+
+                if ($externalAuth && $externalAuth->getProviderId() === UserProvider::PHONE_NUMBER->value) {
+                    $builder->add('phoneNumber', PhoneNumberType::class, [
+                        'label' => $this->translator->trans('phoneNumber', [], 'UserUpdateType'),
+                        'default_region' => $regionInputs[0],
+                        'format' => PhoneNumberFormat::INTERNATIONAL,
+                        'widget' => PhoneNumberType::WIDGET_COUNTRY_CHOICE,
+                        'preferred_country_choices' => $regionInputs,
+                        'country_display_emoji_flag' => true,
+                        'required' => false,
+                        'disabled' => $this->disabled,
+                        'attr' => ['autocomplete' => 'tel'],
+                    ]);
+                }
+            } else {
+                $builder->add('email', EmailType::class, [
+                    'label' => 'Email',
+                    'required' => false,
+                    'disabled' => $this->disabled,
+                ]);
+            }
+
+        }
 
       // Only add banned/isVerified if NOT editing an admin
         if ($dto->blockBanSuperAdmin()) {
