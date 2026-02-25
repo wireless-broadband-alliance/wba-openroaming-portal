@@ -36,6 +36,7 @@ class UserAddDTO
     #[AssertPhoneNumber]
     public ?PhoneNumber $phoneNumber = null;
 
+    #[Assert\NotBlank(message: 'fieldCannotBeBlank')]
     #[Assert\Length(
         min: 8,
         max: 255,
