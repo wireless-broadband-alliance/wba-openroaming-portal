@@ -279,16 +279,14 @@ class UsersManagementController extends AbstractController
         /** @var User $currentUser */
         $currentUser = $this->getUser();
 
-        $newUser = new User();
-        $userAddDTO = new UserAddDTO();
-
         // Create & handle form
+        $userAddDTO = new UserAddDTO();
         $form = $this->createForm(UserAddType::class, $userAddDTO);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             // Convert DTO → Entity data before creation
-            $this->userCreationService->createAdminUser($userAddDTO);
+            $newUser = $this->userCreationService->createAdminUser($userAddDTO);
 
             // Flash message
             $this->addFlash(
