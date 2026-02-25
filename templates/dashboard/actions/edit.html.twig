@@ -189,8 +189,9 @@
                 </div>
             </div>
             <div class="flex justify-end">
-                <button type="submit" class="btn-primary mt-6"
-                        data-confirm={{ 'resetPasswordMessage'|trans({}, 'edit')|e('html_attr') }}>
+                <button type="submit"
+                        class="btn-primary mt-6"
+                        onclick="return confirm('{{ 'resetPasswordMessage'|trans({}, 'edit')|e('js') }}')">
                     {{ 'resetPassword'|trans({}, 'edit') }}
                 </button>
             </div>
