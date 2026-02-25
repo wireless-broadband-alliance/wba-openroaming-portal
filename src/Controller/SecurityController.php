@@ -29,6 +29,7 @@ use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use libphonenumber\NumberParseException;
+use libphonenumber\PhoneNumber;
 use libphonenumber\PhoneNumberFormat;
 use libphonenumber\PhoneNumberUtil;
 use Psr\EventDispatcher\EventDispatcherInterface;
@@ -505,9 +506,9 @@ class SecurityController extends AbstractController
         }
 
         $lastUsername = '';
-        if (!empty($dto->email)) {
+        if (!in_array($dto->email, [null, '', '0'], true)) {
             $lastUsername = $dto->email;
-        } elseif (!empty($dto->phoneNumber)) {
+        } elseif ($dto->phoneNumber instanceof PhoneNumber) {
             $lastUsername = $phoneUtil->format(
                 $dto->phoneNumber,
                 PhoneNumberFormat::INTERNATIONAL
