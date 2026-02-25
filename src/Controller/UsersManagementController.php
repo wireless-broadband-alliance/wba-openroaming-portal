@@ -269,7 +269,7 @@ class UsersManagementController extends AbstractController
      * @throws RandomException
      */
     #[Route('/dashboard/add', name: 'dashboard_add_admin')]
-    #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
+    #[IsGranted(UserAuthenticationVoter::ADMIN_MANAGEMENT_WRITE)]
     public function addUsers(Request $request): Response
     {
         // Call the getSettings method of GetSettings class to retrieve the data
