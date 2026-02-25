@@ -109,6 +109,7 @@ readonly class UserCreationService
         }
 
         $user->setRoles([AdminRoleType::ROLE_ADMIN->value]);
+        $user->setIsVerified(true);
         $user->setFirstName($userAddDTO->firstName);
         $user->setLastName($userAddDTO->lastName);
         $user->setForgotPasswordRequest(true);

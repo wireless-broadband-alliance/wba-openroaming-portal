@@ -38,6 +38,7 @@ use App\Service\UserDeletionService;
 use App\Service\VerificationCodeEmailGenerator;
 use DateInterval;
 use DateTime;
+use DateTimeInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -269,7 +270,7 @@ class UsersManagementController extends AbstractController
      * @throws RandomException
      */
     #[Route('/dashboard/add', name: 'dashboard_add_admin')]
-    #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
+    #[IsGranted(UserAuthenticationVoter::ADMIN_MANAGEMENT_WRITE)]
     public function addUsers(Request $request): Response
     {
         // Call the getSettings method of GetSettings class to retrieve the data
@@ -279,16 +280,14 @@ class UsersManagementController extends AbstractController
         /** @var User $currentUser */
         $currentUser = $this->getUser();
 
-        $newUser = new User();
-        $userAddDTO = new UserAddDTO();
-
         // Create & handle form
+        $userAddDTO = new UserAddDTO();
         $form = $this->createForm(UserAddType::class, $userAddDTO);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             // Convert DTO → Entity data before creation
-            $this->userCreationService->createAdminUser($userAddDTO);
+            $newUser = $this->userCreationService->createAdminUser($userAddDTO);
 
             // Flash message
             $this->addFlash(
@@ -404,10 +403,14 @@ class UsersManagementController extends AbstractController
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
         $currentUser = $this->getUser();
-        $canWrite = $this->isGranted(UserAuthenticationVoter::USERS_MANAGEMENT_WRITE);
+        $canWrite = $this->isGranted(UserAuthenticationVoter::USERS_MANAGEMENT_WRITE) ||
+            $this->isGranted(UserAuthenticationVoter::ADMIN_MANAGEMENT_WRITE);
 
         if ($user->getId() !== $currentUser->getId()) {
-            if (!$this->isGranted(UserAuthenticationVoter::USERS_MANAGEMENT_READ)) {
+            if (
+                !$this->isGranted(UserAuthenticationVoter::USERS_MANAGEMENT_READ) &&
+                !$this->isGranted(UserAuthenticationVoter::ADMIN_MANAGEMENT_READ)
+            ) {
                 throw $this->createAccessDeniedException();
             }
             if (
@@ -416,8 +419,11 @@ class UsersManagementController extends AbstractController
                 throw $this->createAccessDeniedException();
             }
         }
+        if (!$canWrite && $user->getId() !== $currentUser->getId()) {
+            throw $this->createAccessDeniedException();
+        }
 
-        if ($user->getDeletedAt() instanceof \DateTimeInterface) {
+        if ($user->getDeletedAt() instanceof DateTimeInterface) {
             $this->addFlash(
                 'error',
                 $this->translator->trans('userAlreadyDeleted', [], 'controllers')

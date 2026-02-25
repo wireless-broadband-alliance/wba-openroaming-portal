@@ -102,11 +102,15 @@
                         </form>
                     </div>
 
+                    {% set isSuperAdmin = constant('App\\Enum\\AdminRoleType::ROLE_SUPER_ADMIN').value in currentUser.roles %}
+                    {% if isSuperAdmin or is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::ADMIN_MANAGEMENT_WRITE')) %}
+
                     <div class="flex items-center space-x-6">
                         <a href="{{ path('dashboard_add_admin') }}" class="btn-primary px-4 min-w-[150px]">
                             {{ 'addAdmin'|trans({}, 'dashboard') }}
                         </a>
                     </div>
+                    {% endif %}
                 </div>
             </div>
 
