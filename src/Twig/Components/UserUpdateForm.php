@@ -31,6 +31,9 @@ final class UserUpdateForm extends AbstractController
     public ?User $editedUser = null;
 
     #[LiveProp]
+    public ?User $current_user = null;
+
+    #[LiveProp]
     public ?string $rawPhoneNumber = null;
 
     #[LiveProp]
@@ -41,7 +44,8 @@ final class UserUpdateForm extends AbstractController
      */
     protected function instantiateForm(): FormInterface
     {
-        $canWrite = $this->isGranted(UserAuthenticationVoter::USERS_MANAGEMENT_WRITE);
+        $canWrite = $this->isGranted(UserAuthenticationVoter::USERS_MANAGEMENT_WRITE) ||
+            $this->isGranted(UserAuthenticationVoter::ADMIN_MANAGEMENT_WRITE);
 
         return $this->createForm(
             UserUpdateType::class,
