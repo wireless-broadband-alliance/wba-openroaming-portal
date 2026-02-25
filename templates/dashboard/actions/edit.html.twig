@@ -5,7 +5,11 @@
 {% block container %}
   {# Content - Edit Users #}
   <h1 class="text-3xl font-bold text-gray-800 mb-8 border-b-2 border-gray-300 pb-2">{{ user.uuid }}</h1>
-  <twig:UserUpdateForm :userUpdateDTO="userUpdateDTO" :form="form" :editedUser="user" :isEditingSelf="isEditingSelf">
+  <twig:UserUpdateForm
+          :userUpdateDTO="userUpdateDTO"
+          :form="form"
+          :editedUser="user"
+          :isEditingSelf="isEditingSelf">
 
     {{ form_start(form) }}
     {{ form_errors(form) }}
@@ -47,48 +51,63 @@
           </div>
         </div>
 
-        <div class="relative">
-          {{ form_label(form.email, 'Email', {label_attr: {class: 'form-label'}}) }}
-          {{ form_widget(form.email, {attr: {class: 'form-widget'}}) }}
-          <div class="text-red-500 m-2">
-            {{ form_errors(form.email) }}
+        {% if editedUser.userExternalAuths[0].provider == constant('App\\Enum\\UserProvider::PORTAL_ACCOUNT').value %}
+          {% if editedUser.userExternalAuths[0].providerId == constant('App\\Enum\\UserProvider::EMAIL').value %}
+            {# Email #}
+            <div class="relative">
+              {{ form_label(form.email, 'Email', {label_attr: {class: 'form-label'}}) }}
+              {{ form_widget(form.email, {attr: {class: 'form-widget'}}) }}
+              <div class="text-red-500 m-2">
+                {{ form_errors(form.email) }}
+              </div>
+            </div>
+          {% elseif editedUser.userExternalAuths[0].providerId == constant('App\\Enum\\UserProvider::PHONE_NUMBER').value %}
+            {# Phone Number #}
+            <div class="relative">
+            <div class="flex flex-row items-end space-x-4">
+              {# Phone Number Input #}
+              <div class="flex flex-col w-1/3">
+                {{ form_label(form.phoneNumber, 'phoneNumber'|trans({}, 'edit'), {label_attr: {class: 'form-label'}}) }}
+                {{ form_widget(form.phoneNumber.children.country, {
+                  attr: {
+                    class: 'form-widget',
+                    placeholder: 'phoneNumberPlaceOlder'|trans({}, 'edit'),
+                    autocomplete: 'tel',
+                  },
+                }) }}
+              </div>
+              <div class="flex flex-col w-2/3">
+                {{ form_widget(form.phoneNumber.children.number, {
+                  attr: {
+                    class: 'form-widget',
+                    placeholder: 'phoneNumberPlaceOlder'|trans({}, 'edit'),
+                    autocomplete: 'tel',
+                  },
+                }) }}
+              </div>
+            </div>
+
+            <div class="text-red-500 m-2">
+              {{ form_errors(form.phoneNumber) }}
+            </div>
           </div>
-        </div>
+          {% endif %}
+        {% else %}
+          {# Email #}
+          <div class="relative">
+            {{ form_label(form.email, 'Email', {label_attr: {class: 'form-label'}}) }}
+            {{ form_widget(form.email, {attr: {class: 'form-widget'}}) }}
+            <div class="text-red-500 m-2">
+              {{ form_errors(form.email) }}
+            </div>
+          </div>
+        {% endif %}
 
         <div class="relative">
           {{ form_label(form.lastName, 'lastName'|trans({}, 'edit'), {label_attr: {class: 'form-label'}}) }}
           {{ form_widget(form.lastName, {attr: {class: 'form-widget'}}) }}
           <div class="text-red-500 m-2">
             {{ form_errors(form.lastName) }}
-          </div>
-        </div>
-
-        <div class="relative">
-          <div class="flex flex-row items-end space-x-4">
-            {# Phone Number Input #}
-            <div class="flex flex-col w-1/3">
-              {{ form_label(form.phoneNumber, 'phoneNumber'|trans({}, 'edit'), {label_attr: {class: 'form-label'}}) }}
-              {{ form_widget(form.phoneNumber.children.country, {
-                attr: {
-                  class: 'form-widget',
-                  placeholder: 'phoneNumberPlaceOlder'|trans({}, 'edit'),
-                  autocomplete: 'tel',
-                },
-              }) }}
-            </div>
-            <div class="flex flex-col w-2/3">
-              {{ form_widget(form.phoneNumber.children.number, {
-                attr: {
-                  class: 'form-widget',
-                  placeholder: 'phoneNumberPlaceOlder'|trans({}, 'edit'),
-                  autocomplete: 'tel',
-                },
-              }) }}
-            </div>
-          </div>
-
-          <div class="text-red-500 m-2">
-            {{ form_errors(form.phoneNumber) }}
           </div>
         </div>
 

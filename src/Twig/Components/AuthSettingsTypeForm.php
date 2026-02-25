@@ -3,6 +3,7 @@
 namespace App\Twig\Components;
 
 use App\DTO\AuthSettingsTypeDTO;
+use App\Entity\User;
 use App\Enum\SettingName;
 use App\Form\AuthSettingsType;
 use App\Security\Voter\UserAuthenticationVoter;
@@ -28,6 +29,9 @@ final class AuthSettingsTypeForm extends AbstractController
     /** @var array<string, array{value: ?string, description?: ?string}>|null */
     #[LiveProp]
     public ?array $data = null;
+
+    #[LiveProp]
+    public ?User $user = null;
 
     #[LiveProp]
     public ?int $profileLimitDate = null;

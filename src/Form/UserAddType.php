@@ -84,9 +84,6 @@ class UserAddType extends AbstractType
                 'attr' => [
                     'placeholder' => $this->translator->trans('enterNewPassword', [], 'ResetPasswordType'),
                 ],
-                'constraints' => [
-                    new Length(min: 8, max: 255),
-                ],
             ])
             ->add('confirmPassword', PasswordType::class, [
                 'label' => $this->translator->trans('confirmNewPassword', [], 'ResetPasswordType'),
