@@ -38,6 +38,7 @@ use App\Service\UserDeletionService;
 use App\Service\VerificationCodeEmailGenerator;
 use DateInterval;
 use DateTime;
+use DateTimeInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -418,7 +419,7 @@ class UsersManagementController extends AbstractController
             throw $this->createAccessDeniedException();
         }
 
-        if ($user->getDeletedAt() instanceof \DateTimeInterface) {
+        if ($user->getDeletedAt() instanceof DateTimeInterface) {
             $this->addFlash(
                 'error',
                 $this->translator->trans('userAlreadyDeleted', [], 'controllers')

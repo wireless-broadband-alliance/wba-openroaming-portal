@@ -51,8 +51,8 @@
           </div>
         </div>
 
-        {% if user.userExternalAuths[0].provider == constant('App\\Enum\\UserProvider::PORTAL_ACCOUNT').value %}
-          {% if user.userExternalAuths[0].providerId == constant('App\\Enum\\UserProvider::EMAIL').value %}
+        {% if editedUser.userExternalAuths[0].provider == constant('App\\Enum\\UserProvider::PORTAL_ACCOUNT').value %}
+          {% if editedUser.userExternalAuths[0].providerId == constant('App\\Enum\\UserProvider::EMAIL').value %}
             {# Email #}
             <div class="relative">
               {{ form_label(form.email, 'Email', {label_attr: {class: 'form-label'}}) }}
@@ -61,7 +61,7 @@
                 {{ form_errors(form.email) }}
               </div>
             </div>
-          {% elseif user.userExternalAuths[0].providerId == constant('App\\Enum\\UserProvider::PHONE_NUMBER').value %}
+          {% elseif editedUser.userExternalAuths[0].providerId == constant('App\\Enum\\UserProvider::PHONE_NUMBER').value %}
             {# Phone Number #}
             <div class="relative">
             <div class="flex flex-row items-end space-x-4">
