@@ -175,14 +175,14 @@
             <div class="mx-auto rounded-lg grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div class="relative">
                     {{ form_label(formReset.password, 'password'|trans({}, 'edit'), {label_attr: {class: 'form-label'}}) }}
-                    {{ form_widget(formReset.password, {attr: {class: 'form-widget', minlength: 7}}) }}
+                    {{ form_widget(formReset.password, {attr: {class: 'form-widget'}}) }}
                     <div class="mt-2 -mb-2 text-center text-red-500 text-base">
                         {{ form_errors(formReset.password) }}
                     </div>
                 </div>
                 <div class="relative">
                     {{ form_label(formReset.confirmPassword, 'confirmNewPassword'|trans({}, 'edit'), {label_attr: {class: 'form-label'}}) }}
-                    {{ form_widget(formReset.confirmPassword, {attr: {class: 'form-widget', minlength: 7}}) }}
+                    {{ form_widget(formReset.confirmPassword, {attr: {class: 'form-widget'}}) }}
                     <div class="mt-2 -mb-2 text-center text-red-500 text-base">
                         {{ form_errors(formReset.confirmPassword) }}
                     </div>
