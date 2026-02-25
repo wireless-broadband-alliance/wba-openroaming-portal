@@ -100,7 +100,6 @@ class UserUpdateType extends AbstractType
                     'disabled' => $this->disabled,
                 ]);
             }
-
         }
 
       // Only add banned/isVerified if NOT editing an admin

@@ -403,10 +403,14 @@ class UsersManagementController extends AbstractController
         // Get the current logged-in user (admin)
         /** @var User $currentUser */
         $currentUser = $this->getUser();
-        $canWrite = $this->isGranted(UserAuthenticationVoter::USERS_MANAGEMENT_WRITE) || $this->isGranted(UserAuthenticationVoter::ADMIN_MANAGEMENT_WRITE);
+        $canWrite = $this->isGranted(UserAuthenticationVoter::USERS_MANAGEMENT_WRITE) ||
+            $this->isGranted(UserAuthenticationVoter::ADMIN_MANAGEMENT_WRITE);
 
         if ($user->getId() !== $currentUser->getId()) {
-            if (!$this->isGranted(UserAuthenticationVoter::USERS_MANAGEMENT_READ) && !$this->isGranted(UserAuthenticationVoter::ADMIN_MANAGEMENT_READ)) {
+            if (
+                !$this->isGranted(UserAuthenticationVoter::USERS_MANAGEMENT_READ) &&
+                !$this->isGranted(UserAuthenticationVoter::ADMIN_MANAGEMENT_READ)
+            ) {
                 throw $this->createAccessDeniedException();
             }
             if (
