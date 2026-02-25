@@ -191,7 +191,7 @@
       </div>
       <div class="flex justify-end">
         <button type="submit" class="btn-primary mt-6"
-                onclick="return confirm('Are you sure you want to reset the password of: {{ user.uuid }}?')">
+                onclick="return confirm({{ 'resetPasswordMessage'|trans({}, 'edit') }})">
           Reset Password
         </button>
       </div>
@@ -223,7 +223,7 @@
           <a
                   href="{{ path('app_disable2FA_admin', {id: user.id}) }}"
                   class="btn-logout"
-                  onclick="return confirm('Are you sure you to disable 2FA for this user?')">
+                  onclick="return confirm({{ 'disable2fa'|trans({}, 'edit') }})">
             {{ 'disable'|trans({}, 'edit') }}
           </a>
         </div>
