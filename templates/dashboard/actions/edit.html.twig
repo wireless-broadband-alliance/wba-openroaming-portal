@@ -5,7 +5,12 @@
 {% block container %}
   {# Content - Edit Users #}
   <h1 class="text-3xl font-bold text-gray-800 mb-8 border-b-2 border-gray-300 pb-2">{{ user.uuid }}</h1>
-  <twig:UserUpdateForm :userUpdateDTO="userUpdateDTO" :form="form" :editedUser="user" :isEditingSelf="isEditingSelf">
+  <twig:UserUpdateForm
+          :userUpdateDTO="userUpdateDTO"
+          :form="form"
+          :user="user"
+          :editedUser="user"
+          :isEditingSelf="isEditingSelf">
 
     {{ form_start(form) }}
     {{ form_errors(form) }}

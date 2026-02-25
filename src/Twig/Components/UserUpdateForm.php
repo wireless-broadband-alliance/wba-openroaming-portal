@@ -31,6 +31,9 @@ final class UserUpdateForm extends AbstractController
     public ?User $editedUser = null;
 
     #[LiveProp]
+    public ?User $user = null;
+
+    #[LiveProp]
     public ?string $rawPhoneNumber = null;
 
     #[LiveProp]
