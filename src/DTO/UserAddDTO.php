@@ -2,19 +2,11 @@
 
 namespace App\DTO;
 
-use App\Entity\User;
-use App\Entity\UserExternalAuth;
 use App\Enum\AdminPermissionsType;
-use App\Enum\AdminRoleType;
 use App\Enum\PermissionLevel;
 use App\Enum\UserProvider;
-use DateTime;
-use Doctrine\ORM\EntityManagerInterface;
 use libphonenumber\PhoneNumber;
-use LogicException;
 use Misd\PhoneNumberBundle\Validator\Constraints\PhoneNumber as AssertPhoneNumber;
-use Random\RandomException;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 use App\Validator\Constraints as CustomAssert;
 
@@ -28,12 +20,16 @@ class UserAddDTO
     )]
     public ?string $accountType = null;
 
+    // Required ONLY when accountType = EMAIL
     #[Assert\Email]
     #[Assert\Length(max: 180)]
     #[CustomAssert\UniqueEmail]
+    #[Assert\NotBlank(message: 'fieldCannotBeBlank', groups: [UserProvider::EMAIL->value])]
     public ?string $email = null;
 
+    // Required ONLY when accountType = PHONE_NUMBER
     #[AssertPhoneNumber]
+    #[Assert\NotBlank(message: 'fieldCannotBeBlank', groups: [UserProvider::PHONE_NUMBER->value])]
     public ?PhoneNumber $phoneNumber = null;
 
     #[Assert\NotBlank(message: 'fieldCannotBeBlank')]
