@@ -17,6 +17,7 @@ use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -102,6 +103,22 @@ class UserAddType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => UserAddDTO::class,
+            'validation_groups' => function (FormInterface $form) {
+                /** @var UserAddDTO $data */
+                $data = $form->getData();
+
+                $groups = ['Default'];
+
+                if ($data?->accountType === UserProvider::EMAIL->value) {
+                    $groups[] = UserProvider::EMAIL->value;
+                }
+
+                if ($data?->accountType === UserProvider::PHONE_NUMBER->value) {
+                    $groups[] = UserProvider::PHONE_NUMBER->value;
+                }
+
+                return $groups;
+            },
         ]);
     }
 }
