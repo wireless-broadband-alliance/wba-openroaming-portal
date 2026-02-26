@@ -109,11 +109,11 @@ class UserAddType extends AbstractType
 
                 $groups = ['Default'];
 
-                if ($data?->accountType === UserProvider::EMAIL->value) {
+                if ($data->accountType === UserProvider::EMAIL->value) {
                     $groups[] = UserProvider::EMAIL->value;
                 }
 
-                if ($data?->accountType === UserProvider::PHONE_NUMBER->value) {
+                if ($data->accountType === UserProvider::PHONE_NUMBER->value) {
                     $groups[] = UserProvider::PHONE_NUMBER->value;
                 }
 
