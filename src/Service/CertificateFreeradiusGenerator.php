@@ -39,13 +39,13 @@ readonly class CertificateFreeradiusGenerator
      * @param bool|null $simulated Optional runtime override of simulation mode
      * @return string[] Full paths of generated files
      */
-    public function run(string $domain, User $user, ?bool $simulated = null): array
+    public function run(User $user, ?bool $simulated = null): array
     {
         $useSimulation = $simulated ?? false;
 
         $files = $useSimulation
             ? $this->simulateCertificates()
-            : $this->generateCertificates($domain, $user);
+            : $this->generateCertificates($user);
 
         // Store the resulting certs in var/certs/
         $this->storeCertificates($files, $useSimulation);
@@ -58,8 +58,11 @@ readonly class CertificateFreeradiusGenerator
      *
      * @return string[] Full paths of cert files
      */
-    public function generateCertificates(string $domain, User $user): array
+    public function generateCertificates(User $user): array
     {
+        $domain = $this->settingRepository->findOneBy(
+            ['name' => SettingName::RADIUS_TLS_NAME->value]
+        )->getValue();
         $command = [
             'certbot',
             'certonly',

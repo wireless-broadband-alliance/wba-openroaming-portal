@@ -757,7 +757,6 @@ class CertificateManagementFreeradiusController extends AbstractController
         }
 
         $httpChallengeCommands = $this->httpChallengeCommands->getCommands(
-            $domain ?? 'domain.example.org',
             $currentUser->getEmail()
         );
 
