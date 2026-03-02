@@ -15,6 +15,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
+use Symfony\Component\Console\Style\SymfonyStyle;
 
 #[AsCommand(
     name: 'reset:radiusTLS',
@@ -50,24 +51,24 @@ class ResetRadiusTLSCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        if (!$input->getOption('yes')) {
-            $helper = $this->getHelper('question');
-            $question = new ConfirmationQuestion(
-                'This action will reset the radius TLS name. [y/N] ',
-                false
-            );
-            /** @var QuestionHelper $helper */
-            if (!$helper->ask($input, $output, $question)) {
-                $output->writeln('Command aborted.');
-                return Command::SUCCESS;
-            }
+        $io = new SymfonyStyle($input, $output);
+
+        $io->warning([
+            'DANGEROUS OPERATION',
+            'Resetting the RADIUS TLS Name will change the OpenRoaming realm.',
+            'This WILL invalidate all previously downloaded OpenRoaming profiles.',
+            'Users will be BLOCKED from authentication by the resolver.'
+        ]);
+
+        if (!$input->getOption('yes') && !$io->confirm('Do you really want to continue?', false)) {
+            $io->info('Command aborted.');
+            return Command::SUCCESS;
         }
 
         $settings = [
             ['name' => SettingName::RADIUS_TLS_NAME->value, 'value' => 'EditMe'],
             ['name' => SettingName::ENABLE_RADIUS_TLS_RESET->value, 'value' => 'true'],
         ];
-
 
         $this->entityManager->beginTransaction();
 
