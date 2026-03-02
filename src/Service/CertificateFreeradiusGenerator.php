@@ -203,7 +203,7 @@ readonly class CertificateFreeradiusGenerator
                 '--logs-dir',
                 $this->certTargetDir . '/logs',
             ];
-            dd($command);
+
             if ($this->parameterBag->get('app.lets_encrypt_profiles_generation') === false) {
                 $command[] = '--staging';
             }
