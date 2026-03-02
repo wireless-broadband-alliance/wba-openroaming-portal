@@ -28,10 +28,14 @@
     </div>
 
     {% if data.ENABLE_RADIUS_TLS_RESET.value == 'true' %}
-        {# Freeradius Radius TLS Configuration #}
         {{ include('dashboard/shared/settings_actions/certificatesManagement/certificates/freeradius/domainRadius/_domainRadiusConfig.html.twig') }}
     {% else %}
-        {{ include('dashboard/shared/settings_actions/certificatesManagement/certificates/freeradius/freeradiusCertsMethods/_reset_radius_tls_name_commands.html.twig') }}
-        {{ include('dashboard/shared/settings_actions/certificatesManagement/certificates/freeradius/freeradiusCertsMethods/_methods.html.twig') }}
+        <div class="mb-4">
+            {{ include('dashboard/shared/settings_actions/certificatesManagement/certificates/freeradius/freeradiusCertsMethods/_reset_radius_tls_name_commands.html.twig') }}
+        </div>
+
+        <div class="mb-4">
+            {{ include('dashboard/shared/settings_actions/certificatesManagement/certificates/freeradius/freeradiusCertsMethods/_methods.html.twig') }}
+        </div>
     {% endif %}
 {% endblock %}
