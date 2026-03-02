@@ -6,6 +6,8 @@ use App\Entity\CertificateSetupProcess;
 use App\Entity\User;
 use App\Enum\CertificateFileName;
 use App\Enum\CertificateMachineType;
+use App\Enum\SettingName;
+use App\Repository\SettingRepository;
 use DateTimeImmutable;
 use Random\RandomException;
 use RuntimeException;
@@ -24,6 +26,7 @@ readonly class CertificateFreeradiusGenerator
         private CertificateStorageService $certificateStorageService,
         private CertificateProcessCheckerService $certificateProcessCheckerService,
         private TranslatorInterface $translator,
+        private SettingRepository $settingRepository,
     ) {
         $projectDir = $this->parameterBag->get('kernel.project_dir');
         $this->certTargetDir = $projectDir . '/var/certs';
@@ -161,7 +164,6 @@ readonly class CertificateFreeradiusGenerator
      * @throws RandomException
      */
     public function generateCertificatesWithCloudflareDns(
-        string $domain,
         User $user,
         string $cloudflareToken
     ): array {
@@ -173,7 +175,11 @@ readonly class CertificateFreeradiusGenerator
         );
         chmod($credFile, 0600);
 
+
         try {
+            $domain = $this->settingRepository->findOneBy(
+                ['name' => SettingName::RADIUS_TLS_NAME->value]
+            )->getValue();
             $identifier = new DateTimeImmutable()->format('Ymd_His'); // e.g., 20260209_151230
             $certName = $domain . '-' . $identifier;
 

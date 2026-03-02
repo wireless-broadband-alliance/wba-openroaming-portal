@@ -823,6 +823,8 @@ class CertificateManagementFreeradiusController extends AbstractController
         }
 
         $data = $this->getSettings->getSettings();
+        $domain = $data[SettingName::RADIUS_TLS_NAME->value]['value'];
+
 
         // Prepare session for freeradius stepper detection
         $session = $request->getSession();
@@ -851,7 +853,7 @@ class CertificateManagementFreeradiusController extends AbstractController
                     'error',
                     $this->translator->trans(
                         'cloudflareTokenNotMatchesHost',
-                        ['%host%' => $dto->host],
+                        ['%host%' => $domain],
                         'controllers'
                     )
                 );
@@ -864,7 +866,6 @@ class CertificateManagementFreeradiusController extends AbstractController
             $user = $this->getUser();
 
             $this->certificateFreeradiusGenerator->generateCertificatesWithCloudflareDns(
-                $dto->host,
                 $user,
                 $dto->token
             );
@@ -872,7 +873,7 @@ class CertificateManagementFreeradiusController extends AbstractController
             $certificateSetupProcess = $this->certificateProcessCheckerService->getCurrentProcess();
 
             if ($certificateSetupProcess instanceof CertificateSetupProcess) {
-                $certificateSetupProcess->setFreeradiusDomainName($dto->host);
+                $certificateSetupProcess->setFreeradiusDomainName($domain);
                 $certificateSetupProcess->setFreeradiusFormCompletedAt(new DateTimeImmutable());
                 $certificateSetupProcess->setFreeradiusConfigAppliedAt(null);
                 $certificateSetupProcess->setIsFreeradiusCloudflare(true);

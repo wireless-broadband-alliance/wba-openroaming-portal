@@ -50,7 +50,7 @@ class ResetRadiusTLSCommand extends Command
 
         $settings = [
             ['name' => SettingName::RADIUS_TLS_NAME->value, 'value' => 'EditMe'],
-            ['name' => SettingName::CLOUDFLARE_TOKEN->value, 'value' => 'true'],
+            ['name' => SettingName::ENABLE_RADIUS_TLS_RESET->value, 'value' => 'true'],
         ];
 
 
