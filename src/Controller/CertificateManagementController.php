@@ -117,8 +117,11 @@ class CertificateManagementController extends AbstractController
         $formCertificateFreeradiusDomainType->handleRequest($request);
         if ($formCertificateFreeradiusDomainType->isSubmitted() && $formCertificateFreeradiusDomainType->isValid()) {
             $domain = $certificatesFreeradiusDomainDTO->domain;
-            $data[SettingName::RADIUS_TLS_NAME->value] = $certificatesFreeradiusDomainDTO->domain;
-            $data[SettingName::ENABLE_RADIUS_TLS_RESET->value] = 'false';
+            // Save updated settings
+            $this->settingsService->updateSettingsFromArray($dto->toArray());
+            $this->settingsService->flush();
+            $data[SettingName::RADIUS_TLS_NAME->value]['value'] = $certificatesFreeradiusDomainDTO->domain;
+            $data[SettingName::ENABLE_RADIUS_TLS_RESET->value]['value'] = 'false';
 
             $processEntity = $processState['process'];
             $processEntity->setFreeradiusDomainName($domain);
