@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\DTO\CertificateFreeradiusDomainDTO;
 use App\Entity\CertificateSetupProcess;
 use App\Entity\InstallationProgress;
 use App\Entity\User;
@@ -11,6 +12,8 @@ use App\Enum\AdminRoleType;
 use App\Enum\AnalyticalEventType;
 use App\Enum\ProcessStatusType;
 use App\Enum\SessionStatus;
+use App\Enum\SettingName;
+use App\Form\CertificateFreeradiusDomainType;
 use App\Repository\CertificateSetupProcessRepository;
 use App\Repository\InstallationProgressRepository;
 use App\Security\Voter\UserAuthenticationVoter;
@@ -20,6 +23,7 @@ use App\Service\CertificateRadsecproxyInfoService;
 use App\Service\EventActions;
 use App\Service\GetSettings;
 use App\Service\InstallationService;
+use App\Service\SettingsService;
 use DateTime;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
@@ -43,6 +47,7 @@ class CertificateManagementController extends AbstractController
         private readonly InstallationService $installationService,
         private readonly CertificateFreeradiusInfoService $certificateFreeradiusInfoService,
         private readonly CertificateRadsecproxyInfoService $certificateRadsecproxyInfoService,
+        private readonly SettingsService $settingsService,
     ) {
     }
 
@@ -81,11 +86,17 @@ class CertificateManagementController extends AbstractController
         name: 'admin_dashboard_settings_certs_management_freeradius_selection'
     )]
     #[IsGranted(AdminRoleType::ROLE_SUPER_ADMIN->value)]
-    public function settingsCertificatesManagementSelection(): Response
+    public function settingsCertificatesManagementSelection(Request $request): Response
     {
+        // Call the getSettings method of GetSettings class to retrieve the data
+        /** @var array<string, array{value: string, description: string}> $data */
+        $data = $this->getSettings->getSettings();
+        // Save the event
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
+
         // Get current process state
         $processState = $this->certificateProcessCheckerService->getProcessState();
-
         // If there's no active process
         if (!$processState['active']) {
             $this->addFlash(
@@ -99,10 +110,62 @@ class CertificateManagementController extends AbstractController
             return $this->redirectToRoute('admin_dashboard_settings_certs_radsecproxy_upload');
         }
 
+        $certificatesFreeradiusDomainDTO = new CertificateFreeradiusDomainDTO();
+        $formCertificateFreeradiusDomainType = $this->createForm(
+            CertificateFreeradiusDomainType::class,
+            $certificatesFreeradiusDomainDTO
+        );
+
+        $formCertificateFreeradiusDomainType->handleRequest($request);
+        if ($formCertificateFreeradiusDomainType->isSubmitted() && $formCertificateFreeradiusDomainType->isValid()) {
+            $domain = $certificatesFreeradiusDomainDTO->domain;
+            // Save updated settings
+            $settingsToUpdate = [
+                SettingName::RADIUS_TLS_NAME->value => [
+                    'value' => $domain,
+                ],
+                SettingName::ENABLE_RADIUS_TLS_RESET->value => [
+                    'value' => 'false',
+                ],
+            ];
+            $processEntity = $processState['process'];
+            $processEntity->setFreeradiusDomainName($domain);
+
+            $this->settingsService->updateSettingsFromArray($settingsToUpdate);
+            $this->settingsService->flush();
+            $this->entityManager->persist($processEntity);
+            $this->entityManager->flush();
+
+            $this->eventActions->saveEvent(
+                $currentUser,
+                AnalyticalEventType::RADIUS_TLS_UPDATED->value,
+                new DateTime(),
+                [
+                    'ip' => $request->getClientIp(),
+                    'user_agent' => $request->headers->get('User-Agent'),
+                    'by' => $currentUser->getUuid(),
+                ]
+            );
+
+            $this->addFlash(
+                'success',
+                $this->translator->trans(
+                    'radiusTLSNameDomainUpdated',
+                    ['%domain%' => $domain],
+                    'controllers'
+                )
+            );
+
+            return $this->redirectToRoute(
+                'admin_dashboard_settings_certs_management_freeradius_selection'
+            );
+        }
+
         return $this->render(
             'dashboard/shared/settings_actions/certificatesManagement/certificates/certs_selection.html.twig',
             [
-                'data' => $this->getSettings->getSettings(),
+                'data' => $data,
+                'formCertificateFreeradiusDomain' => $formCertificateFreeradiusDomainType->createView(),
             ]
         );
     }

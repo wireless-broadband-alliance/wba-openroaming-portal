@@ -185,6 +185,7 @@ domainSourceRefreshed: 'Domain source "%domain%" was refreshed successfully.'
 domainSourceRefreshFailed: 'Failed to refresh domain source "%domain%".'
 domainSourceInactive: "This domain source is inactive and cannot be refreshed."
 allDomainSourceRefreshed: "Domains sources was refreshed successfully."
+radiusTLSNameDomainUpdated: 'The resolver RADIUS TLS hostname has been successfully updated to "%domain%".'
 domainSourceRefreshAllFailed: "Failed to refresh domains sources."
 cloudflareTokenNotMatchesHost: 'The Cloudflare token does not have permissions for the host %host%'
 httpChallengeAppliedSuccessfully: >
