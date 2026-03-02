@@ -139,7 +139,11 @@ class CertificateManagementController extends AbstractController
 
             $this->addFlash(
                 'success',
-                $this->translator->trans('httpChallengeAppliedSuccessfully', [], 'controllers')
+                $this->translator->trans(
+                    'radiusTLSNameDomainUpdated',
+                    ['%domain%' => $domain],
+                    'controllers'
+                )
             );
         }
 
