@@ -38,11 +38,10 @@
                 </p>
             </div>
 
-
             {# Domain Selection Form #}
             <div class="border border-gray-200 rounded-lg p-6 bg-gray-50">
                 <div class="flex items-center gap-2 mb-4">
-                    <twig:ux:icon name="wba:globe" class="w-5 h-5 text-primary"/>
+                    <twig:ux:icon class="w-5 h-5 text-primary" name="wba:upload-rounded"/>
                     <h4 class="text-lg font-semibold text-gray-800">
                         {{ 'certificate_domain_title'|trans({}, 'http_challenge') }}
                     </h4>
@@ -53,9 +52,9 @@
                 <div class="space-y-3">
                     <div>
                         <div class="space-y-2">
-                            {{ form_label(formCertificateFreeradiusDomain.domain, 'hostLabel'|trans({}, 'dns_challenge'), {label_attr: {class: 'font-semibold'}}) }}
+                            {{ form_label(formCertificateFreeradiusDomain.domain, 'domainLabel'|trans({}, 'http_challenge'), {label_attr: {class: 'font-semibold'}}) }}
                             <p class="text-sm font-medium text-gray-700">
-                                {{ 'hostDescription'|trans({}, 'dns_challenge') }}
+                                {{ 'domainDescription'|trans({}, 'http_challenge') }}
                             </p>
                             {{ form_widget(formCertificateFreeradiusDomain.domain, {attr: {class: 'form-widget'}}) }}
 
@@ -85,7 +84,6 @@
                     'dashboard/shared/settings_actions/certificatesManagement/partials/_http_commands.html.twig',
                     {commands: commands},
                 ) }}
-            {% endif %}
 
             {# Grid: Command + Textarea #}
             <div class="p-6 mt-6">
@@ -167,6 +165,7 @@ docker exec -i hybrid-freeradius-1 sh -c "cd /etc/freeradius/3.0/certs/ && cat c
             </div>
         </div>
         {{ form_end(form) }}
+        {% endif %}
 
         {% if not allowSkipProcess %}
             {# Finish Configuration Form #}

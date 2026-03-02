@@ -1,5 +1,12 @@
+certificate_domain_title: "Domínio do Certificado"
+domainLabel: "Domínio"
+domainDescription: >
+    Introduza o nome de domínio completo (FQDN) que será utilizado para gerar
+    o certificado Let's Encrypt para o servidor Hybrid FreeRADIUS.
+    Este domínio deve resolver publicamente para este servidor e a porta 80 deve estar acessível.
+
+submit_domain: "Atualizar Domínio"
 test_and_proceed: "Gerar Certificados e Continuar"
-submit_domain: 'Atualizar Domínios dos Comandos'
 configuration_complete: "Pronto para Gerar Certificados Let's Encrypt"
 
 instructions: >
