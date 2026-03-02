@@ -16,7 +16,12 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 
-#[AsCommand(name: 'reset:radiusTLS', description: 'Hello PhpStorm')]
+#[AsCommand(
+    name: 'reset:radiusTLS',
+    description: 'DANGEROUS: Resetting the RADIUS TLS Name changes the OpenRoaming realm.' .
+    ' This WILL invalidate all previously downloaded OpenRoaming profiles and users will be BLOCKED' .
+    ' from authentication by the resolver.'
+)]
 class ResetRadiusTLSCommand extends Command
 {
 
@@ -30,9 +35,19 @@ class ResetRadiusTLSCommand extends Command
     {
         $this
             ->setName('reset:radiusTLS')
-            ->setDescription('Reset Radius TLS Name')
-            ->addOption('yes', 'y', InputOption::VALUE_NONE, 'Automatically confirm the reset');
+            ->setDescription(
+                'DANGEROUS: Resetting the RADIUS TLS Name changes the OpenRoaming realm.' .
+                ' This WILL invalidate all previously downloaded OpenRoaming profiles and' .
+                ' users will be BLOCKED from authentication by the resolver.'
+            )
+            ->addOption(
+                'yes',
+                'y',
+                InputOption::VALUE_NONE,
+                'Automatically confirm the reset (DANGEROUS)'
+            );
     }
+
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         if (!$input->getOption('yes')) {
