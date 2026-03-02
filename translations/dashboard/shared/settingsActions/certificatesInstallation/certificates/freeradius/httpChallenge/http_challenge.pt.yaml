@@ -1,5 +1,12 @@
-test_and_proceed: "Gerar Certificados e Continuar"
+certificate_domain_title: "Domínio do Certificado"
+domainLabel: "Domínio"
+domainDescription: >
+    Introduza o nome de domínio completo (FQDN) que será utilizado para gerar
+    os certificados Let's Encrypt para o resolver Hybrid FreeRADIUS.
 
+test_and_proceed: "Gerar Certificados e Continuar"
+submit_domain: 'Atualizar Domínios dos Comandos'
+certificate_domain_warning: 'Por favor, forneça primeiro um domínio válido para gerar os comandos e certifique-se de que é o mesmo usado no resolver.'
 configuration_complete: "Pronto para Gerar Certificados Let's Encrypt"
 
 instructions: >
