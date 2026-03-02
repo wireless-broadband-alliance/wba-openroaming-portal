@@ -62,7 +62,7 @@ readonly class TermsAcceptanceListener
             '/forgot-password/link',
             '/saml/login',
             '/app',
-            '/.well-known/assetlinks.json'
+            '/.well-known/assetlinks.json',
             '/login/confirmation'
         ];
 
