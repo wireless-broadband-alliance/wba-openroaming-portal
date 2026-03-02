@@ -23,6 +23,7 @@ use App\Service\CertificateRadsecproxyInfoService;
 use App\Service\EventActions;
 use App\Service\GetSettings;
 use App\Service\InstallationService;
+use App\Service\SettingsService;
 use DateTime;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
@@ -46,6 +47,7 @@ class CertificateManagementController extends AbstractController
         private readonly InstallationService $installationService,
         private readonly CertificateFreeradiusInfoService $certificateFreeradiusInfoService,
         private readonly CertificateRadsecproxyInfoService $certificateRadsecproxyInfoService,
+        private readonly SettingsService $settingsService,
     ) {
     }
 
@@ -118,14 +120,19 @@ class CertificateManagementController extends AbstractController
         if ($formCertificateFreeradiusDomainType->isSubmitted() && $formCertificateFreeradiusDomainType->isValid()) {
             $domain = $certificatesFreeradiusDomainDTO->domain;
             // Save updated settings
-            $this->settingsService->updateSettingsFromArray($dto->toArray());
-            $this->settingsService->flush();
-            $data[SettingName::RADIUS_TLS_NAME->value]['value'] = $certificatesFreeradiusDomainDTO->domain;
-            $data[SettingName::ENABLE_RADIUS_TLS_RESET->value]['value'] = 'false';
-
+            $settingsToUpdate = [
+                SettingName::RADIUS_TLS_NAME->value => [
+                    'value' => $domain,
+                ],
+                SettingName::ENABLE_RADIUS_TLS_RESET->value => [
+                    'value' => 'false',
+                ],
+            ];
             $processEntity = $processState['process'];
             $processEntity->setFreeradiusDomainName($domain);
 
+            $this->settingsService->updateSettingsFromArray($settingsToUpdate);
+            $this->settingsService->flush();
             $this->entityManager->persist($processEntity);
             $this->entityManager->flush();
 
@@ -147,6 +154,10 @@ class CertificateManagementController extends AbstractController
                     ['%domain%' => $domain],
                     'controllers'
                 )
+            );
+
+            return $this->redirectToRoute(
+                'admin_dashboard_settings_certs_management_freeradius_selection'
             );
         }
 

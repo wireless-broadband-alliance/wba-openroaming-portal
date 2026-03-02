@@ -31,9 +31,7 @@
         {# Freeradius Radius TLS Configuration #}
         {{ include('dashboard/shared/settings_actions/certificatesManagement/certificates/freeradius/domainRadius/_domainRadiusConfig.html.twig') }}
     {% else %}
-        <div class="mb-2">
-            {{ include('dashboard/shared/settings_actions/certificatesManagement/certificates/freeradius/freeradiusCertsMethods/_methods.html.twig') }}
-            {{ include('dashboard/shared/settings_actions/certificatesManagement/certificates/freeradius/freeradiusCertsMethods/_reset_radius_tls_name_commands.html.twig') }}
-        </div>
+        {{ include('dashboard/shared/settings_actions/certificatesManagement/certificates/freeradius/freeradiusCertsMethods/_reset_radius_tls_name_commands.html.twig') }}
+        {{ include('dashboard/shared/settings_actions/certificatesManagement/certificates/freeradius/freeradiusCertsMethods/_methods.html.twig') }}
     {% endif %}
 {% endblock %}
