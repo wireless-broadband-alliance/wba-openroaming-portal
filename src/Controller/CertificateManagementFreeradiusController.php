@@ -742,19 +742,6 @@ class CertificateManagementFreeradiusController extends AbstractController
             return $this->redirectToRoute('admin_dashboard_settings_certs_management');
         }
 
-        $certificatesFreeradiusDomainDTO = new CertificateFreeradiusDomainDTO();
-        $formCertificateFreeradiusDomainType = $this->createForm(
-            CertificateFreeradiusDomainType::class,
-            $certificatesFreeradiusDomainDTO
-        );
-        $formCertificateFreeradiusDomainType->handleRequest($request);
-        if ($formCertificateFreeradiusDomainType->isSubmitted() && $formCertificateFreeradiusDomainType->isValid()) {
-            $domain = $certificatesFreeradiusDomainDTO->domain;
-            $processEntity->setFreeradiusDomainName($domain);
-
-            $this->entityManager->persist($processEntity);
-            $this->entityManager->flush();
-        }
 
         $httpChallengeCommands = $this->httpChallengeCommands->getCommands(
             $currentUser->getEmail()
