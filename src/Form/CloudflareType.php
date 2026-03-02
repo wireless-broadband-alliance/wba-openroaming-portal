@@ -19,9 +19,6 @@ class CloudflareType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('host', TextType::class, [
-                'required' => true,
-            ])
             ->add('token', TextType::class, [
                 'required' => true,
             ]);
