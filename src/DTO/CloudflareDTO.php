@@ -9,7 +9,6 @@ use App\Validator\Constraints as CustomAssert;
 
 class CloudflareDTO
 {
-
     #[NotBlank(message: 'fieldCannotBeBlank')]
     #[Assert\Length(
         min: 20,
