@@ -742,7 +742,6 @@ class CertificateManagementFreeradiusController extends AbstractController
             return $this->redirectToRoute('admin_dashboard_settings_certs_management');
         }
 
-
         $httpChallengeCommands = $this->httpChallengeCommands->getCommands(
             $currentUser->getEmail()
         );
@@ -770,7 +769,6 @@ class CertificateManagementFreeradiusController extends AbstractController
                 'process' => $processState['process'],
                 'form' => $form->createView(),
                 'formFinishProcess' => $formFinishProcess->createView(),
-                'formCertificateFreeradiusDomain' => $formCertificateFreeradiusDomainType->createView(),
                 'mode' => $mode,
                 'commands' => $httpChallengeCommands,
                 'allowSkipProcess' => $allowSkipProcess,
@@ -808,9 +806,9 @@ class CertificateManagementFreeradiusController extends AbstractController
             return $this->redirectToRoute('admin_dashboard_settings_certs_radsecproxy_upload');
         }
 
+        /** @var array<string, array{value: string, description: string}> $data */
         $data = $this->getSettings->getSettings();
         $domain = $data[SettingName::RADIUS_TLS_NAME->value]['value'];
-
 
         // Prepare session for freeradius stepper detection
         $session = $request->getSession();

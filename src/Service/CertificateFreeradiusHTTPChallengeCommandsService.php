@@ -16,7 +16,6 @@ class CertificateFreeradiusHTTPChallengeCommandsService
     /**
      * Get the commands for FreeRADIUS HTTP challenge
      *
-     * @param string $domain The domain for the certificate
      * @param string $email  Email to register with Let's Encrypt
      * @return array<string, array<string, mixed>>
      */
