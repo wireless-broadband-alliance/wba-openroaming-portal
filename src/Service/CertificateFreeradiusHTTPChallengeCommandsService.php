@@ -8,7 +8,7 @@ use App\Repository\SettingRepository;
 class CertificateFreeradiusHTTPChallengeCommandsService
 {
     public function __construct(
-        private SettingRepository $settingRepository,
+        private readonly SettingRepository $settingRepository,
     ) {
     }
     private string $projectRoot = '/root/wba-openroaming-connector/hybrid';
