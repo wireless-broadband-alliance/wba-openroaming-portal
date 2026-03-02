@@ -742,22 +742,7 @@ class CertificateManagementFreeradiusController extends AbstractController
             return $this->redirectToRoute('admin_dashboard_settings_certs_management');
         }
 
-        $certificatesFreeradiusDomainDTO = new CertificateFreeradiusDomainDTO();
-        $formCertificateFreeradiusDomainType = $this->createForm(
-            CertificateFreeradiusDomainType::class,
-            $certificatesFreeradiusDomainDTO
-        );
-        $formCertificateFreeradiusDomainType->handleRequest($request);
-        if ($formCertificateFreeradiusDomainType->isSubmitted() && $formCertificateFreeradiusDomainType->isValid()) {
-            $domain = $certificatesFreeradiusDomainDTO->domain;
-            $processEntity->setFreeradiusDomainName($domain);
-
-            $this->entityManager->persist($processEntity);
-            $this->entityManager->flush();
-        }
-
         $httpChallengeCommands = $this->httpChallengeCommands->getCommands(
-            $domain ?? 'domain.example.org',
             $currentUser->getEmail()
         );
 
@@ -784,7 +769,6 @@ class CertificateManagementFreeradiusController extends AbstractController
                 'process' => $processState['process'],
                 'form' => $form->createView(),
                 'formFinishProcess' => $formFinishProcess->createView(),
-                'formCertificateFreeradiusDomain' => $formCertificateFreeradiusDomainType->createView(),
                 'mode' => $mode,
                 'commands' => $httpChallengeCommands,
                 'allowSkipProcess' => $allowSkipProcess,
@@ -822,7 +806,9 @@ class CertificateManagementFreeradiusController extends AbstractController
             return $this->redirectToRoute('admin_dashboard_settings_certs_radsecproxy_upload');
         }
 
+        /** @var array<string, array{value: string, description: string}> $data */
         $data = $this->getSettings->getSettings();
+        $domain = $data[SettingName::RADIUS_TLS_NAME->value]['value'];
 
         // Prepare session for freeradius stepper detection
         $session = $request->getSession();
@@ -851,7 +837,7 @@ class CertificateManagementFreeradiusController extends AbstractController
                     'error',
                     $this->translator->trans(
                         'cloudflareTokenNotMatchesHost',
-                        ['%host%' => $dto->host],
+                        ['%host%' => $domain],
                         'controllers'
                     )
                 );
@@ -864,7 +850,6 @@ class CertificateManagementFreeradiusController extends AbstractController
             $user = $this->getUser();
 
             $this->certificateFreeradiusGenerator->generateCertificatesWithCloudflareDns(
-                $dto->host,
                 $user,
                 $dto->token
             );
@@ -872,7 +857,7 @@ class CertificateManagementFreeradiusController extends AbstractController
             $certificateSetupProcess = $this->certificateProcessCheckerService->getCurrentProcess();
 
             if ($certificateSetupProcess instanceof CertificateSetupProcess) {
-                $certificateSetupProcess->setFreeradiusDomainName($dto->host);
+                $certificateSetupProcess->setFreeradiusDomainName($domain);
                 $certificateSetupProcess->setFreeradiusFormCompletedAt(new DateTimeImmutable());
                 $certificateSetupProcess->setFreeradiusConfigAppliedAt(null);
                 $certificateSetupProcess->setIsFreeradiusCloudflare(true);

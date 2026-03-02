@@ -3,6 +3,8 @@
 namespace App\Service;
 
 use App\DTO\CloudflareDTO;
+use App\Enum\SettingName;
+use App\Repository\SettingRepository;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
@@ -14,6 +16,7 @@ readonly class CloudflareService
 {
     public function __construct(
         private HttpClientInterface $httpClient,
+        private SettingRepository $settingRepository,
     ) {
     }
 
@@ -22,11 +25,14 @@ readonly class CloudflareService
      */
     public function validate(CloudflareDTO $dto): bool
     {
-        if (!$dto->token || !$dto->host) {
+        if (!$dto->token) {
             return false;
         }
 
-        $zoneId = $this->discoverZoneId($dto->token, $dto->host);
+        $domain = $this->settingRepository->findOneBy(
+            ['name' => SettingName::RADIUS_TLS_NAME->value]
+        )->getValue();
+        $zoneId = $this->discoverZoneId($dto->token, $domain);
 
         if ($zoneId === null) {
             return false;

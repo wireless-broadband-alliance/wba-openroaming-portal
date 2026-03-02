@@ -27,99 +27,15 @@
         </div>
     </div>
 
-    {# Certs Selection - Manual or Auto #}
-    <div data-controller="cert-selection-freeradius">
-        <div
-                data-cert-selection-freeradius-target="initialOptions"
-                class="grid grid-cols-1 md:grid-cols-2 gap-8"
-        >
-
-            {# Manual CARD #}
-            {{ include(
-                'dashboard/shared/settings_actions/certificatesManagement/partials/_cert_option_card.html.twig',
-                {
-                    type: 'link',
-                    route: 'admin_dashboard_settings_certs_freeradius_upload',
-                    title: 'manualTitle',
-                    subtitle: 'manualSubtitle',
-                    icon: 'wba:cloud-upload',
-                    translation_domain: 'certs_selection',
-                },
-            ) }}
-
-            {# Lets Encrypt #}
-            {{ include(
-                'dashboard/shared/settings_actions/certificatesManagement/partials/_cert_option_card.html.twig',
-                {
-                    type: 'button',
-                    route: null,
-                    title: 'letsEncryptTitle',
-                    subtitle: 'autoSubtitle',
-                    icon: 'wba:autorenew-rounded',
-                    translation_domain: 'certs_selection',
-                    action: 'cert-selection-freeradius#selectLetsEncrypt',
-                },
-            ) }}
+    {% if data.ENABLE_RADIUS_TLS_RESET.value == 'true' %}
+        {{ include('dashboard/shared/settings_actions/certificatesManagement/certificates/freeradius/domainRadius/_domainRadiusConfig.html.twig') }}
+    {% else %}
+        <div class="mb-4">
+            {{ include('dashboard/shared/settings_actions/certificatesManagement/certificates/freeradius/freeradiusCertsMethods/_reset_radius_tls_name_commands.html.twig') }}
         </div>
 
-        <div
-                data-cert-selection-freeradius-target="letsEncryptOptions"
-                class="grid grid-cols-1 md:grid-cols-2 gap-8 hidden"
-        >
-            {# Cloudflare DNS #}
-            {{ include(
-                'dashboard/shared/settings_actions/certificatesManagement/partials/_cert_option_card.html.twig',
-                {
-                    type: 'link',
-                    route: 'admin_dashboard_settings_certs_freeradius_cloudflare_dnsChallenge',
-                    title: 'CloudflareDNSTitle',
-                    subtitle: 'CloudflareDNSSubtitle',
-                    icon: 'wba:cloud-upload',
-                    translation_domain: 'certs_selection',
-                },
-            ) }}
-
-            {# Cloudflare HTTP #}
-            {{ include(
-                'dashboard/shared/settings_actions/certificatesManagement/partials/_cert_option_card.html.twig',
-                {
-                    type: 'link',
-                    route: 'admin_dashboard_settings_certs_freeradius_cloudflare_httpChallenge',
-                    title: 'CloudflareHTTPTitle',
-                    subtitle: 'CloudflareHTTPSubtitle',
-                    icon: 'wba:cloud-upload',
-                    translation_domain: 'certs_selection',
-                },
-            ) }}
-
-            {# Return #}
-            <div class="md:col-span-2 flex justify-center sm:justify-end">
-                <button
-                        type="button"
-                        data-action="click->cert-selection-freeradius#back"
-                        class="
-            inline-flex items-center justify-center
-            gap-2
-            w-full sm:w-auto
-            px-3 py-1.5 sm:px-4 sm:py-2
-            text-xs sm:text-sm
-            font-medium
-            rounded-lg
-            border border-gray-200
-            bg-white text-gray-700
-            shadow-sm
-            transition
-            hover:bg-gray-50 hover:border-gray-300
-            focus:outline-none focus:ring-2 focus:ring-primary/30
-        "
-                >
-                    <twig:ux:icon
-                            name="wba:return"
-                            class="w-4 h-4 opacity-70"
-                    />
-                    {{ 'return'|trans({}, 'upload_freeradius') }}
-                </button>
-            </div>
+        <div class="mb-4">
+            {{ include('dashboard/shared/settings_actions/certificatesManagement/certificates/freeradius/freeradiusCertsMethods/_methods.html.twig') }}
         </div>
-    </div>
+    {% endif %}
 {% endblock %}
