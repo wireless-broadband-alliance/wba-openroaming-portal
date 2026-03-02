@@ -38,10 +38,54 @@
                 </p>
             </div>
 
-            {{ include(
-                'dashboard/shared/settings_actions/certificatesManagement/partials/_http_commands.html.twig',
-                {commands: commands},
-            ) }}
+
+            {# Domain Selection Form #}
+            <div class="border border-gray-200 rounded-lg p-6 bg-gray-50">
+                <div class="flex items-center gap-2 mb-4">
+                    <twig:ux:icon name="wba:globe" class="w-5 h-5 text-primary"/>
+                    <h4 class="text-lg font-semibold text-gray-800">
+                        {{ 'certificate_domain_title'|trans({}, 'http_challenge') }}
+                    </h4>
+                </div>
+
+                {{ form_start(formCertificateFreeradiusDomain) }}
+
+                <div class="space-y-3">
+                    <div>
+                        <div class="space-y-2">
+                            {{ form_label(formCertificateFreeradiusDomain.domain, 'hostLabel'|trans({}, 'dns_challenge'), {label_attr: {class: 'font-semibold'}}) }}
+                            <p class="text-sm font-medium text-gray-700">
+                                {{ 'hostDescription'|trans({}, 'dns_challenge') }}
+                            </p>
+                            {{ form_widget(formCertificateFreeradiusDomain.domain, {attr: {class: 'form-widget'}}) }}
+
+                            <div class="text-red-500 text-sm ml-1">
+                                {{ form_errors(formCertificateFreeradiusDomain.domain) }}
+                            </div>
+                        </div>
+
+                        <div class="mt-2 text-red-500 text-sm">
+                            {{ form_errors(formCertificateFreeradiusDomain.domain) }}
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end">
+                        <button type="submit"
+                                class="px-4 py-2 bg-primary text-white rounded-lg shadow hover:bg-primary transition">
+                            {{ 'submit_domain'|trans({}, 'http_challenge') }}
+                        </button>
+                    </div>
+                </div>
+
+                {{ form_end(formCertificateFreeradiusDomain) }}
+            </div>
+
+            {% if process.freeradiusDomainName %}
+                {{ include(
+                    'dashboard/shared/settings_actions/certificatesManagement/partials/_http_commands.html.twig',
+                    {commands: commands},
+                ) }}
+            {% endif %}
 
             {# Grid: Command + Textarea #}
             <div class="p-6 mt-6">

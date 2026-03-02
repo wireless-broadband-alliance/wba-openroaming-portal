@@ -1,5 +1,5 @@
 test_and_proceed: "Gerar Certificados e Continuar"
-
+submit_domain: 'Atualizar Domínios dos Comandos'
 configuration_complete: "Pronto para Gerar Certificados Let's Encrypt"
 
 instructions: >

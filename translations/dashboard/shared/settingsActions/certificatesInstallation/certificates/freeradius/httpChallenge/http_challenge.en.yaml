@@ -1,5 +1,5 @@
 test_and_proceed: "Generate Certificates and Continue"
-
+submit_domain: 'Update Commands Domain'
 configuration_complete: "Ready to Generate Let's Encrypt Certificates"
 
 instructions: >
