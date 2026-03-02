@@ -83,7 +83,6 @@
                 {{ form_end(formCertificateFreeradiusDomain) }}
             </div>
 
-            {% if process.freeradiusDomainName and process.freeradiusDomainName != 'domain.example.org' %}
             {{ include(
                 'dashboard/shared/settings_actions/certificatesManagement/partials/_http_commands.html.twig',
                 {commands: commands},
@@ -169,7 +168,6 @@ docker exec -i hybrid-freeradius-1 sh -c "cd /etc/freeradius/3.0/certs/ && cat c
             </div>
         </div>
         {{ form_end(form) }}
-        {% endif %}
 
         {% if not allowSkipProcess %}
             {# Finish Configuration Form #}
