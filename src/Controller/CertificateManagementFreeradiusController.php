@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\DTO\CertificateFreeradiusDomainDTO;
 use App\DTO\CertificateFreeradiusUploadManualDTO;
 use App\DTO\CertificatesFreeradiusPasteDTO;
 use App\DTO\CloudflareDTO;
@@ -19,6 +20,7 @@ use App\Enum\ProcessStatusType;
 use App\Enum\SessionStatus;
 use App\Enum\SettingName;
 use App\Exception\FreeradiusTestException;
+use App\Form\CertificateFreeradiusDomainType;
 use App\Form\CertificateFreeradiusUploadManualType;
 use App\Form\CertificatesFreeradiusPasteType;
 use App\Form\CloudflareType;
@@ -731,15 +733,31 @@ class CertificateManagementFreeradiusController extends AbstractController
                 // Mark as PASSED and finish configuration
                 $processEntity->setFreeradiusTestResult(CertificateTestResult::PASSED);
                 $processEntity->setUpdatedAt(new DateTimeImmutable());
+
+                $this->entityManager->persist($processEntity);
+                $this->entityManager->flush();
             }
 
             // Redirect to the next stage automatically
             return $this->redirectToRoute('admin_dashboard_settings_certs_management');
         }
 
-        $domain = $request->getHost();
+        $certificatesFreeradiusDomainDTO = new CertificateFreeradiusDomainDTO();
+        $formCertificateFreeradiusDomainType = $this->createForm(
+            CertificateFreeradiusDomainType::class,
+            $certificatesFreeradiusDomainDTO
+        );
+        $formCertificateFreeradiusDomainType->handleRequest($request);
+        if ($formCertificateFreeradiusDomainType->isSubmitted() && $formCertificateFreeradiusDomainType->isValid()) {
+            $domain = $certificatesFreeradiusDomainDTO->domain;
+            $processEntity->setFreeradiusDomainName($domain);
+
+            $this->entityManager->persist($processEntity);
+            $this->entityManager->flush();
+        }
+
         $httpChallengeCommands = $this->httpChallengeCommands->getCommands(
-            $domain,
+            $domain ?? 'domain.example.org',
             $currentUser->getEmail()
         );
 
@@ -766,6 +784,7 @@ class CertificateManagementFreeradiusController extends AbstractController
                 'process' => $processState['process'],
                 'form' => $form->createView(),
                 'formFinishProcess' => $formFinishProcess->createView(),
+                'formCertificateFreeradiusDomain' => $formCertificateFreeradiusDomainType->createView(),
                 'mode' => $mode,
                 'commands' => $httpChallengeCommands,
                 'allowSkipProcess' => $allowSkipProcess,

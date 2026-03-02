@@ -31,6 +31,9 @@ readonly class AdminCertificateProcessEnforcerListener
     ) {
     }
 
+    /**
+     * @throws \Exception
+     */
     public function __invoke(RequestEvent $event): void
     {
         if (!$event->isMainRequest()) {
@@ -122,15 +125,14 @@ readonly class AdminCertificateProcessEnforcerListener
      */
     private function enforceProcess(RequestEvent $event, SessionInterface $session): void
     {
-
-        if (!($this->certificateSetupProcessRepository->getLatestProcess() instanceof CertificateSetupProcess)) {
+        if ($this->certificateSetupProcessRepository->getLatestProcess() instanceof CertificateSetupProcess) {
             $this->certificateProcessCheckerService->verifyCertificates();
         }
+
         // Check installation progress
         $installation = $this->installationProgressRepository->findOneBy([
             'installationState' => ProcessStatusType::COMPLETED
         ]);
-
 
         if (!$installation instanceof InstallationProgress) {
             $session->set(
@@ -154,8 +156,6 @@ readonly class AdminCertificateProcessEnforcerListener
 
         // Check certificates progress
         $certProcess = $this->certificateSetupProcessRepository->getLatestProcess();
-
-
         if (!$certProcess instanceof CertificateSetupProcess) {
             $session->set(
                 SessionStatus::SYSTEM_RESET_REQUEST->value,
