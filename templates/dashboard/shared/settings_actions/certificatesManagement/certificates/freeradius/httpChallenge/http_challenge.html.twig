@@ -83,11 +83,11 @@
                 {{ form_end(formCertificateFreeradiusDomain) }}
             </div>
 
-            {% if process.freeradiusDomainName %}
-                {{ include(
-                    'dashboard/shared/settings_actions/certificatesManagement/partials/_http_commands.html.twig',
-                    {commands: commands},
-                ) }}
+            {% if process.freeradiusDomainName and process.freeradiusDomainName != 'domain.example.org' %}
+            {{ include(
+                'dashboard/shared/settings_actions/certificatesManagement/partials/_http_commands.html.twig',
+                {commands: commands},
+            ) }}
 
             {# Grid: Command + Textarea #}
             <div class="p-6 mt-6">
