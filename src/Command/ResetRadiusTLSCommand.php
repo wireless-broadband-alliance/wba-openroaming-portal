@@ -25,7 +25,6 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 )]
 class ResetRadiusTLSCommand extends Command
 {
-
     public function __construct(
         private readonly EntityManagerInterface $entityManager
     ) {

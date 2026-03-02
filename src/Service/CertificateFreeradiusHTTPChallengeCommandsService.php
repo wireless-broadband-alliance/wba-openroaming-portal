@@ -7,7 +7,6 @@ use App\Repository\SettingRepository;
 
 class CertificateFreeradiusHTTPChallengeCommandsService
 {
-
     public function __construct(
         private SettingRepository $settingRepository,
     ) {
