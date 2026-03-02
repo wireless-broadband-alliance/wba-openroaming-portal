@@ -143,7 +143,7 @@ readonly class AdminCertificateProcessEnforcerListener
             return;
         }
 
-        if ($this->certificateSetupProcessRepository->getLatestProcess() instanceof CertificateSetupProcess) {
+        if (!($this->certificateSetupProcessRepository->getLatestProcess() instanceof CertificateSetupProcess)) {
             $certProcess = $this->certificateProcessCheckerService->verifyCertificates();
             if (
                 $certProcess instanceof CertificateSetupProcess &&
