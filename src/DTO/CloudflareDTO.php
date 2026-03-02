@@ -11,17 +11,6 @@ class CloudflareDTO
 {
     #[NotBlank(message: 'fieldCannotBeBlank')]
     #[Assert\Length(
-        max: 255,
-        maxMessage: 'maxCharacters'
-    )]
-    #[Assert\Regex(
-        pattern: '/^[a-zA-Z0-9.-]+$/',
-        message: 'invalidFormat'
-    )]
-    public ?string $host = null;
-
-    #[NotBlank(message: 'fieldCannotBeBlank')]
-    #[Assert\Length(
         min: 20,
         max: 255,
         minMessage: 'minCharacters',

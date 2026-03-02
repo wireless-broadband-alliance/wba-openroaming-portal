@@ -6,6 +6,8 @@ use App\Entity\CertificateSetupProcess;
 use App\Entity\User;
 use App\Enum\CertificateFileName;
 use App\Enum\CertificateMachineType;
+use App\Enum\SettingName;
+use App\Repository\SettingRepository;
 use DateTimeImmutable;
 use Random\RandomException;
 use RuntimeException;
@@ -24,6 +26,7 @@ readonly class CertificateFreeradiusGenerator
         private CertificateStorageService $certificateStorageService,
         private CertificateProcessCheckerService $certificateProcessCheckerService,
         private TranslatorInterface $translator,
+        private SettingRepository $settingRepository,
     ) {
         $projectDir = $this->parameterBag->get('kernel.project_dir');
         $this->certTargetDir = $projectDir . '/var/certs';
@@ -36,13 +39,13 @@ readonly class CertificateFreeradiusGenerator
      * @param bool|null $simulated Optional runtime override of simulation mode
      * @return string[] Full paths of generated files
      */
-    public function run(string $domain, User $user, ?bool $simulated = null): array
+    public function run(User $user, ?bool $simulated = null): array
     {
         $useSimulation = $simulated ?? false;
 
         $files = $useSimulation
             ? $this->simulateCertificates()
-            : $this->generateCertificates($domain, $user);
+            : $this->generateCertificates($user);
 
         // Store the resulting certs in var/certs/
         $this->storeCertificates($files, $useSimulation);
@@ -55,8 +58,11 @@ readonly class CertificateFreeradiusGenerator
      *
      * @return string[] Full paths of cert files
      */
-    public function generateCertificates(string $domain, User $user): array
+    public function generateCertificates(User $user): array
     {
+        $domain = $this->settingRepository->findOneBy(
+            ['name' => SettingName::RADIUS_TLS_NAME->value]
+        )->getValue();
         $command = [
             'certbot',
             'certonly',
@@ -161,7 +167,6 @@ readonly class CertificateFreeradiusGenerator
      * @throws RandomException
      */
     public function generateCertificatesWithCloudflareDns(
-        string $domain,
         User $user,
         string $cloudflareToken
     ): array {
@@ -173,7 +178,11 @@ readonly class CertificateFreeradiusGenerator
         );
         chmod($credFile, 0600);
 
+
         try {
+            $domain = $this->settingRepository->findOneBy(
+                ['name' => SettingName::RADIUS_TLS_NAME->value]
+            )->getValue();
             $identifier = new DateTimeImmutable()->format('Ymd_His'); // e.g., 20260209_151230
             $certName = $domain . '-' . $identifier;
 

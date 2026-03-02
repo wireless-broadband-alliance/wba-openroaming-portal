@@ -81,7 +81,6 @@ readonly class CertificateWriterUpdateService
         $settingsMap = [
             'RADIUS_REALM_NAME' => $serverCN,
             'NAI_REALM' => $serverCN,
-            'RADIUS_TLS_NAME' => $serverCN,
             'DOMAIN_NAME' => $serverCN,
             'RADIUS_TRUSTED_ROOT_CA_SHA1_HASH' => $caParsed['fingerprintSHA1'] ?? null,
         ];
