@@ -204,7 +204,7 @@ readonly class CertificateFreeradiusGenerator
                 $this->certTargetDir . '/logs',
             ];
 
-            if ($this->parameterBag->get('kernel.environment') === 'dev') {
+            if ($this->parameterBag->get('app.lets_encrypt_profiles_generation') === false) {
                 $command[] = '--staging';
             }
 
