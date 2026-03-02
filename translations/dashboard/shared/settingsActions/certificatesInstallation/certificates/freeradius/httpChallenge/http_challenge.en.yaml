@@ -3,8 +3,9 @@ domainLabel: "Domain"
 domainDescription: >
     Enter the fully qualified domain name (FQDN) that will be used to generate
     the Let's Encrypt certificates for the Hybrid FreeRADIUS resolver.
-submit_domain: "Update Domain"
 test_and_proceed: "Generate Certificates and Continue"
+submit_domain: 'Update Commands Domain'
+certificate_domain_warning: 'Please provide a valid domain first to generate the commands, and make sure it matches the one used in your resolver.'
 configuration_complete: "Ready to Generate Let's Encrypt Certificates"
 
 instructions: >
