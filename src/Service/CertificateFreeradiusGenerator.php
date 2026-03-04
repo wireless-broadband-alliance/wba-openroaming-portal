@@ -213,7 +213,12 @@ readonly class CertificateFreeradiusGenerator
                 $this->certTargetDir . '/logs',
             ];
 
-            if ($this->parameterBag->get('app.lets_encrypt_profiles_generation') === false) {
+            $isProd = filter_var(
+                (string) ($_ENV['LE_PROD'] ?? 'false'),
+                FILTER_VALIDATE_BOOLEAN
+            );
+
+            if (!$isProd) {
                 $command[] = '--staging';
             }
 
