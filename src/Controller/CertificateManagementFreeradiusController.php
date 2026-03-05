@@ -147,7 +147,10 @@ class CertificateManagementFreeradiusController extends AbstractController
             }
 
             // Generate CA content
-            $caContent = $this->certificateCAGeneratorService->generateCA($certificateUploadDTO);
+            $caContent = $this->certificateCAGeneratorService->generateCA(
+                $certificateUploadDTO->cert,
+                $certificateUploadDTO->chain
+            );
 
             // Save CA.pem in the application using your existing method
             $tmpPath = tempnam(sys_get_temp_dir(), 'ca_') . '.pem';

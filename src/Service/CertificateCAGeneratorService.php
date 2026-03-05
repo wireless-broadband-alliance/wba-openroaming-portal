@@ -3,42 +3,53 @@
 namespace App\Service;
 
 use RuntimeException;
-use App\DTO\CertificateFreeradiusUploadManualDTO;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class CertificateCAGeneratorService
 {
-    public function generateCA(
-        CertificateFreeradiusUploadManualDTO $dto
-    ): string {
-        // Load leaf and chain
-        $certFile = $dto->cert;
-        $chainFile = $dto->chain;
+    /**
+     * Generate the root CA certificate from leaf and chain files.
+     *
+     * @param UploadedFile $certFile Leaf certificate (uploaded file)
+     * @param UploadedFile $chainFile Chain certificate bundle (uploaded file)
+     *
+     * @return string PEM content of the root certificate
+     */
+    public function generateCA(UploadedFile $certFile, UploadedFile $chainFile): string
+    {
+        // Make sure files exist
+        $leafPath = $certFile->getRealPath();
+        $chainPath = $chainFile->getRealPath();
 
-        if (!$certFile || !$chainFile) {
-            throw new RuntimeException("Leaf and chain certificates are required.");
+        if (!$leafPath || !file_exists($leafPath)) {
+            throw new RuntimeException("Leaf certificate file not found.");
         }
 
-        $leafPem = $this->normalizePem(file_get_contents($certFile->getRealPath()));
-        $chainPem = $this->extractPemCertificates(file_get_contents($chainFile->getRealPath()));
+        if (!$chainPath || !file_exists($chainPath)) {
+            throw new RuntimeException("Chain certificate file not found.");
+        }
 
-        // Deduplicate
-        $pool = array_merge([$leafPem], $this->uniqueCerts($chainPem));
+        // Load contents
+        $leafPem = $this->normalizePem(file_get_contents($leafPath));
+        $chainPemArray = $this->extractPemCertificates(file_get_contents($chainPath));
 
-        // Find root (self-signed cert)
+        // Deduplicate and pool
+        $pool = array_merge([$leafPem], $this->uniqueCerts($chainPemArray));
+
+        // Find root certificate (self-signed)
         $root = null;
         foreach ($pool as $cert) {
             $parsed = openssl_x509_parse($cert);
-            if ($parsed &&
-                isset($parsed['subject'], $parsed['issuer']) &&
-                $parsed['subject'] === $parsed['issuer']
-            ) {
+            if ($parsed && isset(
+                    $parsed['subject'], $parsed['issuer']
+                ) && $parsed['subject'] === $parsed['issuer']) {
                 $root = $cert;
                 break;
             }
         }
 
+        // fallback: maybe the last certificate in the chain
         if (!$root) {
-            // fallback: maybe the last certificate in the chain
             $root = end($pool);
         }
 
@@ -52,7 +63,6 @@ class CertificateCAGeneratorService
             throw new RuntimeException("Incomplete or invalid certificate chain.");
         }
 
-        // Return the CA content (root certificate)
         return $root;
     }
 
