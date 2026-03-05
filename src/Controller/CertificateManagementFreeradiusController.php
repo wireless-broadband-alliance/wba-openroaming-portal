@@ -606,8 +606,8 @@ class CertificateManagementFreeradiusController extends AbstractController
 
                 // Prepare Private Key to be inserted on the DB because its not a actual cert
                 $extractCertificates[CertificateFileName::PRIVATE_KEY_PEM->value] = rtrim(
-                        $pastedCertificates['privateKey'] ?? ''
-                    ) . "\n";
+                    $pastedCertificates['privateKey'] ?? ''
+                ) . "\n";
 
                 /**
                  * Convert PEM strings → UploadedFile objects to be saved on the tmp
