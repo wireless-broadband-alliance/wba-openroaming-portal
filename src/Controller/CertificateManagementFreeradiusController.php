@@ -554,7 +554,9 @@ class CertificateManagementFreeradiusController extends AbstractController
                 }
 
                 if ($caPem === null) {
-                    return $this->redirectToRoute('admin_dashboard_settings_certs_freeradius_cloudflare_httpChallenge');
+                    return $this->redirectToRoute(
+                        'admin_dashboard_settings_certs_freeradius_cloudflare_httpChallenge'
+                    );
                 }
 
                 // Map raw extracted certificates to identifiers
@@ -602,18 +604,21 @@ class CertificateManagementFreeradiusController extends AbstractController
                     unset($certParsed['fingerprintSHA1']);
                 }
 
+                // Prepare Private Key to be inserted on the DB because its not a actual cert
+                $extractCertificates[CertificateFileName::PRIVATE_KEY_PEM->value] = rtrim(
+                        $pastedCertificates['privateKey'] ?? ''
+                    ) . "\n";
+
                 /**
                  * Convert PEM strings → UploadedFile objects to be saved on the tmp
                  *
                  */
                 foreach ($extractCertificates as $type => $pemContent) {
-                    // Creates fake temporally destination folder for VichUpload
-                    $tmpPath = tempnam(sys_get_temp_dir(), 'freeradius_');
-
-                    if ($tmpPath === false) {
-                        throw new RuntimeException('Unable to create temporary file');
+                    if (empty($pemContent)) {
+                        continue; // skip empty PEMs
                     }
 
+                    $tmpPath = tempnam(sys_get_temp_dir(), 'freeradius_');
                     file_put_contents($tmpPath, $pemContent);
 
                     $uploadedFile = new UploadedFile(
@@ -621,16 +626,18 @@ class CertificateManagementFreeradiusController extends AbstractController
                         $type . '.pem',
                         'application/x-pem-file',
                         null,
-                        true // mark as already moved
+                        true
                     );
 
-                    // Store them
+                    // Determine if this is a private key
+                    $isAKey = $type === CertificateFileName::PRIVATE_KEY_PEM->value;
+
                     $this->certificateStorageService->storeUploadedFile(
                         $uploadedFile,
                         $type,
                         CertificateMachineType::FREERADIUS->value,
                         $processEntity,
-                        true
+                        $isAKey
                     );
                 }
 
