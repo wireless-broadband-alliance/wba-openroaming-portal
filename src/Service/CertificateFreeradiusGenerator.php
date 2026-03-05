@@ -27,6 +27,7 @@ readonly class CertificateFreeradiusGenerator
         private CertificateProcessCheckerService $certificateProcessCheckerService,
         private TranslatorInterface $translator,
         private SettingRepository $settingRepository,
+        private CertificateCAGeneratorService $certificateCAGeneratorService,
     ) {
         $projectDir = $this->parameterBag->get('kernel.project_dir');
         $this->certTargetDir = $projectDir . '/var/certs';
@@ -252,16 +253,6 @@ readonly class CertificateFreeradiusGenerator
             );
         }
 
-        // Get Current CA.PEM on the signing-keys
-        $staticCaPath = $this->parameterBag->get('kernel.project_dir') . '/signing-keys/ca/ca.pem';
-
-        // Copy/store the CA into var/certs as CertificateFileName::CA_PEM
-        $caCert = $this->certificateStorageService->storeGeneratedFile(
-            $staticCaPath,
-            CertificateFileName::CA_PEM->value,
-            CertificateMachineType::FREERADIUS->value,
-            $setupProcess
-        );
 
         $certCert = $this->certificateStorageService->storeGeneratedFile(
             "$liveDir/" . CertificateFileName::CERT_PEM_FILE->value,
@@ -290,6 +281,25 @@ readonly class CertificateFreeradiusGenerator
             CertificateMachineType::FREERADIUS->value,
             $setupProcess,
             true // is private key
+        );
+
+        $caGenerated = $this->certificateCAGeneratorService->generateCA(
+            $certCert->getFile(),
+            $chainCert->getFile()
+        );
+
+        // Save generated CA to temp file
+        $tmpCaPath = sys_get_temp_dir() . '/ca.pem';
+        file_put_contents($tmpCaPath, rtrim((string) $caGenerated) . "\n");
+
+        /**
+         * Store the generated CA
+         */
+        $caCert = $this->certificateStorageService->storeGeneratedFile(
+            $tmpCaPath,
+            CertificateFileName::CA_PEM->value,
+            CertificateMachineType::FREERADIUS->value,
+            $setupProcess
         );
 
         $files = [

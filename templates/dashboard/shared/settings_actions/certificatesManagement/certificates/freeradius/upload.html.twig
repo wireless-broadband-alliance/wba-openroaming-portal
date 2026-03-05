@@ -19,19 +19,6 @@
 
             <div class="space-y-2">
                 <p class="text-sm font-medium text-gray-700">
-                    {{ 'ca.description'|trans({}, 'upload_freeradius') }}
-                </p>
-
-                {{ form_label(form.ca, 'ca.label'|trans({}, 'upload_freeradius'), {label_attr: {class: 'font-semibold'}}) }}
-                {{ form_widget(form.ca, {attr: {class: 'form-widget-upload'}}) }}
-
-                <div class="text-red-500 text-sm ml-1">
-                    {{ form_errors(form.ca) }}
-                </div>
-            </div>
-
-            <div class="space-y-2">
-                <p class="text-sm font-medium text-gray-700">
                     {{ 'cert.description'|trans({}, 'upload_freeradius') }}
                 </p>
 

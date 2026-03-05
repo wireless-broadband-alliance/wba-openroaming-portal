@@ -88,6 +88,9 @@ readonly class CertificateStorageService
                 )
             );
         }
+        // Normalize PEM ending
+        $content = rtrim($content) . "\n";
+        file_put_contents($path, $content);
 
         $certificate = new Certificate();
         $certificate->setName($name);
@@ -146,6 +149,7 @@ readonly class CertificateStorageService
         }
 
         $tmpPath = tempnam(sys_get_temp_dir(), 'cert_');
+        $content = rtrim($content) . "\n"; // Ensures the file has a breaking line in the end
         file_put_contents($tmpPath, $content);
 
         $tmpFile = new UploadedFile(
