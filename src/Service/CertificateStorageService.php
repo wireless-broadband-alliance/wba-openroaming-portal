@@ -88,6 +88,9 @@ readonly class CertificateStorageService
                 )
             );
         }
+        // Normalize PEM ending
+        $content = rtrim($content) . "\n";
+        file_put_contents($path, $content);
 
         $certificate = new Certificate();
         $certificate->setName($name);
