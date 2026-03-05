@@ -609,7 +609,7 @@ class CertificateManagementFreeradiusController extends AbstractController
                 if (
                     preg_match(
                         '/-----BEGIN (?:RSA |EC )?PRIVATE KEY-----(.*?)-----END (?:RSA |EC )?PRIVATE KEY-----/s',
-                        $pastedCertificates,
+                        (string) $pastedCertificates,
                         $matches
                     )
                 ) {

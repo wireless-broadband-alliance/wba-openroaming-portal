@@ -126,7 +126,6 @@ class CertificateCAGeneratorService
 
     /**
      * @param string[] $pool Array of PEM certificates
-     * @param string|null $expectedRoot
      * @return string[]|false Array of PEM certificates or false if incomplete
      */
     private function buildChain(array $pool, ?string $expectedRoot = null): array|false
