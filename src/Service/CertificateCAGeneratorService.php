@@ -9,7 +9,7 @@ class CertificateCAGeneratorService
 {
 
     public function __construct(
-        private TranslatorInterface $translator,
+        private readonly TranslatorInterface $translator,
     ) {}
 
     private array $messages = [];
@@ -99,7 +99,6 @@ class CertificateCAGeneratorService
 
     /**
      * @param string[] $pool Array of PEM certificates
-     * @param string|null $expectedRoot
      * @return array|false
      */
     private function buildChain(array $pool, ?string $expectedRoot = null): array|false

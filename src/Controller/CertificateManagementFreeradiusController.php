@@ -614,7 +614,7 @@ class CertificateManagementFreeradiusController extends AbstractController
                  *
                  */
                 foreach ($extractCertificates as $type => $pemContent) {
-                    if (empty($pemContent)) {
+                    if ($pemContent === '' || $pemContent === '0') {
                         continue; // skip empty PEMs
                     }
 
