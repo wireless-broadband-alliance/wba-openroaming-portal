@@ -11,14 +11,14 @@ class CertificateCAGeneratorService
         CertificateFreeradiusUploadManualDTO $dto
     ): string {
         // Load leaf and chain
-        $leafFile = $dto->cert;
+        $certFile = $dto->cert;
         $chainFile = $dto->chain;
 
-        if (!$leafFile || !$chainFile) {
+        if (!$certFile || !$chainFile) {
             throw new RuntimeException("Leaf and chain certificates are required.");
         }
 
-        $leafPem = $this->normalizePem(file_get_contents($leafFile->getRealPath()));
+        $leafPem = $this->normalizePem(file_get_contents($certFile->getRealPath()));
         $chainPem = $this->extractPemCertificates(file_get_contents($chainFile->getRealPath()));
 
         // Deduplicate
@@ -27,10 +27,19 @@ class CertificateCAGeneratorService
         // Find root (self-signed cert)
         $root = null;
         foreach ($pool as $cert) {
-            if ($this->isSelfSigned($cert)) {
+            $parsed = openssl_x509_parse($cert);
+            if ($parsed &&
+                isset($parsed['subject'], $parsed['issuer']) &&
+                $parsed['subject'] === $parsed['issuer']
+            ) {
                 $root = $cert;
                 break;
             }
+        }
+
+        if (!$root) {
+            // fallback: maybe the last certificate in the chain
+            $root = end($pool);
         }
 
         if (!$root) {
@@ -111,12 +120,13 @@ class CertificateCAGeneratorService
 
     private function isSelfSigned(string $cert): bool
     {
-        $pubKey = openssl_pkey_get_public($cert);
-        if ($pubKey === false) {
+        $parsed = openssl_x509_parse($cert);
+        if ($parsed === false) {
             return false;
         }
 
-        return openssl_x509_verify($cert, $pubKey) === 1;
+        // Compare subject and issuer DN
+        return $parsed['subject'] === $parsed['issuer'];
     }
 
     private function normalizePem(
