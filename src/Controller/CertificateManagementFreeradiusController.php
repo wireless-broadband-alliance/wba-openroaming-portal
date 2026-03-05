@@ -144,16 +144,6 @@ class CertificateManagementFreeradiusController extends AbstractController
                 $process->setIsFreeradiusCertEV(true);
             }
 
-            if ($certificateUploadDTO->ca instanceof UploadedFile) {
-                // Save on the tmp folder the uploaded certificates after the validation
-                $this->certificateStorageService->storeUploadedFile(
-                    $certificateUploadDTO->ca,
-                    CertificateFileName::CA_PEM->value,
-                    CertificateMachineType::FREERADIUS->value,
-                    $process
-                );
-            }
-
             if ($certificateUploadDTO->cert instanceof UploadedFile) {
                 // Save on the tmp folder the uploaded certificates after the validation
                 $this->certificateStorageService->storeUploadedFile(
