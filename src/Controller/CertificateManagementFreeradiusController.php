@@ -505,29 +505,67 @@ class CertificateManagementFreeradiusController extends AbstractController
                 $rawExtracted = $this->freeradiusCertificateValidatorService
                     ->extractCertificates($pastedCertificates);
 
-                // Map to known identifiers
-                $map = [
-                    CertificateFileName::CA_PEM->value,
-                    CertificateFileName::CERT_PEM->value,
-                    CertificateFileName::CHAIN_PEM->value,
-                    CertificateFileName::FULL_CHAIN_PEM->value,
-                    CertificateFileName::PRIVATE_KEY_PEM->value,
-                ];
-                $extractCertificates = [];
+                // Extract the Certs related to each case
+                $certPem = $rawExtracted[0] ?? null;
+                $chainPem = $rawExtracted[1] ?? null;
 
-                foreach ($map as $index => $key) {
-                    if (!isset($rawExtracted[$index])) {
-                        continue;
-                    }
-
-                    $extractCertificates[$key] = trim($rawExtracted[$index]);
+                if (!$certPem || !$chainPem) {
+                    throw new RuntimeException("Cert and Chain certificates are required.");
                 }
 
+                // Create temporary files for leaf and chain
+                $certTmpPath = tempnam(sys_get_temp_dir(), 'cert_');
+                file_put_contents($certTmpPath, $certPem);
+                $certFile = new UploadedFile(
+                    $certTmpPath,
+                    CertificateFileName::CERT_PEM_FILE->value,
+                    'application/x-pem-file',
+                    null,
+                    true // mark as test so Symfony won't validate "real upload"
+                );
+
+                $chainTmpPath = tempnam(sys_get_temp_dir(), 'chain_');
+                file_put_contents($chainTmpPath, $chainPem);
+                $chainFile = new UploadedFile(
+                    $chainTmpPath,
+                    CertificateFileName::CHAIN_PEM_FILE->value,
+                    'application/x-pem-file',
+                    null,
+                    true
+                );
+
+                //  Generate teh CA based on the Cert and the Chain
+                $caPem = $this->certificateCAGeneratorService->generateCA(
+                    $certFile,
+                    $chainFile
+                );
+
+                // Map raw extracted certificates to identifiers
+                $map = [
+                    CertificateFileName::CA_PEM->value,        // 'ca.pem'
+                    CertificateFileName::CERT_PEM->value,      // 'cert.pem'
+                    CertificateFileName::CHAIN_PEM->value,     // 'chain.pem'
+                    CertificateFileName::FULL_CHAIN_PEM->value,// 'full_chain.pem'
+                    CertificateFileName::PRIVATE_KEY_PEM->value, // 'private_key.pem'
+                ];
+
+                $extractCertificates = [];
+
+                // Fill the array with extracted PEMs
+                foreach ($map as $index => $key) {
+                    // Use the raw extracted PEMs from paste form
+                    if (isset($rawExtracted[$index])) {
+                        $extractCertificates[$key] = trim($rawExtracted[$index]);
+                    }
+                }
+
+                // Override or add the CA with the generated root
+                $extractCertificates[CertificateFileName::CA_PEM->value] = trim($caPem);
+
+                // Validate required certificates
                 if (
-                    !isset(
-                        $extractCertificates[CertificateFileName::CA_PEM->value],
-                        $extractCertificates[CertificateFileName::CERT_PEM->value],
-                    )
+                    empty($extractCertificates[CertificateFileName::CA_PEM->value]) ||
+                    empty($extractCertificates[CertificateFileName::CERT_PEM->value])
                 ) {
                     throw new RuntimeException('Missing required certificates');
                 }
@@ -588,6 +626,7 @@ class CertificateManagementFreeradiusController extends AbstractController
                 $processEntity->setFreeradiusDomainName($certParsed['subject']['CN'] ?? null);
                 $processEntity->setUpdatedAt(new DateTimeImmutable());
 
+                $this->entityManager->persist($processEntity);
                 $this->entityManager->flush();
 
                 $this->eventActions->saveEvent(
@@ -768,7 +807,7 @@ class CertificateManagementFreeradiusController extends AbstractController
                 . 'freeradius/test.html.twig',
         };
 
-        $allowSkipProcess = $this->certificateCheckerService->verifyCertificates();
+        $allowSkipProcess = $processEntity->getFreeradiusTestResult() === CertificateTestResult::PASSED;
 
         return $this->render(
             $template,

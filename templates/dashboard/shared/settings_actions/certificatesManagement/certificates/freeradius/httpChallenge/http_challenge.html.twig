@@ -124,7 +124,7 @@ docker exec -i hybrid-freeradius-1 sh -c "cd /etc/freeradius/3.0/certs/ && cat c
         </div>
         {{ form_end(form) }}
 
-        {% if not allowSkipProcess %}
+        {% if allowSkipProcess %}
             {# Finish Configuration Form #}
             {{ form_start(formFinishProcess) }}
             {{ form_row(formFinishProcess._token) }}
