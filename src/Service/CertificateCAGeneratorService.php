@@ -3,26 +3,28 @@
 namespace App\Service;
 
 use RuntimeException;
+use App\DTO\CertificateFreeradiusUploadManualDTO;
 
 class CertificateCAGeneratorService
 {
     public function generateCA(
-        string $certPath,
-        string $chainPath,
-        string $outputCAPath
+        CertificateFreeradiusUploadManualDTO $dto
     ): string {
-        // Load files
-        $leafPem = $this->normalizePem(file_get_contents($certPath));
-        $chainPem = $this->extractPemCertificates(file_get_contents($chainPath));
+        // Load leaf and chain
+        $leafFile = $dto->cert;
+        $chainFile = $dto->chain;
 
-        if (!$leafPem || !$chainPem) {
-            throw new RuntimeException("Leaf or chain certificates cannot be read.");
+        if (!$leafFile || !$chainFile) {
+            throw new RuntimeException("Leaf and chain certificates are required.");
         }
+
+        $leafPem = $this->normalizePem(file_get_contents($leafFile->getRealPath()));
+        $chainPem = $this->extractPemCertificates(file_get_contents($chainFile->getRealPath()));
 
         // Deduplicate
         $pool = array_merge([$leafPem], $this->uniqueCerts($chainPem));
 
-        // Try to find the root (self-signed cert)
+        // Find root (self-signed cert)
         $root = null;
         foreach ($pool as $cert) {
             if ($this->isSelfSigned($cert)) {
@@ -35,16 +37,14 @@ class CertificateCAGeneratorService
             throw new RuntimeException("No valid root certificate found in chain.");
         }
 
-        // Optional: validate the chain fully
+        // Validate full chain
         $fullChain = $this->buildChain($pool, $root);
         if ($fullChain === false) {
             throw new RuntimeException("Incomplete or invalid certificate chain.");
         }
 
-        // Write CA.pem
-        file_put_contents($outputCAPath, $root);
-
-        return $outputCAPath;
+        // Return the CA content (root certificate)
+        return $root;
     }
 
     /**

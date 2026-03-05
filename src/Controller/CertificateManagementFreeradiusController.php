@@ -27,6 +27,7 @@ use App\Form\CloudflareType;
 use App\Form\SimpleSubmitFormType;
 use App\Repository\SettingRepository;
 use App\Security\Voter\UserAuthenticationVoter;
+use App\Service\CertificateCAGeneratorService;
 use App\Service\CertificateCheckerService;
 use App\Service\CertificateFreeradiusCommandsService;
 use App\Service\CertificateFreeradiusGenerator;
@@ -79,6 +80,7 @@ class CertificateManagementFreeradiusController extends AbstractController
         private readonly SettingRepository $settingRepository,
         private readonly FreeradiusCertificateValidatorService $freeradiusCertificateValidatorService,
         private readonly CertificateFreeradiusHTTPChallengeCommandsService $httpChallengeCommands,
+        private readonly CertificateCAGeneratorService $certificateCAGeneratorService,
     ) {
     }
 
@@ -143,6 +145,21 @@ class CertificateManagementFreeradiusController extends AbstractController
             } else {
                 $process->setIsFreeradiusCertEV(true);
             }
+
+            // Generate CA content
+            $caContent = $this->certificateCAGeneratorService->generateCA($certificateUploadDTO);
+
+            // Save CA.pem in the application using your existing method
+            $tmpPath = tempnam(sys_get_temp_dir(), 'ca_') . '.pem';
+            file_put_contents($tmpPath, $caContent);
+
+            $this->certificateStorageService->storeGeneratedFile(
+                $tmpPath,
+                CertificateFileName::CA_PEM->value,
+                CertificateMachineType::FREERADIUS->value,
+                $process
+            );
+            unlink($tmpPath);
 
             if ($certificateUploadDTO->cert instanceof UploadedFile) {
                 // Save on the tmp folder the uploaded certificates after the validation
