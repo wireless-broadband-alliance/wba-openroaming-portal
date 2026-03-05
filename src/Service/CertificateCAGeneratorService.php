@@ -7,10 +7,10 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
 class CertificateCAGeneratorService
 {
-
     public function __construct(
         private TranslatorInterface $translator,
-    ) {}
+    ) {
+    }
 
     private array $messages = [];
 
@@ -62,9 +62,13 @@ class CertificateCAGeneratorService
         $root = null;
         foreach ($pool as $cert) {
             $parsed = openssl_x509_parse($cert);
-            if ($parsed && isset(
-                    $parsed['subject'], $parsed['issuer']
-                ) && $parsed['subject'] === $parsed['issuer']) {
+            if (
+                $parsed &&
+                isset(
+                    $parsed['subject'],
+                    $parsed['issuer']
+                ) && $parsed['subject'] === $parsed['issuer']
+            ) {
                 $root = $cert;
                 break;
             }
