@@ -160,8 +160,8 @@ class CertificateManagementFreeradiusController extends AbstractController
                 return $this->redirectToRoute('admin_dashboard_settings_certs_freeradius_upload');
             }
 
-            // Save CA.pem in the application using your existing method
-            $tmpPath = tempnam(sys_get_temp_dir(), 'ca_') . '.pem';
+            // Save CA.pem in the application
+            $tmpPath = sys_get_temp_dir() . '/ca.pem';
             file_put_contents($tmpPath, $caContent);
 
             $this->certificateStorageService->storeGeneratedFile(
