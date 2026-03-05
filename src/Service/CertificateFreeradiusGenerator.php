@@ -297,7 +297,7 @@ readonly class CertificateFreeradiusGenerator
             throw new RuntimeException('Unable to create temporary CA file');
         }
 
-        file_put_contents($tmpCaPath, rtrim($caGenerated) . "\n");
+        file_put_contents($tmpCaPath, rtrim((string) $caGenerated) . "\n");
 
         /**
          * Store the generated CA
