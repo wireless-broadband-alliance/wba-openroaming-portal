@@ -16,11 +16,6 @@ use Symfony\Component\Validator\Constraints\NotBlank;
     certField: 'cert',
     chainField: 'chain',
 )]
-#[CustomAssert\ValidTrustAnchor(
-    certField: 'cert',
-    chainField: 'chain',
-    rootField: 'ca'
-)]
 class CertificateFreeradiusUploadManualDTO
 {
     /**
@@ -29,21 +24,6 @@ class CertificateFreeradiusUploadManualDTO
      */
     public array $notices = [];
 
-    #[NotBlank(message: 'nullCA')]
-    #[Assert\File(
-        maxSize: '5M',
-        mimeTypes: [
-          'application/x-x509-ca-cert',
-          'application/x-pem-file',
-          'application/octet-stream',
-          'text/plain',
-        ],
-        notFoundMessage: 'nullCA',
-        mimeTypesMessage: 'invalidFileTypeCA'
-    )]
-    #[CustomAssert\ValidPemCertificate]
-    #[CustomAssert\ValidRsaCertificate]
-    public ?UploadedFile $ca = null;
 
     #[NotBlank(message: 'nullCert')]
     #[Assert\File(

@@ -16,12 +16,6 @@ class CertificateFreeradiusUploadManualType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('ca', VichFileType::class, [
-                'label' => 'CA (.pem)',
-                'required' => true,
-                'allow_delete' => false,
-                'download_uri' => false,
-            ])
             ->add('cert', VichFileType::class, [
                 'label' => 'Cert (.pem)',
                 'required' => true,

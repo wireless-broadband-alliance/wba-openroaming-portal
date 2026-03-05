@@ -199,6 +199,10 @@ project: [Upgrade Guide](docs/UPGRADE.md).
 Follow this link for more information on installing this
 project: [Installation Guide](docs/INSTALLATION.md).
 
+# 🛠 AssetMapper
+
+If you notice any issues with styling or frontend assets, please refer to [ASSETMAPPER Configurations](./docs/ASSETMAPPER.md).
+
 # 🔑 Admin Page Access Page
 
 Follow this link for a portal user/admin interface overview: [Portal Guide](docs/PORTALGUI.md).
