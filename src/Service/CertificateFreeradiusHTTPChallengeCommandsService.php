@@ -22,7 +22,7 @@ class CertificateFreeradiusHTTPChallengeCommandsService
     public function getCommands(string $email): array
     {
         // Dynamically build the FreeRADIUS cert path based on domain
-        $freeradiusCertPath = $this->projectRoot . '/config/freeradius/certs';
+        $freeradiusCertPath = $this->projectRoot . '/configs/freeradius/certs';
 
         $domain = $this->settingRepository->findOneBy(
             ['name' => SettingName::RADIUS_TLS_NAME->value]

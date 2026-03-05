@@ -17,15 +17,15 @@
             {{ 'commandTittle'|trans({}, '_reset_radius_tls_name_commands') }}
         </h5>
     </div>
-        <div class="px-6 py-5 space-y-5 bg-white">
-            <p class="text-sm font-medium text-gray-700">
-                {{ 'description'|trans({}, '_reset_radius_tls_name_commands') }}
-            </p>
-    {# Command Block #}
+    <div class="px-6 py-5 space-y-5 bg-white">
+        <p class="text-sm font-medium text-gray-700">
+            {{ 'description'|trans({}, '_reset_radius_tls_name_commands') }}
+        </p>
+        {# Command Block #}
         <div class="space-y-2" data-controller="clipboard">
             <div class="relative rounded-md overflow-hidden">
                                     <pre class="copyable-code relative rounded bg-gray-800 text-white p-4 font-mono overflow-x-auto whitespace-pre-wrap"
-                                         data-clipboard-target="code">php bin/console reset:radiusTLS</pre>
+                                         data-clipboard-target="code">docker exec -it wba-openroaming-portal-web-1 php bin/console reset:radiusTLS</pre>
                 <button type="button"
                         class="absolute top-2 right-2 flex items-center justify-center p-1.5 rounded-md bg-gray-700 hover:bg-gray-600 focus:ring-2 focus:ring-primary/50 transition"
                         title="{{ 'copyCommand.title'|trans({}, 'config_radsec') }}"
@@ -34,8 +34,6 @@
                     <twig:ux:icon class="w-4 h-4 text-white" name="wba:copy"/>
                 </button>
             </div>
-            {# Warning #}
-
         </div>
     </div>
 </div>
