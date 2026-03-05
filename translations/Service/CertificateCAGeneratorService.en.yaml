@@ -1,0 +1,4 @@
+leafCertificateFileNotFound: 'Leaf certificate file not found.'
+chainCertificateFileNotFound: 'Chain certificate file not found.'
+noValidRootCertificateFoundChain: 'No valid root certificate found in chain.'
+incompleteOrInvalidCertificateChain: 'Incomplete or invalid certificate chain.'

@@ -273,6 +273,8 @@ readonly class CertificateFreeradiusGenerator
             $chainCert->getFile()
         );
 
+
+
         $fullChainCert = $this->certificateStorageService->storeGeneratedFile(
             "$liveDir/" . CertificateFileName::FULL_CHAIN_PEM_FILE->value,
             CertificateFileName::FULL_CHAIN_PEM->value,

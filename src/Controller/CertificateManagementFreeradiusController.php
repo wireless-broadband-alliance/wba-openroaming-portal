@@ -152,6 +152,14 @@ class CertificateManagementFreeradiusController extends AbstractController
                 $certificateUploadDTO->chain
             );
 
+            foreach ($this->certificateCAGeneratorService->getMessages() as $msg) {
+                $this->addFlash('error', $msg);
+            }
+
+            if ($caContent === null) {
+                return $this->redirectToRoute('admin_dashboard_settings_certs_freeradius_upload');
+            }
+
             // Save CA.pem in the application using your existing method
             $tmpPath = tempnam(sys_get_temp_dir(), 'ca_') . '.pem';
             file_put_contents($tmpPath, $caContent);
@@ -539,6 +547,14 @@ class CertificateManagementFreeradiusController extends AbstractController
                     $certFile,
                     $chainFile
                 );
+
+                foreach ($this->certificateCAGeneratorService->getMessages() as $msg) {
+                    $this->addFlash('error', $msg);
+                }
+
+                if ($caPem === null) {
+                    return $this->redirectToRoute('admin_dashboard_settings_certs_freeradius_cloudflare_httpChallenge');
+                }
 
                 // Map raw extracted certificates to identifiers
                 $map = [

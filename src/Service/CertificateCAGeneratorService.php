@@ -2,12 +2,23 @@
 
 namespace App\Service;
 
-use RuntimeException;
 use Symfony\Component\HttpFoundation\File\File;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class CertificateCAGeneratorService
 {
+
+    public function __construct(
+        private TranslatorInterface $translator,
+    ) {}
+
+    private array $messages = [];
+
+    public function getMessages(): array
+    {
+        return $this->messages;
+    }
+
     /**
      * Generate the root CA certificate from leaf and chain files.
      *
@@ -16,18 +27,28 @@ class CertificateCAGeneratorService
      *
      * @return string PEM content of the root certificate
      */
-    public function generateCA(File $certFile, File $chainFile): string
+    public function generateCA(File $certFile, File $chainFile): ?string
     {
         // Make sure files exist
         $leafPath = $certFile->getRealPath();
         $chainPath = $chainFile->getRealPath();
 
         if (!$leafPath || !file_exists($leafPath)) {
-            throw new RuntimeException("Leaf certificate file not found.");
+            $this->messages[] = $this->translator->trans(
+                'leafCertificateFileNotFound',
+                [],
+                'CertificateCAGeneratorService'
+            );
+            return null;
         }
 
         if (!$chainPath || !file_exists($chainPath)) {
-            throw new RuntimeException("Chain certificate file not found.");
+            $this->messages[] = $this->translator->trans(
+                'chainCertificateFileNotFound',
+                [],
+                'CertificateCAGeneratorService'
+            );
+            return null;
         }
 
         // Load contents
@@ -52,16 +73,25 @@ class CertificateCAGeneratorService
         // fallback: maybe the last certificate in the chain
         if (!$root) {
             $root = end($pool);
-        }
-
-        if (!$root) {
-            throw new RuntimeException("No valid root certificate found in chain.");
+            if (!$root) {
+                $this->messages[] = $this->translator->trans(
+                    'noValidRootCertificateFoundChain',
+                    [],
+                    'CertificateCAGeneratorService'
+                );
+                return null;
+            }
         }
 
         // Validate full chain
         $fullChain = $this->buildChain($pool, $root);
         if ($fullChain === false) {
-            throw new RuntimeException("Incomplete or invalid certificate chain.");
+            $this->messages[] = $this->translator->trans(
+                'incompleteOrInvalidCertificateChain',
+                [],
+                'CertificateCAGeneratorService'
+            );
+            return null;
         }
 
         return $root;
