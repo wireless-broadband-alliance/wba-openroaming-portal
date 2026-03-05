@@ -288,15 +288,8 @@ readonly class CertificateFreeradiusGenerator
             $chainCert->getFile()
         );
 
-        /**
-         * Save generated CA to temp file
-         */
+        // Save generated CA to temp file
         $tmpCaPath = sys_get_temp_dir() . '/ca.pem';
-
-        if ($tmpCaPath === false) {
-            throw new RuntimeException('Unable to create temporary CA file');
-        }
-
         file_put_contents($tmpCaPath, rtrim((string) $caGenerated) . "\n");
 
         /**

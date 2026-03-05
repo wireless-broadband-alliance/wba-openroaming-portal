@@ -2,3 +2,5 @@ leafCertificateFileNotFound: 'Ficheiro do certificado leaf não encontrado.'
 chainCertificateFileNotFound: 'Ficheiro da cadeia de certificados não encontrado.'
 noValidRootCertificateFoundChain: 'Nenhum certificado root válido encontrado na cadeia.'
 incompleteOrInvalidCertificateChain: 'Cadeia de certificados incompleta ou inválida.'
+failedToReadLeafCertificate: "Falha ao ler o certificado leaf."
+failedToReadChainCertificate: "Falha ao ler a cadeia de certificados."

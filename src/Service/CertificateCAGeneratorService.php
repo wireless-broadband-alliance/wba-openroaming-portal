@@ -12,8 +12,12 @@ class CertificateCAGeneratorService
     ) {
     }
 
+    /** @var string[] */
     private array $messages = [];
 
+    /**
+     * @return string[]
+     */
     public function getMessages(): array
     {
         return $this->messages;
@@ -25,7 +29,7 @@ class CertificateCAGeneratorService
      * @param File $certFile Leaf certificate (uploaded file)
      * @param File $chainFile Chain certificate bundle (uploaded file)
      *
-     * @return string PEM content of the root certificate
+     * @return string|null PEM content of the root certificate
      */
     public function generateCA(File $certFile, File $chainFile): ?string
     {
@@ -52,8 +56,27 @@ class CertificateCAGeneratorService
         }
 
         // Load contents
-        $leafPem = $this->normalizePem(file_get_contents($leafPath));
-        $chainPemArray = $this->extractPemCertificates(file_get_contents($chainPath));
+        $leafContent = file_get_contents($leafPath);
+        if ($leafContent === false) {
+            $this->messages[] = $this->translator->trans(
+                'failedToReadLeafCertificate',
+                [],
+                'CertificateCAGeneratorService'
+            );
+            return null;
+        }
+        $leafPem = $this->normalizePem($leafContent);
+
+        $chainContent = file_get_contents($chainPath);
+        if ($chainContent === false) {
+            $this->messages[] = $this->translator->trans(
+                'failedToReadChainCertificate',
+                [],
+                'CertificateCAGeneratorService'
+            );
+            return null;
+        }
+        $chainPemArray = $this->extractPemCertificates($chainContent);
 
         // Deduplicate and pool
         $pool = array_merge([$leafPem], $this->uniqueCerts($chainPemArray));
@@ -103,7 +126,8 @@ class CertificateCAGeneratorService
 
     /**
      * @param string[] $pool Array of PEM certificates
-     * @return array|false
+     * @param string|null $expectedRoot
+     * @return string[]|false Array of PEM certificates or false if incomplete
      */
     private function buildChain(array $pool, ?string $expectedRoot = null): array|false
     {
