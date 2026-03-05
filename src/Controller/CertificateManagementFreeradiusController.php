@@ -27,6 +27,7 @@ use App\Form\CloudflareType;
 use App\Form\SimpleSubmitFormType;
 use App\Repository\SettingRepository;
 use App\Security\Voter\UserAuthenticationVoter;
+use App\Service\CertificateCAGeneratorService;
 use App\Service\CertificateCheckerService;
 use App\Service\CertificateFreeradiusCommandsService;
 use App\Service\CertificateFreeradiusGenerator;
@@ -79,6 +80,7 @@ class CertificateManagementFreeradiusController extends AbstractController
         private readonly SettingRepository $settingRepository,
         private readonly FreeradiusCertificateValidatorService $freeradiusCertificateValidatorService,
         private readonly CertificateFreeradiusHTTPChallengeCommandsService $httpChallengeCommands,
+        private readonly CertificateCAGeneratorService $certificateCAGeneratorService,
     ) {
     }
 
@@ -144,15 +146,32 @@ class CertificateManagementFreeradiusController extends AbstractController
                 $process->setIsFreeradiusCertEV(true);
             }
 
-            if ($certificateUploadDTO->ca instanceof UploadedFile) {
-                // Save on the tmp folder the uploaded certificates after the validation
-                $this->certificateStorageService->storeUploadedFile(
-                    $certificateUploadDTO->ca,
-                    CertificateFileName::CA_PEM->value,
-                    CertificateMachineType::FREERADIUS->value,
-                    $process
-                );
+            // Generate CA content
+            $caContent = $this->certificateCAGeneratorService->generateCA(
+                $certificateUploadDTO->cert,
+                $certificateUploadDTO->chain
+            );
+
+            foreach ($this->certificateCAGeneratorService->getMessages() as $msg) {
+                $this->addFlash('error', $msg);
             }
+
+            if ($caContent === null) {
+                return $this->redirectToRoute('admin_dashboard_settings_certs_freeradius_upload');
+            }
+
+            // Save CA.pem in the application
+            $tmpPath = sys_get_temp_dir() . '/ca.pem';
+            $caContent = rtrim($caContent) . "\n"; // Ensure is ends with a breaking line
+            file_put_contents($tmpPath, $caContent);
+
+            $this->certificateStorageService->storeGeneratedFile(
+                $tmpPath,
+                CertificateFileName::CA_PEM->value,
+                CertificateMachineType::FREERADIUS->value,
+                $process
+            );
+            unlink($tmpPath);
 
             if ($certificateUploadDTO->cert instanceof UploadedFile) {
                 // Save on the tmp folder the uploaded certificates after the validation
@@ -495,7 +514,52 @@ class CertificateManagementFreeradiusController extends AbstractController
                 $rawExtracted = $this->freeradiusCertificateValidatorService
                     ->extractCertificates($pastedCertificates);
 
-                // Map to known identifiers
+                // Extract the Certs related to each case
+                $certPem = $rawExtracted[0] ?? null;
+                $chainPem = $rawExtracted[1] ?? null;
+
+                if (!$certPem || !$chainPem) {
+                    throw new RuntimeException("Cert and Chain certificates are required.");
+                }
+
+                // Create temporary files for leaf and chain
+                $certTmpPath = tempnam(sys_get_temp_dir(), 'cert_');
+                file_put_contents($certTmpPath, $certPem);
+                $certFile = new UploadedFile(
+                    $certTmpPath,
+                    CertificateFileName::CERT_PEM_FILE->value,
+                    'application/x-pem-file',
+                    null,
+                    true // mark as test so Symfony won't validate "real upload"
+                );
+
+                $chainTmpPath = tempnam(sys_get_temp_dir(), 'chain_');
+                file_put_contents($chainTmpPath, $chainPem);
+                $chainFile = new UploadedFile(
+                    $chainTmpPath,
+                    CertificateFileName::CHAIN_PEM_FILE->value,
+                    'application/x-pem-file',
+                    null,
+                    true
+                );
+
+                //  Generate teh CA based on the Cert and the Chain
+                $caPem = $this->certificateCAGeneratorService->generateCA(
+                    $certFile,
+                    $chainFile
+                );
+
+                foreach ($this->certificateCAGeneratorService->getMessages() as $msg) {
+                    $this->addFlash('error', $msg);
+                }
+
+                if ($caPem === null) {
+                    return $this->redirectToRoute(
+                        'admin_dashboard_settings_certs_freeradius_cloudflare_httpChallenge'
+                    );
+                }
+
+                // Map raw extracted certificates to identifiers
                 $map = [
                     CertificateFileName::CA_PEM->value,
                     CertificateFileName::CERT_PEM->value,
@@ -503,21 +567,24 @@ class CertificateManagementFreeradiusController extends AbstractController
                     CertificateFileName::FULL_CHAIN_PEM->value,
                     CertificateFileName::PRIVATE_KEY_PEM->value,
                 ];
+
                 $extractCertificates = [];
 
+                // Fill the array with extracted PEMs
                 foreach ($map as $index => $key) {
-                    if (!isset($rawExtracted[$index])) {
-                        continue;
+                    // Use the raw extracted PEMs from paste form
+                    if (isset($rawExtracted[$index])) {
+                        $extractCertificates[$key] = rtrim($rawExtracted[$index]) . "\n";
                     }
-
-                    $extractCertificates[$key] = trim($rawExtracted[$index]);
                 }
 
+                // Override or add the CA with the generated root
+                $extractCertificates[CertificateFileName::CA_PEM->value] = trim($caPem);
+
+                // Validate required certificates
                 if (
-                    !isset(
-                        $extractCertificates[CertificateFileName::CA_PEM->value],
-                        $extractCertificates[CertificateFileName::CERT_PEM->value],
-                    )
+                    empty($extractCertificates[CertificateFileName::CA_PEM->value]) ||
+                    empty($extractCertificates[CertificateFileName::CERT_PEM->value])
                 ) {
                     throw new RuntimeException('Missing required certificates');
                 }
@@ -537,18 +604,31 @@ class CertificateManagementFreeradiusController extends AbstractController
                     unset($certParsed['fingerprintSHA1']);
                 }
 
+                // Prepare Private Key to be inserted on the DB because it's not an actual cert
+                $privateKeyPem = '';
+                if (
+                    preg_match(
+                        '/-----BEGIN (?:RSA |EC )?PRIVATE KEY-----(.*?)-----END (?:RSA |EC )?PRIVATE KEY-----/s',
+                        (string) $pastedCertificates,
+                        $matches
+                    )
+                ) {
+                    $privateKeyPem = $matches[0];
+                }
+
+                // Store in the array
+                $extractCertificates[CertificateFileName::PRIVATE_KEY_PEM->value] = rtrim($privateKeyPem) . "\n";
+
                 /**
                  * Convert PEM strings → UploadedFile objects to be saved on the tmp
                  *
                  */
                 foreach ($extractCertificates as $type => $pemContent) {
-                    // Creates fake temporally destination folder for VichUpload
-                    $tmpPath = tempnam(sys_get_temp_dir(), 'freeradius_');
-
-                    if ($tmpPath === false) {
-                        throw new RuntimeException('Unable to create temporary file');
+                    if ($pemContent === '' || $pemContent === '0') {
+                        continue; // skip empty PEMs
                     }
 
+                    $tmpPath = tempnam(sys_get_temp_dir(), 'freeradius_');
                     file_put_contents($tmpPath, $pemContent);
 
                     $uploadedFile = new UploadedFile(
@@ -556,16 +636,18 @@ class CertificateManagementFreeradiusController extends AbstractController
                         $type . '.pem',
                         'application/x-pem-file',
                         null,
-                        true // mark as already moved
+                        true
                     );
 
-                    // Store them
+                    // Determine if this is a private key
+                    $isAKey = $type === CertificateFileName::PRIVATE_KEY_PEM->value;
+
                     $this->certificateStorageService->storeUploadedFile(
                         $uploadedFile,
                         $type,
                         CertificateMachineType::FREERADIUS->value,
                         $processEntity,
-                        true
+                        $isAKey
                     );
                 }
 
@@ -578,6 +660,7 @@ class CertificateManagementFreeradiusController extends AbstractController
                 $processEntity->setFreeradiusDomainName($certParsed['subject']['CN'] ?? null);
                 $processEntity->setUpdatedAt(new DateTimeImmutable());
 
+                $this->entityManager->persist($processEntity);
                 $this->entityManager->flush();
 
                 $this->eventActions->saveEvent(
@@ -758,7 +841,7 @@ class CertificateManagementFreeradiusController extends AbstractController
                 . 'freeradius/test.html.twig',
         };
 
-        $allowSkipProcess = $this->certificateCheckerService->verifyCertificates();
+        $allowSkipProcess = $processEntity->getFreeradiusTestResult() === CertificateTestResult::PASSED;
 
         return $this->render(
             $template,
@@ -848,14 +931,12 @@ class CertificateManagementFreeradiusController extends AbstractController
 
             /** @var User $user */
             $user = $this->getUser();
-
             $this->certificateFreeradiusGenerator->generateCertificatesWithCloudflareDns(
                 $user,
                 $dto->token
             );
 
             $certificateSetupProcess = $this->certificateProcessCheckerService->getCurrentProcess();
-
             if ($certificateSetupProcess instanceof CertificateSetupProcess) {
                 $certificateSetupProcess->setFreeradiusDomainName($domain);
                 $certificateSetupProcess->setFreeradiusFormCompletedAt(new DateTimeImmutable());
