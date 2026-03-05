@@ -606,11 +606,13 @@ class CertificateManagementFreeradiusController extends AbstractController
 
                 // Prepare Private Key to be inserted on the DB because it's not an actual cert
                 $privateKeyPem = '';
-                if (preg_match(
-                    '/-----BEGIN (?:RSA |EC )?PRIVATE KEY-----(.*?)-----END (?:RSA |EC )?PRIVATE KEY-----/s',
-                    $pastedCertificates,
-                    $matches
-                )) {
+                if (
+                    preg_match(
+                        '/-----BEGIN (?:RSA |EC )?PRIVATE KEY-----(.*?)-----END (?:RSA |EC )?PRIVATE KEY-----/s',
+                        $pastedCertificates,
+                        $matches
+                    )
+                ) {
                     $privateKeyPem = $matches[0];
                 }
 
