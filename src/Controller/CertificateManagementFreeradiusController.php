@@ -162,6 +162,7 @@ class CertificateManagementFreeradiusController extends AbstractController
 
             // Save CA.pem in the application
             $tmpPath = sys_get_temp_dir() . '/ca.pem';
+            $caContent = rtrim($caContent) . "\n"; // Ensure is ends with a breaking line
             file_put_contents($tmpPath, $caContent);
 
             $this->certificateStorageService->storeGeneratedFile(
@@ -558,11 +559,11 @@ class CertificateManagementFreeradiusController extends AbstractController
 
                 // Map raw extracted certificates to identifiers
                 $map = [
-                    CertificateFileName::CA_PEM->value,        // 'ca.pem'
-                    CertificateFileName::CERT_PEM->value,      // 'cert.pem'
-                    CertificateFileName::CHAIN_PEM->value,     // 'chain.pem'
-                    CertificateFileName::FULL_CHAIN_PEM->value,// 'full_chain.pem'
-                    CertificateFileName::PRIVATE_KEY_PEM->value, // 'private_key.pem'
+                    CertificateFileName::CA_PEM->value,
+                    CertificateFileName::CERT_PEM->value,
+                    CertificateFileName::CHAIN_PEM->value,
+                    CertificateFileName::FULL_CHAIN_PEM->value,
+                    CertificateFileName::PRIVATE_KEY_PEM->value,
                 ];
 
                 $extractCertificates = [];
