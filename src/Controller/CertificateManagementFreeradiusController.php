@@ -913,14 +913,12 @@ class CertificateManagementFreeradiusController extends AbstractController
 
             /** @var User $user */
             $user = $this->getUser();
-
             $this->certificateFreeradiusGenerator->generateCertificatesWithCloudflareDns(
                 $user,
                 $dto->token
             );
 
             $certificateSetupProcess = $this->certificateProcessCheckerService->getCurrentProcess();
-
             if ($certificateSetupProcess instanceof CertificateSetupProcess) {
                 $certificateSetupProcess->setFreeradiusDomainName($domain);
                 $certificateSetupProcess->setFreeradiusFormCompletedAt(new DateTimeImmutable());

@@ -273,8 +273,6 @@ readonly class CertificateFreeradiusGenerator
             $chainCert->getFile()
         );
 
-
-
         $fullChainCert = $this->certificateStorageService->storeGeneratedFile(
             "$liveDir/" . CertificateFileName::FULL_CHAIN_PEM_FILE->value,
             CertificateFileName::FULL_CHAIN_PEM->value,
@@ -288,6 +286,32 @@ readonly class CertificateFreeradiusGenerator
             CertificateMachineType::FREERADIUS->value,
             $setupProcess,
             true // is private key
+        );
+
+        $caGenerated = $this->certificateCAGeneratorService->generateCA(
+            $certCert->getFile(),
+            $chainCert->getFile()
+        );
+
+        /**
+         * Save generated CA to temp file
+         */
+        $tmpCaPath = tempnam(sys_get_temp_dir(), 'ca_');
+
+        if ($tmpCaPath === false) {
+            throw new RuntimeException('Unable to create temporary CA file');
+        }
+
+        file_put_contents($tmpCaPath, rtrim($caGenerated) . "\n");
+
+        /**
+         * Store the generated CA
+         */
+        $caCert = $this->certificateStorageService->storeGeneratedFile(
+            $tmpCaPath,
+            CertificateFileName::CA_PEM->value,
+            CertificateMachineType::FREERADIUS->value,
+            $setupProcess
         );
 
         $files = [
