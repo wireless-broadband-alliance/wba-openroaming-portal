@@ -1,59 +1,50 @@
 <?php
+
 namespace App\Service;
 
-use Symfony\Component\HttpFoundation\File\UploadedFile;
 use RuntimeException;
 
 class CertificateCAGeneratorService
 {
-    public function validateChain(
-        ?UploadedFile $leafFile,
-        ?UploadedFile $chainFile,
-        ?UploadedFile $rootFile = null
-    ): array {
-        if (!$leafFile || !$chainFile) {
-            throw new RuntimeException("Leaf and chain certificates are required.");
-        }
-
-        $leafPem = @file_get_contents($leafFile->getRealPath());
-        $chainPem = @file_get_contents($chainFile->getRealPath());
-        $rootPem = $rootFile ? @file_get_contents($rootFile->getRealPath()) : null;
+    public function generateCA(
+        string $certPath,
+        string $chainPath,
+        string $outputCAPath
+    ): string {
+        // Load files
+        $leafPem = $this->normalizePem(file_get_contents($certPath));
+        $chainPem = $this->extractPemCertificates(file_get_contents($chainPath));
 
         if (!$leafPem || !$chainPem) {
-            throw new RuntimeException("Cannot read leaf or chain certificates.");
+            throw new RuntimeException("Leaf or chain certificates cannot be read.");
         }
 
-        $leaf = $this->normalizePem($leafPem);
-        if (!$leaf) {
-            throw new RuntimeException("Leaf certificate is invalid.");
+        // Deduplicate
+        $pool = array_merge([$leafPem], $this->uniqueCerts($chainPem));
+
+        // Try to find the root (self-signed cert)
+        $root = null;
+        foreach ($pool as $cert) {
+            if ($this->isSelfSigned($cert)) {
+                $root = $cert;
+                break;
+            }
         }
 
-        $chainCerts = $this->uniqueCerts($this->extractPemCertificates($chainPem));
-
-        if ($chainCerts === []) {
-            throw new RuntimeException("Chain certificates are invalid.");
+        if (!$root) {
+            throw new RuntimeException("No valid root certificate found in chain.");
         }
 
-        $pool = array_merge([$leaf], $chainCerts);
-        $expectedRoot = null;
-
-        if ($rootPem) {
-            $normalizedRoot = $this->normalizePem($rootPem);
-            $pool[] = $normalizedRoot;
-            $expectedRoot = $normalizedRoot;
-        }
-
-        $fullChain = $this->buildChain($pool, $expectedRoot);
-
+        // Optional: validate the chain fully
+        $fullChain = $this->buildChain($pool, $root);
         if ($fullChain === false) {
-            throw new RuntimeException(
-                $expectedRoot
-                    ? "Untrusted root certificate."
-                    : "Incomplete chain."
-            );
+            throw new RuntimeException("Incomplete or invalid certificate chain.");
         }
 
-        return $fullChain;
+        // Write CA.pem
+        file_put_contents($outputCAPath, $root);
+
+        return $outputCAPath;
     }
 
     /**
