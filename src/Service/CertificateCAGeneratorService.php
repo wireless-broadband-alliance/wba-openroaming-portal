@@ -3,6 +3,7 @@
 namespace App\Service;
 
 use RuntimeException;
+use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class CertificateCAGeneratorService
@@ -10,12 +11,12 @@ class CertificateCAGeneratorService
     /**
      * Generate the root CA certificate from leaf and chain files.
      *
-     * @param UploadedFile $certFile Leaf certificate (uploaded file)
-     * @param UploadedFile $chainFile Chain certificate bundle (uploaded file)
+     * @param File $certFile Leaf certificate (uploaded file)
+     * @param File $chainFile Chain certificate bundle (uploaded file)
      *
      * @return string PEM content of the root certificate
      */
-    public function generateCA(UploadedFile $certFile, UploadedFile $chainFile): string
+    public function generateCA(File $certFile, File $chainFile): string
     {
         // Make sure files exist
         $leafPath = $certFile->getRealPath();
