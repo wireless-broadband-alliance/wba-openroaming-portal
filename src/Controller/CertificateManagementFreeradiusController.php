@@ -555,7 +555,7 @@ class CertificateManagementFreeradiusController extends AbstractController
                 foreach ($map as $index => $key) {
                     // Use the raw extracted PEMs from paste form
                     if (isset($rawExtracted[$index])) {
-                        $extractCertificates[$key] = trim($rawExtracted[$index]);
+                        $extractCertificates[$key] = rtrim($rawExtracted[$index]) . "\n";
                     }
                 }
 
