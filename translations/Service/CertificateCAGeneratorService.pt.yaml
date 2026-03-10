@@ -1,3 +1,2 @@
 invalidLeafCertificate: 'Certificado leaf inválido'
-certificateLoopDetected: 'Detetado ciclo no certificado'
-unableToResolveTrustedRoot: 'Não foi possível resolver a raiz de confiança'
+unableToResolveTrustedRoot: 'Não foi possível resolver a trusted root dos certificados'
