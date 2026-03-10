@@ -107,10 +107,8 @@ class CertificateCAGeneratorService
     }
 
     /**
-     * @param string $cert
      * @param string[] $pool
      *
-     * @return string|null
      */
     private function findIssuerInPool(string $cert, array $pool): ?string
     {
@@ -228,7 +226,6 @@ class CertificateCAGeneratorService
     }
 
     /**
-     * @param string $pem
      * @return string[]
      */
     private function extractPemCertificates(string $pem): array
