@@ -117,11 +117,13 @@ class CertificateCAGeneratorService
         if (empty($parsed['extensions']['authorityInfoAccess'])) {
             return null;
         }
-        if (preg_match(
-            '/CA Issuers - URI:(.*)/',
-            $parsed['extensions']['authorityInfoAccess'],
-            $matches
-        )) {
+        if (
+            preg_match(
+                '/CA Issuers - URI:(.*)/',
+                $parsed['extensions']['authorityInfoAccess'],
+                $matches
+            )
+        ) {
             return trim($matches[1]);
         }
         return null;
@@ -198,11 +200,13 @@ class CertificateCAGeneratorService
 
     private function normalizePem(string $pem): ?string
     {
-        if (!preg_match(
-            '/-----BEGIN CERTIFICATE-----(.*?)-----END CERTIFICATE-----/s',
-            $pem,
-            $match
-        )) {
+        if (
+            !preg_match(
+                '/-----BEGIN CERTIFICATE-----(.*?)-----END CERTIFICATE-----/s',
+                $pem,
+                $match
+            )
+        ) {
             return null;
         }
         return "-----BEGIN CERTIFICATE-----{$match[1]}-----END CERTIFICATE-----\n";
