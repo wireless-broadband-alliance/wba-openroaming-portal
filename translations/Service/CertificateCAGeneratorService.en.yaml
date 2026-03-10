@@ -1,4 +1,2 @@
 invalidLeafCertificate: 'Invalid leaf certificate'
-certificateLoopDetected: 'Certificate loop detected'
 unableToResolveTrustedRoot: 'Unable to resolve trusted root'
-
