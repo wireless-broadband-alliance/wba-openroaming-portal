@@ -9,7 +9,10 @@ use Throwable;
 
 class CertificateCAGeneratorService
 {
+    /** @var string[] Messages collected during generation */
     private array $messages = [];
+
+    /** @var array<string, bool> Keeps track of visited certificate fingerprints */
     private array $visitedFingerprints = [];
 
     public function __construct(
@@ -57,7 +60,12 @@ class CertificateCAGeneratorService
         $this->visitedFingerprints = [];
 
         while (true) {
-            $fp = openssl_x509_fingerprint($current);
+            $fp = (string) openssl_x509_fingerprint($current);
+
+            if (isset($this->visitedFingerprints[$fp])) {
+                return null;
+            }
+
             $this->visitedFingerprints[$fp] = true;
 
             // If self-signed and trusted, return as root
@@ -99,7 +107,10 @@ class CertificateCAGeneratorService
     }
 
     /**
-     * Find issuer in provided pool
+     * @param string $cert
+     * @param string[] $pool
+     *
+     * @return string|null
      */
     private function findIssuerInPool(string $cert, array $pool): ?string
     {
@@ -216,6 +227,10 @@ class CertificateCAGeneratorService
         return "-----BEGIN CERTIFICATE-----{$match[1]}-----END CERTIFICATE-----\n";
     }
 
+    /**
+     * @param string $pem
+     * @return string[]
+     */
     private function extractPemCertificates(string $pem): array
     {
         preg_match_all(
