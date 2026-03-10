@@ -48,7 +48,7 @@ class CertificateCAGeneratorService
         }
 
         $pool = [$leafPem];
-        if ($chainFile) {
+        if ($chainFile instanceof File) {
             $chainContent = file_get_contents($chainFile->getRealPath()) ?: '';
             $pool = array_merge($pool, $this->extractPemCertificates($chainContent));
         }
@@ -126,7 +126,7 @@ class CertificateCAGeneratorService
         if (
             preg_match(
                 '/CA Issuers - URI:(.*)/',
-                $parsed['extensions']['authorityInfoAccess'],
+                (string)$parsed['extensions']['authorityInfoAccess'],
                 $matches
             )
         ) {
@@ -179,12 +179,10 @@ class CertificateCAGeneratorService
     private function isTrustedRoot(string $cert): bool
     {
         $store = file_get_contents('/etc/ssl/certs/ca-certificates.crt') ?: '';
-        foreach ($this->extractPemCertificates($store) as $trusted) {
-            if ($this->certEquals($cert, $trusted)) {
-                return true;
-            }
-        }
-        return false;
+        return array_any(
+            $this->extractPemCertificates($store),
+            fn($trusted) => $this->certEquals($cert, $trusted)
+        );
     }
 
     /**
