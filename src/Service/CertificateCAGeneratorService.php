@@ -14,6 +14,7 @@ class CertificateCAGeneratorService
 
     public function __construct(
         private readonly HttpClientInterface $httpClient,
+        private readonly TranslatorInterface $translator,
     ) {
     }
 
@@ -37,7 +38,12 @@ class CertificateCAGeneratorService
     {
         $leafPem = $this->normalizePem(file_get_contents($certFile->getRealPath()) ?: '');
         if (!$leafPem) {
-            $this->messages[] = 'Invalid leaf certificate';
+            $this->messages[] = $this->translator->trans(
+                'invalidLeafCertificate',
+                [],
+                'CertificateCAGeneratorService'
+            );
+
             return null;
         }
 
@@ -53,7 +59,11 @@ class CertificateCAGeneratorService
         while (true) {
             $fp = openssl_x509_fingerprint($current);
             if (isset($this->visitedFingerprints[$fp])) {
-                $this->messages[] = 'Certificate loop detected';
+                $this->messages[] = $this->translator->trans(
+                    'certificateLoopDetected',
+                    [],
+                    'CertificateCAGeneratorService'
+                );
                 return null;
             }
             $this->visitedFingerprints[$fp] = true;
@@ -87,7 +97,11 @@ class CertificateCAGeneratorService
                 continue;
             }
 
-            $this->messages[] = 'Unable to resolve trusted root';
+            $this->messages[] = $this->translator->trans(
+                'unableToResolveTrustedRoot',
+                [],
+                'CertificateCAGeneratorService'
+            );
             return null;
         }
     }
