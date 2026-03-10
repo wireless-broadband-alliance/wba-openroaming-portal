@@ -2,8 +2,10 @@
 
 namespace App\Service;
 
+use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Throwable;
 
 class CertificateCAGeneratorService
 {
@@ -15,107 +17,129 @@ class CertificateCAGeneratorService
     ) {
     }
 
+    /**
+     * @return string[]
+     */
     public function getMessages(): array
     {
         return $this->messages;
     }
 
     /**
-     * Resolve full chain from a leaf certificate
+     * Generate the trusted root CA from a leaf certificate.
+     *
+     * @param File $certFile Leaf certificate
+     * @param File|null $chainFile Optional chain file to help build the chain
+     *
+     * @return string|null PEM content of the trusted root CA
      */
-    public function generateCA(string $leafPem): ?array
+    public function generateCA(File $certFile, ?File $chainFile = null): ?string
     {
-        $chain = [];
-        $current = $this->normalizePem($leafPem);
-
-        if (!$current) {
-            $this->messages[] = 'Invalid leaf certificate format';
+        $leafPem = $this->normalizePem(file_get_contents($certFile->getRealPath()) ?: '');
+        if (!$leafPem) {
+            $this->messages[] = 'Invalid leaf certificate';
             return null;
         }
 
-        while (true) {
-            $fingerprint = openssl_x509_fingerprint($current);
+        $pool = [$leafPem];
+        if ($chainFile) {
+            $chainContent = file_get_contents($chainFile->getRealPath()) ?: '';
+            $pool = array_merge($pool, $this->extractPemCertificates($chainContent));
+        }
 
-            if (isset($this->visitedFingerprints[$fingerprint])) {
+        $current = $leafPem;
+        $this->visitedFingerprints = [];
+
+        while (true) {
+            $fp = openssl_x509_fingerprint($current);
+            if (isset($this->visitedFingerprints[$fp])) {
                 $this->messages[] = 'Certificate loop detected';
                 return null;
             }
+            $this->visitedFingerprints[$fp] = true;
 
-            $this->visitedFingerprints[$fingerprint] = true;
-
-            $chain[] = $current;
-
-            if ($this->isSelfSigned($current)) {
-                break;
+            // If self-signed and trusted, return as root
+            if ($this->isSelfSigned($current) && $this->isTrustedRoot($current)) {
+                return $current;
             }
 
+            // Try to find issuer from pool
+            $issuer = $this->findIssuerInPool($current, $pool);
+            if ($issuer) {
+                $current = $issuer;
+                continue;
+            }
+
+            // Try to fetch issuer via AIA
             $issuerUrl = $this->extractIssuerUrl($current);
-
-            if (!$issuerUrl) {
-                $this->messages[] = 'Issuer URL not found in AIA';
-                return null;
+            if ($issuerUrl) {
+                $issuerPem = $this->downloadIssuerCertificate($issuerUrl);
+                if ($issuerPem && $this->verifySignature($current, $issuerPem)) {
+                    $current = $issuerPem;
+                    continue;
+                }
             }
 
-            $issuerPem = $this->downloadIssuerCertificate($issuerUrl);
-
-            if (!$issuerPem) {
-                $this->messages[] = 'Failed to download issuer certificate';
-                return null;
+            // Fallback: find issuer in system trust store
+            $issuerPem = $this->findIssuerInTrustStore($current);
+            if ($issuerPem && $this->verifySignature($current, $issuerPem)) {
+                $current = $issuerPem;
+                continue;
             }
 
-            if (!$this->verifySignature($current, $issuerPem)) {
-                $this->messages[] = 'Signature verification failed';
-                return null;
-            }
-
-            $current = $issuerPem;
+            $this->messages[] = 'Unable to resolve trusted root';
+            return null;
         }
-
-        return [
-            'chain' => $chain,
-            'root' => end($chain)
-        ];
     }
 
     /**
-     * Extract AIA issuer URL
+     * Find issuer in provided pool
      */
-    private function extractIssuerUrl(string $pem): ?string
+    private function findIssuerInPool(string $cert, array $pool): ?string
     {
-        $cert = openssl_x509_parse($pem);
-
-        if (!isset($cert['extensions']['authorityInfoAccess'])) {
-            return null;
+        foreach ($pool as $candidate) {
+            if ($this->certEquals($cert, $candidate)) {
+                continue;
+            }
+            if ($this->verifySignature($cert, $candidate)) {
+                return $candidate;
+            }
         }
-
-        $aia = $cert['extensions']['authorityInfoAccess'];
-
-        if (preg_match('/CA Issuers - URI:(.*)/', $aia, $matches)) {
-            return trim($matches[1]);
-        }
-
         return null;
     }
 
     /**
-     * Download issuer certificate
+     * Extract AIA issuer URL from a certificate
+     */
+    private function extractIssuerUrl(string $pem): ?string
+    {
+        $parsed = openssl_x509_parse($pem);
+        if (empty($parsed['extensions']['authorityInfoAccess'])) {
+            return null;
+        }
+        if (preg_match(
+            '/CA Issuers - URI:(.*)/',
+            $parsed['extensions']['authorityInfoAccess'],
+            $matches
+        )) {
+            return trim($matches[1]);
+        }
+        return null;
+    }
+
+    /**
+     * Download certificate from AIA URL
      */
     private function downloadIssuerCertificate(string $url): ?string
     {
         try {
-            $response = $this->httpClient->request('GET', $url);
-
-            $der = $response->getContent();
-
+            $der = $this->httpClient->request('GET', $url)->getContent();
             return $this->convertDerToPem($der);
-        } catch (\Throwable $e) {
+        } catch (Throwable) {
             return null;
         }
     }
 
-    /**
-     * Convert DER certificate to PEM
-     */
     private function convertDerToPem(string $der): string
     {
         return "-----BEGIN CERTIFICATE-----\n"
@@ -124,42 +148,76 @@ class CertificateCAGeneratorService
     }
 
     /**
-     * Verify signature
+     * Verify cert signature
      */
     private function verifySignature(string $cert, string $issuer): bool
     {
         $pubKey = openssl_pkey_get_public($issuer);
-
         if (!$pubKey) {
             return false;
         }
-
         return openssl_x509_verify($cert, $pubKey) === 1;
     }
 
-    /**
-     * Detect self-signed certificate
-     */
     private function isSelfSigned(string $cert): bool
     {
         $parsed = openssl_x509_parse($cert);
-
-        if (!$parsed) {
-            return false;
-        }
-
-        return $parsed['subject'] === $parsed['issuer'];
+        return $parsed && isset($parsed['subject'], $parsed['issuer']) && $parsed['subject'] === $parsed['issuer'];
     }
 
     /**
-     * Normalize PEM format
+     * Check if certificate is in system trust store
      */
+    private function isTrustedRoot(string $cert): bool
+    {
+        $store = file_get_contents('/etc/ssl/certs/ca-certificates.crt') ?: '';
+        foreach ($this->extractPemCertificates($store) as $trusted) {
+            if ($this->certEquals($cert, $trusted)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Find issuer in system trust store
+     */
+    private function findIssuerInTrustStore(string $cert): ?string
+    {
+        $store = file_get_contents('/etc/ssl/certs/ca-certificates.crt') ?: '';
+        return array_find(
+            $this->extractPemCertificates($store),
+            fn($trusted) => $this->verifySignature($cert, $trusted)
+        );
+    }
+
+    private function certEquals(string $a, string $b): bool
+    {
+        return openssl_x509_fingerprint($a) === openssl_x509_fingerprint($b);
+    }
+
     private function normalizePem(string $pem): ?string
     {
-        if (!preg_match('/-----BEGIN CERTIFICATE-----(.*?)-----END CERTIFICATE-----/s', $pem, $match)) {
+        if (!preg_match(
+            '/-----BEGIN CERTIFICATE-----(.*?)-----END CERTIFICATE-----/s',
+            $pem,
+            $match
+        )) {
             return null;
         }
-
         return "-----BEGIN CERTIFICATE-----{$match[1]}-----END CERTIFICATE-----\n";
+    }
+
+    private function extractPemCertificates(string $pem): array
+    {
+        preg_match_all(
+            '/-----BEGIN CERTIFICATE-----(.*?)-----END CERTIFICATE-----/s',
+            $pem,
+            $matches
+        );
+        return array_map(
+            static fn($body) => "-----BEGIN CERTIFICATE-----{$body}-----END CERTIFICATE-----\n",
+            $matches[1]
+        );
     }
 }
