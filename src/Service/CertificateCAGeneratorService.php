@@ -58,14 +58,6 @@ class CertificateCAGeneratorService
 
         while (true) {
             $fp = openssl_x509_fingerprint($current);
-            if (isset($this->visitedFingerprints[$fp])) {
-                $this->messages[] = $this->translator->trans(
-                    'certificateLoopDetected',
-                    [],
-                    'CertificateCAGeneratorService'
-                );
-                return null;
-            }
             $this->visitedFingerprints[$fp] = true;
 
             // If self-signed and trusted, return as root
