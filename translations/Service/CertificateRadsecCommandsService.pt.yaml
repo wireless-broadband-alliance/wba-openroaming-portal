@@ -7,3 +7,4 @@ remove_old_images: 'Remover quaisquer imagens antigas do radsecproxy para garant
 rebuild_and_start_container: 'Reconstruir a imagem do radsecproxy sem utilizar cache e iniciar o container.'
 verify_container: 'Verificar se o container radsecproxy está em execução.'
 check_logs: 'Verificar os registos mais recentes do radsecproxy para confirmar o arranque bem-sucedido.'
+navigate_project_directory: 'Navegue até ao diretório do container de destino'

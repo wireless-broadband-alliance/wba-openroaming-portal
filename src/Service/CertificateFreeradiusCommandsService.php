@@ -115,6 +115,15 @@ readonly class CertificateFreeradiusCommandsService
             ];
         }
 
+        // cd to that target dir
+        $commands[] = [
+            'description' => $this->translator->trans(
+                'navigate_project_directory',
+                domain: 'CertificateFreeradiusCommandsService'
+            ),
+            'command' => 'cd ~/wba-openroaming-connector/hybrid/',
+        ];
+
         // Rebuild and restart container with new certs
         $commands[] = [
             'description' => $this->translator->trans(
