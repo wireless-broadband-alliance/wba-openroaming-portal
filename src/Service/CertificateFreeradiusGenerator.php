@@ -27,7 +27,6 @@ readonly class CertificateFreeradiusGenerator
         private CertificateProcessCheckerService $certificateProcessCheckerService,
         private TranslatorInterface $translator,
         private SettingRepository $settingRepository,
-        private CertificateCAGeneratorService $certificateCAGeneratorService,
     ) {
         $projectDir = $this->parameterBag->get('kernel.project_dir');
         $this->certTargetDir = $projectDir . '/var/certs';
