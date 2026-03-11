@@ -283,20 +283,11 @@ readonly class CertificateFreeradiusGenerator
             true // is private key
         );
 
-        $caGenerated = $this->certificateCAGeneratorService->generateCA(
-            $certCert->getFile(),
-            $chainCert->getFile()
-        );
-
-        // Save generated CA to temp file
-        $tmpCaPath = sys_get_temp_dir() . '/ca.pem';
-        file_put_contents($tmpCaPath, rtrim((string) $caGenerated) . "\n");
-
         /**
-         * Store the generated CA
+         * Store the generated CA has a copy of tha chain.pem
          */
         $caCert = $this->certificateStorageService->storeGeneratedFile(
-            $tmpCaPath,
+            "$liveDir/chain.pem",
             CertificateFileName::CA_PEM->value,
             CertificateMachineType::FREERADIUS->value,
             $setupProcess
