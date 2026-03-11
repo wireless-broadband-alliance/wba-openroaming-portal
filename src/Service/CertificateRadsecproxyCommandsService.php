@@ -99,6 +99,15 @@ readonly class CertificateRadsecproxyCommandsService
             ];
         }
 
+        // cd to that target dir
+        $commands[] = [
+            'description' => $this->translator->trans(
+                'navigate_project_directory',
+                domain: 'CertificateRadsecCommandsService'
+            ),
+            'command' => 'cd ~/wba-openroaming-connector/hybrid/',
+        ];
+
         // Rebuild and restart container with new certs
         $commands[] = [
             'description' => $this->translator->trans(
