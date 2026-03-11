@@ -10,20 +10,22 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
 readonly class CertificateRadsecproxyCommandsService
 {
-    private string $certDir;
+    /** @var string[] */
+    private array $certDirs;
 
     public function __construct(
         private TranslatorInterface $translator,
         private EntityManagerInterface $entityManager,
     ) {
-        // Local path where RADSecProxy expects the certs
-        $this->certDir = '~/wba-openroaming-connector/hybrid/configs/radsecproxy/certs/';
+        // All directories where certificates must exist
+        $this->certDirs = [
+            '~/wba-openroaming-connector/hybrid/configs/radsecproxy/certs/',
+            '~/wba-openroaming-connector/certs/wba/',
+        ];
     }
 
     /**
-     * Generate the shell commands to update RADSecProxy certificates.
      * @param array<int, array{name: string, content?: string}> $certificateSet
-     *
      * @return array<int, array{description: string, command: string}>
      */
     public function getRenewCommands(array $certificateSet): array
@@ -36,37 +38,38 @@ readonly class CertificateRadsecproxyCommandsService
                         domain: 'CertificateRadsecCommandsService'
                     ),
                     'command' => '# No action required.',
-                ],
+                ]
             ];
         }
 
         return $this->generateCommands($certificateSet);
     }
 
-
     /**
      * @param array<int, array{name: string, content?: string}> $certificates
-     *
      * @return array<int, array{description: string, command: string}>
      */
     private function generateCommands(array $certificates): array
     {
         $commands = [];
 
-        // Remove old certificate files
+        // Remove old certificates registrations
+        $rmFiles = [];
+
+        foreach ($this->certDirs as $dir) {
+            $rmFiles[] = $dir . 'client.pem';
+            $rmFiles[] = $dir . 'key.pem';
+        }
+
         $commands[] = [
             'description' => $this->translator->trans(
                 'remove_old_files',
                 domain: 'CertificateRadsecCommandsService'
             ),
-            'command' => sprintf(
-                'rm -f %sclient.pem %skey.pem',
-                $this->certDir,
-                $this->certDir
-            ),
+            'command' => 'rm -f ' . implode(' ', $rmFiles),
         ];
 
-        // Map Radsecproxy certificate enum to filenames
+        // Certificate filename mapping
         $radsecFileMap = [
             CertificateFileName::CLIENT_PEM->value => CertificateFileName::CLIENT_PEM_FILE->value,
             CertificateFileName::KEY_PEM->value => CertificateFileName::KEY_PEM_FILE->value,
@@ -75,31 +78,35 @@ readonly class CertificateRadsecproxyCommandsService
         // Write new certificates
         foreach ($certificates as $cert) {
             $content = $cert['content'] ?? null;
+
             if (!$content) {
                 continue;
             }
 
             $content = str_replace("'", "'\"'\"'", $content);
-
-            // $cert['name'] is either 'Client' or 'Key'
             $targetFile = $radsecFileMap[$cert['name']] ?? null;
-
-            // Skip unknown certificate types
             if ($targetFile === null) {
                 continue;
             }
 
-            $commands[] = [
-                'description' => $this->translator->trans(
-                    'write_cert_file',
-                    ['%filename%' => $targetFile],
-                    'CertificateRadsecCommandsService'
-                ),
-                'command' => sprintf("echo '%s' > %s%s", $content, $this->certDir, $targetFile),
-            ];
+            foreach ($this->certDirs as $dir) {
+                $commands[] = [
+                    'description' => $this->translator->trans(
+                        'write_cert_file',
+                        ['%filename%' => $targetFile],
+                        'CertificateRadsecCommandsService'
+                    ),
+                    'command' => sprintf(
+                        "echo '%s' > %s%s",
+                        $content,
+                        $dir,
+                        $targetFile
+                    ),
+                ];
+            }
         }
 
-        // cd to that target dir
+        // Navigate to project directory
         $commands[] = [
             'description' => $this->translator->trans(
                 'navigate_project_directory',
@@ -108,16 +115,16 @@ readonly class CertificateRadsecproxyCommandsService
             'command' => 'cd ~/wba-openroaming-connector/hybrid/',
         ];
 
-        // Rebuild and restart container with new certs
+        // Rebuild containers
         $commands[] = [
             'description' => $this->translator->trans(
                 'rebuild_and_start_container',
                 domain: 'CertificateRadsecCommandsService'
             ),
-            'command' => 'docker compose up -d --build radsecproxy',
+            'command' => 'docker compose up -d --build',
         ];
 
-        // Verify container status
+        // Verify container
         $commands[] = [
             'description' => $this->translator->trans(
                 'verify_container',
@@ -126,7 +133,7 @@ readonly class CertificateRadsecproxyCommandsService
             'command' => 'docker compose ps radsecproxy',
         ];
 
-        // Display last logs
+        // Show logs
         $commands[] = [
             'description' => $this->translator->trans(
                 'check_logs',

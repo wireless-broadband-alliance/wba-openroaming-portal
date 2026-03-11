@@ -127,10 +127,18 @@ readonly class CertificateFreeradiusCommandsService
         // Rebuild and restart container with new certs
         $commands[] = [
             'description' => $this->translator->trans(
-                'rebuild_and_start_container',
+                'stop_container',
                 domain: 'CertificateFreeradiusCommandsService'
             ),
-            'command' => 'docker compose up -d --build freeradius',
+            'command' => 'docker compose down',
+        ];
+
+        $commands[] = [
+            'description' => $this->translator->trans(
+                'start_container',
+                domain: 'CertificateFreeradiusCommandsService'
+            ),
+            'command' => 'docker compose up -d',
         ];
 
         // Verify container status
