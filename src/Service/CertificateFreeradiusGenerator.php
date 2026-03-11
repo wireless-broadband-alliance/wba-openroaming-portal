@@ -252,6 +252,15 @@ readonly class CertificateFreeradiusGenerator
             );
         }
 
+        /**
+         * Store the generated CA has a copy of tha chain.pem
+         */
+        $caCert = $this->certificateStorageService->storeGeneratedFile(
+            "$liveDir/" . CertificateFileName::CHAIN_PEM_FILE->value,
+            CertificateFileName::CA_PEM->value,
+            CertificateMachineType::FREERADIUS->value,
+            $setupProcess
+        );
 
         $certCert = $this->certificateStorageService->storeGeneratedFile(
             "$liveDir/" . CertificateFileName::CERT_PEM_FILE->value,
@@ -280,16 +289,6 @@ readonly class CertificateFreeradiusGenerator
             CertificateMachineType::FREERADIUS->value,
             $setupProcess,
             true // is private key
-        );
-
-        /**
-         * Store the generated CA has a copy of tha chain.pem
-         */
-        $caCert = $this->certificateStorageService->storeGeneratedFile(
-            "$liveDir/chain.pem",
-            CertificateFileName::CA_PEM->value,
-            CertificateMachineType::FREERADIUS->value,
-            $setupProcess
         );
 
         $files = [
