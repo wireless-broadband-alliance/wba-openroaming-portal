@@ -8,3 +8,4 @@ rebuild_and_start_container: 'Reconstruir a imagem do freeradius sem utilizar ca
 start_container: 'Iniciar o container do FreeRADIUS em modo destacado.'
 verify_container: 'Verificar se o container do FreeRADIUS está em execução.'
 check_logs: 'Verificar os registos recentes do FreeRADIUS para confirmar um arranque bem-sucedido.'
+navigate_project_directory: 'Navegue até ao diretório do container de destino'
