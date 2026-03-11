@@ -27,7 +27,6 @@ readonly class CertificateFreeradiusGenerator
         private CertificateProcessCheckerService $certificateProcessCheckerService,
         private TranslatorInterface $translator,
         private SettingRepository $settingRepository,
-        private CertificateCAGeneratorService $certificateCAGeneratorService,
     ) {
         $projectDir = $this->parameterBag->get('kernel.project_dir');
         $this->certTargetDir = $projectDir . '/var/certs';
@@ -253,6 +252,20 @@ readonly class CertificateFreeradiusGenerator
             );
         }
 
+        /**
+         * Store the generated CA has a copy of tha chain.pem
+         */
+        $tmpCaPath = sys_get_temp_dir() . '/ca.pem';
+        copy(
+            "$liveDir/" . CertificateFileName::CHAIN_PEM_FILE->value,
+            $tmpCaPath
+        );
+        $caCert = $this->certificateStorageService->storeGeneratedFile(
+            $tmpCaPath,
+            CertificateFileName::CA_PEM->value,
+            CertificateMachineType::FREERADIUS->value,
+            $setupProcess
+        );
 
         $certCert = $this->certificateStorageService->storeGeneratedFile(
             "$liveDir/" . CertificateFileName::CERT_PEM_FILE->value,
@@ -281,25 +294,6 @@ readonly class CertificateFreeradiusGenerator
             CertificateMachineType::FREERADIUS->value,
             $setupProcess,
             true // is private key
-        );
-
-        $caGenerated = $this->certificateCAGeneratorService->generateCA(
-            $certCert->getFile(),
-            $chainCert->getFile()
-        );
-
-        // Save generated CA to temp file
-        $tmpCaPath = sys_get_temp_dir() . '/ca.pem';
-        file_put_contents($tmpCaPath, rtrim((string) $caGenerated) . "\n");
-
-        /**
-         * Store the generated CA
-         */
-        $caCert = $this->certificateStorageService->storeGeneratedFile(
-            $tmpCaPath,
-            CertificateFileName::CA_PEM->value,
-            CertificateMachineType::FREERADIUS->value,
-            $setupProcess
         );
 
         $files = [
