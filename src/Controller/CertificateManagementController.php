@@ -211,7 +211,7 @@ class CertificateManagementController extends AbstractController
         );
 
         $this->addFlash(
-            'error',
+            'success',
             $this->translator->trans(
                 'certificateProcessAborted',
                 [],
