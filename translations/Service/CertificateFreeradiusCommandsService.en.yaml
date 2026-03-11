@@ -8,3 +8,4 @@ rebuild_and_start_container: 'Rebuild the freeradius image without using cache a
 start_container: 'Start the FreeRADIUS container in detached mode.'
 verify_container: 'Verify that the FreeRADIUS container is running.'
 check_logs: 'Check the latest FreeRADIUS logs to confirm successful startup.'
+navigate_project_directory: 'Navigate to the target container directory'
