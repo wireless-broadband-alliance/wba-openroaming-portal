@@ -295,6 +295,11 @@ readonly class CertificateFreeradiusGenerator
             $chainFile
         );
 
+
+        if (!$isProd || !$caGenerated) {
+            $caGenerated = 'CA cert generated in staging mode. This cert is not valid';
+        }
+
         /**
          * Save generated CA to temp file
          */
