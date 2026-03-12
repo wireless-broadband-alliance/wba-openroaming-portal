@@ -218,13 +218,14 @@ readonly class CertificateFreeradiusGenerator
 
             // Check if env exists
             $leProdEnv = $_ENV['LE_PROD'] ?? null;
-
             if ($leProdEnv !== null) {
                 // Convert to boolean safely
-                $isProd = filter_var($leProdEnv, FILTER_VALIDATE_BOOLEAN);
+                // Treat missing env as false (i.e., staging by default)
+                $isProd = isset($_ENV['LE_PROD']) && filter_var($_ENV['LE_PROD'], FILTER_VALIDATE_BOOLEAN);
+                $stagingMode = !$isProd;
 
                 // Only add --staging if it's NOT production
-                if (!$isProd) {
+                if ($stagingMode) {
                     $command[] = '--staging';
                 }
             }
@@ -287,37 +288,37 @@ readonly class CertificateFreeradiusGenerator
             true // is private key
         );
 
-        $certFile = new File($certCert->getFile()->getPathname());
-        $chainFile = new File($chainCert->getFile()->getPathname());
+        // Only generate CA if not in staging mode
+        $caCert = null;
+        $leProdEnv = $_ENV['LE_PROD'] ?? null;
+        if ($leProdEnv !== null) {
+            // Convert to boolean safely
+            // Treat missing env as false (i.e., staging by default)
+            $isProd = isset($_ENV['LE_PROD']) && filter_var($_ENV['LE_PROD'], FILTER_VALIDATE_BOOLEAN);
+            $stagingMode = !$isProd;
+            if (!$stagingMode) {
+                $certFile = new File($certCert->getFile()->getPathname());
+                $chainFile = new File($chainCert->getFile()->getPathname());
 
-        $caGenerated = $this->certificateCAGeneratorService->generateCA(
-            $certFile,
-            $chainFile
-        );
+                $caGenerated = $this->certificateCAGeneratorService->generateCA(
+                    $certFile,
+                    $chainFile
+                );
 
+                $tmpCaPath = sys_get_temp_dir() . '/ca.pem';
+                file_put_contents($tmpCaPath, rtrim($caGenerated) . "\n");
 
-        if (!$isProd || !$caGenerated) {
-            $caGenerated = 'CA cert generated in staging mode. This cert is not valid';
+                $caCert = $this->certificateStorageService->storeGeneratedFile(
+                    $tmpCaPath,
+                    CertificateFileName::CA_PEM->value,
+                    CertificateMachineType::FREERADIUS->value,
+                    $setupProcess
+                );
+            }
         }
 
-        /**
-         * Save generated CA to temp file
-         */
-        $tmpCaPath = sys_get_temp_dir() . '/ca.pem';
-        file_put_contents($tmpCaPath, rtrim($caGenerated) . "\n");
-
-        /**
-         * Store the generated CA
-         */
-        $caCert = $this->certificateStorageService->storeGeneratedFile(
-            $tmpCaPath,
-            CertificateFileName::CA_PEM->value,
-            CertificateMachineType::FREERADIUS->value,
-            $setupProcess
-        );
-
         $files = [
-            $caCert->getFilePath(),
+            $caCert ? $caCert->getFilePath() : 'CA generated in staging mode',
             $certCert->getFilePath(),
             $chainCert->getFilePath(),
             $fullChainCert->getFilePath(),
