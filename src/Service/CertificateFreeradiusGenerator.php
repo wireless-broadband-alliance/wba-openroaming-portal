@@ -228,7 +228,6 @@ readonly class CertificateFreeradiusGenerator
                     $command[] = '--staging';
                 }
             }
-            dd($command);
             $process = new Process($command);
             $process->setTimeout(300);
             $process->mustRun();
@@ -295,8 +294,6 @@ readonly class CertificateFreeradiusGenerator
             $certFile,
             $chainFile
         );
-
-        dd($caGenerated, $certFile, $chainFile, $certCert, $chainCert);
 
         /**
          * Save generated CA to temp file
