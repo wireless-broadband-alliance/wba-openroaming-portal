@@ -229,6 +229,7 @@ readonly class CertificateFreeradiusGenerator
                     $command[] = '--staging';
                 }
             }
+
             $process = new Process($command);
             $process->setTimeout(300);
             $process->mustRun();
@@ -288,37 +289,32 @@ readonly class CertificateFreeradiusGenerator
             true // is private key
         );
 
-        // Only generate CA if not in staging mode
-        $caCert = null;
-        $leProdEnv = $_ENV['LE_PROD'] ?? null;
-        if ($leProdEnv !== null) {
-            // Convert to boolean safely
-            // Treat missing env as false (i.e., staging by default)
-            $isProd = isset($_ENV['LE_PROD']) && filter_var($_ENV['LE_PROD'], FILTER_VALIDATE_BOOLEAN);
-            $stagingMode = !$isProd;
-            if (!$stagingMode) {
-                $certFile = new File($certCert->getFile()->getPathname());
-                $chainFile = new File($chainCert->getFile()->getPathname());
+        $certFile = new File($certCert->getFile()->getPathname());
+        $chainFile = new File($chainCert->getFile()->getPathname());
 
-                $caGenerated = $this->certificateCAGeneratorService->generateCA(
-                    $certFile,
-                    $chainFile
-                );
+        $isProd = filter_var($_ENV['LE_PROD'] ?? false, FILTER_VALIDATE_BOOLEAN);
+        $caGenerated = $this->certificateCAGeneratorService->generateCA(
+            $certFile,
+            $chainFile,
+            !$isProd // allow untrusted roots when staging
+        );
 
-                $tmpCaPath = sys_get_temp_dir() . '/ca.pem';
-                file_put_contents($tmpCaPath, rtrim($caGenerated) . "\n");
-
-                $caCert = $this->certificateStorageService->storeGeneratedFile(
-                    $tmpCaPath,
-                    CertificateFileName::CA_PEM->value,
-                    CertificateMachineType::FREERADIUS->value,
-                    $setupProcess
-                );
-            }
+        if ($caGenerated === null) {
+            throw new RuntimeException('Unable to generate CA certificate.');
         }
 
+        $tmpCaPath = sys_get_temp_dir() . '/ca.pem';
+        file_put_contents($tmpCaPath, rtrim($caGenerated) . "\n");
+
+        $caCert = $this->certificateStorageService->storeGeneratedFile(
+            $tmpCaPath,
+            CertificateFileName::CA_PEM->value,
+            CertificateMachineType::FREERADIUS->value,
+            $setupProcess
+        );
+
         $files = [
-            $caCert ? $caCert->getFilePath() : 'CA generated in staging mode',
+            $caCert->getFilePath(),
             $certCert->getFilePath(),
             $chainCert->getFilePath(),
             $fullChainCert->getFilePath(),
