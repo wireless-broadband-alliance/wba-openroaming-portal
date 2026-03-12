@@ -181,7 +181,6 @@ readonly class CertificateFreeradiusGenerator
         );
         chmod($credFile, 0600);
 
-
         try {
             $domain = $this->settingRepository->findOneBy(
                 ['name' => SettingName::RADIUS_TLS_NAME->value]
@@ -260,57 +259,71 @@ readonly class CertificateFreeradiusGenerator
             );
         }
 
-        $certCert = $this->certificateStorageService->storeGeneratedFile(
-            "$liveDir/" . CertificateFileName::CERT_PEM_FILE->value,
-            CertificateFileName::CERT_PEM->value,
-            CertificateMachineType::FREERADIUS->value,
-            $setupProcess
-        );
+        // Paths to certbot generated files
+        $certPath = "$liveDir/" . CertificateFileName::CERT_PEM_FILE->value;
+        $chainPath = "$liveDir/" . CertificateFileName::CHAIN_PEM_FILE->value;
+        $fullChainPath = "$liveDir/" . CertificateFileName::FULL_CHAIN_PEM_FILE->value;
+        $privKeyPath = "$liveDir/" . CertificateFileName::PRIVATE_KEY_PEM_FILE->value;
 
-        $chainCert = $this->certificateStorageService->storeGeneratedFile(
-            "$liveDir/" . CertificateFileName::CHAIN_PEM_FILE->value,
-            CertificateFileName::CHAIN_PEM->value,
-            CertificateMachineType::FREERADIUS->value,
-            $setupProcess
-        );
+        // Create File objects directly from certbot output
+        $certFile = new File($certPath);
+        $chainFile = new File($chainPath);
 
-        $fullChainCert = $this->certificateStorageService->storeGeneratedFile(
-            "$liveDir/" . CertificateFileName::FULL_CHAIN_PEM_FILE->value,
-            CertificateFileName::FULL_CHAIN_PEM->value,
-            CertificateMachineType::FREERADIUS->value,
-            $setupProcess
-        );
-
-        $privkeyCert = $this->certificateStorageService->storeGeneratedFile(
-            "$liveDir/" . CertificateFileName::PRIVATE_KEY_PEM_FILE->value,
-            CertificateFileName::PRIVATE_KEY_PEM->value,
-            CertificateMachineType::FREERADIUS->value,
-            $setupProcess,
-            true // is private key
-        );
-
-        $certFile = new File($certCert->getFile()->getPathname());
-        $chainFile = new File($chainCert->getFile()->getPathname());
-
+        // Determine if we are using production LE
         $isProd = filter_var($_ENV['LE_PROD'] ?? false, FILTER_VALIDATE_BOOLEAN);
+
+        // Generate CA from leaf + chain
         $caGenerated = $this->certificateCAGeneratorService->generateCA(
             $certFile,
             $chainFile,
-            !$isProd // allow untrusted roots when staging
+            !$isProd // allow untrusted roots in staging
         );
 
         if ($caGenerated === null) {
             throw new RuntimeException('Unable to generate CA certificate.');
         }
 
-        $tmpCaPath = sys_get_temp_dir() . '/ca.pem';
+        // Save CA temporarily
+        $tmpCaPath = sys_get_temp_dir() . '/ca_' . bin2hex(random_bytes(6)) . '.pem';
         file_put_contents($tmpCaPath, rtrim($caGenerated) . "\n");
 
+        /**
+         * Store certificates (CA first)
+         */
         $caCert = $this->certificateStorageService->storeGeneratedFile(
             $tmpCaPath,
             CertificateFileName::CA_PEM->value,
             CertificateMachineType::FREERADIUS->value,
             $setupProcess
+        );
+
+        $certCert = $this->certificateStorageService->storeGeneratedFile(
+            $certPath,
+            CertificateFileName::CERT_PEM->value,
+            CertificateMachineType::FREERADIUS->value,
+            $setupProcess
+        );
+
+        $chainCert = $this->certificateStorageService->storeGeneratedFile(
+            $chainPath,
+            CertificateFileName::CHAIN_PEM->value,
+            CertificateMachineType::FREERADIUS->value,
+            $setupProcess
+        );
+
+        $fullChainCert = $this->certificateStorageService->storeGeneratedFile(
+            $fullChainPath,
+            CertificateFileName::FULL_CHAIN_PEM->value,
+            CertificateMachineType::FREERADIUS->value,
+            $setupProcess
+        );
+
+        $privkeyCert = $this->certificateStorageService->storeGeneratedFile(
+            $privKeyPath,
+            CertificateFileName::PRIVATE_KEY_PEM->value,
+            CertificateMachineType::FREERADIUS->value,
+            $setupProcess,
+            true
         );
 
         $files = [
