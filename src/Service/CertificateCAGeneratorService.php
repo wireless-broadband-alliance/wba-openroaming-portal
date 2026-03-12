@@ -69,10 +69,8 @@ class CertificateCAGeneratorService
             $this->visitedFingerprints[$fp] = true;
 
             // If self-signed and trusted, return as root
-            if ($this->isSelfSigned($current)) {
-                if ($allowUntrusted || $this->isTrustedRoot($current)) {
-                    return $current;
-                }
+            if ($this->isSelfSigned($current) && ($allowUntrusted || $this->isTrustedRoot($current))) {
+                return $current;
             }
 
             // Try to find issuer from pool
