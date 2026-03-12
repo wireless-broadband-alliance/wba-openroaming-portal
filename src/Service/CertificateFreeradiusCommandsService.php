@@ -141,7 +141,7 @@ readonly class CertificateFreeradiusCommandsService
                 'start_container',
                 domain: 'CertificateFreeradiusCommandsService'
             ),
-            'command' => 'docker compose up -d',
+            'command' => 'docker compose up -d --build',
         ];
 
         // Verify container
