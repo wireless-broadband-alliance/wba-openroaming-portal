@@ -13,6 +13,8 @@ use Random\RandomException;
 use RuntimeException;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\HttpFoundation\File\File;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -27,6 +29,7 @@ readonly class CertificateFreeradiusGenerator
         private CertificateProcessCheckerService $certificateProcessCheckerService,
         private TranslatorInterface $translator,
         private SettingRepository $settingRepository,
+        private CertificateCAGeneratorService $certificateCAGeneratorService,
     ) {
         $projectDir = $this->parameterBag->get('kernel.project_dir');
         $this->certTargetDir = $projectDir . '/var/certs';
@@ -213,15 +216,19 @@ readonly class CertificateFreeradiusGenerator
                 $this->certTargetDir . '/logs',
             ];
 
-            $isProd = filter_var(
-                (string) ($_ENV['LE_PROD'] ?? 'false'),
-                FILTER_VALIDATE_BOOLEAN
-            );
+            // Check if env exists
+            $leProdEnv = $_ENV['LE_PROD'] ?? null;
 
-            if (!$isProd) {
-                $command[] = '--staging';
+            if ($leProdEnv !== null) {
+                // Convert to boolean safely
+                $isProd = filter_var($leProdEnv, FILTER_VALIDATE_BOOLEAN);
+
+                // Only add --staging if it's NOT production
+                if (!$isProd) {
+                    $command[] = '--staging';
+                }
             }
-
+            dd($command);
             $process = new Process($command);
             $process->setTimeout(300);
             $process->mustRun();
@@ -252,21 +259,6 @@ readonly class CertificateFreeradiusGenerator
             );
         }
 
-        /**
-         * Store the generated CA has a copy of tha chain.pem
-         */
-        $tmpCaPath = sys_get_temp_dir() . '/ca.pem';
-        copy(
-            "$liveDir/" . CertificateFileName::CHAIN_PEM_FILE->value,
-            $tmpCaPath
-        );
-        $caCert = $this->certificateStorageService->storeGeneratedFile(
-            $tmpCaPath,
-            CertificateFileName::CA_PEM->value,
-            CertificateMachineType::FREERADIUS->value,
-            $setupProcess
-        );
-
         $certCert = $this->certificateStorageService->storeGeneratedFile(
             "$liveDir/" . CertificateFileName::CERT_PEM_FILE->value,
             CertificateFileName::CERT_PEM->value,
@@ -294,6 +286,32 @@ readonly class CertificateFreeradiusGenerator
             CertificateMachineType::FREERADIUS->value,
             $setupProcess,
             true // is private key
+        );
+
+        $certFile = new File($certCert->getFile()->getPathname());
+        $chainFile = new File($chainCert->getFile()->getPathname());
+
+        $caGenerated = $this->certificateCAGeneratorService->generateCA(
+            $certFile,
+            $chainFile
+        );
+
+        dd($caGenerated, $certFile, $chainFile, $certCert, $chainCert);
+
+        /**
+         * Save generated CA to temp file
+         */
+        $tmpCaPath = sys_get_temp_dir() . '/ca.pem';
+        file_put_contents($tmpCaPath, rtrim($caGenerated) . "\n");
+
+        /**
+         * Store the generated CA
+         */
+        $caCert = $this->certificateStorageService->storeGeneratedFile(
+            $tmpCaPath,
+            CertificateFileName::CA_PEM->value,
+            CertificateMachineType::FREERADIUS->value,
+            $setupProcess
         );
 
         $files = [
