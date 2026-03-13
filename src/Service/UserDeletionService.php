@@ -129,8 +129,6 @@ readonly class UserDeletionService
         'ip' => $request->getClientIp(),
         ];
 
-      // Reattaches the admin after the user entity clears herself because of the flush
-        $admin = $this->userRepository->findOneBy(['uuid' => $deletedUserByUuid]);
 
         $this->eventActions->saveEvent(
             $admin,
