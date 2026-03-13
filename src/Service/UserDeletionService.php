@@ -24,7 +24,6 @@ readonly class UserDeletionService
         private EntityManagerInterface $entityManager,
         private PgpEncryptionService $encryptionService,
         private TranslatorInterface $translator,
-        private UserRepository $userRepository,
     ) {
     }
 
