@@ -178,6 +178,7 @@ class ResetAllSettingsCommand extends Command
             ['name' => SettingName::FREERADIUS_LAST_CONNECTION_CRON->value, 'value' => '* 3 * * *'],
             ['name' => SettingName::DOMAIN_BLACKLIST_IMPORT_CRON->value, 'value' => '0 4 * * *'],
             ['name' => SettingName::CRON_ADVANCED_STATUS->value, 'value' => 'OFF'],
+            ['name' => SettingName::ENABLE_RADIUS_TLS_RESET->value, 'value' => 'true'],
         ];
 
         // phpcs:disable Generic.Files.LineLength.TooLong
