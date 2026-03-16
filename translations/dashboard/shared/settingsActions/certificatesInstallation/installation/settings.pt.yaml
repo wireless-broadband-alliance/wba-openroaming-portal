@@ -7,6 +7,6 @@ trustedProxiesDescription: 'Lista de endereços IP ou redes consideradas proxies
 domainsWarning: 'Os dominios devem ser separados por ","'
 trustedKeyLabel: 'Chave do Turnstile'
 trustedKeyDescription: 'Chave pública utilizada para validar o serviço Turnstile.'
-turnstileSecretLabel: 'Segredo do Turnstile'
+turnstileSecretLabel: 'Secret do Turnstile'
 turnstileSecretDescription: 'Chave secreta associada ao serviço Turnstile, usada para verificação no servidor.'
 abort: 'Abortar Processo'
