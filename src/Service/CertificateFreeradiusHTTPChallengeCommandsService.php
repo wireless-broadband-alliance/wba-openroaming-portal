@@ -18,7 +18,6 @@ class CertificateFreeradiusHTTPChallengeCommandsService
     /**
      * Get the commands for FreeRADIUS HTTP challenge
      *
-     * @param string $email
      * @return array<string, array<string, mixed>>
      */
     public function getCommands(string $email): array
