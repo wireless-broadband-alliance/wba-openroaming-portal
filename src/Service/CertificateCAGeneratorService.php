@@ -37,7 +37,7 @@ class CertificateCAGeneratorService
      *
      * @return string|null PEM content of the trusted root CA
      */
-    public function generateCA(File $certFile, ?File $chainFile = null): ?string
+    public function generateCA(File $certFile, ?File $chainFile = null, bool $allowUntrusted = false): ?string
     {
         $leafPem = $this->normalizePem(file_get_contents($certFile->getRealPath()) ?: '');
         if (!$leafPem) {
@@ -69,7 +69,7 @@ class CertificateCAGeneratorService
             $this->visitedFingerprints[$fp] = true;
 
             // If self-signed and trusted, return as root
-            if ($this->isSelfSigned($current) && $this->isTrustedRoot($current)) {
+            if ($this->isSelfSigned($current) && ($allowUntrusted || $this->isTrustedRoot($current))) {
                 return $current;
             }
 
