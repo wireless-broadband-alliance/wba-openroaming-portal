@@ -2,7 +2,7 @@
 stepInstallCertBot: 'Passo 1 – Instalar o Certbot'
 stepGenerateCertificates: 'Passo 2 – Gerar Certificados'
 stepCopyCertificates: 'Passo 3 – Copiar Certificados para o FreeRADIUS'
-stepRestoreContainers: 'Passo 4 – Reiniciar os Contêineres'
+stepRestoreContainers: 'Passo 4 – Reiniciar os Containers'
 
 # Step 1 – Install Certbot
 updatePackages: 'Atualizar os pacotes do sistema'
