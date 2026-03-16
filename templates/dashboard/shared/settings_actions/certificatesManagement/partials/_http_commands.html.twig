@@ -162,15 +162,29 @@
                 </li>
             </ul>
         </div>
-        {# Copy Genareted Certificates #}
+        {# Copy Generated Certificates #}
         <h3 class="text-gray-900 text-xl font-semibold">
             {{ 'stepCopyCertificates'|trans({}, '_http_commands') }}
         </h3>
         <div class="space-y-2 relative">
             <ul class="list-disc pl-6 mt-3 space-y-4">
+
+                {% set labels = [
+                    'copyCertPem',
+                    'copyCertPem',
+                    'copyChainPem',
+                    'copyChainPem',
+                    'copyFullChainPem',
+                    'copyFullChainPem',
+                    'copyPrivKeyPem',
+                    'copyPrivKeyPem'
+                ] %}
+
                 {% for step in commands.certificate_copy.steps %}
                     <li class="text-sm font-medium text-gray-700">
-                        {{ 'copyCertificateCommand'|trans({}, '_http_commands') }}
+
+                        {{ labels[loop.index0]|trans({}, '_http_commands') }}
+
                         <div class="relative mt-2" data-controller="clipboard">
                     <pre class="copyable-code relative rounded bg-gray-800 text-white p-4 font-mono overflow-x-auto"
                          data-clipboard-target="code">{{ step|raw }}</pre>
@@ -183,6 +197,7 @@
                                 <twig:ux:icon class="w-4 h-4 text-white" name="wba:copy"/>
                             </button>
                         </div>
+
                     </li>
                 {% endfor %}
             </ul>
