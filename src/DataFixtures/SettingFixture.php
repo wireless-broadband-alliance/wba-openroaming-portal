@@ -142,6 +142,7 @@ class SettingFixture extends Fixture
             ['name' => SettingName::LDAP_SYNC_CRON->value, 'value' => '0 2 * * *'],
             ['name' => SettingName::CRON_ADVANCED_STATUS->value, 'value' => 'OFF'],
             ['name' => SettingName::CLOUDFLARE_TOKEN->value, 'value' => ''],
+            ['name' => SettingName::ENABLE_RADIUS_TLS_RESET->value, 'value' => 'true'],
         ];
 
         foreach ($settings as $settingData) {
