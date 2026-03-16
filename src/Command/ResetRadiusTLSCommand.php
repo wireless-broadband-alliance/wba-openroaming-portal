@@ -66,6 +66,9 @@ class ResetRadiusTLSCommand extends Command
 
         $settings = [
             ['name' => SettingName::RADIUS_TLS_NAME->value, 'value' => 'EditMe'],
+            ['name' => SettingName::NAI_REALM->value, 'value' => 'EditMe'],
+            ['name' => SettingName::DOMAIN_NAME->value, 'value' => 'EditMe'],
+            ['name' => SettingName::RADIUS_REALM_NAME->value, 'value' => 'EditMe'],
             ['name' => SettingName::ENABLE_RADIUS_TLS_RESET->value, 'value' => 'true'],
         ];
 

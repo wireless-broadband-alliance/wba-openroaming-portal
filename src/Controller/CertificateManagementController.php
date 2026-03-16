@@ -124,6 +124,15 @@ class CertificateManagementController extends AbstractController
                 SettingName::RADIUS_TLS_NAME->value => [
                     'value' => $domain,
                 ],
+                SettingName::NAI_REALM->value => [
+                    'value' => $domain,
+                ],
+                SettingName::DOMAIN_NAME->value => [
+                    'value' => $domain,
+                ],
+                SettingName::RADIUS_REALM_NAME->value => [
+                    'value' => $domain,
+                ],
                 SettingName::ENABLE_RADIUS_TLS_RESET->value => [
                     'value' => 'false',
                 ],

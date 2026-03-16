@@ -50,7 +50,7 @@ class AuthController extends AbstractController
     public function __construct(
         private readonly UserRepository $userRepository,
         private readonly UserPasswordHasherInterface $passwordHasher,
-        private readonly jwtTokenGenerator $tokenGenerator,
+        private readonly JWTTokenGenerator $JWTTokenGenerator,
         private readonly CaptchaValidator $captchaValidator,
         private readonly EntityManagerInterface $entityManager,
         private readonly GoogleController $googleController,
@@ -228,7 +228,7 @@ class AuthController extends AbstractController
 
         if ($isLoginWithUUIDOnly === OperationMode::OFF->value) {
             // If the login with uuid is disabled generate JWT Token
-            $token = $this->tokenGenerator->generateToken($user);
+            $token = $this->JWTTokenGenerator->generateToken($user);
             if (is_array($token) && $token['success'] === false) {
                 $errorMessage = $token['error'] ?? 'Token generation failed.';
                 $statusCode = $errorMessage === 'Invalid user provided. Please verify the user data.' ? 400 : 500;
