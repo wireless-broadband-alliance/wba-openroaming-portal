@@ -2,31 +2,52 @@
 
 namespace App\Service;
 
+use App\Enum\CertificateFileName;
 use App\Enum\SettingName;
 use App\Repository\SettingRepository;
 
 class CertificateFreeradiusHTTPChallengeCommandsService
 {
+    private string $projectRoot = '/root/wba-openroaming-connector/hybrid';
+
     public function __construct(
         private readonly SettingRepository $settingRepository,
     ) {
     }
-    private string $projectRoot = '/root/wba-openroaming-connector/hybrid';
 
     /**
      * Get the commands for FreeRADIUS HTTP challenge
      *
-     * @param string $email  Email to register with Let's Encrypt
+     * @param string $email
      * @return array<string, array<string, mixed>>
      */
     public function getCommands(string $email): array
     {
-        // Dynamically build the FreeRADIUS cert path based on domain
-        $freeradiusCertPath = $this->projectRoot . '/configs/freeradius/certs';
+        $domain = $this->settingRepository
+            ->findOneBy(['name' => SettingName::RADIUS_TLS_NAME->value])
+            ->getValue();
 
-        $domain = $this->settingRepository->findOneBy(
-            ['name' => SettingName::RADIUS_TLS_NAME->value]
-        )->getValue();
+        $letsencryptPath = "/etc/letsencrypt/live/{$domain}";
+
+        $freeradiusPaths = [
+            $this->projectRoot . '/configs/freeradius/certs',
+            '/root/wba-openroaming-connector/certs/freeradius',
+        ];
+
+        $files = [
+            CertificateFileName::CERT_PEM_FILE->value => CertificateFileName::CERT_PEM_FILE->value,
+            CertificateFileName::CHAIN_PEM_FILE->value => CertificateFileName::CHAIN_PEM_FILE->value,
+            CertificateFileName::FULL_CHAIN_PEM_FILE->value => CertificateFileName::FULL_CHAIN_PEM_FILE->value,
+            CertificateFileName::PRIVATE_KEY_PEM_FILE->value => CertificateFileName::PRIVATE_KEY_PEM_FILE->value,
+        ];
+
+        $copySteps = [];
+
+        foreach ($files as $source => $destination) {
+            foreach ($freeradiusPaths as $path) {
+                $copySteps[] = "cp {$letsencryptPath}/{$source} {$path}/{$destination}";
+            }
+        }
 
         return [
             'certificate_generation' => [
@@ -45,12 +66,7 @@ class CertificateFreeradiusHTTPChallengeCommandsService
 
             'certificate_copy' => [
                 'title' => 'Copy Certificates to FreeRADIUS',
-                'steps' => [
-                    "cp /etc/letsencrypt/live/{$domain}/cert.pem {$freeradiusCertPath}/cert.pem",
-                    "cp /etc/letsencrypt/live/{$domain}/chain.pem {$freeradiusCertPath}/chain.pem",
-                    "cp /etc/letsencrypt/live/{$domain}/fullchain.pem {$freeradiusCertPath}/fullchain.pem",
-                    "cp /etc/letsencrypt/live/{$domain}/privkey.pem {$freeradiusCertPath}/privkey.key",
-                ],
+                'steps' => $copySteps,
             ],
 
             'container_restart' => [
