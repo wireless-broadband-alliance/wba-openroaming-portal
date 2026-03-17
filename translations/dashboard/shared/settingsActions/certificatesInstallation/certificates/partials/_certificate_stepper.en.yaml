@@ -1,0 +1,24 @@
+info_text_stepper_details: 'Please note that you can use the numbered circles to navigate between completed steps. You can only access steps that have already been completed.'
+step:
+  radsecproxy_upload:
+    title: 'Upload RadSecProxy Certs'
+    description: 'Upload your RadSecProxy certificates to start the process.'
+  radsecproxy_config:
+    title: 'Apply RadSecProxy Config'
+    description: 'Run the generated commands to configure your resolver.'
+  radsecproxy_test:
+    title: 'Test Implementation'
+    description: 'Certificate setup almost finished.'
+  freeradius_upload:
+    title: 'Configure Freeradius Certificates'
+    description: 'Upload the certificates or provide the domain to start the process.'
+  freeradius_config:
+    title: 'Apply Freeradius Config'
+    description: 'Run the generated commands to configure your resolver.'
+  freeradius_test:
+    title: 'Test Implementation'
+    description: 'Certificate setup almost finished.'
+
+abort: 'Abort Process'
+leave: 'Leave Process Configuration'
+confirm_abort: 'Are you sure you want to abort the current certificate setup process?'

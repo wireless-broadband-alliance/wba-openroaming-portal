@@ -1,0 +1,32 @@
+{% set isDashboard = app.request.pathinfo starts with '/dashboard' %}
+{% set toastTypeMap = {
+    success: isDashboard ? 'toast-success-dashboard' : 'toast-success',
+    warning: isDashboard ? 'toast-warning-dashboard' : 'toast-warning',
+    error: isDashboard ? 'toast-error-dashboard' : 'toast-error',
+} %}
+
+<div class="grid grid-cols-1 gap-[5px] my-3">
+    {# Success #}
+    {% for message in app.session.flashbag.get('success') %}
+        {{ include('shared/_toast.html.twig', {
+            toast_type: toastTypeMap.success,
+            message: message,
+        }) }}
+    {% endfor %}
+
+    {# Warning #}
+    {% for message in app.session.flashbag.get('warning') %}
+        {{ include('shared/_toast.html.twig', {
+            toast_type: toastTypeMap.warning,
+            message: message,
+        }) }}
+    {% endfor %}
+
+    {# Error #}
+    {% for message in app.session.flashbag.get('error') %}
+        {{ include('shared/_toast.html.twig', {
+            toast_type: toastTypeMap.error,
+            message: message,
+        }) }}
+    {% endfor %}
+</div>

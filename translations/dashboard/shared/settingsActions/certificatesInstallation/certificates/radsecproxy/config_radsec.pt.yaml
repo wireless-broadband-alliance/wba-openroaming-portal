@@ -1,0 +1,18 @@
+configTitle: 'Passos para Renovação'
+step: 'Passo'
+submit: 'Confirmar Configuração'
+confirmFollowSteps: 'Tem a certeza de que seguiu todos os passos necessários?'
+showSensitive: 'Mostrar'
+hideSensitive: 'Ocultar'
+sensitiveHiddenText: 'Contéudo sensivel'
+copyCommand:
+    title: 'Copiar'
+    ariaLabel: 'Copiar'
+    success: 'Copiado!'
+    error: 'Não foi possível copiar o contéudo.'
+configAlreadyApplied: 'Configuração ja foi aplicada!'
+resolverCommands: 'Comandos do Resolver'
+warning:
+    rootCommand: "Execute os seguintes comandos como 'root' no terminal antes de começar!"
+client: 'Cliente'
+key: 'Chave Privada'

@@ -1,0 +1,3 @@
+commandTittle: 'Reset Radius TLS Name'
+warning: 'Changing the RADIUS TLS name will cause existing profiles to stop working only when the reset process is executed.'
+description: 'To reset, run this command inside the web container, then refresh the page and enter the new RADIUS TLS name.'

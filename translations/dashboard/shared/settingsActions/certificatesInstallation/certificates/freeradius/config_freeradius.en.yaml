@@ -1,0 +1,21 @@
+warning:
+  rootCommand: 'Run the following commands as the root user in your terminal before starting on the resolver directory of the portal!'
+CARoot: "Root CA"
+serverCertificate: "Server Certificate"
+certificateChain: "Certificate Chain"
+fullChain: "Full Chain"
+privateKey: "Private Key"
+expandAll: "Expand All"
+collapseAll: "Collapse All"
+originalFilename: "Original Filename"
+sha1Fingerprint: "SHA1 Fingerprint"
+validFrom: "Valid From"
+validTo: "Valid To"
+subject_cn: "Subject CN"
+issuer_cn: "Issuer CN"
+resolverCommands: 'Resolver Commands'
+localCommands: 'Local Commands'
+confirmFollowSteps: 'Are you sure you want to proceed to apply the previous uploaded certificates and the new configuration on the resolver?'
+configAlreadyApplied: 'Config already applied!'
+submit: 'Confirm Configuration'
+title: 'Commands to Update the Resolver'

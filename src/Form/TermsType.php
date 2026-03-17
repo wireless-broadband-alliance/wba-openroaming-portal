@@ -24,8 +24,12 @@ class TermsType extends AbstractType
     ) {
     }
 
+    private bool $disabled = true;
+
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
+        $this->disabled = $options['disabled'];
+
         $allowedSettings = [
             SettingName::TOS->value => ChoiceType::class,
             SettingName::PRIVACY_POLICY->value => ChoiceType::class,
@@ -39,19 +43,21 @@ class TermsType extends AbstractType
             $formFieldOptions = [
                 'constraints' => [],
                 'attr' => [],
+                'disabled' => $this->disabled,
             ];
             if ($formFieldType === TextType::class) {
                 $formFieldOptions = [
                     'attr' => [
                         'autocomplete' => 'off',
                     ],
+                    'disabled' => $this->disabled,
                     'required' => false,
                     'constraints' => [
-                        new Assert\Url([
-                            'message' => $this->translator->trans('valueNotValid', [], 'CapportType'),
-                            'protocols' => ['http', 'https'],
-                            'requireTld' => true,
-                        ]),
+                        new Assert\Url(
+                            message: $this->translator->trans('valueNotValid', [], 'CapportType'),
+                            protocols: ['http', 'https'],
+                            requireTld: true
+                        ),
                     ],
                 ];
             }
@@ -81,6 +87,7 @@ class TermsType extends AbstractType
     {
         $resolver->setDefaults([
             'settings' => [], // No need to set settings here
+            'disabled' => true,
         ]);
     }
 }

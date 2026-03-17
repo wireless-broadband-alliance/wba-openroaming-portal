@@ -1,0 +1,4 @@
+tittleSystemResetRequest: 'Restauro'
+restorePlatform: 'Restaurar Plataforma'
+lastCompletedSystemRequestReset: 'Última execução em: '
+confirmReinstall: "Tem a certeza que desejas reinstalar a plataforma? Este processo irá comprometer a configuração atual."

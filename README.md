@@ -199,6 +199,10 @@ project: [Upgrade Guide](docs/UPGRADE.md).
 Follow this link for more information on installing this
 project: [Installation Guide](docs/INSTALLATION.md).
 
+# 🛠 AssetMapper
+
+If you notice any issues with styling or frontend assets, please refer to [ASSETMAPPER Configurations](./docs/ASSETMAPPER.md).
+
 # 🔑 Admin Page Access Page
 
 Follow this link for a portal user/admin interface overview: [Portal Guide](docs/PORTALGUI.md).
@@ -493,6 +497,8 @@ certificate. **Connection errors** can happen if the right SHA1 hash is not prov
         last connection.
 72. `CRON_ADVANCED_STATUS`:  Saves the previous status mode on the schedule cron configuration page (Simple/Advanced)
 73. `DOMAIN_BLACKLIST_IMPORT_CRON`: Defines the schedule to import/refresh Blacklist of domains.
+74. `CLOUDFLARE_TOKEN` : Token for automatic Cloudflare certificate renewal.
+75. `ENABLE_RADIUS_TLS_RESET`: Saves the current state of the **RADIUS_TLS_NAME**, if this is set to false the reset certs widget will ask for a new radius_tls_name to be configured. **Careful when setting up this stage to be the actual RADIUS_TLS_NAME on the free-radius resolver. For more details consul this **
 
 #### With these environment variables, you can configure and customize various aspects of the project, such as database connections, SAML settings, login methods, and more.
 

@@ -1,0 +1,29 @@
+test_and_proceed: "Test and Proceed"
+configuration_complete: "Configuration Complete"
+instructions: >
+    Run the server test to confirm that the RadSecProxy certificates are installed correctly.
+    Once testing is done, proceed to configure the FreeRADIUS certificates.
+test_certificates: "Test RadSecProxy Certificates"
+proceed_freeradius: "Proceed to FreeRADIUS Certificates"
+in_progress_title: "Testing in progress..."
+in_progress_description: "Verifying the RadSecProxy certificate setup on the server. Please wait."
+start_test_connection: "Are you sure you wish to start the connection test?"
+host: "Host"
+port: "Port"
+user: "User"
+password: "Password"
+timeOut: "Timeout (seconds)"
+test_not_done: "Test not done yet"
+test_passed: "Last Test Passed"
+test_failed: "Last Test Failed"
+labels:
+    testing: "Testing..."
+errors:
+    missing_host: "Please provide the IP of the Resolver."
+    invalid_port: "Please provide the port of the Resolver."
+    unexpected: "An unexpected error occurred while testing."
+results:
+    success_title: "Test Successful"
+    error_title: "Test Failed"
+proceedWithoutTest: 'Proceed without test'
+proceedWithoutTestConfirm: 'Are you sure you want to proceed without taking the test?'

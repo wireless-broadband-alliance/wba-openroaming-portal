@@ -1,0 +1,230 @@
+{% if commands is defined and commands is not empty %}
+    <div class="px-6 py-5 space-y-5 bg-white">
+        {# Install CertBot #}
+        <h3 class="text-gray-900 text-xl font-semibold"
+        >
+            {{ 'stepInstallCertBot'|trans({}, '_http_commands') }}
+        </h3>
+        <div class="space-y-2 relative">
+            <ul class="list pl-6 space-y-4">
+                <li class="text-sm font-semibold text-gray-800">
+                    {{ 'installCertBot'|trans({}, '_http_commands') }}
+                    <ul class="list-disc pl-6 mt-3 space-y-4">
+                        <li class="text-sm font-medium text-gray-700">
+                            {{ 'updatePackages'|trans({}, '_http_commands') }}
+                            <div class="relative mt-2" data-controller="clipboard">
+                            <pre class="copyable-code relative rounded bg-gray-800 text-white p-4 font-mono overflow-x-auto"
+                                 data-clipboard-target="code">apt update && apt upgrade -y</pre>
+
+                                <button type="button"
+                                        class="absolute top-2 right-2 flex items-center justify-center p-1.5 rounded-md bg-gray-700 hover:bg-gray-600 focus:ring-2 focus:ring-primary/50 transition"
+                                        title="{{ 'copyCommand.title'|trans({}, 'config_radsec') }}"
+                                        aria-label="{{ 'copyCommand.ariaLabel'|trans({}, 'config_radsec') }}"
+                                        data-action="click->clipboard#copyToClipboard">
+                                    <twig:ux:icon class="w-4 h-4 text-white" name="wba:copy"/>
+                                </button>
+                            </div>
+                        </li>
+                        <li class="text-sm font-medium text-gray-700">
+                            {{ 'installSnap'|trans({}, '_http_commands') }}
+                            <div class="relative mt-2" data-controller="clipboard">
+                            <pre class="copyable-code relative rounded bg-gray-800 text-white p-4 font-mono overflow-x-auto"
+                                 data-clipboard-target="code">apt install -y snapd</pre>
+                                <button type="button"
+                                        class="absolute top-2 right-2 flex items-center justify-center p-1.5 rounded-md bg-gray-700 hover:bg-gray-600 focus:ring-2 focus:ring-primary/50 transition"
+                                        title="{{ 'copyCommand.title'|trans({}, 'config_radsec') }}"
+                                        aria-label="{{ 'copyCommand.ariaLabel'|trans({}, 'config_radsec') }}"
+                                        data-action="click->clipboard#copyToClipboard">
+                                    <twig:ux:icon class="w-4 h-4 text-white" name="wba:copy"/>
+                                </button>
+                            </div>
+                        </li>
+                        <li class="text-sm font-medium text-gray-700">
+                            {{ 'refreshSnap'|trans({}, '_http_commands') }}
+                            <div class="relative mt-2" data-controller="clipboard">
+                            <pre class="copyable-code relative rounded bg-gray-800 text-white p-4 font-mono overflow-x-auto"
+                                 data-clipboard-target="code">snap install core</pre>
+                                <button type="button"
+                                        class="absolute top-2 right-2 flex items-center justify-center p-1.5 rounded-md bg-gray-700 hover:bg-gray-600 focus:ring-2 focus:ring-primary/50 transition"
+                                        title="{{ 'copyCommand.title'|trans({}, 'config_radsec') }}"
+                                        aria-label="{{ 'copyCommand.ariaLabel'|trans({}, 'config_radsec') }}"
+                                        data-action="click->clipboard#copyToClipboard">
+                                    <twig:ux:icon class="w-4 h-4 text-white" name="wba:copy"/>
+                                </button>
+                            </div>
+                            <div class="relative mt-2" data-controller="clipboard">
+                            <pre class="copyable-code relative rounded bg-gray-800 text-white p-4 font-mono overflow-x-auto"
+                                 data-clipboard-target="code">snap refresh core</pre>
+                                <button type="button"
+                                        class="absolute top-2 right-2 flex items-center justify-center p-1.5 rounded-md bg-gray-700 hover:bg-gray-600 focus:ring-2 focus:ring-primary/50 transition"
+                                        title="{{ 'copyCommand.title'|trans({}, 'config_radsec') }}"
+                                        aria-label="{{ 'copyCommand.ariaLabel'|trans({}, 'config_radsec') }}"
+                                        data-action="click->clipboard#copyToClipboard">
+                                    <twig:ux:icon class="w-4 h-4 text-white" name="wba:copy"/>
+                                </button>
+                            </div>
+                        </li>
+                        <li class="text-sm font-medium text-gray-700">
+                            {{ 'installCertbotStep'|trans({}, '_http_commands') }}
+                            <div class="relative mt-2" data-controller="clipboard">
+                            <pre class="copyable-code relative rounded bg-gray-800 text-white p-4 font-mono overflow-x-auto"
+                                 data-clipboard-target="code">snap install --classic certbot</pre>
+                                <button type="button"
+                                        class="absolute top-2 right-2 flex items-center justify-center p-1.5 rounded-md bg-gray-700 hover:bg-gray-600 focus:ring-2 focus:ring-primary/50 transition"
+                                        title="{{ 'copyCommand.title'|trans({}, 'config_radsec') }}"
+                                        aria-label="{{ 'copyCommand.ariaLabel'|trans({}, 'config_radsec') }}"
+                                        data-action="click->clipboard#copyToClipboard">
+                                    <twig:ux:icon class="w-4 h-4 text-white" name="wba:copy"/>
+                                </button>
+                            </div>
+                        </li>
+                        <li class="text-sm font-medium text-gray-700">
+                            {{ 'createLink'|trans({}, '_http_commands') }}
+                            <div class="relative mt-2" data-controller="clipboard">
+                            <pre class="copyable-code relative rounded bg-gray-800 text-white p-4 font-mono overflow-x-auto"
+                                 data-clipboard-target="code">ln -s /snap/bin/certbot /usr/bin/certbot</pre>
+                                <button type="button"
+                                        class="absolute top-2 right-2 flex items-center justify-center p-1.5 rounded-md bg-gray-700 hover:bg-gray-600 focus:ring-2 focus:ring-primary/50 transition"
+                                        title="{{ 'copyCommand.title'|trans({}, 'config_radsec') }}"
+                                        aria-label="{{ 'copyCommand.ariaLabel'|trans({}, 'config_radsec') }}"
+                                        data-action="click->clipboard#copyToClipboard">
+                                    <twig:ux:icon class="w-4 h-4 text-white" name="wba:copy"/>
+                                </button>
+                            </div>
+                        </li>
+                        <li class="text-sm font-medium text-gray-700">
+                            {{ 'verifyCertbot'|trans({}, '_http_commands') }}
+                            <div class="relative mt-2" data-controller="clipboard">
+                            <pre class="copyable-code relative rounded bg-gray-800 text-white p-4 font-mono overflow-x-auto"
+                                 data-clipboard-target="code">certbot --version</pre>
+                                <button type="button"
+                                        class="absolute top-2 right-2 flex items-center justify-center p-1.5 rounded-md bg-gray-700 hover:bg-gray-600 focus:ring-2 focus:ring-primary/50 transition"
+                                        title="{{ 'copyCommand.title'|trans({}, 'config_radsec') }}"
+                                        aria-label="{{ 'copyCommand.ariaLabel'|trans({}, 'config_radsec') }}"
+                                        data-action="click->clipboard#copyToClipboard">
+                                    <twig:ux:icon class="w-4 h-4 text-white" name="wba:copy"/>
+                                </button>
+                            </div>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+        {# Genarete Certificates #}
+        <h3 class="text-gray-900 text-xl font-semibold"
+        >
+            {{ 'stepGenerateCertificates'|trans({}, '_http_commands') }}
+        </h3>
+        <div class="space-y-2 relative">
+            <ul class="list-disc pl-6 mt-3 space-y-4">
+                <li class="text-sm font-medium text-gray-700">
+                    {{ 'hybridPath'|trans({}, '_http_commands') }}
+                    <div class="relative mt-2" data-controller="clipboard">
+                    <pre class="copyable-code relative rounded bg-gray-800 text-white p-4 font-mono overflow-x-auto"
+                         data-clipboard-target="code">{{ commands.certificate_generation.steps[0]|raw }}</pre>
+
+                        <button type="button"
+                                class="absolute top-2 right-2 flex items-center justify-center p-1.5 rounded-md bg-gray-700 hover:bg-gray-600 focus:ring-2 focus:ring-primary/50 transition"
+                                title="{{ 'copyCommand.title'|trans({}, 'config_radsec') }}"
+                                aria-label="{{ 'copyCommand.ariaLabel'|trans({}, 'config_radsec') }}"
+                                data-action="click->clipboard#copyToClipboard">
+                            <twig:ux:icon class="w-4 h-4 text-white" name="wba:copy"/>
+                        </button>
+                    </div>
+                </li>
+                <li class="text-sm font-medium text-gray-700">
+                    {{ 'composerDown'|trans({}, '_http_commands') }}
+                    <div class="relative mt-2" data-controller="clipboard">
+                    <pre class="copyable-code relative rounded bg-gray-800 text-white p-4 font-mono overflow-x-auto"
+                         data-clipboard-target="code">{{ commands.certificate_generation.steps[1]|raw }}</pre>
+                        <button type="button"
+                                class="absolute top-2 right-2 flex items-center justify-center p-1.5 rounded-md bg-gray-700 hover:bg-gray-600 focus:ring-2 focus:ring-primary/50 transition"
+                                title="{{ 'copyCommand.title'|trans({}, 'config_radsec') }}"
+                                aria-label="{{ 'copyCommand.ariaLabel'|trans({}, 'config_radsec') }}"
+                                data-action="click->clipboard#copyToClipboard">
+                            <twig:ux:icon class="w-4 h-4 text-white" name="wba:copy"/>
+                        </button>
+                    </div>
+                </li>
+                <li class="text-sm font-medium text-gray-700">
+                    {{ 'tlsGenerate'|trans({}, '_http_commands') }}
+                    <div class="relative mt-2" data-controller="clipboard">
+                    <pre class="copyable-code relative rounded bg-gray-800 text-white p-4 font-mono overflow-x-auto"
+                         data-clipboard-target="code">{{ commands.certificate_generation.steps[2]|raw }}</pre>
+                        <button type="button"
+                                class="absolute top-2 right-2 flex items-center justify-center p-1.5 rounded-md bg-gray-700 hover:bg-gray-600 focus:ring-2 focus:ring-primary/50 transition"
+                                title="{{ 'copyCommand.title'|trans({}, 'config_radsec') }}"
+                                aria-label="{{ 'copyCommand.ariaLabel'|trans({}, 'config_radsec') }}"
+                                data-action="click->clipboard#copyToClipboard">
+                            <twig:ux:icon class="w-4 h-4 text-white" name="wba:copy"/>
+                        </button>
+                    </div>
+                </li>
+            </ul>
+        </div>
+        {# Copy Generated Certificates #}
+        <h3 class="text-gray-900 text-xl font-semibold">
+            {{ 'stepCopyCertificates'|trans({}, '_http_commands') }}
+        </h3>
+        <div class="space-y-2 relative">
+            <ul class="list-disc pl-6 mt-3 space-y-4">
+
+                {% set labels = [
+                    'copyCertPem',
+                    'copyCertPem',
+                    'copyChainPem',
+                    'copyChainPem',
+                    'copyFullChainPem',
+                    'copyFullChainPem',
+                    'copyPrivKeyPem',
+                    'copyPrivKeyPem',
+                ] %}
+
+                {% for step in commands.certificate_copy.steps %}
+                    <li class="text-sm font-medium text-gray-700">
+
+                        {{ labels[loop.index0]|trans({}, '_http_commands') }}
+
+                        <div class="relative mt-2" data-controller="clipboard">
+                    <pre class="copyable-code relative rounded bg-gray-800 text-white p-4 font-mono overflow-x-auto"
+                         data-clipboard-target="code">{{ step|raw }}</pre>
+
+                            <button type="button"
+                                    class="absolute top-2 right-2 flex items-center justify-center p-1.5 rounded-md bg-gray-700 hover:bg-gray-600 focus:ring-2 focus:ring-primary/50 transition"
+                                    title="{{ 'copyCommand.title'|trans({}, 'config_radsec') }}"
+                                    aria-label="{{ 'copyCommand.ariaLabel'|trans({}, 'config_radsec') }}"
+                                    data-action="click->clipboard#copyToClipboard">
+                                <twig:ux:icon class="w-4 h-4 text-white" name="wba:copy"/>
+                            </button>
+                        </div>
+
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {# Restart and apply configuration #}
+        <h3 class="text-gray-900 text-xl font-semibold"
+        >
+            {{ 'stepRestoreContainers'|trans({}, '_http_commands') }}
+        </h3>
+        <div class="space-y-2 relative">
+            <ul class="list-disc pl-6 mt-3 space-y-4">
+                <li class="text-sm font-medium text-gray-700">
+                    {{ 'composeUp'|trans({}, '_http_commands') }}
+                    <div class="relative mt-2" data-controller="clipboard">
+                    <pre class="copyable-code relative rounded bg-gray-800 text-white p-4 font-mono overflow-x-auto"
+                         data-clipboard-target="code">{{ commands.container_restart.steps[0]|raw }}</pre>
+
+                        <button type="button"
+                                class="absolute top-2 right-2 flex items-center justify-center p-1.5 rounded-md bg-gray-700 hover:bg-gray-600 focus:ring-2 focus:ring-primary/50 transition"
+                                title="{{ 'copyCommand.title'|trans({}, 'config_radsec') }}"
+                                aria-label="{{ 'copyCommand.ariaLabel'|trans({}, 'config_radsec') }}"
+                                data-action="click->clipboard#copyToClipboard">
+                            <twig:ux:icon class="w-4 h-4 text-white" name="wba:copy"/>
+                        </button>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+{% endif %}

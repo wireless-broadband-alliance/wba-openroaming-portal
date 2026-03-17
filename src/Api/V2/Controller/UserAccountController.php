@@ -42,7 +42,6 @@ class UserAccountController extends AbstractController
         private readonly SamlResolverService $samlResolverService,
         private readonly GoogleController $googleController,
         private readonly MicrosoftController $microsoftController,
-        private readonly jwtTokenGenerator $tokenGenerator,
     ) {
     }
 
@@ -228,7 +227,7 @@ class UserAccountController extends AbstractController
                     $this->googleController->authenticateUserGoogle($currentUser);
 
                     // Generate JWT Token
-                    $token = $this->tokenGenerator->generateToken($currentUser);
+                    $token = $this->JWTTokenGenerator->generateToken($currentUser);
                     if (is_array($token) && $token['success'] === false) {
                         $errorMessage = $token['error'] ?? 'Unknown error';
                         $statusCode =
@@ -271,7 +270,7 @@ class UserAccountController extends AbstractController
                     $this->microsoftController->authenticateUserMicrosoft($currentUser);
 
                     // Generate JWT Token
-                    $token = $this->tokenGenerator->generateToken($currentUser);
+                    $token = $this->JWTTokenGenerator->generateToken($currentUser);
                     if (is_array($token) && $token['success'] === false) {
                         $errorMessage = $token['error'] ?? 'Unknown error';
                         $statusCode =

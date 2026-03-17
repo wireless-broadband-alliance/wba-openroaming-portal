@@ -1,0 +1,29 @@
+# Step Titles
+stepInstallCertBot: 'Passo 1 – Instalar o Certbot'
+stepGenerateCertificates: 'Passo 2 – Gerar Certificados'
+stepCopyCertificates: 'Passo 3 – Copiar Certificados para o FreeRADIUS'
+stepRestoreContainers: 'Passo 4 – Reiniciar os Containers'
+
+# Step 1 – Install Certbot
+updatePackages: 'Atualizar os pacotes do sistema'
+installSnap: 'Instalar o Snap (necessário para o Certbot no Ubuntu 24.04+)'
+refreshSnap: 'Instalar e atualizar o núcleo do Snap'
+installCertBot: 'Instalar o Certbot caso não esteja já instalado'
+installCertbotStep: 'Instalar o Certbot usando Snap'
+createLink: 'Criar um link simbólico para o comando certbot estar disponível globalmente'
+verifyCertbot: 'Verificar se o Certbot está corretamente instalado'
+
+# Step 2 – Generate Certificates
+goToProjectFolder: 'Ir para a pasta do projeto'
+hybridPath: 'Ir para a pasta do Hybrid Connector'
+composerDown: 'Parar e remover todos os contêineres'
+tlsGenerate: 'Gerar certificado SSL com o Certbot (modo standalone)'
+
+# Step 3 – Copy Certificates
+copyCertPem: 'Copiar o certificado SSL (cert.pem) para a pasta de certificados do FreeRADIUS'
+copyChainPem: 'Copiar a cadeia de certificados (chain.pem) para a pasta de certificados do FreeRADIUS'
+copyFullChainPem: 'Copiar o certificado fullchain.pem para a pasta de certificados do FreeRADIUS'
+copyPrivKeyPem: 'Copiar a chave privada (privkey.pem) para a pasta de certificados do FreeRADIUS'
+
+# Step 4 – Restore Containers
+composeUp: 'Iniciar todos os contêineres Docker em modo destacado'

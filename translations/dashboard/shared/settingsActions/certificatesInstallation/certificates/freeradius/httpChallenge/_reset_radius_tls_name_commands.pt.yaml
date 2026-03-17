@@ -1,0 +1,3 @@
+commandTittle: 'Repor o Nome TLS do RADIUS'
+warning: 'Alterar o nome TLS do RADIUS fará com que os perfis existentes deixem de funcionar apenas quando o processo de reposição for executado.'
+description: 'Para efetuar o reset, execute este comando dentro do container web e, em seguida, atualize a página e introduza o novo nome de RADIUS TLS.'

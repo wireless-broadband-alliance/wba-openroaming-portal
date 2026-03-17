@@ -16,32 +16,44 @@ use Symfony\Contracts\Translation\TranslatorInterface;
  */
 class RadiusSettingsType extends AbstractType
 {
+    private bool $disabled = true;
+
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
+        $this->disabled = $options['disabled'];
+
         $builder
             ->add('displayName', TextType::class, [
                 'required' => false,
+                'disabled' => $this->disabled,
             ])
             ->add('radiusRealmName', TextType::class, [
                 'required' => false,
+                'disabled' => $this->disabled,
             ])
             ->add('domainName', TextType::class, [
                 'required' => false,
+                'disabled' => $this->disabled,
             ])
             ->add('operatorName', TextType::class, [
                 'required' => false,
+                'disabled' => $this->disabled,
             ])
             ->add('radiusTlsName', TextType::class, [
                 'required' => false,
+                'disabled' => $this->disabled,
             ])
             ->add('naiRealm', TextType::class, [
                 'required' => false,
+                'disabled' => $this->disabled,
             ])
             ->add('radiusTrustedRootCaSha1Hash', TextType::class, [
                 'required' => false,
+                'disabled' => $this->disabled,
             ])
             ->add('payloadIdentifier', TextType::class, [
                 'required' => false,
+                'disabled' => $this->disabled,
             ])
             ->add('profilesEncryptionTypeIosOnly', ChoiceType::class, [
                 'choices' => [
@@ -49,6 +61,7 @@ class RadiusSettingsType extends AbstractType
                     'WPA 3' => ProfileType::WPA3->value,
                 ],
                 'required' => false,
+                'disabled' => $this->disabled,
             ]);
     }
 
@@ -56,6 +69,7 @@ class RadiusSettingsType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => RadiusSettingsDTO::class,
+            'disabled' => true,
         ]);
     }
 }

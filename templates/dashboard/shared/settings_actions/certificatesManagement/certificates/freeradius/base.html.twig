@@ -1,0 +1,12 @@
+{% extends 'dashboard/shared/settings_actions/certificatesManagement/certificates/base.html.twig' %}
+
+{% block certificates_content %}
+
+    {% if mode is not defined or mode != 'http_challenge' %}
+        {{ include('dashboard/shared/settings_actions/certificatesManagement/partials/_certificate_freeradius_stepper.html.twig') }}
+    {% endif %}
+
+    {% block freeradius_content %}
+    {% endblock %}
+
+{% endblock %}

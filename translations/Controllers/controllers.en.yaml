@@ -130,6 +130,46 @@ invalidLogin: 'Your login link is invalid or has expired. Please request a new l
 passwordSentSMS: 'A new account password has been sent to your phone number via SMS.'
 passwordNotSentSMS: 'We were unable to send the new password to your phone number. Please try again.'
 domainBlacklistConfigurationAppliedSuccessfully: 'New Domain Blacklist configuration have been applied successfully.'
+addedNewUser: 'User "%uuid%" was created successfully.'
+connectionFailed: 'Database connection failed: %dbConnections%'
+dbConnectionApplied: 'Database settings applied successfully.'
+jwtSuccessfully: 'Application settings applied successfully'
+jwtFailed: 'Failed to generate JWT key pair'
+adminConfirmedSuccessfully: 'Admin email confirmed successfully'
+missingRequiredForRadsecProxyTest: 'Remote_host and remote_port are required.'
+radsecproxy_container_not_running: 'Container %container% is not running on host %host%:%port%'
+radsecProxyCertUploadedSuccessfully: 'RadSecProxy certificates uploaded successfully!'
+radsecProxyConfigAppliedSuccessfully: 'RadSecProxy configuration completed!'
+radsecProxyTestPassed: "TLS handshake OK using WBA CA bundle"
+missingRequiredForFreeradiusTest: 'Remote_host and remote_port are required.'
+freeradiusCertUploadedSuccessfully: 'Freeradius certificates uploaded successfully!'
+freeradiusCertGeneratedSuccessfully: 'Freeradius certificates generated successfully for the current configured domain: "%domain%"!'
+freeradiusConfigAppliedSuccessfully: 'Freeradius configuration applied successfully!'
+freeradiusTestPassed: 'Handshake TLS tested successfully using the %caBundle%'
+pendingProcessCertsCompleted: 'Complete the test of all certificates before finishing the process'
+configAlreadyApplied: 'Configuration is been already applied. You can not re-submit this form.'
+certificateProcessAborted: "This process was aborted successfully. Please don't forget to re-configure all the process once again correctly!"
+not_ev_warning: "These certificates are not valid EV's. OpenRoaming profile generation for Windows 10 will fail because of this, but you can proceed if you wish."
+cert_uploaded_are_lets_encrypt_warning: "The uploaded certificate are issued by Let's Encrypt, which does not support EV certificates. OpenRoaming profile generation for Windows 10 will fail because of this, but you can proceed if you wish."
+cert_generated_are_lets_encrypt_warning: "The generated certificate are issued by Let's Encrypt. OpenRoaming profile generation for Windows 10 will fail because of this, but you can proceed if you wish."
+freeradius_is_not_ev_cert_warning: 'The option to download Windows OpenRoaming profiles is disabled because it is not supported with the current configuration.'
+cannotReturnToPreviousPhase: 'You can no longer access this stage because it has already been completed.'
+cannotAccessStageYet: "You cannot access this stage yet because previous steps are incomplete."
+captchaValidationFailed: 'Captcha validation failed.'
+pfx:
+    success: "Windows PFX created successfully!"
+    failure: "Failed to generate Windows PFX please make sure you are submitting valid EV'S!"
+envPermissionDenied: 'The .env file does not have write permissions. Please use the following commands.'
+writeDbSettingsEnv: 'Write the new database settings in the .env file.'
+dbSettingsApplied: 'Database settings applied successfully.'
+dbSettingsNotApplied: 'Database settings were not applied. Please try again.'
+settingsApplied: 'Settings applied successfully.'
+settingsNotApplied: 'Settings were not applied. Please try again.'
+writeSettingsEnv: 'Write the new settings in the .env file.'
+createJwtPair: 'Generate a new jwt key pair '
+installationStartedSuccessfully: 'Verification completed successfully.'
+systemResetRequestStarted: 'System Reset Request started. Make sure to carefully complete each step of the configuration process.'
+notValidDomainOrIP: 'The domain "%domain%" is not valid or does not resolve to an IP address.'
 invalidDomainPattern: "Invalid domain pattern: %domain%"
 invalidDomainPatternList: "The following domain patterns are invalid: %domains%"
 domainNotFound: 'Domain not found'
@@ -145,4 +185,10 @@ domainSourceRefreshed: 'Domain source "%domain%" was refreshed successfully.'
 domainSourceRefreshFailed: 'Failed to refresh domain source "%domain%".'
 domainSourceInactive: "This domain source is inactive and cannot be refreshed."
 allDomainSourceRefreshed: "Domains sources was refreshed successfully."
+radiusTLSNameDomainUpdated: 'The resolver RADIUS TLS hostname has been successfully updated to "%domain%".'
 domainSourceRefreshAllFailed: "Failed to refresh domains sources."
+cloudflareTokenNotMatchesHost: 'The Cloudflare token does not have permissions for the host %host%'
+httpChallengeAppliedSuccessfully: >
+    Validation completed successfully.
+    The new certificates have been verified and prepared.
+    They will be applied to the system once you finish the configuration.

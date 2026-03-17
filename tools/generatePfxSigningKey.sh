@@ -8,7 +8,7 @@ if [ ! -f ../signing-keys/cert.pem ] || [ ! -f ../signing-keys/ca.pem ] || [ ! -
 fi
 
 # Create the PFX file
-cat ../signing-keys/cert.pem ../signing-keys/ca.pem \
+cat ../signing-keys/cert.pem ../signing-keys/ca/ca.pem \
  | openssl pkcs12 -export \
      -inkey ../signing-keys/privkey.pem -password "pass:" -out ../signing-keys/windowsKey.pfx
 

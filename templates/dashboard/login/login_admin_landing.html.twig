@@ -7,12 +7,7 @@
 {% block second_col %}
     {# Form Column #}
     {# Toasts #}
-    <div class="grid grid-cols-1 gap-[5px]">
-        {# Flash error messages #}
-        {% for message in app.session.flashbag.get('error') %}
-            {{ include('site/shared/_toast.html.twig', {toast_type: 'toast-warning'}) }}
-        {% endfor %}
-    </div>
+    {{ block('toast_messages') }}
 
     {% if data.CUSTOMER_LOGO_ENABLED.value == constant('App\\Enum\\OperationMode::ON').value %}
         <img class="w-[120px] h-[58px] object-scale-down mt-[75px]" src="{{ data.CUSTOMER_LOGO.value }}" alt="Logo"/>
@@ -27,33 +22,38 @@
         {{ form_start(form) }}
 
         {# Login Method Toggle - only show if loginMethod is required #}
-        {% if loginChoiceDTO.requireLoginMethod %}
+        {% if form.loginMethod is defined %}
+            {# Login Method Toggle #}
             <div class="flex justify-center mt-8">
                 <div class="flex bg-gray-300 rounded-lg overflow-hidden w-full max-w-md p-1">
                     {# Email Option #}
                     <label
                             class="cursor-pointer flex-1 text-center px-4 py-2 transition-colors duration-200 rounded-md
-               {{ loginChoiceDTO.loginMethod == constant('App\\Enum\\UserProvider::EMAIL').value ? 'bg-white text-black font-semibold shadow-md' : 'text-gray-700' }}"
+                   {{ loginChoiceDTO.loginMethod == constant('App\\Enum\\UserProvider::EMAIL').value ? 'bg-white text-black font-semibold shadow-md' : 'text-gray-700' }}"
                     >
                         <input type="radio"
                                name="{{ form.loginMethod.vars.full_name }}"
                                value="{{ constant('App\\Enum\\UserProvider::EMAIL').value }}"
                                class="hidden"
-                               wire:model="loginChoiceDTO.loginMethod" />
+                               wire:model="loginMethod"
+                               wire:click="changeLoginMethod('{{ constant('App\\Enum\\UserProvider::EMAIL').value }}')"
+                        />
                         Email
                     </label>
 
                     {# Phone Number Option #}
                     <label
                             class="cursor-pointer flex-1 text-center px-4 py-2 transition-colors duration-200 rounded-md
-               {{ loginChoiceDTO.loginMethod == constant('App\\Enum\\UserProvider::PHONE_NUMBER').value ? 'bg-white text-black font-semibold shadow-md' : 'text-gray-700' }}"
+                   {{ loginChoiceDTO.loginMethod == constant('App\\Enum\\UserProvider::PHONE_NUMBER').value ? 'bg-white text-black font-semibold shadow-md' : 'text-gray-700' }}"
                     >
                         <input type="radio"
                                name="{{ form.loginMethod.vars.full_name }}"
                                value="{{ constant('App\\Enum\\UserProvider::PHONE_NUMBER').value }}"
                                class="hidden"
-                               wire:model="loginChoiceDTO.loginMethod" />
-                        PhoneNumber
+                               wire:model="loginMethod"
+                               wire:click="changeLoginMethod('{{ constant('App\\Enum\\UserProvider::EMAIL').value }}')"
+                        />
+                        {{ 'form.phone_number'|trans({}, 'login_landing') }}
                     </label>
                 </div>
             </div>
@@ -62,8 +62,11 @@
         {# Email Field #}
         {% if loginChoiceDTO.loginMethod == constant('App\\Enum\\UserProvider::EMAIL').value and form['email'] is defined %}
             <div class="relative mt-[32px]">
-                {{ form_label(form['email'], constant('App\\Enum\\UserProvider::EMAIL').value, {label_attr: {class: 'form-label'}}) }}
-                {{ form_widget(form['email'], {attr: {class: 'form-widget', placeholder: 'Enter your email'}}) }}
+                {{ form_label(form.email, constant('App\\Enum\\UserProvider::EMAIL').value, {label_attr: {class: 'form-label'}}) }}
+                {{ form_widget(form.email, {attr: {class: 'form-widget', placeholder: 'form.enter_email'|trans({}, 'login_landing')}}) }}
+                <div class="text-red-500 m-2">
+                    {{ form_errors(form.email) }}
+                </div>
             </div>
         {% endif %}
 
@@ -85,39 +88,49 @@
                     {{ form_widget(form.phoneNumber.children.number, {
                         attr: {
                             class: 'block w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary',
-                            placeholder: 'Enter your phone number',
+                            placeholder: 'form.enter_phone'|trans({}, 'login_landing'),
                             autocomplete: 'tel',
+                            inputmode: 'numeric',
+                            pattern: '[0-9]*',
                         },
                     }) }}
                 </div>
             </div>
+            <div class="text-red-500 m-2">
+                {{ form_errors(form.phoneNumber) }}
+            </div>
         {% endif %}
 
         {# Password Field #}
-        {% if form['password'] is defined %}
+        {% if form.password is defined %}
             <div class="relative mt-[32px]">
-                {{ form_label(form['password'], 'Password', {label_attr: {class: 'form-label'}}) }}
-                {{ form_widget(form['password'], {attr: {class: 'form-widget', placeholder: 'Enter your password'}}) }}
+                {{ form_label(form.password, 'Password', {label_attr: {class: 'form-label'}}) }}
+                {{ form_widget(form.password, {attr: {class: 'form-widget', placeholder: 'form.password_placeholder'|trans({}, 'login_landing')}}) }}
+            </div>
+            <div class="text-red-500 m-2">
+                {{ form_errors(form.password) }}
             </div>
         {% endif %}
 
-    {# Turnstile Checker #}
+        {# Turnstile Checker #}
         {% if form.security is defined %}
             <div class="ml-3 mt-5">
-                {{ form_row(form.security) }}
+                {{ form_label(form.security) }}
+                {{ form_widget(form.security) }}
+                <div class="text-red-500">
+                    {{ form_errors(form.security) }}
+                </div>
             </div>
         {% endif %}
 
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+
+        <div class="my-[32px] flex justify-center gap-4">
+            <button type="submit" class="w-[220px] btn-primary">Log in</button>
+        </div>
+
+        {{ form_end(form, {render_rest: false}) }}
     </twig:LoginForm>
-
-    <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
-
-    <div class="my-[32px] flex justify-center gap-4">
-       <button type="submit" class="w-[220px] btn-primary">Log in</button>
-{# {% if data.PLATFORM_MODE.value != constant('App\\Enum\\PlatformMode::DEMO').value %} #}
-{# <a href="{{ path('app_landing') }}" class="w-[220px] btn-secondary">Choose Another</a> #}
-{# {% endif %} #}
-    </div>
 
     {# Divider & Links #}
     <div class="my-[25px] divider"></div>
@@ -161,5 +174,58 @@
         {% endif %}
     {% endif %}
 
-    {{ form_end(form, {render_rest: false}) }}
+    <div class="my-8 grid gap-4">
+        <div class="grid grid-cols-1 sm:gap-4 lg:gap-6 sm:[grid-template-columns:repeat(auto-fit,minmax(150px,1fr))] md:my-2 my-3">
+            {% if data.AUTH_METHOD_SAML_ENABLED.value == 'true' %}
+                <div class="w-full">
+                    <a href="{{ path('dashboard_saml_login') }}"
+                       class="terms-widget__link"
+                       data-action="click->terms-widget#showModal">
+                        <button {{ stimulus_target('terms-widget', 'button') }}
+                                type="button"
+                                class="w-full btn-primary">
+                            {{ data.AUTH_METHOD_SAML_LABEL.value }}
+                        </button>
+                    </a>
+                    <p class="text-xs md:my-1 my-2 text-center text-gray-600">
+                        {{ data.AUTH_METHOD_SAML_DESCRIPTION.value }}
+                    </p>
+                </div>
+            {% endif %}
+
+            {% if data.AUTH_METHOD_GOOGLE_LOGIN_ENABLED.value == 'true' %}
+                <div class="w-full">
+                    <a href="{{ path('connect_google', {type: constant('App\\Enum\\FirewallType::DASHBOARD').value}) }}"
+                       class="terms-widget__link"
+                       data-action="click->terms-widget#showModal">
+                        <button {{ stimulus_target('terms-widget', 'button') }}
+                                type="button"
+                                class="w-full btn-primary ">
+                            {{ data.AUTH_METHOD_GOOGLE_LOGIN_LABEL.value }}
+                        </button>
+                    </a>
+                    <p class="text-xs md:my-1 my-2 text-center text-gray-600">
+                        {{ data.AUTH_METHOD_GOOGLE_LOGIN_DESCRIPTION.value }}
+                    </p>
+                </div>
+            {% endif %}
+
+            {% if data.AUTH_METHOD_MICROSOFT_LOGIN_ENABLED.value == 'true' %}
+                <div class="w-full">
+                    <a href="{{ path('connect_microsoft', {type: constant('App\\Enum\\FirewallType::DASHBOARD').value}) }}"
+                       class="terms-widget__link"
+                       data-action="click->terms-widget#showModal">
+                        <button {{ stimulus_target('terms-widget', 'button') }}
+                                type="button"
+                                class="w-full btn-primary ">
+                            {{ data.AUTH_METHOD_MICROSOFT_LOGIN_LABEL.value }}
+                        </button>
+                    </a>
+                    <p class="text-xs md:my-1 my-2 text-center text-gray-600">
+                        {{ data.AUTH_METHOD_MICROSOFT_LOGIN_DESCRIPTION.value }}
+                    </p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
 {% endblock %}

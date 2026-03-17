@@ -1,0 +1,41 @@
+{% extends 'dashboard/shared/settings_actions/certificatesManagement/certificates/base.html.twig' %}
+
+{% block certificates_content %}
+    {{ include('dashboard/shared/settings_actions/certificatesManagement/partials/_abort_certs.html.twig') }}
+
+    {# Toast Success Warning about Radsecproxy config #}
+    <div class="toast-success-dashboard mt-4">
+        <div class="flex flex-col space-y-2">
+
+            {# Title #}
+            <p class="font-semibold text-base sm:text-lg">
+                {{ 'radsecproxy_process.completed'|trans({}, 'upload_freeradius') }}
+            </p>
+
+            {# Description #}
+            <div class="text-sm sm:text-base">
+                <p>
+                    {{ 'radsecproxy_process.finished_steps'|trans({}, 'upload_freeradius') }}
+                </p>
+                <p>
+                    {{ 'radsecproxy_process.next_phase'|trans({}, 'upload_freeradius') }}
+                    <span class="font-semibold">
+                    {{ 'radsecproxy_process.details'|trans({}, 'upload_freeradius') }}
+                </span>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    {% if data.ENABLE_RADIUS_TLS_RESET.value == 'true' %}
+        {{ include('dashboard/shared/settings_actions/certificatesManagement/certificates/freeradius/domainRadius/_domainRadiusConfig.html.twig') }}
+    {% else %}
+        <div class="mb-4">
+            {{ include('dashboard/shared/settings_actions/certificatesManagement/certificates/freeradius/freeradiusCertsMethods/_reset_radius_tls_name_commands.html.twig') }}
+        </div>
+
+        <div class="mb-4">
+            {{ include('dashboard/shared/settings_actions/certificatesManagement/certificates/freeradius/freeradiusCertsMethods/_methods.html.twig') }}
+        </div>
+    {% endif %}
+{% endblock %}

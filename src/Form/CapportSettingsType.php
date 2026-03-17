@@ -15,22 +15,29 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
  */
 class CapportSettingsType extends AbstractType
 {
+    private bool $disabled = true;
+
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
+        $this->disabled = $options['disabled'];
+
         $builder->add('capportEnabled', ChoiceType::class, [
             'choices' => [
                 OperationMode::ON->value => 'true',
                 OperationMode::OFF->value => 'false',
             ],
             'required' => false,
+            'disabled' => $this->disabled,
         ]);
 
         $builder->add('capportPortalUrl', TextType::class, [
             'required' => false,
+            'disabled' => $this->disabled,
         ]);
 
         $builder->add('capportVenueInfoUrl', TextType::class, [
             'required' => false,
+            'disabled' => $this->disabled,
         ]);
     }
 
@@ -38,6 +45,8 @@ class CapportSettingsType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => CapportSettingsDTO::class,
+            'disabled' => true,
+            'csrf_protection' => true,
         ]);
     }
 }

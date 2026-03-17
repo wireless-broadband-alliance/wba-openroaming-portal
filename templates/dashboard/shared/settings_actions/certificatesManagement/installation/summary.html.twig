@@ -1,0 +1,93 @@
+{% extends 'dashboard/shared/settings_actions/certificatesManagement/installation/base.html.twig' %}
+
+{% block title %}
+    {{ 'adminPageWBA'|trans({}, '_header_admin') }}
+{% endblock %}
+
+{% block installation_content %}
+
+    <div class="mt-6">
+        <h1 class="text-2xl sm:text-3xl font-bold leading-tight">{{ 'title'|trans({}, 'summary') }}</h1>
+        <p class="mt-2 sm:mt-3 text-gray-600 text-base sm:text-lg">{{ 'description'|trans({}, 'summary') }}</p>
+    </div>
+
+    <div class="my-6 divider-solid"></div>
+
+    {# --- Section: Database Configuration --- #}
+    <div class="grid gap-6 sm:grid-cols-1 md:grid-cols-2 xl:grid-cols-2">
+
+        {# OpenRoaming DB Card #}
+        <div class="cert-upload-card transition hover:shadow-lg hover:-translate-y-1 duration-200">
+            <h2 class="text-lg font-semibold text-gray-700 mb-4 flex items-center gap-2">
+                <twig:ux:icon name="wba:database" class="w-5 h-5 fill-none stroke-current"/>
+                {{ 'databaseOpenRoaming'|trans({}, 'summary') }}
+            </h2>
+
+            <div class="grid gap-3 sm:grid-cols-1">
+                <p><span class="font-semibold text-gray-700">{{ 'username'|trans({}, 'summary') }}:</span> <span
+                            class="text-gray-600 font-mono">{{ Installation.dbOpenRoamingUserName }}</span></p>
+                <p><span class="font-semibold text-gray-700">{{ 'host'|trans({}, 'summary') }}:</span> <span
+                            class="text-gray-600 font-mono">{{ Installation.dbOpenRoamingIp }}</span></p>
+                <p><span class="font-semibold text-gray-700">{{ 'port'|trans({}, 'summary') }}:</span> <span
+                            class="text-gray-600 font-mono">{{ Installation.dbOpenRoamingPort }}</span></p>
+            </div>
+        </div>
+
+        {# FreeRadius DB Card #}
+        <div class="cert-upload-card transition hover:shadow-lg hover:-translate-y-1 duration-200">
+            <h2 class="text-lg font-semibold text-gray-700 mb-4 flex items-center gap-2">
+                <twig:ux:icon name="wba:hdd" class="w-5 h-5 fill-none stroke-current"/>
+                {{ 'databaseFreeradius'|trans({}, 'summary') }}
+            </h2>
+
+            <div class="grid gap-3 sm:grid-cols-1">
+                <p><span class="font-semibold text-gray-700">{{ 'username'|trans({}, 'summary') }}:</span> <span
+                            class="text-gray-600 font-mono">{{ Installation.dbFreeradiusUserName }}</span></p>
+                <p><span class="font-semibold text-gray-700">{{ 'host'|trans({}, 'summary') }}:</span> <span
+                            class="text-gray-600 font-mono">{{ Installation.dbFreeradiusIp }}</span></p>
+                <p><span class="font-semibold text-gray-700">{{ 'port'|trans({}, 'summary') }}:</span> <span
+                            class="text-gray-600 font-mono">{{ Installation.dbFreeradiusPort }}</span></p>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="mt-6 gap-6 xl:grid-cols-2">
+
+        {# Additional Settings Card #}
+        <div class="cert-upload-card transition hover:shadow-lg hover:-translate-y-1 duration-200">
+            <h2 class="text-lg font-semibold text-gray-700 mb-4 flex items-center gap-2">
+                <twig:ux:icon name="wba:user-circle" class="w-5 h-5 fill-none stroke-current"/>
+                {{ 'additionalSettings'|trans({}, 'summary') }}
+            </h2>
+
+            <div class="grid gap-3">
+                <p><span class="font-semibold text-gray-700">{{ 'trustedProxies'|trans({}, 'summary') }}:</span> <span
+                            class="text-gray-600 font-mono">{{ Installation.trustedProxies }}</span></p>
+                <p><span class="font-semibold text-gray-700">{{ 'turnstileKey'|trans({}, 'summary') }}:</span> <span
+                            class="text-gray-600 font-mono">{{ Installation.turnstileKey }}</span></p>
+                <p><span class="font-semibold text-gray-700">{{ 'turnstileSecret'|trans({}, 'summary') }}:</span> <span
+                            class="text-gray-600 font-mono">{{ Installation.turnstileSecret }}:</span></p>
+                <p><span class="font-semibold text-gray-700">{{ 'emailAdmin'|trans({}, 'summary') }}:</span> <span
+                            class="text-gray-600">{{ Installation.emailAdmin }}</span></p>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="mt-8 flex justify-end">
+        {% set SYSTEM_RESET_REQUEST = constant('App\\Enum\\SessionStatus::SYSTEM_RESET_REQUEST').value %}
+
+        {% if not app.session.has(SYSTEM_RESET_REQUEST) %}
+            <a href="{{ path('admin_dashboard_settings_certs_management') }}"
+               class="btn-primary flex justify-center items-center px-4 py-2 min-w-[120px]">
+                {{ 'finish'|trans({}, 'summary') }}
+            </a>
+        {% else %}
+            <a href="{{ path('admin_dashboard_settings_certs_radsecproxy_upload') }}"
+               class="btn-primary flex justify-center items-center px-4 py-2 min-w-[120px]">
+                {{ 'proceed'|trans({}, 'summary') }}
+            </a>
+        {% endif %}
+    </div>
+{% endblock %}

@@ -2,6 +2,8 @@
 
 namespace App\EventListener;
 
+use App\Enum\SessionStatus;
+use MongoDB\Driver\Session;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\Security\Http\Event\LogoutEvent;
 
@@ -30,8 +32,14 @@ class LogoutListener implements EventSubscriberInterface
 
             // Dynamically remove ONLY the 2fa_verified session key for the current firewall
             $session->remove("2fa_verified_$firewallName");
-            $session->remove('session_verified');
-            $session->remove('forgot_password_uuid');
+            $session->remove(SessionStatus::TWO_FACTOR_CONTEXT->value);
+            $session->remove(SessionStatus::FORGOT_PASSWORD_UUID->value);
+            $session->remove(SessionStatus::VERIFIED->value);
+            $session->remove(SessionStatus::SYSTEM_RESET_REQUEST->value);
+            $session->remove(SessionStatus::INSTALLATION_STARTED->value);
+            $session->remove(SessionStatus::CERTIFICATE_STARTED->value);
+            $session->remove(SessionStatus::INSTALLATION_VERIFICATION->value);
+            $session->remove(SessionStatus::CERTIFICATE_VERIFICATION->value);
         }
     }
 }

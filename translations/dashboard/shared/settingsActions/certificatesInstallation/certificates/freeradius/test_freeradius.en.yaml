@@ -1,0 +1,39 @@
+test_and_proceed: "Test and Proceed"
+configuration_complete: "Configuration Complete"
+instructions: "Run the server test to confirm that the Freeradius certificates are installed correctly. Once testing is done, the certificates configuration is complete."
+test_certificates: "Test Freeradius Certificates"
+finish_configuration: "Finish Configuration"
+in_progress_title: "Testing in progress..."
+in_progress_description: "Verifying the Freeradius certificate setup on the server. Please wait."
+start_test_connection: "Are you sure you wish to start the connection test?"
+host: 'Host'
+port: 'Port'
+user: 'User'
+password: 'Password'
+timeOut: 'Timeout (seconds)'
+test_not_done: 'Test not done yet'
+test_passed: 'Last Test Passed'
+test_failed: 'Last Test Failed'
+test_failed_warning: "The last test failed, but you can still proceed with the current configuration if you wish."
+manual_test_warning: >
+    Automatic testing is not possible at this step.
+    For security reasons, the machine running FreeRADIUS is isolated and does not have Internet access.
+    Because of this, this step must be completed manually by copying the certificate contents.
+
+manual_command_title: "Run this command on your FreeRADIUS server"
+
+manual_command_hint: >
+    This command outputs all required certificates and private keys.
+    Copy the full output and paste it into the textarea field.
+
+paste_certificates_label: "Paste certificates output"
+paste_certificates_placeholder: |
+    Paste here the full output of the command.
+
+    The content must include:
+    - CA certificate (ca.pem)
+    - Server certificate (cert.pem)
+    - Certificate chain (chain.pem / fullchain.pem)
+    - Private key (privkey.pem)
+    Make sure the output starts with:
+    -----BEGIN CERTIFICATE-----

@@ -231,7 +231,8 @@ readonly class GetSettings
                 SettingName::LDAP_SYNC_CRON->value => 'Defines the schedule for LDAP synchronization automation command',
                 SettingName::FREERADIUS_LAST_CONNECTION_CRON->value => 'Defines the schedule for Freeradius server & the user profile last connection',
                 SettingName::DOMAIN_BLACKLIST_IMPORT_CRON->value => 'Defines the cron schedule for importing and synchronizing blocked domains.',
-                SettingName::CRON_ADVANCED_STATUS->value => 'Saves the previous status mode on the schedule cron configuration page (Simple/Advanced)'
+                SettingName::CRON_ADVANCED_STATUS->value => 'Saves the previous status mode on the schedule cron configuration page (Simple/Advanced)',
+                SettingName::CLOUDFLARE_TOKEN->value => 'Token for automatic Cloudflare certificate renewal.'
             ],
             LanguageType::PT->value => [
                 SettingName::RADIUS_REALM_NAME->value => 'O nome do realm para o seu servidor RADIUS',
@@ -319,7 +320,9 @@ readonly class GetSettings
                 SettingName::LDAP_SYNC_CRON->value => 'Define o agendamento para o comando automático de sincronização LDAP',
                 SettingName::FREERADIUS_LAST_CONNECTION_CRON->value => 'Define o agendamento para o servidor Freeradius e a última ligação do perfil do utilizador',
                 SettingName::DOMAIN_BLACKLIST_IMPORT_CRON->value => 'Define o agendamento (cron) para a execução da importação e sincronização dos domínios bloqueados.',
-                SettingName::CRON_ADVANCED_STATUS->value => 'Guarda o modo de estado anterior na página de configuração do cron (Simples/Avançado)'
+                SettingName::CRON_ADVANCED_STATUS->value => 'Guarda o modo de estado anterior na página de configuração do cron (Simples/Avançado)',
+                SettingName::CLOUDFLARE_TOKEN->value => 'Token para renovação automática do certificado Cloudflare.'
+
             ]
         ];
         // phpcs:enable

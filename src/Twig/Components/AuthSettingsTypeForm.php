@@ -3,8 +3,10 @@
 namespace App\Twig\Components;
 
 use App\DTO\AuthSettingsTypeDTO;
+use App\Entity\User;
 use App\Enum\SettingName;
 use App\Form\AuthSettingsType;
+use App\Security\Voter\UserAuthenticationVoter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormInterface;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
@@ -29,6 +31,9 @@ final class AuthSettingsTypeForm extends AbstractController
     public ?array $data = null;
 
     #[LiveProp]
+    public ?User $user = null;
+
+    #[LiveProp]
     public ?int $profileLimitDate = null;
 
     /**
@@ -37,7 +42,9 @@ final class AuthSettingsTypeForm extends AbstractController
     #[\Override]
     protected function instantiateForm(): FormInterface
     {
-        return $this->createForm(AuthSettingsType::class, $this->authSettingsTypeDTO);
+        $canWrite = $this->isGranted(UserAuthenticationVoter::AUTHENTICATION_METHODS_WRITE);
+
+        return $this->createForm(AuthSettingsType::class, $this->authSettingsTypeDTO, ['disabled' => !$canWrite]);
     }
 
     #[LiveAction]

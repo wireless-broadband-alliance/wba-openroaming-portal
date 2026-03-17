@@ -1,6 +1,6 @@
 {# CRON WARNING #}
 <div class="my-2 mr-2 p-2 z-0 text-base font-semibold w-full">
-    <div class="flex bg-infoBgColor/50 rounded-lg p-4 text-xs md:text-sm text-infoTextColor" role="alert">
+    <div class="toast-success-dashboard" role="alert">
         <twig:ux:icon name="wba:info" class="w-10 md:w-5 h-10 md:h-5 inline mr-3 fill-current"/>
         <span class="font-medium">
                 {{ 'selectMulti'|trans({}, 'schedule')|raw }}
@@ -75,18 +75,21 @@
 
         <div class="mt-6 divider-solid"></div>
 
-        <div class="mt-6 flex flex-row w-full justify-end items-center gap-2">
-            <a href="{{ path('app_dashboard_regenerate_code_admin', {type: 'settingSchedule'}) }}"
-               onclick="return confirm('{{ 'resetDefaultSettings'|trans({}, 'schedule') }}')"
-               class="text-sm hover:text-red-600 font-bold p-2 rounded-lg transition ease-in duration-300">
-              {{ 'reset'|trans({}, 'schedule') }}
-            </a>
+        {% if is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::CRON_SCHEDULE_WRITE')) %}
+            <div class="mt-6 flex flex-row w-full justify-end items-center gap-2">
 
-            <button type="submit" class="btn-primary"
-                    onclick="return confirm('{{ 'applyChanges'|trans({}, 'schedule') }}')">
-              {{ 'saveChanges'|trans({}, 'schedule') }}
-            </button>
-        </div>
+                <a href="{{ path('app_dashboard_regenerate_code_admin', {type: 'settingSchedule'}) }}"
+                   onclick="return confirm('{{ 'resetDefaultSettings'|trans({}, 'schedule') }}')"
+                   class="text-sm hover:text-red-600 font-bold p-2 rounded-lg transition ease-in duration-300">
+                    {{ 'reset'|trans({}, 'schedule') }}
+                </a>
+
+                <button type="submit" class="btn-primary"
+                        onclick="return confirm('{{ 'applyChanges'|trans({}, 'schedule') }}')">
+                    {{ 'saveChanges'|trans({}, 'schedule') }}
+                </button>
+            </div>
+        {% endif %}
 
         {{ form_end(form) }}
     </div>
