@@ -132,12 +132,12 @@
     <div class="mt-6 divider-solid"></div>
 
     {% if is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::USER_ENGAGEMENT_WRITE')) %}
-        <div class="mt-6 flex flex-row w-full justify-end items-center gap-2">
-            <a href="{{ path('app_dashboard_regenerate_code_admin', {type: 'settingCAPPORT'}) }}"
-               onclick="return confirm('{{ 'resetMessage'|trans({}, 'settings_actions_general') }}')"
-               class="text-sm hover:text-red-600 font-bold p-2 rounded-lg transition ease-in duration-300">
-                {{ 'reset'|trans({}, 'settings_actions_general') }}
-            </a>
+    <div class="mt-6 flex flex-row w-full justify-end items-center gap-2">
+        <a href="{{ path('app_dashboard_regenerate_code_admin', {type: 'settingCAPPORT'}) }}"
+           data-confirm="{{ 'resetMessage'|trans({}, 'settings_actions_general')|e('html_attr') }}"
+           class="text-sm hover:text-red-600 font-bold p-2 rounded-lg transition ease-in duration-300">
+            {{ 'reset'|trans({}, 'settings_actions_general') }}
+        </a>
 
             <button type="submit" class="btn-primary"
                     onclick="return confirm('{{ 'saveChangesMessage'|trans({}, 'settings_actions_general') }}')">{{ 'saveChanges'|trans({}, 'settings_actions_general') }}
