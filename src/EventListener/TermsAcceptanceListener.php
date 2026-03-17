@@ -61,8 +61,9 @@ readonly class TermsAcceptanceListener
             '/login/link',
             '/forgot-password/link',
             '/saml/login',
-            '/app',
-            '/.well-known/assetlinks.json',
+            // for apps registration rework uncomment this lines
+            //'/app',
+            //'/.well-known/assetlinks.json',
             '/login/confirmation'
         ];
 
