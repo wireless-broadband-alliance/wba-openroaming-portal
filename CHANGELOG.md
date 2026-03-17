@@ -1,34 +1,27 @@
 # Changelog
 
-# Release V1.11.0
+# Release V1.10.0
 
 - Installation Widget implementation (For first time project setup / for later use on the admin page configuration).
 - Certificate Management for the admin page (for radsecproxy/freeradius certificates)
 - Added a new user role, Super Admin, to allow the management of the platform and the other admins.
 - Added new pages to configure the permissions of the platform admins.
-- It's required to run the new migrations this will set up the new entities for the installation widget
-  details & the certificates management (`InstalationWidget`, `Certificate` & `CertificateSetupProcess`)
-    - Run the migrations with:
-      ```bash
-      php bin/console doctrine:migrations:migrate
-      ```
-- **Required one-time action:** After upgrading, run
-  the [PrepareReleaseV1110Command.php](src/Command/PrepareReleaseV1110Command.php) to migrate
-  existing administrator permissions to the new **Super Admin** role hierarchy.
-  This command should be executed **only once** and while the portal is **offline or restricted**. Also this command change the ca.pem cert location (`/signing-keys/ca`)
-    - Run the command with:
-      ```bash
-      php bin/console prepare-release:v1110
-      ```
-
-# Release V1.10.0
-
 - Added a new configuration page, to manage the black-listed domains used for registration and authentication with
   Google, Microsoft and Simple Email/Password.
 - Added a new validator for each authentication method or registration to block blacklisted domains
 - New loading screen for long time requests (example, refresh domains)
-- It's required to run the new migrations this will set up the new entities for the new domains & sources page (
-  `DomainsBlacklist`, `DomainsSource`)
+- **Required one-time action:** After upgrading, run
+  the [PrepareReleaseV1100Command.php](src/Command/PrepareReleaseV1100Command.php) to migrate
+  existing administrator permissions to the new **Super Admin** role hierarchy.
+  This command should be executed **only once** and while the portal is **offline or restricted**. Also this command
+  change the ca.pem cert location (`/signing-keys/ca`)
+    - Run the command with:
+      ```bash
+      php bin/console prepare-release:v1100
+      ```
+- It's required to run the new migrations this will set up the new entities for the new domains, sources page (
+  `DomainsBlacklist`, `DomainsSource`) & installation widget with the certificates management (`InstalationWidget`,
+  `Certificate` & `CertificateSetupProcess`)
     - Run the migrations with:
       ```bash
       php bin/console doctrine:migrations:migrate
