@@ -298,6 +298,8 @@ class RegistrationController extends AbstractController
         // Get the email and verification code from the URL query parameters
         $uuid = $request->query->get('uuid');
         $verificationCode = $request->query->get('twoFaCode');
+        $source = $request->query->get('source', 'portal');
+        $isApiSource = $source === 'api';
 
         // Get the user with the matching email, excluding admin users
         $user = $this->userRepository->findOneByUUIDExcludingAdmin($uuid);
@@ -315,16 +317,16 @@ class RegistrationController extends AbstractController
             $user->getUuid() === $uuid && $user->getTwoFAcode() === $verificationCode &&
             $this->magicLinkService->linkCanBeUsed($user, AnalyticalEventType::USER_CREATION->value)
         ) {
-                $this->addFlash(
-                    'error',
-                    $this->translator->trans(
-                        'invalidVerificationCodeLink',
-                        [],
-                        'controllers'
-                    )
-                );
+            $this->addFlash(
+                'error',
+                $this->translator->trans(
+                    'invalidVerificationCodeLink',
+                    [],
+                    'controllers'
+                )
+            );
 
-                return $this->redirectToRoute('app_landing');
+            return $this->redirectToRoute('app_landing');
         }
         if ($user->getTwoFAcode() === $verificationCode) {
             try {
@@ -363,7 +365,7 @@ class RegistrationController extends AbstractController
                     $this->translator->trans('accountVerified', [], 'controllers')
                 );
 
-                return $this->redirectToRoute('app_landing');
+                return $this->redirectAfterConfirmation($isApiSource);
             } catch (CustomUserMessageAuthenticationException) {
                 $this->addFlash(
                     'error',
@@ -379,5 +381,14 @@ class RegistrationController extends AbstractController
         }
 
         return $this->redirectToRoute('app_login');
+    }
+
+    private function redirectAfterConfirmation(bool $isApiSource): Response
+    {
+        if ($isApiSource) {
+            return $this->redirectToRoute('app_api_landing');
+        }
+
+        return $this->redirectToRoute('app_landing');
     }
 }

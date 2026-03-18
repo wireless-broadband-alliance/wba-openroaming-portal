@@ -60,6 +60,9 @@ readonly class TermsAcceptanceListener
             '/login/magic',
             '/login/link',
             '/forgot-password/link',
+            '/saml/login',
+            '/app',
+            '/.well-known/assetlinks.json',
             '/login/confirmation'
         ];
 

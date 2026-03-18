@@ -21,10 +21,10 @@ use Symfony\Component\Filesystem\Filesystem;
 use Throwable;
 
 #[AsCommand(
-    name: 'prepare-release:v1110',
-    description: 'Prepare for release v1.11.0: convert admin roles and update CA certificate path'
+    name: 'prepare-release:v1100',
+    description: 'Prepare for release v1.10.0: convert admin roles and update CA certificate path'
 )]
-class PrepareReleaseV1110Command extends Command
+class PrepareReleaseV1100Command extends Command
 {
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
@@ -37,7 +37,7 @@ class PrepareReleaseV1110Command extends Command
     protected function configure(): void
     {
         $this
-            ->setDescription('Prepare for release v1.11.0: convert admin roles and update CA certificate path')
+            ->setDescription('Prepare for release v1.10.0: convert admin roles and update CA certificate path')
             ->addOption('yes', 'y', InputOption::VALUE_NONE, 'Automatically confirm the reset and CA update');
     }
 
@@ -48,7 +48,7 @@ class PrepareReleaseV1110Command extends Command
                 /** @var QuestionHelper $helper */
                 $helper = $this->getHelper('question');
                 $question = new ConfirmationQuestion(
-                    'This action will prepare v1.11.0 release: convert admin roles and update CA. Proceed? [y/N] ',
+                    'This action will prepare v1.10.0 release: convert admin roles and update CA. Proceed? [y/N] ',
                     false
                 );
 
@@ -60,12 +60,12 @@ class PrepareReleaseV1110Command extends Command
 
             // Convert admin roles
             $this->resetAdminUser();
-            $output->writeln('<info>Admin roles updated for v1.11.0 release.</info>');
+            $output->writeln('<info>Admin roles updated for v1.10.0 release.</info>');
 
             // Check CA certificate
             $this->updateCaCertificate($output);
 
-            $output->writeln('<info>v1.11.0 release preparation complete.</info>');
+            $output->writeln('<info>v1.10.0 release preparation complete.</info>');
 
             return Command::SUCCESS;
         } catch (Throwable $e) {

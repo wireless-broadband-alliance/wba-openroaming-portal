@@ -274,6 +274,9 @@ These two envs are for debugging purposes, they only should be used to control a
 Please make sure to set up a **public_key** in (pgp_public_key/public_key.asc)
 **do not create keys on the production server**.
 
+### Default_URL Configuration
+- `DEFAULT_URI` – The base URL used by Symfony to generate absolute links. **Required in production** and must not point to `localhost` or `127.0.0.1`.
+
 ### Google Client and Secret Credentials
 
 For detailed steps on how to obtain your **Google Client ID** and **Google Client Secret**, please refer to

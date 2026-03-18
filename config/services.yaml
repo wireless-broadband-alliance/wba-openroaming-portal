@@ -32,7 +32,12 @@ parameters:
     app.database_freeradius_url: '%env(resolve:DATABASE_FREERADIUS_URL)%'
     app.trusted_proxies: '%env(TRUSTED_PROXIES)%'
     app.jwt_passphrase: '%env(JWT_PASSPHRASE)%'
+    # Default Project URI
+    app.default_uri: '%env(string:DEFAULT_URI)%'
 services:
+    App\EventListener\CheckDefaultUriListener:
+        tags:
+            - { name: kernel.event_listener, event: kernel.request, priority: 10 }
     App\EventListener\LocaleListener:
         tags:
             - { name: kernel.event_listener, event: kernel.request, priority: 20 }

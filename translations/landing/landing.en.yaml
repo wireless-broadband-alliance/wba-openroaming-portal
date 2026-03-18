@@ -51,3 +51,11 @@ emailVerification:
     newCodeSentEmail: 'We have sent you a new code to: %email%.'
     waitBeforeTryingAgain: 'Please wait %time% minutes before trying again.'
     accountSuccessfullyVerified: 'Your account is now successfully verified.'
+
+finishSetupTitle: 'Finish your setup in the app'
+finishSetupExplanation: >
+    You are now signed in.
+    To install your secure OpenRoaming Wi-Fi profile, return to the mobile app and complete the final step.
+finishSetupNote: 'If the app does not open automatically, tap the button below.'
+openAppAndFinish: 'Open App to Install OpenRoaming Wi-Fi Profile'
+continueOnWeb: 'Continue on the web portal'

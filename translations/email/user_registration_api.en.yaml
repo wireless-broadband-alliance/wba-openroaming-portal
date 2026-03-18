@@ -1,0 +1,23 @@
+subject_registration_details: 'Your OpenRoaming Registration Details'
+
+header_welcome: 'Welcome to OpenRoaming!'
+
+intro_new_user: >
+    You're almost ready to connect automatically to secure OpenRoaming Wi-Fi worldwide.
+    To complete your setup, click the button below. You’ll be guided through a secure page to install your OpenRoaming Wi-Fi profile.
+    From there, you will continue to the application to complete the installation.
+    This takes less than one minute.
+
+benefit:
+    auto_connection: 'Automatic connection at OpenRoaming hotspots'
+    secure_auth: 'Secure, encrypted Wi-Fi authentication'
+    no_captive_portals: 'No captive portals'
+    no_repeated_logins: 'No repeated logins'
+
+buttons:
+    download_and_install: 'Continue and verify your account'
+
+footer:
+    support_team: 'Support team:'
+    thank_you: 'Thank you'
+    team: 'The %supportTeam% Team'
