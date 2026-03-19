@@ -1,0 +1,141 @@
+<twig:ReturnAppsForm
+        :returnAppsSettingsDTO="returnAppsSettingsDTO"
+        :data="data"
+        :form="form">
+
+    {{ form_start(form) }}
+    {{ form_widget(form._token) }}
+
+    <div class="p-2 z-0" {{ stimulus_controller('radio-card') }}>
+        {# RETURN_APPS_ENABLED #}
+        <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full" {{ stimulus_controller('radio card') }}>
+            <div class="flex flex-row justify-between">
+                <div class="text-base font-medium text-center break-normal md:break-all">
+                    <h1 class="text-base md:text-lg whitespace-nowrap">{{ 'mode'|trans({}, 'auths_providers') }}</h1>
+                </div>
+                <label class="flex items-center bg-opacity-40">
+                    <img class="w-6 cursor-pointer" {{ stimulus_target('card', 'button') }}
+                            {{ stimulus_action('card', 'show_info', 'mouseover')|stimulus_action('card', 'hide_info', 'mouseout') }}
+                         src="{{ asset('resources/logos/info_icon.svg') }}" alt="info_icon"/>
+                </label>
+            </div>
+
+            {{ include('/dashboard/shared/settings_actions/_description.html.twig', {description: data.AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED.description}) }}
+
+            <div class="flex flex-col items-center space-y-2 mt-5">
+                {# ON Radio #}
+                <label class="flex flex-row justify-between border hover:border-gray-900 duration-200 rounded-lg w-full p-2 pl-4">
+                    On
+                    <input type="radio"
+                           name="{{ form.returnAppsEnabled.vars.full_name }}"
+                           value="true"
+                           class="radio-input hidden"
+                            {% if form.returnAppsEnabled.vars.disabled %} disabled="disabled" {% endif %}
+                            {{ form.returnAppsEnabled.vars.value == 'true' ? 'checked' : '' }}
+                            {{ stimulus_action('radio', 'toggle')|stimulus_action('radio-card', 'unblock') }}
+                            {{ stimulus_target('radio-card', 'on') }}>
+                    <div class="custom-radio pr-3 pt-1.5 {{ form.returnAppsEnabled.vars.value == 'true' ? '' : 'hidden' }}" {{ stimulus_target('radio', 'on') }}>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10" viewBox="0 0 14 10" fill="none">
+                            <path fill-rule="evenodd" clip-rule="evenodd"
+                                  d="M13.0303 0.96967C13.3232 1.26256 13.3232 1.73744 13.0303 2.03033L6.03033 9.03033C5.73744 9.32322 5.26256 9.32322 4.96967 9.03033L0.96967 5.03033C0.676777 4.73744 0.676777 4.26256 0.96967 3.96967C1.26256 3.67678 1.73744 3.67678 2.03033 3.96967L5.5 7.43934L11.9697 0.96967C12.2626 0.676777 12.7374 0.676777 13.0303 0.96967Z"
+                                  fill="#210124"/>
+                        </svg>
+                    </div>
+                </label>
+
+                {# OFF Radio #}
+                <label class="flex flex-row justify-between border hover:border-gray-900 duration-200 rounded-lg w-full p-2 pl-4">
+                    Off
+                    <input type="radio"
+                           name="{{ form.returnAppsEnabled.vars.full_name }}"
+                           value="false"
+                           class="radio-input hidden"
+                            {% if form.returnAppsEnabled.vars.disabled %} disabled="disabled" {% endif %}
+                            {{ form.returnAppsEnabled.vars.value == 'false' ? 'checked' : '' }}
+                            {{ stimulus_action('radio', 'toggle')|stimulus_action('radio-card', 'block') }}
+                            {{ stimulus_target('radio-card', 'off') }}>
+                    <div class="custom-radio pr-3 pt-1.5 {{ form.returnAppsEnabled.vars.value == 'false' ? '' : 'hidden' }}" {{ stimulus_target('radio', 'off') }}>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10" viewBox="0 0 14 10" fill="none">
+                            <path fill-rule="evenodd" clip-rule="evenodd"
+                                  d="M13.0303 0.96967C13.3232 1.26256 13.3232 1.73744 13.0303 2.03033L6.03033 9.03033C5.73744 9.32322 5.26256 9.32322 4.96967 9.03033L0.96967 5.03033C0.676777 4.73744 0.676777 4.26256 0.96967 3.96967C1.26256 3.67678 1.73744 3.67678 2.03033 3.96967L5.5 7.43934L11.9697 0.96967C12.2626 0.676777 12.7374 0.676777 13.0303 0.96967Z"
+                                  fill="#210124"/>
+                        </svg>
+                    </div>
+                </label>
+            </div>
+
+            <div class="mt-2 -mb-2 text-center text-red-500 text-base">
+                {{ form_errors(form.returnAppsEnabled) }}
+            </div>
+
+            {# Mark the field as rendered so Symfony won't duplicate it #}
+            {% do form.returnAppsEnabled.setRendered() %}
+        </div>
+    </div>
+
+    <div class="grid gap-4 lg:grid-cols-2 p-2 z-0" {{ stimulus_controller('radio-card') }}>
+        {# RETURN_APPS_PACKAGE_NAME #}
+        <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full" {{ stimulus_controller('card') }}>
+            <div class="flex flex-row justify-between">
+                <div class="text-base font-medium text-center break-normal md:break-all">
+                    <h1 class="text-base md:text-lg whitespace-nowrap">{{ 'TOTPAppLabel'|trans({}, '_twoFA') }}</h1>
+                </div>
+                <label class="flex items-center bg-opacity-40">
+                    <img class="w-6 cursor-pointer" {{ stimulus_target('card', 'button') }} {{ stimulus_action('card', 'show_info', 'mouseover')|stimulus_action('card', 'hide_info', 'mouseout') }}
+                         src="{{ asset('resources/logos/info_icon.svg') }}" alt="info_icon"/>
+                </label>
+            </div>
+
+            {{ include('/dashboard/shared/settings_actions/_description.html.twig', {description: data.TWO_FACTOR_AUTH_APP_LABEL.description}) }}
+
+            <div class="flex items-center space-x-2 mt-5">
+                {{ form_widget(form.returnAppsPackageName, {attr: {class: 'form-widget', autocomplete: 'off'}}) }}
+            </div>
+            <div class="mt-2 -mb-2 text-center text-red-500 text-base">
+                {{ form_errors(form.returnAppsPackageName) }}
+            </div>
+        </div>
+
+        {# TWO_FACTOR_AUTH_APP_ISSUER #}
+        <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full" {{ stimulus_controller('card') }}>
+            <div class="flex flex-row justify-between">
+                <div class="text-base font-medium text-center break-normal md:break-all">
+                    <h1 class="text-base md:text-lg whitespace-nowrap">{{ 'TOTPAppIssuer'|trans({}, '_twoFA') }}</h1>
+                </div>
+                <label class="flex items-center bg-opacity-40">
+                    <img class="w-6 cursor-pointer" {{ stimulus_target('card', 'button') }} {{ stimulus_action('card', 'show_info', 'mouseover')|stimulus_action('card', 'hide_info', 'mouseout') }}
+                         src="{{ asset('resources/logos/info_icon.svg') }}" alt="info_icon"/>
+                </label>
+            </div>
+
+            {{ include('/dashboard/shared/settings_actions/_description.html.twig', {description: data.TWO_FACTOR_AUTH_APP_ISSUER.description}) }}
+
+            <div class="flex items-center space-x-2 mt-5">
+                {{ form_widget(form.returnAppsFingerprint, {attr: {class: 'form-widget', autocomplete: 'off'}}) }}
+            </div>
+            <div class="mt-2 -mb-2 text-center text-red-500 text-base">
+                {{ form_errors(form.returnAppsFingerprint) }}
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-6 divider-solid"></div>
+
+    {% if is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::RETURN_APPS_READ')) %}
+        <div class="mt-6 flex flex-row w-full justify-end items-center gap-2">
+            <a href="{{ path('app_dashboard_regenerate_code_admin', {type: 'returnApps'}) }}"
+               data-confirm="{{ 'resetMessage'|trans({}, 'settings_actions_general')|e('html_attr') }}"
+               class="text-sm hover:text-red-600 font-bold p-2 rounded-lg transition ease-in duration-300">
+                {{ 'reset'|trans({}, 'settings_actions_general') }}
+            </a>
+
+            <button type="submit" class="btn-primary"
+                    onclick="return confirm('{{ 'saveChangesMessage'|trans({}, 'settings_actions_general') }}')">
+                {{ 'saveChanges'|trans({}, 'settings_actions_general') }}
+            </button>
+        </div>
+    {% endif %}
+
+    {{ form_rest(form) }}
+    {{ form_end(form, {render_rest: false}) }}
+</twig:ReturnAppsForm>

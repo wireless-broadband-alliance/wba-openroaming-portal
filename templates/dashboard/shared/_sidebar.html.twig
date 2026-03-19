@@ -31,6 +31,7 @@
             'admin_dashboard_settings_terms',
             'admin_dashboard_settings_capport',
             'admin_dashboard_settings_certs_management',
+            'admin_dashboard_return_apps',
             'admin_dashboard_settings_schedule',
         ] %}
         {% set userAuthenticationRoutes = [
@@ -115,6 +116,10 @@
 
                         {% if is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::CERTIFICATES_MANAGEMENT_READ')) %}
                             {{ include('dashboard/shared/_sidebar_item.html.twig', {label: 'certsManagement'|trans({}, '_header_admin'), routes: ['admin_dashboard_settings_certs_management'], icon: 'wba:certificate'}) }}
+                        {% endif %}
+
+                        {% if is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::RETURN_APPS_READ')) %}
+                            {{ include('dashboard/shared/_sidebar_item.html.twig', {label: 'returnApps'|trans({}, '_header_admin'), routes: ['admin_dashboard_return_apps'], icon: 'wba:certificate'}) }}
                         {% endif %}
                     </ul>
                 </div>

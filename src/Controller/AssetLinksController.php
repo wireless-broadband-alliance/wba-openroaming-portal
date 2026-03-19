@@ -2,19 +2,36 @@
 
 namespace App\Controller;
 
+use App\DTO\ReturnAppsSettingsDTO;
+use App\Entity\User;
+use App\Enum\AnalyticalEventType;
+use App\Form\ReturnAppsType;
 use App\Repository\SettingRepository;
 use App\Enum\SettingName;
+use App\Security\Voter\UserAuthenticationVoter;
+use App\Service\EventActions;
+use App\Service\GetSettings;
+use App\Service\SettingsService;
+use DateTime;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\RouterInterface;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
-readonly class AssetLinksController
+class AssetLinksController extends AbstractController
 {
     public function __construct(
         private SettingRepository $settingRepository,
-        private RouterInterface $router
+        private RouterInterface $router,
+        private EventActions $eventActions,
+        private GetSettings $getSettings,
+        private TranslatorInterface $translator,
+        private SettingsService $settingsService,
     ) {
     }
 
@@ -105,6 +122,56 @@ readonly class AssetLinksController
                     ],
                 ],
             ],
+        ]);
+    }
+
+    #[Route('/dashboard/settings/returnApps', name: 'admin_dashboard_return_apps')]
+    #[IsGranted(UserAuthenticationVoter::RETURN_APPS_READ)]
+    public function settingsTwoFA(Request $request): Response
+    {
+        /** @var array<string, array{value: string, description: string}> $data */
+        $data = $this->getSettings->getSettings();
+
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
+        $canWrite = $this->isGranted(UserAuthenticationVoter::RETURN_APPS_WRITE);
+
+        // Initialize DTO from settings
+        $dto = new ReturnAppsSettingsDTO($data);
+
+        // Create form bound to DTO
+        $form = $this->createForm(ReturnAppsType::class, $dto, ['disabled' => !$canWrite]);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid() && $canWrite) {
+            // Save updated settings
+            $this->settingsService->updateSettingsFromArray($dto->toArray());
+            $this->settingsService->flush();
+
+            // Log the event
+            $this->eventActions->saveEvent(
+                $currentUser,
+                AnalyticalEventType::RETURN_APPS_UPDATED->value,
+                new DateTime(),
+                [
+                    'ip' => $request->getClientIp(),
+                    'user_agent' => $request->headers->get('User-Agent'),
+                    'uuid' => $currentUser->getUuid(),
+                ]
+            );
+
+            $this->addFlash(
+                'success',
+                $this->translator->trans('newChangesAppliedSuccessfully', [], 'controllers')
+            );
+            return $this->redirectToRoute('admin_dashboard_return_apps');
+        }
+
+        return $this->render('dashboard/shared/settings_actions.html.twig', [
+            'form' => $form->createView(),
+            'returnAppsSettingsDTO' => $dto,
+            'data' => $data,
+            'user' => $currentUser,
         ]);
     }
 }
