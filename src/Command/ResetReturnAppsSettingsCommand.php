@@ -15,14 +15,10 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
-#[AsCommand(
-    name: 'reset:radiusTLS',
-    description: 'DANGEROUS: Resetting the RADIUS TLS Name changes the OpenRoaming realm.' .
-    ' This WILL invalidate all previously downloaded OpenRoaming profiles and users will be BLOCKED' .
-    ' from authentication by the resolver.'
-)]
-class ResetRadiusTLSCommand extends Command
+#[AsCommand(name: 'reset:returnApps', description: 'Reset Return to Apps Settings')]
+class ResetReturnAppsSettingsCommand extends Command
 {
+
     public function __construct(
         private readonly EntityManagerInterface $entityManager
     ) {
@@ -32,30 +28,20 @@ class ResetRadiusTLSCommand extends Command
     protected function configure(): void
     {
         $this
-            ->setName('reset:radiusTLS')
+            ->setName('reset:returnApps')
             ->setDescription(
-                'DANGEROUS: Resetting the RADIUS TLS Name changes the OpenRoaming realm.' .
-                ' This WILL invalidate all previously downloaded OpenRoaming profiles and' .
-                ' users will be BLOCKED from authentication by the resolver.'
+                'Reset Return to Apps Settings'
             )
             ->addOption(
                 'yes',
                 'y',
                 InputOption::VALUE_NONE,
-                'Automatically confirm the reset (DANGEROUS)'
+                'Automatically confirm the reset'
             );
     }
-
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
-
-        $io->warning([
-            'DANGEROUS OPERATION',
-            'Resetting the RADIUS TLS Name will change the OpenRoaming realm.',
-            'This WILL invalidate all previously downloaded OpenRoaming profiles.',
-            'Users will be BLOCKED from authentication by the resolver.'
-        ]);
 
         if (!$input->getOption('yes') && !$io->confirm('Do you really want to continue?', false)) {
             $io->info('Command aborted.');
@@ -63,11 +49,9 @@ class ResetRadiusTLSCommand extends Command
         }
 
         $settings = [
-            ['name' => SettingName::RADIUS_TLS_NAME->value, 'value' => 'EditMe'],
-            ['name' => SettingName::NAI_REALM->value, 'value' => 'EditMe'],
-            ['name' => SettingName::DOMAIN_NAME->value, 'value' => 'EditMe'],
-            ['name' => SettingName::RADIUS_REALM_NAME->value, 'value' => 'EditMe'],
-            ['name' => SettingName::ENABLE_RADIUS_TLS_RESET->value, 'value' => 'true'],
+            ['name' => SettingName::RETURN_APPS_ENABLED->value, 'value' => 'false'],
+            ['name' => SettingName::RETURN_APPS_PACKAGE_NAME->value, 'value' => 'EditMe'],
+            ['name' => SettingName::RETURN_APPS_FINGERPRINTS->value, 'value' => '["EditMe"]'],
         ];
 
         $this->entityManager->beginTransaction();
@@ -97,7 +81,7 @@ class ResetRadiusTLSCommand extends Command
 
             $message = <<<EOL
 
-<info>Success:</info> The Radius TLS Name has been set to the default value.
+<info>Success:</info> All the Return to Apps configuration settings have been set to the default values.
 <comment>Note:</comment> If you want to reset any another setting please check using this command:
       <fg=blue>php bin/console reset</>
 EOL;
