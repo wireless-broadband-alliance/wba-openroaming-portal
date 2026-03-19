@@ -473,7 +473,7 @@ class SiteController extends AbstractController
                 $this->translator->trans(
                     'access_denied_session_expired',
                     [],
-                    'messages'
+                    'controllers'
                 )
             );
         }
