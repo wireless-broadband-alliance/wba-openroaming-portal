@@ -28,6 +28,7 @@ readonly class AdminPermissionsFormBuilder
             'termsPolicies' => 'termsAndPolicies',
             'cronSchedule' => 'scheduleAutomation',
             'certificatesManagement' => 'certificatesManagement',
+            'returnAppsManagement' => 'returnAppsManagement',
             'authenticationMethods' => 'authenticationMethods',
             'twoFactorAuth' => 'twoFactorAuthenticator',
             'ldapSynchronization' => 'LDAPSynchronization',
@@ -51,14 +52,14 @@ readonly class AdminPermissionsFormBuilder
         string $translationKey
     ): void {
         $builder->add($field, ChoiceType::class, [
-        'label' => $this->translator->trans($translationKey, [], 'UserAddType'),
-        'expanded' => true,
-        'multiple' => false,
-        'choices' => [
-            $this->translator->trans('none', [], 'UserAddType') => PermissionLevel::NONE,
-            $this->translator->trans('read', [], 'UserAddType') => PermissionLevel::READ,
-            $this->translator->trans('write', [], 'UserAddType') => PermissionLevel::WRITE,
-        ],
+            'label' => $this->translator->trans($translationKey, [], 'UserAddType'),
+            'expanded' => true,
+            'multiple' => false,
+            'choices' => [
+                $this->translator->trans('none', [], 'UserAddType') => PermissionLevel::NONE,
+                $this->translator->trans('read', [], 'UserAddType') => PermissionLevel::READ,
+                $this->translator->trans('write', [], 'UserAddType') => PermissionLevel::WRITE,
+            ],
         ]);
     }
 }
