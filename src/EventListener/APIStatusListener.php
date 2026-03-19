@@ -21,6 +21,12 @@ final class APIStatusListener
         '/api/v2/capport/json'
     ];
 
+    /** @var string[] */
+    private array $protectedPaths = [
+        '/.well-known/assetlinks.json',
+        '/.well-known/apple-app-site-association'
+    ];
+
     public function __construct(
         private readonly SettingRepository $settingRepository,
     ) {
@@ -38,24 +44,29 @@ final class APIStatusListener
         }
 
         // Checks if the request targets the API
-        if (str_starts_with($pathInfo, $this->apiEntryPoint)) {
+        $isApiRequest = str_starts_with($pathInfo, $this->apiEntryPoint);
+        $isProtectedPath = in_array($pathInfo, $this->protectedPaths, true);
+        if ($isApiRequest || $isProtectedPath) {
             $apiStatus = $this->getApiStatus();
 
             // If API status is disabled (not ON), block the request
             if ($apiStatus !== OperationMode::ON->value) {
-                $response = new JsonResponse([
+                $event->setResponse(new JsonResponse([
                     'success' => false,
                     'message' => 'The API is currently disabled.',
-                ], Response::HTTP_SERVICE_UNAVAILABLE);
-
-                $event->setResponse($response);
+                ], Response::HTTP_SERVICE_UNAVAILABLE));
             }
         }
     }
 
     private function getApiStatus(): string
     {
-        $setting = $this->settingRepository->findOneBy(['name' => SettingName::API_STATUS->value]);
-        return $setting ? trim((string)$setting->getValue()) : OperationMode::OFF->value;
+        $setting = $this->settingRepository->findOneBy([
+            'name' => SettingName::API_STATUS->value
+        ]);
+
+        return $setting
+            ? trim((string)$setting->getValue())
+            : OperationMode::OFF->value;
     }
 }
