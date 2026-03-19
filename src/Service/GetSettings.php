@@ -234,7 +234,8 @@ readonly class GetSettings
                 SettingName::CRON_ADVANCED_STATUS->value => 'Saves the previous status mode on the schedule cron configuration page (Simple/Advanced)',
                 SettingName::CLOUDFLARE_TOKEN->value => 'Token for automatic Cloudflare certificate renewal.',
                 SettingName::RETURN_APPS_ENABLED->value => 'Enables or disables the Return to Apps',
-                SettingName::RETURN_APPS_PACKAGE_NAME->value => 'Name of the package or application associated',
+                SettingName::RETURN_APPS_PACKAGE_NAME_ANDROID->value => 'Name of the package or application associated for android devices',
+                SettingName::RETURN_APPS_ID_IOS->value => 'Name of the package or application associated for iOS devices',
                 SettingName::RETURN_APPS_FINGERPRINTS->value => 'Unique identifiers used to recognize devices in the Return to Apps',
             ],
             LanguageType::PT->value => [
@@ -325,10 +326,9 @@ readonly class GetSettings
                 SettingName::DOMAIN_BLACKLIST_IMPORT_CRON->value => 'Define o agendamento (cron) para a execução da importação e sincronização dos domínios bloqueados.',
                 SettingName::CRON_ADVANCED_STATUS->value => 'Guarda o modo de estado anterior na página de configuração do cron (Simples/Avançado)',
                 SettingName::CLOUDFLARE_TOKEN->value => 'Token para renovação automática do certificado Cloudflare.',
-                SettingName::RETURN_APPS_ENABLED->value => 'Ativa ou desativa a funcionalidade Retornar às Apps',
-                SettingName::RETURN_APPS_PACKAGE_NAME->value => 'Nome do pacote ou aplicação associado',
-                SettingName::RETURN_APPS_FINGERPRINTS->value => 'Identificadores únicos usados para reconhecer dispositivos na funcionalidade Retornar às Apps.',
-
+                SettingName::RETURN_APPS_PACKAGE_NAME_ANDROID->value => 'Nome do pacote ou da aplicação associado a dispositivos Android',
+                SettingName::RETURN_APPS_ID_IOS->value => 'Nome do pacote ou da aplicação associado a dispositivos iOS',
+                SettingName::RETURN_APPS_FINGERPRINTS->value => 'Identificadores únicos utilizados para reconhecer dispositivos na funcionalidade "Return to Apps"',
             ]
         ];
         // phpcs:enable
