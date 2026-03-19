@@ -37,6 +37,9 @@ final class UserAuthenticationVoter extends Voter
     // Certificates Management page
     public const string CERTIFICATES_MANAGEMENT_WRITE = 'CERTIFICATES_MANAGEMENT_WRITE';
     public const string CERTIFICATES_MANAGEMENT_READ = 'CERTIFICATES_MANAGEMENT_READ';
+    // Return Apps Management Page
+    public const string RETURN_APPS_WRITE = 'RETURN_APPS_WRITE';
+    public const string RETURN_APPS_READ = 'RETURN_APPS_READ';
     // Authentication Methods page
     public const string AUTHENTICATION_METHODS_WRITE = 'AUTHENTICATION_METHODS_WRITE';
     public const string AUTHENTICATION_METHODS_READ = 'AUTHENTICATION_METHODS_READ';
@@ -92,6 +95,9 @@ final class UserAuthenticationVoter extends Voter
 
                 self::CERTIFICATES_MANAGEMENT_WRITE,
                 self::CERTIFICATES_MANAGEMENT_READ,
+
+                self::RETURN_APPS_WRITE,
+                self::RETURN_APPS_READ,
 
                 self::AUTHENTICATION_METHODS_WRITE,
                 self::AUTHENTICATION_METHODS_READ,
@@ -150,9 +156,9 @@ final class UserAuthenticationVoter extends Voter
                 AdminPermissionsType::ADMIN_MANAGEMENT_WRITE
             ),
             self::ADMIN_MANAGEMENT_READ => $this->hasPermission(
-                $user,
-                AdminPermissionsType::ADMIN_MANAGEMENT_READ
-            ) ||
+                    $user,
+                    AdminPermissionsType::ADMIN_MANAGEMENT_READ
+                ) ||
                 $this->hasPermission($user, AdminPermissionsType::ADMIN_MANAGEMENT_WRITE),
 
             self::PLATFORM_STATUS_WRITE =>
@@ -184,6 +190,13 @@ final class UserAuthenticationVoter extends Voter
             self::CRON_SCHEDULE_READ =>
                 $this->hasPermission($user, AdminPermissionsType::CRON_SCHEDULE_READ)
                 || $this->hasPermission($user, AdminPermissionsType::CRON_SCHEDULE_WRITE),
+
+            self::RETURN_APPS_WRITE =>
+            $this->hasPermission($user, AdminPermissionsType::RETURN_APPS_WRITE),
+
+            self::RETURN_APPS_READ =>
+                $this->hasPermission($user, AdminPermissionsType::RETURN_APPS_READ)
+                || $this->hasPermission($user, AdminPermissionsType::RETURN_APPS_WRITE),
 
             self::CERTIFICATES_MANAGEMENT_WRITE => $this->hasPermission(
                 $user,
