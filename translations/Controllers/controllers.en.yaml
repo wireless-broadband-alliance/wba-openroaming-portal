@@ -192,3 +192,4 @@ httpChallengeAppliedSuccessfully: >
     Validation completed successfully.
     The new certificates have been verified and prepared.
     They will be applied to the system once you finish the configuration.
+returnAppsResetSuccessfully: 'The Return to Apps settings has been reset successfully!'

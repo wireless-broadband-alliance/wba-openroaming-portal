@@ -190,3 +190,4 @@ httpChallengeAppliedSuccessfully: >
     Validação concluída com sucesso.
     Os novos certificados foram verificados e preparados.
     Serão aplicados ao sistema após finalizar a configuração.
+returnAppsResetSuccessfully: 'As configurações de Retorno para as Apps foram restauradas com sucesso!'

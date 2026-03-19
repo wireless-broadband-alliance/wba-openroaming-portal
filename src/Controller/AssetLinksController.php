@@ -126,7 +126,7 @@ class AssetLinksController extends AbstractController
     }
 
     #[Route('/dashboard/settings/returnApps', name: 'admin_dashboard_return_apps')]
-    #[IsGranted(UserAuthenticationVoter::RETURN_APPS_READ)]
+    #[IsGranted(UserAuthenticationVoter::RETURN_APPS_MANAGEMENT_READ)]
     public function settingsTwoFA(Request $request): Response
     {
         /** @var array<string, array{value: string, description: string}> $data */
@@ -134,7 +134,7 @@ class AssetLinksController extends AbstractController
 
         /** @var User $currentUser */
         $currentUser = $this->getUser();
-        $canWrite = $this->isGranted(UserAuthenticationVoter::RETURN_APPS_WRITE);
+        $canWrite = $this->isGranted(UserAuthenticationVoter::RETURN_APPS_MANAGEMENT_WRITE);
 
         // Initialize DTO from settings
         $dto = new ReturnAppsSettingsDTO($data);
