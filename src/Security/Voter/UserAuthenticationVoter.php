@@ -38,8 +38,8 @@ final class UserAuthenticationVoter extends Voter
     public const string CERTIFICATES_MANAGEMENT_WRITE = 'CERTIFICATES_MANAGEMENT_WRITE';
     public const string CERTIFICATES_MANAGEMENT_READ = 'CERTIFICATES_MANAGEMENT_READ';
     // Return Apps Management Page
-    public const string RETURN_APPS_WRITE = 'RETURN_APPS_WRITE';
-    public const string RETURN_APPS_READ = 'RETURN_APPS_READ';
+    public const string RETURN_APPS_MANAGEMENT_WRITE = 'RETURN_APPS_WRITE';
+    public const string RETURN_APPS_MANAGEMENT_READ = 'RETURN_APPS_READ';
     // Authentication Methods page
     public const string AUTHENTICATION_METHODS_WRITE = 'AUTHENTICATION_METHODS_WRITE';
     public const string AUTHENTICATION_METHODS_READ = 'AUTHENTICATION_METHODS_READ';
@@ -96,8 +96,8 @@ final class UserAuthenticationVoter extends Voter
                 self::CERTIFICATES_MANAGEMENT_WRITE,
                 self::CERTIFICATES_MANAGEMENT_READ,
 
-                self::RETURN_APPS_WRITE,
-                self::RETURN_APPS_READ,
+                self::RETURN_APPS_MANAGEMENT_WRITE,
+                self::RETURN_APPS_MANAGEMENT_READ,
 
                 self::AUTHENTICATION_METHODS_WRITE,
                 self::AUTHENTICATION_METHODS_READ,
@@ -140,7 +140,7 @@ final class UserAuthenticationVoter extends Voter
         }
 
         // Super Admin has access to every page
-        if (in_array('ROLE_SUPER_ADMIN', $user->getRoles())) {
+        if (in_array('ROLE_SUPER_ADMIN', $user->getRoles(), true)) {
             return true;
         }
 
@@ -191,12 +191,12 @@ final class UserAuthenticationVoter extends Voter
                 $this->hasPermission($user, AdminPermissionsType::CRON_SCHEDULE_READ)
                 || $this->hasPermission($user, AdminPermissionsType::CRON_SCHEDULE_WRITE),
 
-            self::RETURN_APPS_WRITE =>
-            $this->hasPermission($user, AdminPermissionsType::RETURN_APPS_WRITE),
+            self::RETURN_APPS_MANAGEMENT_WRITE =>
+            $this->hasPermission($user, AdminPermissionsType::RETURN_APPS_MANAGEMENT_WRITE),
 
-            self::RETURN_APPS_READ =>
-                $this->hasPermission($user, AdminPermissionsType::RETURN_APPS_READ)
-                || $this->hasPermission($user, AdminPermissionsType::RETURN_APPS_WRITE),
+            self::RETURN_APPS_MANAGEMENT_READ =>
+                $this->hasPermission($user, AdminPermissionsType::RETURN_APPS_MANAGEMENT_READ)
+                || $this->hasPermission($user, AdminPermissionsType::RETURN_APPS_MANAGEMENT_WRITE),
 
             self::CERTIFICATES_MANAGEMENT_WRITE => $this->hasPermission(
                 $user,

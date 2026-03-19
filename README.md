@@ -201,7 +201,8 @@ project: [Installation Guide](docs/INSTALLATION.md).
 
 # 🛠 AssetMapper
 
-If you notice any issues with styling or frontend assets, please refer to [ASSETMAPPER Configurations](./docs/ASSETMAPPER.md).
+If you notice any issues with styling or frontend assets, please refer
+to [ASSETMAPPER Configurations](./docs/ASSETMAPPER.md).
 
 # 🔑 Admin Page Access Page
 
@@ -275,7 +276,9 @@ Please make sure to set up a **public_key** in (pgp_public_key/public_key.asc)
 **do not create keys on the production server**.
 
 ### Default_URL Configuration
-- `DEFAULT_URI` – The base URL used by Symfony to generate absolute links. **Required in production** and must not point to `localhost` or `127.0.0.1`.
+
+- `DEFAULT_URI` – The base URL used by Symfony to generate absolute links. **Required in production** and must not point
+  to `localhost` or `127.0.0.1`.
 
 ### Google Client and Secret Credentials
 
@@ -497,11 +500,21 @@ certificate. **Connection errors** can happen if the right SHA1 hash is not prov
 69. `USERS_WHEN_PROFILE_EXPIRES_CRON`: Defines the schedule to notify the users when their profile to expire.
 70. `LDAP_SYNC_CRON`: Defines the schedule for LDAP synchronization automation command.
 71. `FREERADIUS_LAST_CONNECTION_CRON`: Defines the schedule for Freeradius server & the user profile
-        last connection.
+    last connection.
 72. `CRON_ADVANCED_STATUS`:  Saves the previous status mode on the schedule cron configuration page (Simple/Advanced)
 73. `DOMAIN_BLACKLIST_IMPORT_CRON`: Defines the schedule to import/refresh Blacklist of domains.
 74. `CLOUDFLARE_TOKEN` : Token for automatic Cloudflare certificate renewal.
-75. `ENABLE_RADIUS_TLS_RESET`: Saves the current state of the **RADIUS_TLS_NAME**, if this is set to false the reset certs widget will ask for a new radius_tls_name to be configured. **Careful when setting up this stage to be the actual RADIUS_TLS_NAME on the free-radius resolver. For more details consul this **
+75. `ENABLE_RADIUS_TLS_RESET`: Saves the current state of the **RADIUS_TLS_NAME**, if this is set to false the reset
+    certs widget will ask for a new radius_tls_name to be configured. **Careful when setting up this stage to be the
+    actual RADIUS_TLS_NAME on the free-radius resolver. For more details consul this **
+76. `RETURN_APPS_ENABLED`: Enables or disables the return-to-apps configuration for mobile devices. If set to false, the
+    asset association endpoints will not be exposed, preventing Android and iOS applications from linking to the portal.
+77. `RETURN_APPS_PACKAGE_NAME`: Defines the application identifier used for mobile app association. For Android, this
+    corresponds to the package name (e.g., com.example.app). For iOS, this should follow the TEAMID.bundleId format
+    required for Apple App Site Association.
+78. `RETURN_APPS_FINGERPRINTS`: Contains the list of SHA-256 certificate fingerprints used to verify Android application
+    identity. Multiple fingerprints can be configured to support different signing certificates (e.g., debug, release,
+    or rotated keys).
 
 #### With these environment variables, you can configure and customize various aspects of the project, such as database connections, SAML settings, login methods, and more.
 
