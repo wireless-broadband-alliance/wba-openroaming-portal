@@ -12,11 +12,10 @@ class ReturnAppsSettingsDTO
     public ?string $returnAppsEnabled = null;
 
     #[Assert\NotBlank(message: 'fieldCannotBeBlank')]
-    #[Assert\Regex(
-        pattern: '/^[a-zA-z0-9_-]*$/u',
-        message: 'noSpecialCharacters'
-    )]
-    public ?string $returnAppsPackageName = null;
+    public ?string $returnAppsPackageNameAndroid = null;
+
+    #[Assert\NotBlank(message: 'fieldCannotBeBlank')]
+    public ?string $returnAppsIdIOS = null;
 
     /**
      * @var list<string>
@@ -32,7 +31,8 @@ class ReturnAppsSettingsDTO
     public function __construct(array $data = [])
     {
         $this->returnAppsEnabled = $data[SettingName::RETURN_APPS_ENABLED->value]['value'] ?? null;
-        $this->returnAppsPackageName = $data[SettingName::RETURN_APPS_PACKAGE_NAME->value]['value'] ?? null;
+        $this->returnAppsPackageNameAndroid = $data[SettingName::RETURN_APPS_PACKAGE_NAME_ANDROID->value]['value'] ?? null;
+        $this->returnAppsIdIOS = $data[SettingName::RETURN_APPS_ID_IOS->value]['value'] ?? null;
     }
 
     public function toArray(): array
@@ -40,8 +40,10 @@ class ReturnAppsSettingsDTO
         return [
             SettingName::RETURN_APPS_ENABLED->value =>
                 ['value' => $this->returnAppsEnabled],
-            SettingName::RETURN_APPS_PACKAGE_NAME->value =>
-                ['value' => $this->returnAppsPackageName],
+            SettingName::RETURN_APPS_PACKAGE_NAME_ANDROID->value =>
+                ['value' => $this->returnAppsPackageNameAndroid],
+            SettingName::RETURN_APPS_ID_IOS->value =>
+                ['value' => $this->returnAppsIdIOS],
             SettingName::RETURN_APPS_FINGERPRINTS->value =>
                 ['value' => $this->returnAppsFingerprint]
         ];

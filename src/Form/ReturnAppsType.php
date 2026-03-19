@@ -41,6 +41,10 @@ class ReturnAppsType extends AbstractType
                 'required' => false,
                 'disabled' => $this->disabled,
             ])
+            ->add('returnAppsIdIOS', TextType::class, [
+                'required' => false,
+                'disabled' => $this->disabled,
+            ])
             ->add('returnAppsFingerprint', CollectionType::class, [
                 'entry_type' => TextType::class,
                 'allow_add' => true,
