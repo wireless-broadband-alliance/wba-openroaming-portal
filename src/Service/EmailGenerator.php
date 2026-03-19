@@ -32,8 +32,7 @@ readonly class EmailGenerator
      */
     public function sendRegistrationEmail(
         User $user,
-        ?string $password = null,
-        bool $isApi = false
+        ?string $password = null
     ): void {
         $supportTeam = $this->settingRepository
             ->findOneBy(['name' => SettingName::PAGE_TITLE->value])
@@ -47,6 +46,10 @@ readonly class EmailGenerator
             ->findOneBy(['name' => SettingName::LOGIN_WITH_UUID_ONLY->value])
             ->getValue();
 
+        $returnAppsEnabled = $this->settingRepository
+            ->findOneBy(['name' => SettingName::RETURN_APPS_ENABLED->value])
+            ->getValue();
+
         $customerLogo = $this->settingRepository
             ->findOneBy(['name' => SettingName::CUSTOMER_LOGO->value])
             ->getValue();
@@ -54,6 +57,7 @@ readonly class EmailGenerator
         $projectDir = $this->parameterBag->get('kernel.project_dir');
         $logoPath = $projectDir . '/public' . $customerLogo;
 
+        // Default template
         $template = 'email/user_registration.html.twig';
         $translationDomain = 'user_registration';
 
@@ -65,21 +69,24 @@ readonly class EmailGenerator
             'password' => $password ?? null
         ];
 
+        // Switch template depending on login mode or return apps setting
         if ($loginWithUUID === OperationMode::ON->value) {
             $template = 'email/user_registration_login_uuid.html.twig';
             $translationDomain = 'user_registration_login_uuid';
 
             $context['magicURL'] = $this->magicLinkService->magicToken($user);
-        } elseif ($isApi) {
+        } elseif ($returnAppsEnabled === 'true') {
             $template = 'email/user_registration_api.html.twig';
             $translationDomain = 'user_registration_api';
         }
 
         $email = new TemplatedEmail()
-            ->from(new Address(
-                $this->parameterBag->get('app.email_address'),
-                $this->parameterBag->get('app.sender_name')
-            ))
+            ->from(
+                new Address(
+                    $this->parameterBag->get('app.email_address'),
+                    $this->parameterBag->get('app.sender_name')
+                )
+            )
             ->to($user->getEmail())
             ->subject(
                 $this->translator->trans(
