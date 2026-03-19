@@ -1,5 +1,6 @@
 enableTitle: 'Retorno para as Apps'
-packageName: 'Nome do pacote'
+packageName: 'Nome do pacote Android'
 fingerprints: 'Fingerprints'
 fingerprintsDescription: 'Identificadores únicos usados para reconhecer dispositivos na funcionalidade Retornar às Apps.'
 addFingerprint: 'Adicionar Fingerprint'
+idIos: 'Nome do pacote IOS'

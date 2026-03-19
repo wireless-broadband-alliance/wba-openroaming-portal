@@ -37,7 +37,7 @@ class ReturnAppsType extends AbstractType
                 'required' => false,
                 'disabled' => $this->disabled,
             ])
-            ->add('returnAppsPackageName', TextType::class, [
+            ->add('returnAppsPackageNameAndroid', TextType::class, [
                 'required' => false,
                 'disabled' => $this->disabled,
             ])

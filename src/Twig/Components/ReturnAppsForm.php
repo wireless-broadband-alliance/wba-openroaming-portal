@@ -35,7 +35,7 @@ final class ReturnAppsForm extends AbstractController
     #[\Override]
     protected function instantiateForm(): FormInterface
     {
-        $canWrite = $this->isGranted(UserAuthenticationVoter::TWO_FACTOR_AUTH_WRITE);
+        $canWrite = $this->isGranted(UserAuthenticationVoter::RETURN_APPS_MANAGEMENT_WRITE);
 
         return $this->createForm(ReturnAppsType::class, $this->returnAppsSettingsDTO, ['disabled' => !$canWrite]);
     }
