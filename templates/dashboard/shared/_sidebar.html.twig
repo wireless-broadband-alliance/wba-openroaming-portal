@@ -118,7 +118,7 @@
                             {{ include('dashboard/shared/_sidebar_item.html.twig', {label: 'certsManagement'|trans({}, '_header_admin'), routes: ['admin_dashboard_settings_certs_management'], icon: 'wba:certificate'}) }}
                         {% endif %}
 
-                        {% if is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::RETURN_APPS_READ')) %}
+                        {% if is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::RETURN_APPS_MANAGEMENT_READ')) %}
                             {{ include('dashboard/shared/_sidebar_item.html.twig', {label: 'returnApps'|trans({}, '_header_admin'), routes: ['admin_dashboard_return_apps'], icon: 'wba:certificate'}) }}
                         {% endif %}
                     </ul>
