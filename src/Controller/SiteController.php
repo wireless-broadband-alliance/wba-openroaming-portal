@@ -445,7 +445,7 @@ class SiteController extends AbstractController
                 $this->translator->trans(
                     'access_denied_no_session',
                     [],
-                    'controllers' // translation domain
+                    'controllers'
                 )
             );
         }
