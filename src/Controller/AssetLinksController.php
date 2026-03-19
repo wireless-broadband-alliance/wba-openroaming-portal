@@ -26,12 +26,12 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 class AssetLinksController extends AbstractController
 {
     public function __construct(
-        private SettingRepository $settingRepository,
-        private RouterInterface $router,
-        private EventActions $eventActions,
-        private GetSettings $getSettings,
-        private TranslatorInterface $translator,
-        private SettingsService $settingsService,
+        private readonly SettingRepository $settingRepository,
+        private readonly RouterInterface $router,
+        private readonly EventActions $eventActions,
+        private readonly GetSettings $getSettings,
+        private readonly TranslatorInterface $translator,
+        private readonly SettingsService $settingsService,
     ) {
     }
 
@@ -55,7 +55,7 @@ class AssetLinksController extends AbstractController
         }
 
         $packageName = $this->settingRepository
-            ->findOneBy(['name' => SettingName::RETURN_APPS_PACKAGE_NAME->value])
+            ->findOneBy(['name' => SettingName::RETURN_APPS_PACKAGE_NAME_ANDROID->value])
             ?->getValue();
 
         $fingerprints = $this->settingRepository
@@ -97,7 +97,7 @@ class AssetLinksController extends AbstractController
         }
 
         $appIds = $this->settingRepository
-            ->findOneBy(['name' => SettingName::RETURN_APPS_PACKAGE_NAME->value])
+            ->findOneBy(['name' => SettingName::RETURN_APPS_ID_IOS->value])
             ?->getValue();
 
         $path = $this->router->generate(

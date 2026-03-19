@@ -21,6 +21,7 @@ class ReturnAppsType extends AbstractType
         private readonly TranslatorInterface $translator
     ) {
     }
+
     private bool $disabled = true;
 
     public function buildForm(FormBuilderInterface $builder, array $options)
@@ -46,14 +47,16 @@ class ReturnAppsType extends AbstractType
                 'allow_delete' => true,
                 'prototype' => true,
                 'by_reference' => false,
-                'label' => 'Trusted Proxies',
                 'entry_options' => [
                     'attr' => [
-                        'placeholder' => $this->translator->trans('returnAppsFingerprintPlaceholder', [], 'ReturnAppsType'),
+                        'placeholder' => $this->translator->trans(
+                            'returnAppsFingerprintPlaceholder',
+                            [],
+                            'ReturnAppsType'
+                        ),
                     ]
                 ]
             ]);
-
     }
 
     public function configureOptions(OptionsResolver $resolver)

@@ -21,8 +21,9 @@ final class Version20260319111055 extends AbstractMigration
     {
         // this up() migration is auto-generated, please modify it to your needs
         $this->addSql("INSERT INTO Setting (name, value) VALUES ('RETURN_APPS_ENABLED', 'false')");
-        $this->addSql("INSERT INTO Setting (name, value) VALUES ('RETURN_APPS_PACKAGE_NAME', 'EditMe')");
-        $this->addSql("INSERT INTO Setting (name, value) VALUES ('RETURN_APPS_FINGERPRINTS', '[EditMe]')");
+        $this->addSql("INSERT INTO Setting (name, value) VALUES ('RETURN_APPS_PACKAGE_NAME_ANDROID', 'EditMe')");
+        $this->addSql("INSERT INTO Setting (name, value) VALUES ('RETURN_APPS_ID_IOS', 'EditMe')");
+        $this->addSql("INSERT INTO Setting (name, value) VALUES ('RETURN_APPS_FINGERPRINTS', '[\"EditMe\"]')");
     }
 
     public function down(Schema $schema): void

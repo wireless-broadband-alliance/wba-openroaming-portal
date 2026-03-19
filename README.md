@@ -509,10 +509,11 @@ certificate. **Connection errors** can happen if the right SHA1 hash is not prov
     actual RADIUS_TLS_NAME on the free-radius resolver. For more details consul this **
 76. `RETURN_APPS_ENABLED`: Enables or disables the return-to-apps configuration for mobile devices. If set to false, the
     asset association endpoints will not be exposed, preventing Android and iOS applications from linking to the portal.
-77. `RETURN_APPS_PACKAGE_NAME`: Defines the application identifier used for mobile app association. For Android, this
-    corresponds to the package name (e.g., com.example.app). For iOS, this should follow the TEAMID.bundleId format
-    required for Apple App Site Association.
-78. `RETURN_APPS_FINGERPRINTS`: Contains the list of SHA-256 certificate fingerprints used to verify Android application
+77. `RETURN_APPS_PACKAGE_NAME_ANDROID`: Defines the application identifier used for mobile app association for Android,
+    this corresponds to the package name (e.g., com.example.app).
+78. `RETURN_APPS_ID_IOS`: Defines the application identifier used for mobile app association for iOS, this follows
+    the TEAMID.bundleId format required for Apple App Site Association.
+79. `RETURN_APPS_FINGERPRINTS`: Contains the list of SHA-256 certificate fingerprints used to verify Android application
     identity. Multiple fingerprints can be configured to support different signing certificates (e.g., debug, release,
     or rotated keys).
 

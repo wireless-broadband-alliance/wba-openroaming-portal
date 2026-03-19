@@ -50,7 +50,8 @@ class ResetReturnAppsSettingsCommand extends Command
 
         $settings = [
             ['name' => SettingName::RETURN_APPS_ENABLED->value, 'value' => 'false'],
-            ['name' => SettingName::RETURN_APPS_PACKAGE_NAME->value, 'value' => 'EditMe'],
+            ['name' => SettingName::RETURN_APPS_PACKAGE_NAME_ANDROID->value, 'value' => 'EditMe'],
+            ['name' => SettingName::RETURN_APPS_ID_IOS->value, 'value' => 'EditMe'],
             ['name' => SettingName::RETURN_APPS_FINGERPRINTS->value, 'value' => '["EditMe"]'],
         ];
 

@@ -74,7 +74,7 @@
     </div>
 
     <div class="grid gap-4 lg:grid-cols-2 p-2 z-0" {{ stimulus_controller('radio-card') }}>
-        {# RETURN_APPS_PACKAGE_NAME #}
+        {# RETURN_APPS_PACKAGE_NAME_ANDROID #}
         <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full" {{ stimulus_controller('card') }}>
             <div class="flex flex-row justify-between">
                 <div class="text-base font-medium text-center break-normal md:break-all">
@@ -89,10 +89,32 @@
             {{ include('/dashboard/shared/settings_actions/_description.html.twig', {description: data.RETURN_APPS_PACKAGE_NAME.description}) }}
 
             <div class="flex items-center space-x-2 mt-5">
-                {{ form_widget(form.returnAppsPackageName, {attr: {class: 'form-widget', autocomplete: 'off'}}) }}
+                {{ form_widget(form.returnAppsPackageNameAndroid, {attr: {class: 'form-widget', autocomplete: 'off'}}) }}
             </div>
             <div class="mt-2 -mb-2 text-center text-red-500 text-base">
-                {{ form_errors(form.returnAppsPackageName) }}
+                {{ form_errors(form.returnAppsPackageNameAndroid) }}
+            </div>
+        </div>
+
+        {# RETURN_APPS_ID_IOS #}
+        <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full" {{ stimulus_controller('card') }}>
+            <div class="flex flex-row justify-between">
+                <div class="text-base font-medium text-center break-normal md:break-all">
+                    <h1 class="text-base md:text-lg whitespace-nowrap">App Id</h1>
+                </div>
+                <label class="flex items-center bg-opacity-40">
+                    <img class="w-6 cursor-pointer" {{ stimulus_target('card', 'button') }} {{ stimulus_action('card', 'show_info', 'mouseover')|stimulus_action('card', 'hide_info', 'mouseout') }}
+                         src="{{ asset('resources/logos/info_icon.svg') }}" alt="info_icon"/>
+                </label>
+            </div>
+
+            {{ include('/dashboard/shared/settings_actions/_description.html.twig', {description: data.TWO_FACTOR_AUTH_APP_LABEL.description}) }}
+
+            <div class="flex items-center space-x-2 mt-5">
+                {{ form_widget(form.returnAppsIDIOS, {attr: {class: 'form-widget', autocomplete: 'off'}}) }}
+            </div>
+            <div class="mt-2 -mb-2 text-center text-red-500 text-base">
+                {{ form_errors(form.returnAppsIDIOS) }}
             </div>
         </div>
 
@@ -131,7 +153,8 @@
                             <div class="text-red-500 text-sm mt-1">{{ form_errors(fingerprint) }}</div>
                         </div>
                         <div>
-                            <button type="button" class="px-3 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition"
+                            <button type="button"
+                                    class="px-3 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition"
                                     data-action="trusted-proxies#remove">
                                 <twig:ux:icon name="wba:cross-circle-rounded" class="w-6 h-auto fill-current"/>
                             </button>
@@ -146,7 +169,8 @@
                         {{ form_widget(form.returnAppsFingerprint.vars.prototype, {attr: {class: 'form-widget'}}) }}
                     </div>
                     <div>
-                        <button type="button" class="px-3 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition"
+                        <button type="button"
+                                class="px-3 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition"
                                 data-action="trusted-proxies#remove">
                             <twig:ux:icon name="wba:cross-circle-rounded" class="w-6 h-auto fill-current"/>
                         </button>

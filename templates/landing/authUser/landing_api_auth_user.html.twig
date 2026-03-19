@@ -27,9 +27,8 @@
     </div>
 
     <div class="mt-8 flex flex-col sm:flex-row gap-4">
-        <a
-                href="{{ app.request.schemeAndHttpHost ~ app.request.basePath ~ '/return-to-app' }}"
-                class="w-full btn-primary py-3 text-center"
+        <a href="{{ app.request.schemeAndHttpHost ~ app.request.basePath ~ '/return-to-app' }}"
+           class="w-full btn-primary py-3 text-center"
         >
             {{ 'openAppAndFinish'|trans({}, 'landing') }}
         </a>

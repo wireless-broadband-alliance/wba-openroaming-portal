@@ -180,7 +180,8 @@ class ResetAllSettingsCommand extends Command
             ['name' => SettingName::CRON_ADVANCED_STATUS->value, 'value' => 'OFF'],
             ['name' => SettingName::ENABLE_RADIUS_TLS_RESET->value, 'value' => 'true'],
             ['name' => SettingName::RETURN_APPS_ENABLED->value, 'value' => 'false'],
-            ['name' => SettingName::RETURN_APPS_PACKAGE_NAME->value, 'value' => 'EditMe'],
+            ['name' => SettingName::RETURN_APPS_PACKAGE_NAME_ANDROID->value, 'value' => 'EditMe'],
+            ['name' => SettingName::RETURN_APPS_ID_IOS->value, 'value' => 'EditMe'],
             ['name' => SettingName::RETURN_APPS_FINGERPRINTS->value, 'value' => '["EditMe"]'],
         ];
 
