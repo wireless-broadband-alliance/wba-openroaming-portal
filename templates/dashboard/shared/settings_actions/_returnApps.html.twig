@@ -97,25 +97,63 @@
         </div>
 
         {# TWO_FACTOR_AUTH_APP_ISSUER #}
-        <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full" {{ stimulus_controller('card') }}>
+        <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full"
+             data-controller="trusted-proxies">
+
             <div class="flex flex-row justify-between">
-                <div class="text-base font-medium text-center break-normal md:break-all">
-                    <h1 class="text-base md:text-lg whitespace-nowrap">{{ 'TOTPAppIssuer'|trans({}, '_twoFA') }}</h1>
-                </div>
+                <h1 class="text-base md:text-lg font-medium whitespace-nowrap">
+                    {{ 'trustedProxiesLabel'|trans({}, 'settings') }}
+                </h1>
+
                 <label class="flex items-center bg-opacity-40">
-                    <img class="w-6 cursor-pointer" {{ stimulus_target('card', 'button') }} {{ stimulus_action('card', 'show_info', 'mouseover')|stimulus_action('card', 'hide_info', 'mouseout') }}
+                    <img class="w-6 cursor-pointer"
+                            {{ stimulus_target('card', 'button') }}
+                            {{ stimulus_action('card', 'show_info', 'mouseover')|stimulus_action('card', 'hide_info', 'mouseout') }}
                          src="{{ asset('resources/logos/info_icon.svg') }}" alt="info_icon"/>
                 </label>
             </div>
 
-            {{ include('/dashboard/shared/settings_actions/_description.html.twig', {description: data.TWO_FACTOR_AUTH_APP_ISSUER.description}) }}
+            {{ include('/dashboard/shared/settings_actions/_description.html.twig', {
+                description: 'trustedProxiesDescription'|trans({}, 'settings'),
+            }) }}
 
-            <div class="flex items-center space-x-2 mt-5">
-                {{ form_widget(form.returnAppsFingerprint, {attr: {class: 'form-widget', autocomplete: 'off'}}) }}
+            <button type="button"
+                    class="mt-6 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
+                    data-action="trusted-proxies#add">
+                {{ 'addProxy'|trans({}, 'settings') }}
+            </button>
+
+            <div data-trusted-proxies-target="collection" class="space-y-3">
+                {% for fingerprint in form.returnAppsFingerprint %}
+                    <div data-collection-item class="flex items-center space-x-2 mt-5">
+                        <div class="flex-1 flex flex-col">
+                            {{ form_widget(fingerprint, {attr: {class: 'form-widget'}}) }}
+                            <div class="text-red-500 text-sm mt-1">{{ form_errors(fingerprint) }}</div>
+                        </div>
+                        <div>
+                            <button type="button" class="px-3 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition"
+                                    data-action="trusted-proxies#remove">
+                                <twig:ux:icon name="wba:cross-circle-rounded" class="w-6 h-auto fill-current"/>
+                            </button>
+                        </div>
+                    </div>
+                {% endfor %}
             </div>
-            <div class="mt-2 -mb-2 text-center text-red-500 text-base">
-                {{ form_errors(form.returnAppsFingerprint) }}
-            </div>
+
+            <template data-trusted-proxies-target="template">
+                <div data-collection-item class="flex items-center space-x-2 mt-5">
+                    <div class="flex-1 flex flex-col">
+                        {{ form_widget(form.returnAppsFingerprint.vars.prototype, {attr: {class: 'form-widget'}}) }}
+                    </div>
+                    <div>
+                        <button type="button" class="px-3 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition"
+                                data-action="trusted-proxies#remove">
+                            <twig:ux:icon name="wba:cross-circle-rounded" class="w-6 h-auto fill-current"/>
+                        </button>
+                    </div>
+                </div>
+            </template>
+            {% do form.returnAppsFingerprint.setRendered() %}
         </div>
     </div>
 

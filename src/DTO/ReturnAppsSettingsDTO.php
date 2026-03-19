@@ -4,6 +4,7 @@ namespace App\DTO;
 
 use App\Enum\SettingName;
 use Symfony\Component\Validator\Constraints as Assert;
+use App\Validator\Constraints as CustomAssert;
 
 class ReturnAppsSettingsDTO
 {
@@ -17,13 +18,11 @@ class ReturnAppsSettingsDTO
     )]
     public ?string $returnAppsPackageName = null;
 
-    #[Assert\NotBlank(message: 'fieldCannotBeBlank')]
-    #[Assert\Regex(
-        pattern: '/^[a-zA-z0-9_-]*$/u',
-        message: 'noSpecialCharacters'
-    )]
-    #[Assert\Length(min: 3, max: 32, minMessage: 'fieldCannotBeShorterThan', maxMessage: 'fieldCannotBeLongerThan')]
-    public ?string $returnAppsFingerprint = null;
+    /**
+     * @var list<string>
+     */
+    #[Assert\NotBlank(message: 'fieldNotBlank')]
+    public array $returnAppsFingerprint = [];
 
     /**
      * Initialize DTO from settings array.
@@ -34,7 +33,6 @@ class ReturnAppsSettingsDTO
     {
         $this->returnAppsEnabled = $data[SettingName::RETURN_APPS_ENABLED->value]['value'] ?? null;
         $this->returnAppsPackageName = $data[SettingName::RETURN_APPS_PACKAGE_NAME->value]['value'] ?? null;
-        $this->returnAppsFingerprint = $data[SettingName::RETURN_APPS_FINGERPRINTS->value]['value'] ?? null;
     }
 
     public function toArray(): array
