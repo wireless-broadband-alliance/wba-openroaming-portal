@@ -11,7 +11,7 @@
         <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full" {{ stimulus_controller('radio card') }}>
             <div class="flex flex-row justify-between">
                 <div class="text-base font-medium text-center break-normal md:break-all">
-                    <h1 class="text-base md:text-lg whitespace-nowrap">{{ 'mode'|trans({}, 'auths_providers') }}</h1>
+                    <h1 class="text-base md:text-lg whitespace-nowrap">{{ 'enableTitle'|trans({}, '_returnApps') }}</h1>
                 </div>
                 <label class="flex items-center bg-opacity-40">
                     <img class="w-6 cursor-pointer" {{ stimulus_target('card', 'button') }}
@@ -78,7 +78,7 @@
         <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full" {{ stimulus_controller('card') }}>
             <div class="flex flex-row justify-between">
                 <div class="text-base font-medium text-center break-normal md:break-all">
-                    <h1 class="text-base md:text-lg whitespace-nowrap">{{ 'TOTPAppLabel'|trans({}, '_twoFA') }}</h1>
+                    <h1 class="text-base md:text-lg whitespace-nowrap">{{ 'packageName'|trans({}, '_returnApps') }}</h1>
                 </div>
                 <label class="flex items-center bg-opacity-40">
                     <img class="w-6 cursor-pointer" {{ stimulus_target('card', 'button') }} {{ stimulus_action('card', 'show_info', 'mouseover')|stimulus_action('card', 'hide_info', 'mouseout') }}
@@ -96,13 +96,13 @@
             </div>
         </div>
 
-        {# TWO_FACTOR_AUTH_APP_ISSUER #}
+        {# RETURN_APPS_FINGERPRINTS #}
         <div class="transition hover:-translate-y-1 hover:shadow bg-white rounded-md p-6 w-full"
              data-controller="trusted-proxies">
 
             <div class="flex flex-row justify-between">
                 <h1 class="text-base md:text-lg font-medium whitespace-nowrap">
-                    {{ 'trustedProxiesLabel'|trans({}, 'settings') }}
+                    {{ 'fingerprints'|trans({}, '_returnApps') }}
                 </h1>
 
                 <label class="flex items-center bg-opacity-40">
@@ -114,13 +114,13 @@
             </div>
 
             {{ include('/dashboard/shared/settings_actions/_description.html.twig', {
-                description: 'trustedProxiesDescription'|trans({}, 'settings'),
+                description: 'trustedProxiesDescription'|trans({}, '_returnApps'),
             }) }}
 
             <button type="button"
                     class="mt-6 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
                     data-action="trusted-proxies#add">
-                {{ 'addProxy'|trans({}, 'settings') }}
+                {{ 'addFingerprint'|trans({}, '_returnApps') }}
             </button>
 
             <div data-trusted-proxies-target="collection" class="space-y-3">

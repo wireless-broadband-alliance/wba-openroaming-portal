@@ -49,7 +49,7 @@ class ReturnAppsType extends AbstractType
                 'label' => 'Trusted Proxies',
                 'entry_options' => [
                     'attr' => [
-                        'placeholder' => $this->translator->trans('trustedProxiesPlaceholder', [], 'SettingsType'), // TODO: translations
+                        'placeholder' => $this->translator->trans('returnAppsFingerprintPlaceholder', [], 'ReturnAppsType'),
                     ]
                 ]
             ]);

@@ -1,0 +1,5 @@
+enableTitle: 'Return to App'
+packageName: 'Package Name'
+fingerprints: 'Fingerprints'
+fingerprintsDescription: 'Unique identifiers used to recognize devices in the Return to Apps'
+addFingerprint: 'Add Fingerprint'
