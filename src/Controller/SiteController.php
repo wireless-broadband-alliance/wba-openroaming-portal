@@ -441,7 +441,13 @@ class SiteController extends AbstractController
 
         // Check if session exists
         if (!$appReturn) {
-            throw $this->createAccessDeniedException('No app return session found.');
+            throw $this->createAccessDeniedException(
+                $this->translator->trans(
+                    'access_denied_no_session',
+                    [],
+                    'controllers' // translation domain
+                )
+            );
         }
 
         /** @var array<string, array{value: string, description: string}> $data */
@@ -450,14 +456,26 @@ class SiteController extends AbstractController
         // Check if RETURN_APPS_ENABLED is true
         $returnAppsEnabled = $data[SettingName::RETURN_APPS_ENABLED->value]['value'] ?? 'false';
         if ($returnAppsEnabled !== 'true') {
-            throw $this->createAccessDeniedException('Return apps feature is disabled.');
+            throw $this->createAccessDeniedException(
+                $this->translator->trans(
+                    'access_denied_feature_disabled',
+                    [],
+                    'controllers'
+                )
+            );
         }
 
         // Check if session is still valid (TTL)
         $timestamp = $appReturn['timestamp'] ?? 0;
         $ttl = $appReturn['ttl'] ?? 0;
         if ((time() - $timestamp) > $ttl) {
-            throw $this->createAccessDeniedException('App return session expired.');
+            throw $this->createAccessDeniedException(
+                $this->translator->trans(
+                    'access_denied_session_expired',
+                    [],
+                    'messages'
+                )
+            );
         }
 
         /** @var User $currentUser */
