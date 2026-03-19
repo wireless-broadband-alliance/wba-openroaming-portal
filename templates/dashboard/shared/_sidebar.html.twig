@@ -119,7 +119,7 @@
                         {% endif %}
 
                         {% if is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::RETURN_APPS_MANAGEMENT_READ')) %}
-                            {{ include('dashboard/shared/_sidebar_item.html.twig', {label: 'returnApps'|trans({}, '_header_admin'), routes: ['admin_dashboard_return_apps'], icon: 'wba:certificate'}) }}
+                            {{ include('dashboard/shared/_sidebar_item.html.twig', {label: 'returnAppsManagement'|trans({}, '_header_admin'), routes: ['admin_dashboard_return_apps'], icon: 'wba:mobile-arrows'}) }}
                         {% endif %}
                     </ul>
                 </div>
