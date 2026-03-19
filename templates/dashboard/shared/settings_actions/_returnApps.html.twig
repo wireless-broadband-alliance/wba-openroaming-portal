@@ -20,7 +20,7 @@
                 </label>
             </div>
 
-            {{ include('/dashboard/shared/settings_actions/_description.html.twig', {description: data.AUTH_METHOD_LOGIN_TRADITIONAL_ENABLED.description}) }}
+            {{ include('/dashboard/shared/settings_actions/_description.html.twig', {description: data.RETURN_APPS_ENABLED.description}) }}
 
             <div class="flex flex-col items-center space-y-2 mt-5">
                 {# ON Radio #}
@@ -86,7 +86,7 @@
                 </label>
             </div>
 
-            {{ include('/dashboard/shared/settings_actions/_description.html.twig', {description: data.TWO_FACTOR_AUTH_APP_LABEL.description}) }}
+            {{ include('/dashboard/shared/settings_actions/_description.html.twig', {description: data.RETURN_APPS_PACKAGE_NAME.description}) }}
 
             <div class="flex items-center space-x-2 mt-5">
                 {{ form_widget(form.returnAppsPackageName, {attr: {class: 'form-widget', autocomplete: 'off'}}) }}
