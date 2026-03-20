@@ -40,4 +40,14 @@ class FingerprintRepository extends ServiceEntityRepository
     //            ->getOneOrNullResult()
     //        ;
     //    }
+
+    public function findActiveFingerprints(): array
+    {
+        return $this->createQueryBuilder('f')
+            ->andWhere('f.deletedAt = :deletedAt')
+            ->setParameter('deletedAt', null)
+            ->getQuery()
+            ->getResult();
+
+    }
 }
