@@ -47,6 +47,7 @@ class ReturnAppsType extends AbstractType
                 'mapped' => false,
                 'required' => false,
                 'disabled' => $this->disabled,
+                'data' => $options['fingerprints'],
             ]);
     }
 
@@ -55,6 +56,7 @@ class ReturnAppsType extends AbstractType
         $resolver->setDefaults([
             'data_class' => ReturnAppsSettingsDTO::class,
             'disabled' => true,
+            'fingerprints' => []
         ]);
     }
 }
