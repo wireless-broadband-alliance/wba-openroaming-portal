@@ -53,7 +53,7 @@ class AssetLinksController extends AbstractController
 
         $enabled = $enabledSetting?->getValue();
 
-        if (!$enabled) {
+        if ($enabled === 'false') {
             return new JsonResponse(
                 ['error' => 'Asset links are currently disabled'],
                 Response::HTTP_NOT_FOUND
@@ -96,9 +96,9 @@ class AssetLinksController extends AbstractController
 
         $enabled = $enabledSetting?->getValue();
 
-        if (!$enabled) {
+        if ($enabled === 'false') {
             return new JsonResponse(
-                ['error' => 'Apple App Site Association is disabled'],
+                ['error' => 'Asset links are currently disabled'],
                 Response::HTTP_NOT_FOUND
             );
         }
