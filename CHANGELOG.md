@@ -20,8 +20,8 @@
       php bin/console prepare-release:v1100
       ```
 - It's required to run the new migrations this will set up the new entities for the new domains, sources page (
-  `DomainsBlacklist`, `DomainsSource`) & installation widget with the certificates management (`InstalationWidget`,
-  `Certificate` & `CertificateSetupProcess`)
+  `DomainsBlacklist`, `DomainsSource`), installation widget with the certificates management (`InstalationWidget`,
+  `Certificate` & `CertificateSetupProcess`) & the Fingerprints for apps associations with the portal
     - Run the migrations with:
       ```bash
       php bin/console doctrine:migrations:migrate

@@ -64,13 +64,12 @@ class AssetLinksController extends AbstractController
             ->findOneBy(['name' => SettingName::RETURN_APPS_PACKAGE_NAME_ANDROID->value])
             ?->getValue();
 
-        $fingerprints = $this->settingRepository
-            ->findOneBy(['name' => SettingName::RETURN_APPS_FINGERPRINTS->value])
-            ?->getValue();
+        $fingerprintEntities = $this->fingerprintRepository->findActiveFingerprints();
 
-        $fingerprints = is_string($fingerprints)
-            ? json_decode($fingerprints, true, 512, JSON_THROW_ON_ERROR) ?? []
-            : (array)$fingerprints;
+        $fingerprints = array_map(
+            static fn($fp) => $fp->getName(),
+            $fingerprintEntities
+        );
 
         return new JsonResponse([
             [
@@ -94,7 +93,9 @@ class AssetLinksController extends AbstractController
         $enabledSetting = $this->settingRepository->findOneBy([
             'name' => SettingName::RETURN_APPS_ENABLED->value
         ]);
+
         $enabled = $enabledSetting?->getValue();
+
         if (!$enabled) {
             return new JsonResponse(
                 ['error' => 'Apple App Site Association is disabled'],
@@ -106,11 +107,14 @@ class AssetLinksController extends AbstractController
             ->findOneBy(['name' => SettingName::RETURN_APPS_ID_IOS->value])
             ?->getValue();
 
+        $appIds = $appIds ? [$appIds] : [];
+
         $path = $this->router->generate(
             'app_api_landing',
             [],
             UrlGeneratorInterface::ABSOLUTE_PATH
         );
+        
         // Add the corresponding for the app redirection
         $components = [
             [
