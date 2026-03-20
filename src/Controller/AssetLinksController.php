@@ -142,10 +142,7 @@ class AssetLinksController extends AbstractController
         /** @var array<string, array{value: string, description: string}> $data */
         $data = $this->getSettings->getSettings();
         $fingerprintEntities = $this->fingerprintRepository->findActiveFingerprints();
-        $fingerprints = array_map(
-            static fn($fp) => ['fingerprint' => $fp->getName()],
-            $fingerprintEntities
-        );
+        $fingerprints = array_map(static fn($fp) => $fp->getName(), $fingerprintEntities);
 
         /** @var User $currentUser */
         $currentUser = $this->getUser();
@@ -164,17 +161,9 @@ class AssetLinksController extends AbstractController
             ]
         );
         $form->handleRequest($request);
-
         if ($canWrite && $form->isSubmitted() && $form->isValid()) {
             $this->settingsService->updateSettingsFromArray($dto->toArray());
-            $fingerprintData = $form->get('fingerprints')->getData();
-
-            $submittedValues = [];
-            foreach ($fingerprintData as $item) {
-                $submittedValues[] = is_array($item)
-                    ? $item['fingerprint']
-                    : $item->getName();
-            }
+            $submittedValues = $form->get('fingerprints')->getData();
 
             $currentEntities = $this->fingerprintRepository->findActiveFingerprints();
             $currentValues = array_map(static fn($fp) => $fp->getName(), $currentEntities);
@@ -182,7 +171,7 @@ class AssetLinksController extends AbstractController
             $toAdd = array_diff($submittedValues, $currentValues);
             $toRemove = array_diff($currentValues, $submittedValues);
 
-            // Add new
+            // Add new fingerprints
             foreach ($toAdd as $value) {
                 $entity = new Fingerprint();
                 $entity->setName($value);
@@ -191,7 +180,7 @@ class AssetLinksController extends AbstractController
                 $this->entityManager->persist($entity);
             }
 
-            // Soft delete removed
+            // Soft-delete removed fingerprints
             foreach ($currentEntities as $entity) {
                 if (in_array($entity->getName(), $toRemove, true)) {
                     $entity->setDeletedAt(new DateTimeImmutable());

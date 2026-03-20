@@ -6,7 +6,6 @@ namespace App\Form;
 
 use App\DTO\ReturnAppsSettingsDTO;
 use App\Enum\OperationMode;
-use App\Form\Helper\ReturnAppFingerprintFormBuilder;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
@@ -40,11 +39,11 @@ class ReturnAppsType extends AbstractType
                 'disabled' => $this->disabled,
             ])
             ->add('fingerprints', CollectionType::class, [
-                'entry_type' => ReturnAppFingerprintFormBuilder::class,
+                'entry_type' => TextType::class,
                 'allow_add' => true,
                 'allow_delete' => true,
                 'by_reference' => false,
-                'mapped' => false,
+                'mapped' => true,
                 'required' => false,
                 'disabled' => $this->disabled,
                 'data' => $options['fingerprints'],
