@@ -137,7 +137,7 @@
                 </label>
             </div>
 
-            {{ include('/dashboard/shared/settings_actions/_description.html.twig', {description: data.RETURN_APPS_FINGERPRINTS.description}) }}
+            {{ include('/dashboard/shared/settings_actions/_description.html.twig', {description: 'fingerprintDescription'|trans({}, 'settings_actions_general')}) }}
 
             <button type="button"
                     class="mt-6 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
