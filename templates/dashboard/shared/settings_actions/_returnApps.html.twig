@@ -182,6 +182,39 @@
         </div>
     </div>
 
+    {# Toast Details Info Warning #}
+    <div class="mt-2 mr-2 p-2 text-base font-semibold w-full">
+        <div class="flex bg-infoBgColor/50 rounded-lg p-4 text-xs md:text-sm text-infoTextColor" role="alert">
+            <twig:ux:icon name="wba:info" class="w-10 md:w-5 h-10 md:h-5 inline mr-3 fill-current"/>
+
+            <div class="flex-1">
+                <h1 class="font-medium text-blue-800">{{ 'info_details.title'|trans({}, '_returnApps') }}</h1>
+
+                <span class="text-sm text-blue-900 block mt-1">
+                {{ 'info_details.description'|trans({}, '_returnApps') }}
+            </span>
+
+                <ul class="list-disc ml-5 mt-2 text-sm text-blue-900">
+                    <li>
+                        <strong>{{ 'info_details.android_label'|trans({}, '_returnApps') }}</strong>
+                        <code>{{ app.request.schemeAndHttpHost ~ app.request.baseUrl }}/.well-known/assetlinks.json</code>
+                        – {{ 'info_details.android_info'|trans({}, '_returnApps') }}
+                    </li>
+                    <li>
+                        <strong>{{ 'info_details.ios_label'|trans({}, '_returnApps') }}</strong>
+                        <code>{{ app.request.schemeAndHttpHost ~ app.request.baseUrl }}
+                            /.well-known/apple-app-site-association</code>
+                        – {{ 'info_details.ios_info'|trans({}, '_returnApps') }}
+                    </li>
+                </ul>
+
+                <span class="text-sm text-blue-900 block mt-2">
+                {{ 'info_details.success_message'|trans({}, '_returnApps') }}
+            </span>
+            </div>
+        </div>
+    </div>
+
     <div class="mt-6 divider-solid"></div>
 
     {% if is_granted(constant('App\\Security\\Voter\\UserAuthenticationVoter::RETURN_APPS_MANAGEMENT_WRITE')) %}
