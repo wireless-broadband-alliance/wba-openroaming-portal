@@ -20,7 +20,6 @@ export default class extends Controller {
         this.restoreFromCookie();
     }
 
-
     add(eventOrValue = '') {
         if (eventOrValue instanceof Event) {
             eventOrValue.preventDefault();
