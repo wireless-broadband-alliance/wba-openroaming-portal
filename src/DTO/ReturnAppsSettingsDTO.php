@@ -11,16 +11,33 @@ class ReturnAppsSettingsDTO
     #[Assert\NotBlank(message: 'selectOption')]
     public ?string $returnAppsEnabled = null;
 
+
     #[Assert\NotBlank(message: 'fieldCannotBeBlank')]
+    #[Assert\Regex(
+        pattern: '/^[a-zA-Z][a-zA-Z0-9_]*(\.[a-zA-Z][a-zA-Z0-9_]*)+$/',
+        message: 'invalidAndroidPackageName'
+    )]
+    #[Assert\Length(max: 255)]
     public ?string $returnAppsPackageNameAndroid = null;
 
     #[Assert\NotBlank(message: 'fieldCannotBeBlank')]
+    #[Assert\Regex(
+        pattern: '/^[a-zA-Z][a-zA-Z0-9_]*(\.[a-zA-Z][a-zA-Z0-9_]*)+$/',
+        message: 'invalidAndroidPackageName'
+    )]
+    #[Assert\Length(max: 255)]
     public ?string $returnAppsIdIOS = null;
 
     /**
      * @var list<string>
      */
-    #[Assert\NotBlank(message: 'fieldNotBlank')]
+    #[Assert\Count(min: 1, minMessage: 'atLeastOneFingerprint')]
+    #[Assert\All([
+        new Assert\Regex(
+            pattern: '/^([A-Fa-f0-9]{2}:){31}[A-Fa-f0-9]{2}$/',
+            message: 'invalidSha256Fingerprint'
+        )
+    ])]
     public array $returnAppsFingerprint = [];
 
     /**

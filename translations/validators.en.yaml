@@ -89,3 +89,7 @@ freeradius_certificate:
     invalid_bundle: 'The certificate bundle is invalid or does not match the private key.'
     expired: 'The certificate has expired.'
     mismatch_key: 'The private key does not match the certificate.'
+invalidAndroidPackageName: "Please enter a valid package name (e.g., com.example.app)."
+invalidIosBundleId: "Please enter a valid iOS bundle identifier (e.g., com.example.app)."
+invalidSha256Fingerprint: "Please enter a valid SHA-256 fingerprint (format: XX:XX:...:XX)."
+atLeastOneFingerprint: "Please provide at least one fingerprint."
