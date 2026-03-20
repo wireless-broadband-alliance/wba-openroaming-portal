@@ -17,7 +17,7 @@ class InstallationProgress
     private ?int $id = null;
 
     #[ORM\Column(nullable: true, enumType: ProcessStatusType::class)]
-    private ?ProcessStatusType $installationState = null;
+    private ?ProcessStatusType $installationState = ProcessStatusType::IN_PROGRESS;
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $dbOpenRoaming = null;
