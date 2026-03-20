@@ -20,8 +20,8 @@ class ReturnAppsSettingsDTO
 
     #[Assert\NotBlank(message: 'fieldCannotBeBlank')]
     #[Assert\Regex(
-        pattern: '/^[a-zA-Z][a-zA-Z0-9]*(?:-[a-zA-Z0-9]+)*(\.[a-zA-Z][a-zA-Z0-9]*(?:-[a-zA-Z0-9]+)*)+$/',
-        message: 'invalidIosBundleId'
+        pattern: '/^[A-Z0-9]{10}\.[a-zA-Z][a-zA-Z0-9]*(?:-[a-zA-Z0-9]+)*(\.[a-zA-Z][a-zA-Z0-9]*(?:-[a-zA-Z0-9]+)*)+$/',
+        message: 'invalidIosAppId'
     )] // reverse DNS style
     #[Assert\Length(max: 155, maxMessage: 'maxCharacters')]
     public ?string $returnAppsIdIOS = null;
