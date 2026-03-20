@@ -2,11 +2,11 @@
 
 namespace App\Entity;
 
-use App\Repository\FingerprintRepository;
+use App\Repository\ReturnAppFingerprintRepository;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: FingerprintRepository::class)]
-class Fingerprint
+#[ORM\Entity(repositoryClass: ReturnAppFingerprintRepository::class)]
+class ReturnAppFingerprint
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -20,7 +20,7 @@ class Fingerprint
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
 
-    #[ORM\Column]
+    #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $deletedAt = null;
 
     public function getId(): ?int

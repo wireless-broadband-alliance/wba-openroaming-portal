@@ -12,18 +12,18 @@ class ReturnAppsSettingsDTO
 
     #[Assert\NotBlank(message: 'fieldCannotBeBlank')]
     #[Assert\Regex(
-        pattern: '/^[a-zA-Z]\w*(\.[a-zA-Z]\w*)+$/',
+        pattern: '/^[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*)+$/',
         message: 'invalidAndroidPackageName'
-    )]
-    #[Assert\Length(max: 255)]
+    )] // Java-script style
+    #[Assert\Length(max: 255, maxMessage: 'maxCharacters')]
     public ?string $returnAppsPackageNameAndroid = null;
 
     #[Assert\NotBlank(message: 'fieldCannotBeBlank')]
     #[Assert\Regex(
-        pattern: '/^[A-Za-z0-9\-]+(\.[A-Za-z0-9\-]+)+$/',
+        pattern: '/^[a-zA-Z][a-zA-Z0-9]*(?:-[a-zA-Z0-9]+)*(\.[a-zA-Z][a-zA-Z0-9]*(?:-[a-zA-Z0-9]+)*)+$/',
         message: 'invalidIosBundleId'
-    )]
-    #[Assert\Length(max: 255)]
+    )] // reverse DNS style
+    #[Assert\Length(max: 255, maxMessage: 'maxCharacters')]
     public ?string $returnAppsIdIOS = null;
 
     /**

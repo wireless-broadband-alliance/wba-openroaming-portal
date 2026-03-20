@@ -2,18 +2,18 @@
 
 namespace App\Repository;
 
-use App\Entity\Fingerprint;
+use App\Entity\ReturnAppFingerprint;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends ServiceEntityRepository<Fingerprint>
+ * @extends ServiceEntityRepository<ReturnAppFingerprint>
  */
-class FingerprintRepository extends ServiceEntityRepository
+class ReturnAppFingerprintRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, Fingerprint::class);
+        parent::__construct($registry, ReturnAppFingerprint::class);
     }
 
     //    /**
@@ -41,9 +41,6 @@ class FingerprintRepository extends ServiceEntityRepository
     //        ;
     //    }
 
-    /**
-     * @return Fingerprint[]
-     */
     public function findActiveFingerprints(): array
     {
         return $this->createQueryBuilder('f')

@@ -3,11 +3,11 @@
 namespace App\Controller;
 
 use App\DTO\ReturnAppsSettingsDTO;
-use App\Entity\Fingerprint;
+use App\Entity\ReturnAppFingerprint;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Form\ReturnAppsType;
-use App\Repository\FingerprintRepository;
+use App\Repository\ReturnAppFingerprintRepository;
 use App\Repository\SettingRepository;
 use App\Enum\SettingName;
 use App\Security\Voter\UserAuthenticationVoter;
@@ -37,7 +37,7 @@ class AssetLinksController extends AbstractController
         private readonly TranslatorInterface $translator,
         private readonly SettingsService $settingsService,
         private readonly EntityManagerInterface $entityManager,
-        private readonly FingerprintRepository $fingerprintRepository,
+        private readonly ReturnAppFingerprintRepository $returnAppFingerprintRepository,
     ) {
     }
 
@@ -64,7 +64,7 @@ class AssetLinksController extends AbstractController
             ->findOneBy(['name' => SettingName::RETURN_APPS_PACKAGE_NAME_ANDROID->value])
             ?->getValue();
 
-        $fingerprintEntities = $this->fingerprintRepository->findActiveFingerprints();
+        $fingerprintEntities = $this->returnAppFingerprintRepository->findActiveFingerprints();
 
         $fingerprints = array_map(
             static fn($fp) => $fp->getName(),
@@ -141,7 +141,7 @@ class AssetLinksController extends AbstractController
     {
         /** @var array<string, array{value: string, description: string}> $data */
         $data = $this->getSettings->getSettings();
-        $fingerprintEntities = $this->fingerprintRepository->findActiveFingerprints();
+        $fingerprintEntities = $this->returnAppFingerprintRepository->findActiveFingerprints();
         $fingerprints = array_map(static fn($fp) => $fp->getName(), $fingerprintEntities);
 
         /** @var User $currentUser */
@@ -165,7 +165,7 @@ class AssetLinksController extends AbstractController
             $this->settingsService->updateSettingsFromArray($dto->toArray());
             $submittedValues = $form->get('fingerprints')->getData();
 
-            $currentEntities = $this->fingerprintRepository->findActiveFingerprints();
+            $currentEntities = $this->returnAppFingerprintRepository->findActiveFingerprints();
             $currentValues = array_map(static fn($fp) => $fp->getName(), $currentEntities);
 
             $toAdd = array_diff($submittedValues, $currentValues);
@@ -173,7 +173,7 @@ class AssetLinksController extends AbstractController
 
             // Add new fingerprints
             foreach ($toAdd as $value) {
-                $entity = new Fingerprint();
+                $entity = new ReturnAppFingerprint();
                 $entity->setName($value);
                 $entity->setCreatedAt(new DateTimeImmutable());
 
