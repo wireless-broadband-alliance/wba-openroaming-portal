@@ -41,6 +41,9 @@ class ReturnAppFingerprintRepository extends ServiceEntityRepository
     //        ;
     //    }
 
+    /**
+     * @return ReturnAppFingerprint[]
+     */
     public function findActiveFingerprints(): array
     {
         return $this->createQueryBuilder('f')
