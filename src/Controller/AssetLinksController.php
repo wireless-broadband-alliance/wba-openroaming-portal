@@ -55,7 +55,7 @@ class AssetLinksController extends AbstractController
 
         if ($enabled === 'false') {
             return new JsonResponse(
-                ['error' => 'Asset links are currently disabled'],
+                ['error' => 'Android App Site Association is disabled'],
                 Response::HTTP_NOT_FOUND
             );
         }
@@ -98,7 +98,7 @@ class AssetLinksController extends AbstractController
 
         if ($enabled === 'false') {
             return new JsonResponse(
-                ['error' => 'Asset links are currently disabled'],
+                ['error' => 'Apple App Site Association is disabled'],
                 Response::HTTP_NOT_FOUND
             );
         }
