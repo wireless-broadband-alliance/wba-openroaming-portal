@@ -5,3 +5,11 @@ fingerprintsDescription: 'Identificadores únicos usados para reconhecer disposi
 addFingerprint: 'Adicionar Fingerprint'
 idIos: 'Nome do pacote IOS'
 fingerprintDescription: 'Identificadores únicos utilizados para reconhecer dispositivos na funcionalidade "Return to Apps"'
+info_details:
+  title: 'Endpoints do Return Apps'
+  description: 'Para verificar a configuração do Return Apps, assegure-se de que estes endpoints estão acessíveis:'
+  android_label: 'Android'
+  android_info: 'Devolve as impressões digitais SHA256 e o nome do pacote para verificação da app.'
+  ios_label: 'iOS'
+  ios_info: 'Devolve o ficheiro App Site Association para verificação da app iOS.'
+  success_message: 'Se estes endpoints retornarem o JSON esperado, a configuração do Return Apps está correta.'

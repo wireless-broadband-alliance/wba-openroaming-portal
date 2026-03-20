@@ -5,3 +5,11 @@ fingerprintsDescription: 'Unique identifiers used to recognize devices in the Re
 addFingerprint: 'Add Fingerprint'
 idIos: 'IOS Package Name'
 fingerprintDescription: 'Unique identifiers used to recognize devices in the Return to Apps'
+info_details:
+  title: 'Return Apps Endpoints'
+  description: 'To verify your Return Apps configuration, make sure these endpoints are accessible:'
+  android_label: 'Android'
+  android_info: 'Returns the SHA256 fingerprints and package name for app verification.'
+  ios_label: 'iOS'
+  ios_info: 'Returns the App Site Association file for iOS app verification.'
+  success_message: 'If these endpoints return the expected JSON, your app linking configuration is correct.'
