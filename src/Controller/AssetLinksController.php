@@ -3,9 +3,11 @@
 namespace App\Controller;
 
 use App\DTO\ReturnAppsSettingsDTO;
+use App\Entity\Fingerprint;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use App\Form\ReturnAppsType;
+use App\Repository\FingerprintRepository;
 use App\Repository\SettingRepository;
 use App\Enum\SettingName;
 use App\Security\Voter\UserAuthenticationVoter;
@@ -13,6 +15,7 @@ use App\Service\EventActions;
 use App\Service\GetSettings;
 use App\Service\SettingsService;
 use DateTime;
+use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -34,6 +37,7 @@ class AssetLinksController extends AbstractController
         private readonly TranslatorInterface $translator,
         private readonly SettingsService $settingsService,
         private readonly EntityManagerInterface $entityManager,
+        private readonly FingerprintRepository $fingerprintRepository,
     ) {
     }
 
@@ -133,7 +137,7 @@ class AssetLinksController extends AbstractController
     {
         /** @var array<string, array{value: string, description: string}> $data */
         $data = $this->getSettings->getSettings();
-        $fingerprints = $this->fingerPrintRepository->findActiveFingerprints();
+        $fingerprints = $this->fingerprintRepository->findActiveFingerprints();
 
         /** @var User $currentUser */
         $currentUser = $this->getUser();
@@ -175,9 +179,9 @@ class AssetLinksController extends AbstractController
 
             // Add new
             foreach ($toAdd as $value) {
-                $entity = new ReturnAppFingerprint();
-                $entity->setFingerprint($value);
-                $entity->setDeletedAt(null);
+                $entity = new Fingerprint();
+                $entity->setName($value);
+                $entity->setCreatedAt(new DateTimeImmutable());
 
                 $this->entityManager->persist($entity);
             }
@@ -185,11 +189,29 @@ class AssetLinksController extends AbstractController
             // Soft delete removed
             foreach ($currentEntities as $entity) {
                 if (in_array($entity->getFingerprint(), $toRemove, true)) {
-                    $entity->setDeletedAt(new \DateTime());
+                    $entity->setDeletedAt(new DateTimeImmutable());
                 }
             }
 
             $this->entityManager->flush();
+
+            // Log the event
+            $this->eventActions->saveEvent(
+                $currentUser,
+                AnalyticalEventType::RETURN_APPS_UPDATED->value,
+                new DateTime(),
+                [
+                    'ip' => $request->getClientIp(),
+                    'user_agent' => $request->headers->get('User-Agent'),
+                    'uuid' => $currentUser->getUuid(),
+                ]
+            );
+
+            $this->addFlash(
+                'success',
+                $this->translator->trans('newChangesAppliedSuccessfully', [], 'controllers')
+            );
+            return $this->redirectToRoute('admin_dashboard_return_apps');
         }
 
         return $this->render('dashboard/shared/settings_actions.html.twig', [
