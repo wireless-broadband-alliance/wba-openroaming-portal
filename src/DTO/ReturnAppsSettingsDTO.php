@@ -12,7 +12,7 @@ class ReturnAppsSettingsDTO
 
     #[Assert\NotBlank(message: 'fieldCannotBeBlank')]
     #[Assert\Regex(
-        pattern: '/^[a-zA-Z][a-zA-Z0-9_]*(\.[a-zA-Z][a-zA-Z0-9_]*)+$/',
+        pattern: '/^[a-zA-Z]\w*(\.[a-zA-Z]\w*)+$/',
         message: 'invalidAndroidPackageName'
     )]
     #[Assert\Length(max: 255)]
