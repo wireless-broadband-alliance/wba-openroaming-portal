@@ -114,7 +114,7 @@ class AssetLinksController extends AbstractController
             [],
             UrlGeneratorInterface::ABSOLUTE_PATH
         );
-        
+
         // Add the corresponding for the app redirection
         $components = [
             [
@@ -141,7 +141,11 @@ class AssetLinksController extends AbstractController
     {
         /** @var array<string, array{value: string, description: string}> $data */
         $data = $this->getSettings->getSettings();
-        $fingerprints = $this->fingerprintRepository->findActiveFingerprints();
+        $fingerprintEntities = $this->fingerprintRepository->findActiveFingerprints();
+        $fingerprints = array_map(
+            static fn($fp) => ['fingerprint' => $fp->getName()],
+            $fingerprintEntities
+        );
 
         /** @var User $currentUser */
         $currentUser = $this->getUser();
@@ -162,10 +166,7 @@ class AssetLinksController extends AbstractController
         $form->handleRequest($request);
 
         if ($canWrite && $form->isSubmitted() && $form->isValid()) {
-            // 1. Save settings
             $this->settingsService->updateSettingsFromArray($dto->toArray());
-
-            // 2. Handle fingerprints
             $fingerprintData = $form->get('fingerprints')->getData();
 
             $submittedValues = [];

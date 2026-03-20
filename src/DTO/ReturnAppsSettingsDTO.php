@@ -4,7 +4,6 @@ namespace App\DTO;
 
 use App\Enum\SettingName;
 use Symfony\Component\Validator\Constraints as Assert;
-use App\Validator\Constraints as CustomAssert;
 
 class ReturnAppsSettingsDTO
 {
