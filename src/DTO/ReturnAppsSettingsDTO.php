@@ -23,7 +23,7 @@ class ReturnAppsSettingsDTO
         pattern: '/^[a-zA-Z][a-zA-Z0-9]*(?:-[a-zA-Z0-9]+)*(\.[a-zA-Z][a-zA-Z0-9]*(?:-[a-zA-Z0-9]+)*)+$/',
         message: 'invalidIosBundleId'
     )] // reverse DNS style
-    #[Assert\Length(max: 30, maxMessage: 'maxCharacters')]
+    #[Assert\Length(max: 155, maxMessage: 'maxCharacters')]
     public ?string $returnAppsIdIOS = null;
 
     /**
