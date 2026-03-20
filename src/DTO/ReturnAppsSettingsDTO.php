@@ -38,6 +38,9 @@ class ReturnAppsSettingsDTO
     ])]
     public array $fingerprints = [];
 
+    /**
+     * @param array<string, array<string, mixed>> $data
+     */
     public function __construct(array $data = [])
     {
         $this->returnAppsEnabled = $data[SettingName::RETURN_APPS_ENABLED->value]['value'] ?? null;
