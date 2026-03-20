@@ -173,11 +173,11 @@ class AssetLinksController extends AbstractController
             foreach ($fingerprintData as $item) {
                 $submittedValues[] = is_array($item)
                     ? $item['fingerprint']
-                    : $item->getFingerprint();
+                    : $item->getName();
             }
 
             $currentEntities = $this->fingerprintRepository->findActiveFingerprints();
-            $currentValues = array_map(static fn($fp) => $fp->getFingerprint(), $currentEntities);
+            $currentValues = array_map(static fn($fp) => $fp->getName(), $currentEntities);
 
             $toAdd = array_diff($submittedValues, $currentValues);
             $toRemove = array_diff($currentValues, $submittedValues);
@@ -193,7 +193,7 @@ class AssetLinksController extends AbstractController
 
             // Soft delete removed
             foreach ($currentEntities as $entity) {
-                if (in_array($entity->getFingerprint(), $toRemove, true)) {
+                if (in_array($entity->getName(), $toRemove, true)) {
                     $entity->setDeletedAt(new DateTimeImmutable());
                 }
             }

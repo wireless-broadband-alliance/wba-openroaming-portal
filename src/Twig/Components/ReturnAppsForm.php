@@ -52,8 +52,6 @@ final class ReturnAppsForm extends AbstractController
                 $this->returnAppsSettingsDTO->returnAppsPackageNameAndroid,
             SettingName::RETURN_APPS_ID_IOS->value =>
                 $this->returnAppsSettingsDTO->returnAppsIdIOS,
-            SettingName::RETURN_APPS_FINGERPRINTS->value =>
-                $this->returnAppsSettingsDTO->returnAppsFingerprint,
         ], false);
 
         $this->form = $form;

@@ -137,8 +137,6 @@
                 </label>
             </div>
 
-            {{ include('/dashboard/shared/settings_actions/_description.html.twig', {description: data.RETURN_APPS_FINGERPRINTS.description}) }}
-
             <button type="button"
                     class="mt-6 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
                     data-action="trusted-proxies#add">
@@ -146,7 +144,7 @@
             </button>
 
             <div data-trusted-proxies-target="collection" class="space-y-3">
-                {% for fingerprint in form.returnAppsFingerprint %}
+                {% for fingerprint in form.fingerprints %}
                     <div data-collection-item class="flex items-center space-x-2 mt-5">
                         <div class="flex-1 flex flex-col">
                             {{ form_widget(fingerprint, {attr: {class: 'form-widget'}}) }}
@@ -166,7 +164,7 @@
             <template data-trusted-proxies-target="template">
                 <div data-collection-item class="flex items-center space-x-2 mt-5">
                     <div class="flex-1 flex flex-col">
-                        {{ form_widget(form.returnAppsFingerprint.vars.prototype, {attr: {class: 'form-widget'}}) }}
+                        {{ form_widget(form.fingerprints.vars.prototype, {attr: {class: 'form-widget'}}) }}
                     </div>
                     <div>
                         <button type="button"
@@ -177,7 +175,7 @@
                     </div>
                 </div>
             </template>
-            {% do form.returnAppsFingerprint.setRendered() %}
+            {% do form.fingerprints.setRendered() %}
         </div>
     </div>
 
