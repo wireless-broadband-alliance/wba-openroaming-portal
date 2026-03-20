@@ -41,6 +41,9 @@ class FingerprintRepository extends ServiceEntityRepository
     //        ;
     //    }
 
+    /**
+     * @return Fingerprint[]
+     */
     public function findActiveFingerprints(): array
     {
         return $this->createQueryBuilder('f')

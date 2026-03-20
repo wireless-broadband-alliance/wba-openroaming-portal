@@ -55,13 +55,15 @@ class ReturnAppsSettingsDTO
         );
     }
 
+    /**
+     * @return array<string, array{value: bool|string|null}>
+     */
     public function toArray(): array
     {
         return [
             SettingName::RETURN_APPS_ENABLED->value => ['value' => $this->returnAppsEnabled],
             SettingName::RETURN_APPS_PACKAGE_NAME_ANDROID->value => ['value' => $this->returnAppsPackageNameAndroid],
             SettingName::RETURN_APPS_ID_IOS->value => ['value' => $this->returnAppsIdIOS],
-            // fingerprints are not part of settings storage
         ];
     }
 }
