@@ -47,6 +47,5 @@ class FingerprintRepository extends ServiceEntityRepository
             ->andWhere('f.deletedAt IS NULL')
             ->getQuery()
             ->getResult();
-
     }
 }

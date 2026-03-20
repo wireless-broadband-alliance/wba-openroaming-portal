@@ -18,7 +18,6 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 #[AsCommand(name: 'reset:returnApps', description: 'Reset Return to Apps Settings')]
 class ResetReturnAppsSettingsCommand extends Command
 {
-
     public function __construct(
         private readonly EntityManagerInterface $entityManager
     ) {

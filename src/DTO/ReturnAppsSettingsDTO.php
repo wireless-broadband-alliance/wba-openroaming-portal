@@ -41,7 +41,8 @@ class ReturnAppsSettingsDTO
     public function __construct(array $data = [])
     {
         $this->returnAppsEnabled = $data[SettingName::RETURN_APPS_ENABLED->value]['value'] ?? null;
-        $this->returnAppsPackageNameAndroid = $data[SettingName::RETURN_APPS_PACKAGE_NAME_ANDROID->value]['value'] ?? null;
+        $this->returnAppsPackageNameAndroid =
+            $data[SettingName::RETURN_APPS_PACKAGE_NAME_ANDROID->value]['value'] ?? null;
         $this->returnAppsIdIOS = $data[SettingName::RETURN_APPS_ID_IOS->value]['value'] ?? null;
 
         // Flatten the fingerprints to just the string value
