@@ -131,6 +131,7 @@ class AssetLinksController extends AbstractController
     {
         /** @var array<string, array{value: string, description: string}> $data */
         $data = $this->getSettings->getSettings();
+        $fingerprints = $this->fingerPrintRepository->findActiveFingerprints();
 
         /** @var User $currentUser */
         $currentUser = $this->getUser();
@@ -144,6 +145,7 @@ class AssetLinksController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid() && $canWrite) {
+            dd($dto);
             // Save updated settings
             $this->settingsService->updateSettingsFromArray($dto->toArray());
             $this->settingsService->flush();
