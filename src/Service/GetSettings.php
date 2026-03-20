@@ -236,7 +236,6 @@ readonly class GetSettings
                 SettingName::RETURN_APPS_ENABLED->value => 'Enables or disables the Return to Apps',
                 SettingName::RETURN_APPS_PACKAGE_NAME_ANDROID->value => 'Name of the package or application associated for android devices',
                 SettingName::RETURN_APPS_ID_IOS->value => 'Name of the package or application associated for iOS devices',
-                SettingName::RETURN_APPS_FINGERPRINTS->value => 'Unique identifiers used to recognize devices in the Return to Apps',
             ],
             LanguageType::PT->value => [
                 SettingName::RADIUS_REALM_NAME->value => 'O nome do realm para o seu servidor RADIUS',
@@ -328,7 +327,6 @@ readonly class GetSettings
                 SettingName::CLOUDFLARE_TOKEN->value => 'Token para renovação automática do certificado Cloudflare.',
                 SettingName::RETURN_APPS_PACKAGE_NAME_ANDROID->value => 'Nome do pacote ou da aplicação associado a dispositivos Android',
                 SettingName::RETURN_APPS_ID_IOS->value => 'Nome do pacote ou da aplicação associado a dispositivos iOS',
-                SettingName::RETURN_APPS_FINGERPRINTS->value => 'Identificadores únicos utilizados para reconhecer dispositivos na funcionalidade "Return to Apps"',
             ]
         ];
         // phpcs:enable

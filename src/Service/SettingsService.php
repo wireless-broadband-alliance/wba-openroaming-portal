@@ -41,6 +41,12 @@ readonly class SettingsService
             // Try to fetch existing setting
             $setting = $this->settingRepository->findOneBy(['name' => $name]);
 
+            if ($setting && $setting->getName() === SettingName::RETURN_APPS_FINGERPRINTS->value) {
+                foreach ($value as $item) {
+                    $valueToSet = $item['value'] ?? null;
+                }
+            }
+
             $valueToSet = $value !== null ? (string)$value : null;
 
             if ($setting) {

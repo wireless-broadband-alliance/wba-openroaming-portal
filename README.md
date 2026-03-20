@@ -513,9 +513,6 @@ certificate. **Connection errors** can happen if the right SHA1 hash is not prov
     this corresponds to the package name (e.g., com.example.app).
 78. `RETURN_APPS_ID_IOS`: Defines the application identifier used for mobile app association for iOS, this follows
     the TEAMID.bundleId format required for Apple App Site Association.
-79. `RETURN_APPS_FINGERPRINTS`: Contains the list of SHA-256 certificate fingerprints used to verify Android application
-    identity. Multiple fingerprints can be configured to support different signing certificates (e.g., debug, release,
-    or rotated keys).
 
 #### With these environment variables, you can configure and customize various aspects of the project, such as database connections, SAML settings, login methods, and more.
 
