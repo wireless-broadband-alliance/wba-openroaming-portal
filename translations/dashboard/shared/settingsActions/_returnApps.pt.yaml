@@ -13,3 +13,4 @@ info_details:
   ios_label: 'iOS'
   ios_info: 'Devolve o ficheiro App Site Association para verificação da app iOS.'
   success_message: 'Se estes endpoints retornarem o JSON esperado, a configuração do Return Apps está correta.'
+  email_generation_message: "Esta configuração irá também gerar um novo email concebido para o fluxo de registo da aplicação através das APIs de registo."

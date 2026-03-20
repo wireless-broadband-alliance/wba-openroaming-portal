@@ -197,20 +197,26 @@
                 <ul class="list-disc ml-5 mt-2 text-sm text-blue-900">
                     <li>
                         <strong>{{ 'info_details.android_label'|trans({}, '_returnApps') }}</strong>
-                        <code>{{ app.request.schemeAndHttpHost ~ app.request.baseUrl }}/.well-known/assetlinks.json</code>
+                        <code>
+                            {{ app.request.schemeAndHttpHost ~ app.request.baseUrl }}/.well-known/assetlinks.json
+                        </code>
                         – {{ 'info_details.android_info'|trans({}, '_returnApps') }}
                     </li>
                     <li>
                         <strong>{{ 'info_details.ios_label'|trans({}, '_returnApps') }}</strong>
-                        <code>{{ app.request.schemeAndHttpHost ~ app.request.baseUrl }}
-                            /.well-known/apple-app-site-association</code>
+                        <code>
+                            {{ app.request.schemeAndHttpHost ~ app.request.baseUrl }}/.well-known/apple-app-site-association
+                        </code>
                         – {{ 'info_details.ios_info'|trans({}, '_returnApps') }}
                     </li>
                 </ul>
 
                 <span class="text-sm text-blue-900 block mt-2">
-                {{ 'info_details.success_message'|trans({}, '_returnApps') }}
-            </span>
+                    {{ 'info_details.success_message'|trans({}, '_returnApps') }}
+                </span>
+                <span class="text-sm text-blue-900 block mt-2">
+                    {{ 'info_details.email_generation_message'|trans({}, '_returnApps') }}
+                </span>
             </div>
         </div>
     </div>
