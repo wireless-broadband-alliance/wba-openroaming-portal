@@ -23,6 +23,7 @@ class ReturnAppsSettingsDTO
         pattern: '/^[A-Z0-9]{10}$/',
         message: 'invalidIosTeamId'
     )]
+    #[Assert\Length(max: 10, maxMessage: 'maxCharacters')]
     public ?string $returnAppsIosTeamId = null;
 
     #[Assert\NotBlank(message: 'fieldCannotBeBlank')]
