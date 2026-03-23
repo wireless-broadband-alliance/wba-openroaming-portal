@@ -90,6 +90,7 @@ freeradius_certificate:
   expired: 'O certificado expirou.'
   mismatch_key: 'A chave privada não corresponde ao certificado.'
 invalidAndroidPackageName: "Introduza um nome de pacote válido (ex.: com.exemplo.app)."
-invalidIosBundleId: "Introduza um identificador de aplicação iOS válido (ex.: com.exemplo.app)."
+invalidIosTeamId: "Introduza um Team ID iOS válido (e.g., ABC123DEF9)."
+invalidIosBundleId: "Introduza um Bundle ID iOS válido (e.g., com.exemplo.app)."
 invalidSha256Fingerprint: "Introduza uma impressão digital SHA-256 válida (formato: XX:XX:...:XX)."
 atLeastOneFingerprint: "Introduza pelo menos uma impressão digital."
