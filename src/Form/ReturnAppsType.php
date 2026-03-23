@@ -37,7 +37,11 @@ class ReturnAppsType extends AbstractType
                 'required' => false,
                 'disabled' => $this->disabled,
             ])
-            ->add('returnAppsIdIOS', TextType::class, [
+            ->add('returnAppsIosTeamId', TextType::class, [
+                'required' => false,
+                'disabled' => $this->disabled,
+            ])
+            ->add('returnAppsIosBundleId', TextType::class, [
                 'required' => false,
                 'disabled' => $this->disabled,
             ])

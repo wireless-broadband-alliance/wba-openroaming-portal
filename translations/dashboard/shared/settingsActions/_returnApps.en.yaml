@@ -3,7 +3,7 @@ packageName: 'Android Package Name'
 fingerprints: 'Fingerprints'
 fingerprintsDescription: 'Unique identifiers used to recognize devices in the Return to Apps'
 addFingerprint: 'Add Fingerprint'
-idIos: 'IOS Package Name'
+idIos: 'IOS Team & Bundle ID'
 fingerprintDescription: 'Unique identifiers used to recognize devices in the Return to Apps'
 info_details:
   title: 'Return Apps Endpoints'

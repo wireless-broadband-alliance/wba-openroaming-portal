@@ -109,13 +109,8 @@ class AssetLinksController extends AbstractController
 
         $appIds = $appIds ? [$appIds] : [];
 
-        $path = $this->router->generate(
-            'app_api_landing',
-            [],
-            UrlGeneratorInterface::ABSOLUTE_PATH
-        );
-
         // Add the corresponding for the app redirection
+        $path = 'return-to-app';
         $components = [
             [
                 '/' => $path,

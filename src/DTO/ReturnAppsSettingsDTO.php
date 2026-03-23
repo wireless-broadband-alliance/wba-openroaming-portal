@@ -20,11 +20,18 @@ class ReturnAppsSettingsDTO
 
     #[Assert\NotBlank(message: 'fieldCannotBeBlank')]
     #[Assert\Regex(
-        pattern: '/^[A-Z0-9]{10}\.[a-zA-Z][a-zA-Z0-9]*(?:-[a-zA-Z0-9]+)*(\.[a-zA-Z][a-zA-Z0-9]*(?:-[a-zA-Z0-9]+)*)+$/',
-        message: 'invalidIosAppId'
-    )] // reverse DNS style
+        pattern: '/^[A-Z0-9]{10}$/',
+        message: 'invalidIosTeamId'
+    )]
+    public ?string $returnAppsIosTeamId = null;
+
+    #[Assert\NotBlank(message: 'fieldCannotBeBlank')]
+    #[Assert\Regex(
+        pattern: '/^[a-zA-Z][a-zA-Z0-9]*(?:-[a-zA-Z0-9]+)*(\.[a-zA-Z][a-zA-Z0-9]*(?:-[a-zA-Z0-9]+)*)+$/',
+        message: 'invalidIosBundleId'
+    )] // reverse DNS
     #[Assert\Length(max: 155, maxMessage: 'maxCharacters')]
-    public ?string $returnAppsIdIOS = null;
+    public ?string $returnAppsIosBundleId = null;
 
     /**
      * @var string[]
@@ -44,11 +51,19 @@ class ReturnAppsSettingsDTO
     public function __construct(array $data = [])
     {
         $this->returnAppsEnabled = $data[SettingName::RETURN_APPS_ENABLED->value]['value'] ?? null;
+
         $this->returnAppsPackageNameAndroid =
             $data[SettingName::RETURN_APPS_PACKAGE_NAME_ANDROID->value]['value'] ?? null;
-        $this->returnAppsIdIOS = $data[SettingName::RETURN_APPS_ID_IOS->value]['value'] ?? null;
 
-        // Flatten the fingerprints to just the string value
+        $iosFull = $data[SettingName::RETURN_APPS_ID_IOS->value]['value'] ?? null;
+
+        if ($iosFull && str_contains($iosFull, '.')) {
+            [$teamId, $bundleId] = explode('.', $iosFull, 2);
+            $this->returnAppsIosTeamId = $teamId;
+            $this->returnAppsIosBundleId = $bundleId;
+        }
+
+        // Fingerprints
         $this->fingerprints = array_map(
             static fn($fp) => is_array($fp) ? $fp['fingerprint'] : $fp->getName(),
             $data['fingerprints'] ?? []
@@ -60,10 +75,16 @@ class ReturnAppsSettingsDTO
      */
     public function toArray(): array
     {
+        $iosFull = null;
+
+        if ($this->returnAppsIosTeamId && $this->returnAppsIosBundleId) {
+            $iosFull = $this->returnAppsIosTeamId . '.' . $this->returnAppsIosBundleId;
+        }
+
         return [
             SettingName::RETURN_APPS_ENABLED->value => ['value' => $this->returnAppsEnabled],
             SettingName::RETURN_APPS_PACKAGE_NAME_ANDROID->value => ['value' => $this->returnAppsPackageNameAndroid],
-            SettingName::RETURN_APPS_ID_IOS->value => ['value' => $this->returnAppsIdIOS],
+            SettingName::RETURN_APPS_ID_IOS->value => ['value' => $iosFull],
         ];
     }
 }

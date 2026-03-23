@@ -110,11 +110,30 @@
 
             {{ include('/dashboard/shared/settings_actions/_description.html.twig', {description: data.RETURN_APPS_ID_IOS.description}) }}
 
-            <div class="flex items-center space-x-2 mt-5">
-                {{ form_widget(form.returnAppsIdIOS, {attr: {class: 'form-widget', autocomplete: 'off'}}) }}
+            <div class="flex flex-col md:flex-row items-stretch gap-2 mt-5">
+                {{ form_widget(form.returnAppsIosTeamId, {
+                    attr: {
+                        class: 'form-widget md:w-[140px] w-full font-mono',
+                        placeholder: 'TEAMID',
+                        autocomplete: 'off',
+                        maxlength: 10
+                    }
+                }) }}
+
+                <span class="hidden md:flex items-center text-lg font-semibold text-gray-500">.</span>
+
+                {{ form_widget(form.returnAppsIosBundleId, {
+                    attr: {
+                        class: 'form-widget flex-1 w-full',
+                        placeholder: 'com.example.app',
+                        autocomplete: 'off'
+                    }
+                }) }}
             </div>
+
             <div class="mt-2 -mb-2 text-center text-red-500 text-base">
-                {{ form_errors(form.returnAppsIdIOS) }}
+                {{ form_errors(form.returnAppsIosTeamId) }}
+                {{ form_errors(form.returnAppsIosBundleId) }}
             </div>
         </div>
     </div>
@@ -183,40 +202,54 @@
     </div>
 
     {# Toast Details Info Warning #}
-    <div class="mt-2 mr-2 p-2 text-base font-semibold w-full">
-        <div class="flex bg-infoBgColor/50 rounded-lg p-4 text-xs md:text-sm text-infoTextColor" role="alert">
-            <twig:ux:icon name="wba:info" class="w-10 md:w-5 h-10 md:h-5 inline mr-3 fill-current"/>
+    <div class="mt-2 mr-2 p-2 w-full">
+        <div class="flex flex-col md:flex-row bg-infoBgColor/50 rounded-lg p-4 text-xs md:text-sm text-infoTextColor gap-3"
+             role="alert">
+            {# Icon #}
+            <div class="flex-shrink-0 flex justify-center md:justify-start">
+                <twig:ux:icon name="wba:info"
+                              class="w-6 h-6 md:w-5 md:h-5 fill-current"/>
+            </div>
 
+            {# Content #}
             <div class="flex-1">
-                <h1 class="font-medium text-blue-800">{{ 'info_details.title'|trans({}, '_returnApps') }}</h1>
+                <h1 class="font-medium text-blue-800 text-sm md:text-base">
+                    {{ 'info_details.title'|trans({}, '_returnApps') }}
+                </h1>
 
-                <span class="text-sm text-blue-900 block mt-1">
-                {{ 'info_details.description'|trans({}, '_returnApps') }}
-            </span>
+                <p class="text-sm text-blue-900 mt-1">
+                    {{ 'info_details.description'|trans({}, '_returnApps') }}
+                </p>
 
-                <ul class="list-disc ml-5 mt-2 text-sm text-blue-900">
+                <ul class="list-disc ml-5 mt-2 text-sm text-blue-900 space-y-2">
                     <li>
                         <strong>{{ 'info_details.android_label'|trans({}, '_returnApps') }}</strong>
-                        <code>
+                        <code class="block break-all mt-1 bg-white/50 px-2 py-1 rounded text-xs">
                             {{ app.request.schemeAndHttpHost ~ app.request.baseUrl }}/.well-known/assetlinks.json
                         </code>
+                        <span class="block mt-1">
                         – {{ 'info_details.android_info'|trans({}, '_returnApps') }}
+                    </span>
                     </li>
+
                     <li>
                         <strong>{{ 'info_details.ios_label'|trans({}, '_returnApps') }}</strong>
-                        <code>
+                        <code class="block break-all mt-1 bg-white/50 px-2 py-1 rounded text-xs">
                             {{ app.request.schemeAndHttpHost ~ app.request.baseUrl }}/.well-known/apple-app-site-association
                         </code>
+                        <span class="block mt-1">
                         – {{ 'info_details.ios_info'|trans({}, '_returnApps') }}
+                    </span>
                     </li>
                 </ul>
 
-                <span class="text-sm text-blue-900 block mt-2">
+                <p class="text-sm text-blue-900 mt-3">
                     {{ 'info_details.success_message'|trans({}, '_returnApps') }}
-                </span>
-                <span class="text-sm text-blue-900 block mt-2">
+                </p>
+
+                <p class="text-sm text-blue-900 mt-2">
                     {{ 'info_details.email_generation_message'|trans({}, '_returnApps') }}
-                </span>
+                </p>
             </div>
         </div>
     </div>

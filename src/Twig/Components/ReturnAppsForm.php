@@ -46,12 +46,11 @@ final class ReturnAppsForm extends AbstractController
         $form = $this->createForm(ReturnAppsType::class, $this->returnAppsSettingsDTO);
 
         $form->submit([
-            SettingName::RETURN_APPS_ENABLED->value =>
-                $this->returnAppsSettingsDTO->returnAppsEnabled,
-            SettingName::RETURN_APPS_PACKAGE_NAME_ANDROID->value =>
-                $this->returnAppsSettingsDTO->returnAppsPackageNameAndroid,
-            SettingName::RETURN_APPS_ID_IOS->value =>
-                $this->returnAppsSettingsDTO->returnAppsIdIOS,
+            'returnAppsEnabled' => $this->returnAppsSettingsDTO->returnAppsEnabled,
+            'returnAppsPackageNameAndroid' => $this->returnAppsSettingsDTO->returnAppsPackageNameAndroid,
+            'returnAppsIosTeamId' => $this->returnAppsSettingsDTO->returnAppsIosTeamId,
+            'returnAppsIosBundleId' => $this->returnAppsSettingsDTO->returnAppsIosBundleId,
+            'fingerprints' => $this->returnAppsSettingsDTO->fingerprints,
         ], false);
 
         $this->form = $form;
