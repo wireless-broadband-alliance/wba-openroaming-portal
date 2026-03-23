@@ -112,7 +112,7 @@ class AssetLinksController extends AbstractController
         $path = 'return-to-app';
         $components = [
             [
-                '/' => $path,
+                '/' => '/'. $path,
                 'comment' => sprintf('Matches any URL whose path starts with %s', $path),
             ],
         ];
