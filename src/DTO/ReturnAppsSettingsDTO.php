@@ -58,8 +58,8 @@ class ReturnAppsSettingsDTO
 
         $iosFull = $data[SettingName::RETURN_APPS_ID_IOS->value]['value'] ?? null;
 
-        if ($iosFull && str_contains($iosFull, '.')) {
-            [$teamId, $bundleId] = explode('.', $iosFull, 2);
+        if ($iosFull && str_contains((string) $iosFull, '.')) {
+            [$teamId, $bundleId] = explode('.', (string) $iosFull, 2);
             $this->returnAppsIosTeamId = $teamId;
             $this->returnAppsIosBundleId = $bundleId;
         }

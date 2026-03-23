@@ -31,7 +31,6 @@ class AssetLinksController extends AbstractController
 {
     public function __construct(
         private readonly SettingRepository $settingRepository,
-        private readonly RouterInterface $router,
         private readonly EventActions $eventActions,
         private readonly GetSettings $getSettings,
         private readonly TranslatorInterface $translator,
