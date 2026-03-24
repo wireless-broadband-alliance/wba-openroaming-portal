@@ -8,3 +8,4 @@ setting_type.settingAUTH: Authentication Methods
 setting_type.settingTwoFA: Two Factor Authenticator
 setting_type.settingSMS: SMS Configuration
 setting_type.settingSchedule: Schedule Automation
+setting_type.settingReturnApps: Return Apps

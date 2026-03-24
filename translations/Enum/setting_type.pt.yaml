@@ -8,3 +8,4 @@ setting_type.settingAUTH: Métodos de Autenticação
 setting_type.settingTwoFA: Autenticador de Dois Fatores
 setting_type.settingSMS: Configuração SMS
 setting_type.settingSchedule: Configuração das Crons
+setting_type.settingReturnApps: Retorno de Aplicações
