@@ -3,7 +3,8 @@
 # Release V1.10.0
 
 - Installation Widget implementation (For first time project setup / for later use on the admin page configuration).
-- Certificate Management for the admin page (for radsecproxy/freeradius certificates)
+- Certificate Management for the admin page (for radsecproxy/freeradius certificates).
+- Return App configuration page (for centralized endpoint management for both android / iOS devices).
 - Added a new user role, Super Admin, to allow the management of the platform and the other admins.
 - Added new pages to configure the permissions of the platform admins.
 - Added a new configuration page, to manage the black-listed domains used for registration and authentication with
