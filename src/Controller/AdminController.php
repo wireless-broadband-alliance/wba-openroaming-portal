@@ -301,8 +301,7 @@ class AdminController extends AbstractController
         ]);
 
         $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid() && $canWrite) {
+        if ($canWrite && $form->isSubmitted() && $form->isValid()) {
             // Update the settings based on the form submission
             foreach ($settings as $setting) {
                 $settingName = $setting->getName();
