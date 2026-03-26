@@ -28,15 +28,16 @@ var/certs/*
 
 .idea/
 
-# Ignore everything
+# Ignore everything inside signing-keys
 signing-keys/*
 
-# Allow folders
+# Allow directories (so Git can traverse them)
 !signing-keys/
 !signing-keys/ca/
 
-# Allow specific files
-!signing-keys/ca/ca.pem
+# Allow ONLY .gitkeep files
+!signing-keys/.gitkeep
+!signing-keys/ca/.gitkeep
 
 release-package/release.zip
 
