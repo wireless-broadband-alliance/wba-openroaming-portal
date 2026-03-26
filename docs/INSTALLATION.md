@@ -35,10 +35,11 @@ This will pull the prebuilt image with all dependencies included.
 If you want to use `docker-compose-local.yml` for **development or testing**, the container **does not include
 preinstalled dependencies**. Follow these steps **before starting the containers**:
 
-1. **Install PHP dependencies** on your host machine:
+1. **Install project dependencies** on your host machine:
 
 ```bash
-composer install
+composer install     # PHP dependencies
+npm install          # Node.js dependencies for Tailwind & frontend assets
 ```
 
 2. **Create the containers** on your host machine:
@@ -58,48 +59,59 @@ docker ps
 
 ## 4. **Build Tailwind Dependencies**
 
-After completing the previous steps, compile the required Tailwind CSS and other frontend assets. The **default build
-command** is:
+First, enter the `web` container:
 
-```sh
+```bash
+docker exec -it <web-container-id> bash
+```
+
+Once inside the container, compile the required Tailwind CSS and frontend assets. The **default build command** is:
+
+```bash
 php bin/console tailwind:build
 ```
 
-For a complete guide on building and managing assets in different environments (development or production), please refer
-to the [Asset Mapper Documentation](ASSETMAPPER.md).
+### For Production
+
+To compile and **minify** assets for production:
+
+```bash
+php bin/console tailwind:build --minify
+php bin/console asset-map:compile
+```
+
+### For Development
+
+For continuous development and watching changes:
+
+```bash
+php bin/console tailwind:build
+```
+
+> For a complete guide on building and managing assets in different environments (development or production), please
+> refer to the [Asset Mapper Documentation](ASSETMAPPER.md).
 
 ## 5. **Upload Certificates**
 
-Upload your certificate files to the portal so you can generate profiles or use them for
-authentication. Follow these instructions:
+Still inside the `web` container, upload your certificate files to the portal:
 
-1. **Copy your certificate files** to the `public/signing-keys` folder of the project.
-
-    * This is the main folder for signing keys used by the portal.
-
-2. **If you have a CA certificate file** (`ca.pem`):
-
-    * Place it inside the `ca/` subfolder within `public/signing-keys`:
+1. **Copy your certificate files** to the `public/signing-keys` folder.
+2. **If you have a CA certificate** (`ca.pem`), place it inside the `ca/` subfolder:
 
 ```text
 public/signing-keys/ca/ca.pem
 ```
 
-> ⚠️ Make sure you place `ca.pem` in the **`ca/` subfolder** — the portal uses this folder specifically for trusted root
-> CAs.
-
-3. You can copy the files **from your host machine** into the folder directly or **inside the web container**, but do it
-   **before creating any profiles**.
+> ⚠️ Make sure `ca.pem` is in the `ca/` subfolder — the portal uses this folder specifically for trusted root CAs.
+> You can copy files from your host machine into the container or directly into the folder before creating profiles.
 
 ## 6. **Generate PFX Signing Key**
 
-Now, inside the `web` container, go to the tools directory and run the generatePfx
-script by doing this:
+While still inside the `web` container, go to the `tools` directory and run the PFX generation script:
 
 ```bash
-- docker exec -it <web-container-id> bash
-- cd tools
-- sh generatePfxSigningKey.sh
+cd tools
+sh generatePfxSigningKey.sh
 ```
 
 ## 7. **Migrations, Fixtures and Permissions**
