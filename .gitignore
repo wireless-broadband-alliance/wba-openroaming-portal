@@ -28,7 +28,15 @@ var/certs/*
 
 .idea/
 
+# Ignore everything
 signing-keys/*
+
+# Allow folders
+!signing-keys/
+!signing-keys/ca/
+
+# Allow specific files
+!signing-keys/ca/ca.pem
 
 release-package/release.zip
 
