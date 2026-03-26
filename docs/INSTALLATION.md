@@ -5,41 +5,96 @@ instructions for configuring the Portal.
 
 Please follow the instructions below, starting from the **root** folder of the project, to prepare it:
 
-1. **Update Environment Variables**: After you have obtained the project, make sure to update your environment
-   variables. A sample file named `.env.sample` is provided in the project root directory. Duplicate the sample file and
-   rename it to `.env`. You can then modify the environment variables to match your specific configuration. 🗝️
+## 1. **Update Environment Variables**
+
+After you have obtained the project, make sure to update your environment
+variables. A sample file named `.env.sample` is provided in the project root directory. Duplicate the sample file and
+rename it to `.env`. You can then modify the environment variables to match your specific configuration. 🗝️
 
 **Note**: When updating the database credentials in the `.env` file, make sure they **match the credentials specified in
 the docker-compose.yml** file.
 Failure to match the credentials will result in the application being unable to connect to
 the database.
 
-2. **Start Services**: Use Docker to start the necessary services. Execute the following command: 🐳
+## 2. **Start Services**
+
+Use Docker to start the necessary services. There are two scenarios:
+
+#### a) **Production / prebuilt image (default)**
 
 ```bash
-- docker compose up -d
+docker compose up -d
 ```
 
-or, only for local usage and testing,
+This will pull the prebuilt image with all dependencies included.
+
+---
+
+#### b) **Local Development / Testing**
+
+If you want to use `docker-compose-local.yml` for **development or testing**, the container **does not include
+preinstalled dependencies**. Follow these steps **before starting the containers**:
+
+1. **Install PHP dependencies** on your host machine:
 
 ```bash
-- docker compose -f docker-compose-local.yml up -d
+composer install
 ```
 
-3. **Check Containers Status**: After executing the previous command, ensure that all containers for each service are
-   appropriately formed. The following command may be used to verify the status of each container, example:
+2. **Create the containers** on your host machine:
 
 ```bash
-- docker ps
+docker-compose -f docker-compose-local.yml up -d
 ```
 
-4. **Upload Certificates**:
-   Upload your certificate files to the `public/signing-keys` directory for the portal o eventually generate profiles
-   based on your certificates.
-   You can either upload the certs to this folder, inside/outside the container web, but off course before creating it.
+## 3. **Check Containers Status**
 
-5. **Generate PFX Signing Key**: Now, inside the `web` container, go to the tools directory and run the generatePfx
-   script by doing this:
+After executing the previous command, ensure that all containers for each service are
+appropriately formed. The following command may be used to verify the status of each container, example:
+
+```bash
+docker ps
+```
+
+## 4. **Build Tailwind Dependencies**
+
+After completing the previous steps, compile the required Tailwind CSS and other frontend assets. The **default build
+command** is:
+
+```sh
+php bin/console tailwind:build
+```
+
+For a complete guide on building and managing assets in different environments (development or production), please refer
+to the [Asset Mapper Documentation](ASSETMAPPER.md).
+
+## 5. **Upload Certificates**
+
+Upload your certificate files to the portal so you can generate profiles or use them for
+authentication. Follow these instructions:
+
+1. **Copy your certificate files** to the `public/signing-keys` folder of the project.
+
+    * This is the main folder for signing keys used by the portal.
+
+2. **If you have a CA certificate file** (`ca.pem`):
+
+    * Place it inside the `ca/` subfolder within `public/signing-keys`:
+
+```text
+public/signing-keys/ca/ca.pem
+```
+
+> ⚠️ Make sure you place `ca.pem` in the **`ca/` subfolder** — the portal uses this folder specifically for trusted root
+> CAs.
+
+3. You can copy the files **from your host machine** into the folder directly or **inside the web container**, but do it
+   **before creating any profiles**.
+
+## 6. **Generate PFX Signing Key**
+
+Now, inside the `web` container, go to the tools directory and run the generatePfx
+script by doing this:
 
 ```bash
 - docker exec -it <web-container-id> bash
@@ -47,8 +102,10 @@ or, only for local usage and testing,
 - sh generatePfxSigningKey.sh
 ```
 
-6. **Migrations, Fixtures and Permissions**: Still inside of the`web` container, you need to run this 3 commands to load
-   the database schema, load is respective settings and add permissions to a specific folder to save images:
+## 7. **Migrations, Fixtures and Permissions**
+
+Still inside of the`web` container, you need to run this 3 commands to load
+the database schema, load is respective settings and add permissions to a specific folder to save images:
 
 ```bash
 - php bin/console doctrine:migrations:migrate
@@ -74,7 +131,7 @@ Make sure to check the `src/DataFixtures/SettingFixture.php` file for any refere
 migrations about
 the database on the migrations folder of the project.
 
-7. **Generate JWT Keys**
+## 8. **Generate JWT Keys**
 
 This step is required for the **API** configuration. To enable JWT authentication, you need to generate a key pair (
 private and public keys). Make sure to run the
@@ -84,7 +141,7 @@ following command on the root folder of the project to generate these keys:
 php bin/console lexik:jwt:generate-keypair 
 ```
 
-or 
+or
 
 ```bash
 php bin/console lexik:jwt:generate-keypair --passphrase=<your_passphrase>
@@ -97,7 +154,10 @@ This command will create the following files in the `config/jwt` directory:
 
 Make sure to keep these keys secure, especially the private key.
 
-8. **Configure JWT and CORS**: Make sure this configuration is set up on `.env` the JWT and CORS environment variables in your `.env` file:
+## 9. **Configure JWT and CORS**
+
+Make sure this configuration is set up on `.env` the JWT and CORS environment variables
+in your `.env` file:
 
 ```env
 JWT_SECRET_KEY=%kernel.project_dir%/config/jwt/private.pem
@@ -119,7 +179,7 @@ environment.
 
 ### For a complete installation of the portal, please follow these steps
 
-These steps will enhance the portal's security and enable key features required for its full functionality 
+These steps will enhance the portal's security and enable key features required for its full functionality
 (Cron Commands, Microsoft login, Google Login, SAML login and GeoLite2).
 
 ### 🔧 Set up a CRON Job for automation commands
@@ -174,14 +234,13 @@ make sure to expose a SAML attribute on your IDP named
 to expose a unique id of the SAML account.
 This property it's required to authenticate users if one of them doesn't have an email defined on the IDP.
 
-
-### GeoLite Configuration 
+### GeoLite Configuration
 
 > **Important**: GeoLite2 is mandatory for a complete portal installation
 
-GeoLite2 is important for personalizing the user experience based on their location. It allows the portal to identify 
-the user's region from their IP address, helping us adjust content, set cookies properly, and comply with local laws, 
-such as the GDPR. By using GeoLite2, we ensure that our portal delivers relevant content and respects privacy and 
+GeoLite2 is important for personalizing the user experience based on their location. It allows the portal to identify
+the user's region from their IP address, helping us adjust content, set cookies properly, and comply with local laws,
+such as the GDPR. By using GeoLite2, we ensure that our portal delivers relevant content and respects privacy and
 cookie consent regulations.
 
 For detailed instructions on the GeoLite GUI setup, operations, and usage, refer to
@@ -198,7 +257,8 @@ It's **recommended** to follow standard security practices, including:
 - Properly configuring **firewalls** to **protect database servers** and another critical infrastructure.
 - Ensuring all **software** and **dependencies** are **up to date** with the latest security patches.
 
-And again, please **do not share** any of your generated keys from these installations steps and keep as safe as possible.
+And again, please **do not share** any of your generated keys from these installations steps and keep as safe as
+possible.
 
 ## 🎉 Congratulations! 🎉
 
@@ -214,7 +274,8 @@ If you are running the portal locally, you can
 use localhost for an IP address.
 And make sure to use **port 80**, it's the default port of the project.
 
-If you encounter any issues or have any questions along the way, don't hesitate to check to the **Troubleshooting** section on this README or reach out to our support team for assistance.
+If you encounter any issues or have any questions along the way, don't hesitate to check to the **Troubleshooting**
+section on this README or reach out to our support team for assistance.
 
 Thank you for choosing the OpenRoaming Provisioning Portal. We hope it helps your Wi-Fi experience and makes it easier
 to connect in any location! 💻📱
