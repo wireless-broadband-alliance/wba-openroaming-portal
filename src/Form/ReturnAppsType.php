@@ -27,8 +27,8 @@ class ReturnAppsType extends AbstractType
         $builder
             ->add('returnAppsEnabled', ChoiceType::class, [
                 'choices' => [
-                    OperationMode::ON->value => 'true',
-                    OperationMode::OFF->value => 'false',
+                    OperationMode::ON->value => OperationMode::ON->value,
+                    OperationMode::OFF->value => OperationMode::OFF->value,
                 ],
                 'required' => false,
                 'disabled' => $this->disabled,

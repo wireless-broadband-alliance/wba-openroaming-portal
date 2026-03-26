@@ -454,8 +454,8 @@ class SiteController extends AbstractController
         $data = $this->getSettings->getSettings();
 
         // Check if RETURN_APPS_ENABLED is true
-        $returnAppsEnabled = $data[SettingName::RETURN_APPS_ENABLED->value]['value'] ?? 'false';
-        if ($returnAppsEnabled !== 'true') {
+        $returnAppsEnabled = $data[SettingName::RETURN_APPS_ENABLED->value]['value'] ?? OperationMode::OFF->value;
+        if ($returnAppsEnabled !== OperationMode::ON->value) {
             throw $this->createAccessDeniedException(
                 $this->translator->trans(
                     'access_denied_feature_disabled',

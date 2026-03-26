@@ -38,7 +38,7 @@ preinstalled dependencies**. Follow these steps **before starting the containers
 1. **Install project dependencies** on your host machine:
 
 ```bash
-composer install     # PHP dependencies
+sudo composer install     # PHP dependencies
 npm install          # Node.js dependencies for Tailwind & frontend assets
 ```
 

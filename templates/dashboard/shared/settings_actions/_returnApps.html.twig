@@ -28,13 +28,13 @@
                     On
                     <input type="radio"
                            name="{{ form.returnAppsEnabled.vars.full_name }}"
-                           value="true"
+                           value="{{ constant('App\\Enum\\OperationMode::ON').value }}"
                            class="radio-input hidden"
                             {% if form.returnAppsEnabled.vars.disabled %} disabled="disabled" {% endif %}
-                            {{ form.returnAppsEnabled.vars.value == 'true' ? 'checked' : '' }}
+                            {{ form.returnAppsEnabled.vars.value == constant('App\\Enum\\OperationMode::ON').value ? 'checked' : '' }}
                             {{ stimulus_action('radio', 'toggle')|stimulus_action('radio-card', 'unblock') }}
                             {{ stimulus_target('radio-card', 'on') }}>
-                    <div class="custom-radio pr-3 pt-1.5 {{ form.returnAppsEnabled.vars.value == 'true' ? '' : 'hidden' }}" {{ stimulus_target('radio', 'on') }}>
+                    <div class="custom-radio pr-3 pt-1.5 {{ form.returnAppsEnabled.vars.value == constant('App\\Enum\\OperationMode::ON').value ? '' : 'hidden' }}" {{ stimulus_target('radio', 'on') }}>
                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10" viewBox="0 0 14 10" fill="none">
                             <path fill-rule="evenodd" clip-rule="evenodd"
                                   d="M13.0303 0.96967C13.3232 1.26256 13.3232 1.73744 13.0303 2.03033L6.03033 9.03033C5.73744 9.32322 5.26256 9.32322 4.96967 9.03033L0.96967 5.03033C0.676777 4.73744 0.676777 4.26256 0.96967 3.96967C1.26256 3.67678 1.73744 3.67678 2.03033 3.96967L5.5 7.43934L11.9697 0.96967C12.2626 0.676777 12.7374 0.676777 13.0303 0.96967Z"
@@ -48,13 +48,13 @@
                     Off
                     <input type="radio"
                            name="{{ form.returnAppsEnabled.vars.full_name }}"
-                           value="false"
+                           value="{{ constant('App\\Enum\\OperationMode::OFF').value }}"
                            class="radio-input hidden"
                             {% if form.returnAppsEnabled.vars.disabled %} disabled="disabled" {% endif %}
-                            {{ form.returnAppsEnabled.vars.value == 'false' ? 'checked' : '' }}
+                            {{ form.returnAppsEnabled.vars.value == constant('App\\Enum\\OperationMode::OFF').value ? 'checked' : '' }}
                             {{ stimulus_action('radio', 'toggle')|stimulus_action('radio-card', 'block') }}
                             {{ stimulus_target('radio-card', 'off') }}>
-                    <div class="custom-radio pr-3 pt-1.5 {{ form.returnAppsEnabled.vars.value == 'false' ? '' : 'hidden' }}" {{ stimulus_target('radio', 'off') }}>
+                    <div class="custom-radio pr-3 pt-1.5 {{ form.returnAppsEnabled.vars.value == constant('App\\Enum\\OperationMode::OFF').value ? '' : 'hidden' }}" {{ stimulus_target('radio', 'off') }}>
                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="10" viewBox="0 0 14 10" fill="none">
                             <path fill-rule="evenodd" clip-rule="evenodd"
                                   d="M13.0303 0.96967C13.3232 1.26256 13.3232 1.73744 13.0303 2.03033L6.03033 9.03033C5.73744 9.32322 5.26256 9.32322 4.96967 9.03033L0.96967 5.03033C0.676777 4.73744 0.676777 4.26256 0.96967 3.96967C1.26256 3.67678 1.73744 3.67678 2.03033 3.96967L5.5 7.43934L11.9697 0.96967C12.2626 0.676777 12.7374 0.676777 13.0303 0.96967Z"
@@ -235,7 +235,8 @@
                     <li>
                         <strong>{{ 'info_details.ios_label'|trans({}, '_returnApps') }}</strong>
                         <code class="block break-all mt-1 bg-white/50 px-2 py-1 rounded text-xs">
-                            {{ app.request.schemeAndHttpHost ~ app.request.baseUrl }}/.well-known/apple-app-site-association
+                            {{ app.request.schemeAndHttpHost ~ app.request.baseUrl }}
+                            /.well-known/apple-app-site-association
                         </code>
                         <span class="block mt-1">
                         – {{ 'info_details.ios_info'|trans({}, '_returnApps') }}

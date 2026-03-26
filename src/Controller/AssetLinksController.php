@@ -6,6 +6,7 @@ use App\DTO\ReturnAppsSettingsDTO;
 use App\Entity\ReturnAppFingerprint;
 use App\Entity\User;
 use App\Enum\AnalyticalEventType;
+use App\Enum\OperationMode;
 use App\Form\ReturnAppsType;
 use App\Repository\ReturnAppFingerprintRepository;
 use App\Repository\SettingRepository;
@@ -52,7 +53,7 @@ class AssetLinksController extends AbstractController
 
         $enabled = $enabledSetting?->getValue();
 
-        if ($enabled === 'false') {
+        if ($enabled === OperationMode::OFF->value) {
             return new JsonResponse(
                 ['error' => 'Android App Site Association is disabled'],
                 Response::HTTP_NOT_FOUND
@@ -95,7 +96,7 @@ class AssetLinksController extends AbstractController
 
         $enabled = $enabledSetting?->getValue();
 
-        if ($enabled === 'false') {
+        if ($enabled === OperationMode::OFF->value) {
             return new JsonResponse(
                 ['error' => 'Apple App Site Association is disabled'],
                 Response::HTTP_NOT_FOUND
@@ -131,7 +132,7 @@ class AssetLinksController extends AbstractController
 
     #[Route('/dashboard/settings/returnApps', name: 'admin_dashboard_return_apps')]
     #[IsGranted(UserAuthenticationVoter::RETURN_APPS_MANAGEMENT_READ)]
-    public function settingsTwoFA(Request $request): Response
+    public function settingsReturnApps(Request $request): Response
     {
         /** @var array<string, array{value: string, description: string}> $data */
         $data = $this->getSettings->getSettings();
