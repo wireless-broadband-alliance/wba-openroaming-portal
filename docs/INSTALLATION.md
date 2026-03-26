@@ -85,7 +85,7 @@ php bin/console asset-map:compile
 For continuous development and watching changes:
 
 ```bash
-php bin/console tailwind:build
+php bin/console tailwind:build -w
 ```
 
 > For a complete guide on building and managing assets in different environments (development or production), please
