@@ -1,4 +1,4 @@
-# ⚙️ Installation Guide
+# Installation Guide
 
 This guide is intended solely to assist in setting up the OpenRoaming Provisioning Portal. It provides step-by-step
 instructions for configuring the Portal.
@@ -9,7 +9,7 @@ Please follow the instructions below, starting from the **root** folder of the p
 
 After you have obtained the project, make sure to update your environment
 variables. A sample file named `.env.sample` is provided in the project root directory. Duplicate the sample file and
-rename it to `.env`. You can then modify the environment variables to match your specific configuration. 🗝️
+rename it to `.env`. You can then modify the environment variables to match your specific configuration.
 
 **Note**: When updating the database credentials in the `.env` file, make sure they **match the credentials specified in
 the docker-compose.yml** file.
@@ -39,7 +39,6 @@ preinstalled dependencies**. Follow these steps **before starting the containers
 
 ```bash
 sudo composer install     # PHP dependencies
-npm install          # Node.js dependencies for Tailwind & frontend assets
 ```
 
 2. **Create the containers** on your host machine:
@@ -102,7 +101,7 @@ Still inside the `web` container, upload your certificate files to the portal:
 public/signing-keys/ca/ca.pem
 ```
 
-> ⚠️ Make sure `ca.pem` is in the `ca/` subfolder — the portal uses this folder specifically for trusted root CAs.
+> Make sure `ca.pem` is in the `ca/` subfolder — the portal uses this folder specifically for trusted root CAs.
 > You can copy files from your host machine into the container or directly into the folder before creating profiles.
 
 ## 6. **Generate PFX Signing Key**
@@ -187,14 +186,14 @@ The `CORS_ALLOW_ORIGIN` regex allows requests from `localhost` or `127.0.0.1` du
 Adjust it based on your deployment needs, and make sure to not use the default value from the sample in a production
 environment.
 
-## 🛑 Important References Configurations 🛑
+## Important References Configurations
 
 ### For a complete installation of the portal, please follow these steps
 
 These steps will enhance the portal's security and enable key features required for its full functionality
 (Cron Commands, Microsoft login, Google Login, SAML login and GeoLite2).
 
-### 🔧 Set up a CRON Job for automation commands
+### Set up a CRON Job for automation commands
 
 For reference, all the previous documentation related to the **CRONGUI.md** was discontinued. Now the framework
 handles all this automation, and the supervisor configuration takes cares of the process. If you want to run the
@@ -258,7 +257,7 @@ cookie consent regulations.
 For detailed instructions on the GeoLite GUI setup, operations, and usage, refer to
 the [GeoLite GUI Guide](../docs/GEOLITEGUI.md).
 
-### 🛑 Important Security Note after Installation 🛑
+### Important Security Note after Installation
 
 **It is critical to change the application to "prod"** mode before exposing the OpenRoaming Provisioning Portal to the
 internet or any production environment. Running the portal in "dev" mode on a public network **could reveal vital
@@ -272,11 +271,11 @@ It's **recommended** to follow standard security practices, including:
 And again, please **do not share** any of your generated keys from these installations steps and keep as safe as
 possible.
 
-## 🎉 Congratulations! 🎉
+## Congratulations!
 
-You've successfully completed the installation process of the OpenRoaming Provisioning Portal. 🚀
+You've successfully completed the installation process of the OpenRoaming Provisioning Portal.
 
-Now, it's time to access your fully set-up portal! 🌐
+Now, it's time to access your fully set-up portal!
 
 To get started, open your favorite web browser and type the following address in the URL bar:
 http://YOUR_SERVER_IP:80
@@ -290,9 +289,9 @@ If you encounter any issues or have any questions along the way, don't hesitate 
 section on this README or reach out to our support team for assistance.
 
 Thank you for choosing the OpenRoaming Provisioning Portal. We hope it helps your Wi-Fi experience and makes it easier
-to connect in any location! 💻📱
+to connect in any location!
 
-## 🚧 Troubleshooting
+## Troubleshooting
 
 Here are some probable troubleshooting issues you may experience during the OpenRoaming Provisioning Portal
 installation:
@@ -319,7 +318,7 @@ To solve this, use the chmod command inside the `web` container, to give the scr
 - chmod +x tools/generatePfxSigningKey.sh
 ```
 
-## 📞 Contact and Feedback
+## Contact and Feedback
 
 Your suggestions and questions will help us improve the platform's usability and experience.
 

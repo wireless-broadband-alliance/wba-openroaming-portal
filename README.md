@@ -5,49 +5,49 @@ baseline the industry** on the necessary components for developing an enabler co
 
 # Table of Contents
 
-1. [💡 Why It Was Created?](#-why-it-was-created)
+1. [Why It Was Created?](#why-it-was-created)
 
-2. [🤔 How does it Work?](#-how-does-it-work)
+2. [How does it Work?](#how-does-it-work)
 
-3. [🛠️ Tools Used](#-tools-used)
+3. [Tools Used](#tools-used)
 
-4. [📜 Prerequisites](#-prerequisites)
+4. [Prerequisites](#prerequisites)
 
-5. [📥 How to Get the Project](#-how-to-get-the-project)
+5. [How to Get the Project](#how-to-get-the-project)
 
-6. [📖 Features](#-features)
+6. [Features](#features)
     - [User Management](#user-management)
     - [Portal Management](#portal-management)
     - [Settings Management](#settings-management)
     - [Portal Statistics](#portal-statistics)
     - [Connectivity Statistics](#connectivity-statistics)
 
-7. [🚀 OpenRoaming Portal API](#-openroaming-portal-api)
+7. [OpenRoaming Portal API](#openroaming-portal-api)
 
-8. [⚙️ Installation Guide](#-installation-guide)
+8. [Installation Guide](#installation-guide)
 
-9. [🛑 Upgrade Stop: Important Instructions for Future Updates](#-upgrade-stop-important-instructions-for-future-updates)
+9. [Upgrade Stop: Important Instructions for Future Updates](#upgrade-stop-important-instructions-for-future-updates)
 
-10. [👀 Portal Overview & Baseline Operation](#-portal-overview--baseline-operation)
-    - [🔧 Environment Variables](#-environment-variables)
-        - [Symfony Application Variables](#-environment-variables)
+10. [Portal Overview & Baseline Operation](#portal-overview--baseline-operation)
+    - [Environment Variables](#environment-variables)
+        - [Symfony Application Variables](#environment-variables)
         - [Google Client & Secret Credentials](#google-client-and-secret-credentials)
         - [Microsoft Authenticator Credentials](#microsoft-client-and-secret-credentials)
-        - [🔒 SAML Specific Settings](#-saml-specific-settings)
-        - [👾 Turnstile Integration](#-turnstile-integration)
-        - [🌍 GeoLite GUI Documentation](#-geolite-gui-documentation)
-        - [🕷️ API Platform](#-api-platform)
-        - [🪙 JWT Tokens](#-jwt-tokens)
+        - [SAML Specific Settings](#saml-specific-settings)
+        - [Turnstile Integration](#turnstile-integration)
+        - [GeoLite GUI Documentation](#geolite-gui-documentation)
+        - [API Platform](#api-platform)
+        - [JWT Tokens](#jwt-tokens)
 
-11. [🔑 Admin Page Access Page](#-admin-page-access-page)
+11. [Admin Page Access Page](#admin-page-access-page)
 
-12. [🔧 Set up a CRON Job for automation commands](#-set-up-a-cron-job-for-automation-commands)
+12. [Set up a CRON Job for automation commands](#set-up-a-cron-job-for-automation-commands)
 
-13. [🛠️ Settings Table](#-settings-table)
+13. [Settings Table](#settings-table)
 
-14. [📩 Contact Information](#-contact-information)
+14. [Contact Information](#contact-information)
 
-## 💡 Why it was created?
+## Why it was created?
 
 The primary goal of the **OpenRoaming Provisioning Portal is to simplify the provisioning of identities using
 Passpoint**, enabling an OpenRoaming network to support seamless Wi-Fi connectivity and enhance security for users
@@ -56,7 +56,7 @@ across various environments.
 The goal is to **provide secure Wi-Fi access to everyone** without the need for repeated logins or unsecure/open
 networks, making Wi-Fi connectivity for individuals and enterprises easier, quicker, and more user-friendly.
 
-## 🤔 How does it work?
+## How does it work?
 
 OpenRoaming is an **open standard developed to enable global, secure, and automatic Wi-Fi connectivity**. With
 OpenRoaming, users can connect to Wi-Fi networks without being prompted for login credentials. Instead, it utilizes
@@ -70,7 +70,7 @@ key enabler for OpenRoaming technology.
 
 For more information about OpenRoaming Technology, please visit: https://openroaming.org
 
-## 🛠️ Tools Used
+## Tools Used
 
 These are some of the most important tools used on the development of this project:
 
@@ -81,7 +81,7 @@ These are some of the most important tools used on the development of this proje
 - **MySQL Database**: Efficient method to save and return user profiles and settings of the portal.
 - **Docker**: Encapsulating the project in containers to improve deployment and compatibility.
 
-## 📜 Prerequisites:
+## Prerequisites:
 
 - Linux-based system - Ubuntu 22.04 LTS (tested for the reference implementation)
 - Knowledge about Linux OS (required to set up the project)
@@ -90,7 +90,7 @@ These are some of the most important tools used on the development of this proje
 - Docker compose (responsible for managing multiple containers)
 - Git (optional, if the user prefers to clone the repository)
 
-## 📥 How to get the Project
+## How to get the Project
 
 There are two options to retrieve the project:
 
@@ -105,7 +105,7 @@ There are two options to retrieve the project:
 - git clone <repository-url>
 ```
 
-## 📖 Features
+## Features
 
 This section explains the basic concepts behind each portal component.
 
@@ -169,7 +169,7 @@ This page shows data related to the hybrid machine
 - **Total of Current Authentications** Shows the number of current users connected with a profile (This card is
   independent of the date filtering)
 
-## 🚀 OpenRoaming Portal API
+## OpenRoaming Portal API
 
 This page shows data related to the endpoints in the project required for user authentication, management, and
 configuration within the OpenRoaming Portal. It includes detailed descriptions of each endpoint, highlighting their
@@ -182,7 +182,7 @@ Please refer to the [API documentation](docs/Api/V2/index_v2.html) for detailed 
 
 Follow this link for more information on API documentation: [Api Guide](docs/APIGUI.md)
 
-## 🛑 Upgrade Stop: Important Instructions for Future Updates
+## Upgrade Stop: Important Instructions for Future Updates
 
 Certain upgrades may require additional steps or preparation to ensure a smooth and successful transition. These steps
 are vital to maintaining the integrity of your system and avoiding issues caused by breaking changes. Always adhere to
@@ -194,21 +194,21 @@ the instructions provided for each version you are upgrading to.
 Follow this link for more information about upgrading this
 project: [Upgrade Guide](docs/UPGRADE.md).
 
-# ⚙️ Installation Guide
+# Installation Guide
 
 Follow this link for more information on installing this
 project: [Installation Guide](docs/INSTALLATION.md).
 
-# 🛠 AssetMapper
+# AssetMapper
 
 If you notice any issues with styling or frontend assets, please refer
 to [ASSETMAPPER Configurations](./docs/ASSETMAPPER.md).
 
-# 🔑 Admin Page Access Page
+# Admin Page Access Page
 
 Follow this link for a portal user/admin interface overview: [Portal Guide](docs/PORTALGUI.md).
 
-# 👀 Portal Overview & Baseline Operation
+# Portal Overview & Baseline Operation
 
 The objective is for the user to get familiarized with the project and its baseline features.
 
@@ -235,7 +235,7 @@ again, because it's a new demo account being generated on the portal.
 
 Follow this link for a portal user interface overview: [Portal Guide](docs/PORTALGUI.md).
 
-## 🔧 Environment Variables
+## Environment Variables
 
 The OpenRoaming Provisioning Portal utilizes environment variables for its configuration.
 Below is an overview of the different variables and their functions:
@@ -299,7 +299,7 @@ Once obtained, you will use the following environment variables in your portal c
 - `MICROSOFT_CLIENT_ID`
 - `MICROSOFT_CLIENT_SECRET`
 
-### 🔒 SAML Specific Settings
+### SAML Specific Settings
 
 These variables are needed to set up the SAML Service Provider (SP) and Identity Provider (IdP):
 
@@ -320,7 +320,7 @@ make sure to expose a SAML attribute on your IDP named
 to expose a unique id of the SAML account.
 This property it's required to authenticate users if one of them doesn't have an email defined on the IDP.
 
-### 👾 Turnstile Integration
+### Turnstile Integration
 
 These two are used to configure the Turnstile integration with the portal, to check and validate actual users.
 
@@ -333,19 +333,19 @@ link: [Cloudflare Turnstile Testing](https://developers.cloudflare.com/turnstile
 And for any **production deployment**, please follow the
 link: [Cloudflare Turnstile Production Guide]( https://developers.cloudflare.com/turnstile/get-started/).
 
-### 🌍 GeoLite GUI Documentation
+### GeoLite GUI Documentation
 
 For detailed instructions on the GeoLite GUI setup, operations, and usage, refer to
 the [GeoLite GUI Guide](docs/GEOLITEGUI.md).
 
-### 🕷️ API Platform
+### API Platform
 
 The following configurations are required for the API of the project.
 
 - `CORS_ALLOW_ORIGIN`: Required to let the project know which domain is able to use the API, is not necessary to change
   this env.
 
-#### 🪙 Jwt Tokens
+#### Jwt Tokens
 
 If you are planning on using the API, please make sure to run the following command on the root folder of the container
 project:
@@ -362,7 +362,7 @@ check the `.env.sample`.
 - `JWT_PASSPHRASE`: The private key location.
 - `JWT_EXPIRATION`: The expiration date of the token.
 
-### 🔧 Set up a CRON Job for automation commands
+### Set up a CRON Job for automation commands
 
 For reference, all the previous documentation related to the **CRONGUI.md** was discontinued. Now the framework
 handles all this automation, and the supervisor configuration takes cares of the process. If you want to run the
@@ -374,11 +374,11 @@ php bin/console messenger:consume scheduler_default -vv
 
 Also, all this setup is configured on the following file: `src/Schedule.php`
 
-## 🔑 Admin Page Access Page
+## Admin Page Access Page
 
 Follow this link for a portal user/admin interface overview: [Portal Guide](docs/PORTALGUI.md).
 
-### 🛠️ Settings Table
+### Settings Table
 
 The OpenRoaming Provisioning Portal has a detailed "setting" table that allows you to customize the application to your
 individual needs. Here's a rundown of several important variables and their functions:
@@ -516,11 +516,11 @@ certificate. **Connection errors** can happen if the right SHA1 hash is not prov
 
 #### With these environment variables, you can configure and customize various aspects of the project, such as database connections, SAML settings, login methods, and more.
 
-## 📩 Contact Information?
+## Contact Information?
 
 For more information please contact: openroaming@wballiance.com
 
-## 🔍 Prometheus Metrics
+## Prometheus Metrics
 
 The portal exposes metrics for monitoring using Prometheus. The metrics are available at the `/metrics` endpoint.
 

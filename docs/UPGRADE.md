@@ -1,8 +1,8 @@
-# 🛑 Upgrade Guide: Important Instructions for Future Updates
+# Upgrade Guide: Important Instructions for Future Updates
 
 ## Table of Contents
 
-1. [⚠️ Critical Warning: Read Before You Upgrade](#-critical-warning-read-before-you-upgrade-)
+1. [Critical Warning: Read Before You Upgrade](#critical-warning-read-before-you-upgrade)
 2. [General Upgrade Path Guidelines](#general-upgrade-path-guidelines)
 3. [Upgrade Path Matrix](#upgrade-path-matrix)
 4. [Release-Specific Notes: Version 1.8.1](#release-specific-notes-version-181)
@@ -14,12 +14,12 @@
 
 ---
 
-# ⚠️🛑 **CRITICAL WARNING: READ BEFORE YOU UPGRADE** 🛑⚠️
+# **CRITICAL WARNING: READ BEFORE YOU UPGRADE**
 
-> **🚨 FAILURE TO FOLLOW THESE INSTRUCTIONS MAY RESULT IN:**
-> - **Data Loss** 💾
-> - **Significant Downtime** ⌛
-> - **Irreversible System Errors** ❗
+> **FAILURE TO FOLLOW THESE INSTRUCTIONS MAY RESULT IN:**
+> - **Data Loss**
+> - **Significant Downtime**
+> - **Irreversible System Errors**
 
 ### Key Precautions
 
