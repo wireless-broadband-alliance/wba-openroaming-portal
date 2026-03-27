@@ -7,6 +7,7 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 class AdminConfigDTO
 {
+    #[Assert\NotBlank(message: 'fieldNotBlank')]
     #[Assert\Email(message: 'emailNotValid')]
     #[Assert\Length(max: 100, maxMessage: 'maxCharacters')]
     public ?string $email = null;
