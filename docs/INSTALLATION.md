@@ -90,16 +90,33 @@ php bin/console tailwind:build -w
 > For a complete guide on building and managing assets in different environments (development or production), please
 > refer to the [Asset Mapper Documentation](ASSETMAPPER.md).
 
-## 5. **Upload Certificates**
+### 5. **Upload Certificates**
 
-Still inside the `web` container, upload your certificate files to the portal:
+Still inside the `web` container, upload your certificate files to the portal.
 
 1. **Copy your certificate files** to the `public/signing-keys` folder.
-2. **If you have a CA certificate** (`ca.pem`), place it inside the `ca/` subfolder:
+
+2. The portal supports **Let's Encrypt certificates** (commonly used for **OpenRoaming / FreeRADIUS authentication**).
+   The certificate files should be placed using the following structure:
+
+```
+public/signing-keys/
+ ├── cert.pem
+ ├── chain.pem
+ ├── fullchain.pem
+ ├── privkey.pem
+ └── ca/
+     └── ca.pem
+```
+
+3. **In case you also have your custom CA**, please place it inside the `ca/` folder as `ca.pem`.
 
 ```text
 public/signing-keys/ca/ca.pem
 ```
+
+> **Note:** When using Let's Encrypt, these files are typically generated in
+> `/etc/letsencrypt/live/<your-domain>/` and can be copied into the folder above.
 
 > Make sure `ca.pem` is in the `ca/` subfolder — the portal uses this folder specifically for trusted root CAs.
 > You can copy files from your host machine into the container or directly into the folder before creating profiles.
