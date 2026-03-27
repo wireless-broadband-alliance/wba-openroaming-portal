@@ -38,7 +38,7 @@ signing-keys/*
 release-package/release.zip
 
 public/resources/uploaded/*
-!public/resources/upload/.gitkeep
+!public/resources/uploaded/.gitkeep
 
 pgp_public_key/*
 !pgp_public_key/.gitkeep

@@ -178,7 +178,7 @@ purpose, required inputs, and expected outputs.
 Additionally, the documentation shows the necessary security measures,
 such as CAPTCHA validation, that are integrated to protect user data and ensure secure interactions with the API.
 
-Please refer to the [API documentation](docs/Api/V2/index_v2.html) for detailed usage instructions and examples.
+Please refer to the [API documentation](docs/Api/V3/index_v3.html) for detailed usage instructions and examples.
 
 Follow this link for more information on API documentation: [Api Guide](docs/APIGUI.md)
 
