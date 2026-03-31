@@ -32,7 +32,8 @@ readonly class EmailGenerator
      */
     public function sendRegistrationEmail(
         User $user,
-        ?string $password = null
+        ?string $password = null,
+        bool $returnAppsRegistration = false
     ): void {
         $supportTeam = $this->settingRepository
             ->findOneBy(['name' => SettingName::PAGE_TITLE->value])
@@ -75,7 +76,7 @@ readonly class EmailGenerator
             $translationDomain = 'user_registration_login_uuid';
 
             $context['magicURL'] = $this->magicLinkService->magicToken($user);
-        } elseif ($returnAppsEnabled === OperationMode::ON->value) {
+        } elseif ($returnAppsEnabled === OperationMode::ON->value && $returnAppsRegistration === true) {
             $template = 'email/user_registration_api.html.twig';
             $translationDomain = 'user_registration_api';
         }
