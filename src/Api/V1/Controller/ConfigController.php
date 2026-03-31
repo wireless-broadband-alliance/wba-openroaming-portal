@@ -32,7 +32,7 @@ class ConfigController extends AbstractController
      * @throws Exception
      */
     #[Route('/config', name: 'api_v1_config_settings', methods: ['GET'])]
-    public function returnCofig(): JsonResponse
+    public function returnConfig(): JsonResponse
     {
         $settings = $this->getSettings();
 
