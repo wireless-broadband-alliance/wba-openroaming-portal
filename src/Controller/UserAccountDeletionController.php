@@ -56,7 +56,8 @@ class UserAccountDeletionController extends AbstractController
             $this->redirectToRoute('app_landing');
         }
 
-        if (in_array('ROLE_ADMIN', $currentUser->getRoles(), true) ||
+        if (
+            in_array('ROLE_ADMIN', $currentUser->getRoles(), true) ||
             in_array('ROLE_SUPER_ADMIN', $currentUser->getRoles(), true)
         ) {
             $this->addFlash(
