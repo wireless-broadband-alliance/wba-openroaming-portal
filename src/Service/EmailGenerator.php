@@ -76,7 +76,7 @@ readonly class EmailGenerator
             $translationDomain = 'user_registration_login_uuid';
 
             $context['magicURL'] = $this->magicLinkService->magicToken($user);
-        } elseif ($returnAppsEnabled === OperationMode::ON->value && $returnAppsRegistration === true) {
+        } elseif ($returnAppsEnabled === OperationMode::ON->value && $returnAppsRegistration) {
             $template = 'email/user_registration_api.html.twig';
             $translationDomain = 'user_registration_api';
         }
