@@ -45,6 +45,12 @@
         <!-- postgresql+advisory://db_user:db_password@localhost/db_name -->
         <env name="LOCK_DSN" value="flock"/>
         <!-- ###- symfony/lock ### -->
+
+        <!-- ###+ symfony/framework-bundle ### -->
+        <env name="APP_ENV" value="dev"/>
+        <env name="APP_SECRET" value=""/>
+        <env name="APP_SHARE_DIR" value="var/share"/>
+        <!-- ###- symfony/framework-bundle ### -->
     </php>
 
     <testsuites>
@@ -60,7 +66,7 @@
     </coverage>
 
     <listeners>
-        <listener class="Symfony\Bridge\PhpUnit\SymfonyTestsListener" />
+        <listener class="Symfony\Bridge\PhpUnit\SymfonyTestsListener"/>
     </listeners>
 
     <!-- Run `composer require symfony/panther` before enabling this extension -->
