@@ -104,11 +104,6 @@ class MicrosoftController extends AbstractController
             $client = $this->clientRegistry->getClient('microsoft_landing');
         }
 
-        $callbackRoute = match ($type) {
-            'dashboard' => 'dashboard_connect_microsoft_check',
-            default => 'connect_microsoft_check',
-        };
-
         // Define the minimal required scopes
         $state = [
             'previousLoggedID' => $previousLoggedID,
