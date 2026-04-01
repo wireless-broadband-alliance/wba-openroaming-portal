@@ -271,6 +271,9 @@ final class UserAuthenticationVoter extends Voter
             || $this->hasPermission($user, AdminPermissionsType::TERMS_POLICIES_READ)
             || $this->hasPermission($user, AdminPermissionsType::TERMS_POLICIES_WRITE)
 
+            || $this->hasPermission($user, AdminPermissionsType::RETURN_APPS_MANAGEMENT_READ)
+            || $this->hasPermission($user, AdminPermissionsType::RETURN_APPS_MANAGEMENT_WRITE)
+
             || $this->hasPermission($user, AdminPermissionsType::CRON_SCHEDULE_READ)
             || $this->hasPermission($user, AdminPermissionsType::CRON_SCHEDULE_WRITE)
 
