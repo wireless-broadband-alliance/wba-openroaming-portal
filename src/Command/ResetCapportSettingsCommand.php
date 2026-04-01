@@ -52,7 +52,7 @@ class ResetCapportSettingsCommand extends Command
         $settings = [
             ['name' => SettingName::CAPPORT_ENABLED->value, 'value' => 'false'],
             ['name' => SettingName::CAPPORT_PORTAL_URL->value, 'value' => 'https://example.com/'],
-            ['name' => SettingName::CAPPORT_VENUE_INFO_URL->value, 'value' => ' https://openroaming.org/'],
+            ['name' => SettingName::CAPPORT_VENUE_INFO_URL->value, 'value' => 'https://openroaming.org/'],
         ];
 
         $this->entityManager->beginTransaction();

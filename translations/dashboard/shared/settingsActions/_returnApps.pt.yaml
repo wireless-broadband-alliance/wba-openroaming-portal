@@ -1,0 +1,16 @@
+enableTitle: 'Retorno para as Apps'
+packageName: 'Nome do pacote Android'
+fingerprints: 'Fingerprints'
+fingerprintsDescription: 'Identificadores únicos usados para reconhecer dispositivos na funcionalidade Retornar às Apps.'
+addFingerprint: 'Adicionar Fingerprint'
+idIos: 'IOS Team & Bundle ID'
+fingerprintDescription: 'Identificadores únicos utilizados para reconhecer dispositivos na funcionalidade "Return to Apps"'
+info_details:
+  title: 'Endpoints do Return Apps'
+  description: 'Para verificar a configuração do Return Apps, assegure-se de que estes endpoints estão acessíveis:'
+  android_label: 'Android'
+  android_info: 'Devolve as impressões digitais SHA256 e o nome do pacote para verificação da app.'
+  ios_label: 'iOS'
+  ios_info: 'Devolve o ficheiro App Site Association para verificação da app iOS.'
+  success_message: 'Se estes endpoints retornarem o JSON esperado, a configuração do Return Apps está correta.'
+  email_generation_message: "Esta configuração irá também gerar um novo email concebido para o fluxo de registo da aplicação através das APIs de registo."

@@ -423,6 +423,39 @@ class SettingsController extends AbstractController
 
                 return $this->redirectToRoute('admin_dashboard_settings_schedule');
             }
+            if (
+                $type === SettingType::SettingsReturnApps->value
+                && $this->isGranted(UserAuthenticationVoter::RETURN_APPS_MANAGEMENT_WRITE)
+            ) {
+                $command = 'php bin/console reset:returnApps --yes';
+                $projectRootDir = $this->getParameter('kernel.project_dir');
+                $process = new Process(explode(' ', $command), $projectRootDir);
+                $process->run();
+                if (!$process->isSuccessful()) {
+                    throw new ProcessFailedException($process);
+                }
+                // if you want to dd("$output, $errorOutput"), please use the following variables
+                $output = $process->getOutput();
+                $errorOutput = $process->getErrorOutput();
+                $this->addFlash(
+                    'success',
+                    $this->translator->trans('returnAppsResetSuccessfully', [], 'controllers')
+                );
+
+                $eventMetadata = [
+                    'ip' => $request->getClientIp(),
+                    'user_agent' => $request->headers->get('User-Agent'),
+                    'uuid' => $currentUser->getUuid(),
+                ];
+                $this->eventActions->saveEvent(
+                    $currentUser,
+                    AnalyticalEventType::RETURN_APPS_RESET_REQUEST->value,
+                    new DateTime(),
+                    $eventMetadata
+                );
+
+                return $this->redirectToRoute('admin_dashboard_return_apps');
+            }
         } else {
             $this->addFlash(
                 'error',

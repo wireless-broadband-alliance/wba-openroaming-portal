@@ -86,6 +86,11 @@ domain_not_resolvable: 'O domínio indicado não pôde ser resolvido por DNS no 
 invalidDomainListUrl: 'O URL fornecido tem de apontar para uma lista de domínios em formato bruto "(TXT, CSV ou JSON)". Páginas web ou conteúdo HTML não são permitidos.'
 certificate_bundle_required: 'É necessário colar o bundle dos certificados para continuar.'
 freeradius_certificate:
-    invalid_bundle: 'O pacote de certificados é inválido ou não corresponde à chave privada.'
-    expired: 'O certificado expirou.'
-    mismatch_key: 'A chave privada não corresponde ao certificado.'
+  invalid_bundle: 'O pacote de certificados é inválido ou não corresponde à chave privada.'
+  expired: 'O certificado expirou.'
+  mismatch_key: 'A chave privada não corresponde ao certificado.'
+invalidAndroidPackageName: "Introduza um nome de pacote válido (ex.: com.exemplo.app)."
+invalidIosTeamId: "Introduza um Team ID iOS válido (e.g., ABC123DEF9)."
+invalidIosBundleId: "Introduza um Bundle ID iOS válido (e.g., com.exemplo.app)."
+invalidSha256Fingerprint: "Introduza uma impressão digital SHA-256 válida (formato: XX:XX:...:XX)."
+atLeastOneFingerprint: "Introduza pelo menos uma impressão digital."

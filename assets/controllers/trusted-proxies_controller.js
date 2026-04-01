@@ -16,6 +16,7 @@ export default class extends Controller {
     static targets = ['collection', 'template'];
 
     connect() {
+        this.clearCollection();
         this.restoreFromCookie();
     }
 

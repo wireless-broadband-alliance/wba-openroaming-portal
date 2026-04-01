@@ -192,3 +192,7 @@ httpChallengeAppliedSuccessfully: >
     Validation completed successfully.
     The new certificates have been verified and prepared.
     They will be applied to the system once you finish the configuration.
+returnAppsResetSuccessfully: 'The Return to Apps settings has been reset successfully!'
+access_denied_no_session: "You don’t have access to this page. Please log in."
+access_denied_feature_disabled: "This feature is currently disabled."
+access_denied_session_expired: "Your session has expired. Please log in again."

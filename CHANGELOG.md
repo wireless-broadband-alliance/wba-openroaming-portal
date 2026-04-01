@@ -3,7 +3,8 @@
 # Release V1.10.0
 
 - Installation Widget implementation (For first time project setup / for later use on the admin page configuration).
-- Certificate Management for the admin page (for radsecproxy/freeradius certificates)
+- Certificate Management for the admin page (for radsecproxy/freeradius certificates).
+- Return App configuration page (for centralized endpoint management for both android / iOS devices).
 - Added a new user role, Super Admin, to allow the management of the platform and the other admins.
 - Added new pages to configure the permissions of the platform admins.
 - Added a new configuration page, to manage the black-listed domains used for registration and authentication with
@@ -20,8 +21,8 @@
       php bin/console prepare-release:v1100
       ```
 - It's required to run the new migrations this will set up the new entities for the new domains, sources page (
-  `DomainsBlacklist`, `DomainsSource`) & installation widget with the certificates management (`InstalationWidget`,
-  `Certificate` & `CertificateSetupProcess`)
+  `DomainsBlacklist`, `DomainsSource`), installation widget with the certificates management (`InstalationWidget`,
+  `Certificate` & `CertificateSetupProcess`) & the Fingerprints for apps associations with the portal
     - Run the migrations with:
       ```bash
       php bin/console doctrine:migrations:migrate

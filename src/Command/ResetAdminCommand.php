@@ -8,6 +8,7 @@ use App\Enum\AdminRoleType;
 use App\Enum\AnalyticalEventType;
 use App\Enum\DefaultUser;
 use App\Enum\UserProvider;
+use App\Enum\UserTwoFactorAuthenticationStatus;
 use App\Repository\UserRepository;
 use App\Service\EventActions;
 use DateTime;
@@ -85,7 +86,7 @@ class ResetAdminCommand extends Command
             $admin->setUuid(DefaultUser::ADMIN->value);
             $admin->setEmail(DefaultUser::ADMIN->value);
             $admin->setPassword($this->userPasswordHashed->hashPassword($admin, 'gnimaornepo'));
-            $admin->setRoles(['ROLE_SUPER_ADMIN']);
+            $admin->setRoles([AdminRoleType::ROLE_SUPER_ADMIN->value]);
             $admin->setPermissions([]);
             $admin->setIsVerified(true);
             $admin->setForgotPasswordRequest(true);
@@ -107,9 +108,12 @@ class ResetAdminCommand extends Command
             $this->eventActions->saveEvent($admin, AnalyticalEventType::ADMIN_VERIFICATION->value, new DateTime(), []);
         }
 
-      // Set password
+        // Set password
+        $admin->setUuid(DefaultUser::ADMIN->value);
+        $admin->setEmail(DefaultUser::ADMIN->value);
+        $admin->setTwoFAtype(UserTwoFactorAuthenticationStatus::DISABLED->value);
         $admin->setForgotPasswordRequest(true);
-        $admin->setRoles(['ROLE_SUPER_ADMIN']);
+        $admin->setRoles([AdminRoleType::ROLE_SUPER_ADMIN->value]);
         $admin->setPermissions([]);
         $admin->setPassword($this->userPasswordHashed->hashPassword($admin, 'gnimaornepo'));
 

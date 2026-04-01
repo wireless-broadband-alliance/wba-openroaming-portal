@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Entity\UserExternalAuth;
+use App\Enum\AdminRoleType;
 use App\Enum\AnalyticalEventType;
 use App\Enum\FirewallType;
 use App\Enum\OperationMode;
@@ -31,12 +32,14 @@ use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
@@ -430,19 +433,58 @@ class SiteController extends AbstractController
     }
 
     #[Route('/app/continue', name: 'app_api_landing')]
-    public function appApiLanding(): Response
+    #[IsGranted('IS_AUTHENTICATED_FULLY')]
+    public function appApiLanding(Request $request): Response
     {
-        // Call the getSettings method of GetSettings class to retrieve the data
+        $session = $request->getSession();
+        $appReturn = $session->get('app_return');
+
+        // Check if session exists
+        if (!$appReturn) {
+            throw $this->createAccessDeniedException(
+                $this->translator->trans(
+                    'access_denied_no_session',
+                    [],
+                    'controllers'
+                )
+            );
+        }
+
         /** @var array<string, array{value: string, description: string}> $data */
         $data = $this->getSettings->getSettings();
 
-        /** @var User|null $currentUser */
+        // Check if RETURN_APPS_ENABLED is true
+        $returnAppsEnabled = $data[SettingName::RETURN_APPS_ENABLED->value]['value'] ?? OperationMode::OFF->value;
+        if ($returnAppsEnabled !== OperationMode::ON->value) {
+            throw $this->createAccessDeniedException(
+                $this->translator->trans(
+                    'access_denied_feature_disabled',
+                    [],
+                    'controllers'
+                )
+            );
+        }
+
+        // Check if session is still valid (TTL)
+        $timestamp = $appReturn['timestamp'] ?? 0;
+        $ttl = $appReturn['ttl'] ?? 0;
+        if ((time() - $timestamp) > $ttl) {
+            throw $this->createAccessDeniedException(
+                $this->translator->trans(
+                    'access_denied_session_expired',
+                    [],
+                    'controllers'
+                )
+            );
+        }
+
+        /** @var User $currentUser */
         $currentUser = $this->getUser();
 
-        // Prepare Forms before any action
-        $form = $this->createForm(AccountUserUpdateLandingType::class, $this->getUser());
-        $formPassword = $this->createForm(NewPasswordAccountType::class, $this->getUser());
-        $formRevokeProfiles = $this->createForm(RevokeProfilesType::class, $this->getUser());
+        // Prepare forms
+        $form = $this->createForm(AccountUserUpdateLandingType::class, $currentUser);
+        $formPassword = $this->createForm(NewPasswordAccountType::class, $currentUser);
+        $formRevokeProfiles = $this->createForm(RevokeProfilesType::class, $currentUser);
 
         return $this->render('landing/authUser/landing_api_auth_user.html.twig', [
             'form' => $form->createView(),

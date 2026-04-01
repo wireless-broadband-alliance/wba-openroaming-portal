@@ -63,7 +63,10 @@ readonly class TermsAcceptanceListener
             '/saml/login',
             '/app',
             '/.well-known/assetlinks.json',
-            '/login/confirmation'
+            '/login/confirmation',
+            '/app/continue',
+            '/.well-known/assetlinks.json',
+            '/.well-known/apple-app-site-association'
         ];
 
         if (array_any($excludedPrefixes, fn($prefix) => str_starts_with($path, (string)$prefix))) {

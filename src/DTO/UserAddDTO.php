@@ -58,6 +58,7 @@ class UserAddDTO
     public PermissionLevel $termsPolicies = PermissionLevel::NONE;
     public PermissionLevel $cronSchedule = PermissionLevel::NONE;
     public PermissionLevel $certificatesManagement = PermissionLevel::NONE;
+    public PermissionLevel $returnAppsManagement = PermissionLevel::NONE;
     public PermissionLevel $authenticationMethods = PermissionLevel::NONE;
     public PermissionLevel $twoFactorAuth = PermissionLevel::NONE;
     public PermissionLevel $ldapSynchronization = PermissionLevel::NONE;
@@ -80,6 +81,8 @@ class UserAddDTO
             'userEngagement' => 'USER_ENGAGEMENT',
             'termsPolicies' => 'TERMS_POLICIES',
             'cronSchedule' => 'CRON_SCHEDULE',
+            'certificatesManagement' => 'CERTIFICATES_MANAGEMENT',
+            'returnAppsManagement' => 'RETURN_APPS_MANAGEMENT',
             'authenticationMethods' => 'AUTHENTICATION_METHODS',
             'twoFactorAuth' => 'TWO_FACTOR_AUTH',
             'ldapSynchronization' => 'LDAP_SYNCHRONIZATION',

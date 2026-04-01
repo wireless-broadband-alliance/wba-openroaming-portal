@@ -190,3 +190,7 @@ httpChallengeAppliedSuccessfully: >
     Validação concluída com sucesso.
     Os novos certificados foram verificados e preparados.
     Serão aplicados ao sistema após finalizar a configuração.
+returnAppsResetSuccessfully: 'As configurações de Retorno para as Apps foram restauradas com sucesso!'
+access_denied_no_session: "Não tem acesso a esta página. Por favor, inicie sessão."
+access_denied_feature_disabled: "Esta funcionalidade está atualmente desativada."
+access_denied_session_expired: "A sua sessão expirou. Por favor, inicie sessão novamente."

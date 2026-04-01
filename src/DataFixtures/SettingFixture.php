@@ -143,6 +143,9 @@ class SettingFixture extends Fixture
             ['name' => SettingName::CRON_ADVANCED_STATUS->value, 'value' => 'OFF'],
             ['name' => SettingName::CLOUDFLARE_TOKEN->value, 'value' => ''],
             ['name' => SettingName::ENABLE_RADIUS_TLS_RESET->value, 'value' => 'true'],
+            ['name' => SettingName::RETURN_APPS_ENABLED->value, 'value' => 'OFF'],
+            ['name' => SettingName::RETURN_APPS_PACKAGE_NAME_ANDROID->value, 'value' => 'EditMe'],
+            ['name' => SettingName::RETURN_APPS_ID_IOS->value, 'value' => 'EditMe.EditMe'],
         ];
 
         foreach ($settings as $settingData) {

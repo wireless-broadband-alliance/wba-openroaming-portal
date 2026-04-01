@@ -28,12 +28,17 @@ var/certs/*
 
 .idea/
 
+# Ignore everything inside signing-keys
 signing-keys/*
+
+# Allow ONLY .gitkeep files
+!signing-keys/.gitkeep
+!signing-keys/ca/.gitkeep
 
 release-package/release.zip
 
 public/resources/uploaded/*
-!upload/.gitkeep
+!public/resources/uploaded/.gitkeep
 
 pgp_public_key/*
 !pgp_public_key/.gitkeep

@@ -365,7 +365,7 @@ class RegistrationController extends AbstractController
                     $this->translator->trans('accountVerified', [], 'controllers')
                 );
 
-                return $this->redirectAfterConfirmation($isApiSource);
+                return $this->redirectAfterConfirmation($isApiSource, $request);
             } catch (CustomUserMessageAuthenticationException) {
                 $this->addFlash(
                     'error',
@@ -383,9 +383,18 @@ class RegistrationController extends AbstractController
         return $this->redirectToRoute('app_login');
     }
 
-    private function redirectAfterConfirmation(bool $isApiSource): Response
+    private function redirectAfterConfirmation(bool $isApiSource, Request $request): Response
     {
         if ($isApiSource) {
+            // Example at the end of registration success
+            if ($request->query->get('source') === 'api') {
+                $session = $request->getSession();
+                $session->set('app_return', [
+                    'timestamp' => time(),
+                    'ttl' => 300, // 5 minutes
+                ]);
+            }
+
             return $this->redirectToRoute('app_api_landing');
         }
 
