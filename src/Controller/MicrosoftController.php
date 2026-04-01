@@ -19,6 +19,7 @@ use DateTime;
 use DateTimeInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
+use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
@@ -114,21 +115,13 @@ class MicrosoftController extends AbstractController
         ];
 
         // Get the authorization URL with scopes
-        $redirectUrl = $client->getOAuth2Provider()->getAuthorizationUrl([
-            'state' => json_encode($state, JSON_THROW_ON_ERROR),
-            'redirect_uri' => $this->generateUrl(
-                $callbackRoute,
-                [],
-                UrlGeneratorInterface::ABSOLUTE_URL
-            ),
-        ]);
-
-        // Redirect the user to the authorization URL
-        return $this->redirect($redirectUrl);
+        return $client->redirect(
+            ['openid', 'profile', 'email', 'offline_access', 'User.Read'],
+            ['state' => json_encode($state, JSON_THROW_ON_ERROR)]
+        );
     }
 
     /**
-     * @throws IdentityProviderException
      * @throws Exception
      * @throws GuzzleException
      */
@@ -171,17 +164,20 @@ class MicrosoftController extends AbstractController
         $accessToken = $client->getOAuth2Provider()->getAccessToken('authorization_code', [
             'code' => $code,
         ]);
-        /** @phpstan-ignore-next-line */
-        $resourceOwner = $client->fetchUserFromToken($accessToken);
-        /** @phpstan-ignore-next-line */
-        $data = $resourceOwner->toArray();
-        /** @phpstan-ignore-next-line */
-        $microsoftUserId = $resourceOwner->getId();
-
-        // Map the relevant details from the returned $data array
-        $email = $data['emails']['preferred'] ?? $data['emails']['account'] ?? null;
-        $firstname = $data['first_name'] ?? null;
-        $lastname = $data['last_name'] ?? null;
+        $httpClient = new Client();
+        $response = $httpClient->get(
+            'https://graph.microsoft.com/v1.0/me',
+            [
+                'headers' => [
+                    'Authorization' => 'Bearer ' . $accessToken->getToken(),
+                ],
+            ]
+        );
+        $data = json_decode($response->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
+        $microsoftUserId = $data['id'] ?? null;
+        $email = $data['mail'] ?? $data['userPrincipalName'] ?? null;
+        $firstname = $data['givenName'] ?? null;
+        $lastname = $data['surname'] ?? null;
 
         // Check if the email is valid
         if (!$this->userStatusChecker->isValidEmail($email, UserProvider::MICROSOFT_ACCOUNT->value)) {
