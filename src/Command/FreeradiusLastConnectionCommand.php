@@ -105,9 +105,9 @@ class FreeradiusLastConnectionCommand extends Command
                 }
 
                 foreach ($radAcct as $row) {
-                    $username = $row->getUsername() ?? null;
-                    $startTime = $row->getAcctStartTime() ?? null;
-                    $stopTime = $row->getAcctStopTime() ?? null;
+                    $username = $row->getUsername();
+                    $startTime = $row->getAcctStartTime();
+                    $stopTime = $row->getAcctStopTime();
 
                     if (!$username || !$startTime || !$stopTime) {
                         continue;
