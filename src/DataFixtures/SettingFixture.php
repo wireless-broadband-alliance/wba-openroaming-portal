@@ -6,11 +6,18 @@ use App\Entity\Setting;
 use App\Enum\SettingName;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 class SettingFixture extends Fixture
 {
+    public function __construct(
+        private readonly ParameterBagInterface $parameterBag
+    ) {
+    }
+
     public function load(ObjectManager $manager): void
     {
+        $filter = $this->parameterBag->get('app.saml_identifier_attribute');
         $settings = [
             ['name' => SettingName::RADIUS_REALM_NAME->value, 'value' => 'EditMe'],
             ['name' => SettingName::DISPLAY_NAME->value, 'value' => 'EditMe'],
@@ -115,7 +122,10 @@ class SettingFixture extends Fixture
             ['name' => SettingName::SYNC_LDAP_BIND_USER_DN->value, 'value' => ''],
             ['name' => SettingName::SYNC_LDAP_BIND_USER_PASSWORD->value, 'value' => ''],
             ['name' => SettingName::SYNC_LDAP_SEARCH_BASE_DN->value, 'value' => ''],
-            ['name' => SettingName::SYNC_LDAP_SEARCH_FILTER->value, 'value' => '(sAMAccountName=$identifier)'],
+            [
+                'name' => SettingName::SYNC_LDAP_SEARCH_FILTER->value,
+                'value' => sprintf('(%s=$identifier)', $filter)
+            ],
 
             ['name' => SettingName::CAPPORT_ENABLED->value, 'value' => 'false'],
             ['name' => SettingName::CAPPORT_PORTAL_URL->value, 'value' => 'https://example.com/'],

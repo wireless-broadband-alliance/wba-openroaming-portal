@@ -15,6 +15,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 #[AsCommand(
     name: 'reset:allSettings',
@@ -23,7 +24,8 @@ use Symfony\Component\Console\Question\ConfirmationQuestion;
 class ResetAllSettingsCommand extends Command
 {
     public function __construct(
-        private readonly EntityManagerInterface $entityManager
+        private readonly EntityManagerInterface $entityManager,
+        private readonly ParameterBagInterface $parameterBag
     ) {
         parent::__construct();
     }
@@ -49,6 +51,7 @@ class ResetAllSettingsCommand extends Command
             }
         }
 
+        $filter = $this->parameterBag->get('app.saml_identifier_attribute');
         $settings = [
             ['name' => SettingName::RADIUS_REALM_NAME->value, 'value' => 'EditMe'],
             ['name' => SettingName::DISPLAY_NAME->value, 'value' => 'EditMe'],
@@ -151,7 +154,10 @@ class ResetAllSettingsCommand extends Command
             ['name' => SettingName::SYNC_LDAP_BIND_USER_DN->value, 'value' => ''],
             ['name' => SettingName::SYNC_LDAP_BIND_USER_PASSWORD->value, 'value' => ''],
             ['name' => SettingName::SYNC_LDAP_SEARCH_BASE_DN->value, 'value' => ''],
-            ['name' => SettingName::SYNC_LDAP_SEARCH_FILTER->value, 'value' => '(sAMAccountName=$identifier)'],
+            [
+                'name' => SettingName::SYNC_LDAP_SEARCH_FILTER->value,
+                'value' => sprintf('(%s=$identifier)', $filter)
+            ],
 
             ['name' => SettingName::CAPPORT_ENABLED->value, 'value' => 'false'],
             ['name' => SettingName::CAPPORT_PORTAL_URL->value, 'value' => 'https://example.com/'],

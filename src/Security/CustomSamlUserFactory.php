@@ -20,6 +20,7 @@ use Nbgrp\OneloginSamlBundle\Security\User\SamlUserFactoryInterface;
 use ReflectionClass;
 use ReflectionException;
 use RuntimeException;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
@@ -44,7 +45,8 @@ class CustomSamlUserFactory implements SamlUserFactoryInterface
         private readonly UrlGeneratorInterface $urlGenerator,
         RequestStack $requestStack,
         private readonly TranslatorInterface $translator,
-        private readonly SettingRepository $settingRepository
+        private readonly SettingRepository $settingRepository,
+        private readonly ParameterBagInterface $parameterBag,
     ) {
         $this->session = $requestStack->getSession();
         $this->attribute_mapping = [
@@ -75,7 +77,11 @@ class CustomSamlUserFactory implements SamlUserFactoryInterface
         }
 
         $uuid = $this->getAttributeValue($attributes, 'samlUuid');
-        $samlIdentifier = $this->getAttributeValue($attributes, 'sAMAccountName');
+        $identifierAttribute = $this->parameterBag->get('app.saml_identifier_attribute');
+        $samlIdentifier = $this->getAttributeValue(
+            $attributes,
+            $identifierAttribute
+        );
 
         // Check if the user already exists
         $existingUser = $this->userRepository->findOneBy(['uuid' => $uuid]);

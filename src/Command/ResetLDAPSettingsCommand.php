@@ -13,6 +13,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 #[AsCommand(
     name: 'reset:ldapSettings',
@@ -21,7 +22,8 @@ use Symfony\Component\Console\Question\ConfirmationQuestion;
 class ResetLDAPSettingsCommand extends Command
 {
     public function __construct(
-        private readonly EntityManagerInterface $entityManager
+        private readonly EntityManagerInterface $entityManager,
+        private readonly ParameterBagInterface $parameterBag,
     ) {
         parent::__construct();
     }
@@ -47,13 +49,17 @@ class ResetLDAPSettingsCommand extends Command
             }
         }
 
+        $filter = $this->parameterBag->get('app.saml_identifier_attribute');
         $settings = [
             ['name' => SettingName::SYNC_LDAP_ENABLED->value, 'value' => 'false'],
             ['name' => SettingName::SYNC_LDAP_SERVER->value, 'value' => 'ldap://127.0.0.1'],
             ['name' => SettingName::SYNC_LDAP_BIND_USER_DN->value, 'value' => ''],
             ['name' => SettingName::SYNC_LDAP_BIND_USER_PASSWORD->value, 'value' => ''],
             ['name' => SettingName::SYNC_LDAP_SEARCH_BASE_DN->value, 'value' => ''],
-            ['name' => SettingName::SYNC_LDAP_SEARCH_FILTER->value, 'value' => '(sAMAccountName=$identifier)'],
+            [
+                'name' => SettingName::SYNC_LDAP_SEARCH_FILTER->value,
+                'value' => sprintf('(%s=$identifier)', $filter)
+            ],
         ];
 
         // Begin a database transaction to ensure data consistency
