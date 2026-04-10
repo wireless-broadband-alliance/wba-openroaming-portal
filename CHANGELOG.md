@@ -11,6 +11,8 @@
   Google, Microsoft and Simple Email/Password.
 - Added a new validator for each authentication method or registration to block blacklisted domains
 - New loading screen for long time requests (example, refresh domains)
+- Add new `SAML_IDENTIFIER_ATTRIBUTE` environment variable to support configurable SAML user identifier mapping (
+  sAMAccountName, email, uid, or username).
 - **Required one-time action:** After upgrading, run
   the [PrepareReleaseV1100Command.php](src/Command/PrepareReleaseV1100Command.php) to migrate
   existing administrator permissions to the new **Super Admin** role hierarchy.
