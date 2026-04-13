@@ -157,8 +157,8 @@ cannotReturnToPreviousPhase: 'You can no longer access this stage because it has
 cannotAccessStageYet: "You cannot access this stage yet because previous steps are incomplete."
 captchaValidationFailed: 'Captcha validation failed.'
 pfx:
-    success: "Windows PFX created successfully!"
-    failure: "Failed to generate Windows PFX please make sure you are submitting valid EV'S!"
+  success: "Windows PFX created successfully!"
+  failure: "Failed to generate Windows PFX please make sure you are submitting valid EV'S!"
 envPermissionDenied: 'The .env file does not have write permissions. Please use the following commands.'
 writeDbSettingsEnv: 'Write the new database settings in the .env file.'
 dbSettingsApplied: 'Database settings applied successfully.'
@@ -189,10 +189,12 @@ radiusTLSNameDomainUpdated: 'The resolver RADIUS TLS hostname has been successfu
 domainSourceRefreshAllFailed: "Failed to refresh domains sources."
 cloudflareTokenNotMatchesHost: 'The Cloudflare token does not have permissions for the host %host%'
 httpChallengeAppliedSuccessfully: >
-    Validation completed successfully.
-    The new certificates have been verified and prepared.
-    They will be applied to the system once you finish the configuration.
+  Validation completed successfully.
+  The new certificates have been verified and prepared.
+  They will be applied to the system once you finish the configuration.
 returnAppsResetSuccessfully: 'The Return to Apps settings has been reset successfully!'
 access_denied_no_session: "You don’t have access to this page. Please log in."
 access_denied_feature_disabled: "This feature is currently disabled."
 access_denied_session_expired: "Your session has expired. Please log in again."
+invalidPhoneNumber: 'Invalid phone number. Please enter a valid phone number.'
+phoneNumberRequired: 'Phone number cannot be empty.'
