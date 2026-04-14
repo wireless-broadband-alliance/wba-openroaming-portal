@@ -312,6 +312,14 @@ the [SAML Service Provider (SP)](docs/ProvidersGuides/SAML_IDP_CREDENTIALS.md).
 - `SAML_SP_ENTITY_ID`: This is the entity ID (URI) of the SP.
 - `SAML_SP_ACS_URL`: This is the URL of the SP's Assertion Consumer Service (ACS), which processes SAML assertions from
   the IdP.
+- `SAML_IDENTIFIER_ATTRIBUTE`: Defines which SAML attribute is used as the unique user identifier when matching users in
+  the system. Allowed values: sAMAccountName, email, uid, username. Only one value must be selected.
+- `SAML_ATTRIBUTE_MAPPING`: Defines the mapping between SAML attributes and the application user fields.
+  This allows each Identity Provider (IdP) to map its own attribute names to the system’s expected user fields during
+  authentication and user creation.
+  Example fields include: `uuid`, `email`, `first_name`, `last_name`.
+  The value must be a valid JSON object where each key represents a user field and each value represents the
+  corresponding SAML attribute name from the IdP.
 
 **Important**:
 If you want to use this provider authentication on the project,

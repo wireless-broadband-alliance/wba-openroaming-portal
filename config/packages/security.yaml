@@ -53,7 +53,7 @@ security:
                 - App\Security\DashboardAuthenticator
             entry_point: App\Security\DashboardAuthenticator
             saml:
-                identifier_attribute: sAMAccountName
+                identifier_attribute: '%env(string:SAML_IDENTIFIER_ATTRIBUTE)%'
                 user_factory: saml_user_factory
                 persist_user: true
                 use_attribute_friendly_name: true
@@ -94,7 +94,7 @@ security:
                 path: /
                 name: REMEMBERME
             saml:
-                identifier_attribute: sAMAccountName
+                identifier_attribute: '%env(string:SAML_IDENTIFIER_ATTRIBUTE)%'
                 user_factory: saml_user_factory
                 persist_user: true
                 use_attribute_friendly_name: true
