@@ -17,8 +17,6 @@ use App\Repository\UserRepository;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Nbgrp\OneloginSamlBundle\Security\User\SamlUserFactoryInterface;
-use ReflectionClass;
-use ReflectionException;
 use RuntimeException;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -27,8 +25,6 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-use function is_string;
-
 class CustomSamlUserFactory implements SamlUserFactoryInterface
 {
     /**
@@ -36,7 +32,6 @@ class CustomSamlUserFactory implements SamlUserFactoryInterface
      * @var array<string, int|string|list<string>>
      */
     private readonly array $attribute_mapping;
-
     private readonly SessionInterface $session;
 
     public function __construct(
@@ -49,105 +44,98 @@ class CustomSamlUserFactory implements SamlUserFactoryInterface
         private readonly ParameterBagInterface $parameterBag,
     ) {
         $this->session = $requestStack->getSession();
-        $this->attribute_mapping = [
-            'password' => 'notused',
-            'uuid' => '$samlUuid',
-            'email' => '$email',
-            'first_name' => '$givenName',
-            'last_name' => '$surname',
-            'isVerified' => 1,
-            'roles' => [],
-        ];
+        $this->attribute_mapping = $this->parameterBag->get('app.saml_attribute_mapping') ?? [];
     }
 
     /**
      * @param array<string, array<int, string>> $attributes
-     * @throws ReflectionException
-     * @throws \Exception
      */
     public function createUser(string $identifier, array $attributes): UserInterface
     {
-        // Call the getSettings method of GetSettings class to retrieve the data
-        $platformModeStatus = $this->settingRepository->findOneBy(['name' => SettingName::PLATFORM_MODE]);
+        $platformModeStatus = $this->settingRepository->findOneBy([
+            'name' => SettingName::PLATFORM_MODE
+        ]);
 
         if ($platformModeStatus->getValue() === PlatformMode::DEMO->value) {
             throw new RuntimeException(
-                $this->translator->trans('impossibleUseThisAuthenticationMethodInDemoMode', [], 'Security')
+                $this->translator->trans(
+                    'impossibleUseThisAuthenticationMethodInDemoMode',
+                    [],
+                    'Security'
+                )
             );
         }
 
-        $uuid = $this->getAttributeValue($attributes, 'samlUuid');
-        $identifierAttribute = $this->parameterBag->get('app.saml_identifier_attribute');
-        $samlIdentifier = $this->getAttributeValue(
-            $attributes,
-            $identifierAttribute
-        );
+        /**
+         * ---------------------------------------------------------
+         * Resolve identifier (UUID)
+         * ---------------------------------------------------------
+         */
+        $uuidAttribute = $this->attribute_mapping['uuid'] ?? null;
+        if (!$uuidAttribute) {
+            throw new RuntimeException('SAML uuid mapping is missing');
+        }
 
-        // Check if the user already exists
+        $uuid = $this->getAttributeValue($attributes, $uuidAttribute);
+
+        /**
+         * ---------------------------------------------------------
+         * Check existing user
+         * ---------------------------------------------------------
+         */
         $existingUser = $this->userRepository->findOneBy(['uuid' => $uuid]);
-
         if ($existingUser) {
             if ($existingUser->isDisabled()) {
-                /** @phpstan-ignore-next-line */ // To avoid conflicts with RECTOR
                 $this->session->getFlashBag()->add(
                     'error',
                     $this->translator->trans('accountDisabled', [], 'Security')
                 );
-                $redirect = new RedirectResponse($this->urlGenerator->generate('app_landing'));
+
+                $redirect = new RedirectResponse(
+                    $this->urlGenerator->generate('app_landing')
+                );
+
                 $redirect->send();
-                exit; // Stop further authentication execution
+                exit;
             }
             return $existingUser;
         }
 
-        // Instead of userClass and mapping, use App\Entity\User directly
         $user = new User();
-        $reflection = new ReflectionClass(User::class);
+        $user->setUuid($uuid);
 
-        /** @psalm-suppress MixedAssignment */
-        foreach ($this->attribute_mapping as $field => $attribute) {
-            $property = $reflection->getProperty($field);
-            $value = null;
-
-            if (is_string($attribute) && str_starts_with($attribute, '$')) {
-                try {
-                    $value = $this->getAttributeValue($attributes, substr($attribute, 1));
-                } catch (RuntimeException) {
-                    if ($field === 'email') {
-                        $value = null;
-                    }
-                }
-            } else {
-                $value = $attribute;
-            }
-
-            $property->setValue($user, $value);
-        }
-
-        $email = array_key_exists('email', $attributes)
-            ? $attributes['email'][0]
+        $email = isset($this->attribute_mapping['email'])
+            ? $this->getAttributeValue($attributes, $this->attribute_mapping['email'])
             : null;
 
-        $firstName = array_key_exists('givenName', $attributes)
-            ? $attributes['givenName'][0]
+        $firstName = isset($this->attribute_mapping['first_name'])
+            ? $this->getAttributeValue($attributes, $this->attribute_mapping['first_name'])
             : null;
 
-        $lastName = array_key_exists('surname', $attributes)
-            ? $attributes['surname'][0]
+        $lastName = isset($this->attribute_mapping['last_name'])
+            ? $this->getAttributeValue($attributes, $this->attribute_mapping['last_name'])
             : null;
 
-        $user->setDisabled(false);
         $user->setEmail($email);
         $user->setFirstName($firstName);
         $user->setLastName($lastName);
+        $user->setPassword('notused');
+        $user->setIsVerified(true);
+        $user->setRoles([]);
+        $user->setDisabled(false);
         $user->setCreatedAt(new DateTime());
-        // Create a new UserExternalAuth entity
+
+        $samlIdentifierAttribute = $this->parameterBag->get('app.saml_identifier_attribute');
+        $samlIdentifier = $this->getAttributeValue(
+            $attributes,
+            $samlIdentifierAttribute
+        );
+
         $userAuth = new UserExternalAuth();
         $userAuth->setUser($user)
             ->setProvider(UserProvider::SAML->value)
             ->setProviderId($samlIdentifier);
 
-        // Persist the external auth entity
         $this->entityManager->persist($user);
         $this->entityManager->persist($userAuth);
         $this->entityManager->flush();
@@ -163,20 +151,22 @@ class CustomSamlUserFactory implements SamlUserFactoryInterface
         $isArrayValue = str_ends_with($attribute, '[]');
         $attribute = $isArrayValue ? substr($attribute, 0, -2) : $attribute;
 
-        if (!\array_key_exists($attribute, $attributes)) {
-            throw new RuntimeException($this->translator->trans(
-                'attributeNotFoundSAMLData',
-                ['%attribute%' => $attribute],
-                'Security'
-            ));
+        if (!isset($attributes[$attribute])) {
+            throw new RuntimeException(
+                sprintf(
+                    'Missing SAML attribute "%s". Available: %s',
+                    $attribute,
+                    implode(', ', array_keys($attributes))
+                )
+            );
         }
 
-        $attributeValue = $attributes[$attribute];
+        $value = $attributes[$attribute];
+
         if (!$isArrayValue) {
-            /** @psalm-suppress MixedAssignment */
-            $attributeValue = reset($attributeValue);
+            $value = reset($value);
         }
 
-        return $attributeValue;
+        return $value;
     }
 }
