@@ -15,7 +15,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 
 #[AsCommand(
-    name: 'reset:ScheduleSettings',
+    name: 'reset:scheduleSettings',
     description: 'Reset Schedule Settings',
 )]
 
@@ -30,7 +30,7 @@ class ResetScheduleSettingsCommand extends Command
     protected function configure(): void
     {
         $this
-            ->setName('reset:ScheduleSettings')
+            ->setName('reset:scheduleSettings')
             ->setDescription('Reset Schedule Settings')
             ->addOption('yes', 'y', InputOption::VALUE_NONE, 'Automatically confirm the reset');
     }
