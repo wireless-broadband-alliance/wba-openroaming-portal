@@ -6,11 +6,13 @@ use App\Enum\SettingName;
 use App\Repository\SettingRepository;
 use InvalidArgumentException;
 use OTPHP\TOTP;
+use Psr\Cache\CacheItemPoolInterface;
 
 readonly class TOTPService
 {
     public function __construct(
         private SettingRepository $settingRepository,
+        private CacheItemPoolInterface $cache,
     ) {
     }
 
@@ -54,6 +56,9 @@ readonly class TOTPService
         return $totp->getProvisioningUri(); // URI for QR Code
     }
 
+    /**
+     * @throws \Psr\Cache\InvalidArgumentException
+     */
     public function verifyTOTP(string $secret, string $code): bool
     {
         if ($secret === '' || $secret === '0') {
@@ -65,6 +70,19 @@ readonly class TOTPService
         }
 
         // communication with the app using the user secret code to verify the code introduced
-        return TOTP::create($secret)->verify($code);
+        if (TOTP::create($secret)->verify($code)) {
+            $item = $this->cache->getItem('totp_code');
+            if (!$item->isHit()) {
+                // no code found
+                $item->set($code);
+                $item->expiresAfter(30);
+
+                $this->cache->save($item);
+                return true;
+            }
+            $lastCode = $item->get();
+            return !(hash_equals($lastCode, $code));
+        }
+        return false;
     }
 }
