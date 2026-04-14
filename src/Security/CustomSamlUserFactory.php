@@ -32,19 +32,17 @@ class CustomSamlUserFactory implements SamlUserFactoryInterface
      * @var array<string, int|string|list<string>>
      */
     private readonly array $attribute_mapping;
-    private readonly SessionInterface $session;
 
     public function __construct(
         private readonly UserRepository $userRepository,
         private readonly EntityManagerInterface $entityManager,
         private readonly UrlGeneratorInterface $urlGenerator,
-        RequestStack $requestStack,
+        private readonly RequestStack $requestStack,
         private readonly TranslatorInterface $translator,
         private readonly SettingRepository $settingRepository,
         private readonly ParameterBagInterface $parameterBag,
     ) {
-        $this->session = $requestStack->getSession();
-        $this->attribute_mapping = $this->parameterBag->get('app.saml_attribute_mapping') ?? [];
+        $this->attribute_mapping = $this->parameterBag->get('app.saml_attribute_mapping');
     }
 
     /**
@@ -86,17 +84,19 @@ class CustomSamlUserFactory implements SamlUserFactoryInterface
         $existingUser = $this->userRepository->findOneBy(['uuid' => $uuid]);
         if ($existingUser) {
             if ($existingUser->isDisabled()) {
-                $this->session->getFlashBag()->add(
-                    'error',
-                    $this->translator->trans('accountDisabled', [], 'Security')
-                );
+                $session = $this->requestStack->getSession();
+                if (method_exists($session, 'getFlashBag')) {
+                    $session->getFlashBag()->add(
+                        'error',
+                        $this->translator->trans('accountDisabled', [], 'Security')
+                    );
+                    $redirect = new RedirectResponse(
+                        $this->urlGenerator->generate('app_landing')
+                    );
 
-                $redirect = new RedirectResponse(
-                    $this->urlGenerator->generate('app_landing')
-                );
-
-                $redirect->send();
-                exit;
+                    $redirect->send();
+                    exit;
+                }
             }
             return $existingUser;
         }

@@ -98,7 +98,6 @@ class ValidWbaChainValidator extends ConstraintValidator
         if (!$isValid) {
             $this->context->buildViolation(
                 $constraint->message
-                ?? 'This certificate does not belong to the trusted WBA PKI chain.'
             )->addViolation();
         }
     }
