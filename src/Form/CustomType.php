@@ -108,7 +108,6 @@ class CustomType extends AbstractType
                         'mimeTypes' => [
                             'image/jpeg',
                             'image/png',
-                            'image/svg+xml',
                             'image/webp',
                         ],
                         'mimeTypesMessage' => $this->translator->trans('uploadValidFormat', [], 'CustomType'),

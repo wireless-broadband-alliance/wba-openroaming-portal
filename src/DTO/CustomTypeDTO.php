@@ -10,19 +10,19 @@ class CustomTypeDTO
     public ?string $CUSTOMER_LOGO_ENABLED = null;
 
     #[Assert\File(
-        mimeTypes: ['image/png', 'image/jpeg', 'image/svg+xml', 'image/webp'],
+        mimeTypes: ['image/png', 'image/jpeg', 'image/webp'],
         mimeTypesMessage: 'uploadValidFormat'
     )]
     public ?UploadedFile $CUSTOMER_LOGO = null;
 
     #[Assert\File(
-        mimeTypes: ['image/png', 'image/jpeg', 'image/svg+xml', 'image/webp'],
+        mimeTypes: ['image/png', 'image/jpeg', 'image/webp'],
         mimeTypesMessage: 'uploadValidFormat'
     )]
     public ?UploadedFile $OPENROAMING_LOGO = null;
 
     #[Assert\File(
-        mimeTypes: ['image/png', 'image/jpeg', 'image/svg+xml', 'image/webp'],
+        mimeTypes: ['image/png', 'image/jpeg', 'image/webp'],
         mimeTypesMessage: 'uploadValidFormat'
     )]
     public ?UploadedFile $WALLPAPER_IMAGE = null;
