@@ -21,6 +21,9 @@ use App\Service\UserCreationService;
 use DateTime;
 use Doctrine\ORM\NonUniqueResultException;
 use Exception;
+use libphonenumber\PhoneNumber;
+use libphonenumber\PhoneNumberFormat;
+use libphonenumber\PhoneNumberUtil;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Random\RandomException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -63,7 +66,8 @@ class RegistrationController extends AbstractController
         private readonly MagicLinkService $magicLinkService,
         private readonly UserPasswordHasherInterface $userPasswordHasher,
         private readonly RequestStack $requestStack,
-        private readonly EventDispatcherInterface $eventDispatcher
+        private readonly EventDispatcherInterface $eventDispatcher,
+        private readonly PhoneNumberUtil $phoneNumberUtil
     ) {
     }
 
@@ -229,54 +233,71 @@ class RegistrationController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            if ($this->userRepository->findOneBy(['phoneNumber' => $user->getPhoneNumber()])) {
+            $phoneNumber = $user->getPhoneNumber();
+
+            if (!$phoneNumber instanceof PhoneNumber) {
+                $this->addFlash('error', $this->translator->trans('invalidPhoneNumber', [], 'controllers'));
+                return $this->redirectToRoute('app_register_sms');
+            }
+
+            $formattedPhone = $this->phoneNumberUtil->format($phoneNumber, PhoneNumberFormat::E164);
+
+            // Check by UUID
+            $userByUuid = $this->userRepository->findOneBy([
+                'uuid' => $formattedPhone
+            ]);
+
+            // Check by PhoneNumber
+            $userByPhone = $this->userRepository->findOneBy([
+                'phoneNumber' => $phoneNumber
+            ]);
+
+            if ($userByUuid || $userByPhone) {
                 $this->addFlash(
                     'error',
-                    $this->translator->trans(
-                        'userWithSamePhoneNumber',
-                        [],
-                        'controllers'
-                    )
-                );
-            } else {
-                // Generate a random password
-                $randomPassword = bin2hex(random_bytes(4));
-
-                // Hash the password
-                $hashedPassword = $this->userPasswordHasher->hashPassword($user, $randomPassword);
-
-                $user = $this->userCreationService->setPhoneNumber($user);
-                $user = $this->userCreationService->createUser(
-                    $user,
-                    $hashedPassword,
-                    UserProvider::PHONE_NUMBER->value,
-                    $request
+                    $this->translator->trans('userWithSamePhoneNumber', [], 'controllers')
                 );
 
-
-                // Send SMS
-                $message = $this->translator->trans('yourAccountPasswordIs', [], 'controllers')
-                    . $randomPassword
-                    . "%0A"
-                    . $this->translator->trans('verificationCodeIs', [], 'controllers')
-                    . $user->getTwoFAcode();
-                $this->sendSMS->sendSmsNoValidation($user, $message);
-                $this->addFlash(
-                    'success',
-                    $this->translator->trans('messageSentWithPasswordAndVerificationCode', [], 'controllers')
-                );
-
-                // Authenticate the user
-                $token = new UsernamePasswordToken($user, FirewallType::LANDING->value, $user->getRoles());
-                $this->tokenStorage->setToken($token);
-
-                // Store the authentication token in the session
-                $session = $this->requestStack->getSession();
-                $session->set('_security_main', serialize($token));
-
-                // Redirect the user after successful registration
-                return $this->redirectToRoute('app_landing');
+                return $this->redirectToRoute('app_register_sms');
             }
+
+            // Generate a random password
+            $randomPassword = bin2hex(random_bytes(4));
+
+            // Hash the password
+            $hashedPassword = $this->userPasswordHasher->hashPassword($user, $randomPassword);
+
+            $user = $this->userCreationService->setPhoneNumber($user);
+            $user = $this->userCreationService->createUser(
+                $user,
+                $hashedPassword,
+                UserProvider::PHONE_NUMBER->value,
+                $request
+            );
+
+
+            // Send SMS
+            $message = $this->translator->trans('yourAccountPasswordIs', [], 'controllers')
+                . $randomPassword
+                . "%0A"
+                . $this->translator->trans('verificationCodeIs', [], 'controllers')
+                . $user->getTwoFAcode();
+            $this->sendSMS->sendSmsNoValidation($user, $message);
+            $this->addFlash(
+                'success',
+                $this->translator->trans('messageSentWithPasswordAndVerificationCode', [], 'controllers')
+            );
+
+            // Authenticate the user
+            $token = new UsernamePasswordToken($user, FirewallType::LANDING->value, $user->getRoles());
+            $this->tokenStorage->setToken($token);
+
+            // Store the authentication token in the session
+            $session = $this->requestStack->getSession();
+            $session->set('_security_main', serialize($token));
+
+            // Redirect the user after successful registration
+            return $this->redirectToRoute('app_landing');
         }
 
         return $this->render('landing/register/register_landing_sms.html.twig', [

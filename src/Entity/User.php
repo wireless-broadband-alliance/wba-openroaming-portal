@@ -8,6 +8,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use InvalidArgumentException;
 use libphonenumber\PhoneNumber;
 use LogicException;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
@@ -532,9 +533,18 @@ class User extends CustomSamlUserFactory implements UserInterface, PasswordAuthe
         return $this->phoneNumber;
     }
 
-    public function setPhoneNumber(?PhoneNumber $phoneNumber): static
+    public function setPhoneNumber(null|PhoneNumber|string $phoneNumber): static
     {
-        $this->phoneNumber = $phoneNumber ?: null;
+        if ($phoneNumber === '' || $phoneNumber === null) {
+            $this->phoneNumber = null;
+            return $this;
+        }
+
+        if (!$phoneNumber instanceof PhoneNumber) {
+            throw new InvalidArgumentException('Invalid phone number type');
+        }
+
+        $this->phoneNumber = $phoneNumber;
         return $this;
     }
 

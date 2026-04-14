@@ -285,8 +285,25 @@ class SecurityController extends AbstractController
                     );
                 }
             } else {
-                $phoneNumber = '+' . $loginChoiceDTO->phoneNumber->getCountryCode() .
-                    $loginChoiceDTO->phoneNumber->getNationalNumber();
+                if (!$loginChoiceDTO->phoneNumber instanceof PhoneNumber) {
+                    $this->addFlash(
+                        'error',
+                        $this->translator->trans('invalidPhoneNumber', [], 'controllers')
+                    );
+                    return $this->redirectToRoute('app_login_magic');
+                }
+
+                $countryCode = $loginChoiceDTO->phoneNumber->getCountryCode();
+                $nationalNumber = $loginChoiceDTO->phoneNumber->getNationalNumber();
+                if (!$countryCode || !$nationalNumber) {
+                    $this->addFlash(
+                        'error',
+                        $this->translator->trans('phoneNumberRequired', [], 'controllers')
+                    );
+                    return $this->redirectToRoute('app_login_magic');
+                }
+
+                $phoneNumber = sprintf('+%s%s', $countryCode, $nationalNumber);
                 $loginUser = $this->userRepository->findOneBy(['uuid' => $phoneNumber]);
                 if ($loginUser instanceof User) {
                     if ($loginUser->getUserExternalAuths()[0]->getProvider() !== UserProvider::PORTAL_ACCOUNT->value) {

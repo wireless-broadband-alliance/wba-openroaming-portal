@@ -155,8 +155,8 @@ cannotReturnToPreviousPhase: 'Já não pode aceder a esta etapa porque já foi c
 cannotAccessStageYet: "Não pode aceder a esta etapa porque as etapas anteriores não estão concluídas."
 captchaValidationFailed: 'A validação captcha falhou.'
 pfx:
-    success: "Windows PFX foi criado com sucesso!"
-    failure: "Falha ao gerar o ficheiro Windows PFX por favor confirma se esta a inserir EV's válidos!"
+  success: "Windows PFX foi criado com sucesso!"
+  failure: "Falha ao gerar o ficheiro Windows PFX por favor confirma se esta a inserir EV's válidos!"
 envPermissionDenied: 'O ficheiro . env não tem permissões de escrita. Por favor utilize os seguintes comandos.'
 writeDbSettingsEnv: 'Escreva as novas configurações da base de dados no ficheiro .env'
 dbSettingsApplied: 'Configurações da base de dados aplicadas com sucesso.'
@@ -187,10 +187,12 @@ allDomainSourceRefreshed: "As fontes de domínios foram atualizadas com sucesso.
 domainSourceRefreshAllFailed: "Falha ao atualizar as fontes de domínios."
 cloudflareTokenNotMatchesHost: 'O token da Cloudflare não tem permissões para o host %host%'
 httpChallengeAppliedSuccessfully: >
-    Validação concluída com sucesso.
-    Os novos certificados foram verificados e preparados.
-    Serão aplicados ao sistema após finalizar a configuração.
+  Validação concluída com sucesso.
+  Os novos certificados foram verificados e preparados.
+  Serão aplicados ao sistema após finalizar a configuração.
 returnAppsResetSuccessfully: 'As configurações de Retorno para as Apps foram restauradas com sucesso!'
 access_denied_no_session: "Não tem acesso a esta página. Por favor, inicie sessão."
 access_denied_feature_disabled: "Esta funcionalidade está atualmente desativada."
 access_denied_session_expired: "A sua sessão expirou. Por favor, inicie sessão novamente."
+invalidPhoneNumber: 'Número de telefone inválido. Por favor, insira um número válido.'
+phoneNumberRequired: 'O número de telefone é obrigatório.'
