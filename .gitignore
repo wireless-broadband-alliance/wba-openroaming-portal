@@ -63,8 +63,9 @@ pgp_public_key/*
 
 geoLiteDB/GeoLite2-City.mmdb
 
-###> Command for DB reset for local testing ###
+###> Commands for local dev testing ###
 src/Command/ResetRadiusMarcelinaSettingsCommand.php
+src/Command/SeedUserRadiusProfilesCommand.php
 ###< Command for DB reset for local testing ###
 
 ###> symfony/asset-mapper ###
