@@ -41,7 +41,7 @@ invalidFileTypeKey: 'Invalid private key file type. Please upload a valid .pem k
 emailNotValid: 'Email not valid'
 passwordNotMatch: "Passwords do not match."
 fieldCannotBeBlank: 'This field cannot be blank.'
-uploadValidFormat: 'Please upload a valid format (JPEG,PNG,SVG,WEBP) image'
+uploadValidFormat: 'Please upload a valid format (JPEG,PNG,WEBP) image'
 invalidDomainOrIP: 'The value is not a valid domain or does not resolve to an IP address.'
 notUseDefaultPayloadIdentifierCard: 'Please do not use the default value from the Payload Identifier card.'
 selectOption: 'Select an option'
