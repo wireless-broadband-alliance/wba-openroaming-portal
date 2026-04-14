@@ -110,7 +110,6 @@ class CustomType extends AbstractType
                             'image/png',
                             'image/webp',
                         ],
-                        'mimeTypesMessage' => $this->translator->trans('uploadValidFormat', [], 'CustomType'),
                     ]),
                 ];
                 $formFieldType = $config;
