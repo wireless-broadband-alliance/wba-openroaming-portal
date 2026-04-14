@@ -26,8 +26,6 @@ export default class extends Controller {
      * @param {String} chartType - The chart type (e.g., "bar", "line")
      */
     initChart(target, data, chartType) {
-        console.log(`Initializing chart of type "${chartType}" for:`, target);
-
         const parsedData = JSON.parse(data);
 
         // Default chart options
