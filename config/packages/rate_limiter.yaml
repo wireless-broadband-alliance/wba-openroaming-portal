@@ -1,0 +1,6 @@
+framework:
+  rate_limiter:
+    verify_account:
+      policy: sliding_window
+      limit: 5
+      interval: '1 minute'

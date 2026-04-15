@@ -41,6 +41,7 @@ use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Symfony\Component\RateLimiter\RateLimiterFactory;
 
 class RegistrationController extends AbstractController
 {
@@ -67,7 +68,8 @@ class RegistrationController extends AbstractController
         private readonly UserPasswordHasherInterface $userPasswordHasher,
         private readonly RequestStack $requestStack,
         private readonly EventDispatcherInterface $eventDispatcher,
-        private readonly PhoneNumberUtil $phoneNumberUtil
+        private readonly PhoneNumberUtil $phoneNumberUtil,
+        private readonly RateLimiterFactory $verifyAccountLimiter,
     ) {
     }
 
@@ -316,8 +318,17 @@ class RegistrationController extends AbstractController
     public function confirmAccount(
         Request $request,
     ): Response {
-        // Get the email and verification code from the URL query parameters
         $uuid = $request->query->get('uuid');
+        $key = $request->getClientIp() . '_' . $uuid;
+
+        $limiter = $this->verifyAccountLimiter->create($key);
+        $limit = $limiter->consume();
+
+        if (!$limit->isAccepted()) {
+            $this->addFlash('error', 'Too many attempts. Try again later.');
+            return $this->redirectToRoute('app_login');
+        }
+        // Get the email and verification code from the URL query parameters
         $verificationCode = $request->query->get('twoFaCode');
         $source = $request->query->get('source', 'portal');
         $isApiSource = $source === 'api';

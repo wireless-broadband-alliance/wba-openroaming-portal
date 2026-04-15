@@ -38,6 +38,7 @@ use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\RateLimiter\RateLimiterFactory;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
@@ -61,7 +62,8 @@ class ForgotPasswordController extends AbstractController
         private readonly EmailGenerator $emailGenerator,
         private readonly EntityManagerInterface $entityManager,
         private readonly MagicLinkService $magicLinkService,
-        private readonly UserPasswordHasherInterface $userPasswordHasher
+        private readonly UserPasswordHasherInterface $userPasswordHasher,
+        private readonly RateLimiterFactory $verifyAccountLimiter,
     ) {
     }
 
@@ -361,6 +363,16 @@ class ForgotPasswordController extends AbstractController
         $uuid = $request->query->get('uuid');
         $twoFaCode = $request->query->get('twoFaCode');
 
+        $key = $request->getClientIp() . '_' . $uuid;
+
+        $limiter = $this->verifyAccountLimiter->create($key);
+        $limit = $limiter->consume();
+
+        if (!$limit->isAccepted()) {
+            $this->addFlash('error', 'Too many attempts. Try again later.');
+            return $this->redirectToRoute('app_login');
+        }
+
 
         // Get the user with the matching email, excluding admin users
         $user = $this->userRepository->findOneBy(['uuid' => $uuid]);
@@ -423,6 +435,17 @@ class ForgotPasswordController extends AbstractController
 
         // Get the uuid and verification code from the URL query parameters
         $uuid = $request->getSession()->get('forgot_password_uuid');
+
+        $key = $request->getClientIp() . '_' . $uuid;
+
+        $limiter = $this->verifyAccountLimiter->create($key);
+        $limit = $limiter->consume();
+
+        if (!$limit->isAccepted()) {
+            $this->addFlash('error', 'Too many attempts. Try again later.');
+            return $this->redirectToRoute('app_login');
+        }
+
         if (!$uuid) {
             $this->addFlash(
                 'error',
