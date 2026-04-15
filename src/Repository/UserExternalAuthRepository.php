@@ -42,61 +42,38 @@ class UserExternalAuthRepository extends ServiceEntityRepository
         }
     }
 
-
     /**
-     * Fetch portal users counts based on the providerId within a date range.
-     *
-     * @return array<string, int> Returns counts for 'email' and 'phone_number'
+     * Fetch platform users counts based on the providerId within a date range.
+     * @throws \JsonException
      */
-    public function getPortalUserCounts(string $provider, ?DateTime $startDate, ?DateTime $endDate): array
-    {
-        $qb = $this->createQueryBuilder('uea')
-            ->innerJoin('uea.user', 'u')
-            ->select('uea.provider_id')
-            ->where('uea.provider = :provider')
-            ->setParameter('provider', $provider);
-
-        if ($startDate instanceof DateTime) {
-            $qb->andWhere('u.createdAt >= :startDate')
-                ->setParameter('startDate', $startDate);
-        }
-
-        if ($endDate instanceof DateTime) {
-            $qb->andWhere('u.createdAt <= :endDate')
-                ->setParameter('endDate', $endDate);
-        }
-
-        $results = $qb->getQuery()->getResult();
-
-        // Initialize counts
-        $counts = [
-            UserProvider::PHONE_NUMBER->value => 0,
-            UserProvider::EMAIL->value => 0,
-        ];
-
-        // Count occurrences of each providerId
-        foreach ($results as $result) {
-            $providerId = $result['provider_id'];
-            if ($providerId === UserProvider::EMAIL->value) {
-                $counts[UserProvider::EMAIL->value]++;
-            } elseif ($providerId === UserProvider::PHONE_NUMBER->value) {
-                $counts[UserProvider::PHONE_NUMBER->value]++;
-            }
-        }
-
-        return $counts;
-    }
-
     public function countAuthenticationProviders(DateTime $start, DateTime $end): array
     {
         return $this->createQueryBuilder('ua')
             ->select('ua.provider AS provider, COUNT(ua.id) AS count')
             ->join('ua.user', 'u')
-            ->andWhere('u.roles IS EMPTY')
             ->andWhere('u.createdAt BETWEEN :start AND :end')
             ->setParameter('start', $start)
             ->setParameter('end', $end)
             ->groupBy('ua.provider')
+            ->getQuery()
+            ->getArrayResult();
+    }
+
+    /**
+     * Fetch platform users counts based on the portal type (SMS || Email)
+     * @throws \JsonException
+     */
+    public function findPortalUsers(DateTime $start, DateTime $end): array
+    {
+        return $this->createQueryBuilder('ua')
+            ->select('ua.provider_id AS provider_id, COUNT(ua.id) AS count')
+            ->join('ua.user', 'u')
+            ->andWhere('ua.provider = :provider')
+            ->andWhere('u.createdAt BETWEEN :start AND :end')
+            ->setParameter('provider', UserProvider::PORTAL_ACCOUNT->value)
+            ->setParameter('start', $start)
+            ->setParameter('end', $end)
+            ->groupBy('ua.provider_id')
             ->getQuery()
             ->getArrayResult();
     }

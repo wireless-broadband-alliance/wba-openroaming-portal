@@ -2,7 +2,7 @@
 
 namespace App\Service\Statistics\Portal;
 
-class PortalGenerateDatasets
+class GenerateDatasets
 {
     /**
      * Generate datasets for charts graphics

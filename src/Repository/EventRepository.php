@@ -7,6 +7,7 @@ use App\Entity\User;
 use App\Enum\AnalyticalEventType;
 use DateTime;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\DBAL\Exception;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -154,6 +155,43 @@ class EventRepository extends ServiceEntityRepository
                     )
             )
             ->setParameter('emptyString', '')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * Find DOWNLOAD_PROFILE related events.
+     *
+     * @return Event[] Returns an array of Event objects
+     * @throws \JsonException
+     */
+    public function findDownloadProfileEvents(DateTime $start, DateTime $end): array
+    {
+        return $this->createQueryBuilder('e')
+            ->join('e.user', 'u')
+            ->andWhere('e.event_name = :event')
+            ->andWhere('e.event_datetime BETWEEN :start AND :end')
+            ->setParameter('event', AnalyticalEventType::DOWNLOAD_PROFILE->value)
+            ->setParameter('start', $start)
+            ->setParameter('end', $end)
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * Counts USER_CREATION events by platform mode.
+     *
+     * @return Event[] Returns an array of Event objects
+     */
+    public function findUserCreationEvents(DateTime $start, DateTime $end): array
+    {
+        return $this->createQueryBuilder('e')
+            ->join('e.user', 'u')
+            ->andWhere('e.event_name = :event')
+            ->andWhere('e.event_datetime BETWEEN :start AND :end')
+            ->setParameter('event', AnalyticalEventType::USER_CREATION->value)
+            ->setParameter('start', $start)
+            ->setParameter('end', $end)
             ->getQuery()
             ->getResult();
     }

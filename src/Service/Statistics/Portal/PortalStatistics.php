@@ -2,10 +2,6 @@
 
 namespace App\Service\Statistics\Portal;
 
-use App\Entity\Event;
-use App\Entity\User;
-use App\Entity\UserExternalAuth;
-use App\Enum\AnalyticalEventType;
 use App\Enum\OSType;
 use App\Enum\PlatformMode;
 use App\Enum\UserProvider;
@@ -16,7 +12,7 @@ use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
 use DateTime;
 use Exception;
-use Symfony\Component\HttpFoundation\JsonResponse;
+use JetBrains\PhpStorm\NoReturn;
 
 readonly class PortalStatistics
 {
@@ -24,61 +20,57 @@ readonly class PortalStatistics
         private UserRepository $userRepository,
         private EventRepository $eventRepository,
         private UserExternalAuthRepository $userExternalAuthRepository,
+        private GenerateDatasets $generateDatasets,
     ) {
     }
 
     /**
-     * Fetch data related to downloaded profiles devices.
-     *
-     * @return array{
-     *     labels: string[],
-     *     datasets: array{
-     *         data: int[],
-     *         backgroundColor: string[],
-     *         borderColor?: string,
-     *         borderRadius: string
-     *     }[]
-     * }|JsonResponse
-     * @throws Exception
+     * Fetch data related to users with portal accounts (SMS || Email)
+     * @throws \JsonException
      */
-    public function fetchChartDevices(?DateTime $startDate, ?DateTime $endDate): JsonResponse|array
+    public function getSMSEmailStats(DateTime $startDate, DateTime $endDate): array
     {
-        // Fetch all data without date filtering
-        $events = $this->eventRepository->findBy(['event_name' => AnalyticalEventType::DOWNLOAD_PROFILE->value]);
+        $rows = $this->userExternalAuthRepository
+            ->findPortalUsers($startDate, $endDate);
 
-        $profileCounts = [
-            OSType::ANDROID->value => 0,
-            OSType::WINDOWS->value => 0,
-            OSType::MACOS->value => 0,
-            OSType::IOS->value => 0,
+        $result = [
+            'Email' => 0,
+            'Phone' => 0,
         ];
 
-        // Filter and count profile types based on the date criteria
-        foreach ($events as $event) {
-            $eventDateTime = $event->getEventDatetime();
-
-            if (!$eventDateTime) {
-                continue; // Skip events with missing dates
-            }
-
-            if (
-                (!$startDate || $eventDateTime >= $startDate) &&
-                (!$endDate || $eventDateTime <= $endDate)
-            ) {
-                $eventMetadata = $event->getEventMetadata();
-
-                if (isset($eventMetadata['type'])) {
-                    $profileType = $eventMetadata['type'];
-
-                    // Check the profile type and update the corresponding count
-                    if (isset($profileCounts[$profileType])) {
-                        $profileCounts[$profileType]++;
-                    }
-                }
-            }
+        foreach ($rows as $row) {
+            match ($row['provider_id']) {
+                UserProvider::EMAIL->value => $result['Email'] = (int)$row['count'],
+                UserProvider::PHONE_NUMBER->value => $result['Phone'] = (int)$row['count'],
+                default => null,
+            };
         }
 
-        return new PortalGenerateDatasets()->generateDatasets($profileCounts);
+        return $this->generateDatasets->generateDatasets($result);
+    }
+
+    /**
+     * Fetch data related to types of authentication.
+     *
+     * @throws \JsonException
+     */
+    public function getAuthenticationStats(DateTime $startDate, DateTime $endDate): array
+    {
+        $rows = $this->userExternalAuthRepository
+            ->countAuthenticationProviders($startDate, $endDate);
+
+        $result = [
+            UserProvider::SAML->value => 0,
+            UserProvider::GOOGLE_ACCOUNT->value => 0,
+            UserProvider::MICROSOFT_ACCOUNT->value => 0,
+            UserProvider::PORTAL_ACCOUNT->value => 0,
+        ];
+
+        foreach ($rows as $row) {
+            $result[$row['provider']] = (int)$row['count'];
+        }
+
+        return $this->generateDatasets->generateDatasets($result);
     }
 
     /**
@@ -105,156 +97,101 @@ readonly class PortalStatistics
             }
         }
 
-        return new PortalGenerateDatasets()->generateDatasets($result);
+        $labels = [
+            UserTwoFactorAuthenticationStatus::DISABLED->value => 'Disabled',
+            UserTwoFactorAuthenticationStatus::TOTP->value => 'TOTP App',
+            UserTwoFactorAuthenticationStatus::SMS->value => 'SMS',
+            UserTwoFactorAuthenticationStatus::EMAIL->value => 'Email',
+        ];
+
+        $final = [];
+
+        foreach ($result as $type => $count) {
+            $final[$labels[$type] ?? 'Unknown'] = $count;
+        }
+
+        return $this->generateDatasets->generateDatasets($final);
     }
 
     /**
-     * Fetch data related to types of authentication.
+     * Fetch data related to downloaded profiles devices.
      *
+     * @throws \JsonException
      */
-    public function fetchChartAuthentication(DateTime $startDate, DateTime $endDate): array
+    public function getDevicesStats(DateTime $start, DateTime $end): array
     {
-        $rows = $this->userExternalAuthRepository
-            ->countAuthenticationProviders($startDate, $endDate);
+        $events = $this->eventRepository->findDownloadProfileEvents($start, $end);
 
         $result = [
-            UserProvider::SAML->value => 0,
-            UserProvider::GOOGLE_ACCOUNT->value => 0,
-            UserProvider::PORTAL_ACCOUNT->value => 0,
+            OSType::ANDROID->value => 0,
+            OSType::WINDOWS->value => 0,
+            OSType::MACOS->value => 0,
+            OSType::IOS->value => 0,
         ];
 
-        foreach ($rows as $row) {
-            $result[$row['provider']] = (int)$row['count'];
+        foreach ($events as $event) {
+            $metadata = $event->getEventMetadata();
+
+            if (!isset($metadata['type'])) {
+                continue;
+            }
+
+            $type = $metadata['type'];
+
+            if (isset($result[$type])) {
+                $result[$type]++;
+            }
         }
 
-        return new PortalGenerateDatasets()->generateDatasets($result);
+        return $this->generateDatasets->generateDatasets($result);
     }
 
     /**
      * Fetch data related to users created in platform mode - Live/Demo
      *
-     * @return array{
-     *     labels: string[],
-     *     datasets: array{
-     *         data: int[],
-     *         backgroundColor: string[],
-     *         borderColor?: string,
-     *         borderRadius: string
-     *     }[]
-     * }|JsonResponse
-     * @throws Exception
+     * @throws \Doctrine\DBAL\Exception
      */
-    public function fetchChartPlatformStatus(?DateTime $startDate, ?DateTime $endDate): JsonResponse|array
+    public function getPlatformStatusStats(DateTime $startDate, DateTime $endDate): array
     {
-        $repository = $this->entityManager->getRepository(Event::class);
+        $events = $this->eventRepository->findUserCreationEvents($startDate, $endDate);
 
-        $events = $repository->findBy(['event_name' => 'USER_CREATION']);
-
-        $statusCounts = [
+        $result = [
             PlatformMode::LIVE->value => 0,
             PlatformMode::DEMO->value => 0,
         ];
 
         foreach ($events as $event) {
-            $eventDateTime = $event->getEventDatetime();
-            if (!$eventDateTime) {
+            $metadata = $event->getEventMetadata();
+
+            if (!isset($metadata['platform'])) {
                 continue;
             }
-            if (
-                (!$startDate || $eventDateTime >= $startDate) &&
-                (!$endDate || $eventDateTime <= $endDate)
-            ) {
-                $eventMetadata = $event->getEventMetadata();
 
-                if (isset($eventMetadata['platform'])) {
-                    $statusType = $eventMetadata['platform'];
-                    if (isset($statusCounts[$statusType])) {
-                        $statusCounts[$statusType]++;
-                    }
-                }
+            $platform = $metadata['platform'];
+
+            if (isset($result[$platform])) {
+                $result[$platform]++;
             }
         }
 
-        return new PortalGenerateDatasets()->generateDatasets($statusCounts);
+        return $this->generateDatasets->generateDatasets($result);
     }
 
     /**
      * Fetch data related to verified users
      *
-     * @return array{
-     *     labels: string[],
-     *     datasets: array{
-     *         data: int[],
-     *         backgroundColor: string[],
-     *         borderColor?: string,
-     *         borderRadius: string
-     *     }[]
-     * }|JsonResponse
-     * @throws Exception
      */
-    public function fetchChartUserVerified(?DateTime $startDate, ?DateTime $endDate): JsonResponse|array
+    public function getUserVerifiedStas(DateTime $startDate, DateTime $endDate): array
     {
-        $repository = $this->entityManager->getRepository(User::class);
+        $row = $this->userRepository
+            ->countUserVerificationStats($startDate, $endDate);
 
-        /* @phpstan-ignore-next-line */
-        $users = $repository->findAll();
-
-        $userCounts = [
-            UserVerificationStatus::VERIFIED->value => 0,
-            UserVerificationStatus::NEED_VERIFICATION->value => 0,
-            UserVerificationStatus::BANNED->value => 0,
+        $result = [
+            UserVerificationStatus::VERIFIED->value => (int)($row['verified'] ?? 0),
+            UserVerificationStatus::NEED_VERIFICATION->value => (int)($row['not_verified'] ?? 0),
+            UserVerificationStatus::BANNED->value => (int)($row['banned'] ?? 0),
         ];
 
-        foreach ($users as $user) {
-            $createdAt = $user->getCreatedAt();
-
-            if (
-                (!$startDate || $createdAt >= $startDate) &&
-                (!$endDate || $createdAt <= $endDate)
-            ) {
-                $verification = $user->isVerified();
-                $ban = $user->getBannedAt();
-
-                if ($verification) {
-                    $userCounts[UserVerificationStatus::VERIFIED->value]++;
-                } else {
-                    $userCounts[UserVerificationStatus::NEED_VERIFICATION->value]++;
-                }
-
-                if ($ban) {
-                    $userCounts[UserVerificationStatus::BANNED->value]++;
-                }
-            }
-        }
-
-        return new PortalGenerateDatasets()->generateDatasets($userCounts);
-    }
-
-    /**
-     * Fetch data related to users with portal accounts, categorized by email or phone number
-     *
-     * @return array{
-     *     labels: string[],
-     *     datasets: array{
-     *         data: int[],
-     *         backgroundColor: string[],
-     *         borderColor?: string,
-     *         borderRadius: string
-     *     }[]
-     * }|JsonResponse
-     * @throws Exception
-     */
-    public function fetchChartSMSEmail(?DateTime $startDate, ?DateTime $endDate): JsonResponse|array
-    {
-        $userExternalAuthRepository = $this->entityManager->getRepository(UserExternalAuth::class);
-        // Call the repository method to get portal user counts
-        /** @var UserExternalAuthRepository $userExternalAuthRepository */
-        $portalUsersCounts = $userExternalAuthRepository->getPortalUserCounts(
-            UserProvider::PORTAL_ACCOUNT->value,
-            $startDate,
-            $endDate
-        );
-
-        return new PortalGenerateDatasets()->generateDatasets($portalUsersCounts);
+        return $this->generateDatasets->generateDatasets($result);
     }
 }

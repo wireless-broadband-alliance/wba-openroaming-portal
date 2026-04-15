@@ -80,6 +80,26 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
     /**
      * @return User[]
      */
+    public function countUserVerificationStats(DateTime $start, DateTime $end): array
+    {
+        $qb = $this->createQueryBuilder('u');
+
+        return $qb
+            ->select(
+                'SUM(CASE WHEN u.isVerified = true THEN 1 ELSE 0 END) AS verified',
+                'SUM(CASE WHEN u.isVerified = false THEN 1 ELSE 0 END) AS not_verified',
+                'SUM(CASE WHEN u.bannedAt IS NOT NULL THEN 1 ELSE 0 END) AS banned'
+            )
+            ->andWhere('u.createdAt BETWEEN :start AND :end')
+            ->setParameter('start', $start)
+            ->setParameter('end', $end)
+            ->getQuery()
+            ->getSingleResult();
+    }
+
+    /**
+     * @return User[]
+     */
     public function findLDAPEnabledUsers(): array
     {
         return $this->createQueryBuilder('u')

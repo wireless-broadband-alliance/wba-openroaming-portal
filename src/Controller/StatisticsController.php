@@ -34,6 +34,7 @@ class StatisticsController extends AbstractController
     /**
      * @throws JsonException
      * @throws Exception
+     * @throws \Doctrine\DBAL\Exception
      */
     #[Route('/dashboard/statistics', name: 'admin_dashboard_statistics')]
     #[IsGranted(UserAuthenticationVoter::PORTAL_STATISTICS_READ)]
@@ -65,11 +66,11 @@ class StatisticsController extends AbstractController
             return $this->redirectToRoute('admin_dashboard_statistics');
         }
 
-        $fetchChartDevices = $this->portalStatistics->fetchChartDevices($startDate, $endDate);
-        $fetchChartAuthentication = $this->portalStatistics->fetchChartAuthentication($startDate, $endDate);
-        $fetchChartPlatformStatus = $this->portalStatistics->fetchChartPlatformStatus($startDate, $endDate);
-        $fetchChartUserVerified = $this->portalStatistics->fetchChartUserVerified($startDate, $endDate);
-        $fetchChartSMSEmail = $this->portalStatistics->fetchChartSMSEmail($startDate, $endDate);
+        $fetchChartSMSEmail = $this->portalStatistics->getSMSEmailStats($startDate, $endDate);
+        $fetchChartAuthentication = $this->portalStatistics->getAuthenticationStats($startDate, $endDate);
+        $fetchChartDevices = $this->portalStatistics->getDevicesStats($startDate, $endDate);
+        $fetchChartPlatformStatus = $this->portalStatistics->getPlatformStatusStats($startDate, $endDate);
+        $fetchChartUserVerified = $this->portalStatistics->getUserVerifiedStas($startDate, $endDate);
         $fetchChart2FA = $this->portalStatistics->get2FAStats($startDate, $endDate);
 
         $memory_before = memory_get_usage();
@@ -88,11 +89,11 @@ class StatisticsController extends AbstractController
         return $this->render('dashboard/statistics/statistics.html.twig', [
             'user' => $currentUser,
             'data' => $data,
-            'devicesDataJson' => json_encode($fetchChartDevices, JSON_THROW_ON_ERROR),
+            'SMSEmailDataJson' => json_encode($fetchChartSMSEmail, JSON_THROW_ON_ERROR),
             'authenticationDataJson' => json_encode($fetchChartAuthentication, JSON_THROW_ON_ERROR),
+            'devicesDataJson' => json_encode($fetchChartDevices, JSON_THROW_ON_ERROR),
             'platformStatusDataJson' => json_encode($fetchChartPlatformStatus, JSON_THROW_ON_ERROR),
             'usersVerifiedDataJson' => json_encode($fetchChartUserVerified, JSON_THROW_ON_ERROR),
-            'SMSEmailDataJson' => json_encode($fetchChartSMSEmail, JSON_THROW_ON_ERROR),
             'twoFADataJson' => json_encode($fetchChart2FA, JSON_THROW_ON_ERROR),
             'selectedStartDate' => $startDate->format('Y-m-d\TH:i'),
             'selectedEndDate' => $endDate->format('Y-m-d\TH:i'),
