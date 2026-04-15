@@ -86,28 +86,18 @@ class UserExternalAuthRepository extends ServiceEntityRepository
 
         return $counts;
     }
-//    /**
-//     * @return UserExternalAuth[] Returns an array of UserExternalAuth objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('u')
-//            ->andWhere('u.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('u.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
 
-//    public function findOneBySomeField($value): ?UserExternalAuth
-//    {
-//        return $this->createQueryBuilder('u')
-//            ->andWhere('u.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
+    public function countAuthenticationProviders(DateTime $start, DateTime $end): array
+    {
+        return $this->createQueryBuilder('ua')
+            ->select('ua.provider AS provider, COUNT(ua.id) AS count')
+            ->join('ua.user', 'u')
+            ->andWhere('u.roles IS EMPTY')
+            ->andWhere('u.createdAt BETWEEN :start AND :end')
+            ->setParameter('start', $start)
+            ->setParameter('end', $end)
+            ->groupBy('ua.provider')
+            ->getQuery()
+            ->getArrayResult();
+    }
 }

@@ -6,6 +6,7 @@ use App\Entity\User;
 use App\Enum\AdminRoleType;
 use App\Enum\UserProvider;
 use App\Enum\UserVerificationStatus;
+use DateTime;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
@@ -62,30 +63,20 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         }
     }
 
-//    /**
-//     * @return User[] Returns an array of User objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('u')
-//            ->andWhere('u.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('u.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
+    /**
+     * @return User[]
+     */
+    public function findByDateRange(DateTime $start, DateTime $end): array
+    {
+        return $this->createQueryBuilder('u')
+            ->andWhere('u.createdAt >= :start')
+            ->andWhere('u.createdAt <= :end')
+            ->setParameter('start', $start)
+            ->setParameter('end', $end)
+            ->getQuery()
+            ->getResult();
+    }
 
-//    public function findOneBySomeField($value): ?User
-//    {
-//        return $this->createQueryBuilder('u')
-//            ->andWhere('u.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
     /**
      * @return User[]
      */
@@ -236,7 +227,8 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         ?string $searchTerm = null,
         ?string $filter = null,
         bool $onlyAdmins = false // default false → counts all users
-    ): int {
+    ): int
+    {
         $qb = $this->createQueryBuilder('u');
         $qb->select('COUNT(u.id)')
             ->andWhere($qb->expr()->isNull('u.deletedAt')); // exclude deleted users
@@ -289,7 +281,8 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
     public function countVerifiedUsers(
         ?string $searchTerm = null,
         bool $onlyAdmins = false // default false → counts normal verified users
-    ): int {
+    ): int
+    {
         $qb = $this->createQueryBuilder('u');
         $qb->select('COUNT(u.id)')
             ->andWhere('u.isVerified = :verified')
@@ -335,7 +328,8 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
     public function countBannedUsers(
         ?string $searchTerm = null,
         bool $onlyAdmins = false // default false → counts normal banned users
-    ): int {
+    ): int
+    {
         $qb = $this->createQueryBuilder('u');
         $qb->select('COUNT(u.id)')
             ->andWhere('u.bannedAt IS NOT NULL')

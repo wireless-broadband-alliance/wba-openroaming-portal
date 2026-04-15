@@ -7,7 +7,7 @@ use App\RadiusDb\Repository\RadiusAccountingRepository;
 use App\RadiusDb\Repository\RadiusAuthsRepository;
 use App\Security\Voter\UserAuthenticationVoter;
 use App\Service\GetSettings;
-use App\Service\Statistics;
+use App\Service\Statistics\Portal\PortalStatistics;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
@@ -23,10 +23,8 @@ class StatisticsController extends AbstractController
 {
     public function __construct(
         private readonly GetSettings $getSettings,
-        private readonly EntityManagerInterface $entityManager,
-        private readonly RadiusAuthsRepository $radiusAuthsRepository,
-        private readonly RadiusAccountingRepository $radiusAccountingRepository,
         private readonly TranslatorInterface $translator,
+        private readonly PortalStatistics $portalStatistics,
     ) {
     }
 
@@ -67,17 +65,12 @@ class StatisticsController extends AbstractController
             return $this->redirectToRoute('admin_dashboard_statistics');
         }
 
-        $statisticsService = new Statistics(
-            $this->entityManager,
-            $this->radiusAuthsRepository,
-            $this->radiusAccountingRepository
-        );
-        $fetchChartDevices = $statisticsService->fetchChartDevices($startDate, $endDate);
-        $fetchChartAuthentication = $statisticsService->fetchChartAuthentication($startDate, $endDate);
-        $fetchChartPlatformStatus = $statisticsService->fetchChartPlatformStatus($startDate, $endDate);
-        $fetchChartUserVerified = $statisticsService->fetchChartUserVerified($startDate, $endDate);
-        $fetchChartSMSEmail = $statisticsService->fetchChartSMSEmail($startDate, $endDate);
-        $fetchChart2FA = $statisticsService->fetchChart2FA($startDate, $endDate);
+        $fetchChartDevices = $this->portalStatistics->fetchChartDevices($startDate, $endDate);
+        $fetchChartAuthentication = $this->portalStatistics->fetchChartAuthentication($startDate, $endDate);
+        $fetchChartPlatformStatus = $this->portalStatistics->fetchChartPlatformStatus($startDate, $endDate);
+        $fetchChartUserVerified = $this->portalStatistics->fetchChartUserVerified($startDate, $endDate);
+        $fetchChartSMSEmail = $this->portalStatistics->fetchChartSMSEmail($startDate, $endDate);
+        $fetchChart2FA = $this->portalStatistics->get2FAStats($startDate, $endDate);
 
         $memory_before = memory_get_usage();
         $memory_after = memory_get_usage();
