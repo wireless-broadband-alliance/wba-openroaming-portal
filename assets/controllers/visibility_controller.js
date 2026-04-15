@@ -27,7 +27,6 @@ export default class extends Controller {
             this.secondTarget.classList.toggle('hidden');
             return;
         }
-        e
         if (this.hasFirstTarget) {
             this.firstTarget.classList.toggle('hidden');
         }
