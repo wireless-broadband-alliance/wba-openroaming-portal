@@ -12,7 +12,6 @@ use App\Repository\UserExternalAuthRepository;
 use App\Repository\UserRepository;
 use DateTime;
 use Exception;
-use JetBrains\PhpStorm\NoReturn;
 
 readonly class PortalStatistics
 {
