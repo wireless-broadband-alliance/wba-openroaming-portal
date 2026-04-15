@@ -369,7 +369,10 @@ class ForgotPasswordController extends AbstractController
         $limit = $limiter->consume();
 
         if (!$limit->isAccepted()) {
-            $this->addFlash('error', 'Too many attempts. Try again later.');
+            $this->addFlash(
+                'error',
+                $this->translator->trans('tooManyAttempts', [], 'controllers')
+            );
             return $this->redirectToRoute('app_login');
         }
 
@@ -442,7 +445,10 @@ class ForgotPasswordController extends AbstractController
         $limit = $limiter->consume();
 
         if (!$limit->isAccepted()) {
-            $this->addFlash('error', 'Too many attempts. Try again later.');
+            $this->addFlash(
+                'error',
+                $this->translator->trans('tooManyAttempts', [], 'controllers')
+                );
             return $this->redirectToRoute('app_login');
         }
 

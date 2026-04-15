@@ -325,7 +325,10 @@ class RegistrationController extends AbstractController
         $limit = $limiter->consume();
 
         if (!$limit->isAccepted()) {
-            $this->addFlash('error', 'Too many attempts. Try again later.');
+            $this->addFlash(
+                'error',
+                $this->translator->trans('tooManyAttempts', [], 'controllers')
+            );
             return $this->redirectToRoute('app_login');
         }
         // Get the email and verification code from the URL query parameters
