@@ -448,7 +448,7 @@ class ForgotPasswordController extends AbstractController
             $this->addFlash(
                 'error',
                 $this->translator->trans('tooManyAttempts', [], 'controllers')
-                );
+            );
             return $this->redirectToRoute('app_login');
         }
 
