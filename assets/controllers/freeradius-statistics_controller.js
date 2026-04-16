@@ -6,6 +6,8 @@ export default class extends Controller {
 
     connect() {
         const target = this.chartTarget;
+        if (!target) return;
+
         const type = target.dataset.chartType || 'default';
 
         const handlers = {
@@ -19,26 +21,35 @@ export default class extends Controller {
     }
 
     // =========================
-    // SESSION
-    // =========================
-    renderSessionChart(target) {
-        const data = JSON.parse(target.dataset.chartData);
-
-        this.createChart(target, {
-            type: 'bar',
-            data,
-            options: this.baseOptions({
-                tension: 0.35,
-                yBeginAtZero: true,
-            }),
-        });
-    }
-
-    // =========================
-    // AUTH
+    // AUTH (FIXED)
     // =========================
     renderAuthChart(target) {
-        const data = JSON.parse(target.dataset.chartData);
+        const raw = this.parseData(target);
+
+        const labels = Object.keys(raw).sort();
+
+        const accepted = labels.map(date => raw[date]?.accepted ?? 0);
+        const rejected = labels.map(date => raw[date]?.rejected ?? 0);
+
+        const data = {
+            labels,
+            datasets: [
+                {
+                    label: 'Accepted',
+                    data: accepted,
+                    borderColor: '#7DB928',
+                    backgroundColor: 'rgba(125,185,40,0.2)',
+                    fill: true,
+                },
+                {
+                    label: 'Rejected',
+                    data: rejected,
+                    borderColor: '#FE4068',
+                    backgroundColor: 'rgba(254,64,104,0.2)',
+                    fill: true,
+                }
+            ]
+        };
 
         this.createChart(target, {
             type: 'line',
@@ -51,10 +62,51 @@ export default class extends Controller {
     }
 
     // =========================
+    // SESSION (generic example)
+    // =========================
+    renderSessionChart(target) {
+        const raw = this.parseData(target);
+
+        const labels = Object.keys(raw).sort();
+        const values = labels.map(date => raw[date] ?? 0);
+
+        const data = {
+            labels,
+            datasets: [
+                {
+                    label: 'Sessions',
+                    data: values,
+                    borderWidth: 1,
+                }
+            ]
+        };
+
+        this.createChart(target, {
+            type: 'bar',
+            data,
+            options: this.baseOptions({
+                yBeginAtZero: true,
+            }),
+        });
+    }
+
+    // =========================
     // DEFAULT
     // =========================
     renderDefaultChart(target) {
-        const data = JSON.parse(target.dataset.chartData);
+        const raw = this.parseData(target);
+
+        const labels = Object.keys(raw);
+        const values = Object.values(raw);
+
+        const data = {
+            labels,
+            datasets: [
+                {
+                    data: values,
+                }
+            ]
+        };
 
         this.createChart(target, {
             type: 'bar',
@@ -64,8 +116,17 @@ export default class extends Controller {
     }
 
     // =========================
-    // CORE FACTORY
+    // HELPERS
     // =========================
+    parseData(target) {
+        try {
+            return JSON.parse(target.dataset.chartData || '{}');
+        } catch (e) {
+            console.error('Invalid JSON in chart data:', e);
+            return {};
+        }
+    }
+
     createChart(target, config) {
         if (this.chartInstance) {
             this.chartInstance.destroy();
@@ -74,9 +135,6 @@ export default class extends Controller {
         this.chartInstance = new Chart(target, config);
     }
 
-    // =========================
-    // BASE OPTIONS
-    // =========================
     baseOptions({ tension = 0, yBeginAtZero = true } = {}) {
         return {
             maintainAspectRatio: false,
@@ -89,7 +147,7 @@ export default class extends Controller {
 
             plugins: {
                 legend: {
-                    display: false,
+                    display: true, // turned ON for auth chart clarity
                 },
             },
 
