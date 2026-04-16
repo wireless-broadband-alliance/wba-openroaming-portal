@@ -54,13 +54,15 @@
             </div>
             <div class="flex flex-col gap-6 animate-fadeIn">
                 <div class="w-full h-64 relative">
-                    {# data-freeradius-statistics-action="freeradius-statistics#authAttemptsAction@load" #}
-                    <canvas id="authAttemptsChart"
-                            class="w-full h-full"
+                    <canvas
+                            id="authAttemptsChart"
                             data-controller="freeradius-statistics"
                             data-chart-type="auth"
                             data-freeradius-statistics-target="chart"
-                            data-chart-data="{{ authAttemptsJson }}"></canvas>
+                            data-chart-data="{{ authAttemptsJson }}"
+                            data-label-accepted="{{ 'accepted'|trans({}, 'freeradius_statistics') }}"
+                            data-label-rejected="{{ 'rejected'|trans({}, 'freeradius_statistics') }}"
+                    ></canvas>
                 </div>
             </div>
         </div>
@@ -267,11 +269,13 @@
                 <h1 class="text-lg font-medium">{{ 'WiFiStandardsUsage'|trans({}, 'freeradius_statistics') }}</h1>
             </div>
             <div class="xl:pt-10 flex flex-col gap-6 animate-fadeIn">
-                <canvas class="max-w-full" id="wifiTagsChart"
+                <canvas
+                        id="wifiTagsChart"
                         data-controller="freeradius-statistics"
                         data-freeradius-statistics-target="chart"
-                        data-freeradius-statistics-action="freeradius-statistics#wifiTagsAction@load"
-                        data-chart-data="{{ wifiTagsJson }}"></canvas>
+                        data-chart-type="wifiTags"
+                        data-chart-data="{{ wifiTagsJson }}"
+                ></canvas>
             </div>
         </div>
 

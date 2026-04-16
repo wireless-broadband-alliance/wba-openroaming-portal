@@ -16,7 +16,6 @@ readonly class FreeradiusStatistics
     }
 
     // AUTHENTICATION STATS
-
     /**
      * @throws \Exception
      */
