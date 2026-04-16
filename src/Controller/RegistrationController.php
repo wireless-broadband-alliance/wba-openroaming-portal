@@ -335,7 +335,7 @@ class RegistrationController extends AbstractController
         }
 
         if (
-            $user->getUuid() === $uuid && $user->getTwoFAcode() === $verificationCode &&
+            $user && $user->getUuid() === $uuid && $user->getTwoFAcode() === $verificationCode &&
             $this->magicLinkService->linkCanBeUsed($user, AnalyticalEventType::USER_CREATION->value)
         ) {
             $this->addFlash(
@@ -349,7 +349,7 @@ class RegistrationController extends AbstractController
 
             return $this->redirectToRoute('app_landing');
         }
-        if ($user->getTwoFAcode() === $verificationCode) {
+        if ($user && $user->getTwoFAcode() === $verificationCode) {
             try {
                 // Create a token manually for the user
                 $token = new UsernamePasswordToken($user, 'main', $user->getRoles());

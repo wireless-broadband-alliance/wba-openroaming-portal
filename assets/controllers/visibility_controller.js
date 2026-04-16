@@ -1,7 +1,7 @@
 import { Controller } from '@hotwired/stimulus';
 
 export default class extends Controller {
-    static targets = ['select', 'item'];
+    static targets = ['first', 'second'];
 
     connect() {
         this.update();
@@ -19,5 +19,20 @@ export default class extends Controller {
                 element.classList.add('hidden');
             }
         });
+    }
+
+    toggle() {
+        if (this.hasFirstTarget && this.hasSecondTarget) {
+            this.firstTarget.classList.toggle('hidden');
+            this.secondTarget.classList.toggle('hidden');
+            return;
+        }
+        if (this.hasFirstTarget) {
+            this.firstTarget.classList.toggle('hidden');
+        }
+
+        if (this.hasSecondTarget) {
+            this.secondTarget.classList.toggle('hidden');
+        }
     }
 }
