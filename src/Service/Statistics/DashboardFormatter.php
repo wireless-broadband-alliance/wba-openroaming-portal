@@ -34,7 +34,6 @@ readonly class DashboardFormatter
     {
         $hours = floor($seconds / 3600);
         $minutes = floor(($seconds % 3600) / 60);
-        $secs = $seconds % 60;
 
         return sprintf('%dh %02dm', $hours, $minutes);
     }
