@@ -31,6 +31,7 @@ export default class extends Controller {
             auth: this.renderAuthChart.bind(this),
             session: this.renderSessionChart.bind(this),
             sessionTotal: this.renderSessionTotalChart.bind(this),
+            wifiTags: this.renderWifiTagsChart.bind(this),
             default: this.renderDefaultChart.bind(this),
         };
 
@@ -79,7 +80,7 @@ export default class extends Controller {
         this.createChart(target, {
             type: 'line',
             data,
-            options: this.baseOptions({ tension: 0.35, isDuration: true }),
+            options: this.baseOptions({ tension: 0.35, isDuration: true, minimal: true }),
         });
     }
 
@@ -100,7 +101,63 @@ export default class extends Controller {
         this.createChart(target, {
             type: 'bar',
             data,
-            options: this.baseOptions({ isDuration: true }),
+            options: this.baseOptions({ isDuration: true, minimal: true }),
+        });
+    }
+
+    // =========================
+    // WIFI Tags
+    // =========================
+    renderWifiTagsChart(target) {
+        const raw = this.parseData(target);
+
+        const labels = Object.keys(raw);
+        const values = Object.values(raw);
+
+        const total = values.reduce((a, b) => a + b, 0);
+
+        const data = {
+            labels,
+            datasets: [
+                {
+                    data: values,
+
+                    backgroundColor: [
+                        this.colors.primary,
+                        this.colors.info,
+                        this.colors.success,
+                        this.colors.danger,
+                    ],
+
+                    hoverOffset: 8,
+                    borderWidth: 2,
+                },
+            ],
+        };
+
+        this.createChart(target, {
+            type: 'doughnut',
+            data,
+            options: {
+                maintainAspectRatio: false,
+
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                    },
+
+                    tooltip: {
+                        callbacks: {
+                            label: (context) => {
+                                const value = context.raw;
+                                const percent = ((value / total) * 100).toFixed(1);
+
+                                return `${context.label}: ${value} (${percent}%)`;
+                            },
+                        },
+                    },
+                },
+            },
         });
     }
 
@@ -181,7 +238,7 @@ export default class extends Controller {
     // =========================
     // BASE OPTIONS
     // =========================
-    baseOptions({ tension = 0, isDuration = false } = {}) {
+    baseOptions({ tension = 0, isDuration = false, minimal = false } = {}) {
         return {
             maintainAspectRatio: false,
             responsive: true,
@@ -193,7 +250,7 @@ export default class extends Controller {
 
             plugins: {
                 legend: {
-                    display: true,
+                    display: !minimal,
                 },
 
                 tooltip: {
@@ -229,6 +286,7 @@ export default class extends Controller {
             scales: {
                 x: {
                     ticks: {
+                        display: !minimal,
                         maxRotation: 0,
                         autoSkip: true,
                         maxTicksLimit: 7,
@@ -240,6 +298,7 @@ export default class extends Controller {
                 y: {
                     beginAtZero: true,
                     ticks: {
+                        display: !minimal,
                         precision: 0,
                     },
                     grid: {
