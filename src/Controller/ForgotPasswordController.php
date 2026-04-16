@@ -35,6 +35,7 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Component\HttpKernel\Exception\TooManyRequestsHttpException;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
@@ -370,9 +371,16 @@ class ForgotPasswordController extends AbstractController
         $limit = $limiter->consume();
 
         if (!$limit->isAccepted()) {
-            throw new HttpException(
-                429,
-                $this->translator->trans('tooManyAttempts', [], 'controllers')
+            $retryAfter = $limit->getRetryAfter();
+            $seconds = $retryAfter->getTimestamp() - time();
+
+            throw new TooManyRequestsHttpException(
+                $seconds,
+                $this->translator->trans(
+                    'tooManyAttempts',
+                    ['%seconds%' => $seconds],
+                    'controllers'
+                )
             );
         }
 
@@ -445,9 +453,16 @@ class ForgotPasswordController extends AbstractController
         $limit = $limiter->consume();
 
         if (!$limit->isAccepted()) {
-            throw new HttpException(
-                429,
-                $this->translator->trans('tooManyAttempts', [], 'controllers')
+            $retryAfter = $limit->getRetryAfter();
+            $seconds = $retryAfter->getTimestamp() - time();
+
+            throw new TooManyRequestsHttpException(
+                $seconds,
+                $this->translator->trans(
+                    'tooManyAttempts',
+                    ['%seconds%' => $seconds],
+                    'controllers'
+                )
             );
         }
 

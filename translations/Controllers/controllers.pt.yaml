@@ -196,4 +196,4 @@ access_denied_feature_disabled: "Esta funcionalidade está atualmente desativada
 access_denied_session_expired: "A sua sessão expirou. Por favor, inicie sessão novamente."
 invalidPhoneNumber: 'Número de telefone inválido. Por favor, insira um número válido.'
 phoneNumberRequired: 'O número de telefone é obrigatório.'
-tooManyAttempts: 'Demasiadas tentativas. Tente novamente mais tarde.'
+tooManyAttempts: "Demasiadas tentativas. Tente novamente em %seconds% segundos."
