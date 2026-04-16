@@ -1,8 +1,26 @@
-import { Controller } from '@hotwired/stimulus';
-import { Chart } from 'chart.js';
+import {Controller} from '@hotwired/stimulus';
+import {Chart} from 'chart.js';
 
 export default class extends Controller {
     static targets = ['chart'];
+
+    // =========================
+    // DESIGN SYSTEM
+    // =========================
+    colors = {
+        primary: '#7DB928',
+        danger: '#FE4068',
+        info: '#3B82F6',
+        success: '#10B981',
+    };
+
+    // automatic soft fills (important part)
+    soft = {
+        primary: 'rgba(125,185,40,0.12)',
+        danger: 'rgba(254,64,104,0.12)',
+        info: 'rgba(59,130,246,0.12)',
+        success: 'rgba(16,185,129,0.12)',
+    };
 
     connect() {
         const target = this.chartTarget;
@@ -13,80 +31,81 @@ export default class extends Controller {
         const handlers = {
             auth: this.renderAuthChart.bind(this),
             session: this.renderSessionChart.bind(this),
+            sessionTotal: this.renderSessionTotalChart.bind(this),
             default: this.renderDefaultChart.bind(this),
         };
 
-        const handler = handlers[type] || handlers.default;
-        handler(target);
+        (handlers[type] || handlers.default)(target);
     }
 
     // =========================
-    // AUTH (FIXED)
+    // AUTH (FILLED LINE)
     // =========================
     renderAuthChart(target) {
         const raw = this.parseData(target);
-
         const labels = Object.keys(raw).sort();
 
-        const accepted = labels.map(date => raw[date]?.accepted ?? 0);
-        const rejected = labels.map(date => raw[date]?.rejected ?? 0);
+        const accepted = labels.map(d => raw[d]?.accepted ?? 0);
+        const rejected = labels.map(d => raw[d]?.rejected ?? 0);
 
         const data = {
             labels,
             datasets: [
-                {
-                    label: 'Accepted',
-                    data: accepted,
-                    borderColor: '#7DB928',
-                    backgroundColor: 'rgba(125,185,40,0.2)',
-                    fill: true,
-                },
-                {
-                    label: 'Rejected',
-                    data: rejected,
-                    borderColor: '#FE4068',
-                    backgroundColor: 'rgba(254,64,104,0.2)',
-                    fill: true,
-                }
+                this.lineDataset('Accepted', accepted, 'primary'),
+                this.lineDataset('Rejected', rejected, 'danger'),
             ]
         };
 
         this.createChart(target, {
             type: 'line',
             data,
-            options: this.baseOptions({
-                tension: 0.3,
-                yBeginAtZero: true,
-            }),
+            options: this.baseOptions({tension: 0.3}),
         });
     }
 
     // =========================
-    // SESSION (generic example)
+    // SESSION AVERAGE
     // =========================
     renderSessionChart(target) {
         const raw = this.parseData(target);
 
-        const labels = Object.keys(raw).sort();
-        const values = labels.map(date => raw[date] ?? 0);
+        const labels = Object.keys(raw).sort((a, b) => new Date(a) - new Date(b));
+        const values = labels.map(d => raw[d] ?? 0);
 
         const data = {
             labels,
             datasets: [
-                {
-                    label: 'Sessions',
-                    data: values,
-                    borderWidth: 1,
-                }
+                this.lineDataset('Average Session Time', values, 'info'),
+            ]
+        };
+
+        this.createChart(target, {
+            type: 'line',
+            data,
+            options: this.baseOptions({tension: 0.35, formatY: true}),
+        });
+    }
+
+    // =========================
+    // SESSION TOTAL (BAR)
+    // =========================
+    renderSessionTotalChart(target) {
+        const raw = this.parseData(target);
+
+        const labels = Object.keys(raw).sort((a, b) => new Date(a) - new Date(b));
+        const values = labels.map(d => raw[d] ?? 0);
+
+        const data = {
+            labels,
+            datasets: [
+                this.barDataset('Total Session Time', values, 'success'),
             ]
         };
 
         this.createChart(target, {
             type: 'bar',
             data,
-            options: this.baseOptions({
-                yBeginAtZero: true,
-            }),
+            options: this.baseOptions({formatY: true}),
         });
     }
 
@@ -102,9 +121,7 @@ export default class extends Controller {
         const data = {
             labels,
             datasets: [
-                {
-                    data: values,
-                }
+                this.barDataset('Data', values, 'primary'),
             ]
         };
 
@@ -116,13 +133,42 @@ export default class extends Controller {
     }
 
     // =========================
+    // LINE DATASET (AUTO-FILL)
+    // =========================
+    lineDataset(label, data, colorKey) {
+        return {
+            label,
+            data,
+            borderColor: this.colors[colorKey],
+            backgroundColor: this.soft[colorKey], // 🔥 THIS is what gives the fill
+            fill: true,
+
+            borderWidth: 2,
+            pointRadius: 2,
+            pointHoverRadius: 5,
+        };
+    }
+
+    // =========================
+    // BAR DATASET
+    // =========================
+    barDataset(label, data, colorKey) {
+        return {
+            label,
+            data,
+            backgroundColor: this.soft[colorKey],
+            hoverBackgroundColor: this.colors[colorKey],
+        };
+    }
+
+    // =========================
     // HELPERS
     // =========================
     parseData(target) {
         try {
             return JSON.parse(target.dataset.chartData || '{}');
         } catch (e) {
-            console.error('Invalid JSON in chart data:', e);
+            console.error('Invalid JSON:', e);
             return {};
         }
     }
@@ -135,7 +181,19 @@ export default class extends Controller {
         this.chartInstance = new Chart(target, config);
     }
 
-    baseOptions({ tension = 0, yBeginAtZero = true } = {}) {
+    formatDuration(seconds) {
+        const hours = Math.floor(seconds / 3600);
+        const minutes = Math.floor((seconds % 3600) / 60);
+        return `${hours}h ${minutes}m`;
+    }
+
+    // =========================
+    // BASE OPTIONS
+    // =========================
+    baseOptions({
+                    tension = 0,
+                    formatY = false
+                } = {}) {
         return {
             maintainAspectRatio: false,
             responsive: true,
@@ -147,8 +205,18 @@ export default class extends Controller {
 
             plugins: {
                 legend: {
-                    display: true, // turned ON for auth chart clarity
+                    display: true,
                 },
+                tooltip: {
+                    callbacks: {
+                        label: (context) => {
+                            const value = context.raw;
+                            if (typeof value !== 'number') return value;
+
+                            return `${context.dataset.label}: ${this.formatDuration(value)}`;
+                        }
+                    }
+                }
             },
 
             elements: {
@@ -174,9 +242,10 @@ export default class extends Controller {
                     },
                 },
                 y: {
-                    beginAtZero: yBeginAtZero,
+                    beginAtZero: true,
                     ticks: {
                         precision: 0,
+                        callback: formatY ? (v) => this.formatDuration(v) : undefined,
                     },
                     grid: {
                         color: 'rgba(0,0,0,0.05)',
