@@ -128,60 +128,82 @@
 
     <div class="mt-10 grid xl:gap-8 gap-y-8 xl:grid-cols-3 md:grid-cols-1">
         {# Total of Traffic #}
-        <div class="col-span-3 md:col-span-1 w-full bg-white rounded-lg px-4 p-4 gap-4 shadow">
-            <div class="flex justify-between items-center pb-4">
-                <h1 class="text-lg font-medium text-left">{{ 'trafficTotal'|trans({}, 'freeradius_statistics') }}</h1>
-                <h2 class="text-base font-medium text-gray-400 text-right">{{ 'inGigabyte'|trans({}, 'freeradius_statistics') }}</h2>
+        <div class="col-span-3 md:col-span-1 w-full bg-white rounded-xl p-5 shadow">
+            {# HEADER #}
+            <div class="flex justify-between items-center pb-5 border-b border-gray-100">
+                <h1 class="text-lg font-semibold text-gray-800">
+                    {{ 'trafficTotal'|trans({}, 'freeradius_statistics') }}
+                </h1>
+
+                <span class="text-sm text-gray-400">
+            {{ 'inGigabyte'|trans({}, 'freeradius_statistics') }}
+        </span>
             </div>
-            <div class="md:mt-6 flex md:flex-row flex-col justify-center md:justify-around items-center xl:space-x-6 space-x-0">
-                <div class="flex flex-col">
-                    <h1 class="text-center font-semibold">
-                        {{ 'uploads'|trans({}, 'freeradius_statistics') }}
-                    </h1>
-                    {% if totalTrafficFreeradius['input_gb'] >= 0.1 %}
-                        {% set sizeClass = 'w-24 h-24' %}
-                        {% if totalTrafficFreeradius['input_gb'] >= 1000 %}
-                            {% set sizeClass = 'w-32 h-32' %}
-                        {% endif %}
-                        {% if totalTrafficFreeradius['input_gb'] >= 10000 %}
-                            {% set sizeClass = 'w-36 h-36' %}
-                        {% endif %}
-                        {% if totalTrafficFreeradius['input_gb'] >= 100000 %}
-                            {% set sizeClass = 'w-40 h-40' %}
-                        {% endif %}
-                        <div class="mt-4 flex items-center justify-center bg-[#7DB928] rounded-full text-white text-4xl font-bold {{ sizeClass }}">
-                            {{ totalTrafficFreeradius['input_gb'] }}
+
+            {# CONTENT #}
+            <div class="mt-5 space-y-6">
+
+                {% set input = totalTrafficFreeradius.input_bytes ?? 0 %}
+                {% set output = totalTrafficFreeradius.output_bytes ?? 0 %}
+                {% set total = input + output %}
+
+                {# UPLOADS #}
+                <div>
+                    <div class="flex justify-between mb-2">
+                        <h2 class="text-sm font-medium text-gray-600">
+                            {{ 'uploads'|trans({}, 'freeradius_statistics') }}
+                        </h2>
+
+                        <span class="text-sm font-semibold text-gray-800">
+                    {{ totalTrafficFreeradius.input_human ?? '0 B' }}
+                </span>
+                    </div>
+
+                    <div class="w-full bg-gray-100 rounded-full h-3 overflow-hidden">
+                        <div class="bg-[#7DB928] h-3 rounded-full transition-all duration-300"
+                             style="width: {{ total > 0 ? (input / total * 100) : 0 }}%">
                         </div>
-                    {% else %}
-                        <div class="bg-red-500/50 rounded-full m-2 p-2 mt-4 text-red-500 font-semibold text-center md:text-base text-sm">
-                            {{ 'noDataAvailable'|trans({}, 'freeradius_statistics') }}
-                        </div>
-                    {% endif %}
+                    </div>
                 </div>
-                <div class="mt-8 md:mt-0 flex flex-col">
-                    <h1 class="text-center font-semibold">
-                        Downloads
-                    </h1>
-                    {% if totalTrafficFreeradius['output_gb'] >= 0.1 %}
-                        {% set sizeClass = 'w-24 h-24' %}
-                        {% if totalTrafficFreeradius['output_gb'] >= 1000 %}
-                            {% set sizeClass = 'w-32 h-32' %}
-                        {% endif %}
-                        {% if totalTrafficFreeradius['output_gb'] >= 10000 %}
-                            {% set sizeClass = 'w-36 h-36' %}
-                        {% endif %}
-                        {% if totalTrafficFreeradius['output_gb'] >= 100000 %}
-                            {% set sizeClass = 'w-40 h-40' %}
-                        {% endif %}
-                        <div class="mt-4 flex items-center justify-center bg-[#7DB928] rounded-full text-white text-4xl font-bold {{ sizeClass }}">
-                            {{ totalTrafficFreeradius['output_gb'] }}
+
+                {# DOWNLOADS #}
+                <div>
+                    <div class="flex justify-between mb-2">
+                        <h2 class="text-sm font-medium text-gray-600">
+                            Downloads
+                        </h2>
+
+                        <span class="text-sm font-semibold text-gray-800">
+                    {{ totalTrafficFreeradius.output_human ?? '0 B' }}
+                </span>
+                    </div>
+
+                    <div class="w-full bg-gray-100 rounded-full h-3 overflow-hidden">
+                        <div class="bg-[#3B82F6] h-3 rounded-full transition-all duration-300"
+                             style="width: {{ total > 0 ? (output / total * 100) : 0 }}%">
                         </div>
-                    {% else %}
-                        <div class="bg-red-500/50 rounded-full m-2 p-2 mt-4 text-red-500 font-semibold text-center md:text-base text-sm">
-                            {{ 'noDataAvailable'|trans({}, 'freeradius_statistics') }}
-                        </div>
-                    {% endif %}
+                    </div>
                 </div>
+
+                {# SUMMARY CARDS #}
+                <div class="mt-4 grid grid-cols-2 gap-4">
+
+                    <div class="bg-green-50 rounded-lg p-4 text-center">
+                        <div class="text-xs text-gray-500">Total Upload</div>
+                        <div class="text-lg font-bold text-[#7DB928]">
+                            {{ totalTrafficFreeradius.input_human ?? '0 B' }}
+                        </div>
+                    </div>
+
+                    <div class="bg-blue-50 rounded-lg p-4 text-center">
+                        <div class="text-xs text-gray-500">Total Download</div>
+                        <div class="text-lg font-bold text-[#3B82F6]">
+                            {{ totalTrafficFreeradius.output_human ?? '0 B' }}
+                        </div>
+                    </div>
+
+                </div>
+
             </div>
         </div>
 

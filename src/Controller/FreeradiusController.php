@@ -171,7 +171,7 @@ class FreeradiusController extends AbstractController
             floor(($totalTimeSeconds % 3600) / 60)
         );
 
-        // Sum all the traffic from the Accounting table
+        // Format all the traffic from the Accounting table
         $totalTraffic = $this->statisticsFreeradiusFormatter->formatTraffic(
             $fetchChartTrafficFreeradius
         );

@@ -15,8 +15,13 @@ readonly class DashboardFormatter
         }
 
         return [
-            'input_gb' => $this->formatBytes($input),
-            'output_gb' => $this->formatBytes($output),
+            // raw values (for charts, progress bars, calculations)
+            'input_bytes' => $input,
+            'output_bytes' => $output,
+
+            // formatted values (for display only)
+            'input_human' => $this->formatBytes($input),
+            'output_human' => $this->formatBytes($output),
         ];
     }
 
