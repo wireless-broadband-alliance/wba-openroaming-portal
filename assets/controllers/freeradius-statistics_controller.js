@@ -1,5 +1,5 @@
-import {Controller} from '@hotwired/stimulus';
-import {Chart} from 'chart.js';
+import { Controller } from '@hotwired/stimulus';
+import { Chart } from 'chart.js';
 
 export default class extends Controller {
     static targets = ['chart'];
@@ -45,21 +45,21 @@ export default class extends Controller {
         const raw = this.parseData(target);
         const labels = Object.keys(raw).sort();
 
-        const accepted = labels.map(d => raw[d]?.accepted ?? 0);
-        const rejected = labels.map(d => raw[d]?.rejected ?? 0);
+        const accepted = labels.map((d) => raw[d]?.accepted ?? 0);
+        const rejected = labels.map((d) => raw[d]?.rejected ?? 0);
 
         const data = {
             labels,
             datasets: [
                 this.lineDataset('Accepted', accepted, 'primary'),
                 this.lineDataset('Rejected', rejected, 'danger'),
-            ]
+            ],
         };
 
         this.createChart(target, {
             type: 'line',
             data,
-            options: this.baseOptions({tension: 0.3}),
+            options: this.baseOptions({ tension: 0.3 }),
         });
     }
 
@@ -70,19 +70,17 @@ export default class extends Controller {
         const raw = this.parseData(target);
 
         const labels = Object.keys(raw).sort((a, b) => new Date(a) - new Date(b));
-        const values = labels.map(d => raw[d] ?? 0);
+        const values = labels.map((d) => raw[d] ?? 0);
 
         const data = {
             labels,
-            datasets: [
-                this.lineDataset('Average Session Time', values, 'info'),
-            ]
+            datasets: [this.lineDataset('Average Session Time', values, 'info')],
         };
 
         this.createChart(target, {
             type: 'line',
             data,
-            options: this.baseOptions({tension: 0.35, formatY: true}),
+            options: this.baseOptions({ tension: 0.35, formatY: true }),
         });
     }
 
@@ -93,19 +91,17 @@ export default class extends Controller {
         const raw = this.parseData(target);
 
         const labels = Object.keys(raw).sort((a, b) => new Date(a) - new Date(b));
-        const values = labels.map(d => raw[d] ?? 0);
+        const values = labels.map((d) => raw[d] ?? 0);
 
         const data = {
             labels,
-            datasets: [
-                this.barDataset('Total Session Time', values, 'success'),
-            ]
+            datasets: [this.barDataset('Total Session Time', values, 'success')],
         };
 
         this.createChart(target, {
             type: 'bar',
             data,
-            options: this.baseOptions({formatY: true}),
+            options: this.baseOptions({ formatY: true }),
         });
     }
 
@@ -120,9 +116,7 @@ export default class extends Controller {
 
         const data = {
             labels,
-            datasets: [
-                this.barDataset('Data', values, 'primary'),
-            ]
+            datasets: [this.barDataset('Data', values, 'primary')],
         };
 
         this.createChart(target, {
@@ -190,10 +184,7 @@ export default class extends Controller {
     // =========================
     // BASE OPTIONS
     // =========================
-    baseOptions({
-                    tension = 0,
-                    formatY = false
-                } = {}) {
+    baseOptions({ tension = 0, formatY = false } = {}) {
         return {
             maintainAspectRatio: false,
             responsive: true,
@@ -214,9 +205,9 @@ export default class extends Controller {
                             if (typeof value !== 'number') return value;
 
                             return `${context.dataset.label}: ${this.formatDuration(value)}`;
-                        }
-                    }
-                }
+                        },
+                    },
+                },
             },
 
             elements: {
