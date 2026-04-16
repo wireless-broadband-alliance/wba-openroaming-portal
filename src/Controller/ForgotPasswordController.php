@@ -34,6 +34,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
@@ -369,11 +370,10 @@ class ForgotPasswordController extends AbstractController
         $limit = $limiter->consume();
 
         if (!$limit->isAccepted()) {
-            $this->addFlash(
-                'error',
+            throw new HttpException(
+                429,
                 $this->translator->trans('tooManyAttempts', [], 'controllers')
             );
-            return $this->redirectToRoute('app_login');
         }
 
 
@@ -445,11 +445,10 @@ class ForgotPasswordController extends AbstractController
         $limit = $limiter->consume();
 
         if (!$limit->isAccepted()) {
-            $this->addFlash(
-                'error',
+            throw new HttpException(
+                429,
                 $this->translator->trans('tooManyAttempts', [], 'controllers')
             );
-            return $this->redirectToRoute('app_login');
         }
 
         if (!$uuid) {

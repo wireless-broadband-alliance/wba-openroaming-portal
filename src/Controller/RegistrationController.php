@@ -30,6 +30,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
@@ -325,11 +326,10 @@ class RegistrationController extends AbstractController
         $limit = $limiter->consume();
 
         if (!$limit->isAccepted()) {
-            $this->addFlash(
-                'error',
+            throw new HttpException(
+                429,
                 $this->translator->trans('tooManyAttempts', [], 'controllers')
             );
-            return $this->redirectToRoute('app_login');
         }
         // Get the email and verification code from the URL query parameters
         $verificationCode = $request->query->get('twoFaCode');
