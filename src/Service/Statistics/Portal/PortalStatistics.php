@@ -25,6 +25,7 @@ readonly class PortalStatistics
 
     /**
      * Fetch data related to users with portal accounts (SMS || Email)
+     * @return array<string, mixed>
      * @throws \JsonException
      */
     public function getSMSEmailStats(DateTime $startDate, DateTime $endDate): array
@@ -50,7 +51,7 @@ readonly class PortalStatistics
 
     /**
      * Fetch data related to types of authentication.
-     *
+     * @return array<string, mixed>
      * @throws \JsonException
      */
     public function getAuthenticationStats(DateTime $startDate, DateTime $endDate): array
@@ -74,7 +75,10 @@ readonly class PortalStatistics
 
     /**
      * Fetch data related to 2FA configuration on the portal
-     *
+     * @return array{
+     *      labels: string[],
+     *      datasets: array<int, array<string, mixed>>
+     *  }
      * @throws Exception
      */
     public function get2FAStats(DateTime $start, DateTime $end): array
@@ -106,7 +110,7 @@ readonly class PortalStatistics
         $final = [];
 
         foreach ($result as $type => $count) {
-            $final[$labels[$type] ?? 'Unknown'] = $count;
+            $final[$labels[$type]] = $count;
         }
 
         return $this->generateDatasets->generateDatasets($final);
@@ -114,7 +118,10 @@ readonly class PortalStatistics
 
     /**
      * Fetch data related to downloaded profiles devices.
-     *
+     * @return array{
+     *      labels: string[],
+     *      datasets: array<int, array<string, mixed>>
+     *  }
      * @throws \JsonException
      */
     public function getDevicesStats(DateTime $start, DateTime $end): array
@@ -147,7 +154,10 @@ readonly class PortalStatistics
 
     /**
      * Fetch data related to users created in platform mode - Live/Demo
-     *
+     * @return array{
+     *      labels: string[],
+     *      datasets: array<int, array<string, mixed>>
+     *  }
      * @throws \Doctrine\DBAL\Exception
      */
     public function getPlatformStatusStats(DateTime $startDate, DateTime $endDate): array
@@ -178,7 +188,10 @@ readonly class PortalStatistics
 
     /**
      * Fetch data related to verified users
-     *
+     * @return array{
+     *      labels: string[],
+     *      datasets: array<int, array<string, mixed>>
+     *  }
      */
     public function getUserVerifiedStas(DateTime $startDate, DateTime $endDate): array
     {
@@ -186,9 +199,9 @@ readonly class PortalStatistics
             ->countUserVerificationStats($startDate, $endDate);
 
         $result = [
-            UserVerificationStatus::VERIFIED->value => (int)($row['verified'] ?? 0),
-            UserVerificationStatus::NEED_VERIFICATION->value => (int)($row['not_verified'] ?? 0),
-            UserVerificationStatus::BANNED->value => (int)($row['banned'] ?? 0),
+            UserVerificationStatus::VERIFIED->value => (int)($row['verified']),
+            UserVerificationStatus::NEED_VERIFICATION->value => (int)($row['not_verified']),
+            UserVerificationStatus::BANNED->value => (int)($row['banned']),
         ];
 
         return $this->generateDatasets->generateDatasets($result);

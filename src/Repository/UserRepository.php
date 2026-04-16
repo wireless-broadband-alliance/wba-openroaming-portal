@@ -78,7 +78,7 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
     }
 
     /**
-     * @return User[]
+     * @return array{verified: int, not_verified: int, banned: int}
      */
     public function countUserVerificationStats(DateTime $start, DateTime $end): array
     {
