@@ -335,6 +335,11 @@ To solve this, use the chmod command inside the `web` container, to give the scr
 - chmod +x tools/generatePfxSigningKey.sh
 ```
 
+## Important Reference
+
+> After completing installation, make sure to review the [Security Notes](SECURITY.md) for important production
+> considerations.
+
 ## Contact and Feedback
 
 Your suggestions and questions will help us improve the platform's usability and experience.
