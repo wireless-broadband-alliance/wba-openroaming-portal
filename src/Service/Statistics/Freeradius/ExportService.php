@@ -15,7 +15,16 @@ readonly class ExportService
     }
 
     /**
-     * @throws Exception
+     * @param array{
+     *     auth?: array<string, mixed>,
+     *     sessionAvg?: array<string, float>,
+     *     sessionTotal?: array<string, float>,
+     *     traffic?: array<string, array{input: int, output: int}>,
+     *     realms?: array<string, int>,
+     *     apUsage?: array<string, int>,
+     *     wifi?: array<string, int>
+     * } $data
+     * * @throws Exception
      */
     public function export(array $data): string
     {
@@ -37,6 +46,9 @@ readonly class ExportService
         return $file;
     }
 
+    /**
+     * @param array<string, array{accepted: int, rejected: int}> $auth
+     */
     private function buildAuthSheet(Spreadsheet $spreadsheet, array $auth): void
     {
         $sheet = $spreadsheet->getActiveSheet();
@@ -50,13 +62,16 @@ readonly class ExportService
 
         foreach ($auth as $date => $values) {
             $sheet->setCellValue('A' . $row, $date)
-                ->setCellValue('B' . $row, $values['accepted'] ?? 0)
-                ->setCellValue('C' . $row, $values['rejected'] ?? 0);
+                ->setCellValue('B' . $row, $values['accepted'])
+                ->setCellValue('C' . $row, $values['rejected']);
 
             $row++;
         }
     }
 
+    /**
+     * @param array<string, float> $sessionAvg
+     */
     private function buildSessionAvgSheet(Spreadsheet $spreadsheet, array $sessionAvg): void
     {
         $sheet = $spreadsheet->createSheet();
@@ -75,6 +90,9 @@ readonly class ExportService
         }
     }
 
+    /**
+     * @param array<string, float> $sessionTotal
+     */
     private function buildSessionTotalSheet(Spreadsheet $spreadsheet, array $sessionTotal): void
     {
         $sheet = $spreadsheet->createSheet();
@@ -93,6 +111,9 @@ readonly class ExportService
         }
     }
 
+    /**
+     * @param array<string, array{input: int, output: int}> $traffic
+     */
     private function buildTrafficSheet(Spreadsheet $spreadsheet, array $traffic): void
     {
         $sheet = $spreadsheet->createSheet();
@@ -106,13 +127,16 @@ readonly class ExportService
 
         foreach ($traffic as $realm => $values) {
             $sheet->setCellValue('A' . $row, $realm)
-                ->setCellValue('B' . $row, $this->formatter->formatBytes((int)($values['input'] ?? 0)))
-                ->setCellValue('C' . $row, $this->formatter->formatBytes((int)($values['output'] ?? 0)));
+                ->setCellValue('B' . $row, $this->formatter->formatBytes((int)($values['input'])))
+                ->setCellValue('C' . $row, $this->formatter->formatBytes((int)($values['output'])));
 
             $row++;
         }
     }
 
+    /**
+     * @param array<string, int> $apUsage
+     */
     private function buildApSheet(Spreadsheet $spreadsheet, array $apUsage): void
     {
         $sheet = $spreadsheet->createSheet();
@@ -131,6 +155,9 @@ readonly class ExportService
         }
     }
 
+    /**
+     * @param array<string, int> $realms
+     */
     private function buildRealmSheet(Spreadsheet $spreadsheet, array $realms): void
     {
         $sheet = $spreadsheet->createSheet();
@@ -149,6 +176,9 @@ readonly class ExportService
         }
     }
 
+    /**
+     * @param array<string, int> $wifi
+     */
     private function buildWifiSheet(Spreadsheet $spreadsheet, array $wifi): void
     {
         $sheet = $spreadsheet->createSheet();

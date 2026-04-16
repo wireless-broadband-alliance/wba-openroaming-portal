@@ -18,6 +18,7 @@ readonly class FreeradiusStatistics
     // AUTHENTICATION STATS
     /**
      * @throws \Exception
+     * @return array<string, array{accepted: int, rejected: int}>
      */
     public function getAuthenticationStats(DateTime $start, DateTime $end): array
     {
@@ -51,6 +52,9 @@ readonly class FreeradiusStatistics
     }
 
     // SESSION AVERAGE
+    /**
+     * @return array<string, float>
+     */
     public function getSessionAverageStats(DateTime $start, DateTime $end): array
     {
         $events = $this->radiusAccountingRepository->fetchByDateRange($start, $end);
@@ -85,6 +89,9 @@ readonly class FreeradiusStatistics
     }
 
     // SESSION TOTAL
+    /**
+     * @return array<string, float>
+     */
     public function getSessionTotalStats(DateTime $start, DateTime $end): array
     {
         $events = $this->radiusAccountingRepository->fetchByDateRange($start, $end);
@@ -107,6 +114,9 @@ readonly class FreeradiusStatistics
     }
 
     // REALM USAGE
+    /**
+     * @return array<string, int>
+     */
     public function getRealmUsageStats(DateTime $start, DateTime $end): array
     {
         $events = $this->radiusAccountingRepository->fetchByDateRange($start, $end);
@@ -127,6 +137,9 @@ readonly class FreeradiusStatistics
     }
 
     // CURRENT AUTH
+    /**
+     * @return array<string, int>
+     */
     public function getCurrentAuthStats(): array
     {
         $sessions = $this->radiusAccountingRepository->findActiveSessions()->getResult();
@@ -142,6 +155,9 @@ readonly class FreeradiusStatistics
     }
 
     // TRAFFIC
+    /**
+     * @return array<string, array{input: int, output: int}>
+     */
     public function getTrafficStats(DateTime $start, DateTime $end): array
     {
         $rows = $this->radiusAccountingRepository
@@ -166,6 +182,9 @@ readonly class FreeradiusStatistics
     }
 
     // WIFI STATS
+    /**
+     * @return array<string, int>
+     */
     public function getWifiStats(DateTime $start, DateTime $end): array
     {
         $events = $this->radiusAccountingRepository->fetchByDateRange($start, $end);
@@ -191,6 +210,9 @@ readonly class FreeradiusStatistics
     }
 
     // AP USAGE
+    /**
+     * @return array<string, int>
+     */
     public function getApUsageStats(DateTime $start, DateTime $end): array
     {
         $events = $this->radiusAccountingRepository->fetchByDateRange($start, $end);
