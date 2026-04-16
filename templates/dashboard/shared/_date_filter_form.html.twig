@@ -10,4 +10,13 @@
            class="rounded text-sm bg-transparent py-1 px-2 border border-gray-300 focus:ring-0 w-full sm:w-auto"
            value="{{ selectedEndDate }}"
            onchange="this.form.submit()">
+    <select data-date-filter-target="preset"
+            data-action="change->date-filter#applyPreset"
+            class="rounded text-sm bg-transparent py-1 px-2 border border-gray-300">
+        <option value="">Time Interval</option>
+        <option value="1d">Last 24 hours</option>
+        <option value="7d">Last 7 days</option>
+        <option value="1m">Last 1 month</option>
+        <option value="1y">Last 1 year</option>
+    </select>
 </form>
